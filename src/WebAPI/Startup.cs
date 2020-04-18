@@ -35,7 +35,7 @@ namespace WebAPI
             services.AddHttpContextAccessor();
 
             services.AddHealthChecks()
-                .AddDbContextCheck<ApplicationDbContext>();
+                .AddDbContextCheck<PlexRipperDbContext>();
 
             services.AddControllers();
 

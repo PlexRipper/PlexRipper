@@ -24,7 +24,7 @@ namespace PlexRipper.WebAPI
 
                 try
                 {
-                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    var context = services.GetRequiredService<PlexRipperDbContext>();
 
                     if (context.Database.IsSqlite())
                     {

@@ -21,16 +21,15 @@
 			"@nuxtjs/axios",
 			"@nuxtjs/vuetify",
 			"@types/node",
-			"@types/jest",
 			"@types/classnames",
 			"nuxt-i18n",
-			"vue",
+			"vue"
 		],
-		// Make sure to also update the nuxt.config.ts when adding aliases for import resolving. 
+		// Make sure to also update the nuxt.config.ts when adding aliases for import resolving.
 		// These are necessary to tell ts-loader which aliases are used.
 		"paths": {
 			"@/*": ["./*"],
-			"@iGeneric/*": ["./types/dto/generic/*"],
+			"@iGeneric/*": ["./types/dto/generic/*"]
 		},
 		"lib": ["esnext", "esnext.asynciterable", "dom", "dom.iterable", "scripthost"]
 	},

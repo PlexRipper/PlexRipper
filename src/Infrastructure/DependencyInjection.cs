@@ -1,12 +1,12 @@
-﻿using PlexRipper.Application.Common.Interfaces;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Infrastructure.Files;
 using PlexRipper.Infrastructure.Identity;
 using PlexRipper.Infrastructure.Persistence;
 using PlexRipper.Infrastructure.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PlexRipper.Infrastructure
 {
@@ -16,24 +16,24 @@ namespace PlexRipper.Infrastructure
         {
             if (configuration.GetValue<bool>("UseInMemoryDatabase"))
             {
-                services.AddDbContext<ApplicationDbContext>(options =>
+                services.AddDbContext<PlexRipperDbContext>(options =>
                     options.UseInMemoryDatabase("PlexRipperDb"));
             }
             else
             {
-                services.AddDbContext<ApplicationDbContext>(options =>
+                services.AddDbContext<PlexRipperDbContext>(options =>
                     options.UseSqlite(
                         configuration.GetConnectionString("DefaultConnection"),
-                        b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+                        b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName)));
             }
 
-            services.AddScoped<IApplicationDbContext>(provider => provider.GetService<ApplicationDbContext>());
+            services.AddScoped<IApplicationDbContext>(provider => provider.GetService<PlexRipperDbContext>());
 
-                services.AddDefaultIdentity<ApplicationUser>()
-                    .AddEntityFrameworkStores<ApplicationDbContext>();
-            
+            services.AddDefaultIdentity<ApplicationUser>()
+                .AddEntityFrameworkStores<PlexRipperDbContext>();
+
             services.AddIdentityServer()
-                .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+                .AddApiAuthorization<ApplicationUser, PlexRipperDbContext>();
 
             services.AddTransient<IDateTime, DateTimeService>();
             services.AddTransient<IIdentityService, IdentityService>();

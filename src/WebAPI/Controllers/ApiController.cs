@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace PlexRipper.WebUI.Controllers
+namespace PlexRipper.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

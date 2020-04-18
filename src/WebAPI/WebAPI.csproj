@@ -33,12 +33,6 @@
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
-  <Target Name="NSwag" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
-    <Copy SourceFiles="@(Reference)" DestinationFolder="$(OutDir)References" />
-    <Exec Command="$(NSwagExe_Core31) run /variables:Configuration=$(Configuration)" />
-    <RemoveDir Directories="$(OutDir)References" />
-  </Target>
-
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptTarget>ES2019</TypeScriptTarget>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>

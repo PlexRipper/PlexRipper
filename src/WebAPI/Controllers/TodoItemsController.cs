@@ -1,9 +1,10 @@
-﻿using PlexRipper.Application.TodoItems.Commands.CreateTodoItem;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application.TodoItems.Commands.CreateTodoItem;
 using PlexRipper.Application.TodoItems.Commands.DeleteTodoItem;
 using PlexRipper.Application.TodoItems.Commands.UpdateTodoItem;
 using PlexRipper.Application.TodoItems.Commands.UpdateTodoItemDetail;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using PlexRipper.WebAPI.Controllers;
 using System.Threading.Tasks;
 
 namespace PlexRipper.WebUI.Controllers

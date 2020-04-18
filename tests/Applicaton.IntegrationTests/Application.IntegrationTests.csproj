@@ -27,4 +27,10 @@
     <PackageReference Include="Respawn" Version="3.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Application\Application.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\WebAPI\WebAPI.csproj" />
+  </ItemGroup>
+
 </Project>

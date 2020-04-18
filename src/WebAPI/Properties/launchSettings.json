@@ -28,10 +28,9 @@
     },
     "Docker": {
       "commandName": "Docker",
-      "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{3000}",
+      "launchUrl": "{Scheme}://{ServiceHost}:{3000}/weatherforecast",
       "publishAllPorts": true,
-      "useSSL": true
+      "useSSL": false
     }
   }
 }

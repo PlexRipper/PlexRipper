@@ -1,8 +1,4 @@
-﻿using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Infrastructure.Identity;
-using PlexRipper.Infrastructure.Persistence;
-using PlexRipper.WebUI;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +6,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
+using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Infrastructure.Identity;
+using PlexRipper.Infrastructure.Persistence;
+using PlexRipper.WebAPI;
 using Respawn;
 using System.IO;
 using System.Linq;
@@ -53,10 +53,10 @@ public class Testing
         services.AddTransient<ICurrentUserService, CurrentUserService>();
 
         _scopeFactory = services.BuildServiceProvider().GetService<IServiceScopeFactory>();
-        
+
         _checkpoint = new Checkpoint
         {
-            TablesToIgnore = new [] { "__EFMigrationsHistory" }
+            TablesToIgnore = new[] { "__EFMigrationsHistory" }
         };
 
         EnsureDatabase();
@@ -66,7 +66,7 @@ public class Testing
     {
         using var scope = _scopeFactory.CreateScope();
 
-        var context = scope.ServiceProvider.GetService<ApplicationDbContext>();
+        var context = scope.ServiceProvider.GetService<PlexRipperDbContext>();
 
         context.Database.Migrate();
     }
@@ -118,7 +118,7 @@ public class Testing
     {
         using var scope = _scopeFactory.CreateScope();
 
-        var context = scope.ServiceProvider.GetService<ApplicationDbContext>();
+        var context = scope.ServiceProvider.GetService<PlexRipperDbContext>();
 
         return await context.FindAsync<T>(id);
     }

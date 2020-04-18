@@ -8,7 +8,6 @@ using PlexRipper.Infrastructure.Identity;
 using PlexRipper.Infrastructure.Persistence;
 using System;
 using System.Threading.Tasks;
-using WebAPI;
 
 namespace PlexRipper.WebAPI
 {
@@ -33,8 +32,8 @@ namespace PlexRipper.WebAPI
 
                     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-                    await ApplicationDbContextSeed.SeedDefaultUserAsync(userManager);
-                    await ApplicationDbContextSeed.SeedSampleDataAsync(context);
+                    await PlexRipperDBContextSeed.SeedDefaultUserAsync(userManager);
+                    await PlexRipperDBContextSeed.SeedSampleDataAsync(context);
                 }
                 catch (Exception ex)
                 {

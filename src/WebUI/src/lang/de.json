@@ -1,0 +1,89 @@
+{
+    "common": {
+        "cancel": "Abbrechen",
+        "clear": "Zurücksetzen",
+        "count": {
+            "eight": "Acht",
+            "five": "Fünf",
+            "four": "Vier",
+            "nine": "Nein",
+            "one": "Eins",
+            "seven": "Sieben",
+            "six": "Sechs",
+            "three": "Drei",
+            "two": "Zwei"
+        },
+        "daterange": "Datumsbereich",
+        "errorOccured": "Ein Fehler ist aufgetreten",
+        "from": "van",
+        "help": "Hilfe",
+        "loadingMessage": "Laden bitte warten",
+        "noDataText": "Keine Daten gefunden",
+        "ok": "OK",
+        "returnToOverview": "Zurück zur übersicht",
+        "till": "tot"
+    },
+    "fileUpload": {
+        "confirmCancelHeadlineText": "Uploads abbrechen?",
+        "confirmCancelMessageText": "Möchten Sie die laufenden Uploads wirklich abbrechen?",
+        "done": "Bereit",
+        "dropFilesAnywhereToUpload": "Legen Sie Dateien hier ab, um sie hochzuladen",
+        "dropFilesAnywhereToUploadOr": "oder",
+        "remove": "Löschen",
+        "retryUpload": "noch einmal",
+        "selectFiles": "Dateien auswählen.",
+        "selectFilesToUpload": "Dateien zum Hochladen auswählen",
+        "startUpload": "Starten Sie den Upload",
+        "tableHeaderAction": "Aktionen",
+        "tableHeaderName": "Name",
+        "tableHeaderSize": "Abmessungen",
+        "tableHeaderStatus": "Status",
+        "upload": "Upload",
+        "uploadStatusTextActive": "Beschäftigt",
+        "uploadStatusTextSucces": "Erfolgreich"
+    },
+    "filteringFields": {
+        "showCorrectedOnly": "Nur korrigierte Ereignisse anzeigen"
+    },
+    "home": {
+        "hello": "Welkom in de PASS Navigator.\nWanneer zekerheid cruciaal is voor de missie, is het CERTUS.",
+        "madeBy": "Hergestellt von",
+        "specialThanksTo": "Besonderer Dank an"
+    },
+    "modules": {
+        "edi418": "EDI 418",
+        "ledpanels": "LED Panels",
+        "module1": "Moduleke 1",
+        "module2": "Moduleke 2",
+        "ocroverview": "OCR-Übersicht",
+        "rails": "Rails",
+        "visits": "Bezoeken",
+		"testtool": "Test Tool"
+    },
+    "navigation": {
+        "search": "Suche"
+    },
+    "notFound": {
+        "explanation": "Deze pagina kan zijn verplaatst of verwijderd. Probeer te zoeken via het menu. Pagina`s die zijn opgeslagen als bladwijzer kunnen verouderen.",
+        "goHome": "Ga terug naar de startpagina",
+        "title": "Nicht gefunden"
+    },
+    "tableView": {
+        "actionsColumnText": "Aktionen",
+        "itemNumberOfTotalNumberText": "von",
+        "itemsPerPageText": "Zeilen pro Seite",
+        "loadingText": "Daten werden abgerufen ..."
+    },
+    "team": {
+        "alexPoley": "Alex Poley",
+        "dannyStorm": "Danny Storm",
+        "florianSlob": "Florian Slob",
+        "janWillemScheijgrond": "Jan Willem Scheijgrond",
+        "jasonLandbrug": "Jason Landbrug",
+        "jeroenNijhuis": "Jeroen Nijhuis",
+        "kasperStolk": "Kasper Stolk",
+        "michelLeliveld": "Michel Leliveld",
+        "pieterVanDerSpek": "Pieter Van Der Spek",
+        "remcoSchoeman": "Remco Schoeman"
+    }
+}

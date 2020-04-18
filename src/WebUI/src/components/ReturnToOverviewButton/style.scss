@@ -1,0 +1,11 @@
+.return-overview {
+	vertical-align: middle;
+	display: flex;
+	justify-content: flex-start;
+	.v-btn {
+		padding-left: 0;
+		.v-icon {
+			padding-right: 15px;
+		}
+	}
+}

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">14.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <Name>WebUI</Name>
+    <RootNamespace>WebUI</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>2440a73f-3acc-4a50-9254-aea112f3a64f</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>node_modules\@vue\cli-service\bin\vue-cli-service.js</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+    <NodejsPort>1337</NodejsPort>
+    <EnableTypeScript>true</EnableTypeScript>
+    <StartWebBrowser>true</StartWebBrowser>
+    <ScriptArguments>serve</ScriptArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include=".eslintignore" />
+    <Content Include=".eslintrc.json" />
+    <Content Include=".gitattributes" />
+    <Content Include=".gitignore" />
+    <Content Include=".prettierrc" />
+    <Content Include=".stylelintrc.json" />
+    <Content Include="package-lock.json" />
+    <Content Include="src\assets\scss\animations.scss" />
+    <Content Include="src\assets\scss\components.scss" />
+    <Content Include="src\assets\scss\fonts.scss" />
+    <Content Include="src\assets\scss\global.scss" />
+    <Content Include="src\assets\scss\icons.scss" />
+    <Content Include="src\assets\scss\overwriting.scss" />
+    <Content Include="src\assets\scss\style.scss" />
+    <Content Include="src\assets\scss\_mixins.scss" />
+    <Content Include="src\assets\scss\_variables.scss" />
+    <Content Include="src\components\ReturnToOverviewButton\ReturnToOverviewButton.vue" />
+    <Content Include="src\components\ReturnToOverviewButton\style.scss" />
+    <Content Include="src\lang\de.json" />
+    <Content Include="src\lang\en-US.json" />
+    <Content Include="src\lang\nl.json" />
+    <Content Include="src\layouts\default.vue" />
+    <Content Include="src\layouts\error.vue" />
+    <Content Include="src\pages\index.vue" />
+    <Content Include="tsconfig.json" />
+    <Content Include="package.json" />
+    <Content Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="nuxt.config.ts" />
+    <TypeScriptCompile Include="src\dto\gateButton.ts" />
+    <TypeScriptCompile Include="src\dto\gateCategoryFilter.ts" />
+    <TypeScriptCompile Include="src\dto\gateInfo.ts" />
+    <TypeScriptCompile Include="src\dto\gateInfoDetail.ts" />
+    <TypeScriptCompile Include="src\dto\gateInfoFilter.ts" />
+    <TypeScriptCompile Include="src\dto\image.ts" />
+    <TypeScriptCompile Include="src\dto\logMessage.ts" />
+    <TypeScriptCompile Include="src\dto\passMetaData.ts" />
+    <TypeScriptCompile Include="src\enums\moduleName.ts" />
+    <TypeScriptCompile Include="src\enums\severity.ts" />
+    <TypeScriptCompile Include="src\plugins\filters.ts" />
+    <TypeScriptCompile Include="src\plugins\loggingPlugin.ts" />
+    <TypeScriptCompile Include="src\plugins\main.ts" />
+    <TypeScriptCompile Include="src\plugins\vuetify.ts" />
+    <TypeScriptCompile Include="src\store\globalStore.ts" />
+    <TypeScriptCompile Include="src\store\index.ts" />
+    <TypeScriptCompile Include="src\type_definitions\shims-vue.d.ts" />
+    <TypeScriptCompile Include="src\type_definitions\vueTypes.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\" />
+    <Folder Include="src\assets\" />
+    <Folder Include="src\assets\scss\" />
+    <Folder Include="src\components\" />
+    <Folder Include="src\components\ReturnToOverviewButton\" />
+    <Folder Include="src\dto\" />
+    <Folder Include="src\enums\" />
+    <Folder Include="src\lang\" />
+    <Folder Include="src\layouts\" />
+    <Folder Include="src\pages\" />
+    <Folder Include="src\plugins\" />
+    <Folder Include="src\static\" />
+    <Folder Include="src\store\" />
+    <Folder Include="src\types\" />
+    <Folder Include="src\types\enums\" />
+    <Folder Include="src\type_definitions\" />
+  </ItemGroup>
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:48022/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost:1337</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

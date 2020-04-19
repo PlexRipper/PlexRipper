@@ -5,7 +5,7 @@
 	"author": "Jason Landbridge",
 	"private": true,
 	"scripts": {
-		"dev": "nuxt-ts start",
+		"start": "nuxt-ts start",
 		"build": "nuxt-ts build",
 		"npm-install": "npm install",
 		"generate": "nuxt-ts generate",
@@ -30,7 +30,7 @@
 		"axios": "^0.19.2",
 		"classnames": "^2.2.6",
 		"consola": "^2.11.3",
-		"core-js": "^3.6.4",
+		"core-js": "^3.6.5",
 		"filesize": "^6.1.0",
 		"ignore-loader": "^0.1.2",
 		"lodash": "^4.17.15",

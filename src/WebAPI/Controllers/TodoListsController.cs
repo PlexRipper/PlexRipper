@@ -5,10 +5,9 @@ using PlexRipper.Application.TodoLists.Commands.DeleteTodoList;
 using PlexRipper.Application.TodoLists.Commands.UpdateTodoList;
 using PlexRipper.Application.TodoLists.Queries.ExportTodos;
 using PlexRipper.Application.TodoLists.Queries.GetTodos;
-using PlexRipper.WebAPI.Controllers;
 using System.Threading.Tasks;
 
-namespace PlexRipper.WebUI.Controllers
+namespace PlexRipper.WebAPI.Controllers
 {
     [Authorize]
     public class TodoListsController : ApiController

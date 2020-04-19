@@ -76,7 +76,7 @@ namespace PlexRipper.WebAPI
             }
 
             app.UseHealthChecks("/health");
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
 
             app.UseOpenApi(); // serve OpenAPI/Swagger documents
             app.UseSwaggerUi3(); // serve Swagger UI

@@ -1,9 +1,8 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster deI:\Projects\PlexRipper\src\WebAPI\Dockerfile.originalbugging.
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 443
+EXPOSE 5000
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
@@ -23,3 +22,23 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "PlexRipper.WebAPI.dll"]
+
+# Setup Nuxt
+#build stage for a Node.js application
+FROM node:lts-alpine as build-stage
+WORKDIR /app/webui
+# Essential config files
+COPY ../WebUI/package*.json ./
+COPY ../WebUI/tsconfig.json ./
+COPY ../WebUI/nuxt.config.ts ./
+RUN npm install
+# Copy the rest of the project files
+COPY ../WebUI/ ./
+RUN npm run build
+EXPOSE 3000
+
+#production stage
+#FROM nginx:stable-alpine as production-stage
+#COPY --from=build-stage /app/webui/dist /usr/share/nginx/html
+#EXPOSE 80
+#CMD ["nginx", "-g", "daemon off;"]

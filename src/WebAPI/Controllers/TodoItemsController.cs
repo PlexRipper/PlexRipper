@@ -4,10 +4,9 @@ using PlexRipper.Application.TodoItems.Commands.CreateTodoItem;
 using PlexRipper.Application.TodoItems.Commands.DeleteTodoItem;
 using PlexRipper.Application.TodoItems.Commands.UpdateTodoItem;
 using PlexRipper.Application.TodoItems.Commands.UpdateTodoItemDetail;
-using PlexRipper.WebAPI.Controllers;
 using System.Threading.Tasks;
 
-namespace PlexRipper.WebUI.Controllers
+namespace PlexRipper.WebAPI.Controllers
 {
     [Authorize]
     public class TodoItemsController : ApiController

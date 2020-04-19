@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.WeatherForecasts.Queries.GetWeatherForecasts;
-using PlexRipper.WebUI.Controllers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

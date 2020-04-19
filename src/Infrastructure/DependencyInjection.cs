@@ -35,9 +35,11 @@ namespace PlexRipper.Infrastructure
             services.AddIdentityServer()
                 .AddApiAuthorization<ApplicationUser, PlexRipperDbContext>();
 
+            // Add services
             services.AddTransient<IDateTime, DateTimeService>();
             services.AddTransient<IIdentityService, IdentityService>();
             services.AddTransient<ICsvFileBuilder, CsvFileBuilder>();
+            services.AddTransient<IPlexService, PlexService>();
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();

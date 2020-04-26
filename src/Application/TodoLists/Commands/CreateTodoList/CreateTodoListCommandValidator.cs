@@ -8,9 +8,9 @@ namespace PlexRipper.Application.TodoLists.Commands.CreateTodoList
 {
     public class CreateTodoListCommandValidator : AbstractValidator<CreateTodoListCommand>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IPlexRipperDbContext _context;
 
-        public CreateTodoListCommandValidator(IApplicationDbContext context)
+        public CreateTodoListCommandValidator(IPlexRipperDbContext context)
         {
             _context = context;
 

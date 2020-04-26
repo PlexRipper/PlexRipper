@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Domain.Enums;
 using System;
 using System.Linq;
 using System.Threading;
@@ -17,10 +17,10 @@ namespace PlexRipper.Application.TodoLists.Queries.GetTodos
 
     public class GetTodosQueryHandler : IRequestHandler<GetTodosQuery, TodosVm>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IPlexRipperDbContext _context;
         private readonly IMapper _mapper;
 
-        public GetTodosQueryHandler(IApplicationDbContext context, IMapper mapper)
+        public GetTodosQueryHandler(IPlexRipperDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;

@@ -13,9 +13,9 @@ namespace PlexRipper.Application.TodoLists.Commands.CreateTodoList
 
     public class CreateTodoListCommandHandler : IRequestHandler<CreateTodoListCommand, int>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IPlexRipperDbContext _context;
 
-        public CreateTodoListCommandHandler(IApplicationDbContext context)
+        public CreateTodoListCommandHandler(IPlexRipperDbContext context)
         {
             _context = context;
         }

@@ -21,9 +21,9 @@ namespace PlexRipper.Application.TodoItems.Commands.UpdateTodoItemDetail
 
     public class UpdateTodoItemDetailCommandHandler : IRequestHandler<UpdateTodoItemDetailCommand>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IPlexRipperDbContext _context;
 
-        public UpdateTodoItemDetailCommandHandler(IApplicationDbContext context)
+        public UpdateTodoItemDetailCommandHandler(IPlexRipperDbContext context)
         {
             _context = context;
         }

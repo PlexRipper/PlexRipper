@@ -1,6 +1,6 @@
-﻿using PlexRipper.Application.Common.Interfaces;
+﻿using MediatR;
+using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
-using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,9 +15,9 @@ namespace PlexRipper.Application.TodoItems.Commands.CreateTodoItem
 
     public class CreateTodoItemCommandHandler : IRequestHandler<CreateTodoItemCommand, int>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IPlexRipperDbContext _context;
 
-        public CreateTodoItemCommandHandler(IApplicationDbContext context)
+        public CreateTodoItemCommandHandler(IPlexRipperDbContext context)
         {
             _context = context;
         }

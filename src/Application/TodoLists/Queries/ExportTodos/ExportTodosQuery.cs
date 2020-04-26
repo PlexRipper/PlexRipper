@@ -16,11 +16,11 @@ namespace PlexRipper.Application.TodoLists.Queries.ExportTodos
 
     public class ExportTodosQueryHandler : IRequestHandler<ExportTodosQuery, ExportTodosVm>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IPlexRipperDbContext _context;
         private readonly IMapper _mapper;
         private readonly ICsvFileBuilder _fileBuilder;
 
-        public ExportTodosQueryHandler(IApplicationDbContext context, IMapper mapper, ICsvFileBuilder fileBuilder)
+        public ExportTodosQueryHandler(IPlexRipperDbContext context, IMapper mapper, ICsvFileBuilder fileBuilder)
         {
             _context = context;
             _mapper = mapper;

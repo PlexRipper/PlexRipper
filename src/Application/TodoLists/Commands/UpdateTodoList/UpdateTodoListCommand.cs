@@ -16,9 +16,9 @@ namespace PlexRipper.Application.TodoLists.Commands.UpdateTodoList
 
     public class UpdateTodoListCommandHandler : IRequestHandler<UpdateTodoListCommand>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IPlexRipperDbContext _context;
 
-        public UpdateTodoListCommandHandler(IApplicationDbContext context)
+        public UpdateTodoListCommandHandler(IPlexRipperDbContext context)
         {
             _context = context;
         }

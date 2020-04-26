@@ -16,9 +16,9 @@ namespace PlexRipper.Application.TodoLists.Commands.DeleteTodoList
 
     public class DeleteTodoListCommandHandler : IRequestHandler<DeleteTodoListCommand>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IPlexRipperDbContext _context;
 
-        public DeleteTodoListCommandHandler(IApplicationDbContext context)
+        public DeleteTodoListCommandHandler(IPlexRipperDbContext context)
         {
             _context = context;
         }

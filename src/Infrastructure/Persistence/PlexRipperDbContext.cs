@@ -1,84 +1,35 @@
-﻿using IdentityServer4.EntityFramework.Options;
-using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Infrastructure.Identity;
-using System.Data;
+using PlexRipper.Domain.Entities.Plex;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PlexRipper.Infrastructure.Persistence
 {
-    public class PlexRipperDbContext : ApiAuthorizationDbContext<ApplicationUser>, IApplicationDbContext
+    public class PlexRipperDbContext : DbContext, IPlexRipperDbContext
     {
-        private readonly ICurrentUserService _currentUserService;
-        private readonly IDateTime _dateTime;
-        private IDbContextTransaction _currentTransaction;
+        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
 
-        public PlexRipperDbContext(
-            DbContextOptions options,
-            IOptions<OperationalStoreOptions> operationalStoreOptions,
-            ICurrentUserService currentUserService,
-            IDateTime dateTime) : base(options, operationalStoreOptions)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            _currentUserService = currentUserService;
-            _dateTime = dateTime;
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlite("Data Source=PlexRipperDB.db");
+            }
         }
 
+        // Register tables
         public DbSet<TodoList> TodoLists { get; set; }
 
         public DbSet<TodoItem> TodoItems { get; set; }
+        public DbSet<Account> Accounts { get; set; }
+        public DbSet<PlexAccount> PlexAccounts { get; set; }
 
-        public async Task BeginTransactionAsync()
+        public Task<int> SaveChangesAsync()
         {
-            if (_currentTransaction != null)
-            {
-                return;
-            }
-
-            _currentTransaction = await base.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted).ConfigureAwait(false);
-        }
-
-        public async Task CommitTransactionAsync()
-        {
-            try
-            {
-                await SaveChangesAsync().ConfigureAwait(false);
-
-                _currentTransaction?.Commit();
-            }
-            catch
-            {
-                RollbackTransaction();
-                throw;
-            }
-            finally
-            {
-                if (_currentTransaction != null)
-                {
-                    _currentTransaction.Dispose();
-                    _currentTransaction = null;
-                }
-            }
-        }
-
-        public void RollbackTransaction()
-        {
-            try
-            {
-                _currentTransaction?.Rollback();
-            }
-            finally
-            {
-                if (_currentTransaction != null)
-                {
-                    _currentTransaction.Dispose();
-                    _currentTransaction = null;
-                }
-            }
+            return base.SaveChangesAsync(CancellationToken.None);
         }
 
         protected override void OnModelCreating(ModelBuilder builder)

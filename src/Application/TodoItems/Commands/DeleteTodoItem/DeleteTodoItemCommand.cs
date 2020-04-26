@@ -1,7 +1,7 @@
-﻿using PlexRipper.Application.Common.Exceptions;
+﻿using MediatR;
+using PlexRipper.Application.Common.Exceptions;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
-using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,9 +14,9 @@ namespace PlexRipper.Application.TodoItems.Commands.DeleteTodoItem
 
     public class DeleteTodoItemCommandHandler : IRequestHandler<DeleteTodoItemCommand>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IPlexRipperDbContext _context;
 
-        public DeleteTodoItemCommandHandler(IApplicationDbContext context)
+        public DeleteTodoItemCommandHandler(IPlexRipperDbContext context)
         {
             _context = context;
         }

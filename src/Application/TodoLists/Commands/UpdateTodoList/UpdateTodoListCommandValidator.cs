@@ -9,9 +9,9 @@ namespace PlexRipper.Application.TodoLists.Commands.UpdateTodoList
 {
     public class UpdateTodoListCommandValidator : AbstractValidator<UpdateTodoListCommand>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IPlexRipperDbContext _context;
 
-        public UpdateTodoListCommandValidator(IApplicationDbContext context)
+        public UpdateTodoListCommandValidator(IPlexRipperDbContext context)
         {
             _context = context;
 

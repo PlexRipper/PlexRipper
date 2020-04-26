@@ -27,19 +27,19 @@ namespace PlexRipper.Infrastructure
                         b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName)));
             }
 
-            services.AddScoped<IApplicationDbContext>(provider => provider.GetService<PlexRipperDbContext>());
+            services.AddScoped<IPlexRipperDbContext>(provider => provider.GetService<PlexRipperDbContext>());
 
             services.AddDefaultIdentity<ApplicationUser>()
                 .AddEntityFrameworkStores<PlexRipperDbContext>();
 
-            services.AddIdentityServer()
-                .AddApiAuthorization<ApplicationUser, PlexRipperDbContext>();
+            // services.AddIdentityServer().AddApiAuthorization<ApplicationUser, PlexRipperDbContext>();
 
             // Add services
             services.AddTransient<IDateTime, DateTimeService>();
             services.AddTransient<IIdentityService, IdentityService>();
             services.AddTransient<ICsvFileBuilder, CsvFileBuilder>();
             services.AddTransient<IPlexService, PlexService>();
+            services.AddTransient<IAccountService, AccountService>();
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();

@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using PlexRipper.Infrastructure.Identity;
+using NLog;
+using NLog.Web;
 using PlexRipper.Infrastructure.Persistence;
 using System;
 using System.Threading.Tasks;
@@ -15,37 +15,48 @@ namespace PlexRipper.WebAPI
     {
         public static async Task Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();
+            var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            logger.Debug("init main");
+            try
+            {
+                logger.Debug("init main");
+                var host = CreateHostBuilder(args).Build();
+                SetupDB(host, logger);
 
+                await host.RunAsync();
+            }
+            catch (Exception exception)
+            {
+                //NLog: catch setup errors
+                logger.Error(exception, "Stopped program because of exception");
+                throw;
+            }
+            finally
+            {
+                // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+                LogManager.Shutdown();
+            }
+        }
+
+        private static void SetupDB(IHost host, Logger logger)
+        {
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-
                 try
                 {
                     var context = services.GetRequiredService<PlexRipperDbContext>();
-
                     if (context.Database.IsSqlite())
                     {
                         context.Database.EnsureCreated();
                     }
-
-                    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-
-                    await PlexRipperDBContextSeed.SeedDefaultUserAsync(userManager);
-                    await PlexRipperDBContextSeed.SeedSampleDataAsync(context);
                 }
                 catch (Exception ex)
                 {
-                    var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-
-                    logger.LogError(ex, "An error occurred while migrating or seeding the database.");
-
+                    logger.Error(ex, "An error occurred while migrating or seeding the database.");
                     throw;
                 }
             }
-
-            await host.RunAsync();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -53,6 +64,12 @@ namespace PlexRipper.WebAPI
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                });
+                }).ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                })
+                .UseNLog();
     }
 }

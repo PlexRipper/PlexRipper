@@ -1,6 +1,5 @@
 ﻿using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
-using PlexRipper.Domain.ValueObjects;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,10 +7,15 @@ namespace PlexRipper.Application.Common.Interfaces
 {
     public interface IPlexService
     {
+        /// <summary>
+        /// Check the validity of <see cref="Account"/> credentials to the Plex API. 
+        /// </summary>
+        /// <param name="account">The Account to be validated</param>
+        /// <returns>The PlexAccount in DB that is returned from the Plex API</returns>
         Task<PlexAccount> IsAccountValid(Account account);
         Task<string> GetPlexToken(Account account);
         Task<List<string>> GetServers(Account account);
-        PlexAccount AddOrUpdatePlexAccount(PlexAccountDTO plexAccountDto);
+        // PlexAccount AddOrUpdatePlexAccount(PlexAccountDTO plexAccountDto);
         PlexAccount GetPlexAccount(long plexAccountId);
 
         /// <summary>

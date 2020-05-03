@@ -10,6 +10,5 @@ namespace PlexRipper.Domain.Entities
         public bool IsConfirmed { get; set; }
         public DateTime ConfirmedAt { get; set; }
         public virtual PlexAccount PlexAccount { get; set; }
-        public long? PlexAccountId { get; set; }
     }
 }

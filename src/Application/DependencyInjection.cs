@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
-using PlexRipper.Application.Common.Behaviours;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using PlexRipper.Application.Common.Behaviours;
+using PlexRipper.Application.Common.Interfaces.API;
+using PlexRipper.Application.Common.Models;
 using System.Reflection;
 
 namespace PlexRipper.Application
@@ -17,6 +19,8 @@ namespace PlexRipper.Application
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPerformanceBehaviour<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
+
+            services.AddTransient<IApi, Api>();
 
             return services;
         }

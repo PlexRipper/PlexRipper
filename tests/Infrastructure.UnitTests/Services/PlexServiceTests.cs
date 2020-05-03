@@ -1,47 +1,65 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Extensions.Logging;
 using NUnit.Framework;
-using PlexRipper.Application.Common.Mappings;
-using PlexRipper.Infrastructure.Persistence;
-using PlexRipper.Infrastructure.Services;
 using System.Threading.Tasks;
 
 namespace Infrastructure.UnitTests.Services
 {
     public class PlexServiceTests
     {
-        private PlexRipperDbContext _context;
-        private Mapper _mapper;
 
         [SetUp]
         public void Setup()
         {
-            // Setup DB
-            var options = new DbContextOptionsBuilder<PlexRipperDbContext>()
-                .UseSqlite("Data Source=PlexRipperDB_TESTS.db")
-                .Options;
-            PlexRipperDbContext context = new PlexRipperDbContext(options);
-            // context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
-            _context = context;
-
-            //Setup mapper
-            var myProfile = new InfrastructureProfile();
-            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
-            _mapper = new Mapper(configuration);
+            BaseDependanciesTest.Setup();
         }
 
         [Test]
         public async Task ShouldReturnValidApiToken()
         {
-            var plexService = new PlexService(_context, _mapper);
-            var accountService = new AccountService(_context, _mapper, plexService);
-            var account = accountService.AddAccount("", "");
-            var result = await accountService.ValidateAccount(account);
-            Assert.IsNotNull(result);
+            // Arrange
+            var plexService = BaseServiceTest.GetPlexService();
+            var accountService = BaseServiceTest.GetAccountService();
+            var credentials = BaseServiceTest.GetCredentials();
 
+            //Act 
+            var account = accountService.AddAccount(credentials.Username, credentials.Password);
+            var result = await accountService.ValidateAccount(account);
             string authToken = await plexService.GetPlexToken(account);
+
+            //Assert
+            Assert.IsNotNull(result);
             Assert.IsNotEmpty(authToken);
+        }
+
+
+        [Test]
+        public async Task ShouldReturnListOfServers()
+        {
+            // Arrange
+            var plexService = BaseServiceTest.GetPlexService();
+            var accountService = BaseServiceTest.GetAccountService();
+            var credentials = BaseServiceTest.GetCredentials();
+            //Act 
+            var account = accountService.AddAccount(credentials.Username, credentials.Password);
+            var result = await accountService.ValidateAccount(account);
+            var serverList = await plexService.GetServers(account);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.IsNotEmpty(serverList);
+        }
+
+
+
+
+        [Test]
+        public void ShouldLogDebugToUnitTestConsole()
+        {
+            var logger = BaseDependanciesTest.GetLogger<object>();
+            logger.LogDebug("This is a debug string");
+            logger.LogInformation("This is an information string");
+            logger.LogError("This is a error string");
+            logger.LogCritical("This is a critical string");
         }
     }
 }

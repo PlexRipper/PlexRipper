@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using PlexRipper.Domain.Entities.Plex;
-using PlexRipper.Domain.ValueObjects;
+using PlexRipper.Infrastructure.Common.Models.Plex;
 
-namespace PlexRipper.Application.Common.Mappings
+namespace PlexRipper.Infrastructure.Common.Mappings
 {
     public class InfrastructureProfile : Profile
     {

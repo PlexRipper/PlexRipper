@@ -1,13 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
 using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Infrastructure.Identity;
 using PlexRipper.Infrastructure.Persistence;
 using PlexRipper.WebAPI;
 using Respawn;
@@ -87,25 +85,26 @@ public class Testing
 
     private static string _currentUserId;
 
-    public static async Task<string> RunAsDefaultUserAsync()
+    public static Task<string> RunAsDefaultUserAsync()
     {
-        return await RunAsUserAsync("test@local", "Testing1234!");
+        return default;
+        // return await RunAsUserAsync("test@local", "Testing1234!");
     }
 
-    public static async Task<string> RunAsUserAsync(string userName, string password)
-    {
-        using var scope = _scopeFactory.CreateScope();
+    //public static async Task<string> RunAsUserAsync(string userName, string password)
+    //{
+    //    using var scope = _scopeFactory.CreateScope();
 
-        var userManager = scope.ServiceProvider.GetService<UserManager<ApplicationUser>>();
+    //   //  var userManager = scope.ServiceProvider.GetService<UserManager<ApplicationUser>>();
 
-        var user = new ApplicationUser { UserName = userName, Email = userName };
+    //    var user = new ApplicationUser { UserName = userName, Email = userName };
 
-        var result = await userManager.CreateAsync(user, password);
+    //    var result = await userManager.CreateAsync(user, password);
 
-        _currentUserId = user.Id;
+    //    _currentUserId = user.Id;
 
-        return _currentUserId;
-    }
+    //    return _currentUserId;
+    //}
 
     public static async Task ResetState()
     {

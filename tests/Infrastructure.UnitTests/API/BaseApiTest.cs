@@ -13,7 +13,7 @@ namespace Infrastructure.UnitTests.API
 
         public static PlexApi GetPlexApi()
         {
-            return new PlexApi(GetApi());
+            return new PlexApi(GetApi(), BaseDependanciesTest.GetLogger<PlexApi>());
         }
 
 

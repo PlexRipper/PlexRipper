@@ -114,23 +114,6 @@ namespace PlexRipper.Infrastructure.Services
             return null;
         }
 
-        /// <summary>
-        /// Returns a new AuthToken and will update the <see cref="PlexAccount"/> in the DB.
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        private async Task<string> RefreshPlexAuthTokenAsync(Account account)
-        {
-            var result = await RequestPlexSignInDataAsync(account);
-            if (result != null)
-            {
-                AddOrUpdatePlexAccount(result);
-                _logger.LogInformation($"Returned token was: {result.AuthToken}");
-                return result.AuthToken;
-            }
-            _logger.LogError("Result from RequestPlexSignInDataAsync() was null.");
-            return string.Empty;
-        }
 
         #endregion Private Methods
         #region Public Methods
@@ -210,7 +193,7 @@ namespace PlexRipper.Infrastructure.Services
                     return plexAccount.AuthToken;
                 }
                 _logger.LogInformation("Plex AuthToken has expired, refreshing Plex AuthToken now.");
-                return await RefreshPlexAuthTokenAsync(account);
+                return await _plexApi.RefreshPlexAuthTokenAsync(account);
             }
 
             _logger.LogError($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!");

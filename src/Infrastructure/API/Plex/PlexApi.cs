@@ -1,9 +1,10 @@
-﻿using PlexRipper.Application.Common.Interfaces.API;
+﻿using Microsoft.Extensions.Logging;
+using PlexRipper.Application.Common.Interfaces.API;
 using PlexRipper.Domain.Common.API;
+using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Domain.Enums;
 using PlexRipper.Infrastructure.Common.Interfaces;
-using PlexRipper.Infrastructure.Common.Models;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
 using PlexRipper.Infrastructure.Common.Models.Plex;
 using System;
@@ -14,12 +15,14 @@ namespace PlexRipper.Infrastructure.API.Plex
 {
     public class PlexApi : IPlexApi
     {
-        public PlexApi(IApi api)
+        public PlexApi(IApi api, ILogger<PlexApi> logger)
         {
+            Log = logger;
             Api = api;
         }
 
         private IApi Api { get; }
+        private ILogger<PlexApi> Log { get; }
 
         private const string SignInUri = "https://plex.tv/users/sign_in.json";
         private const string FriendsUri = "https://plex.tv/pms/friends/all";
@@ -31,22 +34,42 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// This is for authenticating users credentials with Plex
         /// <para>NOTE: Plex "Managed" users do not work</para>
         /// </summary>
-        /// <param name="user"></param>
+        /// <param name="account"></param>
         /// <returns></returns>
-        public async Task<PlexAuthentication> SignIn(UserRequest user)
+        public async Task<PlexAuthentication> PlexSignInAsync(Account account)
         {
             var userModel = new PlexUserRequest
             {
-                user = user
+                user =
+                {
+                    login = account.Username,
+                    password = account.Password
+                }
             };
             var request = new Request(SignInUri, string.Empty, HttpMethod.Post);
 
             AddHeaders(request);
             request.AddJsonBody(userModel);
 
-            var obj = await Api.Request<PlexAuthentication>(request);
+            return await Api.Request<PlexAuthentication>(request);
+        }
 
-            return obj;
+
+        /// <summary>
+        /// Returns a new AuthToken and will update the <see cref="PlexAccount"/> in the DB.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        public async Task<string> RefreshPlexAuthTokenAsync(Account account)
+        {
+            var result = await PlexSignInAsync(account);
+            if (result != null)
+            {
+                Log.LogInformation($"Returned token was: {result.user.AuthToken}");
+                return result.user.AuthToken;
+            }
+            Log.LogError("Result from RequestPlexSignInDataAsync() was null.");
+            return string.Empty;
         }
 
         public async Task<PlexStatus> GetStatus(string authToken, string uri)

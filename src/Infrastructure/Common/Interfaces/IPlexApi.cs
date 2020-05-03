@@ -1,5 +1,5 @@
-﻿using PlexRipper.Domain.Entities.Plex;
-using PlexRipper.Infrastructure.Common.Models;
+﻿using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
 using PlexRipper.Infrastructure.Common.Models.Plex;
 using System;
@@ -11,7 +11,7 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
     {
         Task<PlexStatus> GetStatus(string authToken, string uri);
         Task<PlexLibrariesForMachineId> GetLibrariesForMachineId(string authToken, string machineId);
-        Task<PlexAuthentication> SignIn(UserRequest user);
+        Task<PlexAuthentication> PlexSignInAsync(Account account);
         Task<PlexServerDTO> GetServer(string authToken);
         Task<PlexContainer> GetLibrarySections(string authToken, string plexFullHost);
         Task<PlexContainer> GetLibrary(string authToken, string plexFullHost, string libraryId);
@@ -25,5 +25,12 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
         Task<OAuthPin> GetPin(int pinId);
         Uri GetOAuthUrl(string code, string applicationUrl);
         Task<PlexAddWrapper> AddUser(string emailAddress, string serverId, string authToken, int[] libs);
+
+        /// <summary>
+        /// Returns a new AuthToken and will update the <see cref="PlexAccount"/> in the DB.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        Task<string> RefreshPlexAuthTokenAsync(Account account);
     }
 }

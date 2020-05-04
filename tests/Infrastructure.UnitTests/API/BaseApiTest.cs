@@ -17,6 +17,6 @@ namespace Infrastructure.UnitTests.API
         }
 
 
-        public static OmbiHttpClient HttpClient { get; } = new OmbiHttpClient();
+        public static PlexRipperHttpClient HttpClient { get; } = new PlexRipperHttpClient();
     }
 }

@@ -13,9 +13,8 @@ namespace PlexRipper.Application.Common.Interfaces
         /// <param name="account">The Account to be validated</param>
         /// <returns>The PlexAccount in DB that is returned from the Plex API</returns>
         Task<PlexAccount> IsAccountValid(Account account);
+        Task<List<PlexServer>> GetServers(Account account, bool refresh = false);
         Task<string> GetPlexToken(Account account);
-        Task<List<string>> GetServers(Account account);
-        // PlexAccount AddOrUpdatePlexAccount(PlexAccountDTO plexAccountDto);
         PlexAccount GetPlexAccount(long plexAccountId);
 
         /// <summary>
@@ -24,5 +23,6 @@ namespace PlexRipper.Application.Common.Interfaces
         /// <param name="account">The <see cref="Account"/> to use</param>
         /// <returns>Can return null when invalid</returns>
         PlexAccount ConvertToPlexAccount(Account account);
+
     }
 }

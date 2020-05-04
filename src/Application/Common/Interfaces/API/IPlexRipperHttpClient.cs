@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace PlexRipper.Application.Common.Interfaces.API
 {
-    public interface IOmbiHttpClient
+    public interface IPlexRipperHttpClient
     {
         Task<HttpResponseMessage> SendAsync(HttpRequestMessage request);
         Task<string> GetStringAsync(Uri requestUri);

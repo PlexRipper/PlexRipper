@@ -13,6 +13,8 @@ namespace PlexRipper.Application.Common.Interfaces
         DbSet<TodoItem> TodoItems { get; set; }
         DbSet<PlexAccount> PlexAccounts { get; set; }
         DbSet<Account> Accounts { get; set; }
+        DbSet<PlexServer> PlexServers { get; set; }
+        DbSet<PlexAccountServer> PlexAccountServers { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         Task<int> SaveChangesAsync();

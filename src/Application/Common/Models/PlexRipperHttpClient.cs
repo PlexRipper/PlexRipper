@@ -11,9 +11,9 @@ namespace PlexRipper.Application.Common.Models
     /// https://blogs.msdn.microsoft.com/alazarev/2017/12/29/disposable-finalizers-and-httpclient/
     /// https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/
     /// </summary>
-    public class OmbiHttpClient : IOmbiHttpClient
+    public class PlexRipperHttpClient : IPlexRipperHttpClient
     {
-        public OmbiHttpClient()
+        public PlexRipperHttpClient()
         {
 
         }

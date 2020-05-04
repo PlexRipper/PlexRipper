@@ -42,7 +42,7 @@ namespace Infrastructure.UnitTests.Services
             //Act 
             var account = accountService.AddAccount(credentials.Username, credentials.Password);
             var result = await accountService.ValidateAccount(account);
-            var serverList = await plexService.GetServers(account);
+            var serverList = await plexService.GetServers(account, true);
 
             //Assert
             Assert.IsNotNull(result);

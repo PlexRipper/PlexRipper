@@ -26,6 +26,8 @@ namespace PlexRipper.Infrastructure.Persistence
         public DbSet<TodoItem> TodoItems { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<PlexAccount> PlexAccounts { get; set; }
+        public DbSet<PlexServer> PlexServers { get; set; }
+        public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
 
         public Task<int> SaveChangesAsync()
         {

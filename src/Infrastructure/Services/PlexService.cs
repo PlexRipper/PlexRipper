@@ -134,17 +134,60 @@ namespace PlexRipper.Infrastructure.Services
             return string.Empty;
         }
 
-        public async Task<List<string>> GetServers(Account account)
+        public async Task<List<PlexServer>> GetServers(Account account, bool refresh = false)
         {
-            var token = await GetPlexToken(account);
 
-            if (!string.IsNullOrEmpty(token))
+            var plexAccount = ConvertToPlexAccount(account);
+            if (refresh)
             {
-                var result = await _plexApi.GetServer(token);
-                _logger.LogDebug("response: ", result);
+                var token = await GetPlexToken(account);
+
+                if (!string.IsNullOrEmpty(token))
+                {
+                    var result = await _plexApi.GetServer(token);
+                    await AddOrUpdatePlexServers(plexAccount, result.Server);
+                }
             }
 
-            return new List<string>();
+            // Retrieve all servers
+            var serverList = await _context.PlexServers
+                .Include(x => x.PlexAccountServers)
+                .ThenInclude(x => x.PlexAccount)
+                .Where(x => x.PlexAccountServers
+                    .Any(y => y.PlexAccountId == plexAccount.Id))
+                .ToListAsync();
+
+            return serverList;
+        }
+
+        private async Task AddOrUpdatePlexServers(PlexAccount plexAccount, List<ServerInfoDTO> servers)
+        {
+            foreach (ServerInfoDTO serverInfoDto in servers)
+            {
+                var plexServer = _mapper.Map<PlexServer>(serverInfoDto);
+                var plexServerDB =
+                    _context.PlexServers.FirstOrDefault(x => x.MachineIdentifier == plexServer.MachineIdentifier);
+                if (plexServerDB != null)
+                {
+                    plexServerDB = plexServer;
+                    _context.PlexServers.Update(plexServerDB);
+                }
+                else
+                {
+                    // Add
+                    await _context.PlexServers.AddAsync(plexServer);
+                    // Create entry in many-to-many table
+                    var plexAccountServer = new PlexAccountServer
+                    {
+                        PlexAccount = plexAccount,
+                        PlexServer = plexServer
+                    };
+                    plexServer.PlexAccountServers = new List<PlexAccountServer>();
+                    plexServer.PlexAccountServers.Add(plexAccountServer);
+                    await _context.PlexServers.AddAsync(plexServer);
+                }
+            }
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>

@@ -1,7 +1,10 @@
-﻿namespace PlexRipper.Infrastructure.Common.Models.Plex
+﻿using Newtonsoft.Json;
+
+namespace PlexRipper.Infrastructure.Common.Models.Plex
 {
     public class PlexAuthentication
     {
-        public PlexAccountDTO user { get; set; }
+        [JsonProperty("user")]
+        public PlexAccountDTO User { get; set; }
     }
 }

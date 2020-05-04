@@ -40,7 +40,7 @@ namespace PlexRipper.Infrastructure.API.Plex
         {
             var userModel = new PlexUserRequest
             {
-                user =
+                user = new UserRequest()
                 {
                     login = account.Username,
                     password = account.Password
@@ -65,8 +65,8 @@ namespace PlexRipper.Infrastructure.API.Plex
             var result = await PlexSignInAsync(account);
             if (result != null)
             {
-                Log.LogInformation($"Returned token was: {result.user.AuthToken}");
-                return result.user.AuthToken;
+                Log.LogInformation($"Returned token was: {result.User.AuthToken}");
+                return result.User.AuthToken;
             }
             Log.LogError("Result from RequestPlexSignInDataAsync() was null.");
             return string.Empty;
@@ -205,13 +205,13 @@ namespace PlexRipper.Infrastructure.API.Plex
             AddHeaders(request);
 
             request.AddQueryString("code", code);
-            // request.AddQueryString("context[device][product]", ApplicationName);
+            request.AddQueryString("context[device][product]", "Saverr");  // TODO Debate if we should put PlexRipper here
             request.AddQueryString("context[device][environment]", "bundled");
             request.AddQueryString("context[device][layout]", "desktop");
             request.AddQueryString("context[device][platform]", "Web");
             request.AddQueryString("context[device][device]", "Ombi");
 
-            // request.AddQueryString("clientID", s.InstallId.ToString("N"));
+            request.AddQueryString("clientID", "271938");
 
             if (request.FullUri.Fragment.Equals("#"))
             {
@@ -270,8 +270,8 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// <param name="request"></param>
         private void AddHeaders(Request request)
         {
-            // request.AddHeader("X-Plex-Client-Identifier", s.InstallId.ToString("N"));
-            // request.AddHeader("X-Plex-Product", ApplicationName);
+            request.AddHeader("X-Plex-Client-Identifier", "271938");
+            request.AddHeader("X-Plex-Product", "Saverr"); // TODO Debate if we should put PlexRipper here
             request.AddHeader("X-Plex-Version", "3");
             request.AddHeader("X-Plex-Device", "Ombi");
             request.AddHeader("X-Plex-Platform", "Web");

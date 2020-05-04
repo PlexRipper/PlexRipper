@@ -31,7 +31,7 @@ namespace Infrastructure.UnitTests
         public static void Setup()
         {
             var context = GetDbContext();
-            // context.Database.EnsureDeleted();
+            context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
         }
 

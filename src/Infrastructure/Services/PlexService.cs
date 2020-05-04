@@ -1,21 +1,15 @@
 ﻿using AutoMapper;
-using IdentityServer4.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
-using PlexRipper.Domain.Enums;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Common.Models.Plex;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PlexRipper.Infrastructure.Services
@@ -51,74 +45,9 @@ namespace PlexRipper.Infrastructure.Services
 
         #endregion Public Constructors
 
-        #region Private Methods
-
-        private HttpRequestMessage CreatePlexRequest(Account account, string url, HttpMethod httpMethod, string content = "", ContentType contentType = ContentType.Json)
-        {
-            if (account.Username.IsNullOrEmpty() || account.Password.IsNullOrEmpty())
-            {
-                _logger.LogDebug("Username or password was empty");
-                return null;
-            }
-
-            // Convert to Base64 encoded string
-            string base64AuthInfo = Convert.ToBase64String(
-                Encoding.ASCII.GetBytes($"{account.Username}:{account.Password}"));
-
-            var request = new HttpRequestMessage()
-            {
-                RequestUri = new Uri(url),
-                Method = httpMethod,
-            };
-
-            request.Headers.Add("X-Plex-Version", "1.1.0");
-            request.Headers.Add("X-Plex-Product", "Saverr");
-            request.Headers.Add("X-Plex-Client-Identifier", "271938");
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", base64AuthInfo);
-
-            request.Content = new StringContent(content, Encoding.UTF8, $"application/{contentType.ToString().ToLower()}");
-
-            return request;
-        }
-
-        private async Task<HttpResponseMessage> RequestSignInAsync(Account account)
-        {
-            var request = CreatePlexRequest(account, PlexSignInUrl, HttpMethod.Post);
-            return await client.SendAsync(request);
-        }
-
-        private async Task<PlexAccountDTO> RequestPlexSignInDataAsync(Account account)
-        {
-            if (account.Username.IsNullOrEmpty() || account.Password.IsNullOrEmpty())
-            {
-                _logger.LogError("Either the username or password was empty in RequestPlexSignInDataAsync()", account);
-                return null;
-            }
-
-            var response = await RequestSignInAsync(account);
-            // Send request to Plex servers
-            if (response.IsSuccessStatusCode)
-            {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                JObject o = JObject.Parse(responseBody);
-                if (o.ContainsKey("user"))
-                {
-                    return JsonConvert.DeserializeObject<PlexAccountDTO>(o["user"].ToString());
-                }
-                _logger.LogError("The Plex Api returned an invalid Json object lacking key user", responseBody);
-                return null;
-            }
-
-            _logger.LogError("The Plex Api response was unsuccessful", response);
-            return null;
-        }
-
-
-        #endregion Private Methods
         #region Public Methods
 
-        public PlexAccount AddOrUpdatePlexAccount(PlexAccountDTO plexAccountDto)
+        public async Task<PlexAccount> AddOrUpdatePlexAccount(Account account, PlexAccountDTO plexAccountDto)
         {
             if (plexAccountDto == null)
             {
@@ -126,15 +55,19 @@ namespace PlexRipper.Infrastructure.Services
                 return null;
             }
 
+
+            var accountDB = await _context.Accounts.FindAsync(account.Id);
+
             PlexAccount plexAccount = _mapper.Map<PlexAccount>(plexAccountDto);
-            var result = _context.PlexAccounts.Find(plexAccount.Id);
+            var result = await _context.PlexAccounts.FindAsync(plexAccount.Id);
             if (result != null)
             {
                 _logger.LogDebug($"PlexAccount with Id: {result.Id} already exists, will update now");
                 // Update
                 result = plexAccount;
+                plexAccount.Account = accountDB;
                 result.ConfirmedAt = DateTime.Now;
-                _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return result;
 
             }
@@ -142,8 +75,9 @@ namespace PlexRipper.Infrastructure.Services
             // Add
             _logger.LogDebug($"PlexAccount with Id: {plexAccount.Id} does not yet exist, will add now");
             plexAccount.ConfirmedAt = DateTime.Now;
-            _context.PlexAccounts.Add(plexAccount);
-            _context.SaveChangesAsync();
+            plexAccount.Account = accountDB;
+            await _context.PlexAccounts.AddAsync(plexAccount);
+            await _context.SaveChangesAsync();
             return plexAccount;
         }
 
@@ -206,14 +140,9 @@ namespace PlexRipper.Infrastructure.Services
 
             if (!string.IsNullOrEmpty(token))
             {
-                string serversUrl = $"{PlexServersUrl}?X-Plex-Token={token}";
-
-                var request = CreatePlexRequest(account, serversUrl, HttpMethod.Get, "", ContentType.Xml);
-                var response = await client.SendAsync(request);
-                string responseString = await response.Content.ReadAsStringAsync();
-                _logger.LogDebug("response: ", responseString);
+                var result = await _plexApi.GetServer(token);
+                _logger.LogDebug("response: ", result);
             }
-
 
             return new List<string>();
         }
@@ -225,10 +154,11 @@ namespace PlexRipper.Infrastructure.Services
         /// <returns>The PlexAccount in DB that is returned from the Plex API</returns>
         public async Task<PlexAccount> IsAccountValid(Account account)
         {
-            var plexAccountDto = await RequestPlexSignInDataAsync(account);
-            if (plexAccountDto != null)
+            var accountDB = await _context.Accounts.FindAsync(account.Id);
+            var plexAuthentication = await _plexApi.PlexSignInAsync(account);
+            if (plexAuthentication.User != null)
             {
-                return AddOrUpdatePlexAccount(plexAccountDto);
+                return await AddOrUpdatePlexAccount(accountDB, plexAuthentication.User);
             }
             // TODO Add error logging here
             return null;

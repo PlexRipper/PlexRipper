@@ -9,6 +9,6 @@ namespace PlexRipper.Application.Common.Interfaces.API
         Task<T> Request<T>(Request request);
         Task<string> RequestContent(Request request);
         T DeserializeXml<T>(string receivedString);
-        Task<bool> Download(Request request);
+        Task<bool> Download(Request request, string fileName);
     }
 }

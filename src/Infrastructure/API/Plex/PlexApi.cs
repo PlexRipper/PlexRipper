@@ -128,7 +128,7 @@ namespace PlexRipper.Infrastructure.API.Plex
 
             var request = new Request($"{downloadUrl}?X-Plex-Token={authToken}", HttpMethod.Get);
             AddHeaders(request, authToken);
-            Task.WaitAll(Api.Download(request));
+            Api.Download(request, fileName);
 
             return true;
 

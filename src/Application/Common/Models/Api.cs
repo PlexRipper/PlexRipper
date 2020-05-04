@@ -7,6 +7,7 @@ using PlexRipper.Domain.Extensions;
 using Polly;
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -30,31 +31,20 @@ namespace PlexRipper.Application.Common.Models
             NullValueHandling = NullValueHandling.Ignore
         };
 
-        public async Task<bool> Download(Request request)
+        public async Task<bool> Download(Request request, string fileName)
         {
-            using (var httpRequestMessage = new HttpRequestMessage(request.HttpMethod, request.FullUri))
+            try
             {
-                AddHeadersBody(request, httpRequestMessage);
-
-                Logger.LogDebug($"Sending request to: ${httpRequestMessage.RequestUri}");
-
-                var response = await _client.GetAsync(httpRequestMessage);
-
-                if (!response.IsSuccessStatusCode)
+                using (WebClient webClient = new WebClient())
                 {
-                    if (!request.IgnoreErrors)
-                    {
-                        await LogError(request, response);
-                    }
-                    string downloadPath = @$"{Environment.CurrentDirectory}\PlexDownloads\";
-                    Logger.LogDebug($"Downloading to: {downloadPath}");
-                    await using (var fs = new FileStream(downloadPath, FileMode.CreateNew))
-                    {
-                        Task.WaitAll(response.Content.CopyToAsync(fs));
-                        return true;
-                    }
+                    string downloadPath = @$"{Environment.CurrentDirectory}\PlexDownloads2\{fileName}";
+                    Task.WaitAll(webClient.DownloadFileTaskAsync(request.FullUri, @downloadPath));
+                    return true;
                 }
-
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Failed to download File: {fileName}", e);
             }
             return false;
         }

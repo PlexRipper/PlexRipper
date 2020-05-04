@@ -50,6 +50,23 @@ namespace Infrastructure.UnitTests.Services
         }
 
 
+        [Test]
+        public async Task ShouldReturnPlexLibrary()
+        {
+
+            var plexService = BaseServiceTest.GetPlexService();
+            var accountService = BaseServiceTest.GetAccountService();
+            var credentials = BaseServiceTest.GetCredentials();
+
+            var account = accountService.GetAccount(credentials.Username, credentials.Password);
+
+            var serverList = await plexService.GetServers(account);
+            var library = await plexService.GetLibrary(serverList[0]);
+
+            Assert.IsNotNull(library);
+        }
+
+
 
 
         [Test]

@@ -1,7 +1,9 @@
-﻿using PlexRipper.Domain.Entities;
+﻿using PlexRipper.Application.Common.Models;
+using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
 using PlexRipper.Infrastructure.Common.Models.Plex;
+using PlexRipper.Infrastructure.Common.Models.Plex.PlexLibrary;
 using System;
 using System.Threading.Tasks;
 
@@ -14,9 +16,9 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
         Task<PlexAuthentication> PlexSignInAsync(Account account);
         Task<PlexServerDTO> GetServer(string authToken);
         Task<PlexContainer> GetLibrarySections(string authToken, string plexFullHost);
-        Task<PlexContainer> GetLibrary(string authToken, string plexFullHost, string libraryId);
+        Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId);
         Task<PlexMetadata> GetEpisodeMetaData(string authToken, string host, int ratingKey);
-        Task<PlexMetadata> GetMetadata(string authToken, string plexFullHost, int itemId);
+        Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int itemId);
         Task<PlexMetadata> GetSeasons(string authToken, string plexFullHost, int ratingKey);
         Task<PlexContainer> GetAllEpisodes(string authToken, string host, string section, int start, int retCount);
         Task<PlexFriends> GetUsers(string authToken);
@@ -32,5 +34,7 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
         /// <param name="account"></param>
         /// <returns></returns>
         Task<string> RefreshPlexAuthTokenAsync(Account account);
+
+        void DownloadMedia(string authToken, string plexFullHost, string mediaKey);
     }
 }

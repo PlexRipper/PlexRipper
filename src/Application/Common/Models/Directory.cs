@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Infrastructure.Common.Models.Plex
+﻿namespace PlexRipper.Application.Common.Models
 {
     public class Directory
     {

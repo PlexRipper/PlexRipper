@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain.Entities.Plex
 {
@@ -25,5 +26,11 @@ namespace PlexRipper.Domain.Entities.Plex
 
         public List<PlexAccountServer> PlexAccountServers { get; set; }
 
+
+        [NotMapped]
+        public string BaseUrl => $"{Scheme}://{Address}:{Port}/";
+
+        [NotMapped]
+        public string LibraryUrl => $"{BaseUrl}library/sections/";
     }
 }

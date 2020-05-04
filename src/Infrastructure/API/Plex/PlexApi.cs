@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces.API;
+using PlexRipper.Application.Common.Models;
 using PlexRipper.Domain.Common.API;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
@@ -7,7 +8,9 @@ using PlexRipper.Domain.Enums;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
 using PlexRipper.Infrastructure.Common.Models.Plex;
+using PlexRipper.Infrastructure.Common.Models.Plex.PlexLibrary;
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -102,11 +105,11 @@ namespace PlexRipper.Infrastructure.API.Plex
             return await Api.Request<PlexContainer>(request);
         }
 
-        public async Task<PlexContainer> GetLibrary(string authToken, string plexFullHost, string libraryId)
+        public async Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId)
         {
             var request = new Request($"library/sections/{libraryId}/all", plexFullHost, HttpMethod.Get);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexContainer>(request);
+            return await Api.Request<PlexLibraryDTO>(request);
         }
 
         public async Task<PlexLibrariesForMachineId> GetLibrariesForMachineId(string authToken, string machineId)
@@ -114,6 +117,28 @@ namespace PlexRipper.Infrastructure.API.Plex
             var request = new Request("", $"https://plex.tv/api/servers/{machineId}", HttpMethod.Get, ContentType.Xml);
             AddHeaders(request, authToken);
             return await Api.Request<PlexLibrariesForMachineId>(request);
+        }
+
+        public void DownloadMedia(string authToken, string plexFullHost, string mediaKey)
+        {
+            var request = new Request($"library/metadata/{mediaKey}/?download=1", plexFullHost, HttpMethod.Get);
+            string url = $"{plexFullHost}library/metadata/{mediaKey}/?download=1&X-Plex-Token={authToken}";
+            Log.LogDebug(url);
+            WebClient webClient = new WebClient();
+            webClient.DownloadProgressChanged += ((sender, args) =>
+            {
+                Log.LogInformation(args.ProgressPercentage.ToString());
+            });
+            webClient.DownloadFileCompleted += ((sender, args) =>
+            {
+                Log.LogInformation("Download has completed!");
+            });
+
+            webClient.DownloadFileAsync(new Uri(url), @"D:\Downloads\PlexDownloads\lol.mp4");
+            AddHeaders(request, authToken);
+
+            //return await Api.Request<PlexLibraryDTO>(request);
+
         }
 
         /// <summary>
@@ -134,11 +159,11 @@ namespace PlexRipper.Infrastructure.API.Plex
             return await Api.Request<PlexMetadata>(request);
         }
 
-        public async Task<PlexMetadata> GetMetadata(string authToken, string plexFullHost, int itemId)
+        public async Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int itemId)
         {
-            var request = new Request($"library/metadata/{itemId}", plexFullHost, HttpMethod.Get);
+            var request = new Request($"library/metadata/{itemId}", plexFullHost, HttpMethod.Get, ContentType.Xml);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexMetadata>(request);
+            return await Api.Request<PlexMediaMetaDataDTO>(request);
         }
 
         public async Task<PlexMetadata> GetSeasons(string authToken, string plexFullHost, int ratingKey)

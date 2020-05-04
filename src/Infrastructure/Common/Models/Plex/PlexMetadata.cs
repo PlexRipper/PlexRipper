@@ -1,7 +1,9 @@
-﻿namespace PlexRipper.Infrastructure.Common.Models.Plex
+﻿using PlexRipper.Application.Common.Models;
+
+namespace PlexRipper.Infrastructure.Common.Models.Plex
 {
     public class PlexMetadata
     {
-        public Mediacontainer MediaContainer { get; set; }
+        public MediaContainer MediaContainer { get; set; }
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace PlexRipper.Infrastructure.Common.Models.Plex
+﻿namespace PlexRipper.Application.Common.Models
 {
-    public class Mediacontainer
+    public class MediaContainer
     {
         public int size { get; set; }
         public bool allowCameraUpload { get; set; }

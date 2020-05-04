@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Models;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Infrastructure.Common.Interfaces;
@@ -189,6 +190,19 @@ namespace PlexRipper.Infrastructure.Services
             }
             await _context.SaveChangesAsync();
         }
+
+
+        public async Task<PlexContainer> GetLibrary(PlexServer plexServer)
+        {
+            var plexContainer = await _plexApi.GetLibrarySections(plexServer.AccessToken, plexServer.BaseUrl);
+            var library = plexContainer.MediaContainer.Directory[4];
+            var result = await _plexApi.GetLibrary(plexServer.AccessToken, plexServer.BaseUrl, library.key);
+            var metaData = await _plexApi.GetMetadata(plexServer.AccessToken, plexServer.BaseUrl, 5516);
+            _plexApi.DownloadMedia(plexServer.AccessToken, plexServer.BaseUrl, "5516");
+            return plexContainer;
+        }
+
+
 
         /// <summary>
         /// Check the validity of <see cref="Account"/> credentials to the Plex API. 

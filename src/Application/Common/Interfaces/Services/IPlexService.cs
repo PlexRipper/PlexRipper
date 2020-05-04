@@ -1,4 +1,5 @@
-﻿using PlexRipper.Domain.Entities;
+﻿using PlexRipper.Application.Common.Models;
+using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -24,5 +25,6 @@ namespace PlexRipper.Application.Common.Interfaces
         /// <returns>Can return null when invalid</returns>
         PlexAccount ConvertToPlexAccount(Account account);
 
+        Task<PlexContainer> GetLibrary(PlexServer plexServer);
     }
 }

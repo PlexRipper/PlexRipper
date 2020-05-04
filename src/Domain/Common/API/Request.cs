@@ -14,6 +14,13 @@ namespace PlexRipper.Domain.Common.API
 
         }
 
+        public Request(string absoluteUrl, HttpMethod http, ContentType contentType = ContentType.Json)
+        {
+            AbsoluteUrl = absoluteUrl;
+            HttpMethod = http;
+            ContentType = contentType;
+        }
+
         public Request(string endpoint, string baseUrl, HttpMethod http, ContentType contentType = ContentType.Json)
         {
             Endpoint = endpoint;
@@ -25,6 +32,12 @@ namespace PlexRipper.Domain.Common.API
         public ContentType ContentType { get; }
         public string Endpoint { get; }
         public string BaseUrl { get; }
+
+        /// <summary>
+        /// Will override the BaseUrl and Endpoint when set
+        /// </summary>
+        public string AbsoluteUrl { get; set; }
+
         public HttpMethod HttpMethod { get; }
         public bool IgnoreErrors { get; set; }
         public bool Retry { get; set; }
@@ -37,6 +50,11 @@ namespace PlexRipper.Domain.Common.API
         {
             get
             {
+                if (!string.IsNullOrEmpty(AbsoluteUrl))
+                {
+                    return AbsoluteUrl;
+                }
+
                 var sb = new StringBuilder();
                 if (!string.IsNullOrEmpty(BaseUrl))
                 {

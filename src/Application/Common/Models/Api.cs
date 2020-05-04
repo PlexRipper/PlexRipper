@@ -30,6 +30,35 @@ namespace PlexRipper.Application.Common.Models
             NullValueHandling = NullValueHandling.Ignore
         };
 
+        public async Task<bool> Download(Request request)
+        {
+            using (var httpRequestMessage = new HttpRequestMessage(request.HttpMethod, request.FullUri))
+            {
+                AddHeadersBody(request, httpRequestMessage);
+
+                Logger.LogDebug($"Sending request to: ${httpRequestMessage.RequestUri}");
+
+                var response = await _client.GetAsync(httpRequestMessage);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    if (!request.IgnoreErrors)
+                    {
+                        await LogError(request, response);
+                    }
+                    string downloadPath = @$"{Environment.CurrentDirectory}\PlexDownloads\";
+                    Logger.LogDebug($"Downloading to: {downloadPath}");
+                    await using (var fs = new FileStream(downloadPath, FileMode.CreateNew))
+                    {
+                        Task.WaitAll(response.Content.CopyToAsync(fs));
+                        return true;
+                    }
+                }
+
+            }
+            return false;
+        }
+
         public async Task<T> Request<T>(Request request)
         {
             using (var httpRequestMessage = new HttpRequestMessage(request.HttpMethod, request.FullUri))

@@ -10,7 +10,8 @@ using PlexRipper.Infrastructure.Common.Models.OAuth;
 using PlexRipper.Infrastructure.Common.Models.Plex;
 using PlexRipper.Infrastructure.Common.Models.Plex.PlexLibrary;
 using System;
-using System.Net;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -119,23 +120,33 @@ namespace PlexRipper.Infrastructure.API.Plex
             return await Api.Request<PlexLibrariesForMachineId>(request);
         }
 
-        public void DownloadMedia(string authToken, string plexFullHost, string mediaKey)
+        public bool DownloadMedia(string authToken, string downloadUrl, string fileName)
         {
-            var request = new Request($"library/metadata/{mediaKey}/?download=1", plexFullHost, HttpMethod.Get);
-            string url = $"{plexFullHost}library/metadata/{mediaKey}/?download=1&X-Plex-Token={authToken}";
-            Log.LogDebug(url);
-            WebClient webClient = new WebClient();
-            webClient.DownloadProgressChanged += ((sender, args) =>
-            {
-                Log.LogInformation(args.ProgressPercentage.ToString());
-            });
-            webClient.DownloadFileCompleted += ((sender, args) =>
-            {
-                Log.LogInformation("Download has completed!");
-            });
+            //var request = new Request($"library/metadata/{mediaKey}/?download=1", plexFullHost, HttpMethod.Get);
+            //string url = $"{plexFullHost}library/metadata/{mediaKey}/?download=1&X-Plex-Token={authToken}";
+            Log.LogDebug(downloadUrl);
 
-            webClient.DownloadFileAsync(new Uri(url), @"D:\Downloads\PlexDownloads\lol.mp4");
+            var request = new Request($"{downloadUrl}?X-Plex-Token={authToken}", HttpMethod.Get);
             AddHeaders(request, authToken);
+            Task.WaitAll(Api.Download(request));
+
+            return true;
+
+
+
+
+            //WebClient webClient = new WebClient();
+            //webClient.DownloadProgressChanged += ((sender, args) =>
+            //{
+            //    Log.LogInformation(args.ProgressPercentage.ToString());
+            //});
+            //webClient.DownloadFileCompleted += ((sender, args) =>
+            //{
+            //    Log.LogInformation("Download has completed!");
+            //});
+
+            //webClient.DownloadFileAsync(new Uri(downloadUrl), @$"D:\Downloads\PlexDownloads\{fileName}");
+            // AddHeaders(request, authToken);
 
             //return await Api.Request<PlexLibraryDTO>(request);
 
@@ -165,6 +176,36 @@ namespace PlexRipper.Infrastructure.API.Plex
             AddHeaders(request, authToken);
             return await Api.Request<PlexMediaMetaDataDTO>(request);
         }
+
+
+        public string GetDownloadUrl(PlexServer server, PlexMediaMetaDataDTO metaDataDto)
+        {
+            try
+            {
+                string key = metaDataDto.MediaContainer.Metadata.First().Media.First().Part.First().Key;
+                return $"{server.BaseUrl}{key}";
+            }
+            catch (Exception e)
+            {
+                Log.LogError("Could not retrieve Download Url from MetaData", e);
+            }
+            return string.Empty;
+        }
+
+        public string GetDownloadFilename(PlexServer server, PlexMediaMetaDataDTO metaDataDto)
+        {
+            try
+            {
+                string path = metaDataDto.MediaContainer.Metadata.First().Media.First().Part.First().File;
+                return Path.GetFileName(path);
+            }
+            catch (Exception e)
+            {
+                Log.LogError("Could not retrieve Filename from MetaData", e);
+            }
+            return string.Empty;
+        }
+
 
         public async Task<PlexMetadata> GetSeasons(string authToken, string plexFullHost, int ratingKey)
         {

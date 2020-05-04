@@ -28,9 +28,9 @@ namespace PlexRipper.Domain.Entities.Plex
 
 
         [NotMapped]
-        public string BaseUrl => $"{Scheme}://{Address}:{Port}/";
+        public string BaseUrl => $"{Scheme}://{Address}:{Port}";
 
         [NotMapped]
-        public string LibraryUrl => $"{BaseUrl}library/sections/";
+        public string LibraryUrl => $"{BaseUrl}/library/sections";
     }
 }

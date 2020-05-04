@@ -35,6 +35,22 @@ namespace PlexRipper.Application.Common.Models
             }
         }
 
+        public async Task<HttpResponseMessage> GetAsync(HttpRequestMessage request, HttpCompletionOption httpCompletionOption = HttpCompletionOption.ResponseHeadersRead)
+        {
+            Setup();
+            try
+            {
+                return await _client.GetAsync(request.RequestUri, httpCompletionOption);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+
+
         public async Task<string> GetStringAsync(Uri requestUri)
         {
             Setup();
@@ -47,7 +63,7 @@ namespace PlexRipper.Application.Common.Models
             {
                 _handler ??= GetHandler();
                 _client = new HttpClient(_handler);
-                _client.DefaultRequestHeaders.Add("User-Agent", "PlexRipper");
+                _client.DefaultRequestHeaders.Add("User-Agent", "PlexRipper"); //TODO Debate if we should keep PlexRipper in here
             }
         }
 

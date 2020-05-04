@@ -35,6 +35,8 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
         /// <returns></returns>
         Task<string> RefreshPlexAuthTokenAsync(Account account);
 
-        void DownloadMedia(string authToken, string plexFullHost, string mediaKey);
+        bool DownloadMedia(string authToken, string downloadUrl, string fileName);
+        string GetDownloadUrl(PlexServer server, PlexMediaMetaDataDTO metaDataDto);
+        string GetDownloadFilename(PlexServer server, PlexMediaMetaDataDTO metaDataDto);
     }
 }

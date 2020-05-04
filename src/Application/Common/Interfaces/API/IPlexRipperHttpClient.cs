@@ -8,5 +8,6 @@ namespace PlexRipper.Application.Common.Interfaces.API
     {
         Task<HttpResponseMessage> SendAsync(HttpRequestMessage request);
         Task<string> GetStringAsync(Uri requestUri);
+        Task<HttpResponseMessage> GetAsync(HttpRequestMessage request, HttpCompletionOption httpCompletionOption = HttpCompletionOption.ResponseHeadersRead);
     }
 }

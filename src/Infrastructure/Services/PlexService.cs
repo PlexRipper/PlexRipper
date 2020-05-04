@@ -198,7 +198,9 @@ namespace PlexRipper.Infrastructure.Services
             var library = plexContainer.MediaContainer.Directory[4];
             var result = await _plexApi.GetLibrary(plexServer.AccessToken, plexServer.BaseUrl, library.key);
             var metaData = await _plexApi.GetMetadata(plexServer.AccessToken, plexServer.BaseUrl, 5516);
-            _plexApi.DownloadMedia(plexServer.AccessToken, plexServer.BaseUrl, "5516");
+            string downloadUrl = _plexApi.GetDownloadUrl(plexServer, metaData);
+            string filename = _plexApi.GetDownloadFilename(plexServer, metaData);
+            _plexApi.DownloadMedia(plexServer.AccessToken, downloadUrl, filename);
             return plexContainer;
         }
 

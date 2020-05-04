@@ -161,7 +161,7 @@ namespace PlexRipper.Infrastructure.API.Plex
 
         public async Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int itemId)
         {
-            var request = new Request($"library/metadata/{itemId}", plexFullHost, HttpMethod.Get, ContentType.Xml);
+            var request = new Request($"library/metadata/{itemId}", plexFullHost, HttpMethod.Get);
             AddHeaders(request, authToken);
             return await Api.Request<PlexMediaMetaDataDTO>(request);
         }

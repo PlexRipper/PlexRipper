@@ -36,6 +36,8 @@ namespace PlexRipper.Application.Common.Models
             {
                 AddHeadersBody(request, httpRequestMessage);
 
+                Logger.LogDebug($"Sending request to: ${httpRequestMessage.RequestUri}");
+
                 var httpResponseMessage = await _client.SendAsync(httpRequestMessage);
 
                 if (!httpResponseMessage.IsSuccessStatusCode)

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using PlexRipper.Domain.ValueObjects;
 
-namespace PlexRipper.Infrastructure.Common.Models.Plex
+namespace PlexRipper.Application.Common.DTO.Plex
 {
     public class PlexAccountDTO
     {

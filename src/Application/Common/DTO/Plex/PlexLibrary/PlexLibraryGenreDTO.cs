@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace PlexRipper.Infrastructure.Common.Models.Plex.PlexLibrary
+namespace PlexRipper.Application.Common.DTO.Plex.PlexLibrary
 {
     public class PlexLibraryGenreDTO
     {

@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System.Collections.Generic;
 
-namespace PlexRipper.Infrastructure.Common.Models.Plex.PlexLibrary
+namespace PlexRipper.Application.Common.DTO.Plex.PlexLibrary
 {
     public class PlexLibraryMediaContainerDTO
     {

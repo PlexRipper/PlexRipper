@@ -25,10 +25,7 @@
 //  ************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-using System.Xml.Serialization;
-
-namespace PlexRipper.Infrastructure.Common.Models.Plex
+namespace PlexRipper.Application.Common.DTO.Plex
 {
     [XmlRoot(ElementName = "MediaContainer")]
     public class PlexServerDTO

@@ -1,6 +1,6 @@
 ﻿using PlexRipper.Application.Common.Models;
 
-namespace PlexRipper.Infrastructure.Common.Models.Plex
+namespace PlexRipper.Application.Common.DTO.Plex
 {
     public class PlexMetadata
     {

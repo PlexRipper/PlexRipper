@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using PlexRipper.Application.Common.DTO.Plex;
+using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
 using PlexRipper.Application.Common.Interfaces.API;
 using PlexRipper.Application.Common.Models;
 using PlexRipper.Domain.Common.API;
@@ -7,8 +9,6 @@ using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Domain.Enums;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
-using PlexRipper.Infrastructure.Common.Models.Plex;
-using PlexRipper.Infrastructure.Common.Models.Plex.PlexLibrary;
 using System;
 using System.IO;
 using System.Linq;

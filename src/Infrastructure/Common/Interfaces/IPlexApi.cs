@@ -2,10 +2,10 @@
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
-using PlexRipper.Infrastructure.Common.Models.Plex;
-using PlexRipper.Infrastructure.Common.Models.Plex.PlexLibrary;
 using System;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.DTO.Plex;
+using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
 
 namespace PlexRipper.Infrastructure.Common.Interfaces
 {

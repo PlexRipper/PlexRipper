@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PlexRipper.Infrastructure.Common.Mappings;
+using PlexRipper.Application.Common.Mappings;
 using PlexRipper.Infrastructure.Persistence;
 
 namespace Infrastructure.UnitTests

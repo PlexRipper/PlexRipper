@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PlexRipper.Application.Common.DTO.Plex;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Models;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Infrastructure.Common.Interfaces;
-using PlexRipper.Infrastructure.Common.Models.Plex;
 using System;
 using System.Collections.Generic;
 using System.Linq;

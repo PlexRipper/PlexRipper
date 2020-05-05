@@ -2,10 +2,9 @@
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Domain.ValueObjects;
-using PlexRipper.Infrastructure.Common.Models.Plex;
 using System;
 
-namespace PlexRipper.Infrastructure.Common.Mappings
+namespace PlexRipper.Application.Common.Mappings
 {
     public class InfrastructureProfile : Profile
     {

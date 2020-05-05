@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System.Collections.Generic;
 
-namespace PlexRipper.Infrastructure.Common.Models.Plex.PlexLibrary
+namespace PlexRipper.Application.Common.DTO.Plex.PlexLibrary
 {
     /// <summary>
     /// Used to parse the response from the Plex API when requesting a media file to be streamed

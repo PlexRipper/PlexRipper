@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,11 +25,11 @@ namespace PlexRipper.Infrastructure.Services
             _logger = logger;
         }
 
-        public Account GetAccount(string username, string password)
+        public async Task<Account> GetAccountAsync(string username, string password)
         {
 
-            var result = _context.Accounts.Include(x => x.PlexAccount)
-                .FirstOrDefault(x => x.Username == username && x.Password == password);
+            var result = await _context.Accounts.Include(x => x.PlexAccount)
+                .FirstOrDefaultAsync(x => x.Username == username && x.Password == password);
 
             if (result != null)
             {
@@ -39,33 +40,79 @@ namespace PlexRipper.Infrastructure.Services
             return null;
         }
 
-        public Account AddAccount(string username, string password)
+        public async Task<Account> GetAccountAsync(int accountId)
         {
-            var result = GetAccount(username, password);
+
+            var result = await _context.Accounts.FindAsync(accountId);
+
             if (result != null)
             {
-                _logger.LogWarning("Account already exists in DB with these credentials");
                 return result;
             }
 
-            _logger.LogDebug("Creating a new Account in DB");
-            var account = new Account()
+            _logger.LogWarning($"Could not find an Account with id: {accountId}");
+            return null;
+        }
+
+        public async Task<bool> DeleteAccountAsync(int accountId)
+        {
+            var result = await GetAccountAsync(accountId);
+            if (result != null)
             {
-                Username = username,
-                Password = password
-            };
+                _context.Accounts.Remove(result);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
 
-            _context.Accounts.Add(account);
-            _context.SaveChanges();
+        public async Task<List<Account>> GetAllAccountsAsync()
+        {
+            return await _context.Accounts.ToListAsync();
+        }
 
-            return account;
+        /// <summary>
+        /// Adds a new <see cref="Account"/> to the Database.
+        /// </summary>
+        /// <param name="username">The username of the <see cref="Account"/></param>
+        /// <param name="password">The password of the <see cref="Account"/></param>
+        /// <returns>The newly created <see cref="Account"/></returns>
+        public async Task<Account> AddAccountAsync(string username, string password)
+        {
+            try
+            {
+                var result = await GetAccountAsync(username, password);
+                if (result != null)
+                {
+                    _logger.LogWarning("Account already exists in DB with these credentials");
+                    return result;
+                }
+
+                _logger.LogDebug("Creating a new Account in DB");
+                var account = new Account
+                {
+                    Username = username,
+                    Password = password
+                };
+
+                await _context.Accounts.AddAsync(account);
+                await _context.SaveChangesAsync();
+
+                return account;
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Error while adding a new Account", e);
+                throw;
+            }
         }
         /// <summary>
         /// Check if this account is valid by querying the Plex API
         /// </summary>
         /// <param name="account">The account to check</param>
         /// <returns>Are the account credentials valid</returns>
-        public async Task<bool> ValidateAccount(Account account)
+        public async Task<bool> ValidateAccountAsync(Account account)
         {
             // Retrieve Account from DB
             var accountDB = _context.Accounts

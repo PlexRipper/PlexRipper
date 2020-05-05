@@ -39,7 +39,6 @@
 	"vetur.format.defaultFormatter.js": "prettier-eslint",
 	"vetur.format.defaultFormatter.ts": "prettier-tslint",
 	"vetur.format.options.useTabs": true,
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"files.exclude": {
 		"**/.gitattributes": true,
 		"**/*.njsproj": true,

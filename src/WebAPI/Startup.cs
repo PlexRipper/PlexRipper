@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AutoMapper;
+using Carter;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +16,7 @@ using PlexRipper.Infrastructure;
 using PlexRipper.Infrastructure.Persistence;
 using PlexRipper.WebAPI.Services;
 using System.Linq;
+using System.Reflection;
 
 namespace PlexRipper.WebAPI
 {
@@ -27,6 +32,9 @@ namespace PlexRipper.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Auto Mapper
+            services.AddAutoMapper(typeof(Startup));
+
             services.AddApplication();
             services.AddInfrastructure(Configuration);
 
@@ -37,8 +45,16 @@ namespace PlexRipper.WebAPI
             services.AddHealthChecks()
                 .AddDbContextCheck<PlexRipperDbContext>();
 
-            services.AddControllers();
 
+            // Fluent Validator
+            services.AddMvc().AddFluentValidation();
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Carter
+            services.AddCarter();
+
+            services.AddControllers(); // TODO Might be removed
+            services.AddCors();
             // Customise default API behaviour
             services.Configure<ApiBehaviorOptions>(options =>
             {
@@ -74,6 +90,11 @@ namespace PlexRipper.WebAPI
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            // TODO Make sure to configure this correctly when setting up secruity
+            app.UseCors(builder => builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
 
             app.UseHealthChecks("/health");
             // app.UseHttpsRedirection();
@@ -82,13 +103,8 @@ namespace PlexRipper.WebAPI
             app.UseSwaggerUi3(); // serve Swagger UI
 
             app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(builder => builder.MapCarter());
+            // app.UseAuthorization();
         }
     }
 }

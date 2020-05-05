@@ -8,7 +8,6 @@ using PlexRipper.Application.Common.Interfaces.API;
 using PlexRipper.Application.Common.Models;
 using PlexRipper.Infrastructure.API.Plex;
 using PlexRipper.Infrastructure.Common.Interfaces;
-using PlexRipper.Infrastructure.Files;
 using PlexRipper.Infrastructure.Persistence;
 using PlexRipper.Infrastructure.Services;
 using System.Reflection;
@@ -38,13 +37,11 @@ namespace PlexRipper.Infrastructure
             //    .AddEntityFrameworkStores<PlexRipperDbContext>();
 
             // services.AddIdentityServer().AddApiAuthorization<ApplicationUser, PlexRipperDbContext>();
-
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 
             // Add services
             services.AddTransient<IDateTime, DateTimeService>();
-            services.AddTransient<ICsvFileBuilder, CsvFileBuilder>();
             // Services
             services.AddTransient<IPlexService, PlexService>();
             services.AddTransient<IAccountService, AccountService>();

@@ -22,8 +22,8 @@ namespace Infrastructure.UnitTests.Services
             var credentials = BaseServiceTest.GetCredentials();
 
             //Act 
-            var account = accountService.AddAccount(credentials.Username, credentials.Password);
-            var result = await accountService.ValidateAccount(account);
+            var account = await accountService.AddAccountAsync(credentials.Username, credentials.Password);
+            var result = await accountService.ValidateAccountAsync(account);
             string authToken = await plexService.GetPlexToken(account);
 
             //Assert
@@ -40,8 +40,8 @@ namespace Infrastructure.UnitTests.Services
             var accountService = BaseServiceTest.GetAccountService();
             var credentials = BaseServiceTest.GetCredentials();
             //Act 
-            var account = accountService.AddAccount(credentials.Username, credentials.Password);
-            var result = await accountService.ValidateAccount(account);
+            var account = await accountService.AddAccountAsync(credentials.Username, credentials.Password);
+            var result = await accountService.ValidateAccountAsync(account);
             var serverList = await plexService.GetServers(account, true);
 
             //Assert
@@ -58,7 +58,7 @@ namespace Infrastructure.UnitTests.Services
             var accountService = BaseServiceTest.GetAccountService();
             var credentials = BaseServiceTest.GetCredentials();
 
-            var account = accountService.GetAccount(credentials.Username, credentials.Password);
+            var account = await accountService.GetAccountAsync(credentials.Username, credentials.Password);
 
             var serverList = await plexService.GetServers(account);
             var library = await plexService.GetLibrary(serverList[0]);

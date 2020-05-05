@@ -5,5 +5,5 @@ export default ({ $axios }: NuxtAppOptions): void => {
 		Log.debug(`Making request to ${config.url}`);
 	});
 
-	// $axios.setBaseURL('http://localhost:5001/api');
+	$axios.setBaseURL('https://localhost:5001/api');
 };

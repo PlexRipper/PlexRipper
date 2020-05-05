@@ -1,16 +1,8 @@
 <template>
 	<v-app>
 		<v-content>
-			<v-container fluid>
-				<v-row>
-					<v-col cols="3">
-						<navigation-drawer />
-					</v-col>
-					<v-col>
-						<nuxt />
-					</v-col>
-				</v-row>
-			</v-container>
+			<navigation-drawer />
+			<nuxt />
 		</v-content>
 		<v-footer app>
 			<span>&copy; {{ currentYear }} </span>

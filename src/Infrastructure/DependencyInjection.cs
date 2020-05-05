@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.API;
+using PlexRipper.Application.Common.Models;
 using PlexRipper.Infrastructure.API.Plex;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Files;
@@ -47,7 +49,9 @@ namespace PlexRipper.Infrastructure
             services.AddTransient<IPlexService, PlexService>();
             services.AddTransient<IAccountService, AccountService>();
             // Api
+            services.AddTransient<IPlexRipperHttpClient, PlexRipperHttpClient>();
             services.AddTransient<IPlexApi, PlexApi>();
+            services.AddTransient<IApi, Api>();
 
 
             services.AddAuthentication()

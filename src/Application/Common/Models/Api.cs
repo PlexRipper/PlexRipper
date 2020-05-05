@@ -37,6 +37,17 @@ namespace PlexRipper.Application.Common.Models
             {
                 using (WebClient webClient = new WebClient())
                 {
+                    webClient.DownloadFileCompleted += (sender, args) =>
+                    {
+                        Logger.LogInformation("The download has completed!");
+                    };
+
+                    // Specify a progress notification handler.
+                    webClient.DownloadProgressChanged += (sender, args) =>
+                    {
+                        Logger.LogInformation($"Downloaded {args.BytesReceived} of {args.TotalBytesToReceive} bytes. {args.ProgressPercentage} % complete...");
+                    };
+
                     string downloadPath = @$"{Environment.CurrentDirectory}\PlexDownloads2\{fileName}";
                     Task.WaitAll(webClient.DownloadFileTaskAsync(request.FullUri, @downloadPath));
                     return true;

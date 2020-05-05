@@ -26,6 +26,7 @@ const config: Configuration = {
 	 */
 	plugins: [
 		{ src: '@plugins/vuetify.ts', mode: 'client' },
+		{ src: '@plugins/axios.ts', mode: 'client' },
 		{ src: '@plugins/loggingPlugin.ts', mode: 'client' },
 	],
 	/*

@@ -13,7 +13,7 @@ namespace PlexRipper.Application.UnitTests.Common.Mappings
         {
             _configuration = new MapperConfiguration(cfg =>
             {
-                cfg.AddProfile<MappingProfile>();
+                cfg.AddProfile<ApplicationMappingProfile>();
             });
 
             _mapper = _configuration.CreateMapper();

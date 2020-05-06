@@ -2,6 +2,8 @@
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
+using System;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,20 +12,25 @@ namespace PlexRipper.Infrastructure.Persistence
 {
     public class PlexRipperDbContext : DbContext, IPlexRipperDbContext
     {
-        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
+        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options)
+        {
+
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
+            string path = Environment.CurrentDirectory;
+
+            if (Directory.Exists("/config"))
             {
-                optionsBuilder.UseSqlite("Data Source=PlexRipperDB.db");
+                path = "/config";
             }
+
+            optionsBuilder.UseSqlite($"Data Source={path}/PlexRipperDB.db");
+
         }
 
-        // Register tables
-        public DbSet<TodoList> TodoLists { get; set; }
 
-        public DbSet<TodoItem> TodoItems { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<PlexAccount> PlexAccounts { get; set; }
         public DbSet<PlexServer> PlexServers { get; set; }

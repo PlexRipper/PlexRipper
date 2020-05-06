@@ -46,7 +46,7 @@ namespace Infrastructure.UnitTests
 
         public static Mapper GetMapper()
         {
-            var myProfile = new InfrastructureProfile();
+            var myProfile = new ApplicationMappingProfile();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
             return new Mapper(configuration);
         }

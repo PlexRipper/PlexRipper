@@ -51,6 +51,16 @@ namespace PlexRipper.WebAPI.Controllers
             // Save the account in the DB
             try
             {
+                var exists = await _accountService.GetAccountAsync(result.Data.Username) != null;
+                if (exists)
+                {
+                    res.StatusCode = StatusCodes.Status403Forbidden;
+                    await res.AsJson(new
+                    {
+                        message = $"Account with username: \"{result.Data.Username}\" already exists!"
+                    });
+                    return;
+                }
                 var accountDB = await _accountService.AddAccountAsync(result.Data.Username, result.Data.Password);
 
                 if (accountDB != null)

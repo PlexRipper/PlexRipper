@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Application.Common.DTO.Plex
+﻿using System.Xml.Serialization;
+
+namespace PlexRipper.Application.Common.DTO.Plex
 {
     [XmlRoot(ElementName = "Server")]
     public class ServerInfoDTO

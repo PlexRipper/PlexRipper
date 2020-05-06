@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +9,6 @@ using PlexRipper.Infrastructure.API.Plex;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Persistence;
 using PlexRipper.Infrastructure.Services;
-using System.Reflection;
 
 namespace PlexRipper.Infrastructure
 {
@@ -37,8 +35,6 @@ namespace PlexRipper.Infrastructure
             //    .AddEntityFrameworkStores<PlexRipperDbContext>();
 
             // services.AddIdentityServer().AddApiAuthorization<ApplicationUser, PlexRipperDbContext>();
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
 
             // Add services
             services.AddTransient<IDateTime, DateTimeService>();

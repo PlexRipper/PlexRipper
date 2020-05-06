@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using PlexRipper.Domain.ValueObjects;
+using System;
+using System.Collections.Generic;
 
 namespace PlexRipper.Application.Common.DTO.Plex
 {

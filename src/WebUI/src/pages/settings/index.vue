@@ -1,13 +1,9 @@
 <template>
 	<v-container>
 		<!-- Plex Accounts -->
-		<v-row v-for="(account, index) in accounts" :key="index">
-			<v-col cols="12" sm="6">
-				<v-text-field label="Username" full-width single-line outlined :value="account.username" />
-			</v-col>
-
-			<v-col cols="12" sm="6">
-				<v-text-field label="Password" full-width single-line outlined :value="account.password" />
+		<v-row>
+			<v-col cols="3" v-for="(account, index) in accounts" :key="index">
+				<account-card :account="account" />
 			</v-col>
 		</v-row>
 		<v-row>
@@ -20,35 +16,41 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import AccountCard from './components/AccountCard.vue';
 import Log from 'consola';
 
 interface IPlexAccounts {
 	username: string;
 	password: string;
-	isConfifmed: boolean;
+	isConfirmed: boolean;
 }
 
-@Component
+@Component({
+	components: {
+		AccountCard,
+	},
+})
 export default class Settings extends Vue {
-	accounts: IPlexAccounts[] = [
-		{
-			username: 'test',
-			password: 'password123',
-			isConfifmed: false,
-		},
-	];
+	accounts: IPlexAccounts[] = [];
 
-
-	checkAccount(account: IPlexAccounts){
-
+	checkAccount(account: IPlexAccounts): void {
+		Log.debug(account);
 	}
 
 	async mounted(): Promise<void> {
 		try {
-			const ip = await this.$axios.$get('/weatherforecast');
-			Log.debug(ip);
+			this.accounts = await this.$axios.$get('/accounts');
+			Log.debug(this.accounts);
 		} catch (error) {
 			Log.error(error);
+		}
+
+		if (this.accounts.length === 0) {
+			this.accounts.push({
+				username: '',
+				password: '',
+				isConfirmed: false,
+			});
 		}
 	}
 }

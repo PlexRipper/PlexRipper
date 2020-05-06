@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PlexRipper.Application.Common.DTO.Plex;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Domain.ValueObjects;
@@ -6,9 +7,9 @@ using System;
 
 namespace PlexRipper.Application.Common.Mappings
 {
-    public class InfrastructureProfile : Profile
+    public class ApplicationMappingProfile : Profile
     {
-        public InfrastructureProfile()
+        public ApplicationMappingProfile()
         {
             CreateMap<PlexAccountDTO, PlexAccount>(MemberList.Destination).ReverseMap();
             CreateMap<AccountDTO, Account>(MemberList.Destination).ReverseMap();

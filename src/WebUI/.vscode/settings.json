@@ -36,8 +36,8 @@
 	"typescript.referencesCodeLens.enabled": true,
 	"typescript.referencesCodeLens.showOnAllFunctions": true,
 	"typescript.tsdk": "node_modules\\typescript\\lib",
-	"vetur.format.defaultFormatter.js": "prettier-eslint",
-	"vetur.format.defaultFormatter.ts": "prettier-tslint",
+	"vetur.format.defaultFormatter.js": "none",
+	"vetur.format.defaultFormatter.ts": "none",
 	"vetur.format.options.useTabs": true,
 	"files.exclude": {
 		"**/.gitattributes": true,

@@ -30,7 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Mappings\" />
     <Folder Include="Common\Models\Plex\PlexLibrary\" />
   </ItemGroup>
 

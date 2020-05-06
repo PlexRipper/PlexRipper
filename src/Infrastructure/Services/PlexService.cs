@@ -94,7 +94,7 @@ namespace PlexRipper.Infrastructure.Services
         /// <returns>Can return null when invalid</returns>
         public PlexAccount ConvertToPlexAccount(Account account)
         {
-            if (!account.IsConfirmed)
+            if (!account.IsValidated)
             {
                 _logger.LogWarning(
                     $"The account with Id: {account.Id} has not yet been confirmed." +

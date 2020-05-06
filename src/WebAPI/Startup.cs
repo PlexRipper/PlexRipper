@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Carter;
+﻿using Carter;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -32,9 +31,6 @@ namespace PlexRipper.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Auto Mapper
-            services.AddAutoMapper(typeof(Startup));
-
             services.AddApplication();
             services.AddInfrastructure(Configuration);
 

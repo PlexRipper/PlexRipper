@@ -25,18 +25,18 @@ namespace PlexRipper.Infrastructure.Services
             _logger = logger;
         }
 
-        public async Task<Account> GetAccountAsync(string username, string password)
+        public async Task<Account> GetAccountAsync(string username)
         {
 
             var result = await _context.Accounts.Include(x => x.PlexAccount)
-                .FirstOrDefaultAsync(x => x.Username == username && x.Password == password);
+                .FirstOrDefaultAsync(x => x.Username == username);
 
             if (result != null)
             {
                 return result;
             }
 
-            _logger.LogWarning($"Could not find an Account with username: {username} and password: {password}");
+            _logger.LogWarning($"Could not find an Account with username: {username}");
             return null;
         }
 
@@ -81,7 +81,7 @@ namespace PlexRipper.Infrastructure.Services
         {
             try
             {
-                var result = await GetAccountAsync(username, password);
+                var result = await GetAccountAsync(username);
                 if (result != null)
                 {
                     _logger.LogWarning("Account already exists in DB with these credentials");
@@ -131,16 +131,16 @@ namespace PlexRipper.Infrastructure.Services
             {
                 // Account is valid
                 _logger.LogDebug("Account credentials were valid");
-                accountDB.IsConfirmed = true;
-                accountDB.ConfirmedAt = DateTime.Now;
+                accountDB.IsValidated = true;
+                accountDB.ValidatedAt = DateTime.Now;
                 accountDB.PlexAccount = await _context.PlexAccounts.FindAsync(plexAccount.Id);
             }
             else
             {
                 // Account is invalid
                 _logger.LogWarning("Account credentials were invalid");
-                accountDB.IsConfirmed = false;
-                accountDB.ConfirmedAt = DateTime.MinValue;
+                accountDB.IsValidated = false;
+                accountDB.ValidatedAt = DateTime.MinValue;
                 _context.PlexAccounts.Remove(accountDB.PlexAccount);
             }
             await _context.SaveChangesAsync();

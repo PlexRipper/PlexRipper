@@ -8,9 +8,6 @@ namespace PlexRipper.Application.Common.Interfaces
 {
     public interface IPlexRipperDbContext
     {
-        DbSet<TodoList> TodoLists { get; set; }
-
-        DbSet<TodoItem> TodoItems { get; set; }
         DbSet<PlexAccount> PlexAccounts { get; set; }
         DbSet<Account> Accounts { get; set; }
         DbSet<PlexServer> PlexServers { get; set; }

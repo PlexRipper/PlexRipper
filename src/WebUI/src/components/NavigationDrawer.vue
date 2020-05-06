@@ -42,13 +42,13 @@ export default class NavigationDrawer extends Vue {
 		];
 	}
 
-	async mounted(): Promise<void> {
-		try {
-			const ip = await this.$axios.$get('/weatherforecast');
-			Log.debug(ip);
-		} catch (error) {
-			Log.error(error);
-		}
-	}
+	// async mounted(): Promise<void> {
+	// 	try {
+	// 		const ip = await this.$axios.$get('/weatherforecast');
+	// 		Log.debug(ip);
+	// 	} catch (error) {
+	// 		Log.error(error);
+	// 	}
+	// }
 }
 </script>

@@ -47,7 +47,7 @@ const config: Configuration = {
 		'@nuxtjs/eslint-module',
 		// Doc: https://github.com/nuxt-community/stylelint-module
 		'@nuxtjs/stylelint-module',
-		'@nuxtjs/vuetify',
+		['@nuxtjs/vuetify', { defaultAssets: false }],
 	],
 	/*
 	 ** Nuxt.js modules

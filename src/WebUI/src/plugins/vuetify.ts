@@ -1,8 +1,8 @@
+import 'material-design-icons-iconfont/dist/material-design-icons.css';
+import '@mdi/font/css/materialdesignicons.css';
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { Context } from '@nuxt/types';
-import 'material-design-icons-iconfont/dist/material-design-icons.css';
-import '@mdi/font/css/materialdesignicons.css'; // Ensure you are using css-loader version "^2.1.1" ,
 
 /*
  ** vuetify module configuration
@@ -16,7 +16,10 @@ export default (ctx: Context): void => {
 			options: {
 				customProperties: true,
 			},
-			dark: false,
+			dark: true,
+		},
+		icons: {
+			iconfont: 'mdi',
 		},
 	});
 

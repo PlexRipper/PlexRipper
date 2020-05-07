@@ -37,6 +37,7 @@ COPY ../WebUI/ ./
 RUN npm run build
 EXPOSE 3000
 
+VOLUME /config /downloads 
 #production stage
 #FROM nginx:stable-alpine as production-stage
 #COPY --from=build-stage /app/webui/dist /usr/share/nginx/html

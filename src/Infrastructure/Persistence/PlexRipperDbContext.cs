@@ -2,8 +2,6 @@
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
-using System;
-using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,20 +12,10 @@ namespace PlexRipper.Infrastructure.Persistence
     {
         public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options)
         {
-
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string path = Environment.CurrentDirectory;
-
-            if (Directory.Exists("/config"))
-            {
-                path = "/config";
-            }
-
-            optionsBuilder.UseSqlite($"Data Source={path}/PlexRipperDB.db");
-
         }
 
 

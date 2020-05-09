@@ -38,16 +38,17 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// This is for authenticating users credentials with Plex
         /// <para>NOTE: Plex "Managed" users do not work</para>
         /// </summary>
-        /// <param name="account"></param>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
         /// <returns></returns>
-        public async Task<PlexAuthentication> PlexSignInAsync(Account account)
+        public async Task<PlexAuthentication> PlexSignInAsync(string username, string password)
         {
             var userModel = new PlexUserRequest
             {
                 user = new UserRequest()
                 {
-                    login = account.Username,
-                    password = account.Password
+                    login = username,
+                    password = password
                 }
             };
             var request = new Request(SignInUri, string.Empty, HttpMethod.Post);
@@ -66,7 +67,7 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// <returns></returns>
         public async Task<string> RefreshPlexAuthTokenAsync(Account account)
         {
-            var result = await PlexSignInAsync(account);
+            var result = await PlexSignInAsync(account.Username, account.Password);
             if (result != null)
             {
                 Log.LogInformation($"Returned token was: {result.User.AuthToken}");

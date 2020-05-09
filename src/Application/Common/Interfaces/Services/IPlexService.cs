@@ -8,12 +8,7 @@ namespace PlexRipper.Application.Common.Interfaces
 {
     public interface IPlexService
     {
-        /// <summary>
-        /// Check the validity of <see cref="Account"/> credentials to the Plex API. 
-        /// </summary>
-        /// <param name="account">The Account to be validated</param>
-        /// <returns>The PlexAccount in DB that is returned from the Plex API</returns>
-        Task<PlexAccount> IsAccountValid(Account account);
+        Task<bool> IsPlexAccountValid(string username, string password);
         Task<List<PlexServer>> GetServers(Account account, bool refresh = false);
         Task<string> GetPlexToken(Account account);
         PlexAccount GetPlexAccount(long plexAccountId);

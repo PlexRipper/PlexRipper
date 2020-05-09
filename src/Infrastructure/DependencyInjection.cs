@@ -9,7 +9,6 @@ using PlexRipper.Infrastructure.API.Plex;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Persistence;
 using PlexRipper.Infrastructure.Services;
-using System;
 using System.IO;
 
 namespace PlexRipper.Infrastructure
@@ -25,11 +24,9 @@ namespace PlexRipper.Infrastructure
             }
             else
             {
-                var path = new Uri(
-                    Path.GetDirectoryName(
-                        System.Reflection.Assembly.GetExecutingAssembly().CodeBase) ?? throw new InvalidOperationException()
-                ).LocalPath;
-                string dbPath = Path.Combine(path, "PlexRipperDB.db");
+                var rootDir =
+                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+                string dbPath = Path.Combine(rootDir, "PlexRipperDB.db");
 
                 services.AddDbContext<PlexRipperDbContext>(options =>
                     options.UseSqlite(

@@ -15,20 +15,20 @@ namespace PlexRipper.WebAPI
     {
         public static async Task Main(string[] args)
         {
-            var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
-            logger.Debug("init main");
+            // var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            //logger.Debug("init main");
             try
             {
-                logger.Debug("init main");
+                //logger.Debug("init main");
                 var host = CreateHostBuilder(args).Build();
-                SetupDB(host, logger);
+                SetupDB(host);
 
                 await host.RunAsync();
             }
             catch (Exception exception)
             {
                 //NLog: catch setup errors
-                logger.Error(exception, "Stopped program because of exception");
+                // logger.Error(exception, "Stopped program because of exception");
                 throw;
             }
             finally
@@ -38,7 +38,7 @@ namespace PlexRipper.WebAPI
             }
         }
 
-        private static void SetupDB(IHost host, Logger logger)
+        private static void SetupDB(IHost host) //Logger logger
         {
             using (var scope = host.Services.CreateScope())
             {
@@ -53,7 +53,7 @@ namespace PlexRipper.WebAPI
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, "An error occurred while migrating or seeding the database.");
+                    //logger.Error(ex, "An error occurred while migrating or seeding the database.");
                     throw;
                 }
             }

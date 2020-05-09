@@ -1,14 +1,13 @@
 <template>
 	<v-container>
-		<!-- Plex Accounts -->
 		<v-row>
+			<!-- Plex Accounts -->
 			<v-col cols="3" v-for="(account, index) in accounts" :key="index">
 				<account-card :account="account" />
 			</v-col>
-		</v-row>
-		<v-row>
-			<v-col>
-				<v-btn block color="primary">Add Plex Account</v-btn>
+			<!-- Add new Account card -->
+			<v-col cols="3">
+				<account-card />
 			</v-col>
 		</v-row>
 	</v-container>

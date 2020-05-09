@@ -79,12 +79,11 @@ dist
 
 # IDE / Editor
 .idea
-.vscode/vscode-chrome-debug-userdatadir/
 
 # Service worker
 sw.*
 
-# Mac OSX
+# macOS
 .DS_Store
 
 # Vim swap files

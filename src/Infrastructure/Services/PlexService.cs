@@ -205,22 +205,16 @@ namespace PlexRipper.Infrastructure.Services
         }
 
 
-
         /// <summary>
-        /// Check the validity of <see cref="Account"/> credentials to the Plex API. 
+        /// Check the validity of Plex credentials to the Plex API. 
         /// </summary>
-        /// <param name="account">The Account to be validated</param>
-        /// <returns>The PlexAccount in DB that is returned from the Plex API</returns>
-        public async Task<PlexAccount> IsAccountValid(Account account)
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns>The result of the test</returns>
+        public async Task<bool> IsPlexAccountValid(string username, string password)
         {
-            var accountDB = await _context.Accounts.FindAsync(account.Id);
-            var plexAuthentication = await _plexApi.PlexSignInAsync(account);
-            if (plexAuthentication.User != null)
-            {
-                return await AddOrUpdatePlexAccount(accountDB, plexAuthentication.User);
-            }
-            // TODO Add error logging here
-            return null;
+            var plexAuthentication = await _plexApi.PlexSignInAsync(username, password);
+            return plexAuthentication?.User != null;
         }
         #endregion Public Methods
 

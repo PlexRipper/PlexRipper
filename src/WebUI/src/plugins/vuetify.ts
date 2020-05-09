@@ -12,6 +12,7 @@ export default (ctx: Context): void => {
 	Vue.use(Vuetify);
 
 	const vuetify = new Vuetify({
+		customVariables: ['~/assets/scss/_variables.scss'],
 		theme: {
 			options: {
 				customProperties: true,
@@ -24,5 +25,4 @@ export default (ctx: Context): void => {
 	});
 
 	ctx.app.vuetify = vuetify;
-	ctx.$vuetify = vuetify.framework;
 };

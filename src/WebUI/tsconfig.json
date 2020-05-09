@@ -1,38 +1,23 @@
 {
-	"compilerOptions": {
-		"target": "esnext",
-		"module": "esnext",
-		"strict": true,
-		"jsx": "preserve",
-		"importHelpers": true,
-		"moduleResolution": "node",
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		"allowJs": true,
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"sourceMap": true,
-		"noEmit": true,
-		"baseUrl": "./src/",
-		"outDir": "./build/",
-		"types": [
-			// The order is very important here, don't sort!
-			"@nuxt/types",
-			"@nuxtjs/axios",
-			"@nuxtjs/vuetify",
-			"@types/node",
-			"@types/classnames",
-			"nuxt-i18n",
-			"vue"
-		],
-		// Make sure to also update the nuxt.config.ts when adding aliases for import resolving.
-		// These are necessary to tell ts-loader which aliases are used.
-		"paths": {
-			"@/*": ["./*"],
-			"@iGeneric/*": ["./types/dto/generic/*"]
-		},
-		"lib": ["esnext", "esnext.asynciterable", "dom", "dom.iterable", "scripthost"]
-	},
-	"include": ["./**/**/**/**/*"],
-	"exclude": ["node_modules", "dist", ".nuxt", ".installation", ".vscode"]
+  "compilerOptions": {
+    "target": "es2018",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": ["esnext", "esnext.asynciterable", "dom"],
+    "esModuleInterop": true,
+    "allowJs": true,
+    "sourceMap": true,
+    "strict": true,
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": "./src/",
+    "outDir": "./build/",
+    "paths": {
+      "~/*": ["./*"],
+      "@/*": ["./*"]
+    },
+    "types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify",]
+  },
+  "exclude": ["node_modules", ".nuxt", "dist", ".vscode"]
 }

@@ -9,6 +9,7 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<Account> GetAccountAsync(int accountId);
         Task<List<Account>> GetAllAccountsAsync();
         Task<bool> ValidateAccountAsync(Account account);
+        Task<bool> ValidateAccountAsync(string username, string password);
 
         /// <summary>
         /// Adds a new <see cref="Account"/> to the Database.

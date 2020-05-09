@@ -20,7 +20,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import Log from 'consola';
 
 interface INavItem {
 	title: string;

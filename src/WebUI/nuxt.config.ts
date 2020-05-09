@@ -1,5 +1,4 @@
 import { Configuration } from '@nuxt/types/config';
-import * as path from 'path';
 
 const config: Configuration = {
 	mode: 'spa',
@@ -22,12 +21,19 @@ const config: Configuration = {
 		link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
 	},
 	/*
+	 ** Customize the progress-bar color
+	 */
+	loading: { color: '#fff' },
+	/*
+	 ** Global CSS
+	 */
+	css: [],
+	/*
 	 ** Plugins to load before mounting the App
 	 */
 	plugins: [
 		{ src: '@plugins/vuetify.ts', mode: 'client' },
 		{ src: '@plugins/axios.ts', mode: 'client' },
-		{ src: '@plugins/loggingPlugin.ts', mode: 'client' },
 	],
 	/*
 	 ** Nuxt.js dev-modules
@@ -43,40 +49,19 @@ const config: Configuration = {
 				},
 			},
 		],
-		// Doc: https://github.com/nuxt-community/eslint-module
-		'@nuxtjs/eslint-module',
 		// Doc: https://github.com/nuxt-community/stylelint-module
 		'@nuxtjs/stylelint-module',
-		['@nuxtjs/vuetify', { defaultAssets: false }],
+		'@nuxtjs/vuetify',
 	],
 	/*
 	 ** Nuxt.js modules
 	 */
 	modules: [
-		'@nuxtjs/proxy',
 		// Doc: https://axios.nuxtjs.org/usage
 		'@nuxtjs/axios',
-		['@nuxtjs/pwa', { icon: false }],
-		// Doc: https://github.com/nuxt-community/style-resources-module
-		'@nuxtjs/style-resources',
-		// Doc: https://github.com/nuxt-community/nuxt-i18n
-		'nuxt-i18n',
+		// Doc: https://github.com/nuxt-community/dotenv-module
+		'@nuxtjs/dotenv',
 	],
-	/*
-	 ** Nuxt Style Resources module configuration
-	 ** https://github.com/nuxt-community/style-resources-module
-	 */
-	styleResources: {
-		scss: [
-			// WARNING: Do not import actual styles here. Use this module only to import variables, mixins,
-			// functions (et cetera) as they won't exist in the actual build.
-			// Importing actual styles will include them in every component and will also make your build/HMR magnitudes slower.
-
-			// Global variables, site-wide settings, config switches, etc
-			'@/assets/scss/_variables.scss',
-			'@/assets/scss/_mixins.scss',
-		],
-	},
 	/*
 	 ** Build configuration
 	 */
@@ -90,42 +75,8 @@ const config: Configuration = {
 			if (isDev) {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
 			}
-
-			if (!config || !config.module) {
-				return;
-			}
-			// This will ignore any Markdown.md files
-			// https://github.com/rails/webpacker/issues/1571
-			config.module.rules.push({
-				test: /\.md$/,
-				loader: 'ignore-loader',
-			});
-
-			// Make sure to also update the tsconfig.json when adding aliases for import resolving.
-			// These are necessary to tell webpack which aliases are used.
-			if (config && config.resolve && config.resolve.alias) {
-				config.resolve.alias['@'] = path.resolve(__dirname, 'src/');
-				config.resolve.alias['@iGeneric'] = path.resolve(__dirname, 'src/types/dto/generic/');
-			}
-		},
-		parallel: true,
-		cache: true,
-		babel: {
-			presets: [
-				'@vue/app',
-				[
-					'@babel/preset-env',
-					{
-						targets: {
-							node: 'current',
-						},
-					},
-				],
-			],
-			plugins: [['transform-imports'], '@babel/plugin-proposal-nullish-coalescing-operator', '@babel/plugin-proposal-optional-chaining'],
 		},
 	},
-	transpileDependencies: ['vuex-persist'],
 };
 
 export default config;

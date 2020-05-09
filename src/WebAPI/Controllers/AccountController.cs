@@ -6,6 +6,7 @@ using Carter.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.ValueObjects;
 using System;
 using System.Threading.Tasks;
@@ -24,11 +25,12 @@ namespace PlexRipper.WebAPI.Controllers
             _accountService = accountService;
             _mapper = mapper;
             Log = log;
-
-            Get("/accounts", GetAll);
-            Get("/accounts/{id:int}", Get);
-            Post("/accounts", Post);
-            Delete("/accounts/{id:int}", Delete);
+            string path = "/accounts";
+            Get(path, GetAll);
+            Get(path + "/{id:int}", Get);
+            Post(path, Post);
+            Delete(path + "/{id:int}", Delete);
+            Post(path, Validate); // Validate Account
         }
 
         private async Task Delete(HttpRequest req, HttpResponse res)
@@ -91,5 +93,19 @@ namespace PlexRipper.WebAPI.Controllers
             await res.Negotiate(data);
         }
 
+        private async Task Validate(HttpRequest req, HttpResponse res)
+        {
+            var result = await req.BindAndValidate<AccountDTO>();
+
+            if (!result.ValidationResult.IsValid)
+            {
+                res.StatusCode = StatusCodes.Status422UnprocessableEntity;
+                await res.Negotiate(result.ValidationResult.GetFormattedErrors());
+                return;
+            }
+            var account = _mapper.Map<Account>(result.Data);
+            var accountDB = await _accountService.ValidateAccountAsync(account);
+
+        }
     }
 }

@@ -5,7 +5,6 @@ using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PlexRipper.Infrastructure.Services
@@ -112,39 +111,73 @@ namespace PlexRipper.Infrastructure.Services
         /// </summary>
         /// <param name="account">The account to check</param>
         /// <returns>Are the account credentials valid</returns>
-        public async Task<bool> ValidateAccountAsync(Account account)
+        public async Task<bool> ValidateAccountAsync(string username, string password)
         {
-            // Retrieve Account from DB
-            var accountDB = _context.Accounts
-                .Include(x => x.PlexAccount)
-                .FirstOrDefault(x => x.Id == account.Id);
+            //// Retrieve Account from DB
+            //var accountDB = _context.Accounts
+            //    .Include(x => x.PlexAccount)
+            //    .FirstOrDefault(x => x.Id == account.Id);
 
-            if (accountDB == null)
-            {
-                _logger.LogWarning($"Could not find Account with id: {account.Id}", account);
-                return false;
-            }
+            //if (accountDB == null)
+            //{
+            //    _logger.LogWarning($"Could not find Account with id: {account.Id}", account);
+            //    return false;
+            //}
 
             // Check if account is valid
-            var plexAccount = await _plexService.IsAccountValid(accountDB);
-            if (plexAccount != null)
-            {
-                // Account is valid
-                _logger.LogDebug("Account credentials were valid");
-                accountDB.IsValidated = true;
-                accountDB.ValidatedAt = DateTime.Now;
-                accountDB.PlexAccount = await _context.PlexAccounts.FindAsync(plexAccount.Id);
-            }
-            else
-            {
-                // Account is invalid
-                _logger.LogWarning("Account credentials were invalid");
-                accountDB.IsValidated = false;
-                accountDB.ValidatedAt = DateTime.MinValue;
-                _context.PlexAccounts.Remove(accountDB.PlexAccount);
-            }
-            await _context.SaveChangesAsync();
-            return true;
+            return await _plexService.IsPlexAccountValid(username, password);
+            //if (plexAccount != null)
+            //{
+            //    // Account is valid
+            //    _logger.LogDebug("Account credentials were valid");
+            //    accountDB.IsValidated = true;
+            //    accountDB.ValidatedAt = DateTime.Now;
+            //    accountDB.PlexAccount = await _context.PlexAccounts.FindAsync(plexAccount.Id);
+            //}
+            //else
+            //{
+            //    // Account is invalid
+            //    _logger.LogWarning("Account credentials were invalid");
+            //    accountDB.IsValidated = false;
+            //    accountDB.ValidatedAt = DateTime.MinValue;
+            //    _context.PlexAccounts.Remove(accountDB.PlexAccount);
+            //}
+            //await _context.SaveChangesAsync();
+            // return true;
+        }
+        public async Task<bool> ValidateAccountAsync(Account account)
+        {
+            //// Retrieve Account from DB
+            //var accountDB = _context.Accounts
+            //    .Include(x => x.PlexAccount)
+            //    .FirstOrDefault(x => x.Id == account.Id);
+
+            //if (accountDB == null)
+            //{
+            //    _logger.LogWarning($"Could not find Account with id: {account.Id}", account);
+            //    return false;
+            //}
+
+            // Check if account is valid
+            return await _plexService.IsPlexAccountValid(account.Username, account.Password);
+            //if (plexAccount != null)
+            //{
+            //    // Account is valid
+            //    _logger.LogDebug("Account credentials were valid");
+            //    accountDB.IsValidated = true;
+            //    accountDB.ValidatedAt = DateTime.Now;
+            //    accountDB.PlexAccount = await _context.PlexAccounts.FindAsync(plexAccount.Id);
+            //}
+            //else
+            //{
+            //    // Account is invalid
+            //    _logger.LogWarning("Account credentials were invalid");
+            //    accountDB.IsValidated = false;
+            //    accountDB.ValidatedAt = DateTime.MinValue;
+            //    _context.PlexAccounts.Remove(accountDB.PlexAccount);
+            //}
+            //await _context.SaveChangesAsync();
+            // return true;
         }
     }
 }

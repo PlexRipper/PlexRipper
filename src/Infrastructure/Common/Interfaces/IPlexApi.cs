@@ -1,11 +1,11 @@
-﻿using PlexRipper.Application.Common.Models;
+﻿using PlexRipper.Application.Common.DTO.Plex;
+using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
+using PlexRipper.Application.Common.Models;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
 using System;
 using System.Threading.Tasks;
-using PlexRipper.Application.Common.DTO.Plex;
-using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
 
 namespace PlexRipper.Infrastructure.Common.Interfaces
 {
@@ -13,7 +13,7 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
     {
         Task<PlexStatus> GetStatus(string authToken, string uri);
         Task<PlexLibrariesForMachineId> GetLibrariesForMachineId(string authToken, string machineId);
-        Task<PlexAuthentication> PlexSignInAsync(Account account);
+        Task<PlexAuthentication> PlexSignInAsync(string username, string password);
         Task<PlexServerDTO> GetServer(string authToken);
         Task<PlexContainer> GetLibrarySections(string authToken, string plexFullHost);
         Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId);

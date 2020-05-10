@@ -1,3 +1,5 @@
+import { IPlexAccount } from './IPlexAccount';
+
 export default interface IAccount {
 	id: number;
 	displayName: string;
@@ -5,4 +7,6 @@ export default interface IAccount {
 	password: string;
 	isEnabled: boolean;
 	isValidated: boolean;
+	validatedAt: Date;
+	plexAccount: IPlexAccount;
 }

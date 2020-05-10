@@ -3,7 +3,7 @@ import log from 'consola';
 
 export default (): void => {
 	Vue.config.productionTip = false;
-	Vue.config.devtools = false;
+	Vue.config.devtools = true;
 
 	const isProduction = process.env.NODE_ENV === 'production';
 

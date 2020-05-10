@@ -8,7 +8,8 @@
     "allowJs": true,
     "sourceMap": true,
     "strict": true,
-    "noEmit": true,
+	"noEmit": true,
+	"importHelpers": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "baseUrl": "./src/",
@@ -16,7 +17,9 @@
     "paths": {
       "~/*": ["./*"],
       "@/*": ["./*"],
-      "@dto/*": ["./types/dto/*"]
+      "@store/*": ["./types/store/*"],
+      "@dto/*": ["./types/dto/*"],
+      "@api/*": ["./types/api/*"]
     },
     "types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify",]
   },

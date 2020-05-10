@@ -7,7 +7,7 @@ namespace PlexRipper.Application.Common.Interfaces
     public interface IAccountService
     {
         Task<Account> GetAccountAsync(int accountId);
-        Task<List<Account>> GetAllAccountsAsync();
+        Task<List<Account>> GetAllAccountsAsync(bool onlyEnabled = false);
         Task<bool> ValidateAccountAsync(Account account);
         Task<bool> ValidateAccountAsync(string username, string password);
 

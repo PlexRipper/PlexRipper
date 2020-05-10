@@ -2,14 +2,14 @@
 	<v-dialog v-model="dialog" persistent max-width="800">
 		<template v-slot:activator="{ on }">
 			<!-- Add new account -->
-			<v-card v-if="isNew" hover v-on="on" @click="openDialog()">
+			<v-card v-if="isNew" hover max-height="130" v-on="on" @click="openDialog()">
 				<v-card-text class="text-center">
-					<v-icon style="font-size: 100px; height: 100px">mdi-plus-box-outline</v-icon>
+					<v-icon style="font-size: 100px;">mdi-plus-box-outline</v-icon>
 				</v-card-text>
 			</v-card>
 			<!-- Edit Account -->
-			<v-card v-else hover v-on="on" @click="openDialog()">
-				<v-card-title class="headline">{{ account ? account.displayName : '' }} - {{ account ? account.id : -1 }}</v-card-title>
+			<v-card v-else hover max-height="130" v-on="on" @click="openDialog()">
+				<v-card-title class="headline">{{ account ? account.displayName : '' }}</v-card-title>
 				<v-card-text>
 					<template>
 						<v-chip v-if="account.isValidated" class="ma-2" color="green" text-color="white">
@@ -20,8 +20,11 @@
 						</v-chip>
 					</template>
 
-					<v-chip class="ma-2" color="green" text-color="white">
-						Green Chip
+					<v-chip v-if="account.isEnabled" class="ma-2" color="green" text-color="white">
+						Enabled
+					</v-chip>
+					<v-chip v-else class="ma-2" color="red" text-color="white">
+						Disabled
 					</v-chip>
 				</v-card-text>
 			</v-card>
@@ -72,14 +75,15 @@
 				</v-form>
 			</v-card-text>
 			<v-card-actions>
-				<v-btn color="error" class="mr-4" min-width="130" @click="reset">
-					<v-icon>mdi-restore</v-icon>
-					Reset
-				</v-btn>
 				<!-- Delete account -->
-				<v-btn v-if="!isNew" class="mr-4" min-width="130" @click="deleteAccount">
+				<v-btn v-if="!isNew" color="error" class="mr-4" min-width="130" @click="deleteAccount">
 					<v-icon>mdi-delete</v-icon>
 					Delete
+				</v-btn>
+				<!-- Reset Form -->
+				<v-btn class="mr-4" min-width="130" @click="reset">
+					<v-icon>mdi-restore</v-icon>
+					Reset
 				</v-btn>
 				<v-spacer />
 				<!-- Validation button -->
@@ -150,7 +154,8 @@ export default class AccountCard extends Vue {
 	}
 
 	get getDisplayName(): string {
-		return this.displayName !== '' ? `Plex account: ${this.displayName}` : 'Plex account';
+		const title = `${this.isNew ? 'Add' : 'Edit'} Plex account`;
+		return this.displayName !== '' ? `${title}: ${this.displayName}` : title;
 	}
 
 	get getDisplayNameRules(): unknown {

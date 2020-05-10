@@ -103,7 +103,9 @@ namespace PlexRipper.WebAPI.Controllers
 
         private async Task GetAll(HttpRequest req, HttpResponse res)
         {
-            var data = await _accountService.GetAllAccountsAsync();
+            bool onlyEnabled = req.Query["enabled"].ToString() == "1";
+
+            var data = await _accountService.GetAllAccountsAsync(onlyEnabled);
             await res.AsJson(data);
         }
 

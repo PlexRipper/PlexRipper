@@ -5,6 +5,7 @@ using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PlexRipper.Infrastructure.Services
@@ -65,9 +66,16 @@ namespace PlexRipper.Infrastructure.Services
             return false;
         }
 
-        public async Task<List<Account>> GetAllAccountsAsync()
+        public async Task<List<Account>> GetAllAccountsAsync(bool onlyEnabled = false)
         {
-            return await _context.Accounts.ToListAsync();
+            var accounts = await _context.Accounts.Include(x => x.PlexAccount).ToListAsync();
+
+            // Prevent infinite recusive nested
+            // TODO Find better method for this
+            foreach (var account in accounts)
+                account.PlexAccount.Account = null;
+
+            return onlyEnabled ? accounts.Where(x => x.IsEnabled).ToList() : accounts;
         }
 
         /// <summary>

@@ -1,7 +1,8 @@
 <template>
 	<v-app>
+		<navigation-drawer />
+		<app-bar />
 		<v-content>
-			<navigation-drawer />
 			<nuxt />
 		</v-content>
 		<v-footer app>
@@ -13,9 +14,12 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import NavigationDrawer from '@/components/NavigationDrawer.vue';
+import AppBar from '@/components/AppBar.vue';
+
 @Component({
 	components: {
 		NavigationDrawer,
+		AppBar,
 	},
 })
 export default class Default extends Vue {

@@ -81,7 +81,9 @@ const config: Configuration = {
 			// Make sure to also update the tsconfig.json when adding aliases for import resolving.
 			// These are necessary to tell webpack which aliases are used.
 			if (config && config.resolve && config.resolve.alias) {
+				config.resolve.alias['@store'] = path.resolve(__dirname, 'src/store/');
 				config.resolve.alias['@dto'] = path.resolve(__dirname, 'src/types/dto/');
+				config.resolve.alias['@api'] = path.resolve(__dirname, 'src/types/api/');
 			}
 		},
 	},

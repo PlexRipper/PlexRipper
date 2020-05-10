@@ -84,7 +84,9 @@ namespace PlexRipper.Infrastructure.Services
 
         public PlexAccount GetPlexAccount(long plexAccountId)
         {
-            return _context.PlexAccounts.FirstOrDefault(x => x.Id == plexAccountId);
+            return _context.PlexAccounts
+                .Include(x => x.PlexAccountServers)
+                .FirstOrDefault(x => x.Id == plexAccountId);
         }
 
         /// <summary>
@@ -105,6 +107,7 @@ namespace PlexRipper.Infrastructure.Services
             account = _context
                    .Accounts
                    .Include(x => x.PlexAccount)
+                   .ThenInclude(x => x.PlexAccountServers)
                    .FirstOrDefault(x => x.Id == account.Id);
             return account?.PlexAccount;
         }
@@ -135,11 +138,14 @@ namespace PlexRipper.Infrastructure.Services
             return string.Empty;
         }
 
+
+
         public async Task<List<PlexServer>> GetServers(Account account, bool refresh = false)
         {
 
             var plexAccount = ConvertToPlexAccount(account);
-            if (refresh)
+
+            if (refresh || plexAccount.PlexAccountServers.Count == 0)
             {
                 var token = await GetPlexToken(account);
 
@@ -161,9 +167,12 @@ namespace PlexRipper.Infrastructure.Services
             return serverList;
         }
 
-        private async Task AddOrUpdatePlexServers(PlexAccount plexAccount, List<ServerInfoDTO> servers)
+
+
+
+        private async Task AddOrUpdatePlexServers(PlexAccount plexAccount, List<PlexServerDTO> servers)
         {
-            foreach (ServerInfoDTO serverInfoDto in servers)
+            foreach (PlexServerDTO serverInfoDto in servers)
             {
                 var plexServer = _mapper.Map<PlexServer>(serverInfoDto);
                 var plexServerDB =

@@ -91,13 +91,13 @@ namespace PlexRipper.Infrastructure.API.Plex
             return await Api.Request<PlexAccount>(request);
         }
 
-        public async Task<PlexServerDTO> GetServer(string authToken)
+        public async Task<PlexServerXML> GetServer(string authToken)
         {
             var request = new Request(ServerUri, string.Empty, HttpMethod.Get, ContentType.Xml);
 
             AddHeaders(request, authToken);
 
-            return await Api.Request<PlexServerDTO>(request);
+            return await Api.Request<PlexServerXML>(request);
         }
 
         public async Task<PlexContainer> GetLibrarySections(string authToken, string plexFullHost)

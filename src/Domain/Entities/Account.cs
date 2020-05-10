@@ -14,6 +14,6 @@ namespace PlexRipper.Domain.Entities
         public bool IsEnabled { get; set; }
         public bool IsValidated { get; set; }
         public DateTime ValidatedAt { get; set; }
-        public PlexAccount PlexAccount { get; set; }
+        public virtual PlexAccount PlexAccount { get; set; }
     }
 }

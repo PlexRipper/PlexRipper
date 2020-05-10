@@ -1,7 +1,8 @@
 ﻿using Newtonsoft.Json;
+using PlexRipper.Application.Common.DTO.Plex;
 using System;
 
-namespace PlexRipper.Domain.ValueObjects
+namespace PlexRipper.Application.Common.DTO
 {
     public class AccountDTO
     {
@@ -25,6 +26,9 @@ namespace PlexRipper.Domain.ValueObjects
 
         [JsonProperty("validatedAt")]
         public DateTime ValidatedAt { get; set; }
+
+        [JsonProperty("plexAccount")]
+        public PlexAccountDTO PlexAccount { get; set; }
 
     }
 }

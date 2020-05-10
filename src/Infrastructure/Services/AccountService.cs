@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Entities.Plex;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,11 +29,15 @@ namespace PlexRipper.Infrastructure.Services
         public async Task<Account> GetAccountAsync(string username)
         {
 
-            var result = await _context.Accounts.Include(x => x.PlexAccount)
+            var result = await _context.Accounts
+                .Include(x => x.PlexAccount)
+                .ThenInclude(x => x.PlexAccountServers)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Username == username);
 
             if (result != null)
             {
+                result.PlexAccount.Account = null;
                 return result;
             }
 
@@ -47,7 +52,7 @@ namespace PlexRipper.Infrastructure.Services
 
             if (result != null)
             {
-                return result;
+                return await GetAccountAsync(result.Username);
             }
 
             _logger.LogWarning($"Could not find an Account with id: {accountId}");
@@ -59,6 +64,7 @@ namespace PlexRipper.Infrastructure.Services
             var result = await GetAccountAsync(accountId);
             if (result != null)
             {
+                // TODO Also delete nested PlexAccounts and PlexServers
                 _context.Accounts.Remove(result);
                 await _context.SaveChangesAsync();
                 return true;
@@ -68,14 +74,23 @@ namespace PlexRipper.Infrastructure.Services
 
         public async Task<List<Account>> GetAllAccountsAsync(bool onlyEnabled = false)
         {
-            var accounts = await _context.Accounts.Include(x => x.PlexAccount).ToListAsync();
+            var accounts = await _context.Accounts
+                .Include(x => x.PlexAccount)
+                .ThenInclude(x => x.PlexAccountServers)
+                .AsNoTracking()
+                .ToListAsync();
 
-            // Prevent infinite recusive nested
+            // Prevent infinite recursive nested
             // TODO Find better method for this
             foreach (var account in accounts)
                 account.PlexAccount.Account = null;
 
             return onlyEnabled ? accounts.Where(x => x.IsEnabled).ToList() : accounts;
+        }
+        public async Task<List<PlexServer>> GetServers(int accountId, bool refresh = false)
+        {
+            var account = await GetAccountAsync(accountId);
+            return await _plexService.GetServers(account, refresh);
         }
 
         /// <summary>
@@ -126,6 +141,9 @@ namespace PlexRipper.Infrastructure.Services
                             accountDB.IsValidated = true;
                             accountDB.ValidatedAt = DateTime.Now;
                         }
+
+                        // Refresh the Plex Servers
+                        await GetServers(accountDB.Id, true);
                     }
                 }
 
@@ -139,78 +157,25 @@ namespace PlexRipper.Infrastructure.Services
                 throw;
             }
         }
+
         /// <summary>
+        /// Check if this account is valid by querying the Plex API
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns>Are the account credentials valid</returns>
+        public async Task<bool> ValidateAccountAsync(string username, string password)
+        {
+            return await _plexService.IsPlexAccountValid(username, password);
+        }
+        /// /// <summary>
         /// Check if this account is valid by querying the Plex API
         /// </summary>
         /// <param name="account">The account to check</param>
         /// <returns>Are the account credentials valid</returns>
-        public async Task<bool> ValidateAccountAsync(string username, string password)
-        {
-            //// Retrieve Account from DB
-            //var accountDB = _context.Accounts
-            //    .Include(x => x.PlexAccount)
-            //    .FirstOrDefault(x => x.Id == account.Id);
-
-            //if (accountDB == null)
-            //{
-            //    _logger.LogWarning($"Could not find Account with id: {account.Id}", account);
-            //    return false;
-            //}
-
-            // Check if account is valid
-            return await _plexService.IsPlexAccountValid(username, password);
-            //if (plexAccount != null)
-            //{
-            //    // Account is valid
-            //    _logger.LogDebug("Account credentials were valid");
-            //    accountDB.IsValidated = true;
-            //    accountDB.ValidatedAt = DateTime.Now;
-            //    accountDB.PlexAccount = await _context.PlexAccounts.FindAsync(plexAccount.Id);
-            //}
-            //else
-            //{
-            //    // Account is invalid
-            //    _logger.LogWarning("Account credentials were invalid");
-            //    accountDB.IsValidated = false;
-            //    accountDB.ValidatedAt = DateTime.MinValue;
-            //    _context.PlexAccounts.Remove(accountDB.PlexAccount);
-            //}
-            //await _context.SaveChangesAsync();
-            // return true;
-        }
         public async Task<bool> ValidateAccountAsync(Account account)
         {
-            //// Retrieve Account from DB
-            //var accountDB = _context.Accounts
-            //    .Include(x => x.PlexAccount)
-            //    .FirstOrDefault(x => x.Id == account.Id);
-
-            //if (accountDB == null)
-            //{
-            //    _logger.LogWarning($"Could not find Account with id: {account.Id}", account);
-            //    return false;
-            //}
-
-            // Check if account is valid
             return await _plexService.IsPlexAccountValid(account.Username, account.Password);
-            //if (plexAccount != null)
-            //{
-            //    // Account is valid
-            //    _logger.LogDebug("Account credentials were valid");
-            //    accountDB.IsValidated = true;
-            //    accountDB.ValidatedAt = DateTime.Now;
-            //    accountDB.PlexAccount = await _context.PlexAccounts.FindAsync(plexAccount.Id);
-            //}
-            //else
-            //{
-            //    // Account is invalid
-            //    _logger.LogWarning("Account credentials were invalid");
-            //    accountDB.IsValidated = false;
-            //    accountDB.ValidatedAt = DateTime.MinValue;
-            //    _context.PlexAccounts.Remove(accountDB.PlexAccount);
-            //}
-            //await _context.SaveChangesAsync();
-            // return true;
         }
     }
 }

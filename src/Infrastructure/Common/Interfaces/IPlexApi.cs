@@ -14,7 +14,7 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
         Task<PlexStatus> GetStatus(string authToken, string uri);
         Task<PlexLibrariesForMachineId> GetLibrariesForMachineId(string authToken, string machineId);
         Task<PlexAuthentication> PlexSignInAsync(string username, string password);
-        Task<PlexServerDTO> GetServer(string authToken);
+        Task<PlexServerXML> GetServer(string authToken);
         Task<PlexContainer> GetLibrarySections(string authToken, string plexFullHost);
         Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId);
         Task<PlexMetadata> GetEpisodeMetaData(string authToken, string host, int ratingKey);

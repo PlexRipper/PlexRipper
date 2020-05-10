@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PlexRipper.Domain.Entities;
 
@@ -10,7 +10,8 @@ namespace PlexRipper.Infrastructure.Persistence.Configurations
         {
             builder
                 .HasOne(x => x.PlexAccount)
-                .WithOne(x => x.Account);
+                .WithOne(x => x.Account)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -1,6 +1,10 @@
 <template>
 	<v-app-bar color="red" dense :dark="$vuetify.theme.dark" app clipped-left>
-		<v-toolbar-title to="/">Plex Ripper</v-toolbar-title>
+		<v-toolbar-title>
+			<v-btn to="/" text>
+				Plex Ripper
+			</v-btn>
+		</v-toolbar-title>
 
 		<v-spacer></v-spacer>
 

@@ -1,50 +1,32 @@
 ﻿using Carter;
-using Microsoft.AspNetCore.Mvc;
+using Carter.Request;
+using Carter.Response;
+using Microsoft.AspNetCore.Http;
 using PlexRipper.Application.Common.Interfaces;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PlexRipper.WebAPI.Controllers
 {
     public class PlexServerController : CarterModule
     {
         private readonly IPlexService _plexService;
+        private readonly IAccountService _accountService;
 
-        public PlexServerController(IPlexService plexService) : base("/api")
+        public PlexServerController(IPlexService plexService, IAccountService accountService) : base("/api")
         {
             _plexService = plexService;
+            _accountService = accountService;
+            string path = "/plex";
+
+            Get(path + "/servers/{id:int}", GetServersByAccountId);
+
         }
 
-        // GET: api/PlexServer
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private async Task GetServersByAccountId(HttpRequest req, HttpResponse res)
         {
-            // await _plexService.GetServers();
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET: api/PlexServer/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST: api/PlexServer
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT: api/PlexServer/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            int accountId = req.RouteValues.As<int>("id");
+            var data = _accountService.GetServers(accountId);
+            await res.Negotiate(data);
         }
     }
 }

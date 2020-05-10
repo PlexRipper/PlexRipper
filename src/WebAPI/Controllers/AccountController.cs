@@ -5,10 +5,11 @@ using Carter.Request;
 using Carter.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using PlexRipper.Application.Common.DTO;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.ValueObjects;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -84,7 +85,7 @@ namespace PlexRipper.WebAPI.Controllers
                 if (accountDB != null)
                 {
                     res.StatusCode = StatusCodes.Status201Created;
-                    await res.Negotiate(_mapper.Map<AccountDTO>(accountDB));
+                    await res.AsJson(_mapper.Map<AccountDTO>(accountDB));
                 }
                 else
                 {
@@ -106,13 +107,15 @@ namespace PlexRipper.WebAPI.Controllers
             bool onlyEnabled = req.Query["enabled"].ToString() == "1";
 
             var data = await _accountService.GetAllAccountsAsync(onlyEnabled);
-            await res.AsJson(data);
+            var result = _mapper.Map<List<AccountDTO>>(data);
+            await res.AsJson(result);
         }
 
         private async Task Get(HttpRequest req, HttpResponse res)
         {
             var data = await _accountService.GetAccountAsync(req.RouteValues.As<int>("id"));
-            await res.Negotiate(data);
+            var result = _mapper.Map<AccountDTO>(data);
+            await res.AsJson(result);
         }
 
         private async Task Validate(HttpRequest req, HttpResponse res)

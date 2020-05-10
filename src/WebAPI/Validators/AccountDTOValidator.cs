@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using PlexRipper.Domain.ValueObjects;
+using PlexRipper.Application.Common.DTO;
 
 namespace PlexRipper.WebAPI.Validators
 {

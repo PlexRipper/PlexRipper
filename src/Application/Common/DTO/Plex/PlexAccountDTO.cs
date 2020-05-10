@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 
@@ -38,10 +37,10 @@ namespace PlexRipper.Application.Common.DTO.Plex
         public string AuthenticationToken { get; set; }
 
         [JsonProperty("subscription")]
-        public Subscription Subscription { get; set; }
+        public SubscriptionDTO SubscriptionDto { get; set; }
 
         [JsonProperty("roles")]
-        public Roles Roles { get; set; }
+        public RolesDTO RolesDto { get; set; }
 
         [JsonProperty("entitlements")]
         public List<object> Entitlements { get; set; }
@@ -54,5 +53,7 @@ namespace PlexRipper.Application.Common.DTO.Plex
 
         [JsonProperty("rememberMe")]
         public bool RememberMe { get; set; }
+
+        public List<PlexServerDTO> PlexServers { get; set; }
     }
 }

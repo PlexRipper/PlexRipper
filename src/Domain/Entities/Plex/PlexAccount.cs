@@ -21,12 +21,12 @@ namespace PlexRipper.Domain.Entities.Plex
         /// <summary>
         /// The Plex Ripper account associated with this Plex account.
         /// </summary>
-        public Account Account { get; set; }
+        public virtual Account Account { get; set; }
         public int AccountId { get; set; }
 
         /// <summary>
         /// The associated PlexAccountServers the user has access to
         /// </summary>
-        public List<PlexAccountServer> PlexAccountServers { get; set; }
+        public virtual List<PlexAccountServer> PlexAccountServers { get; set; }
     }
 }

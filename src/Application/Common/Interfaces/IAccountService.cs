@@ -1,6 +1,7 @@
 ﻿using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Domain.Entities.Plex;
 
 namespace PlexRipper.Application.Common.Interfaces
 {
@@ -20,5 +21,6 @@ namespace PlexRipper.Application.Common.Interfaces
 
         Task<bool> DeleteAccountAsync(int accountId);
         Task<Account> GetAccountAsync(string username);
+        Task<List<PlexServer>> GetServers(int accountId, bool refresh = false);
     }
 }

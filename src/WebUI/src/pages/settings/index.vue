@@ -2,27 +2,22 @@
 	<v-container>
 		<v-row>
 			<!-- Plex Accounts -->
-			<v-col cols="3" v-for="(account, index) in accounts" :key="index">
-				<account-card :account="account" />
+			<v-col v-for="(account, index) in accounts" :key="index" cols="3">
+				<account-card :account="account" @dialog-closed="refreshAccounts()" />
 			</v-col>
 			<!-- Add new Account card -->
 			<v-col cols="3">
-				<account-card />
+				<account-card @dialog-closed="refreshAccounts()" />
 			</v-col>
 		</v-row>
 	</v-container>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import AccountCard from './components/AccountCard.vue';
 import Log from 'consola';
-
-interface IPlexAccounts {
-	username: string;
-	password: string;
-	isConfirmed: boolean;
-}
+import { Component, Vue } from 'vue-property-decorator';
+import IAccount from '@dto/IAccount';
+import AccountCard from './components/AccountCard.vue';
 
 @Component({
 	components: {
@@ -30,27 +25,23 @@ interface IPlexAccounts {
 	},
 })
 export default class Settings extends Vue {
-	accounts: IPlexAccounts[] = [];
+	accounts: IAccount[] = [];
 
-	checkAccount(account: IPlexAccounts): void {
+	checkAccount(account: IAccount): void {
 		Log.debug(account);
 	}
 
-	async mounted(): Promise<void> {
+	async refreshAccounts(): Promise<void> {
 		try {
 			this.accounts = await this.$axios.$get('/accounts');
 			Log.debug(this.accounts);
 		} catch (error) {
 			Log.error(error);
 		}
+	}
 
-		if (this.accounts.length === 0) {
-			this.accounts.push({
-				username: '',
-				password: '',
-				isConfirmed: false,
-			});
-		}
+	async mounted(): Promise<void> {
+		await this.refreshAccounts();
 	}
 }
 </script>

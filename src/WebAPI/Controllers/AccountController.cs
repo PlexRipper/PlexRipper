@@ -28,9 +28,35 @@ namespace PlexRipper.WebAPI.Controllers
             string path = "/accounts";
             Get(path, GetAll);
             Get(path + "/{id:int}", Get);
+            Get(path + "/check/", CheckUsername); // Check if username exists
             Post(path, Post);
+            Post(path + "/validate", Validate); // Validate Account
             Delete(path + "/{id:int}", Delete);
-            Post(path, Validate); // Validate Account
+        }
+
+        private async Task CheckUsername(HttpRequest req, HttpResponse res)
+        {
+            string username = req.Query["username"].ToString();
+
+            if (string.IsNullOrEmpty(username))
+            {
+                res.StatusCode = StatusCodes.Status400BadRequest;
+                await res.Negotiate(null);
+            }
+
+            var exists = await _accountService.GetAccountAsync(username) != null;
+            if (exists)
+            {
+                res.StatusCode = StatusCodes.Status406NotAcceptable;
+                await res.AsJson(new
+                {
+                    message = $"Account with username: \"{username}\" already exists!"
+                });
+            }
+            else
+            {
+                res.StatusCode = StatusCodes.Status200OK;
+            }
         }
 
         private async Task Delete(HttpRequest req, HttpResponse res)
@@ -53,22 +79,17 @@ namespace PlexRipper.WebAPI.Controllers
             // Save the account in the DB
             try
             {
-                var exists = await _accountService.GetAccountAsync(result.Data.Username) != null;
-                if (exists)
-                {
-                    res.StatusCode = StatusCodes.Status403Forbidden;
-                    await res.AsJson(new
-                    {
-                        message = $"Account with username: \"{result.Data.Username}\" already exists!"
-                    });
-                    return;
-                }
-                var accountDB = await _accountService.AddAccountAsync(result.Data.Username, result.Data.Password);
+                var accountDB = await _accountService.AddOrUpdateAccountAsync(_mapper.Map<Account>(result.Data));
 
                 if (accountDB != null)
                 {
                     res.StatusCode = StatusCodes.Status201Created;
                     await res.Negotiate(_mapper.Map<AccountDTO>(accountDB));
+                }
+                else
+                {
+                    res.StatusCode = StatusCodes.Status400BadRequest;
+                    await res.Negotiate(null);
                 }
             }
             catch (Exception e)
@@ -77,7 +98,6 @@ namespace PlexRipper.WebAPI.Controllers
                 res.StatusCode = StatusCodes.Status500InternalServerError;
                 await res.Negotiate(null);
             }
-
         }
 
 
@@ -103,9 +123,10 @@ namespace PlexRipper.WebAPI.Controllers
                 await res.Negotiate(result.ValidationResult.GetFormattedErrors());
                 return;
             }
-            var account = _mapper.Map<Account>(result.Data);
-            var accountDB = await _accountService.ValidateAccountAsync(account);
 
+            var isValid = await _accountService.ValidateAccountAsync(result.Data.Username, result.Data.Password);
+            res.StatusCode = isValid ? StatusCodes.Status200OK : StatusCodes.Status401Unauthorized;
+            return;
         }
     }
 }

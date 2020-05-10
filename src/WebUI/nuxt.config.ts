@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { Configuration } from '@nuxt/types/config';
 
 const config: Configuration = {
@@ -32,6 +33,7 @@ const config: Configuration = {
 	 ** Plugins to load before mounting the App
 	 */
 	plugins: [
+		{ src: '@plugins/consola.ts', mode: 'client' },
 		{ src: '@plugins/vuetify.ts', mode: 'client' },
 		{ src: '@plugins/axios.ts', mode: 'client' },
 	],
@@ -74,6 +76,12 @@ const config: Configuration = {
 		extend(config, { isDev, isClient }): void {
 			if (isDev) {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
+			}
+
+			// Make sure to also update the tsconfig.json when adding aliases for import resolving.
+			// These are necessary to tell webpack which aliases are used.
+			if (config && config.resolve && config.resolve.alias) {
+				config.resolve.alias['@dto'] = path.resolve(__dirname, 'src/types/dto/');
 			}
 		},
 	},

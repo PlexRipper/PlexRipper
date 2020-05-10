@@ -213,9 +213,17 @@ namespace PlexRipper.Infrastructure.Services
         /// <returns>The result of the test</returns>
         public async Task<bool> IsPlexAccountValid(string username, string password)
         {
-            var plexAuthentication = await _plexApi.PlexSignInAsync(username, password);
-            return plexAuthentication?.User != null;
+            return await RequestPlexAccountAsync(username, password) != null;
         }
+
+
+        public async Task<PlexAccountDTO> RequestPlexAccountAsync(string username, string password)
+        {
+            var plexAuthentication = await _plexApi.PlexSignInAsync(username, password);
+            return plexAuthentication?.User;
+
+        }
+
         #endregion Public Methods
 
     }

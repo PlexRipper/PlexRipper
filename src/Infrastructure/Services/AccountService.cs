@@ -73,36 +73,61 @@ namespace PlexRipper.Infrastructure.Services
         /// <summary>
         /// Adds a new <see cref="Account"/> to the Database.
         /// </summary>
-        /// <param name="username">The username of the <see cref="Account"/></param>
-        /// <param name="password">The password of the <see cref="Account"/></param>
+        /// <param name="newAccount"></param>
         /// <returns>The newly created <see cref="Account"/></returns>
-        public async Task<Account> AddAccountAsync(string username, string password)
+        public async Task<Account> AddOrUpdateAccountAsync(Account newAccount)
         {
             try
             {
-                var result = await GetAccountAsync(username);
-                if (result != null)
+                bool isNew = false;
+                bool isUpdated = false;
+                var accountDB = await _context.Accounts.FirstOrDefaultAsync(x => x.Username == newAccount.Username);
+
+                // Add new
+                if (accountDB == null)
                 {
-                    _logger.LogWarning("Account already exists in DB with these credentials");
-                    return result;
+                    _logger.LogInformation("Creating a new Account in DB");
+
+                    await _context.Accounts.AddAsync(newAccount);
+                    await _context.SaveChangesAsync();
+                    accountDB = await _context.Accounts.FirstOrDefaultAsync(x => x.Username == newAccount.Username);
+                    isNew = true;
                 }
 
-                _logger.LogDebug("Creating a new Account in DB");
-                var account = new Account
+                // Re-validate if the password changed
+                if (accountDB.Password != newAccount.Password)
                 {
-                    Username = username,
-                    Password = password
-                };
+                    accountDB.Password = newAccount.Password;
+                    isUpdated = true;
+                }
 
-                await _context.Accounts.AddAsync(account);
+                // Update other values
+                accountDB.DisplayName = newAccount.DisplayName;
+                accountDB.IsEnabled = newAccount.IsEnabled;
+
+                // Request and setup PlexAccount from API and add to Account
+                if (isNew || isUpdated)
+                {
+                    var plexAccountDTO = await _plexService.RequestPlexAccountAsync(accountDB.Username, accountDB.Password);
+                    if (plexAccountDTO != null)
+                    {
+                        var plexAccount = await _plexService.AddOrUpdatePlexAccount(accountDB, plexAccountDTO);
+                        if (plexAccount != null)
+                        {
+                            accountDB.PlexAccount = plexAccount;
+                            accountDB.IsValidated = true;
+                            accountDB.ValidatedAt = DateTime.Now;
+                        }
+                    }
+                }
+
                 await _context.SaveChangesAsync();
-
-                return account;
+                return accountDB;
 
             }
             catch (Exception e)
             {
-                _logger.LogError("Error while adding a new Account", e);
+                _logger.LogError("Error while adding or updating a new Account", e);
                 throw;
             }
         }

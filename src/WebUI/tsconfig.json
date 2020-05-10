@@ -15,7 +15,8 @@
     "outDir": "./build/",
     "paths": {
       "~/*": ["./*"],
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@dto/*": ["./types/dto/*"]
     },
     "types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify",]
   },

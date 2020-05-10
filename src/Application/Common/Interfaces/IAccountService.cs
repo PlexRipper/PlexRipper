@@ -14,10 +14,9 @@ namespace PlexRipper.Application.Common.Interfaces
         /// <summary>
         /// Adds a new <see cref="Account"/> to the Database.
         /// </summary>
-        /// <param name="username">The username of the <see cref="Account"/></param>
-        /// <param name="password">The password of the <see cref="Account"/></param>
+        /// <param name="account"></param>
         /// <returns>The newly created <see cref="Account"/></returns>
-        Task<Account> AddAccountAsync(string username, string password);
+        Task<Account> AddOrUpdateAccountAsync(Account account);
 
         Task<bool> DeleteAccountAsync(int accountId);
         Task<Account> GetAccountAsync(string username);

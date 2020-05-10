@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using PlexRipper.Domain.Entities;
 using System.Threading.Tasks;
 
 namespace Infrastructure.UnitTests.Services
@@ -22,7 +23,11 @@ namespace Infrastructure.UnitTests.Services
             var credentials = BaseServiceTest.GetCredentials();
 
             //Act 
-            var account = await accountService.AddAccountAsync(credentials.Username, credentials.Password);
+            var account = await accountService.AddOrUpdateAccountAsync(new Account
+            {
+                Username = credentials.Username,
+                Password = credentials.Password
+            });
             var result = await accountService.ValidateAccountAsync(account);
             string authToken = await plexService.GetPlexToken(account);
 
@@ -40,7 +45,11 @@ namespace Infrastructure.UnitTests.Services
             var accountService = BaseServiceTest.GetAccountService();
             var credentials = BaseServiceTest.GetCredentials();
             //Act 
-            var account = await accountService.AddAccountAsync(credentials.Username, credentials.Password);
+            var account = await accountService.AddOrUpdateAccountAsync(new Account
+            {
+                Username = credentials.Username,
+                Password = credentials.Password
+            });
             var result = await accountService.ValidateAccountAsync(account);
             var serverList = await plexService.GetServers(account, true);
 

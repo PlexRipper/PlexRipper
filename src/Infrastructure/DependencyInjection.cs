@@ -25,7 +25,7 @@ namespace PlexRipper.Infrastructure
             else
             {
                 var rootDir =
-                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 string dbPath = Path.Combine(rootDir, "PlexRipperDB.db");
 
                 services.AddDbContext<PlexRipperDbContext>(options =>

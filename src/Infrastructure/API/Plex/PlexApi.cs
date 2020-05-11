@@ -7,6 +7,8 @@ using PlexRipper.Domain.Common.API;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Domain.Enums;
+using PlexRipper.Infrastructure.Common.DTO;
+using PlexRipper.Infrastructure.Common.DTO.PlexSignIn;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
 using System;
@@ -41,14 +43,14 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async Task<PlexAuthentication> PlexSignInAsync(string username, string password)
+        public async Task<PlexAuthenticationDTO> PlexSignInAsync(string username, string password)
         {
-            var userModel = new PlexUserRequest
+            var userModel = new PlexUserRequestDTO
             {
-                user = new UserRequest()
+                User = new UserRequestDTO()
                 {
-                    login = username,
-                    password = password
+                    Login = username,
+                    Password = password
                 }
             };
             var request = new Request(SignInUri, string.Empty, HttpMethod.Post);
@@ -56,7 +58,7 @@ namespace PlexRipper.Infrastructure.API.Plex
             AddHeaders(request);
             request.AddJsonBody(userModel);
 
-            return await Api.Request<PlexAuthentication>(request);
+            return await Api.Request<PlexAuthenticationDTO>(request);
         }
 
 
@@ -241,12 +243,12 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// </summary>
         /// <param name="authToken"></param>
         /// <returns></returns>
-        public async Task<PlexFriends> GetUsers(string authToken)
+        public async Task<PlexFriendsXML> GetUsers(string authToken)
         {
             var request = new Request(string.Empty, FriendsUri, HttpMethod.Get, ContentType.Xml);
             AddHeaders(request, authToken);
 
-            return await Api.Request<PlexFriends>(request);
+            return await Api.Request<PlexFriendsXML>(request);
         }
 
         public async Task<PlexMetadata> GetRecentlyAdded(string authToken, string uri, string sectionId)
@@ -309,8 +311,8 @@ namespace PlexRipper.Infrastructure.API.Plex
             var result = await Api.RequestContent(request);
             try
             {
-                var add = Api.DeserializeXml<PlexAdd>(result);
-                return new PlexAddWrapper { Add = add };
+                var add = Api.DeserializeXml<PlexAddXML>(result);
+                return new PlexAddWrapper { AddXml = add };
             }
             catch (InvalidOperationException)
             {

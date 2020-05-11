@@ -2,6 +2,23 @@
 
 namespace PlexRipper.Application.Common.DTO.Plex
 {
+    [XmlRoot(ElementName = "MediaContainer")]
+    public class PlexFriendsXML
+    {
+        [XmlElement(ElementName = "User")]
+        public UserFriends[] User { get; set; }
+        [XmlAttribute(AttributeName = "friendlyName")]
+        public string FriendlyName { get; set; }
+        [XmlAttribute(AttributeName = "identifier")]
+        public string Identifier { get; set; }
+        [XmlAttribute(AttributeName = "machineIdentifier")]
+        public string MachineIdentifier { get; set; }
+        [XmlAttribute(AttributeName = "totalSize")]
+        public string TotalSize { get; set; }
+        [XmlAttribute(AttributeName = "size")]
+        public string Size { get; set; }
+    }
+
     [XmlRoot(ElementName = "Server")]
     public class Server
     {
@@ -40,20 +57,5 @@ namespace PlexRipper.Application.Common.DTO.Plex
         public string Thumb { get; set; }
     }
 
-    [XmlRoot(ElementName = "MediaContainer")]
-    public class PlexFriends
-    {
-        [XmlElement(ElementName = "User")]
-        public UserFriends[] User { get; set; }
-        [XmlAttribute(AttributeName = "friendlyName")]
-        public string FriendlyName { get; set; }
-        [XmlAttribute(AttributeName = "identifier")]
-        public string Identifier { get; set; }
-        [XmlAttribute(AttributeName = "machineIdentifier")]
-        public string MachineIdentifier { get; set; }
-        [XmlAttribute(AttributeName = "totalSize")]
-        public string TotalSize { get; set; }
-        [XmlAttribute(AttributeName = "size")]
-        public string Size { get; set; }
-    }
+
 }

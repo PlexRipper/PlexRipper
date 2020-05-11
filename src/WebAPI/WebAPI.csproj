@@ -12,13 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="NewFolder\**" />
-    <Content Remove="NewFolder\**" />
-    <EmbeddedResource Remove="NewFolder\**" />
-    <None Remove="NewFolder\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="Carter" Version="5.1.0" />
     <PackageReference Include="FluentValidation" Version="8.6.2" />

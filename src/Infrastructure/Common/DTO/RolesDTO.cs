@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace PlexRipper.Application.Common.DTO.Plex
+namespace PlexRipper.Infrastructure.Common.DTO
 {
     public class RolesDTO
     {

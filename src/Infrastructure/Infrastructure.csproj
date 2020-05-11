@@ -29,8 +29,4 @@
     <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Common\Models\Plex\PlexLibrary\" />
-  </ItemGroup>
-
 </Project>

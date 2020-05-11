@@ -74,16 +74,12 @@ namespace PlexRipper.Infrastructure.Services
 
         public async Task<List<Account>> GetAllAccountsAsync(bool onlyEnabled = false)
         {
-            var accounts = await _context.Accounts
+            List<Account> accounts = await _context.Accounts
                 .Include(x => x.PlexAccount)
                 .ThenInclude(x => x.PlexAccountServers)
+                .ThenInclude(x => x.PlexServer)
                 .AsNoTracking()
                 .ToListAsync();
-
-            // Prevent infinite recursive nested
-            // TODO Find better method for this
-            foreach (var account in accounts)
-                account.PlexAccount.Account = null;
 
             return onlyEnabled ? accounts.Where(x => x.IsEnabled).ToList() : accounts;
         }

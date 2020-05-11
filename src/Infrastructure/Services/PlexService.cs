@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using PlexRipper.Application.Common.DTO.Plex;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Models;
 using PlexRipper.Domain.Entities;
@@ -48,7 +47,7 @@ namespace PlexRipper.Infrastructure.Services
 
         #region Public Methods
 
-        public async Task<PlexAccount> AddOrUpdatePlexAccount(Account account, PlexAccountDTO plexAccountDto)
+        public async Task<PlexAccount> AddOrUpdatePlexAccount(Account account, PlexAccount plexAccountDto)
         {
             if (plexAccountDto == null)
             {
@@ -152,7 +151,8 @@ namespace PlexRipper.Infrastructure.Services
                 if (!string.IsNullOrEmpty(token))
                 {
                     var result = await _plexApi.GetServer(token);
-                    await AddOrUpdatePlexServers(plexAccount, result.Server);
+                    var conversion = _mapper.Map<List<PlexServer>>(result.Server);
+                    await AddOrUpdatePlexServers(plexAccount, conversion);
                 }
             }
 
@@ -170,11 +170,10 @@ namespace PlexRipper.Infrastructure.Services
 
 
 
-        private async Task AddOrUpdatePlexServers(PlexAccount plexAccount, List<PlexServerDTO> servers)
+        private async Task AddOrUpdatePlexServers(PlexAccount plexAccount, List<PlexServer> servers)
         {
-            foreach (PlexServerDTO serverInfoDto in servers)
+            foreach (var plexServer in servers)
             {
-                var plexServer = _mapper.Map<PlexServer>(serverInfoDto);
                 var plexServerDB =
                     _context.PlexServers.FirstOrDefault(x => x.MachineIdentifier == plexServer.MachineIdentifier);
                 if (plexServerDB != null)
@@ -226,10 +225,10 @@ namespace PlexRipper.Infrastructure.Services
         }
 
 
-        public async Task<PlexAccountDTO> RequestPlexAccountAsync(string username, string password)
+        public async Task<PlexAccount> RequestPlexAccountAsync(string username, string password)
         {
             var plexAuthentication = await _plexApi.PlexSignInAsync(username, password);
-            return plexAuthentication?.User;
+            return _mapper.Map<PlexAccount>(plexAuthentication?.User);
 
         }
 

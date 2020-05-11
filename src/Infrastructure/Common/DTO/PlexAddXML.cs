@@ -1,8 +1,23 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace PlexRipper.Application.Common.DTO.Plex
+namespace PlexRipper.Infrastructure.Common.DTO
 {
+    [XmlRoot(ElementName = "MediaContainer")]
+    public class PlexAddXML
+    {
+        [XmlElement(ElementName = "SharedServer")]
+        public SharedServer SharedServer { get; set; }
+        [XmlAttribute(AttributeName = "friendlyName")]
+        public string FriendlyName { get; set; }
+        [XmlAttribute(AttributeName = "identifier")]
+        public string Identifier { get; set; }
+        [XmlAttribute(AttributeName = "machineIdentifier")]
+        public string MachineIdentifier { get; set; }
+        [XmlAttribute(AttributeName = "size")]
+        public string Size { get; set; }
+    }
+
     [XmlRoot(ElementName = "Section")]
     public class Section
     {
@@ -51,21 +66,6 @@ namespace PlexRipper.Application.Common.DTO.Plex
         public string Owned { get; set; }
     }
 
-    [XmlRoot(ElementName = "MediaContainer")]
-    public class PlexAdd
-    {
-        [XmlElement(ElementName = "SharedServer")]
-        public SharedServer SharedServer { get; set; }
-        [XmlAttribute(AttributeName = "friendlyName")]
-        public string FriendlyName { get; set; }
-        [XmlAttribute(AttributeName = "identifier")]
-        public string Identifier { get; set; }
-        [XmlAttribute(AttributeName = "machineIdentifier")]
-        public string MachineIdentifier { get; set; }
-        [XmlAttribute(AttributeName = "size")]
-        public string Size { get; set; }
-    }
-
     [XmlRoot(ElementName = "Response")]
     public class AddUserError
     {
@@ -77,7 +77,7 @@ namespace PlexRipper.Application.Common.DTO.Plex
 
     public class PlexAddWrapper
     {
-        public PlexAdd Add { get; set; }
+        public PlexAddXML AddXml { get; set; }
         public AddUserError Error { get; set; }
         public bool HasError => Error != null;
     }

@@ -1,4 +1,5 @@
-﻿using Carter;
+﻿using AutoMapper;
+using Carter;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +14,7 @@ using PlexRipper.Application;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Infrastructure;
 using PlexRipper.Infrastructure.Persistence;
+using PlexRipper.WebAPI.Common.Mappings;
 using PlexRipper.WebAPI.Services;
 using System.Linq;
 using System.Reflection;
@@ -41,6 +43,14 @@ namespace PlexRipper.WebAPI
             services.AddHealthChecks()
                 .AddDbContextCheck<PlexRipperDbContext>();
 
+
+            // Auto Mapper Configurations
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new WebApiMappingProfile());
+            });
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
 
             // Fluent Validator
             services.AddMvc().AddFluentValidation();

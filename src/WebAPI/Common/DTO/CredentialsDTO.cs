@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace PlexRipper.Application.Common.DTO
+namespace PlexRipper.WebAPI.Common.DTO
 {
     public class CredentialsDTO
     {

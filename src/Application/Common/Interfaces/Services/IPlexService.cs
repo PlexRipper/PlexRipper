@@ -1,5 +1,4 @@
-﻿using PlexRipper.Application.Common.DTO.Plex;
-using PlexRipper.Application.Common.Models;
+﻿using PlexRipper.Application.Common.Models;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using System.Collections.Generic;
@@ -22,7 +21,7 @@ namespace PlexRipper.Application.Common.Interfaces
         PlexAccount ConvertToPlexAccount(Account account);
 
         Task<PlexContainer> GetLibrary(PlexServer plexServer);
-        Task<PlexAccountDTO> RequestPlexAccountAsync(string username, string password);
-        Task<PlexAccount> AddOrUpdatePlexAccount(Account account, PlexAccountDTO plexAccountDto);
+        Task<PlexAccount> RequestPlexAccountAsync(string username, string password);
+        Task<PlexAccount> AddOrUpdatePlexAccount(Account account, PlexAccount plexAccountDto);
     }
 }

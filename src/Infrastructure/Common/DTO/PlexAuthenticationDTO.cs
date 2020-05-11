@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace PlexRipper.Application.Common.DTO.Plex
+namespace PlexRipper.Infrastructure.Common.DTO
 {
-    public class PlexAuthentication
+    public class PlexAuthenticationDTO
     {
         [JsonProperty("user")]
         public PlexAccountDTO User { get; set; }

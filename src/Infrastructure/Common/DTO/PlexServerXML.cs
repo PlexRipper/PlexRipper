@@ -28,7 +28,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace PlexRipper.Application.Common.DTO.Plex
+namespace PlexRipper.Infrastructure.Common.DTO
 {
     [XmlRoot(ElementName = "MediaContainer")]
     public class PlexServerXML

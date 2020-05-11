@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using NUnit.Framework;
-using PlexRipper.Application.Common.Mappings;
 
 namespace PlexRipper.Application.UnitTests.Common.Mappings
 {

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
-namespace PlexRipper.Infrastructure.Common.DTO
+namespace PlexRipper.Infrastructure.Common.DTO.PlexGetServer
 {
     [XmlRoot(ElementName = "Server")]
-    public class PlexServerDTO
+    public class PlexServerXML
     {
         [XmlAttribute(AttributeName = "accessToken")]
         public string AccessToken { get; set; }
@@ -34,10 +33,10 @@ namespace PlexRipper.Infrastructure.Common.DTO
         public string MachineIdentifier { get; set; }
 
         [XmlAttribute(AttributeName = "createdAt")]
-        public DateTime CreatedAt { get; set; }
+        public long CreatedAt { get; set; }
 
         [XmlAttribute(AttributeName = "updatedAt")]
-        public DateTime UpdatedAt { get; set; }
+        public long UpdatedAt { get; set; }
 
         [XmlAttribute(AttributeName = "owned")]
         public bool Owned { get; set; }

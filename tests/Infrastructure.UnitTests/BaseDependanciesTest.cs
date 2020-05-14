@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Persistence;
 
 namespace Infrastructure.UnitTests
@@ -30,7 +31,7 @@ namespace Infrastructure.UnitTests
         public static void Setup()
         {
             var context = GetDbContext();
-            // context.Database.EnsureDeleted();
+            context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
         }
 
@@ -45,7 +46,7 @@ namespace Infrastructure.UnitTests
 
         public static Mapper GetMapper()
         {
-            var myProfile = new ApplicationMappingProfile();
+            var myProfile = new InfrastructureMappingProfile();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
             return new Mapper(configuration);
         }

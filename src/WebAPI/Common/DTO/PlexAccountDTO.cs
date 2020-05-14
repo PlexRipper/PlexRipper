@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using PlexRipper.Application.Common.DTO.Plex;
 using PlexRipper.Infrastructure.Common.DTO;
+using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {

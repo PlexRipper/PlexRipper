@@ -2,10 +2,9 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PlexRipper.Domain.ValueObjects;
+using PlexRipper.Infrastructure.Common.DTO;
 using PlexRipper.Infrastructure.Services;
 using System.IO;
-using PlexRipper.Application.Common.DTO;
 
 namespace Infrastructure.UnitTests.Services
 {

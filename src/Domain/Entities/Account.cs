@@ -15,5 +15,17 @@ namespace PlexRipper.Domain.Entities
         public bool IsValidated { get; set; }
         public DateTime ValidatedAt { get; set; }
         public virtual PlexAccount PlexAccount { get; set; }
+
+        public Account()
+        {
+
+        }
+
+        public Account(string username, string password)
+        {
+            Username = username;
+            Password = password;
+            IsEnabled = true;
+        }
     }
 }

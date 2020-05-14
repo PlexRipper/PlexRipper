@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Application.Common.DTO.Plex;
+using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
 using System;
 using System.Collections.Generic;
 

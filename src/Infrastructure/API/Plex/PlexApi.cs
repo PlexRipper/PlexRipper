@@ -2,12 +2,13 @@
 using PlexRipper.Application.Common.DTO.Plex;
 using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
 using PlexRipper.Application.Common.Interfaces.API;
-using PlexRipper.Application.Common.Models;
 using PlexRipper.Domain.Common.API;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Domain.Enums;
 using PlexRipper.Infrastructure.Common.DTO;
+using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
+using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;
 using PlexRipper.Infrastructure.Common.DTO.PlexSignIn;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
@@ -93,20 +94,20 @@ namespace PlexRipper.Infrastructure.API.Plex
             return await Api.Request<PlexAccount>(request);
         }
 
-        public async Task<PlexServerXML> GetServer(string authToken)
+        public async Task<PlexServerContainerXML> GetServer(string authToken)
         {
             var request = new Request(ServerUri, string.Empty, HttpMethod.Get, ContentType.Xml);
 
             AddHeaders(request, authToken);
 
-            return await Api.Request<PlexServerXML>(request);
+            return await Api.Request<PlexServerContainerXML>(request);
         }
 
-        public async Task<PlexContainer> GetLibrarySections(string authToken, string plexFullHost)
+        public async Task<PlexLibraryContainerDTO> GetLibrarySections(string authToken, string plexFullHost)
         {
             var request = new Request("library/sections", plexFullHost, HttpMethod.Get);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexContainer>(request);
+            return await Api.Request<PlexLibraryContainerDTO>(request);
         }
 
         public async Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId)
@@ -226,7 +227,7 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// <param name="start">The start count.</param>
         /// <param name="retCount">The return count, how many items you want returned.</param>
         /// <returns></returns>
-        public async Task<PlexContainer> GetAllEpisodes(string authToken, string host, string section, int start, int retCount)
+        public async Task<PlexLibraryContainerDTO> GetAllEpisodes(string authToken, string host, string section, int start, int retCount)
         {
             var request = new Request($"/library/sections/{section}/all", host, HttpMethod.Get);
 
@@ -234,7 +235,7 @@ namespace PlexRipper.Infrastructure.API.Plex
             AddLimitHeaders(request, start, retCount);
             AddHeaders(request, authToken);
 
-            return await Api.Request<PlexContainer>(request);
+            return await Api.Request<PlexLibraryContainerDTO>(request);
         }
 
         /// <summary>

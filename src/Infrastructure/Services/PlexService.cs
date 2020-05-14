@@ -1,8 +1,8 @@
-﻿using AutoMapper;
+﻿using Ardalis.GuardClauses;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Common.Models;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Infrastructure.Common.Interfaces;
@@ -95,6 +95,12 @@ namespace PlexRipper.Infrastructure.Services
         /// <returns>Can return null when invalid</returns>
         public PlexAccount ConvertToPlexAccount(Account account)
         {
+            if (account == null)
+            {
+                _logger.LogWarning("The account was null");
+                return null;
+            }
+
             if (!account.IsValidated)
             {
                 _logger.LogWarning(
@@ -144,6 +150,13 @@ namespace PlexRipper.Infrastructure.Services
 
             var plexAccount = ConvertToPlexAccount(account);
 
+            if (plexAccount == null)
+            {
+                _logger.LogWarning($"plexAccount, converted from account with Id: {account.Id}, was null");
+                return new List<PlexServer>();
+            }
+
+
             if (refresh || plexAccount.PlexAccountServers.Count == 0)
             {
                 var token = await GetPlexToken(account);
@@ -156,15 +169,23 @@ namespace PlexRipper.Infrastructure.Services
                 }
             }
 
-            // Retrieve all servers
-            var serverList = await _context.PlexServers
-                .Include(x => x.PlexAccountServers)
-                .ThenInclude(x => x.PlexAccount)
-                .Where(x => x.PlexAccountServers
-                    .Any(y => y.PlexAccountId == plexAccount.Id))
-                .ToListAsync();
+            try
+            {
+                // Retrieve all servers
+                var serverList = await _context.PlexServers
+                    .Include(x => x.PlexAccountServers)
+                    .ThenInclude(x => x.PlexAccount)
+                    .Where(x => x.PlexAccountServers
+                        .Any(y => y.PlexAccountId == plexAccount.Id))
+                    .ToListAsync();
 
-            return serverList;
+                return serverList;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Exception: ", e);
+                throw;
+            }
         }
 
 
@@ -200,16 +221,65 @@ namespace PlexRipper.Infrastructure.Services
         }
 
 
-        public async Task<PlexContainer> GetLibrary(PlexServer plexServer)
+        public async Task<PlexLibrary> GetLibrary(PlexServer plexServer)
         {
-            var plexContainer = await _plexApi.GetLibrarySections(plexServer.AccessToken, plexServer.BaseUrl);
-            var library = plexContainer.MediaContainer.Directory[4];
-            var result = await _plexApi.GetLibrary(plexServer.AccessToken, plexServer.BaseUrl, library.key);
+            var plexContainer = await GetLibraries(plexServer);
+            var library = plexContainer[4];
+            var result = await _plexApi.GetLibrary(plexServer.AccessToken, plexServer.BaseUrl, library.Key);
             var metaData = await _plexApi.GetMetadata(plexServer.AccessToken, plexServer.BaseUrl, 5516);
             string downloadUrl = _plexApi.GetDownloadUrl(plexServer, metaData);
             string filename = _plexApi.GetDownloadFilename(plexServer, metaData);
             _plexApi.DownloadMedia(plexServer.AccessToken, downloadUrl, filename);
             return plexContainer;
+        }
+
+        public async Task<List<PlexLibrary>> GetLibraries(PlexServer plexServer, bool refresh = false)
+        {
+            Guard.Against.Null(plexServer, nameof(plexServer));
+
+            var result = await _context.PlexServers.FindAsync(plexServer.Id);
+
+            if (result != null && result.PlexLibraries.Count == 0 || refresh)
+            {
+                var plexContainer = await _plexApi.GetLibrarySections(plexServer.AccessToken, plexServer.BaseUrl);
+                var librariesDTOs = plexContainer.MediaContainer.Directory.ToList();
+
+                var libraries = await _context.PlexLibraries.Where(x => x.PlexServer.Id == plexServer.Id).ToListAsync();
+
+                var librariesNotToRemove = new List<int>();
+
+                // Update or add new plex libraries
+                foreach (var libraryDTO in librariesDTOs)
+                {
+                    var libraryDB = libraries.Find(x => x.Key == libraryDTO.Key);
+
+                    if (libraryDB != null)
+                    {
+                        libraryDB.Count = libraryDTO.Count;
+                        libraryDB.Key = libraryDTO.Key;
+                        libraryDB.Title = libraryDTO.Title;
+                        librariesNotToRemove.Add(libraryDB.Id);
+                    }
+                    else
+                    {
+                        await _context.PlexLibraries.AddAsync(_mapper.Map<PlexLibrary>(libraryDTO));
+                    }
+                }
+
+                // Remove any library that were not either updated or added
+                foreach (var plexLibrary in libraries)
+                {
+                    if (!librariesNotToRemove.Contains(plexLibrary.Id))
+                    {
+                        _context.PlexLibraries.Remove(plexLibrary);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+            }
+
+            return await _context.PlexLibraries.Where(x => x.PlexServer.Id == plexServer.Id).ToListAsync();
         }
 
 

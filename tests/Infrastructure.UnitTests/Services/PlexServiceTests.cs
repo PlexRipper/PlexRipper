@@ -67,6 +67,7 @@ namespace Infrastructure.UnitTests.Services
             var accountService = BaseServiceTest.GetAccountService();
             var credentials = BaseServiceTest.GetCredentials();
 
+            await accountService.AddOrUpdateAccountAsync(new Account(credentials.Username, credentials.Password));
             var account = await accountService.GetAccountAsync(credentials.Username);
 
             var serverList = await plexService.GetServers(account);

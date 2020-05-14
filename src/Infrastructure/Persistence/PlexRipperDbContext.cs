@@ -23,6 +23,7 @@ namespace PlexRipper.Infrastructure.Persistence
         public DbSet<PlexAccount> PlexAccounts { get; set; }
         public DbSet<PlexServer> PlexServers { get; set; }
         public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
+        public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
         public Task<int> SaveChangesAsync()
         {

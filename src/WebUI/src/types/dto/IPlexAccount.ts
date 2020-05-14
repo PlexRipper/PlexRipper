@@ -1,3 +1,5 @@
+import IPlexServer from './IPlexServer';
+
 export interface IPlexAccount {
 	id: number;
 	uuid: string;
@@ -11,4 +13,5 @@ export interface IPlexAccount {
 	confirmedAt: string;
 	forumId: number;
 	accountId: number;
+	plexServers: IPlexServer[];
 }

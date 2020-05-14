@@ -6,6 +6,7 @@ const logText = 'From AccountAPI => ';
 export async function GetAllAccounts(): Promise<IAccount[]> {
 	try {
 		let accounts: IAccount[] = [];
+
 		await GlobalStore.Axios.get('/accounts').then((x) => {
 			accounts = x.data;
 		});

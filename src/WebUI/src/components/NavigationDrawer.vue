@@ -1,7 +1,7 @@
 <template>
 	<v-navigation-drawer app clipped>
 		<v-layout column fill-height>
-			<v-treeview dense />
+			<server-drawer />
 			<v-spacer />
 			<v-list dense nav>
 				<v-list-item v-for="item in getNavItems" :key="item.title" link nuxt :to="item.link">
@@ -20,6 +20,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import ServerDrawer from './ServerDrawer.vue';
 
 interface INavItem {
 	title: string;
@@ -27,7 +28,9 @@ interface INavItem {
 	link: string;
 }
 
-@Component
+@Component({
+	components: { ServerDrawer },
+})
 export default class NavigationDrawer extends Vue {
 	items: object[] = [];
 

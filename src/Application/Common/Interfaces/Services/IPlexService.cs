@@ -8,8 +8,8 @@ namespace PlexRipper.Application.Common.Interfaces
     public interface IPlexService
     {
         Task<bool> IsPlexAccountValid(string username, string password);
-        Task<List<PlexServer>> GetServers(Account account, bool refresh = false);
-        Task<string> GetPlexToken(Account account);
+        Task<List<PlexServer>> GetServers(PlexAccount plexAccount, bool refresh = false);
+        Task<string> GetPlexToken(PlexAccount plexAccount);
         PlexAccount GetPlexAccount(long plexAccountId);
 
         /// <summary>
@@ -22,6 +22,7 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<PlexLibrary> GetLibrary(PlexServer plexServer);
         Task<PlexAccount> RequestPlexAccountAsync(string username, string password);
         Task<PlexAccount> AddOrUpdatePlexAccount(Account account, PlexAccount plexAccountDto);
-        Task<List<PlexLibrary>> GetLibraries(PlexServer plexServer, bool refresh = false);
+        Task<List<PlexLibrary>> GetLibrariesAsync(PlexServer plexServer, bool refresh = false);
+        Task<List<PlexLibrary>> GetLibrariesByPlexServerIdAsync(int plexServerId, bool refresh = false);
     }
 }

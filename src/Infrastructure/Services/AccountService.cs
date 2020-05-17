@@ -45,11 +45,15 @@ namespace PlexRipper.Infrastructure.Services
             return null;
         }
 
+        /// <summary>
+        /// Returns the Account as noTracking
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <returns></returns>
         public async Task<Account> GetAccountAsync(int accountId)
         {
 
-            var result = await _context.Accounts.FindAsync(accountId);
-
+            var result = await _context.Accounts.AsNoTracking().Where(x => x.Id == accountId).FirstOrDefaultAsync();
             if (result != null)
             {
                 return await GetAccountAsync(result.Username);
@@ -64,8 +68,8 @@ namespace PlexRipper.Infrastructure.Services
             var result = await GetAccountAsync(accountId);
             if (result != null)
             {
-                // TODO Also delete nested PlexAccounts and PlexServers
                 _context.Accounts.Remove(result);
+
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -86,7 +90,8 @@ namespace PlexRipper.Infrastructure.Services
         public async Task<List<PlexServer>> GetServers(int accountId, bool refresh = false)
         {
             var account = await GetAccountAsync(accountId);
-            return await _plexService.GetServers(account, refresh);
+            var plexAccount = _plexService.ConvertToPlexAccount(account);
+            return await _plexService.GetServers(plexAccount, refresh);
         }
 
         /// <summary>

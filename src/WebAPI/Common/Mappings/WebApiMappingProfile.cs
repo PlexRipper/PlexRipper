@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
-using PlexRipper.Infrastructure.Common.DTO;
+using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
 using PlexRipper.WebAPI.Common.DTO;
 using System.Linq;
-using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
-using PlexAccountDTO = PlexRipper.WebAPI.Common.DTO.PlexAccountDTO;
 
 namespace PlexRipper.WebAPI.Common.Mappings
 {

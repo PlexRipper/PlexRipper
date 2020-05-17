@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using System.Threading;
@@ -17,5 +18,6 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         Task<int> SaveChangesAsync();
         int SaveChanges();
+        EntityEntry Entry(object entity);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using NUnit.Framework;
+using PlexRipper.Application.Common.Mappings;
 
 namespace PlexRipper.Application.UnitTests.Common.Mappings
 {
@@ -24,4 +25,5 @@ namespace PlexRipper.Application.UnitTests.Common.Mappings
             _configuration.AssertConfigurationIsValid();
         }
     }
+
 }

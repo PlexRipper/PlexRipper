@@ -63,11 +63,6 @@ namespace PlexRipper.Infrastructure.API.Plex
         }
 
 
-        /// <summary>
-        /// Returns a new AuthToken and will update the <see cref="PlexAccount"/> in the DB.
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns></returns>
         public async Task<string> RefreshPlexAuthTokenAsync(Account account)
         {
             var result = await PlexSignInAsync(account.Username, account.Password);

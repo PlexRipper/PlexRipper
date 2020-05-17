@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
@@ -28,6 +29,11 @@ namespace PlexRipper.Infrastructure.Persistence
         public Task<int> SaveChangesAsync()
         {
             return base.SaveChangesAsync(CancellationToken.None);
+        }
+
+        public override EntityEntry Entry(object entity)
+        {
+            return base.Entry(entity);
         }
 
         protected override void OnModelCreating(ModelBuilder builder)

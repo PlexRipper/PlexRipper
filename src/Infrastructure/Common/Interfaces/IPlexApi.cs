@@ -1,14 +1,13 @@
 ﻿using PlexRipper.Application.Common.DTO.Plex;
 using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
-using PlexRipper.Application.Common.Models;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Infrastructure.Common.DTO;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
+using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
 using System;
 using System.Threading.Tasks;
-using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;
 
 namespace PlexRipper.Infrastructure.Common.Interfaces
 {
@@ -31,11 +30,6 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
         Uri GetOAuthUrl(string code, string applicationUrl);
         Task<PlexAddWrapper> AddUser(string emailAddress, string serverId, string authToken, int[] libs);
 
-        /// <summary>
-        /// Returns a new AuthToken and will update the <see cref="PlexAccount"/> in the DB.
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns></returns>
         Task<string> RefreshPlexAuthTokenAsync(Account account);
 
         bool DownloadMedia(string authToken, string downloadUrl, string fileName);

@@ -23,13 +23,16 @@ namespace Infrastructure.UnitTests.Services
             var credentials = BaseServiceTest.GetCredentials();
 
             //Act 
-            var account = await accountService.AddOrUpdateAccountAsync(new Account
+            var newAccount = new Account
             {
                 Username = credentials.Username,
                 Password = credentials.Password
-            });
-            var result = await accountService.ValidateAccountAsync(account);
-            string authToken = await plexService.GetPlexToken(account);
+            };
+
+            var result = await accountService.ValidateAccountAsync(newAccount);
+            var account = await accountService.AddOrUpdateAccountAsync(newAccount);
+
+            string authToken = await plexService.GetPlexToken(account.PlexAccount);
 
             //Assert
             Assert.IsNotNull(result);
@@ -51,7 +54,7 @@ namespace Infrastructure.UnitTests.Services
                 Password = credentials.Password
             });
             var result = await accountService.ValidateAccountAsync(account);
-            var serverList = await plexService.GetServers(account, true);
+            var serverList = await plexService.GetServers(account.PlexAccount, true);
 
             //Assert
             Assert.IsNotNull(result);
@@ -70,7 +73,7 @@ namespace Infrastructure.UnitTests.Services
             await accountService.AddOrUpdateAccountAsync(new Account(credentials.Username, credentials.Password));
             var account = await accountService.GetAccountAsync(credentials.Username);
 
-            var serverList = await plexService.GetServers(account);
+            var serverList = await plexService.GetServers(account.PlexAccount);
             var library = await plexService.GetLibrary(serverList[0]);
 
             Assert.IsNotNull(library);

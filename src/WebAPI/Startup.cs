@@ -12,7 +12,9 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Mappings;
 using PlexRipper.Infrastructure;
+using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Persistence;
 using PlexRipper.WebAPI.Common.Mappings;
 using PlexRipper.WebAPI.Services;
@@ -48,6 +50,8 @@ namespace PlexRipper.WebAPI
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new WebApiMappingProfile());
+                mc.AddProfile(new ApplicationMappingProfile());
+                mc.AddProfile(new InfrastructureMappingProfile());
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);

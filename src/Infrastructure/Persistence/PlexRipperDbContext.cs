@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.Plex;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,8 +17,14 @@ namespace PlexRipper.Infrastructure.Persistence
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-        }
+            var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string dbPath = Path.Combine(rootDir, "PlexRipperDB.db");
 
+            optionsBuilder.UseSqlite(
+                $"Data Source={dbPath}",
+                b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+
+        }
 
         public DbSet<Account> Accounts { get; set; }
         public DbSet<PlexAccount> PlexAccounts { get; set; }

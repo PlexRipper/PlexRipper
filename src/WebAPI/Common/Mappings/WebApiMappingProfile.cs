@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.Plex;
-using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
 using PlexRipper.WebAPI.Common.DTO;
 using System.Linq;
 
@@ -20,10 +18,6 @@ namespace PlexRipper.WebAPI.Common.Mappings
             CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
                 .ForMember(dto => dto.PlexServers,
                     opt => opt.MapFrom(x => x.PlexAccountServers.ToArray().Select(y => y.PlexServer).ToList()));
-
-
-            CreateMap<PlexServerDTO, PlexServer>(MemberList.Destination)
-                .ReverseMap();
         }
     }
 }

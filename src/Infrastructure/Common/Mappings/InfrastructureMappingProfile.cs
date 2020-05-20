@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using PlexRipper.Domain.Entities.Plex;
+using PlexRipper.Domain.Entities;
 using PlexRipper.Infrastructure.Common.DTO;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
 using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;

@@ -4,10 +4,10 @@ using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
 using PlexRipper.Application.Common.Interfaces.API;
 using PlexRipper.Domain.Common.API;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Domain.Enums;
 using PlexRipper.Infrastructure.Common.DTO;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
+using PlexRipper.Infrastructure.Common.DTO.PlexGetStatus;
 using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;
 using PlexRipper.Infrastructure.Common.DTO.PlexSignIn;
 using PlexRipper.Infrastructure.Common.Interfaces;
@@ -75,11 +75,11 @@ namespace PlexRipper.Infrastructure.API.Plex
             return string.Empty;
         }
 
-        public async Task<PlexStatus> GetStatus(string authToken, string uri)
+        public async Task<PlexStatusDTO> GetStatus(string authToken, string uri)
         {
             var request = new Request(uri, string.Empty, HttpMethod.Get);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexStatus>(request);
+            return await Api.Request<PlexStatusDTO>(request);
         }
 
         public async Task<PlexAccount> GetAccount(string authToken)
@@ -132,8 +132,6 @@ namespace PlexRipper.Infrastructure.API.Plex
             return true;
 
 
-
-
             //WebClient webClient = new WebClient();
             //webClient.DownloadProgressChanged += ((sender, args) =>
             //{
@@ -181,7 +179,7 @@ namespace PlexRipper.Infrastructure.API.Plex
         {
             try
             {
-                string key = metaDataDto.MediaContainer.Metadata.First().Media.First().Part.First().Key;
+                string key = metaDataDto.MediaContainerDto.Metadata.First().Media.First().Part.First().Key;
                 return $"{server.BaseUrl}{key}";
             }
             catch (Exception e)
@@ -195,7 +193,7 @@ namespace PlexRipper.Infrastructure.API.Plex
         {
             try
             {
-                string path = metaDataDto.MediaContainer.Metadata.First().Media.First().Part.First().File;
+                string path = metaDataDto.MediaContainerDto.Metadata.First().Media.First().Part.First().File;
                 return Path.GetFileName(path);
             }
             catch (Exception e)

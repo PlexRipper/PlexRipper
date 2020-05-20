@@ -1,7 +1,6 @@
 ﻿using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PlexRipper.Domain.Entities.Plex;
 
 namespace PlexRipper.Application.Common.Interfaces
 {

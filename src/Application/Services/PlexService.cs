@@ -1,18 +1,15 @@
-﻿using Ardalis.GuardClauses;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.Plex;
-using PlexRipper.Infrastructure.Common.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace PlexRipper.Infrastructure.Services
+namespace PlexRipper.Application.Services
 {
     public class PlexService : IPlexService
     {
@@ -24,7 +21,7 @@ namespace PlexRipper.Infrastructure.Services
         private const string PlexServersUrl = "https://plex.tv/pms/servers.xml";
         private const string PlexSignInUrl = "https://plex.tv/users/sign_in.json";
         private static readonly HttpClient client = new HttpClient();
-        private readonly IPlexApi _plexApi;
+        private readonly IPlexApiService _plexServiceApi;
         private readonly IPlexRipperDbContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger<PlexService> _logger;
@@ -33,9 +30,9 @@ namespace PlexRipper.Infrastructure.Services
 
         #region Public Constructors
 
-        public PlexService(IPlexRipperDbContext context, IMapper mapper, IPlexApi plexApi, ILogger<PlexService> logger)
+        public PlexService(IPlexRipperDbContext context, IMapper mapper, IPlexApiService plexServiceApi, ILogger<PlexService> logger)
         {
-            _plexApi = plexApi;
+            _plexServiceApi = plexServiceApi;
             _context = context;
             _mapper = mapper;
             _logger = logger;
@@ -119,7 +116,11 @@ namespace PlexRipper.Infrastructure.Services
 
         public async Task<string> GetPlexToken(PlexAccount plexAccount)
         {
-            Guard.Against.Null(plexAccount, nameof(plexAccount));
+            if (plexAccount == null)
+            {
+                _logger.LogWarning("The plexAccount was null");
+                return string.Empty;
+            }
 
             if (plexAccount.AuthToken != string.Empty)
             {
@@ -131,7 +132,7 @@ namespace PlexRipper.Infrastructure.Services
                 }
                 _logger.LogInformation("Plex AuthToken has expired, refreshing Plex AuthToken now.");
 
-                return await _plexApi.RefreshPlexAuthTokenAsync(plexAccount.Account);
+                return await _plexServiceApi.RefreshPlexAuthTokenAsync(plexAccount.Account);
             }
 
             _logger.LogError($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!");
@@ -142,8 +143,11 @@ namespace PlexRipper.Infrastructure.Services
 
         public async Task<List<PlexServer>> GetServers(PlexAccount plexAccount, bool refresh = false)
         {
-
-            Guard.Against.Null(plexAccount, nameof(plexAccount));
+            if (plexAccount == null)
+            {
+                _logger.LogWarning("The plexAccount was null");
+                return new List<PlexServer>();
+            }
 
             if (refresh || plexAccount.PlexAccountServers.Count == 0)
             {
@@ -151,9 +155,8 @@ namespace PlexRipper.Infrastructure.Services
 
                 if (!string.IsNullOrEmpty(token))
                 {
-                    var result = await _plexApi.GetServer(token);
-                    var conversion = _mapper.Map<List<PlexServer>>(result.Server);
-                    await AddOrUpdatePlexServers(plexAccount, conversion);
+                    var result = await _plexServiceApi.GetServerAsync(token);
+                    await AddOrUpdatePlexServers(plexAccount, result);
                 }
             }
 
@@ -184,7 +187,7 @@ namespace PlexRipper.Infrastructure.Services
             foreach (var plexServer in servers)
             {
                 var plexServerDB =
-                    _context.PlexServers.FirstOrDefault(x => x.MachineIdentifier == plexServer.MachineIdentifier);
+                    Queryable.FirstOrDefault(_context.PlexServers, x => x.MachineIdentifier == plexServer.MachineIdentifier);
                 if (plexServerDB != null)
                 {
                     plexServerDB = plexServer;
@@ -212,7 +215,7 @@ namespace PlexRipper.Infrastructure.Services
         public async Task<PlexLibrary> GetLibrary(PlexServer plexServer)
         {
             var plexLibraries = await GetLibrariesAsync(plexServer);
-            return plexLibraries.First();
+            return Enumerable.First<PlexLibrary>(plexLibraries);
             //var result = await _plexApi.GetLibrary(plexServer.AccessToken, plexServer.BaseUrl, library.Key);
             //var metaData = await _plexApi.GetMetadata(plexServer.AccessToken, plexServer.BaseUrl, 5516);
             //string downloadUrl = _plexApi.GetDownloadUrl(plexServer, metaData);
@@ -229,30 +232,33 @@ namespace PlexRipper.Infrastructure.Services
         /// <returns>List of <see cref="PlexLibrary"/></returns>
         public async Task<List<PlexLibrary>> GetLibrariesAsync(PlexServer plexServer, bool refresh = false)
         {
-            Guard.Against.Null(plexServer, nameof(plexServer));
+            if (plexServer == null)
+            {
+                _logger.LogWarning($"The {nameof(plexServer)} was null");
+                return new List<PlexLibrary>();
+            }
 
             var plexServerDB = await _context.PlexServers.FindAsync(plexServer.Id);
 
             if (plexServerDB != null && (plexServerDB.PlexLibraries == null || plexServerDB.PlexLibraries.Count == 0) || refresh)
             {
-                var plexContainer = await _plexApi.GetLibrarySections(plexServer.AccessToken, plexServer.BaseUrl);
-                var librariesDTOs = plexContainer.MediaContainer.Directory.ToList();
+                var newLibraries = await _plexServiceApi.GetLibrarySections(plexServer.AccessToken, plexServer.BaseUrl);
 
                 var libraries = await _context.PlexLibraries.Where(x => x.PlexServer.Id == plexServer.Id).ToListAsync();
 
                 var librariesNotToRemove = new List<int>();
 
                 // Update or add new plex libraries
-                foreach (var libraryDTO in librariesDTOs)
+                foreach (var newLibrary in newLibraries)
                 {
-                    var libraryDB = libraries.Find(x => x.Key == libraryDTO.Key);
+                    var libraryDB = libraries.Find(x => x.Key == newLibrary.Key);
 
                     if (libraryDB != null)
                     {
                         // Update
-                        libraryDB.Count = libraryDTO.Count;
-                        libraryDB.Key = libraryDTO.Key;
-                        libraryDB.Title = libraryDTO.Title;
+                        libraryDB.Count = newLibrary.Count;
+                        libraryDB.Key = newLibrary.Key;
+                        libraryDB.Title = newLibrary.Title;
                         libraryDB.HasAccess = true;
                         libraryDB.PlexServer = plexServerDB;
                         librariesNotToRemove.Add(libraryDB.Id);
@@ -260,7 +266,7 @@ namespace PlexRipper.Infrastructure.Services
                     else
                     {
                         // Add
-                        libraryDB = _mapper.Map<PlexLibrary>(libraryDTO);
+                        libraryDB = _mapper.Map<PlexLibrary>(newLibrary);
                         libraryDB.HasAccess = true;
                         libraryDB.PlexServer = plexServerDB;
                         await _context.PlexLibraries.AddAsync(libraryDB);
@@ -286,14 +292,21 @@ namespace PlexRipper.Infrastructure.Services
 
         public async Task<List<PlexLibrary>> GetLibrariesByPlexServerIdAsync(int plexServerId, bool refresh = false)
         {
-            Guard.Against.Zero(plexServerId, nameof(plexServerId));
+            if (plexServerId <= 0)
+            {
+                _logger.LogWarning($"{nameof(plexServerId)} was 0 or lower and thus invalid!");
+                return new List<PlexLibrary>();
+            }
 
             var plexServer = await _context.PlexServers.FindAsync(plexServerId);
 
-            Guard.Against.Null(plexServer, nameof(plexServer));
+            if (plexServer == null)
+            {
+                _logger.LogWarning($"The {nameof(plexServer)} was null");
+                return new List<PlexLibrary>();
+            }
 
             return await GetLibrariesAsync(plexServer);
-
         }
 
         /// <summary>
@@ -310,9 +323,7 @@ namespace PlexRipper.Infrastructure.Services
 
         public async Task<PlexAccount> RequestPlexAccountAsync(string username, string password)
         {
-            var plexAuthentication = await _plexApi.PlexSignInAsync(username, password);
-            return _mapper.Map<PlexAccount>(plexAuthentication?.User);
-
+            return await _plexServiceApi.PlexSignInAsync(username, password);
         }
 
         #endregion Public Methods

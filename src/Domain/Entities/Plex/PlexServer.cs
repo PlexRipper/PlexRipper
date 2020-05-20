@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PlexRipper.Domain.Entities.Plex
+namespace PlexRipper.Domain.Entities
 {
     public class PlexServer
     {

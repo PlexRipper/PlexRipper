@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Domain.Entities.Plex
+﻿namespace PlexRipper.Domain.Entities
 {
     public class PlexAccountServer
     {

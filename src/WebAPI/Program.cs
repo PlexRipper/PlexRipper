@@ -1,75 +1,49 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using NLog;
-using NLog.Web;
-using PlexRipper.Infrastructure.Persistence;
-using System;
-using System.Threading.Tasks;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
+using System.IO;
 
 namespace PlexRipper.WebAPI
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+
+        private static Logger LoggerConfiguration { get; } = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .MinimumLevel.Debug()
+            .WriteTo.ColoredConsole(
+                LogEventLevel.Verbose,
+                "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}")
+            .CreateLogger();
+
+        public static void Main(string[] args)
         {
-            var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
-            logger.Debug("init main");
             try
             {
-                //logger.Debug("init main");
-                var host = CreateHostBuilder(args).Build();
-                SetupDB(host, logger);
+                LoggerConfiguration.Information("Starting up");
 
-                await host.RunAsync();
-            }
-            catch (Exception exception)
-            {
-                // NLog: catch setup errors
-                logger.Error(exception, "Stopped program because of exception");
-                throw;
+                var host = Host.CreateDefaultBuilder(args)
+                    .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                    .ConfigureWebHostDefaults(webHostBuilder =>
+                    {
+                        webHostBuilder
+                            .UseContentRoot(Directory.GetCurrentDirectory())
+                            .UseStartup<Startup>();
+                    })
+                    .Build();
+
+                host.Run();
             }
             finally
             {
                 // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
-                LogManager.Shutdown();
+                Log.CloseAndFlush();
             }
         }
 
-        private static void SetupDB(IHost host, Logger logger)
-        {
-            using (var scope = host.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                try
-                {
-                    var context = services.GetRequiredService<PlexRipperDbContext>();
-                    if (context.Database.IsSqlite())
-                    {
-                        context.Database.EnsureCreated();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex, "An error occurred while migrating or seeding the database.");
-                    throw;
-                }
-            }
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                }).ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.AddConsole();
-                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-                })
-                .UseNLog();
+        public static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args).UseSerilog();
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.Plex;
 using System.Threading;
 using System.Threading.Tasks;
 

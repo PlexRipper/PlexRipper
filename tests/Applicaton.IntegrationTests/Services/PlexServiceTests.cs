@@ -3,7 +3,7 @@ using NUnit.Framework;
 using PlexRipper.Domain.Entities;
 using System.Threading.Tasks;
 
-namespace Infrastructure.UnitTests.Services
+namespace PlexRipper.Application.IntegrationTests.Services
 {
     public class PlexServiceTests
     {
@@ -86,10 +86,10 @@ namespace Infrastructure.UnitTests.Services
         public void ShouldLogDebugToUnitTestConsole()
         {
             var logger = BaseDependanciesTest.GetLogger<object>();
-            logger.LogDebug("This is a debug string");
-            logger.LogInformation("This is an information string");
-            logger.LogError("This is a error string");
-            logger.LogCritical("This is a critical string");
+            LoggerExtensions.LogDebug(logger, "This is a debug string");
+            LoggerExtensions.LogInformation(logger, "This is an information string");
+            LoggerExtensions.LogError(logger, "This is a error string");
+            LoggerExtensions.LogCritical(logger, "This is a critical string");
         }
     }
 }

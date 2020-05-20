@@ -3,13 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.Plex;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PlexRipper.Infrastructure.Services
+namespace PlexRipper.Application.Services
 {
     public class AccountService : IAccountService
     {
@@ -85,7 +84,7 @@ namespace PlexRipper.Infrastructure.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            return onlyEnabled ? accounts.Where(x => x.IsEnabled).ToList() : accounts;
+            return onlyEnabled ? Enumerable.Where<Account>(accounts, x => x.IsEnabled).ToList() : accounts;
         }
         public async Task<List<PlexServer>> GetServers(int accountId, bool refresh = false)
         {

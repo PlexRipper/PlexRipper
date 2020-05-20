@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PlexRipper.Domain.Entities.Plex
+namespace PlexRipper.Domain.Entities
 {
     public class PlexAccount
     {

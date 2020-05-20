@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace PlexRipper.Application.Common.DTO.Plex.PlexLibrary
+namespace PlexRipper.Infrastructure.Common.DTO.PlexGetStatus
 {
     /// <summary>
     /// Used to parse the response from the Plex API when requesting a media file to be streamed
@@ -12,7 +12,7 @@ namespace PlexRipper.Application.Common.DTO.Plex.PlexLibrary
     {
 
         [JsonProperty("MediaContainer")]
-        public MediaContainer MediaContainer { get; set; }
+        public MediaContainerDTO MediaContainerDto { get; set; }
     }
 
     public class Stream
@@ -380,7 +380,7 @@ namespace PlexRipper.Application.Common.DTO.Plex.PlexLibrary
         public IList<Similar> Similar { get; set; }
     }
 
-    public class MediaContainer
+    public class MediaContainerDTO
     {
 
         [JsonProperty("size")]

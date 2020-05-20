@@ -1,9 +1,9 @@
 ﻿using PlexRipper.Application.Common.DTO.Plex;
 using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.Plex;
 using PlexRipper.Infrastructure.Common.DTO;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
+using PlexRipper.Infrastructure.Common.DTO.PlexGetStatus;
 using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
 using System;
@@ -13,7 +13,7 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
 {
     public interface IPlexApi
     {
-        Task<PlexStatus> GetStatus(string authToken, string uri);
+        Task<PlexStatusDTO> GetStatus(string authToken, string uri);
         Task<PlexLibrariesForMachineId> GetLibrariesForMachineId(string authToken, string machineId);
         Task<PlexAuthenticationDTO> PlexSignInAsync(string username, string password);
         Task<PlexServerContainerXML> GetServer(string authToken);

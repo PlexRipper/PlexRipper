@@ -1,5 +1,4 @@
 ﻿using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.Plex;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

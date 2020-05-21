@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using NUnit.Framework;
 using PlexRipper.Application.Common.Mappings;
+using Xunit;
 
 namespace PlexRipper.Application.UnitTests.Common.Mappings
 {
@@ -19,7 +19,7 @@ namespace PlexRipper.Application.UnitTests.Common.Mappings
             _mapper = _configuration.CreateMapper();
         }
 
-        [Test]
+        [Fact]
         public void ShouldHaveValidConfiguration()
         {
             _configuration.AssertConfigurationIsValid();

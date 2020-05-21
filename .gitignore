@@ -231,3 +231,5 @@ _Pvt_Extensions
 .fake/
 
 tests/Infrastructure.UnitTests/secretCredentials.json
+
+tests/Applicaton.IntegrationTests/secretCredentials.json

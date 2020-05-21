@@ -33,5 +33,6 @@ namespace PlexRipper.Domain.Interfaces
         public void RemoveRange(IEnumerable<int> ids);
         public void RemoveRange(IEnumerable<TEntity> entities);
         public IQueryable<TEntity> BaseIncludes();
+        public Task SaveChangesAsync();
     }
 }

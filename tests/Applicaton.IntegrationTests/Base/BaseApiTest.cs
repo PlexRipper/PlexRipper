@@ -1,7 +1,8 @@
 ﻿using PlexRipper.Application.Common.Models;
 using PlexRipper.Infrastructure.API.Plex;
+using PlexRipper.Infrastructure.Services;
 
-namespace Infrastructure.UnitTests.API
+namespace PlexRipper.Application.IntegrationTests.Base
 {
     public static class BaseApiTest
     {
@@ -14,6 +15,11 @@ namespace Infrastructure.UnitTests.API
         public static PlexApi GetPlexApi()
         {
             return new PlexApi(GetApi(), BaseDependanciesTest.GetLogger<PlexApi>());
+        }
+
+        public static PlexApiService GetPlexApiService()
+        {
+            return new PlexApiService(GetPlexApi(), BaseDependanciesTest.GetMapper());
         }
 
 

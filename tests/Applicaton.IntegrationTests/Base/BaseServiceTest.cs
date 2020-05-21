@@ -3,9 +3,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PlexRipper.Application.Services;
 using PlexRipper.Infrastructure.Common.DTO;
+using PlexRipper.Infrastructure.Repositories;
 using System.IO;
 
-namespace PlexRipper.Application.IntegrationTests.Services
+namespace PlexRipper.Application.IntegrationTests.Base
 {
     public class BaseServiceTest
     {
@@ -42,7 +43,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             return new PlexService(
                 BaseDependanciesTest.GetDbContext(),
                 BaseDependanciesTest.GetMapper(),
-                BaseApiTest.GetPlexApi(),
+                BaseApiTest.GetPlexApiService(),
                 BaseDependanciesTest.GetLogger<PlexService>());
         }
 
@@ -50,6 +51,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
         {
             return new AccountService(
                 BaseDependanciesTest.GetDbContext(),
+                new AccountRepository(BaseDependanciesTest.GetDbContext()),
                 BaseDependanciesTest.GetMapper(),
                 GetPlexService(),
                 BaseDependanciesTest.GetLogger<AccountService>());

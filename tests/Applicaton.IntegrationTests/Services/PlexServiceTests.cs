@@ -1,68 +1,79 @@
-﻿using Microsoft.Extensions.Logging;
-using NUnit.Framework;
+﻿using Autofac.Extras.Moq;
+using Microsoft.Extensions.Logging;
+using PlexRipper.Application.IntegrationTests.Base;
+using PlexRipper.Application.Services;
 using PlexRipper.Domain.Entities;
+using Shouldly;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace PlexRipper.Application.IntegrationTests.Services
 {
     public class PlexServiceTests
     {
 
-        [SetUp]
-        public void Setup()
+        public PlexServiceTests()
         {
             BaseDependanciesTest.Setup();
         }
 
-        [Test]
-        public async Task ShouldReturnValidApiToken()
+        [Fact]
+        public async Task GetPlexToken_ShouldReturnValidApiToken()
         {
-            // Arrange
-            var plexService = BaseServiceTest.GetPlexService();
-            var accountService = BaseServiceTest.GetAccountService();
-            var credentials = BaseServiceTest.GetCredentials();
-
-            //Act 
-            var newAccount = new Account
+            using (var mock = AutoMock.GetLoose())
             {
-                Username = credentials.Username,
-                Password = credentials.Password
-            };
 
-            var result = await accountService.ValidateAccountAsync(newAccount);
-            var account = await accountService.AddOrUpdateAccountAsync(newAccount);
+                // Arrange
+                var plexService = mock.Create<PlexService>();
+                var accountService = BaseServiceTest.GetAccountService();
+                var credentials = BaseServiceTest.GetCredentials();
 
-            string authToken = await plexService.GetPlexToken(account.PlexAccount);
+                //Act 
+                var newAccount = new Account
+                {
+                    Username = credentials.Username,
+                    Password = credentials.Password
+                };
 
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.IsNotEmpty(authToken);
+                var result = await accountService.ValidateAccountAsync(newAccount);
+                var account = await accountService.AddOrUpdateAccountAsync(newAccount);
+
+                string authToken = await plexService.GetPlexToken(account.PlexAccount);
+
+                //Assert
+                result.ShouldNotBeNull();
+                authToken.ShouldNotBeEmpty();
+            }
+
         }
 
 
-        [Test]
+        [Fact]
         public async Task ShouldReturnListOfServers()
         {
             // Arrange
             var plexService = BaseServiceTest.GetPlexService();
             var accountService = BaseServiceTest.GetAccountService();
             var credentials = BaseServiceTest.GetCredentials();
+
             //Act 
             var account = await accountService.AddOrUpdateAccountAsync(new Account
             {
                 Username = credentials.Username,
                 Password = credentials.Password
             });
+
             var result = await accountService.ValidateAccountAsync(account);
             var serverList = await plexService.GetServers(account.PlexAccount, true);
 
             //Assert
-            Assert.IsNotNull(result);
-            Assert.IsNotEmpty(serverList);
+            result.ShouldNotBeNull();
+            serverList.ShouldNotBeEmpty();
+
         }
 
 
-        [Test]
+        [Fact]
         public async Task ShouldReturnPlexLibrary()
         {
 
@@ -76,13 +87,14 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var serverList = await plexService.GetServers(account.PlexAccount);
             var library = await plexService.GetLibrary(serverList[0]);
 
-            Assert.IsNotNull(library);
+            library.ShouldNotBeNull();
+
         }
 
 
 
 
-        [Test]
+        [Fact]
         public void ShouldLogDebugToUnitTestConsole()
         {
             var logger = BaseDependanciesTest.GetLogger<object>();

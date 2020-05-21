@@ -108,5 +108,10 @@ namespace PlexRipper.Infrastructure.Repositories
             return Context.Set<TEntity>().AsNoTracking();
         }
 
+        public async Task SaveChangesAsync()
+        {
+            await Context.SaveChangesAsync();
+        }
+
     }
 }

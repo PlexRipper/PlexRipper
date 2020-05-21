@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PlexRipper.Application.Common.Mappings;
 using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Persistence;
 
-namespace Infrastructure.UnitTests
+namespace PlexRipper.Application.IntegrationTests.Base
 {
     public static class BaseDependanciesTest
     {
@@ -46,8 +47,8 @@ namespace Infrastructure.UnitTests
 
         public static Mapper GetMapper()
         {
-            var myProfile = new InfrastructureMappingProfile();
-            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var configuration = new MapperConfiguration(
+                cfg => cfg.AddProfile(new ApplicationMappingProfile()));
             return new Mapper(configuration);
         }
     }

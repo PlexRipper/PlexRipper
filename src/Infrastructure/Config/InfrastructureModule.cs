@@ -6,13 +6,11 @@ using PlexRipper.Application.Common.Models;
 using PlexRipper.Infrastructure.API.Plex;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Persistence;
-using System.Linq;
 using System.Reflection;
-using Module = Autofac.Module;
 
 namespace PlexRipper.Infrastructure.Config
 {
-    public class InfrastructureModule : Module
+    public class InfrastructureModule : Autofac.Module
     {
         protected override void Load(ContainerBuilder builder)
         {
@@ -21,6 +19,11 @@ namespace PlexRipper.Infrastructure.Config
             // register all I*Services
             builder.RegisterAssemblyTypes(assembly)
                 .Where(t => t.Name.EndsWith("Service"))
+                .AsImplementedInterfaces();
+
+            // register all I*Repository
+            builder.RegisterAssemblyTypes(assembly)
+                .Where(t => t.Name.EndsWith("Repository"))
                 .AsImplementedInterfaces();
 
             builder.RegisterType<PlexRipperHttpClient>().As<IPlexRipperHttpClient>().SingleInstance();

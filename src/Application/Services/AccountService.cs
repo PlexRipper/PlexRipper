@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -13,13 +14,15 @@ namespace PlexRipper.Application.Services
     public class AccountService : IAccountService
     {
         private readonly IPlexRipperDbContext _context;
+        private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
         private readonly IPlexService _plexService;
         private readonly ILogger<AccountService> _logger;
 
-        public AccountService(IPlexRipperDbContext context, IMapper mapper, IPlexService plexService, ILogger<AccountService> logger)
+        public AccountService(IPlexRipperDbContext context, IAccountRepository accountRepository, IMapper mapper, IPlexService plexService, ILogger<AccountService> logger)
         {
             _context = context;
+            _accountRepository = accountRepository;
             _mapper = mapper;
             _plexService = plexService;
             _logger = logger;
@@ -27,16 +30,12 @@ namespace PlexRipper.Application.Services
 
         public async Task<Account> GetAccountAsync(string username)
         {
-
-            var result = await _context.Accounts
-                .Include(x => x.PlexAccount)
-                .ThenInclude(x => x.PlexAccountServers)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Username == username);
+            var result = await _accountRepository
+                .FindWithIncludeAsync(x => x.Username == username);
 
             if (result != null)
             {
-                result.PlexAccount.Account = null;
+                result.PlexAccount.Account = null; // TODO Might be removed
                 return result;
             }
 
@@ -51,8 +50,8 @@ namespace PlexRipper.Application.Services
         /// <returns></returns>
         public async Task<Account> GetAccountAsync(int accountId)
         {
+            var result = await _accountRepository.GetWithIncludeAsync(accountId);
 
-            var result = await _context.Accounts.AsNoTracking().Where(x => x.Id == accountId).FirstOrDefaultAsync();
             if (result != null)
             {
                 return await GetAccountAsync(result.Username);
@@ -77,14 +76,17 @@ namespace PlexRipper.Application.Services
 
         public async Task<List<Account>> GetAllAccountsAsync(bool onlyEnabled = false)
         {
-            List<Account> accounts = await _context.Accounts
-                .Include(x => x.PlexAccount)
-                .ThenInclude(x => x.PlexAccountServers)
-                .ThenInclude(x => x.PlexServer)
-                .AsNoTracking()
-                .ToListAsync();
-
-            return onlyEnabled ? Enumerable.Where<Account>(accounts, x => x.IsEnabled).ToList() : accounts;
+            if (onlyEnabled)
+            {
+                var result = await _accountRepository
+                    .FindAllWithIncludeAsync(x => x.IsEnabled);
+                return result.ToList();
+            }
+            else
+            {
+                var result = await _accountRepository.GetAllWithIncludeAsync();
+                return result.ToList();
+            }
         }
         public async Task<List<PlexServer>> GetServers(int accountId, bool refresh = false)
         {

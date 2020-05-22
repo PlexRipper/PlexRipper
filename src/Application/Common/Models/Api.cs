@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using PlexRipper.Application.Common.Interfaces.API;
 using PlexRipper.Domain.Common.API;
 using PlexRipper.Domain.Enums;
@@ -17,13 +16,13 @@ namespace PlexRipper.Application.Common.Models
 {
     public class Api : IApi
     {
-        public Api(ILogger<Api> log, IPlexRipperHttpClient client)
+        public Api(Serilog.ILogger log, IPlexRipperHttpClient client)
         {
-            Logger = log;
+            Log = log;
             _client = client;
         }
 
-        private ILogger<Api> Logger { get; }
+        private Serilog.ILogger Log { get; }
         private readonly IPlexRipperHttpClient _client;
 
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
@@ -39,13 +38,13 @@ namespace PlexRipper.Application.Common.Models
                 {
                     webClient.DownloadFileCompleted += (sender, args) =>
                     {
-                        Logger.LogInformation("The download has completed!");
+                        Log.Information("The download has completed!");
                     };
 
                     // Specify a progress notification handler.
                     webClient.DownloadProgressChanged += (sender, args) =>
                     {
-                        Logger.LogInformation($"Downloaded {args.BytesReceived} of {args.TotalBytesToReceive} bytes. {args.ProgressPercentage} % complete...");
+                        Log.Information($"Downloaded {args.BytesReceived} of {args.TotalBytesToReceive} bytes. {args.ProgressPercentage} % complete...");
                     };
 
                     string downloadPath = @$"{Environment.CurrentDirectory}\PlexDownloads2\{fileName}";
@@ -55,7 +54,7 @@ namespace PlexRipper.Application.Common.Models
             }
             catch (Exception e)
             {
-                Logger.LogError($"Failed to download File: {fileName}", e);
+                Log.Error($"Failed to download File: {fileName}", e);
             }
             return false;
         }
@@ -66,7 +65,7 @@ namespace PlexRipper.Application.Common.Models
             {
                 AddHeadersBody(request, httpRequestMessage);
 
-                Logger.LogDebug($"Sending request to: ${httpRequestMessage.RequestUri}");
+                Log.Debug($"Sending request to: ${httpRequestMessage.RequestUri}");
 
                 var httpResponseMessage = await _client.SendAsync(httpRequestMessage);
 
@@ -89,7 +88,7 @@ namespace PlexRipper.Application.Common.Models
                             }, (exception, timeSpan, context) =>
                             {
 
-                                Logger.LogError($"Retrying RequestUri: {request.FullUri} Because we got Status Code: {exception?.Result?.StatusCode}");
+                                Log.Error($"Retrying RequestUri: {request.FullUri} Because we got Status Code: {exception?.Result?.StatusCode}");
                             });
 
                         httpResponseMessage = await result.ExecuteAsync(async () =>
@@ -186,25 +185,19 @@ namespace PlexRipper.Application.Common.Models
 
         private async Task LogError(Request request, HttpResponseMessage httpResponseMessage)
         {
-            Logger.LogError($"StatusCode: {httpResponseMessage.StatusCode}, Reason: {httpResponseMessage.ReasonPhrase}, RequestUri: {request.FullUri}");
+            Log.Error($"StatusCode: {httpResponseMessage.StatusCode}, Reason: {httpResponseMessage.ReasonPhrase}, RequestUri: {request.FullUri}");
             await LogDebugContent(httpResponseMessage);
         }
 
         private async Task LogDebugContent(HttpResponseMessage message)
         {
-            if (Logger.IsEnabled(LogLevel.Debug))
-            {
-                var content = await message.Content.ReadAsStringAsync();
-                Logger.LogDebug(content);
-            }
+            var content = await message.Content.ReadAsStringAsync();
+            Log.Debug(content);
         }
 
         private void LogDebugContent(string message)
         {
-            if (Logger.IsEnabled(LogLevel.Debug))
-            {
-                Logger.LogDebug(message);
-            }
+            Log.Debug(message);
         }
     }
 }

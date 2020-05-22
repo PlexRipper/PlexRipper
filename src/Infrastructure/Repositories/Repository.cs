@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Interfaces;
 using System;
@@ -63,34 +64,76 @@ namespace PlexRipper.Infrastructure.Repositories
             return await Context.Set<TEntity>().SingleOrDefaultAsync(predicate);
         }
 
-        public void Add(TEntity entity)
+        public async Task<TEntity> Add(TEntity entity)
         {
-            Context.Set<TEntity>().Add(entity);
+            await Context.Set<TEntity>().AddAsync(entity);
+            await SaveChangesAsync();
+            return entity;
         }
 
-        public void AddRange(IEnumerable<TEntity> entities)
+        public async Task<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entities)
         {
-            Context.Set<TEntity>().AddRange(entities);
+            await Context.Set<TEntity>().AddRangeAsync(entities);
+            await SaveChangesAsync();
+            return entities;
         }
 
-        public void Update(TEntity entity)
+        public async Task<int> UpdateAsync(
+            TEntity entity,
+            params Expression<Func<TEntity, object>>[] navigations)
         {
-            throw new NotImplementedException();
+            // From: https://stackoverflow.com/a/55190929
+            var dbEntity = GetWithIncludeAsync(entity.Id);
+
+            var dbEntry = Context.Entry(dbEntity);
+            dbEntry.CurrentValues.SetValues(entity);
+
+            foreach (var property in navigations)
+            {
+                var propertyName = property.GetPropertyAccess().Name;
+                var dbItemsEntry = dbEntry.Collection(propertyName);
+                var accessor = dbItemsEntry.Metadata.GetCollectionAccessor();
+
+                await dbItemsEntry.LoadAsync();
+                var dbItemsMap = ((IEnumerable<BaseEntity>)dbItemsEntry.CurrentValue)
+                    .ToDictionary(e => e.Id);
+
+                var items = (IEnumerable<BaseEntity>)accessor.GetOrCreate(entity, false);
+
+                foreach (var item in items)
+                {
+                    if (!dbItemsMap.TryGetValue(item.Id, out var oldItem))
+                        accessor.Add(dbEntity, item, false);
+                    else
+                    {
+                        Context.Entry(oldItem).CurrentValues.SetValues(item);
+                        dbItemsMap.Remove(item.Id);
+                    }
+                }
+
+                foreach (var oldItem in dbItemsMap.Values)
+                    accessor.Remove(dbEntity, oldItem);
+            }
+
+            return await SaveChangesAsync();
         }
 
-        public async Task RemoveAsync(int id)
+        public async Task<bool> RemoveAsync(int id)
         {
             var result = await GetAsync(id);
             if (result != null)
             {
-                Remove(result);
+                return await RemoveAsync(result);
             }
+            return false;
             // TODO add logging here
         }
 
-        public void Remove(TEntity entity)
+        public async Task<bool> RemoveAsync(TEntity entity)
         {
             Context.Set<TEntity>().Remove(entity);
+            await SaveChangesAsync();
+            return await GetAsync(entity.Id) == null;
         }
 
         public void RemoveRange(IEnumerable<int> ids)
@@ -108,9 +151,9 @@ namespace PlexRipper.Infrastructure.Repositories
             return Context.Set<TEntity>().AsNoTracking();
         }
 
-        public async Task SaveChangesAsync()
+        public async Task<int> SaveChangesAsync()
         {
-            await Context.SaveChangesAsync();
+            return await Context.SaveChangesAsync();
         }
 
     }

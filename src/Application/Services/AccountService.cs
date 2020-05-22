@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,17 +17,43 @@ namespace PlexRipper.Application.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
         private readonly IPlexService _plexService;
-        private readonly ILogger<AccountService> _logger;
+        private ILogger Log { get; }
 
-        public AccountService(IPlexRipperDbContext context, IAccountRepository accountRepository, IMapper mapper, IPlexService plexService, ILogger<AccountService> logger)
+        public AccountService(IPlexRipperDbContext context, IAccountRepository accountRepository, IMapper mapper, IPlexService plexService, ILogger logger)
         {
             _context = context;
             _accountRepository = accountRepository;
             _mapper = mapper;
             _plexService = plexService;
-            _logger = logger;
+            Log = logger;
+        }
+        public async Task<List<PlexServer>> GetServers(int accountId, bool refresh = false)
+        {
+            var account = await GetAccountAsync(accountId);
+            var plexAccount = _plexService.ConvertToPlexAccount(account);
+            return await _plexService.GetServers(plexAccount, refresh);
+        }
+        /// <summary>
+        /// Check if this account is valid by querying the Plex API
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns>Are the account credentials valid</returns>
+        public async Task<bool> ValidateAccountAsync(string username, string password)
+        {
+            return await _plexService.IsPlexAccountValid(username, password);
+        }
+        /// /// <summary>
+        /// Check if this account is valid by querying the Plex API
+        /// </summary>
+        /// <param name="account">The account to check</param>
+        /// <returns>Are the account credentials valid</returns>
+        public async Task<bool> ValidateAccountAsync(Account account)
+        {
+            return await _plexService.IsPlexAccountValid(account.Username, account.Password);
         }
 
+        #region CRUD
         public async Task<Account> GetAccountAsync(string username)
         {
             var result = await _accountRepository
@@ -39,7 +65,7 @@ namespace PlexRipper.Application.Services
                 return result;
             }
 
-            _logger.LogWarning($"Could not find an Account with username: {username}");
+            Log.Warning($"Could not find an Account with username: {username}");
             return null;
         }
 
@@ -57,43 +83,65 @@ namespace PlexRipper.Application.Services
                 return await GetAccountAsync(result.Username);
             }
 
-            _logger.LogWarning($"Could not find an Account with id: {accountId}");
+            Log.Warning($"Could not find an Account with id: {accountId}");
             return null;
-        }
-
-        public async Task<bool> DeleteAccountAsync(int accountId)
-        {
-            var result = await GetAccountAsync(accountId);
-            if (result != null)
-            {
-                _context.Accounts.Remove(result);
-
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            return false;
         }
 
         public async Task<List<Account>> GetAllAccountsAsync(bool onlyEnabled = false)
         {
             if (onlyEnabled)
             {
+                Log.Debug("Returning only enabled account");
                 var result = await _accountRepository
                     .FindAllWithIncludeAsync(x => x.IsEnabled);
                 return result.ToList();
             }
             else
             {
+                Log.Debug("Returning all accounts");
                 var result = await _accountRepository.GetAllWithIncludeAsync();
                 return result.ToList();
             }
         }
-        public async Task<List<PlexServer>> GetServers(int accountId, bool refresh = false)
+
+
+        public async Task<Account> CreateAccountAsync(Account newAccount)
         {
-            var account = await GetAccountAsync(accountId);
-            var plexAccount = _plexService.ConvertToPlexAccount(account);
-            return await _plexService.GetServers(plexAccount, refresh);
+            var result = await _accountRepository.FindAsync(x => x.Username == newAccount.Username && x.Password == newAccount.Password);
+            if (result == null)
+            {
+                Log.Information("Creating a new Account in DB");
+                return await _accountRepository.Add(newAccount);
+            }
+
+            Log.Warning("An account with these credentials already exists!");
+            return null;
         }
+
+        public async Task<Account> UpdateAccountAsync(Account newAccount)
+        {
+            if (newAccount == null)
+            {
+                Log.Warning("The account was null");
+                return null;
+            }
+            if (newAccount.Id <= 0)
+            {
+                Log.Warning("The Id was 0 or lower");
+                return null;
+            }
+
+            var accountDB = await _accountRepository.GetAsync(newAccount.Id);
+            if (accountDB != null)
+            {
+                await _accountRepository.UpdateAsync(accountDB);
+                return await _accountRepository.GetWithIncludeAsync(newAccount.Id);
+            }
+
+            Log.Warning($"An account with Id {newAccount.Id} did not exist and could not be updated");
+            return null;
+        }
+
 
         /// <summary>
         /// Adds a new <see cref="Account"/> to the Database.
@@ -111,7 +159,7 @@ namespace PlexRipper.Application.Services
                 // Add new
                 if (accountDB == null)
                 {
-                    _logger.LogInformation("Creating a new Account in DB");
+                    Log.Information("Creating a new Account in DB");
 
                     await _context.Accounts.AddAsync(newAccount);
                     await _context.SaveChangesAsync();
@@ -155,29 +203,20 @@ namespace PlexRipper.Application.Services
             }
             catch (Exception e)
             {
-                _logger.LogError("Error while adding or updating a new Account", e);
+                Log.Error("Error while adding or updating a new Account", e);
                 throw;
             }
         }
 
-        /// <summary>
-        /// Check if this account is valid by querying the Plex API
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns>Are the account credentials valid</returns>
-        public async Task<bool> ValidateAccountAsync(string username, string password)
+        public async Task<bool> SetupAccount(Account account)
         {
-            return await _plexService.IsPlexAccountValid(username, password);
+            throw new NotImplementedException();
         }
-        /// /// <summary>
-        /// Check if this account is valid by querying the Plex API
-        /// </summary>
-        /// <param name="account">The account to check</param>
-        /// <returns>Are the account credentials valid</returns>
-        public async Task<bool> ValidateAccountAsync(Account account)
+
+        public async Task<bool> RemoveAccountAsync(int accountId)
         {
-            return await _plexService.IsPlexAccountValid(account.Username, account.Password);
+            return await _accountRepository.RemoveAsync(accountId);
         }
+        #endregion
     }
 }

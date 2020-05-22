@@ -18,8 +18,10 @@ namespace PlexRipper.Application.Common.Interfaces
         /// <returns>The newly created <see cref="Account"/></returns>
         Task<Account> AddOrUpdateAccountAsync(Account account);
 
-        Task<bool> DeleteAccountAsync(int accountId);
+        Task<bool> RemoveAccountAsync(int accountId);
         Task<Account> GetAccountAsync(string username);
         Task<List<PlexServer>> GetServers(int accountId, bool refresh = false);
+        Task<Account> CreateAccountAsync(Account newAccount);
+        Task<Account> UpdateAccountAsync(Account newAccount);
     }
 }

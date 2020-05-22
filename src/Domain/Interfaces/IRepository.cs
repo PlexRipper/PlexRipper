@@ -9,6 +9,26 @@ namespace PlexRipper.Domain.Interfaces
 {
     public interface IRepository<TEntity> where TEntity : BaseEntity
     {
+        public IQueryable<TEntity> BaseIncludes();
+        #region Create
+        public Task<TEntity> Add(TEntity entity);
+
+        public Task<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entities);
+
+
+
+
+        #endregion
+
+        #region Update
+        public Task<int> UpdateAsync(TEntity entity, params Expression<Func<TEntity, object>>[] navigations);
+
+
+
+
+        #endregion
+
+        #region Read
         public Task<TEntity> GetAsync(int id);
         public Task<TEntity> GetWithIncludeAsync(int id);
 
@@ -16,23 +36,26 @@ namespace PlexRipper.Domain.Interfaces
         public Task<IEnumerable<TEntity>> GetAllAsync();
         public Task<IEnumerable<TEntity>> GetAllWithIncludeAsync();
 
+        public Task<TEntity> SingleOrDefault(Expression<Func<TEntity, bool>> predicate);
+
         public Task<TEntity> FindAsync(Expression<Func<TEntity, bool>> predicate);
         public Task<TEntity> FindWithIncludeAsync(Expression<Func<TEntity, bool>> predicate);
         public Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate);
         public Task<IEnumerable<TEntity>> FindAllWithIncludeAsync(Expression<Func<TEntity, bool>> predicate);
+        #endregion
 
-        public Task<TEntity> SingleOrDefault(Expression<Func<TEntity, bool>> predicate);
+        #region Delete
 
-        public void Add(TEntity entity);
-        public void AddRange(IEnumerable<TEntity> entities);
 
-        public void Update(TEntity entity);
+        public Task<bool> RemoveAsync(int id);
 
-        public Task RemoveAsync(int id);
-        public void Remove(TEntity entity);
+        public Task<bool> RemoveAsync(TEntity entity);
+
         public void RemoveRange(IEnumerable<int> ids);
+
         public void RemoveRange(IEnumerable<TEntity> entities);
-        public IQueryable<TEntity> BaseIncludes();
-        public Task SaveChangesAsync();
+        #endregion
+
+        public Task<int> SaveChangesAsync();
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using PlexRipper.Application.Common.DTO.Plex;
+﻿using PlexRipper.Application.Common.DTO.Plex;
 using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
 using PlexRipper.Application.Common.Interfaces.API;
 using PlexRipper.Domain.Common.API;
@@ -22,14 +21,14 @@ namespace PlexRipper.Infrastructure.API.Plex
 {
     public class PlexApi : IPlexApi
     {
-        public PlexApi(IApi api, ILogger<PlexApi> logger)
+        public PlexApi(IApi api, Serilog.ILogger logger)
         {
             Log = logger;
             Api = api;
         }
 
         private IApi Api { get; }
-        private ILogger<PlexApi> Log { get; }
+        private Serilog.ILogger Log { get; }
 
         private const string SignInUri = "https://plex.tv/users/sign_in.json";
         private const string FriendsUri = "https://plex.tv/pms/friends/all";
@@ -68,10 +67,10 @@ namespace PlexRipper.Infrastructure.API.Plex
             var result = await PlexSignInAsync(account.Username, account.Password);
             if (result != null)
             {
-                Log.LogInformation($"Returned token was: {result.User.AuthToken}");
+                Log.Information($"Returned token was: {result.User.AuthToken}");
                 return result.User.AuthToken;
             }
-            Log.LogError("Result from RequestPlexSignInDataAsync() was null.");
+            Log.Error("Result from RequestPlexSignInDataAsync() was null.");
             return string.Empty;
         }
 
@@ -123,7 +122,7 @@ namespace PlexRipper.Infrastructure.API.Plex
         {
             //var request = new Request($"library/metadata/{mediaKey}/?download=1", plexFullHost, HttpMethod.Get);
             //string url = $"{plexFullHost}library/metadata/{mediaKey}/?download=1&X-Plex-Token={authToken}";
-            Log.LogDebug(downloadUrl);
+            Log.Debug(downloadUrl);
 
             var request = new Request($"{downloadUrl}?X-Plex-Token={authToken}", HttpMethod.Get);
             AddHeaders(request, authToken);
@@ -135,11 +134,11 @@ namespace PlexRipper.Infrastructure.API.Plex
             //WebClient webClient = new WebClient();
             //webClient.DownloadProgressChanged += ((sender, args) =>
             //{
-            //    Log.LogInformation(args.ProgressPercentage.ToString());
+            //    Log.Information(args.ProgressPercentage.ToString());
             //});
             //webClient.DownloadFileCompleted += ((sender, args) =>
             //{
-            //    Log.LogInformation("Download has completed!");
+            //    Log.Information("Download has completed!");
             //});
 
             //webClient.DownloadFileAsync(new Uri(downloadUrl), @$"D:\Downloads\PlexDownloads\{fileName}");
@@ -184,7 +183,7 @@ namespace PlexRipper.Infrastructure.API.Plex
             }
             catch (Exception e)
             {
-                Log.LogError("Could not retrieve Download Url from MetaData", e);
+                Log.Error("Could not retrieve Download Url from MetaData", e);
             }
             return string.Empty;
         }
@@ -198,7 +197,7 @@ namespace PlexRipper.Infrastructure.API.Plex
             }
             catch (Exception e)
             {
-                Log.LogError("Could not retrieve Filename from MetaData", e);
+                Log.Error("Could not retrieve Filename from MetaData", e);
             }
             return string.Empty;
         }

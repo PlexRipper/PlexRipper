@@ -62,7 +62,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         private async Task Delete(HttpRequest req, HttpResponse res)
         {
-            var result = await _accountService.DeleteAccountAsync(req.RouteValues.As<int>("id"));
+            var result = await _accountService.RemoveAccountAsync(req.RouteValues.As<int>("id"));
             res.StatusCode = result ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest;
         }
 

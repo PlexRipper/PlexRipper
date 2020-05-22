@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Infrastructure.Persistence;
-using System.Reflection;
 
 namespace PlexRipper.Infrastructure
 {
@@ -10,9 +9,6 @@ namespace PlexRipper.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-
-            var dataAccess = Assembly.GetExecutingAssembly();
-
 
             services.AddDbContext<PlexRipperDbContext>();
 

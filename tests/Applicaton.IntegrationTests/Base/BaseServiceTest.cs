@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PlexRipper.Application.Services;
 using PlexRipper.Infrastructure.Common.DTO;
@@ -33,8 +32,8 @@ namespace PlexRipper.Application.IntegrationTests.Base
                 }
 
             }
-            LoggerExtensions.LogWarning(BaseDependanciesTest
-                    .GetLogger<BaseServiceTest>(), "MAKE SURE TO CREATE A \"secretCredentials.json\" IN THE Infrastructure.UnitTests project TO START TESTING!");
+            //LoggerExtensions.LogWarning(BaseDependanciesTest
+            //        .GetLogger<BaseServiceTest>(), "MAKE SURE TO CREATE A \"secretCredentials.json\" IN THE Infrastructure.UnitTests project TO START TESTING!");
             return new CredentialsDTO();
         }
 

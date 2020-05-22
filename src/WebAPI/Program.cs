@@ -1,6 +1,8 @@
 ﻿using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -11,19 +13,13 @@ namespace PlexRipper.WebAPI
     public class Program
     {
 
-        private static Logger LoggerConfiguration { get; } = new LoggerConfiguration()
-            .Enrich.FromLogContext()
-            .MinimumLevel.Debug()
-            .WriteTo.ColoredConsole(
-                LogEventLevel.Verbose,
-                "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}")
-            .CreateLogger();
-
         public static void Main(string[] args)
         {
+            Log.Logger = SetupLogging();
+
             try
             {
-                LoggerConfiguration.Information("Starting up");
+                Log.Logger.Information("Starting up");
 
                 var host = Host.CreateDefaultBuilder(args)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
@@ -33,6 +29,12 @@ namespace PlexRipper.WebAPI
                             .UseContentRoot(Directory.GetCurrentDirectory())
                             .UseStartup<Startup>();
                     })
+                    .ConfigureLogging(config =>
+                    {
+                        config.ClearProviders();
+                        config.AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
+                    })
+                    .UseSerilog()
                     .Build();
 
                 host.Run();
@@ -44,6 +46,19 @@ namespace PlexRipper.WebAPI
             }
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args).UseSerilog();
+        public static Logger SetupLogging()
+        {
+            string template =
+                "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}";
+
+            return new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Debug()
+                .WriteTo.ColoredConsole(LogEventLevel.Debug, template)
+                .CreateLogger();
+        }
     }
 }

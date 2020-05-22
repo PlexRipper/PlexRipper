@@ -1,20 +1,20 @@
 ﻿using Autofac.Extras.Moq;
-using Microsoft.Extensions.Logging;
 using PlexRipper.Application.IntegrationTests.Base;
 using PlexRipper.Application.Services;
 using PlexRipper.Domain.Entities;
 using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace PlexRipper.Application.IntegrationTests.Services
 {
     public class PlexServiceTests
     {
 
-        public PlexServiceTests()
+        public PlexServiceTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.Setup();
+            BaseDependanciesTest.Setup(output);
         }
 
         [Fact]
@@ -98,10 +98,11 @@ namespace PlexRipper.Application.IntegrationTests.Services
         public void ShouldLogDebugToUnitTestConsole()
         {
             var logger = BaseDependanciesTest.GetLogger<object>();
-            LoggerExtensions.LogDebug(logger, "This is a debug string");
-            LoggerExtensions.LogInformation(logger, "This is an information string");
-            LoggerExtensions.LogError(logger, "This is a error string");
-            LoggerExtensions.LogCritical(logger, "This is a critical string");
+            logger.Warning("This is a warning string");
+            logger.Debug("This is a debug string");
+            logger.Information("This is an information string");
+            logger.Error("This is a error string");
+            logger.Fatal("This is a fatal string");
         }
     }
 }

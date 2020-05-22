@@ -1,39 +1,42 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Mappings;
-using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Persistence;
+using Serilog;
+using Serilog.Events;
+using Xunit.Abstractions;
 
 namespace PlexRipper.Application.IntegrationTests.Base
 {
     public static class BaseDependanciesTest
     {
-        public static ILogger<T> GetLogger<T>()
+        static ILogger logConfig;
+
+        public static Serilog.ILogger GetLogger<T>()
         {
-            return SetupLogging().CreateLogger<T>();
+            return logConfig.ForContext<T>();
         }
 
-        private static ILoggerFactory SetupLogging()
+        public static void Setup(ITestOutputHelper output)
         {
-            var serviceProvider = new ServiceCollection()
-                .AddLogging(builder =>
-                {
-                    builder.SetMinimumLevel(LogLevel.Debug);
-                    builder.AddDebug();
-                    builder.AddConsole();
-                })
-                .BuildServiceProvider();
-
-            return serviceProvider.GetService<ILoggerFactory>();
-        }
-
-        public static void Setup()
-        {
+            SetupLogging(output);
             var context = GetDbContext();
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
+
+        }
+
+        public static void SetupLogging(ITestOutputHelper output)
+        {
+            logConfig = new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.Debug()
+                .WriteTo.TestOutput(output, LogEventLevel.Debug)
+                .WriteTo.ColoredConsole(
+                    LogEventLevel.Debug,
+                    "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}")
+                .CreateLogger();
+            Log.Logger = logConfig;
         }
 
         public static PlexRipperDbContext GetDbContext()

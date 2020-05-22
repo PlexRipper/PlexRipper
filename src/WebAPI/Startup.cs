@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using AutofacSerilogIntegration;
 using AutoMapper;
 using Carter;
 using FluentValidation;
@@ -60,9 +61,6 @@ namespace PlexRipper.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-
-
             services.AddApplication();
             services.AddInfrastructure(Configuration);
 
@@ -141,7 +139,7 @@ namespace PlexRipper.WebAPI
 
             // Register Modules
             builder.RegisterModule<InfrastructureModule>();
-
+            builder.RegisterLogger();
 
             //WebApi
             builder.RegisterType<CurrentUserService>().As<ICurrentUserService>(); //TODO might be removed

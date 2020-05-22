@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using System;
@@ -24,18 +23,18 @@ namespace PlexRipper.Application.Services
         private readonly IPlexApiService _plexServiceApi;
         private readonly IPlexRipperDbContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger<PlexService> _logger;
+        private Serilog.ILogger Log { get; }
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public PlexService(IPlexRipperDbContext context, IMapper mapper, IPlexApiService plexServiceApi, ILogger<PlexService> logger)
+        public PlexService(IPlexRipperDbContext context, IMapper mapper, IPlexApiService plexServiceApi, Serilog.ILogger log)
         {
             _plexServiceApi = plexServiceApi;
             _context = context;
             _mapper = mapper;
-            _logger = logger;
+            Log = log;
             client.Timeout = new TimeSpan(0, 0, 0, 30);
 
         }
@@ -48,7 +47,7 @@ namespace PlexRipper.Application.Services
         {
             if (plexAccountDto == null)
             {
-                _logger.LogError($"PlexAccountDTO given as a parameter in {nameof(AddOrUpdatePlexAccount)} was null.");
+                Log.Error($"PlexAccountDTO given as a parameter in {nameof(AddOrUpdatePlexAccount)} was null.");
                 return null;
             }
 
@@ -59,7 +58,7 @@ namespace PlexRipper.Application.Services
             var result = await _context.PlexAccounts.FindAsync(plexAccount.Id);
             if (result != null)
             {
-                _logger.LogDebug($"PlexAccount with Id: {result.Id} already exists, will update now");
+                Log.Debug($"PlexAccount with Id: {result.Id} already exists, will update now");
                 // Update
                 result = plexAccount;
                 plexAccount.Account = accountDB;
@@ -70,7 +69,7 @@ namespace PlexRipper.Application.Services
             }
 
             // Add
-            _logger.LogDebug($"PlexAccount with Id: {plexAccount.Id} does not yet exist, will add now");
+            Log.Debug($"PlexAccount with Id: {plexAccount.Id} does not yet exist, will add now");
             plexAccount.ConfirmedAt = DateTime.Now;
             plexAccount.Account = accountDB;
             await _context.PlexAccounts.AddAsync(plexAccount);
@@ -94,13 +93,13 @@ namespace PlexRipper.Application.Services
         {
             if (account == null)
             {
-                _logger.LogWarning("The account was null");
+                Log.Warning("The account was null");
                 return null;
             }
 
             if (!account.IsValidated)
             {
-                _logger.LogWarning(
+                Log.Warning(
                     $"The account with Id: {account.Id} has not yet been confirmed." +
                            $" Confirm first before using ConvertToPlexAccount()");
                 return null;
@@ -118,7 +117,7 @@ namespace PlexRipper.Application.Services
         {
             if (plexAccount == null)
             {
-                _logger.LogWarning("The plexAccount was null");
+                Log.Warning("The plexAccount was null");
                 return string.Empty;
             }
 
@@ -127,15 +126,15 @@ namespace PlexRipper.Application.Services
                 // TODO Make the token refresh limit configurable 
                 if ((plexAccount.ConfirmedAt - DateTime.Now).TotalDays < 30)
                 {
-                    _logger.LogInformation("Plex AuthToken was still valid, using from local DB.");
+                    Log.Information("Plex AuthToken was still valid, using from local DB.");
                     return plexAccount.AuthToken;
                 }
-                _logger.LogInformation("Plex AuthToken has expired, refreshing Plex AuthToken now.");
+                Log.Information("Plex AuthToken has expired, refreshing Plex AuthToken now.");
 
                 return await _plexServiceApi.RefreshPlexAuthTokenAsync(plexAccount.Account);
             }
 
-            _logger.LogError($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!");
+            Log.Error($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!");
             return string.Empty;
         }
 
@@ -145,7 +144,7 @@ namespace PlexRipper.Application.Services
         {
             if (plexAccount == null)
             {
-                _logger.LogWarning("The plexAccount was null");
+                Log.Warning("The plexAccount was null");
                 return new List<PlexServer>();
             }
 
@@ -174,7 +173,7 @@ namespace PlexRipper.Application.Services
             }
             catch (Exception e)
             {
-                _logger.LogError("Exception: ", e);
+                Log.Error("Exception: ", e);
                 throw;
             }
         }
@@ -234,7 +233,7 @@ namespace PlexRipper.Application.Services
         {
             if (plexServer == null)
             {
-                _logger.LogWarning($"The {nameof(plexServer)} was null");
+                Log.Warning($"The {nameof(plexServer)} was null");
                 return new List<PlexLibrary>();
             }
 
@@ -294,7 +293,7 @@ namespace PlexRipper.Application.Services
         {
             if (plexServerId <= 0)
             {
-                _logger.LogWarning($"{nameof(plexServerId)} was 0 or lower and thus invalid!");
+                Log.Warning($"{nameof(plexServerId)} was 0 or lower and thus invalid!");
                 return new List<PlexLibrary>();
             }
 
@@ -302,7 +301,7 @@ namespace PlexRipper.Application.Services
 
             if (plexServer == null)
             {
-                _logger.LogWarning($"The {nameof(plexServer)} was null");
+                Log.Warning($"The {nameof(plexServer)} was null");
                 return new List<PlexLibrary>();
             }
 

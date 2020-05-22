@@ -4,9 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain.Entities
 {
-    public class PlexServer
+    public class PlexServer : BaseEntity
     {
-        public int Id { get; set; }
         public string AccessToken { get; set; }
         public string Name { get; set; }
         public string Address { get; set; }
@@ -24,8 +23,10 @@ namespace PlexRipper.Domain.Entities
         public long OwnerId { get; set; }
         public bool Home { get; set; }
 
-        public virtual List<PlexAccountServer> PlexAccountServers { get; set; }
-        public virtual List<PlexLibrary> PlexLibraries { get; set; }
+        public virtual List<PlexAccountServer> PlexAccountServers { get; set; } = new List<PlexAccountServer>();
+        public int PlexAccountId { get; set; }
+
+        public virtual List<PlexLibrary> PlexLibraries { get; set; } = new List<PlexLibrary>();
 
 
         [NotMapped]

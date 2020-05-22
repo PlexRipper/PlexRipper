@@ -20,26 +20,40 @@ namespace PlexRipper.Application.Services
         private const string GetAccountUri = "https://plex.tv/users/account.json";
         private const string PlexServersUrl = "https://plex.tv/pms/servers.xml";
         private const string PlexSignInUrl = "https://plex.tv/users/sign_in.json";
+
         private static readonly HttpClient client = new HttpClient();
         private readonly IPlexApiService _plexServiceApi;
         private readonly IPlexRipperDbContext _context;
         private readonly IPlexAccountRepository _plexAccountRepository;
+        private readonly IPlexServerService _plexServerService;
+        private readonly IPlexServerRepository _plexServerRepository;
         private readonly IMapper _mapper;
+        private readonly IPlexAuthenticationService _plexAuthenticationService;
         private Serilog.ILogger Log { get; }
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public PlexService(IPlexRipperDbContext context, IPlexAccountRepository plexAccountRepository, IMapper mapper, IPlexApiService plexServiceApi, Serilog.ILogger log)
+        public PlexService(
+            IPlexRipperDbContext context,
+            IPlexAccountRepository plexAccountRepository,
+            IPlexServerService plexServerService,
+            IPlexServerRepository plexServerRepository,
+            IPlexAuthenticationService plexAuthenticationService,
+            IPlexApiService plexServiceApi,
+            IMapper mapper,
+            Serilog.ILogger log)
         {
             _plexServiceApi = plexServiceApi;
             _context = context;
             _plexAccountRepository = plexAccountRepository;
+            _plexServerService = plexServerService;
+            _plexServerRepository = plexServerRepository;
             _mapper = mapper;
             Log = log;
             client.Timeout = new TimeSpan(0, 0, 0, 30);
-
+            _plexAuthenticationService = plexAuthenticationService;
         }
 
         #endregion Public Constructors
@@ -76,101 +90,20 @@ namespace PlexRipper.Application.Services
 
         public async Task<string> GetPlexToken(PlexAccount plexAccount)
         {
-            if (plexAccount == null)
-            {
-                Log.Warning("The plexAccount was null");
-                return string.Empty;
-            }
-
-            if (plexAccount.AuthToken != string.Empty)
-            {
-                // TODO Make the token refresh limit configurable 
-                if ((plexAccount.ConfirmedAt - DateTime.Now).TotalDays < 30)
-                {
-                    Log.Information("Plex AuthToken was still valid, using from local DB.");
-                    return plexAccount.AuthToken;
-                }
-                Log.Information("Plex AuthToken has expired, refreshing Plex AuthToken now.");
-
-                return await _plexServiceApi.RefreshPlexAuthTokenAsync(plexAccount.Account);
-            }
-
-            Log.Error($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!");
-            return string.Empty;
+            return await _plexAuthenticationService.GetPlexToken(plexAccount);
         }
 
 
 
-        public async Task<List<PlexServer>> GetServers(PlexAccount plexAccount, bool refresh = false)
+        public async Task<List<PlexServer>> GetServersAsync(PlexAccount plexAccount, bool refresh = false)
         {
-            if (plexAccount == null)
+            if (refresh)
             {
-                Log.Warning("The plexAccount was null");
-                return new List<PlexServer>();
+                await _plexServerService.RefreshServersAsync(plexAccount);
             }
-
-            if (refresh || plexAccount.PlexAccountServers.Count == 0)
-            {
-                var token = await GetPlexToken(plexAccount);
-
-                if (!string.IsNullOrEmpty(token))
-                {
-                    var result = await _plexServiceApi.GetServerAsync(token);
-                    await AddOrUpdatePlexServers(plexAccount, result);
-                }
-            }
-
-            try
-            {
-                // Retrieve all servers
-                var serverList = await _context.PlexServers
-                    .Include(x => x.PlexAccountServers)
-                    .ThenInclude(x => x.PlexAccount)
-                    .Where(x => x.PlexAccountServers
-                        .Any(y => y.PlexAccountId == plexAccount.Id))
-                    .ToListAsync();
-
-                return serverList;
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception: ", e);
-                throw;
-            }
+            var x = await _plexServerService.GetServers(plexAccount);
+            return x.ToList();
         }
-
-
-
-
-        private async Task AddOrUpdatePlexServers(PlexAccount plexAccount, List<PlexServer> servers)
-        {
-            foreach (var plexServer in servers)
-            {
-                var plexServerDB =
-                    Queryable.FirstOrDefault(_context.PlexServers, x => x.MachineIdentifier == plexServer.MachineIdentifier);
-                if (plexServerDB != null)
-                {
-                    plexServerDB = plexServer;
-                    _context.PlexServers.Update(plexServerDB);
-                }
-                else
-                {
-                    // Add
-                    await _context.PlexServers.AddAsync(plexServer);
-                    // Create entry in many-to-many table
-                    var plexAccountServer = new PlexAccountServer
-                    {
-                        PlexAccount = plexAccount,
-                        PlexServer = plexServer
-                    };
-                    plexServer.PlexAccountServers = new List<PlexAccountServer>();
-                    plexServer.PlexAccountServers.Add(plexAccountServer);
-                    await _context.PlexServers.AddAsync(plexServer);
-                }
-            }
-            await _context.SaveChangesAsync();
-        }
-
 
         public async Task<PlexLibrary> GetLibrary(PlexServer plexServer)
         {

@@ -27,7 +27,8 @@ namespace PlexRipper.Infrastructure.Services
         public async Task<PlexAccount> PlexSignInAsync(string username, string password)
         {
             var plexAuthentication = await _plexApi.PlexSignInAsync(username, password);
-            return _mapper.Map<PlexAccount>(plexAuthentication?.User);
+            var map = _mapper.Map<PlexAccount>(plexAuthentication?.User);
+            return map;
         }
 
         public async Task<string> RefreshPlexAuthTokenAsync(Account account)

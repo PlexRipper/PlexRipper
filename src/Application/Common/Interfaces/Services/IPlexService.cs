@@ -7,7 +7,7 @@ namespace PlexRipper.Application.Common.Interfaces
     public interface IPlexService
     {
         Task<bool> IsPlexAccountValid(string username, string password);
-        Task<List<PlexServer>> GetServers(PlexAccount plexAccount, bool refresh = false);
+        Task<List<PlexServer>> GetServersAsync(PlexAccount plexAccount, bool refresh = false);
         Task<string> GetPlexToken(PlexAccount plexAccount);
         Task<PlexAccount> GetPlexAccount(long plexId);
 

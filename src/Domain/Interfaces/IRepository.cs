@@ -13,7 +13,7 @@ namespace PlexRipper.Domain.Interfaces
         #region Create
         public Task AddAsync(TEntity entity);
 
-        public Task AddRange(IEnumerable<TEntity> entities);
+        public Task AddRangeAsync(IEnumerable<TEntity> entities);
 
 
 

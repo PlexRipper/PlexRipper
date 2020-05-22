@@ -17,21 +17,23 @@ namespace PlexRipper.Application.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IMapper _mapper;
         private readonly IPlexService _plexService;
+        private readonly IPlexServerService _plexServerService;
         private ILogger Log { get; }
 
-        public AccountService(IPlexRipperDbContext context, IAccountRepository accountRepository, IMapper mapper, IPlexService plexService, ILogger logger)
+        public AccountService(IPlexRipperDbContext context, IAccountRepository accountRepository, IMapper mapper, IPlexService plexService, IPlexServerService plexServerService, ILogger logger)
         {
             _context = context;
             _accountRepository = accountRepository;
             _mapper = mapper;
             _plexService = plexService;
+            _plexServerService = plexServerService;
             Log = logger;
         }
-        public async Task<List<PlexServer>> GetServers(int accountId, bool refresh = false)
+        public async Task<List<PlexServer>> GetServersAsync(int accountId, bool refresh = false)
         {
             var account = await GetAccountAsync(accountId);
             var plexAccount = _plexService.ConvertToPlexAccount(account);
-            return await _plexService.GetServers(plexAccount, refresh);
+            return await _plexService.GetServersAsync(plexAccount, refresh);
         }
         /// <summary>
         /// Check if this account is valid by querying the Plex API
@@ -51,6 +53,52 @@ namespace PlexRipper.Application.Services
         public async Task<bool> ValidateAccountAsync(Account account)
         {
             return await _plexService.IsPlexAccountValid(account.Username, account.Password);
+        }
+
+        public async Task<bool> SetupAccountAsync(Account account)
+        {
+            if (account == null)
+            {
+                Log.Warning($"{nameof(SetupAccountAsync)} => The account was null");
+                return false;
+            }
+            Log.Debug("Setting up new Account");
+
+            account = await _accountRepository.GetAsync(account.Id);
+
+            // Request new PlexAccount
+            var plexAccount = await _plexService.RequestPlexAccountAsync(account.Username, account.Password);
+
+
+            if (plexAccount == null)
+            {
+                Log.Warning($"{nameof(SetupAccountAsync)} => The plexAccount was null");
+                return false;
+            }
+
+            if (account.PlexAccount == null)
+            {
+                // Create
+                await _plexService.CreatePlexAccount(account, plexAccount);
+            }
+            else
+            {
+                // Update
+                await _plexService.UpdatePlexAccount(plexAccount);
+            }
+
+            account.PlexAccount = plexAccount;
+            account.IsValidated = true;
+            account.ValidatedAt = DateTime.Now;
+            await UpdateAccountAsync(account);
+
+            // Retrieve and store servers
+            var serverList = await GetServersAsync(account.Id, true);
+            await _plexServerService.AddOrUpdatePlexServersAsync(plexAccount, serverList);
+            Log.Debug("Account was setup successfully!");
+            return true;
+
+            // TODO Refresh the Plex Servers
         }
 
         #region CRUD
@@ -186,49 +234,6 @@ namespace PlexRipper.Application.Services
                 throw;
             }
         }
-
-        public async Task<bool> SetupAccountAsync(Account account)
-        {
-            if (account == null)
-            {
-                Log.Warning($"{nameof(SetupAccountAsync)} => The account was null");
-                return false;
-            }
-
-            account = await _accountRepository.GetAsync(account.Id);
-
-            // Request new PlexAccount
-            var plexAccount = await _plexService.RequestPlexAccountAsync(account.Username, account.Password);
-
-
-            if (plexAccount == null)
-            {
-                Log.Warning($"{nameof(SetupAccountAsync)} => The plexAccount was null");
-                return false;
-            }
-
-            if (account.PlexAccount == null)
-            {
-                // Create
-                await _plexService.CreatePlexAccount(account, plexAccount);
-            }
-            else
-            {
-                // Update
-                await _plexService.UpdatePlexAccount(plexAccount);
-            }
-
-            account.PlexAccount = plexAccount;
-            account.IsValidated = true;
-            account.ValidatedAt = DateTime.Now;
-            await UpdateAccountAsync(account);
-            return true;
-
-            // TODO Refresh the Plex Servers
-            // await GetServers(accountDB.Id, true);
-        }
-
-
         public async Task<bool> RemoveAccountAsync(int accountId)
         {
             return await _accountRepository.RemoveAsync(accountId);

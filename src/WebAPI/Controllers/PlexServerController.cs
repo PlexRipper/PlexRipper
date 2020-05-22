@@ -26,7 +26,7 @@ namespace PlexRipper.WebAPI.Controllers
         private async Task GetServersByAccountId(HttpRequest req, HttpResponse res)
         {
             int accountId = req.RouteValues.As<int>("id");
-            var data = _accountService.GetServers(accountId);
+            var data = _accountService.GetServersAsync(accountId);
             await res.Negotiate(data);
         }
 

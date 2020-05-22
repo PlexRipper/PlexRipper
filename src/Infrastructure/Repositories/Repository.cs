@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Interfaces;
+using PlexRipper.Infrastructure.Persistence;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,9 @@ namespace PlexRipper.Infrastructure.Repositories
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity
     {
         public ILogger Log { get; }
-        protected readonly DbContext Context;
+        protected readonly PlexRipperDbContext Context;
 
-        public Repository(DbContext context, ILogger log)
+        public Repository(PlexRipperDbContext context, ILogger log)
         {
             Log = log;
             Context = context;
@@ -80,7 +81,7 @@ namespace PlexRipper.Infrastructure.Repositories
             await Context.Entry(entity).GetDatabaseValuesAsync();
         }
 
-        public async Task AddRange(IEnumerable<TEntity> entities)
+        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
         {
             var newEntities = entities.ToList();
 

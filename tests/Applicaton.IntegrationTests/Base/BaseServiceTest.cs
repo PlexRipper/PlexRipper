@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using PlexRipper.Application.Services;
 using PlexRipper.Infrastructure.Common.DTO;
 using PlexRipper.Infrastructure.Repositories;
+using PlexRipper.Infrastructure.Services;
 using System.IO;
 
 namespace PlexRipper.Application.IntegrationTests.Base
@@ -37,13 +38,48 @@ namespace PlexRipper.Application.IntegrationTests.Base
             return new CredentialsDTO();
         }
 
+
+
+        public static PlexApiService GetPlexApiService()
+        {
+            return new PlexApiService(BaseApiTest.GetPlexApi(), BaseDependanciesTest.GetMapper());
+        }
+
+
+        public static PlexAuthenticationService GetPlexAuthenticationService()
+        {
+            return new PlexAuthenticationService(GetPlexApiService(), BaseDependanciesTest.GetLogger<PlexAuthenticationService>());
+        }
+
         public static PlexService GetPlexService()
         {
             return new PlexService(
                 BaseDependanciesTest.GetDbContext(),
-                new PlexAccountRepository(BaseDependanciesTest.GetDbContext(), BaseDependanciesTest.GetLogger<PlexAccountRepository>()),
-                BaseDependanciesTest.GetMapper(),
+                GetPlexAccountRepository(),
+                GetPlexServerService(),
+                GetPlexServerRepository(),
+                GetPlexAuthenticationService(),
                 BaseApiTest.GetPlexApiService(),
+                BaseDependanciesTest.GetMapper(),
+                BaseDependanciesTest.GetLogger<PlexService>());
+        }
+
+        private static PlexAccountRepository GetPlexAccountRepository()
+        {
+            return new PlexAccountRepository(BaseDependanciesTest.GetDbContext(), BaseDependanciesTest.GetLogger<PlexAccountRepository>());
+        }
+
+        private static PlexServerRepository GetPlexServerRepository()
+        {
+            return new PlexServerRepository(BaseDependanciesTest.GetDbContext(), BaseDependanciesTest.GetLogger<PlexServerRepository>());
+        }
+
+        public static PlexServerService GetPlexServerService()
+        {
+            return new PlexServerService(
+                new PlexServerRepository(BaseDependanciesTest.GetDbContext(), BaseDependanciesTest.GetLogger<PlexServerRepository>()),
+                BaseApiTest.GetPlexApiService(),
+                GetPlexAuthenticationService(),
                 BaseDependanciesTest.GetLogger<PlexService>());
         }
 
@@ -54,6 +90,7 @@ namespace PlexRipper.Application.IntegrationTests.Base
                 new AccountRepository(BaseDependanciesTest.GetDbContext(), BaseDependanciesTest.GetLogger<AccountRepository>()),
                 BaseDependanciesTest.GetMapper(),
                 GetPlexService(),
+                GetPlexServerService(),
                 BaseDependanciesTest.GetLogger<AccountService>());
         }
     }

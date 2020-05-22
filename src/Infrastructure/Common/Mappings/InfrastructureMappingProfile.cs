@@ -15,11 +15,12 @@ namespace PlexRipper.Infrastructure.Common.Mappings
             //PlexAccountDTO <-> PlexAccount
             CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
                 .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexId, opt => opt.MapFrom(dto => dto.Id));
+                .ForMember(dest => dest.PlexId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
             CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
-                .ForMember(dto => dto.PlexServers,
+                .ForMember(dest => dest.PlexServers,
                     opt => opt.MapFrom(x => x.PlexAccountServers.ToArray().Select(y => y.PlexServer).ToList()))
-                .ForMember(dto => dto.Id, opt => opt.MapFrom(x => x.PlexId));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(x => x.PlexId));
 
 
             //PlexServerDTO <-> PlexServer

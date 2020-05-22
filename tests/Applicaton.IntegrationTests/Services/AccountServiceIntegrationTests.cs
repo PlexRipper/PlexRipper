@@ -31,11 +31,13 @@ namespace PlexRipper.Application.IntegrationTests.Services
             //Act 
             var isValid = await accountService.ValidateAccountAsync(newAccount);
             var accountDB = await accountService.CreateAccountAsync(newAccount);
+            var serversList = await accountService.GetServersAsync(accountDB.Id);
 
             //Assert
             isValid.ShouldBeTrue();
             accountDB.IsValidated.ShouldBeTrue();
             accountDB.PlexAccount.ShouldNotBeNull();
+            serversList.ShouldNotBeEmpty();
         }
 
 
@@ -55,7 +57,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             });
 
             var result = await accountService.ValidateAccountAsync(account);
-            var serverList = await plexService.GetServers(account.PlexAccount, true);
+            var serverList = await plexService.GetServersAsync(account.PlexAccount, true);
 
             //Assert
             result.ShouldNotBeNull();
@@ -74,7 +76,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             await accountService.AddOrUpdateAccountAsync(new Account(credentials.Username, credentials.Password));
             var account = await accountService.GetAccountAsync(credentials.Username);
 
-            var serverList = await plexService.GetServers(account.PlexAccount);
+            var serverList = await plexService.GetServersAsync(account.PlexAccount);
             var library = await plexService.GetLibrary(serverList[0]);
 
             library.ShouldNotBeNull();

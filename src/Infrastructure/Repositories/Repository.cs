@@ -19,6 +19,7 @@ namespace PlexRipper.Infrastructure.Repositories
         {
             Log = log;
             Context = context;
+
         }
 
         public bool IsTracking(TEntity entity)
@@ -95,7 +96,7 @@ namespace PlexRipper.Infrastructure.Repositories
             }
             else
             {
-                var exist = await GetAsync(entity.Id);
+                var exist = await Context.Set<TEntity>().AsTracking().FirstOrDefaultAsync(x => x.Id == entity.Id);
                 Context.Entry(exist).CurrentValues.SetValues(entity);
             }
             await SaveChangesAsync();

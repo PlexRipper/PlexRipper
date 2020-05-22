@@ -25,7 +25,7 @@ namespace PlexRipper.Infrastructure.Repositories
 
         public override async Task<Account> GetWithIncludeAsync(int id)
         {
-            return await BaseIncludes().FirstOrDefaultAsync();
+            return await BaseIncludes().FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public override async Task<IEnumerable<Account>> GetAllWithIncludeAsync()

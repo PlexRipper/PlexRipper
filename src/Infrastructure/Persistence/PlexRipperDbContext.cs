@@ -12,10 +12,15 @@ namespace PlexRipper.Infrastructure.Persistence
     {
         public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options)
         {
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            // TODO  EF Core Tracking is off
+            // https://agirlamonggeeks.com/2019/05/06/entity-framework-asnotracking-why-how-ef-and-ef-core/
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
             if (!optionsBuilder.IsConfigured)
             {
                 var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

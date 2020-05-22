@@ -54,7 +54,7 @@ namespace PlexRipper.Application.UnitTests
             // Arrange
             var accountService = BaseServiceTest.GetAccountService();
             var newAccount = new Account("TestUsername", "Password123");
-            var updatedAccount = new Account("TestUsername", "123PassW@rd123");
+            var updatedAccount = new Account("TestUsername", "123PassWrd123");
 
             // Act
             var accountDB = await accountService.CreateAccountAsync(newAccount);

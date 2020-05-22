@@ -41,6 +41,7 @@ namespace PlexRipper.Application.IntegrationTests.Base
         {
             return new PlexService(
                 BaseDependanciesTest.GetDbContext(),
+                new PlexAccountRepository(BaseDependanciesTest.GetDbContext(), BaseDependanciesTest.GetLogger<PlexAccountRepository>()),
                 BaseDependanciesTest.GetMapper(),
                 BaseApiTest.GetPlexApiService(),
                 BaseDependanciesTest.GetLogger<PlexService>());

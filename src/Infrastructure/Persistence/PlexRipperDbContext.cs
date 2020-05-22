@@ -19,14 +19,16 @@ namespace PlexRipper.Infrastructure.Persistence
         {
             // TODO  EF Core Tracking is off
             // https://agirlamonggeeks.com/2019/05/06/entity-framework-asnotracking-why-how-ef-and-ef-core/
-            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            // optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            optionsBuilder.UseLazyLoadingProxies();
 
             if (!optionsBuilder.IsConfigured)
             {
                 var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 string dbPath = Path.Combine(rootDir, "PlexRipperDB.db");
 
-                optionsBuilder.UseSqlite(
+                optionsBuilder
+                    .UseSqlite(
                     $"Data Source={dbPath}",
                     b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
             }

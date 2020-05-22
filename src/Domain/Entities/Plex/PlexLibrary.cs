@@ -12,7 +12,7 @@
 
         public bool HasAccess { get; set; }
 
-        public PlexServer PlexServer { get; set; }
+        public virtual PlexServer PlexServer { get; set; }
 
     }
 }

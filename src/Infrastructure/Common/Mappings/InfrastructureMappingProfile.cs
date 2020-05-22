@@ -14,13 +14,15 @@ namespace PlexRipper.Infrastructure.Common.Mappings
         {
             //PlexAccountDTO <-> PlexAccount
             CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
-                .ForMember(x => x.PlexAccountServers,
-                    opt => opt.Ignore());
+                .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexId, opt => opt.MapFrom(dto => dto.Id));
             CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
                 .ForMember(dto => dto.PlexServers,
-                    opt => opt.MapFrom(x => x.PlexAccountServers.ToArray().Select(y => y.PlexServer).ToList()));
+                    opt => opt.MapFrom(x => x.PlexAccountServers.ToArray().Select(y => y.PlexServer).ToList()))
+                .ForMember(dto => dto.Id, opt => opt.MapFrom(x => x.PlexId));
 
 
+            //PlexServerDTO <-> PlexServer
             CreateMap<PlexServerDTO, PlexServer>(MemberList.Destination)
                 .ReverseMap();
 
@@ -28,14 +30,10 @@ namespace PlexRipper.Infrastructure.Common.Mappings
             //PlexServerXML <-> PlexServer
             CreateMap<PlexServerXML, PlexServer>(MemberList.Destination)
                 .ForMember(dest => dest.CreatedAt,
-                    opt =>
-                        opt.MapFrom(src => DateTimeOffset.FromUnixTimeSeconds(src.CreatedAt).UtcDateTime))
+                    opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeSeconds(src.CreatedAt).UtcDateTime))
                 .ForMember(dest => dest.UpdatedAt,
-                    opt =>
-                        opt.MapFrom(src => DateTimeOffset.FromUnixTimeSeconds(src.UpdatedAt).UtcDateTime))
+                    opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeSeconds(src.UpdatedAt).UtcDateTime))
             .ReverseMap();
-
-
 
             //PlexLibraryDirectoryDTO <-> PlexLibrary
             CreateMap<PlexLibraryDirectoryDTO, PlexLibrary>(MemberList.Source).ReverseMap();

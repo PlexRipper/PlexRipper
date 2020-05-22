@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace PlexRipper.Application.Services
         private static readonly HttpClient client = new HttpClient();
         private readonly IPlexApiService _plexServiceApi;
         private readonly IPlexRipperDbContext _context;
+        private readonly IPlexAccountRepository _plexAccountRepository;
         private readonly IMapper _mapper;
         private Serilog.ILogger Log { get; }
 
@@ -29,10 +31,11 @@ namespace PlexRipper.Application.Services
 
         #region Public Constructors
 
-        public PlexService(IPlexRipperDbContext context, IMapper mapper, IPlexApiService plexServiceApi, Serilog.ILogger log)
+        public PlexService(IPlexRipperDbContext context, IPlexAccountRepository plexAccountRepository, IMapper mapper, IPlexApiService plexServiceApi, Serilog.ILogger log)
         {
             _plexServiceApi = plexServiceApi;
             _context = context;
+            _plexAccountRepository = plexAccountRepository;
             _mapper = mapper;
             Log = log;
             client.Timeout = new TimeSpan(0, 0, 0, 30);
@@ -42,48 +45,6 @@ namespace PlexRipper.Application.Services
         #endregion Public Constructors
 
         #region Public Methods
-
-        public async Task<PlexAccount> AddOrUpdatePlexAccount(Account account, PlexAccount plexAccountDto)
-        {
-            if (plexAccountDto == null)
-            {
-                Log.Error($"PlexAccountDTO given as a parameter in {nameof(AddOrUpdatePlexAccount)} was null.");
-                return null;
-            }
-
-
-            var accountDB = await _context.Accounts.FindAsync(account.Id);
-
-            PlexAccount plexAccount = _mapper.Map<PlexAccount>(plexAccountDto);
-            var result = await _context.PlexAccounts.FindAsync(plexAccount.Id);
-            if (result != null)
-            {
-                Log.Debug($"PlexAccount with Id: {result.Id} already exists, will update now");
-                // Update
-                result = plexAccount;
-                plexAccount.Account = accountDB;
-                result.ConfirmedAt = DateTime.Now;
-                await _context.SaveChangesAsync();
-                return result;
-
-            }
-
-            // Add
-            Log.Debug($"PlexAccount with Id: {plexAccount.Id} does not yet exist, will add now");
-            plexAccount.ConfirmedAt = DateTime.Now;
-            plexAccount.Account = accountDB;
-            await _context.PlexAccounts.AddAsync(plexAccount);
-            await _context.SaveChangesAsync();
-            return plexAccount;
-        }
-
-        public PlexAccount GetPlexAccount(long plexAccountId)
-        {
-            return _context.PlexAccounts
-                .Include(x => x.PlexAccountServers)
-                .FirstOrDefault(x => x.Id == plexAccountId);
-        }
-
         /// <summary>
         /// Returns the <see cref="PlexAccount"/> associated with this <see cref="Account"/>
         /// </summary>
@@ -327,5 +288,56 @@ namespace PlexRipper.Application.Services
 
         #endregion Public Methods
 
+        #region CRUD
+
+        /// <summary>
+        /// Returns the <see cref="PlexAccount"/> based on the Id set by PlexRipper.
+        /// </summary>
+        /// <param name="plexAccountId"></param>
+        /// <returns></returns>
+        public async Task<PlexAccount> GetPlexAccount(int plexAccountId)
+        {
+            return await _plexAccountRepository.GetAsync(plexAccountId);
+        }
+
+        /// <summary>
+        /// Returns the <see cref="PlexAccount"/> based on the PlexId set by the PlexAPI.
+        /// </summary>
+        /// <param name="plexId"></param>
+        /// <returns></returns>
+        public async Task<PlexAccount> GetPlexAccount(long plexId)
+        {
+            return await _plexAccountRepository.FindAsync(x => x.PlexId == plexId);
+        }
+
+        public async Task<PlexAccount> CreatePlexAccount(Account account, PlexAccount plexAccount)
+        {
+            if (plexAccount == null)
+            {
+                Log.Warning($"{nameof(plexAccount)} given as a parameter in {nameof(CreatePlexAccount)} was null.");
+                return null;
+            }
+
+            plexAccount.ConfirmedAt = DateTime.Now;
+            plexAccount.AccountId = account.Id;
+
+            await _plexAccountRepository.AddAsync(plexAccount);
+            return await _plexAccountRepository.GetAsync(plexAccount.Id);
+        }
+
+        public async Task<PlexAccount> UpdatePlexAccount(PlexAccount plexAccount)
+        {
+            if (plexAccount == null)
+            {
+                Log.Warning($"{nameof(plexAccount)} given as a parameter in {nameof(UpdatePlexAccount)} was null.");
+                return null;
+            }
+            plexAccount.ConfirmedAt = DateTime.Now;
+            await _plexAccountRepository.UpdateAsync(plexAccount);
+            return await _plexAccountRepository.GetAsync(plexAccount.Id);
+
+        }
+
+        #endregion
     }
 }

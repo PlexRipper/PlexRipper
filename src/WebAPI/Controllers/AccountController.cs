@@ -30,7 +30,8 @@ namespace PlexRipper.WebAPI.Controllers
             Get(path, GetAll);
             Get(path + "/{id:int}", Get);
             Get(path + "/check/", CheckUsername); // Check if username exists
-            Post(path, Post);
+            Post(path + "/create", Create); // Create Account
+            Post(path + "/update", Update); // Update Account
             Post(path + "/validate", Validate); // Validate Account
             Delete(path + "/{id:int}", Delete);
         }
@@ -66,7 +67,7 @@ namespace PlexRipper.WebAPI.Controllers
             res.StatusCode = result ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest;
         }
 
-        private async Task Post(HttpRequest req, HttpResponse res)
+        private async Task Create(HttpRequest req, HttpResponse res)
         {
             var result = await req.BindAndValidate<AccountDTO>();
 
@@ -80,7 +81,42 @@ namespace PlexRipper.WebAPI.Controllers
             // Save the account in the DB
             try
             {
-                var accountDB = await _accountService.AddOrUpdateAccountAsync(_mapper.Map<Account>(result.Data));
+                var accountDB = await _accountService.CreateAccountAsync(_mapper.Map<Account>(result.Data));
+
+                if (accountDB != null)
+                {
+                    res.StatusCode = StatusCodes.Status201Created;
+                    await res.AsJson(_mapper.Map<AccountDTO>(accountDB));
+                }
+                else
+                {
+                    res.StatusCode = StatusCodes.Status400BadRequest;
+                    await res.Negotiate(null);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.LogError("Error:", e);
+                res.StatusCode = StatusCodes.Status500InternalServerError;
+                await res.Negotiate(null);
+            }
+        }
+
+        private async Task Update(HttpRequest req, HttpResponse res)
+        {
+            var result = await req.BindAndValidate<AccountDTO>();
+
+            if (!result.ValidationResult.IsValid)
+            {
+                res.StatusCode = StatusCodes.Status422UnprocessableEntity;
+                await res.Negotiate(result.ValidationResult.GetFormattedErrors());
+                return;
+            }
+
+            // Save the account in the DB
+            try
+            {
+                var accountDB = await _accountService.UpdateAccountAsync(_mapper.Map<Account>(result.Data));
 
                 if (accountDB != null)
                 {

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Mappings;
+using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Persistence;
 using Serilog;
 using Serilog.Events;
@@ -51,8 +52,13 @@ namespace PlexRipper.Application.IntegrationTests.Base
         public static Mapper GetMapper()
         {
             var configuration = new MapperConfiguration(
-                cfg => cfg.AddProfile(new ApplicationMappingProfile()));
+                cfg =>
+                {
+                    cfg.AddProfile(new ApplicationMappingProfile());
+                    cfg.AddProfile(new InfrastructureMappingProfile());
+                });
             return new Mapper(configuration);
         }
+
     }
 }

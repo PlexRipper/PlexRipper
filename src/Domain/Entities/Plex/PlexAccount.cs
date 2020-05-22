@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace PlexRipper.Domain.Entities
 {
-    public class PlexAccount
+    public class PlexAccount : BaseEntity
     {
-        public long Id { get; set; }
+        public long PlexId { get; set; }
         public string Uuid { get; set; }
         public string Email { get; set; }
         public DateTime JoinedAt { get; set; }

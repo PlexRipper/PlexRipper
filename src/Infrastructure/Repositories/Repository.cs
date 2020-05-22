@@ -73,7 +73,7 @@ namespace PlexRipper.Infrastructure.Repositories
             return await Context.Set<TEntity>().SingleOrDefaultAsync(predicate);
         }
 
-        public async Task Add(TEntity entity)
+        public async Task AddAsync(TEntity entity)
         {
             await Context.Set<TEntity>().AddAsync(entity);
             await SaveChangesAsync();

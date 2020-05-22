@@ -9,13 +9,14 @@ using Xunit.Abstractions;
 
 namespace PlexRipper.Application.IntegrationTests.Services
 {
-    public class PlexServiceTests
+    public class PlexServiceIntegrationTests
     {
 
-        public PlexServiceTests(ITestOutputHelper output)
+        public PlexServiceIntegrationTests(ITestOutputHelper output)
         {
             BaseDependanciesTest.Setup(output);
         }
+
 
         [Fact]
         public async Task GetPlexToken_ShouldReturnValidApiToken()

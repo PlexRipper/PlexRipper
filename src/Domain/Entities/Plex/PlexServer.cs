@@ -24,8 +24,8 @@ namespace PlexRipper.Domain.Entities
         public long OwnerId { get; set; }
         public bool Home { get; set; }
 
-        public List<PlexAccountServer> PlexAccountServers { get; set; }
-        public List<PlexLibrary> PlexLibraries { get; set; }
+        public virtual List<PlexAccountServer> PlexAccountServers { get; set; }
+        public virtual List<PlexLibrary> PlexLibraries { get; set; }
 
 
         [NotMapped]

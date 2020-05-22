@@ -110,7 +110,7 @@
 				<!-- Save account -->
 				<v-btn :disabled="!(isValidated === 'OK')" color="success" min-width="130" class="mr-4" @click="saveAccount">
 					<v-icon>mdi-content-save</v-icon>
-					Save
+					{{ isNew ? 'Create' : 'Update' }}
 				</v-btn>
 			</v-card-actions>
 		</v-card>
@@ -252,8 +252,10 @@ export default class AccountCard extends Vue {
 	}
 
 	async saveAccount(): Promise<void> {
+		const path = '/accounts/' + (this.isNew ? 'create/' : 'update/');
 		await this.$axios
-			.post('/accounts/', {
+			.post(path, {
+				id: this.account?.id,
 				isEnabled: this.isEnabled,
 				displayName: this.displayName,
 				username: this.username,

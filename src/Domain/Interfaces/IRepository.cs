@@ -11,9 +11,9 @@ namespace PlexRipper.Domain.Interfaces
     {
         public IQueryable<TEntity> BaseIncludes();
         #region Create
-        public Task<TEntity> Add(TEntity entity);
+        public Task Add(TEntity entity);
 
-        public Task<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entities);
+        public Task AddRange(IEnumerable<TEntity> entities);
 
 
 
@@ -21,7 +21,7 @@ namespace PlexRipper.Domain.Interfaces
         #endregion
 
         #region Update
-        public Task<int> UpdateAsync(TEntity entity, params Expression<Func<TEntity, object>>[] navigations);
+        public Task UpdateAsync(TEntity entity);
 
 
 

@@ -50,7 +50,7 @@ namespace PlexRipper.Application.IntegrationTests.Base
         {
             return new AccountService(
                 BaseDependanciesTest.GetDbContext(),
-                new AccountRepository(BaseDependanciesTest.GetDbContext()),
+                new AccountRepository(BaseDependanciesTest.GetDbContext(), BaseDependanciesTest.GetLogger<AccountRepository>()),
                 BaseDependanciesTest.GetMapper(),
                 GetPlexService(),
                 BaseDependanciesTest.GetLogger<AccountService>());

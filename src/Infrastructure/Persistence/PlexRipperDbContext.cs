@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using System.IO;
@@ -17,13 +16,15 @@ namespace PlexRipper.Infrastructure.Persistence
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string dbPath = Path.Combine(rootDir, "PlexRipperDB.db");
+            if (!optionsBuilder.IsConfigured)
+            {
+                var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string dbPath = Path.Combine(rootDir, "PlexRipperDB.db");
 
-            optionsBuilder.UseSqlite(
-                $"Data Source={dbPath}",
-                b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
-
+                optionsBuilder.UseSqlite(
+                    $"Data Source={dbPath}",
+                    b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+            }
         }
 
         public DbSet<Account> Accounts { get; set; }
@@ -35,11 +36,6 @@ namespace PlexRipper.Infrastructure.Persistence
         public Task<int> SaveChangesAsync()
         {
             return base.SaveChangesAsync(CancellationToken.None);
-        }
-
-        public override EntityEntry Entry(object entity)
-        {
-            return base.Entry(entity);
         }
 
         protected override void OnModelCreating(ModelBuilder builder)

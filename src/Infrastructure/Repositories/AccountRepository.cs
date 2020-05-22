@@ -2,6 +2,7 @@
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Infrastructure.Persistence;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace PlexRipper.Infrastructure.Repositories
 {
     public class AccountRepository : Repository<Account>, IAccountRepository
     {
-        public AccountRepository(PlexRipperDbContext context) : base(context) { }
+        public AccountRepository(PlexRipperDbContext context, ILogger log) : base(context, log) { }
 
         public override IQueryable<Account> BaseIncludes()
         {

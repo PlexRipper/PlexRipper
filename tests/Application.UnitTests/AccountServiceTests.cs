@@ -54,13 +54,16 @@ namespace PlexRipper.Application.UnitTests
             // Arrange
             var accountService = BaseServiceTest.GetAccountService();
             var newAccount = new Account("TestUsername", "Password123");
-            var updatedAccount = new Account("TestUsername", "123Password123");
+            var updatedAccount = new Account("TestUsername", "123PassW@rd123");
+
             // Act
-            var account = await accountService.CreateAccountAsync(newAccount);
-            account = await accountService.UpdateAccountAsync(updatedAccount);
+            var accountDB = await accountService.CreateAccountAsync(newAccount);
+            updatedAccount.Id = accountDB.Id;
+            accountDB = await accountService.UpdateAccountAsync(updatedAccount);
 
             // Assert
-            account.ShouldNotBeNull();
+            accountDB.ShouldNotBeNull();
+            accountDB.Password.ShouldBe(updatedAccount.Password);
         }
 
 

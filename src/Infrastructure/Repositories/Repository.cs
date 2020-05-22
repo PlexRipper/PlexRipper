@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Interfaces;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,16 +12,24 @@ namespace PlexRipper.Infrastructure.Repositories
 {
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity
     {
+        public ILogger Log { get; }
         protected readonly DbContext Context;
 
-        public Repository(DbContext context)
+        public Repository(DbContext context, ILogger log)
         {
+            Log = log;
             Context = context;
+        }
+
+        public bool IsTracking(TEntity entity)
+        {
+            return Context.ChangeTracker.Entries<TEntity>().Any(x => x.Entity.Id == entity.Id);
         }
 
         public async Task<TEntity> GetAsync(int id)
         {
-            return await Context.Set<TEntity>().FindAsync(id);
+            return await Context.Set<TEntity>()
+                .FirstOrDefaultAsync(e => e.Id == id);
         }
 
         public virtual async Task<TEntity> GetWithIncludeAsync(int id)
@@ -64,58 +72,33 @@ namespace PlexRipper.Infrastructure.Repositories
             return await Context.Set<TEntity>().SingleOrDefaultAsync(predicate);
         }
 
-        public async Task<TEntity> Add(TEntity entity)
+        public async Task Add(TEntity entity)
         {
             await Context.Set<TEntity>().AddAsync(entity);
             await SaveChangesAsync();
-            return entity;
+            await Context.Entry(entity).GetDatabaseValuesAsync();
         }
 
-        public async Task<IEnumerable<TEntity>> AddRange(IEnumerable<TEntity> entities)
+        public async Task AddRange(IEnumerable<TEntity> entities)
         {
-            await Context.Set<TEntity>().AddRangeAsync(entities);
+            var newEntities = entities.ToList();
+
+            await Context.Set<TEntity>().AddRangeAsync(newEntities);
             await SaveChangesAsync();
-            return entities;
         }
 
-        public async Task<int> UpdateAsync(
-            TEntity entity,
-            params Expression<Func<TEntity, object>>[] navigations)
+        public async Task UpdateAsync(TEntity entity)
         {
-            // From: https://stackoverflow.com/a/55190929
-            var dbEntity = GetWithIncludeAsync(entity.Id);
-
-            var dbEntry = Context.Entry(dbEntity);
-            dbEntry.CurrentValues.SetValues(entity);
-
-            foreach (var property in navigations)
+            if (!IsTracking(entity))
             {
-                var propertyName = property.GetPropertyAccess().Name;
-                var dbItemsEntry = dbEntry.Collection(propertyName);
-                var accessor = dbItemsEntry.Metadata.GetCollectionAccessor();
-
-                await dbItemsEntry.LoadAsync();
-                var dbItemsMap = ((IEnumerable<BaseEntity>)dbItemsEntry.CurrentValue)
-                    .ToDictionary(e => e.Id);
-
-                var items = (IEnumerable<BaseEntity>)accessor.GetOrCreate(entity, false);
-
-                foreach (var item in items)
-                {
-                    if (!dbItemsMap.TryGetValue(item.Id, out var oldItem))
-                        accessor.Add(dbEntity, item, false);
-                    else
-                    {
-                        Context.Entry(oldItem).CurrentValues.SetValues(item);
-                        dbItemsMap.Remove(item.Id);
-                    }
-                }
-
-                foreach (var oldItem in dbItemsMap.Values)
-                    accessor.Remove(dbEntity, oldItem);
+                Context.Set<TEntity>().Update(entity);
             }
-
-            return await SaveChangesAsync();
+            else
+            {
+                var exist = await GetAsync(entity.Id);
+                Context.Entry(exist).CurrentValues.SetValues(entity);
+            }
+            await SaveChangesAsync();
         }
 
         public async Task<bool> RemoveAsync(int id)
@@ -148,7 +131,7 @@ namespace PlexRipper.Infrastructure.Repositories
 
         public virtual IQueryable<TEntity> BaseIncludes()
         {
-            return Context.Set<TEntity>().AsNoTracking();
+            return Context.Set<TEntity>();
         }
 
         public async Task<int> SaveChangesAsync()

@@ -107,11 +107,14 @@ namespace PlexRipper.Application.Services
 
         public async Task<Account> CreateAccountAsync(Account newAccount)
         {
-            var result = await _accountRepository.FindAsync(x => x.Username == newAccount.Username && x.Password == newAccount.Password);
+            var result = await _accountRepository.FindAsync(
+                x => x.Username == newAccount.Username &&
+                     x.Password == newAccount.Password);
             if (result == null)
             {
                 Log.Information("Creating a new Account in DB");
-                return await _accountRepository.Add(newAccount);
+                await _accountRepository.Add(newAccount);
+                return await _accountRepository.GetAsync(newAccount.Id);
             }
 
             Log.Warning("An account with these credentials already exists!");
@@ -131,15 +134,8 @@ namespace PlexRipper.Application.Services
                 return null;
             }
 
-            var accountDB = await _accountRepository.GetAsync(newAccount.Id);
-            if (accountDB != null)
-            {
-                await _accountRepository.UpdateAsync(accountDB);
-                return await _accountRepository.GetWithIncludeAsync(newAccount.Id);
-            }
-
-            Log.Warning($"An account with Id {newAccount.Id} did not exist and could not be updated");
-            return null;
+            await _accountRepository.UpdateAsync(newAccount);
+            return await _accountRepository.GetWithIncludeAsync(newAccount.Id);
         }
 
 

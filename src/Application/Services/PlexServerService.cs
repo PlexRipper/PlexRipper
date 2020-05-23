@@ -21,7 +21,7 @@ namespace PlexRipper.Application.Services
             IPlexAuthenticationService plexAuthenticationService,
             IPlexServerRepository plexServerRepository,
             IPlexLibraryService plexLibraryService,
-            ILogger logger)
+            Serilog.ILogger logger)
         {
             _plexServerRepository = plexServerRepository;
             _plexLibraryService = plexLibraryService;

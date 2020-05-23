@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
+using PlexRipper.Infrastructure.Common.Interfaces;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -10,28 +10,16 @@ namespace PlexRipper.Infrastructure.Persistence
 {
     public class PlexRipperDbContext : DbContext, IPlexRipperDbContext
     {
-        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options)
-        {
 
-        }
+        public DbContext Instance => this;
+
+        public PlexRipperDbContext() { }
+
+        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // TODO  EF Core Tracking is off
-            // https://agirlamonggeeks.com/2019/05/06/entity-framework-asnotracking-why-how-ef-and-ef-core/
-            // optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            optionsBuilder.UseLazyLoadingProxies();
-
-            if (!optionsBuilder.IsConfigured)
-            {
-                var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string dbPath = Path.Combine(rootDir, "PlexRipperDB.db");
-
-                optionsBuilder
-                    .UseSqlite(
-                    $"Data Source={dbPath}",
-                    b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
-            }
+            SetConfig(optionsBuilder);
         }
 
         public DbSet<Account> Accounts { get; set; }
@@ -51,5 +39,34 @@ namespace PlexRipper.Infrastructure.Persistence
 
             base.OnModelCreating(builder);
         }
+
+        private static void SetConfig(DbContextOptionsBuilder optionsBuilder, bool isTest = false)
+        {
+            optionsBuilder.UseLazyLoadingProxies();
+
+            var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+            string dbName = isTest ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
+            string dbPath = Path.Combine(rootDir, dbName);
+
+            optionsBuilder
+                .UseSqlite(
+                    $"Data Source={dbPath}",
+                    b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+        }
+
+        public static DbContextOptionsBuilder<PlexRipperDbContext> GetConfig()
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
+            SetConfig(optionsBuilder);
+            return optionsBuilder;
+        }
+
+        public static DbContextOptionsBuilder<PlexRipperDbContext> GetTestConfig()
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
+            SetConfig(optionsBuilder, true);
+            return optionsBuilder;
+        }
+
     }
 }

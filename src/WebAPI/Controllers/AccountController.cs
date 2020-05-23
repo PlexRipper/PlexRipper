@@ -4,7 +4,6 @@ using Carter.ModelBinding;
 using Carter.Request;
 using Carter.Response;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
@@ -18,9 +17,9 @@ namespace PlexRipper.WebAPI.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly IMapper _mapper;
-        private readonly ILogger<AccountController> Log;
+        private readonly Serilog.ILogger Log;
 
-        public AccountController(IAccountService accountService, IMapper mapper, ILogger<AccountController> log) : base("/api")
+        public AccountController(IAccountService accountService, IMapper mapper, Serilog.ILogger log) : base("/api")
         {
 
             _accountService = accountService;
@@ -96,7 +95,7 @@ namespace PlexRipper.WebAPI.Controllers
             }
             catch (Exception e)
             {
-                Log.LogError("Error:", e);
+                Log.Error("Error:", e);
                 res.StatusCode = StatusCodes.Status500InternalServerError;
                 await res.Negotiate(null);
             }
@@ -131,7 +130,7 @@ namespace PlexRipper.WebAPI.Controllers
             }
             catch (Exception e)
             {
-                Log.LogError("Error:", e);
+                Log.Error("Error:", e);
                 res.StatusCode = StatusCodes.Status500InternalServerError;
                 await res.Negotiate(null);
             }

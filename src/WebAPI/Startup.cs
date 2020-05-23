@@ -12,13 +12,12 @@ using Microsoft.Extensions.DependencyInjection;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Services;
-using PlexRipper.Infrastructure;
+using PlexRipper.Application.Common.Mappings;
+using PlexRipper.Application.Config;
+using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Config;
+using PlexRipper.Infrastructure.Persistence;
 using PlexRipper.WebAPI.Config;
-using PlexRipper.WebAPI.Services;
-using System;
 using System.Linq;
 using System.Reflection;
 
@@ -62,14 +61,9 @@ namespace PlexRipper.WebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplication();
-            services.AddInfrastructure(Configuration);
-
+            // services.AddInfrastructure(Configuration);
 
             services.AddHttpContextAccessor();
-
-            // Auto Mapper
-            IMapper mapper = SetupAutoMapper();
-            services.AddSingleton(mapper);
 
             // Fluent Validator
             services.AddMvc().AddFluentValidation();
@@ -102,47 +96,32 @@ namespace PlexRipper.WebAPI
 
             // Autofac
             services.AddOptions();
-        }
 
-        /// <summary>
-        /// Scans all assemblies and adds any found Automapper profiles to the mapper
-        /// </summary>
-        /// <returns>Returns the mapper object with all profiles added</returns>
-        private IMapper SetupAutoMapper()
-        {
-            var assembliesToScan = AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic);
-            var allTypes = assembliesToScan.SelectMany(a => a.GetExportedTypes()).ToArray();
 
-            var profiles =
-                allTypes
-                    .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()))
-                    .Where(t => !t.GetTypeInfo().IsAbstract);
-
-            // Auto Mapper Configurations
-            var mappingConfig = new MapperConfiguration(cfg =>
-            {
-                foreach (var profile in profiles)
-                {
-                    cfg.AddProfile(profile);
-                }
-            });
-
-            return mappingConfig.CreateMapper();
+            //Setup Database
+            var DB = new PlexRipperDbContext(PlexRipperDbContext.GetConfig().Options);
+            // TODO Re-enable Migrate when stable
+            // DB.Database.Migrate();
+            DB.Database.EnsureCreated();
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
-
             // Application
-            builder.RegisterType<PlexService>().As<IPlexService>().SingleInstance();
-            builder.RegisterType<AccountService>().As<IAccountService>().InstancePerLifetimeScope();
+            builder.RegisterModule<ApplicationModule>();
 
-            // Register Modules
+            // Infrastructure
             builder.RegisterModule<InfrastructureModule>();
             builder.RegisterLogger();
 
-            //WebApi
-            builder.RegisterType<CurrentUserService>().As<ICurrentUserService>(); //TODO might be removed
+            // Auto Mapper
+            builder.Register(ctx => new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new ApplicationMappingProfile());
+                cfg.AddProfile(new InfrastructureMappingProfile());
+            }));
+
+            builder.Register(ctx => ctx.Resolve<MapperConfiguration>().CreateMapper()).As<IMapper>().InstancePerLifetimeScope();
         }
     }
 }

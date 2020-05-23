@@ -11,10 +11,13 @@ namespace PlexRipper.Application.IntegrationTests.Services
 {
     public class PlexServiceIntegrationTests
     {
+        private BaseContainer Container { get; }
 
         public PlexServiceIntegrationTests(ITestOutputHelper output)
         {
             BaseDependanciesTest.Setup(output);
+            Container = new BaseContainer();
+
         }
 
 
@@ -26,8 +29,8 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
                 // Arrange
                 var plexService = mock.Create<PlexService>();
-                var accountService = BaseServiceTest.GetAccountService();
-                var credentials = BaseServiceTest.GetCredentials();
+                var accountService = Container.GetAccountService;
+                var credentials = Secrets.GetCredentials();
 
                 //Act 
                 var newAccount = new Account
@@ -37,7 +40,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
                 };
 
                 var result = await accountService.ValidateAccountAsync(newAccount);
-                var account = await accountService.AddOrUpdateAccountAsync(newAccount);
+                var account = await accountService.CreateAccountAsync(newAccount);
 
                 string authToken = await plexService.GetPlexToken(account.PlexAccount);
 
@@ -53,12 +56,12 @@ namespace PlexRipper.Application.IntegrationTests.Services
         public async Task ShouldReturnListOfServers()
         {
             // Arrange
-            var plexService = BaseServiceTest.GetPlexService();
-            var accountService = BaseServiceTest.GetAccountService();
-            var credentials = BaseServiceTest.GetCredentials();
+            var plexService = Container.GetPlexService;
+            var accountService = Container.GetAccountService;
+            var credentials = Secrets.GetCredentials();
 
             //Act 
-            var account = await accountService.AddOrUpdateAccountAsync(new Account
+            var account = await accountService.CreateAccountAsync(new Account
             {
                 Username = credentials.Username,
                 Password = credentials.Password
@@ -72,27 +75,6 @@ namespace PlexRipper.Application.IntegrationTests.Services
             serverList.ShouldNotBeEmpty();
 
         }
-
-
-        [Fact]
-        public async Task ShouldReturnPlexLibrary()
-        {
-
-            var plexService = BaseServiceTest.GetPlexService();
-            var accountService = BaseServiceTest.GetAccountService();
-            var credentials = BaseServiceTest.GetCredentials();
-
-            await accountService.AddOrUpdateAccountAsync(new Account(credentials.Username, credentials.Password));
-            var account = await accountService.GetAccountAsync(credentials.Username);
-
-            var serverList = await plexService.GetServersAsync(account.PlexAccount);
-            var library = await plexService.GetLibrary(serverList[0]);
-
-            library.ShouldNotBeNull();
-
-        }
-
-
 
 
         [Fact]

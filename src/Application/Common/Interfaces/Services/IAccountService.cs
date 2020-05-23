@@ -11,13 +11,6 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<bool> ValidateAccountAsync(Account account);
         Task<bool> ValidateAccountAsync(string username, string password);
 
-        /// <summary>
-        /// Adds a new <see cref="Account"/> to the Database.
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns>The newly created <see cref="Account"/></returns>
-        Task<Account> AddOrUpdateAccountAsync(Account account);
-
         Task<bool> RemoveAccountAsync(int accountId);
         Task<Account> GetAccountAsync(string username);
         Task<List<PlexServer>> GetServersAsync(int accountId, bool refresh = false);

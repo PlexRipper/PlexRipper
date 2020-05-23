@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Interfaces;
-using PlexRipper.Infrastructure.Persistence;
+using PlexRipper.Infrastructure.Common.Interfaces;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -13,14 +13,13 @@ namespace PlexRipper.Infrastructure.Repositories
 {
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity
     {
+        protected readonly IPlexRipperDbContext Context;
         public ILogger Log { get; }
-        protected readonly PlexRipperDbContext Context;
 
-        public Repository(PlexRipperDbContext context, ILogger log)
+        public Repository(IPlexRipperDbContext context, ILogger log)
         {
             Log = log;
             Context = context;
-
         }
 
         public bool IsTracking(TEntity entity)
@@ -30,7 +29,7 @@ namespace PlexRipper.Infrastructure.Repositories
 
         public async Task<TEntity> GetAsync(int id)
         {
-            return await Context.Set<TEntity>()
+            return await Context.Instance.Set<TEntity>()
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
@@ -41,7 +40,7 @@ namespace PlexRipper.Infrastructure.Repositories
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-            return await Context.Set<TEntity>().ToListAsync();
+            return await Context.Instance.Set<TEntity>().ToListAsync();
         }
 
         public virtual async Task<IEnumerable<TEntity>> GetAllWithIncludeAsync()
@@ -51,7 +50,7 @@ namespace PlexRipper.Infrastructure.Repositories
 
         public async Task<TEntity> FindAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            return await Context.Set<TEntity>().Where(predicate).FirstOrDefaultAsync();
+            return await Context.Instance.Set<TEntity>().Where(predicate).FirstOrDefaultAsync();
         }
 
         public virtual async Task<TEntity> FindWithIncludeAsync(Expression<Func<TEntity, bool>> predicate)
@@ -61,7 +60,7 @@ namespace PlexRipper.Infrastructure.Repositories
 
         public async Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            return await Context.Set<TEntity>().Where(predicate).ToListAsync();
+            return await Context.Instance.Set<TEntity>().Where(predicate).ToListAsync();
         }
 
         public virtual async Task<IEnumerable<TEntity>> FindAllWithIncludeAsync(Expression<Func<TEntity, bool>> predicate)
@@ -71,12 +70,12 @@ namespace PlexRipper.Infrastructure.Repositories
 
         public async Task<TEntity> SingleOrDefault(Expression<Func<TEntity, bool>> predicate)
         {
-            return await Context.Set<TEntity>().SingleOrDefaultAsync(predicate);
+            return await Context.Instance.Set<TEntity>().SingleOrDefaultAsync(predicate);
         }
 
         public async Task AddAsync(TEntity entity)
         {
-            await Context.Set<TEntity>().AddAsync(entity);
+            await Context.Instance.Set<TEntity>().AddAsync(entity);
             await SaveChangesAsync();
             await Context.Entry(entity).GetDatabaseValuesAsync();
         }
@@ -85,7 +84,7 @@ namespace PlexRipper.Infrastructure.Repositories
         {
             var newEntities = entities.ToList();
 
-            await Context.Set<TEntity>().AddRangeAsync(newEntities);
+            await Context.Instance.Set<TEntity>().AddRangeAsync(newEntities);
             await SaveChangesAsync();
         }
 
@@ -93,11 +92,11 @@ namespace PlexRipper.Infrastructure.Repositories
         {
             if (!IsTracking(entity))
             {
-                Context.Set<TEntity>().Update(entity);
+                Context.Instance.Set<TEntity>().Update(entity);
             }
             else
             {
-                var exist = await Context.Set<TEntity>().AsTracking().FirstOrDefaultAsync(x => x.Id == entity.Id);
+                var exist = await Context.Instance.Set<TEntity>().AsTracking().FirstOrDefaultAsync(x => x.Id == entity.Id);
                 Context.Entry(exist).CurrentValues.SetValues(entity);
             }
             await SaveChangesAsync();
@@ -116,7 +115,7 @@ namespace PlexRipper.Infrastructure.Repositories
 
         public async Task<bool> RemoveAsync(TEntity entity)
         {
-            Context.Set<TEntity>().Remove(entity);
+            Context.Instance.Set<TEntity>().Remove(entity);
             await SaveChangesAsync();
             return await GetAsync(entity.Id) == null;
         }
@@ -128,12 +127,12 @@ namespace PlexRipper.Infrastructure.Repositories
 
         public void RemoveRange(IEnumerable<TEntity> entities)
         {
-            Context.Set<TEntity>().RemoveRange(entities);
+            Context.Instance.Set<TEntity>().RemoveRange(entities);
         }
 
         public virtual IQueryable<TEntity> BaseIncludes()
         {
-            return Context.Set<TEntity>();
+            return Context.Instance.Set<TEntity>();
         }
 
         public async Task<int> SaveChangesAsync()

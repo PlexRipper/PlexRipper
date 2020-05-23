@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces;
+﻿using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
 using Serilog;
@@ -13,27 +11,22 @@ namespace PlexRipper.Application.Services
 {
     public class AccountService : IAccountService
     {
-        private readonly IPlexRipperDbContext _context;
         private readonly IAccountRepository _accountRepository;
-        private readonly IMapper _mapper;
         private readonly IPlexService _plexService;
         private readonly IPlexServerService _plexServerService;
         private ILogger Log { get; }
 
-        public AccountService(IPlexRipperDbContext context, IAccountRepository accountRepository, IMapper mapper, IPlexService plexService, IPlexServerService plexServerService, ILogger logger)
+        public AccountService(IAccountRepository accountRepository, IPlexService plexService, IPlexServerService plexServerService, ILogger logger)
         {
-            _context = context;
             _accountRepository = accountRepository;
-            _mapper = mapper;
             _plexService = plexService;
             _plexServerService = plexServerService;
             Log = logger;
         }
         public async Task<List<PlexServer>> GetServersAsync(int accountId, bool refresh = false)
         {
-            var account = await GetAccountAsync(accountId);
-            var plexAccount = _plexService.ConvertToPlexAccount(account);
-            return await _plexService.GetServersAsync(plexAccount, refresh);
+            var account = await GetAccountAsync(accountId).ConfigureAwait(true);
+            return await _plexService.GetServersAsync(account.PlexAccount, refresh).ConfigureAwait(true);
         }
         /// <summary>
         /// Check if this account is valid by querying the Plex API
@@ -201,39 +194,6 @@ namespace PlexRipper.Application.Services
         }
 
 
-        /// <summary>
-        /// Adds a new <see cref="Account"/> to the Database.
-        /// </summary>
-        /// <param name="newAccount"></param>
-        /// <returns>The newly created <see cref="Account"/></returns>
-        public async Task<Account> AddOrUpdateAccountAsync(Account newAccount)
-        {
-            try
-            {
-                bool isNew = false;
-                bool isUpdated = false;
-                var accountDB = await _context.Accounts.FirstOrDefaultAsync(x => x.Username == newAccount.Username);
-
-                // Update other values
-                accountDB.DisplayName = newAccount.DisplayName;
-                accountDB.IsEnabled = newAccount.IsEnabled;
-
-                // Request and setup PlexAccount from API and add to Account
-                if (isNew || isUpdated)
-                {
-
-                }
-
-                await _context.SaveChangesAsync();
-                return accountDB;
-
-            }
-            catch (Exception e)
-            {
-                Log.Error("Error while adding or updating a new Account", e);
-                throw;
-            }
-        }
         public async Task<bool> RemoveAccountAsync(int accountId)
         {
             return await _accountRepository.RemoveAsync(accountId);

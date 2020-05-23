@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Infrastructure.Persistence;
 
-namespace PlexRipper.Infrastructure.Migrations
+namespace PlexRipper.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200523161057_MinorUpdates")]
+    partial class MinorUpdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

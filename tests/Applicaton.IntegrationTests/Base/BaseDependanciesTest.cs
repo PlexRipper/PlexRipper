@@ -15,15 +15,7 @@ namespace PlexRipper.Application.IntegrationTests.Base
 
         public static Serilog.ILogger GetLogger<T>()
         {
-            return new LoggerConfiguration()
-                .WriteTo.Console()
-                .WriteTo.Debug()
-                .WriteTo.TestOutput(Output, LogEventLevel.Debug)
-                .WriteTo.ColoredConsole(
-                    LogEventLevel.Debug,
-                    "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}")
-                .CreateLogger()
-                .ForContext<T>();
+            return GetLoggerConfig().ForContext<T>();
         }
 
         public static void Setup(ITestOutputHelper output)
@@ -36,9 +28,9 @@ namespace PlexRipper.Application.IntegrationTests.Base
 
         }
 
-        public static void SetupLogging()
+        public static ILogger GetLoggerConfig()
         {
-            Log.Logger = new LoggerConfiguration()
+            return new LoggerConfiguration()
                 .WriteTo.Console()
                 .WriteTo.Debug()
                 .WriteTo.TestOutput(Output, LogEventLevel.Debug)
@@ -46,6 +38,11 @@ namespace PlexRipper.Application.IntegrationTests.Base
                     LogEventLevel.Debug,
                     "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}")
                 .CreateLogger();
+        }
+
+        public static void SetupLogging()
+        {
+            Log.Logger = GetLoggerConfig();
         }
 
         public static PlexRipperDbContext GetDbContext()

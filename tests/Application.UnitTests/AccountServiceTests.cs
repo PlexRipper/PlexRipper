@@ -11,18 +11,21 @@ namespace PlexRipper.Application.UnitTests
     [Order(1)]
     public class AccountServiceTests
     {
+        private BaseContainer Container { get; }
 
 
         public AccountServiceTests(ITestOutputHelper output)
         {
             BaseDependanciesTest.Setup(output);
+            Container = new BaseContainer();
+
         }
 
         [Fact, Order(1)]
         public async Task CreateAccountAsync_ShouldReturnValidAccount_WhenAccountDoesNotExist()
         {
             // Arrange
-            var accountService = BaseServiceTest.GetAccountService();
+            var accountService = Container.GetAccountService;
             var newAccount = new Account("TestUsername", "Password123");
 
             // Act
@@ -36,7 +39,7 @@ namespace PlexRipper.Application.UnitTests
         public async Task CreateAccountAsync_ShouldReturnNull_WhenAccountExist()
         {
             // Arrange
-            var accountService = BaseServiceTest.GetAccountService();
+            var accountService = Container.GetAccountService;
             var newAccount = new Account("TestUsername", "Password123");
 
             // Act
@@ -52,7 +55,7 @@ namespace PlexRipper.Application.UnitTests
         public async Task UpdateAccountAsync_ShouldReturnValidAccount_WhenAccountWasUpdated()
         {
             // Arrange
-            var accountService = BaseServiceTest.GetAccountService();
+            var accountService = Container.GetAccountService;
             var newAccount = new Account("TestUsername", "Password123");
             var updatedAccount = new Account("TestUsername", "123PassWrd123");
 

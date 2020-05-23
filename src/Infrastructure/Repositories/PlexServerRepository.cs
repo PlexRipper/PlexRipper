@@ -6,12 +6,13 @@ using Serilog;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PlexRipper.Infrastructure.Common.Interfaces;
 
 namespace PlexRipper.Infrastructure.Repositories
 {
     public class PlexServerRepository : Repository<PlexServer>, IPlexServerRepository
     {
-        public PlexServerRepository(PlexRipperDbContext context, ILogger log) : base(context, log) { }
+        public PlexServerRepository(IPlexRipperDbContext context, ILogger log) : base(context, log) { }
 
         public async Task<IEnumerable<PlexServer>> GetServers(int plexAccountId)
         {

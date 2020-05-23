@@ -35,7 +35,7 @@ namespace PlexRipper.Application.Services
 
             Log.Debug($"{nameof(RefreshLibrariesAsync)} => Refreshing PlexLibraries for plexServer: {plexServer.Id}");
 
-            var libraries = await _plexServiceApi.GetLibrarySections(plexServer.AccessToken, plexServer.LibraryUrl);
+            var libraries = await _plexServiceApi.GetLibrarySections(plexServer.AccessToken, plexServer.BaseUrl);
             await AddOrUpdatePlexLibrariesAsync(plexServer, libraries);
 
             return true;

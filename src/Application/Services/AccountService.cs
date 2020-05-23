@@ -93,8 +93,8 @@ namespace PlexRipper.Application.Services
             await UpdateAccountAsync(account);
 
             // Retrieve and store servers
-            var serverList = await GetServersAsync(account.Id, true);
-            await _plexServerService.AddOrUpdatePlexServersAsync(plexAccount, serverList);
+            await _plexServerService.RefreshPlexServersAsync(plexAccount);
+
             Log.Debug("Account was setup successfully!");
             return true;
 

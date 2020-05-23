@@ -11,6 +11,6 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<PlexAccount> GetAccountAsync(string authToken);
         Task<PlexLibrary> GetLibraryAsync(string authToken, string plexFullHost, string libraryId);
         Task<List<PlexServer>> GetServerAsync(string authToken);
-        Task<List<PlexLibrary>> GetLibrarySections(string authToken, string plexFullHost);
+        Task<List<PlexLibrary>> GetLibrarySections(string authToken, string plexLibraryUrl);
     }
 }

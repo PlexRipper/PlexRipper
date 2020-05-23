@@ -99,7 +99,7 @@ namespace PlexRipper.Application.Services
         {
             if (refresh)
             {
-                await _plexServerService.RefreshServersAsync(plexAccount);
+                await _plexServerService.RefreshPlexServersAsync(plexAccount);
             }
             var x = await _plexServerService.GetServers(plexAccount);
             return x.ToList();
@@ -127,7 +127,7 @@ namespace PlexRipper.Application.Services
         {
             if (plexServer == null)
             {
-                Log.Warning($"The {nameof(plexServer)} was null");
+                Log.Warning($" {nameof(GetLibrariesAsync)} => The { nameof(plexServer)} was null");
                 return new List<PlexLibrary>();
             }
 

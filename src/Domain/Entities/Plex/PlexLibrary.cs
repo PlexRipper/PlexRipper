@@ -14,5 +14,7 @@
 
         public virtual PlexServer PlexServer { get; set; }
 
+        public int PlexServerId { get; set; }
+
     }
 }

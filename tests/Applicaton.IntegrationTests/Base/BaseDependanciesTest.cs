@@ -11,33 +11,41 @@ namespace PlexRipper.Application.IntegrationTests.Base
 {
     public static class BaseDependanciesTest
     {
-        static ILogger logConfig;
+        static ITestOutputHelper Output;
 
         public static Serilog.ILogger GetLogger<T>()
         {
-            return logConfig.ForContext<T>();
+            return new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.Debug()
+                .WriteTo.TestOutput(Output, LogEventLevel.Debug)
+                .WriteTo.ColoredConsole(
+                    LogEventLevel.Debug,
+                    "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}")
+                .CreateLogger()
+                .ForContext<T>();
         }
 
         public static void Setup(ITestOutputHelper output)
         {
-            SetupLogging(output);
+            Output = output;
+            SetupLogging();
             var context = GetDbContext();
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
         }
 
-        public static void SetupLogging(ITestOutputHelper output)
+        public static void SetupLogging()
         {
-            logConfig = new LoggerConfiguration()
+            Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console()
                 .WriteTo.Debug()
-                .WriteTo.TestOutput(output, LogEventLevel.Debug)
+                .WriteTo.TestOutput(Output, LogEventLevel.Debug)
                 .WriteTo.ColoredConsole(
                     LogEventLevel.Debug,
                     "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}")
                 .CreateLogger();
-            Log.Logger = logConfig;
         }
 
         public static PlexRipperDbContext GetDbContext()

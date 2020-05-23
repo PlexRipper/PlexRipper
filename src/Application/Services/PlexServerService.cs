@@ -11,18 +11,70 @@ namespace PlexRipper.Application.Services
     public class PlexServerService : IPlexServerService
     {
         private readonly IPlexServerRepository _plexServerRepository;
+        private readonly IPlexLibraryService _plexLibraryService;
         private readonly IPlexApiService _plexServiceApi;
         private readonly IPlexAuthenticationService _plexAuthenticationService;
         private ILogger Log { get; }
 
-        public PlexServerService(IPlexServerRepository plexServerRepository, IPlexApiService plexServiceApi, IPlexAuthenticationService plexAuthenticationService, ILogger logger)
+        public PlexServerService(
+            IPlexApiService plexServiceApi,
+            IPlexAuthenticationService plexAuthenticationService,
+            IPlexServerRepository plexServerRepository,
+            IPlexLibraryService plexLibraryService,
+            ILogger logger)
         {
             _plexServerRepository = plexServerRepository;
+            _plexLibraryService = plexLibraryService;
             _plexServiceApi = plexServiceApi;
             _plexAuthenticationService = plexAuthenticationService;
             Log = logger;
         }
 
+        /// <summary>
+        /// Retrieves the latest <see cref="PlexServer"/> data, and the corresponding <see cref="PlexLibrary"/>, from the PlexAPI and stores it in the Database.
+        /// </summary>
+        /// <param name="plexAccount">PlexAccount to use to retrieve the servers</param>
+        /// <returns>Is successful</returns>
+        public async Task<bool> RefreshPlexServersAsync(PlexAccount plexAccount)
+        {
+            if (plexAccount == null)
+            {
+                Log.Warning($"{nameof(RefreshPlexServersAsync)} => plexAccount was null");
+                return false;
+            }
+
+            Log.Debug($"{nameof(RefreshPlexServersAsync)} => Refreshing PlexLibraries for PlexAccount: {plexAccount.Id} was null");
+
+            var token = await _plexAuthenticationService.GetPlexToken(plexAccount);
+
+            if (string.IsNullOrEmpty(token))
+            {
+                Log.Warning($"{nameof(RefreshPlexServersAsync)} => Token was empty");
+                return false;
+            }
+
+            var serverList = await _plexServiceApi.GetServerAsync(token);
+
+            // First add or update the plex servers
+            await AddOrUpdatePlexServersAsync(plexAccount, serverList);
+
+            //Refresh all libraries for each plexServer as well
+            foreach (var plexServer in serverList)
+            {
+                await _plexLibraryService.RefreshLibrariesAsync(plexServer);
+            }
+
+            return true;
+        }
+
+
+        #region CRUD
+        public async Task<List<PlexServer>> AddServers(PlexAccount plexAccount, List<PlexServer> servers)
+        {
+            await _plexServerRepository.AddRangeAsync(servers);
+            var x = await _plexServerRepository.GetServers(plexAccount.Id);
+            return x.ToList();
+        }
 
         public async Task<List<PlexServer>> GetServers(PlexAccount plexAccount, bool refresh = false)
         {
@@ -38,10 +90,10 @@ namespace PlexRipper.Application.Services
             {
                 if (!serverList.Any())
                 {
-                    Log.Warning($"{nameof(GetServers)} => PlexAccount {plexAccount.Id} did not have any PlexServers assigned. Forcing {nameof(RefreshServersAsync)} was null");
+                    Log.Warning($"{nameof(GetServers)} => PlexAccount {plexAccount.Id} did not have any PlexServers assigned. Forcing {nameof(RefreshPlexServersAsync)} was null");
                 }
 
-                var refreshSuccess = await RefreshServersAsync(plexAccount);
+                var refreshSuccess = await RefreshPlexServersAsync(plexAccount);
                 if (refreshSuccess)
                 {
                     serverList = await _plexServerRepository.GetServers(plexAccount.Id);
@@ -49,19 +101,6 @@ namespace PlexRipper.Application.Services
             }
 
             return serverList.ToList();
-        }
-
-        public async Task<List<PlexServer>> AddServers(PlexAccount plexAccount, List<PlexServer> servers)
-        {
-
-            //foreach (var plexServer in servers)
-            //{
-            //    plexServer.PlexAccountId = plexAccount.PlexId;
-            //}
-
-            await _plexServerRepository.AddRangeAsync(servers);
-            var x = await _plexServerRepository.GetServers(plexAccount.Id);
-            return x.ToList();
         }
 
         public async Task AddOrUpdatePlexServersAsync(PlexAccount plexAccount, List<PlexServer> servers)
@@ -89,6 +128,7 @@ namespace PlexRipper.Application.Services
 
                 if (plexServerDB != null)
                 {
+                    plexServer.Id = plexServerDB.Id;
                     await _plexServerRepository.UpdateAsync(plexServer);
                 }
                 else
@@ -110,32 +150,8 @@ namespace PlexRipper.Application.Services
 
         }
 
-        /// <summary>
-        /// Retrieves the latest <see cref="PlexServer"/> from the PlexAPI and stores them in the Database.
-        /// </summary>
-        /// <param name="plexAccount">PlexAccount to use to retrieve the servers</param>
-        /// <returns>Is successful</returns>
-        public async Task<bool> RefreshServersAsync(PlexAccount plexAccount)
-        {
-            if (plexAccount == null)
-            {
-                Log.Warning($"{nameof(RefreshServersAsync)} => plexAccount was null");
-                return false;
-            }
 
-            Log.Debug($"{nameof(RefreshServersAsync)} => Refreshing PlexServers for PlexAccount: {plexAccount.Id} was null");
-            var token = await _plexAuthenticationService.GetPlexToken(plexAccount);
 
-            if (string.IsNullOrEmpty(token))
-            {
-                Log.Warning($"{nameof(RefreshServersAsync)} => Token was empty");
-                return false;
-            }
-
-            var serverList = await _plexServiceApi.GetServerAsync(token);
-            await AddOrUpdatePlexServersAsync(plexAccount, serverList);
-
-            return true;
-        }
+        #endregion
     }
 }

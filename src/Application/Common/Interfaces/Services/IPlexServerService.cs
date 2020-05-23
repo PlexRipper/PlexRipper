@@ -9,6 +9,6 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<List<PlexServer>> GetServers(PlexAccount plexAccount, bool refresh = false);
         Task<List<PlexServer>> AddServers(PlexAccount plexAccount, List<PlexServer> servers);
         Task AddOrUpdatePlexServersAsync(PlexAccount plexAccount, List<PlexServer> servers);
-        Task<bool> RefreshServersAsync(PlexAccount plexAccount);
+        Task<bool> RefreshPlexServersAsync(PlexAccount plexAccount);
     }
 }

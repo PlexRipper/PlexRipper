@@ -24,7 +24,6 @@ namespace PlexRipper.Domain.Entities
         public bool Home { get; set; }
 
         public virtual List<PlexAccountServer> PlexAccountServers { get; set; } = new List<PlexAccountServer>();
-        public int PlexAccountId { get; set; }
 
         public virtual List<PlexLibrary> PlexLibraries { get; set; } = new List<PlexLibrary>();
 

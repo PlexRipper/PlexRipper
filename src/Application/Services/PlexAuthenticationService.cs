@@ -21,7 +21,7 @@ namespace PlexRipper.Application.Services
         {
             if (plexAccount == null)
             {
-                Log.Warning("The plexAccount was null");
+                Log.Warning($"{nameof(GetPlexToken)} => The plexAccount was null");
                 return string.Empty;
             }
 
@@ -30,14 +30,14 @@ namespace PlexRipper.Application.Services
                 // TODO Make the token refresh limit configurable 
                 if ((plexAccount.ConfirmedAt - DateTime.Now).TotalDays < 30)
                 {
-                    Log.Information("Plex AuthToken was still valid, using from local DB.");
+                    Log.Information($"{nameof(GetPlexToken)} => Plex AuthToken was still valid, using from local DB.");
                     return plexAccount.AuthToken;
                 }
-                Log.Information("Plex AuthToken has expired, refreshing Plex AuthToken now.");
+                Log.Information($"{nameof(GetPlexToken)} => Plex AuthToken has expired, refreshing Plex AuthToken now.");
 
                 return await _plexApiService.RefreshPlexAuthTokenAsync(plexAccount.Account);
             }
-            Log.Error($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!");
+            Log.Error($"{nameof(GetPlexToken)} => PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!");
             return string.Empty;
         }
     }

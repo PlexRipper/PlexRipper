@@ -22,6 +22,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             // Arrange
             var accountService = BaseServiceTest.GetAccountService();
             var credentials = BaseServiceTest.GetCredentials();
+            var plexServerService = BaseServiceTest.GetPlexServerService();
             var newAccount = new Account
             {
                 Username = credentials.Username,

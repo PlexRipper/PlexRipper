@@ -97,10 +97,10 @@ namespace PlexRipper.Infrastructure.API.Plex
             return await Api.Request<PlexServerContainerXML>(request);
         }
 
-        public async Task<PlexLibraryContainerDTO> GetLibrarySections(string authToken, string plexFullHost)
+        public async Task<PlexLibraryContainerDTO> GetLibrarySections(string plexAuthToken, string plexFullHost)
         {
             var request = new Request("library/sections", plexFullHost, HttpMethod.Get);
-            AddHeaders(request, authToken);
+            AddHeaders(request, plexAuthToken);
             return await Api.Request<PlexLibraryContainerDTO>(request);
         }
 

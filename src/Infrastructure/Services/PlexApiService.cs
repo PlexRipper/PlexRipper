@@ -52,9 +52,9 @@ namespace PlexRipper.Infrastructure.Services
             return _mapper.Map<List<PlexServer>>(result.Server);
         }
 
-        public async Task<List<PlexLibrary>> GetLibrarySections(string authToken, string plexFullHost)
+        public async Task<List<PlexLibrary>> GetLibrarySections(string authToken, string plexLibraryUrl)
         {
-            var result = await _plexApi.GetLibrarySections(authToken, plexFullHost);
+            var result = await _plexApi.GetLibrarySections(authToken, plexLibraryUrl);
             var librariesDTOs = result.MediaContainer.Directory.ToList();
             return _mapper.Map<List<PlexLibrary>>(librariesDTOs);
         }

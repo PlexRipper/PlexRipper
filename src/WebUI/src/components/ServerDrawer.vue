@@ -3,8 +3,18 @@
 		<v-expansion-panel v-for="(server, i) in getServers" :key="i">
 			<v-expansion-panel-header>{{ server.name }}</v-expansion-panel-header>
 			<v-expansion-panel-content>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-				veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+				<v-list nav dense>
+					<v-list-item-group color="primary">
+						<v-list-item v-for="(library, y) in server.plexLibraries" :key="y">
+							<v-list-item-icon>
+								<v-icon>{{ findIcon(library.type) }}</v-icon>
+							</v-list-item-icon>
+							<v-list-item-content>
+								<v-list-item-title v-text="library.title"></v-list-item-title>
+							</v-list-item-content>
+						</v-list-item>
+					</v-list-item-group>
+				</v-list>
 			</v-expansion-panel-content>
 		</v-expansion-panel>
 	</v-expansion-panels>
@@ -37,6 +47,19 @@ export default class ServerDrawer extends Vue {
 
 	get getServers(): IPlexServer[] {
 		return UserStore.getServers;
+	}
+
+	findIcon(type: string): string {
+		switch (type) {
+			case 'show':
+				return 'mdi-television-classic';
+			case 'movie':
+				return 'mdi-filmstrip';
+			case 'artist':
+				return 'mdi-music';
+			default:
+				return 'mdi-help-circle-outline';
+		}
 	}
 }
 </script>

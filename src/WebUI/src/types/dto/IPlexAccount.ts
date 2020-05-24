@@ -4,14 +4,13 @@ export interface IPlexAccount {
 	id: number;
 	uuid: string;
 	email: string;
-	joinedAt: string;
+	joinedAt: Date;
 	username: string;
 	title: string;
 	hasPassword: boolean;
 	authToken: string;
 	authenticationToken: string;
-	confirmedAt: string;
+	confirmedAt: Date;
 	forumId: number;
-	accountId: number;
 	plexServers: IPlexServer[];
 }

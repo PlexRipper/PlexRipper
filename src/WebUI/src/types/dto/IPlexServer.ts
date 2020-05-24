@@ -1,4 +1,7 @@
+import IPlexLibrary from './IPlexLibrary';
+
 export default interface IPlexServer {
+	id: number;
 	accessToken: string;
 	name: string;
 	address: string;
@@ -14,4 +17,5 @@ export default interface IPlexServer {
 	synced: boolean;
 	ownerId: number;
 	home: boolean;
+	plexLibraries: IPlexLibrary[];
 }

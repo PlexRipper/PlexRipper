@@ -37,9 +37,5 @@ export default class Settings extends Vue {
 	async refreshAccounts(): Promise<void> {
 		await UserStore.refreshAccounts();
 	}
-
-	async created(): Promise<void> {
-		await this.refreshAccounts();
-	}
 }
 </script>

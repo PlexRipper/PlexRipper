@@ -15,10 +15,10 @@ namespace PlexRipper.Application.Config
             builder.RegisterAssemblyTypes(assembly)
                 .Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces()
-                .SingleInstance();
+                .InstancePerDependency();
 
-            builder.RegisterType<PlexService>().As<IPlexService>().SingleInstance();
-            builder.RegisterType<AccountService>().As<IAccountService>().SingleInstance();
+            builder.RegisterType<PlexService>().As<IPlexService>().InstancePerDependency();
+            builder.RegisterType<AccountService>().As<IAccountService>().InstancePerDependency();
 
         }
     }

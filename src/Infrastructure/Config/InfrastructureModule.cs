@@ -9,6 +9,7 @@ using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Persistence;
 using PlexRipper.Infrastructure.Services;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace PlexRipper.Infrastructure.Config
 {
@@ -21,18 +22,21 @@ namespace PlexRipper.Infrastructure.Config
             // register all I*Repository
             builder.RegisterAssemblyTypes(assembly)
                 .Where(t => t.Name.EndsWith("Repository"))
-                .AsImplementedInterfaces()
-                .SingleInstance();
+                .AsImplementedInterfaces();
 
-            builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
-            builder.RegisterType<PlexRipperHttpClient>().As<IPlexRipperHttpClient>().SingleInstance();
+            builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>();
+            builder
+                .RegisterType<PlexRipperHttpClient>()
+                .As<IPlexRipperHttpClient>()
+                .SingleInstance();
 
             builder.RegisterType<PlexApiService>().As<IPlexApiService>();
 
-            builder.RegisterType<PlexApi>().As<IPlexApi>().InstancePerDependency();
-            builder.RegisterType<Api>().As<IApi>().InstancePerDependency();
+            builder.RegisterType<PlexApi>().As<IPlexApi>();
+            builder.RegisterType<Api>().As<IApi>();
 
             // Register Entity Framework Database
+
             builder.RegisterType<PlexRipperDbContext>()
                 .WithParameter("options", PlexRipperDbContext.GetConfig().Options)
                 .As<IPlexRipperDbContext>()
@@ -51,7 +55,8 @@ namespace PlexRipper.Infrastructure.Config
             // TODO Re-enable Migrate when stable
             // DB.Database.Migrate();
             // DB.Database.EnsureDeleted();
-            DB.Database.EnsureCreatedAsync();
+
+            Task.WaitAll(DB.Database.EnsureCreatedAsync());
         }
     }
 }

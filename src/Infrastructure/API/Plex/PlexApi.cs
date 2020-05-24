@@ -44,7 +44,7 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async Task<PlexAuthenticationDTO> PlexSignInAsync(string username, string password)
+        public Task<PlexAuthenticationDTO> PlexSignInAsync(string username, string password)
         {
             var userModel = new PlexUserRequestDTO
             {
@@ -59,7 +59,7 @@ namespace PlexRipper.Infrastructure.API.Plex
             AddHeaders(request);
             request.AddJsonBody(userModel);
 
-            return await Api.Request<PlexAuthenticationDTO>(request);
+            return Api.Request<PlexAuthenticationDTO>(request);
         }
 
 
@@ -75,27 +75,27 @@ namespace PlexRipper.Infrastructure.API.Plex
             return string.Empty;
         }
 
-        public async Task<PlexStatusDTO> GetStatus(string authToken, string uri)
+        public Task<PlexStatusDTO> GetStatus(string authToken, string uri)
         {
             var request = new Request(uri, string.Empty, HttpMethod.Get);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexStatusDTO>(request);
+            return Api.Request<PlexStatusDTO>(request);
         }
 
-        public async Task<PlexAccount> GetAccount(string authToken)
+        public Task<PlexAccount> GetAccount(string authToken)
         {
             var request = new Request(GetAccountUri, string.Empty, HttpMethod.Get);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexAccount>(request);
+            return Api.Request<PlexAccount>(request);
         }
 
-        public async Task<PlexServerContainerXML> GetServer(string authToken)
+        public Task<PlexServerContainerXML> GetServer(string authToken)
         {
             var request = new Request(ServerUri, string.Empty, HttpMethod.Get, ContentType.Xml);
 
             AddHeaders(request, authToken);
 
-            return await Api.Request<PlexServerContainerXML>(request);
+            return Api.Request<PlexServerContainerXML>(request);
         }
 
         /// <summary>
@@ -104,25 +104,25 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// <param name="plexAuthToken"></param>
         /// <param name="plexFullHost"></param>
         /// <returns></returns>
-        public async Task<PlexLibrarySectionsDTO> GetLibrarySections(string plexAuthToken, string plexFullHost)
+        public Task<PlexLibrarySectionsDTO> GetLibrarySections(string plexAuthToken, string plexFullHost)
         {
             var request = new Request("library/sections", plexFullHost, HttpMethod.Get);
             AddHeaders(request, plexAuthToken);
-            return await Api.Request<PlexLibrarySectionsDTO>(request);
+            return Api.Request<PlexLibrarySectionsDTO>(request);
         }
 
-        public async Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId)
+        public Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId)
         {
             var request = new Request($"library/sections/{libraryId}/all", plexFullHost, HttpMethod.Get);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexLibraryDTO>(request);
+            return Api.Request<PlexLibraryDTO>(request);
         }
 
-        public async Task<PlexLibrariesForMachineId> GetLibrariesForMachineId(string authToken, string machineId)
+        public Task<PlexLibrariesForMachineId> GetLibrariesForMachineId(string authToken, string machineId)
         {
             var request = new Request("", $"https://plex.tv/api/servers/{machineId}", HttpMethod.Get, ContentType.Xml);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexLibrariesForMachineId>(request);
+            return Api.Request<PlexLibrariesForMachineId>(request);
         }
 
         public bool DownloadMedia(string authToken, string downloadUrl, string fileName)
@@ -166,18 +166,18 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// <param name="plexFullHost"></param>
         /// <param name="ratingKey"></param>
         /// <returns></returns>
-        public async Task<PlexMetadata> GetEpisodeMetaData(string authToken, string plexFullHost, int ratingKey)
+        public Task<PlexMetadata> GetEpisodeMetaData(string authToken, string plexFullHost, int ratingKey)
         {
             var request = new Request($"/library/metadata/{ratingKey}", plexFullHost, HttpMethod.Get);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexMetadata>(request);
+            return Api.Request<PlexMetadata>(request);
         }
 
-        public async Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int itemId)
+        public Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int itemId)
         {
             var request = new Request($"library/metadata/{itemId}", plexFullHost, HttpMethod.Get);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexMediaMetaDataDTO>(request);
+            return Api.Request<PlexMediaMetaDataDTO>(request);
         }
 
 
@@ -210,11 +210,11 @@ namespace PlexRipper.Infrastructure.API.Plex
         }
 
 
-        public async Task<PlexMetadata> GetSeasons(string authToken, string plexFullHost, int ratingKey)
+        public Task<PlexMetadata> GetSeasons(string authToken, string plexFullHost, int ratingKey)
         {
             var request = new Request($"library/metadata/{ratingKey}/children", plexFullHost, HttpMethod.Get);
             AddHeaders(request, authToken);
-            return await Api.Request<PlexMetadata>(request);
+            return Api.Request<PlexMetadata>(request);
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// <param name="start">The start count.</param>
         /// <param name="retCount">The return count, how many items you want returned.</param>
         /// <returns></returns>
-        public async Task<PlexLibraryContainerDTO> GetAllEpisodes(string authToken, string host, string section, int start, int retCount)
+        public Task<PlexLibraryContainerDTO> GetAllEpisodes(string authToken, string host, string section, int start, int retCount)
         {
             var request = new Request($"/library/sections/{section}/all", host, HttpMethod.Get);
 
@@ -234,7 +234,7 @@ namespace PlexRipper.Infrastructure.API.Plex
             AddLimitHeaders(request, start, retCount);
             AddHeaders(request, authToken);
 
-            return await Api.Request<PlexLibraryContainerDTO>(request);
+            return Api.Request<PlexLibraryContainerDTO>(request);
         }
 
         /// <summary>
@@ -243,29 +243,29 @@ namespace PlexRipper.Infrastructure.API.Plex
         /// </summary>
         /// <param name="authToken"></param>
         /// <returns></returns>
-        public async Task<PlexFriendsXML> GetUsers(string authToken)
+        public Task<PlexFriendsXML> GetUsers(string authToken)
         {
             var request = new Request(string.Empty, FriendsUri, HttpMethod.Get, ContentType.Xml);
             AddHeaders(request, authToken);
 
-            return await Api.Request<PlexFriendsXML>(request);
+            return Api.Request<PlexFriendsXML>(request);
         }
 
-        public async Task<PlexMetadata> GetRecentlyAdded(string authToken, string uri, string sectionId)
+        public Task<PlexMetadata> GetRecentlyAdded(string authToken, string uri, string sectionId)
         {
             var request = new Request($"library/sections/{sectionId}/recentlyAdded", uri, HttpMethod.Get);
             AddHeaders(request, authToken);
             AddLimitHeaders(request, 0, 50);
 
-            return await Api.Request<PlexMetadata>(request);
+            return Api.Request<PlexMetadata>(request);
         }
 
-        public async Task<OAuthPin> GetPin(int pinId)
+        public Task<OAuthPin> GetPin(int pinId)
         {
             var request = new Request($"api/v2/pins/{pinId}", "https://plex.tv/", HttpMethod.Get);
             AddHeaders(request);
 
-            return await Api.Request<OAuthPin>(request);
+            return Api.Request<OAuthPin>(request);
         }
 
         public Uri GetOAuthUrl(string code, string applicationUrl)

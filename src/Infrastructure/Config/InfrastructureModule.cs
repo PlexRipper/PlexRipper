@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.API;
 using PlexRipper.Application.Common.Models;
@@ -24,12 +25,12 @@ namespace PlexRipper.Infrastructure.Config
                 .SingleInstance();
 
             builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
+            builder.RegisterType<PlexRipperHttpClient>().As<IPlexRipperHttpClient>().SingleInstance();
 
-            builder.RegisterType<PlexApiService>().As<IPlexApiService>().SingleInstance();
+            builder.RegisterType<PlexApiService>().As<IPlexApiService>();
 
             builder.RegisterType<PlexApi>().As<IPlexApi>().InstancePerDependency();
             builder.RegisterType<Api>().As<IApi>().InstancePerDependency();
-            builder.RegisterType<PlexRipperHttpClient>().As<IPlexRipperHttpClient>().SingleInstance();
 
             // Register Entity Framework Database
             builder.RegisterType<PlexRipperDbContext>()
@@ -37,6 +38,20 @@ namespace PlexRipper.Infrastructure.Config
                 .As<IPlexRipperDbContext>()
                 .InstancePerLifetimeScope();
 
+            builder.Register(context => context.Resolve<DbContextOptions<PlexRipperDbContext>>())
+                .As<DbContextOptions>()
+                .InstancePerLifetimeScope();
+
+            builder.RegisterType<PlexRipperDbContext>()
+                .AsSelf()
+                .InstancePerLifetimeScope();
+
+            //Setup Database
+            var DB = new PlexRipperDbContext(PlexRipperDbContext.GetConfig().Options);
+            // TODO Re-enable Migrate when stable
+            // DB.Database.Migrate();
+            // DB.Database.EnsureDeleted();
+            DB.Database.EnsureCreatedAsync();
         }
     }
 }

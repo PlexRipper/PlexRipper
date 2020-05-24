@@ -97,8 +97,7 @@ namespace PlexRipper.Application.Services
         #region CRUD
         public async Task<Account> GetAccountAsync(string username)
         {
-            var result = await _accountRepository
-                .FindWithIncludeAsync(x => x.Username == username);
+            var result = await _accountRepository.FindAsync(x => x.Username == username);
 
             if (result != null)
             {
@@ -117,7 +116,7 @@ namespace PlexRipper.Application.Services
         /// <returns></returns>
         public async Task<Account> GetAccountAsync(int accountId)
         {
-            var result = await _accountRepository.GetWithIncludeAsync(accountId);
+            var result = await _accountRepository.GetAsync(accountId);
 
             if (result != null)
             {
@@ -134,13 +133,13 @@ namespace PlexRipper.Application.Services
             {
                 Log.Debug("Returning only enabled account");
                 var result = await _accountRepository
-                    .FindAllWithIncludeAsync(x => x.IsEnabled);
+                    .FindAllAsync(x => x.IsEnabled);
                 return result.ToList();
             }
             else
             {
                 Log.Debug("Returning all accounts");
-                var result = await _accountRepository.GetAllWithIncludeAsync();
+                var result = await _accountRepository.GetAllAsync();
                 return result.ToList();
             }
         }

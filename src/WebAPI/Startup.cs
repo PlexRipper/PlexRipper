@@ -16,7 +16,6 @@ using PlexRipper.Application.Common.Mappings;
 using PlexRipper.Application.Config;
 using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Config;
-using PlexRipper.Infrastructure.Persistence;
 using PlexRipper.WebAPI.Config;
 using System.Linq;
 using System.Reflection;
@@ -27,7 +26,9 @@ namespace PlexRipper.WebAPI
     {
 
 
-        public IConfiguration Configuration { get; private set; }
+        public IConfigurationRoot Configuration { get; private set; }
+
+        public ILifetimeScope AutofacContainer { get; private set; }
 
         public Startup(IWebHostEnvironment env)
         {
@@ -61,7 +62,6 @@ namespace PlexRipper.WebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplication();
-            // services.AddInfrastructure(Configuration);
 
             services.AddHttpContextAccessor();
 
@@ -96,13 +96,6 @@ namespace PlexRipper.WebAPI
 
             // Autofac
             services.AddOptions();
-
-
-            //Setup Database
-            var DB = new PlexRipperDbContext(PlexRipperDbContext.GetConfig().Options);
-            // TODO Re-enable Migrate when stable
-            // DB.Database.Migrate();
-            DB.Database.EnsureCreated();
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
@@ -114,6 +107,7 @@ namespace PlexRipper.WebAPI
             builder.RegisterModule<InfrastructureModule>();
             builder.RegisterLogger();
 
+
             // Auto Mapper
             builder.Register(ctx =>
             {
@@ -121,6 +115,7 @@ namespace PlexRipper.WebAPI
                 {
                     cfg.AddProfile(new ApplicationMappingProfile());
                     cfg.AddProfile(new InfrastructureMappingProfile());
+                    cfg.AddProfile(new WebApiMappingProfile());
                 });
                 config.AssertConfigurationIsValid();
                 return config;

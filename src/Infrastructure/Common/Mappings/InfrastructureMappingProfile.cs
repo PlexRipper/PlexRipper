@@ -23,12 +23,14 @@ namespace PlexRipper.Infrastructure.Common.Mappings
             //PlexServerDTO -> PlexServer
             CreateMap<PlexServerDTO, PlexServer>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexLibraries, opt => opt.Ignore())
                 .ReverseMap();
 
 
             //PlexServerXML -> PlexServer
             CreateMap<PlexServerXML, PlexServer>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexLibraries, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt,
                     opt => opt.ConvertUsing(new UnixLongToDateTimeUTC()))
                 .ForMember(dest => dest.UpdatedAt,
@@ -43,6 +45,7 @@ namespace PlexRipper.Infrastructure.Common.Mappings
             // PlexLibrarySectionsDirectoryDTO -> PlexLibrary
             CreateMap<PlexLibrarySectionsDirectoryDTO, PlexLibrary>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
                 // Location[0].Id -> LibraryLocationId
                 .ForMember(dest => dest.LibraryLocationId,
                     opt => opt.MapFrom(src => src.Location.First().Id))

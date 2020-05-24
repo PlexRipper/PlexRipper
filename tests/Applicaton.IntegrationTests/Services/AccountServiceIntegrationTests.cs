@@ -18,11 +18,19 @@ namespace PlexRipper.Application.IntegrationTests.Services
         }
 
         [Fact]
-        public async Task SetupAccount_ShouldReturnValidPlexAccount_WhenCredentialsAreValid()
+        public async Task FullAccountServiceIntegrationTest()
+        {
+            var test1 = await SetupAccount_ShouldReturnValidPlexAccount_WhenCredentialsAreValid();
+
+            test1.ShouldBeTrue();
+        }
+
+
+        [Fact]
+        public async Task<bool> SetupAccount_ShouldReturnValidPlexAccount_WhenCredentialsAreValid()
         {
 
             // Arrange
-            var plexServerService = Container.GetPlexServerService;
             var credentials = Secrets.GetCredentials();
             var accountService = Container.GetAccountService;
             var newAccount = new Account
@@ -41,6 +49,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             accountDB.IsValidated.ShouldBeTrue();
             accountDB.PlexAccount.ShouldNotBeNull();
             serversList.ShouldNotBeEmpty();
+            return true;
         }
 
 

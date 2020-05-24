@@ -4,8 +4,10 @@ using AutoMapper;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Mappings;
 using PlexRipper.Application.Config;
+using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Config;
+using PlexRipper.Infrastructure.Persistence;
 
 namespace PlexRipper.Application.IntegrationTests.Base
 {
@@ -23,6 +25,12 @@ namespace PlexRipper.Application.IntegrationTests.Base
             // Infrastructure
             builder.RegisterModule<InfrastructureModule>();
             builder.RegisterLogger(BaseDependanciesTest.GetLoggerConfig(), true);
+
+            // Register Entity Framework Database
+            builder.RegisterType<PlexRipperDbContext>()
+                .WithParameter("options", PlexRipperDbContext.GetTestConfig().Options)
+                .As<IPlexRipperDbContext>()
+                .InstancePerLifetimeScope();
 
             // Auto Mapper
             builder.Register(ctx =>

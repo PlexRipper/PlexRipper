@@ -1,10 +1,14 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
     public class PlexServerDTO
     {
+
+        [JsonProperty("id")]
+        public int Id { get; set; }
 
         [JsonProperty("accessToken")]
         public string AccessToken { get; set; }
@@ -50,6 +54,10 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("home")]
         public bool Home { get; set; }
+
+        [JsonProperty("plexLibraries")]
+        public List<PlexLibraryDTO> PlexLibraries { get; set; }
+
     }
 
 }

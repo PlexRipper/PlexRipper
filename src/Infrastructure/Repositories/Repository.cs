@@ -27,15 +27,9 @@ namespace PlexRipper.Infrastructure.Repositories
             return Context.ChangeTracker.Entries<TEntity>().Any(x => x.Entity.Id == entity.Id);
         }
 
-        public async Task<TEntity> GetAsync(int id)
+        public Task<TEntity> GetAsync(int id)
         {
-            return await Context.Instance.Set<TEntity>()
-                .FirstOrDefaultAsync(e => e.Id == id);
-        }
-
-        public virtual async Task<TEntity> GetWithIncludeAsync(int id)
-        {
-            return await GetAsync(id);
+            return Context.Instance.Set<TEntity>().FirstOrDefaultAsync(e => e.Id == id);
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()
@@ -43,19 +37,9 @@ namespace PlexRipper.Infrastructure.Repositories
             return await Context.Instance.Set<TEntity>().ToListAsync();
         }
 
-        public virtual async Task<IEnumerable<TEntity>> GetAllWithIncludeAsync()
+        public Task<TEntity> FindAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            return await GetAllAsync();
-        }
-
-        public async Task<TEntity> FindAsync(Expression<Func<TEntity, bool>> predicate)
-        {
-            return await Context.Instance.Set<TEntity>().Where(predicate).FirstOrDefaultAsync();
-        }
-
-        public virtual async Task<TEntity> FindWithIncludeAsync(Expression<Func<TEntity, bool>> predicate)
-        {
-            return await FindAsync(predicate);
+            return Context.Instance.Set<TEntity>().Where(predicate).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate)
@@ -63,14 +47,9 @@ namespace PlexRipper.Infrastructure.Repositories
             return await Context.Instance.Set<TEntity>().Where(predicate).ToListAsync();
         }
 
-        public virtual async Task<IEnumerable<TEntity>> FindAllWithIncludeAsync(Expression<Func<TEntity, bool>> predicate)
+        public Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            return await FindAllAsync(predicate);
-        }
-
-        public async Task<TEntity> SingleOrDefault(Expression<Func<TEntity, bool>> predicate)
-        {
-            return await Context.Instance.Set<TEntity>().SingleOrDefaultAsync(predicate);
+            return Context.Instance.Set<TEntity>().SingleOrDefaultAsync(predicate);
         }
 
         public async Task AddAsync(TEntity entity)

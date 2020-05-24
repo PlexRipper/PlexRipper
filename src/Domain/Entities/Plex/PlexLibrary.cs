@@ -46,7 +46,6 @@ namespace PlexRipper.Domain.Entities
         /// <summary>
         /// The PlexServerId of the PlexServer this PlexLibrary belongs to
         /// </summary>
-        [IgnoreMap]
         public int PlexServerId { get; set; }
 
         // TODO Create a many-to-many relationship to determing which PlexAccounts have access to this PlexLibrary

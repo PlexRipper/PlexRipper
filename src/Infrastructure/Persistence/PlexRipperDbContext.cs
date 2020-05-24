@@ -19,7 +19,7 @@ namespace PlexRipper.Infrastructure.Persistence
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            SetConfig(optionsBuilder);
+            optionsBuilder = GetConfig();
         }
 
         public DbSet<Account> Accounts { get; set; }

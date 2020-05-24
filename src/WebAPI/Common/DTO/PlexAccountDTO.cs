@@ -24,9 +24,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("title")]
         public string Title { get; set; }
 
-        [JsonProperty("thumb")]
-        public Uri Thumb { get; set; }
-
         [JsonProperty("hasPassword")]
         public bool HasPassword { get; set; }
 
@@ -36,24 +33,13 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("authentication_token")]
         public string AuthenticationToken { get; set; }
 
-        [JsonProperty("subscription")]
-        public SubscriptionDTO SubscriptionDto { get; set; }
-
-        [JsonProperty("roles")]
-        public RolesDTO RolesDto { get; set; }
-
-        [JsonProperty("entitlements")]
-        public List<object> Entitlements { get; set; }
-
         [JsonProperty("confirmedAt")]
         public object ConfirmedAt { get; set; }
 
         [JsonProperty("forumId")]
         public object ForumId { get; set; }
 
-        [JsonProperty("rememberMe")]
-        public bool RememberMe { get; set; }
-
+        [JsonProperty("plexServers")]
         public List<PlexServerDTO> PlexServers { get; set; }
     }
 }

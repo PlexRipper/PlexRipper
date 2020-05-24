@@ -30,18 +30,11 @@ namespace PlexRipper.Domain.Interfaces
 
         #region Read
         public Task<TEntity> GetAsync(int id);
-        public Task<TEntity> GetWithIncludeAsync(int id);
-
 
         public Task<IEnumerable<TEntity>> GetAllAsync();
-        public Task<IEnumerable<TEntity>> GetAllWithIncludeAsync();
-
-        public Task<TEntity> SingleOrDefault(Expression<Func<TEntity, bool>> predicate);
 
         public Task<TEntity> FindAsync(Expression<Func<TEntity, bool>> predicate);
-        public Task<TEntity> FindWithIncludeAsync(Expression<Func<TEntity, bool>> predicate);
         public Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate);
-        public Task<IEnumerable<TEntity>> FindAllWithIncludeAsync(Expression<Func<TEntity, bool>> predicate);
         #endregion
 
         #region Delete

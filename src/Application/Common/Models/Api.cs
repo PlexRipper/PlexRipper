@@ -65,7 +65,7 @@ namespace PlexRipper.Application.Common.Models
             {
                 AddHeadersBody(request, httpRequestMessage);
 
-                Log.Debug($"Sending request to: ${httpRequestMessage.RequestUri}");
+                Log.Debug($"Api.Request => Sending request to: {httpRequestMessage.RequestUri}");
                 HttpResponseMessage httpResponseMessage;
 
                 try
@@ -74,7 +74,7 @@ namespace PlexRipper.Application.Common.Models
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "An exception happend while sending a request", request);
+                    Log.Error(e, "An exception occured while sending a request", request);
                     throw;
                 }
 
@@ -115,7 +115,7 @@ namespace PlexRipper.Application.Common.Models
                 if (httpResponseMessage.IsSuccessStatusCode)
                 {
                     // do something with the response
-                    LogDebugContent(receivedString);
+                    Log.Verbose(receivedString);
                     if (request.ContentType == ContentType.Json)
                     {
                         try
@@ -200,7 +200,7 @@ namespace PlexRipper.Application.Common.Models
             // Add the Json Body
             if (request.JsonBody != null)
             {
-                LogDebugContent("REQUEST: " + request.JsonBody);
+                Log.Verbose("REQUEST: " + request.JsonBody);
                 httpRequestMessage.Content = new JsonContent(request.JsonBody);
                 httpRequestMessage.Content.Headers.ContentType =
                     new MediaTypeHeaderValue("application/json"); // Emby connect fails if we have the charset in the header
@@ -225,9 +225,5 @@ namespace PlexRipper.Application.Common.Models
             Log.Debug(content);
         }
 
-        private void LogDebugContent(string message)
-        {
-            Log.Debug(message);
-        }
     }
 }

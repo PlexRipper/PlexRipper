@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿#nullable enable
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 
@@ -15,9 +16,11 @@ namespace PlexRipper.Domain.Extensions.Converters
             {
                 base.WriteJson(writer, value, serializer);
             }
+#pragma warning disable 168
             catch (Exception e)
+#pragma warning restore 168
             {
-                Console.WriteLine(e);
+                // Console.WriteLine(e);
             }
         }
 
@@ -27,9 +30,11 @@ namespace PlexRipper.Domain.Extensions.Converters
             {
                 return base.ReadJson(reader, objectType, existingValue, serializer);
             }
+#pragma warning disable 168
             catch (Exception e)
+#pragma warning restore 168
             {
-                Console.WriteLine(e);
+                // Console.WriteLine(e);
             }
 
             return DateTime.MinValue;

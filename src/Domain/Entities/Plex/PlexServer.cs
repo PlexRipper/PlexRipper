@@ -26,7 +26,6 @@ namespace PlexRipper.Domain.Entities
         [IgnoreMap]
         public virtual List<PlexAccountServer> PlexAccountServers { get; set; } = new List<PlexAccountServer>();
 
-        [IgnoreMap]
         public virtual List<PlexLibrary> PlexLibraries { get; set; } = new List<PlexLibrary>();
 
 

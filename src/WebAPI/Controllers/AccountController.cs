@@ -95,7 +95,7 @@ namespace PlexRipper.WebAPI.Controllers
             }
             catch (Exception e)
             {
-                Log.Error("Error:", e);
+                Log.Error(e, $"Error: {e.Message}");
                 res.StatusCode = StatusCodes.Status500InternalServerError;
                 await res.Negotiate(null);
             }
@@ -130,7 +130,7 @@ namespace PlexRipper.WebAPI.Controllers
             }
             catch (Exception e)
             {
-                Log.Error("Error:", e);
+                Log.Error(e, $"Error: {e.Message}");
                 res.StatusCode = StatusCodes.Status500InternalServerError;
                 await res.Negotiate(null);
             }

@@ -22,14 +22,19 @@ namespace PlexRipper.Application.IntegrationTests.Base
 
             // Infrastructure
             builder.RegisterModule<InfrastructureModule>();
-            builder.RegisterLogger(BaseDependanciesTest.GetLoggerConfig());
+            builder.RegisterLogger(BaseDependanciesTest.GetLoggerConfig(), true);
 
             // Auto Mapper
-            builder.Register(ctx => new MapperConfiguration(cfg =>
+            builder.Register(ctx =>
             {
-                cfg.AddProfile(new ApplicationMappingProfile());
-                cfg.AddProfile(new InfrastructureMappingProfile());
-            }));
+                var config = new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfile(new ApplicationMappingProfile());
+                    cfg.AddProfile(new InfrastructureMappingProfile());
+                });
+                config.AssertConfigurationIsValid();
+                return config;
+            });
 
             builder.Register(ctx => ctx.Resolve<MapperConfiguration>().CreateMapper()).As<IMapper>().InstancePerLifetimeScope();
 

@@ -56,9 +56,9 @@ namespace PlexRipper.Application.Services
 
         #region Public Methods
 
-        public async Task<string> GetPlexToken(PlexAccount plexAccount)
+        public Task<string> GetPlexTokenAsync(PlexAccount plexAccount)
         {
-            return await _plexAuthenticationService.GetPlexToken(plexAccount);
+            return _plexAuthenticationService.GetPlexToken(plexAccount);
         }
 
         public async Task<List<PlexServer>> GetServersAsync(PlexAccount plexAccount, bool refresh = false)
@@ -109,7 +109,7 @@ namespace PlexRipper.Application.Services
         /// </summary>
         /// <param name="plexAccountId"></param>
         /// <returns></returns>
-        public async Task<PlexAccount> GetPlexAccount(int plexAccountId)
+        public async Task<PlexAccount> GetPlexAccountAsync(int plexAccountId)
         {
             return await _plexAccountRepository.GetAsync(plexAccountId);
         }
@@ -124,11 +124,11 @@ namespace PlexRipper.Application.Services
             return await _plexAccountRepository.FindAsync(x => x.PlexId == plexId);
         }
 
-        public async Task<PlexAccount> CreatePlexAccount(Account account, PlexAccount plexAccount)
+        public async Task<PlexAccount> CreatePlexAccountAsync(Account account, PlexAccount plexAccount)
         {
             if (plexAccount == null)
             {
-                Log.Warning($"{nameof(plexAccount)} given as a parameter in {nameof(CreatePlexAccount)} was null.");
+                Log.Warning($"{nameof(plexAccount)} given as a parameter in {nameof(CreatePlexAccountAsync)} was null.");
                 return null;
             }
 
@@ -139,11 +139,11 @@ namespace PlexRipper.Application.Services
             return await _plexAccountRepository.GetAsync(plexAccount.Id);
         }
 
-        public async Task<PlexAccount> UpdatePlexAccount(PlexAccount plexAccount)
+        public async Task<PlexAccount> UpdatePlexAccountAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
             {
-                Log.Warning($"{nameof(plexAccount)} given as a parameter in {nameof(UpdatePlexAccount)} was null.");
+                Log.Warning($"{nameof(plexAccount)} given as a parameter in {nameof(UpdatePlexAccountAsync)} was null.");
                 return null;
             }
             plexAccount.ConfirmedAt = DateTime.Now;

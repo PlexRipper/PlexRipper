@@ -119,9 +119,16 @@ namespace PlexRipper.Application.Services
             }
 
             Log.Debug($"{ nameof(AddOrUpdatePlexServersAsync)} => Starting adding or updating servers");
+
             // Add or update the plex servers
             foreach (var plexServer in servers)
             {
+                // There might be cases where the scheme is not set properly by the PlexAPI so correct this
+                if (plexServer.Port == 443)
+                {
+                    plexServer.Scheme = "https";
+                }
+
                 // TODO Might need a better way to identify servers, multiple Plex instances might run on the same server.
                 var plexServerDB = await
                     _plexServerRepository.FindAsync(x => x.MachineIdentifier == plexServer.MachineIdentifier);
@@ -139,8 +146,7 @@ namespace PlexRipper.Application.Services
                         PlexAccountId = plexAccount.Id,
                         PlexServerId = plexServer.Id
                     };
-                    plexServer.PlexAccountServers = new List<PlexAccountServer>();
-                    plexServer.PlexAccountServers.Add(plexAccountServer);
+                    plexServer.PlexAccountServers = new List<PlexAccountServer> { plexAccountServer };
                     await _plexServerRepository.AddAsync(plexServer);
                 }
             }

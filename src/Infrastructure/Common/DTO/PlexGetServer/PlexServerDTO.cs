@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using PlexRipper.Domain.Extensions.Converters;
 using System;
 
 namespace PlexRipper.Infrastructure.Common.DTO.PlexGetServer
@@ -34,9 +35,11 @@ namespace PlexRipper.Infrastructure.Common.DTO.PlexGetServer
         public string MachineIdentifier { get; set; }
 
         [JsonProperty("createdAt")]
+        [JsonConverter(typeof(SafeUnixDateTimeConverter))]
         public DateTime CreatedAt { get; set; }
 
         [JsonProperty("updatedAt")]
+        [JsonConverter(typeof(SafeUnixDateTimeConverter))]
         public DateTime UpdatedAt { get; set; }
 
         [JsonProperty("owned")]

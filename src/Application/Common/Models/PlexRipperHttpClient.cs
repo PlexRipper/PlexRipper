@@ -13,13 +13,14 @@ namespace PlexRipper.Application.Common.Models
     /// </summary>
     public class PlexRipperHttpClient : IPlexRipperHttpClient
     {
+
+        private static HttpClient _client;
+        private static HttpClientHandler _handler;
+
         public PlexRipperHttpClient()
         {
 
         }
-
-        private static HttpClient _client;
-        private static HttpMessageHandler _handler;
 
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
         {
@@ -33,6 +34,12 @@ namespace PlexRipper.Application.Common.Models
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        public async Task<string> GetStringAsync(Uri requestUri)
+        {
+            Setup();
+            return await _client.GetStringAsync(requestUri);
         }
 
         public async Task<HttpResponseMessage> GetAsync(HttpRequestMessage request, HttpCompletionOption httpCompletionOption = HttpCompletionOption.ResponseHeadersRead)
@@ -49,27 +56,20 @@ namespace PlexRipper.Application.Common.Models
             }
         }
 
-
-
-        public async Task<string> GetStringAsync(Uri requestUri)
-        {
-            Setup();
-            return await _client.GetStringAsync(requestUri);
-        }
-
         private void Setup()
         {
             if (_client == null)
             {
-                _handler ??= GetHandler();
-                _client = new HttpClient(_handler);
-                _client.DefaultRequestHeaders.Add("User-Agent", "PlexRipper"); //TODO Debate if we should keep PlexRipper in here
-            }
-        }
+                _handler ??= new HttpClientHandler();
+                // Disable server SSL certificate validation 
+                // https://stackoverflow.com/a/44540071
+                _handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+                _handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
-        private HttpMessageHandler GetHandler()
-        {
-            return new HttpClientHandler();
+
+                _client = new HttpClient(_handler);
+                _client.DefaultRequestHeaders.Add("User-Agent", "PlexClient"); //TODO Debate if we should have PlexRipper in here
+            }
         }
     }
 }

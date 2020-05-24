@@ -20,16 +20,16 @@ namespace PlexRipper.WebAPI.Controllers
             _accountService = accountService;
             string path = "/plex";
 
-            Get(path + "/servers/{id:int}", GetServersByAccountId);
+            Get(path + "/servers/{id:int}", GetServersByAccountIdAsync);
             // Get(path + "/servers/{id:int}/libraries/", GetLibrariesByServerId);
 
         }
 
-        private async Task GetServersByAccountId(HttpRequest req, HttpResponse res)
+        private Task GetServersByAccountIdAsync(HttpRequest req, HttpResponse res)
         {
             int accountId = req.RouteValues.As<int>("id");
             var data = _accountService.GetServersAsync(accountId);
-            await res.Negotiate(data);
+            return res.Negotiate(data);
         }
 
         //private async Task GetLibrariesByServerId(HttpRequest req, HttpResponse res)

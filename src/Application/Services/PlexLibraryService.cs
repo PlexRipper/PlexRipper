@@ -35,7 +35,7 @@ namespace PlexRipper.Application.Services
 
             Log.Debug($"{nameof(RefreshLibrariesAsync)} => Refreshing PlexLibraries for plexServer: {plexServer.Id}");
 
-            var libraries = await _plexServiceApi.GetLibrarySections(plexServer.AccessToken, plexServer.BaseUrl);
+            var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServer.AccessToken, plexServer.BaseUrl);
             await AddOrUpdatePlexLibrariesAsync(plexServer, libraries);
 
             return true;
@@ -91,7 +91,7 @@ namespace PlexRipper.Application.Services
             foreach (var plexLibrary in libraries)
             {
                 // Create
-                var plexLibraryDB = await _plexLibraryRepository.FindAsync(x => x.PlexServerId == plexServer.Id && x.Key == plexLibrary.Key);
+                var plexLibraryDB = await _plexLibraryRepository.FindAsync(x => x.PlexServerId == plexServer.Id && x.Uuid == plexLibrary.Uuid);
 
                 plexLibrary.PlexServerId = plexServer.Id;
 

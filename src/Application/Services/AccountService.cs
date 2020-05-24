@@ -34,18 +34,18 @@ namespace PlexRipper.Application.Services
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns>Are the account credentials valid</returns>
-        public async Task<bool> ValidateAccountAsync(string username, string password)
+        public Task<bool> ValidateAccountAsync(string username, string password)
         {
-            return await _plexService.IsPlexAccountValid(username, password);
+            return _plexService.IsPlexAccountValid(username, password);
         }
         /// /// <summary>
         /// Check if this account is valid by querying the Plex API
         /// </summary>
         /// <param name="account">The account to check</param>
         /// <returns>Are the account credentials valid</returns>
-        public async Task<bool> ValidateAccountAsync(Account account)
+        public Task<bool> ValidateAccountAsync(Account account)
         {
-            return await _plexService.IsPlexAccountValid(account.Username, account.Password);
+            return _plexService.IsPlexAccountValid(account.Username, account.Password);
         }
 
         public async Task<bool> SetupAccountAsync(Account account)
@@ -72,12 +72,12 @@ namespace PlexRipper.Application.Services
             if (account.PlexAccount == null)
             {
                 // Create
-                await _plexService.CreatePlexAccount(account, plexAccount);
+                await _plexService.CreatePlexAccountAsync(account, plexAccount);
             }
             else
             {
                 // Update
-                await _plexService.UpdatePlexAccount(plexAccount);
+                await _plexService.UpdatePlexAccountAsync(plexAccount);
             }
 
             account.PlexAccount = plexAccount;

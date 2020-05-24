@@ -1,6 +1,4 @@
-﻿using Autofac.Extras.Moq;
-using PlexRipper.Application.IntegrationTests.Base;
-using PlexRipper.Application.Services;
+﻿using PlexRipper.Application.IntegrationTests.Base;
 using PlexRipper.Domain.Entities;
 using Shouldly;
 using System.Threading.Tasks;
@@ -24,31 +22,27 @@ namespace PlexRipper.Application.IntegrationTests.Services
         [Fact]
         public async Task GetPlexToken_ShouldReturnValidApiToken()
         {
-            using (var mock = AutoMock.GetLoose())
+
+            // Arrange
+            var plexService = Container.GetPlexService;
+            var accountService = Container.GetAccountService;
+            var credentials = Secrets.GetCredentials();
+
+            //Act 
+            var newAccount = new Account
             {
+                Username = credentials.Username,
+                Password = credentials.Password
+            };
 
-                // Arrange
-                var plexService = mock.Create<PlexService>();
-                var accountService = Container.GetAccountService;
-                var credentials = Secrets.GetCredentials();
+            var result = await accountService.ValidateAccountAsync(newAccount);
+            var account = await accountService.CreateAccountAsync(newAccount);
 
-                //Act 
-                var newAccount = new Account
-                {
-                    Username = credentials.Username,
-                    Password = credentials.Password
-                };
+            string authToken = await plexService.GetPlexTokenAsync(account.PlexAccount);
 
-                var result = await accountService.ValidateAccountAsync(newAccount);
-                var account = await accountService.CreateAccountAsync(newAccount);
-
-                string authToken = await plexService.GetPlexToken(account.PlexAccount);
-
-                //Assert
-                result.ShouldNotBeNull();
-                authToken.ShouldNotBeEmpty();
-            }
-
+            //Assert
+            result.ShouldNotBeNull();
+            authToken.ShouldNotBeEmpty();
         }
 
 

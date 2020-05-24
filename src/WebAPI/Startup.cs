@@ -37,7 +37,7 @@ namespace PlexRipper.WebAPI
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
 
             // TODO Make sure to configure this correctly when setting up security
@@ -115,11 +115,16 @@ namespace PlexRipper.WebAPI
             builder.RegisterLogger();
 
             // Auto Mapper
-            builder.Register(ctx => new MapperConfiguration(cfg =>
+            builder.Register(ctx =>
             {
-                cfg.AddProfile(new ApplicationMappingProfile());
-                cfg.AddProfile(new InfrastructureMappingProfile());
-            }));
+                var config = new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfile(new ApplicationMappingProfile());
+                    cfg.AddProfile(new InfrastructureMappingProfile());
+                });
+                config.AssertConfigurationIsValid();
+                return config;
+            });
 
             builder.Register(ctx => ctx.Resolve<MapperConfiguration>().CreateMapper()).As<IMapper>().InstancePerLifetimeScope();
         }

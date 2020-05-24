@@ -16,14 +16,14 @@ namespace PlexRipper.Application.Common.Models
 {
     public class Api : IApi
     {
-        public Api(Serilog.ILogger log, IPlexRipperHttpClient client)
+        private Serilog.ILogger Log { get; }
+        private readonly IPlexRipperHttpClient _plexRipperHttpClient;
+
+        public Api(Serilog.ILogger log, IPlexRipperHttpClient plexRipperHttpClient)
         {
             Log = log;
-            _client = client;
+            _plexRipperHttpClient = plexRipperHttpClient;
         }
-
-        private Serilog.ILogger Log { get; }
-        private readonly IPlexRipperHttpClient _client;
 
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
         {
@@ -66,8 +66,17 @@ namespace PlexRipper.Application.Common.Models
                 AddHeadersBody(request, httpRequestMessage);
 
                 Log.Debug($"Sending request to: ${httpRequestMessage.RequestUri}");
+                HttpResponseMessage httpResponseMessage;
 
-                var httpResponseMessage = await _client.SendAsync(httpRequestMessage);
+                try
+                {
+                    httpResponseMessage = await _plexRipperHttpClient.SendAsync(httpRequestMessage);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "An exception happend while sending a request", request);
+                    throw;
+                }
 
                 if (!httpResponseMessage.IsSuccessStatusCode)
                 {
@@ -83,39 +92,60 @@ namespace PlexRipper.Application.Common.Models
                             .Handle<HttpRequestException>()
                             .OrResult<HttpResponseMessage>(r => request.StatusCodeToRetry.Contains(r.StatusCode))
                             .WaitAndRetryAsync(new[]
-                            {
-                                TimeSpan.FromSeconds(10),
-                            }, (exception, timeSpan, context) =>
-                            {
-
-                                Log.Error($"Retrying RequestUri: {request.FullUri} Because we got Status Code: {exception?.Result?.StatusCode}");
-                            });
+                                {
+                                    TimeSpan.FromSeconds(10),
+                                },
+                                (exception, timeSpan, context) =>
+                                {
+                                    Log.Error(
+                                        $"Retrying RequestUri: {request.FullUri} Because we got Status Code: {exception?.Result?.StatusCode}");
+                                });
 
                         httpResponseMessage = await result.ExecuteAsync(async () =>
                         {
                             using (var req = await httpRequestMessage.Clone())
                             {
-                                return await _client.SendAsync(req);
+                                return await _plexRipperHttpClient.SendAsync(req);
                             }
                         });
                     }
                 }
-
-                // do something with the response
                 var receivedString = await httpResponseMessage.Content.ReadAsStringAsync();
-                LogDebugContent(receivedString);
-                if (request.ContentType == ContentType.Json)
+
+                if (httpResponseMessage.IsSuccessStatusCode)
                 {
-                    request.OnBeforeDeserialization?.Invoke(receivedString);
-                    return JsonConvert.DeserializeObject<T>(receivedString, Settings);
+                    // do something with the response
+                    LogDebugContent(receivedString);
+                    if (request.ContentType == ContentType.Json)
+                    {
+                        try
+                        {
+                            request.OnBeforeDeserialization?.Invoke(receivedString);
+                            return JsonConvert.DeserializeObject<T>(receivedString, Settings);
+                        }
+                        catch (JsonReaderException e)
+                        {
+                            Log.Error(e, $"Failed to parse Json object with type {typeof(T)}", receivedString);
+                            throw;
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e, $"Failed with Exception when parsing response with type {typeof(T)}", receivedString);
+                            throw;
+                        }
+
+                    }
+                    else
+                    {
+                        // XML
+                        return DeserializeXml<T>(receivedString);
+                    }
                 }
-                else
-                {
-                    // XML
-                    return DeserializeXml<T>(receivedString);
-                }
+
+                Log.Error("Failed to get a successfull response with request", request, receivedString);
             }
 
+            return default;
         }
 
         public T DeserializeXml<T>(string receivedString)
@@ -132,7 +162,7 @@ namespace PlexRipper.Application.Common.Models
             {
                 AddHeadersBody(request, httpRequestMessage);
 
-                var httpResponseMessage = await _client.SendAsync(httpRequestMessage);
+                var httpResponseMessage = await _plexRipperHttpClient.SendAsync(httpRequestMessage);
                 if (!httpResponseMessage.IsSuccessStatusCode)
                 {
                     if (!request.IgnoreErrors)
@@ -153,7 +183,7 @@ namespace PlexRipper.Application.Common.Models
             using (var httpRequestMessage = new HttpRequestMessage(request.HttpMethod, request.FullUri))
             {
                 AddHeadersBody(request, httpRequestMessage);
-                var httpResponseMessage = await _client.SendAsync(httpRequestMessage);
+                var httpResponseMessage = await _plexRipperHttpClient.SendAsync(httpRequestMessage);
                 await LogDebugContent(httpResponseMessage);
                 if (!httpResponseMessage.IsSuccessStatusCode)
                 {

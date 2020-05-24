@@ -33,7 +33,7 @@ namespace PlexRipper.Application.IntegrationTests.Base
             return new LoggerConfiguration()
                 .WriteTo.Console()
                 .WriteTo.Debug()
-                .WriteTo.TestOutput(Output, LogEventLevel.Debug)
+                .WriteTo.TestOutput(Output)
                 .WriteTo.ColoredConsole(
                     LogEventLevel.Debug,
                     "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}")

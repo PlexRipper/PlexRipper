@@ -33,10 +33,10 @@ namespace PlexRipper.Infrastructure.Common.DTO.PlexGetServer
         public string MachineIdentifier { get; set; }
 
         [XmlAttribute(AttributeName = "createdAt")]
-        public long CreatedAt { get; set; }
+        public string CreatedAt { get; set; }
 
         [XmlAttribute(AttributeName = "updatedAt")]
-        public long UpdatedAt { get; set; }
+        public string UpdatedAt { get; set; }
 
         [XmlAttribute(AttributeName = "owned")]
         public bool Owned { get; set; }

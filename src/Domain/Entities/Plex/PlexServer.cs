@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -19,12 +20,13 @@ namespace PlexRipper.Domain.Entities
         public DateTime UpdatedAt { get; set; }
         public bool Owned { get; set; }
         public bool Synced { get; set; }
-        public string SourceTitle { get; set; }
         public long OwnerId { get; set; }
         public bool Home { get; set; }
 
+        [IgnoreMap]
         public virtual List<PlexAccountServer> PlexAccountServers { get; set; } = new List<PlexAccountServer>();
 
+        [IgnoreMap]
         public virtual List<PlexLibrary> PlexLibraries { get; set; } = new List<PlexLibrary>();
 
 

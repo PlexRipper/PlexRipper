@@ -2,6 +2,7 @@
 using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Infrastructure.Common.DTO;
+using PlexRipper.Infrastructure.Common.DTO.PlexGetLibrarySections;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetStatus;
 using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;
@@ -17,7 +18,7 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
         Task<PlexLibrariesForMachineId> GetLibrariesForMachineId(string authToken, string machineId);
         Task<PlexAuthenticationDTO> PlexSignInAsync(string username, string password);
         Task<PlexServerContainerXML> GetServer(string authToken);
-        Task<PlexLibraryContainerDTO> GetLibrarySections(string plexAuthToken, string plexFullHost);
+        Task<PlexLibrarySectionsDTO> GetLibrarySections(string plexAuthToken, string plexFullHost);
         Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId);
         Task<PlexMetadata> GetEpisodeMetaData(string authToken, string host, int ratingKey);
         Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int itemId);

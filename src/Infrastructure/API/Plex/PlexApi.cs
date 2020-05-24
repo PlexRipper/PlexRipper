@@ -5,6 +5,7 @@ using PlexRipper.Domain.Common.API;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
 using PlexRipper.Infrastructure.Common.DTO;
+using PlexRipper.Infrastructure.Common.DTO.PlexGetLibrarySections;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetStatus;
 using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;
@@ -97,11 +98,17 @@ namespace PlexRipper.Infrastructure.API.Plex
             return await Api.Request<PlexServerContainerXML>(request);
         }
 
-        public async Task<PlexLibraryContainerDTO> GetLibrarySections(string plexAuthToken, string plexFullHost)
+        /// <summary>
+        /// Returns an detailed overview of the PlexLibraries in a PlexServer from the PlexAPI.
+        /// </summary>
+        /// <param name="plexAuthToken"></param>
+        /// <param name="plexFullHost"></param>
+        /// <returns></returns>
+        public async Task<PlexLibrarySectionsDTO> GetLibrarySections(string plexAuthToken, string plexFullHost)
         {
             var request = new Request("library/sections", plexFullHost, HttpMethod.Get);
             AddHeaders(request, plexAuthToken);
-            return await Api.Request<PlexLibraryContainerDTO>(request);
+            return await Api.Request<PlexLibrarySectionsDTO>(request);
         }
 
         public async Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId)

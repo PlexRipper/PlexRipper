@@ -8,7 +8,7 @@ namespace PlexRipper.Application.Common.Interfaces
     {
         Task<bool> IsPlexAccountValid(string username, string password);
         Task<List<PlexServer>> GetServersAsync(PlexAccount plexAccount, bool refresh = false);
-        Task<string> GetPlexToken(PlexAccount plexAccount);
+        Task<string> GetPlexTokenAsync(PlexAccount plexAccount);
         Task<PlexAccount> GetPlexAccount(long plexId);
 
         // Task<PlexLibrary> GetLibrary(PlexServer plexServer);
@@ -20,9 +20,9 @@ namespace PlexRipper.Application.Common.Interfaces
         /// </summary>
         /// <param name="plexAccountId"></param>
         /// <returns></returns>
-        Task<PlexAccount> GetPlexAccount(int plexAccountId);
+        Task<PlexAccount> GetPlexAccountAsync(int plexAccountId);
 
-        Task<PlexAccount> CreatePlexAccount(Account account, PlexAccount plexAccount);
-        Task<PlexAccount> UpdatePlexAccount(PlexAccount plexAccount);
+        Task<PlexAccount> CreatePlexAccountAsync(Account account, PlexAccount plexAccount);
+        Task<PlexAccount> UpdatePlexAccountAsync(PlexAccount plexAccount);
     }
 }

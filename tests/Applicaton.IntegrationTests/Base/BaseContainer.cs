@@ -4,10 +4,12 @@ using AutoMapper;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Mappings;
 using PlexRipper.Application.Config;
+using PlexRipper.Domain.AutoMapper;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Config;
 using PlexRipper.Infrastructure.Persistence;
+using PlexRipper.WebAPI.Config;
 
 namespace PlexRipper.Application.IntegrationTests.Base
 {
@@ -37,8 +39,11 @@ namespace PlexRipper.Application.IntegrationTests.Base
             {
                 var config = new MapperConfiguration(cfg =>
                 {
+                    cfg.AddProfile(new DomainMappingProfile());
                     cfg.AddProfile(new ApplicationMappingProfile());
                     cfg.AddProfile(new InfrastructureMappingProfile());
+                    cfg.AddProfile(new WebApiMappingProfile());
+
                 });
                 config.AssertConfigurationIsValid();
                 return config;

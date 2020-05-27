@@ -14,6 +14,7 @@ using NSwag.Generation.Processors.Security;
 using PlexRipper.Application;
 using PlexRipper.Application.Common.Mappings;
 using PlexRipper.Application.Config;
+using PlexRipper.Domain.AutoMapper;
 using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Config;
 using PlexRipper.WebAPI.Config;
@@ -113,6 +114,7 @@ namespace PlexRipper.WebAPI
             {
                 var config = new MapperConfiguration(cfg =>
                 {
+                    cfg.AddProfile(new DomainMappingProfile());
                     cfg.AddProfile(new ApplicationMappingProfile());
                     cfg.AddProfile(new InfrastructureMappingProfile());
                     cfg.AddProfile(new WebApiMappingProfile());

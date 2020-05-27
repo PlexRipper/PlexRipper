@@ -1,5 +1,5 @@
 <template>
-	<v-navigation-drawer app clipped>
+	<v-navigation-drawer app clipped permanent width="300">
 		<v-layout column fill-height>
 			<server-drawer />
 			<v-spacer />

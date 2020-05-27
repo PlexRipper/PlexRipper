@@ -1,6 +1,7 @@
 ﻿using PlexRipper.Application.IntegrationTests.Base;
 using PlexRipper.Domain.Entities;
 using Shouldly;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -33,6 +34,8 @@ namespace PlexRipper.Application.IntegrationTests.Services
             // Arrange
             var credentials = Secrets.GetCredentials();
             var accountService = Container.GetAccountService;
+            var plexServerService = Container.GetPlexServerService;
+
             var newAccount = new Account
             {
                 Username = credentials.Username,
@@ -43,12 +46,14 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var isValid = await accountService.ValidateAccountAsync(newAccount);
             var accountDB = await accountService.CreateAccountAsync(newAccount);
             var serversList = await accountService.GetServersAsync(accountDB.Id);
+            var plexServer = await plexServerService.GetAllLibraryMediaAsync(serversList.First(), true);
 
             //Assert
             isValid.ShouldBeTrue();
             accountDB.IsValidated.ShouldBeTrue();
             accountDB.PlexAccount.ShouldNotBeNull();
             serversList.ShouldNotBeEmpty();
+            plexServer.PlexLibraries.ShouldNotBeEmpty();
             return true;
         }
 

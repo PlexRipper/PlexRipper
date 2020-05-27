@@ -27,6 +27,11 @@ namespace PlexRipper.Infrastructure.Repositories
             return Context.ChangeTracker.Entries<TEntity>().Any(x => x.Entity.Id == entity.Id);
         }
 
+        /// <summary>
+        /// Returns the first instance of the entity by id
+        /// </summary>
+        /// <param name="id">The entity id</param>
+        /// <returns>The entity</returns>
         public Task<TEntity> GetAsync(int id)
         {
             return Context.Instance.Set<TEntity>().FirstOrDefaultAsync(e => e.Id == id);
@@ -83,30 +88,39 @@ namespace PlexRipper.Infrastructure.Repositories
 
         public async Task<bool> RemoveAsync(int id)
         {
-            var result = await GetAsync(id);
-            if (result != null)
+            var entity = await GetAsync(id);
+            if (entity != null)
             {
-                return await RemoveAsync(result);
+                Context.Instance.Set<TEntity>().Remove(entity);
+                await SaveChangesAsync();
+                return true;
             }
-            return false;
             // TODO add logging here
+            return false;
         }
 
+        /// <summary>
+        /// Will remove an entity from the Database. It will check first and then remove.
+        /// </summary>
+        /// <param name="entity">The entity to delete</param>
+        /// <returns>If successful</returns>
         public async Task<bool> RemoveAsync(TEntity entity)
         {
-            Context.Instance.Set<TEntity>().Remove(entity);
-            await SaveChangesAsync();
-            return await GetAsync(entity.Id) == null;
+            if (GetAsync(entity.Id) != null)
+            {
+                Context.Instance.Set<TEntity>().Remove(entity);
+                await SaveChangesAsync();
+                return true;
+            }
+            // TODO add logging here
+            return false;
         }
 
-        public void RemoveRange(IEnumerable<int> ids)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveRange(IEnumerable<TEntity> entities)
+        public async Task<bool> RemoveRangeAsync(IEnumerable<TEntity> entities)
         {
             Context.Instance.Set<TEntity>().RemoveRange(entities);
+            await SaveChangesAsync();
+            return true;
         }
 
         public virtual IQueryable<TEntity> BaseIncludes()
@@ -114,9 +128,9 @@ namespace PlexRipper.Infrastructure.Repositories
             return Context.Instance.Set<TEntity>();
         }
 
-        public async Task<int> SaveChangesAsync()
+        public Task<int> SaveChangesAsync()
         {
-            return await Context.SaveChangesAsync();
+            return Context.SaveChangesAsync();
         }
 
     }

@@ -1,5 +1,5 @@
-﻿using AutoMapper;
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PlexRipper.Domain.Entities
 {
@@ -35,18 +35,20 @@ namespace PlexRipper.Domain.Entities
         /// </summary>
         public string LibraryLocationPath { get; set; }
 
-
-
         /// <summary>
         /// The PlexServer this PlexLibrary belongs to
         /// </summary>
-        [IgnoreMap]
         public virtual PlexServer PlexServer { get; set; }
 
         /// <summary>
         /// The PlexServerId of the PlexServer this PlexLibrary belongs to
         /// </summary>
         public int PlexServerId { get; set; }
+
+
+        public virtual List<PlexMovies> Movies { get; set; }
+
+
 
         // TODO Create a many-to-many relationship to determing which PlexAccounts have access to this PlexLibrary
         // public bool HasAccess { get; set; }

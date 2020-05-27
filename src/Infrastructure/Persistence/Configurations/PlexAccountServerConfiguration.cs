@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Entities.JoinTables;
 
 namespace PlexRipper.Infrastructure.Persistence.Configurations
 {

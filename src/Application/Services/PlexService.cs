@@ -67,21 +67,9 @@ namespace PlexRipper.Application.Services
             {
                 await _plexServerService.RefreshPlexServersAsync(plexAccount);
             }
-            var x = await _plexServerService.GetServers(plexAccount);
+            var x = await _plexServerService.GetServersAsync(plexAccount);
             return x.ToList();
         }
-
-        //public async Task<PlexLibrary> GetLibrary(PlexServer plexServer)
-        //{
-        //    var plexLibraries = await GetLibrariesAsync(plexServer);
-        //    return Enumerable.First<PlexLibrary>(plexLibraries);
-        //    //var result = await _plexApi.GetLibrary(plexServer.AccessToken, plexServer.BaseUrl, library.Key);
-        //    //var metaData = await _plexApi.GetMetadata(plexServer.AccessToken, plexServer.BaseUrl, 5516);
-        //    //string downloadUrl = _plexApi.GetDownloadUrl(plexServer, metaData);
-        //    //string filename = _plexApi.GetDownloadFilename(plexServer, metaData);
-        //    //_plexApi.DownloadMedia(plexServer.AccessToken, downloadUrl, filename);
-        //    //return plexContainer;
-        //}
 
         /// <summary>
         /// Check the validity of Plex credentials to the Plex API. 

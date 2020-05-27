@@ -11,15 +11,18 @@ namespace PlexRipper.Application.Services
     public class PlexLibraryService : IPlexLibraryService
     {
         private readonly IPlexLibraryRepository _plexLibraryRepository;
+        private readonly IPlexMoviesRepository _plexMoviesRepository;
         private readonly IPlexApiService _plexServiceApi;
         private ILogger Log { get; }
 
         public PlexLibraryService(
             IPlexApiService plexServiceApi,
             IPlexLibraryRepository plexLibraryRepository,
+            IPlexMoviesRepository plexMoviesRepository,
             ILogger logger)
         {
             _plexLibraryRepository = plexLibraryRepository;
+            _plexMoviesRepository = plexMoviesRepository;
             _plexServiceApi = plexServiceApi;
             Log = logger;
         }
@@ -40,6 +43,33 @@ namespace PlexRipper.Application.Services
 
             return true;
         }
+
+        /// <summary>
+        /// Returns the <see cref="PlexLibrary"/> containing the media content.
+        /// </summary>
+        /// <param name="plexServer"></param>
+        /// <param name="libraryKey"></param>
+        /// <returns></returns>
+        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexServer plexServer, string libraryKey, bool refresh = false)
+        {
+            var plexLibrary = plexServer.PlexLibraries.Find(x => x.Key == libraryKey);
+            plexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, plexServer.AccessToken, plexServer.BaseUrl);
+
+            switch (plexLibrary.Type)
+            {
+                case "movie":
+                    await AddOrUpdateMoviesAsync(plexLibrary, plexLibrary.Movies);
+                    break;
+            }
+            // Create library
+
+            //var metaData = await _plexServiceApi.GetMetadata(plexServer.AccessToken, plexServer.BaseUrl, 5516);
+            //string downloadUrl = _plexApi.GetDownloadUrl(plexServer, metaData);
+            //string filename = _plexApi.GetDownloadFilename(plexServer, metaData);
+            //_plexApi.DownloadMedia(plexServer.AccessToken, downloadUrl, filename);
+            return plexLibrary;
+        }
+
 
         #region CRUD
         public async Task<List<PlexLibrary>> GetPlexLibrariesAsync(PlexServer plexServer, bool refresh = false)
@@ -114,7 +144,34 @@ namespace PlexRipper.Application.Services
         }
 
 
+        public async Task AddOrUpdateMoviesAsync(PlexLibrary plexLibrary, List<PlexMovies> movies)
+        {
+            if (plexLibrary == null)
+            {
+                Log.Warning($"{nameof(AddOrUpdateMoviesAsync)} => plexLibrary was null");
+                return;
+            }
 
+            if (movies.Count == 0)
+            {
+                Log.Warning($"{nameof(AddOrUpdateMoviesAsync)} => servers list was empty");
+                return;
+            }
+
+            Log.Debug($"{ nameof(AddOrUpdateMoviesAsync)} => Starting adding or updating movies in library: {plexLibrary.Title}");
+            // Remove all movies and re-add them
+            var currentMovies = await _plexMoviesRepository.FindAllAsync(x => x.PlexLibraryId == plexLibrary.Id);
+            await _plexMoviesRepository.RemoveRangeAsync(currentMovies);
+
+            // Ensure the correct ID is added. 
+            foreach (var movie in movies)
+            {
+                movie.PlexLibraryId = plexLibrary.Id;
+            }
+
+            await _plexMoviesRepository.AddRangeAsync(movies);
+
+        }
 
         #endregion
     }

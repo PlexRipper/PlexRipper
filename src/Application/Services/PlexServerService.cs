@@ -1,6 +1,7 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Entities.JoinTables;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,19 +69,40 @@ namespace PlexRipper.Application.Services
         }
 
 
+        /// <summary>
+        /// Use to get all <see cref="PlexLibrary"/> with their media in the parent <see cref="PlexServer"/>
+        /// </summary>
+        /// <param name="plexServer"></param>
+        /// <param name="refresh">Force refresh from PlexApi</param>
+        /// <returns></returns>
+        public async Task<PlexServer> GetAllLibraryMediaAsync(PlexServer plexServer, bool refresh = false)
+        {
+            var plexServerDB = await _plexServerRepository.GetAsync(plexServer.Id);
+
+            if (refresh)
+            {
+                foreach (var library in plexServerDB.PlexLibraries)
+                {
+                    await _plexLibraryService.GetLibraryMediaAsync(plexServerDB, library.Key, refresh);
+                }
+                return await _plexServerRepository.GetAsync(plexServer.Id);
+            }
+            return plexServerDB;
+        }
+
         #region CRUD
-        public async Task<List<PlexServer>> AddServers(PlexAccount plexAccount, List<PlexServer> servers)
+        public async Task<List<PlexServer>> AddServersAsync(PlexAccount plexAccount, List<PlexServer> servers)
         {
             await _plexServerRepository.AddRangeAsync(servers);
             var x = await _plexServerRepository.GetServers(plexAccount.Id);
             return x.ToList();
         }
 
-        public async Task<List<PlexServer>> GetServers(PlexAccount plexAccount, bool refresh = false)
+        public async Task<List<PlexServer>> GetServersAsync(PlexAccount plexAccount, bool refresh = false)
         {
             if (plexAccount == null)
             {
-                Log.Warning($"{nameof(GetServers)} => The plexAccount was null");
+                Log.Warning($"{nameof(GetServersAsync)} => The plexAccount was null");
                 return new List<PlexServer>();
             }
 
@@ -90,7 +112,7 @@ namespace PlexRipper.Application.Services
             {
                 if (!serverList.Any())
                 {
-                    Log.Warning($"{nameof(GetServers)} => PlexAccount {plexAccount.Id} did not have any PlexServers assigned. Forcing {nameof(RefreshPlexServersAsync)} was null");
+                    Log.Warning($"{nameof(GetServersAsync)} => PlexAccount {plexAccount.Id} did not have any PlexServers assigned. Forcing {nameof(RefreshPlexServersAsync)} was null");
                 }
 
                 var refreshSuccess = await RefreshPlexServersAsync(plexAccount);

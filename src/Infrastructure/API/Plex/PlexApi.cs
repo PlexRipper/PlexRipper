@@ -1,5 +1,4 @@
 ﻿using PlexRipper.Application.Common.DTO.Plex;
-using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
 using PlexRipper.Application.Common.Interfaces.API;
 using PlexRipper.Domain.Common.API;
 using PlexRipper.Domain.Entities;
@@ -9,6 +8,7 @@ using PlexRipper.Infrastructure.Common.DTO.PlexGetLibrarySections;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetStatus;
 using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;
+using PlexRipper.Infrastructure.Common.DTO.PlexLibraryMedia;
 using PlexRipper.Infrastructure.Common.DTO.PlexSignIn;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
@@ -111,11 +111,11 @@ namespace PlexRipper.Infrastructure.API.Plex
             return Api.Request<PlexLibrarySectionsDTO>(request);
         }
 
-        public Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId)
+        public Task<PlexLibraryMediaDTO> GetLibraryMediaAsync(string authToken, string plexFullHost, string libraryId)
         {
             var request = new Request($"library/sections/{libraryId}/all", plexFullHost, HttpMethod.Get);
             AddHeaders(request, authToken);
-            return Api.Request<PlexLibraryDTO>(request);
+            return Api.Request<PlexLibraryMediaDTO>(request);
         }
 
         public Task<PlexLibrariesForMachineId> GetLibrariesForMachineId(string authToken, string machineId)

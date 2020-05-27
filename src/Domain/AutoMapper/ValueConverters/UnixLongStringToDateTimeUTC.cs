@@ -3,7 +3,7 @@ using System;
 
 namespace PlexRipper.Domain.AutoMapper.ValueConverters
 {
-    public class UnixLongToDateTimeUTC : IValueConverter<string, DateTime>
+    public class UnixLongStringToDateTimeUTC : IValueConverter<string, DateTime>
     {
         public DateTime Convert(string sourceMember, ResolutionContext context)
         {

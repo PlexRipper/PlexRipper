@@ -44,9 +44,7 @@ namespace PlexRipper.Domain.Interfaces
 
         public Task<bool> RemoveAsync(TEntity entity);
 
-        public void RemoveRange(IEnumerable<int> ids);
-
-        public void RemoveRange(IEnumerable<TEntity> entities);
+        public Task<bool> RemoveRangeAsync(IEnumerable<TEntity> entities);
         #endregion
 
         public Task<int> SaveChangesAsync();

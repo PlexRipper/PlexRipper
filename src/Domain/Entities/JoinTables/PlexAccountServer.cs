@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Domain.Entities
+﻿namespace PlexRipper.Domain.Entities.JoinTables
 {
     public class PlexAccountServer
     {

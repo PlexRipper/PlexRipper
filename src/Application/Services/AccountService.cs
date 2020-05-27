@@ -193,9 +193,9 @@ namespace PlexRipper.Application.Services
         }
 
 
-        public async Task<bool> RemoveAccountAsync(int accountId)
+        public Task<bool> RemoveAccountAsync(int accountId)
         {
-            return await _accountRepository.RemoveAsync(accountId);
+            return _accountRepository.RemoveAsync(accountId);
         }
         #endregion
     }

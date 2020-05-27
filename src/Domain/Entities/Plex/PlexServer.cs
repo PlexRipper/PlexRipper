@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PlexRipper.Domain.Entities.JoinTables;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,9 +25,9 @@ namespace PlexRipper.Domain.Entities
         public bool Home { get; set; }
 
         [IgnoreMap]
-        public virtual List<PlexAccountServer> PlexAccountServers { get; set; } = new List<PlexAccountServer>();
+        public virtual List<PlexAccountServer> PlexAccountServers { get; set; }
 
-        public virtual List<PlexLibrary> PlexLibraries { get; set; } = new List<PlexLibrary>();
+        public virtual List<PlexLibrary> PlexLibraries { get; set; }
 
 
         [NotMapped]

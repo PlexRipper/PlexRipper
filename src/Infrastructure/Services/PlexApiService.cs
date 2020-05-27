@@ -76,10 +76,34 @@ namespace PlexRipper.Infrastructure.Services
             return map;
         }
 
-        public async Task<PlexLibrary> GetLibraryAsync(string authToken, string plexFullHost, string libraryId)
+        /// <summary>
+        /// Returns and PlexLibrary container with either Movies, Series, Music or Photos depending on the type. 
+        /// </summary>
+        /// <param name="library"></param>
+        /// <param name="authToken"></param>
+        /// <param name="plexFullHost"></param>
+        /// <returns></returns>
+        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary library, string authToken, string plexFullHost)
         {
-            var result = await _plexApi.GetLibrary(authToken, plexFullHost, libraryId);
-            return result == null ? null : _mapper.Map<PlexLibrary>(result.MediaContainer);
+            var result = await _plexApi.GetLibraryMediaAsync(authToken, plexFullHost, library.Key);
+
+            if (result == null) { return null; }
+
+            var libraryContainer = new PlexLibrary
+            {
+                Id = library.Id,
+                Type = result.MediaContainer.ViewGroup
+            };
+
+            // Determine how to map based on the Library type.
+            switch (result.MediaContainer.ViewGroup)
+            {
+                case "movie":
+                    libraryContainer.Movies = _mapper.Map<List<PlexMovies>>(result.MediaContainer.Metadata);
+                    break;
+            }
+
+            return libraryContainer;
         }
     }
 }

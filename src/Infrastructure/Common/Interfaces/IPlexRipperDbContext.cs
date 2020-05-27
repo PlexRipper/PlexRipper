@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Domain.Entities.JoinTables;
 
 namespace PlexRipper.Infrastructure.Common.Interfaces
 {

@@ -1,11 +1,11 @@
 ﻿using PlexRipper.Application.Common.DTO.Plex;
-using PlexRipper.Application.Common.DTO.Plex.PlexLibrary;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Infrastructure.Common.DTO;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetLibrarySections;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetStatus;
 using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;
+using PlexRipper.Infrastructure.Common.DTO.PlexLibraryMedia;
 using PlexRipper.Infrastructure.Common.Models.OAuth;
 using System;
 using System.Threading.Tasks;
@@ -19,7 +19,7 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
         Task<PlexAuthenticationDTO> PlexSignInAsync(string username, string password);
         Task<PlexServerContainerXML> GetServer(string authToken);
         Task<PlexLibrarySectionsDTO> GetLibrarySections(string plexAuthToken, string plexFullHost);
-        Task<PlexLibraryDTO> GetLibrary(string authToken, string plexFullHost, string libraryId);
+        Task<PlexLibraryMediaDTO> GetLibraryMediaAsync(string authToken, string plexFullHost, string libraryId);
         Task<PlexMetadata> GetEpisodeMetaData(string authToken, string host, int ratingKey);
         Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int itemId);
         Task<PlexMetadata> GetSeasons(string authToken, string plexFullHost, int ratingKey);

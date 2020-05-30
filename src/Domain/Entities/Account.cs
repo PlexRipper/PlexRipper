@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PlexRipper.Domain.Entities.Base;
+using System;
 
 namespace PlexRipper.Domain.Entities
 {

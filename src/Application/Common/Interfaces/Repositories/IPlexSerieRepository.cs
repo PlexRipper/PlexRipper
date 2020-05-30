@@ -3,7 +3,7 @@ using PlexRipper.Domain.Interfaces;
 
 namespace PlexRipper.Application.Common.Interfaces.Repositories
 {
-    public interface IPlexMoviesRepository : IRepository<PlexMovie>
+    public interface IPlexSerieRepository : IRepository<PlexSerie>
     {
     }
 }

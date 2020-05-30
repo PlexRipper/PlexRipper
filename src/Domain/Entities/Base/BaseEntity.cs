@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Domain.Entities
+﻿namespace PlexRipper.Domain.Entities.Base
 {
     public abstract class BaseEntity
     {

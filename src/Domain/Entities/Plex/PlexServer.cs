@@ -3,6 +3,7 @@ using PlexRipper.Domain.Entities.JoinTables;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using PlexRipper.Domain.Entities.Base;
 
 namespace PlexRipper.Domain.Entities
 {

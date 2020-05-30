@@ -159,7 +159,7 @@ namespace PlexRipper.Application.Services
 
                 await SetupAccountAsync(accountDB);
 
-                return accountDB;
+                return await _accountRepository.GetAsync(accountDB.Id);
             }
 
             Log.Warning("An account with these credentials already exists!");

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Entities.Base;
 using PlexRipper.Domain.Interfaces;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using Serilog;

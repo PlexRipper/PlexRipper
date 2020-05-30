@@ -1,17 +1,16 @@
-﻿using PlexRipper.Domain.Entities.JoinTables;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain.Entities.Base
 {
-    public class PlexMovies : BaseEntity
+    /// <summary>
+    /// Plex stores media in 1 generic type but PlexRipper stores it by type, this is the base entity for common properties.
+    /// </summary>
+    public class PlexMedia : BaseEntity
     {
-
         public int RatingKey { get; set; }
         public string Key { get; set; }
         public string Guid { get; set; }
         public string Studio { get; set; }
-        public string Type { get; set; }
         public string Title { get; set; }
         public string ContentRating { get; set; }
         public string Summary { get; set; }
@@ -28,8 +27,7 @@ namespace PlexRipper.Domain.Entities
         public int ChildCount { get; set; }
         public DateTime AddedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public virtual List<PlexMovieGenre> PlexMovieGenres { get; set; }
-        public virtual List<PlexMovieRole> PlexMovieRoles { get; set; }
+
 
         public int? ViewCount { get; set; }
         public DateTime? LastViewedAt { get; set; }

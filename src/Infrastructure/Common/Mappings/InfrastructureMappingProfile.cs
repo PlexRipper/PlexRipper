@@ -49,6 +49,7 @@ namespace PlexRipper.Infrastructure.Common.Mappings
                 .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
                 .ForMember(dest => dest.Movies, opt => opt.Ignore())
+                .ForMember(dest => dest.Series, opt => opt.Ignore())
                 // Location[0].Id -> LibraryLocationId
                 .ForMember(dest => dest.LibraryLocationId,
                     opt => opt.MapFrom(src => src.Location.First().Id))
@@ -57,10 +58,21 @@ namespace PlexRipper.Infrastructure.Common.Mappings
                     opt => opt.MapFrom(src => src.Location.First().Path));
 
             // PlexLibraryMetaDataDTO -> PlexMovies
-            CreateMap<PlexLibraryMetaDataDTO, PlexMovies>(MemberList.Destination)
+            CreateMap<PlexLibraryMetaDataDTO, PlexMovie>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexMovieGenres, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexMovieRoles, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
+                .ForMember(dest => dest.LastViewedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.OriginallyAvailableAt,
+                    opt => opt.ConvertUsing(new StringToDateTimeUTC()));
+
+            // PlexLibraryMetaDataDTO -> PlexSerie
+            CreateMap<PlexLibraryMetaDataDTO, PlexSerie>(MemberList.Destination)
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexSerieGenres, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexSerieRoles, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
                 .ForMember(dest => dest.LastViewedAt, opt => opt.Ignore())

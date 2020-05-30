@@ -1,6 +1,7 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Enums;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,18 +12,21 @@ namespace PlexRipper.Application.Services
     public class PlexLibraryService : IPlexLibraryService
     {
         private readonly IPlexLibraryRepository _plexLibraryRepository;
-        private readonly IPlexMoviesRepository _plexMoviesRepository;
+        private readonly IPlexMovieService _plexMovieService;
+        private readonly IPlexSerieService _plexSerieService;
         private readonly IPlexApiService _plexServiceApi;
         private ILogger Log { get; }
 
         public PlexLibraryService(
             IPlexApiService plexServiceApi,
             IPlexLibraryRepository plexLibraryRepository,
-            IPlexMoviesRepository plexMoviesRepository,
+            IPlexMovieService plexMovieService,
+            IPlexSerieService plexSerieService,
             ILogger logger)
         {
             _plexLibraryRepository = plexLibraryRepository;
-            _plexMoviesRepository = plexMoviesRepository;
+            _plexMovieService = plexMovieService;
+            _plexSerieService = plexSerieService;
             _plexServiceApi = plexServiceApi;
             Log = logger;
         }
@@ -55,10 +59,14 @@ namespace PlexRipper.Application.Services
             var plexLibrary = plexServer.PlexLibraries.Find(x => x.Key == libraryKey);
             plexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, plexServer.AccessToken, plexServer.BaseUrl);
 
-            switch (plexLibrary.Type)
+            switch (plexLibrary.GetMediaType)
             {
-                case "movie":
-                    await AddOrUpdateMoviesAsync(plexLibrary, plexLibrary.Movies);
+                case PlexMediaType.Movie:
+                    await _plexMovieService.AddOrUpdatePlexMoviesAsync(plexLibrary, plexLibrary.Movies);
+                    break;
+
+                case PlexMediaType.Serie:
+                    await _plexSerieService.AddOrUpdatePlexSeriesAsync(plexLibrary, plexLibrary.Series);
                     break;
             }
             // Create library
@@ -144,34 +152,6 @@ namespace PlexRipper.Application.Services
         }
 
 
-        public async Task AddOrUpdateMoviesAsync(PlexLibrary plexLibrary, List<PlexMovies> movies)
-        {
-            if (plexLibrary == null)
-            {
-                Log.Warning($"{nameof(AddOrUpdateMoviesAsync)} => plexLibrary was null");
-                return;
-            }
-
-            if (movies.Count == 0)
-            {
-                Log.Warning($"{nameof(AddOrUpdateMoviesAsync)} => servers list was empty");
-                return;
-            }
-
-            Log.Debug($"{ nameof(AddOrUpdateMoviesAsync)} => Starting adding or updating movies in library: {plexLibrary.Title}");
-            // Remove all movies and re-add them
-            var currentMovies = await _plexMoviesRepository.FindAllAsync(x => x.PlexLibraryId == plexLibrary.Id);
-            await _plexMoviesRepository.RemoveRangeAsync(currentMovies);
-
-            // Ensure the correct ID is added. 
-            foreach (var movie in movies)
-            {
-                movie.PlexLibraryId = plexLibrary.Id;
-            }
-
-            await _plexMoviesRepository.AddRangeAsync(movies);
-
-        }
 
         #endregion
     }

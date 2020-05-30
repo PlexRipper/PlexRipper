@@ -77,7 +77,7 @@ namespace PlexRipper.Infrastructure.Services
         }
 
         /// <summary>
-        /// Returns and PlexLibrary container with either Movies, Series, Music or Photos depending on the type. 
+        /// Returns a PlexLibrary container with either Movies, Series, Music or Photos depending on the type. 
         /// </summary>
         /// <param name="library"></param>
         /// <param name="authToken"></param>
@@ -99,7 +99,10 @@ namespace PlexRipper.Infrastructure.Services
             switch (result.MediaContainer.ViewGroup)
             {
                 case "movie":
-                    libraryContainer.Movies = _mapper.Map<List<PlexMovies>>(result.MediaContainer.Metadata);
+                    libraryContainer.Movies = _mapper.Map<List<PlexMovie>>(result.MediaContainer.Metadata);
+                    break;
+                case "show":
+                    libraryContainer.Series = _mapper.Map<List<PlexSerie>>(result.MediaContainer.Metadata);
                     break;
             }
 

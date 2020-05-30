@@ -8,7 +8,6 @@ namespace PlexRipper.Application.Common.Interfaces
     {
         Task<bool> RefreshLibrariesAsync(PlexServer plexServer);
         Task<List<PlexLibrary>> GetPlexLibrariesAsync(PlexServer plexServer, bool refresh = false);
-        Task AddOrUpdateMoviesAsync(PlexLibrary plexLibrary, List<PlexMovies> movies);
 
         /// <summary>
         /// Returns the <see cref="PlexLibrary"/> containing the media content.

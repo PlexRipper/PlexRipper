@@ -22,7 +22,7 @@ namespace PlexRipper.Infrastructure.Persistence
         public DbSet<PlexAccount> PlexAccounts { get; set; }
         public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
-        public DbSet<PlexMovies> PlexMovies { get; set; }
+        public DbSet<PlexMovie> PlexMovies { get; set; }
         public DbSet<PlexRole> PlexRoles { get; set; }
         public DbSet<PlexServer> PlexServers { get; set; }
         #endregion

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PlexRipper.Domain.Entities.Base;
+using PlexRipper.Domain.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace PlexRipper.Domain.Entities
@@ -46,11 +48,29 @@ namespace PlexRipper.Domain.Entities
         public int PlexServerId { get; set; }
 
 
-        public virtual List<PlexMovies> Movies { get; set; }
+        public virtual List<PlexMovie> Movies { get; set; }
+        public virtual List<PlexSerie> Series { get; set; }
 
-
-
-        // TODO Create a many-to-many relationship to determing which PlexAccounts have access to this PlexLibrary
+        // TODO Create a many-to-many relationship to determining which PlexAccounts have access to this PlexLibrary
         // public bool HasAccess { get; set; }
+
+
+        public PlexMediaType GetMediaType
+        {
+            get
+            {
+                switch (Type)
+                {
+                    case "movie":
+                        return PlexMediaType.Movie;
+                    // Plex calls Tv Shows "shows", but PlexRipper considers them series
+                    case "show":
+                        return PlexMediaType.Serie;
+                    default:
+                        return PlexMediaType.Unknown;
+                }
+            }
+
+        }
     }
 }

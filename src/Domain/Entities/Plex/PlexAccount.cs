@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using PlexRipper.Domain.Entities.Base;
 using PlexRipper.Domain.Entities.JoinTables;
 
 namespace PlexRipper.Domain.Entities

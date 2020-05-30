@@ -1,10 +1,10 @@
 ﻿using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Infrastructure.Persistence;
+using PlexRipper.Infrastructure.Common.Interfaces;
 using Serilog;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using PlexRipper.Infrastructure.Common.Interfaces;
 
 namespace PlexRipper.Infrastructure.Repositories
 {
@@ -12,9 +12,10 @@ namespace PlexRipper.Infrastructure.Repositories
     {
         public PlexLibraryRepository(IPlexRipperDbContext context, ILogger log) : base(context, log) { }
 
-        public async Task<IEnumerable<PlexLibrary>> GetLibraries(int serverId)
+        public async Task<IList<PlexLibrary>> GetLibraries(int serverId)
         {
-            return await FindAllAsync(x => x.PlexServerId == serverId);
+            var x = await FindAllAsync(x => x.PlexServerId == serverId);
+            return x.ToList();
         }
     }
 }

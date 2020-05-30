@@ -83,7 +83,7 @@ namespace PlexRipper.Application.Services
             {
                 foreach (var library in plexServerDB.PlexLibraries)
                 {
-                    await _plexLibraryService.GetLibraryMediaAsync(plexServerDB, library.Key, refresh);
+                    await _plexLibraryService.GetLibraryMediaAsync(plexServerDB, library.Key, true);
                 }
                 return await _plexServerRepository.GetAsync(plexServer.Id);
             }

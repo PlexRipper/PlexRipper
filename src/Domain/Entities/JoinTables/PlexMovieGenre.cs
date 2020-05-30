@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Domain.Entities.JoinTables
+﻿using PlexRipper.Domain.Entities.Base;
+
+namespace PlexRipper.Domain.Entities.JoinTables
 {
     public class PlexMovieGenre : BaseEntity
     {
@@ -6,7 +8,7 @@
         public virtual PlexGenre PlexGenre { get; set; }
 
         public int PlexMoviesId { get; set; }
-        public virtual PlexMovies PlexMovies { get; set; }
+        public virtual PlexMovie PlexMovie { get; set; }
 
     }
 }

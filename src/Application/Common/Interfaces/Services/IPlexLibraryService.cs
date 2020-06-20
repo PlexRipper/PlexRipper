@@ -16,5 +16,14 @@ namespace PlexRipper.Application.Common.Interfaces
         /// <param name="libraryKey"></param>
         /// <returns></returns>
         Task<PlexLibrary> GetLibraryMediaAsync(PlexServer plexServer, string libraryKey, bool refresh = false);
+
+        /// <summary>
+        /// Retrieves the new media metadata from the PlexApi
+        /// </summary>
+        /// <param name="plexLibrary"></param>
+        /// <returns>Returns the PlexLibrary with the containing media</returns>
+        Task<PlexLibrary> RefreshLibraryMediaAsync(PlexLibrary plexLibrary);
+
+        Task<PlexLibrary> GetPlexLibraryAsync(int libraryId, bool refresh = false);
     }
 }

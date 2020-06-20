@@ -3,7 +3,7 @@ using System;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
-    public class PlexLibraryDTO
+    public class PlexLibraryContainerDTO
     {
         [JsonProperty("key")]
         public string Key { get; set; }
@@ -40,5 +40,7 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("count")]
         public int Count { get; set; }
+
+
     }
 }

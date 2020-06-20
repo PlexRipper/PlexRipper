@@ -57,29 +57,84 @@ namespace PlexRipper.Application.Services
         public async Task<PlexLibrary> GetLibraryMediaAsync(PlexServer plexServer, string libraryKey, bool refresh = false)
         {
             var plexLibrary = plexServer.PlexLibraries.Find(x => x.Key == libraryKey);
-            plexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, plexServer.AccessToken, plexServer.BaseUrl);
-
-            switch (plexLibrary.GetMediaType)
+            if (refresh || !plexLibrary.HasMedia)
             {
-                case PlexMediaType.Movie:
-                    await _plexMovieService.AddOrUpdatePlexMoviesAsync(plexLibrary, plexLibrary.Movies);
-                    break;
-
-                case PlexMediaType.Serie:
-                    await _plexSerieService.AddOrUpdatePlexSeriesAsync(plexLibrary, plexLibrary.Series);
-                    break;
+                await RefreshLibraryMediaAsync(plexLibrary);
             }
+            return plexLibrary;
+
             // Create library
 
             //var metaData = await _plexServiceApi.GetMetadata(plexServer.AccessToken, plexServer.BaseUrl, 5516);
             //string downloadUrl = _plexApi.GetDownloadUrl(plexServer, metaData);
             //string filename = _plexApi.GetDownloadFilename(plexServer, metaData);
             //_plexApi.DownloadMedia(plexServer.AccessToken, downloadUrl, filename);
-            return plexLibrary;
+        }
+
+        /// <summary>
+        /// Retrieves the new media metadata from the PlexApi and stores it in the database.
+        /// </summary>
+        /// <param name="plexLibrary">The <see cref="PlexLibrary"/> to retrieve</param>
+        /// <returns>Returns the PlexLibrary with the containing media</returns>
+        public async Task<PlexLibrary> RefreshLibraryMediaAsync(PlexLibrary plexLibrary)
+        {
+            if (plexLibrary == null)
+            {
+                Log.Warning($"{nameof(RefreshLibraryMediaAsync)} => The plexLibrary was null");
+                return null;
+            }
+
+            plexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, plexLibrary.PlexServer.AccessToken, plexLibrary.PlexServer.BaseUrl);
+
+            switch (plexLibrary.GetMediaType)
+            {
+                case PlexMediaType.Movie:
+                    await _plexMovieService.AddOrUpdatePlexMoviesAsync(plexLibrary, plexLibrary.Movies);
+                    break;
+                case PlexMediaType.Serie:
+                    await _plexSerieService.AddOrUpdatePlexSeriesAsync(plexLibrary, plexLibrary.Series);
+                    break;
+            }
+
+            return await _plexLibraryRepository.GetAsync(plexLibrary.Id);
         }
 
 
         #region CRUD
+
+        /// <summary>
+        /// Return the PlexLibrary by the Id, will refresh if the library has no media assigned.
+        /// </summary>
+        /// <param name="libraryId"></param>
+        /// <returns></returns>
+        public async Task<PlexLibrary> GetPlexLibraryAsync(int libraryId, bool refresh = false)
+        {
+            if (libraryId <= 0)
+            {
+                Log.Warning($"{nameof(GetPlexLibrariesAsync)} => The PlexLibraryId was invalid: {libraryId}");
+                return null;
+            }
+
+            var libraryDB = await _plexLibraryRepository.GetAsync(libraryId);
+
+            if (libraryDB == null)
+            {
+                Log.Warning($"{nameof(GetPlexLibrariesAsync)} => A PlexLibrary with id {libraryId} does not exist in the database");
+                return null;
+            }
+
+            if (!libraryDB.HasMedia)
+            {
+                Log.Debug($"{nameof(GetPlexLibrariesAsync)} => PlexLibrary with id {libraryId} has no media, forcing refresh from the PlexApi");
+                libraryDB = await RefreshLibraryMediaAsync(libraryDB);
+            }
+
+            return libraryDB;
+        }
+
+
+
+
         public async Task<List<PlexLibrary>> GetPlexLibrariesAsync(PlexServer plexServer, bool refresh = false)
         {
             if (plexServer == null)

@@ -83,7 +83,7 @@ namespace PlexRipper.Application.Services
             account.PlexAccount = plexAccount;
             account.IsValidated = true;
             account.ValidatedAt = DateTime.Now;
-            await UpdateAccountAsync(account);
+            var accountDB = await UpdateAccountAsync(account);
 
             // Retrieve and store servers
             await _plexServerService.RefreshPlexServersAsync(plexAccount);

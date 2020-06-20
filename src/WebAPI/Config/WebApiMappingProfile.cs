@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
+using PlexRipper.WebAPI.Common.DTO.PlexMedia;
 using System.Linq;
 
 namespace PlexRipper.WebAPI.Config
@@ -22,8 +23,20 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<PlexServerDTO, PlexServer>(MemberList.Source).ReverseMap();
 
 
-            //PlexLibraryDTO <-> PlexLibrary
-            CreateMap<PlexLibraryDTO, PlexLibrary>(MemberList.Source).ReverseMap();
+            //PlexLibrary -> PlexLibraryDTO
+            CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount)).ReverseMap();
+
+
+            //PlexLibrary -> PlexLibraryDTO
+            CreateMap<PlexLibrary, PlexLibraryContainerDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount));
+
+            //PlexLibrary -> PlexLibraryDTO
+            CreateMap<PlexSerie, PlexSerieDTO>(MemberList.Destination);
+
+            //PlexLibrary -> PlexLibraryDTO
+            CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination);
 
         }
     }

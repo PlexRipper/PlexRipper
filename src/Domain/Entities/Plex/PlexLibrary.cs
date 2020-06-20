@@ -8,6 +8,8 @@ namespace PlexRipper.Domain.Entities
     public class PlexLibrary : BaseEntity
     {
 
+        #region Properties
+
         /// <summary>
         /// The Library Section Identifier used by Plex
         /// </summary>
@@ -37,6 +39,10 @@ namespace PlexRipper.Domain.Entities
         /// </summary>
         public string LibraryLocationPath { get; set; }
 
+
+        #endregion
+
+        #region Relationships
         /// <summary>
         /// The PlexServer this PlexLibrary belongs to
         /// </summary>
@@ -51,6 +57,9 @@ namespace PlexRipper.Domain.Entities
         public virtual List<PlexMovie> Movies { get; set; }
         public virtual List<PlexSerie> Series { get; set; }
 
+        #endregion
+
+        #region Helpers
         // TODO Create a many-to-many relationship to determining which PlexAccounts have access to this PlexLibrary
         // public bool HasAccess { get; set; }
 
@@ -59,18 +68,35 @@ namespace PlexRipper.Domain.Entities
         {
             get
             {
-                switch (Type)
+                return Type switch
                 {
-                    case "movie":
-                        return PlexMediaType.Movie;
+                    "movie" => PlexMediaType.Movie,
                     // Plex calls Tv Shows "shows", but PlexRipper considers them series
-                    case "show":
-                        return PlexMediaType.Serie;
-                    default:
-                        return PlexMediaType.Unknown;
-                }
+                    "show" => PlexMediaType.Serie,
+                    _ => PlexMediaType.Unknown
+                };
             }
 
         }
+
+        public bool HasMedia => Movies.Count > 0 || Series.Count > 0;
+
+        public int GetMediaCount
+        {
+            get
+            {
+                return GetMediaType switch
+                {
+                    PlexMediaType.Movie => Movies.Count,
+                    PlexMediaType.Serie => Series.Count,
+                    _ => 0
+                };
+            }
+        }
+
+        #endregion
+
+
+
     }
 }

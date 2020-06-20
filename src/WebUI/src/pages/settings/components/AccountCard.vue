@@ -122,6 +122,7 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import Log from 'consola';
 import IAccount from '@dto/IAccount';
+import * as AccountApi from '@api/accountApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
 @Component({
@@ -151,6 +152,16 @@ export default class AccountCard extends Vue {
 
 	get isNew(): boolean {
 		return !this.account;
+	}
+
+	get getAccount(): IAccount {
+		return {
+			id: this.isNew ? 0 : this.account.id,
+			isEnabled: this.isEnabled,
+			displayName: this.displayName,
+			username: this.username,
+			password: this.password,
+		} as IAccount;
 	}
 
 	get getDisplayName(): string {
@@ -200,29 +211,17 @@ export default class AccountCard extends Vue {
 
 		if (this.valid) {
 			this.validateLoading = true;
-			await this.$axios
-				.post('/accounts/validate', {
-					displayName: this.displayName,
-					username: this.username,
-					password: this.password,
-				})
-				.then((res) => {
-					Log.debug('The validation api result: ', res);
-					if (res.status === 200) {
-						this.isValidated = 'OK';
-					}
-				})
-				.catch((e) => {
-					Log.error('Validation Api Error: ', e);
-					if (e.response.status === 401) {
-						this.isValidated = 'ERROR';
-					}
+			const statusCode = await AccountApi.ValidateAccountAsync(this.getAccount);
+			// Set the validation status based on the validate api response
+			switch (statusCode) {
+				case 200:
+					this.isValidated = 'OK';
+					break;
 
-					if (e.response.status === 422) {
-						this.isValidated = 'ERROR';
-						// TODO Add pop-up error dialog
-					}
-				});
+				default:
+					this.isValidated = 'ERROR';
+					break;
+			}
 			this.validateLoading = false;
 		}
 	}
@@ -252,48 +251,17 @@ export default class AccountCard extends Vue {
 	}
 
 	async saveAccount(): Promise<void> {
-		const path = '/accounts/' + (this.isNew ? 'create/' : 'update/');
-		await this.$axios
-			.post(path, {
-				id: this.account?.id,
-				isEnabled: this.isEnabled,
-				displayName: this.displayName,
-				username: this.username,
-				password: this.password,
-			})
-			.then((res) => {
-				Log.debug('The validation api result: ', res);
-				if (res.status === 200) {
-					this.isValidated = 'OK';
-				}
-			})
-			.catch((e) => {
-				Log.error('Validation Api Error: ', e);
-				if (e.response.status === 401) {
-					this.isValidated = 'ERROR';
-				}
+		if (this.isNew) {
+			await AccountApi.createAccountAsync(this.getAccount);
+		} else {
+			await AccountApi.updateAccountAsync(this.getAccount);
+		}
 
-				if (e.response.status === 422) {
-					this.isValidated = 'ERROR';
-					// TODO Add pop-up error dialog
-				}
-			});
 		this.closeDialog();
 	}
 
 	async deleteAccount(): Promise<void> {
-		if (this.account?.id) {
-			await this.$axios
-				.delete(`/accounts/${this.account.id}`)
-				.then(() => {
-					this.closeDialog();
-				})
-				.catch((e) => {
-					Log.error('Accounts API Error:', e);
-				});
-			return;
-		}
-		Log.error('Could not delete Account as the ID is not available');
+		await AccountApi.deleteAccountAsync(this.account.id);
 	}
 
 	openDialog(): void {

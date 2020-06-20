@@ -4,7 +4,6 @@ import { getModule, config } from 'vuex-module-decorators';
 
 // Modules
 import globalStore from '@/store/globalStore';
-import navigationStore from '@/store/navigationStore';
 import userStore from '@/store/userStore';
 
 config.rawError = true;
@@ -17,11 +16,9 @@ Vue.use(Vuex);
 export const store = new Vuex.Store<unknown>({
 	modules: {
 		globalStore,
-		navigationStore,
 		userStore,
 	},
 });
 
 export const GlobalStore: globalStore = getModule(globalStore, store);
-export const NavigationStore: navigationStore = getModule(navigationStore, store);
 export const UserStore: userStore = getModule(userStore, store);

@@ -1,6 +1,6 @@
 import { Module, Mutation, Action, VuexModule } from 'vuex-module-decorators';
 import IAccount from '@dto/IAccount';
-import { GetAllAccounts } from '@api/accountApi';
+import { GetAllAccountsAsync } from '@api/accountApi';
 import Log from 'consola';
 import IPlexServer from '@dto/IPlexServer';
 
@@ -46,7 +46,7 @@ export default class UserStore extends VuexModule {
 
 	@Action({ commit: 'setAccounts' })
 	async refreshAccounts(): Promise<IAccount[]> {
-		return await GetAllAccounts();
+		return await GetAllAccountsAsync();
 	}
 
 	@Action

@@ -179,7 +179,7 @@ namespace PlexRipper.WebAPI.Controllers
             return Ok($"Successfully deleted account with id: {id}");
         }
 
-        [HttpPost("/validate")]
+        [HttpPost("validate")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -207,7 +207,7 @@ namespace PlexRipper.WebAPI.Controllers
             }
         }
 
-        [HttpGet("/check/{username}")]
+        [HttpGet("check/{username}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(bool))]
         public async Task<IActionResult> CheckUsername(string username)

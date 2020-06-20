@@ -1,172 +1,236 @@
 ﻿using AutoMapper;
-using Carter;
-using Carter.ModelBinding;
-using Carter.Request;
-using Carter.Response;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
+using PlexRipper.WebAPI.Validators;
+using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PlexRipper.WebAPI.Controllers
 {
-    public class AccountController : CarterModule
+    public class AccountController : BaseController
     {
+
         private readonly IAccountService _accountService;
         private readonly IMapper _mapper;
-        private readonly Serilog.ILogger Log;
+        public override ILogger Log { get; }
 
-        public AccountController(IAccountService accountService, IMapper mapper, Serilog.ILogger log) : base("/api")
+        public AccountController(IAccountService accountService, IMapper mapper, ILogger logger)
         {
-
+            Log = logger.ForContext<AccountController>();
             _accountService = accountService;
             _mapper = mapper;
-            Log = log;
-            string path = "/accounts";
-            Get(path, GetAll);
-            Get(path + "/{id:int}", Get);
-            Get(path + "/check/", CheckUsername); // Check if username exists
-            Post(path + "/create", Create); // Create Account
-            Post(path + "/update", Update); // Update Account
-            Post(path + "/validate", Validate); // Validate Account
-            Delete(path + "/{id:int}", Delete);
         }
 
-        private async Task CheckUsername(HttpRequest req, HttpResponse res)
-        {
-            string username = req.Query["username"].ToString();
 
-            if (string.IsNullOrEmpty(username))
+        //GET: api/<AccountController>
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AccountDTO>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(IEnumerable<AccountDTO>))]
+        public async Task<ActionResult<IEnumerable<AccountDTO>>> GetAll([FromQuery] bool enabledOnly = false)
+        {
+            var data = await _accountService.GetAllAccountsAsync(enabledOnly);
+            var result = _mapper.Map<List<AccountDTO>>(data);
+            if (!result.Any() && enabledOnly)
             {
-                res.StatusCode = StatusCodes.Status400BadRequest;
-                await res.Negotiate(null);
+                Log.Debug("Could not find any enabled accounts");
+                return NotFound();
+            }
+            Log.Debug($"Returned {result.Count} accounts");
+            return Ok(result);
+        }
+
+        // GET api/<AccountController>/5
+        [HttpGet("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AccountDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<AccountDTO>> GetById(int id)
+        {
+            string message;
+            if (id <= 0)
+            {
+                message = $"The Id can not be 0 when getting an {nameof(Account)}";
+                Log.Warning(message);
+                return BadRequest(message);
             }
 
-            var exists = await _accountService.GetAccountAsync(username) != null;
-            if (exists)
+            try
             {
-                res.StatusCode = StatusCodes.Status406NotAcceptable;
-                await res.AsJson(new
+                var data = await _accountService.GetAccountAsync((int)id);
+                if (data != null)
                 {
-                    message = $"Account with username: \"{username}\" already exists!"
-                });
+                    return Ok(_mapper.Map<AccountDTO>(data));
+                }
+                message = $"Could not find an {nameof(Account)} with Id: {(int)id}";
+                Log.Warning(message);
+                return NotFound(message);
+
+            }
+            catch (Exception e)
+            {
+                //return InternalServerError(e);
+            }
+            return BadRequest();
+        }
+
+
+        // PUT api/<AccountController>/5
+        [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Put(int id, [FromBody] AccountDTO account)
+        {
+            string message;
+            if (id <= 0)
+            {
+                message = "The Id can not be 0 or lower when updating an account";
+                Log.Warning(message);
+                return BadRequest(message);
+            }
+
+            var validator = new AccountDTOValidator();
+            ValidationResult results = await validator.ValidateAsync(account);
+
+            if (!results.IsValid)
+            {
+                Log.Error(results.Errors.ToString(), "Validation failed:");
+                return BadRequest(results.Errors);
+            }
+
+
+            // Save the account in the DB
+            try
+            {
+                account.Id = id;
+                var accountDB = await _accountService.UpdateAccountAsync(_mapper.Map<Account>(account));
+
+                if (accountDB != null)
+                {
+                    return Ok(_mapper.Map<AccountDTO>(accountDB));
+                }
+                return UnprocessableEntity(null);
+
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
+        }
+
+
+        // POST api/<AccountController>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(AccountDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Post([FromBody] AccountDTO newAccount)
+        {
+            var validator = new AccountDTOValidator();
+            ValidationResult results = await validator.ValidateAsync(newAccount);
+
+            if (!results.IsValid)
+            {
+                return BadRequest(results.Errors);
+            }
+
+            // Save the account in the DB
+            try
+            {
+                var accountDB = await _accountService.CreateAccountAsync(_mapper.Map<Account>(newAccount));
+
+                if (accountDB != null)
+                {
+                    return Created($"Account with id {accountDB.Id} was created successfully", _mapper.Map<AccountDTO>(accountDB));
+                }
+                return UnprocessableEntity(null);
+
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
+        }
+
+
+
+        // DELETE api/<AccountController>/5
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            bool result = await _accountService.RemoveAccountAsync(id);
+
+            if (!result)
+            {
+                return NotFound($"Could not find account with id: {id} to delete");
+            }
+            return Ok($"Successfully deleted account with id: {id}");
+        }
+
+        [HttpPost("/validate")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Validate([FromBody] AccountDTO account)
+        {
+            var validator = new AccountDTOValidator();
+            ValidationResult results = await validator.ValidateAsync(account);
+
+            if (!results.IsValid)
+            {
+                return BadRequest(results.Errors);
+            }
+
+            bool isValid = await _accountService.ValidateAccountAsync(account.Username, account.Password);
+            if (isValid)
+            {
+                string message = $"Account with username: {account.Username} was valid";
+                Log.Debug(message);
+                return Ok(message);
             }
             else
             {
-                res.StatusCode = StatusCodes.Status200OK;
+                string message = $"Account with username: {account.Username} was invalid";
+                return Unauthorized(message);
             }
         }
 
-        private async Task Delete(HttpRequest req, HttpResponse res)
+        [HttpGet("/check/{username}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(bool))]
+        public async Task<IActionResult> CheckUsername(string username)
         {
-            var result = await _accountService.RemoveAccountAsync(req.RouteValues.As<int>("id"));
-            res.StatusCode = result ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest;
-        }
-
-        private async Task Create(HttpRequest req, HttpResponse res)
-        {
-            var result = await req.BindAndValidate<AccountDTO>();
-
-            if (!result.ValidationResult.IsValid)
+            if (string.IsNullOrEmpty(username))
             {
-                res.StatusCode = StatusCodes.Status422UnprocessableEntity;
-                await res.Negotiate(result.ValidationResult.GetFormattedErrors());
-                return;
+                return BadRequest("Ensure that an username is given");
             }
 
-            // Save the account in the DB
-            try
+            bool exists = await _accountService.GetAccountAsync(username) != null;
+            if (exists)
             {
-                var accountDB = await _accountService.CreateAccountAsync(_mapper.Map<Account>(result.Data));
-
-                if (accountDB != null)
-                {
-                    res.StatusCode = StatusCodes.Status201Created;
-                    await res.AsJson(_mapper.Map<AccountDTO>(accountDB));
-                }
-                else
-                {
-                    res.StatusCode = StatusCodes.Status400BadRequest;
-                    await res.Negotiate(null);
-                }
+                string message = $"Account with username: \"{username}\" already exists!";
+                Log.Warning(message);
+                return Forbid(message);
             }
-            catch (Exception e)
+            else
             {
-                Log.Error(e, $"Error: {e.Message}");
-                res.StatusCode = StatusCodes.Status500InternalServerError;
-                await res.Negotiate(null);
+                string message = $"Username: {username} is available";
+                Log.Debug(message);
+                return Ok($"Username: {username} is available");
+
             }
-        }
-
-        private async Task Update(HttpRequest req, HttpResponse res)
-        {
-            var result = await req.BindAndValidate<AccountDTO>();
-
-            if (!result.ValidationResult.IsValid)
-            {
-                res.StatusCode = StatusCodes.Status422UnprocessableEntity;
-                await res.Negotiate(result.ValidationResult.GetFormattedErrors());
-                return;
-            }
-
-            // Save the account in the DB
-            try
-            {
-                var accountDB = await _accountService.UpdateAccountAsync(_mapper.Map<Account>(result.Data));
-
-                if (accountDB != null)
-                {
-                    res.StatusCode = StatusCodes.Status201Created;
-                    await res.AsJson(_mapper.Map<AccountDTO>(accountDB));
-                }
-                else
-                {
-                    res.StatusCode = StatusCodes.Status400BadRequest;
-                    await res.Negotiate(null);
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, $"Error: {e.Message}");
-                res.StatusCode = StatusCodes.Status500InternalServerError;
-                await res.Negotiate(null);
-            }
-        }
-
-
-        private async Task GetAll(HttpRequest req, HttpResponse res)
-        {
-            bool onlyEnabled = req.Query["enabled"].ToString() == "1";
-
-            var data = await _accountService.GetAllAccountsAsync(onlyEnabled);
-            var result = _mapper.Map<List<AccountDTO>>(data);
-            await res.AsJson(result);
-        }
-
-        private async Task Get(HttpRequest req, HttpResponse res)
-        {
-            var data = await _accountService.GetAccountAsync(req.RouteValues.As<int>("id"));
-            var result = _mapper.Map<AccountDTO>(data);
-            await res.AsJson(result);
-        }
-
-        private async Task Validate(HttpRequest req, HttpResponse res)
-        {
-            var result = await req.BindAndValidate<AccountDTO>();
-
-            if (!result.ValidationResult.IsValid)
-            {
-                res.StatusCode = StatusCodes.Status422UnprocessableEntity;
-                await res.Negotiate(result.ValidationResult.GetFormattedErrors());
-                return;
-            }
-
-            var isValid = await _accountService.ValidateAccountAsync(result.Data.Username, result.Data.Password);
-            res.StatusCode = isValid ? StatusCodes.Status200OK : StatusCodes.Status401Unauthorized;
-            return;
         }
     }
 }

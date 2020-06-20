@@ -49,7 +49,7 @@ namespace PlexRipper.WebAPI
         public static Logger SetupLogging()
         {
             string template =
-                "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}";
+                "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({SourceContext}) {Message}{NewLine}{Exception}";
 
             return new LoggerConfiguration()
                 .MinimumLevel.Debug()

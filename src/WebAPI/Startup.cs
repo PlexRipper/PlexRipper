@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using AutofacSerilogIntegration;
 using AutoMapper;
-using Carter;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -54,7 +53,12 @@ namespace PlexRipper.WebAPI
             app.UseSwaggerUi3(); // serve Swagger UI
 
             app.UseRouting();
-            app.UseEndpoints(builder => builder.MapCarter());
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+
             // app.UseAuthorization();
         }
 
@@ -63,6 +67,7 @@ namespace PlexRipper.WebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplication();
+            services.AddControllers();
 
             services.AddHttpContextAccessor();
 
@@ -70,10 +75,6 @@ namespace PlexRipper.WebAPI
             services.AddMvc().AddFluentValidation();
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-            // Carter
-            services.AddCarter();
-
-            services.AddControllers(); // TODO Might be removed
             services.AddCors();
             // Customise default API behaviour
             services.Configure<ApiBehaviorOptions>(options =>
@@ -106,7 +107,7 @@ namespace PlexRipper.WebAPI
 
             // Infrastructure
             builder.RegisterModule<InfrastructureModule>();
-            builder.RegisterLogger();
+            builder.RegisterLogger(autowireProperties: true);
 
 
             // Auto Mapper

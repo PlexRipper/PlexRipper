@@ -1,59 +1,61 @@
 {
-  "name": "plex-ripper-web-ui",
-  "version": "1.0.0",
-  "description": "Plex Ripper Web UI",
-  "author": "JasonLandbridge",
-  "private": true,
-  "scripts": {
-    "dev": "nuxt-ts",
-    "build": "nuxt-ts build",
-    "generate": "nuxt-ts generate",
-    "start": "nuxt-ts start",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
-    "lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier-stylelint --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{css,scss}\" --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\"",
-    "test": "jest"
-  },
-  "lint-staged": {
-    "*.{js,vue}": "npm run lint",
-    "*.{css,vue}": "stylelint"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "dependencies": {
-    "@mdi/font": "^5.3.45",
-    "@nuxt/types": "^0.7.9",
-    "@nuxt/typescript-runtime": "^0.4.10",
-    "@nuxtjs/axios": "^5.11.0",
-    "@nuxtjs/dotenv": "^1.4.0",
-    "@types/node": "^13.13.12",
-    "consola": "^2.13.0",
-    "material-design-icons-iconfont": "^5.0.1",
-    "nuxt": "^2.13.0",
-    "vue-property-decorator": "^8.5.1"
-  },
-  "devDependencies": {
-    "@nuxt/typescript-build": "^0.6.7",
-    "@nuxtjs/eslint-config-typescript": "^1.0.0",
-    "@nuxtjs/eslint-module": "^1.0.0",
-    "@nuxtjs/stylelint-module": "^3.1.0",
-    "@nuxtjs/vuetify": "^1.0.0",
-    "@vue/test-utils": "^1.0.3",
-    "babel-eslint": "^10.0.1",
-    "babel-jest": "^24.1.0",
-    "eslint": "^6.1.0",
-    "eslint-config-prettier": "^6.10.0",
-    "eslint-plugin-nuxt": "^1.0.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "husky": "^4.0.0",
-    "jest": "^24.1.0",
-    "lint-staged": "^10.2.11",
-    "prettier": "^1.19.1",
-    "stylelint": "^10.1.0",
-    "ts-jest": "^25.0.0",
-    "vue-jest": "^4.0.0-beta.3",
-    "vuex-module-decorators": "^0.17.0"
-  }
+	"name": "plex-ripper-web-ui",
+	"version": "1.0.0",
+	"description": "Plex Ripper Web UI",
+	"author": "JasonLandbridge",
+	"private": true,
+	"scripts": {
+		"dev": "nuxt-ts dev",
+		"build": "nuxt-ts build",
+		"generate": "nuxt-ts build && nuxt-ts export",
+		"start": "nuxt-ts start",
+		"lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+		"lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier-stylelint --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{css,scss}\" --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\"",
+		"test": "jest"
+	},
+	"lint-staged": {
+		"*.{js,vue}": "npm run lint",
+		"*.{css,vue}": "stylelint"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"dependencies": {
+		"@mdi/font": "^5.3.45",
+		"@nuxt/types": "^2.13.0",
+		"@nuxt/typescript-runtime": "^0.4.10",
+		"@nuxtjs/axios": "^5.11.0",
+		"@nuxtjs/dotenv": "^1.4.0",
+		"@types/node": "^14.0.13",
+		"consola": "^2.13.0",
+		"material-design-icons-iconfont": "^5.0.1",
+		"nuxt": "^2.13.0",
+		"vue": "^2.6.11",
+		"vue-class-component": "^7.2.3",
+		"vue-property-decorator": "^9.0.0"
+	},
+	"devDependencies": {
+		"@nuxt/typescript-build": "^1.0.3",
+		"@nuxtjs/eslint-config-typescript": "^2.0.0",
+		"@nuxtjs/eslint-module": "^2.0.0",
+		"@nuxtjs/stylelint-module": "^4.0.0",
+		"@nuxtjs/vuetify": "^1.0.0",
+		"@vue/test-utils": "^1.0.3",
+		"babel-eslint": "^10.0.1",
+		"babel-jest": "^24.1.0",
+		"eslint": "^6.1.0",
+		"eslint-config-prettier": "^6.10.0",
+		"eslint-plugin-nuxt": "^1.0.0",
+		"eslint-plugin-prettier": "^3.1.4",
+		"husky": "^4.0.0",
+		"jest": "^24.1.0",
+		"lint-staged": "^10.2.11",
+		"prettier": "^1.19.1",
+		"stylelint": "^10.1.0",
+		"ts-jest": "^25.0.0",
+		"vue-jest": "^4.0.0-beta.3",
+		"vuex-module-decorators": "^0.17.0"
+	}
 }

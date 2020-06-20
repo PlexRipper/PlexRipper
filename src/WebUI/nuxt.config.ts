@@ -3,6 +3,7 @@ import { Configuration } from '@nuxt/types/config';
 
 const config: Configuration = {
 	mode: 'spa',
+	target: 'static',
 	srcDir: 'src/',
 	/*
 	 ** Headers of the page
@@ -34,7 +35,6 @@ const config: Configuration = {
 	 */
 	plugins: [
 		{ src: '@plugins/consola.ts', mode: 'client' },
-		{ src: '@plugins/vuetify.ts', mode: 'client' },
 		{ src: '@plugins/axios.ts', mode: 'client' },
 	],
 	/*
@@ -42,18 +42,21 @@ const config: Configuration = {
 	 */
 	buildModules: [
 		// Doc: https://typescript.nuxtjs.org/guide/
+		'@nuxt/typescript-build',
+		// Doc: https://github.com/nuxt-community/stylelint-module
+		'@nuxtjs/stylelint-module',
 		[
-			'@nuxt/typescript-build',
+			'@nuxtjs/vuetify',
 			{
-				typeCheck: {
-					memoryLimit: 2048,
-					workers: 4,
+				customVariables: ['~/assets/scss/_variables.scss'],
+				theme: {
+					options: {
+						customProperties: true,
+					},
+					dark: true,
 				},
 			},
 		],
-		// Doc: https://github.com/nuxt-community/stylelint-module
-		'@nuxtjs/stylelint-module',
-		'@nuxtjs/vuetify',
 	],
 	/*
 	 ** Nuxt.js modules

@@ -9,9 +9,10 @@ namespace PlexRipper.WebAPI.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces(MediaTypeNames.Application.Json)]
-    public class BaseController : ControllerBase
+    public abstract class BaseController : ControllerBase
     {
         public virtual ILogger Log { get; }
+
 
         [NonAction]
         public IActionResult InternalServerError(Exception e)

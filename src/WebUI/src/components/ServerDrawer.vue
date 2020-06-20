@@ -5,7 +5,7 @@
 			<v-expansion-panel-content>
 				<v-list nav dense>
 					<v-list-item-group color="primary">
-						<v-list-item v-for="(library, y) in server.plexLibraries" :key="y">
+						<v-list-item v-for="(library, y) in server.plexLibraries" :key="y" @click="openMediaPage(library)">
 							<v-list-item-icon>
 								<v-icon>{{ findIcon(library.type) }}</v-icon>
 							</v-list-item-icon>
@@ -21,9 +21,11 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import IPlexServer from '@dto/IPlexServer';
 import { UserStore } from '../store';
+import IPlexLibrary from '../types/dto/IPlexLibrary';
 
 interface INavItem {
 	title: string;
@@ -60,6 +62,10 @@ export default class ServerDrawer extends Vue {
 			default:
 				return 'mdi-help-circle-outline';
 		}
+	}
+
+	openMediaPage(library: IPlexLibrary): void {
+		Log.debug(library);
 	}
 }
 </script>

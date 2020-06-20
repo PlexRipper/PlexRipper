@@ -91,6 +91,13 @@ namespace PlexRipper.Application.Services
         }
 
         #region CRUD
+
+
+        public Task<PlexServer> GetServerAsync(int plexServerId)
+        {
+            return _plexServerRepository.GetAsync(plexServerId);
+        }
+
         public async Task<List<PlexServer>> AddServersAsync(PlexAccount plexAccount, List<PlexServer> servers)
         {
             await _plexServerRepository.AddRangeAsync(servers);

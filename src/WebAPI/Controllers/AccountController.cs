@@ -33,7 +33,7 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AccountDTO>))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(IEnumerable<AccountDTO>))]
-        public async Task<ActionResult<IEnumerable<AccountDTO>>> GetAll([FromQuery] bool enabledOnly = false)
+        public async Task<IActionResult> GetAll([FromQuery] bool enabledOnly = false)
         {
             var data = await _accountService.GetAllAccountsAsync(enabledOnly);
             var result = _mapper.Map<List<AccountDTO>>(data);
@@ -52,7 +52,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<AccountDTO>> GetById(int id)
+        public async Task<IActionResult> Get(int id)
         {
             string message;
             if (id <= 0)
@@ -64,21 +64,20 @@ namespace PlexRipper.WebAPI.Controllers
 
             try
             {
-                var data = await _accountService.GetAccountAsync((int)id);
+                var data = await _accountService.GetAccountAsync(id);
                 if (data != null)
                 {
                     return Ok(_mapper.Map<AccountDTO>(data));
                 }
-                message = $"Could not find an {nameof(Account)} with Id: {(int)id}";
+                message = $"Could not find an {nameof(Account)} with Id: {id}";
                 Log.Warning(message);
                 return NotFound(message);
 
             }
             catch (Exception e)
             {
-                //return InternalServerError(e);
+                return InternalServerError(e);
             }
-            return BadRequest();
         }
 
 
@@ -86,7 +85,7 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Put(int id, [FromBody] AccountDTO account)
         {
@@ -118,7 +117,9 @@ namespace PlexRipper.WebAPI.Controllers
                 {
                     return Ok(_mapper.Map<AccountDTO>(accountDB));
                 }
-                return UnprocessableEntity(null);
+                message = $"Could not find a {nameof(PlexServer)} with Id: {id}";
+                Log.Warning(message);
+                return NotFound(message);
 
             }
             catch (Exception e)

@@ -18,5 +18,7 @@ namespace PlexRipper.Application.Common.Interfaces
         /// <param name="refresh">Force refresh from PlexApi</param>
         /// <returns></returns>
         Task<PlexServer> GetAllLibraryMediaAsync(PlexServer plexServer, bool refresh = false);
+
+        Task<PlexServer> GetServerAsync(int plexServerId);
     }
 }

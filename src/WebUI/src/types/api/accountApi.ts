@@ -4,7 +4,7 @@ import { GlobalStore } from '@/store';
 const logText = 'From AccountAPI => ';
 const apiPath = '/account';
 
-export async function GetAllAccountsAsync(): Promise<IAccount[]> {
+export async function getAllAccountsAsync(): Promise<IAccount[]> {
 	try {
 		let accounts: IAccount[] = [];
 

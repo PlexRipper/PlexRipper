@@ -1,4 +1,6 @@
 ﻿
+using PlexRipper.Application.Common.Interfaces.Settings;
+
 namespace PlexRipper.Settings.Models
 {
     public class SettingsModel : BaseModel
@@ -7,6 +9,7 @@ namespace PlexRipper.Settings.Models
 
         private string _apiKey = "bnrijbrogbwoeibgoiuweb";
         private bool _confirmExit = false;
+        private IDownloadManagerModel _downloadManager;
 
         #endregion Fields
 
@@ -33,6 +36,19 @@ namespace PlexRipper.Settings.Models
                 if (value != _confirmExit)
                 {
                     _confirmExit = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public IDownloadManagerModel DownloadManager
+        {
+            get => _downloadManager;
+            set
+            {
+                if (value != _downloadManager)
+                {
+                    _downloadManager = value;
                     OnPropertyChanged();
                 }
             }

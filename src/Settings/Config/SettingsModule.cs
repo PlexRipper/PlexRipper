@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using PlexRipper.Application.Common.Interfaces.Settings;
 
 
 namespace PlexRipper.Settings.Config

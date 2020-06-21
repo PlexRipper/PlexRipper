@@ -14,6 +14,7 @@ using PlexRipper.Application;
 using PlexRipper.Application.Common.Mappings;
 using PlexRipper.Application.Config;
 using PlexRipper.Domain.AutoMapper;
+using PlexRipper.DownloadManager.Config;
 using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Config;
 using PlexRipper.Settings.Config;
@@ -109,6 +110,7 @@ namespace PlexRipper.WebAPI
             // Infrastructure
             builder.RegisterModule<InfrastructureModule>();
             builder.RegisterModule<SettingsModule>();
+            builder.RegisterModule<DownloadManagerModule>();
             builder.RegisterLogger(autowireProperties: true);
 
 

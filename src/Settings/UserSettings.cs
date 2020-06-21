@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PlexRipper.Application.Common.Interfaces.Settings;
 using PlexRipper.Settings.Models;
 using Serilog;
 using System;

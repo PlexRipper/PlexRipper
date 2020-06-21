@@ -1,4 +1,5 @@
 ﻿using PlexRipper.Settings;
+using Shouldly;
 using Xunit;
 
 namespace Settings.UnitTests
@@ -13,8 +14,12 @@ namespace Settings.UnitTests
 
             // Act
             settings.Save();
-            // Assert
+            settings.Settings.ApiKey = "TEST!@#";
+            settings.Settings.ApiKey = "TEST123";
+            settings.Load();
 
+            // Assert
+            settings.Settings.ApiKey.ShouldBe("TEST123");
         }
     }
 }

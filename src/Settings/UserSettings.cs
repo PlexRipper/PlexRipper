@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PlexRipper.Settings.Models;
 using System;
 using System.IO;
 
@@ -10,22 +11,42 @@ namespace PlexRipper.Settings
         public static string FileName { get; } = "PlexRipperSettings.json";
         public static string FilePath { get; } = System.IO.Directory.GetCurrentDirectory();
 
-        public static string FileLocation => Path.Combine(FilePath, FileName);
+        public static string ConfigDirectory => Path.Join(FilePath, "\\config");
+        public static string FileLocation => Path.Join(ConfigDirectory, FileName);
 
-        public static SettingsModel SettingsModel { get; set; }
+        private SettingsModel _settings;
+
+        public SettingsModel Settings
+        {
+            get => _settings;
+            set
+            {
+                _settings = value;
+                _settings.PropertyChanged += (sender, args) => Save();
+            }
+        }
 
         public UserSettings()
         {
-
+            Settings = new SettingsModel();
         }
 
         public bool Save()
         {
+            CreateConfigDirectory();
+
             try
             {
-                string result = JsonConvert.SerializeObject(SettingsModel);
+                var jObject = JObject.FromObject(Settings);
 
-                File.WriteAllText(FileLocation, result);
+                using (StreamWriter file = File.CreateText(FileLocation))
+                using (JsonTextWriter writer = new JsonTextWriter(file)
+                {
+                    Formatting = Formatting.Indented
+                })
+                {
+                    jObject.WriteTo(writer);
+                }
 
                 return true;
             }
@@ -40,7 +61,6 @@ namespace PlexRipper.Settings
         {
             if (!File.Exists(FileLocation))
             {
-                SettingsModel = new SettingsModel();
                 Save();
             }
 
@@ -51,7 +71,7 @@ namespace PlexRipper.Settings
                 using (JsonTextReader reader = new JsonTextReader(file))
                 {
                     JObject o2 = (JObject)JToken.ReadFrom(reader);
-                    SettingsModel = o2.ToObject<SettingsModel>();
+                    Settings = o2.ToObject<SettingsModel>();
                 }
             }
             catch (Exception e)
@@ -65,6 +85,14 @@ namespace PlexRipper.Settings
         public static bool Reset()
         {
             return true;
+        }
+
+        public void CreateConfigDirectory()
+        {
+            if (!Directory.Exists(ConfigDirectory))
+            {
+                Directory.CreateDirectory(ConfigDirectory);
+            }
         }
     }
 }

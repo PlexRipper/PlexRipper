@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "DownloadManager": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

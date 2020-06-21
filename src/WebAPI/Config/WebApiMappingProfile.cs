@@ -32,11 +32,11 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<PlexLibrary, PlexLibraryContainerDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount));
 
-            //PlexLibrary -> PlexLibraryDTO
-            CreateMap<PlexSerie, PlexSerieDTO>(MemberList.Destination);
+            //PlexSerie -> PlexSerieDTO
+            CreateMap<PlexSerie, PlexSerieDTO>(MemberList.Destination).ReverseMap();
 
-            //PlexLibrary -> PlexLibraryDTO
-            CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination);
+            //PlexMovie -> PlexMovieDTO
+            CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination).ReverseMap();
 
         }
     }

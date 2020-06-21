@@ -1,4 +1,8 @@
+import { IPlexSerie } from './IPlexSerie';
+import { IPlexMovie } from './IPlexMovie';
+
 export default interface IPlexLibrary {
+	id: number;
 	key: string;
 	title: string;
 	type: string;
@@ -10,4 +14,7 @@ export default interface IPlexLibrary {
 	libraryLocationId: number;
 	libraryLocationPath: string;
 	plexServerId: number;
+	count: number;
+	movies?: IPlexMovie[] | undefined;
+	series?: IPlexSerie[] | undefined;
 }

@@ -66,6 +66,7 @@ export default class ServerDrawer extends Vue {
 
 	openMediaPage(library: IPlexLibrary): void {
 		Log.debug(library);
+		this.$router.push(`/movies/${library.id}`);
 	}
 }
 </script>

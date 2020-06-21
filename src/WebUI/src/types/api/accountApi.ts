@@ -34,11 +34,11 @@ export async function ValidateAccountAsync(account: IAccount): Promise<Number> {
 export async function createAccountAsync(account: IAccount): Promise<Number> {
 	return await GlobalStore.Axios.post(apiPath, account)
 		.then((res) => {
-			Log.debug(logText + 'The validation api result: ', res);
+			Log.debug(logText + 'createAccountAsync result: ', res);
 			return res.status;
 		})
 		.catch((e) => {
-			Log.error(logText + 'Validation Api Error: ', e);
+			Log.error(logText + 'createAccountAsync Error: ', e);
 			return e.response.status;
 		});
 }
@@ -46,11 +46,11 @@ export async function createAccountAsync(account: IAccount): Promise<Number> {
 export async function updateAccountAsync(account: IAccount): Promise<Number> {
 	return await GlobalStore.Axios.put(`${apiPath}/${account.id}`, account)
 		.then((res) => {
-			Log.debug(logText + 'The validation api result: ', res);
+			Log.debug(logText + 'updateAccountAsync result: ', res);
 			return res.status;
 		})
 		.catch((e) => {
-			Log.error(logText + 'Validation Api Error: ', e);
+			Log.error(logText + 'updateAccountAsync Error: ', e);
 			return e.response.status;
 		});
 }
@@ -59,11 +59,11 @@ export async function deleteAccountAsync(accountId: Number): Promise<boolean> {
 	if (accountId > 0) {
 		await GlobalStore.Axios.delete(`${apiPath}/${accountId}`)
 			.then((res) => {
-				Log.debug(logText + 'The validation api result: ', res);
+				Log.debug(logText + 'deleteAccountAsync result: ', res);
 				return res.status;
 			})
 			.catch((e) => {
-				Log.error(logText + 'Validation Api Error: ', e);
+				Log.error(logText + 'deleteAccountAsync Error: ', e);
 				return e.response.status;
 			});
 	}

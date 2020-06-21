@@ -51,7 +51,8 @@ namespace PlexRipper.WebAPI.Controllers
             var data = await _plexLibraryService.GetPlexLibraryAsync(id, refresh);
             if (data != null)
             {
-                var result = _mapper.Map<PlexLibraryContainerDTO>(data);
+                var result = _mapper.Map<PlexLibraryDTO>(data);
+                Log.Debug($"Found {data.GetMediaCount} in library {data.Title} of type {data.Type}");
                 return Ok(result);
 
             }

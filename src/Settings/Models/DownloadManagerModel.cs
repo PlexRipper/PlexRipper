@@ -18,6 +18,7 @@ namespace PlexRipper.Settings.Models
         private string _proxyUsername = string.Empty;
         private int _speedLimit = 200;
         private bool _startDownloadsOnStartup = true;
+        private string _tempDownloadLocation;
 
         #endregion Fields
 
@@ -44,6 +45,20 @@ namespace PlexRipper.Settings.Models
                 if (value != _downloadLocation)
                 {
                     _downloadLocation = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string TempDownloadLocation
+        {
+            get => _tempDownloadLocation;
+            set
+            {
+                if (value != _tempDownloadLocation)
+                {
+
+                    _tempDownloadLocation = value;
                     OnPropertyChanged();
                 }
             }

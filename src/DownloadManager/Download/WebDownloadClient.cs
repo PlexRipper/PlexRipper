@@ -1,5 +1,6 @@
 ﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Settings;
+using PlexRipper.DownloadManager.Common;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -14,15 +15,14 @@ namespace PlexRipper.DownloadManager.Download
 {
     public class WebDownloadClient : INotifyPropertyChanged
     {
-        private readonly IDownloadManager _downloadManager;
-        private readonly IUserSettings _userSettings;
-        private readonly ILogger _logger;
-
         #region Fields
 
         // Used for blocking other processes when a file is being created or written to
         private static object fileLocker = new object();
 
+        private readonly IDownloadManager _downloadManager;
+        private readonly ILogger _logger;
+        private readonly IUserSettings _userSettings;
         // List of download speed values in the last 10 seconds
         private List<int> downloadRates = new List<int>();
 
@@ -442,35 +442,12 @@ namespace PlexRipper.DownloadManager.Download
         }
 
         #endregion Methods
+
+        #region Properties
+
+        #endregion Properties
+
         #region Constructors
-
-        public WebDownloadClient(IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger, string url)
-        {
-            _downloadManager = downloadManager;
-            _userSettings = userSettings;
-            _logger = logger.ForContext<WebDownloadClient>();
-
-            this.BufferSize = 1024; // Buffer size is 1KB
-            this.MaxCacheSize = _userSettings.DownloadManager.MemoryCacheSize * 1024; // Default cache size is 1MB
-            this.BufferCountPerNotification = 64;
-
-            this.Url = new Uri(url, UriKind.Absolute);
-
-            this.SupportsRange = false;
-            this.HasError = false;
-            this.OpenFileOnCompletion = false;
-            this.TempFileCreated = false;
-            this.IsSelected = false;
-            this.IsBatch = false;
-            this.BatchUrlChecked = false;
-            this.SpeedLimitChanged = false;
-            this.speedUpdateCount = 0;
-            this.recentAverageRate = 0;
-            this.StatusText = String.Empty;
-
-            this.Status = DownloadStatus.Initialized;
-        }
-
 
         #endregion Constructors
 
@@ -509,7 +486,7 @@ namespace PlexRipper.DownloadManager.Download
         }
 
         // Average download speed
-        public string AverageDownloadSpeed => DownloadManager.FormatSpeedString((int)Math.Floor((double)(DownloadedSize + CachedSize) / TotalElapsedTime.TotalSeconds));
+        public string AverageDownloadSpeed => Formatter.FormatSpeedString((int)Math.Floor((double)(DownloadedSize + CachedSize) / TotalElapsedTime.TotalSeconds));
 
         // Batch URL was checked
         public bool BatchUrlChecked { get; set; }
@@ -543,7 +520,7 @@ namespace PlexRipper.DownloadManager.Download
         // Size of downloaded data which was written to the local file
         public long DownloadedSize { get; set; }
 
-        public string DownloadedSizeString => DownloadManager.FormatSizeString(DownloadedSize + CachedSize);
+        public string DownloadedSizeString => Formatter.FormatSizeString(DownloadedSize + CachedSize);
 
         // Local folder which contains the file
         public string DownloadFolder => this.TempDownloadPath.Remove(TempDownloadPath.LastIndexOf("\\") + 1);
@@ -557,7 +534,7 @@ namespace PlexRipper.DownloadManager.Download
             {
                 if (this.Status == DownloadStatus.Downloading && !this.HasError)
                 {
-                    return DownloadManager.FormatSpeedString(downloadSpeed);
+                    return Formatter.FormatSpeedString(downloadSpeed);
                 }
                 return String.Empty;
             }
@@ -569,7 +546,7 @@ namespace PlexRipper.DownloadManager.Download
         // File size (in bytes)
         public long FileSize { get; set; }
 
-        public string FileSizeString => DownloadManager.FormatSizeString(FileSize);
+        public string FileSizeString => Formatter.FormatSizeString(FileSize);
 
         // File type (extension)
         public string FileType => Url.ToString().Substring(Url.ToString().LastIndexOf('.') + 1).ToUpper();
@@ -585,6 +562,8 @@ namespace PlexRipper.DownloadManager.Download
 
         // Last update time of the DataGrid item
         public DateTime LastUpdateTime { get; set; }
+
+        public ILogger Log => _logger;
 
         // Maxiumum cache size
         public int MaxCacheSize { get; set; }
@@ -661,7 +640,7 @@ namespace PlexRipper.DownloadManager.Download
 
                     TimeSpan span = TimeSpan.FromSeconds(secondsLeft);
 
-                    return DownloadManager.FormatTimeSpanString(span);
+                    return Formatter.FormatTimeSpanString(span);
                 }
                 return String.Empty;
             }
@@ -683,13 +662,37 @@ namespace PlexRipper.DownloadManager.Download
             }
         }
 
-        public string TotalElapsedTimeString => DownloadManager.FormatTimeSpanString(TotalElapsedTime);
+        public string TotalElapsedTimeString => Formatter.FormatTimeSpanString(TotalElapsedTime);
 
         // URL of the file to download
         public Uri Url { get; private set; }
 
-        public ILogger Log => _logger;
+        public WebDownloadClient(IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger)
+        {
+            _downloadManager = downloadManager;
+            _userSettings = userSettings;
+            _logger = logger.ForContext<WebDownloadClient>();
 
+            this.BufferSize = 1024; // Buffer size is 1KB
+            this.MaxCacheSize = _userSettings.DownloadManager.MemoryCacheSize * 1024; // Default cache size is 1MB
+            this.BufferCountPerNotification = 64;
+
+            this.Url = new Uri(url, UriKind.Absolute);
+
+            this.SupportsRange = false;
+            this.HasError = false;
+            this.OpenFileOnCompletion = false;
+            this.TempFileCreated = false;
+            this.IsSelected = false;
+            this.IsBatch = false;
+            this.BatchUrlChecked = false;
+            this.SpeedLimitChanged = false;
+            this.speedUpdateCount = 0;
+            this.recentAverageRate = 0;
+            this.StatusText = String.Empty;
+
+            this.Status = DownloadStatus.Initialized;
+        }
         public event EventHandler DownloadCompleted;
 
         public event EventHandler DownloadProgressChanged;

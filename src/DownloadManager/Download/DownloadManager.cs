@@ -1,25 +1,23 @@
 ﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Settings;
-using System;
+using Serilog;
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace PlexRipper.DownloadManager.Download
 {
     public class DownloadManager : IDownloadManager
     {
+        #region Fields
+
         private readonly IUserSettings _userSettings;
 
-        private static readonly NumberFormatInfo numberFormat = NumberFormatInfo.InvariantInfo;
+        private readonly ILogger _logger;
+        private ILogger Log { get; }
 
         // Collection which contains all download clients, bound to the DataGrid control
         public List<WebDownloadClient> DownloadsList = new List<WebDownloadClient>();
 
-        public DownloadManager(IUserSettings userSettings)
-        {
-            _userSettings = userSettings;
-
-        }
+        #endregion Fields
 
         #region Properties
 
@@ -57,59 +55,29 @@ namespace PlexRipper.DownloadManager.Download
         // Total number of downloads in the list
         public int TotalDownloads => DownloadsList.Count;
 
-        #endregion
+        #endregion Properties
+
+        #region Constructors
+
+        public DownloadManager(IUserSettings userSettings, ILogger logger)
+        {
+            _userSettings = userSettings;
+            Log = logger.ForContext<DownloadManager>();
+        }
+
+        #endregion Constructors
 
         #region Methods
 
-        // Format file size or downloaded size string
-        public static string FormatSizeString(long byteSize)
-        {
-            double kiloByteSize = (double)byteSize / 1024D;
-            double megaByteSize = kiloByteSize / 1024D;
-            double gigaByteSize = megaByteSize / 1024D;
 
-            if (byteSize < 1024)
-                return string.Format(numberFormat, "{0} B", byteSize);
-            else if (byteSize < 1048576)
-                return string.Format(numberFormat, "{0:0.00} kB", kiloByteSize);
-            else if (byteSize < 1073741824)
-                return string.Format(numberFormat, "{0:0.00} MB", megaByteSize);
-            else
-                return string.Format(numberFormat, "{0:0.00} GB", gigaByteSize);
+        public WebDownloadClient CreateDownloadClient()
+        {
+            var newClient = new WebDownloadClient(this, _userSettings, Log);
+            DownloadsList.Add(newClient);
+            return newClient;
         }
 
-        // Format download speed string
-        public static string FormatSpeedString(int speed)
-        {
-            float kbSpeed = (float)speed / 1024F;
-            float mbSpeed = kbSpeed / 1024F;
+        #endregion Methods
 
-            if (speed <= 0)
-                return string.Empty;
-            else if (speed < 1024)
-                return speed + " B/s";
-            else if (speed < 1048576)
-                return kbSpeed.ToString("#.00", numberFormat) + " kB/s";
-            else
-                return mbSpeed.ToString("#.00", numberFormat) + " MB/s";
-        }
-
-        // Format time span string so it can display values of more than 24 hours
-        public static string FormatTimeSpanString(TimeSpan span)
-        {
-            string hours = ((int)span.TotalHours).ToString();
-            string minutes = span.Minutes.ToString();
-            string seconds = span.Seconds.ToString();
-            if ((int)span.TotalHours < 10)
-                hours = "0" + hours;
-            if (span.Minutes < 10)
-                minutes = "0" + minutes;
-            if (span.Seconds < 10)
-                seconds = "0" + seconds;
-
-            return $"{hours}:{minutes}:{seconds}";
-        }
-
-        #endregion
     }
 }

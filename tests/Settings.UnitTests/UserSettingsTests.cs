@@ -14,12 +14,12 @@ namespace Settings.UnitTests
 
             // Act
             settings.Save();
-            settings.Settings.ApiKey = "TEST!@#";
-            settings.Settings.ApiKey = "TEST123";
+            settings.ApiKey = "TEST!@#";
+            settings.ApiKey = "TEST123";
             settings.Load();
 
             // Assert
-            settings.Settings.ApiKey.ShouldBe("TEST123");
+            settings.ApiKey.ShouldBe("TEST123");
         }
     }
 }

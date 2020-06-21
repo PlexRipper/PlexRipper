@@ -47,6 +47,7 @@
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\DownloadManager\DownloadManager.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Settings\Settings.csproj" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

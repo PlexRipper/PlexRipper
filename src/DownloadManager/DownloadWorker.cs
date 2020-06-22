@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using PlexRipper.Application.Common.Interfaces.Application;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using System;
 using System.Threading;
@@ -9,21 +9,23 @@ namespace PlexRipper.DownloadManager
 {
     public class DownloadWorker : BackgroundService
     {
+        public Serilog.ILogger Log { get; }
         private readonly IDownloadManager _downloadManager;
-        private readonly ILogger<DownloadWorker> _logger;
+        private readonly ITestClass _testClass;
 
-        public DownloadWorker(IDownloadManager downloadManager, ILogger<DownloadWorker> logger)
+        public DownloadWorker(IDownloadManager downloadManager, ITestClass testClass, Serilog.ILogger log)
         {
+            Log = log;
             _downloadManager = downloadManager;
-            _logger = logger;
+            _testClass = testClass;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                Log.Debug($"Worker running at: {DateTimeOffset.Now}");
+                _testClass.TestLogging();
                 await Task.Delay(1000, stoppingToken);
             }
         }

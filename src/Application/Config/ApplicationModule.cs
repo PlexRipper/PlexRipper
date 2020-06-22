@@ -1,4 +1,6 @@
 ﻿using Autofac;
+using PlexRipper.Application.Common.Interfaces.Application;
+using PlexRipper.Application.Common.TestClass;
 using System.Reflection;
 
 namespace PlexRipper.Application.Config
@@ -14,6 +16,8 @@ namespace PlexRipper.Application.Config
                 .Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces()
                 .InstancePerDependency();
+
+            builder.RegisterType<TestClass>().As<ITestClass>().SingleInstance();
         }
     }
 }

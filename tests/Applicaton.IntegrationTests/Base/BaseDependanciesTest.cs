@@ -32,13 +32,16 @@ namespace PlexRipper.Application.IntegrationTests.Base
 
         public static ILogger GetLoggerConfig()
         {
+            string template =
+                "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({SourceContext}) {Message}{NewLine}{Exception}";
+
             return new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.Debug()
                 .WriteTo.TestOutput(Output)
-                .WriteTo.ColoredConsole(
-                    LogEventLevel.Debug,
-                    "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({CorrelationToken}) {Message}{NewLine}{Exception}")
+                .WriteTo.ColoredConsole(LogEventLevel.Verbose, template)
                 .CreateLogger();
         }
 

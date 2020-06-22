@@ -1,7 +1,8 @@
 ﻿using Autofac;
+using AutofacSerilogIntegration;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.Application;
 using PlexRipper.WebAPI.Config;
-using Serilog;
 
 namespace PlexRipper.Application.IntegrationTests.Base
 {
@@ -13,7 +14,7 @@ namespace PlexRipper.Application.IntegrationTests.Base
         {
             var builder = new ContainerBuilder();
             ContainerConfig.ConfigureContainer(builder);
-            builder.Register<ILogger>((c, p) => BaseDependanciesTest.GetLoggerConfig()).SingleInstance();
+            builder.RegisterLogger(BaseDependanciesTest.GetLoggerConfig());
             AutofacContainer = builder.Build();
         }
 
@@ -23,6 +24,7 @@ namespace PlexRipper.Application.IntegrationTests.Base
         public IPlexService GetPlexService => AutofacContainer.Resolve<IPlexService>();
         public IPlexDownloadService GetPlexDownloadService => AutofacContainer.Resolve<IPlexDownloadService>();
         public IPlexLibraryService GetPlexLibraryService => AutofacContainer.Resolve<IPlexLibraryService>();
+        public ITestClass GetTestClass => AutofacContainer.Resolve<ITestClass>();
 
     }
 }

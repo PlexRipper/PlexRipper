@@ -100,18 +100,5 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
         }
 
-
-
-
-        [Fact]
-        public void ShouldLogDebugToUnitTestConsole()
-        {
-            var logger = BaseDependanciesTest.GetLogger<object>();
-            logger.Warning("This is a warning string");
-            logger.Debug("This is a debug string");
-            logger.Information("This is an information string");
-            logger.Error("This is a error string");
-            logger.Fatal("This is a fatal string");
-        }
     }
 }

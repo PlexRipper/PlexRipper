@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Application.Common.Interfaces.Settings
+﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
+
+namespace PlexRipper.Application.Common.Interfaces.Settings
 {
     public interface IUserSettings
     {

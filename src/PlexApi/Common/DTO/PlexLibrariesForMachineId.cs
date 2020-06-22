@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace PlexRipper.Application.Common.DTO.Plex
+namespace PlexRipper.PlexApi.Common.DTO
 {
     [XmlRoot(ElementName = "Section")]
     public class SectionLite

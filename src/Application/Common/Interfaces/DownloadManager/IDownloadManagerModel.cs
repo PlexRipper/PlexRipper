@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Application.Common.Interfaces.Settings
+﻿namespace PlexRipper.Application.Common.Interfaces.DownloadManager
 {
     public interface IDownloadManagerModel
     {

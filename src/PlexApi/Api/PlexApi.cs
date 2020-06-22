@@ -1,6 +1,4 @@
-﻿using PlexRipper.Application.Common.DTO.Plex;
-using PlexRipper.Application.Common.Interfaces.API;
-using PlexRipper.Domain.Entities;
+﻿using PlexRipper.Domain.Entities;
 using PlexRipper.PlexApi.Common.DTO;
 using PlexRipper.PlexApi.Common.DTO.PlexGetLibrarySections;
 using PlexRipper.PlexApi.Common.DTO.PlexGetServer;
@@ -16,24 +14,14 @@ using System.Threading.Tasks;
 
 namespace PlexRipper.PlexApi.Api
 {
-    public enum ContentType
-    {
-        Json,
-        Xml,
-        Text,
-        Html,
-    }
-
     public class PlexApi
     {
-        public PlexApi(IApi api, PlexWebClient client, Serilog.ILogger logger)
+        public PlexApi(PlexWebClient client, Serilog.ILogger logger)
         {
             Log = logger;
-            Api = api;
             Client = client;
         }
 
-        private IApi Api { get; }
         public PlexWebClient Client { get; }
         private Serilog.ILogger Log { get; }
 
@@ -94,7 +82,7 @@ namespace PlexRipper.PlexApi.Api
 
         public Task<PlexServerContainerXML> GetServerAsync(string authToken)
         {
-            var request = new RestRequest(new Uri(ServerUri), Method.GET);
+            var request = new RestRequest(new Uri(ServerUri), Method.GET, DataFormat.Xml);
             request = AddToken(request, authToken);
             return Client.SendRequestAsync<PlexServerContainerXML>(request);
         }

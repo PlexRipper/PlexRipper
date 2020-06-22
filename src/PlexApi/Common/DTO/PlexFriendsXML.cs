@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace PlexRipper.Application.Common.DTO.Plex
+namespace PlexRipper.PlexApi.Common.DTO
 {
     [XmlRoot(ElementName = "MediaContainer")]
     public class PlexFriendsXML

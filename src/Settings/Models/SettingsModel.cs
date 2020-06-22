@@ -1,4 +1,5 @@
 ﻿
+using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Settings;
 
 namespace PlexRipper.Settings.Models

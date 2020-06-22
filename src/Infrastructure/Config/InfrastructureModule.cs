@@ -1,8 +1,5 @@
 ﻿using Autofac;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces.API;
-using PlexRipper.Application.Common.Models;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Persistence;
 using System.Reflection;
@@ -21,16 +18,7 @@ namespace PlexRipper.Infrastructure.Config
                 .Where(t => t.Name.EndsWith("Repository"))
                 .AsImplementedInterfaces();
 
-            builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>();
-            builder
-                .RegisterType<PlexRipperHttpClient>()
-                .As<IPlexRipperHttpClient>()
-                .SingleInstance();
-
-            builder.RegisterType<Api>().As<IApi>();
-
             // Register Entity Framework Database
-
             builder.RegisterType<PlexRipperDbContext>()
                 .WithParameter("options", PlexRipperDbContext.GetConfig().Options)
                 .As<IPlexRipperDbContext>()

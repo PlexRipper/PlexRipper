@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Infrastructure.Persistence;
+using PlexRipper.Infrastructure.Common.Interfaces;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PlexRipper.Infrastructure.Common.Interfaces;
 
 namespace PlexRipper.Infrastructure.Repositories
 {

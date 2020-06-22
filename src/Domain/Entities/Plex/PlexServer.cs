@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using PlexRipper.Domain.Entities.Base;
 using PlexRipper.Domain.Entities.JoinTables;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using PlexRipper.Domain.Entities.Base;
 
 namespace PlexRipper.Domain.Entities
 {
@@ -30,11 +30,22 @@ namespace PlexRipper.Domain.Entities
 
         public virtual List<PlexLibrary> PlexLibraries { get; set; }
 
+        #region Helpers
 
+
+        /// <summary>
+        /// The server url, e.g: http://112.202.10.213:32400
+        /// </summary>
         [NotMapped]
         public string BaseUrl => $"{Scheme}://{Address}:{Port}";
 
+        /// <summary>
+        /// The library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections
+        /// </summary>
         [NotMapped]
         public string LibraryUrl => $"{BaseUrl}/library/sections";
+
+        #endregion
+
     }
 }

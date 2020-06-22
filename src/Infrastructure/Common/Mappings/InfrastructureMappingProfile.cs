@@ -4,6 +4,7 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.Infrastructure.Common.DTO;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetLibrarySections;
 using PlexRipper.Infrastructure.Common.DTO.PlexGetServer;
+using PlexRipper.Infrastructure.Common.DTO.PlexGetStatus;
 using PlexRipper.Infrastructure.Common.DTO.PlexLibrary;
 using PlexRipper.Infrastructure.Common.DTO.PlexLibraryMedia;
 using System.Linq;
@@ -79,8 +80,32 @@ namespace PlexRipper.Infrastructure.Common.Mappings
                 .ForMember(dest => dest.OriginallyAvailableAt,
                     opt => opt.ConvertUsing(new StringToDateTimeUTC()));
 
+            CreateMap<PlexMediaMetaDataDTO, PlexMediaMetaData>(MemberList.Destination)
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => GetMedia(src).Duration))
+                .ForMember(dest => dest.Bitrate, opt => opt.MapFrom(src => GetMedia(src).Bitrate))
+                .ForMember(dest => dest.Width, opt => opt.MapFrom(src => GetMedia(src).Width))
+                .ForMember(dest => dest.Height, opt => opt.MapFrom(src => GetMedia(src).Height))
+                .ForMember(dest => dest.AspectRatio, opt => opt.MapFrom(src => GetMedia(src).AspectRatio))
+                .ForMember(dest => dest.AudioChannels, opt => opt.MapFrom(src => GetMedia(src).AudioChannels))
+                .ForMember(dest => dest.AudioCodec, opt => opt.MapFrom(src => GetMedia(src).AudioCodec))
+                .ForMember(dest => dest.VideoCodec, opt => opt.MapFrom(src => GetMedia(src).VideoCodec))
+                .ForMember(dest => dest.VideoResolution, opt => opt.MapFrom(src => GetMedia(src).VideoResolution))
+                .ForMember(dest => dest.MediaFormat, opt => opt.MapFrom(src => GetMedia(src).Container))
+                .ForMember(dest => dest.VideoFrameRate, opt => opt.MapFrom(src => GetMedia(src).VideoFrameRate))
+                .ForMember(dest => dest.AudioProfile, opt => opt.MapFrom(src => GetMedia(src).AudioProfile))
+                .ForMember(dest => dest.VideoProfile, opt => opt.MapFrom(src => GetMedia(src).VideoProfile))
+                .ForMember(dest => dest.FilePath, opt => opt.MapFrom(src => GetMedia(src).Part.First().File))
+                .ForMember(dest => dest.ObfuscatedFilePath, opt => opt.MapFrom(src => GetMedia(src).Part.First().Key));
+        }
 
-
+        private Medium GetMedia(PlexMediaMetaDataDTO src)
+        {
+            if (!src.MediaContainerDto.Metadata.Any() && !src.MediaContainerDto.Metadata.First().Media.Any())
+            {
+                return null;
+            }
+            return GetMedia(src);
         }
     }
 }

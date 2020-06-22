@@ -1,6 +1,8 @@
 ﻿using PlexRipper.Application.IntegrationTests.Base;
 using PlexRipper.Domain.Entities;
+using Shouldly;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,9 +23,10 @@ namespace PlexRipper.Application.IntegrationTests.Services
         public async Task PlexDownloadShouldDownloadEntireFile()
         {
             // Arrange
-            var plexDownloadService = Container.GetPlexDownloadService;
             var accountService = Container.GetAccountService;
             var plexServerService = Container.GetPlexServerService;
+            var plexLibraryService = Container.GetPlexLibraryService;
+            var plexDownloadService = Container.GetPlexDownloadService;
             var credentials = Secrets.GetCredentials();
 
             //Act 
@@ -36,13 +39,16 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var result = await accountService.ValidateAccountAsync(newAccount);
             var account = await accountService.CreateAccountAsync(newAccount);
             var serverList = await plexServerService.GetServersAsync(account.PlexAccount);
-            var testServer = serverList.First();
 
-            //var downloadRequest = new DownloadRequest();
-            //plexDownloadService.StartDownload(downloadRequest);
+            var plexLibrary = await plexLibraryService.GetLibraryMediaAsync(serverList.First().PlexLibraries[1]);
+            var movie = plexLibrary.Movies[15];
+
+            var downloadRequest = await plexDownloadService.GetDownloadRequestAsync(movie);
+            plexDownloadService.StartDownload(downloadRequest);
+            await Task.Delay(30000);
 
             //Assert
-
+            plexLibrary.ShouldNotBeNull();
         }
     }
 }

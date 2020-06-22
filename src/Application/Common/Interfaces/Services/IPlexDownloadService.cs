@@ -8,5 +8,6 @@ namespace PlexRipper.Application.Common.Interfaces
     {
         void StartDownload(DownloadRequest downloadRequest);
         Task<string> GetPlexTokenAsync(PlexAccount plexAccount);
+        Task<DownloadRequest> GetDownloadRequestAsync(PlexMovie movie);
     }
 }

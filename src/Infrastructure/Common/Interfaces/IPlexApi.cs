@@ -21,7 +21,7 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
         Task<PlexLibrarySectionsDTO> GetLibrarySections(string plexAuthToken, string plexFullHost);
         Task<PlexLibraryMediaDTO> GetLibraryMediaAsync(string authToken, string plexFullHost, string libraryId);
         Task<PlexMetadata> GetEpisodeMetaData(string authToken, string host, int ratingKey);
-        Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int itemId);
+        Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int ratingKey);
         Task<PlexMetadata> GetSeasons(string authToken, string plexFullHost, int ratingKey);
         Task<PlexLibraryContainerDTO> GetAllEpisodes(string authToken, string host, string section, int start, int retCount);
         Task<PlexFriendsXML> GetUsers(string authToken);
@@ -36,5 +36,6 @@ namespace PlexRipper.Infrastructure.Common.Interfaces
         bool DownloadMedia(string authToken, string downloadUrl, string fileName);
         string GetDownloadUrl(PlexServer server, PlexMediaMetaDataDTO metaDataDto);
         string GetDownloadFilename(PlexServer server, PlexMediaMetaDataDTO metaDataDto);
+        Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string metaDataUrl);
     }
 }

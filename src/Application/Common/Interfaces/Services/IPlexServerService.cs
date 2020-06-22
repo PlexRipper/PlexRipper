@@ -11,12 +11,6 @@ namespace PlexRipper.Application.Common.Interfaces
         Task AddOrUpdatePlexServersAsync(PlexAccount plexAccount, List<PlexServer> servers);
         Task<bool> RefreshPlexServersAsync(PlexAccount plexAccount);
 
-        /// <summary>
-        /// Use to get all <see cref="PlexLibrary"/> with their media in the parent <see cref="PlexServer"/>
-        /// </summary>
-        /// <param name="plexServer"></param>
-        /// <param name="refresh">Force refresh from PlexApi</param>
-        /// <returns></returns>
         Task<PlexServer> GetAllLibraryMediaAsync(PlexServer plexServer, bool refresh = false);
 
         Task<PlexServer> GetServerAsync(int plexServerId);

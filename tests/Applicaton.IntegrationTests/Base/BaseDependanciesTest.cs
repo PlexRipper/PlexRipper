@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Config.Mappings;
+using PlexRipper.Domain.AutoMapper;
 using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Persistence;
+using PlexRipper.WebAPI.Config;
 using Serilog;
 using Serilog.Events;
 using Xunit.Abstractions;
@@ -59,9 +61,12 @@ namespace PlexRipper.Application.IntegrationTests.Base
             var configuration = new MapperConfiguration(
                 cfg =>
                 {
+                    cfg.AddProfile(new DomainMappingProfile());
                     cfg.AddProfile(new ApplicationMappingProfile());
                     cfg.AddProfile(new InfrastructureMappingProfile());
+                    cfg.AddProfile(new WebApiMappingProfile());
                 });
+            configuration.AssertConfigurationIsValid();
             return new Mapper(configuration);
         }
 

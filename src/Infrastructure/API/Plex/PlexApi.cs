@@ -173,9 +173,16 @@ namespace PlexRipper.Infrastructure.API.Plex
             return Api.Request<PlexMetadata>(request);
         }
 
-        public Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int itemId)
+        public Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string plexFullHost, int ratingKey)
         {
-            var request = new Request($"library/metadata/{itemId}", plexFullHost, HttpMethod.Get);
+            var request = new Request($"library/metadata/{ratingKey}", plexFullHost, HttpMethod.Get);
+            AddHeaders(request, authToken);
+            return Api.Request<PlexMediaMetaDataDTO>(request);
+        }
+
+        public Task<PlexMediaMetaDataDTO> GetMetadata(string authToken, string metaDataUrl)
+        {
+            var request = new Request(metaDataUrl, HttpMethod.Get);
             AddHeaders(request, authToken);
             return Api.Request<PlexMediaMetaDataDTO>(request);
         }

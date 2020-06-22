@@ -20,5 +20,10 @@ namespace PlexRipper.Application.Common.Interfaces
         /// <param name="plexFullHost"></param>
         /// <returns></returns>
         Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary library, string authToken, string plexFullHost);
+
+        Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl);
+        Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey);
     }
+
+
 }

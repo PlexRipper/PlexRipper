@@ -2,6 +2,7 @@
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Infrastructure.Common.DTO;
+using PlexRipper.Infrastructure.Common.DTO.PlexGetStatus;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -107,6 +108,19 @@ namespace PlexRipper.Infrastructure.Services
             }
 
             return libraryContainer;
+        }
+
+
+        public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey)
+        {
+            PlexMediaMetaDataDTO result = await _plexApi.GetMetadata(serverAuthToken, plexFullHost, ratingKey);
+            return _mapper.Map<PlexMediaMetaData>(result);
+        }
+
+        public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl)
+        {
+            PlexMediaMetaDataDTO result = await _plexApi.GetMetadata(serverAuthToken, metaDataUrl);
+            return _mapper.Map<PlexMediaMetaData>(result);
         }
     }
 }

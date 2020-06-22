@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using AutofacSerilogIntegration;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -86,6 +87,7 @@ namespace PlexRipper.WebAPI
         public void ConfigureContainer(ContainerBuilder builder)
         {
             ContainerConfig.ConfigureContainer(builder);
+            builder.RegisterLogger(autowireProperties: true);
         }
     }
 }

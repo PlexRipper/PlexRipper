@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain.Entities.Base
 {
@@ -35,5 +36,13 @@ namespace PlexRipper.Domain.Entities.Base
 
         public virtual PlexLibrary PlexLibrary { get; set; }
         public int PlexLibraryId { get; set; }
+
+
+        #region Helpers
+
+        [NotMapped]
+        public string MetaDataUrl => $"{PlexLibrary.PlexServer.BaseUrl}{Key}";
+
+        #endregion
     }
 }

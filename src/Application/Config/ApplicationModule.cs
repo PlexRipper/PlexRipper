@@ -1,6 +1,4 @@
 ﻿using Autofac;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Services;
 using System.Reflection;
 
 namespace PlexRipper.Application.Config
@@ -16,10 +14,6 @@ namespace PlexRipper.Application.Config
                 .Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces()
                 .InstancePerDependency();
-
-            builder.RegisterType<PlexService>().As<IPlexService>().InstancePerDependency();
-            builder.RegisterType<AccountService>().As<IAccountService>().InstancePerDependency();
-
         }
     }
 }

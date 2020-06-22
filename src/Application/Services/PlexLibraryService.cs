@@ -48,15 +48,32 @@ namespace PlexRipper.Application.Services
             return true;
         }
 
+        public Task<PlexMediaMetaData> GetMetaDataAsync(PlexMovie movie)
+        {
+            var plexServer = movie.PlexLibrary.PlexServer;
+            return _plexServiceApi.GetMediaMetaDataAsync(plexServer.AccessToken, movie.MetaDataUrl);
+        }
+
         /// <summary>
-        /// Returns the <see cref="PlexLibrary"/> containing the media content.
+        /// Returns the <see cref="PlexLibrary"/> with the media content.
         /// </summary>
         /// <param name="plexServer"></param>
         /// <param name="libraryKey"></param>
         /// <returns></returns>
-        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexServer plexServer, string libraryKey, bool refresh = false)
+        public Task<PlexLibrary> GetLibraryMediaAsync(PlexServer plexServer, string libraryKey, bool refresh = false)
         {
             var plexLibrary = plexServer.PlexLibraries.Find(x => x.Key == libraryKey);
+            return GetLibraryMediaAsync(plexLibrary, refresh);
+        }
+
+        /// <summary>
+        /// Returns the <see cref="PlexLibrary"/> with the media content.
+        /// </summary>
+        /// <param name="plexLibrary"></param>
+        /// <param name="refresh"></param>
+        /// <returns></returns>
+        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary plexLibrary, bool refresh = false)
+        {
             if (refresh || !plexLibrary.HasMedia)
             {
                 await RefreshLibraryMediaAsync(plexLibrary);
@@ -65,11 +82,12 @@ namespace PlexRipper.Application.Services
 
             // Create library
 
-            //var metaData = await _plexServiceApi.GetMetadata(plexServer.AccessToken, plexServer.BaseUrl, 5516);
-            //string downloadUrl = _plexApi.GetDownloadUrl(plexServer, metaData);
+            //var metaData = await _plexServiceApi.GetMediaMetaDataAsync(plexServer.AccessToken, plexServer.BaseUrl, 5516);
+            // string downloadUrl = _plexApi.GetDownloadUrl(plexServer, metaData);
             //string filename = _plexApi.GetDownloadFilename(plexServer, metaData);
             //_plexApi.DownloadMedia(plexServer.AccessToken, downloadUrl, filename);
         }
+
 
         /// <summary>
         /// Retrieves the new media metadata from the PlexApi and stores it in the database.

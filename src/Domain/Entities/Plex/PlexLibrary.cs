@@ -2,6 +2,7 @@
 using PlexRipper.Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain.Entities
 {
@@ -63,7 +64,7 @@ namespace PlexRipper.Domain.Entities
         // TODO Create a many-to-many relationship to determining which PlexAccounts have access to this PlexLibrary
         // public bool HasAccess { get; set; }
 
-
+        [NotMapped]
         public PlexMediaType GetMediaType
         {
             get
@@ -78,9 +79,10 @@ namespace PlexRipper.Domain.Entities
             }
 
         }
-
+        [NotMapped]
         public bool HasMedia => Movies.Count > 0 || Series.Count > 0;
 
+        [NotMapped]
         public int GetMediaCount
         {
             get

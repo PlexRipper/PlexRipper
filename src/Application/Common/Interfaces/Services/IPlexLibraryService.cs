@@ -25,5 +25,15 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<PlexLibrary> RefreshLibraryMediaAsync(PlexLibrary plexLibrary);
 
         Task<PlexLibrary> GetPlexLibraryAsync(int libraryId, bool refresh = false);
+
+        /// <summary>
+        /// Returns the <see cref="PlexLibrary"/> with the media content.
+        /// </summary>
+        /// <param name="plexLibrary"></param>
+        /// <param name="refresh"></param>
+        /// <returns></returns>
+        Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary plexLibrary, bool refresh = false);
+
+        Task<PlexMediaMetaData> GetMetaDataAsync(PlexMovie movie);
     }
 }

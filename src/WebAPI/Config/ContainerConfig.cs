@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using AutofacSerilogIntegration;
 using AutoMapper;
 using PlexRipper.Application.Config;
 using PlexRipper.Application.Config.Mappings;
@@ -13,6 +12,10 @@ namespace PlexRipper.WebAPI.Config
 {
     public static class ContainerConfig
     {
+        /// <summary>
+        /// Autofac container builder, Serilog registration is left out due to being context dependent. Integration tests have a different configuration than the application. 
+        /// </summary>
+        /// <param name="builder"></param>
         public static void ConfigureContainer(ContainerBuilder builder)
         {
             // Application
@@ -22,8 +25,6 @@ namespace PlexRipper.WebAPI.Config
             builder.RegisterModule<InfrastructureModule>();
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<DownloadManagerModule>();
-            builder.RegisterLogger(autowireProperties: true);
-
 
             // Auto Mapper
             builder.Register(ctx =>

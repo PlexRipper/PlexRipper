@@ -70,7 +70,7 @@ namespace PlexRipper.Application.Services
 
 
         /// <summary>
-        /// Use to get all <see cref="PlexLibrary"/> with their media in the parent <see cref="PlexServer"/>
+        /// This will get all <see cref="PlexLibrary"/>s with their media in the parent <see cref="PlexServer"/>
         /// </summary>
         /// <param name="plexServer"></param>
         /// <param name="refresh">Force refresh from PlexApi</param>

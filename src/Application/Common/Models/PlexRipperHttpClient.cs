@@ -1,4 +1,5 @@
 ﻿using PlexRipper.Application.Common.Interfaces.API;
+using Serilog;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -17,10 +18,12 @@ namespace PlexRipper.Application.Common.Models
         private static HttpClient _client;
         private static HttpClientHandler _handler;
 
-        public PlexRipperHttpClient()
+        public PlexRipperHttpClient(ILogger logger)
         {
-
+            Log = logger.ForContext<PlexRipperHttpClient>();
         }
+
+        public ILogger Log { get; }
 
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
         {
@@ -31,6 +34,7 @@ namespace PlexRipper.Application.Common.Models
             }
             catch (Exception e)
             {
+                Log.Error(e, $"Exception in {nameof(PlexRipperHttpClient)}:");
                 Console.WriteLine(e);
                 throw;
             }

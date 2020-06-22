@@ -4,8 +4,9 @@ using PlexRipper.Application.Config;
 using PlexRipper.Application.Config.Mappings;
 using PlexRipper.Domain.AutoMapper;
 using PlexRipper.DownloadManager.Config;
-using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Config;
+using PlexRipper.PlexApi.Config;
+using PlexRipper.PlexApi.Config.Mappings;
 using PlexRipper.Settings.Config;
 
 namespace PlexRipper.WebAPI.Config
@@ -25,6 +26,7 @@ namespace PlexRipper.WebAPI.Config
             builder.RegisterModule<InfrastructureModule>();
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<DownloadManagerModule>();
+            builder.RegisterModule<PlexApiModule>();
 
             // Auto Mapper
             builder.Register(ctx =>
@@ -33,7 +35,7 @@ namespace PlexRipper.WebAPI.Config
                 {
                     cfg.AddProfile(new DomainMappingProfile());
                     cfg.AddProfile(new ApplicationMappingProfile());
-                    cfg.AddProfile(new InfrastructureMappingProfile());
+                    cfg.AddProfile(new PlexApiMappingProfile());
                     cfg.AddProfile(new WebApiMappingProfile());
                 });
                 config.AssertConfigurationIsValid();

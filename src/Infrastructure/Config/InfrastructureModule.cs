@@ -1,13 +1,10 @@
 ﻿using Autofac;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.API;
 using PlexRipper.Application.Common.Models;
-using PlexRipper.Infrastructure.API.Plex;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Persistence;
-using PlexRipper.Infrastructure.Services;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -30,9 +27,6 @@ namespace PlexRipper.Infrastructure.Config
                 .As<IPlexRipperHttpClient>()
                 .SingleInstance();
 
-            builder.RegisterType<PlexApiService>().As<IPlexApiService>();
-
-            builder.RegisterType<PlexApi>().As<IPlexApi>();
             builder.RegisterType<Api>().As<IApi>();
 
             // Register Entity Framework Database

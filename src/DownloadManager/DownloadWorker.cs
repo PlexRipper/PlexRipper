@@ -25,7 +25,7 @@ namespace PlexRipper.DownloadManager
             while (!stoppingToken.IsCancellationRequested)
             {
                 Log.Debug($"Worker running at: {DateTimeOffset.Now}");
-                _testClass.TestLogging();
+                // _testClass.TestLogging();
                 await Task.Delay(1000, stoppingToken);
             }
         }

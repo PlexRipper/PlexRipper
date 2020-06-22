@@ -247,3 +247,5 @@ tests/Applicaton.IntegrationTests/secretCredentials.json
 .idea/.idea.PlexRipper/.idea/projectSettingsUpdater.xml
 
 .idea/.idea.PlexRipper/.idea/workspace.xml
+
+tests/BaseTests/secretCredentials.json

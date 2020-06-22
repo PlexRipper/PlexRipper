@@ -1,8 +1,7 @@
-﻿using PlexRipper.Application.IntegrationTests.Base;
+﻿using PlexRipper.BaseTests;
 using PlexRipper.Domain.Entities;
 using Shouldly;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -45,7 +44,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
             var downloadRequest = await plexDownloadService.GetDownloadRequestAsync(movie);
             plexDownloadService.StartDownload(downloadRequest);
-            await Task.Delay(30000);
+            // await Task.Delay(30000);
 
             //Assert
             plexLibrary.ShouldNotBeNull();

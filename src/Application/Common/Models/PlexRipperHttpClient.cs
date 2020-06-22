@@ -35,7 +35,6 @@ namespace PlexRipper.Application.Common.Models
             catch (Exception e)
             {
                 Log.Error(e, $"Exception in {nameof(PlexRipperHttpClient)}:");
-                Console.WriteLine(e);
                 throw;
             }
         }
@@ -64,15 +63,22 @@ namespace PlexRipper.Application.Common.Models
         {
             if (_client == null)
             {
-                _handler ??= new HttpClientHandler();
-                // Disable server SSL certificate validation 
-                // https://stackoverflow.com/a/44540071
-                _handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-                _handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                try
+                {
+                    _handler ??= new HttpClientHandler();
+                    // Disable server SSL certificate validation 
+                    // https://stackoverflow.com/a/44540071
+                    _handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+                    _handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
-
-                _client = new HttpClient(_handler);
-                _client.DefaultRequestHeaders.Add("User-Agent", "PlexClient"); //TODO Debate if we should have PlexRipper in here
+                    _client = new HttpClient(_handler);
+                    _client.DefaultRequestHeaders.Add("User-Agent", "PlexClient"); //TODO Debate if we should have PlexRipper in here
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, $"Exception in {nameof(PlexRipperHttpClient)}:");
+                    throw;
+                }
             }
         }
     }

@@ -2,7 +2,7 @@
 
 namespace PlexRipper.PlexApi.Common.DTO
 {
-    public class PlexMetadata
+    public class PlexMetadataDTO
     {
         public MediaContainerDTO MediaContainerDto { get; set; }
     }

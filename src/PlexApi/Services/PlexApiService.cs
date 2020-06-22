@@ -38,17 +38,18 @@ namespace PlexRipper.PlexApi.Services
 
         public Task<PlexStatusDTO> GetStatus(string authToken, string uri)
         {
-            return _plexApi.GetStatus(authToken, uri);
+            return _plexApi.GetStatusAsync(authToken, uri);
         }
 
-        public Task<PlexAccount> GetAccountAsync(string authToken)
+        public async Task<PlexAccount> GetAccountAsync(string authToken)
         {
-            return _plexApi.GetAccount(authToken);
+            var result = await _plexApi.GetAccountAsync(authToken);
+            return _mapper.Map<PlexAccount>(result);
         }
 
         public async Task<List<PlexServer>> GetServerAsync(string authToken)
         {
-            var result = await _plexApi.GetServer(authToken);
+            var result = await _plexApi.GetServerAsync(authToken);
             return result == null ?
                 new List<PlexServer>() :
                 _mapper.Map<List<PlexServer>>(result.Server);
@@ -56,7 +57,7 @@ namespace PlexRipper.PlexApi.Services
 
         public async Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexLibraryUrl)
         {
-            var result = await _plexApi.GetLibrarySections(authToken, plexLibraryUrl);
+            var result = await _plexApi.GetLibrarySectionsAsync(authToken, plexLibraryUrl);
             if (result == null)
             {
                 return new List<PlexLibrary>();
@@ -112,13 +113,13 @@ namespace PlexRipper.PlexApi.Services
 
         public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey)
         {
-            PlexMediaMetaDataDTO result = await _plexApi.GetMetadata(serverAuthToken, plexFullHost, ratingKey);
+            PlexMediaMetaDataDTO result = await _plexApi.GetMetadataAsync(serverAuthToken, plexFullHost, ratingKey);
             return _mapper.Map<PlexMediaMetaData>(result);
         }
 
         public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl)
         {
-            PlexMediaMetaDataDTO result = await _plexApi.GetMetadata(serverAuthToken, metaDataUrl);
+            PlexMediaMetaDataDTO result = await _plexApi.GetMetadataAsync(serverAuthToken, metaDataUrl);
             return _mapper.Map<PlexMediaMetaData>(result);
         }
     }

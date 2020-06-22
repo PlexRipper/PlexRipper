@@ -1,4 +1,4 @@
-﻿using PlexRipper.Application.IntegrationTests.Base;
+﻿using PlexRipper.BaseTests;
 using Serilog;
 using Xunit;
 using Xunit.Abstractions;

@@ -6,7 +6,6 @@ using PlexRipper.Domain.Extensions;
 using Polly;
 using System;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -29,35 +28,6 @@ namespace PlexRipper.Application.Common.Models
         {
             NullValueHandling = NullValueHandling.Ignore
         };
-
-        public async Task<bool> Download(Request request, string fileName)
-        {
-            try
-            {
-                using (WebClient webClient = new WebClient())
-                {
-                    webClient.DownloadFileCompleted += (sender, args) =>
-                    {
-                        Log.Information("The download has completed!");
-                    };
-
-                    // Specify a progress notification handler.
-                    webClient.DownloadProgressChanged += (sender, args) =>
-                    {
-                        Log.Information($"Downloaded {args.BytesReceived} of {args.TotalBytesToReceive} bytes. {args.ProgressPercentage} % complete...");
-                    };
-
-                    string downloadPath = @$"{Environment.CurrentDirectory}\PlexDownloads2\{fileName}";
-                    Task.WaitAll(webClient.DownloadFileTaskAsync(request.FullUri, @downloadPath));
-                    return true;
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error($"Failed to download File: {fileName}", e);
-            }
-            return false;
-        }
 
         public async Task<T> Request<T>(Request request)
         {

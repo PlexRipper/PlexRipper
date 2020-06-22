@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Mappings;
+using PlexRipper.Application.Config.Mappings;
 using PlexRipper.Infrastructure.Common.Mappings;
 using PlexRipper.Infrastructure.Persistence;
 using Serilog;

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 
-namespace PlexRipper.Application.Common.Mappings
+namespace PlexRipper.Application.Config.Mappings
 {
     public class ApplicationMappingProfile : Profile
     {

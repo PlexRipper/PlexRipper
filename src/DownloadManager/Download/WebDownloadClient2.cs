@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace PlexRipper.DownloadManager.Download
 {
-    public class WebDownloadClient : INotifyPropertyChanged
+    public class WebDownloadClient2 : INotifyPropertyChanged
     {
         #region Fields
 
@@ -170,7 +170,7 @@ namespace PlexRipper.DownloadManager.Download
             HttpWebRequest webRequest = null;
             HttpWebResponse webResponse = null;
             Stream responseStream = null;
-            ThrottledStream throttledStream = null;
+            // ThrottledStream throttledStream = null;
             MemoryStream downloadCache = null;
             speedUpdateCount = 0;
             recentAverageRate = 0;
@@ -243,9 +243,9 @@ namespace PlexRipper.DownloadManager.Download
                 }
                 else
                 {
-                    maxBytesPerSecond = ThrottledStream.Infinite;
+                    // maxBytesPerSecond = ThrottledStream.Infinite;
                 }
-                throttledStream = new ThrottledStream(responseStream, maxBytesPerSecond);
+                // throttledStream = new ThrottledStream(responseStream, maxBytesPerSecond);
 
                 // Create memory cache with the specified size
                 downloadCache = new MemoryStream(this.MaxCacheSize);
@@ -268,14 +268,14 @@ namespace PlexRipper.DownloadManager.Download
                         }
                         else
                         {
-                            maxBytesPerSecond = ThrottledStream.Infinite;
+                            // maxBytesPerSecond = ThrottledStream.Infinite;
                         }
-                        throttledStream.MaximumBytesPerSecond = maxBytesPerSecond;
+                        // throttledStream.MaximumBytesPerSecond = maxBytesPerSecond;
                         SpeedLimitChanged = false;
                     }
 
                     // Read data from the response stream and write it to the buffer
-                    bytesSize = throttledStream.Read(downloadBuffer, 0, downloadBuffer.Length);
+                    //bytesSize = throttledStream.Read(downloadBuffer, 0, downloadBuffer.Length);
 
                     // If the cache is full or the download is paused or completed, write data from the cache to the temporary file
                     if (this.Status != DownloadStatus.Downloading || bytesSize == 0 || this.MaxCacheSize < CachedSize + bytesSize)
@@ -341,7 +341,7 @@ namespace PlexRipper.DownloadManager.Download
             {
                 // Close the response stream and cache, stop the thread
                 responseStream?.Close();
-                throttledStream?.Close();
+                //throttledStream?.Close();
                 webResponse?.Close();
                 downloadCache?.Close();
                 DownloadThread?.Abort();
@@ -667,17 +667,16 @@ namespace PlexRipper.DownloadManager.Download
         // URL of the file to download
         public Uri Url { get; private set; }
 
-        public WebDownloadClient(IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger)
+        public WebDownloadClient2(IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger)
         {
             _downloadManager = downloadManager;
             _userSettings = userSettings;
-            _logger = logger.ForContext<WebDownloadClient>();
+            _logger = logger.ForContext<WebDownloadClient2>();
 
             this.BufferSize = 1024; // Buffer size is 1KB
             this.MaxCacheSize = _userSettings.DownloadManager.MemoryCacheSize * 1024; // Default cache size is 1MB
             this.BufferCountPerNotification = 64;
 
-            this.Url = new Uri(url, UriKind.Absolute);
 
             this.SupportsRange = false;
             this.HasError = false;

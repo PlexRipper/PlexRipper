@@ -4,11 +4,9 @@ using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Extensions.Ordering;
 
 namespace PlexRipper.Application.UnitTests
 {
-    [Order(1)]
     public class AccountServiceTests
     {
         private BaseContainer Container { get; }
@@ -21,7 +19,7 @@ namespace PlexRipper.Application.UnitTests
 
         }
 
-        [Fact, Order(1)]
+        [Fact]
         public async Task CreateAccountAsync_ShouldReturnValidAccount_WhenAccountDoesNotExist()
         {
             // Arrange
@@ -35,7 +33,7 @@ namespace PlexRipper.Application.UnitTests
             account.ShouldNotBeNull();
         }
 
-        [Fact, Order(2)]
+        [Fact]
         public async Task CreateAccountAsync_ShouldReturnNull_WhenAccountExist()
         {
             // Arrange
@@ -51,7 +49,7 @@ namespace PlexRipper.Application.UnitTests
             account2.ShouldBeNull();
         }
 
-        [Fact, Order(3)]
+        [Fact]
         public async Task UpdateAccountAsync_ShouldReturnValidAccount_WhenAccountWasUpdated()
         {
             // Arrange

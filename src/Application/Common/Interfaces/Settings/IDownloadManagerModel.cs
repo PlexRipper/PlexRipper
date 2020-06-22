@@ -8,6 +8,7 @@
         bool StartDownloadsOnStartup { get; set; }
         bool ConfirmDelete { get; set; }
         string DownloadLocation { get; set; }
+        string TempDownloadLocation { get; set; }
         int MemoryCacheSize { get; set; }
         bool ManualProxyConfig { get; set; }
         string HttpProxy { get; set; }

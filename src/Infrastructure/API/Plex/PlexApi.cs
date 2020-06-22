@@ -133,7 +133,7 @@ namespace PlexRipper.Infrastructure.API.Plex
 
             var request = new Request($"{downloadUrl}?X-Plex-Token={authToken}", HttpMethod.Get);
             AddHeaders(request, authToken);
-            Api.Download(request, fileName);
+            //Api.Download(request, fileName);
 
             return true;
 

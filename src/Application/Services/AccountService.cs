@@ -48,7 +48,12 @@ namespace PlexRipper.Application.Services
             return _plexService.IsPlexAccountValid(account.Username, account.Password);
         }
 
-        public async Task<bool> SetupAccountAsync(Account account)
+        /// <summary>
+        /// This will retrieve the associated <see cref="PlexAccount"/> with any <see cref="PlexServer"/>s and store it in the database.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns>Is successful</returns>
+        private async Task<bool> SetupAccountAsync(Account account)
         {
             if (account == null)
             {
@@ -144,7 +149,11 @@ namespace PlexRipper.Application.Services
             }
         }
 
-
+        /// <summary>
+        /// Creates an <see cref="Account"/> in the Database, the account should be unique and be validated first through <see cref="AccountService"/>.ValidateAccountAsync().
+        /// </summary>
+        /// <param name="newAccount">The unique account</param>
+        /// <returns>Returns the added account after setup</returns>
         public async Task<Account> CreateAccountAsync(Account newAccount)
         {
             var result = await _accountRepository.FindAsync(
@@ -163,7 +172,7 @@ namespace PlexRipper.Application.Services
             }
 
             Log.Warning("An account with these credentials already exists!");
-            return null;
+            return result;
         }
 
         public async Task<Account> UpdateAccountAsync(Account newAccount)

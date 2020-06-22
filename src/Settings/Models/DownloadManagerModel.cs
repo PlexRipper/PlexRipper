@@ -57,7 +57,6 @@ namespace PlexRipper.Settings.Models
             {
                 if (value != _tempDownloadLocation)
                 {
-
                     _tempDownloadLocation = value;
                     OnPropertyChanged();
                 }

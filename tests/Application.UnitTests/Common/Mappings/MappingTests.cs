@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using PlexRipper.Application.Common.Mappings;
+using PlexRipper.Application.Config.Mappings;
 using Xunit;
 
 namespace PlexRipper.Application.UnitTests.Common.Mappings

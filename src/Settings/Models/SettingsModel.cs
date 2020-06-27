@@ -1,6 +1,5 @@
 ﻿
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
-using PlexRipper.Application.Common.Interfaces.Settings;
 
 namespace PlexRipper.Settings.Models
 {
@@ -10,7 +9,7 @@ namespace PlexRipper.Settings.Models
 
         private string _apiKey = "bnrijbrogbwoeibgoiuweb";
         private bool _confirmExit = false;
-        private IDownloadManagerModel _downloadManager;
+        private IDownloadManagerModel _downloadManager = new DownloadManagerModel();
 
         #endregion Fields
 

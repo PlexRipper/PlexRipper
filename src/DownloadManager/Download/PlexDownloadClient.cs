@@ -15,6 +15,13 @@ namespace PlexRipper.DownloadManager.Download
         private IDownloadManager _downloadManager;
         private IUserSettings _userSettings;
 
+        public decimal Percentage { get; internal set; }
+
+        // Size of downloaded data which was written to the local file
+        public long DownloadedSize { get; set; }
+
+        // Percentage of downloaded data
+
         public PlexDownloadClient(IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger)
         {
             Log = logger;
@@ -52,5 +59,14 @@ namespace PlexRipper.DownloadManager.Download
         {
             CancelAsync();
         }
+
+        //protected override void OnDownloadProgressChanged(DownloadProgressChangedEventArgs e)
+        //{
+
+        //    if (e.ProgressPercentage)
+        //    {
+        //        base.OnDownloadProgressChanged(e);
+        //    }
+        //}
     }
 }

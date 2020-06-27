@@ -1,5 +1,6 @@
 ﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Settings;
+using PlexRipper.Application.Common.Models;
 using PlexRipper.DownloadManager.Common;
 using Serilog;
 using System;
@@ -410,18 +411,19 @@ namespace PlexRipper.DownloadManager.Download
         // Generate DownloadCompleted event
         protected virtual void RaiseDownloadCompleted()
         {
-            if (DownloadCompleted != null)
+            if (DownloadFileCompleted != null)
             {
-                DownloadCompleted(this, EventArgs.Empty);
+                DownloadFileCompleted(this, EventArgs.Empty);
             }
         }
 
         // Generate DownloadProgressChanged event
         protected virtual void RaiseDownloadProgressChanged()
         {
+            Log.Information(PercentString);
             if (DownloadProgressChanged != null)
             {
-                DownloadProgressChanged(this, EventArgs.Empty);
+
             }
         }
 
@@ -442,18 +444,6 @@ namespace PlexRipper.DownloadManager.Download
         }
 
         #endregion Methods
-
-        #region Properties
-
-        #endregion Properties
-
-        #region Constructors
-
-        #endregion Constructors
-
-        #region Events
-
-        #endregion Events
 
         // Download speed
         public int downloadSpeed;
@@ -486,7 +476,7 @@ namespace PlexRipper.DownloadManager.Download
         }
 
         // Average download speed
-        public string AverageDownloadSpeed => Formatter.FormatSpeedString((int)Math.Floor((double)(DownloadedSize + CachedSize) / TotalElapsedTime.TotalSeconds));
+        public string AverageDownloadSpeed => DataFormat.FormatSpeedString((int)Math.Floor((double)(DownloadedSize + CachedSize) / TotalElapsedTime.TotalSeconds));
 
         // Batch URL was checked
         public bool BatchUrlChecked { get; set; }
@@ -520,7 +510,7 @@ namespace PlexRipper.DownloadManager.Download
         // Size of downloaded data which was written to the local file
         public long DownloadedSize { get; set; }
 
-        public string DownloadedSizeString => Formatter.FormatSizeString(DownloadedSize + CachedSize);
+        public string DownloadedSizeString => DataFormat.FormatSizeString(DownloadedSize + CachedSize);
 
         // Local folder which contains the file
         public string DownloadFolder => this.TempDownloadPath.Remove(TempDownloadPath.LastIndexOf("\\") + 1);
@@ -534,7 +524,7 @@ namespace PlexRipper.DownloadManager.Download
             {
                 if (this.Status == DownloadStatus.Downloading && !this.HasError)
                 {
-                    return Formatter.FormatSpeedString(downloadSpeed);
+                    return DataFormat.FormatSpeedString(downloadSpeed);
                 }
                 return String.Empty;
             }
@@ -546,7 +536,7 @@ namespace PlexRipper.DownloadManager.Download
         // File size (in bytes)
         public long FileSize { get; set; }
 
-        public string FileSizeString => Formatter.FormatSizeString(FileSize);
+        public string FileSizeString => DataFormat.FormatSizeString(FileSize);
 
         // File type (extension)
         public string FileType => Url.ToString().Substring(Url.ToString().LastIndexOf('.') + 1).ToUpper();
@@ -586,9 +576,6 @@ namespace PlexRipper.DownloadManager.Download
                     return String.Format(numberFormat, "{0:0.0}%", Percent);
             }
         }
-
-        // Progress bar value
-        public float Progress => Percent;
 
         // Speed limit was changed
         public bool SpeedLimitChanged { get; set; }
@@ -640,7 +627,7 @@ namespace PlexRipper.DownloadManager.Download
 
                     TimeSpan span = TimeSpan.FromSeconds(secondsLeft);
 
-                    return Formatter.FormatTimeSpanString(span);
+                    return DataFormat.FormatTimeSpanString(span);
                 }
                 return String.Empty;
             }
@@ -662,7 +649,7 @@ namespace PlexRipper.DownloadManager.Download
             }
         }
 
-        public string TotalElapsedTimeString => Formatter.FormatTimeSpanString(TotalElapsedTime);
+        public string TotalElapsedTimeString => DataFormat.FormatTimeSpanString(TotalElapsedTime);
 
         // URL of the file to download
         public Uri Url { get; private set; }
@@ -692,9 +679,9 @@ namespace PlexRipper.DownloadManager.Download
 
             this.Status = DownloadStatus.Initialized;
         }
-        public event EventHandler DownloadCompleted;
+        public event EventHandler DownloadFileCompleted;
 
-        public event EventHandler DownloadProgressChanged;
+        public event DownloadProgressChangedEventHandler DownloadProgressChanged;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -853,8 +840,9 @@ namespace PlexRipper.DownloadManager.Download
         }
 
         // Start or continue download
-        public void Start()
+        public void Start(DownloadRequest downloadRequest)
         {
+            this.Url = new Uri(downloadRequest.DownloadUrl);
             if (this.Status == DownloadStatus.Initialized || this.Status == DownloadStatus.Paused
                 || this.Status == DownloadStatus.Queued || this.HasError)
             {

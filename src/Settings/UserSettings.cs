@@ -36,6 +36,8 @@ namespace PlexRipper.Settings
             Log = logger.ForContext<UserSettings>();
 
             this.PropertyChanged += (sender, args) => Save();
+
+            Load();
         }
 
         #endregion Constructors

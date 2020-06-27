@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace PlexRipper.DownloadManager.Common
 {
-    public static class Formatter
+    public static class DataFormat
     {
         private static readonly NumberFormatInfo numberFormat = NumberFormatInfo.InvariantInfo;
 

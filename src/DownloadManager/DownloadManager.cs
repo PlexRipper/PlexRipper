@@ -1,6 +1,7 @@
 ﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Settings;
 using PlexRipper.Application.Common.Models;
+using PlexRipper.DownloadManager.Common;
 using PlexRipper.DownloadManager.Download;
 using Serilog;
 using System.Collections.Generic;
@@ -80,8 +81,18 @@ namespace PlexRipper.DownloadManager
             newClient.DownloadProgressChanged += OnDownloadProgressChanged;
             newClient.DownloadFileCompleted += OnDownloadFileCompleted;
 
-            //var newClient = new WebDownloadClient(this, _userSettings, Log);
             DownloadsList.Add(newClient);
+            return newClient;
+        }
+
+        private WebDownloadClient2 CreateDownloadClient2()
+        {
+            WebDownloadClient2 newClient = new WebDownloadClient2(this, _userSettings, Log);
+
+            //newClient.DownloadProgressChanged += OnDownloadProgressChanged;
+            //newClient.DownloadFileCompleted += OnDownloadFileCompleted;
+
+            // DownloadsList.Add(newClient);
             return newClient;
         }
 
@@ -92,12 +103,13 @@ namespace PlexRipper.DownloadManager
 
         private void OnDownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            Log.Information($"Downloaded {e.BytesReceived} of {e.TotalBytesToReceive} bytes. {e.ProgressPercentage} % complete...");
+
+            Log.Information($"Downloaded {DataFormat.FormatSizeString(e.BytesReceived)} of {DataFormat.FormatSizeString(e.TotalBytesToReceive)} bytes. {e.ProgressPercentage} % complete...");
         }
 
         public void StartDownload(DownloadRequest downloadRequest)
         {
-            var downloadClient = CreateDownloadClient();
+            var downloadClient = CreateDownloadClient2();
             downloadClient.Start(downloadRequest);
         }
 

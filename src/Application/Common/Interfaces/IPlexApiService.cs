@@ -1,10 +1,11 @@
-using PlexRipper.Domain.Entities;
+﻿using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PlexRipper.Application.Common.Interfaces
 {
-    public interface IPlexApiService
+    public interface
+        IPlexApiService
     {
         Task<PlexAccount> PlexSignInAsync(string username, string password);
         Task<string> RefreshPlexAuthTokenAsync(Account account);

@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using PlexRipper.Application.Common.Interfaces.Settings;
+using Serilog;
 
 
 namespace PlexRipper.Settings.Config
@@ -8,7 +9,10 @@ namespace PlexRipper.Settings.Config
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<UserSettings>().As<IUserSettings>().SingleInstance();
+            builder
+                .Register(x => new UserSettings(x.Resolve<ILogger>()))
+                .As<IUserSettings>()
+                .SingleInstance();
         }
     }
 }

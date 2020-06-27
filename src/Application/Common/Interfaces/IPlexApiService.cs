@@ -1,4 +1,4 @@
-﻿using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -23,6 +23,7 @@ namespace PlexRipper.Application.Common.Interfaces
 
         Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl);
         Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey);
+        Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl);
     }
 
 

@@ -88,6 +88,8 @@ namespace PlexRipper.WebAPI
         {
             ContainerConfig.ConfigureContainer(builder);
             builder.RegisterLogger(autowireProperties: true);
+
         }
+
     }
 }

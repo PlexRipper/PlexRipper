@@ -25,10 +25,19 @@ namespace PlexRipper.Domain.Entities
         public long OwnerId { get; set; }
         public bool Home { get; set; }
 
+
+        #region Relationships
+
         [IgnoreMap]
         public virtual List<PlexAccountServer> PlexAccountServers { get; set; }
 
         public virtual List<PlexLibrary> PlexLibraries { get; set; }
+
+        public virtual PlexServerStatus ServerStatus { get; set; }
+        [IgnoreMap]
+        public virtual int ServerStatusId { get; set; }
+
+        #endregion
 
         #region Helpers
 

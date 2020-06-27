@@ -1,4 +1,6 @@
-﻿using RestSharp;
+﻿using PlexRipper.PlexApi.Api;
+using RestSharp;
+using RestSharp.Serialization.Xml;
 using RestSharp.Serializers.NewtonsoftJson;
 using Serilog;
 using System.Threading.Tasks;
@@ -13,6 +15,10 @@ namespace PlexRipper.PlexApi
         {
             Log = log;
             this.UseNewtonsoftJson();
+            this.UseDotNetXmlSerializer();
+            this.Timeout = 15000;
+
+            // TODO Ignore all bad SSL certificates based on user option set
         }
 
         public async Task<T> SendRequestAsync<T>(RestRequest request)
@@ -23,12 +29,30 @@ namespace PlexRipper.PlexApi
             if (response.IsSuccessful)
             {
                 Log.Information($"Request to {request.Resource} was successful!");
+                Log.Debug($"Response was: {response.Content}");
             }
             else
             {
-                Log.Error(response.ErrorException, $"PlexApi Error: ({response.StatusCode}) {response.Content}");
+                Log.Error(response.ErrorException, $"PlexApi Error: Error on request to {request.Resource} ({response.StatusCode}) - {response.Content}");
             }
             return response.Data;
+        }
+
+        public async Task<IRestResponse> SendRequestAsync(RestRequest request)
+        {
+            request = AddHeaders(request);
+
+            var response = await ExecuteAsync(request);
+            if (response.IsSuccessful)
+            {
+                Log.Information($"Request to {request.Resource} was successful!");
+                Log.Debug($"Response was: {response.Content}");
+            }
+            else
+            {
+                Log.Error(response.ErrorException, $"PlexApi Error: Error on request to {request.Resource} ({response.StatusCode}) - {response.Content}");
+            }
+            return response;
         }
 
         /// <summary>
@@ -38,13 +62,10 @@ namespace PlexRipper.PlexApi
         /// <returns>The request with headers added</returns>
         private RestRequest AddHeaders(RestRequest request)
         {
-            request.AddHeader("User-Agent", "PlexClient");
-            request.AddHeader("X-Plex-Client-Identifier", "271938");
-            // TODO Debate if we should put PlexRipper here
-            request.AddHeader("X-Plex-Product", "Saverr");
-            request.AddHeader("X-Plex-Version", "3");
-            request.AddHeader("X-Plex-Device", "Ombi");
-            request.AddHeader("X-Plex-Platform", "Web");
+            foreach (var headerPair in PlexHeaderData.GetBasicHeaders)
+            {
+                request.AddHeader(headerPair.Key, headerPair.Value);
+            }
             return request;
         }
     }

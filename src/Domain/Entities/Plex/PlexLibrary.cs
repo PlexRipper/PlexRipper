@@ -80,7 +80,18 @@ namespace PlexRipper.Domain.Entities
 
         }
         [NotMapped]
-        public bool HasMedia => Movies.Count > 0 || Series.Count > 0;
+        public bool HasMedia
+        {
+            get
+            {
+                return GetMediaType switch
+                {
+                    PlexMediaType.Movie => Movies != null && Movies.Count > 0,
+                    PlexMediaType.Serie => Series != null && Series.Count > 0,
+                    _ => false
+                };
+            }
+        }
 
         [NotMapped]
         public int GetMediaCount

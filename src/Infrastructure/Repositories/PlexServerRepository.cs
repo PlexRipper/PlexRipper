@@ -21,14 +21,6 @@ namespace PlexRipper.Infrastructure.Repositories
                 .Where(x => x.PlexAccountServers
                     .Any(y => y.PlexAccountId == plexAccountId))
                 .ToListAsync();
-
-            //return await Context.PlexServers
-            //     .Include(p => p.PlexAccountServers)
-            //     .ThenInclude(x => x.PlexServer)
-            //     .Where(y => y.PlexAccountServers
-            //         .Any(p => p.PlexAccountId == plexAccountId))
-            //     .ToListAsync();
-
         }
     }
 }

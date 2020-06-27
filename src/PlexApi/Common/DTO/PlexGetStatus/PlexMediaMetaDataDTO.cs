@@ -113,13 +113,13 @@ namespace PlexRipper.PlexApi.Common.DTO.PlexGetStatus
         public string Key { get; set; }
 
         [JsonProperty("duration")]
-        public int Duration { get; set; }
+        public long Duration { get; set; }
 
         [JsonProperty("file")]
         public string File { get; set; }
 
         [JsonProperty("size")]
-        public int Size { get; set; }
+        public long Size { get; set; }
 
         [JsonProperty("audioProfile")]
         public string AudioProfile { get; set; }
@@ -144,7 +144,7 @@ namespace PlexRipper.PlexApi.Common.DTO.PlexGetStatus
         public int Id { get; set; }
 
         [JsonProperty("duration")]
-        public int Duration { get; set; }
+        public long Duration { get; set; }
 
         [JsonProperty("bitrate")]
         public int Bitrate { get; set; }

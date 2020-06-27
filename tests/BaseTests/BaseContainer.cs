@@ -14,7 +14,7 @@ namespace PlexRipper.BaseTests
         {
             var builder = new ContainerBuilder();
             ContainerConfig.ConfigureContainer(builder);
-            builder.RegisterLogger(BaseDependanciesTest.GetLoggerConfig());
+            builder.RegisterLogger(autowireProperties: true);
             AutofacContainer = builder.Build();
         }
 

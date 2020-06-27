@@ -63,7 +63,7 @@ namespace PlexRipper.WebAPI
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
                 .Enrich.FromLogContext()
-                .WriteTo.Debug()
+                .WriteTo.Debug(outputTemplate: template)
                 .WriteTo.ColoredConsole(LogEventLevel.Debug, template)
                 .CreateLogger();
         }

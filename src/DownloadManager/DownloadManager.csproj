@@ -15,5 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
+    <ProjectReference Include="..\PlexApi\PlexApi.csproj" />
   </ItemGroup>
 </Project>

@@ -13,6 +13,7 @@ namespace PlexRipper.Application.Services
     {
         private readonly IPlexServerRepository _plexServerRepository;
         private readonly IPlexLibraryService _plexLibraryService;
+        private readonly IPlexServerStatusRepository _plexServerStatusRepository;
         private readonly IPlexApiService _plexServiceApi;
         private readonly IPlexAuthenticationService _plexAuthenticationService;
         private ILogger Log { get; }
@@ -22,10 +23,12 @@ namespace PlexRipper.Application.Services
             IPlexAuthenticationService plexAuthenticationService,
             IPlexServerRepository plexServerRepository,
             IPlexLibraryService plexLibraryService,
-            Serilog.ILogger logger)
+            IPlexServerStatusRepository plexServerStatusRepository,
+            ILogger logger)
         {
             _plexServerRepository = plexServerRepository;
             _plexLibraryService = plexLibraryService;
+            _plexServerStatusRepository = plexServerStatusRepository;
             _plexServiceApi = plexServiceApi;
             _plexAuthenticationService = plexAuthenticationService;
             Log = logger;
@@ -40,17 +43,17 @@ namespace PlexRipper.Application.Services
         {
             if (plexAccount == null)
             {
-                Log.Warning($"{nameof(RefreshPlexServersAsync)} => plexAccount was null");
+                Log.Warning("plexAccount was null");
                 return false;
             }
 
-            Log.Debug($"{nameof(RefreshPlexServersAsync)} => Refreshing PlexLibraries for PlexAccount: {plexAccount.Id} was null");
+            Log.Debug($"Refreshing PlexLibraries for PlexAccount: {plexAccount.Id}");
 
             var token = await _plexAuthenticationService.GetPlexToken(plexAccount);
 
             if (string.IsNullOrEmpty(token))
             {
-                Log.Warning($"{nameof(RefreshPlexServersAsync)} => Token was empty");
+                Log.Warning("Token was empty");
                 return false;
             }
 
@@ -62,10 +65,38 @@ namespace PlexRipper.Application.Services
             //Refresh all libraries for each plexServer as well
             foreach (var plexServer in serverList)
             {
-                await _plexLibraryService.RefreshLibrariesAsync(plexServer);
+                var status = await GetPlexServerStatusAsync(plexServer);
+                if (status.IsSuccessful)
+                {
+                    await _plexLibraryService.RefreshLibrariesAsync(plexServer);
+                }
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Check if the <see cref="PlexServer"/> is available and log the status
+        /// </summary>
+        /// <param name="plexServer"></param>
+        /// <returns></returns>
+        public async Task<PlexServerStatus> GetPlexServerStatusAsync(PlexServer plexServer)
+        {
+            // Request status
+            var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(plexServer.AccessToken, plexServer.BaseUrl);
+
+            serverStatus.PlexServer = plexServer;
+            serverStatus.PlexServerId = plexServer.Id;
+
+            // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
+            await _plexServerStatusRepository.AddAsync(serverStatus);
+
+            // Update the plexServer status with the latest status
+            var serverDB = await _plexServerRepository.GetAsync(plexServer.Id);
+            serverDB.ServerStatusId = serverStatus.Id;
+            await _plexServerRepository.UpdateAsync(serverDB);
+
+            return serverStatus;
         }
 
 

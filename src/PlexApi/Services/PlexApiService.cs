@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
-using PlexRipper.PlexApi.Common.DTO;
 using PlexRipper.PlexApi.Common.DTO.PlexGetStatus;
 using System;
 using System.Collections.Generic;
@@ -36,9 +35,9 @@ namespace PlexRipper.PlexApi.Services
             return _plexApi.RefreshPlexAuthTokenAsync(account);
         }
 
-        public Task<PlexStatusDTO> GetStatus(string authToken, string uri)
+        public Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl)
         {
-            return _plexApi.GetStatusAsync(authToken, uri);
+            return _plexApi.GetServerStatusAsync(authToken, serverBaseUrl);
         }
 
         public async Task<PlexAccount> GetAccountAsync(string authToken)

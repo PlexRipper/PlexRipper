@@ -2,33 +2,50 @@
 using PlexRipper.Application.Common.Interfaces.Settings;
 using PlexRipper.Application.Common.Models;
 using PlexRipper.DownloadManager.Common;
+using PlexRipper.PlexApi.Api;
 using Serilog;
+using System;
 using System.Threading.Tasks;
 
 namespace PlexRipper.DownloadManager.Download
 {
     public class PlexDownloadClient : ExtendedWebClient
     {
+        public ILogger Log { get; }
         private IDownloadManager _downloadManager;
         private IUserSettings _userSettings;
-        private ILogger _logger;
 
         public PlexDownloadClient(IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger)
         {
+            Log = logger;
             _downloadManager = downloadManager;
             _userSettings = userSettings;
-            _logger = logger.ForContext<PlexDownloadClient>();
 
+            AddHeaders();
         }
 
+        private void AddHeaders()
+        {
+            foreach ((string key, string value) in PlexHeaderData.GetBasicHeaders)
+            {
+                this.Headers.Add(key, value);
+            }
+        }
         public Task DownloadTask { get; set; }
 
         // Start or continue download
         public void Start(DownloadRequest downloadRequest)
         {
             Log.Debug(downloadRequest.DownloadUrl);
-            DownloadTask = DownloadFileTaskAsync(downloadRequest.DownloadUri, downloadRequest.FileName);
-            DownloadTask.Start();
+            try
+            {
+                Task.WaitAll(DownloadFileTaskAsync(downloadRequest.DownloadUri, downloadRequest.FileName));
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, $"Could not download {downloadRequest.FileName} from {downloadRequest.DownloadUrl}");
+                throw;
+            }
         }
 
         public void Cancel()

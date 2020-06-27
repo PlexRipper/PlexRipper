@@ -6,7 +6,7 @@ namespace PlexRipper.Domain.Entities
 {
     public class PlexMediaMetaData : BaseEntity
     {
-        public int Duration { get; set; }
+        public long Duration { get; set; }
 
         public int Bitrate { get; set; }
 

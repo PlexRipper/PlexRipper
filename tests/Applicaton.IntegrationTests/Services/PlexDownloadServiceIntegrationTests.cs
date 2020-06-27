@@ -39,15 +39,17 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var account = await accountService.CreateAccountAsync(newAccount);
             var serverList = await plexServerService.GetServersAsync(account.PlexAccount);
 
-            var plexLibrary = await plexLibraryService.GetLibraryMediaAsync(serverList.First().PlexLibraries[1]);
-            var movie = plexLibrary.Movies[15];
+            var plexLibrary = await plexLibraryService.GetLibraryMediaAsync(serverList.First().PlexLibraries[4]);
+            var movie = plexLibrary.Movies[16];
 
             var downloadRequest = await plexDownloadService.GetDownloadRequestAsync(movie);
             plexDownloadService.StartDownload(downloadRequest);
-            // await Task.Delay(30000);
+            await Task.Delay(30000);
 
             //Assert
             plexLibrary.ShouldNotBeNull();
         }
+
+
     }
 }

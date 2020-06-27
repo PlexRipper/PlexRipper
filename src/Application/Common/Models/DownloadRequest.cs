@@ -11,7 +11,7 @@ namespace PlexRipper.Application.Common.Models
 
         public Uri DownloadUri => new Uri(DownloadUrl, UriKind.Absolute);
 
-        public string DownloadUrl => $"{Url}?X-Plex-Token={AuthToken}";
+        public string DownloadUrl => $"{Url}?download=1&X-Plex-Token={AuthToken}";
 
         public DownloadRequest(string downloadUrl, string serverAuthToken, string fileName)
         {

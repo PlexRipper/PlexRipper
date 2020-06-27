@@ -1,7 +1,7 @@
 ﻿using Autofac;
-using Microsoft.EntityFrameworkCore;
 using PlexRipper.Infrastructure.Common.Interfaces;
 using PlexRipper.Infrastructure.Persistence;
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -18,26 +18,34 @@ namespace PlexRipper.Infrastructure.Config
                 .Where(t => t.Name.EndsWith("Repository"))
                 .AsImplementedInterfaces();
 
-            // Register Entity Framework Database
+            // Setup Database
+            var dbContextOptions = PlexRipperDbContext.GetConfig().Options;
+
+            var testMode = Environment.GetEnvironmentVariable("IntegrationTestMode");
+            if (testMode != null && testMode == "true")
+            {
+                // Register Entity Framework Database in TestMode for IntegrationTests
+                dbContextOptions = PlexRipperDbContext.GetTestConfig().Options;
+            }
+
             builder.RegisterType<PlexRipperDbContext>()
-                .WithParameter("options", PlexRipperDbContext.GetConfig().Options)
+                .WithParameter("options", dbContextOptions)
                 .As<IPlexRipperDbContext>()
                 .InstancePerLifetimeScope();
 
-            builder.Register(context => context.Resolve<DbContextOptions<PlexRipperDbContext>>())
-                .As<DbContextOptions>()
-                .InstancePerLifetimeScope();
+            // Create Database
+            // TODO Move the creation of the Database to a better place, unknown where
+            var DB = new PlexRipperDbContext(dbContextOptions);
 
-            builder.RegisterType<PlexRipperDbContext>()
-                .AsSelf()
-                .InstancePerLifetimeScope();
+            // Should the Database be deleted and re-created
+            var resetDb = Environment.GetEnvironmentVariable("ResetDB");
+            if (resetDb != null && resetDb == "true")
+            {
+                DB.Database.EnsureDeleted();
+            }
 
-            //Setup Database
-            var DB = new PlexRipperDbContext(PlexRipperDbContext.GetConfig().Options);
             // TODO Re-enable Migrate when stable
             // DB.Database.Migrate();
-            // DB.Database.EnsureDeleted();
-
             Task.WaitAll(DB.Database.EnsureCreatedAsync());
         }
     }

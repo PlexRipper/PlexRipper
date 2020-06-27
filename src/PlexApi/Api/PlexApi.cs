@@ -42,7 +42,7 @@ namespace PlexRipper.PlexApi.Api
         {
             var userModel = new PlexUserRequestDTO
             {
-                User = new UserRequestDTO()
+                User = new UserRequestDTO
                 {
                     Login = username,
                     Password = password
@@ -66,11 +66,19 @@ namespace PlexRipper.PlexApi.Api
             return string.Empty;
         }
 
-        public Task<PlexStatusDTO> GetStatusAsync(string authToken, string uri)
+        public async Task<PlexServerStatus> GetServerStatusAsync(string authToken, string serverBaseUrl)
         {
-            var request = new RestRequest(new Uri(uri), Method.GET);
+            var request = new RestRequest(new Uri(serverBaseUrl), Method.GET);
             request = AddToken(request, authToken);
-            return Client.SendRequestAsync<PlexStatusDTO>(request);
+            var response = await Client.SendRequestAsync(request);
+            var status = new PlexServerStatus
+            {
+                StatusCode = (int)response.StatusCode,
+                IsSuccessful = response.IsSuccessful,
+                StatusMessage = response.IsSuccessful ? response.StatusDescription : response.ErrorMessage,
+                LastChecked = DateTime.Now.ToUniversalTime()
+            };
+            return status;
         }
 
         public Task<PlexAccountDTO> GetAccountAsync(string authToken)

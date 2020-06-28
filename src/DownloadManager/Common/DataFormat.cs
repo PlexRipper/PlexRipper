@@ -66,9 +66,9 @@ namespace PlexRipper.DownloadManager.Common
             return $"{hours}:{minutes}:{seconds}";
         }
 
-        public static float GetPercentage(long bytesReceived, long totalBytes)
+        public static decimal GetPercentage(long bytesReceived, long totalBytes)
         {
-            return (float)Math.Round((bytesReceived / (double)totalBytes) * 100, 2, MidpointRounding.AwayFromZero);
+            return (decimal)Math.Round((bytesReceived / (double)totalBytes) * 100, 2, MidpointRounding.AwayFromZero);
         }
     }
 }

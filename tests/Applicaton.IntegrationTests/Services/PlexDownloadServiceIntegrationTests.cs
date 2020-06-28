@@ -45,6 +45,8 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var downloadRequest = await plexDownloadService.GetDownloadRequestAsync(movie);
             plexDownloadService.StartDownload(downloadRequest);
 
+            await Task.Delay(15000);
+
             //Assert
             plexLibrary.ShouldNotBeNull();
         }

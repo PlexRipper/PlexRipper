@@ -85,17 +85,6 @@ namespace PlexRipper.DownloadManager
             return newClient;
         }
 
-        private WebDownloadClient2 CreateDownloadClient2()
-        {
-            WebDownloadClient2 newClient = new WebDownloadClient2(this, _userSettings, Log);
-
-            //newClient.DownloadProgressChanged += OnDownloadProgressChanged;
-            //newClient.DownloadFileCompleted += OnDownloadFileCompleted;
-
-            // DownloadsList.Add(newClient);
-            return newClient;
-        }
-
         private void OnDownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
             Log.Information("The download has completed!");
@@ -109,7 +98,7 @@ namespace PlexRipper.DownloadManager
 
         public void StartDownload(DownloadRequest downloadRequest)
         {
-            var downloadClient = CreateDownloadClient2();
+            var downloadClient = CreateDownloadClient();
             downloadClient.Start(downloadRequest);
         }
 

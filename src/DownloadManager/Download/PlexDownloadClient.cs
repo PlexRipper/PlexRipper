@@ -77,18 +77,19 @@ namespace PlexRipper.DownloadManager.Download
             }
         }
 
-        #endregion Methods
-
         protected override void OnDownloadProgressChanged(DownloadProgressChangedEventArgs e)
         {
             BytesReceived = e.BytesReceived;
             TotalBytesToReceive = e.TotalBytesToReceive;
             var newPercentage = DataFormat.GetPercentage(BytesReceived, TotalBytesToReceive);
+            // Only fire event when percentage has changed
             if (newPercentage != Percentage)
             {
-
                 base.OnDownloadProgressChanged(e);
             }
+            Percentage = newPercentage;
         }
+
+        #endregion Methods
     }
 }

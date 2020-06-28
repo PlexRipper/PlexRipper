@@ -44,8 +44,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
+    <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\DownloadManager\DownloadManager.csproj" />
-    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\PlexApi\PlexApi.csproj" />
     <ProjectReference Include="..\Settings\Settings.csproj" />
   </ItemGroup>

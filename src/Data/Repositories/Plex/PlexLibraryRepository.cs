@@ -1,10 +1,10 @@
-﻿using PlexRipper.Application.Common.Interfaces.Repositories;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Data.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using Serilog;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PlexRipper.Data.Repositories
 {

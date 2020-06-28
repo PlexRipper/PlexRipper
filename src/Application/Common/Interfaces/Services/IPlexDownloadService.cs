@@ -1,13 +1,12 @@
-﻿using PlexRipper.Application.Common.Models;
-using PlexRipper.Domain.Entities;
+﻿using PlexRipper.Domain.Entities;
 using System.Threading.Tasks;
 
 namespace PlexRipper.Application.Common.Interfaces
 {
     public interface IPlexDownloadService
     {
-        void StartDownload(DownloadRequest downloadRequest);
+        void StartDownload(DownloadTask downloadTask);
         Task<string> GetPlexTokenAsync(PlexAccount plexAccount);
-        Task<DownloadRequest> GetDownloadRequestAsync(PlexMovie movie);
+        Task<DownloadTask> GetDownloadRequestAsync(PlexMovie movie);
     }
 }

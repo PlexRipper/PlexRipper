@@ -1,6 +1,5 @@
 ﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Settings;
-using PlexRipper.Application.Common.Models;
 using PlexRipper.DownloadManager.Common;
 using Serilog;
 using System;
@@ -665,17 +664,6 @@ namespace PlexRipper.DownloadManager.Download
             this.BufferCountPerNotification = 64;
 
 
-            this.SupportsRange = false;
-            this.HasError = false;
-            this.OpenFileOnCompletion = false;
-            this.TempFileCreated = false;
-            this.IsSelected = false;
-            this.IsBatch = false;
-            this.BatchUrlChecked = false;
-            this.SpeedLimitChanged = false;
-            this.speedUpdateCount = 0;
-            this.recentAverageRate = 0;
-            this.StatusText = String.Empty;
 
             this.Status = DownloadStatus.Initialized;
         }
@@ -840,9 +828,8 @@ namespace PlexRipper.DownloadManager.Download
         }
 
         // Start or continue download
-        public void Start(DownloadRequest downloadRequest)
+        public void Start()
         {
-            this.Url = new Uri(downloadRequest.DownloadUrl);
             if (this.Status == DownloadStatus.Initialized || this.Status == DownloadStatus.Paused
                 || this.Status == DownloadStatus.Queued || this.HasError)
             {

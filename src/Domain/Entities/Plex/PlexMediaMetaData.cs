@@ -1,4 +1,4 @@
-﻿using PlexRipper.Domain.Entities.Base;
+using PlexRipper.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 

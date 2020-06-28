@@ -1,12 +1,14 @@
 ﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
+using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Application.Common.Interfaces.Settings;
-using PlexRipper.Application.Common.Models;
+using PlexRipper.Domain.Entities;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.DownloadManager.Download;
 using Serilog;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace PlexRipper.DownloadManager
 {
@@ -15,6 +17,7 @@ namespace PlexRipper.DownloadManager
         #region Fields
 
         private readonly IUserSettings _userSettings;
+        private readonly IDownloadTaskRepository _downloadTaskRepository;
 
         private ILogger Log { get; }
 
@@ -63,10 +66,11 @@ namespace PlexRipper.DownloadManager
 
         #region Constructors
 
-        public DownloadManager(IUserSettings userSettings, ILogger logger)
+        public DownloadManager(IUserSettings userSettings, ILogger logger, IDownloadTaskRepository downloadTaskRepository)
         {
             _userSettings = userSettings;
-            Log = logger.ForContext<DownloadManager>();
+            _downloadTaskRepository = downloadTaskRepository;
+            Log = logger;
         }
 
         #endregion Constructors
@@ -74,9 +78,9 @@ namespace PlexRipper.DownloadManager
         #region Methods
 
 
-        private PlexDownloadClient CreateDownloadClient()
+        private PlexDownloadClient CreateDownloadClient(DownloadTask downloadTask)
         {
-            PlexDownloadClient newClient = new PlexDownloadClient(this, _userSettings, Log);
+            PlexDownloadClient newClient = new PlexDownloadClient(downloadTask, this, _userSettings, Log);
 
             newClient.DownloadProgressChanged += OnDownloadProgressChanged;
             newClient.DownloadFileCompleted += OnDownloadFileCompleted;
@@ -96,10 +100,14 @@ namespace PlexRipper.DownloadManager
             Log.Information($"Downloaded {DataFormat.FormatSizeString(e.BytesReceived)} of {DataFormat.FormatSizeString(e.TotalBytesToReceive)} bytes. {e.ProgressPercentage} % complete...");
         }
 
-        public void StartDownload(DownloadRequest downloadRequest)
+        public async Task StartDownloadAsync(DownloadTask downloadTask)
         {
-            var downloadClient = CreateDownloadClient();
-            downloadClient.Start(downloadRequest);
+            // Add to DB
+            await _downloadTaskRepository.AddAsync(downloadTask);
+
+            Log.Debug(downloadTask.ToString());
+            var downloadClient = CreateDownloadClient(downloadTask);
+            downloadClient.Start();
         }
 
 

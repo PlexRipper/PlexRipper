@@ -18,6 +18,9 @@ namespace PlexRipper.Data
 
         #region Tables
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<DownloadTask> DownloadTasks { get; set; }
+        public DbSet<FolderPath> FolderPaths { get; set; }
+
         public DbSet<PlexGenre> PlexGenres { get; set; }
         public DbSet<PlexAccount> PlexAccounts { get; set; }
         public DbSet<PlexLibrary> PlexLibraries { get; set; }
@@ -67,6 +70,8 @@ namespace PlexRipper.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            builder = PlexRipperDBContextSeed.SeedDatabase(builder);
 
             base.OnModelCreating(builder);
         }

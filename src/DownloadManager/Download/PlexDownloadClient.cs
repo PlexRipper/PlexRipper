@@ -1,6 +1,6 @@
 ﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Settings;
-using PlexRipper.Application.Common.Models;
+using PlexRipper.Domain.Entities;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.PlexApi.Api;
 using Serilog;
@@ -21,7 +21,7 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Constructors
 
-        public PlexDownloadClient(IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger)
+        public PlexDownloadClient(DownloadTask downloadTask, IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger)
         {
             Log = logger;
             _downloadManager = downloadManager;
@@ -37,8 +37,10 @@ namespace PlexRipper.DownloadManager.Download
         // Size of downloaded data which was written to the local file
         public long DownloadedSize { get; set; }
 
-        public Task DownloadTask { get; set; }
+        public DownloadTask DownloadTask { get; set; }
         public ILogger Log { get; }
+        public int ClientId => DownloadTask.Id;
+
         public decimal Percentage { get; internal set; }
         public long BytesReceived { get; internal set; }
         public long TotalBytesToReceive { get; internal set; }
@@ -50,16 +52,16 @@ namespace PlexRipper.DownloadManager.Download
         #region Methods
 
         // Start or continue download
-        public void Start(DownloadRequest downloadRequest)
+        public void Start()
         {
-            Log.Debug(downloadRequest.DownloadUrl);
+            Log.Debug(DownloadTask.DownloadUrl);
             try
             {
-                Task.WaitAll(DownloadFileTaskAsync(downloadRequest.DownloadUri, downloadRequest.FileName));
+                Task.WaitAll(DownloadFileTaskAsync(DownloadTask.DownloadUri, DownloadTask.FileName));
             }
             catch (Exception e)
             {
-                Log.Error(e, $"Could not download {downloadRequest.FileName} from {downloadRequest.DownloadUrl}");
+                Log.Error(e, $"Could not download {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
                 throw;
             }
         }

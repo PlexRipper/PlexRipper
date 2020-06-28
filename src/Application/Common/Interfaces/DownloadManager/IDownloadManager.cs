@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application.Common.Models;
+﻿using PlexRipper.Domain.Entities;
+using System.Threading.Tasks;
 
 namespace PlexRipper.Application.Common.Interfaces.DownloadManager
 {
@@ -7,6 +8,6 @@ namespace PlexRipper.Application.Common.Interfaces.DownloadManager
         int ActiveDownloads { get; }
         int CompletedDownloads { get; }
         int TotalDownloads { get; }
-        void StartDownload(DownloadRequest downloadTask);
+        Task StartDownloadAsync(DownloadTask downloadTask);
     }
 }

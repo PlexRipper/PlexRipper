@@ -18,7 +18,7 @@ namespace PlexRipper.Data.Repositories
 
         public Repository(IPlexRipperDbContext context, ILogger log)
         {
-            Log = log;
+            Log = log.ForContext<TEntity>();
             Context = context;
         }
 
@@ -59,9 +59,17 @@ namespace PlexRipper.Data.Repositories
 
         public async Task AddAsync(TEntity entity)
         {
-            await Context.Instance.Set<TEntity>().AddAsync(entity);
-            await SaveChangesAsync();
-            await Context.Entry(entity).GetDatabaseValuesAsync();
+            try
+            {
+                await Context.Instance.Set<TEntity>().AddAsync(entity);
+                await SaveChangesAsync();
+                await Context.Entry(entity).GetDatabaseValuesAsync();
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, $"Exception occured during the adding of {typeof(TEntity)} to the Database");
+                throw;
+            }
         }
 
         public async Task AddRangeAsync(IEnumerable<TEntity> entities)
@@ -88,15 +96,29 @@ namespace PlexRipper.Data.Repositories
 
         public async Task<bool> RemoveAsync(int id)
         {
-            var entity = await GetAsync(id);
-            if (entity != null)
+            try
             {
-                Context.Instance.Set<TEntity>().Remove(entity);
-                await SaveChangesAsync();
-                return true;
+                if (id <= 0)
+                {
+                    Log.Warning($"Id was {id}");
+                }
+
+                // Check if entity exists
+                var entity = await GetAsync(id);
+                if (entity != null)
+                {
+                    Context.Instance.Set<TEntity>().Remove(entity);
+                    await SaveChangesAsync();
+                    return true;
+                }
+                Log.Warning($"Entity with {id} of type {typeof(TEntity)} does not exist and can therefore not be removed.");
+                return false;
             }
-            // TODO add logging here
-            return false;
+            catch (Exception e)
+            {
+                Log.Error(e, $"Exception occured during the removal of {typeof(TEntity)} from the Database");
+                throw;
+            }
         }
 
         /// <summary>
@@ -106,14 +128,28 @@ namespace PlexRipper.Data.Repositories
         /// <returns>If successful</returns>
         public async Task<bool> RemoveAsync(TEntity entity)
         {
-            if (GetAsync(entity.Id) != null)
+            try
             {
-                Context.Instance.Set<TEntity>().Remove(entity);
-                await SaveChangesAsync();
-                return true;
+                if (entity == null)
+                {
+                    Log.Warning($"Entity of type {typeof(TEntity)} to be removed was null");
+                    return false;
+                }
+
+                if (GetAsync(entity.Id) != null)
+                {
+                    Context.Instance.Set<TEntity>().Remove(entity);
+                    await SaveChangesAsync();
+                    return true;
+                }
+                Log.Warning($"Entity with {entity.Id} of type {typeof(TEntity)} does not exist and can therefore not be removed.");
+                return false;
             }
-            // TODO add logging here
-            return false;
+            catch (Exception e)
+            {
+                Log.Error(e, $"Exception occured during the removal of {typeof(TEntity)} from the Database");
+                throw;
+            }
         }
 
         public async Task<bool> RemoveRangeAsync(IEnumerable<TEntity> entities)
@@ -130,6 +166,7 @@ namespace PlexRipper.Data.Repositories
 
         public Task<int> SaveChangesAsync()
         {
+            Log.Verbose("Saving changes to database");
             return Context.SaveChangesAsync();
         }
 

@@ -1,0 +1,19 @@
+{
+  "ApiKey": "bnrijbrogbwoeibgoiuweb",
+  "ConfirmExit": false,
+  "DownloadManager": {
+    "ConfirmDelete": true,
+    "DownloadLocation": "/Downloads",
+    "TempDownloadLocation": null,
+    "EnableSpeedLimit": false,
+    "HttpProxy": "",
+    "ManualProxyConfig": false,
+    "MaxDownloads": 5,
+    "MemoryCacheSize": 1024,
+    "ProxyPassword": "",
+    "ProxyPort": 80,
+    "ProxyUsername": "",
+    "SpeedLimit": 200,
+    "StartDownloadsOnStartup": true
+  }
+}

@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using PlexRipper.Application.Config.Mappings;
+using PlexRipper.Domain;
 using PlexRipper.Domain.AutoMapper;
 using PlexRipper.PlexApi.Config.Mappings;
 using PlexRipper.WebAPI.Config;
 using Serilog;
-using Serilog.Events;
 using System;
 using Xunit.Abstractions;
+using Log = Serilog.Log;
 
 namespace PlexRipper.BaseTests
 {
@@ -30,17 +31,9 @@ namespace PlexRipper.BaseTests
 
         public static ILogger GetLoggerConfig()
         {
-            string template =
-                "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({SourceContext:l}) {Message}{NewLine}{Exception}";
-
-            return new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .Enrich.WithProperty("SourceContext", null)
-                // .Enrich.FromLogContext()
-                .WriteTo.Console(outputTemplate: template)
-                .WriteTo.Debug(outputTemplate: template)
-                .WriteTo.TestOutput(Output, outputTemplate: template)
-                .WriteTo.ColoredConsole(LogEventLevel.Verbose, template)
+            var config = LogConfigurationExtensions.GetBaseConfiguration;
+            return config
+                .WriteTo.TestOutput(Output, outputTemplate: LogConfigurationExtensions.Template)
                 .CreateLogger();
         }
 

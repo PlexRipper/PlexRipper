@@ -1,26 +1,24 @@
 ﻿using PlexRipper.Application.Common.Interfaces.Application;
-using Serilog;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common.TestClass
 {
     public class TestClass : ITestClass
     {
-        public ILogger Log { get; }
 
-        public TestClass(ILogger log)
+        public TestClass()
         {
-            Log = log;
+
         }
 
         public void TestLogging()
         {
-            Log.Verbose("TestClass.Log => This is a verbose string");
-            Log.Debug("TestClass.Log => This is a debug string");
-            Log.Warning("TestClass.Log => This is a warning string");
-            Log.Information("TestClass.Log => This is an information string");
-            Log.Error("TestClass.Log => This is an error string");
-            Log.Fatal("TestClass.Log => This is a fatal string");
-
+            Log.Verbose("This is a verbose string");
+            Log.Debug("This is a debug string");
+            Log.Warning("This is a warning string");
+            Log.Information("This is an information string");
+            Log.Error("This is an error string");
+            Log.Fatal("This is a fatal string");
         }
     }
 }

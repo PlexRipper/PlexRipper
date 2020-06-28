@@ -4,11 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using Serilog;
-using Serilog.Core;
-using Serilog.Events;
+using System;
 using System.IO;
+using Log = PlexRipper.Domain.Log;
 
 namespace PlexRipper.WebAPI
 {
@@ -17,11 +18,11 @@ namespace PlexRipper.WebAPI
 
         public static void Main(string[] args)
         {
-            Log.Logger = SetupLogging();
+            Serilog.Log.Logger = LogConfigurationExtensions.GetLogger();
 
             try
             {
-                Log.Logger.Information("Starting up");
+                Log.Information("Starting up");
 
                 var host = Host.CreateDefaultBuilder(args)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
@@ -30,42 +31,22 @@ namespace PlexRipper.WebAPI
                         webHostBuilder
                             .UseContentRoot(Directory.GetCurrentDirectory())
                             .UseStartup<Startup>();
-
                     })
                     .ConfigureLogging(config =>
                     {
                         config.ClearProviders();
                         config.AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
                     })
-                    .ConfigureServices((hostContext, services) =>
-                    {
-                        services.AddHostedService<DownloadWorker>();
-                    })
+                    .ConfigureServices((hostContext, services) => { services.AddHostedService<DownloadWorker>(); })
                     .UseSerilog()
                     .Build();
 
                 host.Run();
             }
-            finally
+            catch (Exception e)
             {
-                // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
-                Log.CloseAndFlush();
+                Log.Fatal(e);
             }
-        }
-
-        public static Logger SetupLogging()
-        {
-            string template =
-                "{NewLine}{Timestamp:HH:mm:ss} [{Level}] ({SourceContext}) {Message}{NewLine}{Exception}";
-
-            return new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-                .Enrich.FromLogContext()
-                .WriteTo.Debug(outputTemplate: template)
-                .WriteTo.ColoredConsole(LogEventLevel.Debug, template)
-                .CreateLogger();
         }
     }
 }

@@ -5,22 +5,21 @@ using PlexRipper.DownloadManager.Common;
 using PlexRipper.PlexApi.Api;
 using Serilog;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace PlexRipper.DownloadManager.Download
 {
     public class PlexDownloadClient : ExtendedWebClient
     {
-        public ILogger Log { get; }
+
+        #region Fields
+
         private IDownloadManager _downloadManager;
         private IUserSettings _userSettings;
+        #endregion Fields
 
-        public decimal Percentage { get; internal set; }
-
-        // Size of downloaded data which was written to the local file
-        public long DownloadedSize { get; set; }
-
-        // Percentage of downloaded data
+        #region Constructors
 
         public PlexDownloadClient(IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger)
         {
@@ -31,14 +30,24 @@ namespace PlexRipper.DownloadManager.Download
             AddHeaders();
         }
 
-        private void AddHeaders()
-        {
-            foreach ((string key, string value) in PlexHeaderData.GetBasicHeaders)
-            {
-                this.Headers.Add(key, value);
-            }
-        }
+        #endregion Constructors
+
+        #region Properties
+
+        // Size of downloaded data which was written to the local file
+        public long DownloadedSize { get; set; }
+
         public Task DownloadTask { get; set; }
+        public ILogger Log { get; }
+        public decimal Percentage { get; internal set; }
+        public long BytesReceived { get; internal set; }
+        public long TotalBytesToReceive { get; internal set; }
+
+
+
+        #endregion Properties
+
+        #region Methods
 
         // Start or continue download
         public void Start(DownloadRequest downloadRequest)
@@ -60,13 +69,26 @@ namespace PlexRipper.DownloadManager.Download
             CancelAsync();
         }
 
-        //protected override void OnDownloadProgressChanged(DownloadProgressChangedEventArgs e)
-        //{
+        private void AddHeaders()
+        {
+            foreach ((string key, string value) in PlexHeaderData.GetBasicHeaders)
+            {
+                this.Headers.Add(key, value);
+            }
+        }
 
-        //    if (e.ProgressPercentage)
-        //    {
-        //        base.OnDownloadProgressChanged(e);
-        //    }
-        //}
+        #endregion Methods
+
+        protected override void OnDownloadProgressChanged(DownloadProgressChangedEventArgs e)
+        {
+            BytesReceived = e.BytesReceived;
+            TotalBytesToReceive = e.TotalBytesToReceive;
+            var newPercentage = DataFormat.GetPercentage(BytesReceived, TotalBytesToReceive);
+            if (newPercentage != Percentage)
+            {
+
+                base.OnDownloadProgressChanged(e);
+            }
+        }
     }
 }

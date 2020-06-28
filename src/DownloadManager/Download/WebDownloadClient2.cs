@@ -150,7 +150,7 @@ namespace PlexRipper.DownloadManager.Download
             // Lock this block of code so other threads and processes don't interfere with file creation
             lock (fileLocker)
             {
-                using (FileStream fileStream = File.Create(this.TempDownloadPath))
+                using (FileStream fileStream = File.Create(Directory.GetCurrentDirectory()))
                 {
                     long createdSize = 0;
                     byte[] buffer = new byte[4096];
@@ -171,7 +171,7 @@ namespace PlexRipper.DownloadManager.Download
             HttpWebRequest webRequest = null;
             HttpWebResponse webResponse = null;
             Stream responseStream = null;
-            // ThrottledStream throttledStream = null;
+            ThrottledStream throttledStream = null;
             MemoryStream downloadCache = null;
             speedUpdateCount = 0;
             recentAverageRate = 0;
@@ -191,12 +191,12 @@ namespace PlexRipper.DownloadManager.Download
                     this.BatchUrlChecked = true;
                 }
 
-                if (!TempFileCreated)
-                {
-                    // Reserve local disk space for the file
-                    CreateTempFile();
-                    this.TempFileCreated = true;
-                }
+                //if (!TempFileCreated)
+                //{
+                //    // Reserve local disk space for the file
+                //    CreateTempFile();
+                //    this.TempFileCreated = true;
+                //}
 
                 this.lastStartTime = DateTime.UtcNow;
 
@@ -244,9 +244,9 @@ namespace PlexRipper.DownloadManager.Download
                 }
                 else
                 {
-                    // maxBytesPerSecond = ThrottledStream.Infinite;
+                    maxBytesPerSecond = ThrottledStream.Infinite;
                 }
-                // throttledStream = new ThrottledStream(responseStream, maxBytesPerSecond);
+                throttledStream = new ThrottledStream(responseStream, maxBytesPerSecond);
 
                 // Create memory cache with the specified size
                 downloadCache = new MemoryStream(this.MaxCacheSize);
@@ -269,14 +269,14 @@ namespace PlexRipper.DownloadManager.Download
                         }
                         else
                         {
-                            // maxBytesPerSecond = ThrottledStream.Infinite;
+                            maxBytesPerSecond = ThrottledStream.Infinite;
                         }
-                        // throttledStream.MaximumBytesPerSecond = maxBytesPerSecond;
+                        throttledStream.MaximumBytesPerSecond = maxBytesPerSecond;
                         SpeedLimitChanged = false;
                     }
 
                     // Read data from the response stream and write it to the buffer
-                    //bytesSize = throttledStream.Read(downloadBuffer, 0, downloadBuffer.Length);
+                    bytesSize = throttledStream.Read(downloadBuffer, 0, downloadBuffer.Length);
 
                     // If the cache is full or the download is paused or completed, write data from the cache to the temporary file
                     if (this.Status != DownloadStatus.Downloading || bytesSize == 0 || this.MaxCacheSize < CachedSize + bytesSize)
@@ -345,7 +345,7 @@ namespace PlexRipper.DownloadManager.Download
                 //throttledStream?.Close();
                 webResponse?.Close();
                 downloadCache?.Close();
-                DownloadThread?.Abort();
+                // DownloadThread?.Abort();
             }
         }
 

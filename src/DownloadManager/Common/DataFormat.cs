@@ -14,18 +14,17 @@ namespace PlexRipper.DownloadManager.Common
         /// <returns></returns>
         public static string FormatSizeString(long byteSize)
         {
-            double kiloByteSize = (double)byteSize / 1024D;
+            double kiloByteSize = byteSize / 1024D;
             double megaByteSize = kiloByteSize / 1024D;
             double gigaByteSize = megaByteSize / 1024D;
 
             if (byteSize < 1024)
                 return string.Format(numberFormat, "{0} B", byteSize);
-            else if (byteSize < 1048576)
+            if (byteSize < 1048576)
                 return string.Format(numberFormat, "{0:0.00} kB", kiloByteSize);
-            else if (byteSize < 1073741824)
+            if (byteSize < 1073741824)
                 return string.Format(numberFormat, "{0:0.00} MB", megaByteSize);
-            else
-                return string.Format(numberFormat, "{0:0.00} GB", gigaByteSize);
+            return string.Format(numberFormat, "{0:0.00} GB", gigaByteSize);
         }
 
         /// <summary>
@@ -35,17 +34,16 @@ namespace PlexRipper.DownloadManager.Common
         /// <returns></returns>
         public static string FormatSpeedString(int speed)
         {
-            float kbSpeed = (float)speed / 1024F;
+            float kbSpeed = speed / 1024F;
             float mbSpeed = kbSpeed / 1024F;
 
             if (speed <= 0)
                 return string.Empty;
-            else if (speed < 1024)
+            if (speed < 1024)
                 return speed + " B/s";
-            else if (speed < 1048576)
+            if (speed < 1048576)
                 return kbSpeed.ToString("#.00", numberFormat) + " kB/s";
-            else
-                return mbSpeed.ToString("#.00", numberFormat) + " MB/s";
+            return mbSpeed.ToString("#.00", numberFormat) + " MB/s";
         }
 
         /// <summary>
@@ -66,6 +64,11 @@ namespace PlexRipper.DownloadManager.Common
                 seconds = "0" + seconds;
 
             return $"{hours}:{minutes}:{seconds}";
+        }
+
+        public static float GetPercentage(long bytesReceived, long totalBytes)
+        {
+            return (float)Math.Round((bytesReceived / (double)totalBytes) * 100, 2, MidpointRounding.AwayFromZero);
         }
     }
 }

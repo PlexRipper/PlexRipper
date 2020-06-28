@@ -1,7 +1,5 @@
-﻿using Newtonsoft.Json;
-using PlexRipper.Domain.Extensions.Converters;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO.PlexGetLibrarySections
 {
@@ -10,125 +8,109 @@ namespace PlexRipper.PlexApi.Common.DTO.PlexGetLibrarySections
     /// </summary>
     public class PlexLibrarySectionsDTO
     {
-        [JsonProperty("MediaContainer")]
+        [JsonPropertyName("MediaContainer")]
         public PlexLibrarySectionsMediaContainerDTO MediaContainer { get; set; }
     }
 
     public class PlexLibrarySectionsMediaContainerDTO
     {
 
-        [JsonProperty("size")]
+        [JsonPropertyName("size")]
         public int Size { get; set; }
 
-        [JsonProperty("allowSync")]
+        [JsonPropertyName("allowSync")]
         public bool AllowSync { get; set; }
 
-        [JsonProperty("identifier")]
+        [JsonPropertyName("identifier")]
         public string Identifier { get; set; }
 
-        [JsonProperty("mediaTagPrefix")]
+        [JsonPropertyName("mediaTagPrefix")]
         public string MediaTagPrefix { get; set; }
 
-        [JsonProperty("mediaTagVersion")]
+        [JsonPropertyName("mediaTagVersion")]
         public int MediaTagVersion { get; set; }
 
-        [JsonProperty("title1")]
+        [JsonPropertyName("title1")]
         public string Title1 { get; set; }
 
-        [JsonProperty("Directory")]
+        [JsonPropertyName("Directory")]
         public IList<PlexLibrarySectionsDirectoryDTO> Directory { get; set; }
     }
 
     public class PlexLibrarySectionsDirectoryDTO
     {
 
-        [JsonProperty("allowSync")]
+        [JsonPropertyName("allowSync")]
         public bool AllowSync { get; set; }
 
-        [JsonProperty("art")]
+        [JsonPropertyName("art")]
         public string Art { get; set; }
 
-        [JsonProperty("composite")]
+        [JsonPropertyName("composite")]
         public string Composite { get; set; }
 
-        [JsonProperty("filters")]
+        [JsonPropertyName("filters")]
         public bool Filters { get; set; }
 
-        [JsonProperty("refreshing")]
+        [JsonPropertyName("refreshing")]
         public bool Refreshing { get; set; }
 
-        [JsonProperty("thumb")]
+        [JsonPropertyName("thumb")]
         public string Thumb { get; set; }
 
-        [JsonProperty("key")]
+        [JsonPropertyName("key")]
         public string Key { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [JsonProperty("title")]
+        [JsonPropertyName("title")]
         public string Title { get; set; }
 
-        [JsonProperty("agent")]
+        [JsonPropertyName("agent")]
         public string Agent { get; set; }
 
-        [JsonProperty("scanner")]
+        [JsonPropertyName("scanner")]
         public string Scanner { get; set; }
 
-        [JsonProperty("language")]
+        [JsonPropertyName("language")]
         public string Language { get; set; }
 
-        [JsonProperty("uuid")]
+        [JsonPropertyName("uuid")]
         public string Uuid { get; set; }
 
-        /// <summary>
-        ///  Huge numbers might be returned, which is why the type is string which will later be safely converted by AutoMapper to a valid DateTime.
-        /// </summary>
-        [JsonProperty("updatedAt")]
-        [JsonConverter(typeof(SafeUnixDateTimeConverter))]
-        public DateTime UpdatedAt { get; set; }
+        [JsonPropertyName("updatedAt")]
+        public long UpdatedAt { get; set; }
 
-        /// <summary>
-        ///  Huge numbers might be returned, which is why the type is string which will later be safely converted by AutoMapper to a valid DateTime.
-        /// </summary>
-        [JsonProperty("createdAt")]
-        [JsonConverter(typeof(SafeUnixDateTimeConverter))]
-        public DateTime CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public long CreatedAt { get; set; }
 
-        /// <summary>
+        [JsonPropertyName("scannedAt")]
+        public long ScannedAt { get; set; }
 
-        /// </summary>
-        [JsonProperty("scannedAt")]
-        [JsonConverter(typeof(SafeUnixDateTimeConverter))]
-        public DateTime ScannedAt { get; set; }
-
-        [JsonProperty("content")]
+        [JsonPropertyName("content")]
         public bool Content { get; set; }
 
-        [JsonProperty("directory")]
+        [JsonPropertyName("directory")]
         public bool Directory { get; set; }
 
-        /// <summary>
-        ///  Huge numbers might be returned, which is why the type is string which will later be safely converted by AutoMapper to a valid DateTime.
-        /// </summary>
-        [JsonProperty("contentChangedAt")]
-        [JsonConverter(typeof(SafeUnixDateTimeConverter))]
-        public DateTime ContentChangedAt { get; set; }
+        [JsonPropertyName("contentChangedAt")]
+        public long ContentChangedAt { get; set; }
 
-        [JsonProperty("hidden")]
+        [JsonPropertyName("hidden")]
         public int Hidden { get; set; }
 
-        [JsonProperty("Location")]
+        [JsonPropertyName("Location")]
         public IList<PlexLibrarySectionsLocationDTO> Location { get; set; }
     }
 
     public class PlexLibrarySectionsLocationDTO
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("path")]
+        [JsonPropertyName("path")]
         public string Path { get; set; }
     }
 }

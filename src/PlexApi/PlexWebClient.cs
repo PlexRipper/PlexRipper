@@ -1,8 +1,9 @@
 ﻿using PlexRipper.PlexApi.Api;
 using RestSharp;
 using RestSharp.Serialization.Xml;
-using RestSharp.Serializers.NewtonsoftJson;
+using RestSharp.Serializers.SystemTextJson;
 using Serilog;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace PlexRipper.PlexApi
@@ -14,7 +15,12 @@ namespace PlexRipper.PlexApi
         public PlexWebClient(ILogger log)
         {
             Log = log;
-            this.UseNewtonsoftJson();
+            this.UseSystemTextJson(new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true,
+                WriteIndented = true,
+            });
             this.UseDotNetXmlSerializer();
             this.Timeout = 15000;
 

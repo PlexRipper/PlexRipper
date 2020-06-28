@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
-using PlexRipper.PlexApi.Common.DTO.PlexGetStatus;
+﻿using PlexRipper.PlexApi.Common.DTO.PlexGetStatus;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO
 {
 
     public class PlexStatusDTO
     {
-        [JsonProperty("mediaContainer")]
+        [JsonPropertyName("mediaContainer")]
 
         public MediaContainerDTO MediaContainer { get; set; }
     }

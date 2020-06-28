@@ -1,7 +1,5 @@
-﻿using Newtonsoft.Json;
-using PlexRipper.Domain.Extensions.Converters;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO.PlexLibraryMedia
 {
@@ -10,59 +8,59 @@ namespace PlexRipper.PlexApi.Common.DTO.PlexLibraryMedia
     /// </summary>
     public class PlexLibraryMediaDTO
     {
-        [JsonProperty("MediaContainer")]
+        [JsonPropertyName("MediaContainer")]
         public PlexLibraryMediaContainerDTO MediaContainer { get; set; }
     }
 
     public class PlexLibraryMediaContainerDTO
     {
 
-        [JsonProperty("size")]
+        [JsonPropertyName("size")]
         public int Size { get; set; }
 
-        [JsonProperty("allowSync")]
+        [JsonPropertyName("allowSync")]
         public bool AllowSync { get; set; }
 
-        [JsonProperty("art")]
+        [JsonPropertyName("art")]
         public string Art { get; set; }
 
-        [JsonProperty("identifier")]
+        [JsonPropertyName("identifier")]
         public string Identifier { get; set; }
 
-        [JsonProperty("librarySectionID")]
+        [JsonPropertyName("librarySectionID")]
         public int LibrarySectionID { get; set; }
 
-        [JsonProperty("librarySectionTitle")]
+        [JsonPropertyName("librarySectionTitle")]
         public string LibrarySectionTitle { get; set; }
 
-        [JsonProperty("librarySectionUUID")]
+        [JsonPropertyName("librarySectionUUID")]
         public string LibrarySectionUUID { get; set; }
 
-        [JsonProperty("mediaTagPrefix")]
+        [JsonPropertyName("mediaTagPrefix")]
         public string MediaTagPrefix { get; set; }
 
-        [JsonProperty("mediaTagVersion")]
+        [JsonPropertyName("mediaTagVersion")]
         public int MediaTagVersion { get; set; }
 
-        [JsonProperty("nocache")]
+        [JsonPropertyName("nocache")]
         public bool Nocache { get; set; }
 
-        [JsonProperty("thumb")]
+        [JsonPropertyName("thumb")]
         public string Thumb { get; set; }
 
-        [JsonProperty("title1")]
+        [JsonPropertyName("title1")]
         public string Title1 { get; set; }
 
-        [JsonProperty("title2")]
+        [JsonPropertyName("title2")]
         public string Title2 { get; set; }
 
-        [JsonProperty("viewGroup")]
+        [JsonPropertyName("viewGroup")]
         public string ViewGroup { get; set; }
 
-        [JsonProperty("viewMode")]
+        [JsonPropertyName("viewMode")]
         public int ViewMode { get; set; }
 
-        [JsonProperty("Metadata")]
+        [JsonPropertyName("Metadata")]
         public IList<PlexLibraryMetaDataDTO> Metadata { get; set; }
 
     }
@@ -73,102 +71,99 @@ namespace PlexRipper.PlexApi.Common.DTO.PlexLibraryMedia
     public class PlexLibraryMetaDataDTO
     {
 
-        [JsonProperty("ratingKey")]
+        [JsonPropertyName("ratingKey")]
         public string RatingKey { get; set; }
 
-        [JsonProperty("key")]
+        [JsonPropertyName("key")]
         public string Key { get; set; }
 
-        [JsonProperty("guid")]
+        [JsonPropertyName("guid")]
         public string Guid { get; set; }
 
-        [JsonProperty("studio")]
+        [JsonPropertyName("studio")]
         public string Studio { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [JsonProperty("title")]
+        [JsonPropertyName("title")]
         public string Title { get; set; }
 
-        [JsonProperty("contentRating")]
+        [JsonPropertyName("contentRating")]
         public string ContentRating { get; set; }
 
-        [JsonProperty("summary")]
+        [JsonPropertyName("summary")]
         public string Summary { get; set; }
 
-        [JsonProperty("index")]
+        [JsonPropertyName("index")]
         public int Index { get; set; }
 
-        [JsonProperty("rating")]
+        [JsonPropertyName("rating")]
         public double Rating { get; set; }
 
-        [JsonProperty("year")]
+        [JsonPropertyName("year")]
         public int Year { get; set; }
 
-        [JsonProperty("thumb")]
+        [JsonPropertyName("thumb")]
         public string Thumb { get; set; }
 
-        [JsonProperty("art")]
+        [JsonPropertyName("art")]
         public string Art { get; set; }
 
-        [JsonProperty("banner")]
+        [JsonPropertyName("banner")]
         public object Banner { get; set; }
 
-        [JsonProperty("duration")]
+        [JsonPropertyName("duration")]
         public int Duration { get; set; }
 
         /// <summary>
         /// In format YYYY-MM-DD, e.g: 2017-02-19
         /// </summary>
-        [JsonProperty("originallyAvailableAt")]
+        [JsonPropertyName("originallyAvailableAt")]
         public string OriginallyAvailableAt { get; set; }
 
-        [JsonProperty("leafCount")]
+        [JsonPropertyName("leafCount")]
         public int LeafCount { get; set; }
 
-        [JsonProperty("viewedLeafCount")]
+        [JsonPropertyName("viewedLeafCount")]
         public int ViewedLeafCount { get; set; }
 
-        [JsonProperty("childCount")]
+        [JsonPropertyName("childCount")]
         public int ChildCount { get; set; }
 
-        [JsonProperty("addedAt")]
-        [JsonConverter(typeof(SafeUnixDateTimeConverter))]
-        public DateTime AddedAt { get; set; }
+        [JsonPropertyName("addedAt")]
+        public long AddedAt { get; set; }
 
-        [JsonProperty("updatedAt")]
-        [JsonConverter(typeof(SafeUnixDateTimeConverter))]
-        public DateTime UpdatedAt { get; set; }
+        [JsonPropertyName("updatedAt")]
+        public long UpdatedAt { get; set; }
 
-        [JsonProperty("Genre")]
+        [JsonPropertyName("Genre")]
         public IList<PlexLibraryGenreDTO> Genre { get; set; }
 
-        [JsonProperty("Role")]
+        [JsonPropertyName("Role")]
         public IList<PlexLibraryRoleDTO> Role { get; set; }
 
-        [JsonProperty("viewCount")]
+        [JsonPropertyName("viewCount")]
         public int? ViewCount { get; set; }
 
-        [JsonProperty("lastViewedAt")]
-        [JsonConverter(typeof(SafeUnixDateTimeConverter))]
-        public DateTime? LastViewedAt { get; set; }
+        [JsonPropertyName("lastViewedAt")]
+        public long? LastViewedAt { get; set; }
 
-        [JsonProperty("theme")]
+        [JsonPropertyName("theme")]
         public object Theme { get; set; }
     }
 
     public class PlexLibraryGenreDTO
     {
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
     }
 
     public class PlexLibraryRoleDTO
     {
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
     }
 

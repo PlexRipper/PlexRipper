@@ -1,160 +1,160 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO.PlexLibrary
 {
     public class PlexLibraryContainerDTO
     {
-        [JsonProperty("MediaContainer")]
+        [JsonPropertyName("MediaContainer")]
         public PlexMediaContainerDTO MediaContainer { get; set; }
 
     }
     public class PlexMediaContainerDTO
     {
-        [JsonProperty("size")]
+        [JsonPropertyName("size")]
         public int Size { get; set; }
 
-        [JsonProperty("allowCameraUpload")]
+        [JsonPropertyName("allowCameraUpload")]
         public bool AllowCameraUpload { get; set; }
 
-        [JsonProperty("allowChannelAccess")]
+        [JsonPropertyName("allowChannelAccess")]
         public bool AllowChannelAccess { get; set; }
 
-        [JsonProperty("allowMediaDeletion")]
+        [JsonPropertyName("allowMediaDeletion")]
         public bool AllowMediaDeletion { get; set; }
 
-        [JsonProperty("allowSharing")]
+        [JsonPropertyName("allowSharing")]
         public bool AllowSharing { get; set; }
 
-        [JsonProperty("allowSync")]
+        [JsonPropertyName("allowSync")]
         public bool AllowSync { get; set; }
 
-        [JsonProperty("backgroundProcessing")]
+        [JsonPropertyName("backgroundProcessing")]
         public bool BackgroundProcessing { get; set; }
 
-        [JsonProperty("certificate")]
+        [JsonPropertyName("certificate")]
         public bool Certificate { get; set; }
 
-        [JsonProperty("companionProxy")]
+        [JsonPropertyName("companionProxy")]
         public bool CompanionProxy { get; set; }
 
-        [JsonProperty("countryCode")]
+        [JsonPropertyName("countryCode")]
         public object CountryCode { get; set; }
 
-        [JsonProperty("diagnostics")]
+        [JsonPropertyName("diagnostics")]
         public object Diagnostics { get; set; }
 
-        [JsonProperty("eventStream")]
+        [JsonPropertyName("eventStream")]
         public bool EventStream { get; set; }
 
-        [JsonProperty("friendlyName")]
+        [JsonPropertyName("friendlyName")]
         public object FriendlyName { get; set; }
 
-        [JsonProperty("hubSearch")]
+        [JsonPropertyName("hubSearch")]
         public bool HubSearch { get; set; }
 
-        [JsonProperty("itemClusters")]
+        [JsonPropertyName("itemClusters")]
         public bool ItemClusters { get; set; }
 
-        [JsonProperty("machineIdentifier")]
+        [JsonPropertyName("machineIdentifier")]
         public object MachineIdentifier { get; set; }
 
-        [JsonProperty("mediaProviders")]
+        [JsonPropertyName("mediaProviders")]
         public bool MediaProviders { get; set; }
 
-        [JsonProperty("multiuser")]
+        [JsonPropertyName("multiuser")]
         public bool Multiuser { get; set; }
 
-        [JsonProperty("myPlex")]
+        [JsonPropertyName("myPlex")]
         public bool MyPlex { get; set; }
 
-        [JsonProperty("myPlexMappingState")]
+        [JsonPropertyName("myPlexMappingState")]
         public object MyPlexMappingState { get; set; }
 
-        [JsonProperty("myPlexSigninState")]
+        [JsonPropertyName("myPlexSigninState")]
         public object MyPlexSigninState { get; set; }
 
-        [JsonProperty("myPlexSubscription")]
+        [JsonPropertyName("myPlexSubscription")]
         public bool MyPlexSubscription { get; set; }
 
-        [JsonProperty("myPlexUsername")]
+        [JsonPropertyName("myPlexUsername")]
         public object MyPlexUsername { get; set; }
 
-        [JsonProperty("photoAutoTag")]
+        [JsonPropertyName("photoAutoTag")]
         public bool PhotoAutoTag { get; set; }
 
-        [JsonProperty("platform")]
+        [JsonPropertyName("platform")]
         public object Platform { get; set; }
 
-        [JsonProperty("platformVersion")]
+        [JsonPropertyName("platformVersion")]
         public object PlatformVersion { get; set; }
 
-        [JsonProperty("pluginHost")]
+        [JsonPropertyName("pluginHost")]
         public bool PluginHost { get; set; }
 
-        [JsonProperty("readOnlyLibraries")]
+        [JsonPropertyName("readOnlyLibraries")]
         public bool ReadOnlyLibraries { get; set; }
 
-        [JsonProperty("requestParametersInCookie")]
+        [JsonPropertyName("requestParametersInCookie")]
         public bool RequestParametersInCookie { get; set; }
 
-        [JsonProperty("streamingBrainVersion")]
+        [JsonPropertyName("streamingBrainVersion")]
         public int StreamingBrainVersion { get; set; }
 
-        [JsonProperty("sync")]
+        [JsonPropertyName("sync")]
         public bool Sync { get; set; }
 
-        [JsonProperty("transcoderActiveVideoSessions")]
+        [JsonPropertyName("transcoderActiveVideoSessions")]
         public int TranscoderActiveVideoSessions { get; set; }
 
-        [JsonProperty("transcoderAudio")]
+        [JsonPropertyName("transcoderAudio")]
         public bool TranscoderAudio { get; set; }
 
-        [JsonProperty("transcoderLyrics")]
+        [JsonPropertyName("transcoderLyrics")]
         public bool TranscoderLyrics { get; set; }
 
-        [JsonProperty("transcoderPhoto")]
+        [JsonPropertyName("transcoderPhoto")]
         public bool TranscoderPhoto { get; set; }
 
-        [JsonProperty("transcoderSubtitles")]
+        [JsonPropertyName("transcoderSubtitles")]
         public bool TranscoderSubtitles { get; set; }
 
-        [JsonProperty("transcoderVideo")]
+        [JsonPropertyName("transcoderVideo")]
         public bool TranscoderVideo { get; set; }
 
-        [JsonProperty("transcoderVideoBitrates")]
+        [JsonPropertyName("transcoderVideoBitrates")]
         public object TranscoderVideoBitrates { get; set; }
 
-        [JsonProperty("transcoderVideoQualities")]
+        [JsonPropertyName("transcoderVideoQualities")]
         public object TranscoderVideoQualities { get; set; }
 
-        [JsonProperty("transcoderVideoResolutions")]
+        [JsonPropertyName("transcoderVideoResolutions")]
         public object TranscoderVideoResolutions { get; set; }
 
-        [JsonProperty("updatedAt")]
+        [JsonPropertyName("updatedAt")]
         public int UpdatedAt { get; set; }
 
-        [JsonProperty("updater")]
+        [JsonPropertyName("updater")]
         public bool Updater { get; set; }
 
-        [JsonProperty("version")]
+        [JsonPropertyName("version")]
         public object Version { get; set; }
 
-        [JsonProperty("voiceSearch")]
+        [JsonPropertyName("voiceSearch")]
         public bool VoiceSearch { get; set; }
 
-        [JsonProperty("directory")]
+        [JsonPropertyName("directory")]
         public PlexLibraryDirectoryDTO[] Directory { get; set; }
     }
 
     public class PlexLibraryDirectoryDTO
     {
-        [JsonProperty("count")]
+        [JsonPropertyName("count")]
         public int Count { get; set; }
 
-        [JsonProperty("key")]
+        [JsonPropertyName("key")]
         public string Key { get; set; }
 
-        [JsonProperty("title")]
+        [JsonPropertyName("title")]
         public string Title { get; set; }
     }
 

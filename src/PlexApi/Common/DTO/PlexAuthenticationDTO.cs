@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO
 {
     public class PlexAuthenticationDTO
     {
-        [JsonProperty("user")]
+        [JsonPropertyName("user")]
         public PlexAccountDTO User { get; set; }
     }
 }

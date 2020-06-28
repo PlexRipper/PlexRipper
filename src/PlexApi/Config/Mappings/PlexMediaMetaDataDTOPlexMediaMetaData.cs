@@ -9,7 +9,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
     {
         public PlexMediaMetaData Convert(PlexMediaMetaDataDTO source, PlexMediaMetaData destination, ResolutionContext context)
         {
-            if (!source.MediaContainerDto.Metadata.Any() && !source.MediaContainerDto.Metadata.First().Media.Any())
+            if (source?.MediaContainerDto == null || !source.MediaContainerDto.Metadata.Any() || !source.MediaContainerDto.Metadata.First().Media.Any())
             {
                 return null;
             }

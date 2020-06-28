@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO.PlexSignIn
 {
     public class UserRequestDTO
     {
-        [JsonProperty("login")]
+        [JsonPropertyName("login")]
         public string Login { get; set; }
-        [JsonProperty("password")]
+        [JsonPropertyName("password")]
         public string Password { get; set; }
     }
 }

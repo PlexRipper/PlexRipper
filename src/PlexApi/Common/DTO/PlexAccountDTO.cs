@@ -1,58 +1,58 @@
-﻿using Newtonsoft.Json;
-using PlexRipper.PlexApi.Common.DTO.PlexGetServer;
+﻿using PlexRipper.PlexApi.Common.DTO.PlexGetServer;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO
 {
     public class PlexAccountDTO
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public long Id { get; set; }
 
-        [JsonProperty("uuid")]
+        [JsonPropertyName("uuid")]
         public string Uuid { get; set; }
 
-        [JsonProperty("email")]
+        [JsonPropertyName("email")]
         public string Email { get; set; }
 
-        [JsonProperty("joined_at")]
+        [JsonPropertyName("joined_at")]
         public DateTime JoinedAt { get; set; }
 
-        [JsonProperty("username")]
+        [JsonPropertyName("username")]
         public string Username { get; set; }
 
-        [JsonProperty("title")]
+        [JsonPropertyName("title")]
         public string Title { get; set; }
 
-        [JsonProperty("thumb")]
+        [JsonPropertyName("thumb")]
         public Uri Thumb { get; set; }
 
-        [JsonProperty("hasPassword")]
+        [JsonPropertyName("hasPassword")]
         public bool HasPassword { get; set; }
 
-        [JsonProperty("authToken")]
+        [JsonPropertyName("authToken")]
         public string AuthToken { get; set; }
 
-        [JsonProperty("authentication_token")]
+        [JsonPropertyName("authentication_token")]
         public string AuthenticationToken { get; set; }
 
-        [JsonProperty("subscription")]
+        [JsonPropertyName("subscription")]
         public SubscriptionDTO SubscriptionDto { get; set; }
 
-        [JsonProperty("roles")]
+        [JsonPropertyName("roles")]
         public RolesDTO RolesDto { get; set; }
 
-        [JsonProperty("entitlements")]
+        [JsonPropertyName("entitlements")]
         public List<object> Entitlements { get; set; }
 
-        [JsonProperty("confirmedAt")]
+        [JsonPropertyName("confirmedAt")]
         public object ConfirmedAt { get; set; }
 
-        [JsonProperty("forumId")]
+        [JsonPropertyName("forumId")]
         public object ForumId { get; set; }
 
-        [JsonProperty("rememberMe")]
+        [JsonPropertyName("rememberMe")]
         public bool RememberMe { get; set; }
 
         public List<PlexServerDTO> PlexServers { get; set; }

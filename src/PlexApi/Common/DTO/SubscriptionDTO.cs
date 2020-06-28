@@ -1,19 +1,19 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO
 {
     public class SubscriptionDTO
     {
-        [JsonProperty("active")]
+        [JsonPropertyName("active")]
         public bool Active { get; set; }
 
-        [JsonProperty("status")]
+        [JsonPropertyName("status")]
         public object Status { get; set; }
 
-        [JsonProperty("plan")]
+        [JsonPropertyName("plan")]
         public object Plan { get; set; }
 
-        [JsonProperty("features")]
+        [JsonPropertyName("features")]
         public object Features { get; set; }
     }
 }

@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO.PlexGetStatus
 {
@@ -11,403 +11,403 @@ namespace PlexRipper.PlexApi.Common.DTO.PlexGetStatus
     public class PlexMediaMetaDataDTO
     {
 
-        [JsonProperty("MediaContainer")]
+        [JsonPropertyName("MediaContainer")]
         public MediaContainerDTO MediaContainerDto { get; set; }
     }
 
     public class Stream
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("streamType")]
+        [JsonPropertyName("streamType")]
         public int StreamType { get; set; }
 
-        [JsonProperty("default")]
+        [JsonPropertyName("default")]
         public bool Default { get; set; }
 
-        [JsonProperty("codec")]
+        [JsonPropertyName("codec")]
         public string Codec { get; set; }
 
-        [JsonProperty("index")]
+        [JsonPropertyName("index")]
         public int Index { get; set; }
 
-        [JsonProperty("bitrate")]
+        [JsonPropertyName("bitrate")]
         public int Bitrate { get; set; }
 
-        [JsonProperty("bitDepth")]
+        [JsonPropertyName("bitDepth")]
         public int BitDepth { get; set; }
 
-        [JsonProperty("chromaLocation")]
+        [JsonPropertyName("chromaLocation")]
         public string ChromaLocation { get; set; }
 
-        [JsonProperty("chromaSubsampling")]
+        [JsonPropertyName("chromaSubsampling")]
         public string ChromaSubsampling { get; set; }
 
-        [JsonProperty("codedHeight")]
+        [JsonPropertyName("codedHeight")]
         public string CodedHeight { get; set; }
 
-        [JsonProperty("codedWidth")]
+        [JsonPropertyName("codedWidth")]
         public string CodedWidth { get; set; }
 
-        [JsonProperty("frameRate")]
+        [JsonPropertyName("frameRate")]
         public double FrameRate { get; set; }
 
-        [JsonProperty("hasScalingMatrix")]
+        [JsonPropertyName("hasScalingMatrix")]
         public bool HasScalingMatrix { get; set; }
 
-        [JsonProperty("height")]
+        [JsonPropertyName("height")]
         public int Height { get; set; }
 
-        [JsonProperty("level")]
+        [JsonPropertyName("level")]
         public int Level { get; set; }
 
-        [JsonProperty("profile")]
+        [JsonPropertyName("profile")]
         public string Profile { get; set; }
 
-        [JsonProperty("refFrames")]
+        [JsonPropertyName("refFrames")]
         public int RefFrames { get; set; }
 
-        [JsonProperty("scanType")]
+        [JsonPropertyName("scanType")]
         public string ScanType { get; set; }
 
-        [JsonProperty("width")]
+        [JsonPropertyName("width")]
         public int Width { get; set; }
 
-        [JsonProperty("displayTitle")]
+        [JsonPropertyName("displayTitle")]
         public string DisplayTitle { get; set; }
 
-        [JsonProperty("selected")]
+        [JsonPropertyName("selected")]
         public bool? Selected { get; set; }
 
-        [JsonProperty("channels")]
+        [JsonPropertyName("channels")]
         public int? Channels { get; set; }
 
-        [JsonProperty("audioChannelLayout")]
+        [JsonPropertyName("audioChannelLayout")]
         public string AudioChannelLayout { get; set; }
 
-        [JsonProperty("samplingRate")]
+        [JsonPropertyName("samplingRate")]
         public int? SamplingRate { get; set; }
 
-        [JsonProperty("key")]
+        [JsonPropertyName("key")]
         public string Key { get; set; }
 
-        [JsonProperty("language")]
+        [JsonPropertyName("language")]
         public string Language { get; set; }
 
-        [JsonProperty("languageCode")]
+        [JsonPropertyName("languageCode")]
         public string LanguageCode { get; set; }
 
-        [JsonProperty("format")]
+        [JsonPropertyName("format")]
         public string Format { get; set; }
     }
 
     public class Part
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("key")]
+        [JsonPropertyName("key")]
         public string Key { get; set; }
 
-        [JsonProperty("duration")]
+        [JsonPropertyName("duration")]
         public long Duration { get; set; }
 
-        [JsonProperty("file")]
+        [JsonPropertyName("file")]
         public string File { get; set; }
 
-        [JsonProperty("size")]
+        [JsonPropertyName("size")]
         public long Size { get; set; }
 
-        [JsonProperty("audioProfile")]
+        [JsonPropertyName("audioProfile")]
         public string AudioProfile { get; set; }
 
-        [JsonProperty("container")]
+        [JsonPropertyName("container")]
         public string Container { get; set; }
 
-        [JsonProperty("indexes")]
+        [JsonPropertyName("indexes")]
         public string Indexes { get; set; }
 
-        [JsonProperty("videoProfile")]
+        [JsonPropertyName("videoProfile")]
         public string VideoProfile { get; set; }
 
-        [JsonProperty("Stream")]
+        [JsonPropertyName("Stream")]
         public IList<Stream> Stream { get; set; }
     }
 
     public class Medium
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("duration")]
+        [JsonPropertyName("duration")]
         public long Duration { get; set; }
 
-        [JsonProperty("bitrate")]
+        [JsonPropertyName("bitrate")]
         public int Bitrate { get; set; }
 
-        [JsonProperty("width")]
+        [JsonPropertyName("width")]
         public int Width { get; set; }
 
-        [JsonProperty("height")]
+        [JsonPropertyName("height")]
         public int Height { get; set; }
 
-        [JsonProperty("aspectRatio")]
+        [JsonPropertyName("aspectRatio")]
         public double AspectRatio { get; set; }
 
-        [JsonProperty("audioChannels")]
+        [JsonPropertyName("audioChannels")]
         public int AudioChannels { get; set; }
 
-        [JsonProperty("audioCodec")]
+        [JsonPropertyName("audioCodec")]
         public string AudioCodec { get; set; }
 
-        [JsonProperty("videoCodec")]
+        [JsonPropertyName("videoCodec")]
         public string VideoCodec { get; set; }
 
-        [JsonProperty("videoResolution")]
+        [JsonPropertyName("videoResolution")]
         public string VideoResolution { get; set; }
 
-        [JsonProperty("container")]
+        [JsonPropertyName("container")]
         public string Container { get; set; }
 
-        [JsonProperty("videoFrameRate")]
+        [JsonPropertyName("videoFrameRate")]
         public string VideoFrameRate { get; set; }
 
-        [JsonProperty("audioProfile")]
+        [JsonPropertyName("audioProfile")]
         public string AudioProfile { get; set; }
 
-        [JsonProperty("videoProfile")]
+        [JsonPropertyName("videoProfile")]
         public string VideoProfile { get; set; }
 
-        [JsonProperty("Part")]
+        [JsonPropertyName("Part")]
         public IList<Part> Part { get; set; }
     }
 
     public class Genre
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("filter")]
+        [JsonPropertyName("filter")]
         public string Filter { get; set; }
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
     }
 
     public class Director
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("filter")]
+        [JsonPropertyName("filter")]
         public string Filter { get; set; }
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
     }
 
     public class Writer
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("filter")]
+        [JsonPropertyName("filter")]
         public string Filter { get; set; }
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
     }
 
     public class Producer
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("filter")]
+        [JsonPropertyName("filter")]
         public string Filter { get; set; }
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
     }
 
     public class Country
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("filter")]
+        [JsonPropertyName("filter")]
         public string Filter { get; set; }
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
     }
 
     public class Role
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("filter")]
+        [JsonPropertyName("filter")]
         public string Filter { get; set; }
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
 
-        [JsonProperty("role")]
+        [JsonPropertyName("role")]
         public string RoleName { get; set; }
 
-        [JsonProperty("thumb")]
+        [JsonPropertyName("thumb")]
         public string Thumb { get; set; }
     }
 
     public class Similar
     {
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("filter")]
+        [JsonPropertyName("filter")]
         public string Filter { get; set; }
 
-        [JsonProperty("tag")]
+        [JsonPropertyName("tag")]
         public string Tag { get; set; }
     }
 
     public class Metadata
     {
 
-        [JsonProperty("ratingKey")]
+        [JsonPropertyName("ratingKey")]
         public string RatingKey { get; set; }
 
-        [JsonProperty("key")]
+        [JsonPropertyName("key")]
         public string Key { get; set; }
 
-        [JsonProperty("guid")]
+        [JsonPropertyName("guid")]
         public string Guid { get; set; }
 
-        [JsonProperty("studio")]
+        [JsonPropertyName("studio")]
         public string Studio { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [JsonProperty("title")]
+        [JsonPropertyName("title")]
         public string Title { get; set; }
 
-        [JsonProperty("librarySectionTitle")]
+        [JsonPropertyName("librarySectionTitle")]
         public string LibrarySectionTitle { get; set; }
 
-        [JsonProperty("librarySectionID")]
+        [JsonPropertyName("librarySectionID")]
         public int LibrarySectionID { get; set; }
 
-        [JsonProperty("librarySectionKey")]
+        [JsonPropertyName("librarySectionKey")]
         public string LibrarySectionKey { get; set; }
 
-        [JsonProperty("contentRating")]
+        [JsonPropertyName("contentRating")]
         public string ContentRating { get; set; }
 
-        [JsonProperty("summary")]
+        [JsonPropertyName("summary")]
         public string Summary { get; set; }
 
-        [JsonProperty("rating")]
+        [JsonPropertyName("rating")]
         public double Rating { get; set; }
 
-        [JsonProperty("audienceRating")]
+        [JsonPropertyName("audienceRating")]
         public double AudienceRating { get; set; }
 
-        [JsonProperty("year")]
+        [JsonPropertyName("year")]
         public int Year { get; set; }
 
-        [JsonProperty("tagline")]
+        [JsonPropertyName("tagline")]
         public string Tagline { get; set; }
 
-        [JsonProperty("thumb")]
+        [JsonPropertyName("thumb")]
         public string Thumb { get; set; }
 
-        [JsonProperty("art")]
+        [JsonPropertyName("art")]
         public string Art { get; set; }
 
-        [JsonProperty("duration")]
+        [JsonPropertyName("duration")]
         public int Duration { get; set; }
 
-        [JsonProperty("originallyAvailableAt")]
+        [JsonPropertyName("originallyAvailableAt")]
         public string OriginallyAvailableAt { get; set; }
 
-        [JsonProperty("addedAt")]
+        [JsonPropertyName("addedAt")]
         public int AddedAt { get; set; }
 
-        [JsonProperty("updatedAt")]
+        [JsonPropertyName("updatedAt")]
         public int UpdatedAt { get; set; }
 
-        [JsonProperty("audienceRatingImage")]
+        [JsonPropertyName("audienceRatingImage")]
         public string AudienceRatingImage { get; set; }
 
-        [JsonProperty("ratingImage")]
+        [JsonPropertyName("ratingImage")]
         public string RatingImage { get; set; }
 
-        [JsonProperty("Media")]
+        [JsonPropertyName("Media")]
         public IList<Medium> Media { get; set; }
 
-        [JsonProperty("Genre")]
+        [JsonPropertyName("Genre")]
         public IList<Genre> Genre { get; set; }
 
-        [JsonProperty("Director")]
+        [JsonPropertyName("Director")]
         public IList<Director> Director { get; set; }
 
-        [JsonProperty("Writer")]
+        [JsonPropertyName("Writer")]
         public IList<Writer> Writer { get; set; }
 
-        [JsonProperty("Producer")]
+        [JsonPropertyName("Producer")]
         public IList<Producer> Producer { get; set; }
 
-        [JsonProperty("Country")]
+        [JsonPropertyName("Country")]
         public IList<Country> Country { get; set; }
 
-        [JsonProperty("Role")]
+        [JsonPropertyName("Role")]
         public IList<Role> Role { get; set; }
 
-        [JsonProperty("Similar")]
+        [JsonPropertyName("Similar")]
         public IList<Similar> Similar { get; set; }
     }
 
     public class MediaContainerDTO
     {
 
-        [JsonProperty("size")]
+        [JsonPropertyName("size")]
         public int Size { get; set; }
 
-        [JsonProperty("allowSync")]
+        [JsonPropertyName("allowSync")]
         public bool AllowSync { get; set; }
 
-        [JsonProperty("identifier")]
+        [JsonPropertyName("identifier")]
         public string Identifier { get; set; }
 
-        [JsonProperty("librarySectionID")]
+        [JsonPropertyName("librarySectionID")]
         public int LibrarySectionID { get; set; }
 
-        [JsonProperty("librarySectionTitle")]
+        [JsonPropertyName("librarySectionTitle")]
         public string LibrarySectionTitle { get; set; }
 
-        [JsonProperty("librarySectionUUID")]
+        [JsonPropertyName("librarySectionUUID")]
         public string LibrarySectionUUID { get; set; }
 
-        [JsonProperty("mediaTagPrefix")]
+        [JsonPropertyName("mediaTagPrefix")]
         public string MediaTagPrefix { get; set; }
 
-        [JsonProperty("mediaTagVersion")]
+        [JsonPropertyName("mediaTagVersion")]
         public int MediaTagVersion { get; set; }
 
-        [JsonProperty("Metadata")]
+        [JsonPropertyName("Metadata")]
         public IList<Metadata> Metadata { get; set; }
     }
 

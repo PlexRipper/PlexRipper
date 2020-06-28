@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO
 {
     public class RolesDTO
     {
-        [JsonProperty("roles")]
+        [JsonPropertyName("roles")]
         public List<string> Roles { get; set; }
     }
 }

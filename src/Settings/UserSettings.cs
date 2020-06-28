@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using PlexRipper.Application.Common.Interfaces.Settings;
 using PlexRipper.Settings.Models;
 using Serilog;
@@ -75,14 +74,10 @@ namespace PlexRipper.Settings
 
             try
             {
-                // read JSON directly from a file
-                using (StreamReader file = File.OpenText(FileLocation))
-                using (JsonTextReader reader = new JsonTextReader(file))
-                {
-                    JObject o2 = (JObject)JToken.ReadFrom(reader);
-                    var loadedSettings = o2.ToObject<SettingsModel>();
-                    SetValues(loadedSettings);
-                }
+                string jsonString = File.ReadAllText(FileLocation);
+                var loadedSettings =
+                    JsonConvert.DeserializeObject<SettingsModel>(jsonString);
+                SetValues(loadedSettings);
             }
             catch (Exception e)
             {
@@ -99,14 +94,8 @@ namespace PlexRipper.Settings
 
             try
             {
-                using (StreamWriter file = File.CreateText(FileLocation))
-                using (JsonTextWriter writer = new JsonTextWriter(file)
-                {
-                    Formatting = Formatting.Indented
-                })
-                {
-                    JObject.FromObject(this).WriteTo(writer);
-                }
+                string jsonString = JsonConvert.SerializeObject(this, Formatting.Indented);
+                File.WriteAllText(FileLocation, jsonString);
 
                 return true;
             }

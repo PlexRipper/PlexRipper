@@ -37,7 +37,7 @@ namespace PlexRipper.Application.Services
             Log.Debug($"Creating download request for movie {movie.Title}");
             var server = movie.PlexLibrary.PlexServer;
             var metaData = await _plexApiService.GetMediaMetaDataAsync(server.AccessToken, server.BaseUrl, movie.RatingKey);
-            return new DownloadRequest($"{server.BaseUrl}{metaData.ObfuscatedFilePath}", server.AccessToken, metaData.FileName);
+            return metaData != null ? new DownloadRequest($"{server.BaseUrl}{metaData.ObfuscatedFilePath}", server.AccessToken, metaData.FileName) : null;
         }
     }
 }

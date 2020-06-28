@@ -13,6 +13,9 @@ namespace PlexRipper.Domain.AutoMapper
             //String -> Guid
             CreateMap<string, Guid>().ConvertUsing(s => Guid.Parse(s));
             CreateMap<Guid, string>().ConvertUsing(g => g.ToString("N"));
+            CreateMap<long, DateTime>().ConvertUsing(g => DateTimeOffset.FromUnixTimeSeconds(g).DateTime.ToUniversalTime());
+            CreateMap<DateTime, long>().ConvertUsing(g => new DateTimeOffset(g).ToUnixTimeSeconds());
+
         }
     }
 }

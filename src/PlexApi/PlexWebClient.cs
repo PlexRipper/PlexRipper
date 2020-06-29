@@ -1,9 +1,9 @@
-﻿using PlexRipper.PlexApi.Api;
+﻿using PlexRipper.Domain;
+using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Config.Converters;
 using RestSharp;
 using RestSharp.Serialization.Xml;
 using RestSharp.Serializers.SystemTextJson;
-using Serilog;
 using System.Text.Json;
 using System.Threading.Tasks;
 

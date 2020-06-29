@@ -1,10 +1,10 @@
 ﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Application.Common.Interfaces.Settings;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.DownloadManager.Download;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

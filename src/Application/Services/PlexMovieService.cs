@@ -1,7 +1,7 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
-using Serilog;
+using PlexRipper.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

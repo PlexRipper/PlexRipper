@@ -33,10 +33,7 @@ namespace PlexRipper.Domain.Entities
 
         public virtual List<PlexLibrary> PlexLibraries { get; set; }
 
-        public virtual PlexServerStatus ServerStatus { get; set; }
-        [IgnoreMap]
-        public virtual int ServerStatusId { get; set; }
-
+        public virtual List<PlexServerStatus> ServerStatus { get; set; }
         #endregion
 
         #region Helpers

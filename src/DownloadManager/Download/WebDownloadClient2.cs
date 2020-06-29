@@ -1,7 +1,7 @@
 ﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Settings;
+using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Common;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,7 +21,6 @@ namespace PlexRipper.DownloadManager.Download
         private static object fileLocker = new object();
 
         private readonly IDownloadManager _downloadManager;
-        private readonly ILogger _logger;
         private readonly IUserSettings _userSettings;
         // List of download speed values in the last 10 seconds
         private List<int> downloadRates = new List<int>();
@@ -551,8 +550,6 @@ namespace PlexRipper.DownloadManager.Download
 
         // Last update time of the DataGrid item
         public DateTime LastUpdateTime { get; set; }
-
-        public ILogger Log => _logger;
 
         // Maxiumum cache size
         public int MaxCacheSize { get; set; }

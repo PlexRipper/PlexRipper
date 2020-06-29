@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
-using Serilog;
+using PlexRipper.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

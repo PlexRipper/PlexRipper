@@ -2,7 +2,7 @@
 using PlexRipper.Data.Common.Interfaces;
 using PlexRipper.Domain.Entities.Base;
 using PlexRipper.Domain.Interfaces;
-using Serilog;
+using PlexRipper.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;

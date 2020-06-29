@@ -150,7 +150,9 @@ namespace PlexRipper.WebAPI.Controllers
 
                 if (accountDB != null)
                 {
-                    return Created($"Account with id {accountDB.Id} was created successfully", _mapper.Map<AccountDTO>(accountDB));
+                    var message = $"Account with id {accountDB.Id} was created successfully";
+                    Log.Information(message);
+                    return Created(message, _mapper.Map<AccountDTO>(accountDB));
                 }
                 return UnprocessableEntity(null);
 
@@ -170,12 +172,15 @@ namespace PlexRipper.WebAPI.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             bool result = await _accountService.RemoveAccountAsync(id);
-
+            var message = $"Successfully deleted account with id: {id}";
             if (!result)
             {
-                return NotFound($"Could not find account with id: {id} to delete");
+                message = $"Could not find account with id: {id} to delete";
+                Log.Warning(message);
+                return NotFound(message);
             }
-            return Ok($"Successfully deleted account with id: {id}");
+            Log.Debug(message);
+            return Ok(message);
         }
 
         [HttpPost("validate")]
@@ -189,6 +194,8 @@ namespace PlexRipper.WebAPI.Controllers
 
             if (!results.IsValid)
             {
+                string message = $"The account failed to validate, {results.Errors}";
+                Log.Error(message);
                 return BadRequest(results.Errors);
             }
 
@@ -196,12 +203,13 @@ namespace PlexRipper.WebAPI.Controllers
             if (isValid)
             {
                 string message = $"Account with username: {account.Username} was valid";
-                Log.Debug(message);
+                Log.Information(message);
                 return Ok(message);
             }
             else
             {
                 string message = $"Account with username: {account.Username} was invalid";
+                Log.Warning(message);
                 return Unauthorized(message);
             }
         }
@@ -213,7 +221,9 @@ namespace PlexRipper.WebAPI.Controllers
         {
             if (string.IsNullOrEmpty(username))
             {
-                return BadRequest("Ensure that an username is given");
+                string message = "Ensure that an username is send with the request";
+                Log.Error(message);
+                return BadRequest(message);
             }
 
             bool exists = await _accountService.GetAccountAsync(username) != null;

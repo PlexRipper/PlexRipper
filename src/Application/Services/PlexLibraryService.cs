@@ -2,7 +2,7 @@
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
-using Serilog;
+using PlexRipper.Domain;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

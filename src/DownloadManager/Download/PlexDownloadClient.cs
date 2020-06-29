@@ -1,9 +1,9 @@
 ﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Settings;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.PlexApi.Api;
-using Serilog;
 using System;
 using System.Net;
 using System.Threading.Tasks;

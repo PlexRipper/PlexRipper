@@ -1,6 +1,6 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
-using Serilog;
 using System;
 using System.Threading.Tasks;
 

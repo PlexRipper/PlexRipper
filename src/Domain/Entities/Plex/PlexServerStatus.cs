@@ -15,7 +15,7 @@ namespace PlexRipper.Domain.Entities
         #region Relationships
 
         public virtual PlexServer PlexServer { get; set; }
-        public virtual int PlexServerId { get; set; }
+        public int PlexServerId { get; set; }
         #endregion
 
     }

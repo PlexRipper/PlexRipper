@@ -1,8 +1,8 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.Repositories;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.JoinTables;
-using Serilog;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -88,11 +88,6 @@ namespace PlexRipper.Application.Services
 
             // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
             await _plexServerStatusRepository.AddAsync(serverStatus);
-
-            // Update the plexServer status with the latest status
-            var serverDB = await _plexServerRepository.GetAsync(plexServer.Id);
-            serverDB.ServerStatusId = serverStatus.Id;
-            await _plexServerRepository.UpdateAsync(serverDB);
 
             return serverStatus;
         }

@@ -2,7 +2,7 @@
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
-using Serilog;
+using PlexRipper.Domain;
 using System.Threading.Tasks;
 
 namespace PlexRipper.Application.Services

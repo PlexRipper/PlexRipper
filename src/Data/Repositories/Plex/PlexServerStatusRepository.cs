@@ -1,7 +1,7 @@
 ﻿using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Data.Common.Interfaces;
 using PlexRipper.Domain.Entities;
-using Serilog;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Repositories
 {

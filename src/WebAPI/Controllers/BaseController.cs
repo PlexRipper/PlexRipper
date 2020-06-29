@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
+using PlexRipper.Domain;
 using System;
 using System.Net.Mime;
 

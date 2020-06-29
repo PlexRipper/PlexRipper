@@ -41,9 +41,12 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
             var plexLibrary = await plexLibraryService.GetLibraryMediaAsync(serverList.First().PlexLibraries[4]);
             var movie = plexLibrary.Movies[16];
+            var movie2 = plexLibrary.Movies[18];
 
             var downloadRequest = await plexDownloadService.GetDownloadRequestAsync(movie);
+            var downloadRequest2 = await plexDownloadService.GetDownloadRequestAsync(movie2);
             plexDownloadService.StartDownload(downloadRequest);
+            plexDownloadService.StartDownload(downloadRequest2);
 
             await Task.Delay(15000);
 

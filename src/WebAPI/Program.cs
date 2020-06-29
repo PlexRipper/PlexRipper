@@ -47,6 +47,11 @@ namespace PlexRipper.WebAPI
             {
                 Log.Fatal(e);
             }
+            finally
+            {
+                // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+                Serilog.Log.CloseAndFlush();
+            }
         }
     }
 }

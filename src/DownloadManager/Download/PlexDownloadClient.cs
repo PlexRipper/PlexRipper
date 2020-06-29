@@ -21,12 +21,11 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Constructors
 
-        public PlexDownloadClient(DownloadTask downloadTask, IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger)
+        public PlexDownloadClient(DownloadTask downloadTask, IDownloadManager downloadManager, IUserSettings userSettings)
         {
-            Log = logger;
             _downloadManager = downloadManager;
             _userSettings = userSettings;
-
+            DownloadTask = downloadTask;
             AddHeaders();
         }
 
@@ -37,8 +36,7 @@ namespace PlexRipper.DownloadManager.Download
         // Size of downloaded data which was written to the local file
         public long DownloadedSize { get; set; }
 
-        public DownloadTask DownloadTask { get; set; }
-        public ILogger Log { get; }
+        public DownloadTask DownloadTask { get; internal set; }
         public int ClientId => DownloadTask.Id;
 
         public decimal Percentage { get; internal set; }
@@ -51,7 +49,10 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Methods
 
-        // Start or continue download
+        /// <summary>
+        /// Start the download of the DownloadTask passed during the construction.
+        /// </summary>
+        /// <returns></returns>
         public void Start()
         {
             Log.Debug(DownloadTask.DownloadUrl);

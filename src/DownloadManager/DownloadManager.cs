@@ -5,6 +5,7 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.DownloadManager.Download;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
@@ -18,8 +19,6 @@ namespace PlexRipper.DownloadManager
 
         private readonly IUserSettings _userSettings;
         private readonly IDownloadTaskRepository _downloadTaskRepository;
-
-        private ILogger Log { get; }
 
         // Collection which contains all download clients, bound to the DataGrid control
         public List<PlexDownloadClient> DownloadsList = new List<PlexDownloadClient>();
@@ -66,11 +65,10 @@ namespace PlexRipper.DownloadManager
 
         #region Constructors
 
-        public DownloadManager(IUserSettings userSettings, ILogger logger, IDownloadTaskRepository downloadTaskRepository)
+        public DownloadManager(IUserSettings userSettings, IDownloadTaskRepository downloadTaskRepository)
         {
             _userSettings = userSettings;
             _downloadTaskRepository = downloadTaskRepository;
-            Log = logger;
         }
 
         #endregion Constructors
@@ -80,7 +78,7 @@ namespace PlexRipper.DownloadManager
 
         private PlexDownloadClient CreateDownloadClient(DownloadTask downloadTask)
         {
-            PlexDownloadClient newClient = new PlexDownloadClient(downloadTask, this, _userSettings, Log);
+            PlexDownloadClient newClient = new PlexDownloadClient(downloadTask, this, _userSettings);
 
             newClient.DownloadProgressChanged += OnDownloadProgressChanged;
             newClient.DownloadFileCompleted += OnDownloadFileCompleted;
@@ -96,18 +94,25 @@ namespace PlexRipper.DownloadManager
 
         private void OnDownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-
-            Log.Information($"Downloaded {DataFormat.FormatSizeString(e.BytesReceived)} of {DataFormat.FormatSizeString(e.TotalBytesToReceive)} bytes. {e.ProgressPercentage} % complete...");
+            var plexDownloadClient = sender as PlexDownloadClient;
+            Log.Information($"({plexDownloadClient.ClientId}){plexDownloadClient.DownloadTask.FileName} => Downloaded {DataFormat.FormatSizeString(e.BytesReceived)} of {DataFormat.FormatSizeString(e.TotalBytesToReceive)} bytes. {e.ProgressPercentage} % complete...");
         }
 
         public async Task StartDownloadAsync(DownloadTask downloadTask)
         {
             // Add to DB
             await _downloadTaskRepository.AddAsync(downloadTask);
-
-            Log.Debug(downloadTask.ToString());
-            var downloadClient = CreateDownloadClient(downloadTask);
-            downloadClient.Start();
+            try
+            {
+                Log.Debug(downloadTask.ToString());
+                var downloadClient = CreateDownloadClient(downloadTask);
+                downloadClient.Start();
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to start the Download of {plexDownloadClient.DownloadTask.FileName}");
+                throw;
+            }
         }
 
 

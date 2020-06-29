@@ -1,4 +1,4 @@
-﻿using PlexRipper.Application.IntegrationTests.Base;
+﻿using PlexRipper.BaseTests;
 using PlexRipper.Domain.Entities;
 using Shouldly;
 using System.Threading.Tasks;

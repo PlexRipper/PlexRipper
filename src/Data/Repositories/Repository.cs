@@ -14,11 +14,10 @@ namespace PlexRipper.Data.Repositories
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity
     {
         protected readonly IPlexRipperDbContext Context;
-        public ILogger Log { get; }
 
-        public Repository(IPlexRipperDbContext context, ILogger log)
+
+        public Repository(IPlexRipperDbContext context)
         {
-            Log = log.ForContext<TEntity>();
             Context = context;
         }
 
@@ -61,9 +60,12 @@ namespace PlexRipper.Data.Repositories
         {
             try
             {
-                await Context.Instance.Set<TEntity>().AddAsync(entity);
-                await SaveChangesAsync();
-                await Context.Entry(entity).GetDatabaseValuesAsync();
+                if (!IsTracking(entity))
+                {
+                    await Context.Instance.Set<TEntity>().AddAsync(entity);
+                    await SaveChangesAsync();
+                    await Context.Entry(entity).GetDatabaseValuesAsync();
+                }
             }
             catch (Exception e)
             {
@@ -164,10 +166,44 @@ namespace PlexRipper.Data.Repositories
             return Context.Instance.Set<TEntity>();
         }
 
-        public Task<int> SaveChangesAsync()
+        public async Task SaveChangesAsync()
         {
-            Log.Verbose("Saving changes to database");
-            return Context.SaveChangesAsync();
+            try
+            {
+                Log.Verbose("Saving changes to database");
+                await Context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                Log.Warning($"There was a Concurrency Exception on an entity: {typeof(TEntity)}");
+                // Source: https://docs.microsoft.com/en-us/ef/core/saving/concurrency
+                foreach (var entry in ex.Entries)
+                {
+                    if (entry.Entity is TEntity)
+                    {
+                        var proposedValues = entry.CurrentValues;
+                        var databaseValues = await entry.GetDatabaseValuesAsync();
+
+                        foreach (var property in proposedValues.Properties)
+                        {
+                            var proposedValue = proposedValues[property];
+                            var databaseValue = databaseValues[property];
+
+                            // TODO: decide which value should be written to database
+                            proposedValues[property] = proposedValue;
+                        }
+
+                        // Refresh original values to bypass next concurrency check
+                        entry.OriginalValues.SetValues(databaseValues);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(
+                            "Don't know how to handle concurrency conflicts for "
+                            + entry.Metadata.Name);
+                    }
+                }
+            }
         }
 
     }

@@ -1,4 +1,5 @@
 ﻿using PlexRipper.PlexApi.Api;
+using PlexRipper.PlexApi.Config.Converters;
 using RestSharp;
 using RestSharp.Serialization.Xml;
 using RestSharp.Serializers.SystemTextJson;
@@ -10,16 +11,16 @@ namespace PlexRipper.PlexApi
 {
     public class PlexWebClient : RestClient
     {
-        public ILogger Log { get; }
 
-        public PlexWebClient(ILogger log)
+
+        public PlexWebClient()
         {
-            Log = log;
             this.UseSystemTextJson(new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 PropertyNameCaseInsensitive = true,
                 WriteIndented = true,
+                Converters = { new LongToDateTime() }
             });
             this.UseDotNetXmlSerializer();
             this.Timeout = 15000;

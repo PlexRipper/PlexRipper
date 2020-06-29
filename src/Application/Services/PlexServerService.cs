@@ -16,22 +16,20 @@ namespace PlexRipper.Application.Services
         private readonly IPlexServerStatusRepository _plexServerStatusRepository;
         private readonly IPlexApiService _plexServiceApi;
         private readonly IPlexAuthenticationService _plexAuthenticationService;
-        private ILogger Log { get; }
+
 
         public PlexServerService(
             IPlexApiService plexServiceApi,
             IPlexAuthenticationService plexAuthenticationService,
             IPlexServerRepository plexServerRepository,
             IPlexLibraryService plexLibraryService,
-            IPlexServerStatusRepository plexServerStatusRepository,
-            ILogger logger)
+            IPlexServerStatusRepository plexServerStatusRepository)
         {
             _plexServerRepository = plexServerRepository;
             _plexLibraryService = plexLibraryService;
             _plexServerStatusRepository = plexServerStatusRepository;
             _plexServiceApi = plexServiceApi;
             _plexAuthenticationService = plexAuthenticationService;
-            Log = logger;
         }
 
         /// <summary>
@@ -85,7 +83,7 @@ namespace PlexRipper.Application.Services
             // Request status
             var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(plexServer.AccessToken, plexServer.BaseUrl);
 
-            serverStatus.PlexServer = plexServer;
+            //serverStatus.PlexServer = plexServer;
             serverStatus.PlexServerId = plexServer.Id;
 
             // Add plexServer status to DB, the PlexServerStatus table functions as a server log.

@@ -7,7 +7,7 @@ namespace PlexRipper.Data.Repositories
 {
     public class PlexServerStatusRepository : Repository<PlexServerStatus>, IPlexServerStatusRepository
     {
-        public PlexServerStatusRepository(IPlexRipperDbContext context, ILogger log) : base(context, log) { }
+        public PlexServerStatusRepository(IPlexRipperDbContext context) : base(context) { }
 
     }
 }

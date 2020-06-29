@@ -653,11 +653,10 @@ namespace PlexRipper.DownloadManager.Download
         // URL of the file to download
         public Uri Url { get; private set; }
 
-        public WebDownloadClient2(IDownloadManager downloadManager, IUserSettings userSettings, ILogger logger)
+        public WebDownloadClient2(IDownloadManager downloadManager, IUserSettings userSettings)
         {
             _downloadManager = downloadManager;
             _userSettings = userSettings;
-            _logger = logger.ForContext<WebDownloadClient2>();
 
             this.BufferSize = 1024; // Buffer size is 1KB
             this.MaxCacheSize = _userSettings.DownloadManager.MemoryCacheSize * 1024; // Default cache size is 1MB

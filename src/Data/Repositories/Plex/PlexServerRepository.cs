@@ -11,7 +11,7 @@ namespace PlexRipper.Data.Repositories
 {
     public class PlexServerRepository : Repository<PlexServer>, IPlexServerRepository
     {
-        public PlexServerRepository(IPlexRipperDbContext context, ILogger log) : base(context, log) { }
+        public PlexServerRepository(IPlexRipperDbContext context) : base(context) { }
 
         public async Task<IEnumerable<PlexServer>> GetServers(int plexAccountId)
         {

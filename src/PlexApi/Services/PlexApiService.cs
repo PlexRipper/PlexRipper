@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PlexRipper.Domain;
 
 namespace PlexRipper.PlexApi.Services
 {
@@ -59,6 +60,7 @@ namespace PlexRipper.PlexApi.Services
             var result = await _plexApi.GetLibrarySectionsAsync(authToken, plexLibraryUrl);
             if (result == null)
             {
+                Log.Warning($"{plexLibraryUrl} returned no libraries");
                 return new List<PlexLibrary>();
             }
 

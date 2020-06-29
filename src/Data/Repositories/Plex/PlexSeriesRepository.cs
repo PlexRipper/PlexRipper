@@ -7,7 +7,7 @@ namespace PlexRipper.Data.Repositories
 {
     public class PlexSeriesRepository : Repository<PlexSerie>, IPlexSerieRepository
     {
-        public PlexSeriesRepository(IPlexRipperDbContext context, ILogger log) : base(context, log) { }
+        public PlexSeriesRepository(IPlexRipperDbContext context) : base(context) { }
 
 
     }

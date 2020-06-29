@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using PlexRipper.Application.Common.Interfaces.Application;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,13 +8,11 @@ namespace PlexRipper.DownloadManager
 {
     public class DownloadWorker : BackgroundService
     {
-        public Serilog.ILogger Log { get; }
         private readonly IDownloadManager _downloadManager;
         private readonly ITestClass _testClass;
 
-        public DownloadWorker(IDownloadManager downloadManager, ITestClass testClass, Serilog.ILogger log)
+        public DownloadWorker(IDownloadManager downloadManager, ITestClass testClass)
         {
-            Log = log;
             _downloadManager = downloadManager;
             _testClass = testClass;
         }
@@ -24,9 +21,9 @@ namespace PlexRipper.DownloadManager
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                Log.Debug($"Worker running at: {DateTimeOffset.Now}");
+                //Log.Debug($"Worker running at: {DateTimeOffset.Now}");
                 // _testClass.TestLogging();
-                await Task.Delay(1000, stoppingToken);
+                await Task.Delay(10000, stoppingToken);
             }
         }
     }

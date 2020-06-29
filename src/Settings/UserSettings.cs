@@ -26,14 +26,12 @@ namespace PlexRipper.Settings
 
         #endregion Properties
 
-        private ILogger Log { get; }
+
 
         #region Constructors
 
-        public UserSettings(ILogger logger)
+        public UserSettings()
         {
-            Log = logger.ForContext<UserSettings>();
-
             this.PropertyChanged += (sender, args) => Save();
 
             Load();

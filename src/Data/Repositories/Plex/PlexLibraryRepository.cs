@@ -10,7 +10,7 @@ namespace PlexRipper.Data.Repositories
 {
     public class PlexLibraryRepository : Repository<PlexLibrary>, IPlexLibraryRepository
     {
-        public PlexLibraryRepository(IPlexRipperDbContext context, ILogger log) : base(context, log) { }
+        public PlexLibraryRepository(IPlexRipperDbContext context) : base(context) { }
 
         public async Task<IList<PlexLibrary>> GetLibraries(int serverId)
         {

@@ -20,11 +20,10 @@ namespace PlexRipper.WebAPI.Controllers
         private readonly IPlexLibraryService _plexLibraryService;
         private readonly IAccountService _accountService;
         private readonly IMapper _mapper;
-        private ILogger Log { get; }
 
-        public PlexLibraryController(IPlexService plexService, IPlexLibraryService plexLibraryService, IAccountService accountService, IMapper mapper, ILogger logger)
+
+        public PlexLibraryController(IPlexService plexService, IPlexLibraryService plexLibraryService, IAccountService accountService, IMapper mapper)
         {
-            Log = logger.ForContext<PlexLibraryController>();
 
             _plexService = plexService;
             _plexLibraryService = plexLibraryService;

@@ -12,18 +12,16 @@ namespace PlexRipper.Application.Services
         private readonly IPlexLibraryRepository _plexLibraryRepository;
         private readonly IPlexMoviesRepository _plexMoviesRepository;
         private readonly IPlexApiService _plexServiceApi;
-        private ILogger Log { get; }
+
 
         public PlexMovieService(
             IPlexApiService plexServiceApi,
             IPlexLibraryRepository plexLibraryRepository,
-            IPlexMoviesRepository plexMoviesRepository,
-            ILogger logger)
+            IPlexMoviesRepository plexMoviesRepository)
         {
             _plexLibraryRepository = plexLibraryRepository;
             _plexMoviesRepository = plexMoviesRepository;
             _plexServiceApi = plexServiceApi;
-            Log = logger;
         }
 
         public async Task AddOrUpdatePlexMoviesAsync(PlexLibrary plexLibrary, List<PlexMovie> movies)

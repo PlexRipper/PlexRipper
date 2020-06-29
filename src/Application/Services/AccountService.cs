@@ -14,14 +14,12 @@ namespace PlexRipper.Application.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IPlexService _plexService;
         private readonly IPlexServerService _plexServerService;
-        private ILogger Log { get; }
 
-        public AccountService(IAccountRepository accountRepository, IPlexService plexService, IPlexServerService plexServerService, ILogger logger)
+        public AccountService(IAccountRepository accountRepository, IPlexService plexService, IPlexServerService plexServerService)
         {
             _accountRepository = accountRepository;
             _plexService = plexService;
             _plexServerService = plexServerService;
-            Log = logger;
         }
         public async Task<List<PlexServer>> GetServersAsync(int accountId, bool refresh = false)
         {

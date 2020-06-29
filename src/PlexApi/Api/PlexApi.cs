@@ -1,4 +1,5 @@
-﻿using PlexRipper.Domain.Entities;
+﻿using PlexRipper.Domain;
+using PlexRipper.Domain.Entities;
 using PlexRipper.PlexApi.Common.DTO;
 using PlexRipper.PlexApi.Common.DTO.PlexGetLibrarySections;
 using PlexRipper.PlexApi.Common.DTO.PlexGetServer;
@@ -16,14 +17,12 @@ namespace PlexRipper.PlexApi.Api
 {
     public class PlexApi
     {
-        public PlexApi(PlexWebClient client, Serilog.ILogger logger)
+        public PlexApi(PlexWebClient client)
         {
-            Log = logger;
             Client = client;
         }
 
         public PlexWebClient Client { get; }
-        private Serilog.ILogger Log { get; }
 
         private const string SignInUri = "https://plex.tv/users/sign_in.json";
         private const string FriendsUri = "https://plex.tv/pms/friends/all";

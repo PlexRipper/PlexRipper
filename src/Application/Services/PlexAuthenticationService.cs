@@ -8,13 +8,12 @@ namespace PlexRipper.Application.Services
 {
     public class PlexAuthenticationService : IPlexAuthenticationService
     {
-        private ILogger Log { get; }
         private readonly IPlexApiService _plexApiService;
 
-        public PlexAuthenticationService(IPlexApiService plexApiService, ILogger log)
+        public PlexAuthenticationService(IPlexApiService plexApiService)
         {
             _plexApiService = plexApiService;
-            Log = log;
+
         }
 
         public async Task<string> GetPlexToken(PlexAccount plexAccount)

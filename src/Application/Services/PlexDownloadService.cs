@@ -9,14 +9,13 @@ namespace PlexRipper.Application.Services
 {
     public class PlexDownloadService : IPlexDownloadService
     {
-        public ILogger Log { get; }
+
         private readonly IDownloadManager _downloadManager;
         private readonly IPlexAuthenticationService _plexAuthenticationService;
         private readonly IPlexApiService _plexApiService;
 
-        public PlexDownloadService(IDownloadManager downloadManager, IPlexAuthenticationService plexAuthenticationService, IPlexApiService plexApiService, ILogger log)
+        public PlexDownloadService(IDownloadManager downloadManager, IPlexAuthenticationService plexAuthenticationService, IPlexApiService plexApiService)
         {
-            Log = log;
             _downloadManager = downloadManager;
             _plexAuthenticationService = plexAuthenticationService;
             _plexApiService = plexApiService;

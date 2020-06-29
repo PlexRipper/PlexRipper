@@ -3,10 +3,10 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Validators;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +19,9 @@ namespace PlexRipper.WebAPI.Controllers
 
         private readonly IAccountService _accountService;
         private readonly IMapper _mapper;
-        public override ILogger Log { get; }
 
-        public AccountController(IAccountService accountService, IMapper mapper, ILogger logger)
+        public AccountController(IAccountService accountService, IMapper mapper)
         {
-            Log = logger.ForContext<AccountController>();
             _accountService = accountService;
             _mapper = mapper;
         }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.Repositories;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,6 @@ namespace PlexRipper.Application.Services
         private readonly IPlexServerRepository _plexServerRepository;
         private readonly IMapper _mapper;
         private readonly IPlexAuthenticationService _plexAuthenticationService;
-        private Serilog.ILogger Log { get; }
 
         #endregion Private Fields
 
@@ -39,15 +39,13 @@ namespace PlexRipper.Application.Services
             IPlexServerRepository plexServerRepository,
             IPlexAuthenticationService plexAuthenticationService,
             IPlexApiService plexServiceApi,
-            IMapper mapper,
-            Serilog.ILogger log)
+            IMapper mapper)
         {
             _plexServiceApi = plexServiceApi;
             _plexAccountRepository = plexAccountRepository;
             _plexServerService = plexServerService;
             _plexServerRepository = plexServerRepository;
             _mapper = mapper;
-            Log = log;
             client.Timeout = new TimeSpan(0, 0, 0, 30);
             _plexAuthenticationService = plexAuthenticationService;
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Common.DTO.PlexGetLibrarySections
@@ -80,13 +81,13 @@ namespace PlexRipper.PlexApi.Common.DTO.PlexGetLibrarySections
         public string Uuid { get; set; }
 
         [JsonPropertyName("updatedAt")]
-        public long UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         [JsonPropertyName("createdAt")]
-        public long CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         [JsonPropertyName("scannedAt")]
-        public long ScannedAt { get; set; }
+        public DateTime ScannedAt { get; set; }
 
         [JsonPropertyName("content")]
         public bool Content { get; set; }
@@ -95,7 +96,7 @@ namespace PlexRipper.PlexApi.Common.DTO.PlexGetLibrarySections
         public bool Directory { get; set; }
 
         [JsonPropertyName("contentChangedAt")]
-        public long ContentChangedAt { get; set; }
+        public DateTime ContentChangedAt { get; set; }
 
         [JsonPropertyName("hidden")]
         public int Hidden { get; set; }

@@ -15,20 +15,17 @@ namespace PlexRipper.Application.Services
         private readonly IPlexMovieService _plexMovieService;
         private readonly IPlexSerieService _plexSerieService;
         private readonly IPlexApiService _plexServiceApi;
-        private ILogger Log { get; }
 
         public PlexLibraryService(
             IPlexApiService plexServiceApi,
             IPlexLibraryRepository plexLibraryRepository,
             IPlexMovieService plexMovieService,
-            IPlexSerieService plexSerieService,
-            ILogger logger)
+            IPlexSerieService plexSerieService)
         {
             _plexLibraryRepository = plexLibraryRepository;
             _plexMovieService = plexMovieService;
             _plexSerieService = plexSerieService;
             _plexServiceApi = plexServiceApi;
-            Log = logger;
         }
 
 

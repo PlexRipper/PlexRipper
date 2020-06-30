@@ -231,19 +231,18 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(message);
             }
 
-            bool exists = await _accountService.GetAccountAsync(username) != null;
-            if (exists)
-            {
-                string message = $"Account with username: \"{username}\" already exists!";
-                Log.Warning(message);
-                return Forbid(message);
-            }
-            else
+            bool available = await _accountService.CheckIfUsernameIsAvailableAsync(username);
+            if (available)
             {
                 string message = $"Username: {username} is available";
                 Log.Debug(message);
                 return Ok($"Username: {username} is available");
-
+            }
+            else
+            {
+                string message = $"Account with username: \"{username}\" already exists!";
+                Log.Warning(message);
+                return Forbid(message);
             }
         }
     }

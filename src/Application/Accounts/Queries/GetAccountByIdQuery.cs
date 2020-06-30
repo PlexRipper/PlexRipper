@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain.Entities;
@@ -11,7 +12,7 @@ namespace PlexRipper.Application.Accounts.Queries
     /// <summary>
     /// Returns the <see cref="Account"/> by its id with an include to the <see cref="PlexAccount"/>.
     /// </summary>
-    public class GetAccountByIdQuery : IRequest<Account>
+    public class GetAccountByIdQuery : AbstractValidator<Account>, IRequest<Account>
     {
         public GetAccountByIdQuery(int id)
         {
@@ -19,11 +20,9 @@ namespace PlexRipper.Application.Accounts.Queries
         }
 
         public int Id { get; }
-
-        public void Validate()
-        {
-        }
     }
+
+
 
     public class GetAccountByIdQueryHandler : IRequestHandler<GetAccountByIdQuery, Account>
     {

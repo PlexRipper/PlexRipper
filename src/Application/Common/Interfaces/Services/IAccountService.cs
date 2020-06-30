@@ -12,7 +12,7 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<bool> ValidateAccountAsync(string username, string password);
 
         Task<bool> RemoveAccountAsync(int accountId);
-        Task<Account> GetAccountAsync(string username);
+        Task<bool> CheckIfUsernameIsAvailableAsync(string username);
         Task<List<PlexServer>> GetServersAsync(int accountId, bool refresh = false);
         Task<Account> CreateAccountAsync(Account newAccount);
         Task<Account> UpdateAccountAsync(Account newAccount);

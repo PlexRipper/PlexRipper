@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using AutoMapper;
-using MediatR.Extensions.Autofac.DependencyInjection;
 using PlexRipper.Application.Config;
 using PlexRipper.Application.Config.Mappings;
 using PlexRipper.Data.Config;
@@ -22,7 +21,6 @@ namespace PlexRipper.WebAPI.Config
         {
             // Application
             builder.RegisterModule<ApplicationModule>();
-            builder.AddMediatR(typeof(ApplicationModule).Assembly);
 
             // Infrastructure
             builder.RegisterModule<DataModule>();

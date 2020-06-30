@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace PlexRipper.Domain.Interfaces
+namespace PlexRipper.Domain
 {
     public interface IRepository<TEntity> where TEntity : BaseEntity
     {

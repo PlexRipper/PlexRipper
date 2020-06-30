@@ -80,25 +80,5 @@ namespace PlexRipper.Application.IntegrationTests.Services
             result.ShouldNotBeNull();
             serverList.ShouldNotBeEmpty();
         }
-
-
-        [Fact]
-        public async Task ShouldReturnPlexLibrary()
-        {
-
-            var plexService = Container.GetPlexService;
-            var accountService = Container.GetAccountService;
-            var credentials = Secrets.GetCredentials();
-
-            await accountService.CreateAccountAsync(new Account(credentials.Username, credentials.Password));
-            var account = await accountService.GetAccountAsync(credentials.Username);
-
-            var serverList = await plexService.GetServersAsync(account.PlexAccount);
-            //var library = await plexService.GetLibrary(serverList[0]);
-
-            //library.ShouldNotBeNull();
-
-        }
-
     }
 }

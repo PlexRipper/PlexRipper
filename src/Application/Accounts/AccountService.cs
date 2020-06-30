@@ -64,7 +64,7 @@ namespace PlexRipper.Application.Accounts
             }
             Log.Debug("Setting up new Account");
 
-            account = await _accountRepository.GetAsync(account.Id);
+            account = await GetAccountAsync(account.Id);
 
             // Request new PlexAccount
             var plexAccount = await _plexService.RequestPlexAccountAsync(account.Username, account.Password);
@@ -101,32 +101,39 @@ namespace PlexRipper.Application.Accounts
             // TODO Refresh the Plex Servers
         }
 
-        #region CRUD
-        public async Task<Account> GetAccountAsync(string username)
+        /// <summary>
+        /// Checks if an <see cref="Account"/> with the same username already exists
+        /// </summary>
+        /// <param name="username">The username to check for</param>
+        /// <returns>true if username is available</returns>
+        public async Task<bool> CheckIfUsernameIsAvailableAsync(string username)
         {
-            var result = await _accountRepository.FindAsync(x => x.Username == username);
+            var result = await _mediator.Send(new GetAccountByUsernameQuery(username));
 
             if (result != null)
             {
-                result.PlexAccount.Account = null; // TODO Might be removed
-                return result;
+                Log.Warning($"An Account with the username: {username} already exists.");
+                return false;
             }
 
-            Log.Warning($"Could not find an Account with username: {username}");
-            return null;
+            Log.Debug($"The username: {username} is available.");
+            return true;
         }
 
+        #region CRUD
+
         /// <summary>
-        /// Returns the Account as noTracking
+        /// Returns the <see cref="Account"/> with the corresponding <see cref="PlexAccount"/> and the accessible <see cref="PlexServer"/>s
         /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
+        /// <param name="accountId">The Id to retrieve the <see cref="Account"/> by</param>
+        /// <returns>The account found</returns>
         public async Task<Account> GetAccountAsync(int accountId)
         {
             var result = await _mediator.Send(new GetAccountByIdQuery(accountId));
 
             if (result != null)
             {
+                Log.Debug($"Found an Account with the id: {accountId}");
                 return result;
             }
 

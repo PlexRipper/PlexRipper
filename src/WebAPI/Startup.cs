@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using PlexRipper.Application;
+using PlexRipper.Application.Config;
 using PlexRipper.WebAPI.Config;
 using System.Linq;
 using System.Reflection;
@@ -50,16 +50,19 @@ namespace PlexRipper.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddApplication();
-            services.AddControllers();
-
-            services.AddHttpContextAccessor();
-
             // Fluent Validator
-            services.AddMvc().AddFluentValidation();
+            services.AddMvc().AddFluentValidation(fv =>
+            {
+                fv.RegisterValidatorsFromAssemblyContaining<ApplicationModule>();
+                fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
+            });
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
+            // General
+            services.AddControllers();
+            services.AddHttpContextAccessor();
             services.AddCors();
+
             // Customise default API behaviour
             services.Configure<ApiBehaviorOptions>(options =>
             {

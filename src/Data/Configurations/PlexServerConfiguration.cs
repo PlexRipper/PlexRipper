@@ -11,12 +11,14 @@ namespace PlexRipper.Data.Configurations
             builder
                 .HasMany(x => x.PlexLibraries)
                 .WithOne(x => x.PlexServer)
+                .HasForeignKey(x => x.PlexServerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder
-                .HasMany(x => x.ServerStatus)
-                .WithOne(x => x.PlexServer)
-                .OnDelete(DeleteBehavior.Cascade);
+            //builder
+            //    .HasMany(x => x.ServerStatus)
+            //    .WithOne(x => x.PlexServer)
+            //    .HasForeignKey(x => x.PlexServerId)
+            //    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

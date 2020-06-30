@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common.Interfaces;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities.Base;
 using PlexRipper.Domain.Interfaces;
-using PlexRipper.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +57,7 @@ namespace PlexRipper.Data.Repositories
             return Context.Instance.Set<TEntity>().SingleOrDefaultAsync(predicate);
         }
 
-        public async Task AddAsync(TEntity entity)
+        public virtual async Task AddAsync(TEntity entity)
         {
             try
             {
@@ -172,6 +173,11 @@ namespace PlexRipper.Data.Repositories
             {
                 Log.Verbose("Saving changes to database");
                 await Context.SaveChangesAsync();
+            }
+            catch (SqliteException ex)
+            {
+                Log.Error(ex);
+                throw;
             }
             catch (DbUpdateConcurrencyException ex)
             {

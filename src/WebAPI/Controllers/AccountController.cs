@@ -150,11 +150,16 @@ namespace PlexRipper.WebAPI.Controllers
 
                 if (accountDB != null)
                 {
-                    var message = $"Account with id {accountDB.Id} was created successfully";
+                    var message = $"Account with id {accountDB.Id} was created and/or retrieved successfully";
                     Log.Information(message);
                     return Created(message, _mapper.Map<AccountDTO>(accountDB));
                 }
-                return UnprocessableEntity(null);
+                else
+                {
+                    var message = $"Could not process the account";
+                    Log.Warning(message);
+                    return UnprocessableEntity(message);
+                }
 
             }
             catch (Exception e)

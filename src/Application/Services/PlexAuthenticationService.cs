@@ -1,4 +1,5 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using System;

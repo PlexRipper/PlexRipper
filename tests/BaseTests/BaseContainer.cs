@@ -2,6 +2,7 @@
 using AutofacSerilogIntegration;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.Application;
+using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.WebAPI.Config;
 
 namespace PlexRipper.BaseTests

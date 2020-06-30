@@ -12,8 +12,8 @@ namespace PlexRipper.Domain.Entities
         public string StatusMessage { get; set; }
 
         public DateTime LastChecked { get; set; }
-        #region Relationships
 
+        #region Relationships
         public virtual PlexServer PlexServer { get; set; }
         public int PlexServerId { get; set; }
         #endregion

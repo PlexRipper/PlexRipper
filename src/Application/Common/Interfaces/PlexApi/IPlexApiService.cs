@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace PlexRipper.Application.Common.Interfaces
+namespace PlexRipper.Application.Common.Interfaces.PlexApi
 {
     public interface
         IPlexApiService

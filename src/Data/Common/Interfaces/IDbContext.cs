@@ -5,6 +5,6 @@ namespace PlexRipper.Data.Common.Interfaces
 {
     public interface IDbContext : IDisposable
     {
-        DbContext Instance { get; }
+        public DbContext Instance { get; }
     }
 }

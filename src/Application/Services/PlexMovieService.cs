@@ -4,6 +4,7 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Interfaces.PlexApi;
 
 namespace PlexRipper.Application.Services
 {

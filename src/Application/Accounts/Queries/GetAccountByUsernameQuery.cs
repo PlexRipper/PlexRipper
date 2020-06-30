@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace PlexRipper.Application.Accounts.Queries
     /// <summary>
     /// Returns the <see cref="Account"/> by its id without any includes.
     /// </summary>
-    public class GetAccountByUsernameQuery : IRequest<Account>
+    public class GetAccountByUsernameQuery : IRequest<ValidationResponse<Account>>
     {
         public string Username { get; }
 
@@ -29,7 +30,7 @@ namespace PlexRipper.Application.Accounts.Queries
         }
     }
 
-    public class GetAccountByUsernameQueryHandler : IRequestHandler<GetAccountByUsernameQuery, Account>
+    public class GetAccountByUsernameQueryHandler : IRequestHandler<GetAccountByUsernameQuery, ValidationResponse<Account>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -38,10 +39,12 @@ namespace PlexRipper.Application.Accounts.Queries
             _dbContext = dbContext;
         }
 
-        public Task<Account> Handle(GetAccountByUsernameQuery request, CancellationToken cancellationToken)
+        public async Task<ValidationResponse<Account>> Handle(GetAccountByUsernameQuery request, CancellationToken cancellationToken)
         {
-            return _dbContext.Accounts
-                .FirstOrDefaultAsync(x => x.Username == request.Username);
+            var account = await _dbContext.Accounts.FirstOrDefaultAsync(x => x.Username == request.Username);
+
+            return new ValidationResponse<Account>(account);
+
         }
     }
 }

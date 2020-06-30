@@ -1,4 +1,5 @@
-﻿using PlexRipper.Domain.Entities;
+﻿using PlexRipper.Domain;
+using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<bool> ValidateAccountAsync(string username, string password);
 
         Task<bool> RemoveAccountAsync(int accountId);
-        Task<bool> CheckIfUsernameIsAvailableAsync(string username);
+        Task<ValidationResponse<Account>> CheckIfUsernameIsAvailableAsync(string username);
         Task<List<PlexServer>> GetServersAsync(int accountId, bool refresh = false);
         Task<Account> CreateAccountAsync(Account newAccount);
         Task<Account> UpdateAccountAsync(Account newAccount);

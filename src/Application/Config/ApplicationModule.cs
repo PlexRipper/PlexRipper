@@ -21,6 +21,10 @@ namespace PlexRipper.Application.Config
             builder.RegisterAssemblyTypes(assembly)
                 .Where(t => t.IsClosedTypeOf(typeof(IValidator<>)))
                 .AsImplementedInterfaces();
+            // Register all the Command classes (they implement IRequestHandler) in assembly holding the Commands
+            builder.RegisterAssemblyTypes(assembly)
+                .AsClosedTypesOf(typeof(IRequestHandler<,>));
+            // Register Behavior Pipeline
             builder.RegisterGeneric(typeof(ValidationPipeline<,>)).As(typeof(IPipelineBehavior<,>));
 
             // register all I*Services

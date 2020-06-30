@@ -106,18 +106,23 @@ namespace PlexRipper.Application.Accounts
         /// </summary>
         /// <param name="username">The username to check for</param>
         /// <returns>true if username is available</returns>
-        public async Task<bool> CheckIfUsernameIsAvailableAsync(string username)
+        public async Task<ValidationResponse<Account>> CheckIfUsernameIsAvailableAsync(string username)
         {
             var result = await _mediator.Send(new GetAccountByUsernameQuery(username));
 
-            if (result != null)
+            if (!result.IsValidResponse)
+            {
+                return result;
+            }
+
+            if (result.Data != null)
             {
                 Log.Warning($"An Account with the username: {username} already exists.");
-                return false;
+                return result;
             }
 
             Log.Debug($"The username: {username} is available.");
-            return true;
+            return result;
         }
 
         #region CRUD

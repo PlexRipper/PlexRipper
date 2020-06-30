@@ -50,6 +50,11 @@ namespace PlexRipper.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // General
+            services.AddControllers();
+            services.AddHttpContextAccessor();
+            services.AddCors();
+
             // Fluent Validator
             services.AddMvc().AddFluentValidation(fv =>
             {
@@ -58,10 +63,6 @@ namespace PlexRipper.WebAPI
             });
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-            // General
-            services.AddControllers();
-            services.AddHttpContextAccessor();
-            services.AddCors();
 
             // Customise default API behaviour
             services.Configure<ApiBehaviorOptions>(options =>

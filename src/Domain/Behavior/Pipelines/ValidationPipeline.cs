@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using MediatR;
-using PlexRipper.Domain.Validation;
 using System;
 using System.Linq;
 using System.Threading;
@@ -25,24 +24,23 @@ namespace PlexRipper.Domain.Behavior.Pipelines
 
             if (!result.IsValid)
             {
-                Log.Error(result.Errors.Select(s => s.ErrorMessage).Aggregate((acc, cur) => acc += string.Concat("_|_", cur))
-                );
-
                 var responseType = typeof(TResponse);
+                var errorList = result.Errors.Select(s => s.ErrorMessage).ToList();
+                Log.Error($"{responseType} - {errorList.Aggregate((acc, cur) => acc += string.Concat("_|_", cur))}");
+
 
                 if (responseType.IsGenericType)
                 {
                     var resultType = responseType.GetGenericArguments()[0];
-                    var invalidResponseType = typeof(ValidateableResponse<>).MakeGenericType(resultType);
+                    var invalidResponseType = typeof(ValidationResponse<>).MakeGenericType(resultType);
 
-                    return Activator.CreateInstance(invalidResponseType, null, result.Errors.Select(s => s.ErrorMessage).ToList()) as TResponse;
+                    var invalidResponse = Activator.CreateInstance(invalidResponseType, null, errorList) as TResponse;
 
+                    return invalidResponse;
                 }
             }
 
-            var response = await next();
-
-            return response;
+            return await next();
         }
     }
 }

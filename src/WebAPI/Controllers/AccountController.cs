@@ -220,30 +220,29 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         [HttpGet("check/{username}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(bool))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<string>))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(string))]
         public async Task<IActionResult> CheckUsername(string username)
         {
-            if (string.IsNullOrEmpty(username))
+            var validation = await _accountService.CheckIfUsernameIsAvailableAsync(username);
+            if (validation.IsValidResponse)
             {
-                string message = "Ensure that an username is send with the request";
-                Log.Error(message);
-                return BadRequest(message);
+                if (validation.Data == null)
+                {
+                    string message = $"Username: {username} is available";
+                    Log.Debug(message);
+                    return Ok($"Username: {username} is available");
+                }
+                else
+                {
+                    string message = $"Account with username: \"{username}\" already exists!";
+                    Log.Warning(message);
+                    return Forbid(message);
+                }
             }
 
-            bool available = await _accountService.CheckIfUsernameIsAvailableAsync(username);
-            if (available)
-            {
-                string message = $"Username: {username} is available";
-                Log.Debug(message);
-                return Ok($"Username: {username} is available");
-            }
-            else
-            {
-                string message = $"Account with username: \"{username}\" already exists!";
-                Log.Warning(message);
-                return Forbid(message);
-            }
+            return BadRequest(validation.Errors);
         }
     }
 }

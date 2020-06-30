@@ -28,12 +28,12 @@ namespace PlexRipper.Domain.Entities
 
         #region Relationships
 
-        [IgnoreMap]
-        public virtual List<PlexAccountServer> PlexAccountServers { get; set; }
+        [IgnoreMap] // TODO remove IgnoreMap
+        public virtual ICollection<PlexAccountServer> PlexAccountServers { get; set; }
 
-        public virtual List<PlexLibrary> PlexLibraries { get; set; }
+        public virtual ICollection<PlexLibrary> PlexLibraries { get; set; }
 
-        public virtual List<PlexServerStatus> ServerStatus { get; set; }
+        public virtual ICollection<PlexServerStatus> ServerStatus { get; set; }
         #endregion
 
         #region Helpers

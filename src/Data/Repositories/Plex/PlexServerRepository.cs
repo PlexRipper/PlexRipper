@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application.Common.Interfaces.DataAccess;
+using PlexRipper.Application.Common.Interfaces.Repositories;
+using PlexRipper.Domain.Entities;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces.Repositories;
-using PlexRipper.Data.Common.Interfaces;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Repositories
 {

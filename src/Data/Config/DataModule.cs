@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using PlexRipper.Data.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.DataAccess;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;

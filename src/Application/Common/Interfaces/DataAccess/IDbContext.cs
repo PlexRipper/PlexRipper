@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 
-namespace PlexRipper.Data.Common.Interfaces
+namespace PlexRipper.Application.Common.Interfaces.DataAccess
 {
     public interface IDbContext : IDisposable
     {

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.JoinTables;
 using System.IO;
@@ -50,8 +50,8 @@ namespace PlexRipper.Data
 
         private static void SetConfig(DbContextOptionsBuilder optionsBuilder, bool isTest = false)
         {
-            optionsBuilder.UseLazyLoadingProxies();
-
+            // optionsBuilder.UseLazyLoadingProxies();
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
             string dbName = isTest ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
             string dbPath = Path.Combine(rootDir, dbName);

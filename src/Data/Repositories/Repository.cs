@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities.Base;
 using PlexRipper.Domain.Interfaces;

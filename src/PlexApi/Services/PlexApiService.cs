@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.PlexApi;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.PlexApi.Common.DTO.PlexGetStatus;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PlexRipper.Domain;
 
 namespace PlexRipper.PlexApi.Services
 {

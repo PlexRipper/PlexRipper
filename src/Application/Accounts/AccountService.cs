@@ -1,4 +1,6 @@
-﻿using PlexRipper.Application.Common.Interfaces;
+﻿using MediatR;
+using PlexRipper.Application.Accounts.Queries;
+using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
@@ -7,16 +9,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PlexRipper.Application.Services
+namespace PlexRipper.Application.Accounts
 {
     public class AccountService : IAccountService
     {
+        private readonly IMediator _mediator;
         private readonly IAccountRepository _accountRepository;
         private readonly IPlexService _plexService;
         private readonly IPlexServerService _plexServerService;
 
-        public AccountService(IAccountRepository accountRepository, IPlexService plexService, IPlexServerService plexServerService)
+        public AccountService(IMediator mediator, IAccountRepository accountRepository, IPlexService plexService, IPlexServerService plexServerService)
         {
+            _mediator = mediator;
             _accountRepository = accountRepository;
             _plexService = plexService;
             _plexServerService = plexServerService;
@@ -119,11 +123,11 @@ namespace PlexRipper.Application.Services
         /// <returns></returns>
         public async Task<Account> GetAccountAsync(int accountId)
         {
-            var result = await _accountRepository.GetAsync(accountId);
+            var result = await _mediator.Send(new GetAccountByIdQuery(accountId));
 
             if (result != null)
             {
-                return await GetAccountAsync(result.Username);
+                return result;
             }
 
             Log.Warning($"Could not find an Account with id: {accountId}");

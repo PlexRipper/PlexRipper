@@ -1,5 +1,5 @@
-﻿using PlexRipper.Application.Common.Interfaces.Repositories;
-using PlexRipper.Data.Common.Interfaces;
+﻿using PlexRipper.Application.Common.Interfaces.DataAccess;
+using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.Data.Repositories

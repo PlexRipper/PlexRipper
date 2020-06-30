@@ -5,7 +5,7 @@ using PlexRipper.Domain.Entities.JoinTables;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlexRipper.Data.Common.Interfaces
+namespace PlexRipper.Application.Common.Interfaces.DataAccess
 {
     public interface IPlexRipperDbContext : IDbContext
     {

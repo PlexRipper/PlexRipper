@@ -1,12 +1,12 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.Common.Interfaces.Repositories;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
-using PlexRipper.Domain;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
 
 namespace PlexRipper.Application.Services
 {
@@ -66,7 +66,7 @@ namespace PlexRipper.Application.Services
         /// <returns></returns>
         public Task<PlexLibrary> GetLibraryMediaAsync(PlexServer plexServer, string libraryKey, bool refresh = false)
         {
-            var plexLibrary = plexServer.PlexLibraries.Find(x => x.Key == libraryKey);
+            var plexLibrary = plexServer.PlexLibraries.ToList().Find(x => x.Key == libraryKey);
             return GetLibraryMediaAsync(plexLibrary, refresh);
         }
 

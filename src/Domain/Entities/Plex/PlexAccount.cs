@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using PlexRipper.Domain.Entities.Base;
+﻿using PlexRipper.Domain.Entities.Base;
 using PlexRipper.Domain.Entities.JoinTables;
+using System;
+using System.Collections.Generic;
 
 namespace PlexRipper.Domain.Entities
 {
@@ -20,15 +20,19 @@ namespace PlexRipper.Domain.Entities
         public DateTime ConfirmedAt { get; set; }
         public int ForumId { get; set; }
 
+        #region Relationships
+
         /// <summary>
         /// The Plex Ripper account associated with this Plex account.
         /// </summary>
-        public virtual Account Account { get; set; }
+        public Account Account { get; set; }
         public int AccountId { get; set; }
 
         /// <summary>
         /// The associated PlexAccountServers the user has access to
         /// </summary>
-        public virtual List<PlexAccountServer> PlexAccountServers { get; set; }
+        public virtual ICollection<PlexAccountServer> PlexAccountServers { get; set; }
+
+        #endregion
     }
 }

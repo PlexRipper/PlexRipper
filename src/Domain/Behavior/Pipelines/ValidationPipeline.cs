@@ -20,6 +20,7 @@ namespace PlexRipper.Domain.Behavior.Pipelines
 
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
+            // Pre
             var result = await _compositeValidator.ValidateAsync(request, cancellationToken);
 
             if (!result.IsValid)

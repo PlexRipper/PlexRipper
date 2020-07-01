@@ -5,6 +5,6 @@ namespace PlexRipper.Application.Common.Interfaces
 {
     public interface IPlexAuthenticationService
     {
-        Task<string> GetPlexToken(PlexAccount plexAccount);
+        Task<string> GetPlexTokenAsync(PlexAccount plexAccount);
     }
 }

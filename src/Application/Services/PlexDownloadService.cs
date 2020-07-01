@@ -1,10 +1,10 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
+using PlexRipper.Application.Common.Interfaces.PlexApi;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
-using PlexRipper.Domain;
 using System.Threading.Tasks;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
 
 namespace PlexRipper.Application.Services
 {
@@ -29,7 +29,7 @@ namespace PlexRipper.Application.Services
 
         public Task<string> GetPlexTokenAsync(PlexAccount plexAccount)
         {
-            return _plexAuthenticationService.GetPlexToken(plexAccount);
+            return _plexAuthenticationService.GetPlexTokenAsync(plexAccount);
         }
 
         public async Task<DownloadTask> GetDownloadRequestAsync(PlexMovie movie)

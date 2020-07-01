@@ -28,10 +28,19 @@ namespace PlexRipper.PlexApi.Services
         public async Task<PlexAccount> PlexSignInAsync(string username, string password)
         {
             var result = await _plexApi.PlexSignInAsync(username, password);
-            return result == null ? null : _mapper.Map<PlexAccount>(result.User);
+            if (result != null)
+            {
+                var mapResult = _mapper.Map<PlexAccount>(result.User);
+                mapResult.IsValidated = true;
+                mapResult.ValidatedAt = DateTime.Now;
+                Log.Information($"Successfully retrieved the PlexAccount data for user {username} from the PlexApi");
+                return mapResult;
+            }
+            Log.Warning("The result from the PlexSignIn was null");
+            return null;
         }
 
-        public Task<string> RefreshPlexAuthTokenAsync(Account account)
+        public Task<string> RefreshPlexAuthTokenAsync(PlexAccount account)
         {
             return _plexApi.RefreshPlexAuthTokenAsync(account);
         }

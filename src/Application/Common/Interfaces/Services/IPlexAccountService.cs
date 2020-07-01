@@ -1,0 +1,60 @@
+﻿using PlexRipper.Domain;
+using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Types;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace PlexRipper.Application.Common.Interfaces
+{
+    public interface IPlexAccountService
+    {
+        Task<ValidationResponse<List<PlexServer>>> GetPlexServersAsync(PlexAccount plexAccount, bool refresh = false);
+
+        /// <summary>
+        /// Check if this account is valid by querying the Plex API
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns>Are the account credentials valid</returns>
+        Task<ValidationResponse<BooleanValue>> ValidatePlexAccountAsync(string username, string password);
+
+        /// /// <summary>
+        /// Check if this account is valid by querying the Plex API
+        /// </summary>
+        /// <param name="plexAccount">The account to check</param>
+        /// <returns>Are the account credentials valid</returns>
+        Task<ValidationResponse<BooleanValue>> ValidatePlexAccountAsync(PlexAccount plexAccount);
+
+        /// <summary>
+        /// Checks if an <see cref="PlexAccount"/> with the same username already exists
+        /// </summary>
+        /// <param name="username">The username to check for</param>
+        /// <returns>true if username is available</returns>
+        Task<ValidationResponse<PlexAccount>> CheckIfUsernameIsAvailableAsync(string username);
+
+        /// <summary>
+        /// Returns the <see cref="PlexAccount"/> with the corresponding <see cref="PlexAccount"/> and the accessible <see cref="PlexServer"/>s
+        /// </summary>
+        /// <param name="accountId">The Id to retrieve the <see cref="PlexAccount"/> by</param>
+        /// <returns>The account found</returns>
+        Task<ValidationResponse<PlexAccount>> GetPlexAccountAsync(int accountId);
+
+        Task<ValidationResponse<List<PlexAccount>>> GetAllPlexAccountsAsync(bool onlyEnabled = false);
+
+        /// <summary>
+        /// Creates an <see cref="PlexAccount"/> in the Database and performs an SetupAccountAsync().
+        /// </summary>
+        /// <param name="plexAccount">The unique account</param>
+        /// <returns>Returns the added account after setup</returns>
+        Task<ValidationResponse<PlexAccount>> CreatePlexAccountAsync(PlexAccount plexAccount);
+
+        /// <summary>
+        /// Hard deletes the <see cref="PlexAccount"/> from the Database
+        /// </summary>
+        /// <param name="plexAccountId"></param>
+        /// <returns></returns>
+        Task<ValidationResponse<BooleanValue>> DeletePlexAccountAsync(int plexAccountId);
+
+        Task<ValidationResponse<PlexAccount>> UpdateAccountAsync(PlexAccount newAccount);
+    }
+}

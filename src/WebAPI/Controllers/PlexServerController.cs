@@ -7,7 +7,6 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -19,17 +18,15 @@ namespace PlexRipper.WebAPI.Controllers
     public class PlexServerController : BaseController
     {
 
-        private readonly IPlexService _plexService;
         private readonly IPlexServerService _plexServerService;
-        private readonly IAccountService _accountService;
+        private readonly IPlexAccountService _plexAccountService;
         private readonly IMapper _mapper;
 
-        public PlexServerController(IPlexService plexService, IPlexServerService plexServerService, IAccountService accountService, IMapper mapper)
+        public PlexServerController(IPlexServerService plexServerService, IPlexAccountService plexAccountService, IMapper mapper)
         {
             _mapper = mapper;
-            _plexService = plexService;
             _plexServerService = plexServerService;
-            _accountService = accountService;
+            _plexAccountService = plexAccountService;
         }
 
 
@@ -93,34 +90,35 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         // GET api/<PlexServerController>/5
-        [HttpGet("/ByAccount/{accountId}")]
-        public async Task<IActionResult> GetByAccountId(int accountId)
-        {
-            string message;
-            if (accountId <= 0)
-            {
-                message = $"The {nameof(PlexServer)}s can't be found if the {nameof(Account)} id is 0 or lower.";
-                Log.Warning(message);
-                return BadRequest(message);
-            }
+        // TODO check if this is still a needed method
+        //[HttpGet("/ByAccount/{accountId}")]
+        //public async Task<IActionResult> GetByAccountId(int accountId)
+        //{
+        //    string message;
+        //    if (accountId <= 0)
+        //    {
+        //        message = $"The {nameof(PlexServer)}s can't be found if the {nameof(PlexAccount)} id is 0 or lower.";
+        //        Log.Warning(message);
+        //        return BadRequest(message);
+        //    }
 
-            try
-            {
-                var result = await _accountService.GetServersAsync(accountId);
-                if (!result.Any())
-                {
-                    message = $"Could not find any {nameof(PlexServer)}s associated with {nameof(Account)} where Id is {accountId}";
-                    Log.Debug(message);
-                    return NotFound(message);
-                }
-                return Ok(_mapper.Map<List<PlexServerDTO>>(result));
+        //    try
+        //    {
+        //        var result = await _plexAccountService.GetServersAsync(accountId);
+        //        if (!result.Any())
+        //        {
+        //            message = $"Could not find any {nameof(PlexServer)}s associated with {nameof(PlexAccount)} where Id is {accountId}";
+        //            Log.Debug(message);
+        //            return NotFound(message);
+        //        }
+        //        return Ok(_mapper.Map<List<PlexServerDTO>>(result));
 
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return InternalServerError(e);
+        //    }
 
-        }
+        //}
     }
 }

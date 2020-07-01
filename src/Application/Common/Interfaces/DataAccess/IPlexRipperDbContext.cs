@@ -11,7 +11,6 @@ namespace PlexRipper.Application.Common.Interfaces.DataAccess
     {
         ChangeTracker ChangeTracker { get; }
         DbContext Instance { get; }
-        DbSet<Account> Accounts { get; set; }
         DbSet<DownloadTask> DownloadTasks { get; set; }
         DbSet<FolderPath> FolderPaths { get; set; }
         DbSet<PlexGenre> PlexGenres { get; set; }

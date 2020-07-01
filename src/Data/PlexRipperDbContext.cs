@@ -17,12 +17,11 @@ namespace PlexRipper.Data
         public DbContext Instance => this;
 
         #region Tables
-        public DbSet<Account> Accounts { get; set; }
+        public DbSet<PlexAccount> PlexAccounts { get; set; }
         public DbSet<DownloadTask> DownloadTasks { get; set; }
         public DbSet<FolderPath> FolderPaths { get; set; }
 
         public DbSet<PlexGenre> PlexGenres { get; set; }
-        public DbSet<PlexAccount> PlexAccounts { get; set; }
         public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
         public DbSet<PlexMovie> PlexMovies { get; set; }
@@ -33,6 +32,7 @@ namespace PlexRipper.Data
 
         #region JoinTables
         public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
+        public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
         public DbSet<PlexMovieGenre> PlexMovieGenres { get; set; }
         public DbSet<PlexMovieRole> PlexMovieRoles { get; set; }
         #endregion

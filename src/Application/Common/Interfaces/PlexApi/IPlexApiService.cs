@@ -7,8 +7,14 @@ namespace PlexRipper.Application.Common.Interfaces.PlexApi
     public interface
         IPlexApiService
     {
+        /// <summary>
+        /// Returns the <see cref="PlexAccount"/> after PlexApi validation.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         Task<PlexAccount> PlexSignInAsync(string username, string password);
-        Task<string> RefreshPlexAuthTokenAsync(Account account);
+        Task<string> RefreshPlexAuthTokenAsync(PlexAccount account);
         Task<PlexAccount> GetAccountAsync(string authToken);
         Task<List<PlexServer>> GetServerAsync(string authToken);
         Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexLibraryUrl);

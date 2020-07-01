@@ -23,11 +23,11 @@ namespace PlexRipper.Application.UnitTests
         public async Task CreateAccountAsync_ShouldReturnValidAccount_WhenAccountDoesNotExist()
         {
             // Arrange
-            var accountService = Container.GetAccountService;
-            var newAccount = new Account("TestUsername", "Password123");
+            var accountService = Container.GetPlexAccountService;
+            var newAccount = new PlexAccount("TestUsername", "Password123");
 
             // Act
-            var account = await accountService.CreateAccountAsync(newAccount);
+            var account = await accountService.CreatePlexAccountAsync(newAccount);
 
             // Assert
             account.ShouldNotBeNull();
@@ -37,12 +37,12 @@ namespace PlexRipper.Application.UnitTests
         public async Task CreateAccountAsync_ShouldReturnNull_WhenAccountExist()
         {
             // Arrange
-            var accountService = Container.GetAccountService;
-            var newAccount = new Account("TestUsername", "Password123");
+            var accountService = Container.GetPlexAccountService;
+            var newAccount = new PlexAccount("TestUsername", "Password123");
 
             // Act
-            var account = await accountService.CreateAccountAsync(newAccount);
-            var account2 = await accountService.CreateAccountAsync(newAccount);
+            var account = await accountService.CreatePlexAccountAsync(newAccount);
+            var account2 = await accountService.CreatePlexAccountAsync(newAccount);
 
             // Assert
             account.ShouldNotBeNull();
@@ -53,14 +53,14 @@ namespace PlexRipper.Application.UnitTests
         public async Task UpdateAccountAsync_ShouldReturnValidAccount_WhenAccountWasUpdated()
         {
             // Arrange
-            var accountService = Container.GetAccountService;
-            var newAccount = new Account("TestUsername", "Password123");
-            var updatedAccount = new Account("TestUsername", "123PassWrd123");
+            var accountService = Container.GetPlexAccountService;
+            var newAccount = new PlexAccount("TestUsername", "Password123");
+            var updatedAccount = new PlexAccount("TestUsername", "123PassWrd123");
 
             // Act
-            var accountDB = await accountService.CreateAccountAsync(newAccount);
+            var accountDB = (await accountService.CreatePlexAccountAsync(newAccount)).Data;
             updatedAccount.Id = accountDB.Id;
-            accountDB = await accountService.UpdateAccountAsync(updatedAccount);
+            accountDB = (await accountService.UpdateAccountAsync(updatedAccount)).Data;
 
             // Assert
             accountDB.ShouldNotBeNull();

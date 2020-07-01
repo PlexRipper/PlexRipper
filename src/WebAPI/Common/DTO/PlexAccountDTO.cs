@@ -7,7 +7,25 @@ namespace PlexRipper.WebAPI.Common.DTO
     public class PlexAccountDTO
     {
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public int Id { get; set; }
+
+        [JsonProperty("displayName")]
+        public string DisplayName { get; set; }
+
+        [JsonProperty("username")]
+        public string Username { get; set; }
+
+        [JsonProperty("password")]
+        public string Password { get; set; }
+
+        [JsonProperty("isEnabled")]
+        public bool IsEnabled { get; set; }
+
+        [JsonProperty("isValidated")]
+        public bool IsValidated { get; set; }
+
+        [JsonProperty("validatedAt")]
+        public DateTime ValidatedAt { get; set; }
 
         [JsonProperty("uuid")]
         public string Uuid { get; set; }
@@ -17,9 +35,6 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("joined_at")]
         public DateTime JoinedAt { get; set; }
-
-        [JsonProperty("username")]
-        public string Username { get; set; }
 
         [JsonProperty("title")]
         public string Title { get; set; }

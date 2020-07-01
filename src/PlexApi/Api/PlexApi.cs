@@ -53,9 +53,9 @@ namespace PlexRipper.PlexApi.Api
         }
 
 
-        public async Task<string> RefreshPlexAuthTokenAsync(Account account)
+        public async Task<string> RefreshPlexAuthTokenAsync(PlexAccount plexAccount)
         {
-            var result = await PlexSignInAsync(account.Username, account.Password);
+            var result = await PlexSignInAsync(plexAccount.Username, plexAccount.Password);
             if (result != null)
             {
                 Log.Information($"Returned token was: {result.User.AuthToken}");

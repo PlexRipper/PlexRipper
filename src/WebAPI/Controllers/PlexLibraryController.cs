@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,18 +16,16 @@ namespace PlexRipper.WebAPI.Controllers
     public class PlexLibraryController : ControllerBase
     {
 
-        private readonly IPlexService _plexService;
         private readonly IPlexLibraryService _plexLibraryService;
-        private readonly IAccountService _accountService;
+        private readonly IPlexAccountService _plexAccountService;
         private readonly IMapper _mapper;
 
 
-        public PlexLibraryController(IPlexService plexService, IPlexLibraryService plexLibraryService, IAccountService accountService, IMapper mapper)
+        public PlexLibraryController(IPlexLibraryService plexLibraryService, IPlexAccountService plexAccountService, IMapper mapper)
         {
 
-            _plexService = plexService;
             _plexLibraryService = plexLibraryService;
-            _accountService = accountService;
+            _plexAccountService = plexAccountService;
             _mapper = mapper;
         }
 

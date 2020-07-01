@@ -22,22 +22,22 @@ namespace PlexRipper.Application.IntegrationTests.Services
         public async Task PlexDownloadShouldDownloadEntireFile()
         {
             // Arrange
-            var accountService = Container.GetAccountService;
+            var accountService = Container.GetPlexAccountService;
             var plexServerService = Container.GetPlexServerService;
             var plexLibraryService = Container.GetPlexLibraryService;
             var plexDownloadService = Container.GetPlexDownloadService;
             var credentials = Secrets.GetCredentials();
 
             //Act 
-            var newAccount = new Account
+            var newAccount = new PlexAccount
             {
                 Username = credentials.Username,
                 Password = credentials.Password
             };
 
-            var result = await accountService.ValidateAccountAsync(newAccount);
-            var account = await accountService.CreateAccountAsync(newAccount);
-            var serverList = await plexServerService.GetServersAsync(account.PlexAccount);
+            var result = await accountService.ValidatePlexAccountAsync(newAccount);
+            var account = await accountService.CreatePlexAccountAsync(newAccount);
+            var serverList = await plexServerService.GetServersAsync(account.Data);
 
             var plexLibrary = await plexLibraryService.GetLibraryMediaAsync(serverList.ToList().First().PlexLibraries.ToList()[4]);
             var movie = plexLibrary.Movies[16];

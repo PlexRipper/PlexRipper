@@ -17,27 +17,27 @@ namespace PlexRipper.Application.Services
 
         }
 
-        public async Task<string> GetPlexToken(PlexAccount plexAccount)
+        public async Task<string> GetPlexTokenAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
             {
-                Log.Warning($"{nameof(GetPlexToken)} => The plexAccount was null");
+                Log.Warning($"{nameof(GetPlexTokenAsync)} => The plexAccount was null");
                 return string.Empty;
             }
 
-            if (plexAccount.AuthToken != string.Empty)
+            if (plexAccount.AuthenticationToken != string.Empty)
             {
                 // TODO Make the token refresh limit configurable 
                 if ((plexAccount.ConfirmedAt - DateTime.Now).TotalDays < 30)
                 {
-                    Log.Information($"{nameof(GetPlexToken)} => Plex AuthToken was still valid, using from local DB.");
-                    return plexAccount.AuthToken;
+                    Log.Information($"{nameof(GetPlexTokenAsync)} => Plex AuthToken was still valid, using from local DB.");
+                    return plexAccount.AuthenticationToken;
                 }
-                Log.Information($"{nameof(GetPlexToken)} => Plex AuthToken has expired, refreshing Plex AuthToken now.");
+                Log.Information($"{nameof(GetPlexTokenAsync)} => Plex AuthToken has expired, refreshing Plex AuthToken now.");
 
-                return await _plexApiService.RefreshPlexAuthTokenAsync(plexAccount.Account);
+                return await _plexApiService.RefreshPlexAuthTokenAsync(plexAccount);
             }
-            Log.Error($"{nameof(GetPlexToken)} => PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!");
+            Log.Error($"{nameof(GetPlexTokenAsync)} => PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!");
             return string.Empty;
         }
     }

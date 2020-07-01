@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PlexRipper.Application.Services
+namespace PlexRipper.Application.PlexServers
 {
     public class PlexServerService : IPlexServerService
     {
@@ -48,7 +48,7 @@ namespace PlexRipper.Application.Services
 
             Log.Debug($"Refreshing PlexLibraries for PlexAccount: {plexAccount.Id}");
 
-            var token = await _plexAuthenticationService.GetPlexToken(plexAccount);
+            var token = await _plexAuthenticationService.GetPlexTokenAsync(plexAccount);
 
             if (string.IsNullOrEmpty(token))
             {

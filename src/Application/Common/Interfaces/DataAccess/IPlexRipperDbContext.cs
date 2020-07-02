@@ -23,6 +23,7 @@ namespace PlexRipper.Application.Common.Interfaces.DataAccess
         DbSet<PlexAccountServer> PlexAccountServers { get; set; }
         DbSet<PlexMovieGenre> PlexMovieGenres { get; set; }
         DbSet<PlexMovieRole> PlexMovieRoles { get; set; }
+        DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         int SaveChanges();

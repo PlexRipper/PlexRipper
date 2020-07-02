@@ -107,6 +107,9 @@ namespace PlexRipper.Domain.Entities
             }
         }
 
+        [NotMapped]
+        public string Name => Title;
+
         #endregion
 
 

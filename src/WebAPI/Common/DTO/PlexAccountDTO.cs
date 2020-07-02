@@ -48,9 +48,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("authentication_token")]
         public string AuthenticationToken { get; set; }
 
-        [JsonProperty("confirmedAt")]
-        public object ConfirmedAt { get; set; }
-
         [JsonProperty("forumId")]
         public object ForumId { get; set; }
 

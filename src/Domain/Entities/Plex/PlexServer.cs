@@ -9,14 +9,21 @@ namespace PlexRipper.Domain.Entities
 {
     public class PlexServer : BaseEntity
     {
-        public string AccessToken { get; set; }
+        [Column(Order = 1)]
         public string Name { get; set; }
-        public string Address { get; set; }
-        public int Port { get; set; }
-        public string Version { get; set; }
+        [Column(Order = 2)]
         public string Scheme { get; set; }
+        [Column(Order = 3)]
+        public string Address { get; set; }
+        [Column(Order = 4)]
+        public int Port { get; set; }
+        [Column(Order = 5)]
+        public string Version { get; set; }
+        [Column(Order = 6)]
         public string Host { get; set; }
+        [Column(Order = 7)]
         public string LocalAddresses { get; set; }
+        [Column(Order = 8)]
         public string MachineIdentifier { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -51,6 +58,8 @@ namespace PlexRipper.Domain.Entities
         [NotMapped]
         public string LibraryUrl => $"{BaseUrl}/library/sections";
 
+        [NotMapped]
+        public string AccessToken { get; set; }
         #endregion
 
     }

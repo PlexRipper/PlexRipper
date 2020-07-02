@@ -29,7 +29,6 @@ namespace PlexRipper.Domain.Entities
         // public Uri Thumb { get; set; }
         public bool HasPassword { get; set; }
         public string AuthenticationToken { get; set; }
-        public DateTime ConfirmedAt { get; set; } //TODO Might be removed
         public int ForumId { get; set; }
 
         #region Relationships
@@ -66,7 +65,6 @@ namespace PlexRipper.Domain.Entities
             Title = plexAccount.Title;
             HasPassword = plexAccount.HasPassword;
             AuthenticationToken = plexAccount.AuthenticationToken;
-            ConfirmedAt = plexAccount.ConfirmedAt;
             ForumId = plexAccount.ForumId;
             IsValidated = true;
             ValidatedAt = DateTime.Now;

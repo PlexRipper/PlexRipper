@@ -1,9 +1,11 @@
-﻿using PlexRipper.Application.Common.Interfaces;
+﻿using FluentResults;
+using MediatR;
+using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.Common.Interfaces.Repositories;
+using PlexRipper.Application.PlexServers.Commands;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.JoinTables;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +14,7 @@ namespace PlexRipper.Application.PlexServers
 {
     public class PlexServerService : IPlexServerService
     {
+        private readonly IMediator _mediator;
         private readonly IPlexServerRepository _plexServerRepository;
         private readonly IPlexLibraryService _plexLibraryService;
         private readonly IPlexServerStatusRepository _plexServerStatusRepository;
@@ -20,12 +23,14 @@ namespace PlexRipper.Application.PlexServers
 
 
         public PlexServerService(
+            IMediator mediator,
             IPlexApiService plexServiceApi,
             IPlexAuthenticationService plexAuthenticationService,
             IPlexServerRepository plexServerRepository,
             IPlexLibraryService plexLibraryService,
             IPlexServerStatusRepository plexServerStatusRepository)
         {
+            _mediator = mediator;
             _plexServerRepository = plexServerRepository;
             _plexLibraryService = plexLibraryService;
             _plexServerStatusRepository = plexServerStatusRepository;
@@ -38,12 +43,12 @@ namespace PlexRipper.Application.PlexServers
         /// </summary>
         /// <param name="plexAccount">PlexAccount to use to retrieve the servers</param>
         /// <returns>Is successful</returns>
-        public async Task<bool> RefreshPlexServersAsync(PlexAccount plexAccount)
+        public async Task<Result<List<PlexServer>>> RefreshPlexServersAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
             {
                 Log.Warning("plexAccount was null");
-                return false;
+                return Result.Fail("plexAccount was null");
             }
 
             Log.Debug($"Refreshing PlexLibraries for PlexAccount: {plexAccount.Id}");
@@ -53,25 +58,25 @@ namespace PlexRipper.Application.PlexServers
             if (string.IsNullOrEmpty(token))
             {
                 Log.Warning("Token was empty");
-                return false;
+                return Result.Fail("Token was empty");
             }
 
             var serverList = await _plexServiceApi.GetServerAsync(token);
 
             // First add or update the plex servers
-            await AddOrUpdatePlexServersAsync(plexAccount, serverList);
+            var result = await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, serverList));
 
             //Refresh all libraries for each plexServer as well
-            foreach (var plexServer in serverList)
-            {
-                var status = await GetPlexServerStatusAsync(plexServer);
-                if (status.IsSuccessful)
-                {
-                    await _plexLibraryService.RefreshLibrariesAsync(plexServer);
-                }
-            }
+            //foreach (var plexServer in serverList)
+            //{
+            //    var status = await GetPlexServerStatusAsync(plexServer);
+            //    if (status.IsSuccessful)
+            //    {
+            //        await _plexLibraryService.RefreshLibrariesAsync(plexServer);
+            //    }
+            //}
 
-            return true;
+            return result;
         }
 
         /// <summary>
@@ -148,69 +153,14 @@ namespace PlexRipper.Application.PlexServers
                 }
 
                 var refreshSuccess = await RefreshPlexServersAsync(plexAccount);
-                if (refreshSuccess)
+                if (refreshSuccess.IsSuccess)
                 {
-                    serverList = await _plexServerRepository.GetServers(plexAccount.Id);
+                    serverList = refreshSuccess.Value;
                 }
             }
 
             return serverList.ToList();
         }
-
-        public async Task AddOrUpdatePlexServersAsync(PlexAccount plexAccount, List<PlexServer> servers)
-        {
-
-            if (plexAccount == null)
-            {
-                Log.Warning($"{nameof(AddOrUpdatePlexServersAsync)} => plexAccount was null");
-                return;
-            }
-
-            if (servers.Count == 0)
-            {
-                Log.Warning($"{nameof(AddOrUpdatePlexServersAsync)} => servers list was empty");
-                return;
-            }
-
-            Log.Debug($"{ nameof(AddOrUpdatePlexServersAsync)} => Starting adding or updating servers");
-
-            // Add or update the plex servers
-            foreach (var plexServer in servers)
-            {
-                // There might be cases where the scheme is not set properly by the PlexAPI so correct this
-                if (plexServer.Port == 443)
-                {
-                    plexServer.Scheme = "https";
-                }
-
-                // TODO Might need a better way to identify servers, multiple Plex instances might run on the same server.
-                var plexServerDB = await
-                    _plexServerRepository.FindAsync(x => x.MachineIdentifier == plexServer.MachineIdentifier);
-
-                if (plexServerDB != null)
-                {
-                    plexServer.Id = plexServerDB.Id;
-                    await _plexServerRepository.UpdateAsync(plexServer);
-                }
-                else
-                {
-                    // Create entry in many-to-many table
-                    var plexAccountServer = new PlexAccountServer
-                    {
-                        PlexAccountId = plexAccount.Id,
-                        PlexServerId = plexServer.Id
-                    };
-                    plexServer.PlexAccountServers = new List<PlexAccountServer> { plexAccountServer };
-                    await _plexServerRepository.AddAsync(plexServer);
-                }
-            }
-
-            // TODO Add check if it was successful
-
-
-        }
-
-
 
         #endregion
     }

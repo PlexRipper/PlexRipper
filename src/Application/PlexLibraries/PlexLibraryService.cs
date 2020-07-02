@@ -1,6 +1,9 @@
-﻿using PlexRipper.Application.Common.Interfaces;
+﻿using FluentResults;
+using MediatR;
+using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.Common.Interfaces.Repositories;
+using PlexRipper.Application.PlexLibraries.Commands;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
@@ -8,48 +11,57 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PlexRipper.Application.Services
+namespace PlexRipper.Application.PlexLibraries
 {
     public class PlexLibraryService : IPlexLibraryService
     {
+        private readonly IMediator _mediator;
         private readonly IPlexLibraryRepository _plexLibraryRepository;
         private readonly IPlexMovieService _plexMovieService;
         private readonly IPlexSerieService _plexSerieService;
         private readonly IPlexApiService _plexServiceApi;
 
         public PlexLibraryService(
+            IMediator mediator,
             IPlexApiService plexServiceApi,
             IPlexLibraryRepository plexLibraryRepository,
             IPlexMovieService plexMovieService,
             IPlexSerieService plexSerieService)
         {
+            _mediator = mediator;
             _plexLibraryRepository = plexLibraryRepository;
             _plexMovieService = plexMovieService;
             _plexSerieService = plexSerieService;
             _plexServiceApi = plexServiceApi;
         }
 
-
-        public async Task<bool> RefreshLibrariesAsync(PlexServer plexServer)
+        /// <summary>
+        /// Retrieve the latest <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database.
+        /// </summary>
+        /// <param name="plexAccount"></param>
+        /// <param name="plexServer"></param>
+        /// <returns>If successful</returns>
+        public async Task<Result<bool>> RefreshLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer)
         {
             if (plexServer == null)
             {
-                Log.Warning($"{nameof(RefreshLibrariesAsync)} => plexServer was null");
-                return false;
+                string msg = "plexServer was null";
+                Log.Warning(msg);
+                return Result.Fail(msg);
             }
 
-            Log.Debug($"{nameof(RefreshLibrariesAsync)} => Refreshing PlexLibraries for plexServer: {plexServer.Id}");
+            Log.Debug($"Refreshing PlexLibraries for plexServer: {plexServer.Id}");
 
             var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServer.AccessToken, plexServer.BaseUrl);
 
             if (!libraries.Any())
             {
-                Log.Warning($"{nameof(RefreshLibrariesAsync)} => plexLibraries returned was empty for server {plexServer.Name} - {plexServer.BaseUrl}");
-                return false;
+                string msg = $"plexLibraries returned was empty for server {plexServer.Name} - {plexServer.BaseUrl}";
+                Log.Warning(msg);
+                return Result.Fail(msg);
             }
-            await AddOrUpdatePlexLibrariesAsync(plexServer, libraries);
 
-            return true;
+            return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, plexServer, libraries));
         }
 
         public Task<PlexMediaMetaData> GetMetaDataAsync(PlexMovie movie)
@@ -98,7 +110,7 @@ namespace PlexRipper.Application.Services
         /// </summary>
         /// <param name="plexLibrary">The <see cref="PlexLibrary"/> to retrieve</param>
         /// <returns>Returns the PlexLibrary with the containing media</returns>
-        public async Task<PlexLibrary> RefreshLibraryMediaAsync(PlexLibrary plexLibrary)
+        public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(PlexLibrary plexLibrary)
         {
             if (plexLibrary == null)
             {
@@ -118,7 +130,8 @@ namespace PlexRipper.Application.Services
                     break;
             }
 
-            return await _plexLibraryRepository.GetAsync(plexLibrary.Id);
+            var library = await _plexLibraryRepository.GetAsync(plexLibrary.Id);
+            return Result.Ok(library);
         }
 
 
@@ -148,7 +161,9 @@ namespace PlexRipper.Application.Services
             if (!libraryDB.HasMedia)
             {
                 Log.Debug($"{nameof(GetPlexLibrariesAsync)} => PlexLibrary with id {libraryId} has no media, forcing refresh from the PlexApi");
-                libraryDB = await RefreshLibraryMediaAsync(libraryDB);
+                var result = await RefreshLibraryMediaAsync(libraryDB);
+                // TODO Function needs to be converted
+                libraryDB = result.Value;
             }
 
             return libraryDB;
@@ -157,7 +172,7 @@ namespace PlexRipper.Application.Services
 
 
 
-        public async Task<List<PlexLibrary>> GetPlexLibrariesAsync(PlexServer plexServer, bool refresh = false)
+        public async Task<List<PlexLibrary>> GetPlexLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer, bool refresh = false)
         {
             if (plexServer == null)
             {
@@ -175,8 +190,8 @@ namespace PlexRipper.Application.Services
                     Log.Warning($"{nameof(GetPlexLibrariesAsync)} => PlexAccount {plexServer.Id} did not have any PlexServers assigned. Forcing {nameof(RefreshLibrariesAsync)} was null");
                 }
 
-                var refreshSuccess = await RefreshLibrariesAsync(plexServer);
-                if (refreshSuccess)
+                var refreshSuccess = await RefreshLibrariesAsync(plexAccount, plexServer);
+                if (refreshSuccess.IsSuccess && refreshSuccess.Value)
                 {
                     plexLibraryList = await _plexLibraryRepository.GetLibraries(plexServer.Id);
                 }
@@ -190,17 +205,17 @@ namespace PlexRipper.Application.Services
 
             if (plexServer == null)
             {
-                Log.Warning($"{nameof(AddOrUpdatePlexLibrariesAsync)} => plexServer was null");
+                Log.Warning("plexServer was null");
                 return;
             }
 
             if (libraries.Count == 0)
             {
-                Log.Warning($"{nameof(AddOrUpdatePlexLibrariesAsync)} => libraries list was empty");
+                Log.Warning("libraries list was empty");
                 return;
             }
 
-            Log.Debug($"{ nameof(AddOrUpdatePlexLibrariesAsync)} => Starting adding or updating plex libraries");
+            Log.Debug("Starting adding or updating plex libraries");
 
             // Add or update the plex libraries
             foreach (var plexLibrary in libraries)

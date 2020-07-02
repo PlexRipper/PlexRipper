@@ -14,12 +14,14 @@ namespace PlexRipper.Application.PlexAccounts
     {
         private readonly IMediator _mediator;
         private readonly IPlexServerService _plexServerService;
+        private readonly IPlexLibraryService _plexLibraryService;
         private readonly IPlexApiService _plexApiService;
 
-        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexApiService plexApiService)
+        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexLibraryService plexLibraryService, IPlexApiService plexApiService)
         {
             _mediator = mediator;
             _plexServerService = plexServerService;
+            _plexLibraryService = plexLibraryService;
             _plexApiService = plexApiService;
         }
 
@@ -105,7 +107,7 @@ namespace PlexRipper.Application.PlexAccounts
             var plexAccountFromApi = await _plexApiService.PlexSignInAsync(plexAccount.Username, plexAccount.Password);
             if (plexAccountFromApi == null)
             {
-                string msg = $"The plexAccount with {plexAccount.Username} was invalid when send to the PlexApi";
+                string msg = $"The plexAccount with {plexAccount.Username} was invalid when sent to the PlexApi";
 
                 Log.Warning(msg);
                 return Result.Fail(msg);
@@ -124,7 +126,22 @@ namespace PlexRipper.Application.PlexAccounts
             }
 
             // Retrieve and store servers
-            await _plexServerService.RefreshPlexServersAsync(plexAccount);
+            var refreshResult = await _plexServerService.RefreshPlexServersAsync(plexAccount);
+            if (refreshResult.IsFailed)
+            {
+                string msg = "Failed to refresh the PlexServers when setting up the PlexAccount";
+                Log.Warning(msg);
+                return Result.Fail<bool>(msg);
+            }
+
+            // Retrieve and store the corresponding PlexLibraries
+            if (refreshResult.Value.Count > 0)
+            {
+                foreach (var plexServer in refreshResult.Value)
+                {
+                    await _plexLibraryService.RefreshLibrariesAsync(plexAccount, plexServer);
+                }
+            }
 
             Log.Debug("Account was setup successfully!");
             return Result.Ok(true);

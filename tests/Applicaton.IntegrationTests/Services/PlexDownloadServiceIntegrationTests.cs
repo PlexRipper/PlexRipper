@@ -37,7 +37,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
             var result = await accountService.ValidatePlexAccountAsync(newAccount);
             var account = await accountService.CreatePlexAccountAsync(newAccount);
-            var serverList = await plexServerService.GetServersAsync(account.Data);
+            var serverList = await plexServerService.GetServersAsync(account.Value);
 
             var plexLibrary = await plexLibraryService.GetLibraryMediaAsync(serverList.ToList().First().PlexLibraries.ToList()[4]);
             var movie = plexLibrary.Movies[16];

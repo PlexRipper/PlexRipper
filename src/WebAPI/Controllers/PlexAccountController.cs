@@ -32,12 +32,12 @@ namespace PlexRipper.WebAPI.Controllers
         public async Task<IActionResult> GetAll([FromQuery] bool enabledOnly = false)
         {
             var validationResult = await _plexAccountService.GetAllPlexAccountsAsync(enabledOnly);
-            if (!validationResult.IsValidResponse)
+            if (validationResult.IsFailed)
             {
                 return BadRequest(validationResult.Errors);
             }
 
-            var result = _mapper.Map<List<PlexAccountDTO>>(validationResult.Data);
+            var result = _mapper.Map<List<PlexAccountDTO>>(validationResult.Value);
             if (!result.Any() && enabledOnly)
             {
                 Log.Debug("Could not find any enabled accounts");
@@ -56,16 +56,16 @@ namespace PlexRipper.WebAPI.Controllers
         public async Task<IActionResult> Get(int id)
         {
             var validationResult = await _plexAccountService.GetPlexAccountAsync(id);
-            if (!validationResult.IsValidResponse)
+            if (validationResult.IsFailed)
             {
                 return BadRequest(validationResult.Errors);
             }
 
             try
             {
-                if (validationResult.Data != null)
+                if (validationResult.Value != null)
                 {
-                    return Ok(_mapper.Map<PlexAccountDTO>(validationResult.Data));
+                    return Ok(_mapper.Map<PlexAccountDTO>(validationResult.Value));
                 }
                 string message = $"Could not find a PlexAccount with Id: {id}";
                 Log.Warning(message);
@@ -88,7 +88,7 @@ namespace PlexRipper.WebAPI.Controllers
         public async Task<IActionResult> Put(int id, [FromBody] PlexAccountDTO account)
         {
             var validationResult = await _plexAccountService.GetPlexAccountAsync(id);
-            if (!validationResult.IsValidResponse)
+            if (validationResult.IsFailed)
             {
                 return BadRequest(validationResult.Errors);
             }
@@ -137,27 +137,27 @@ namespace PlexRipper.WebAPI.Controllers
 
         // POST api/<AccountController>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(PlexAccountDTO))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(CreatePlexAccountDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Post([FromBody] PlexAccountDTO newAccount)
+        public async Task<IActionResult> Post([FromBody] CreatePlexAccountDTO newAccount)
         {
             // Save the account in the DB
             try
             {
                 var result = _mapper.Map<PlexAccount>(newAccount);
                 var validationResult = await _plexAccountService.CreatePlexAccountAsync(result);
-                if (!validationResult.IsValidResponse)
+                if (validationResult.IsFailed)
                 {
                     return BadRequest(validationResult.Errors);
                 }
 
-                if (validationResult.Data != null)
+                if (validationResult.Value != null)
                 {
-                    var message = $"Account with id {validationResult.Data.Id} was created and/or retrieved successfully";
+                    var message = $"Account with id {validationResult.Value.Id} was created and/or retrieved successfully";
                     Log.Information(message);
-                    return Created(message, _mapper.Map<PlexAccountDTO>(validationResult.Data));
+                    return Created(message, _mapper.Map<PlexAccountDTO>(validationResult.Value));
 
                 }
                 else
@@ -182,7 +182,7 @@ namespace PlexRipper.WebAPI.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _plexAccountService.DeletePlexAccountAsync(id);
-            if (result.IsValidResponse)
+            if (result.IsFailed)
             {
                 return BadRequest(result.Errors);
             }
@@ -199,14 +199,14 @@ namespace PlexRipper.WebAPI.Controllers
         {
             var validationResult = await _plexAccountService.ValidatePlexAccountAsync(account.Username, account.Password);
 
-            if (!validationResult.IsValidResponse)
+            if (validationResult.IsFailed)
             {
                 string message = $"The account failed to validate, {validationResult.Errors}";
                 Log.Error(message);
                 return BadRequest(validationResult.Errors);
             }
 
-            if (validationResult.Data.Value)
+            if (validationResult.Value)
             {
                 string message = $"Account with username: {account.Username} was valid";
                 Log.Information(message);
@@ -227,23 +227,24 @@ namespace PlexRipper.WebAPI.Controllers
         public async Task<IActionResult> CheckUsername(string username)
         {
             var validation = await _plexAccountService.CheckIfUsernameIsAvailableAsync(username);
-            if (validation.IsValidResponse)
+
+            if (validation.IsFailed)
             {
-                if (validation.Data == null)
-                {
-                    string message = $"Username: {username} is available";
-                    Log.Debug(message);
-                    return Ok($"Username: {username} is available");
-                }
-                else
-                {
-                    string message = $"Account with username: \"{username}\" already exists!";
-                    Log.Warning(message);
-                    return Forbid(message);
-                }
+                return BadRequest(validation.Errors);
             }
 
-            return BadRequest(validation.Errors);
+            if (validation.Value)
+            {
+                string message = $"Username: {username} is available";
+                Log.Debug(message);
+                return Ok($"Username: {username} is available");
+            }
+            else
+            {
+                string message = $"Account with username: \"{username}\" already exists!";
+                Log.Warning(message);
+                return Forbid(message);
+            }
         }
     }
 }

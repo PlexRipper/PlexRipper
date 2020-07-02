@@ -58,9 +58,9 @@ namespace PlexRipper.Application.UnitTests
             var updatedAccount = new PlexAccount("TestUsername", "123PassWrd123");
 
             // Act
-            var accountDB = (await accountService.CreatePlexAccountAsync(newAccount)).Data;
+            var accountDB = (await accountService.CreatePlexAccountAsync(newAccount)).Value;
             updatedAccount.Id = accountDB.Id;
-            accountDB = (await accountService.UpdateAccountAsync(updatedAccount)).Data;
+            accountDB = (await accountService.UpdateAccountAsync(updatedAccount)).Value;
 
             // Assert
             accountDB.ShouldNotBeNull();

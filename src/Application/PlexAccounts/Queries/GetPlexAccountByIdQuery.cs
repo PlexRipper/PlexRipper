@@ -1,8 +1,8 @@
-﻿using FluentValidation;
+﻿using FluentResults;
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using System.Linq;
 using System.Threading;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PlexRipper.Application.PlexAccounts
 {
-    public class GetPlexAccountByIdQuery : IRequest<ValidationResponse<PlexAccount>>
+    public class GetPlexAccountByIdQuery : IRequest<Result<PlexAccount>>
     {
         public int Id { get; }
 
@@ -32,7 +32,7 @@ namespace PlexRipper.Application.PlexAccounts
     }
 
 
-    public class GetAccountByIdQueryHandler : IRequestHandler<GetPlexAccountByIdQuery, ValidationResponse<PlexAccount>>
+    public class GetAccountByIdQueryHandler : IRequestHandler<GetPlexAccountByIdQuery, Result<PlexAccount>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -41,16 +41,14 @@ namespace PlexRipper.Application.PlexAccounts
             _dbContext = dbContext;
         }
 
-        public async Task<ValidationResponse<PlexAccount>> Handle(GetPlexAccountByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PlexAccount>> Handle(GetPlexAccountByIdQuery request, CancellationToken cancellationToken)
         {
             var account = await _dbContext.PlexAccounts
                 .Include(x => x.PlexAccountServers)
                 .Where(x => x.PlexAccountServers
                     .Any(y => y.PlexAccountId == request.Id))
                 .FirstOrDefaultAsync(x => x.Id == request.Id);
-
-            return new ValidationResponse<PlexAccount>(account);
-
+            return Result.Ok(account);
         }
     }
 }

@@ -2,7 +2,6 @@
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.PlexMedia;
-using System.Linq;
 
 namespace PlexRipper.WebAPI.Config
 {
@@ -19,8 +18,7 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(x => x.PlexAccountServers, opt => opt.Ignore());
             CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
                 .ForMember(dto => dto.AuthToken, opt => opt.MapFrom(x => x.AuthenticationToken))
-                .ForMember(dto => dto.PlexServers,
-                    opt => opt.MapFrom(x => x.PlexAccountServers.ToArray().Select(y => y.PlexServer).ToList()));
+                .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexServers));
 
             //PlexServer <-> PlexServerDTO
             CreateMap<PlexServerDTO, PlexServer>(MemberList.Source).ReverseMap();

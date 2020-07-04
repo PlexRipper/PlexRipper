@@ -182,7 +182,7 @@ namespace PlexRipper.Application.PlexAccounts
         {
             var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId));
 
-            if (!result.IsFailed)
+            if (result.IsFailed)
             {
                 return result;
             }

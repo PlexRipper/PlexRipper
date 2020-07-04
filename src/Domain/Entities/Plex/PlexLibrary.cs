@@ -54,7 +54,6 @@ namespace PlexRipper.Domain.Entities
         /// </summary>
         public int PlexServerId { get; set; }
 
-
         public virtual List<PlexMovie> Movies { get; set; }
         public virtual List<PlexSerie> Series { get; set; }
 

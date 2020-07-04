@@ -45,6 +45,9 @@ namespace PlexRipper.Domain.Entities
 
         #region Helpers
 
+        [NotMapped]
+        public List<PlexServer> PlexServers { get; set; }
+
         /// <summary>
         /// This merges the response of the PlexApi into this <see cref="PlexAccount"/>
         /// </summary>

@@ -15,7 +15,7 @@ namespace PlexRipper.Application.PlexAccounts
         public int Id { get; }
 
         /// <summary>
-        /// Returns the <see cref="PlexAccount"/> by its id with an include <see cref="PlexServer"/>s.
+        /// Returns the <see cref="PlexAccount"/> by its id with an include to the <see cref="PlexServer"/>s and <see cref="PlexLibrary"/>.
         /// </summary>
         public GetPlexAccountByIdQuery(int id)
         {
@@ -86,7 +86,9 @@ namespace PlexRipper.Application.PlexAccounts
                             OwnerId = c.PlexServer.OwnerId,
                             Home = c.PlexServer.Home,
                             PlexAccountServers = c.PlexServer.PlexAccountServers,
-
+                            // Only select the PlexLibraries this PlexAccount has access to by looking at the PlexAccountLibraries table.
+                            ServerStatus = null,
+                            AccessToken = null, //TODO might need to fill this in as well
                             PlexLibraries = _dbContext.PlexAccountLibraries
                                 .Include(f => f.PlexLibrary)
                                 .Where(d => d.PlexAccountId == id && d.PlexServerId == c.PlexServerId)
@@ -108,8 +110,6 @@ namespace PlexRipper.Application.PlexAccounts
                                     Series = v.PlexLibrary.Series
                                 })
                                 .ToList(),
-                            ServerStatus = null,
-                            AccessToken = null
                         })
                         .ToList(),
                 })

@@ -13,6 +13,10 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<CreatePlexAccountDTO, PlexAccount>(MemberList.Source)
                 .ReverseMap();
 
+            //CreatePlexAccountDTO -> PlexAccount
+            CreateMap<UpdatePlexAccountDTO, PlexAccount>(MemberList.Source)
+                .ReverseMap();
+
             //PlexAccountDTO <-> PlexAccount
             CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
                 .ForMember(x => x.PlexAccountServers, opt => opt.Ignore());

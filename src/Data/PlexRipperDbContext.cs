@@ -54,7 +54,7 @@ namespace PlexRipper.Data
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
             string dbName = isTest ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
-            string dbPath = Path.Combine(rootDir, dbName);
+            string dbPath = Path.Combine(rootDir + "/config", dbName);
 
             optionsBuilder
                 .UseSqlite(

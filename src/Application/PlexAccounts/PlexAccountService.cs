@@ -252,11 +252,11 @@ namespace PlexRipper.Application.PlexAccounts
             return isSuccessful.ToResult<PlexAccount>();
         }
 
-        public async Task<Result<PlexAccount>> UpdateAccountAsync(PlexAccount newAccount)
+        public async Task<Result<PlexAccount>> UpdateAccountAsync(PlexAccount plexAccount)
         {
 
-            var result = await _mediator.Send(new UpdatePlexAccountCommand(newAccount));
-            if (!result.IsFailed)
+            var result = await _mediator.Send(new UpdatePlexAccountCommand(plexAccount));
+            if (result.IsFailed)
             {
                 string msg = "Failed to validate the PlexAccount that will be updated";
                 Log.Warning(msg);
@@ -266,7 +266,7 @@ namespace PlexRipper.Application.PlexAccounts
 
             // Re-validate if the password changed
             // TODO this assumes the updated account is returned
-            if (result.Value != null && result.Value.Password != newAccount.Password)
+            if (result.Value != null && result.Value.Password != plexAccount.Password)
             {
                 await SetupAccountAsync(result.Value);
                 return await GetPlexAccountAsync(result.Value.Id);

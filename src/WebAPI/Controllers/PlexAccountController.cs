@@ -31,20 +31,27 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(IEnumerable<PlexAccountDTO>))]
         public async Task<IActionResult> GetAll([FromQuery] bool enabledOnly = false)
         {
-            var validationResult = await _plexAccountService.GetAllPlexAccountsAsync(enabledOnly);
-            if (validationResult.IsFailed)
+            try
             {
-                return BadRequest(validationResult.Errors);
-            }
+                var validationResult = await _plexAccountService.GetAllPlexAccountsAsync(enabledOnly);
+                if (validationResult.IsFailed)
+                {
+                    return BadRequest(validationResult.Errors);
+                }
 
-            var result = _mapper.Map<List<PlexAccountDTO>>(validationResult.Value);
-            if (!result.Any() && enabledOnly)
-            {
-                Log.Debug("Could not find any enabled accounts");
-                return NotFound();
+                var result = _mapper.Map<List<PlexAccountDTO>>(validationResult.Value);
+                if (!result.Any() && enabledOnly)
+                {
+                    Log.Debug("Could not find any enabled accounts");
+                    return NotFound();
+                }
+                Log.Debug($"Returned {result.Count} accounts");
+                return Ok(result);
             }
-            Log.Debug($"Returned {result.Count} accounts");
-            return Ok(result);
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
         }
 
         // GET api/<PlexAccountController>/5
@@ -55,14 +62,14 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(int id)
         {
-            var validationResult = await _plexAccountService.GetPlexAccountAsync(id);
-            if (validationResult.IsFailed)
-            {
-                return BadRequest(validationResult.Errors);
-            }
-
             try
             {
+                var validationResult = await _plexAccountService.GetPlexAccountAsync(id);
+                if (validationResult.IsFailed)
+                {
+                    return BadRequest(validationResult.Errors);
+                }
+
                 if (validationResult.Value != null)
                 {
                     return Ok(_mapper.Map<PlexAccountDTO>(validationResult.Value));
@@ -85,47 +92,18 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Put(int id, [FromBody] PlexAccountDTO account)
+        public async Task<IActionResult> Put(int id, [FromBody] UpdatePlexAccountDTO account)
         {
-            var validationResult = await _plexAccountService.GetPlexAccountAsync(id);
-            if (validationResult.IsFailed)
-            {
-                return BadRequest(validationResult.Errors);
-            }
-
-
-            string message;
-            if (id <= 0)
-            {
-                message = "The Id can not be 0 or lower when updating an account";
-                Log.Warning(message);
-                return BadRequest(message);
-            }
-
-            // TODO Fix validation here
-            //var validator = new PlexAccountDTOValidator();
-            //ValidationResult results = await validator.ValidateAsync(account);
-
-            //if (!results.IsValid)
-            //{
-            //    Log.Error(results.Errors.ToString(), "Validation failed:");
-            //    return BadRequest(results.Errors);
-            //}
-
-
-            // Save the account in the DB
             try
             {
                 account.Id = id;
-                var accountDB = await _plexAccountService.UpdateAccountAsync(_mapper.Map<PlexAccount>(account));
-
-                if (accountDB != null)
+                var result = await _plexAccountService.UpdateAccountAsync(_mapper.Map<PlexAccount>(account));
+                if (result.IsFailed)
                 {
-                    return Ok(_mapper.Map<PlexAccountDTO>(accountDB));
+                    return BadRequest(result);
                 }
-                message = $"Could not find a {nameof(PlexServer)} with Id: {id}";
-                Log.Warning(message);
-                return NotFound(message);
+
+                return Ok(_mapper.Map<PlexAccountDTO>(result));
 
             }
             catch (Exception e)
@@ -143,7 +121,6 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Post([FromBody] CreatePlexAccountDTO newAccount)
         {
-            // Save the account in the DB
             try
             {
                 var result = _mapper.Map<PlexAccount>(newAccount);
@@ -181,14 +158,21 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _plexAccountService.DeletePlexAccountAsync(id);
-            if (result.IsFailed)
+            try
             {
-                return BadRequest(result.Errors);
+                var result = await _plexAccountService.DeletePlexAccountAsync(id);
+                if (result.IsFailed)
+                {
+                    return BadRequest(result.Errors);
+                }
+                var message = $"Successfully deleted account with id: {id}";
+                Log.Debug(message);
+                return Ok(message);
             }
-            var message = $"Successfully deleted account with id: {id}";
-            Log.Debug(message);
-            return Ok(message);
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
         }
 
         [HttpPost("validate")]
@@ -197,26 +181,34 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Validate([FromBody] PlexAccountDTO account)
         {
-            var validationResult = await _plexAccountService.ValidatePlexAccountAsync(account.Username, account.Password);
+            try
+            {
+                var validationResult =
+                    await _plexAccountService.ValidatePlexAccountAsync(account.Username, account.Password);
 
-            if (validationResult.IsFailed)
-            {
-                string message = $"The account failed to validate, {validationResult.Errors}";
-                Log.Error(message);
-                return BadRequest(validationResult.Errors);
-            }
+                if (validationResult.IsFailed)
+                {
+                    string message = $"The account failed to validate, {validationResult.Errors}";
+                    Log.Error(message);
+                    return BadRequest(validationResult.Errors);
+                }
 
-            if (validationResult.Value)
-            {
-                string message = $"Account with username: {account.Username} was valid";
-                Log.Information(message);
-                return Ok(message);
+                if (validationResult.Value)
+                {
+                    string message = $"Account with username: {account.Username} was valid";
+                    Log.Information(message);
+                    return Ok(message);
+                }
+                else
+                {
+                    string message = $"Account with username: {account.Username} was invalid";
+                    Log.Warning(message);
+                    return Unauthorized(message);
+                }
             }
-            else
+            catch (Exception e)
             {
-                string message = $"Account with username: {account.Username} was invalid";
-                Log.Warning(message);
-                return Unauthorized(message);
+                return InternalServerError(e);
             }
         }
 
@@ -226,24 +218,31 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(string))]
         public async Task<IActionResult> CheckUsername(string username)
         {
-            var validation = await _plexAccountService.CheckIfUsernameIsAvailableAsync(username);
+            try
+            {
+                var validation = await _plexAccountService.CheckIfUsernameIsAvailableAsync(username);
 
-            if (validation.IsFailed)
-            {
-                return BadRequest(validation.Errors);
-            }
+                if (validation.IsFailed)
+                {
+                    return BadRequest(validation.Errors);
+                }
 
-            if (validation.Value)
-            {
-                string message = $"Username: {username} is available";
-                Log.Debug(message);
-                return Ok($"Username: {username} is available");
+                if (validation.Value)
+                {
+                    string message = $"Username: {username} is available";
+                    Log.Debug(message);
+                    return Ok($"Username: {username} is available");
+                }
+                else
+                {
+                    string message = $"Account with username: \"{username}\" already exists!";
+                    Log.Warning(message);
+                    return Forbid(message);
+                }
             }
-            else
+            catch (Exception e)
             {
-                string message = $"Account with username: \"{username}\" already exists!";
-                Log.Warning(message);
-                return Forbid(message);
+                return InternalServerError(e);
             }
         }
     }

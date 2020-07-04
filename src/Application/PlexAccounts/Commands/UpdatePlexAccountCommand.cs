@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain.Entities;
 using System.Threading;
@@ -24,9 +25,15 @@ namespace PlexRipper.Application.PlexAccounts
         {
             RuleFor(x => x.PlexAccount).NotNull();
             RuleFor(x => x.PlexAccount.Id).GreaterThan(0);
+            RuleFor(x => x.PlexAccount.DisplayName).NotEmpty();
             RuleFor(x => x.PlexAccount.Username).NotEmpty().MinimumLength(5);
             RuleFor(x => x.PlexAccount.Password).NotEmpty().MinimumLength(5);
-            RuleFor(x => x.PlexAccount.DisplayName).NotEmpty();
+            RuleFor(x => x.PlexAccount.IsValidated).NotNull();
+            RuleFor(x => x.PlexAccount.PlexId).GreaterThan(0);
+            RuleFor(x => x.PlexAccount.Uuid).NotEmpty().MinimumLength(5);
+            RuleFor(x => x.PlexAccount.Title).NotEmpty().MinimumLength(5);
+            RuleFor(x => x.PlexAccount.AuthenticationToken).NotEmpty().MinimumLength(10);
+
         }
     }
 
@@ -41,9 +48,26 @@ namespace PlexRipper.Application.PlexAccounts
 
         public async Task<Result<PlexAccount>> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
         {
-            _dbContext.PlexAccounts.Update(command.PlexAccount);
+            var plexAccount = command.PlexAccount;
+            var accountInDb = await _dbContext.PlexAccounts
+                .Include(x => x.PlexAccountServers)
+                .ThenInclude(x => x.PlexServer)
+                .AsTracking().FirstOrDefaultAsync(x => x.Id == plexAccount.Id);
+
+            if (accountInDb == null)
+            {
+                return Result.Fail(new Error($"Could not find a PlexAccount to update with id: {plexAccount.Id}"));
+            }
+
+            //accountInDb.DisplayName = plexAccount.DisplayName;
+            //accountInDb.Username = plexAccount.Username;
+            //accountInDb.Password = plexAccount.Password;
+            //accountInDb.IsEnabled = plexAccount.IsEnabled;
+
+            // _dbContext.PlexAccounts.Update(plexAccount);
+            _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
+            // _dbContext.Entry(command.PlexAccount).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
-            var accountInDb = await _dbContext.PlexAccounts.FindAsync(command.PlexAccount.Id);
             return Result.Ok(accountInDb);
         }
     }

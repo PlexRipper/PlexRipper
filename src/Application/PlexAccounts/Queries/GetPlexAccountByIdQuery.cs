@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain.Entities;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,12 +44,40 @@ namespace PlexRipper.Application.PlexAccounts
 
         public async Task<Result<PlexAccount>> Handle(GetPlexAccountByIdQuery request, CancellationToken cancellationToken)
         {
+
+            var list = _dbContext.PlexAccountLibraries.Include(x => x.PlexServer).ThenInclude(z => z.PlexLibraries).Where(b => b.PlexAccountId == request.Id).ToList();
+
             var account = await _dbContext.PlexAccounts
                 .Include(x => x.PlexAccountServers)
-                .Where(x => x.PlexAccountServers
-                    .Any(y => y.PlexAccountId == request.Id))
+                .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.PlexLibraries
+                    .Where(z => list.Any(n => n.PlexServerId == z.PlexServerId && n.PlexLibraryId == z.Id)))
                 .FirstOrDefaultAsync(x => x.Id == request.Id);
-            return Result.Ok(account);
+
+            var dds = await _dbContext.PlexServers
+                .Include(x => x.PlexLibraries
+                    .Where(z => list.Any(n => n.PlexServerId == z.PlexServerId && n.PlexLibraryId == z.Id)))
+                .ToListAsync();
+
+            foreach (var server in account.PlexAccountServers)
+            {
+                var c = server.PlexServer.PlexLibraries.ToList();
+
+
+                var x = new List<PlexLibrary>();
+                for (int i = 0; i < server.PlexServer.PlexLibraries.Count; i++)
+                {
+
+                }
+
+                foreach (var library in server.PlexServer.PlexLibraries)
+                {
+
+                }
+
+            }
+
+            return Result.Ok(new PlexAccount());
         }
     }
 }

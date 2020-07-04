@@ -46,12 +46,18 @@ namespace PlexRipper.Application.PlexAccounts
         {
             if (request.OnlyEnabled)
             {
-                var plexAccounts = await _dbContext.PlexAccounts.Where(x => x.IsEnabled).ToListAsync();
+                var plexAccounts = await _dbContext.PlexAccounts
+                    .Include(x => x.PlexAccountServers)
+                    .ThenInclude(x => x.PlexServer)
+                    .Where(x => x.IsEnabled).ToListAsync();
                 return Result.Ok(plexAccounts);
             }
             else
             {
-                var plexAccounts = await _dbContext.PlexAccounts.ToListAsync();
+                var plexAccounts = await _dbContext.PlexAccounts
+                    .Include(x => x.PlexAccountServers)
+                    .ThenInclude(x => x.PlexServer)
+                    .ToListAsync();
                 return Result.Ok(plexAccounts);
             }
         }

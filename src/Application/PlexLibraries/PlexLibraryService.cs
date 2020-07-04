@@ -50,13 +50,13 @@ namespace PlexRipper.Application.PlexLibraries
                 return Result.Fail(msg);
             }
 
-            Log.Debug($"Refreshing PlexLibraries for plexServer: {plexServer.Id}");
+            Log.Debug($"Refreshing PlexLibraries for plexServer: {plexServer.Name}");
 
             var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServer.AccessToken, plexServer.BaseUrl);
 
             if (!libraries.Any())
             {
-                string msg = $"plexLibraries returned was empty for server {plexServer.Name} - {plexServer.BaseUrl}";
+                string msg = $"plexLibraries returned for server {plexServer.Name} - {plexServer.BaseUrl} was empty";
                 Log.Warning(msg);
                 return Result.Fail(msg);
             }

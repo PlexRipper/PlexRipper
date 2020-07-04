@@ -31,10 +31,13 @@ namespace PlexRipper.PlexApi.Services
             if (result != null)
             {
                 var mapResult = _mapper.Map<PlexAccount>(result.User);
-                mapResult.IsValidated = true;
-                mapResult.ValidatedAt = DateTime.Now;
-                Log.Information($"Successfully retrieved the PlexAccount data for user {username} from the PlexApi");
-                return mapResult;
+                if (mapResult != null)
+                {
+                    mapResult.IsValidated = true;
+                    mapResult.ValidatedAt = DateTime.Now;
+                    Log.Information($"Successfully retrieved the PlexAccount data for user {username} from the PlexApi");
+                    return mapResult;
+                }
             }
             Log.Warning("The result from the PlexSignIn was null");
             return null;
@@ -59,11 +62,14 @@ namespace PlexRipper.PlexApi.Services
         public async Task<List<PlexServer>> GetServerAsync(string authToken)
         {
             var result = await _plexApi.GetServerAsync(authToken);
-            return result == null ?
-                new List<PlexServer>() :
-                _mapper.Map<List<PlexServer>>(result.Server);
+            if (result != null)
+            {
+                var convertedList = _mapper.Map<List<PlexServer>>(result.Server);
+                return CleanupPlexServers(convertedList);
+            }
+            Log.Warning("Failed to retrieve PlexServers");
+            return new List<PlexServer>();
         }
-
         public async Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexLibraryUrl)
         {
             var result = await _plexApi.GetLibrarySectionsAsync(authToken, plexLibraryUrl);
@@ -131,6 +137,26 @@ namespace PlexRipper.PlexApi.Services
         {
             PlexMediaMetaDataDTO result = await _plexApi.GetMetadataAsync(serverAuthToken, metaDataUrl);
             return _mapper.Map<PlexMediaMetaData>(result);
+        }
+
+        /// <summary>
+        /// Some PlexServers are misconfigured so we have to fix that. 
+        /// </summary>
+        /// <param name="plexServers"></param>
+        /// <returns></returns>
+        private List<PlexServer> CleanupPlexServers(List<PlexServer> plexServers)
+        {
+            if (plexServers.Count > 0)
+            {
+                foreach (var plexServer in plexServers)
+                {
+                    if (plexServer.Port == 443 && plexServer.Scheme == "http")
+                    {
+                        plexServer.Scheme = "https";
+                    }
+                }
+            }
+            return plexServers;
         }
     }
 }

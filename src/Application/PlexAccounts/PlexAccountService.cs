@@ -48,7 +48,7 @@ namespace PlexRipper.Application.PlexAccounts
         /// </summary>
         /// <param name="username"></param>
         /// <param name="password"></param>
-        /// <returns>Are the account credentials valid</returns>
+        /// <returns>If the account credentials valid</returns>
         public async Task<Result<bool>> ValidatePlexAccountAsync(string username, string password)
         {
             if (username == string.Empty || password == string.Empty)
@@ -58,10 +58,10 @@ namespace PlexRipper.Application.PlexAccounts
                 return Result.Fail(msg);
             }
 
-            var plexAccountFromApi = await _plexApiService.PlexSignInAsync(username, username);
+            var plexAccountFromApi = await _plexApiService.PlexSignInAsync(username, password);
             if (plexAccountFromApi == null)
             {
-                string msg = $"The plexAccount with {username} was invalid when send to the PlexApi";
+                string msg = $"The plexAccount with {username} was invalid when sent to the PlexApi";
 
                 Log.Warning(msg);
                 return Result.Fail(msg);
@@ -222,6 +222,12 @@ namespace PlexRipper.Application.PlexAccounts
                 string msg = $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
                 Log.Warning(msg);
                 return Result.Fail<PlexAccount>(msg);
+            }
+            // Check account for validity
+            var checkAccount = await ValidatePlexAccountAsync(plexAccount.Username, plexAccount.Password);
+            if (checkAccount.IsFailed || !checkAccount.Value)
+            {
+                return checkAccount.ToResult<PlexAccount>();
             }
 
             // Create PlexAccount

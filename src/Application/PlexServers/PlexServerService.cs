@@ -66,16 +66,6 @@ namespace PlexRipper.Application.PlexServers
             // First add or update the plex servers
             var result = await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, serverList));
 
-            //Refresh all libraries for each plexServer as well
-            //foreach (var plexServer in serverList)
-            //{
-            //    var status = await GetPlexServerStatusAsync(plexServer);
-            //    if (status.IsSuccessful)
-            //    {
-            //        await _plexLibraryService.RefreshLibrariesAsync(plexServer);
-            //    }
-            //}
-
             return result;
         }
 

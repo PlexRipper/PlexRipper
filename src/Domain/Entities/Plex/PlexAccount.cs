@@ -28,6 +28,9 @@ namespace PlexRipper.Domain.Entities
         public string Title { get; set; }
         // public Uri Thumb { get; set; }
         public bool HasPassword { get; set; }
+        /// <summary>
+        /// The general plex authentication token used to retrieve account data such as the <see cref="PlexServer"/>s the account has access to. 
+        /// </summary>
         public string AuthenticationToken { get; set; }
         public int ForumId { get; set; }
 

@@ -59,14 +59,7 @@ namespace PlexRipper.Application.PlexAccounts
                 return Result.Fail(new Error($"Could not find a PlexAccount to update with id: {plexAccount.Id}"));
             }
 
-            //accountInDb.DisplayName = plexAccount.DisplayName;
-            //accountInDb.Username = plexAccount.Username;
-            //accountInDb.Password = plexAccount.Password;
-            //accountInDb.IsEnabled = plexAccount.IsEnabled;
-
-            // _dbContext.PlexAccounts.Update(plexAccount);
             _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
-            // _dbContext.Entry(command.PlexAccount).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
             return Result.Ok(accountInDb);
         }

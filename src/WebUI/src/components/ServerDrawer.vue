@@ -24,8 +24,8 @@
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import IPlexServer from '@dto/IPlexServer';
+import IPlexLibrary from '@dto/IPlexLibrary';
 import { UserStore } from '../store';
-import IPlexLibrary from '../types/dto/IPlexLibrary';
 
 interface INavItem {
 	title: string;

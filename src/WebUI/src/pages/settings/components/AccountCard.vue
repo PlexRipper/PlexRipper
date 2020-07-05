@@ -121,7 +121,7 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import Log from 'consola';
-import IAccount from '@dto/IAccount';
+import IPlexAccount from '@dto/IPlexAccount';
 import * as AccountApi from '@api/accountApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
@@ -131,8 +131,8 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 	},
 })
 export default class AccountCard extends Vue {
-	@Prop({ type: Object as () => IAccount })
-	readonly account!: IAccount;
+	@Prop({ type: Object as () => IPlexAccount })
+	readonly account!: IPlexAccount;
 
 	validateLoading: boolean = false;
 
@@ -154,14 +154,14 @@ export default class AccountCard extends Vue {
 		return !this.account;
 	}
 
-	get getAccount(): IAccount {
+	get getAccount(): IPlexAccount {
 		return {
 			id: this.isNew ? 0 : this.account.id,
 			isEnabled: this.isEnabled,
 			displayName: this.displayName,
 			username: this.username,
 			password: this.password,
-		} as IAccount;
+		} as IPlexAccount;
 	}
 
 	get getDisplayName(): string {
@@ -202,7 +202,7 @@ export default class AccountCard extends Vue {
 		return this.$refs.form as Vue & { validate: () => boolean; reset: () => void; resetValidation: () => void };
 	}
 
-	checkAccount(account: IAccount): void {
+	checkAccount(account: IPlexAccount): void {
 		Log.debug(account);
 	}
 

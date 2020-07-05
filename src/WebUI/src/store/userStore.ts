@@ -1,5 +1,5 @@
 import { Module, Mutation, Action, VuexModule } from 'vuex-module-decorators';
-import IAccount from '@dto/IAccount';
+import IPlexAccount from '@dto/IPlexAccount';
 import { getAllAccountsAsync } from '@api/accountApi';
 import Log from 'consola';
 import IPlexServer from '@dto/IPlexServer';
@@ -9,9 +9,9 @@ import IPlexServer from '@dto/IPlexServer';
 export default class UserStore extends VuexModule {
 	activeAccountId: number = 0;
 
-	accounts: IAccount[] = [];
+	accounts: IPlexAccount[] = [];
 
-	get getActiveAccount(): IAccount | undefined {
+	get getActiveAccount(): IPlexAccount | undefined {
 		if (this.activeAccountId <= 0) {
 			Log.error(`activeAccountId is invalid: ${this.activeAccountId}`);
 			return undefined;
@@ -19,22 +19,22 @@ export default class UserStore extends VuexModule {
 		return this.accounts.find((x) => x.id === this.activeAccountId);
 	}
 
-	get getAccounts(): IAccount[] {
+	get getAccounts(): IPlexAccount[] {
 		return this.accounts;
 	}
 
-	get getEnabledAccounts(): IAccount[] {
+	get getEnabledAccounts(): IPlexAccount[] {
 		return this.accounts.filter((x) => x.isEnabled);
 	}
 
 	get getServers(): IPlexServer[] {
-		return this.accounts.find((x) => x.id === this.activeAccountId)?.plexAccount.plexServers ?? [];
+		return this.accounts.find((x) => x.id === this.activeAccountId)?.plexServers ?? [];
 	}
 
 	selectAccount(): void {}
 
 	@Mutation
-	setAccounts(accounts: IAccount[]): void {
+	setAccounts(accounts: IPlexAccount[]): void {
 		this.accounts = accounts;
 
 		// Set the default selected account to the first instance
@@ -45,7 +45,7 @@ export default class UserStore extends VuexModule {
 	}
 
 	@Action({ commit: 'setAccounts' })
-	async refreshAccounts(): Promise<IAccount[]> {
+	async refreshAccounts(): Promise<IPlexAccount[]> {
 		return await getAllAccountsAsync();
 	}
 

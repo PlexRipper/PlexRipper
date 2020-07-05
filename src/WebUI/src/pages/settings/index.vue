@@ -16,7 +16,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import IAccount from '@dto/IAccount';
+import IPlexAccount from '@dto/IPlexAccount';
 import AccountCard from './components/AccountCard.vue';
 import { UserStore } from '@/store/';
 
@@ -26,11 +26,11 @@ import { UserStore } from '@/store/';
 	},
 })
 export default class Settings extends Vue {
-	checkAccount(account: IAccount): void {
+	checkAccount(account: IPlexAccount): void {
 		Log.debug(account);
 	}
 
-	get getAccounts(): IAccount[] {
+	get getAccounts(): IPlexAccount[] {
 		return UserStore.getAccounts;
 	}
 

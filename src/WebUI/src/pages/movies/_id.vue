@@ -16,6 +16,7 @@ import * as PlexLibraryApi from '@api/plexLibraryApi';
 import { IPlexMovie } from '@dto/IPlexMovie';
 import MovieTable from './components/MovieTable.vue';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import { UserStore } from '@/store/';
 
 @Component({
 	components: {
@@ -30,9 +31,10 @@ export default class MoviesDetail extends Vue {
 
 	isLoading: boolean = true;
 
-	async created(): Promise<void> {
+	async mounted(): Promise<void> {
 		this.libraryId = +this.$route.params.id;
-		const libraryData = await PlexLibraryApi.getPlexLibraryAsync(this.libraryId);
+
+		const libraryData = await PlexLibraryApi.getPlexLibraryAsync(this.libraryId, UserStore.getAccountId);
 		if (libraryData.type === 'movie') {
 			this.movies = libraryData.movies ?? [];
 		}

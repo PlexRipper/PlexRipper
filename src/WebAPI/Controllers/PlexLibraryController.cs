@@ -33,10 +33,10 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id, int plexAccountId)
         {
-            var data = await _plexLibraryService.GetPlexLibraryAsync(plexAccountId, id);
+            var data = await _plexLibraryService.GetPlexLibraryAsync(id, plexAccountId);
             if (data != null)
             {
-                var result = _mapper.Map<PlexLibraryDTO>(data);
+                var result = _mapper.Map<PlexLibraryDTO>(data.Value);
                 Log.Debug($"Found {data.Value.GetMediaCount} in library {data.Value.Title} of type {data.Value.Type}");
                 return Ok(result);
 
@@ -47,7 +47,7 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         // POST api/<PlexLibrary>/
-        [HttpPost]
+        [HttpPost("refresh")]
         public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibrary refreshPlexLibrary)
         {
             var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibrary.PlexAccountId, refreshPlexLibrary.PlexLibraryId);

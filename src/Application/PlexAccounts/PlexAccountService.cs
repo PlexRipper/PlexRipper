@@ -245,7 +245,7 @@ namespace PlexRipper.Application.PlexAccounts
             var isSuccessful = await SetupAccountAsync(accountInDB.Value);
             if (isSuccessful.IsSuccess)
             {
-                return await GetPlexAccountAsync(accountInDB.Value.Id);
+                return await _mediator.Send(new GetPlexAccountByIdWithPlexLibrariesQuery(accountInDB.Value.Id));
             }
 
             // Failed to setup account successfully return errors

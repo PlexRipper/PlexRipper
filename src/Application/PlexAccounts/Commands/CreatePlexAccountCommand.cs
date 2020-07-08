@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
+using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
     }
 
-    public class CreateAccountHandler : IRequestHandler<CreatePlexAccountCommand, Result<PlexAccount>>
+    public class CreateAccountHandler : BaseHandler, IRequestHandler<CreatePlexAccountCommand, Result<PlexAccount>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -47,7 +48,7 @@ namespace PlexRipper.Application.PlexAccounts
             await _dbContext.SaveChangesAsync();
             await _dbContext.Entry(command.PlexAccount).GetDatabaseValuesAsync();
 
-            return Result.Ok(command.PlexAccount);
+            return ReturnResult(command.PlexAccount, command.PlexAccount.Id);
         }
     }
 }

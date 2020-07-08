@@ -169,9 +169,7 @@ namespace PlexRipper.Application.PlexLibraries
                     await _plexSerieService.AddOrUpdatePlexSeriesAsync(plexLibrary, plexLibrary.Series);
                     break;
             }
-
-            var library = await _plexLibraryRepository.GetAsync(plexLibrary.Id);
-            return Result.Ok(library);
+            return await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id));
         }
 
         public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexAccountId,
@@ -199,12 +197,11 @@ namespace PlexRipper.Application.PlexLibraries
         /// <summary>
         /// Return the PlexLibrary by the Id, will refresh if the library has no media assigned.
         /// </summary>
-        /// <param name="plexAccountId"></param>
         /// <param name="libraryId"></param>
+        /// <param name="plexAccountId"></param>
         /// <returns></returns>
-        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int plexAccountId, int libraryId)
+        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId)
         {
-
             var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
 
             if (libraryDB.IsFailed)
@@ -214,12 +211,20 @@ namespace PlexRipper.Application.PlexLibraries
 
             if (!libraryDB.Value.HasMedia)
             {
-
                 Log.Information($"PlexLibrary with id {libraryId} has no media, forcing refresh from the PlexApi");
+                if (plexAccountId <= 0)
+                {
+                    Log.Warning($"plexAccountId was {plexAccountId}, could not refresh the PlexLibrary with id {libraryId}");
+                    return null;
+                }
 
                 var plexAccount = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
-                return await RefreshLibraryMediaAsync(plexAccount.Value, libraryDB.Value);
+                if (plexAccount.IsFailed)
+                {
+                    return plexAccount.ToResult<PlexLibrary>();
+                }
 
+                return await RefreshLibraryMediaAsync(plexAccount.Value, libraryDB.Value);
             }
 
             return libraryDB;

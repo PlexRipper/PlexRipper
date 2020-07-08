@@ -49,10 +49,10 @@ namespace PlexRipper.Application.Common.Interfaces
         /// <summary>
         /// Return the PlexLibrary by the Id, will refresh if the library has no media assigned.
         /// </summary>
-        /// <param name="plexAccountId"></param>
         /// <param name="libraryId"></param>
+        /// <param name="plexAccountId"></param>
         /// <returns></returns>
-        Task<Result<PlexLibrary>> GetPlexLibraryAsync(int plexAccountId, int libraryId);
+        Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId);
 
         Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexAccountId,
             int plexLibraryId);

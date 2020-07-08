@@ -19,6 +19,10 @@ export default class UserStore extends VuexModule {
 		return this.accounts.find((x) => x.id === this.activeAccountId);
 	}
 
+	get getAccountId(): number {
+		return this.activeAccountId;
+	}
+
 	get getAccounts(): IPlexAccount[] {
 		return this.accounts;
 	}

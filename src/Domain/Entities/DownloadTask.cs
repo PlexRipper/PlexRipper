@@ -22,9 +22,13 @@ namespace PlexRipper.Domain.Entities
 
         public virtual FolderPath FolderPath { get; set; }
         public int FolderPathId { get; set; }
+
         #endregion
 
         #region Helpers
+        [NotMapped] //TODO Debate if the token should be stored in the database or retrieved 
+        public string PlexServerAuthToken { get; set; }
+
         [NotMapped]
         public DownloadStatus Status
         {
@@ -37,7 +41,7 @@ namespace PlexRipper.Domain.Entities
 
         [NotMapped]
         public string DownloadUrl =>
-            $"{PlexServer.BaseUrl}{FileLocationUrl}?download=1&X-Plex-Token={PlexServer.AccessToken}";
+            $"{PlexServer.BaseUrl}{FileLocationUrl}?download=1&X-Plex-Token={PlexServerAuthToken}";
 
         #endregion
     }

@@ -23,5 +23,5 @@
     },
     "types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify",]
   },
-  "exclude": ["node_modules", ".nuxt", "dist", ".vscode"]
+  "exclude": ["node_modules", ".nuxt", "node_modules/dist", ".vscode"]
 }

@@ -1,6 +1,9 @@
-﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
+﻿using MediatR;
+using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Application.Common.Interfaces.Settings;
+using PlexRipper.Application.PlexDownloads.Commands;
+using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.DownloadManager.Common;
@@ -17,6 +20,7 @@ namespace PlexRipper.DownloadManager
     {
         #region Fields
 
+        private readonly IMediator _mediator;
         private readonly IUserSettings _userSettings;
         private readonly IDownloadTaskRepository _downloadTaskRepository;
 
@@ -65,8 +69,9 @@ namespace PlexRipper.DownloadManager
 
         #region Constructors
 
-        public DownloadManager(IUserSettings userSettings, IDownloadTaskRepository downloadTaskRepository)
+        public DownloadManager(IMediator mediator, IUserSettings userSettings, IDownloadTaskRepository downloadTaskRepository)
         {
+            _mediator = mediator;
             _userSettings = userSettings;
             _downloadTaskRepository = downloadTaskRepository;
         }
@@ -101,11 +106,24 @@ namespace PlexRipper.DownloadManager
         public async Task StartDownloadAsync(DownloadTask downloadTask)
         {
             // Add to DB
-            await _downloadTaskRepository.AddAsync(downloadTask);
+            var result = await _mediator.Send(new AddDownloadTaskCommandCommand(downloadTask));
+            if (result.IsFailed)
+            {
+                return;
+            }
+            var downloadTaskDB = await _mediator.Send(new GetDownloadTaskByIdQuery(result.Value.Id));
+            if (downloadTaskDB.IsFailed)
+            {
+                return;
+            }
+
             try
             {
-                Log.Debug(downloadTask.ToString());
-                var downloadClient = CreateDownloadClient(downloadTask);
+                // TODO This might be removed if the authToken is stored in the database.
+                downloadTaskDB.Value.PlexServerAuthToken = downloadTask.PlexServerAuthToken;
+
+                Log.Debug(downloadTaskDB.Value.ToString());
+                var downloadClient = CreateDownloadClient(downloadTaskDB.Value);
                 downloadClient.Start();
             }
             catch (Exception e)

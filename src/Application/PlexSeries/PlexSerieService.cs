@@ -1,12 +1,12 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.Common.Interfaces.Repositories;
-using PlexRipper.Domain.Entities;
 using PlexRipper.Domain;
+using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
 
-namespace PlexRipper.Application.Services
+namespace PlexRipper.Application.PlexSeries
 {
     public class PlexSerieService : IPlexSerieService
     {

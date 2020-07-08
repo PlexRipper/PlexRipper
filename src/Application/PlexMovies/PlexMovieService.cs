@@ -1,12 +1,12 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.Common.Interfaces.Repositories;
-using PlexRipper.Domain.Entities;
 using PlexRipper.Domain;
+using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
 
-namespace PlexRipper.Application.Services
+namespace PlexRipper.Application.PlexMovies
 {
     public class PlexMovieService : IPlexMovieService
     {
@@ -25,7 +25,7 @@ namespace PlexRipper.Application.Services
             _plexServiceApi = plexServiceApi;
         }
 
-        public async Task AddOrUpdatePlexMoviesAsync(PlexLibrary plexLibrary, List<PlexMovie> movies)
+        public async Task AddOrUpdatePlexMoviesAsync(PlexLibrary plexLibrary, List<Domain.Entities.PlexMovie> movies)
         {
             if (plexLibrary == null)
             {

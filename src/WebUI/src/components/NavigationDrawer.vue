@@ -1,9 +1,10 @@
 <template>
 	<v-navigation-drawer app clipped permanent width="300">
-		<v-layout column fill-height>
-			<server-drawer />
-			<v-spacer />
-			<v-list dense nav>
+		<!-- Server drawer -->
+		<server-drawer />
+		<!-- Menu items -->
+		<template v-slot:append>
+			<v-list>
 				<v-list-item v-for="item in getNavItems" :key="item.title" link nuxt :to="item.link">
 					<v-list-item-icon>
 						<v-icon>{{ item.icon }}</v-icon>
@@ -14,7 +15,7 @@
 					</v-list-item-content>
 				</v-list-item>
 			</v-list>
-		</v-layout>
+		</template>
 	</v-navigation-drawer>
 </template>
 
@@ -37,20 +38,16 @@ export default class NavigationDrawer extends Vue {
 	get getNavItems(): INavItem[] {
 		return [
 			{
+				title: 'Downloads',
+				icon: 'mdi-download',
+				link: '/downloads',
+			},
+			{
 				title: 'Settings',
-				icon: 'mdi-settings',
+				icon: 'mdi-cog',
 				link: '/settings',
 			},
 		];
 	}
-
-	// async mounted(): Promise<void> {
-	// 	try {
-	// 		const ip = await this.$axios.$get('/weatherforecast');
-	// 		Log.debug(ip);
-	// 	} catch (error) {
-	// 		Log.error(error);
-	// 	}
-	// }
 }
 </script>

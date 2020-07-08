@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="PlexAuthentication\Commands\" />
+    <Folder Include="PlexMovies\Commands\" />
   </ItemGroup>
 
 </Project>

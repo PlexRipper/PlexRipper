@@ -4,7 +4,7 @@ using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
-using System.Collections.Generic;
+using PlexRipper.WebAPI.Common.DTO.PlexLibrary;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -29,27 +29,15 @@ namespace PlexRipper.WebAPI.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/<PlexLibrary>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
         // GET api/<PlexLibrary>/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id, bool refresh = false)
+        public async Task<IActionResult> Get(int id, int plexAccountId)
         {
-            if (id <= 0)
-            {
-                return BadRequest($"The Id can not be 0 when updating a {nameof(PlexLibrary)}");
-            }
-
-            var data = await _plexLibraryService.GetPlexLibraryAsync(id, refresh);
+            var data = await _plexLibraryService.GetPlexLibraryAsync(plexAccountId, id);
             if (data != null)
             {
                 var result = _mapper.Map<PlexLibraryDTO>(data);
-                Log.Debug($"Found {data.GetMediaCount} in library {data.Title} of type {data.Type}");
+                Log.Debug($"Found {data.Value.GetMediaCount} in library {data.Value.Title} of type {data.Value.Type}");
                 return Ok(result);
 
             }
@@ -58,27 +46,19 @@ namespace PlexRipper.WebAPI.Controllers
             return NotFound(message);
         }
 
-        // POST api/<PlexLibrary>
+        // POST api/<PlexLibrary>/
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibrary refreshPlexLibrary)
         {
-            //TODO Not yet implemented
+            var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibrary.PlexAccountId, refreshPlexLibrary.PlexLibraryId);
 
-        }
+            if (data.IsFailed)
+            {
+                return BadRequest(data.Errors);
+            }
 
-        // PUT api/<PlexLibrary>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-            //TODO Not yet implemented
-        }
-
-        // DELETE api/<PlexLibrary>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-            //TODO Not yet implemented
-
+            var mapResult = _mapper.Map<PlexLibraryDTO>(data.Value);
+            return Ok(mapResult);
         }
     }
 }

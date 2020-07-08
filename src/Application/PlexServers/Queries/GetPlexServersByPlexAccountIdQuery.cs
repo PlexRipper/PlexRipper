@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
+using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,8 +31,8 @@ namespace PlexRipper.Application.PlexServers.Queries
     }
 
 
-    public class GetPlexServersByAccountIdQueryHandler
-        : IRequestHandler<GetPlexServersByPlexAccountIdQuery, Result<List<PlexServer>>>
+    public class GetPlexServersByAccountIdQueryHandler : BaseHandler,
+        IRequestHandler<GetPlexServersByPlexAccountIdQuery, Result<List<PlexServer>>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -49,8 +50,8 @@ namespace PlexRipper.Application.PlexServers.Queries
                 .Where(x => x.PlexAccountServers
                     .Any(y => y.PlexAccount.Id == request.Id))
                 .ToListAsync();
-            return Result.Ok(plexServers);
 
+            return ReturnResult(plexServers);
         }
     }
 }

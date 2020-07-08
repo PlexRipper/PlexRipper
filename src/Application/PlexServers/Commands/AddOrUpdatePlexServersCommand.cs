@@ -92,7 +92,7 @@ namespace PlexRipper.Application.PlexServers.Commands
                 {
                     // Update entry
                     Log.Debug($"PlexAccount {plexAccount.DisplayName} already has an association with PlexServer: {plexServer.Name}, updating authentication token now.");
-                    plexAccountServer.AuthToken = plexServer.AccessToken;
+                    plexAccountServer.AuthToken = plexServer.AccessToken; // TODO need a better method to transfer the plexAccount tokens from the DTO
                     plexAccountServer.AuthTokenCreationDate = DateTime.Now;
                 }
                 else
@@ -103,7 +103,7 @@ namespace PlexRipper.Application.PlexServers.Commands
                     {
                         PlexAccountId = plexAccount.Id,
                         PlexServerId = plexServer.Id,
-                        AuthToken = plexServer.AccessToken,
+                        AuthToken = plexServer.AccessToken, // TODO need a better method to transfer the plexAccount tokens from the DTO
                         AuthTokenCreationDate = DateTime.Now
                     }, cancellationToken);
                 }

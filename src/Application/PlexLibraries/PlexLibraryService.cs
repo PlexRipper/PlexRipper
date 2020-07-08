@@ -3,7 +3,9 @@ using MediatR;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.Common.Interfaces.Repositories;
+using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Application.PlexLibraries.Commands;
+using PlexRipper.Application.PlexLibraries.Queries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
@@ -16,6 +18,7 @@ namespace PlexRipper.Application.PlexLibraries
     public class PlexLibraryService : IPlexLibraryService
     {
         private readonly IMediator _mediator;
+        private readonly IPlexAuthenticationService _plexAuthenticationService;
         private readonly IPlexLibraryRepository _plexLibraryRepository;
         private readonly IPlexMovieService _plexMovieService;
         private readonly IPlexSerieService _plexSerieService;
@@ -23,12 +26,14 @@ namespace PlexRipper.Application.PlexLibraries
 
         public PlexLibraryService(
             IMediator mediator,
+            IPlexAuthenticationService plexAuthenticationService,
             IPlexApiService plexServiceApi,
             IPlexLibraryRepository plexLibraryRepository,
             IPlexMovieService plexMovieService,
             IPlexSerieService plexSerieService)
         {
             _mediator = mediator;
+            _plexAuthenticationService = plexAuthenticationService;
             _plexLibraryRepository = plexLibraryRepository;
             _plexMovieService = plexMovieService;
             _plexSerieService = plexSerieService;
@@ -52,7 +57,14 @@ namespace PlexRipper.Application.PlexLibraries
 
             Log.Debug($"Refreshing PlexLibraries for plexServer: {plexServer.Name}");
 
-            var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServer.AccessToken, plexServer.BaseUrl);
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccount.Id, plexServer.Id);
+
+            if (authToken.IsFailed)
+            {
+                return Result.Fail(new Error("Failed to retrieve the server auth token"));
+            }
+
+            var libraries = await _plexServiceApi.GetLibrarySectionsAsync(authToken.Value, plexServer.BaseUrl);
 
             if (!libraries.Any())
             {
@@ -64,61 +76,89 @@ namespace PlexRipper.Application.PlexLibraries
             return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, plexServer, libraries));
         }
 
-        public Task<PlexMediaMetaData> GetMetaDataAsync(PlexMovie movie)
+        public async Task<Result<PlexMediaMetaData>> GetMetaDataAsync(PlexAccount plexAccount, PlexMovie movie)
         {
-            var plexServer = movie.PlexLibrary.PlexServer;
-            return _plexServiceApi.GetMediaMetaDataAsync(plexServer.AccessToken, movie.MetaDataUrl);
+            if (plexAccount == null || movie == null)
+            {
+                string msg = "Either plexAccount of the movie was null";
+                Log.Warning(msg);
+                return Result.Fail(msg);
+            }
+
+            var plexServer = movie.PlexLibrary?.PlexServer;
+
+            // Get plexServer authToken
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccount.Id, plexServer.Id);
+
+            if (authToken.IsFailed)
+            {
+                return Result.Fail(new Error("Failed to retrieve the server auth token"));
+            }
+
+            // Send api request
+            var apiResult = await _plexServiceApi.GetMediaMetaDataAsync(authToken.Value, movie.MetaDataUrl);
+            if (apiResult != null)
+            {
+                return Result.Ok(apiResult);
+            }
+            return Result.Fail(new Error($"Failed to retrieve the metadata for movie {movie.Title}"));
         }
 
         /// <summary>
         /// Returns the <see cref="PlexLibrary"/> with the media content.
         /// </summary>
+        /// <param name="plexAccount"></param>
         /// <param name="plexServer"></param>
         /// <param name="libraryKey"></param>
+        /// <param name="refresh"></param>
         /// <returns></returns>
-        public Task<PlexLibrary> GetLibraryMediaAsync(PlexServer plexServer, string libraryKey, bool refresh = false)
+        public Task<PlexLibrary> GetLibraryMediaAsync(PlexAccount plexAccount, PlexServer plexServer, string libraryKey, bool refresh = false)
         {
             var plexLibrary = plexServer.PlexLibraries.ToList().Find(x => x.Key == libraryKey);
-            return GetLibraryMediaAsync(plexLibrary, refresh);
+            return GetLibraryMediaAsync(plexAccount, plexLibrary, refresh);
         }
 
         /// <summary>
         /// Returns the <see cref="PlexLibrary"/> with the media content.
         /// </summary>
+        /// <param name="plexAccount"></param>
         /// <param name="plexLibrary"></param>
         /// <param name="refresh"></param>
         /// <returns></returns>
-        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary plexLibrary, bool refresh = false)
+        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexAccount plexAccount, PlexLibrary plexLibrary, bool refresh = false)
         {
             if (refresh || !plexLibrary.HasMedia)
             {
-                await RefreshLibraryMediaAsync(plexLibrary);
+                await RefreshLibraryMediaAsync(plexAccount, plexLibrary);
             }
             return plexLibrary;
-
-            // Create library
-
-            //var metaData = await _plexServiceApi.GetMediaMetaDataAsync(plexServer.AccessToken, plexServer.BaseUrl, 5516);
-            // string downloadUrl = _plexApi.GetDownloadUrl(plexServer, metaData);
-            //string filename = _plexApi.GetDownloadFilename(plexServer, metaData);
-            //_plexApi.DownloadMedia(plexServer.AccessToken, downloadUrl, filename);
         }
 
 
         /// <summary>
         /// Retrieves the new media metadata from the PlexApi and stores it in the database.
         /// </summary>
+        /// <param name="plexAccount"></param>
         /// <param name="plexLibrary">The <see cref="PlexLibrary"/> to retrieve</param>
         /// <returns>Returns the PlexLibrary with the containing media</returns>
-        public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(PlexLibrary plexLibrary)
+        public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(PlexAccount plexAccount, PlexLibrary plexLibrary)
         {
             if (plexLibrary == null)
             {
-                Log.Warning($"{nameof(RefreshLibraryMediaAsync)} => The plexLibrary was null");
-                return null;
+                string msg = "The plexLibrary was null";
+                Log.Warning(msg);
+                return Result.Fail(msg);
             }
 
-            plexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, plexLibrary.PlexServer.AccessToken, plexLibrary.PlexServer.BaseUrl);
+            // Get plexServer authToken
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccount.Id, plexLibrary.PlexServer.Id);
+
+            if (authToken.IsFailed)
+            {
+                return Result.Fail(new Error("Failed to retrieve the server auth token"));
+            }
+
+            plexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value, plexLibrary.PlexServer.BaseUrl);
 
             switch (plexLibrary.GetMediaType)
             {
@@ -134,71 +174,57 @@ namespace PlexRipper.Application.PlexLibraries
             return Result.Ok(library);
         }
 
+        public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexAccountId,
+            int plexLibraryId)
+        {
+            var plexAccount = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
+            if (plexAccount.IsFailed)
+            {
+                return plexAccount.ToResult<PlexLibrary>();
+            }
+
+            var plexLibrary = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibraryId));
+            if (plexLibrary.IsFailed)
+            {
+                return plexLibrary;
+            }
+
+            return await RefreshLibraryMediaAsync(plexAccount.Value, plexLibrary.Value);
+        }
+
+
 
         #region CRUD
 
         /// <summary>
         /// Return the PlexLibrary by the Id, will refresh if the library has no media assigned.
         /// </summary>
+        /// <param name="plexAccountId"></param>
         /// <param name="libraryId"></param>
         /// <returns></returns>
-        public async Task<PlexLibrary> GetPlexLibraryAsync(int libraryId, bool refresh = false)
+        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int plexAccountId, int libraryId)
         {
-            if (libraryId <= 0)
+
+            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
+
+            if (libraryDB.IsFailed)
             {
-                Log.Warning($"{nameof(GetPlexLibrariesAsync)} => The PlexLibraryId was invalid: {libraryId}");
-                return null;
+                return libraryDB;
             }
 
-            var libraryDB = await _plexLibraryRepository.GetAsync(libraryId);
-
-            if (libraryDB == null)
+            if (!libraryDB.Value.HasMedia)
             {
-                Log.Warning($"{nameof(GetPlexLibrariesAsync)} => A PlexLibrary with id {libraryId} does not exist in the database");
-                return null;
-            }
 
-            if (!libraryDB.HasMedia)
-            {
-                Log.Debug($"{nameof(GetPlexLibrariesAsync)} => PlexLibrary with id {libraryId} has no media, forcing refresh from the PlexApi");
-                var result = await RefreshLibraryMediaAsync(libraryDB);
-                // TODO Function needs to be converted
-                libraryDB = result.Value;
+                Log.Information($"PlexLibrary with id {libraryId} has no media, forcing refresh from the PlexApi");
+
+                var plexAccount = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
+                return await RefreshLibraryMediaAsync(plexAccount.Value, libraryDB.Value);
+
             }
 
             return libraryDB;
         }
 
-
-
-
-        public async Task<List<PlexLibrary>> GetPlexLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer, bool refresh = false)
-        {
-            if (plexServer == null)
-            {
-                Log.Warning($"{nameof(GetPlexLibrariesAsync)} => The PlexLibrary was null");
-                return new List<PlexLibrary>();
-            }
-
-            // Retrieve all plexLibraries
-            var plexLibraryList = await _plexLibraryRepository.GetLibraries(plexServer.Id);
-
-            if (refresh || !plexLibraryList.Any())
-            {
-                if (!plexLibraryList.Any())
-                {
-                    Log.Warning($"{nameof(GetPlexLibrariesAsync)} => PlexAccount {plexServer.Id} did not have any PlexServers assigned. Forcing {nameof(RefreshLibrariesAsync)} was null");
-                }
-
-                var refreshSuccess = await RefreshLibrariesAsync(plexAccount, plexServer);
-                if (refreshSuccess.IsSuccess && refreshSuccess.Value)
-                {
-                    plexLibraryList = await _plexLibraryRepository.GetLibraries(plexServer.Id);
-                }
-            }
-
-            return plexLibraryList.ToList();
-        }
 
         private async Task AddOrUpdatePlexLibrariesAsync(PlexServer plexServer, List<PlexLibrary> libraries)
         {

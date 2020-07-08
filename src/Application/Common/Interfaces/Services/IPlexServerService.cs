@@ -7,12 +7,19 @@ namespace PlexRipper.Application.Common.Interfaces
 {
     public interface IPlexServerService
     {
-        Task<List<PlexServer>> GetServersAsync(PlexAccount plexAccount, bool refresh = false);
-        Task<List<PlexServer>> AddServersAsync(PlexAccount plexAccount, List<PlexServer> servers);
+        Task<Result<List<PlexServer>>> GetServersAsync(PlexAccount plexAccount, bool refresh = false);
         Task<Result<List<PlexServer>>> RefreshPlexServersAsync(PlexAccount plexAccount);
 
-        Task<PlexServer> GetAllLibraryMediaAsync(PlexServer plexServer, bool refresh = false);
+        Task<Result<PlexServer>> GetAllLibraryMediaAsync(PlexAccount plexAccount, PlexServer plexServer,
+            bool refresh = false);
 
-        Task<PlexServer> GetServerAsync(int plexServerId);
+        Task<Result<PlexServer>> GetServerAsync(int plexServerId);
+
+        /// <summary>
+        /// Check if the <see cref="PlexServer"/> is available and log the status
+        /// </summary>
+        /// <param name="plexServer"></param>
+        /// <returns></returns>
+        Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(PlexAccount plexAccount, PlexServer plexServer);
     }
 }

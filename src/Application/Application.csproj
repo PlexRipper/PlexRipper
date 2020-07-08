@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="PlexLibraries\Queries\" />
+    <Folder Include="PlexAuthentication\Commands\" />
   </ItemGroup>
 
 </Project>

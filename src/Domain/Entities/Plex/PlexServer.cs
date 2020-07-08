@@ -58,6 +58,10 @@ namespace PlexRipper.Domain.Entities
         [NotMapped]
         public string LibraryUrl => $"{BaseUrl}/library/sections";
 
+        /// <summary>
+        /// Do not use this property to retrieve the needed authToken, this is only meant to transfer the incoming authToken from the plexApi to the Database.
+        /// See AddOrUpdatePlexServersHandler
+        /// </summary>
         [NotMapped]
         public string AccessToken { get; set; }
         #endregion

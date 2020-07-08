@@ -87,7 +87,6 @@ namespace PlexRipper.Application.PlexAccounts
                                 PlexAccountServers = c.PlexServer.PlexAccountServers,
                                 // Only select the PlexLibraries this PlexAccount has access to by looking at the PlexAccountLibraries table.
                                 ServerStatus = null,
-                                AccessToken = null, //TODO might need to fill this in as well
                                 PlexLibraries = _dbContext.PlexAccountLibraries
                                     .Include(f => f.PlexLibrary)
                                     .Where(d => d.PlexAccountId == c.PlexAccountId && d.PlexServerId == c.PlexServer.Id)

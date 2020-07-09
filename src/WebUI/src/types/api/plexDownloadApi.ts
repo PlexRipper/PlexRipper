@@ -1,7 +1,7 @@
 import Log from 'consola';
 import IPlexLibrary from '@dto/IPlexLibrary';
 import { GlobalStore } from '@/store';
-
+import {} from '@aspnet/signalr';
 const logText = 'From PlexLibraryAPI => ';
 const apiPath = '/Download';
 

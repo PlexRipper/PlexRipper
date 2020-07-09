@@ -23,6 +23,7 @@
 		}
 	},
 	"dependencies": {
+		"@aspnet/signalr": "^1.1.4",
 		"@mdi/font": "^5.3.45",
 		"@nuxt/types": "^2.13.0",
 		"@nuxt/typescript-runtime": "^0.4.10",

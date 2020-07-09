@@ -10,6 +10,7 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application.Config;
 using PlexRipper.WebAPI.Config;
+using PlexRipper.WebAPI.Hubs;
 using System.Linq;
 using System.Reflection;
 
@@ -21,15 +22,20 @@ namespace PlexRipper.WebAPI
 
         public ILifetimeScope AutofacContainer { get; private set; }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
         public void Configure(IApplicationBuilder app)
         {
 
             // TODO Make sure to configure this correctly when setting up security
             app.UseCors(builder => builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
+                .WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST")
+                .AllowCredentials()
+            );
 
             // app.UseHttpsRedirection();
 
@@ -41,13 +47,17 @@ namespace PlexRipper.WebAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<DownloadProgressHub>("/download/progress");
             });
 
             // app.UseAuthorization();
         }
 
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
             // General
@@ -63,6 +73,8 @@ namespace PlexRipper.WebAPI
             });
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
+            // SignalR
+            services.AddSignalR();
 
             // Customise default API behaviour
             services.Configure<ApiBehaviorOptions>(options =>

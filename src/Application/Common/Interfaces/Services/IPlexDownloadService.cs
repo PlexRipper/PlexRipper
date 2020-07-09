@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using PlexRipper.Domain.Entities;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PlexRipper.Application.Common.Interfaces
@@ -10,5 +11,6 @@ namespace PlexRipper.Application.Common.Interfaces
         Task StartDownloadAsync(DownloadTask downloadTask);
         Task<Result<bool>> DownloadMovieAsync(int plexAccountId, int plexMovieId);
         Task<Result<DownloadTask>> GetDownloadRequestAsync(int plexAccountId, PlexMovie plexMovie);
+        Task<Result<List<DownloadTask>>> GetAllDownloadsAsync();
     }
 }

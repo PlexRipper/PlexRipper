@@ -5,11 +5,18 @@
 		disable-pagination
 		hide-default-footer
 		:headers="getHeaders"
-		:items="movies"
-		:server-items-length="movies.length"
+		:items="downloads"
+		:server-items-length="downloads.length"
 		:dark="$vuetify.theme.dark"
 		:loading="loading"
 	>
+		<template v-slot:item.progress="{ item }">
+			<v-progress-linear v-model="item.progress" color="blue-grey" :dark="$vuetify.theme.dark" height="25">
+				<template v-slot="{ value }">
+					<strong>{{ Math.ceil(value) }}%</strong>
+				</template>
+			</v-progress-linear>
+		</template>
 		<template v-slot:item.actions="{ item }">
 			<v-icon small @click="downloadMovie(item)">
 				mdi-download
@@ -23,6 +30,7 @@ import Log from 'consola';
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { IPlexMovie } from '@dto/IPlexMovie';
 import { DataTableHeader } from 'vuetify/types';
+import IDownloadTask from '@dto/IDownloadTask';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { downloadPlexMovie } from '@/types/api/plexDownloadApi';
 import { UserStore } from '@/store/';
@@ -32,14 +40,14 @@ import { UserStore } from '@/store/';
 		LoadingSpinner,
 	},
 })
-export default class MovieTable extends Vue {
-	@Prop({ required: true, type: Array as () => IPlexMovie[] })
-	readonly movies: IPlexMovie[] = [];
+export default class DownloadsTable extends Vue {
+	@Prop({ required: true, type: Array as () => IDownloadTask[] })
+	readonly downloads!: IDownloadTask[];
 
-	@Prop({ required: true, type: Boolean })
-	readonly loading: Boolean = true;
+	@Prop({ type: Boolean })
+	readonly loading: Boolean = false;
 
-	get getHeaders(): DataTableHeader<IPlexMovie>[] {
+	get getHeaders(): DataTableHeader<IDownloadTask>[] {
 		return [
 			{
 				text: 'Id',
@@ -50,16 +58,12 @@ export default class MovieTable extends Vue {
 				value: 'title',
 			},
 			{
-				text: 'Year',
-				value: 'year',
+				text: 'Status',
+				value: 'status',
 			},
 			{
-				text: 'Added At',
-				value: 'addedAt',
-			},
-			{
-				text: 'Updated At',
-				value: 'updatedAt',
+				text: 'Progress',
+				value: 'progress',
 			},
 			{
 				text: 'Actions',

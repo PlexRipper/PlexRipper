@@ -3,10 +3,12 @@ using MediatR;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
+using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Application.PlexMovies.Queries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PlexRipper.Application.PlexDownloads
@@ -36,6 +38,11 @@ namespace PlexRipper.Application.PlexDownloads
             return _plexAuthenticationService.GetPlexTokenAsync(plexAccount);
         }
 
+        public Task<Result<List<DownloadTask>>> GetAllDownloadsAsync()
+        {
+            return _mediator.Send(new GetAllDownloadTasksQuery());
+        }
+
         public async Task<Result<DownloadTask>> GetDownloadRequestAsync(int plexAccountId, PlexMovie plexMovie)
         {
             if (plexMovie == null)
@@ -62,6 +69,7 @@ namespace PlexRipper.Application.PlexDownloads
                     PlexServerId = server.Id,
                     FolderPathId = 1, // TODO make this dynamic
                     FileLocationUrl = metaData.ObfuscatedFilePath,
+                    Title = plexMovie.Title,
                     Status = DownloadStatus.Initialized,
                     FileName = metaData.FileName,
                     PlexServerAuthToken = token.Value

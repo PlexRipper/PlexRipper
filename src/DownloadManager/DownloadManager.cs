@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Application.Common.Interfaces.Settings;
@@ -6,8 +7,10 @@ using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Types;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.DownloadManager.Download;
+using PlexRipper.SignalR.Hubs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,6 +24,7 @@ namespace PlexRipper.DownloadManager
         #region Fields
 
         private readonly IMediator _mediator;
+        private readonly IHubContext<DownloadProgressHub> _hubContext;
         private readonly IUserSettings _userSettings;
         private readonly IDownloadTaskRepository _downloadTaskRepository;
 
@@ -69,9 +73,10 @@ namespace PlexRipper.DownloadManager
 
         #region Constructors
 
-        public DownloadManager(IMediator mediator, IUserSettings userSettings, IDownloadTaskRepository downloadTaskRepository)
+        public DownloadManager(IMediator mediator, IHubContext<DownloadProgressHub> hubContext, IUserSettings userSettings, IDownloadTaskRepository downloadTaskRepository)
         {
             _mediator = mediator;
+            _hubContext = hubContext;
             _userSettings = userSettings;
             _downloadTaskRepository = downloadTaskRepository;
         }
@@ -100,6 +105,19 @@ namespace PlexRipper.DownloadManager
         private void OnDownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             var plexDownloadClient = sender as PlexDownloadClient;
+
+            var downloadProgress = new DownloadProgress
+            {
+                Id = plexDownloadClient.DownloadTask.Id,
+                Status = plexDownloadClient.DownloadTask.DownloadStatus,
+                Percentage = e.ProgressPercentage,
+                DataReceived = DataFormat.FormatSizeString(e.BytesReceived),
+                DataTotal = DataFormat.FormatSizeString(e.TotalBytesToReceive),
+                DownloadSpeed = "3 MB/s"
+            };
+
+            _hubContext.Clients.All.SendAsync("DownloadProgress", downloadProgress);
+
             Log.Information($"({plexDownloadClient.ClientId}){plexDownloadClient.DownloadTask.FileName} => Downloaded {DataFormat.FormatSizeString(e.BytesReceived)} of {DataFormat.FormatSizeString(e.TotalBytesToReceive)} bytes. {e.ProgressPercentage} % complete...");
         }
 

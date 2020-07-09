@@ -43,7 +43,6 @@ namespace PlexRipper.Data.Config
                 DB.Database.EnsureDeleted();
             }
 
-            //DB.Database.EnsureDeleted();
             // TODO Re-enable Migrate when stable
             // DB.Database.Migrate();
             Task.WaitAll(DB.Database.EnsureCreatedAsync());

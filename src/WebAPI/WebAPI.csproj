@@ -38,6 +38,7 @@
     <ProjectReference Include="..\DownloadManager\DownloadManager.csproj" />
     <ProjectReference Include="..\PlexApi\PlexApi.csproj" />
     <ProjectReference Include="..\Settings\Settings.csproj" />
+    <ProjectReference Include="..\SignalR\SignalR.csproj" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

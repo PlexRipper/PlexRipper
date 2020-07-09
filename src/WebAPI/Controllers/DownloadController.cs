@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.WebAPI.Common.DTO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -18,11 +20,19 @@ namespace PlexRipper.WebAPI.Controllers
             _plexDownloadService = plexDownloadService;
             _mapper = mapper;
         }
+
         // GET: api/<DownloadController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<DownloadTaskDTO>))]
+        public async Task<IActionResult> Get()
         {
-            return new string[] { "value1", "value2" };
+            var result = await _plexDownloadService.GetAllDownloadsAsync();
+            if (result.IsFailed)
+            {
+                return BadRequest(result.Errors);
+            }
+            var mapResult = _mapper.Map<List<DownloadTaskDTO>>(result.Value);
+            return Ok(mapResult);
         }
 
         // Get api/<DownloadController>/movie/{plexMovieId:int}?plexAccountId={id}

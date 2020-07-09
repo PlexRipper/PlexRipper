@@ -42,8 +42,8 @@ namespace PlexRipper.Application.PlexDownloads.Commands
         public async Task<Result<DownloadTask>> Handle(AddDownloadTaskCommandCommand command, CancellationToken cancellationToken)
         {
             await _dbContext.DownloadTasks.AddAsync(command.DownloadTask);
-            await _dbContext.SaveChangesAsync();
-            await _dbContext.Entry(command.DownloadTask).GetDatabaseValuesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.Entry(command.DownloadTask).GetDatabaseValuesAsync(cancellationToken);
 
             return ReturnResult(command.DownloadTask, command.DownloadTask.Id);
         }

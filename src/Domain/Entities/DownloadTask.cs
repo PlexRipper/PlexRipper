@@ -13,6 +13,11 @@ namespace PlexRipper.Domain.Entities
         public string FileLocationUrl { get; set; }
         public string FileName { get; set; }
 
+        /// <summary>
+        /// The formatted media title as shown in Plex.
+        /// </summary>
+        public string Title { get; set; }
+
         public string DownloadStatus { get; set; }
 
         #region Relationships

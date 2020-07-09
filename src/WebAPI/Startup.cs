@@ -9,8 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application.Config;
+using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Config;
-using PlexRipper.WebAPI.Hubs;
 using System.Linq;
 using System.Reflection;
 

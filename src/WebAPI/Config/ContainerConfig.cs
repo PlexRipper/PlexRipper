@@ -28,6 +28,10 @@ namespace PlexRipper.WebAPI.Config
             builder.RegisterModule<DownloadManagerModule>();
             builder.RegisterModule<PlexApiModule>();
 
+            // Presentation
+            builder.RegisterModule<WebApiModule>();
+
+
             // Auto Mapper
             builder.Register(ctx =>
             {

@@ -43,6 +43,10 @@ namespace PlexRipper.WebAPI.Config
             //PlexMovie -> PlexMovieDTO
             CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination).ReverseMap();
 
+            //DownloadTask -> DownloadTaskDTO
+            CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.DownloadStatus));
+
         }
     }
 }

@@ -74,6 +74,10 @@ export default class DownloadsTable extends Vue {
 				value: 'dataTotal',
 			},
 			{
+				text: 'Download Speed',
+				value: 'downloadSpeed',
+			},
+			{
 				text: 'Percentage',
 				value: 'percentage',
 			},

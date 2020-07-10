@@ -4,6 +4,7 @@ using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
+using PlexRipper.Application.FolderPaths.Queries;
 using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Application.PlexMovies.Queries;
@@ -58,6 +59,15 @@ namespace PlexRipper.Application.PlexDownloads
                 return token.ToResult<DownloadTask>();
             }
 
+            // TODO make this dynamic
+            // Get the destination folder
+            var folderPath = await _mediator.Send(new GetFolderPathByIdQuery(1));
+            if (folderPath.IsFailed)
+            {
+                return Result.Fail("folderPath was null");
+            }
+
+            // Retrieve Metadata for this PlexMovie
             var metaData = await _plexApiService.GetMediaMetaDataAsync(token.Value, server.BaseUrl, plexMovie.RatingKey);
 
             if (metaData != null)
@@ -65,7 +75,8 @@ namespace PlexRipper.Application.PlexDownloads
                 return Result.Ok(new DownloadTask
                 {
                     PlexServerId = server.Id,
-                    FolderPathId = 1, // TODO make this dynamic
+                    FolderPathId = folderPath.Value.Id,
+                    FolderPath = folderPath.Value,
                     FileLocationUrl = metaData.ObfuscatedFilePath,
                     Title = plexMovie.Title,
                     Status = DownloadStatus.Initialized,

@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
@@ -42,6 +43,14 @@ namespace PlexRipper.Application.PlexDownloads.Commands
         public async Task<Result<DownloadTask>> Handle(AddDownloadTaskCommandCommand command, CancellationToken cancellationToken)
         {
             await _dbContext.DownloadTasks.AddAsync(command.DownloadTask);
+            if (command.DownloadTask.FolderPath != null)
+            {
+                _dbContext.Entry(command.DownloadTask.FolderPath).State = EntityState.Unchanged;
+            }
+            if (command.DownloadTask.PlexServer != null)
+            {
+                _dbContext.Entry(command.DownloadTask.PlexServer).State = EntityState.Unchanged;
+            }
             await _dbContext.SaveChangesAsync(cancellationToken);
             await _dbContext.Entry(command.DownloadTask).GetDatabaseValuesAsync(cancellationToken);
 

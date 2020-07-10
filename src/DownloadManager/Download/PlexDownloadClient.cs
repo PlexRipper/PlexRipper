@@ -6,6 +6,7 @@ using PlexRipper.DownloadManager.Common;
 using PlexRipper.PlexApi.Api;
 using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PlexRipper.DownloadManager.Download
@@ -37,13 +38,16 @@ namespace PlexRipper.DownloadManager.Download
         public long DownloadedSize { get; set; }
 
         public DownloadTask DownloadTask { get; internal set; }
+        /// <summary>
+        /// The ClientId is always the same id that is assigned to the <see cref="DownloadTask"/>
+        /// </summary>
         public int ClientId => DownloadTask.Id;
 
         public decimal Percentage { get; internal set; }
         public long BytesReceived { get; internal set; }
         public long TotalBytesToReceive { get; internal set; }
 
-
+        public CancellationToken CancellationToken { get; set; } = new CancellationToken();
 
         #endregion Properties
 
@@ -58,7 +62,8 @@ namespace PlexRipper.DownloadManager.Download
             Log.Debug(DownloadTask.DownloadUrl);
             try
             {
-                Task.WaitAll(DownloadFileTaskAsync(DownloadTask.DownloadUri, DownloadTask.FileName));
+                Task.WaitAll(Task.Run(() => DownloadFileTaskAsync(DownloadTask.DownloadUri, DownloadTask.FileName),
+                    CancellationToken));
             }
             catch (Exception e)
             {
@@ -67,9 +72,10 @@ namespace PlexRipper.DownloadManager.Download
             }
         }
 
-        public void Cancel()
+        public bool Cancel()
         {
             CancelAsync();
+            return CancellationToken.IsCancellationRequested;
         }
 
         private void AddHeaders()

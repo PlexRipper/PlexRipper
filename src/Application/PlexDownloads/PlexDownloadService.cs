@@ -3,6 +3,7 @@ using MediatR;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
+using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Application.PlexMovies.Queries;
 using PlexRipper.Domain;
@@ -37,12 +38,6 @@ namespace PlexRipper.Application.PlexDownloads
         {
             return _plexAuthenticationService.GetPlexTokenAsync(plexAccount);
         }
-
-        public Task<Result<List<DownloadTask>>> GetAllDownloadsAsync()
-        {
-            return _mediator.Send(new GetAllDownloadTasksQuery());
-        }
-
         public async Task<Result<DownloadTask>> GetDownloadRequestAsync(int plexAccountId, PlexMovie plexMovie)
         {
             if (plexMovie == null)
@@ -96,5 +91,22 @@ namespace PlexRipper.Application.PlexDownloads
             await StartDownloadAsync(downloadTask.Value);
             return Result.Ok(true);
         }
+
+        #region CRUD
+        public Task<Result<List<DownloadTask>>> GetAllDownloadsAsync()
+        {
+            return _mediator.Send(new GetAllDownloadTasksQuery());
+        }
+
+        public Task<Result<bool>> DeleteDownloadsAsync(int downloadTaskId)
+        {
+            _downloadManager.CancelDownload(downloadTaskId);
+            return _mediator.Send(new DeleteDownloadTaskByIdCommand(downloadTaskId));
+        }
+
+
+
+
+        #endregion
     }
 }

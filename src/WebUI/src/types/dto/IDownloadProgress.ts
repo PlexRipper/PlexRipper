@@ -1,8 +1,8 @@
 export default interface IDownloadProgress {
 	id: number;
-	Status: string;
-	Percentage: number;
-	DataReceived: string;
-	DataTotal: string;
-	DownloadSpeed: string;
+	status: string;
+	percentage: number;
+	dataReceived: string;
+	dataTotal: string;
+	downloadSpeed: string;
 }

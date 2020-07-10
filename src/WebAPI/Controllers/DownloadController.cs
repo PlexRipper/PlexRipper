@@ -62,8 +62,15 @@ namespace PlexRipper.WebAPI.Controllers
 
         // DELETE api/<DownloadController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            var result = await _plexDownloadService.DeleteDownloadsAsync(id);
+            if (result.IsFailed)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            return Ok(result.Value);
         }
     }
 }

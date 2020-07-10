@@ -60,8 +60,6 @@ namespace PlexRipper.Domain.Entities
         #endregion
 
         #region Helpers
-        // TODO Create a many-to-many relationship to determining which PlexAccounts have access to this PlexLibrary
-        // public bool HasAccess { get; set; }
 
         [NotMapped]
         public PlexMediaType GetMediaType

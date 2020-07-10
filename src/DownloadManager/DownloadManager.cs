@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.Repositories;
@@ -151,6 +152,26 @@ namespace PlexRipper.DownloadManager
             }
         }
 
+        private PlexDownloadClient GetDownloadClient(int downloadTaskId)
+        {
+            return DownloadsList.Find(x => x.ClientId == downloadTaskId);
+        }
+
+        /// <summary>
+        /// Cancels the <see cref="PlexDownloadClient"/> executing the <see cref="DownloadTask"/> if it is downloading. Returns true if no client is executing the DownloadTask.
+        /// </summary>
+        /// <param name="downloadTaskId"></param>
+        /// <returns></returns>
+        public Result<bool> CancelDownload(int downloadTaskId)
+        {
+            var downloadClient = GetDownloadClient(downloadTaskId);
+            if (downloadClient != null)
+            {
+                var result = downloadClient.Cancel();
+                return result ? Result.Ok(true) : Result.Fail<bool>($"Failed to cancel downloadTask with id {downloadTaskId}");
+            }
+            return Result.Ok(true);
+        }
 
         #endregion Methods
 

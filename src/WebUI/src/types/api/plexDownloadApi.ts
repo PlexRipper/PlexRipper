@@ -18,6 +18,18 @@ export async function downloadPlexMovie(movieId: number, plexAccountId: number):
 		});
 }
 
+export async function deleteDownloadTask(downloadTaskId: number): Promise<boolean> {
+	return await GlobalStore.Axios.delete(`${apiPath}/${downloadTaskId}`)
+		.then((x) => {
+			Log.debug(logText + 'deleteDownloadTask response: ', x.data);
+			return x.data;
+		})
+		.catch((e) => {
+			Log.error(logText + 'deleteDownloadTask error: ', e);
+			return e.response.status;
+		});
+}
+
 export async function getAllDownloads(): Promise<IDownloadTask[]> {
 	return await GlobalStore.Axios.get(`${apiPath}/`)
 		.then((x) => {

@@ -12,5 +12,6 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<Result<bool>> DownloadMovieAsync(int plexAccountId, int plexMovieId);
         Task<Result<DownloadTask>> GetDownloadRequestAsync(int plexAccountId, PlexMovie plexMovie);
         Task<Result<List<DownloadTask>>> GetAllDownloadsAsync();
+        Task<Result<bool>> DeleteDownloadsAsync(int downloadTaskId);
     }
 }

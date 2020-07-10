@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
+using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Application.Common.Interfaces.Settings;
 using PlexRipper.Application.PlexDownloads.Commands;
@@ -27,6 +28,7 @@ namespace PlexRipper.DownloadManager
         private readonly IMediator _mediator;
         private readonly IHubContext<DownloadProgressHub> _hubContext;
         private readonly IUserSettings _userSettings;
+        private readonly IFileSystem _fileSystem;
         private readonly IDownloadTaskRepository _downloadTaskRepository;
 
         // Collection which contains all download clients, bound to the DataGrid control
@@ -74,11 +76,12 @@ namespace PlexRipper.DownloadManager
 
         #region Constructors
 
-        public DownloadManager(IMediator mediator, IHubContext<DownloadProgressHub> hubContext, IUserSettings userSettings, IDownloadTaskRepository downloadTaskRepository)
+        public DownloadManager(IMediator mediator, IHubContext<DownloadProgressHub> hubContext, IUserSettings userSettings, IFileSystem fileSystem, IDownloadTaskRepository downloadTaskRepository)
         {
             _mediator = mediator;
             _hubContext = hubContext;
             _userSettings = userSettings;
+            _fileSystem = fileSystem;
             _downloadTaskRepository = downloadTaskRepository;
         }
 
@@ -168,7 +171,9 @@ namespace PlexRipper.DownloadManager
             if (downloadClient != null)
             {
                 var result = downloadClient.Cancel();
-                return result ? Result.Ok(true) : Result.Fail<bool>($"Failed to cancel downloadTask with id {downloadTaskId}");
+                return result
+                    ? Result.Ok(true)
+                    : Result.Fail<bool>($"Failed to cancel downloadTask with id {downloadTaskId}");
             }
             return Result.Ok(true);
         }

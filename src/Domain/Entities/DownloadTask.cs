@@ -48,6 +48,9 @@ namespace PlexRipper.Domain.Entities
         public string DownloadUrl =>
             $"{PlexServer.BaseUrl}{FileLocationUrl}?download=1&X-Plex-Token={PlexServerAuthToken}";
 
+        [NotMapped]
+        public string DownloadDirectory { get; set; }
+
         #endregion
     }
 }

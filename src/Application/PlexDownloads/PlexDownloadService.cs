@@ -2,6 +2,7 @@
 using MediatR;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
+using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
@@ -19,13 +20,15 @@ namespace PlexRipper.Application.PlexDownloads
         private readonly IMediator _mediator;
         private readonly IDownloadManager _downloadManager;
         private readonly IPlexAuthenticationService _plexAuthenticationService;
+        private readonly IFileSystem _fileSystem;
         private readonly IPlexApiService _plexApiService;
 
-        public PlexDownloadService(IMediator mediator, IDownloadManager downloadManager, IPlexAuthenticationService plexAuthenticationService, IPlexApiService plexApiService)
+        public PlexDownloadService(IMediator mediator, IDownloadManager downloadManager, IPlexAuthenticationService plexAuthenticationService, IFileSystem fileSystem, IPlexApiService plexApiService)
         {
             _mediator = mediator;
             _downloadManager = downloadManager;
             _plexAuthenticationService = plexAuthenticationService;
+            _fileSystem = fileSystem;
             _plexApiService = plexApiService;
         }
 
@@ -67,7 +70,8 @@ namespace PlexRipper.Application.PlexDownloads
                     Title = plexMovie.Title,
                     Status = DownloadStatus.Initialized,
                     FileName = metaData.FileName,
-                    PlexServerAuthToken = token.Value
+                    PlexServerAuthToken = token.Value,
+                    DownloadDirectory = _fileSystem.RootDirectory + "/Movies"
                 });
             }
 

@@ -1,7 +1,15 @@
 <template>
 	<v-row>
 		<v-col cols="12">
-			<v-data-table :headers="headers" :items="items" hide-default-footer fixed-header disable-sort disable-pagination disable-filtering>
+			<v-data-table
+				:headers="headers"
+				:items="items"
+				hide-default-footer
+				fixed-header
+				disable-sort
+				disable-pagination
+				disable-filtering
+			>
 				<template v-slot:item.type="{ item }">
 					<v-icon>{{ getIcon(item.type) }}</v-icon>
 				</template>

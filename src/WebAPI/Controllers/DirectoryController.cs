@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application.Common.Interfaces.FileSystem;
+using PlexRipper.Domain.Types.FileSystem;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,18 +11,18 @@ namespace PlexRipper.WebAPI.Controllers
     [ApiController]
     public class DirectoryController : ControllerBase
     {
-        // GET: api/<DirectoryController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        private readonly IFileSystem _fileSystem;
 
-        // GET api/<DirectoryController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        public DirectoryController(IFileSystem fileSystem)
         {
-            return "value";
+            _fileSystem = fileSystem;
+        }
+        // GET: api/<DirectoryController>?path=
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileSystemResult))]
+        public IActionResult Get(string path)
+        {
+            return Ok(_fileSystem.LookupContents(path, false, true));
         }
 
         // POST api/<DirectoryController>

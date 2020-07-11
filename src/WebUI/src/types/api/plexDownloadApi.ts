@@ -3,7 +3,8 @@ import IPlexLibrary from '@dto/IPlexLibrary';
 import IDownloadTask from '@dto/IDownloadTask';
 import { GlobalStore } from '@/store';
 import {} from '@aspnet/signalr';
-const logText = 'From PlexLibraryAPI => ';
+
+const logText = 'From PlexDownloadApi => ';
 const apiPath = '/Download';
 
 export async function downloadPlexMovie(movieId: number, plexAccountId: number): Promise<IPlexLibrary> {

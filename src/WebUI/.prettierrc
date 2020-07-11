@@ -7,7 +7,7 @@
   "jsxBracketSameLine": true,
   "bracketSpacing": true,
   "vueIndentScriptAndStyle": false,
-  "printWidth": 150,
+  "printWidth": 130,
   "jsxSingleQuote": true,
   "useTabs": true
 }

@@ -1,27 +1,27 @@
 {
-  "compilerOptions": {
-    "target": "es2018",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "lib": ["esnext", "esnext.asynciterable", "dom"],
-    "esModuleInterop": true,
-    "allowJs": true,
-    "sourceMap": true,
-    "strict": true,
-	"noEmit": true,
-	"importHelpers": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "baseUrl": "./src/",
-    "outDir": "./build/",
-    "paths": {
-      "~/*": ["./*"],
-      "@/*": ["./*"],
-      "@store/*": ["./types/store/*"],
-      "@dto/*": ["./types/dto/*"],
-      "@api/*": ["./types/api/*"]
-    },
-    "types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify",]
-  },
-  "exclude": ["node_modules", ".nuxt", "node_modules/dist", ".vscode"]
+	"compilerOptions": {
+		"target": "es2018",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"lib": ["esnext", "esnext.asynciterable", "dom"],
+		"esModuleInterop": true,
+		"allowJs": true,
+		"sourceMap": true,
+		"strict": true,
+		"noEmit": true,
+		"importHelpers": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"baseUrl": "./src/",
+		"outDir": "./build/",
+		"paths": {
+			"~/*": ["./*"],
+			"@/*": ["./*"],
+			"@store/*": ["./types/store/*"],
+			"@dto/*": ["./types/dto/*"],
+			"@api/*": ["./types/api/*"]
+		},
+		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify"]
+	},
+	"exclude": ["node_modules", ".nuxt", "node_modules/dist", ".vscode"]
 }

@@ -1,20 +1,19 @@
 <template>
 	<v-row justify="start">
 		<v-col>
-			<v-dialog v-model="isDialogOpen" scrollable max-width="900px">
-				<!-- The path box -->
-				<template v-slot:activator="{ on }">
-					<v-btn color="primary" dark v-on="on">{{ buttonText }}</v-btn>
-				</template>
-
+			<v-dialog :value="open" persistent scrollable max-width="900px">
 				<v-card style="position: absolute; top: 200px; bottom:200px;  max-width: 900px; max-height:900px">
 					<v-card-title>
 						<v-row>
 							<v-col cols="12">
-								<label>Select path</label>
+								<label>Select {{ path.type }}</label>
 							</v-col>
 							<v-col cols="12">
-								<v-text-field v-model="path" placeholder="Start typing or select a path below" @input="setPath($event)" />
+								<v-text-field
+									v-model="newDirectory"
+									placeholder="Start typing or select a path below"
+									@input="newDirectory = $event"
+								/>
 							</v-col>
 						</v-row>
 					</v-card-title>
@@ -28,7 +27,7 @@
 							disable-sort
 							disable-pagination
 							disable-filtering
-							@click:row="handleClick"
+							@click:row="directoryNavigate"
 						>
 							<template v-slot:item.type="{ item }">
 								<v-icon>{{ getIcon(item.type) }}</v-icon>
@@ -37,7 +36,7 @@
 					</v-card-text>
 					<v-card-actions class="justify-end">
 						<v-btn color="blue darken-1" text @click="cancel()">Cancel</v-btn>
-						<v-btn color="blue darken-1" text @click="ok()">Ok</v-btn>
+						<v-btn color="blue darken-1" text @click="confirm()">Ok</v-btn>
 					</v-card-actions>
 				</v-card>
 			</v-dialog>
@@ -50,16 +49,21 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify';
 import IPath from '@dto/settings/iPath.ts';
 import Log from 'consola';
+import { requestDirectories } from '@api/directoryApi';
+import { IDirectory } from '@dto/settings/paths/IFileSystem';
 
 @Component
 export default class DirectoryBrowser extends Vue {
-	@Prop({ required: false, type: String, default: 'Add Folder' })
-	readonly buttonText!: string;
+	@Prop({ required: false, type: Object as () => IPath })
+	readonly path!: IPath;
 
-	isDialogOpen: boolean = false;
+	@Prop({ required: true, type: Boolean })
+	readonly open!: boolean;
 
 	parentPath: string = '';
-	path: string = '';
+	newDirectory: string = '';
+
+	items: IDirectory[] = [];
 
 	headers: DataTableHeader[] = [
 		{
@@ -72,8 +76,6 @@ export default class DirectoryBrowser extends Vue {
 			value: 'name',
 		},
 	];
-
-	items: IPath[] = [];
 
 	getIcon(type: string): string {
 		switch (type) {
@@ -91,22 +93,18 @@ export default class DirectoryBrowser extends Vue {
 		}
 	}
 
-	setPath(path: string): void {
-		Log.debug(path);
-	}
-
-	ok(): void {
-		this.$emit('new-path', this.path);
-		this.cancel();
+	confirm(): void {
+		this.path.directory = this.newDirectory;
+		this.$emit('confirm', this.path);
 	}
 
 	cancel(): void {
-		this.path = '';
-		this.isDialogOpen = false;
-		this.requestDirectories(this.path);
+		this.$emit('cancel');
+		this.requestDirectories(this.newDirectory);
 	}
 
-	handleClick(dataRow: IPath): void {
+	directoryNavigate(dataRow: IDirectory): void {
+		Log.warn(dataRow);
 		if (dataRow.path === '..') {
 			this.requestDirectories(this.parentPath);
 		} else {
@@ -114,28 +112,26 @@ export default class DirectoryBrowser extends Vue {
 		}
 	}
 
-	requestDirectories(path: string): void {
-		this.$axios.get(`/filesystem/?path=${path}`).then((response) => {
-			this.items = response.data.directories;
+	async requestDirectories(path: string): Promise<void> {
+		const response = await requestDirectories(path);
 
-			// Don't add return row if in the root folder
-			if (path !== '') {
-				this.items.unshift({
-					type: {
-						id: 0,
-						type: 'none',
-					},
-					name: '...',
-					path: '..',
-				} as IPath);
-			}
-			this.parentPath = response.data.parent;
-			this.path = path;
-		});
+		this.items = response.directories;
+
+		// Don't add return row if in the root folder
+		if (path !== '') {
+			this.items.unshift({
+				name: '...',
+				path: '..',
+				type: 0,
+			});
+		}
+		this.parentPath = response.parent;
+		this.newDirectory = path;
 	}
 
 	mounted(): void {
 		this.requestDirectories('');
+		this.newDirectory = this.path.directory;
 	}
 }
 </script>

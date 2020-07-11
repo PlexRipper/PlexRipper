@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application.Config;
+using PlexRipper.Domain;
 using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Config;
 using System.Linq;
@@ -102,8 +103,10 @@ namespace PlexRipper.WebAPI
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
+            Log.Debug("Setting up Autofac Containers");
             ContainerConfig.ConfigureContainer(builder);
             builder.RegisterLogger(autowireProperties: true);
+            Log.Debug("Finished setting up Autofac Containers");
 
         }
 

@@ -1,30 +1,38 @@
 <template>
-	<v-row>
-		<v-col>
-			<v-row>
-				<v-col>
-					<h2>Movie import Paths</h2>
-					<hr />
-				</v-col>
-			</v-row>
-			<folder-table :items="moviePaths" @delete-path="deletePath($event, pathTypes[0])" />
-			<directory-browser @new-path="addPath($event, pathTypes[0])" />
-			<v-row>
-				<v-col>
-					<h2>Series import paths</h2>
-					<hr />
-				</v-col>
-			</v-row>
-			<folder-table :items="seriePaths" @delete-path="deletePath($event, pathTypes[1])" />
-			<directory-browser @new-path="addPath($event, pathTypes[1])" />
-		</v-col>
-	</v-row>
+	<v-container>
+		<v-row v-for="(path, i) in paths" :key="i">
+			<v-col cols="2">
+				<v-subheader>{{ path.type }}</v-subheader>
+			</v-col>
+			<v-col cols="10">
+				<v-text-field
+					append-icon="mdi-folder-open"
+					name="input-10-2"
+					:value="path.directory"
+					class="input-group--focused"
+					solo
+					@click:append="openDirectoryBrowser(path)"
+				></v-text-field>
+			</v-col>
+		</v-row>
+		<v-row v-if="selectedPath">
+			<v-col>
+				<directory-browser
+					:open="isDirectoryBrowserOpen"
+					:path="selectedPath"
+					@confirm="confirmDirectoryBrowser"
+					@cancel="cancelDirectoryBrowser"
+				/>
+			</v-col>
+		</v-row>
+	</v-container>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 import IPath from '@dto/settings/iPath.ts';
-import IPathType from '@dto/settings/iPathType.ts';
+import Log from 'consola';
+import { getFolderPaths } from '@api/pathApi';
 import DirectoryBrowser from './components/DirectoryBrowser.vue';
 import FolderTable from './components/FolderTable.vue';
 
@@ -37,68 +45,30 @@ import FolderTable from './components/FolderTable.vue';
 export default class SettingsPaths extends Vue {
 	moduleName: string = 'Settings Paths';
 
-	pathTypes: IPathType[] = [
-		{ id: 1, type: 'Movies' },
-		{ id: 2, type: 'Series' },
-	];
+	paths: IPath[] = [];
 
-	moviePaths: IPath[] = [];
-	seriePaths: IPath[] = [];
+	isDirectoryBrowserOpen: boolean = false;
 
-	setPath(paths: IPath[], type: IPathType): void {
-		switch (type.id) {
-			case 1:
-				this.moviePaths = paths;
-				break;
+	selectedPath: IPath | null = null;
 
-			case 2:
-				this.seriePaths = paths;
-				break;
-		}
+	openDirectoryBrowser(path: IPath): void {
+		this.selectedPath = path;
+		this.isDirectoryBrowserOpen = true;
 	}
 
-	addPath(path: string, type: IPathType): void {
-		let tempPaths: IPath[] = [];
-		switch (type.id) {
-			case 1:
-				tempPaths = this.moviePaths;
-				break;
-
-			case 2:
-				tempPaths = this.seriePaths;
-				break;
-		}
-
-		tempPaths.push({ id: 0, path, type });
-
-		this.$axios
-			.post('/rootfolder/', {
-				path,
-				type,
-			})
-			.then((response) => {
-				this.setPath(tempPaths, type);
-				this.requestPaths(response.data.type);
-			});
+	confirmDirectoryBrowser(path: IPath): void {
+		this.selectedPath = path;
+		Log.debug(path);
+		this.isDirectoryBrowserOpen = false;
 	}
 
-	deletePath(path: IPath, type: IPathType): void {
-		this.$axios.delete(`/rootfolder/${path.id}`).then(() => {
-			this.requestPaths(type);
-		});
+	cancelDirectoryBrowser(): void {
+		this.isDirectoryBrowserOpen = false;
 	}
 
-	requestPaths(type: IPathType): void {
-		this.$axios.get(`/rootfolder/?typeId=${type.id}`).then((response) => {
-			const paths: IPath[] = response.data ? response.data : [];
-
-			this.setPath(paths, type);
-		});
-	}
-
-	mounted(): void {
-		this.requestPaths(this.pathTypes[0]);
-		this.requestPaths(this.pathTypes[1]);
+	async created(): Promise<void> {
+		this.paths = await getFolderPaths();
+		Log.debug(this.paths);
 	}
 }
 </script>

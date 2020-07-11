@@ -1,6 +1,7 @@
 import Log from 'consola';
 import IPlexAccount from '@dto/IPlexAccount';
 import { GlobalStore } from '@/store';
+
 const logText = 'From AccountAPI => ';
 const apiPath = '/plexaccount';
 

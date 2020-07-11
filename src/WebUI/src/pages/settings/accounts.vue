@@ -25,7 +25,7 @@ import { UserStore } from '@/store/';
 		AccountCard,
 	},
 })
-export default class Settings extends Vue {
+export default class Accounts extends Vue {
 	checkAccount(account: IPlexAccount): void {
 		Log.debug(account);
 	}

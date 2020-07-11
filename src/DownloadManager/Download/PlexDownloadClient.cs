@@ -148,6 +148,10 @@ namespace PlexRipper.DownloadManager.Download
                 response.EnsureSuccessStatusCode();
 
                 TotalBytesToReceive = response.Content.Headers.ContentLength ?? -1L;
+                if (TotalBytesToReceive <= 0)
+                {
+                    return Result.Fail("File size could not be determined of the media that will be downloaded");
+                }
 
                 _responseStream = await response.Content.ReadAsStreamAsync();
                 var result = _fileSystem.SaveFile(DownloadPath, DownloadTask.FileName, TotalBytesToReceive);
@@ -155,6 +159,7 @@ namespace PlexRipper.DownloadManager.Download
                 {
                     return result;
                 }
+                _fileStream = result.Value;
 
                 // Set Timings
                 DownloadStartAt = DateTime.UtcNow;

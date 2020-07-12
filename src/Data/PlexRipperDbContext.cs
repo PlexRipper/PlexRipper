@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.JoinTables;
 using System.IO;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PlexRipper.Data
 {
@@ -14,18 +12,16 @@ namespace PlexRipper.Data
 
         #region Properties
 
-        public DbContext Instance => this;
-
         #region Tables
-        public DbSet<Account> Accounts { get; set; }
+        public DbSet<PlexAccount> PlexAccounts { get; set; }
         public DbSet<DownloadTask> DownloadTasks { get; set; }
         public DbSet<FolderPath> FolderPaths { get; set; }
 
         public DbSet<PlexGenre> PlexGenres { get; set; }
-        public DbSet<PlexAccount> PlexAccounts { get; set; }
         public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
         public DbSet<PlexMovie> PlexMovies { get; set; }
+        public DbSet<PlexTvShow> PlexTvShows { get; set; }
         public DbSet<PlexRole> PlexRoles { get; set; }
         public DbSet<PlexServer> PlexServers { get; set; }
         public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
@@ -33,6 +29,7 @@ namespace PlexRipper.Data
 
         #region JoinTables
         public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
+        public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
         public DbSet<PlexMovieGenre> PlexMovieGenres { get; set; }
         public DbSet<PlexMovieRole> PlexMovieRoles { get; set; }
         #endregion
@@ -50,11 +47,11 @@ namespace PlexRipper.Data
 
         private static void SetConfig(DbContextOptionsBuilder optionsBuilder, bool isTest = false)
         {
-            optionsBuilder.UseLazyLoadingProxies();
-
+            // optionsBuilder.UseLazyLoadingProxies();
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
             string dbName = isTest ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
-            string dbPath = Path.Combine(rootDir, dbName);
+            string dbPath = Path.Combine(rootDir + "/config", dbName);
 
             optionsBuilder
                 .UseSqlite(
@@ -88,11 +85,6 @@ namespace PlexRipper.Data
             var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
             SetConfig(optionsBuilder, true);
             return optionsBuilder;
-        }
-
-        public Task<int> SaveChangesAsync()
-        {
-            return base.SaveChangesAsync(CancellationToken.None);
         }
 
         #endregion Methods

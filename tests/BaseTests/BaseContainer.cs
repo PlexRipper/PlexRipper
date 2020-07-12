@@ -20,9 +20,8 @@ namespace PlexRipper.BaseTests
         }
 
 
-        public IAccountService GetAccountService => AutofacContainer.Resolve<IAccountService>();
+        public IPlexAccountService GetPlexAccountService => AutofacContainer.Resolve<IPlexAccountService>();
         public IPlexServerService GetPlexServerService => AutofacContainer.Resolve<IPlexServerService>();
-        public IPlexService GetPlexService => AutofacContainer.Resolve<IPlexService>();
         public IPlexDownloadService GetPlexDownloadService => AutofacContainer.Resolve<IPlexDownloadService>();
         public IPlexLibraryService GetPlexLibraryService => AutofacContainer.Resolve<IPlexLibraryService>();
         public ITestClass GetTestClass => AutofacContainer.Resolve<ITestClass>();

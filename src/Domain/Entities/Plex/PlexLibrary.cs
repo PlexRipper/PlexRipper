@@ -54,15 +54,12 @@ namespace PlexRipper.Domain.Entities
         /// </summary>
         public int PlexServerId { get; set; }
 
-
         public virtual List<PlexMovie> Movies { get; set; }
-        public virtual List<PlexSerie> Series { get; set; }
+        public virtual List<PlexTvShow> TvShows { get; set; }
 
         #endregion
 
         #region Helpers
-        // TODO Create a many-to-many relationship to determining which PlexAccounts have access to this PlexLibrary
-        // public bool HasAccess { get; set; }
 
         [NotMapped]
         public PlexMediaType GetMediaType
@@ -72,8 +69,7 @@ namespace PlexRipper.Domain.Entities
                 return Type switch
                 {
                     "movie" => PlexMediaType.Movie,
-                    // Plex calls Tv Shows "shows", but PlexRipper considers them series
-                    "show" => PlexMediaType.Serie,
+                    "show" => PlexMediaType.TvShow,
                     _ => PlexMediaType.Unknown
                 };
             }
@@ -87,7 +83,7 @@ namespace PlexRipper.Domain.Entities
                 return GetMediaType switch
                 {
                     PlexMediaType.Movie => Movies != null && Movies.Count > 0,
-                    PlexMediaType.Serie => Series != null && Series.Count > 0,
+                    PlexMediaType.TvShow => TvShows != null && TvShows.Count > 0,
                     _ => false
                 };
             }
@@ -101,11 +97,14 @@ namespace PlexRipper.Domain.Entities
                 return GetMediaType switch
                 {
                     PlexMediaType.Movie => Movies?.Count ?? -1,
-                    PlexMediaType.Serie => Movies?.Count ?? -1,
+                    PlexMediaType.TvShow => Movies?.Count ?? -1,
                     _ => -1
                 };
             }
         }
+
+        [NotMapped]
+        public string Name => Title;
 
         #endregion
 

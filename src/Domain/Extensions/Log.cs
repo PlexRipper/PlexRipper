@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace PlexRipper.Domain
 {
+    // TODO Add summaries describing how the log levels should be used
     public static class Log
     {
         private static string FormatForException(this string message, Exception ex)

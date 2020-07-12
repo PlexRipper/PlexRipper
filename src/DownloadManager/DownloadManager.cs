@@ -1,14 +1,20 @@
-﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
-using PlexRipper.Application.Common.Interfaces.Repositories;
+﻿using FluentResults;
+using MediatR;
+using Microsoft.AspNetCore.SignalR;
+using PlexRipper.Application.Common.Interfaces.DownloadManager;
+using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Application.Common.Interfaces.Settings;
+using PlexRipper.Application.PlexDownloads.Commands;
+using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Types;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.DownloadManager.Download;
+using PlexRipper.SignalR.Hubs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace PlexRipper.DownloadManager
@@ -17,8 +23,10 @@ namespace PlexRipper.DownloadManager
     {
         #region Fields
 
+        private readonly IMediator _mediator;
+        private readonly IHubContext<DownloadProgressHub> _hubContext;
         private readonly IUserSettings _userSettings;
-        private readonly IDownloadTaskRepository _downloadTaskRepository;
+        private readonly IFileSystem _fileSystem;
 
         // Collection which contains all download clients, bound to the DataGrid control
         public List<PlexDownloadClient> DownloadsList = new List<PlexDownloadClient>();
@@ -65,10 +73,12 @@ namespace PlexRipper.DownloadManager
 
         #region Constructors
 
-        public DownloadManager(IUserSettings userSettings, IDownloadTaskRepository downloadTaskRepository)
+        public DownloadManager(IMediator mediator, IHubContext<DownloadProgressHub> hubContext, IUserSettings userSettings, IFileSystem fileSystem)
         {
+            _mediator = mediator;
+            _hubContext = hubContext;
             _userSettings = userSettings;
-            _downloadTaskRepository = downloadTaskRepository;
+            _fileSystem = fileSystem;
         }
 
         #endregion Constructors
@@ -78,10 +88,10 @@ namespace PlexRipper.DownloadManager
 
         private PlexDownloadClient CreateDownloadClient(DownloadTask downloadTask)
         {
-            PlexDownloadClient newClient = new PlexDownloadClient(downloadTask, this, _userSettings);
+            PlexDownloadClient newClient = new PlexDownloadClient(downloadTask, _fileSystem);
 
             newClient.DownloadProgressChanged += OnDownloadProgressChanged;
-            newClient.DownloadFileCompleted += OnDownloadFileCompleted;
+            //newClient.DownloadFileCompleted += OnDownloadFileCompleted;
 
             DownloadsList.Add(newClient);
             return newClient;
@@ -92,21 +102,37 @@ namespace PlexRipper.DownloadManager
             Log.Information("The download has completed!");
         }
 
-        private void OnDownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        private void OnDownloadProgressChanged(object sender, DownloadProgress downloadProgress)
         {
             var plexDownloadClient = sender as PlexDownloadClient;
-            Log.Information($"({plexDownloadClient.ClientId}){plexDownloadClient.DownloadTask.FileName} => Downloaded {DataFormat.FormatSizeString(e.BytesReceived)} of {DataFormat.FormatSizeString(e.TotalBytesToReceive)} bytes. {e.ProgressPercentage} % complete...");
+
+            _hubContext.Clients.All.SendAsync("DownloadProgress", downloadProgress);
+
+            Log.Information($"({plexDownloadClient.ClientId}){plexDownloadClient.DownloadTask.FileName} => Downloaded {DataFormat.FormatSizeString(downloadProgress.DataReceived)} of {DataFormat.FormatSizeString(downloadProgress.DataTotal)} bytes ({downloadProgress.DownloadSpeed}). {downloadProgress.Percentage} % complete...");
         }
 
         public async Task StartDownloadAsync(DownloadTask downloadTask)
         {
             // Add to DB
-            await _downloadTaskRepository.AddAsync(downloadTask);
+            var result = await _mediator.Send(new AddDownloadTaskCommandCommand(downloadTask));
+            if (result.IsFailed)
+            {
+                return;
+            }
+            var downloadTaskDB = await _mediator.Send(new GetDownloadTaskByIdQuery(result.Value.Id));
+            if (downloadTaskDB.IsFailed)
+            {
+                return;
+            }
+
             try
             {
-                Log.Debug(downloadTask.ToString());
-                var downloadClient = CreateDownloadClient(downloadTask);
-                downloadClient.Start();
+                // TODO This might be removed if the authToken is stored in the database.
+                downloadTaskDB.Value.PlexServerAuthToken = downloadTask.PlexServerAuthToken;
+
+                Log.Debug(downloadTaskDB.Value.ToString());
+                var downloadClient = CreateDownloadClient(downloadTaskDB.Value);
+                await downloadClient.StartAsync();
             }
             catch (Exception e)
             {
@@ -115,6 +141,28 @@ namespace PlexRipper.DownloadManager
             }
         }
 
+        private PlexDownloadClient GetDownloadClient(int downloadTaskId)
+        {
+            return DownloadsList.Find(x => x.ClientId == downloadTaskId);
+        }
+
+        /// <summary>
+        /// Cancels the <see cref="PlexDownloadClient"/> executing the <see cref="DownloadTask"/> if it is downloading. Returns true if no client is executing the DownloadTask.
+        /// </summary>
+        /// <param name="downloadTaskId"></param>
+        /// <returns></returns>
+        public Result<bool> CancelDownload(int downloadTaskId)
+        {
+            var downloadClient = GetDownloadClient(downloadTaskId);
+            if (downloadClient != null)
+            {
+                var result = downloadClient.Cancel();
+                return result
+                    ? Result.Ok(true)
+                    : Result.Fail<bool>($"Failed to cancel downloadTask with id {downloadTaskId}");
+            }
+            return Result.Ok(true);
+        }
 
         #endregion Methods
 

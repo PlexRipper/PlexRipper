@@ -9,14 +9,21 @@ namespace PlexRipper.Domain.Entities
 {
     public class PlexServer : BaseEntity
     {
-        public string AccessToken { get; set; }
+        [Column(Order = 1)]
         public string Name { get; set; }
-        public string Address { get; set; }
-        public int Port { get; set; }
-        public string Version { get; set; }
+        [Column(Order = 2)]
         public string Scheme { get; set; }
+        [Column(Order = 3)]
+        public string Address { get; set; }
+        [Column(Order = 4)]
+        public int Port { get; set; }
+        [Column(Order = 5)]
+        public string Version { get; set; }
+        [Column(Order = 6)]
         public string Host { get; set; }
+        [Column(Order = 7)]
         public string LocalAddresses { get; set; }
+        [Column(Order = 8)]
         public string MachineIdentifier { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -28,12 +35,12 @@ namespace PlexRipper.Domain.Entities
 
         #region Relationships
 
-        [IgnoreMap]
-        public virtual List<PlexAccountServer> PlexAccountServers { get; set; }
+        [IgnoreMap] // TODO remove IgnoreMap
+        public virtual ICollection<PlexAccountServer> PlexAccountServers { get; set; }
 
-        public virtual List<PlexLibrary> PlexLibraries { get; set; }
+        public virtual ICollection<PlexLibrary> PlexLibraries { get; set; }
 
-        public virtual List<PlexServerStatus> ServerStatus { get; set; }
+        public virtual ICollection<PlexServerStatus> ServerStatus { get; set; }
         #endregion
 
         #region Helpers
@@ -51,6 +58,12 @@ namespace PlexRipper.Domain.Entities
         [NotMapped]
         public string LibraryUrl => $"{BaseUrl}/library/sections";
 
+        /// <summary>
+        /// Do not use this property to retrieve the needed authToken, this is only meant to transfer the incoming authToken from the plexApi to the Database.
+        /// See AddOrUpdatePlexServersHandler
+        /// </summary>
+        [NotMapped]
+        public string AccessToken { get; set; }
         #endregion
 
     }

@@ -1,11 +1,17 @@
 import IPlexServer from './IPlexServer';
 
-export interface IPlexAccount {
+export default interface IPlexAccount {
 	id: number;
+	displayName: string;
+	username: string;
+	password: string;
+	isEnabled: boolean;
+	isValidated: boolean;
+	validatedAt: Date;
+	plexAccount: IPlexAccount;
 	uuid: string;
 	email: string;
 	joinedAt: Date;
-	username: string;
 	title: string;
 	hasPassword: boolean;
 	authToken: string;

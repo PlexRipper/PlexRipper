@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import IAccount from '@dto/IAccount';
+import IPlexAccount from '@dto/IPlexAccount';
 import { UserStore } from '@/store/';
 
 @Component
@@ -53,7 +53,7 @@ export default class AppBar extends Vue {
 		this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
 	}
 
-	get getAccounts(): IAccount[] {
+	get getAccounts(): IPlexAccount[] {
 		return UserStore.getEnabledAccounts;
 	}
 }

@@ -22,31 +22,31 @@ namespace PlexRipper.Application.IntegrationTests.Services
         public async Task PlexDownloadShouldDownloadEntireFile()
         {
             // Arrange
-            var accountService = Container.GetAccountService;
+            var accountService = Container.GetPlexAccountService;
             var plexServerService = Container.GetPlexServerService;
             var plexLibraryService = Container.GetPlexLibraryService;
             var plexDownloadService = Container.GetPlexDownloadService;
             var credentials = Secrets.GetCredentials();
 
             //Act 
-            var newAccount = new Account
+            var newAccount = new PlexAccount
             {
                 Username = credentials.Username,
                 Password = credentials.Password
             };
 
-            var result = await accountService.ValidateAccountAsync(newAccount);
-            var account = await accountService.CreateAccountAsync(newAccount);
-            var serverList = await plexServerService.GetServersAsync(account.PlexAccount);
+            var result = await accountService.ValidatePlexAccountAsync(newAccount);
+            var account = await accountService.CreatePlexAccountAsync(newAccount);
+            var serverList = await plexServerService.GetServersAsync(account.Value);
 
-            var plexLibrary = await plexLibraryService.GetLibraryMediaAsync(serverList.First().PlexLibraries[4]);
+            var plexLibrary = await plexLibraryService.GetLibraryMediaAsync(account.Value, serverList.Value.ToList().First().PlexLibraries.ToList()[4]);
             var movie = plexLibrary.Movies[16];
             var movie2 = plexLibrary.Movies[18];
 
-            var downloadRequest = await plexDownloadService.GetDownloadRequestAsync(movie);
-            var downloadRequest2 = await plexDownloadService.GetDownloadRequestAsync(movie2);
-            plexDownloadService.StartDownload(downloadRequest);
-            plexDownloadService.StartDownload(downloadRequest2);
+            var downloadRequest = await plexDownloadService.GetDownloadRequestAsync(account.Value.Id, movie);
+            var downloadRequest2 = await plexDownloadService.GetDownloadRequestAsync(account.Value.Id, movie2);
+            await plexDownloadService.StartDownloadAsync(downloadRequest.Value);
+            await plexDownloadService.StartDownloadAsync(downloadRequest2.Value);
 
             await Task.Delay(15000);
 

@@ -23,7 +23,7 @@ namespace PlexRipper.PlexApi
                 Converters = { new LongToDateTime() }
             });
             this.UseDotNetXmlSerializer();
-            this.Timeout = 15000;
+            this.Timeout = 10000;
 
             // TODO Ignore all bad SSL certificates based on user option set
         }

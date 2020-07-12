@@ -35,7 +35,7 @@ namespace PlexRipper.PlexApi.Common.DTO.PlexGetLibrarySections
         public string Title1 { get; set; }
 
         [JsonPropertyName("Directory")]
-        public IList<PlexLibrarySectionsDirectoryDTO> Directory { get; set; }
+        public List<PlexLibrarySectionsDirectoryDTO> Directory { get; set; }
     }
 
     public class PlexLibrarySectionsDirectoryDTO
@@ -102,7 +102,7 @@ namespace PlexRipper.PlexApi.Common.DTO.PlexGetLibrarySections
         public int Hidden { get; set; }
 
         [JsonPropertyName("Location")]
-        public IList<PlexLibrarySectionsLocationDTO> Location { get; set; }
+        public List<PlexLibrarySectionsLocationDTO> Location { get; set; }
     }
 
     public class PlexLibrarySectionsLocationDTO

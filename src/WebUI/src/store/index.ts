@@ -5,6 +5,7 @@ import { getModule, config } from 'vuex-module-decorators';
 // Modules
 import globalStore from '@/store/globalStore';
 import userStore from '@/store/userStore';
+import signalrStore from '@/store/signalrStore';
 
 config.rawError = true;
 
@@ -17,8 +18,10 @@ export const store = new Vuex.Store<unknown>({
 	modules: {
 		globalStore,
 		userStore,
+		signalrStore,
 	},
 });
 
 export const GlobalStore: globalStore = getModule(globalStore, store);
 export const UserStore: userStore = getModule(userStore, store);
+export const SignalrStore: signalrStore = getModule(signalrStore, store);

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Entities.JoinTables;
 using System;
 
 namespace PlexRipper.Domain.AutoMapper
@@ -15,6 +17,12 @@ namespace PlexRipper.Domain.AutoMapper
             CreateMap<Guid, string>().ConvertUsing(g => g.ToString("N"));
             CreateMap<long, DateTime>().ConvertUsing(g => DateTimeOffset.FromUnixTimeSeconds(g).DateTime.ToUniversalTime());
             CreateMap<DateTime, long>().ConvertUsing(g => new DateTimeOffset(g).ToUnixTimeSeconds());
+
+
+            // Entities
+            // PlexAccountServer => PlexServer
+            CreateMap<PlexAccountServer, PlexServer>(MemberList.Destination)
+                .ConvertUsing(source => source.PlexServer ?? null);
 
         }
     }

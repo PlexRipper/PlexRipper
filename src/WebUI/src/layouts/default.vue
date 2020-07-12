@@ -2,9 +2,9 @@
 	<v-app>
 		<navigation-drawer />
 		<app-bar />
-		<v-content>
+		<v-main>
 			<nuxt />
-		</v-content>
+		</v-main>
 		<v-footer app>
 			<span>&copy; {{ currentYear }} </span>
 		</v-footer>

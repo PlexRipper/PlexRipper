@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using FluentResults;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.Domain;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,74 +16,73 @@ namespace PlexRipper.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PlexLibraryController : ControllerBase
+    public class PlexLibraryController : BaseController
     {
 
-        private readonly IPlexService _plexService;
         private readonly IPlexLibraryService _plexLibraryService;
-        private readonly IAccountService _accountService;
         private readonly IMapper _mapper;
 
 
-        public PlexLibraryController(IPlexService plexService, IPlexLibraryService plexLibraryService, IAccountService accountService, IMapper mapper)
+        public PlexLibraryController(IPlexLibraryService plexLibraryService, IMapper mapper)
         {
 
-            _plexService = plexService;
             _plexLibraryService = plexLibraryService;
-            _accountService = accountService;
             _mapper = mapper;
         }
 
-        // GET: api/<PlexLibrary>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
         // GET api/<PlexLibrary>/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id, bool refresh = false)
+        [HttpGet("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlexLibraryDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        public async Task<IActionResult> Get(int id, int plexAccountId)
         {
-            if (id <= 0)
+            if (id <= 0) { return BadRequestInvalidId; }
+
+            try
             {
-                return BadRequest($"The Id can not be 0 when updating a {nameof(PlexLibrary)}");
+                var data = await _plexLibraryService.GetPlexLibraryAsync(id, plexAccountId);
+
+                if (data.IsFailed)
+                {
+                    return BadRequest(data.Errors);
+                }
+
+                if (data.Value != null)
+                {
+                    var result = _mapper.Map<PlexLibraryDTO>(data.Value);
+                    Log.Debug($"Found {data.Value.GetMediaCount} in library {data.Value.Title} of type {data.Value.Type}");
+                    return Ok(result);
+
+                }
+                string message = $"Could not find a {nameof(PlexLibrary)} with Id: {id}";
+                Log.Warning(message);
+                return NotFound(message);
+
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
+        }
+
+        // POST api/<PlexLibrary>/
+        [HttpPost("refresh")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlexLibraryDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(List<Error>))]
+        public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibraryDTO refreshPlexLibraryDto)
+        {
+            var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexAccountId, refreshPlexLibraryDto.PlexLibraryId);
+
+            if (data.IsFailed)
+            {
+                return InternalServerError(data.Errors);
             }
 
-            var data = await _plexLibraryService.GetPlexLibraryAsync(id, refresh);
-            if (data != null)
-            {
-                var result = _mapper.Map<PlexLibraryDTO>(data);
-                Log.Debug($"Found {data.GetMediaCount} in library {data.Title} of type {data.Type}");
-                return Ok(result);
-
-            }
-            string message = $"Could not find a {nameof(PlexLibrary)} with Id: {id}";
-            Log.Warning(message);
-            return NotFound(message);
-        }
-
-        // POST api/<PlexLibrary>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-            //TODO Not yet implemented
-
-        }
-
-        // PUT api/<PlexLibrary>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-            //TODO Not yet implemented
-        }
-
-        // DELETE api/<PlexLibrary>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-            //TODO Not yet implemented
-
+            var mapResult = _mapper.Map<PlexLibraryDTO>(data.Value);
+            return Ok(mapResult);
         }
     }
 }

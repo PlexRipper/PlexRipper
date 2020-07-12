@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using PlexRipper.Data.Common.Interfaces;
+using PlexRipper.Application.Common.Interfaces.DataAccess;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -30,7 +30,7 @@ namespace PlexRipper.Data.Config
             builder.RegisterType<PlexRipperDbContext>()
                 .WithParameter("options", dbContextOptions)
                 .As<IPlexRipperDbContext>()
-                .InstancePerLifetimeScope();
+                .InstancePerDependency(); // TODO this might need to be InstancePerLifetime
 
             // Create Database
             // TODO Move the creation of the Database to a better place, unknown where

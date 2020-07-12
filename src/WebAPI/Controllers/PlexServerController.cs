@@ -18,18 +18,16 @@ namespace PlexRipper.WebAPI.Controllers
     {
 
         private readonly IPlexServerService _plexServerService;
-        private readonly IPlexAccountService _plexAccountService;
         private readonly IMapper _mapper;
 
-        public PlexServerController(IPlexServerService plexServerService, IPlexAccountService plexAccountService, IMapper mapper)
+        public PlexServerController(IPlexServerService plexServerService, IMapper mapper)
         {
             _mapper = mapper;
             _plexServerService = plexServerService;
-            _plexAccountService = plexAccountService;
         }
 
         // GET api/<PlexServerController>/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

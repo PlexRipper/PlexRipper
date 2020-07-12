@@ -37,12 +37,18 @@ namespace PlexRipper.WebAPI.Controllers
         [NonAction]
         public IActionResult BadRequest(int id, string nameOf = "")
         {
+
+            var errorList = new List<Error>
+            {
+                new Error($"The Id: {id} was 0 or lower")
+            };
+
             if (nameOf != string.Empty)
             {
-                return new BadRequestObjectResult(new Error($"The Id parameter \"{nameOf}\" has an invalid id of {id}"));
+                errorList[0] = new Error($"The Id parameter \"{nameOf}\" has an invalid id of {id}");
             }
 
-            return new BadRequestObjectResult(new Error($"The Id: {id} was 0 or lower"));
+            return new BadRequestObjectResult(errorList);
         }
     }
 }

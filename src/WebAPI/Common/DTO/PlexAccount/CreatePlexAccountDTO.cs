@@ -2,7 +2,8 @@
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
-    public class CreatePlexAccountDTO
+    public class
+        CreatePlexAccountDTO
     {
         [JsonProperty("displayName")]
         public string DisplayName { get; set; }

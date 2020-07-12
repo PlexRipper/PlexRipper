@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common.Interfaces;
@@ -28,7 +29,9 @@ namespace PlexRipper.WebAPI.Controllers
         //GET: api/<PlexAccountController>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PlexAccountDTO>))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(IEnumerable<PlexAccountDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Result))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAll([FromQuery] bool enabledOnly = false)
         {
             try
@@ -57,8 +60,8 @@ namespace PlexRipper.WebAPI.Controllers
         // GET api/<PlexAccountController>/5
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlexAccountDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Result))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(int id)
         {
@@ -90,19 +93,21 @@ namespace PlexRipper.WebAPI.Controllers
 
         // PUT api/<PlexAccountController>/5
         [HttpPut("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlexAccountDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Result))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Put(int id, [FromBody] UpdatePlexAccountDTO account)
         {
+            if (id <= 0) { return BadRequestInvalidId; }
+
             try
             {
                 account.Id = id;
                 var result = await _plexAccountService.UpdateAccountAsync(_mapper.Map<PlexAccount>(account));
                 if (result.IsFailed)
                 {
-                    return BadRequest(result);
+                    return BadRequest(result.Errors);
                 }
 
                 return Ok(_mapper.Map<PlexAccountDTO>(result));
@@ -118,8 +123,8 @@ namespace PlexRipper.WebAPI.Controllers
         // POST api/<AccountController>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(CreatePlexAccountDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(Result))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Post([FromBody] CreatePlexAccountDTO newAccount)
         {
@@ -180,15 +185,16 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         [HttpPost("validate")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Validate([FromBody] PlexAccountDTO account)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Result))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(Result))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Validate([FromBody] CredentialsDTO account)
         {
             try
             {
-                var validationResult =
-                    await _plexAccountService.ValidatePlexAccountAsync(account.Username, account.Password);
+                var validationResult = await _plexAccountService.ValidatePlexAccountAsync(account.Username, account.Password);
 
                 if (validationResult.IsFailed)
                 {
@@ -218,20 +224,22 @@ namespace PlexRipper.WebAPI.Controllers
 
         [HttpGet("check/{username}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<string>))]
-        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+        [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(Result))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CheckUsername(string username)
         {
+            if (string.IsNullOrEmpty(username) || username.Length < 5) { return BadRequest("Invalid username"); }
             try
             {
-                var validation = await _plexAccountService.CheckIfUsernameIsAvailableAsync(username);
+                var result = await _plexAccountService.CheckIfUsernameIsAvailableAsync(username);
 
-                if (validation.IsFailed)
+                if (result.IsFailed)
                 {
-                    return BadRequest(validation.Errors);
+                    return BadRequest(result.Errors);
                 }
 
-                if (validation.Value)
+                if (result.Value)
                 {
                     string message = $"Username: {username} is available";
                     Log.Debug(message);

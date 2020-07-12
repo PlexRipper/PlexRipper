@@ -1,4 +1,4 @@
-using FluentResults;
+﻿using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +41,13 @@ namespace PlexRipper.Application.PlexLibraries.Queries
 
         public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdQuery request, CancellationToken cancellationToken)
         {
+
+            var result = await ValidateAsync<
+                GetPlexLibraryByIdQuery,
+                GetLibraryByIdQueryValidator>(request);
+            if (result.IsFailed) return result;
+
+
             var plexLibrary = await _dbContext.PlexLibraries
                 .Include(x => x.PlexServer)
                 .Include(x => x.Movies)

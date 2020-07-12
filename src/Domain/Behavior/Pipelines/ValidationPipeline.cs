@@ -2,6 +2,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
+using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,20 +37,21 @@ namespace PlexRipper.Domain.Behavior.Pipelines
                 }
 
                 var x = Result.Fail(error);
-
                 //var z = (TResponse)Activator.CreateInstance(typeof(TResponse));
 
                 if (responseType.IsGenericType)
                 {
                     var resultType = responseType.GetGenericArguments()[0];
-                    var invalidResponseType = typeof(Result<>).MakeGenericType(resultType);
+
 
                     // TODO This will always return null, needs a fix
                     // https://github.com/altmann/FluentResults/issues/54
-                    var f = Result.Fail(error) as TResponse;
+                    var f = Result.Fail(error).ToResult<PlexLibrary>() as TResponse;
+                    //return responseType;
                     return f;
+
                     //var invalidResponse =
-                    //    Activator.CreateInstance(invalidResponseType, null, result.Errors.Select(s => s.ErrorMessage).ToList()) as TResponse;
+                    //    Activator.CreateInstance(invalidResponseType, null) as TResponse;
 
                     //return invalidResponse;
                 }

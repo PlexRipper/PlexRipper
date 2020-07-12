@@ -33,7 +33,7 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id, int plexAccountId)
         {
-            if (id <= 0) { return BadRequestInvalidId; }
+            // if (id <= 0) { return BadRequestInvalidId; }
 
             var data = await _plexLibraryService.GetPlexLibraryAsync(id, plexAccountId);
 

@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using AutofacSerilogIntegration;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
 using System.Linq;
+using System.Reflection;
 
 namespace PlexRipper.WebAPI
 {
@@ -76,7 +78,8 @@ namespace PlexRipper.WebAPI
                 fv.RegisterValidatorsFromAssemblyContaining<ValidateFilter>();
                 fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
             });
-            // services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             // SignalR
             services.AddSignalR();

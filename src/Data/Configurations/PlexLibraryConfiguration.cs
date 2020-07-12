@@ -15,7 +15,7 @@ namespace PlexRipper.Data.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder
-                .HasMany(x => x.Series)
+                .HasMany(x => x.TvShows)
                 .WithOne(x => x.PlexLibrary)
                 .HasForeignKey(x => x.PlexLibraryId)
                 .OnDelete(DeleteBehavior.Cascade);

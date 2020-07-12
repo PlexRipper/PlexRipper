@@ -55,7 +55,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
                 .ForMember(dest => dest.Movies, opt => opt.Ignore())
-                .ForMember(dest => dest.Series, opt => opt.Ignore())
+                .ForMember(dest => dest.TvShows, opt => opt.Ignore())
                 // Location[0].Id -> LibraryLocationId
                 .ForMember(dest => dest.LibraryLocationId,
                     opt => opt.MapFrom(src => src.Location.First().Id))
@@ -75,10 +75,10 @@ namespace PlexRipper.PlexApi.Config.Mappings
                     opt => opt.ConvertUsing(new StringToDateTimeUTC()));
 
             // PlexLibraryMetaDataDTO -> PlexSerie
-            CreateMap<PlexLibraryMetaDataDTO, PlexSerie>(MemberList.Destination)
+            CreateMap<PlexLibraryMetaDataDTO, PlexTvShow>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexSerieGenres, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexSerieRoles, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexTvShowGenres, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexTvShowRoles, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
                 .ForMember(dest => dest.LastViewedAt, opt => opt.Ignore())

@@ -13,7 +13,7 @@ namespace PlexRipper.Data
             builder.Entity<FolderPath>().HasData(
                 new FolderPath { Id = 2, DisplayName = "MoviePath", Directory = "/Movies", FolderType = FolderType.MovieFolder });
             builder.Entity<FolderPath>().HasData(
-                new FolderPath { Id = 3, DisplayName = "SeriesPath", Directory = "/Series", FolderType = FolderType.SerieFolder });
+                new FolderPath { Id = 3, DisplayName = "SeriesPath", Directory = "/Series", FolderType = FolderType.TvShowFolder });
 
             return builder;
         }

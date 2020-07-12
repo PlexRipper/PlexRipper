@@ -16,9 +16,9 @@ namespace PlexRipper.Application.PlexSeries
     public class CreateOrUpdatePlexTvShowsCommand : IRequest<Result<PlexLibrary>>
     {
         public PlexLibrary PlexLibrary { get; }
-        public List<PlexSerie> PlexTvShows { get; }
+        public List<PlexTvShow> PlexTvShows { get; }
 
-        public CreateOrUpdatePlexTvShowsCommand(PlexLibrary plexLibrary, List<PlexSerie> plexTvShows)
+        public CreateOrUpdatePlexTvShowsCommand(PlexLibrary plexLibrary, List<PlexTvShow> plexTvShows)
         {
             PlexLibrary = plexLibrary;
             PlexTvShows = plexTvShows;
@@ -70,7 +70,7 @@ namespace PlexRipper.Application.PlexSeries
             await _dbContext.PlexTvShows.AddRangeAsync(plexTvShows);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            var entity = await _dbContext.PlexLibraries.Include(x => x.Series)
+            var entity = await _dbContext.PlexLibraries.Include(x => x.TvShows)
                 .FirstOrDefaultAsync(x => x.Id == plexLibrary.Id);
 
             ReturnResult(entity, plexLibrary.Id);

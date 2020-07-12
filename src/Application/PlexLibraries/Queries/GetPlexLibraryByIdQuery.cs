@@ -51,7 +51,7 @@ namespace PlexRipper.Application.PlexLibraries.Queries
             var plexLibrary = await _dbContext.PlexLibraries
                 .Include(x => x.PlexServer)
                 .Include(x => x.Movies)
-                .Include(x => x.Series)
+                .Include(x => x.TvShows)
                 .FirstOrDefaultAsync(x => x.Id == request.Id);
 
             return ReturnResult(plexLibrary, request.Id);

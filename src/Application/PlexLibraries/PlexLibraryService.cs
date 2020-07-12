@@ -19,21 +19,15 @@ namespace PlexRipper.Application.PlexLibraries
     {
         private readonly IMediator _mediator;
         private readonly IPlexAuthenticationService _plexAuthenticationService;
-        private readonly IPlexMovieService _plexMovieService;
-        private readonly IPlexSerieService _plexSerieService;
         private readonly IPlexApiService _plexServiceApi;
 
         public PlexLibraryService(
             IMediator mediator,
             IPlexAuthenticationService plexAuthenticationService,
-            IPlexApiService plexServiceApi,
-            IPlexMovieService plexMovieService,
-            IPlexSerieService plexSerieService)
+            IPlexApiService plexServiceApi)
         {
             _mediator = mediator;
             _plexAuthenticationService = plexAuthenticationService;
-            _plexMovieService = plexMovieService;
-            _plexSerieService = plexSerieService;
             _plexServiceApi = plexServiceApi;
         }
 
@@ -163,8 +157,8 @@ namespace PlexRipper.Application.PlexLibraries
                 case PlexMediaType.Movie:
                     result = await _mediator.Send(new CreateOrUpdatePlexMoviesCommand(plexLibrary, plexLibrary.Movies));
                     break;
-                case PlexMediaType.Serie:
-                    result = await _mediator.Send(new CreateOrUpdatePlexTvShowsCommand(plexLibrary, plexLibrary.Series));
+                case PlexMediaType.TvShow:
+                    result = await _mediator.Send(new CreateOrUpdatePlexTvShowsCommand(plexLibrary, plexLibrary.TvShows));
                     break;
             }
 

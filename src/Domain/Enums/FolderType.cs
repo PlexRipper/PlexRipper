@@ -5,6 +5,6 @@
         Unknown = 0,
         DownloadFolder = 1,
         MovieFolder = 2,
-        SerieFolder = 3,
+        TvShowFolder = 3,
     }
 }

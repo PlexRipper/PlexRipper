@@ -119,7 +119,7 @@ namespace PlexRipper.PlexApi.Services
                     libraryContainer.Movies = _mapper.Map<List<PlexMovie>>(result.MediaContainer.Metadata);
                     break;
                 case "show":
-                    libraryContainer.Series = _mapper.Map<List<PlexSerie>>(result.MediaContainer.Metadata);
+                    libraryContainer.TvShows = _mapper.Map<List<PlexTvShow>>(result.MediaContainer.Metadata);
                     break;
             }
 

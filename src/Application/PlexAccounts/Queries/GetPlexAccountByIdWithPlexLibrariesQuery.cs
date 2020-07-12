@@ -107,7 +107,7 @@ namespace PlexRipper.Application.PlexAccounts
                                     LibraryLocationPath = v.PlexLibrary.LibraryLocationPath,
                                     PlexServerId = v.PlexLibrary.PlexServerId,
                                     Movies = v.PlexLibrary.Movies,
-                                    Series = v.PlexLibrary.Series
+                                    TvShows = v.PlexLibrary.TvShows
                                 })
                                 .ToList(),
                         })

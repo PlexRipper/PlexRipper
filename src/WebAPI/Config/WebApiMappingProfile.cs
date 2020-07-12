@@ -38,7 +38,7 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount));
 
             //PlexSerie -> PlexSerieDTO
-            CreateMap<PlexSerie, PlexSerieDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<PlexTvShow, PlexTvShowDTO>(MemberList.Destination).ReverseMap();
 
             //PlexMovie -> PlexMovieDTO
             CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination).ReverseMap();

@@ -49,8 +49,8 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("movies")]
         public virtual List<PlexMovieDTO> Movies { get; set; }
 
-        [JsonProperty("series")]
-        public virtual List<PlexSerieDTO> Series { get; set; }
+        [JsonProperty("tvShows")]
+        public virtual List<PlexTvShowDTO> TvShows { get; set; }
 
     }
 }

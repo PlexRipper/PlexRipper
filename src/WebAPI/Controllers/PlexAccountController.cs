@@ -62,6 +62,8 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(int id)
         {
+            if (id <= 0) { return BadRequestInvalidId; }
+
             try
             {
                 var validationResult = await _plexAccountService.GetPlexAccountAsync(id);
@@ -158,6 +160,8 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
+            if (id <= 0) { return BadRequestInvalidId; }
+
             try
             {
                 var result = await _plexAccountService.DeletePlexAccountAsync(id);

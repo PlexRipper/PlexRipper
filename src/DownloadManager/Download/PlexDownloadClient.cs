@@ -197,9 +197,9 @@ namespace PlexRipper.DownloadManager.Download
             // TODO using exception like this might be dangerous
             try
             {
-                _cancellationToken.Cancel();
-                _responseStream.Dispose();
-                _fileStream.Dispose();
+                _cancellationToken?.Cancel();
+                _responseStream?.Dispose();
+                _fileStream?.Dispose();
             }
             catch (Exception e)
             {

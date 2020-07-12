@@ -17,8 +17,11 @@ export async function getPlexLibraryAsync(libraryId: number, plexAccountId: numb
 		});
 }
 
-export async function refreshPlexLibraryAsync(libraryId: number, plexAccountId: number): Promise<IPlexLibrary> {
-	return await GlobalStore.Axios.get(`${apiPath}/${libraryId}refresh/?plexAccountId=${plexAccountId}`)
+export async function refreshPlexLibraryAsync(libraryId: number, accountId: number): Promise<IPlexLibrary> {
+	return await GlobalStore.Axios.post(`${apiPath}/refresh/`, {
+		plexAccountId: accountId,
+		plexLibraryId: libraryId,
+	})
 		.then((x) => {
 			Log.debug(logText + 'refreshPlexLibraryAsync response: ', x.data);
 			return x.data;

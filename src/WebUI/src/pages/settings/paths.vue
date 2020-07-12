@@ -34,12 +34,10 @@ import IPath from '@dto/settings/iPath.ts';
 import Log from 'consola';
 import { getFolderPaths } from '@api/pathApi';
 import DirectoryBrowser from './components/DirectoryBrowser.vue';
-import FolderTable from './components/FolderTable.vue';
 
 @Component({
 	components: {
 		DirectoryBrowser,
-		FolderTable,
 	},
 })
 export default class SettingsPaths extends Vue {

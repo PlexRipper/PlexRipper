@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
 namespace PlexRipper.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PlexMovieController : ControllerBase
+    public class PlexMovieController : BaseController
     {
         // GET: api/<PlexMovieController>
         [HttpGet]
@@ -15,10 +15,12 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         // GET api/<PlexMovieController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{id:int}")]
+        public IActionResult Get(int id)
         {
-            return "value";
+            if (id <= 0) { return BadRequestInvalidId; }
+
+            return Ok();
         }
 
         // POST api/<PlexMovieController>
@@ -28,7 +30,7 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         // PUT api/<PlexMovieController>/5
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public void Put(int id, [FromBody] string value)
         {
         }

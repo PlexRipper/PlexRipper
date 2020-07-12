@@ -1,6 +1,6 @@
-﻿namespace PlexRipper.WebAPI.Common.DTO.PlexLibrary
+﻿namespace PlexRipper.WebAPI.Common.DTO
 {
-    public class RefreshPlexLibrary
+    public class RefreshPlexLibraryDTO
     {
         public int PlexAccountId { get; set; }
         public int PlexLibraryId { get; set; }

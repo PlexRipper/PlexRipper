@@ -10,7 +10,7 @@ namespace PlexRipper.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DownloadController : ControllerBase
+    public class DownloadController : BaseController
     {
         private readonly IPlexDownloadService _plexDownloadService;
         private readonly IMapper _mapper;
@@ -39,6 +39,9 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpGet("movie/{plexMovieId:int}")]
         public async Task<IActionResult> Get(int plexMovieId, int plexAccountId)
         {
+            if (plexMovieId <= 0) { return BadRequestInvalidId; }
+            if (plexAccountId <= 0) { return BadRequestInvalidId; }
+
             var result = await _plexDownloadService.DownloadMovieAsync(plexAccountId, plexMovieId);
             if (result.IsFailed)
             {

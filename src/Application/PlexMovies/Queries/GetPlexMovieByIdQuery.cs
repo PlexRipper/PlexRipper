@@ -8,7 +8,7 @@ using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlexRipper.Application.PlexMovies.Queries
+namespace PlexRipper.Application.PlexMovies
 {
     public class GetPlexMovieByIdQuery : IRequest<Result<PlexMovie>>
     {

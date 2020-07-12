@@ -1,7 +1,5 @@
 ﻿using FluentResults;
-using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.FileSystem;
-using PlexRipper.Application.Common.Interfaces.Settings;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Types;
@@ -26,10 +24,8 @@ namespace PlexRipper.DownloadManager.Download
         private readonly IFileSystem _fileSystem;
         private readonly Progress<long> _progress = new Progress<long>();
         private Task _copyTask;
-        private IDownloadManager _downloadManager;
         private Stream _fileStream;
         private Stream _responseStream;
-        private IUserSettings _userSettings;
         private List<long> _bytesReceivedHistory = new List<long>();
         private DateTime _lastNotificationTime = DateTime.UtcNow;
         private bool _calculateDownloadSpeedLock = false;
@@ -37,11 +33,9 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Constructors
 
-        public PlexDownloadClient(DownloadTask downloadTask, IDownloadManager downloadManager, IUserSettings userSettings, IFileSystem fileSystem)
+        public PlexDownloadClient(DownloadTask downloadTask, IFileSystem fileSystem)
         {
 
-            _downloadManager = downloadManager;
-            _userSettings = userSettings;
             _fileSystem = fileSystem;
             DownloadTask = downloadTask;
             AddHeaders();

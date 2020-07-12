@@ -75,7 +75,7 @@ namespace PlexRipper.Application.PlexServers.Commands
 
             }
 
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             // Add or update the PlexAccount and PlexServer relationships 
             Log.Information("Adding or updating the PlexAccount association with PlexServers now.");
@@ -109,7 +109,7 @@ namespace PlexRipper.Application.PlexServers.Commands
                 }
             }
 
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             Log.Information("Removing PlexAccount associations with PlexServers now that are not accessible anymore");
             // The list of all past and current serverId's the plexAccount has access too

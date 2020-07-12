@@ -2,14 +2,14 @@
 using MediatR;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
-using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Application.PlexLibraries.Commands;
 using PlexRipper.Application.PlexLibraries.Queries;
+using PlexRipper.Application.PlexMovies;
+using PlexRipper.Application.PlexSeries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,7 +19,6 @@ namespace PlexRipper.Application.PlexLibraries
     {
         private readonly IMediator _mediator;
         private readonly IPlexAuthenticationService _plexAuthenticationService;
-        private readonly IPlexLibraryRepository _plexLibraryRepository;
         private readonly IPlexMovieService _plexMovieService;
         private readonly IPlexSerieService _plexSerieService;
         private readonly IPlexApiService _plexServiceApi;
@@ -28,13 +27,11 @@ namespace PlexRipper.Application.PlexLibraries
             IMediator mediator,
             IPlexAuthenticationService plexAuthenticationService,
             IPlexApiService plexServiceApi,
-            IPlexLibraryRepository plexLibraryRepository,
             IPlexMovieService plexMovieService,
             IPlexSerieService plexSerieService)
         {
             _mediator = mediator;
             _plexAuthenticationService = plexAuthenticationService;
-            _plexLibraryRepository = plexLibraryRepository;
             _plexMovieService = plexMovieService;
             _plexSerieService = plexSerieService;
             _plexServiceApi = plexServiceApi;
@@ -160,16 +157,18 @@ namespace PlexRipper.Application.PlexLibraries
 
             plexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value, plexLibrary.PlexServer.BaseUrl);
 
+            var result = Result.Fail($"Failed to refresh library {plexLibrary.Id}");
             switch (plexLibrary.GetMediaType)
             {
                 case PlexMediaType.Movie:
-                    await _plexMovieService.AddOrUpdatePlexMoviesAsync(plexLibrary, plexLibrary.Movies);
+                    result = await _mediator.Send(new CreateOrUpdatePlexMoviesCommand(plexLibrary, plexLibrary.Movies));
                     break;
                 case PlexMediaType.Serie:
-                    await _plexSerieService.AddOrUpdatePlexSeriesAsync(plexLibrary, plexLibrary.Series);
+                    result = await _mediator.Send(new CreateOrUpdatePlexTvShowsCommand(plexLibrary, plexLibrary.Series));
                     break;
             }
-            return await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id));
+
+            return result;
         }
 
         public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexAccountId,
@@ -229,52 +228,6 @@ namespace PlexRipper.Application.PlexLibraries
 
             return libraryDB;
         }
-
-
-        private async Task AddOrUpdatePlexLibrariesAsync(PlexServer plexServer, List<PlexLibrary> libraries)
-        {
-
-            if (plexServer == null)
-            {
-                Log.Warning("plexServer was null");
-                return;
-            }
-
-            if (libraries.Count == 0)
-            {
-                Log.Warning("libraries list was empty");
-                return;
-            }
-
-            Log.Debug("Starting adding or updating plex libraries");
-
-            // Add or update the plex libraries
-            foreach (var plexLibrary in libraries)
-            {
-                // Create
-                var plexLibraryDB = await _plexLibraryRepository.FindAsync(x => x.PlexServerId == plexServer.Id && x.Uuid == plexLibrary.Uuid);
-
-                plexLibrary.PlexServerId = plexServer.Id;
-
-                if (plexLibraryDB != null)
-                {
-                    // Update
-                    plexLibrary.Id = plexLibraryDB.Id;
-                    await _plexLibraryRepository.UpdateAsync(plexLibrary);
-                }
-                else
-                {
-                    //Create
-                    await _plexLibraryRepository.AddAsync(plexLibrary);
-                }
-            }
-
-            // TODO Add check if it was successful
-
-
-        }
-
-
 
         #endregion
     }

@@ -4,8 +4,6 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.JoinTables;
 using System.IO;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PlexRipper.Data
 {
@@ -13,8 +11,6 @@ namespace PlexRipper.Data
     {
 
         #region Properties
-
-        public DbContext Instance => this;
 
         #region Tables
         public DbSet<PlexAccount> PlexAccounts { get; set; }
@@ -25,6 +21,7 @@ namespace PlexRipper.Data
         public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
         public DbSet<PlexMovie> PlexMovies { get; set; }
+        public DbSet<PlexSerie> PlexTvShows { get; set; }
         public DbSet<PlexRole> PlexRoles { get; set; }
         public DbSet<PlexServer> PlexServers { get; set; }
         public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
@@ -88,11 +85,6 @@ namespace PlexRipper.Data
             var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
             SetConfig(optionsBuilder, true);
             return optionsBuilder;
-        }
-
-        public Task<int> SaveChangesAsync()
-        {
-            return base.SaveChangesAsync(CancellationToken.None);
         }
 
         #endregion Methods

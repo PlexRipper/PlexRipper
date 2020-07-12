@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace PlexRipper.Application.Common.Interfaces.DataAccess
 {
-    public interface IPlexRipperDbContext : IDbContext
+    public interface IPlexRipperDbContext
     {
-        ChangeTracker ChangeTracker { get; }
-        DbContext Instance { get; }
         DbSet<DownloadTask> DownloadTasks { get; set; }
         DbSet<FolderPath> FolderPaths { get; set; }
         DbSet<PlexGenre> PlexGenres { get; set; }
@@ -24,10 +22,10 @@ namespace PlexRipper.Application.Common.Interfaces.DataAccess
         DbSet<PlexMovieGenre> PlexMovieGenres { get; set; }
         DbSet<PlexMovieRole> PlexMovieRoles { get; set; }
         DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
+        DbSet<PlexSerie> PlexTvShows { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
-        int SaveChanges();
+
         EntityEntry Entry(object entity);
-        Task<int> SaveChangesAsync();
     }
 }

@@ -80,8 +80,7 @@ namespace PlexRipper.FileSystem
             {
                 if (OsInfo.IsWindows)
                 {
-                    var result = new FileSystemResult();
-                    result.Directories = GetDrives();
+                    var result = new FileSystemResult { Directories = GetDrives() };
 
                     return result;
                 }

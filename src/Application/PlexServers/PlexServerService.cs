@@ -2,7 +2,6 @@
 using MediatR;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
-using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Application.PlexServers.Commands;
 using PlexRipper.Application.PlexServers.Queries;
 using PlexRipper.Domain;
@@ -16,9 +15,7 @@ namespace PlexRipper.Application.PlexServers
     public class PlexServerService : IPlexServerService
     {
         private readonly IMediator _mediator;
-        private readonly IPlexServerRepository _plexServerRepository;
         private readonly IPlexLibraryService _plexLibraryService;
-        private readonly IPlexServerStatusRepository _plexServerStatusRepository;
         private readonly IPlexApiService _plexServiceApi;
         private readonly IPlexAuthenticationService _plexAuthenticationService;
 
@@ -27,14 +24,10 @@ namespace PlexRipper.Application.PlexServers
             IMediator mediator,
             IPlexApiService plexServiceApi,
             IPlexAuthenticationService plexAuthenticationService,
-            IPlexServerRepository plexServerRepository,
-            IPlexLibraryService plexLibraryService,
-            IPlexServerStatusRepository plexServerStatusRepository)
+            IPlexLibraryService plexLibraryService)
         {
             _mediator = mediator;
-            _plexServerRepository = plexServerRepository;
             _plexLibraryService = plexLibraryService;
-            _plexServerStatusRepository = plexServerStatusRepository;
             _plexServiceApi = plexServiceApi;
             _plexAuthenticationService = plexAuthenticationService;
         }
@@ -90,13 +83,11 @@ namespace PlexRipper.Application.PlexServers
             // Request status
             var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.BaseUrl);
 
-            //serverStatus.PlexServer = plexServer;
+            serverStatus.PlexServer = plexServer;
             serverStatus.PlexServerId = plexServer.Id;
 
             // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
-            await _plexServerStatusRepository.AddAsync(serverStatus);
-
-            return Result.Ok(serverStatus);
+            return await _mediator.Send(new CreatePlexServerStatusCommand(serverStatus));
         }
 
 

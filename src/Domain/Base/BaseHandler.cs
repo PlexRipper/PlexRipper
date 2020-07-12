@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using FluentValidation;
+using PlexRipper.Domain.Entities.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace PlexRipper.Domain.Base
 {
     public class BaseHandler
     {
-        public Result<T> ReturnResult<T>(T value, int id = 0)
+        public Result<T> ReturnResult<T>(T value, int id = 0) where T : BaseEntity
         {
             if (value != null)
             {

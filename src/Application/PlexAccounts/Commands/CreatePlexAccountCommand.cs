@@ -45,7 +45,7 @@ namespace PlexRipper.Application.PlexAccounts
             Log.Debug("Creating a new Account in DB");
 
             await _dbContext.PlexAccounts.AddAsync(command.PlexAccount);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
             await _dbContext.Entry(command.PlexAccount).GetDatabaseValuesAsync();
 
             return ReturnResult(command.PlexAccount, command.PlexAccount.Id);

@@ -3,7 +3,6 @@ using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.FileSystem;
-using PlexRipper.Application.Common.Interfaces.Repositories;
 using PlexRipper.Application.Common.Interfaces.Settings;
 using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
@@ -28,7 +27,6 @@ namespace PlexRipper.DownloadManager
         private readonly IHubContext<DownloadProgressHub> _hubContext;
         private readonly IUserSettings _userSettings;
         private readonly IFileSystem _fileSystem;
-        private readonly IDownloadTaskRepository _downloadTaskRepository;
 
         // Collection which contains all download clients, bound to the DataGrid control
         public List<PlexDownloadClient> DownloadsList = new List<PlexDownloadClient>();
@@ -75,13 +73,12 @@ namespace PlexRipper.DownloadManager
 
         #region Constructors
 
-        public DownloadManager(IMediator mediator, IHubContext<DownloadProgressHub> hubContext, IUserSettings userSettings, IFileSystem fileSystem, IDownloadTaskRepository downloadTaskRepository)
+        public DownloadManager(IMediator mediator, IHubContext<DownloadProgressHub> hubContext, IUserSettings userSettings, IFileSystem fileSystem)
         {
             _mediator = mediator;
             _hubContext = hubContext;
             _userSettings = userSettings;
             _fileSystem = fileSystem;
-            _downloadTaskRepository = downloadTaskRepository;
         }
 
         #endregion Constructors
@@ -91,7 +88,7 @@ namespace PlexRipper.DownloadManager
 
         private PlexDownloadClient CreateDownloadClient(DownloadTask downloadTask)
         {
-            PlexDownloadClient newClient = new PlexDownloadClient(downloadTask, this, _userSettings, _fileSystem);
+            PlexDownloadClient newClient = new PlexDownloadClient(downloadTask, _fileSystem);
 
             newClient.DownloadProgressChanged += OnDownloadProgressChanged;
             //newClient.DownloadFileCompleted += OnDownloadFileCompleted;

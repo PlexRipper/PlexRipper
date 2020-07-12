@@ -7,7 +7,7 @@ using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.FolderPaths.Queries;
 using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
-using PlexRipper.Application.PlexMovies.Queries;
+using PlexRipper.Application.PlexMovies;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;

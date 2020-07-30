@@ -6,7 +6,8 @@ namespace PlexRipper.Domain.Entities
 {
     public class PlexTvShow : PlexMedia
     {
-        public virtual List<PlexTvShowGenre> PlexTvShowGenres { get; set; }
-        public virtual List<PlexTvShowRole> PlexTvShowRoles { get; set; }
+        public List<PlexTvShowGenre> PlexTvShowGenres { get; set; }
+        public List<PlexTvShowRole> PlexTvShowRoles { get; set; }
+        public List<PlexTvShowSeason> Seasons { get; set; }
     }
 }

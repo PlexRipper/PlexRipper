@@ -11,6 +11,7 @@
 					:value="path.directory"
 					class="input-group--focused"
 					solo
+					readonly
 					@click:append="openDirectoryBrowser(path)"
 				></v-text-field>
 			</v-col>
@@ -30,9 +31,9 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
-import IPath from '@dto/settings/iPath.ts';
+import IFolderPath from '@dto/settings/iFolderPath';
 import Log from 'consola';
-import { getFolderPaths } from '@api/pathApi';
+import { getFolderPaths, updateFolderPath } from '@api/pathApi';
 import DirectoryBrowser from './components/DirectoryBrowser.vue';
 
 @Component({
@@ -43,30 +44,36 @@ import DirectoryBrowser from './components/DirectoryBrowser.vue';
 export default class SettingsPaths extends Vue {
 	moduleName: string = 'Settings Paths';
 
-	paths: IPath[] = [];
+	paths: IFolderPath[] = [];
 
 	isDirectoryBrowserOpen: boolean = false;
 
-	selectedPath: IPath | null = null;
+	selectedPath: IFolderPath | null = null;
 
-	openDirectoryBrowser(path: IPath): void {
+	openDirectoryBrowser(path: IFolderPath): void {
 		this.selectedPath = path;
 		this.isDirectoryBrowserOpen = true;
 	}
 
-	confirmDirectoryBrowser(path: IPath): void {
+	confirmDirectoryBrowser(path: IFolderPath): void {
 		this.selectedPath = path;
 		Log.debug(path);
 		this.isDirectoryBrowserOpen = false;
+
+		updateFolderPath(path).subscribe((data) => {
+			Log.debug(`Succesfully updated folderpath ${path.displayName}`, data);
+		});
 	}
 
 	cancelDirectoryBrowser(): void {
 		this.isDirectoryBrowserOpen = false;
 	}
 
-	async created(): Promise<void> {
-		this.paths = await getFolderPaths();
-		Log.debug(this.paths);
+	created(): void {
+		getFolderPaths().subscribe((data) => {
+			this.paths = data;
+			Log.debug(this.paths);
+		});
 	}
 }
 </script>

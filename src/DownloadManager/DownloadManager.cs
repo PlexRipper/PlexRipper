@@ -111,18 +111,18 @@ namespace PlexRipper.DownloadManager
             Log.Information($"({plexDownloadClient.ClientId}){plexDownloadClient.DownloadTask.FileName} => Downloaded {DataFormat.FormatSizeString(downloadProgress.DataReceived)} of {DataFormat.FormatSizeString(downloadProgress.DataTotal)} bytes ({downloadProgress.DownloadSpeed}). {downloadProgress.Percentage} % complete...");
         }
 
-        public async Task StartDownloadAsync(DownloadTask downloadTask)
+        public async Task<Result> StartDownloadAsync(DownloadTask downloadTask)
         {
             // Add to DB
-            var result = await _mediator.Send(new AddDownloadTaskCommandCommand(downloadTask));
+            var result = await _mediator.Send(new AddDownloadTaskCommand(downloadTask));
             if (result.IsFailed)
             {
-                return;
+                return result;
             }
             var downloadTaskDB = await _mediator.Send(new GetDownloadTaskByIdQuery(result.Value.Id));
             if (downloadTaskDB.IsFailed)
             {
-                return;
+                return result;
             }
 
             try
@@ -132,11 +132,11 @@ namespace PlexRipper.DownloadManager
 
                 Log.Debug(downloadTaskDB.Value.ToString());
                 var downloadClient = CreateDownloadClient(downloadTaskDB.Value);
-                await downloadClient.StartAsync();
+                return await downloadClient.StartAsync();
             }
             catch (Exception e)
             {
-                Log.Error(e, "Failed to start the Download of {plexDownloadClient.DownloadTask.FileName}");
+                Log.Error(e, $"Failed to start the Download of {downloadTask.FileName}");
                 throw;
             }
         }

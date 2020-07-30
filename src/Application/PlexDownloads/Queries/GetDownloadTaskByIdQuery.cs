@@ -40,6 +40,9 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 
         public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<GetDownloadTaskByIdQuery, GetDownloadTaskByIdQueryValidator>(request);
+            if (result.IsFailed) return result;
+
             var downloadTask = await _dbContext.DownloadTasks
                                     .Include(x => x.PlexServer)
                                     .Include(x => x.FolderPath)

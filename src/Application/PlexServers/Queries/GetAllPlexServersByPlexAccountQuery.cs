@@ -48,6 +48,9 @@ namespace PlexRipper.Application.PlexServers.Queries
         public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersByPlexAccountQuery request,
             CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<GetAllPlexServersByPlexAccountQuery, GetAllPlexServersByPlexAccountQueryValidator>(request);
+            if (result.IsFailed) return result;
+
             var serverList = await _dbContext
                 .PlexAccountServers
                 .Include(x => x.PlexServer)

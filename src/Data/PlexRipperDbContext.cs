@@ -22,6 +22,7 @@ namespace PlexRipper.Data
 
         public DbSet<PlexMovie> PlexMovies { get; set; }
         public DbSet<PlexTvShow> PlexTvShows { get; set; }
+        public DbSet<PlexTvShowSeason> PlexTvShowSeason { get; set; }
         public DbSet<PlexRole> PlexRoles { get; set; }
         public DbSet<PlexServer> PlexServers { get; set; }
         public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }

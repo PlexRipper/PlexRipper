@@ -40,6 +40,9 @@ namespace PlexRipper.Application.PlexMovies
 
         public async Task<Result<PlexMovie>> Handle(GetPlexMovieByIdQuery request, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<GetPlexMovieByIdQuery, GetPlexMovieByIdQueryValidator>(request);
+            if (result.IsFailed) return result;
+
             var plexMovie = await _dbContext.PlexMovies
                                     .Include(x => x.PlexLibrary)
                                     .ThenInclude(x => x.PlexServer)

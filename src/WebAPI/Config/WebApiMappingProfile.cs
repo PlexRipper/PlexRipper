@@ -25,10 +25,10 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexServers));
 
             //PlexServer <-> PlexServerDTO
-            CreateMap<PlexServerDTO, PlexServer>(MemberList.Source).ReverseMap();
+            CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination).ReverseMap();
 
 
-            //PlexLibrary -> PlexLibraryDTO
+            //PlexLibrary <-> PlexLibraryDTO
             CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount)).ReverseMap();
 
@@ -37,8 +37,11 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<PlexLibrary, PlexLibraryContainerDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount));
 
-            //PlexSerie -> PlexSerieDTO
+            //PlexTvShow <-> PlexTvShowDTO
             CreateMap<PlexTvShow, PlexTvShowDTO>(MemberList.Destination).ReverseMap();
+
+            //PlexTvShowSeason -> PlexTvShowSeasonDTO
+            CreateMap<PlexTvShowSeason, PlexTvShowSeasonDTO>(MemberList.Destination).ReverseMap();
 
             //PlexMovie -> PlexMovieDTO
             CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination).ReverseMap();

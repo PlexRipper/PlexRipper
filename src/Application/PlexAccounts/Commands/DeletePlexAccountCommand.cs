@@ -1,12 +1,12 @@
-﻿using FluentValidation;
+﻿using FluentResults;
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Types;
+using PlexRipper.Domain.Base;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentResults;
 
 namespace PlexRipper.Application.PlexAccounts
 {
@@ -28,7 +28,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
     }
 
-    public class DeletePlexAccountHandler : IRequestHandler<DeletePlexAccountCommand, Result<bool>>
+    public class DeletePlexAccountHandler : BaseHandler, IRequestHandler<DeletePlexAccountCommand, Result<bool>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -39,6 +39,9 @@ namespace PlexRipper.Application.PlexAccounts
 
         public async Task<Result<bool>> Handle(DeletePlexAccountCommand command, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<DeletePlexAccountCommand, DeletePlexAccountValidator>(command);
+            if (result.IsFailed) return result;
+
             var entity = await _dbContext.PlexAccounts.AsTracking().FirstOrDefaultAsync(x => x.Id == command.Id);
 
             if (entity == null)
@@ -49,7 +52,7 @@ namespace PlexRipper.Application.PlexAccounts
             }
 
             _dbContext.PlexAccounts.Remove(entity);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
             Log.Debug($"Deleted PlexAccount with Id: {command.Id} from the database");
 
             return Result.Ok(true);

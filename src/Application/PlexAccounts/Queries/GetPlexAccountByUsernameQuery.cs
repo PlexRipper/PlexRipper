@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
+using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
     }
 
-    public class GetPlexAccountByUsernameQueryHandler : IRequestHandler<GetPlexAccountByUsernameQuery, Result<PlexAccount>>
+    public class GetPlexAccountByUsernameQueryHandler : BaseHandler, IRequestHandler<GetPlexAccountByUsernameQuery, Result<PlexAccount>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -42,6 +43,9 @@ namespace PlexRipper.Application.PlexAccounts
 
         public async Task<Result<PlexAccount>> Handle(GetPlexAccountByUsernameQuery request, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<GetPlexAccountByUsernameQuery, GetAccountByUsernameValidator>(request);
+            if (result.IsFailed) return result;
+
             var account = await _dbContext.PlexAccounts.FirstOrDefaultAsync(x => x.Username == request.Username);
 
             return Result.Ok(account);

@@ -20,7 +20,7 @@ namespace PlexRipper.SignalR.Hubs
                 return Clients.All.SendAsync("DownloadProgress", downloadProgress);
             }
             Log.Error("Clients is null, make sure a client has been subscribed!");
-            return new Task(() => {});
+            return new Task(() => { });
         }
     }
 }

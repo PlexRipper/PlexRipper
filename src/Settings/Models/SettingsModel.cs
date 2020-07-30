@@ -7,22 +7,22 @@ namespace PlexRipper.Settings.Models
     {
         #region Fields
 
-        private string _apiKey = "bnrijbrogbwoeibgoiuweb";
         private bool _confirmExit = false;
         private IDownloadManagerModel _downloadManager = new DownloadManagerModel();
+        private int _activeAccountId = 0;
 
         #endregion Fields
 
         #region Properties
 
-        public string ApiKey
+        public int ActiveAccountId
         {
-            get => _apiKey;
+            get => _activeAccountId;
             set
             {
-                if (value != _apiKey)
+                if (value != _activeAccountId)
                 {
-                    _apiKey = value;
+                    _activeAccountId = value;
                     OnPropertyChanged();
                 }
             }

@@ -1,4 +1,4 @@
-export default interface IPath {
+export default interface IFolderPath {
 	id: number;
 	displayName?: string;
 	type: string;

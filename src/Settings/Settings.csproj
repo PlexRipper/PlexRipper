@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
+    <ProjectReference Include="..\FileSystem\FileSystem.csproj" />
   </ItemGroup>
 
 </Project>

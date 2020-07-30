@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
+using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,7 +38,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
     }
 
-    public class UpdatePlexAccountHandler : IRequestHandler<UpdatePlexAccountCommand, Result<PlexAccount>>
+    public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexAccountCommand, Result<PlexAccount>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -48,6 +49,9 @@ namespace PlexRipper.Application.PlexAccounts
 
         public async Task<Result<PlexAccount>> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<UpdatePlexAccountCommand, UpdatePlexAccountValidator>(command);
+            if (result.IsFailed) return result;
+
             var plexAccount = command.PlexAccount;
             var accountInDb = await _dbContext.PlexAccounts
                 .Include(x => x.PlexAccountServers)
@@ -60,7 +64,7 @@ namespace PlexRipper.Application.PlexAccounts
             }
 
             _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
             return Result.Ok(accountInDb);
         }
     }

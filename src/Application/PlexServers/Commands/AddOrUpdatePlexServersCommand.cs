@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
+using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.JoinTables;
 using System;
@@ -36,7 +37,7 @@ namespace PlexRipper.Application.PlexServers.Commands
         }
     }
 
-    public class AddOrUpdatePlexServersHandler : IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexServer>>>
+    public class AddOrUpdatePlexServersHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexServer>>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -47,6 +48,9 @@ namespace PlexRipper.Application.PlexServers.Commands
 
         public async Task<Result<List<PlexServer>>> Handle(AddOrUpdatePlexLibrariesCommand command, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<AddOrUpdatePlexLibrariesCommand, AddOrUpdatePlexServersValidator>(command);
+            if (result.IsFailed) return result;
+
             var plexAccount = command.PlexAccount;
             var plexServers = command.PlexServers;
 

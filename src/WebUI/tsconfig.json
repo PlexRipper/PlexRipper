@@ -19,7 +19,8 @@
 			"@/*": ["./*"],
 			"@store/*": ["./types/store/*"],
 			"@dto/*": ["./types/dto/*"],
-			"@api/*": ["./types/api/*"]
+			"@api/*": ["./types/api/*"],
+			"@service/*": ["./types/service/*"]
 		},
 		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify"]
 	},

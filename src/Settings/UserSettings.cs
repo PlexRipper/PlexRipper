@@ -1,7 +1,8 @@
 ﻿using Newtonsoft.Json;
+using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Application.Common.Interfaces.Settings;
-using PlexRipper.Settings.Models;
 using PlexRipper.Domain;
+using PlexRipper.Settings.Models;
 using System;
 using System.IO;
 using System.Linq;
@@ -10,19 +11,15 @@ namespace PlexRipper.Settings
 {
     public class UserSettings : SettingsModel, IUserSettings
     {
+        private readonly IFileSystem _fileSystem;
 
         #region Properties
 
         [JsonIgnore]
-        private static string ConfigDirectory => Path.Join(FilePath, "\\config");
-
-        [JsonIgnore]
-        private static string FileLocation => Path.Join(ConfigDirectory, FileName);
+        private string FileLocation => Path.Join(_fileSystem.ConfigDirectory, FileName);
 
         [JsonIgnore]
         private static string FileName { get; } = "PlexRipperSettings.json";
-        [JsonIgnore]
-        private static string FilePath { get; } = Directory.GetCurrentDirectory();
 
         #endregion Properties
 
@@ -30,8 +27,9 @@ namespace PlexRipper.Settings
 
         #region Constructors
 
-        public UserSettings()
+        public UserSettings(IFileSystem fileSystem)
         {
+            _fileSystem = fileSystem;
             this.PropertyChanged += (sender, args) => Save();
 
             Load();
@@ -49,14 +47,11 @@ namespace PlexRipper.Settings
             Save();
         }
 
-        private void CreateConfigDirectory()
+        private void CreateSettingsFile()
         {
-            if (!Directory.Exists(ConfigDirectory))
-            {
-                Log.Debug("Config directory doesn't exist, will create now.");
-
-                Directory.CreateDirectory(ConfigDirectory);
-            }
+            Log.Information($"{FileName} doesn't exist, will create now.");
+            string jsonString = JsonConvert.SerializeObject(new SettingsModel(), Formatting.Indented);
+            File.WriteAllText(FileLocation, jsonString);
         }
 
         public bool Load()
@@ -65,9 +60,7 @@ namespace PlexRipper.Settings
 
             if (!File.Exists(FileLocation))
             {
-                Log.Debug($"{FileName} doesn't exist, will create now.");
-
-                Save();
+                CreateSettingsFile();
             }
 
             try
@@ -88,7 +81,6 @@ namespace PlexRipper.Settings
         public bool Save()
         {
             Log.Debug("Saving UserSettings now.");
-            CreateConfigDirectory();
 
             try
             {

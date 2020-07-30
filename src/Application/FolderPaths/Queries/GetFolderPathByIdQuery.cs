@@ -39,6 +39,9 @@ namespace PlexRipper.Application.FolderPaths.Queries
 
         public async Task<Result<FolderPath>> Handle(GetFolderPathByIdQuery request, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<GetFolderPathByIdQuery, GetFolderPathByIdQueryValidator>(request);
+            if (result.IsFailed) return result;
+
             var folderPath = await _dbContext.FolderPaths.FindAsync(request.Id);
             return ReturnResult(folderPath, request.Id);
 

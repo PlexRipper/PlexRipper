@@ -22,9 +22,9 @@ namespace PlexRipper.Application.Common.Interfaces
         /// Retrieves the new media metadata from the PlexApi
         /// </summary>
         /// <param name="plexAccount"></param>
-        /// <param name="plexLibrary"></param>
+        /// <param name="newPlexLibrary"></param>
         /// <returns>Returns the PlexLibrary with the containing media</returns>
-        Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(PlexAccount plexAccount, PlexLibrary plexLibrary);
+        Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(PlexAccount plexAccount, PlexLibrary newPlexLibrary);
 
         /// <summary>
         /// Returns the <see cref="PlexLibrary"/> with the media content.

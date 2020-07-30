@@ -47,6 +47,9 @@ namespace PlexRipper.Application.PlexSeries
 
         public async Task<Result<PlexLibrary>> Handle(CreateOrUpdatePlexTvShowsCommand command, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<CreateOrUpdatePlexTvShowsCommand, CreateOrUpdatePlexTvShowsValidator>(command);
+            if (result.IsFailed) return result;
+
             var plexLibrary = command.PlexLibrary;
             var plexTvShows = command.PlexTvShows;
 

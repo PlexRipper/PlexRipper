@@ -1,11 +1,11 @@
-import { IPlexSerie } from './IPlexSerie';
-import { IPlexMovie } from './IPlexMovie';
+import IPlexTvShow from './IPlexTvShow';
+import IPlexMovie from './IPlexMovie';
 
 export default interface IPlexLibrary {
 	id: number;
 	key: string;
 	title: string;
-	type: string;
+	type: 'movie' | 'show';
 	updatedAt: Date;
 	createdAt: Date;
 	scannedAt: Date;
@@ -16,5 +16,5 @@ export default interface IPlexLibrary {
 	plexServerId: number;
 	count: number;
 	movies?: IPlexMovie[] | undefined;
-	series?: IPlexSerie[] | undefined;
+	tvShows?: IPlexTvShow[] | undefined;
 }

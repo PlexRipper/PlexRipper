@@ -2,11 +2,11 @@
 	<v-container>
 		<v-row>
 			<!-- Plex Accounts -->
-			<v-col v-for="(account, index) in getAccounts" :key="index" cols="3">
+			<v-col v-for="(account, index) in accounts" :key="index" cols="4" style="min-width: 395px">
 				<account-card :account="account" @dialog-closed="refreshAccounts()" />
 			</v-col>
 			<!-- Add new Account card -->
-			<v-col cols="3">
+			<v-col cols="4" style="min-width: 395px">
 				<account-card @dialog-closed="refreshAccounts()" />
 			</v-col>
 		</v-row>
@@ -17,8 +17,8 @@
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import IPlexAccount from '@dto/IPlexAccount';
+import AccountService from '@service/accountService';
 import AccountCard from './components/AccountCard.vue';
-import { UserStore } from '@/store/';
 
 @Component({
 	components: {
@@ -26,16 +26,21 @@ import { UserStore } from '@/store/';
 	},
 })
 export default class Accounts extends Vue {
+	private accounts: IPlexAccount[] = [];
+
 	checkAccount(account: IPlexAccount): void {
 		Log.debug(account);
 	}
 
-	get getAccounts(): IPlexAccount[] {
-		return UserStore.getAccounts;
+	refreshAccounts(): void {
+		AccountService.fetchAccounts();
 	}
 
-	async refreshAccounts(): Promise<void> {
-		await UserStore.refreshAccounts();
+	created(): void {
+		AccountService.getAccounts().subscribe((data) => {
+			this.accounts = data ?? [];
+			Log.debug(this.accounts);
+		});
 	}
 }
 </script>

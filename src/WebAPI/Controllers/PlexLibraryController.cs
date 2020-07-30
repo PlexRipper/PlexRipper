@@ -39,7 +39,8 @@ namespace PlexRipper.WebAPI.Controllers
 
         public async Task<IActionResult> Get(int id, int plexAccountId)
         {
-            if (id <= 0) { return BadRequestInvalidId; }
+            if (id <= 0) { return BadRequest(id, nameof(id)); }
+            if (plexAccountId <= 0) { return BadRequest(plexAccountId, nameof(plexAccountId)); }
 
             try
             {
@@ -81,8 +82,16 @@ namespace PlexRipper.WebAPI.Controllers
                 return InternalServerError(data.Errors);
             }
 
-            var mapResult = _mapper.Map<PlexLibraryDTO>(data.Value);
-            return Ok(mapResult);
+            if (data.Value != null)
+            {
+                var result = _mapper.Map<PlexLibraryDTO>(data.Value);
+                Log.Debug($"Found {data.Value.GetMediaCount} in library {data.Value.Title} of type {data.Value.Type} after refreshing");
+                return Ok(result);
+            }
+
+            string message = $"Could not refresh {nameof(PlexLibrary)} with Id: {refreshPlexLibraryDto.PlexLibraryId}";
+            Log.Warning(message);
+            return InternalServerError(new List<Error> { new Error(message) });
         }
     }
 }

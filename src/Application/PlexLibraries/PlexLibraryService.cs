@@ -130,7 +130,7 @@ namespace PlexRipper.Application.PlexLibraries
         /// Retrieves the new media metadata from the PlexApi and stores it in the database.
         /// </summary>
         /// <param name="plexAccount"></param>
-        /// <param name="plexLibrary">The <see cref="PlexLibrary"/> to retrieve</param>
+        /// <param name="newPlexLibrary">The <see cref="PlexLibrary"/> to retrieve</param>
         /// <returns>Returns the PlexLibrary with the containing media</returns>
         public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(PlexAccount plexAccount, PlexLibrary plexLibrary)
         {
@@ -149,20 +149,27 @@ namespace PlexRipper.Application.PlexLibraries
                 return Result.Fail(new Error("Failed to retrieve the server auth token"));
             }
 
-            plexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value, plexLibrary.PlexServer.BaseUrl);
-
+            var newPlexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value, plexLibrary.PlexServer.BaseUrl);
             var result = Result.Fail($"Failed to refresh library {plexLibrary.Id}");
-            switch (plexLibrary.GetMediaType)
+            if (newPlexLibrary == null)
             {
-                case PlexMediaType.Movie:
-                    result = await _mediator.Send(new CreateOrUpdatePlexMoviesCommand(plexLibrary, plexLibrary.Movies));
-                    break;
-                case PlexMediaType.TvShow:
-                    result = await _mediator.Send(new CreateOrUpdatePlexTvShowsCommand(plexLibrary, plexLibrary.TvShows));
-                    break;
+                return result;
             }
 
-            return result;
+            switch (newPlexLibrary.GetMediaType)
+            {
+                case PlexMediaType.Movie:
+                    result = await _mediator.Send(new CreateOrUpdatePlexMoviesCommand(newPlexLibrary, newPlexLibrary.Movies));
+                    break;
+                case PlexMediaType.TvShow:
+                    return await RefreshPlexTvShowLibrary(authToken.Value, newPlexLibrary);
+            }
+            if (result.IsFailed)
+            {
+                return result.ToResult<PlexLibrary>();
+            }
+            Log.Information($"Successfully refreshed library {newPlexLibrary.Title} with id: {newPlexLibrary.Id}");
+            return Result.Ok(newPlexLibrary);
         }
 
         public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexAccountId,
@@ -174,7 +181,7 @@ namespace PlexRipper.Application.PlexLibraries
                 return plexAccount.ToResult<PlexLibrary>();
             }
 
-            var plexLibrary = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibraryId));
+            var plexLibrary = await _mediator.Send(new GetPlexLibraryByIdWithMediaQuery(plexLibraryId));
             if (plexLibrary.IsFailed)
             {
                 return plexLibrary;
@@ -184,7 +191,47 @@ namespace PlexRipper.Application.PlexLibraries
         }
 
 
+        private async Task<Result<PlexLibrary>> RefreshPlexTvShowLibrary(string authToken, PlexLibrary plexLibrary)
+        {
 
+            if (plexLibrary == null)
+            {
+                string msg = "The plexLibrary was null";
+                Log.Warning(msg);
+                return Result.Fail(msg);
+            }
+
+            if (plexLibrary.GetMediaType != PlexMediaType.TvShow)
+            {
+                string msg = "PlexLibrary is not of type TvShow";
+                Log.Warning(msg);
+                return Result.Fail(msg);
+            }
+
+            if (plexLibrary.TvShows.Count == 0)
+            {
+                string msg = "PlexLibrary does not contain any TvShows and thus cannot request the corresponding media";
+                Log.Warning(msg);
+                return Result.Fail(msg);
+            }
+
+            var result = await _mediator.Send(new GetPlexLibraryByIdWithServerQuery(plexLibrary.Id));
+            if (result.IsFailed)
+            {
+                return result;
+            }
+
+
+            // Request seasons and episodes for every tv show
+            var plexLibraryDb = result.Value;
+            foreach (var plexTvShow in plexLibrary.TvShows)
+            {
+                plexTvShow.Seasons = await _plexServiceApi.GetSeasonsAsync(authToken, plexLibraryDb.PlexServer.BaseUrl, plexTvShow);
+            }
+
+            result = await _mediator.Send(new CreateOrUpdatePlexTvShowsCommand(plexLibrary, plexLibrary.TvShows));
+            return result;
+        }
         #region CRUD
 
         /// <summary>
@@ -195,7 +242,7 @@ namespace PlexRipper.Application.PlexLibraries
         /// <returns></returns>
         public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId)
         {
-            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
+            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdWithMediaQuery(libraryId));
 
             if (libraryDB.IsFailed)
             {

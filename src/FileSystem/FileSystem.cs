@@ -12,98 +12,58 @@ namespace PlexRipper.FileSystem
 {
     public class FileSystem : IFileSystem
     {
+        #region Fields
+
         private readonly IDiskProvider _diskProvider;
-        public string RootDirectory => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
-
-        public string ConfigDirectory => $"{RootDirectory}/config";
-
-
-        public Result<FileStream> SaveFile(string directory, string fileName, long fileSize)
-        {
-            try
-            {
-                var fullPath = Path.Combine(directory, fileName);
-                if (Directory.Exists(fullPath))
-                {
-                    Log.Warning($"Path: {fullPath} already exists, will overwrite now");
-                }
-                Directory.CreateDirectory(directory);
-
-                var availableSpace = CheckDirectoryAvailableSpace(directory);
-
-                if (availableSpace < fileSize)
-                {
-                    return Result.Fail<FileStream>(
-                        $"There is not enough space available in root directory {directory}");
-                }
-
-                var fileStream = File.Create(fullPath);
-                // Pre-allocate the required file size
-                fileStream.SetLength(fileSize);
-                return Result.Ok();
-
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-                throw;
-            }
-        }
+        private static string _rootDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+        private static string _configDirectory = $"{_rootDirectory}/config";
+        #endregion Fields
+        #region Constructors
 
         public FileSystem(IDiskProvider diskProvider)
         {
             _diskProvider = diskProvider;
         }
 
-        public string ToAbsolutePath(string relativePath)
-        {
-            var x = Path.GetFullPath(Path.Combine(RootDirectory, relativePath));
-            return x;
-        }
+        #endregion Constructors
 
-        public static long CheckDirectoryAvailableSpace(string directory)
-        {
-            var root = GetPathRoot(directory);
-            DriveInfo drive = new DriveInfo(root);
-            return drive.AvailableFreeSpace;
-        }
+        #region Properties
 
-        public static string GetPathRoot(string directory)
+        public string ConfigDirectory
         {
-            FileInfo f = new FileInfo(directory);
-            return Path.GetPathRoot(f.FullName);
-        }
-
-        public FileSystemResult LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
-        {
-            if (string.IsNullOrWhiteSpace(query))
+            get
             {
-                if (OsInfo.IsWindows)
+                CreateConfigDirectory();
+                return _configDirectory;
+            }
+        }
+
+        public string RootDirectory => _rootDirectory;
+        #endregion Properties
+
+        #region Methods
+
+        private void CreateConfigDirectory()
+        {
+            if (!Directory.Exists(_configDirectory))
+            {
+                Log.Debug("Config directory doesn't exist, will create now.");
+
+                Directory.CreateDirectory(_configDirectory);
+            }
+        }
+
+        private List<FileSystemModel> GetDrives()
+        {
+            return _diskProvider.GetMounts()
+                .Select(d => new FileSystemModel
                 {
-                    var result = new FileSystemResult { Directories = GetDrives() };
-
-                    return result;
-                }
-
-                query = "/";
-            }
-            if (
-                allowFoldersWithoutTrailingSlashes &&
-                //query.IsPathValid() &&
-                Directory.Exists(query))
-            {
-                return GetResult(query, includeFiles);
-            }
-
-            var lastSeparatorIndex = query.LastIndexOf(Path.DirectorySeparatorChar);
-            var path = query.Substring(0, lastSeparatorIndex + 1);
-
-            if (lastSeparatorIndex != -1)
-            {
-                return GetResult(path, includeFiles);
-            }
-
-            return new FileSystemResult();
+                    Type = FileSystemEntityType.Drive,
+                    Name = _diskProvider.GetVolumeName(d),
+                    Path = d.RootDirectory,
+                    LastModified = null
+                })
+                .ToList();
         }
 
         private FileSystemResult GetResult(string path, bool includeFiles)
@@ -141,17 +101,89 @@ namespace PlexRipper.FileSystem
             return result;
         }
 
-        private List<FileSystemModel> GetDrives()
+        public static string GetPathRoot(string directory)
         {
-            return _diskProvider.GetMounts()
-                .Select(d => new FileSystemModel
-                {
-                    Type = FileSystemEntityType.Drive,
-                    Name = _diskProvider.GetVolumeName(d),
-                    Path = d.RootDirectory,
-                    LastModified = null
-                })
-                .ToList();
+            FileInfo f = new FileInfo(directory);
+            return Path.GetPathRoot(f.FullName);
         }
+
+        public static long CheckDirectoryAvailableSpace(string directory)
+        {
+            var root = GetPathRoot(directory);
+            DriveInfo drive = new DriveInfo(root);
+            return drive.AvailableFreeSpace;
+        }
+
+        public FileSystemResult LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                if (OsInfo.IsWindows)
+                {
+                    var result = new FileSystemResult { Directories = GetDrives() };
+
+                    return result;
+                }
+
+                query = "/";
+            }
+            if (
+                allowFoldersWithoutTrailingSlashes &&
+                //query.IsPathValid() &&
+                Directory.Exists(query))
+            {
+                return GetResult(query, includeFiles);
+            }
+
+            var lastSeparatorIndex = query.LastIndexOf(Path.DirectorySeparatorChar);
+            var path = query.Substring(0, lastSeparatorIndex + 1);
+
+            if (lastSeparatorIndex != -1)
+            {
+                return GetResult(path, includeFiles);
+            }
+
+            return new FileSystemResult();
+        }
+
+        public Result<FileStream> SaveFile(string directory, string fileName, long fileSize)
+        {
+            try
+            {
+                var fullPath = Path.Combine(directory, fileName);
+                if (Directory.Exists(fullPath))
+                {
+                    Log.Warning($"Path: {fullPath} already exists, will overwrite now");
+                }
+                Directory.CreateDirectory(directory);
+
+                var availableSpace = CheckDirectoryAvailableSpace(directory);
+
+                if (availableSpace < fileSize)
+                {
+                    return Result.Fail<FileStream>(
+                        $"There is not enough space available in root directory {directory}");
+                }
+
+                var fileStream = File.Create(fullPath);
+                // Pre-allocate the required file size
+                fileStream.SetLength(fileSize);
+                return Result.Ok(fileStream);
+
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                throw;
+            }
+        }
+
+        public string ToAbsolutePath(string relativePath)
+        {
+            var x = Path.GetFullPath(Path.Combine(RootDirectory, relativePath));
+            return x;
+        }
+
+        #endregion Methods
     }
 }

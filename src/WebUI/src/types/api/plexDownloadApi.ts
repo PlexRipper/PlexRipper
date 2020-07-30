@@ -1,44 +1,57 @@
 import Log from 'consola';
-import IPlexLibrary from '@dto/IPlexLibrary';
 import IDownloadTask from '@dto/IDownloadTask';
-import { GlobalStore } from '@/store';
-import {} from '@aspnet/signalr';
+import { AxiosResponse } from 'axios';
+import Axios from 'axios-observable';
+import { Observable, of } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
 
 const logText = 'From PlexDownloadApi => ';
-const apiPath = '/Download';
+const apiPath = '/download';
 
-export async function downloadPlexMovie(movieId: number, plexAccountId: number): Promise<IPlexLibrary> {
-	return await GlobalStore.Axios.get(`${apiPath}/movie/${movieId}?plexAccountId=${plexAccountId}`)
-		.then((x) => {
-			Log.debug(logText + 'downloadPlexMovie response: ', x.data);
-			return x.data;
-		})
-		.catch((e) => {
-			Log.error(logText + 'downloadPlexMovie error: ', e);
-			return e.response.status;
-		});
+export function downloadPlexMovie(movieId: number, plexAccountId: number): Observable<boolean> {
+	if (plexAccountId <= 0) {
+		Log.error(`${logText}downloadPlexMovie: invalid plexAccountId of ${plexAccountId}`);
+		return of(false);
+	}
+
+	if (movieId <= 0) {
+		Log.error(`${logText}downloadPlexMovie: invalid libraryId of ${movieId}`);
+		return of(false);
+	}
+
+	Log.debug(`${logText}downloadPlexMovie: Sending request with movieId ${movieId} and plexAccountId ${plexAccountId}`);
+	const result: Observable<AxiosResponse> = Axios.post(`${apiPath}/movie`, {
+		plexAccountId,
+		plexMovieId: movieId,
+	});
+
+	return result.pipe(
+		tap((res) => Log.debug(`${logText}downloadPlexMovie response:`, res.data)),
+		map((res: AxiosResponse) => res.data),
+	);
 }
 
-export async function deleteDownloadTask(downloadTaskId: number): Promise<boolean> {
-	return await GlobalStore.Axios.delete(`${apiPath}/${downloadTaskId}`)
-		.then((x) => {
-			Log.debug(logText + 'deleteDownloadTask response: ', x.data);
-			return x.data;
-		})
-		.catch((e) => {
-			Log.error(logText + 'deleteDownloadTask error: ', e);
-			return e.response.status;
-		});
+export function deleteDownloadTask(downloadTaskId: number): Observable<boolean> {
+	if (downloadTaskId <= 0) {
+		Log.error(`${logText}deleteDownloadTask: invalid downloadTaskId of ${downloadTaskId}`);
+		return of(false);
+	}
+
+	Log.debug(`${logText}deleteDownloadTask: Sending delete request with downloadTaskId ${downloadTaskId}`);
+	const result: Observable<AxiosResponse> = Axios.delete(`${apiPath}/${downloadTaskId}`);
+
+	return result.pipe(
+		tap((res) => Log.debug(`${logText}deleteDownloadTask response:`, res.data)),
+		map((res: AxiosResponse) => res.data),
+	);
 }
 
-export async function getAllDownloads(): Promise<IDownloadTask[]> {
-	return await GlobalStore.Axios.get(`${apiPath}/`)
-		.then((x) => {
-			Log.debug(logText + 'downloadPlexMovie response: ', x.data);
-			return x.data;
-		})
-		.catch((e) => {
-			Log.error(logText + 'downloadPlexMovie error: ', e);
-			return e.response.status;
-		});
+export function getAllDownloads(): Observable<IDownloadTask[]> {
+	Log.debug(`${logText}getAllDownloads: Sending request`);
+	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/`);
+
+	return result.pipe(
+		tap((res) => Log.debug(`${logText}getAllDownloads response:`, res.data)),
+		map((res: AxiosResponse) => res.data),
+	);
 }

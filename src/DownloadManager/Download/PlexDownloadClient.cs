@@ -6,9 +6,7 @@ using PlexRipper.Domain.Types;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.PlexApi.Api;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,9 +24,8 @@ namespace PlexRipper.DownloadManager.Download
         private Task _copyTask;
         private Stream _fileStream;
         private Stream _responseStream;
-        private List<long> _bytesReceivedHistory = new List<long>();
-        private DateTime _lastNotificationTime = DateTime.UtcNow;
-        private bool _calculateDownloadSpeedLock = false;
+        private System.Timers.Timer _progressTimer = new System.Timers.Timer(1000) { AutoReset = true };
+
         #endregion Fields
 
         #region Constructors
@@ -44,8 +41,16 @@ namespace PlexRipper.DownloadManager.Download
             _progress.ProgressChanged += (sender, l) =>
             {
                 BytesReceived = l;
-                CalculateDownloadSpeed(l);
-                OnDownloadProgressChanged(l);
+                BytesRemaining = TotalBytesToReceive - BytesReceived;
+            };
+
+            // Give an download progress update based on the timer
+            _progressTimer.Elapsed += (sender, args) =>
+            {
+                // Ensure the same value is used
+                long bytesReceived = BytesReceived;
+                CalculateDownloadSpeed(bytesReceived);
+                OnDownloadProgressChanged(bytesReceived);
             };
         }
 
@@ -53,7 +58,6 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Properties
 
-        public long BytesReceived { get; internal set; }
 
         /// <summary>
         /// The ClientId is always the same id that is assigned to the <see cref="DownloadTask"/>
@@ -65,18 +69,16 @@ namespace PlexRipper.DownloadManager.Download
 
         public string DownloadPath => _fileSystem.ToAbsolutePath(DownloadTask.FolderPath?.Directory);
 
-        public int DownloadSpeed { get; internal set; }
+        public long DownloadSpeed { get; internal set; }
 
         public DateTime DownloadStartAt { get; internal set; }
 
         public DownloadTask DownloadTask { get; internal set; }
 
         public TimeSpan ElapsedTime => DateTime.UtcNow.Subtract(DownloadStartAt);
-        public TimeSpan ElapsedTimeDownloadSpeed => DateTime.UtcNow.Subtract(_lastNotificationTime);
 
-
-
-        public decimal Percentage { get; internal set; }
+        public long BytesReceived { get; internal set; }
+        public long BytesRemaining { get; internal set; }
 
         public long TotalBytesToReceive { get; internal set; }
 
@@ -94,38 +96,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private void CalculateDownloadSpeed(long bytesReceived)
         {
-            // Only run this once a second
-            if (ElapsedTime.TotalMilliseconds < 1000 && !_calculateDownloadSpeedLock)
-            {
-                return;
-            }
-            _calculateDownloadSpeedLock = true;
-
-            // Ensure there are only 100 entries
-            _bytesReceivedHistory.Add(bytesReceived);
-            if (_bytesReceivedHistory.Count > 100)
-            {
-                _bytesReceivedHistory.RemoveAt(0);
-            }
-            var sizeDiffList = new List<long>();
-            for (int i = 0; i < _bytesReceivedHistory.Count; i += 2)
-            {
-                if (_bytesReceivedHistory.Count > i + 1)
-                {
-                    sizeDiffList.Add(Math.Abs(_bytesReceivedHistory[i] - _bytesReceivedHistory[i + 1]));
-                }
-            }
-
-            if (sizeDiffList.Count > 0)
-            {
-                var sizeDiff = sizeDiffList.Last();
-
-                DownloadSpeed = (int)Math.Floor(sizeDiff / ElapsedTime.TotalSeconds);
-            }
-
-            // TODO Add average speed
-            _lastNotificationTime = DateTime.UtcNow;
-            _calculateDownloadSpeedLock = false;
+            DownloadSpeed = Convert.ToInt64(Math.Round(bytesReceived / ElapsedTime.TotalSeconds, 2));
         }
 
         /// <summary>
@@ -154,10 +125,14 @@ namespace PlexRipper.DownloadManager.Download
                     return result;
                 }
                 _fileStream = result.Value;
+                if (_fileStream == null)
+                {
+                    return Result.Fail($"The file stream was null with destination {DownloadPath}");
+                }
 
                 // Set Timings
                 DownloadStartAt = DateTime.UtcNow;
-                _lastNotificationTime = DateTime.UtcNow;
+                _progressTimer.Start();
 
                 _copyTask = _responseStream
                     .CopyToAsync(_fileStream, _progress, 81920, _cancellationToken.Token)
@@ -177,12 +152,8 @@ namespace PlexRipper.DownloadManager.Download
                 Log.Error(e, msg);
                 var result = Result.Fail(new ExceptionalError(e));
                 result.Errors.Add(new Error(msg));
-                return result;
-            }
-            finally
-            {
-                // TODO Delete file downloaded
                 Cancel();
+                return result;
             }
         }
 
@@ -191,6 +162,7 @@ namespace PlexRipper.DownloadManager.Download
             // TODO using exception like this might be dangerous
             try
             {
+                _progressTimer.Stop();
                 _cancellationToken?.Cancel();
                 _responseStream?.Dispose();
                 _fileStream?.Dispose();
@@ -204,24 +176,19 @@ namespace PlexRipper.DownloadManager.Download
         }
         protected virtual void OnDownloadProgressChanged(long bytesReceived)
         {
-            var newPercentage = DataFormat.GetPercentage(bytesReceived, TotalBytesToReceive);
-            // Only fire event when percentage has changed
-            if (newPercentage != Percentage)
+            var downloadProgress = new DownloadProgress
             {
-                Percentage = newPercentage;
+                Id = ClientId,
+                Status = DownloadTask.DownloadStatus,
+                Percentage = DataFormat.GetPercentage(bytesReceived, TotalBytesToReceive),
+                DataReceived = bytesReceived,
+                DataTotal = TotalBytesToReceive,
+                DownloadSpeed = DownloadSpeed,
+                TimeRemaining = (int)Math.Floor(BytesRemaining / (double)DownloadSpeed),
+            };
 
-                var downloadProgress = new DownloadProgress
-                {
-                    Id = ClientId,
-                    Status = DownloadTask.DownloadStatus,
-                    Percentage = newPercentage,
-                    DataReceived = bytesReceived,
-                    DataTotal = TotalBytesToReceive,
-                    DownloadSpeed = DownloadSpeed.ToString()
-                };
+            DownloadProgressChanged?.Invoke(this, downloadProgress);
 
-                DownloadProgressChanged?.Invoke(this, downloadProgress);
-            }
         }
 
         #endregion Methods

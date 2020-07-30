@@ -27,6 +27,7 @@
 							disable-sort
 							disable-pagination
 							disable-filtering
+							item-class="class"
 							@click:row="directoryNavigate"
 						>
 							<template v-slot:item.type="{ item }">
@@ -45,17 +46,16 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify';
-import IPath from '@dto/settings/iPath.ts';
-import Log from 'consola';
-import { requestDirectories } from '@api/directoryApi';
+import IFolderPath from '@dto/settings/iFolderPath';
+import { getDirectoryPath } from '@api/pathApi';
 import { IDirectory } from '@dto/settings/paths/IFileSystem';
 
 @Component
 export default class DirectoryBrowser extends Vue {
-	@Prop({ required: false, type: Object as () => IPath })
-	readonly path!: IPath;
+	@Prop({ required: false, type: Object as () => IFolderPath })
+	readonly path!: IFolderPath;
 
 	@Prop({ required: true, type: Boolean })
 	readonly open!: boolean;
@@ -70,10 +70,12 @@ export default class DirectoryBrowser extends Vue {
 			text: 'Type',
 			value: 'type',
 			width: 60,
+			class: 'directory-row',
 		},
 		{
 			text: 'Name',
 			value: 'name',
+			class: 'directory-row',
 		},
 	];
 
@@ -93,6 +95,14 @@ export default class DirectoryBrowser extends Vue {
 		}
 	}
 
+	@Watch('open', { immediate: true, deep: true })
+	onDialogOpen(val: boolean): void {
+		if (val) {
+			this.newDirectory = this.path.directory;
+			this.requestDirectories(this.newDirectory);
+		}
+	}
+
 	confirm(): void {
 		this.path.directory = this.newDirectory;
 		this.$emit('confirm', this.path);
@@ -100,11 +110,9 @@ export default class DirectoryBrowser extends Vue {
 
 	cancel(): void {
 		this.$emit('cancel');
-		this.requestDirectories(this.newDirectory);
 	}
 
 	directoryNavigate(dataRow: IDirectory): void {
-		Log.warn(dataRow);
 		if (dataRow.path === '..') {
 			this.requestDirectories(this.parentPath);
 		} else {
@@ -112,26 +120,21 @@ export default class DirectoryBrowser extends Vue {
 		}
 	}
 
-	async requestDirectories(path: string): Promise<void> {
-		const response = await requestDirectories(path);
+	requestDirectories(path: string): void {
+		getDirectoryPath(path).subscribe((data) => {
+			this.items = data.directories;
 
-		this.items = response.directories;
-
-		// Don't add return row if in the root folder
-		if (path !== '') {
-			this.items.unshift({
-				name: '...',
-				path: '..',
-				type: 0,
-			});
-		}
-		this.parentPath = response.parent;
-		this.newDirectory = path;
-	}
-
-	mounted(): void {
-		this.requestDirectories('');
-		this.newDirectory = this.path.directory;
+			// Don't add return row if in the root folder
+			if (path !== '') {
+				this.items.unshift({
+					name: '...',
+					path: '..',
+					type: 0,
+				});
+			}
+			this.parentPath = data.parent;
+			this.newDirectory = path;
+		});
 	}
 }
 </script>

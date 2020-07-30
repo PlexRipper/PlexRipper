@@ -22,7 +22,7 @@ namespace PlexRipper.Domain.Behavior.Pipelines
 
             return await next();
 
-            //// Pre
+            // Pre
             //ValidationResult result = await _compositeValidator.ValidateAsync(request, cancellationToken);
 
             //if (!result.IsValid)
@@ -47,6 +47,7 @@ namespace PlexRipper.Domain.Behavior.Pipelines
 
             //        // TODO This will always return null, needs a fix
             //        // https://github.com/altmann/FluentResults/issues/54
+            // https://stackoverflow.com/q/62860749/8205497
             //        var f = Result.Fail(error) as TResponse;
             //        //return responseType;
             //        return f;
@@ -59,7 +60,7 @@ namespace PlexRipper.Domain.Behavior.Pipelines
 
             //}
 
-            //return await next();
+            ////return await next();
         }
     }
 

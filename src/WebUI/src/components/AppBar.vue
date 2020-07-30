@@ -25,8 +25,8 @@
 			</template>
 
 			<v-list>
-				<template v-if="getAccounts.length > 0">
-					<v-list-item v-for="(account, index) in getAccounts" :key="index" @click="() => {}">
+				<template v-if="accounts.length > 0">
+					<v-list-item v-for="(account, index) in accounts" :key="index" @click="setActiveAccount(account)">
 						<v-list-item-title> {{ account.displayName }}</v-list-item-title>
 					</v-list-item>
 				</template>
@@ -41,20 +41,25 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import IPlexAccount from '@dto/IPlexAccount';
-import { UserStore } from '@/store/';
+import AccountService from '@service/accountService';
+import SettingsService from '@service/settingsService';
 
 @Component
 export default class AppBar extends Vue {
+	private accounts: IPlexAccount[] = [];
+
 	setDarkMode(): void {
 		this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
 	}
 
-	openGithub(): void {
-		this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
+	setActiveAccount(account: IPlexAccount): void {
+		SettingsService.setActiveAccount(account.id);
 	}
 
-	get getAccounts(): IPlexAccount[] {
-		return UserStore.getEnabledAccounts;
+	created(): void {
+		AccountService.getAccounts().subscribe((data) => {
+			this.accounts = data?.filter((x) => x.isEnabled) ?? [];
+		});
 	}
 }
 </script>

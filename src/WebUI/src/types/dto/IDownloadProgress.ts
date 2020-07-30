@@ -5,4 +5,5 @@ export default interface IDownloadProgress {
 	dataReceived: string;
 	dataTotal: string;
 	downloadSpeed: string;
+	timeRemaining: number;
 }

@@ -47,6 +47,10 @@ namespace PlexRipper.Application.PlexServers.Commands
 
         public async Task<Result<PlexServerStatus>> Handle(CreatePlexServerStatusCommand command, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<CreatePlexServerStatusCommand, CreatePlexServerStatusCommandValidator>(command);
+            if (result.IsFailed) return result;
+
+
             Log.Debug("Creating a new PlexServerStatus in the DB");
 
             await _dbContext.PlexServerStatuses.AddAsync(command.PlexServerStatus);

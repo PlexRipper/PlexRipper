@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
+using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace PlexRipper.Application.PlexAccounts
 
 
     public class
-        GetAllPlexAccountsHandler : IRequestHandler<GetAllPlexAccountsQuery, Result<List<PlexAccount>>>
+        GetAllPlexAccountsHandler : BaseHandler, IRequestHandler<GetAllPlexAccountsQuery, Result<List<PlexAccount>>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 

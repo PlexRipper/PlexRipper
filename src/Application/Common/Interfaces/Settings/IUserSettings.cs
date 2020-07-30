@@ -6,7 +6,7 @@ namespace PlexRipper.Application.Common.Interfaces.Settings
     {
         bool Save();
         bool Load();
-        string ApiKey { get; set; }
+        int ActiveAccountId { get; set; }
         bool ConfirmExit { get; set; }
 
         IDownloadManagerModel DownloadManager { get; set; }

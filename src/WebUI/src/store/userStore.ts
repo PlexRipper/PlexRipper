@@ -1,6 +1,5 @@
 import { Module, Mutation, Action, VuexModule } from 'vuex-module-decorators';
 import IPlexAccount from '@dto/IPlexAccount';
-import { getAllAccountsAsync } from '@api/accountApi';
 import Log from 'consola';
 import IPlexServer from '@dto/IPlexServer';
 
@@ -20,7 +19,7 @@ export default class UserStore extends VuexModule {
 	}
 
 	get getAccountId(): number {
-		return this.activeAccountId;
+		return this.getActiveAccount?.id ?? this.activeAccountId;
 	}
 
 	get getAccounts(): IPlexAccount[] {
@@ -28,11 +27,11 @@ export default class UserStore extends VuexModule {
 	}
 
 	get getEnabledAccounts(): IPlexAccount[] {
-		return this.accounts.filter((x) => x.isEnabled);
+		return this.accounts?.filter((x) => x.isEnabled);
 	}
 
 	get getServers(): IPlexServer[] {
-		return this.accounts.find((x) => x.id === this.activeAccountId)?.plexServers ?? [];
+		return this.accounts?.find((x) => x.id === this.activeAccountId)?.plexServers ?? [];
 	}
 
 	selectAccount(): void {}
@@ -46,11 +45,6 @@ export default class UserStore extends VuexModule {
 			this.activeAccountId = this.accounts[0].id;
 			Log.debug(`No account was selected so the default is: ${this.activeAccountId}`);
 		}
-	}
-
-	@Action({ commit: 'setAccounts' })
-	async refreshAccounts(): Promise<IPlexAccount[]> {
-		return await getAllAccountsAsync();
 	}
 
 	@Action

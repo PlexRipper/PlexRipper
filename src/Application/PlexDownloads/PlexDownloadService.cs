@@ -33,7 +33,7 @@ namespace PlexRipper.Application.PlexDownloads
             _plexApiService = plexApiService;
         }
 
-        public Task StartDownloadAsync(DownloadTask downloadTask)
+        public Task<Result> StartDownloadAsync(DownloadTask downloadTask)
         {
             return _downloadManager.StartDownloadAsync(downloadTask);
         }
@@ -103,8 +103,7 @@ namespace PlexRipper.Application.PlexDownloads
                 return downloadTask.ToResult<bool>();
             }
 
-            await StartDownloadAsync(downloadTask.Value);
-            return Result.Ok(true);
+            return await StartDownloadAsync(downloadTask.Value);
         }
 
         #region CRUD

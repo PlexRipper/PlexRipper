@@ -42,6 +42,9 @@ namespace PlexRipper.Application.PlexServers.Queries
         public async Task<Result<PlexServer>> Handle(GetPlexServerByIdQuery request,
             CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<GetPlexServerByIdQuery, GetPlexServerByIdQueryQueryValidator>(request);
+            if (result.IsFailed) return result;
+
             var plexServer = await _dbContext.PlexServers.Include(x => x.PlexLibraries)
                 .FirstOrDefaultAsync(x => x.Id == request.Id);
 

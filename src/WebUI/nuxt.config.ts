@@ -35,6 +35,7 @@ const config: Configuration = {
 	 */
 	plugins: [
 		{ src: '@plugins/consola.ts', mode: 'client' },
+		{ src: '@plugins/filters.ts', mode: 'client' },
 		{ src: '@plugins/axios.ts', mode: 'client' },
 	],
 	/*
@@ -87,6 +88,7 @@ const config: Configuration = {
 				config.resolve.alias['@store'] = path.resolve(__dirname, 'src/store/');
 				config.resolve.alias['@dto'] = path.resolve(__dirname, 'src/types/dto/');
 				config.resolve.alias['@api'] = path.resolve(__dirname, 'src/types/api/');
+				config.resolve.alias['@service'] = path.resolve(__dirname, 'src/types/service/');
 			}
 		},
 	},

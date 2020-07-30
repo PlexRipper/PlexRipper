@@ -38,10 +38,14 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         // Get api/<DownloadController>/movie/{plexMovieId:int}?plexAccountId={id}
-        [HttpGet("movie/{plexMovieId:int}")]
+        [HttpPost("movie")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
-        public async Task<IActionResult> Get(int plexMovieId, int plexAccountId)
+        public async Task<IActionResult> Post([FromBody] DownloadMovieDTO downloadMovie)
         {
+            int plexMovieId = downloadMovie.PlexMovieId;
+            int plexAccountId = downloadMovie.PlexAccountId;
+
             if (plexMovieId <= 0) { return BadRequest(plexMovieId, nameof(plexMovieId)); }
             if (plexAccountId <= 0) { return BadRequest(plexAccountId, nameof(plexAccountId)); }
 

@@ -41,9 +41,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Base", "Base", "{033AA8B6-0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "src\Data\Data.csproj", "{92810180-C144-4D76-BB6B-B02134CA2C39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR", "src\SignalR\SignalR.csproj", "{E0AA73DE-F78B-420A-B726-0278C9F00C6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR", "src\SignalR\SignalR.csproj", "{E0AA73DE-F78B-420A-B726-0278C9F00C6F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSystem", "src\FileSystem\FileSystem.csproj", "{E19F855E-B9CC-4A8D-982E-6BCCE0A58348}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileSystem", "src\FileSystem\FileSystem.csproj", "{E19F855E-B9CC-4A8D-982E-6BCCE0A58348}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

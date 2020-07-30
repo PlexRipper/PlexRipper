@@ -1,14 +1,17 @@
 <template>
 	<v-container>
-		<v-row>
+		<v-row justify="space-between">
 			<v-col cols="6">
-				<p>Movies detail {{ libraryId }}</p>
+				<h1>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</h1>
 			</v-col>
 			<v-col cols="auto">
-				<v-btn @click="refreshLibraryAsync">Refresh Library</v-btn>
+				<v-btn @click="refreshLibrary">Refresh Library</v-btn>
 			</v-col>
+		</v-row>
+		<!-- The movie table -->
+		<v-row v-if="activeAccount">
 			<v-col cols="12">
-				<movie-table :movies="movies" :loading="isLoading" />
+				<movie-table :movies="movies" :active-account="activeAccount" :loading="isLoading" />
 			</v-col>
 		</v-row>
 	</v-container>
@@ -16,46 +19,63 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import * as PlexLibraryApi from '@api/plexLibraryApi';
+import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 import { IPlexMovie } from '@dto/IPlexMovie';
+import IPlexAccount from '@dto/IPlexAccount';
+import SettingsService from '@service/settingsService';
+import Log from 'consola';
+import IPlexLibrary from '@dto/IPlexLibrary';
+import IPlexServer from '@dto/IPlexServer';
 import MovieTable from './components/MovieTable.vue';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import { UserStore } from '@/store/';
 
-@Component({
+@Component<MoviesDetail>({
 	components: {
 		LoadingSpinner,
 		MovieTable,
 	},
 })
 export default class MoviesDetail extends Vue {
+	activeAccount: IPlexAccount | null = null;
+
 	libraryId: number = 0;
 
-	movies: IPlexMovie[] = [];
+	library: IPlexLibrary | null = null;
 
 	isLoading: boolean = true;
 
-	async refreshLibraryAsync(): Promise<void> {
-		this.isLoading = true;
-		const libraryData = await PlexLibraryApi.refreshPlexLibraryAsync(this.libraryId, UserStore.getAccountId);
-		if (libraryData.type === 'movie') {
-			this.movies = libraryData.movies ?? [];
-		}
-		this.isLoading = false;
+	get movies(): IPlexMovie[] {
+		return this.library?.movies ?? [];
 	}
 
-	async getLibraryAsync(): Promise<void> {
-		this.isLoading = true;
-		const libraryData = await PlexLibraryApi.getPlexLibraryAsync(this.libraryId, UserStore.getAccountId);
-		if (libraryData.type === 'movie') {
-			this.movies = libraryData.movies ?? [];
-		}
-		this.isLoading = false;
+	get server(): IPlexServer | null {
+		return this.activeAccount?.plexServers.find((x) => x.id === this.library?.plexServerId) ?? null;
 	}
 
-	async mounted(): Promise<void> {
+	refreshLibrary(): void {
+		this.isLoading = true;
+
+		refreshPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).subscribe((data) => {
+			this.library = data;
+			this.isLoading = false;
+		});
+	}
+
+	getLibrary(): void {
+		this.isLoading = true;
+		getPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).subscribe((data) => {
+			this.library = data;
+			this.isLoading = false;
+		});
+	}
+
+	created(): void {
 		this.libraryId = +this.$route.params.id;
-		await this.getLibraryAsync();
+		SettingsService.getActiveAccount().subscribe((data) => {
+			Log.debug(`MoviesDetail => ${data?.id}`, data);
+			this.activeAccount = data ?? null;
+			this.getLibrary();
+		});
 	}
 }
 </script>

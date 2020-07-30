@@ -106,11 +106,8 @@ namespace PlexRipper.PlexApi.Services
 
             if (result == null) { return null; }
 
-            var libraryContainer = new PlexLibrary
-            {
-                Id = library.Id,
-                Type = result.MediaContainer.ViewGroup
-            };
+            var libraryContainer = _mapper.Map<PlexLibrary>(result);
+            libraryContainer.Id = library.Id;
 
             // Determine how to map based on the Library type.
             switch (result.MediaContainer.ViewGroup)
@@ -135,8 +132,15 @@ namespace PlexRipper.PlexApi.Services
 
         public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl)
         {
-            PlexMediaMetaDataDTO result = await _plexApi.GetMetadataAsync(serverAuthToken, metaDataUrl);
+            var result = await _plexApi.GetMetadataAsync(serverAuthToken, metaDataUrl);
             return _mapper.Map<PlexMediaMetaData>(result);
+        }
+
+        public async Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow)
+        {
+            var result = await _plexApi.GetSeasonsAsync(serverAuthToken, plexFullHost, plexTvShow.RatingKey);
+            return new List<PlexTvShowSeason>();
+            // return _mapper.Map<List<PlexTvShowSeason>>(result.MediaContainerDto);
         }
 
         /// <summary>

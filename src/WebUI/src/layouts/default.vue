@@ -15,7 +15,6 @@
 import { Component, Vue } from 'vue-property-decorator';
 import NavigationDrawer from '@/components/NavigationDrawer.vue';
 import AppBar from '@/components/AppBar.vue';
-import StartUp from '@/plugins/startup';
 
 @Component({
 	components: {
@@ -28,9 +27,8 @@ export default class Default extends Vue {
 		return new Date().getFullYear();
 	}
 
-	async created(): Promise<void> {
+	created(): void {
 		this.$vuetify.theme.dark = true;
-		await StartUp();
 	}
 }
 </script>

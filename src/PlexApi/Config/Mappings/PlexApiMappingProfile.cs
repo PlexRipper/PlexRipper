@@ -22,13 +22,18 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
 
-            //PlexServerDTO -> PlexServer
+            //PlexServerDTO <-> PlexServer
             CreateMap<PlexServerDTO, PlexServer>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibraries, opt => opt.Ignore())
                 .ForMember(dest => dest.ServerStatus, opt => opt.Ignore())
                 .ReverseMap();
 
+            //PlexLibraryMediaDTO -> PlexLibrary
+            CreateMap<PlexLibraryMediaDTO, PlexLibrary>(MemberList.None)
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(x => x.MediaContainer.ViewGroup))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.MediaContainer.Title1));
 
             //PlexServerXML -> PlexServer
             CreateMap<PlexServerXML, PlexServer>(MemberList.Destination)
@@ -74,7 +79,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.OriginallyAvailableAt,
                     opt => opt.ConvertUsing(new StringToDateTimeUTC()));
 
-            // PlexLibraryMetaDataDTO -> PlexSerie
+            // PlexLibraryMetaDataDTO -> PlexTvShow
             CreateMap<PlexLibraryMetaDataDTO, PlexTvShow>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexTvShowGenres, opt => opt.Ignore())
@@ -82,6 +87,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
                 .ForMember(dest => dest.LastViewedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.Seasons, opt => opt.Ignore())
                 .ForMember(dest => dest.OriginallyAvailableAt,
                     opt => opt.ConvertUsing(new StringToDateTimeUTC()));
 

@@ -1,23 +1,22 @@
 import Log from 'consola';
 import IPlexAccount from '@dto/IPlexAccount';
+import { Observable } from 'rxjs';
+import { AxiosResponse } from 'axios';
+import Axios from 'axios-observable';
+import { map } from 'rxjs/operators';
 import { GlobalStore } from '@/store';
 
 const logText = 'From AccountAPI => ';
 const apiPath = '/plexaccount';
 
-export async function getAllAccountsAsync(): Promise<IPlexAccount[]> {
-	try {
-		let accounts: IPlexAccount[] = [];
+export function getAllAccounts(): Observable<IPlexAccount[] | null> {
+	const result: Observable<AxiosResponse> = Axios.get<IPlexAccount[]>(apiPath);
+	return result.pipe(map((res: AxiosResponse) => res.data));
+}
 
-		await GlobalStore.Axios.get(apiPath).then((x) => {
-			accounts = x.data;
-		});
-		Log.debug(logText, accounts);
-		return accounts;
-	} catch (error) {
-		Log.error(logText, error);
-	}
-	return [];
+export function getAllEnabledAccounts(): Observable<IPlexAccount[] | null> {
+	const result: Observable<AxiosResponse> = Axios.get<IPlexAccount[]>(`${apiPath}/?enabledOnly=true`);
+	return result.pipe(map((res: AxiosResponse) => res.data));
 }
 
 export async function ValidateAccountAsync(account: IPlexAccount): Promise<Number> {

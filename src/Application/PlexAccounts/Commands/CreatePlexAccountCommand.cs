@@ -20,9 +20,9 @@ namespace PlexRipper.Application.PlexAccounts
         }
     }
 
-    public class CreatePlexAccountValidator : AbstractValidator<CreatePlexAccountCommand>
+    public class CreatePlexAccountCommandValidator : AbstractValidator<CreatePlexAccountCommand>
     {
-        public CreatePlexAccountValidator()
+        public CreatePlexAccountCommandValidator()
         {
             RuleFor(x => x.PlexAccount.Id).Equal(0).WithMessage("The Id should be 0 when creating a new PlexAccount");
             RuleFor(x => x.PlexAccount.Username).NotEmpty().MinimumLength(5);
@@ -42,6 +42,9 @@ namespace PlexRipper.Application.PlexAccounts
 
         public async Task<Result<PlexAccount>> Handle(CreatePlexAccountCommand command, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<CreatePlexAccountCommand, CreatePlexAccountCommandValidator>(command);
+            if (result.IsFailed) return result;
+
             Log.Debug("Creating a new Account in DB");
 
             await _dbContext.PlexAccounts.AddAsync(command.PlexAccount);

@@ -9,7 +9,7 @@ namespace PlexRipper.Settings.Config
         protected override void Load(ContainerBuilder builder)
         {
             builder
-                .Register(x => new UserSettings())
+                .RegisterType<UserSettings>()
                 .As<IUserSettings>()
                 .SingleInstance();
         }

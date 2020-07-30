@@ -10,16 +10,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
 import Log from 'consola';
-import * as PlexDownloadApi from '@api/plexDownloadApi';
+import { Component, Vue } from 'vue-property-decorator';
 import IDownloadTask from '@dto/IDownloadTask';
 import IDownloadProgress from '@dto/IDownloadProgress';
+import { deleteDownloadTask } from '@api/plexDownloadApi';
+import DownloadService from '@service/downloadService';
+import SignalrService from '@service/signalrService';
+import { tap, switchMap } from 'rxjs/operators';
 import DownloadsTable from './components/DownloadsTable.vue';
 import IDownloadRow from './types/IDownloadRow';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import { SignalrStore } from '@/store/';
-import { deleteDownloadTask } from '@/types/api/plexDownloadApi';
 
 @Component({
 	components: {
@@ -54,28 +55,29 @@ export default class Downloads extends Vue {
 		}
 	}
 
-	async deleteDownloadTasks(downloadTaskId: number): Promise<void> {
-		await deleteDownloadTask(downloadTaskId);
-		// Refresh downloadTasks
-		await this.getAllDownloadTasks();
-	}
-
-	async getAllDownloadTasks(): Promise<void> {
-		this.downloads = await PlexDownloadApi.getAllDownloads();
-	}
-
-	async mounted(): Promise<void> {
-		await this.getAllDownloadTasks();
-
-		addEventListener('signalRSetup', () => {
-			const progressConnection = SignalrStore.getDownloadProgressConnection;
-			progressConnection.on('DownloadProgress', this.updateDownloadProgress);
-
-			progressConnection.on('ReceiveMessage', function(user, message) {
-				Log.debug(user);
-				Log.debug(message);
-			});
+	deleteDownloadTasks(downloadTaskId: number): void {
+		deleteDownloadTask(downloadTaskId).subscribe(() => {
+			// Refresh downloadTasks
+			DownloadService.fetchDownloadList();
 		});
+	}
+
+	created(): void {
+		// Retrieve download list and then retrieve the signalR download progress
+		DownloadService.getDownloadList()
+			.pipe(
+				tap((data) => {
+					this.downloads = data ?? [];
+				}),
+				switchMap(() => SignalrService.getDownloadProgress()),
+			)
+			.subscribe((data) => {
+				if (data) {
+					this.updateDownloadProgress(data);
+				} else {
+					Log.error(`DownloadProgress was undefined`);
+				}
+			});
 	}
 }
 </script>

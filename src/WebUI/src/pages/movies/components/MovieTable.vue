@@ -19,13 +19,13 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import { IPlexMovie } from '@dto/IPlexMovie';
+import IPlexMovie from '@dto/IPlexMovie';
 import { DataTableHeader } from 'vuetify/types';
+import IPlexAccount from '@dto/IPlexAccount';
+import DownloadService from '@service/downloadService';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { downloadPlexMovie } from '@/types/api/plexDownloadApi';
-import { UserStore } from '@/store/';
 
 @Component({
 	components: {
@@ -33,11 +33,14 @@ import { UserStore } from '@/store/';
 	},
 })
 export default class MovieTable extends Vue {
-	@Prop({ required: true, type: Array as () => IPlexMovie[] })
-	readonly movies: IPlexMovie[] = [];
+	@Prop({ required: true, type: Object as () => IPlexAccount })
+	readonly activeAccount!: IPlexAccount;
 
-	@Prop({ required: true, type: Boolean })
-	readonly loading: Boolean = true;
+	@Prop({ required: true, type: Array as () => IPlexMovie[] })
+	readonly movies!: IPlexMovie[];
+
+	@Prop({ required: true, type: Boolean, default: true })
+	readonly loading!: Boolean;
 
 	get getHeaders(): DataTableHeader<IPlexMovie>[] {
 		return [
@@ -70,8 +73,9 @@ export default class MovieTable extends Vue {
 	}
 
 	downloadMovie(item: IPlexMovie): void {
-		Log.debug(item);
-		downloadPlexMovie(item.id, UserStore.getAccountId);
+		downloadPlexMovie(item.id, this.activeAccount?.id ?? 0).subscribe(() => {
+			DownloadService.fetchDownloadList();
+		});
 	}
 }
 </script>

@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace PlexRipper.Application.PlexLibraries.Queries
 {
-    public class GetPlexLibraryByIdQuery : IRequest<Result<PlexLibrary>>
+    public class GetPlexLibraryByIdWithServerQuery : IRequest<Result<PlexLibrary>>
     {
-        public GetPlexLibraryByIdQuery(int id)
+        public GetPlexLibraryByIdWithServerQuery(int id)
         {
             Id = id;
         }
@@ -20,38 +20,31 @@ namespace PlexRipper.Application.PlexLibraries.Queries
         public int Id { get; }
     }
 
-    public class GetLibraryByIdQueryValidator : AbstractValidator<GetPlexLibraryByIdQuery>
+    public class GetPlexLibraryByIdWithServerQueryValidator : AbstractValidator<GetPlexLibraryByIdWithServerQuery>
     {
-        public GetLibraryByIdQueryValidator()
+        public GetPlexLibraryByIdWithServerQueryValidator()
         {
             RuleFor(x => x.Id).GreaterThan(0);
         }
-
     }
 
 
-    public class GetLibraryByIdHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdQuery, Result<PlexLibrary>>
+    public class GetPlexLibraryByIdWithServerQueryHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdWithServerQuery, Result<PlexLibrary>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
-        public GetLibraryByIdHandler(IPlexRipperDbContext dbContext)
+        public GetPlexLibraryByIdWithServerQueryHandler(IPlexRipperDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdWithServerQuery request, CancellationToken cancellationToken)
         {
-
-            var result = await ValidateAsync<
-                GetPlexLibraryByIdQuery,
-                GetLibraryByIdQueryValidator>(request);
+            var result = await ValidateAsync<GetPlexLibraryByIdWithServerQuery, GetPlexLibraryByIdWithServerQueryValidator>(request);
             if (result.IsFailed) return result;
-
 
             var plexLibrary = await _dbContext.PlexLibraries
                 .Include(x => x.PlexServer)
-                .Include(x => x.Movies)
-                .Include(x => x.TvShows)
                 .FirstOrDefaultAsync(x => x.Id == request.Id);
 
             return ReturnResult(plexLibrary, request.Id);

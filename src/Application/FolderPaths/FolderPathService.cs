@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common.Interfaces;
+using PlexRipper.Application.FolderPaths.Commands;
 using PlexRipper.Application.FolderPaths.Queries;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
@@ -21,5 +22,12 @@ namespace PlexRipper.Application.FolderPaths
         {
             return _mediator.Send(new GetAllFolderPathsQuery());
         }
+
+        public Task<Result<FolderPath>> UpdateFolderPathAsync(FolderPath folderPath)
+        {
+            return _mediator.Send(new UpdateFolderPathCommand(folderPath));
+        }
+
+
     }
 }

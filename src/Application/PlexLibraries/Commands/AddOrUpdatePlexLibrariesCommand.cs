@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
+using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.JoinTables;
 using System;
@@ -38,7 +39,7 @@ namespace PlexRipper.Application.PlexLibraries.Commands
         }
     }
 
-    public class AddOrUpdatePlexLibrariesHandler : IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<bool>>
+    public class AddOrUpdatePlexLibrariesHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<bool>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -49,6 +50,9 @@ namespace PlexRipper.Application.PlexLibraries.Commands
 
         public async Task<Result<bool>> Handle(AddOrUpdatePlexLibrariesCommand command, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<AddOrUpdatePlexLibrariesCommand, AddOrUpdatePlexLibrariesValidator>(command);
+            if (result.IsFailed) return result;
+
             var plexAccount = command.PlexAccount;
             var plexServer = command.PlexServer;
             var plexLibraries = command.PlexLibraries;
@@ -83,7 +87,7 @@ namespace PlexRipper.Application.PlexLibraries.Commands
                     }
                 }
 
-                await _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync(cancellationToken);
 
                 // Add or update the PlexAccount, PlexServer and PlexLibrary relationships 
                 Log.Information("Adding or updating the PlexAccount association with PlexLibraries now.");
@@ -118,7 +122,7 @@ namespace PlexRipper.Application.PlexLibraries.Commands
 
                 }
 
-                await _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync(cancellationToken);
 
                 // Remove plexLibraries the PlexAccount no longer has access to.
                 // TODO Add a separate function that cleans up the database for libraries that have no PlexAccounts which can access them

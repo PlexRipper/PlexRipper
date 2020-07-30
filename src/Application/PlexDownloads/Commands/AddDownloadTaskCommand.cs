@@ -10,17 +10,17 @@ using System.Threading.Tasks;
 
 namespace PlexRipper.Application.PlexDownloads.Commands
 {
-    public class AddDownloadTaskCommandCommand : IRequest<Result<DownloadTask>>
+    public class AddDownloadTaskCommand : IRequest<Result<DownloadTask>>
     {
         public DownloadTask DownloadTask { get; }
 
-        public AddDownloadTaskCommandCommand(DownloadTask downloadTask)
+        public AddDownloadTaskCommand(DownloadTask downloadTask)
         {
             DownloadTask = downloadTask;
         }
     }
 
-    public class AddDownloadTaskCommandValidator : AbstractValidator<AddDownloadTaskCommandCommand>
+    public class AddDownloadTaskCommandValidator : AbstractValidator<AddDownloadTaskCommand>
     {
         public AddDownloadTaskCommandValidator()
         {
@@ -31,7 +31,7 @@ namespace PlexRipper.Application.PlexDownloads.Commands
         }
     }
 
-    public class AddDownloadTaskCommandHandler : BaseHandler, IRequestHandler<AddDownloadTaskCommandCommand, Result<DownloadTask>>
+    public class AddDownloadTaskCommandHandler : BaseHandler, IRequestHandler<AddDownloadTaskCommand, Result<DownloadTask>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -40,8 +40,11 @@ namespace PlexRipper.Application.PlexDownloads.Commands
             _dbContext = dbContext;
         }
 
-        public async Task<Result<DownloadTask>> Handle(AddDownloadTaskCommandCommand command, CancellationToken cancellationToken)
+        public async Task<Result<DownloadTask>> Handle(AddDownloadTaskCommand command, CancellationToken cancellationToken)
         {
+            var result = await ValidateAsync<AddDownloadTaskCommand, AddDownloadTaskCommandValidator>(command);
+            if (result.IsFailed) return result;
+
             await _dbContext.DownloadTasks.AddAsync(command.DownloadTask);
             if (command.DownloadTask.FolderPath != null)
             {

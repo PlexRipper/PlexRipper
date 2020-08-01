@@ -56,7 +56,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import { IPlexMovie } from '@dto/IPlexMovie';
+import IPlexMovie from '@dto/IPlexMovie';
 import { DataTableHeader } from 'vuetify/types';
 import IDownloadRow from '../types/IDownloadRow';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';

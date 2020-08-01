@@ -122,7 +122,7 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import Log from 'consola';
 import IPlexAccount from '@dto/IPlexAccount';
-import * as AccountApi from '@api/accountApi';
+import { validateAccount, createAccount, deleteAccount, updateAccount } from '@api/accountApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
 @Component({
@@ -206,23 +206,19 @@ export default class AccountCard extends Vue {
 		Log.debug(account);
 	}
 
-	async validate(): Promise<void> {
+	validate(): void {
 		this.getForm.validate();
 
 		if (this.valid) {
 			this.validateLoading = true;
-			const statusCode = await AccountApi.ValidateAccountAsync(this.getAccount);
-			// Set the validation status based on the validate api response
-			switch (statusCode) {
-				case 200:
+			validateAccount(this.getAccount).subscribe((data) => {
+				if (data) {
 					this.isValidated = 'OK';
-					break;
-
-				default:
+				} else {
 					this.isValidated = 'ERROR';
-					break;
-			}
-			this.validateLoading = false;
+				}
+				this.validateLoading = false;
+			});
 		}
 	}
 
@@ -247,21 +243,25 @@ export default class AccountCard extends Vue {
 	}
 
 	cancel(): void {
-		this.dialog = false;
-	}
-
-	async saveAccount(): Promise<void> {
-		if (this.isNew) {
-			await AccountApi.createAccountAsync(this.getAccount);
-		} else {
-			await AccountApi.updateAccountAsync(this.getAccount);
-		}
-
 		this.closeDialog();
 	}
 
-	async deleteAccount(): Promise<void> {
-		await AccountApi.deleteAccountAsync(this.account.id);
+	saveAccount(): void {
+		if (this.isNew) {
+			createAccount(this.getAccount).subscribe(() => {
+				this.closeDialog();
+			});
+		} else {
+			updateAccount(this.getAccount).subscribe(() => {
+				this.closeDialog();
+			});
+		}
+	}
+
+	deleteAccount(): void {
+		deleteAccount(this.account.id).subscribe(() => {
+			this.closeDialog();
+		});
 	}
 
 	openDialog(): void {

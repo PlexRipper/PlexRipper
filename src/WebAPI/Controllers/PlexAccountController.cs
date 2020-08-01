@@ -185,7 +185,7 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         [HttpPost("validate")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Result))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(Result))]
@@ -205,9 +205,8 @@ namespace PlexRipper.WebAPI.Controllers
 
                 if (validationResult.Value)
                 {
-                    string message = $"Account with username: {account.Username} was valid";
-                    Log.Information(message);
-                    return Ok(message);
+                    Log.Information($"Account with username: {account.Username} was valid");
+                    return Ok(true);
                 }
                 else
                 {

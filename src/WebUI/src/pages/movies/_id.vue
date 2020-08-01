@@ -20,7 +20,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
-import { IPlexMovie } from '@dto/IPlexMovie';
+import IPlexMovie from '@dto/IPlexMovie';
 import IPlexAccount from '@dto/IPlexAccount';
 import SettingsService from '@service/settingsService';
 import Log from 'consola';

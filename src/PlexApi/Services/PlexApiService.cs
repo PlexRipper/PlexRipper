@@ -2,10 +2,8 @@
 using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
-using PlexRipper.PlexApi.Common.DTO.PlexGetStatus;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PlexRipper.PlexApi.Services
@@ -30,7 +28,7 @@ namespace PlexRipper.PlexApi.Services
             var result = await _plexApi.PlexSignInAsync(username, password);
             if (result != null)
             {
-                var mapResult = _mapper.Map<PlexAccount>(result.User);
+                var mapResult = _mapper.Map<PlexAccount>(result);
                 if (mapResult != null)
                 {
                     mapResult.IsValidated = true;
@@ -64,7 +62,7 @@ namespace PlexRipper.PlexApi.Services
             var result = await _plexApi.GetServerAsync(authToken);
             if (result != null)
             {
-                var convertedList = _mapper.Map<List<PlexServer>>(result.Server);
+                var convertedList = _mapper.Map<List<PlexServer>>(result);
                 return CleanupPlexServers(convertedList);
             }
             Log.Warning("Failed to retrieve PlexServers");
@@ -79,7 +77,7 @@ namespace PlexRipper.PlexApi.Services
                 return new List<PlexLibrary>();
             }
 
-            var librariesDTOs = result.MediaContainer.Directory.ToList();
+            var librariesDTOs = result.MediaContainer.Directory;
             var map = new List<PlexLibrary>();
             try
             {
@@ -102,7 +100,7 @@ namespace PlexRipper.PlexApi.Services
         /// <returns></returns>
         public async Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary library, string authToken, string plexFullHost)
         {
-            var result = await _plexApi.GetLibraryMediaAsync(authToken, plexFullHost, library.Key);
+            var result = await _plexApi.GetMetadataForLibraryAsync(authToken, plexFullHost, library.Key);
 
             if (result == null) { return null; }
 
@@ -126,7 +124,7 @@ namespace PlexRipper.PlexApi.Services
 
         public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey)
         {
-            PlexMediaMetaDataDTO result = await _plexApi.GetMetadataAsync(serverAuthToken, plexFullHost, ratingKey);
+            var result = await _plexApi.GetMetadataAsync(serverAuthToken, plexFullHost, ratingKey);
             return _mapper.Map<PlexMediaMetaData>(result);
         }
 

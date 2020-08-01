@@ -1,20 +1,20 @@
 ﻿using AutoMapper;
 using PlexRipper.Domain.Entities;
-using PlexRipper.PlexApi.Common.DTO.PlexGetStatus;
+using PlexRipper.PlexApi.Models;
 using System.Linq;
 
 namespace PlexRipper.PlexApi.Config.Mappings
 {
-    public class PlexMediaMetaDataDTOPlexMediaMetaData : ITypeConverter<PlexMediaMetaDataDTO, PlexMediaMetaData>
+    public class PlexMediaMetaDataDTOPlexMediaMetaData : ITypeConverter<PlexMediaContainer, PlexMediaMetaData>
     {
-        public PlexMediaMetaData Convert(PlexMediaMetaDataDTO source, PlexMediaMetaData destination, ResolutionContext context)
+        public PlexMediaMetaData Convert(PlexMediaContainer source, PlexMediaMetaData destination, ResolutionContext context)
         {
-            if (source?.MediaContainerDto == null || !source.MediaContainerDto.Metadata.Any() || !source.MediaContainerDto.Metadata.First().Media.Any())
+            if (source?.MediaContainer == null || !source.MediaContainer.Metadata.Any() || !source.MediaContainer.Metadata.First().Media.Any())
             {
                 return null;
             }
 
-            var medium = source.MediaContainerDto.Metadata.First().Media.First();
+            var medium = source.MediaContainer.Metadata.First().Media.First();
             var part = medium.Part.Any() ? medium.Part.First() : null;
 
             return new PlexMediaMetaData

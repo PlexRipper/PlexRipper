@@ -4,12 +4,13 @@ import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
 import { map, tap } from 'rxjs/operators';
+import Result from 'fluent-type-results';
 
 const logText = 'From AccountAPI => ';
 const apiPath = '/plexaccount';
 
 export function getAllAccounts(): Observable<IPlexAccount[] | null> {
-	const result: Observable<AxiosResponse> = Axios.get<IPlexAccount[]>(apiPath);
+	const result: Observable<AxiosResponse> = Axios.get<Result<IPlexAccount[]>>(apiPath);
 	return result.pipe(
 		map((res: AxiosResponse) => res.data),
 		tap((data) => Log.debug(logText + 'getAllEnabledAccounts response:', data)),
@@ -17,7 +18,7 @@ export function getAllAccounts(): Observable<IPlexAccount[] | null> {
 }
 
 export function getAllEnabledAccounts(): Observable<IPlexAccount[] | null> {
-	const result: Observable<AxiosResponse> = Axios.get<IPlexAccount[]>(`${apiPath}/?enabledOnly=true`);
+	const result: Observable<AxiosResponse> = Axios.get<Result<IPlexAccount[]>>(`${apiPath}/?enabledOnly=true`);
 	return result.pipe(
 		map((res: AxiosResponse) => res.data),
 		tap((data) => Log.debug(logText + 'getAllEnabledAccounts response:', data)),
@@ -53,5 +54,13 @@ export function deleteAccount(accountId: Number): Observable<IPlexAccount> {
 	return result.pipe(
 		map((res: AxiosResponse) => res.data),
 		tap((data) => Log.debug(logText + 'deleteAccount response:', data)),
+	);
+}
+
+export function getAccount(accountId: Number): Observable<Result<IPlexAccount>> {
+	const result: Observable<AxiosResponse<Result<IPlexAccount>>> = Axios.get<Result<IPlexAccount>>(`${apiPath}/${accountId}`);
+	return result.pipe(
+		map((res: AxiosResponse) => res.data),
+		tap((data) => Log.debug(logText + 'getAccount response:', data.value)),
 	);
 }

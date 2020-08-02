@@ -44,9 +44,6 @@ namespace PlexRipper.Application.PlexAccounts
 
         public async Task<Result<PlexAccount>> Handle(GetPlexAccountByIdWithPlexLibrariesQuery request, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetPlexAccountByIdWithPlexLibrariesQuery, GetPlexAccountByIdWithPlexLibrariesQueryValidator>(request);
-            if (result.IsFailed) return result;
-
             var id = request.Id;
 
             var account = await _dbContext.PlexAccounts

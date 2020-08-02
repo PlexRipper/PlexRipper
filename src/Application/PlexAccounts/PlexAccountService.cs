@@ -231,24 +231,27 @@ namespace PlexRipper.Application.PlexAccounts
             }
 
             // Create PlexAccount
-            var accountInDB = await _mediator.Send(new CreatePlexAccountCommand(plexAccount));
+            var createResult = await _mediator.Send(new CreatePlexAccountCommand(plexAccount));
 
-            if (accountInDB.IsFailed)
+            if (createResult.IsFailed)
             {
                 string msg = "Failed to validate the PlexAccount that will be created";
                 Log.Warning(msg);
-                accountInDB.Errors.Add(new Error(msg));
-                return accountInDB;
+                createResult.Errors.Add(new Error(msg));
+                return createResult.ToResult();
             }
 
             // Setup PlexAccount
-            var isSuccessful = await SetupAccountAsync(accountInDB.Value);
+            var accountInDb = await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value));
+            if (accountInDb.IsFailed) { return accountInDb; }
+
+            var isSuccessful = await SetupAccountAsync(accountInDb.Value);
             if (isSuccessful.IsSuccess)
             {
-                return await _mediator.Send(new GetPlexAccountByIdWithPlexLibrariesQuery(accountInDB.Value.Id));
+                return await _mediator.Send(new GetPlexAccountByIdWithPlexLibrariesQuery(accountInDb.Value.Id));
             }
 
-            // Failed to setup account successfully return errors
+            // Failed to setup account successfully, return errors
             return isSuccessful.ToResult<PlexAccount>();
         }
 
@@ -280,9 +283,10 @@ namespace PlexRipper.Application.PlexAccounts
         /// </summary>
         /// <param name="plexAccountId"></param>
         /// <returns></returns>
-        public Task<Result<bool>> DeletePlexAccountAsync(int plexAccountId)
+        public async Task<Result<bool>> DeletePlexAccountAsync(int plexAccountId)
         {
-            return _mediator.Send(new DeletePlexAccountCommand(plexAccountId));
+            var result = await _mediator.Send(new DeletePlexAccountCommand(plexAccountId));
+            return result;
         }
         #endregion
     }

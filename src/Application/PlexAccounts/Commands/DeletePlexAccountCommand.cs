@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PlexRipper.Application.PlexAccounts
 {
-    public class DeletePlexAccountCommand : IRequest<Result<bool>>
+    public class DeletePlexAccountCommand : IRequest<Result>
     {
         public int Id { get; }
 
@@ -28,7 +28,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
     }
 
-    public class DeletePlexAccountHandler : BaseHandler, IRequestHandler<DeletePlexAccountCommand, Result<bool>>
+    public class DeletePlexAccountHandler : BaseHandler, IRequestHandler<DeletePlexAccountCommand, Result>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -37,25 +37,22 @@ namespace PlexRipper.Application.PlexAccounts
             _dbContext = dbContext;
         }
 
-        public async Task<Result<bool>> Handle(DeletePlexAccountCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(DeletePlexAccountCommand command, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<DeletePlexAccountCommand, DeletePlexAccountValidator>(command);
-            if (result.IsFailed) return result;
-
             var entity = await _dbContext.PlexAccounts.AsTracking().FirstOrDefaultAsync(x => x.Id == command.Id);
 
             if (entity == null)
             {
                 string msg = $"Entity of type PlexAccount with Id {command.Id} could not be found to be removed";
                 Log.Warning(msg);
-                Result.Fail(msg);
+                return Result.Fail(msg);
             }
 
             _dbContext.PlexAccounts.Remove(entity);
             await _dbContext.SaveChangesAsync(cancellationToken);
             Log.Debug($"Deleted PlexAccount with Id: {command.Id} from the database");
 
-            return Result.Ok(true);
+            return Result.Ok();
         }
     }
 }

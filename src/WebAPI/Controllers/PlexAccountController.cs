@@ -59,10 +59,10 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET api/<PlexAccountController>/5
         [HttpGet("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlexAccountDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PlexAccountDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Result))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Result))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(Result))]
         public async Task<IActionResult> Get(int id)
         {
             if (id <= 0) { return BadRequestInvalidId; }
@@ -72,16 +72,17 @@ namespace PlexRipper.WebAPI.Controllers
                 var validationResult = await _plexAccountService.GetPlexAccountAsync(id);
                 if (validationResult.IsFailed)
                 {
-                    return BadRequest(validationResult.Errors);
+                    return BadRequest(validationResult.ToResult());
                 }
 
                 if (validationResult.Value != null)
                 {
-                    return Ok(_mapper.Map<PlexAccountDTO>(validationResult.Value));
+                    var result = Result.Ok(_mapper.Map<PlexAccountDTO>(validationResult.Value));
+                    return Ok(result);
                 }
                 string message = $"Could not find a PlexAccount with Id: {id}";
                 Log.Warning(message);
-                return NotFound(message);
+                return NotFound(Result.Fail(message));
 
             }
             catch (Exception e)

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PlexRipper.Application.PlexAccounts
 {
-    public class CreatePlexAccountCommand : IRequest<Result<PlexAccount>>
+    public class CreatePlexAccountCommand : IRequest<Result<int>>
     {
         public PlexAccount PlexAccount { get; }
 
@@ -31,7 +31,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
     }
 
-    public class CreateAccountHandler : BaseHandler, IRequestHandler<CreatePlexAccountCommand, Result<PlexAccount>>
+    public class CreateAccountHandler : BaseHandler, IRequestHandler<CreatePlexAccountCommand, Result<int>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -40,18 +40,15 @@ namespace PlexRipper.Application.PlexAccounts
             _dbContext = dbContext;
         }
 
-        public async Task<Result<PlexAccount>> Handle(CreatePlexAccountCommand command, CancellationToken cancellationToken)
+        public async Task<Result<int>> Handle(CreatePlexAccountCommand command, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<CreatePlexAccountCommand, CreatePlexAccountCommandValidator>(command);
-            if (result.IsFailed) return result;
-
             Log.Debug("Creating a new Account in DB");
 
             await _dbContext.PlexAccounts.AddAsync(command.PlexAccount);
             await _dbContext.SaveChangesAsync(cancellationToken);
             await _dbContext.Entry(command.PlexAccount).GetDatabaseValuesAsync();
 
-            return ReturnResult(command.PlexAccount, command.PlexAccount.Id);
+            return Result.Ok(command.PlexAccount.Id);
         }
     }
 }

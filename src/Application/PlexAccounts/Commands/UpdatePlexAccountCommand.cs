@@ -34,7 +34,6 @@ namespace PlexRipper.Application.PlexAccounts
             RuleFor(x => x.PlexAccount.Uuid).NotEmpty().MinimumLength(5);
             RuleFor(x => x.PlexAccount.Title).NotEmpty().MinimumLength(5);
             RuleFor(x => x.PlexAccount.AuthenticationToken).NotEmpty().MinimumLength(10);
-
         }
     }
 
@@ -49,9 +48,6 @@ namespace PlexRipper.Application.PlexAccounts
 
         public async Task<Result<PlexAccount>> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<UpdatePlexAccountCommand, UpdatePlexAccountValidator>(command);
-            if (result.IsFailed) return result;
-
             var plexAccount = command.PlexAccount;
             var accountInDb = await _dbContext.PlexAccounts
                 .Include(x => x.PlexAccountServers)
@@ -65,7 +61,7 @@ namespace PlexRipper.Application.PlexAccounts
 
             _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
             await _dbContext.SaveChangesAsync(cancellationToken);
-            return Result.Ok(accountInDb);
+            return Result.Ok();
         }
     }
 }

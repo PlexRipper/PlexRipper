@@ -42,6 +42,14 @@
     <ProjectReference Include="..\SignalR\SignalR.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="nswag.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="WebAPI.csproj.DotSettings" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptTarget>ES2019</TypeScriptTarget>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>

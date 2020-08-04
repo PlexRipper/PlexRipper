@@ -234,18 +234,6 @@ tests/Infrastructure.UnitTests/secretCredentials.json
 
 tests/Applicaton.IntegrationTests/secretCredentials.json
 
-.idea/.idea.PlexRipper/.idea/.idea.PlexRipper.iml
-
-.idea/.idea.PlexRipper/.idea/contentModel.xml
-
-.idea/.idea.PlexRipper/.idea/encodings.xml
-
-.idea/.idea.PlexRipper/.idea/indexLayout.xml
-
-.idea/.idea.PlexRipper/.idea/modules.xml
-
-.idea/.idea.PlexRipper/.idea/projectSettingsUpdater.xml
-
-.idea/.idea.PlexRipper/.idea/workspace.xml
+.idea/
 
 tests/BaseTests/secretCredentials.json

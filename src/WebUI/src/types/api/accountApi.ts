@@ -1,66 +1,43 @@
-import Log from 'consola';
 import IPlexAccount from '@dto/IPlexAccount';
 import { Observable } from 'rxjs';
-import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
-import { map, tap } from 'rxjs/operators';
 import Result from 'fluent-type-results';
+import { checkResponse } from './baseApi';
 
 const logText = 'From AccountAPI => ';
 const apiPath = '/plexaccount';
 
 export function getAllAccounts(): Observable<IPlexAccount[] | null> {
-	const result: Observable<AxiosResponse> = Axios.get<Result<IPlexAccount[]>>(apiPath);
-	return result.pipe(
-		map((res: AxiosResponse) => res.data),
-		tap((data) => Log.debug(logText + 'getAllEnabledAccounts response:', data)),
-	);
+	const result = Axios.get<Result<IPlexAccount[]>>(apiPath);
+	return checkResponse<IPlexAccount[] | null>(result, logText, 'getAllAccounts');
 }
 
 export function getAllEnabledAccounts(): Observable<IPlexAccount[] | null> {
-	const result: Observable<AxiosResponse> = Axios.get<Result<IPlexAccount[]>>(`${apiPath}/?enabledOnly=true`);
-	return result.pipe(
-		map((res: AxiosResponse) => res.data),
-		tap((data) => Log.debug(logText + 'getAllEnabledAccounts response:', data)),
-	);
+	const result = Axios.get<Result<IPlexAccount[]>>(`${apiPath}/?enabledOnly=true`);
+	return checkResponse<IPlexAccount[] | null>(result, logText, 'getAllEnabledAccounts');
 }
 
 export function validateAccount(account: IPlexAccount): Observable<boolean> {
-	const result: Observable<AxiosResponse> = Axios.post<boolean>(`${apiPath}/validate`, account);
-	return result.pipe(
-		map((res: AxiosResponse) => res.data),
-		tap((data) => Log.debug(logText + 'validateAccount response:', data)),
-	);
+	const result = Axios.post<Result<boolean>>(`${apiPath}/validate`, account);
+	return checkResponse<boolean>(result, logText, 'validateAccount');
 }
 
-export function createAccount(account: IPlexAccount): Observable<IPlexAccount> {
-	const result: Observable<AxiosResponse> = Axios.post<IPlexAccount>(apiPath, account);
-	return result.pipe(
-		map((res: AxiosResponse) => res.data),
-		tap((data) => Log.debug(logText + 'createAccount response:', data)),
-	);
+export function createAccount(account: IPlexAccount): Observable<IPlexAccount | null> {
+	const result = Axios.post<Result<IPlexAccount>>(apiPath, account);
+	return checkResponse<IPlexAccount | null>(result, logText, 'createAccount');
 }
 
-export function updateAccount(account: IPlexAccount): Observable<IPlexAccount> {
-	const result: Observable<AxiosResponse> = Axios.put<IPlexAccount>(`${apiPath}/${account.id}`, account);
-	return result.pipe(
-		map((res: AxiosResponse) => res.data),
-		tap((data) => Log.debug(logText + 'updateAccount response:', data)),
-	);
+export function updateAccount(account: IPlexAccount): Observable<IPlexAccount | null> {
+	const result = Axios.put<Result<IPlexAccount>>(`${apiPath}/${account.id}`, account);
+	return checkResponse<IPlexAccount | null>(result, logText, 'updateAccount');
 }
 
-export function deleteAccount(accountId: Number): Observable<IPlexAccount> {
-	const result: Observable<AxiosResponse> = Axios.delete(`${apiPath}/${accountId}`);
-	return result.pipe(
-		map((res: AxiosResponse) => res.data),
-		tap((data) => Log.debug(logText + 'deleteAccount response:', data)),
-	);
+export function deleteAccount(accountId: Number): Observable<boolean> {
+	const result = Axios.delete<Result<boolean>>(`${apiPath}/${accountId}`);
+	return checkResponse<boolean>(result, logText, 'deleteAccount');
 }
 
-export function getAccount(accountId: Number): Observable<Result<IPlexAccount>> {
-	const result: Observable<AxiosResponse<Result<IPlexAccount>>> = Axios.get<Result<IPlexAccount>>(`${apiPath}/${accountId}`);
-	return result.pipe(
-		map((res: AxiosResponse) => res.data),
-		tap((data) => Log.debug(logText + 'getAccount response:', data.value)),
-	);
+export function getAccount(accountId: Number): Observable<IPlexAccount> {
+	const result = Axios.get<Result<IPlexAccount>>(`${apiPath}/${accountId}`);
+	return checkResponse<IPlexAccount>(result, logText, 'getAccount');
 }

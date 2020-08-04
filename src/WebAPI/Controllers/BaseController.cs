@@ -13,14 +13,14 @@ namespace PlexRipper.WebAPI.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public abstract class BaseController : ControllerBase
     {
-        public IActionResult BadRequestInvalidId => new BadRequestObjectResult(new Error("The Id was 0 or lower"));
+        public IActionResult BadRequestInvalidId => new BadRequestObjectResult(Result.Fail("The Id was 0 or lower"));
 
         [NonAction]
-        public IActionResult InternalServerError(Exception e)
+        protected IActionResult InternalServerError(Exception e)
         {
-            string message = $"Internal server error: {e.Message}";
-            Log.Error(e, message);
-            return StatusCode(StatusCodes.Status500InternalServerError, message);
+            string msg = $"Internal server error: {e.Message}";
+            Log.Error(e, msg);
+            return StatusCode(StatusCodes.Status500InternalServerError, Result.Fail(msg));
         }
 
         [NonAction]

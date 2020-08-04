@@ -38,9 +38,8 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 
         public async Task<Result<List<DownloadTask>>> Handle(GetAllDownloadTasksQuery request, CancellationToken cancellationToken)
         {
-            var downloadList = await _dbContext.DownloadTasks.ToListAsync();
-            return ReturnResult(downloadList);
-
+            var downloadList = await _dbContext.DownloadTasks.ToListAsync(cancellationToken);
+            return Result.Ok(downloadList);
         }
     }
 }

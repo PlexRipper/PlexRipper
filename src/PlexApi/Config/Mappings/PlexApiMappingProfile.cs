@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Linq;
+using AutoMapper;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
 using PlexRipper.Domain.Entities;
 using PlexRipper.PlexApi.Models;
@@ -43,6 +44,27 @@ namespace PlexRipper.PlexApi.Config.Mappings
                     opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
                .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
 
+            //Directory -> PlexLibrary
+            CreateMap<Directory, PlexLibrary>(MemberList.Destination)
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
+                .ForMember(dest => dest.Movies, opt => opt.Ignore())
+                .ForMember(dest => dest.TvShows, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt,
+                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
+                .ForMember(dest => dest.UpdatedAt,
+                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC())) 
+                .ForMember(dest => dest.ScannedAt,
+                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))   
+                .ForMember(dest => dest.ContentChangedAt,
+                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
+                .ForMember(dest => dest.LibraryLocationId,
+                    opt => opt.MapFrom(src => src.Location.First().Id))
+                // Location[0].Path -> LibraryLocationPath
+                .ForMember(dest => dest.LibraryLocationPath,
+                    opt => opt.MapFrom(src => src.Location.First().Path));
+            
             // MediaContainer -> PlexMovie
             CreateMap<Metadata, PlexMovie>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())

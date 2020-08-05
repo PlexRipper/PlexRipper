@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using PlexRipper.PlexApi.Helpers;
 
 namespace PlexRipper.PlexApi.Models
 {
@@ -82,7 +83,10 @@ namespace PlexRipper.PlexApi.Models
         [JsonPropertyName("theme")]
         public string Theme { get; set; }
 
-        [JsonPropertyName("directory")]
+        /// <summary>
+        /// The PlexLibraries are contained here, JsonPropertyName Directory must be capitalized.
+        /// </summary>
+        [JsonPropertyName("Directory")]
         public List<Directory> Directory { get; set; }
 
         //TV Show Episode

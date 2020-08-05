@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using PlexRipper.PlexApi.Helpers;
 
 namespace PlexRipper.PlexApi.Models
 {
@@ -44,13 +46,13 @@ namespace PlexRipper.PlexApi.Models
         public string Uuid { get; set; }
         
         [JsonPropertyName("updatedAt")]
-        public int UpdatedAt { get; set; }
+        public string UpdatedAt { get; set; }
 
         [JsonPropertyName("createdAt")]
-        public int CreatedAt { get; set; }
+        public string CreatedAt { get; set; }
         
         [JsonPropertyName("scannedAt")]
-        public int ScannedAt { get; set; }
+        public string ScannedAt { get; set; }
         
         [JsonPropertyName("content")]
         public bool Content { get; set; }
@@ -59,10 +61,10 @@ namespace PlexRipper.PlexApi.Models
         public bool IsDirectory { get; set; }
         
         [JsonPropertyName("contentChangedAt")]
-        public int ContentChangedAt { get; set; }
+        public string ContentChangedAt { get; set; }
       
         
         [JsonPropertyName("Location")]
-        public Location[] Location { get; set; }
+        public List<Location> Location { get; set; }
     }
 }

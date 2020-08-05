@@ -231,8 +231,11 @@ namespace PlexRipper.PlexApi.Models
         [JsonPropertyName("transcoderVideoResolutions")]
         public object TranscoderVideoResolutions { get; set; }
         
+        [JsonPropertyName("createdAt")]
+        public string CreatedAt { get; set; }  
+        
         [JsonPropertyName("updatedAt")]
-        public int UpdatedAt { get; set; }
+        public string UpdatedAt { get; set; }
 
         [JsonPropertyName("updater")]
         public bool Updater { get; set; }

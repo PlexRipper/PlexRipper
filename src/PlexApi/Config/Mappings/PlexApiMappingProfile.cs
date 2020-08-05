@@ -33,7 +33,15 @@ namespace PlexRipper.PlexApi.Config.Mappings
             CreateMap<MediaContainer, PlexLibrary>(MemberList.None)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(x => x.ViewGroup))
-                .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
+                .ForMember(dest => dest.CreatedAt,
+                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
+                .ForMember(dest => dest.UpdatedAt,
+                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))   
+                .ForMember(dest => dest.ContentChangedAt,
+                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))       
+                .ForMember(dest => dest.ScannedAt,
+                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
+               .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
 
             // MediaContainer -> PlexMovie
             CreateMap<Metadata, PlexMovie>(MemberList.Destination)

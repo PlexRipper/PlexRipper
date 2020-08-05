@@ -4,7 +4,7 @@ using System.Buffers.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Plex.Api.Helpers
+namespace PlexRipper.PlexApi.Helpers
 {
     public class LongValueConverter : JsonConverter<long>
     {
@@ -12,18 +12,33 @@ namespace Plex.Api.Helpers
         {
             if (reader.TokenType == JsonTokenType.String)
             {
-                // try to parse number directly from bytes
+                // The minimum long value UnixTime seconds that can be used to parse to DateTime.MinValue
+                var value = -62135596800;
+                
+               // try to parse number directly from bytes
                 ReadOnlySpan<byte> span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-                if (Utf8Parser.TryParse(span, out long number, out int bytesConsumed) && span.Length == bytesConsumed)
-                    return number;
-
+                
+               // span.Length
+               if (Utf8Parser.TryParse(span, out long number, out int bytesConsumed) && span.Length == bytesConsumed)
+               {
+                   if (value >= -62135596800 && value <= 253402300799)
+                   {
+                       return number;
+                   }
+               }
+                
                 // try to parse from a string if the above failed, this covers cases with other escaped/UTF characters
                 if (Int64.TryParse(reader.GetString(), out number))
-                    return number;
+                {
+                    if (value >= -62135596800 && value <= 253402300799)
+                    {
+                        return number;
+                    }
+                }
             }
 
             // fallback to default handling
-            return reader.GetInt64();
+            return long.MaxValue;
         }
 
         public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options)

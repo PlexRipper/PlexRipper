@@ -122,7 +122,7 @@ namespace PlexRipper.Application.PlexAccounts
                 string msg = "Failed to validate the plexAccount before the update process in the database";
 
                 Log.Warning(msg);
-                return Result.Fail(msg);
+                return result.ToResult().WithError(msg);
             }
 
             // Retrieve and store servers
@@ -131,7 +131,7 @@ namespace PlexRipper.Application.PlexAccounts
             {
                 string msg = "Failed to refresh the PlexServers when setting up the PlexAccount";
                 Log.Warning(msg);
-                return Result.Fail<bool>(msg);
+                return refreshResult.ToResult().WithError(msg);
             }
 
             // Retrieve and store the corresponding PlexLibraries
@@ -158,7 +158,7 @@ namespace PlexRipper.Application.PlexAccounts
 
             if (result.IsFailed)
             {
-                return result.ToResult<bool>();
+                return result.ToResult();
             }
 
             if (result.Value != null)
@@ -210,6 +210,7 @@ namespace PlexRipper.Application.PlexAccounts
         /// <returns>Returns the added account after setup</returns>
         public async Task<Result<PlexAccount>> CreatePlexAccountAsync(PlexAccount plexAccount)
         {
+            Log.Debug($"Creating account with username {plexAccount.Username}");
             var result = await CheckIfUsernameIsAvailableAsync(plexAccount.Username);
             // Fail on validation errors
             if (result.IsFailed)
@@ -221,8 +222,9 @@ namespace PlexRipper.Application.PlexAccounts
             {
                 string msg = $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
                 Log.Warning(msg);
-                return Result.Fail<PlexAccount>(msg);
+                return result.ToResult().WithError(msg);
             }
+            
             // Check account for validity
             var checkAccount = await ValidatePlexAccountAsync(plexAccount.Username, plexAccount.Password);
             if (checkAccount.IsFailed || !checkAccount.Value)

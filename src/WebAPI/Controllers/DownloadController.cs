@@ -16,7 +16,7 @@ namespace PlexRipper.WebAPI.Controllers
         private readonly IPlexDownloadService _plexDownloadService;
         private readonly IMapper _mapper;
 
-        public DownloadController(IPlexDownloadService plexDownloadService, IMapper mapper)
+        public DownloadController(IPlexDownloadService plexDownloadService, IMapper mapper) : base(mapper)
         {
             _plexDownloadService = plexDownloadService;
             _mapper = mapper;

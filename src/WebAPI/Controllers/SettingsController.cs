@@ -16,7 +16,7 @@ namespace PlexRipper.WebAPI.Controllers
         private readonly ISettingsService _settingsService;
         private readonly IMapper _mapper;
 
-        public SettingsController(ISettingsService settingsService, IMapper mapper)
+        public SettingsController(ISettingsService settingsService, IMapper mapper) : base(mapper)
         {
             _settingsService = settingsService;
             _mapper = mapper;

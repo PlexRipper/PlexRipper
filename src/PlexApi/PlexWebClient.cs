@@ -1,4 +1,4 @@
-﻿using PlexRipper.Domain;
+using PlexRipper.Domain;
 using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Config.Converters;
 using RestSharp;
@@ -11,17 +11,23 @@ namespace PlexRipper.PlexApi
 {
     public class PlexWebClient : RestClient
     {
-
+        public static JsonSerializerOptions SerializerOptions
+        {
+            get
+            {
+                return new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true,
+                    WriteIndented = true,
+                    Converters = {new LongToDateTime()}
+                };
+            }
+        }
 
         public PlexWebClient()
         {
-            this.UseSystemTextJson(new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNameCaseInsensitive = true,
-                WriteIndented = true,
-                Converters = { new LongToDateTime() }
-            });
+            this.UseSystemTextJson();
             this.UseDotNetXmlSerializer();
             this.Timeout = 10000;
 

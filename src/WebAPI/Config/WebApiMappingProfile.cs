@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using FluentResults;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.PlexMedia;
+using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Config
 {
@@ -9,6 +11,10 @@ namespace PlexRipper.WebAPI.Config
     {
         public WebApiMappingProfile()
         {
+            //Result -> ResultDTO
+            CreateMap<Result, ResultDTO>(MemberList.Destination)
+                .ForMember(x => x.Value, opt => opt.Ignore()); 
+                
             //CreatePlexAccountDTO -> PlexAccount
             CreateMap<CreatePlexAccountDTO, PlexAccount>(MemberList.Source)
                 .ReverseMap();

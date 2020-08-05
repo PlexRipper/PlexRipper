@@ -2,6 +2,7 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { getAllAccounts } from '@api/accountApi';
 import IPlexAccount from '@dto/IPlexAccount';
 import GlobalService from '@service/globalService';
+import Log from 'consola';
 
 export class AccountService {
 	private _accounts: ReplaySubject<IPlexAccount[]> = new ReplaySubject();
@@ -13,7 +14,10 @@ export class AccountService {
 	}
 
 	public fetchAccounts(): void {
-		getAllAccounts().subscribe((value) => this._accounts.next(value ?? []));
+		getAllAccounts().subscribe((value) => {
+			Log.debug(`AccountService => Fetch Accounts`, value);
+			this._accounts.next(value ?? []);
+		});
 	}
 
 	public getAccounts(): Observable<IPlexAccount[]> {

@@ -33,7 +33,7 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public Task<PlexUser> PlexSignInAsync(string username, string password)
+        public Task<PlexAccountDTO> PlexSignInAsync(string username, string password)
         {
             var userModel = new PlexUserRequest
             {
@@ -45,7 +45,7 @@ namespace PlexRipper.PlexApi.Api
             };
             var request = new RestRequest(new Uri(SignInUri), Method.POST);
             request.AddJsonBody(userModel);
-            return Client.SendRequestAsync<PlexUser>(request);
+            return Client.SendRequestAsync<PlexAccountDTO>(request);
         }
 
 
@@ -54,8 +54,8 @@ namespace PlexRipper.PlexApi.Api
             var result = await PlexSignInAsync(plexAccount.Username, plexAccount.Password);
             if (result != null)
             {
-                Log.Information($"Returned token was: {result.AuthenticationToken}");
-                return result.AuthenticationToken;
+                Log.Information($"Returned token was: {result.User.AuthenticationToken}");
+                return result.User.AuthenticationToken;
             }
             Log.Error("Result from RequestPlexSignInDataAsync() was null.");
             return string.Empty;
@@ -78,11 +78,11 @@ namespace PlexRipper.PlexApi.Api
             return status;
         }
 
-        public Task<PlexUser> GetAccountAsync(string authToken)
+        public Task<PlexAccountDTO> GetAccountAsync(string authToken)
         {
             var request = new RestRequest(new Uri(GetAccountUri), Method.GET);
             request = AddToken(request, authToken);
-            return Client.SendRequestAsync<PlexUser>(request);
+            return Client.SendRequestAsync<PlexAccountDTO>(request);
         }
 
         public async Task<List<Server>> GetServerAsync(string authToken)

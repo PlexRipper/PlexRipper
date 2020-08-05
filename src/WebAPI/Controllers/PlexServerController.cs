@@ -20,7 +20,7 @@ namespace PlexRipper.WebAPI.Controllers
         private readonly IPlexServerService _plexServerService;
         private readonly IMapper _mapper;
 
-        public PlexServerController(IPlexServerService plexServerService, IMapper mapper)
+        public PlexServerController(IPlexServerService plexServerService, IMapper mapper) : base(mapper)
         {
             _mapper = mapper;
             _plexServerService = plexServerService;

@@ -5,10 +5,13 @@ using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Models
 {
-    public class PlexAccount
+    public class PlexAccountDTO
     {
         [JsonPropertyName("user")]
-        public PlexUser PlexUser { get; set; }
+        public PlexUserDTO User { get; set; }
+
+        [JsonPropertyName("error")]
+        public string Error { get; set; }
     }
 
     /// <summary>
@@ -42,33 +45,47 @@ namespace PlexRipper.PlexApi.Models
     ///     username (str): Your account username.
     ///     uuid (str): Unknown.
     /// </summary>
-    public class PlexUser
+    public class PlexUserDTO
     {
         [JsonConverter(typeof(IntValueConverter))]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
+        [JsonPropertyName("email")]
         public string Email { get; set; }
 
+        [JsonPropertyName("uuid")]
         public string Uuid { get; set; }
 
         [JsonPropertyName("joined_at")]
         public DateTime JoinedAt { get; set; }
 
+        [JsonPropertyName("username")]
         public string Username { get; set; }
 
+        [JsonPropertyName("title")]
         public string Title { get; set; }
 
+        [JsonPropertyName("thumb")]
         public string Thumb { get; set; }
 
+        [JsonPropertyName("hasPassword")]
         public bool HasPassword { get; set; }
 
+        [JsonPropertyName("authToken")]
+        public string AuthToken { get; set; }  
+        
         [JsonPropertyName("authentication_token")]
         public string AuthenticationToken { get; set; }
+        
 
+        [JsonPropertyName("confirmedAt")]
         public DateTime? ConfirmedAt { get; set; }
 
+        [JsonPropertyName("forumId")]
         public int? ForumId { get; set; }
 
+        [JsonPropertyName("rememberMe")]
         public bool RememberMe { get; set; }
 
         [JsonPropertyName("subscription")]

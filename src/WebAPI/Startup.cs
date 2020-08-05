@@ -33,10 +33,11 @@ namespace PlexRipper.WebAPI
 
             // TODO Make sure to configure this correctly when setting up security
             app.UseCors(builder => builder
-                .WithOrigins("http://localhost:3000")
+                .AllowAnyOrigin()
+                // .WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials()
+                // .AllowCredentials()
             );
 
             // app.UseHttpsRedirection();
@@ -63,9 +64,9 @@ namespace PlexRipper.WebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             // General
+            services.AddCors();
             services.AddControllers();
             services.AddHttpContextAccessor();
-            services.AddCors();
 
             // Fluent Validator
             services.AddMvc(options =>

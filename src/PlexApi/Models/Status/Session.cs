@@ -137,7 +137,7 @@ namespace PlexRipper.PlexApi.Models.Status
         public List<Medium> Media { get; set; }
 
         [JsonPropertyName("User")]
-        public PlexUser PlexUser { get; set; }
+        public PlexUserDTO PlexUserDto { get; set; }
 
         [JsonPropertyName("Player")]
         public Player Player { get; set; }

@@ -28,7 +28,7 @@ namespace PlexRipper.PlexApi.Services
             var result = await _plexApi.PlexSignInAsync(username, password);
             if (result != null)
             {
-                var mapResult = _mapper.Map<PlexAccount>(result);
+                var mapResult = _mapper.Map<PlexAccount>(result.User);
                 if (mapResult != null)
                 {
                     mapResult.IsValidated = true;

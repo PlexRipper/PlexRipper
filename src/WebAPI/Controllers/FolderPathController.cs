@@ -7,6 +7,7 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Types.FileSystem;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,7 +20,7 @@ namespace PlexRipper.WebAPI.Controllers
         private readonly IFolderPathService _folderPathService;
         private readonly IFileSystem _fileSystem;
 
-        public FolderPathController(IFolderPathService folderPathService, IFileSystem fileSystem)
+        public FolderPathController(IFolderPathService folderPathService, IFileSystem fileSystem, IMapper mapper) : base(mapper)
         {
             _folderPathService = folderPathService;
             _fileSystem = fileSystem;

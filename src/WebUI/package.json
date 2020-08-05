@@ -5,7 +5,7 @@
 	"author": "JasonLandbridge",
 	"private": true,
 	"scripts": {
-		"dev": "nuxt-ts dev",
+		"dev": "nuxt-ts dev --no-inline",
 		"build": "nuxt-ts build",
 		"generate": "nuxt-ts build && nuxt-ts export",
 		"start": "nuxt-ts start",

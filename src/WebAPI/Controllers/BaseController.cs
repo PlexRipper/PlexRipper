@@ -5,6 +5,8 @@ using PlexRipper.Domain;
 using System;
 using System.Collections.Generic;
 using System.Net.Mime;
+using AutoMapper;
+using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
 {
@@ -13,7 +15,14 @@ namespace PlexRipper.WebAPI.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public abstract class BaseController : ControllerBase
     {
-        public IActionResult BadRequestInvalidId => new BadRequestObjectResult(Result.Fail("The Id was 0 or lower"));
+        private readonly IMapper _mapper;
+
+        protected BaseController(IMapper mapper)
+        {
+            _mapper = mapper;
+        }
+
+        protected IActionResult BadRequestInvalidId => new BadRequestObjectResult(Result.Fail("The Id was 0 or lower"));
 
         [NonAction]
         protected IActionResult InternalServerError(Exception e)
@@ -24,7 +33,7 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         [NonAction]
-        public IActionResult InternalServerError(List<Error> errors)
+        protected IActionResult InternalServerError(List<Error> errors)
         {
             Log.Error("Internal server error:");
             foreach (Error error in errors)
@@ -35,7 +44,7 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         [NonAction]
-        public IActionResult BadRequest(int id, string nameOf = "")
+        protected IActionResult BadRequest(int id, string nameOf = "")
         {
 
             var errorList = new List<Error>
@@ -49,6 +58,16 @@ namespace PlexRipper.WebAPI.Controllers
             }
 
             return new BadRequestObjectResult(errorList);
+        }  
+        
+        [NonAction]
+        protected IActionResult BadRequest(Result result)
+        {
+            // Filter our the value type
+            var resultDTO = _mapper.Map<ResultDTO>(result);
+            return new BadRequestObjectResult(resultDTO);
         }
+        
+        
     }
 }

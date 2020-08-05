@@ -31,18 +31,18 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ReverseMap();
 
             //MediaContainer -> PlexLibrary
-            CreateMap<MediaContainer, PlexLibrary>(MemberList.None)
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(x => x.ViewGroup))
-                .ForMember(dest => dest.CreatedAt,
-                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
-                .ForMember(dest => dest.UpdatedAt,
-                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))   
-                .ForMember(dest => dest.ContentChangedAt,
-                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))       
-                .ForMember(dest => dest.ScannedAt,
-                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
-               .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
+            // CreateMap<MediaContainer, PlexLibrary>(MemberList.None)
+            //     .ForMember(dest => dest.Id, opt => opt.Ignore())
+            //     .ForMember(dest => dest.Type, opt => opt.MapFrom(x => x.ViewGroup))
+            //     .ForMember(dest => dest.CreatedAt,
+            //         opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
+            //     .ForMember(dest => dest.UpdatedAt,
+            //         opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))   
+            //     .ForMember(dest => dest.ContentChangedAt,
+            //         opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))       
+            //     .ForMember(dest => dest.ScannedAt,
+            //         opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
+            //    .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
 
             //Directory -> PlexLibrary
             CreateMap<Directory, PlexLibrary>(MemberList.Destination)
@@ -51,21 +51,13 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
                 .ForMember(dest => dest.Movies, opt => opt.Ignore())
                 .ForMember(dest => dest.TvShows, opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt,
-                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
-                .ForMember(dest => dest.UpdatedAt,
-                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC())) 
-                .ForMember(dest => dest.ScannedAt,
-                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))   
-                .ForMember(dest => dest.ContentChangedAt,
-                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
                 .ForMember(dest => dest.LibraryLocationId,
                     opt => opt.MapFrom(src => src.Location.First().Id))
                 // Location[0].Path -> LibraryLocationPath
                 .ForMember(dest => dest.LibraryLocationPath,
                     opt => opt.MapFrom(src => src.Location.First().Path));
             
-            // MediaContainer -> PlexMovie
+            // Metadata -> PlexMovie
             CreateMap<Metadata, PlexMovie>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexMovieGenres, opt => opt.Ignore())
@@ -77,7 +69,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.OriginallyAvailableAt,
                     opt => opt.ConvertUsing(new StringToDateTimeUTC()));
 
-            // MediaContainer -> PlexTvShow
+            // Metadata -> PlexTvShow
             CreateMap<Metadata, PlexTvShow>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexTvShowGenres, opt => opt.Ignore())

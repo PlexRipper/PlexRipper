@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using PlexRipper.PlexApi.Config.Converters;
 using PlexRipper.PlexApi.Helpers;
 
 namespace PlexRipper.PlexApi.Models
@@ -236,10 +238,12 @@ namespace PlexRipper.PlexApi.Models
         public object TranscoderVideoResolutions { get; set; }
         
         [JsonPropertyName("createdAt")]
-        public string CreatedAt { get; set; }  
+        [JsonConverter(typeof(LongToDateTime))]
+        public DateTime CreatedAt { get; set; }  
         
         [JsonPropertyName("updatedAt")]
-        public string UpdatedAt { get; set; }
+        [JsonConverter(typeof(LongToDateTime))]
+        public DateTime UpdatedAt { get; set; }
 
         [JsonPropertyName("updater")]
         public bool Updater { get; set; }

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using PlexRipper.PlexApi.Config.Converters;
 using PlexRipper.PlexApi.Helpers;
 
 namespace PlexRipper.PlexApi.Models
@@ -46,13 +48,16 @@ namespace PlexRipper.PlexApi.Models
         public string Uuid { get; set; }
         
         [JsonPropertyName("updatedAt")]
-        public string UpdatedAt { get; set; }
+        [JsonConverter(typeof(LongToDateTime))]
+        public DateTime UpdatedAt { get; set; }
 
         [JsonPropertyName("createdAt")]
-        public string CreatedAt { get; set; }
+        [JsonConverter(typeof(LongToDateTime))]
+        public DateTime CreatedAt { get; set; }
         
         [JsonPropertyName("scannedAt")]
-        public string ScannedAt { get; set; }
+        [JsonConverter(typeof(LongToDateTime))]
+        public DateTime ScannedAt { get; set; }
         
         [JsonPropertyName("content")]
         public bool Content { get; set; }
@@ -61,7 +66,8 @@ namespace PlexRipper.PlexApi.Models
         public bool IsDirectory { get; set; }
         
         [JsonPropertyName("contentChangedAt")]
-        public string ContentChangedAt { get; set; }
+        [JsonConverter(typeof(LongToDateTime))]
+        public DateTime ContentChangedAt { get; set; }
       
         
         [JsonPropertyName("Location")]

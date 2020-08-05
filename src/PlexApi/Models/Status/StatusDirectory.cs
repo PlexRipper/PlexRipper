@@ -1,7 +1,7 @@
 ﻿
 namespace PlexRipper.PlexApi.Models.Status
 {
-    public class Directory
+    public class StatusDirectory
     {
         public int Count { get; set; }
         public string Key { get; set; }

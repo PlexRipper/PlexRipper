@@ -10,28 +10,19 @@ namespace PlexRipper.PlexApi.Config.Converters
     {
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType == JsonTokenType.String)
+            if (reader.TokenType == JsonTokenType.Number)
             {
-                // The minimum long value UnixTime seconds that can be used to parse to DateTime.MinValue
-                var value = -62135596800;
-
                 // try to parse number directly from bytes
                 ReadOnlySpan<byte> span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
                 if (Utf8Parser.TryParse(span, out long number, out int bytesConsumed) && span.Length == bytesConsumed)
                 {
-                    value = number;
+                    if (number >= -62135596800 && number <= 253402300799)
+                    {
+                        return DateTimeOffset.FromUnixTimeSeconds(number).DateTime.ToUniversalTime();
+                    }
                 }
 
-                // try to parse from a string if the above failed, this covers cases with other escaped/UTF characters
-                if (Int64.TryParse(reader.GetString(), out number))
-                {
-                    value = number;
-                }
-
-                if (value >= -62135596800 && value <= 253402300799)
-                {
-                    return DateTimeOffset.FromUnixTimeSeconds(value).DateTime.ToUniversalTime();
-                }
+                return DateTime.MinValue;
             }
 
             // fallback to default handling

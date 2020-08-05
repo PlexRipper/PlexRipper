@@ -9,6 +9,7 @@ namespace PlexRipper.PlexApi.Models
     {
         [JsonPropertyName("id")]
         public int Id { get; set; }
+        
         [JsonPropertyName("path")]
         public string Path { get; set; }
     }

@@ -1,7 +1,7 @@
-﻿using Plex.Api.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using PlexRipper.PlexApi.Helpers;
 
 namespace PlexRipper.PlexApi.Models
 {

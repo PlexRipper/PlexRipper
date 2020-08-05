@@ -202,16 +202,13 @@ export default class AccountCard extends Vue {
 		return this.$refs.form as Vue & { validate: () => boolean; reset: () => void; resetValidation: () => void };
 	}
 
-	checkAccount(account: IPlexAccount): void {
-		Log.debug(account);
-	}
-
 	validate(): void {
 		this.getForm.validate();
 
 		if (this.valid) {
 			this.validateLoading = true;
 			validateAccount(this.getAccount).subscribe((data) => {
+				// TODO show notification with errors if any
 				if (data) {
 					this.isValidated = 'OK';
 				} else {

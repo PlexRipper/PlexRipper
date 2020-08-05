@@ -18,8 +18,8 @@ export function preApiRequest(logText: string, fnName: string): void {
 export function checkResponse<T>(response: Observable<AxiosResponse<Result<T>>>, logText: string, fnName: string): Observable<T> {
 	// Pipe response
 	return response.pipe(
-		tap((res) => {
-			if (res.status !== 200) {
+		tap((res: AxiosResponse<Result<T>>) => {
+			if (res?.status && res?.status !== 200) {
 				switch (res.status) {
 					case 400:
 						Log.error(`${logText}${fnName} => Bad Request from response:`, res.request);
@@ -39,7 +39,7 @@ export function checkResponse<T>(response: Observable<AxiosResponse<Result<T>>>,
 				}
 			}
 		}),
-		map((res: AxiosResponse) => res.data?.value),
+		map((res: AxiosResponse) => res?.data?.value),
 		tap((data) => Log.debug(`${logText}${fnName} response:`, data)),
 	);
 }

@@ -20,7 +20,7 @@ namespace PlexApi.UnitTests
         public async Task ShouldReturnValidPlexAccountDTO_WhenCredentialsAreValid()
         {
             // Arrange
-            var credentials = Secrets.GetCredentials();
+            var credentials = Secrets.Account1;
             var plexApiService = Container.GetPlexApiService;
 
             // Act
@@ -28,6 +28,7 @@ namespace PlexApi.UnitTests
 
             // Assert
             plexAccount.ShouldNotBeNull();
-        }
-    }
+        }   
+        
+      }
 }

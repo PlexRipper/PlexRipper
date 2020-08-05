@@ -24,7 +24,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             // Arrange
             var accountService = Container.GetPlexAccountService;
             var plexLibraryService = Container.GetPlexLibraryService;
-            var credentials = Secrets.GetCredentials();
+            var credentials = Secrets.Account1;
 
             //Act 
             var newAccount = new PlexAccount

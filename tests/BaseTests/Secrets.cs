@@ -12,7 +12,7 @@ namespace PlexRipper.BaseTests
 
         }
 
-        public static CredentialsDTO GetCredentials()
+        public static TestCredentialsDTO GetCredentials()
         {
             // Create a secretCredentials.json in the root of Infrastructure.UnitTests project and add Plex testing credentials.
             // {
@@ -23,16 +23,18 @@ namespace PlexRipper.BaseTests
             {
                 string json = r.ReadToEnd();
                 JObject o = JObject.Parse(json);
-                if (o.ContainsKey("username") && o.ContainsKey("password"))
+                if (o.ContainsKey("credentials"))
                 {
-                    return JsonConvert.DeserializeObject<CredentialsDTO>(json);
+                    return JsonConvert.DeserializeObject<TestCredentialsDTO>(json);
                 }
 
             }
             //LoggerExtensions.LogWarning(BaseDependanciesTest
             //        .GetLogger<BaseServiceTest>(), "MAKE SURE TO CREATE A \"secretCredentials.json\" IN THE Infrastructure.UnitTests project TO START TESTING!");
-            return new CredentialsDTO();
+            return new TestCredentialsDTO();
         }
 
+        public static TestAccountDTO Account1 => GetCredentials().Credentials.Count > 0 ? GetCredentials().Credentials[0] : new TestAccountDTO();
+        public static TestAccountDTO Account2 => GetCredentials().Credentials.Count > 1 ? GetCredentials().Credentials[1] : new TestAccountDTO();
     }
 }

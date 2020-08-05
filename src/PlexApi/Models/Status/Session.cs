@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Plex.Api.Helpers;
+using PlexRipper.PlexApi.Helpers;
 
 namespace PlexRipper.PlexApi.Models.Status
 {

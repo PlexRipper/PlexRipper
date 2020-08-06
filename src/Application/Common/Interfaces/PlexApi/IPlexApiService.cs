@@ -32,6 +32,7 @@ namespace PlexRipper.Application.Common.Interfaces.PlexApi
         Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey);
         Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl);
         Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
+        Task<List<PlexTvShowEpisode>> GetEpisodesAsync(string serverAuthToken, string plexFullHost, PlexTvShowSeason plexTvShowSeason);
     }
 
 

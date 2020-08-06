@@ -24,7 +24,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             // Arrange
             var accountService = Container.GetPlexAccountService;
             var plexLibraryService = Container.GetPlexLibraryService;
-            var credentials = Secrets.Account1;
+            var credentials = Secrets.Account2;
 
             //Act 
             var newAccount = new PlexAccount
@@ -37,7 +37,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
             // Act
             var result = await accountService.CreatePlexAccountAsync(newAccount);
-            var library = result.Value.PlexServers.First().PlexLibraries.ToList()[4];
+            var library = result.Value.PlexServers.First()?.PlexLibraries.ToList()?[6];
             var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(library.Id, result.Value.Id);
 
 

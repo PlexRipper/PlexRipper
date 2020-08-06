@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using PlexRipper.Domain.Entities.Base;
 
 namespace PlexRipper.Domain.Entities
 {
-    public class PlexTvShowSeason : BaseEntity
+    public class PlexTvShowEpisode : BaseEntity
     {
        
         public int RatingKey { get; set; }
@@ -28,10 +27,8 @@ namespace PlexRipper.Domain.Entities
         #endregion
         
         #region Relationships
-        public PlexTvShow TvShow { get; set; }
-        public int TvShowId { get; set; }
-
-        public List<PlexTvShowEpisode> Episodes { get; set; }
+        public PlexTvShowSeason TvShowSeason { get; set; }
+        public int TvShowSeasonId { get; set; }
         #endregion
     }
 }

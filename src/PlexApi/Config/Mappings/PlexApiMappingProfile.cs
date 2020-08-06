@@ -31,18 +31,10 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ReverseMap();
 
             //MediaContainer -> PlexLibrary
-            // CreateMap<MediaContainer, PlexLibrary>(MemberList.None)
-            //     .ForMember(dest => dest.Id, opt => opt.Ignore())
-            //     .ForMember(dest => dest.Type, opt => opt.MapFrom(x => x.ViewGroup))
-            //     .ForMember(dest => dest.CreatedAt,
-            //         opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
-            //     .ForMember(dest => dest.UpdatedAt,
-            //         opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))   
-            //     .ForMember(dest => dest.ContentChangedAt,
-            //         opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))       
-            //     .ForMember(dest => dest.ScannedAt,
-            //         opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
-            //    .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
+            CreateMap<MediaContainer, PlexLibrary>(MemberList.None)
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(x => x.ViewGroup))
+               .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
 
             //Directory -> PlexLibrary
             CreateMap<Directory, PlexLibrary>(MemberList.Destination)
@@ -81,6 +73,20 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.OriginallyAvailableAt,
                     opt => opt.ConvertUsing(new StringToDateTimeUTC()));
 
+            // Metadata -> PlexTvShowSeason
+            CreateMap<Metadata, PlexTvShowSeason>(MemberList.Destination)
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.TvShow, opt => opt.Ignore())
+                .ForMember(dest => dest.TvShowId, opt => opt.Ignore())
+                .ForMember(dest => dest.Episodes, opt => opt.Ignore());  
+            
+            // Metadata -> PlexTvShowEpisode
+            CreateMap<Metadata, PlexTvShowEpisode>(MemberList.Destination)
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.TvShowSeason, opt => opt.Ignore())
+                .ForMember(dest => dest.TvShowSeasonId, opt => opt.Ignore());
+            
+            
             // PlexMediaContainer -> PlexMediaMetaData
             CreateMap<PlexMediaContainer, PlexMediaMetaData>(MemberList.Destination)
                 .ConvertUsing<PlexMediaMetaDataDTOPlexMediaMetaData>();

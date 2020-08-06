@@ -76,7 +76,6 @@ namespace PlexRipper.Application.PlexSeries
             var entity = await _dbContext.PlexLibraries.Include(x => x.TvShows)
                 .FirstOrDefaultAsync(x => x.Id == plexLibrary.Id);
 
-            ReturnResult(entity, plexLibrary.Id);
             return Result.Ok(entity);
 
         }

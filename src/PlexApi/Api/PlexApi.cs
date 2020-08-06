@@ -142,13 +142,13 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="authToken">The authentication token.</param>
         /// <param name="host">The host.</param>
         /// <param name="plexFullHost"></param>
-        /// <param name="section">The section.</param>
+        /// <param name="plexTvShowSeasonKey">The rating key from the <see cref="PlexTvShowSeason"/></param>
         /// <param name="start">The start count.</param>
         /// <param name="retCount">The return count, how many items you want returned.</param>
         /// <returns></returns>
-        public Task<PlexMediaContainer> GetAllEpisodesAsync(string authToken, string plexFullHost, string section, int start, int retCount)
+        public Task<PlexMediaContainer> GetAllEpisodesAsync(string authToken, string plexFullHost, int plexTvShowSeasonKey, int start = 0, int retCount = 100)
         {
-            var request = new RestRequest(new Uri($"{plexFullHost}/library/sections/{section}/all"), Method.GET);
+            var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{plexTvShowSeasonKey}/children"), Method.GET);
             request = AddToken(request, authToken);
             request = AddLimitHeaders(request, start, retCount);
             request.AddQueryParameter("type", "4");

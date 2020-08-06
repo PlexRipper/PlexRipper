@@ -224,11 +224,20 @@ namespace PlexRipper.Application.PlexLibraries
 
             // Request seasons and episodes for every tv show
             var plexLibraryDb = result.Value;
+            var serverUrl = plexLibraryDb.PlexServer.BaseUrl;
             foreach (var plexTvShow in plexLibrary.TvShows)
             {
-                plexTvShow.Seasons = await _plexServiceApi.GetSeasonsAsync(authToken, plexLibraryDb.PlexServer.BaseUrl, plexTvShow);
+                plexTvShow.Seasons = await _plexServiceApi.GetSeasonsAsync(authToken, serverUrl, plexTvShow);
+                // Retrieve the episodes for every season
+                if (plexTvShow.Seasons.Any())
+                {
+                    foreach (var showSeason in plexTvShow.Seasons)
+                    {
+                        showSeason.Episodes = await _plexServiceApi.GetEpisodesAsync(authToken, serverUrl, showSeason);
+                    }
+                }
             }
-
+            Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title}");
             result = await _mediator.Send(new CreateOrUpdatePlexTvShowsCommand(plexLibrary, plexLibrary.TvShows));
             return result;
         }

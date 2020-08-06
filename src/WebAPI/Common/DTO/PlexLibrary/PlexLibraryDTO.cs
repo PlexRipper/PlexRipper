@@ -1,11 +1,10 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.WebAPI.Common.DTO.PlexMedia;
 using System;
 using System.Collections.Generic;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
-    public class PlexLibraryDTO
+    public sealed class PlexLibraryDTO
     {
         [JsonProperty("id")]
         public int Id { get; set; }
@@ -47,10 +46,10 @@ namespace PlexRipper.WebAPI.Common.DTO
         public int Count { get; set; }
 
         [JsonProperty("movies")]
-        public virtual List<PlexMovieDTO> Movies { get; set; }
+        public List<PlexMovieDTO> Movies { get; set; }
 
         [JsonProperty("tvShows")]
-        public virtual List<PlexTvShowDTO> TvShows { get; set; }
+        public List<PlexTvShowDTO> TvShows { get; set; }
 
     }
 }

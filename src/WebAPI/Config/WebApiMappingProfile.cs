@@ -2,7 +2,6 @@
 using FluentResults;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.WebAPI.Common.DTO.PlexMedia;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Config
@@ -13,8 +12,8 @@ namespace PlexRipper.WebAPI.Config
         {
             //Result -> ResultDTO
             CreateMap<Result, ResultDTO>(MemberList.Destination)
-                .ForMember(x => x.Value, opt => opt.Ignore()); 
-                
+                .ForMember(x => x.Value, opt => opt.Ignore());
+
             //CreatePlexAccountDTO -> PlexAccount
             CreateMap<CreatePlexAccountDTO, PlexAccount>(MemberList.Source)
                 .ReverseMap();
@@ -46,8 +45,11 @@ namespace PlexRipper.WebAPI.Config
             //PlexTvShow <-> PlexTvShowDTO
             CreateMap<PlexTvShow, PlexTvShowDTO>(MemberList.Destination).ReverseMap();
 
-            //PlexTvShowSeason -> PlexTvShowSeasonDTO
+            //PlexTvShowSeason <-> PlexTvShowSeasonDTO
             CreateMap<PlexTvShowSeason, PlexTvShowSeasonDTO>(MemberList.Destination).ReverseMap();
+
+            //PlexTvShowSeason <-> PlexTvShowSeasonDTO
+            CreateMap<PlexTvShowEpisode, PlexTvShowEpisodeDTO>(MemberList.Destination).ReverseMap();
 
             //PlexMovie -> PlexMovieDTO
             CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination).ReverseMap();

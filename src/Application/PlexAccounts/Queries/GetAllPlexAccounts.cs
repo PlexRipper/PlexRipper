@@ -45,6 +45,7 @@ namespace PlexRipper.Application.PlexAccounts
         public async Task<Result<List<PlexAccount>>> Handle(GetAllPlexAccountsQuery request,
             CancellationToken cancellationToken)
         {
+            // TODO There might be a better way of retrieving this data
             var plexAccounts = await _dbContext.PlexAccounts
                     .Include(x => x.PlexAccountServers)
                     .ThenInclude(x => x.PlexServer)
@@ -112,7 +113,7 @@ namespace PlexRipper.Application.PlexAccounts
                             })
                             .ToList(),
                     })
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
 
             if (request.OnlyEnabled)

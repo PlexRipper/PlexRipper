@@ -97,7 +97,7 @@ namespace PlexRipper.Domain.Entities
                 return GetMediaType switch
                 {
                     PlexMediaType.Movie => Movies?.Count ?? -1,
-                    PlexMediaType.TvShow => Movies?.Count ?? -1,
+                    PlexMediaType.TvShow => TvShows?.Count ?? -1,
                     _ => -1
                 };
             }

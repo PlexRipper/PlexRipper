@@ -7,7 +7,6 @@ using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -32,10 +31,10 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET api/<PlexLibrary>/5
         [HttpGet("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlexLibraryDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PlexLibraryDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Result))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Result))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(Result))]
 
         public async Task<IActionResult> Get(int id, int plexAccountId)
         {
@@ -48,16 +47,16 @@ namespace PlexRipper.WebAPI.Controllers
 
                 if (data.IsFailed)
                 {
-                    return BadRequest(data.Errors);
+                    return BadRequest(data);
                 }
 
                 if (data.Value != null)
                 {
                     var result = _mapper.Map<PlexLibraryDTO>(data.Value);
                     Log.Debug($"Found {data.Value.GetMediaCount} in library {data.Value.Title} of type {data.Value.Type}");
-                    return Ok(result);
-
+                    return Ok(Result.Ok(result));
                 }
+
                 string message = $"Could not find a {nameof(PlexLibrary)} with Id: {id}";
                 Log.Warning(message);
                 return NotFound(message);
@@ -71,15 +70,15 @@ namespace PlexRipper.WebAPI.Controllers
 
         // POST api/<PlexLibrary>/
         [HttpPost("refresh")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlexLibraryDTO))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(List<Error>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PlexLibraryDTO>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(Result))]
         public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibraryDTO refreshPlexLibraryDto)
         {
             var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexAccountId, refreshPlexLibraryDto.PlexLibraryId);
 
             if (data.IsFailed)
             {
-                return InternalServerError(data.Errors);
+                return InternalServerError(data);
             }
 
             if (data.Value != null)
@@ -89,9 +88,9 @@ namespace PlexRipper.WebAPI.Controllers
                 return Ok(result);
             }
 
-            string message = $"Could not refresh {nameof(PlexLibrary)} with Id: {refreshPlexLibraryDto.PlexLibraryId}";
-            Log.Warning(message);
-            return InternalServerError(new List<Error> { new Error(message) });
+            string msg = $"Could not refresh {nameof(PlexLibrary)} with Id: {refreshPlexLibraryDto.PlexLibraryId}";
+            Log.Warning(msg);
+            return InternalServerError(Result.Fail(msg));
         }
     }
 }

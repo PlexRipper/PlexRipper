@@ -46,7 +46,7 @@ namespace PlexRipper.Application.PlexAccounts
             var id = request.Id;
 
             var account = await _dbContext.PlexAccounts
-                .FirstOrDefaultAsync(x => x.Id == request.Id);
+                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             return ReturnResult(account, id);
         }

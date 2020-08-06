@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Domain;
 using System;
-using System.Collections.Generic;
 using System.Net.Mime;
 using AutoMapper;
 using PlexRipper.WebAPI.Common.FluentResult;
@@ -33,31 +32,24 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         [NonAction]
-        protected IActionResult InternalServerError(List<Error> errors)
+        protected IActionResult InternalServerError(Result result)
         {
             Log.Error("Internal server error:");
-            foreach (Error error in errors)
-            {
-                Log.Error(error.Message);
-            }
-            return StatusCode(StatusCodes.Status500InternalServerError, errors);
+            return StatusCode(StatusCodes.Status500InternalServerError, result);
         }
 
         [NonAction]
         protected IActionResult BadRequest(int id, string nameOf = "")
         {
 
-            var errorList = new List<Error>
-            {
-                new Error($"The Id: {id} was 0 or lower")
-            };
+            var error = new Error($"The Id: {id} was 0 or lower");
 
             if (nameOf != string.Empty)
             {
-                errorList[0] = new Error($"The Id parameter \"{nameOf}\" has an invalid id of {id}");
+                error = new Error($"The Id parameter \"{nameOf}\" has an invalid id of {id}");
             }
 
-            return new BadRequestObjectResult(errorList);
+            return new BadRequestObjectResult(Result.Fail(error));
         }  
         
         [NonAction]

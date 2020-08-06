@@ -33,7 +33,7 @@ namespace PlexRipper.WebAPI.Controllers
                 var result = await _settingsService.GetActivePlexAccountAsync();
                 if (result.IsFailed)
                 {
-                    return InternalServerError(result.Errors);
+                    return InternalServerError(result);
                 }
 
                 return Ok(_mapper.Map<PlexAccountDTO>(result.Value));

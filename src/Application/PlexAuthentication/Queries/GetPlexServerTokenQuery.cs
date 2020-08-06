@@ -46,7 +46,7 @@ namespace PlexRipper.Application.PlexAuthentication.Queries
             var result = await ValidateAsync<GetPlexServerTokenQuery, GetPlexServerTokenQueryValidator>(request);
             if (result.IsFailed) return result;
 
-            var authToken = await _dbContext.PlexAccountServers.FirstOrDefaultAsync(x => x.PlexAccountId == request.PlexAccountId && x.PlexServerId == request.PlexServerId);
+            var authToken = await _dbContext.PlexAccountServers.FirstOrDefaultAsync(x => x.PlexAccountId == request.PlexAccountId && x.PlexServerId == request.PlexServerId, cancellationToken: cancellationToken);
 
             if (authToken != null)
             {

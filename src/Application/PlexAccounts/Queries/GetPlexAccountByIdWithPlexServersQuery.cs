@@ -91,7 +91,7 @@ namespace PlexRipper.Application.PlexAccounts
                         })
                         .ToList(),
                 })
-                .FirstOrDefaultAsync(x => x.Id == request.Id);
+                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             return ReturnResult(account, id);
         }

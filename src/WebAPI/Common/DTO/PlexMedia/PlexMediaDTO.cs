@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using Newtonsoft.Json;
 
-namespace PlexRipper.WebAPI.Common.DTO.PlexMedia
+namespace PlexRipper.WebAPI.Common.DTO
 {
     public class PlexMediaDTO
     {

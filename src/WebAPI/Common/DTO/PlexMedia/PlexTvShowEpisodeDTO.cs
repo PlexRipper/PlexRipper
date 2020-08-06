@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
-    public class PlexTvShowSeasonDTO
+    public class PlexTvShowEpisodeDTO
     {
         [JsonProperty("id")]
         public int Id { get; set; }
@@ -48,11 +47,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("originallyAvailableAt")]
         public DateTime OriginallyAvailableAt { get; set; }
 
-        [JsonProperty("tvShowId")]
-        public int TvShowId { get; set; }
-
-        [JsonProperty("episodes")]
-        public List<PlexTvShowEpisodeDTO> Episodes { get; set; }
-
+        [JsonProperty("tvShowSeasonId")]
+        public int TvShowSeasonId { get; set; }
     }
 }

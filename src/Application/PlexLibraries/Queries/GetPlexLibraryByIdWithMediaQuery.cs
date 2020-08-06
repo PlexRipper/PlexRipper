@@ -48,7 +48,9 @@ namespace PlexRipper.Application.PlexLibraries.Queries
                 .Include(x => x.PlexServer)
                 .Include(x => x.Movies)
                 .Include(x => x.TvShows)
-                .FirstOrDefaultAsync(x => x.Id == request.Id);
+                .ThenInclude(x => x.Seasons)
+                .ThenInclude(x => x.Episodes)
+                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             return ReturnResult(plexLibrary, request.Id);
         }

@@ -3,6 +3,7 @@ using PlexRipper.Application.Common.Interfaces.DataAccess;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Config
 {
@@ -40,12 +41,22 @@ namespace PlexRipper.Data.Config
             var resetDb = Environment.GetEnvironmentVariable("ResetDB");
             if (resetDb != null && resetDb == "true")
             {
+                Log.Warning("ResetDB command is true, database will be deleted and re-created.");
                 DB.Database.EnsureDeleted();
             }
 
             // TODO Re-enable Migrate when stable
             // DB.Database.Migrate();
-            Task.WaitAll(DB.Database.EnsureCreatedAsync());
+            // TODO This should maybe be setup with Reactive extensions
+            Task.Run(async () =>
+            {
+                var exist = await DB.Database.CanConnectAsync();
+                if (!exist)
+                {
+                    Log.Information("Database does not exist, creating one now.");
+                    await DB.Database.EnsureCreatedAsync();
+                }
+            });
         }
     }
 }

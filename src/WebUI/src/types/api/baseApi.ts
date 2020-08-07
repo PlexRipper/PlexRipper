@@ -11,8 +11,8 @@ export const baseApiUrl = `${baseUrl}/api`;
 
 export const signalRDownloadProgressUrl = `${baseUrl}/download/progress`;
 
-export function preApiRequest(logText: string, fnName: string): void {
-	Log.debug(`${logText} ${fnName} => sending request`);
+export function preApiRequest(logText: string, fnName: string, msg: string = ''): void {
+	Log.debug(`${logText} ${fnName} => sending request ${msg}`);
 }
 
 export function checkResponse<T>(response: Observable<AxiosResponse<Result<T>>>, logText: string, fnName: string): Observable<T> {

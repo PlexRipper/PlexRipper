@@ -40,19 +40,19 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import IPlexAccount from '@dto/IPlexAccount';
+import { PlexAccountDTO } from '@dto/mainApi';
 import AccountService from '@service/accountService';
 import SettingsService from '@service/settingsService';
 
 @Component
 export default class AppBar extends Vue {
-	private accounts: IPlexAccount[] = [];
+	private accounts: PlexAccountDTO[] = [];
 
 	setDarkMode(): void {
 		this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
 	}
 
-	setActiveAccount(account: IPlexAccount): void {
+	setActiveAccount(account: PlexAccountDTO): void {
 		SettingsService.setActiveAccount(account.id);
 	}
 

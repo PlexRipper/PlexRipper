@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
-import { PlexLibraryDTO } from '~/types/dto/mainApi';
-import { checkResponse, preApiRequest } from './baseApi';
+import { checkResponse, preApiRequest } from '@api/baseApi';
+import { PlexLibraryDTO } from '@dto/mainApi';
 
 const logText = 'From PlexLibraryAPI => ';
 const apiPath = '/plexLibrary';

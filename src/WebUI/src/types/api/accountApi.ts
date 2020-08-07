@@ -1,4 +1,4 @@
-import IPlexAccount from '@dto/IPlexAccount';
+import { PlexAccountDTO } from '@dto/mainApi';
 import { Observable } from 'rxjs';
 import Axios from 'axios-observable';
 import Result from 'fluent-type-results';
@@ -7,34 +7,34 @@ import { checkResponse, preApiRequest } from './baseApi';
 const logText = 'From AccountAPI => ';
 const apiPath = '/plexaccount';
 
-export function getAllAccounts(): Observable<IPlexAccount[]> {
+export function getAllAccounts(): Observable<PlexAccountDTO[]> {
 	preApiRequest(logText, 'getAllAccounts');
-	const result = Axios.get<Result<IPlexAccount[]>>(apiPath);
-	return checkResponse<IPlexAccount[]>(result, logText, 'getAllAccounts');
+	const result = Axios.get<Result<PlexAccountDTO[]>>(apiPath);
+	return checkResponse<PlexAccountDTO[]>(result, logText, 'getAllAccounts');
 }
 
-export function getAllEnabledAccounts(): Observable<IPlexAccount[]> {
+export function getAllEnabledAccounts(): Observable<PlexAccountDTO[]> {
 	preApiRequest(logText, 'getAllEnabledAccounts');
-	const result = Axios.get<Result<IPlexAccount[]>>(`${apiPath}/?enabledOnly=true`);
-	return checkResponse<IPlexAccount[]>(result, logText, 'getAllEnabledAccounts');
+	const result = Axios.get<Result<PlexAccountDTO[]>>(`${apiPath}/?enabledOnly=true`);
+	return checkResponse<PlexAccountDTO[]>(result, logText, 'getAllEnabledAccounts');
 }
 
-export function validateAccount(account: IPlexAccount): Observable<boolean> {
+export function validateAccount(account: PlexAccountDTO): Observable<boolean> {
 	preApiRequest(logText, 'validateAccount');
 	const result = Axios.post<Result<boolean>>(`${apiPath}/validate`, account);
 	return checkResponse<boolean>(result, logText, 'validateAccount');
 }
 
-export function createAccount(account: IPlexAccount): Observable<IPlexAccount | null> {
+export function createAccount(account: PlexAccountDTO): Observable<PlexAccountDTO | null> {
 	preApiRequest(logText, 'createAccount');
-	const result = Axios.post<Result<IPlexAccount>>(apiPath, account);
-	return checkResponse<IPlexAccount | null>(result, logText, 'createAccount');
+	const result = Axios.post<Result<PlexAccountDTO>>(apiPath, account);
+	return checkResponse<PlexAccountDTO | null>(result, logText, 'createAccount');
 }
 
-export function updateAccount(account: IPlexAccount): Observable<IPlexAccount | null> {
+export function updateAccount(account: PlexAccountDTO): Observable<PlexAccountDTO | null> {
 	preApiRequest(logText, 'updateAccount');
-	const result = Axios.put<Result<IPlexAccount>>(`${apiPath}/${account.id}`, account);
-	return checkResponse<IPlexAccount | null>(result, logText, 'updateAccount');
+	const result = Axios.put<Result<PlexAccountDTO>>(`${apiPath}/${account.id}`, account);
+	return checkResponse<PlexAccountDTO | null>(result, logText, 'updateAccount');
 }
 
 export function deleteAccount(accountId: Number): Observable<boolean> {
@@ -43,8 +43,8 @@ export function deleteAccount(accountId: Number): Observable<boolean> {
 	return checkResponse<boolean>(result, logText, 'deleteAccount');
 }
 
-export function getAccount(accountId: Number): Observable<IPlexAccount> {
+export function getAccount(accountId: Number): Observable<PlexAccountDTO> {
 	preApiRequest(logText, 'getAccount');
-	const result = Axios.get<Result<IPlexAccount>>(`${apiPath}/${accountId}`);
-	return checkResponse<IPlexAccount>(result, logText, 'getAccount');
+	const result = Axios.get<Result<PlexAccountDTO>>(`${apiPath}/${accountId}`);
+	return checkResponse<PlexAccountDTO>(result, logText, 'getAccount');
 }

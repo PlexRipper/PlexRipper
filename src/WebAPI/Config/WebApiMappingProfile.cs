@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using FluentResults;
 using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Types.FileSystem;
 using PlexRipper.WebAPI.Common.DTO;
+using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Config
@@ -57,6 +59,15 @@ namespace PlexRipper.WebAPI.Config
             //DownloadTask -> DownloadTaskDTO
             CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.DownloadStatus));
+
+            //FolderPath -> FolderPathDTO
+            CreateMap<FolderPath, FolderPathDTO>(MemberList.Destination).ReverseMap();
+
+            //FileSystemResult -> FileSystemDTO
+            CreateMap<FileSystemResult, FileSystemDTO>(MemberList.Destination).ReverseMap();
+
+            //FileSystemModel -> FileSystemModelDTO
+            CreateMap<FileSystemModel, FileSystemModelDTO>(MemberList.Destination).ReverseMap();
 
         }
     }

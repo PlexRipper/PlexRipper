@@ -1,27 +1,26 @@
-import { IFileSystem } from '@dto/settings/paths/IFileSystem';
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
-import { checkResponse, preApiRequest } from './baseApi';
-import IFolderPath from '~/types/dto/settings/iFolderPath';
+import { FolderPathDTO, FileSystemDTO } from '@dto/mainApi';
+import { checkResponse, preApiRequest } from '@api/baseApi';
 
 const logText = 'From folderPathApi => ';
 const apiPath = '/folderpath';
 
-export function getFolderPaths(): Observable<IFolderPath[]> {
+export function getFolderPaths(): Observable<FolderPathDTO[]> {
 	preApiRequest(logText, 'getFolderPaths');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}`);
-	return checkResponse<IFolderPath[]>(result, logText, 'getFolderPaths');
+	return checkResponse<FolderPathDTO[]>(result, logText, 'getFolderPaths');
 }
 
-export function getDirectoryPath(path: string): Observable<IFileSystem> {
+export function getDirectoryPath(path: string): Observable<FileSystemDTO> {
 	preApiRequest(logText, 'getDirectoryPath');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/directory/?path=${path}`);
-	return checkResponse<IFileSystem>(result, logText, 'getDirectoryPath');
+	return checkResponse<FileSystemDTO>(result, logText, 'getDirectoryPath');
 }
 
-export function updateFolderPath(folderPath: IFolderPath): Observable<IFolderPath> {
+export function updateFolderPath(folderPath: FolderPathDTO): Observable<FolderPathDTO> {
 	preApiRequest(logText, 'updateFolderPath');
 	const result: Observable<AxiosResponse> = Axios.put(`${apiPath}`, folderPath);
-	return checkResponse<IFolderPath>(result, logText, 'updateFolderPath');
+	return checkResponse<FolderPathDTO>(result, logText, 'updateFolderPath');
 }

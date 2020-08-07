@@ -24,7 +24,7 @@ namespace PlexRipper.WebAPI.Common.FluentResult
 
     public class ResultDTO<T> : ResultDTO
     {
-        [JsonProperty("value")]
+        [JsonProperty("value", Required = Required.Always)]
         public T Value { get; set; }
     }
 }

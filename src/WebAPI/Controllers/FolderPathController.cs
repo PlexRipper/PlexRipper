@@ -8,6 +8,7 @@ using PlexRipper.Domain.Types.FileSystem;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -20,39 +21,45 @@ namespace PlexRipper.WebAPI.Controllers
     {
         private readonly IFolderPathService _folderPathService;
         private readonly IFileSystem _fileSystem;
+        private readonly IMapper _mapper;
 
         public FolderPathController(IFolderPathService folderPathService, IFileSystem fileSystem, IMapper mapper) : base(mapper)
         {
             _folderPathService = folderPathService;
             _fileSystem = fileSystem;
+            _mapper = mapper;
         }
 
         // GET: api/<FolderPathController>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<FolderPath>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<FolderPathDTO>>))]
         public async Task<IActionResult> Get()
         {
             var result = await _folderPathService.GetAllFolderPathsAsync();
-            return Ok(result);
+            var mapResult = _mapper.Map<List<FolderPathDTO>>(result.Value);
+            return Ok(Result.Ok(mapResult));
         }
 
         // GET: api/<FolderPathController>/directory?path=
         [HttpGet("directory")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<FileSystemResult>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<FileSystemDTO>))]
         public IActionResult Get(string path)
         {
-            var result = Result.Ok(_fileSystem.LookupContents(path, false, true));
-            return Ok(result);
+            var mapResult = _mapper.Map<FileSystemDTO>(_fileSystem.LookupContents(path, false, true));
+            return Ok(Result.Ok(mapResult));
         }
 
         // POST: api/<FolderPathController>
         [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<FolderPath>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<FolderPathDTO>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Put([FromBody] FolderPath folderPath)
+        public async Task<IActionResult> Put([FromBody] FolderPathDTO folderPathDto)
         {
+            var folderPath = _mapper.Map<FolderPath>(folderPathDto);
             var result = await _folderPathService.UpdateFolderPathAsync(folderPath);
-            return result.IsFailed ? BadRequest(result) : Ok(result);
+
+            folderPathDto = _mapper.Map<FolderPathDTO>(result.Value);
+            return result.IsFailed ? BadRequest(result) : Ok(result.ToResult<FolderPathDTO>().WithValue(folderPathDto));
         }
     }
 }

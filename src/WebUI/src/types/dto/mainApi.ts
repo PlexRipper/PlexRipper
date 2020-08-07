@@ -10,7 +10,7 @@
  * ---------------------------------------------------------------
  */
 
-export type ResultDTOOfIEnumerableOfDownloadTaskDTO = ResultDTO & { value?: DownloadTaskDTO[] | null | null };
+export type ResultDTOOfIEnumerableOfDownloadTaskDTO = ResultDTO & { value: DownloadTaskDTO[] };
 
 export interface DownloadTaskDTO {
   id?: number;
@@ -35,86 +35,79 @@ export type Error = Reason & { reasons?: Error[] | null | null };
 
 export type Success = Reason & object;
 
-export type ResultDTOOfBoolean = ResultDTO & { value?: boolean };
+export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
 
 export interface DownloadMovieDTO {
   plexAccountId?: number;
   plexMovieId?: number;
 }
 
-export type ResultDTOOfIEnumerableOfFolderPath = ResultDTO & { value?: FolderPath[] | null | null };
+export type ResultDTOOfIEnumerableOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[] };
 
-export type FolderPath = BaseEntity & {
-  type?: string | null;
-  displayName?: string | null;
-  directory?: string | null;
-  folderType?: FolderType;
-};
-
-export type FolderType = 0 | 1 | 2 | 3;
-
-export interface BaseEntity {
-  id?: number;
+export interface FolderPathDTO {
+  id: number;
+  type: string;
+  displayName: string;
+  directory: string;
 }
 
-export type ResultDTOOfFileSystemResult = ResultDTO & { value?: FileSystemResult | null };
+export type ResultDTOOfFileSystemDTO = ResultDTO & { value: FileSystemDTO };
 
-export interface FileSystemResult {
-  parent?: string | null;
-  directories?: FileSystemModel[] | null | null;
-  files?: FileSystemModel[] | null | null;
+export interface FileSystemDTO {
+  parent: string;
+  directories: FileSystemModelDTO[];
+  files: FileSystemModelDTO[];
 }
 
-export interface FileSystemModel {
-  type?: FileSystemEntityType;
-  name?: string | null;
-  path?: string | null;
-  extension?: string | null;
-  size?: number;
-  lastModified?: string | null;
+export interface FileSystemModelDTO {
+  type: FileSystemEntityType;
+  name: string;
+  path: string;
+  extension: string;
+  size: number;
+  lastModified: string | null;
 }
 
 export type FileSystemEntityType = 0 | 1 | 2 | 3;
 
-export type ResultDTOOfIEnumerableOfPlexAccountDTO = ResultDTO & { value?: PlexAccountDTO[] | null | null };
+export type ResultDTOOfIEnumerableOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO[] };
 
 export interface PlexAccountDTO {
-  id?: number;
-  displayName?: string;
-  username?: string;
-  password?: string;
-  isEnabled?: boolean;
-  isValidated?: boolean;
-  validatedAt?: string;
-  uuid?: string;
-  email?: string;
-  joined_at?: string;
-  title?: string;
-  hasPassword?: boolean;
-  authToken?: string;
-  authentication_token?: string;
-  forumId?: any;
+  id: number;
+  displayName: string;
+  username: string;
+  password: string;
+  isEnabled: boolean;
+  isValidated: boolean;
+  validatedAt: string;
+  uuid: string;
+  email: string | null;
+  joined_at: string;
+  title: string;
+  hasPassword: boolean;
+  authToken: string;
+  forumId: number;
   plexServers: PlexServerDTO[];
 }
 
 export interface PlexServerDTO {
   id?: number;
-  accessToken?: string | null;
-  name?: string | null;
-  address?: string | null;
+  accessToken?: string;
+  name?: string;
+  address?: string;
   port?: number;
-  version?: string | null;
-  scheme?: string | null;
-  host?: string | null;
-  localAddresses?: string | null;
-  machineIdentifier?: string | null;
+  version?: string;
+  scheme?: string;
+  host?: string;
+  localAddresses?: string;
+  machineIdentifier?: string;
   createdAt?: string;
   updatedAt?: string;
   owned?: boolean;
   synced?: boolean;
   ownerId?: number;
   home?: boolean;
-  plexLibraries?: PlexLibraryDTO[] | null | null;
+  plexLibraries?: PlexLibraryDTO[];
 }
 
 export interface PlexLibraryDTO {
@@ -204,7 +197,7 @@ export interface PlexTvShowEpisodeDTO {
   tvShowSeasonId?: number;
 }
 
-export type ResultDTOOfPlexAccountDTO = ResultDTO & { value?: PlexAccountDTO | null };
+export type ResultDTOOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO };
 
 export interface UpdatePlexAccountDTO {
   id?: number;
@@ -215,25 +208,25 @@ export interface UpdatePlexAccountDTO {
 }
 
 export interface CreatePlexAccountDTO {
-  displayName?: string | null;
-  username?: string | null;
-  password?: string | null;
+  displayName?: string;
+  username?: string;
+  password?: string;
   isEnabled?: boolean;
 }
 
 export interface CredentialsDTO {
-  username?: string | null;
-  password?: string | null;
+  username?: string;
+  password?: string;
 }
 
-export type ResultDTOOfPlexLibraryDTO = ResultDTO & { value?: PlexLibraryDTO | null };
+export type ResultDTOOfPlexLibraryDTO = ResultDTO & { value: PlexLibraryDTO };
 
 export interface RefreshPlexLibraryDTO {
   plexAccountId?: number;
   plexLibraryId?: number;
 }
 
-export type ResultDTOOfPlexServerDTO = ResultDTO & { value?: PlexServerDTO | null };
+export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };
 
 export type RequestParams = Omit<RequestInit, "body" | "method"> & {
   secure?: boolean;
@@ -375,15 +368,15 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request GET:/api/FolderPath
      */
     folderPathGet: (params?: RequestParams) =>
-      this.request<ResultDTOOfIEnumerableOfFolderPath, any>(`/api/FolderPath`, "GET", params),
+      this.request<ResultDTOOfIEnumerableOfFolderPathDTO, any>(`/api/FolderPath`, "GET", params),
 
     /**
      * @tags FolderPath
      * @name FolderPath_Put
      * @request PUT:/api/FolderPath
      */
-    folderPathPut: (data: FolderPath, params?: RequestParams) =>
-      this.request<ResultDTOOfIEnumerableOfFolderPath, ResultDTO>(`/api/FolderPath`, "PUT", params, data),
+    folderPathPut: (data: FolderPathDTO, params?: RequestParams) =>
+      this.request<ResultDTOOfIEnumerableOfFolderPathDTO, ResultDTO>(`/api/FolderPath`, "PUT", params, data),
 
     /**
      * @tags FolderPath
@@ -391,7 +384,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request GET:/api/FolderPath/directory
      */
     folderPathGet2: (query?: { path?: string | null }, params?: RequestParams) =>
-      this.request<ResultDTOOfFileSystemResult, any>(
+      this.request<ResultDTOOfFileSystemDTO, any>(
         `/api/FolderPath/directory${this.addQueryParams(query)}`,
         "GET",
         params,

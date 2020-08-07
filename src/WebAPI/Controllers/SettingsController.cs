@@ -38,7 +38,7 @@ namespace PlexRipper.WebAPI.Controllers
                     return InternalServerError(result);
                 }
                 var mapResult = _mapper.Map<PlexAccountDTO>(result.Value);
-                return Ok(mapResult);
+                return Ok(Result.Ok(mapResult));
 
             }
             catch (Exception e)
@@ -67,7 +67,7 @@ namespace PlexRipper.WebAPI.Controllers
                 }
 
                 var mapResult = _mapper.Map<PlexAccountDTO>(result.Value);
-                return Ok(mapResult);
+                return Ok(Result.Ok(mapResult));
             }
             catch (Exception e)
             {

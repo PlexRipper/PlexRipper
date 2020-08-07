@@ -1,4 +1,4 @@
-import IDownloadTask from '@dto/IDownloadTask';
+import { DownloadTaskDTO } from '@dto/mainApi';
 import IDownloadProgress from '@dto/IDownloadProgress';
 
-export default interface IDownloadRow extends IDownloadTask, IDownloadProgress {}
+export default interface IDownloadRow extends DownloadTaskDTO, IDownloadProgress {}

@@ -31,7 +31,7 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
-import IFolderPath from '@dto/settings/iFolderPath';
+import { FolderPathDTO } from '@dto/mainApi';
 import Log from 'consola';
 import { getFolderPaths, updateFolderPath } from '@api/pathApi';
 import DirectoryBrowser from './components/DirectoryBrowser.vue';
@@ -44,18 +44,18 @@ import DirectoryBrowser from './components/DirectoryBrowser.vue';
 export default class SettingsPaths extends Vue {
 	moduleName: string = 'Settings Paths';
 
-	paths: IFolderPath[] = [];
+	paths: FolderPathDTO[] = [];
 
 	isDirectoryBrowserOpen: boolean = false;
 
-	selectedPath: IFolderPath | null = null;
+	selectedPath: FolderPathDTO | null = null;
 
-	openDirectoryBrowser(path: IFolderPath): void {
+	openDirectoryBrowser(path: FolderPathDTO): void {
 		this.selectedPath = path;
 		this.isDirectoryBrowserOpen = true;
 	}
 
-	confirmDirectoryBrowser(path: IFolderPath): void {
+	confirmDirectoryBrowser(path: FolderPathDTO): void {
 		this.selectedPath = path;
 		Log.debug(path);
 		this.isDirectoryBrowserOpen = false;

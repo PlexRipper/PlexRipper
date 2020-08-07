@@ -121,7 +121,7 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import Log from 'consola';
-import IPlexAccount from '@dto/IPlexAccount';
+import { PlexAccountDTO } from '@dto/mainApi';
 import { validateAccount, createAccount, deleteAccount, updateAccount } from '@api/accountApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
@@ -131,8 +131,8 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 	},
 })
 export default class AccountCard extends Vue {
-	@Prop({ type: Object as () => IPlexAccount })
-	readonly account!: IPlexAccount;
+	@Prop({ type: Object as () => PlexAccountDTO })
+	readonly account!: PlexAccountDTO;
 
 	validateLoading: boolean = false;
 
@@ -154,14 +154,14 @@ export default class AccountCard extends Vue {
 		return !this.account;
 	}
 
-	get getAccount(): IPlexAccount {
+	get getAccount(): PlexAccountDTO {
 		return {
 			id: this.isNew ? 0 : this.account.id,
 			isEnabled: this.isEnabled,
 			displayName: this.displayName,
 			username: this.username,
 			password: this.password,
-		} as IPlexAccount;
+		} as PlexAccountDTO;
 	}
 
 	get getDisplayName(): string {

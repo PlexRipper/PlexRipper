@@ -48,14 +48,13 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify';
-import IFolderPath from '@dto/settings/iFolderPath';
 import { getDirectoryPath } from '@api/pathApi';
-import { IDirectory } from '@dto/settings/paths/IFileSystem';
+import { FolderPathDTO, FileSystemModelDTO } from '~/types/dto/mainApi';
 
 @Component
 export default class DirectoryBrowser extends Vue {
-	@Prop({ required: false, type: Object as () => IFolderPath })
-	readonly path!: IFolderPath;
+	@Prop({ required: false, type: Object as () => FolderPathDTO })
+	readonly path!: FolderPathDTO;
 
 	@Prop({ required: true, type: Boolean })
 	readonly open!: boolean;
@@ -63,7 +62,7 @@ export default class DirectoryBrowser extends Vue {
 	parentPath: string = '';
 	newDirectory: string = '';
 
-	items: IDirectory[] = [];
+	items: FileSystemModelDTO[] = [];
 
 	headers: DataTableHeader[] = [
 		{
@@ -112,7 +111,7 @@ export default class DirectoryBrowser extends Vue {
 		this.$emit('cancel');
 	}
 
-	directoryNavigate(dataRow: IDirectory): void {
+	directoryNavigate(dataRow: FileSystemModelDTO): void {
 		if (dataRow.path === '..') {
 			this.requestDirectories(this.parentPath);
 		} else {
@@ -130,6 +129,9 @@ export default class DirectoryBrowser extends Vue {
 					name: '...',
 					path: '..',
 					type: 0,
+					extension: '',
+					size: 0,
+					lastModified: '',
 				});
 			}
 			this.parentPath = data.parent;

@@ -2,10 +2,10 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { getAllDownloads } from '@api/plexDownloadApi';
 import GlobalService from '@service/globalService';
 import Log from 'consola';
-import IDownloadTask from '../dto/IDownloadTask';
+import { DownloadTaskDTO } from '@dto/mainApi';
 
 export class DownloadService {
-	private _downloadList: ReplaySubject<IDownloadTask[]> = new ReplaySubject();
+	private _downloadList: ReplaySubject<DownloadTaskDTO[]> = new ReplaySubject();
 
 	public constructor() {
 		GlobalService.getAxiosReady().subscribe(() => {
@@ -14,7 +14,7 @@ export class DownloadService {
 		});
 	}
 
-	public getDownloadList(): Observable<IDownloadTask[]> {
+	public getDownloadList(): Observable<DownloadTaskDTO[]> {
 		return this._downloadList.asObservable();
 	}
 

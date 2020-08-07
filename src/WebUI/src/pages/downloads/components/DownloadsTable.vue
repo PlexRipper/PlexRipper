@@ -56,10 +56,10 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import IPlexMovie from '@dto/IPlexMovie';
 import { DataTableHeader } from 'vuetify/types';
-import IDownloadRow from '../types/IDownloadRow';
+import { PlexMovieDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import IDownloadRow from '../types/IDownloadRow';
 
 @Component({
 	components: {
@@ -115,11 +115,11 @@ export default class DownloadsTable extends Vue {
 		];
 	}
 
-	pauseMovie(item: IPlexMovie): void {
+	pauseMovie(item: PlexMovieDTO): void {
 		Log.debug(item);
 	}
 
-	cancelMovie(item: IPlexMovie): void {
+	cancelMovie(item: PlexMovieDTO): void {
 		Log.debug(item);
 	}
 

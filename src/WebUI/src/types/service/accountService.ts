@@ -1,11 +1,11 @@
 import { ReplaySubject, Observable } from 'rxjs';
 import { getAllAccounts } from '@api/accountApi';
-import IPlexAccount from '@dto/IPlexAccount';
+import { PlexAccountDTO } from '@dto/mainApi';
 import GlobalService from '@service/globalService';
 import Log from 'consola';
 
 export class AccountService {
-	private _accounts: ReplaySubject<IPlexAccount[]> = new ReplaySubject();
+	private _accounts: ReplaySubject<PlexAccountDTO[]> = new ReplaySubject();
 
 	public constructor() {
 		GlobalService.getAxiosReady().subscribe(() => {
@@ -20,7 +20,7 @@ export class AccountService {
 		});
 	}
 
-	public getAccounts(): Observable<IPlexAccount[]> {
+	public getAccounts(): Observable<PlexAccountDTO[]> {
 		return this._accounts.asObservable();
 	}
 }

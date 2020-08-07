@@ -4,22 +4,22 @@ namespace PlexRipper.WebAPI.Common.DTO
 {
     public class DownloadProgressDTO
     {
-        [JsonProperty("id")]
+        [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
-        [JsonProperty("status")]
+        [JsonProperty("status", Required = Required.Always)]
         public string Status { get; set; }
 
-        [JsonProperty("percentage")]
+        [JsonProperty("percentage", Required = Required.Always)]
         public decimal Percentage { get; set; }
 
-        [JsonProperty("dataReceived")]
+        [JsonProperty("dataReceived", Required = Required.Always)]
         public string DataReceived { get; set; }
 
-        [JsonProperty("dataTotal")]
+        [JsonProperty("dataTotal", Required = Required.Always)]
         public string DataTotal { get; set; }
 
-        [JsonProperty("downloadSpeed")]
+        [JsonProperty("downloadSpeed", Required = Required.Always)]
         public string DownloadSpeed { get; set; }
     }
 }

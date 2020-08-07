@@ -16,8 +16,8 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import IPlexAccount from '@dto/IPlexAccount';
 import AccountService from '@service/accountService';
+import { PlexAccountDTO } from '@dto/mainApi';
 import AccountCard from './components/AccountCard.vue';
 
 @Component({
@@ -26,9 +26,9 @@ import AccountCard from './components/AccountCard.vue';
 	},
 })
 export default class Accounts extends Vue {
-	private accounts: IPlexAccount[] = [];
+	private accounts: PlexAccountDTO[] = [];
 
-	checkAccount(account: IPlexAccount): void {
+	checkAccount(account: PlexAccountDTO): void {
 		Log.debug(account);
 	}
 

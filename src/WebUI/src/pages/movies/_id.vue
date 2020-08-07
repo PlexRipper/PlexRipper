@@ -18,16 +18,14 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
-import IPlexMovie from '@dto/IPlexMovie';
-import IPlexAccount from '@dto/IPlexAccount';
 import SettingsService from '@service/settingsService';
-import Log from 'consola';
-import IPlexLibrary from '@dto/IPlexLibrary';
-import IPlexServer from '@dto/IPlexServer';
-import MovieTable from './components/MovieTable.vue';
+import { PlexAccountDTO, PlexMovieDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import MovieTable from './components/MovieTable.vue';
 
 @Component<MoviesDetail>({
 	components: {
@@ -36,19 +34,19 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 	},
 })
 export default class MoviesDetail extends Vue {
-	activeAccount: IPlexAccount | null = null;
+	activeAccount: PlexAccountDTO | null = null;
 
 	libraryId: number = 0;
 
-	library: IPlexLibrary | null = null;
+	library: PlexLibraryDTO | null = null;
 
 	isLoading: boolean = true;
 
-	get movies(): IPlexMovie[] {
+	get movies(): PlexMovieDTO[] {
 		return this.library?.movies ?? [];
 	}
 
-	get server(): IPlexServer | null {
+	get server(): PlexServerDTO | null {
 		return this.activeAccount?.plexServers.find((x) => x.id === this.library?.plexServerId) ?? null;
 	}
 

@@ -1,7 +1,9 @@
 import * as path from 'path';
-import { Configuration } from '@nuxt/types/config';
+import { NuxtConfig } from '@nuxt/types/config';
+import { NuxtWebpackEnv } from '@nuxt/types/config/build';
+import { Configuration as WebpackConfiguration } from 'webpack';
 
-const config: Configuration = {
+const config: NuxtConfig = {
 	mode: 'spa',
 	target: 'static',
 	srcDir: 'src/',
@@ -77,7 +79,7 @@ const config: Configuration = {
 		 */
 		// Will allow for debugging in Typescript + Nuxt
 		// Doc: https://nordschool.com/enable-vs-code-debugger-for-nuxt-and-typescript/
-		extend(config, { isDev, isClient }): void {
+		extend(config: WebpackConfiguration, { isDev, isClient }: NuxtWebpackEnv): void {
 			if (isDev) {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
 			}

@@ -20,7 +20,7 @@
 			</v-toolbar>
 		</template>
 		<template v-slot:expanded-item="{ headers, item }">
-			<td :colspan="getHeaders.length">More info about {{ item.title }}</td>
+			<td :colspan="headers.length">More info about {{ item.title }}</td>
 		</template>
 		<template v-slot:item.actions="{ item }">
 			<v-icon small @click="downloadMovie(item)">
@@ -33,9 +33,8 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify/types';
-import IPlexAccount from '@dto/IPlexAccount';
 import DownloadService from '@service/downloadService';
-import IPlexTvShow from '@dto/IPlexTvShow';
+import { PlexAccountDTO, PlexTvShowDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { downloadPlexMovie } from '@/types/api/plexDownloadApi';
 
@@ -45,11 +44,11 @@ import { downloadPlexMovie } from '@/types/api/plexDownloadApi';
 	},
 })
 export default class TVShowsTable extends Vue {
-	@Prop({ required: true, type: Object as () => IPlexAccount })
-	readonly activeAccount!: IPlexAccount;
+	@Prop({ required: true, type: Object as () => PlexAccountDTO })
+	readonly activeAccount!: PlexAccountDTO;
 
-	@Prop({ required: true, type: Array as () => IPlexTvShow[] })
-	readonly tvshows!: IPlexTvShow[];
+	@Prop({ required: true, type: Array as () => PlexTvShowDTO[] })
+	readonly tvshows!: PlexTvShowDTO[];
 
 	@Prop({ required: true, type: Boolean, default: true })
 	readonly loading!: Boolean;
@@ -57,7 +56,7 @@ export default class TVShowsTable extends Vue {
 	expanded: string[] = [];
 	singleExpand: boolean = false;
 
-	get getHeaders(): DataTableHeader<IPlexTvShow>[] {
+	get getHeaders(): DataTableHeader<PlexTvShowDTO>[] {
 		return [
 			{
 				text: 'Id',
@@ -87,8 +86,8 @@ export default class TVShowsTable extends Vue {
 		];
 	}
 
-	downloadMovie(item: IPlexTvShow): void {
-		downloadPlexMovie(item.id, this.activeAccount?.id ?? 0).subscribe(() => {
+	downloadMovie(item: PlexTvShowDTO): void {
+		downloadPlexMovie(item?.id ?? 0, this.activeAccount?.id ?? 0).subscribe(() => {
 			DownloadService.fetchDownloadList();
 		});
 	}

@@ -1,16 +1,15 @@
 import { Module, Mutation, Action, VuexModule } from 'vuex-module-decorators';
-import IPlexAccount from '@dto/IPlexAccount';
 import Log from 'consola';
-import IPlexServer from '@dto/IPlexServer';
+import { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 
 // Doc: https://typescript.nuxtjs.org/cookbook/store.html#class-based
 @Module({ name: 'userStore', namespaced: true, stateFactory: true })
 export default class UserStore extends VuexModule {
 	activeAccountId: number = 0;
 
-	accounts: IPlexAccount[] = [];
+	accounts: PlexAccountDTO[] = [];
 
-	get getActiveAccount(): IPlexAccount | undefined {
+	get getActiveAccount(): PlexAccountDTO | undefined {
 		if (this.activeAccountId <= 0) {
 			Log.error(`activeAccountId is invalid: ${this.activeAccountId}`);
 			return undefined;
@@ -22,22 +21,22 @@ export default class UserStore extends VuexModule {
 		return this.getActiveAccount?.id ?? this.activeAccountId;
 	}
 
-	get getAccounts(): IPlexAccount[] {
+	get getAccounts(): PlexAccountDTO[] {
 		return this.accounts;
 	}
 
-	get getEnabledAccounts(): IPlexAccount[] {
+	get getEnabledAccounts(): PlexAccountDTO[] {
 		return this.accounts?.filter((x) => x.isEnabled);
 	}
 
-	get getServers(): IPlexServer[] {
+	get getServers(): PlexServerDTO[] {
 		return this.accounts?.find((x) => x.id === this.activeAccountId)?.plexServers ?? [];
 	}
 
 	selectAccount(): void {}
 
 	@Mutation
-	setAccounts(accounts: IPlexAccount[]): void {
+	setAccounts(accounts: PlexAccountDTO[]): void {
 		this.accounts = accounts;
 
 		// Set the default selected account to the first instance

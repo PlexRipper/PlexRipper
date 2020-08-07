@@ -4,13 +4,13 @@ namespace PlexRipper.WebAPI.Common.DTO
 {
     public class DownloadTaskDTO
     {
-        [JsonProperty("id")]
+        [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
-        [JsonProperty("title")]
+        [JsonProperty("title", Required = Required.Always)]
         public string Title { get; set; }
 
-        [JsonProperty("status")]
+        [JsonProperty("status", Required = Required.Always)]
         public string Status { get; set; }
 
     }

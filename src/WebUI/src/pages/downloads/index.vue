@@ -12,15 +12,15 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import IDownloadTask from '@dto/IDownloadTask';
 import IDownloadProgress from '@dto/IDownloadProgress';
 import { deleteDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
 import { tap, switchMap } from 'rxjs/operators';
+import { DownloadTaskDTO } from '@dto/mainApi';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import DownloadsTable from './components/DownloadsTable.vue';
 import IDownloadRow from './types/IDownloadRow';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
 @Component({
 	components: {
@@ -29,7 +29,7 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 	},
 })
 export default class Downloads extends Vue {
-	downloads: IDownloadTask[] = [];
+	downloads: DownloadTaskDTO[] = [];
 	downloadProgressList: IDownloadProgress[] = [];
 
 	get getDownloadRows(): IDownloadRow[] {

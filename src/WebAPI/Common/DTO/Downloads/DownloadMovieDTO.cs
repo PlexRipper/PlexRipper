@@ -4,10 +4,10 @@ namespace PlexRipper.WebAPI.Common.DTO
 {
     public class DownloadMovieDTO
     {
-        [JsonProperty("plexAccountId")]
+        [JsonProperty("plexAccountId", Required = Required.Always)]
         public int PlexAccountId { get; set; }
 
-        [JsonProperty("plexMovieId")]
+        [JsonProperty("plexMovieId", Required = Required.Always)]
         public int PlexMovieId { get; set; }
     }
 }

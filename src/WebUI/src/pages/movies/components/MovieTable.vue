@@ -20,10 +20,9 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import IPlexMovie from '@dto/IPlexMovie';
 import { DataTableHeader } from 'vuetify/types';
-import IPlexAccount from '@dto/IPlexAccount';
 import DownloadService from '@service/downloadService';
+import { PlexAccountDTO, PlexMovieDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { downloadPlexMovie } from '@/types/api/plexDownloadApi';
 
@@ -33,16 +32,16 @@ import { downloadPlexMovie } from '@/types/api/plexDownloadApi';
 	},
 })
 export default class MovieTable extends Vue {
-	@Prop({ required: true, type: Object as () => IPlexAccount })
-	readonly activeAccount!: IPlexAccount;
+	@Prop({ required: true, type: Object as () => PlexAccountDTO })
+	readonly activeAccount!: PlexAccountDTO;
 
-	@Prop({ required: true, type: Array as () => IPlexMovie[] })
-	readonly movies!: IPlexMovie[];
+	@Prop({ required: true, type: Array as () => PlexMovieDTO[] })
+	readonly movies!: PlexMovieDTO[];
 
 	@Prop({ required: true, type: Boolean, default: true })
 	readonly loading!: Boolean;
 
-	get getHeaders(): DataTableHeader<IPlexMovie>[] {
+	get getHeaders(): DataTableHeader<PlexMovieDTO>[] {
 		return [
 			{
 				text: 'Id',
@@ -72,8 +71,8 @@ export default class MovieTable extends Vue {
 		];
 	}
 
-	downloadMovie(item: IPlexMovie): void {
-		downloadPlexMovie(item.id, this.activeAccount?.id ?? 0).subscribe(() => {
+	downloadMovie(item: PlexMovieDTO): void {
+		downloadPlexMovie(item?.id ?? 0, this.activeAccount?.id ?? 0).subscribe(() => {
 			DownloadService.fetchDownloadList();
 		});
 	}

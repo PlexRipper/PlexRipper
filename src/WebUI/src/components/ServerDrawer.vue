@@ -50,10 +50,8 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import IPlexServer from '@dto/IPlexServer';
-import IPlexLibrary from '@dto/IPlexLibrary';
 import SettingsService from '@service/settingsService';
-import IPlexAccount from '../types/dto/IPlexAccount';
+import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 
 interface INavItem {
 	title: string;
@@ -64,8 +62,8 @@ interface INavItem {
 @Component
 export default class ServerDrawer extends Vue {
 	items: object[] = [];
-	plexServers: IPlexServer[] = [];
-	activeAccount!: IPlexAccount | null;
+	plexServers: PlexServerDTO[] = [];
+	activeAccount!: PlexAccountDTO | null;
 
 	get getNavItems(): INavItem[] {
 		return [
@@ -90,7 +88,7 @@ export default class ServerDrawer extends Vue {
 		}
 	}
 
-	openMediaPage(library: IPlexLibrary): void {
+	openMediaPage(library: PlexLibraryDTO): void {
 		Log.debug(library);
 		switch (library.type) {
 			case 'movie':

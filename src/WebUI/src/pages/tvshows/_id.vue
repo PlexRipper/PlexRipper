@@ -18,16 +18,14 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
-import IPlexAccount from '@dto/IPlexAccount';
 import SettingsService from '@service/settingsService';
-import Log from 'consola';
-import IPlexLibrary from '@dto/IPlexLibrary';
-import IPlexServer from '@dto/IPlexServer';
-import IPlexTvShow from '@dto/IPlexTvShow';
-import TvShowTable from './components/TvShowTable.vue';
+import { PlexAccountDTO, PlexTvShowDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import TvShowTable from './components/TvShowTable.vue';
 
 @Component<TvShowsDetail>({
 	components: {
@@ -36,19 +34,19 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 	},
 })
 export default class TvShowsDetail extends Vue {
-	activeAccount: IPlexAccount | null = null;
+	activeAccount: PlexAccountDTO | null = null;
 
 	libraryId: number = 0;
 
-	library: IPlexLibrary | null = null;
+	library: PlexLibraryDTO | null = null;
 
 	isLoading: boolean = true;
 
-	get tvshows(): IPlexTvShow[] {
+	get tvshows(): PlexTvShowDTO[] {
 		return this.library?.tvShows ?? [];
 	}
 
-	get server(): IPlexServer | null {
+	get server(): PlexServerDTO | null {
 		return this.activeAccount?.plexServers.find((x) => x.id === this.library?.plexServerId) ?? null;
 	}
 

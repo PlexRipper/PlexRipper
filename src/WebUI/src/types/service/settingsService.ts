@@ -1,13 +1,13 @@
 import { ReplaySubject, Observable, iif } from 'rxjs';
 import { tap, mergeMap } from 'rxjs/operators';
 import { getActiveAccount, setActiveAccount } from '@api/settingsApi';
-import IPlexAccount from '@dto/IPlexAccount';
+import { PlexAccountDTO } from '@dto/mainApi';
 import GlobalService from '@service/globalService';
 import AccountService from '@service/accountService';
 import Log from 'consola';
 
 export class SettingsService {
-	private _activeAccount: ReplaySubject<IPlexAccount | null> = new ReplaySubject();
+	private _activeAccount: ReplaySubject<PlexAccountDTO | null> = new ReplaySubject();
 
 	public constructor() {
 		GlobalService.getAxiosReady()
@@ -25,7 +25,7 @@ export class SettingsService {
 			});
 	}
 
-	public getActiveAccount(): Observable<IPlexAccount | null> {
+	public getActiveAccount(): Observable<PlexAccountDTO | null> {
 		return this._activeAccount.asObservable();
 	}
 

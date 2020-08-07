@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "es2018",
+		"target": "esnext",
 		"module": "esnext",
 		"moduleResolution": "node",
 		"lib": ["esnext", "esnext.asynciterable", "dom"],
@@ -8,10 +8,13 @@
 		"allowJs": true,
 		"sourceMap": true,
 		"strict": true,
+		"allowSyntheticDefaultImports": true,
+		"noImplicitAny": true,
 		"noEmit": true,
 		"importHelpers": true,
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
+		"resolveJsonModule": true,
 		"baseUrl": "./src/",
 		"outDir": "./build/",
 		"paths": {

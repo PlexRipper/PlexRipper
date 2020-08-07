@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
-import { PlexLibraryDTO } from '@dto/api/mainApi';
+import { PlexLibraryDTO } from '~/types/dto/mainApi';
 import { checkResponse, preApiRequest } from './baseApi';
 
 const logText = 'From PlexLibraryAPI => ';
@@ -19,5 +19,5 @@ export function refreshPlexLibrary(libraryId: number, plexAccountId: number): Ob
 		plexAccountId,
 		plexLibraryId: libraryId,
 	});
-	return checkResponse<PlexLibraryDTO>(result, logText, 'getPlexLibrary');
+	return checkResponse<PlexLibraryDTO | null>(result, logText, 'getPlexLibrary');
 }

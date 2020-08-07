@@ -1,40 +1,27 @@
-import Log from 'consola';
 import { IFileSystem } from '@dto/settings/paths/IFileSystem';
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
+import { checkResponse, preApiRequest } from './baseApi';
 import IFolderPath from '~/types/dto/settings/iFolderPath';
 
 const logText = 'From folderPathApi => ';
 const apiPath = '/folderpath';
 
 export function getFolderPaths(): Observable<IFolderPath[]> {
-	Log.debug(`${logText}getFolderPaths: Sending request`);
+	preApiRequest(logText, 'getFolderPaths');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}`);
-
-	return result.pipe(
-		tap((res) => Log.debug(`${logText}getFolderPaths response:`, res.data)),
-		map((res: AxiosResponse) => res.data),
-	);
+	return checkResponse<IFolderPath[]>(result, logText, 'getFolderPaths');
 }
 
 export function getDirectoryPath(path: string): Observable<IFileSystem> {
-	Log.debug(`${logText}getDirectoryPath: Sending request: ${path}`);
+	preApiRequest(logText, 'getDirectoryPath');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/directory/?path=${path}`);
-
-	return result.pipe(
-		tap((res) => Log.debug(`${logText}getDirectoryPath response:`, res.data)),
-		map((res: AxiosResponse) => res.data),
-	);
+	return checkResponse<IFileSystem>(result, logText, 'getDirectoryPath');
 }
 
 export function updateFolderPath(folderPath: IFolderPath): Observable<IFolderPath> {
-	Log.debug(`${logText}updateFolderPath: Sending request: ${folderPath}`);
+	preApiRequest(logText, 'updateFolderPath');
 	const result: Observable<AxiosResponse> = Axios.put(`${apiPath}`, folderPath);
-
-	return result.pipe(
-		tap((res) => Log.debug(`${logText}updateFolderPath response:`, res.data)),
-		map((res: AxiosResponse) => res.data),
-	);
+	return checkResponse<IFolderPath>(result, logText, 'updateFolderPath');
 }

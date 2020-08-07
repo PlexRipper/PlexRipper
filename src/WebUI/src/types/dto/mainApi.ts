@@ -80,21 +80,21 @@ export type ResultDTOOfIEnumerableOfPlexAccountDTO = ResultDTO & { value?: PlexA
 
 export interface PlexAccountDTO {
   id?: number;
-  displayName?: string | null;
-  username?: string | null;
-  password?: string | null;
+  displayName?: string;
+  username?: string;
+  password?: string;
   isEnabled?: boolean;
   isValidated?: boolean;
   validatedAt?: string;
-  uuid?: string | null;
-  email?: string | null;
+  uuid?: string;
+  email?: string;
   joined_at?: string;
-  title?: string | null;
+  title?: string;
   hasPassword?: boolean;
-  authToken?: string | null;
-  authentication_token?: string | null;
+  authToken?: string;
+  authentication_token?: string;
   forumId?: any;
-  plexServers?: PlexServerDTO[] | null | null;
+  plexServers: PlexServerDTO[];
 }
 
 export interface PlexServerDTO {

@@ -6,52 +6,52 @@ namespace PlexRipper.WebAPI.Common.DTO
 {
     public class PlexAccountDTO
     {
-        [JsonProperty("id")]
+        [JsonProperty("id", Required = Required.DisallowNull)]
         public int Id { get; set; }
 
-        [JsonProperty("displayName")]
+        [JsonProperty("displayName", Required = Required.DisallowNull)]
         public string DisplayName { get; set; }
 
-        [JsonProperty("username")]
+        [JsonProperty("username", Required = Required.DisallowNull)]
         public string Username { get; set; }
 
-        [JsonProperty("password")]
+        [JsonProperty("password", Required = Required.DisallowNull)]
         public string Password { get; set; }
 
-        [JsonProperty("isEnabled")]
+        [JsonProperty("isEnabled", Required = Required.DisallowNull)]
         public bool IsEnabled { get; set; }
 
-        [JsonProperty("isValidated")]
+        [JsonProperty("isValidated", Required = Required.DisallowNull)]
         public bool IsValidated { get; set; }
 
-        [JsonProperty("validatedAt")]
+        [JsonProperty("validatedAt", Required = Required.DisallowNull)]
         public DateTime ValidatedAt { get; set; }
 
-        [JsonProperty("uuid")]
+        [JsonProperty("uuid", Required = Required.DisallowNull)]
         public string Uuid { get; set; }
 
-        [JsonProperty("email")]
+        [JsonProperty("email", Required = Required.DisallowNull)]
         public string Email { get; set; }
 
-        [JsonProperty("joined_at")]
+        [JsonProperty("joined_at", Required = Required.DisallowNull)]
         public DateTime JoinedAt { get; set; }
 
-        [JsonProperty("title")]
+        [JsonProperty("title", Required = Required.DisallowNull)]
         public string Title { get; set; }
 
-        [JsonProperty("hasPassword")]
+        [JsonProperty("hasPassword", Required = Required.DisallowNull)]
         public bool HasPassword { get; set; }
 
-        [JsonProperty("authToken")]
+        [JsonProperty("authToken", Required = Required.DisallowNull)]
         public string AuthToken { get; set; }
 
-        [JsonProperty("authentication_token")]
+        [JsonProperty("authentication_token", Required = Required.DisallowNull)]
         public string AuthenticationToken { get; set; }
 
-        [JsonProperty("forumId")]
+        [JsonProperty("forumId", Required = Required.DisallowNull)]
         public object ForumId { get; set; }
 
-        [JsonProperty("plexServers")]
+        [JsonProperty("plexServers", Required = Required.Always)]
         public List<PlexServerDTO> PlexServers { get; set; }
     }
 }

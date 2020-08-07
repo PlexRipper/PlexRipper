@@ -11,8 +11,8 @@ namespace PlexRipper.WebAPI.Config
         public WebApiMappingProfile()
         {
             //Result -> ResultDTO
-            CreateMap<Result, ResultDTO>(MemberList.Destination)
-                .ForMember(x => x.Value, opt => opt.Ignore());
+            CreateMap<Result, ResultDTO>(MemberList.None);
+            CreateMap(typeof(Result<>), typeof(ResultDTO<>), MemberList.None);
 
             //CreatePlexAccountDTO -> PlexAccount
             CreateMap<CreatePlexAccountDTO, PlexAccount>(MemberList.Source)

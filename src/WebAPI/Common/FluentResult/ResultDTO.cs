@@ -20,8 +20,11 @@ namespace PlexRipper.WebAPI.Common.FluentResult
 
         [JsonProperty("successes")]
         public IList<Success> Successes { get; set; }
-        
+    }
+
+    public class ResultDTO<T> : ResultDTO
+    {
         [JsonProperty("value")]
-        public object Value { get; set; }
+        public T Value { get; set; }
     }
 }

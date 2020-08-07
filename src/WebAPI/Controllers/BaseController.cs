@@ -21,21 +21,23 @@ namespace PlexRipper.WebAPI.Controllers
             _mapper = mapper;
         }
 
-        protected IActionResult BadRequestInvalidId => new BadRequestObjectResult(Result.Fail("The Id was 0 or lower"));
+
 
         [NonAction]
         protected IActionResult InternalServerError(Exception e)
         {
             string msg = $"Internal server error: {e.Message}";
             Log.Error(e, msg);
-            return StatusCode(StatusCodes.Status500InternalServerError, Result.Fail(msg));
+            var resultDTO = _mapper.Map<ResultDTO>(Result.Fail(msg));
+            return StatusCode(StatusCodes.Status500InternalServerError, resultDTO);
         }
 
         [NonAction]
         protected IActionResult InternalServerError(Result result)
         {
             Log.Error("Internal server error:");
-            return StatusCode(StatusCodes.Status500InternalServerError, result);
+            var resultDTO = _mapper.Map<ResultDTO>(result);
+            return StatusCode(StatusCodes.Status500InternalServerError, resultDTO);
         }
 
         [NonAction]
@@ -49,9 +51,15 @@ namespace PlexRipper.WebAPI.Controllers
                 error = new Error($"The Id parameter \"{nameOf}\" has an invalid id of {id}");
             }
 
-            return new BadRequestObjectResult(Result.Fail(error));
-        }  
-        
+            return BadRequest(Result.Fail(error));
+        }
+
+        [NonAction]
+        protected IActionResult BadRequestInvalidId()
+        {
+            return BadRequest(Result.Fail("The Id was 0 or lower"));
+        }
+
         [NonAction]
         protected IActionResult BadRequest(Result result)
         {
@@ -59,7 +67,15 @@ namespace PlexRipper.WebAPI.Controllers
             var resultDTO = _mapper.Map<ResultDTO>(result);
             return new BadRequestObjectResult(resultDTO);
         }
-        
-        
+
+        [NonAction]
+        protected IActionResult Ok<T>(Result<T> result)
+        {
+            // Filter our the value type
+            var resultDTO = _mapper.Map<ResultDTO<T>>(result);
+            return new OkObjectResult(resultDTO);
+        }
+
+
     }
 }

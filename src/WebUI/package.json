@@ -8,7 +8,7 @@
 		"dev": "nuxt-ts dev --no-inline",
 		"build": "nuxt-ts build",
 		"generate": "nuxt-ts build && nuxt-ts export",
-		"generate-ts": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json -o ./src/types/dto/api/ -n mainApi.ts > output.d.ts",
+		"generate-ts": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json -o ./src/types/dto/api/ -n mainApi.ts",
 		"start": "nuxt-ts start",
 		"lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
 		"lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier-stylelint --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{css,scss}\" --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\"",

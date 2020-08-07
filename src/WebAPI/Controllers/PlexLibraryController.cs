@@ -8,6 +8,7 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
 using System;
 using System.Threading.Tasks;
+using PlexRipper.WebAPI.Common.FluentResult;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -31,11 +32,10 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET api/<PlexLibrary>/5
         [HttpGet("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PlexLibraryDTO>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Result))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(Result))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(Result))]
-
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Get(int id, int plexAccountId)
         {
             if (id <= 0) { return BadRequest(id, nameof(id)); }
@@ -70,8 +70,8 @@ namespace PlexRipper.WebAPI.Controllers
 
         // POST api/<PlexLibrary>/
         [HttpPost("refresh")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PlexLibraryDTO>))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(Result))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibraryDTO refreshPlexLibraryDto)
         {
             var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexAccountId, refreshPlexLibraryDto.PlexLibraryId);

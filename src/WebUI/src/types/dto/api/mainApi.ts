@@ -10,23 +10,54 @@
  * ---------------------------------------------------------------
  */
 
+export type ResultDTOOfIEnumerableOfDownloadTaskDTO = ResultDTO & { value?: DownloadTaskDTO[] | null | null };
+
 export interface DownloadTaskDTO {
   id?: number;
   title?: string | null;
   status?: string | null;
 }
 
-export type Error = Reason & { reasons?: Error[] | null | null };
+export interface ResultDTO {
+  isFailed?: boolean;
+  isSuccess?: boolean;
+  reasons?: Reason[] | null | null;
+  errors?: Error[] | null | null;
+  successes?: Success[] | null | null;
+}
 
 export interface Reason {
   message?: string | null;
   metadata?: Record<string, any>;
 }
 
+export type Error = Reason & { reasons?: Error[] | null | null };
+
+export type Success = Reason & object;
+
+export type ResultDTOOfBoolean = ResultDTO & { value?: boolean };
+
 export interface DownloadMovieDTO {
   plexAccountId?: number;
   plexMovieId?: number;
 }
+
+export type ResultDTOOfIEnumerableOfFolderPath = ResultDTO & { value?: FolderPath[] | null | null };
+
+export type FolderPath = BaseEntity & {
+  type?: string | null;
+  displayName?: string | null;
+  directory?: string | null;
+  folderType?: FolderType;
+};
+
+export type FolderType = 0 | 1 | 2 | 3;
+
+export interface BaseEntity {
+  id?: number;
+}
+
+export type ResultDTOOfFileSystemResult = ResultDTO & { value?: FileSystemResult | null };
 
 export interface FileSystemResult {
   parent?: string | null;
@@ -45,23 +76,7 @@ export interface FileSystemModel {
 
 export type FileSystemEntityType = 0 | 1 | 2 | 3;
 
-export type FolderPath = BaseEntity & {
-  type?: string | null;
-  displayName?: string | null;
-  directory?: string | null;
-  folderType?: FolderType;
-};
-
-export type FolderType = 0 | 1 | 2 | 3;
-
-export interface BaseEntity {
-  id?: number;
-}
-
-export type ResultOfIEnumerableOfPlexAccountDTO = ResultBaseOfResultOfIEnumerableOfPlexAccountDTO & {
-  valueOrDefault?: PlexAccountDTO[] | null | null;
-  value?: PlexAccountDTO[] | null | null;
-};
+export type ResultDTOOfIEnumerableOfPlexAccountDTO = ResultDTO & { value?: PlexAccountDTO[] | null | null };
 
 export interface PlexAccountDTO {
   id?: number;
@@ -189,33 +204,7 @@ export interface PlexTvShowEpisodeDTO {
   tvShowSeasonId?: number;
 }
 
-export type ResultBaseOfResultOfIEnumerableOfPlexAccountDTO = ResultBase & object;
-
-export interface ResultBase {
-  isFailed?: boolean;
-  isSuccess?: boolean;
-  reasons?: Reason[] | null | null;
-  errors?: Error[] | null | null;
-  successes?: Success[] | null | null;
-}
-
-export type Success = Reason & object;
-
-export interface ResultDTO {
-  isFailed?: boolean;
-  isSuccess?: boolean;
-  reasons?: Reason[] | null | null;
-  errors?: Error[] | null | null;
-  successes?: Success[] | null | null;
-  value?: any;
-}
-
-export type ResultOfPlexAccountDTO = ResultBaseOfResultOfPlexAccountDTO & {
-  valueOrDefault?: PlexAccountDTO | null;
-  value?: PlexAccountDTO | null;
-};
-
-export type ResultBaseOfResultOfPlexAccountDTO = ResultBase & object;
+export type ResultDTOOfPlexAccountDTO = ResultDTO & { value?: PlexAccountDTO | null };
 
 export interface UpdatePlexAccountDTO {
   id?: number;
@@ -232,39 +221,19 @@ export interface CreatePlexAccountDTO {
   isEnabled?: boolean;
 }
 
-export type ResultOfBoolean = ResultBaseOfResultOfBoolean & { valueOrDefault?: boolean; value?: boolean };
-
-export type ResultBaseOfResultOfBoolean = ResultBase & object;
-
 export interface CredentialsDTO {
   username?: string | null;
   password?: string | null;
 }
 
-export type ResultOfPlexLibraryDTO = ResultBaseOfResultOfPlexLibraryDTO & {
-  valueOrDefault?: PlexLibraryDTO | null;
-  value?: PlexLibraryDTO | null;
-};
-
-export type ResultBaseOfResultOfPlexLibraryDTO = ResultBase & object;
-
-export type Result = ResultBaseOfResult & object;
-
-export type ResultBaseOfResult = ResultBase & object;
+export type ResultDTOOfPlexLibraryDTO = ResultDTO & { value?: PlexLibraryDTO | null };
 
 export interface RefreshPlexLibraryDTO {
   plexAccountId?: number;
   plexLibraryId?: number;
 }
 
-export interface ProblemDetails {
-  type?: string | null;
-  title?: string | null;
-  status?: number | null;
-  detail?: string | null;
-  instance?: string | null;
-  extensions?: Record<string, any>;
-}
+export type ResultDTOOfPlexServerDTO = ResultDTO & { value?: PlexServerDTO | null };
 
 export type RequestParams = Omit<RequestInit, "body" | "method"> & {
   secure?: boolean;
@@ -381,7 +350,8 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @name Download_Get
      * @request GET:/api/Download
      */
-    downloadGet: (params?: RequestParams) => this.request<DownloadTaskDTO[], Error[]>(`/api/Download`, "GET", params),
+    downloadGet: (params?: RequestParams) =>
+      this.request<ResultDTOOfIEnumerableOfDownloadTaskDTO, ResultDTO>(`/api/Download`, "GET", params),
 
     /**
      * @tags Download
@@ -389,7 +359,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request POST:/api/Download/movie
      */
     downloadPost: (data: DownloadMovieDTO, params?: RequestParams) =>
-      this.request<boolean, Error[]>(`/api/Download/movie`, "POST", params, data),
+      this.request<ResultDTOOfBoolean, ResultDTO>(`/api/Download/movie`, "POST", params, data),
 
     /**
      * @tags Download
@@ -397,22 +367,15 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request DELETE:/api/Download/{downloadTaskId}
      */
     downloadDelete: (downloadTaskId: number, params?: RequestParams) =>
-      this.request<any, Error[]>(`/api/Download/${downloadTaskId}`, "DELETE", params),
+      this.request<ResultDTOOfBoolean, ResultDTO>(`/api/Download/${downloadTaskId}`, "DELETE", params),
 
     /**
      * @tags FolderPath
      * @name FolderPath_Get
-     * @request GET:/api/FolderPath/directory
-     */
-    folderPathGet: (query?: { path?: string | null }, params?: RequestParams) =>
-      this.request<FileSystemResult, any>(`/api/FolderPath/directory${this.addQueryParams(query)}`, "GET", params),
-
-    /**
-     * @tags FolderPath
-     * @name FolderPath_GetAll
      * @request GET:/api/FolderPath
      */
-    folderPathGetAll: (params?: RequestParams) => this.request<FolderPath[], any>(`/api/FolderPath`, "GET", params),
+    folderPathGet: (params?: RequestParams) =>
+      this.request<ResultDTOOfIEnumerableOfFolderPath, any>(`/api/FolderPath`, "GET", params),
 
     /**
      * @tags FolderPath
@@ -420,7 +383,19 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request PUT:/api/FolderPath
      */
     folderPathPut: (data: FolderPath, params?: RequestParams) =>
-      this.request<FolderPath[], Error[]>(`/api/FolderPath`, "PUT", params, data),
+      this.request<ResultDTOOfIEnumerableOfFolderPath, ResultDTO>(`/api/FolderPath`, "PUT", params, data),
+
+    /**
+     * @tags FolderPath
+     * @name FolderPath_Get2
+     * @request GET:/api/FolderPath/directory
+     */
+    folderPathGet2: (query?: { path?: string | null }, params?: RequestParams) =>
+      this.request<ResultDTOOfFileSystemResult, any>(
+        `/api/FolderPath/directory${this.addQueryParams(query)}`,
+        "GET",
+        params,
+      ),
 
     /**
      * @tags PlexAccount
@@ -428,7 +403,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request GET:/api/PlexAccount
      */
     plexAccountGetAll: (query?: { enabledOnly?: boolean }, params?: RequestParams) =>
-      this.request<ResultOfIEnumerableOfPlexAccountDTO, ResultDTO>(
+      this.request<ResultDTOOfIEnumerableOfPlexAccountDTO, ResultDTO>(
         `/api/PlexAccount${this.addQueryParams(query)}`,
         "GET",
         params,
@@ -440,7 +415,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request POST:/api/PlexAccount
      */
     plexAccountPost: (data: CreatePlexAccountDTO, params?: RequestParams) =>
-      this.request<ResultOfPlexAccountDTO, ResultDTO>(`/api/PlexAccount`, "POST", params, data),
+      this.request<ResultDTOOfPlexAccountDTO, ResultDTO>(`/api/PlexAccount`, "POST", params, data),
 
     /**
      * @tags PlexAccount
@@ -448,7 +423,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request GET:/api/PlexAccount/{id}
      */
     plexAccountGet: (id: number, params?: RequestParams) =>
-      this.request<ResultOfPlexAccountDTO, ResultDTO>(`/api/PlexAccount/${id}`, "GET", params),
+      this.request<ResultDTOOfPlexAccountDTO, ResultDTO>(`/api/PlexAccount/${id}`, "GET", params),
 
     /**
      * @tags PlexAccount
@@ -456,7 +431,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request PUT:/api/PlexAccount/{id}
      */
     plexAccountPut: (id: number, data: UpdatePlexAccountDTO, params?: RequestParams) =>
-      this.request<ResultOfPlexAccountDTO, ResultDTO>(`/api/PlexAccount/${id}`, "PUT", params, data),
+      this.request<ResultDTOOfPlexAccountDTO, ResultDTO>(`/api/PlexAccount/${id}`, "PUT", params, data),
 
     /**
      * @tags PlexAccount
@@ -464,7 +439,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request DELETE:/api/PlexAccount/{id}
      */
     plexAccountDelete: (id: number, params?: RequestParams) =>
-      this.request<ResultOfBoolean, ResultDTO>(`/api/PlexAccount/${id}`, "DELETE", params),
+      this.request<ResultDTOOfBoolean, ResultDTO>(`/api/PlexAccount/${id}`, "DELETE", params),
 
     /**
      * @tags PlexAccount
@@ -472,7 +447,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request POST:/api/PlexAccount/validate
      */
     plexAccountValidate: (data: CredentialsDTO, params?: RequestParams) =>
-      this.request<ResultOfBoolean, ResultDTO>(`/api/PlexAccount/validate`, "POST", params, data),
+      this.request<ResultDTOOfBoolean, ResultDTO>(`/api/PlexAccount/validate`, "POST", params, data),
 
     /**
      * @tags PlexAccount
@@ -480,7 +455,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request GET:/api/PlexAccount/check/{username}
      */
     plexAccountCheckUsername: (username: string | null, params?: RequestParams) =>
-      this.request<ResultOfBoolean, ResultDTO>(`/api/PlexAccount/check/${username}`, "GET", params),
+      this.request<ResultDTOOfBoolean, ResultDTO>(`/api/PlexAccount/check/${username}`, "GET", params),
 
     /**
      * @tags PlexLibrary
@@ -488,7 +463,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request GET:/api/PlexLibrary/{id}
      */
     plexLibraryGet: (id: number, query?: { plexAccountId?: number }, params?: RequestParams) =>
-      this.request<ResultOfPlexLibraryDTO, Result>(
+      this.request<ResultDTOOfPlexLibraryDTO, ResultDTO>(
         `/api/PlexLibrary/${id}${this.addQueryParams(query)}`,
         "GET",
         params,
@@ -500,7 +475,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request POST:/api/PlexLibrary/refresh
      */
     plexLibraryRefreshLibrary: (data: RefreshPlexLibraryDTO, params?: RequestParams) =>
-      this.request<ResultOfPlexLibraryDTO, Result>(`/api/PlexLibrary/refresh`, "POST", params, data),
+      this.request<ResultDTOOfPlexLibraryDTO, ResultDTO>(`/api/PlexLibrary/refresh`, "POST", params, data),
 
     /**
      * @tags PlexServer
@@ -508,7 +483,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request GET:/api/PlexServer/{id}
      */
     plexServerGet: (id: number, params?: RequestParams) =>
-      this.request<any, ProblemDetails>(`/api/PlexServer/${id}`, "GET", params),
+      this.request<ResultDTOOfPlexServerDTO, ResultDTO>(`/api/PlexServer/${id}`, "GET", params),
 
     /**
      * @tags Settings
@@ -516,7 +491,7 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request GET:/api/Settings/activeaccount
      */
     settingsGet: (params?: RequestParams) =>
-      this.request<PlexAccountDTO, any>(`/api/Settings/activeaccount`, "GET", params),
+      this.request<ResultDTOOfPlexAccountDTO, ResultDTO>(`/api/Settings/activeaccount`, "GET", params),
 
     /**
      * @tags Settings
@@ -524,6 +499,6 @@ export class Api<SecurityDataType = any> extends HttpClient<SecurityDataType> {
      * @request PUT:/api/Settings/activeaccount/{id}
      */
     settingsPut: (id: number, params?: RequestParams) =>
-      this.request<PlexAccountDTO, ProblemDetails>(`/api/Settings/activeaccount/${id}`, "PUT", params),
+      this.request<ResultDTOOfPlexAccountDTO, ResultDTO>(`/api/Settings/activeaccount/${id}`, "PUT", params),
   };
 }

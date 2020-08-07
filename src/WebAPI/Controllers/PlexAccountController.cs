@@ -29,7 +29,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         //GET: api/<PlexAccountController>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<IEnumerable<PlexAccountDTO>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<PlexAccountDTO>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> GetAll([FromQuery] bool enabledOnly = false)
@@ -49,7 +49,7 @@ namespace PlexRipper.WebAPI.Controllers
                     Log.Warning(msg);
                     return NotFound(Result.Fail(msg));
                 }
-                
+
                 string msg2 = $"Returned {mapResult.Count} accounts";
                 Log.Debug(msg2);
                 return Ok(Result.Ok(mapResult).WithSuccess(msg2));
@@ -62,13 +62,13 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET api/<PlexAccountController>/5
         [HttpGet("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PlexAccountDTO>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Get(int id)
         {
-            if (id <= 0) { return BadRequestInvalidId; }
+            if (id <= 0) { return BadRequestInvalidId(); }
 
             try
             {
@@ -90,13 +90,13 @@ namespace PlexRipper.WebAPI.Controllers
 
         // PUT api/<PlexAccountController>/5
         [HttpPut("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<PlexAccountDTO>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Put(int id, [FromBody] UpdatePlexAccountDTO account)
         {
-            if (id <= 0) { return BadRequestInvalidId; }
+            if (id <= 0) { return BadRequestInvalidId(); }
 
             try
             {
@@ -106,7 +106,7 @@ namespace PlexRipper.WebAPI.Controllers
                 {
                     return BadRequest(result);
                 }
-                
+
                 var mapResult = _mapper.Map<PlexAccountDTO>(result);
                 return Ok(Result.Ok(mapResult));
             }
@@ -119,7 +119,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         // POST api/<AccountController>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Result<PlexAccountDTO>))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ResultDTO<PlexAccountDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Post([FromBody] CreatePlexAccountDTO newAccount)
@@ -147,13 +147,13 @@ namespace PlexRipper.WebAPI.Controllers
 
         // DELETE api/<AccountController>/5
         [HttpDelete("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Delete(int id)
         {
-            if (id <= 0) { return BadRequestInvalidId; }
+            if (id <= 0) { return BadRequestInvalidId(); }
 
             try
             {
@@ -162,7 +162,7 @@ namespace PlexRipper.WebAPI.Controllers
                 {
                     return BadRequest(result);
                 }
-                
+
                 var msg = $"Successfully deleted account with id: {id}";
                 Log.Debug(msg);
                 return Ok(Result.Ok(true).WithSuccess(msg));
@@ -174,7 +174,7 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         [HttpPost("validate")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Validate([FromBody] CredentialsDTO account)
@@ -210,7 +210,7 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         [HttpGet("check/{username}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<bool>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> CheckUsername(string username)

@@ -6,6 +6,8 @@ using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using System;
 using System.Threading.Tasks;
+using FluentResults;
+using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
 {
@@ -24,8 +26,8 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET api/<SettingsController>/activeaccount/
         [HttpGet("activeaccount/")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlexAccountDTO))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Get()
         {
             try
@@ -35,8 +37,8 @@ namespace PlexRipper.WebAPI.Controllers
                 {
                     return InternalServerError(result);
                 }
-
-                return Ok(_mapper.Map<PlexAccountDTO>(result.Value));
+                var mapResult = _mapper.Map<PlexAccountDTO>(result.Value);
+                return Ok(mapResult);
 
             }
             catch (Exception e)
@@ -47,13 +49,12 @@ namespace PlexRipper.WebAPI.Controllers
 
         // PUT api/<SettingsController>/activeaccount/5
         [HttpPut("activeaccount/{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlexAccountDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Put(int id)
         {
-            if (id <= 0) { return BadRequestInvalidId; }
+            if (id <= 0) { return BadRequestInvalidId(); }
 
             try
             {
@@ -62,11 +63,11 @@ namespace PlexRipper.WebAPI.Controllers
                 var result = await _settingsService.SetActivePlexAccountAsync(id);
                 if (result.IsFailed)
                 {
-                    return BadRequest(result.Errors);
+                    return BadRequest(result);
                 }
 
-                return Ok(_mapper.Map<PlexAccountDTO>(result.Value));
-
+                var mapResult = _mapper.Map<PlexAccountDTO>(result.Value);
+                return Ok(mapResult);
             }
             catch (Exception e)
             {

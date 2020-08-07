@@ -8,6 +8,7 @@ using PlexRipper.Domain.Types.FileSystem;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using PlexRipper.WebAPI.Common.FluentResult;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -26,37 +27,32 @@ namespace PlexRipper.WebAPI.Controllers
             _fileSystem = fileSystem;
         }
 
-        // GET: api/<FolderPathController>/directory?path=
-        [HttpGet("directory")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileSystemResult))]
-        public IActionResult Get(string path)
-        {
-            return Ok(_fileSystem.LookupContents(path, false, true));
-        }
-
         // GET: api/<FolderPathController>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<FolderPath>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<FolderPath>>))]
         public async Task<IActionResult> Get()
         {
             var result = await _folderPathService.GetAllFolderPathsAsync();
-            return Ok(result.Value);
+            return Ok(result);
+        }
+
+        // GET: api/<FolderPathController>/directory?path=
+        [HttpGet("directory")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<FileSystemResult>))]
+        public IActionResult Get(string path)
+        {
+            var result = Result.Ok(_fileSystem.LookupContents(path, false, true));
+            return Ok(result);
         }
 
         // POST: api/<FolderPathController>
         [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<FolderPath>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(List<Error>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<FolderPath>>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Put([FromBody] FolderPath folderPath)
         {
             var result = await _folderPathService.UpdateFolderPathAsync(folderPath);
-            if (result.IsFailed)
-            {
-                return BadRequest(result.Errors);
-            }
-            return Ok(result.Value);
+            return result.IsFailed ? BadRequest(result) : Ok(result);
         }
-
-
     }
 }

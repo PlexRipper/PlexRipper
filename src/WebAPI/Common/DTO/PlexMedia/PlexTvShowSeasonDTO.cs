@@ -6,7 +6,7 @@ namespace PlexRipper.WebAPI.Common.DTO
 {
     public class PlexTvShowSeasonDTO
     {
-        [JsonProperty("id")]
+        [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
         [JsonProperty("ratingKey")]
@@ -48,7 +48,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("originallyAvailableAt")]
         public DateTime OriginallyAvailableAt { get; set; }
 
-        [JsonProperty("tvShowId")]
+        [JsonProperty("tvShowId", Required = Required.Always)]
         public int TvShowId { get; set; }
 
         [JsonProperty("episodes")]

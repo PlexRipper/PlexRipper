@@ -131,7 +131,7 @@ export interface PlexLibraryDTO {
 export type PlexMovieDTO = PlexMediaDTO & object;
 
 export interface PlexMediaDTO {
-  id?: number;
+  id: number;
   ratingKey?: number;
   key?: any;
   guid?: any;
@@ -155,13 +155,13 @@ export interface PlexMediaDTO {
   viewCount?: any;
   lastViewedAt?: any;
   theme?: any;
-  plexLibraryId?: number;
+  plexLibraryId: number;
 }
 
 export type PlexTvShowDTO = PlexMediaDTO & { seasons?: PlexTvShowSeasonDTO[] | null | null };
 
 export interface PlexTvShowSeasonDTO {
-  id?: number;
+  id: number;
   ratingKey?: number;
   key?: string | null;
   guid?: string | null;
@@ -175,12 +175,12 @@ export interface PlexTvShowSeasonDTO {
   addedAt?: string;
   updatedAt?: string;
   originallyAvailableAt?: string;
-  tvShowId?: number;
+  tvShowId: number;
   episodes?: PlexTvShowEpisodeDTO[] | null | null;
 }
 
 export interface PlexTvShowEpisodeDTO {
-  id?: number;
+  id: number;
   ratingKey?: number;
   key?: string | null;
   guid?: string | null;
@@ -194,7 +194,7 @@ export interface PlexTvShowEpisodeDTO {
   addedAt?: string;
   updatedAt?: string;
   originallyAvailableAt?: string;
-  tvShowSeasonId?: number;
+  tvShowSeasonId: number;
 }
 
 export type ResultDTOOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO };

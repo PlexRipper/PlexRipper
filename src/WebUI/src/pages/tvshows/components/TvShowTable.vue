@@ -11,7 +11,6 @@
 		:dark="$vuetify.theme.dark"
 		:loading="loading"
 		show-expand
-		class="season-table"
 		:expanded.sync="expanded"
 	>
 		<template v-slot:top>
@@ -23,7 +22,11 @@
 		</template>
 
 		<template v-slot:item.data-table-select="{ item }">
-			<v-checkbox :indeterminate="isTvShowIndeterminate(item.id)" @change="tvShowSelected(item.id, $event)" />
+			<v-checkbox
+				:value="tvShowValue(item.id)"
+				:indeterminate="isTvShowIndeterminate(item.id)"
+				@change="tvShowSelected(item.id, $event)"
+			/>
 		</template>
 
 		<template v-slot:expanded-item="{ headers, item }">
@@ -35,14 +38,20 @@
 						<template v-slot:activator>
 							<v-checkbox
 								:value="seasonValue(item.id, season.id)"
+								:indeterminate="isSeasonIndeterminate(item.id, season.id)"
 								@click.self.stop="seasonSelected(item.id, season.id, !seasonValue(item.id, season.id))"
 							></v-checkbox>
 							<v-list-item-title>{{ season.title }}</v-list-item-title>
 						</template>
 						<!-- Episodes -->
-						<v-list-item v-for="(episode, y) in season.episodes" :key="y" style="padding-left: 90px">
+						<v-list-item v-for="(episode, y) in season.episodes" :key="`${index}-${y}`" style="padding-left: 90px">
 							<v-list-item-action>
-								<v-checkbox></v-checkbox>
+								<v-checkbox
+									:value="episodeValue(item.id, season.id, episode.id)"
+									@click.self.stop="
+										episodeSelected(item.id, season.id, episode.id, !episodeValue(item.id, season.id, episode.id))
+									"
+								></v-checkbox>
 							</v-list-item-action>
 							<v-list-item-title> {{ episode.title }} </v-list-item-title>
 						</v-list-item>
@@ -66,25 +75,7 @@ import DownloadService from '@service/downloadService';
 import { PlexAccountDTO, PlexTvShowDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { downloadPlexMovie } from '@/types/api/plexDownloadApi';
-
-interface ITvShowSelector {
-	id: number;
-	selected: boolean;
-	indeterminate: boolean;
-	seasons: ISeasonSelector[];
-}
-
-interface ISeasonSelector {
-	id: number;
-	selected: boolean;
-	episodes: IEpisodeSelector[];
-}
-
-interface IEpisodeSelector {
-	id: number;
-	selected: boolean;
-}
-
+import { ITvShowSelector } from '../types/iTvShowSelector';
 @Component({
 	components: {
 		LoadingSpinner,
@@ -97,12 +88,14 @@ export default class TVShowsTable extends Vue {
 	@Prop({ required: true, type: Array as () => PlexTvShowDTO[] })
 	readonly tvshows!: PlexTvShowDTO[];
 
+	@Prop({ required: true, type: Array as () => ITvShowSelector[] })
+	readonly selected!: ITvShowSelector[];
+
 	@Prop({ required: true, type: Boolean, default: true })
 	readonly loading!: Boolean;
 
 	expanded: string[] = [];
 	singleExpand: boolean = false;
-	selected: ITvShowSelector[] = [];
 
 	get getHeaders(): DataTableHeader<PlexTvShowDTO>[] {
 		return [
@@ -140,20 +133,19 @@ export default class TVShowsTable extends Vue {
 	}
 
 	tvShowSelected(id: number, state: boolean): void {
-		let index = this.selected.findIndex((x) => x.id === id);
-		if (index === -1) {
-			// Has not been added
-			this.selected.push({ id, indeterminate: false, selected: state, seasons: [] });
-			index = this.selected.length - 1;
-		} else {
-			this.selected[index].selected = state;
-		}
+		const index = this.selected.findIndex((x) => x.id === id);
 
-		Log.debug(this.selected);
+		this.selected[index].selected = state;
+		// Set all seasons
+		this.selected[index].seasons.forEach((season) => this.seasonSelected(id, season.id, state));
 	}
 
 	isTvShowIndeterminate(tvShowId: number): boolean {
-		return this.selected.find((x) => x.id === tvShowId)?.indeterminate ?? false;
+		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
+		const numberOfSelected = this.selected[tvShowindex].seasons.filter((season) => {
+			return this.isSeasonIndeterminate(tvShowId, season.id) || season.selected;
+		}).length;
+		return !(numberOfSelected === 0 || numberOfSelected === this.selected[tvShowindex].seasons.length);
 	}
 
 	tvShowValue(tvShowId: number): boolean {
@@ -161,6 +153,15 @@ export default class TVShowsTable extends Vue {
 		if (tvShowindex === -1) {
 			return false;
 		}
+
+		const numberOfSelected = this.selected[tvShowindex].seasons.filter((season) => {
+			return this.seasonValue(tvShowId, season.id);
+		}).length;
+
+		if (numberOfSelected === this.selected[tvShowindex].seasons.length) {
+			this.selected[tvShowindex].selected = true;
+		}
+
 		return this.selected[tvShowindex].selected;
 	}
 
@@ -173,26 +174,58 @@ export default class TVShowsTable extends Vue {
 		if (seasonIndex === -1) {
 			return false;
 		}
+
+		const numberOfSelected = this.selected[tvShowindex].seasons[seasonIndex].episodes.filter((x) => x.selected).length;
+		if (numberOfSelected === this.selected[tvShowindex].seasons[seasonIndex].episodes.length) {
+			this.selected[tvShowindex].seasons[seasonIndex].selected = true;
+		}
+
 		return this.selected[tvShowindex].seasons[seasonIndex].selected;
 	}
 
+	isSeasonIndeterminate(tvShowId: number, seasonId: number): boolean {
+		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
+		const seasonIndex = this.selected[tvShowindex].seasons.findIndex((x) => x.id === seasonId);
+
+		const numberOfSelected = this.selected[tvShowindex].seasons[seasonIndex].episodes.filter((x) => x.selected).length;
+
+		return !(numberOfSelected === 0 || numberOfSelected === this.selected[tvShowindex].seasons[seasonIndex].episodes.length);
+	}
+
 	seasonSelected(tvShowId: number, seasonId: number, state: boolean): void {
-		let tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
-		let seasonIndex = this.selected[tvShowindex]?.seasons.findIndex((x) => x.id === seasonId) ?? -1;
-		if (tvShowindex === -1) {
-			// Has not been added
-			this.selected.push({ id: tvShowId, selected: state, indeterminate: state, seasons: [] });
-			tvShowindex = this.selected.length - 1;
+		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
+		const seasonIndex = this.selected[tvShowindex].seasons.findIndex((x) => x.id === seasonId);
+
+		this.selected[tvShowindex].seasons[seasonIndex].selected = state;
+		this.selected[tvShowindex].seasons[seasonIndex].episodes.forEach((episode) =>
+			this.episodeSelected(tvShowId, seasonId, episode.id, state),
+		);
+
+		Log.debug(this.selected);
+	}
+
+	episodeValue(tvShowId: number, seasonId: number, episodeId: number): boolean {
+		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId) ?? -1;
+		const seasonIndex = this.selected[tvShowindex]?.seasons.findIndex((x) => x.id === seasonId) ?? -1;
+		const episodeIndex = this.selected[tvShowindex]?.seasons[seasonIndex]?.episodes.findIndex((x) => x.id === episodeId) ?? -1;
+
+		if (tvShowindex === -1 || seasonIndex === -1 || episodeIndex === -1) {
+			return false;
 		}
 
-		if (seasonIndex === -1) {
-			// Has not been added
-			this.selected[tvShowindex].seasons.push({ id: seasonId, selected: state, episodes: [] });
-			seasonIndex = this.selected[tvShowindex].seasons.length - 1;
-		} else {
-			this.selected[tvShowindex].seasons[seasonIndex].selected = state;
+		return this.selected[tvShowindex].seasons[seasonIndex].episodes[episodeIndex].selected;
+	}
+
+	episodeSelected(tvShowId: number, seasonId: number, episodeId: number, state: boolean): void {
+		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId) ?? -1;
+		const seasonIndex = this.selected[tvShowindex]?.seasons.findIndex((x) => x.id === seasonId) ?? -1;
+		const episodeIndex = this.selected[tvShowindex]?.seasons[seasonIndex]?.episodes.findIndex((x) => x.id === episodeId) ?? -1;
+
+		if (tvShowindex === -1 || seasonIndex === -1 || episodeIndex === -1) {
+			return;
 		}
-		this.selected[tvShowindex].indeterminate = state;
+
+		this.selected[tvShowindex].seasons[seasonIndex].episodes[episodeIndex].selected = state;
 
 		Log.debug(this.selected);
 	}
@@ -205,9 +238,8 @@ export default class TVShowsTable extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-.text-start {
-	background: floralwhite !important;
-	max-width: 40px !important;
+<style lang="scss">
+tr.v-data-table__selected {
+	background: none !important;
 }
 </style>

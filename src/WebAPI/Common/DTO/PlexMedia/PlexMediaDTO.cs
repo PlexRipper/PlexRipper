@@ -6,7 +6,7 @@ namespace PlexRipper.WebAPI.Common.DTO
     public class PlexMediaDTO
     {
 
-        [JsonProperty("id")]
+        [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
         [JsonProperty("ratingKey")]
@@ -78,7 +78,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("theme")]
         public object Theme { get; set; }
 
-        [JsonProperty("plexLibraryId")]
+        [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }
     }
 }

@@ -11,7 +11,7 @@
 		<!-- The movie table -->
 		<v-row v-if="activeAccount">
 			<v-col>
-				<tv-show-table :tvshows="tvshows" :active-account="activeAccount" :loading="isLoading" />
+				<tv-show-table :tvshows="tvshows" :active-account="activeAccount" :selected.sync="selected" :loading="isLoading" />
 			</v-col>
 		</v-row>
 	</v-container>
@@ -23,8 +23,9 @@ import { Component, Vue } from 'vue-property-decorator';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 import SettingsService from '@service/settingsService';
 import { PlexAccountDTO, PlexTvShowDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
-
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import { ITvShowSelector, ISeasonSelector, IEpisodeSelector } from './types/iTvShowSelector';
+
 import TvShowTable from './components/TvShowTable.vue';
 
 @Component<TvShowsDetail>({
@@ -41,6 +42,8 @@ export default class TvShowsDetail extends Vue {
 	library: PlexLibraryDTO | null = null;
 
 	isLoading: boolean = true;
+
+	selected: ITvShowSelector[] = [];
 
 	get tvshows(): PlexTvShowDTO[] {
 		return this.library?.tvShows ?? [];
@@ -59,11 +62,35 @@ export default class TvShowsDetail extends Vue {
 		});
 	}
 
+	setSelectionTree(): void {
+		// Create a selected structure based on every tvShow, season and episode
+		this.tvshows.forEach((tvShow) => {
+			const seasons: ISeasonSelector[] = [];
+			if (tvShow.seasons) {
+				tvShow.seasons.forEach((season) => {
+					const episodes: IEpisodeSelector[] = [];
+					if (season.episodes) {
+						season.episodes.forEach((episode) => {
+							// Add episodes
+							episodes.push({ id: episode.id, selected: false });
+						});
+					}
+					// Add seasons
+					seasons.push({ id: season.id, selected: false, episodes });
+				});
+			}
+			// Add tvShows
+			this.selected.push({ id: tvShow.id, selected: true, seasons });
+		});
+		Log.warn(this.selected);
+	}
+
 	getLibrary(): void {
 		this.isLoading = true;
 		getPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).subscribe((data) => {
 			Log.debug(`TvShowsDetail => Library: ${data?.id}`, data);
 			this.library = data;
+			this.setSelectionTree();
 			this.isLoading = false;
 		});
 	}

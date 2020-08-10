@@ -227,20 +227,3 @@ export interface RefreshPlexLibraryDTO {
 }
 
 export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };
-
-export type RequestParams = Omit<RequestInit, "body" | "method"> & {
-  secure?: boolean;
-};
-
-export type RequestQueryParamsType = Record<string | number, any>;
-
-type ApiConfig<SecurityDataType> = {
-  baseUrl?: string;
-  baseApiParams?: RequestParams;
-  securityWorker?: (securityData: SecurityDataType) => RequestParams;
-};
-
-const enum BodyType {
-  Json,
-}
-

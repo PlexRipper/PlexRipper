@@ -10,7 +10,7 @@
 		</v-row>
 		<!-- The movie table -->
 		<v-row v-if="activeAccount">
-			<v-col cols="12">
+			<v-col>
 				<tv-show-table :tvshows="tvshows" :active-account="activeAccount" :loading="isLoading" />
 			</v-col>
 		</v-row>

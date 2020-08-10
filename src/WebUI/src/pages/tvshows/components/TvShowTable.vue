@@ -10,6 +10,7 @@
 		:dark="$vuetify.theme.dark"
 		:loading="loading"
 		show-expand
+		class="season-table"
 		:expanded.sync="expanded"
 	>
 		<template v-slot:top>
@@ -20,7 +21,35 @@
 			</v-toolbar>
 		</template>
 		<template v-slot:expanded-item="{ headers, item }">
-			<td :colspan="headers.length">More info about {{ item.title }}</td>
+			<td :colspan="24">
+				<v-data-table
+					:headers="headers"
+					:items="item.seasons"
+					show-select
+					disable-pagination
+					hide-default-header
+					hide-default-footer
+					show-expand
+					:server-items-length="item.seasons.length"
+					:dark="$vuetify.theme.dark"
+				>
+					<template v-slot:expanded-item="{ item }">
+						<td :colspan="24">
+							<v-data-table
+								style="margin-left: 125px;"
+								:headers="getHeaders"
+								:items="item.episodes"
+								show-select
+								disable-pagination
+								hide-default-header
+								hide-default-footer
+								:dark="$vuetify.theme.dark"
+							>
+							</v-data-table>
+						</td>
+					</template>
+				</v-data-table>
+			</td>
 		</template>
 		<template v-slot:item.actions="{ item }">
 			<v-icon small @click="downloadMovie(item)">
@@ -58,29 +87,34 @@ export default class TVShowsTable extends Vue {
 
 	get getHeaders(): DataTableHeader<PlexTvShowDTO>[] {
 		return [
-			{
-				text: 'Id',
-				value: 'id',
-			},
+			// {
+			// 	text: 'Id',
+			// 	value: 'id',
+			// },
 			{
 				text: 'Title',
 				value: 'title',
+				width: 500,
 			},
 			{
 				text: 'Year',
 				value: 'year',
+				width: 50,
 			},
 			{
 				text: 'Added At',
 				value: 'addedAt',
+				width: 150,
 			},
 			{
 				text: 'Updated At',
 				value: 'updatedAt',
+				width: 150,
 			},
 			{
 				text: 'Actions',
 				value: 'actions',
+				width: 50,
 				sortable: false,
 			},
 		];
@@ -93,3 +127,10 @@ export default class TVShowsTable extends Vue {
 	}
 }
 </script>
+
+<style lang="scss" scoped>
+.text-start {
+	background: floralwhite !important;
+	max-width: 40px !important;
+}
+</style>

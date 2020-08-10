@@ -11,7 +11,13 @@
 		<!-- The movie table -->
 		<v-row v-if="activeAccount">
 			<v-col>
-				<tv-show-table :tvshows="tvshows" :active-account="activeAccount" :selected.sync="selected" :loading="isLoading" />
+				<tv-show-table
+					:tvshows="tvshows"
+					:active-account="activeAccount"
+					:selected="selected"
+					:loading="isLoading"
+					@selected="setSelected"
+				/>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -60,6 +66,11 @@ export default class TvShowsDetail extends Vue {
 			this.library = data;
 			this.isLoading = false;
 		});
+	}
+
+	setSelected(selected: ITvShowSelector[]): void {
+		Log.debug(selected);
+		this.selected = selected;
 	}
 
 	setSelectionTree(): void {

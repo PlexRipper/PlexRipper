@@ -25,7 +25,7 @@
 			<v-checkbox
 				:value="tvShowValue(item.id)"
 				:indeterminate="isTvShowIndeterminate(item.id)"
-				@change="tvShowSelected(item.id, $event)"
+				@click="tvShowSelected(item.id, !item.selected)"
 			/>
 		</template>
 
@@ -33,7 +33,7 @@
 			<td :colspan="24">
 				<v-list>
 					<!-- Season -->
-					<v-list-group v-for="(season, index) in item.seasons" :key="index" sub-group :value="false">
+					<v-list-group v-for="(season, index) in item.seasons" :key="`${item.id}-${index}`" sub-group>
 						<!-- The season header -->
 						<template v-slot:activator>
 							<v-checkbox
@@ -44,7 +44,7 @@
 							<v-list-item-title>{{ season.title }}</v-list-item-title>
 						</template>
 						<!-- Episodes -->
-						<v-list-item v-for="(episode, y) in season.episodes" :key="`${index}-${y}`" style="padding-left: 90px">
+						<v-list-item v-for="(episode, y) in season.episodes" :key="`${item.id}-${index}-${y}`" style="padding-left: 90px">
 							<v-list-item-action>
 								<v-checkbox
 									:value="episodeValue(item.id, season.id, episode.id)"
@@ -59,6 +59,7 @@
 				</v-list>
 			</td>
 		</template>
+		<!-- Tv Show actions -->
 		<template v-slot:item.actions="{ item }">
 			<v-icon small @click="downloadMovie(item)">
 				mdi-download
@@ -68,7 +69,6 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify/types';
 import DownloadService from '@service/downloadService';
@@ -135,9 +135,9 @@ export default class TVShowsTable extends Vue {
 	tvShowSelected(id: number, state: boolean): void {
 		const index = this.selected.findIndex((x) => x.id === id);
 
-		this.selected[index].selected = state;
 		// Set all seasons
 		this.selected[index].seasons.forEach((season) => this.seasonSelected(id, season.id, state));
+		this.selected[index].selected = state;
 	}
 
 	isTvShowIndeterminate(tvShowId: number): boolean {
@@ -158,27 +158,21 @@ export default class TVShowsTable extends Vue {
 			return this.seasonValue(tvShowId, season.id);
 		}).length;
 
-		if (numberOfSelected === this.selected[tvShowindex].seasons.length) {
-			this.selected[tvShowindex].selected = true;
-		}
+		// Set TvShow selected state based on how the seasons are selected
+		this.selected[tvShowindex].selected = numberOfSelected === this.selected[tvShowindex].seasons.length;
 
 		return this.selected[tvShowindex].selected;
 	}
 
 	seasonValue(tvShowId: number, seasonId: number): boolean {
 		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
-		if (tvShowindex === -1) {
-			return false;
-		}
-		const seasonIndex = this.selected[tvShowindex]?.seasons.findIndex((x) => x.id === seasonId) ?? -1;
-		if (seasonIndex === -1) {
-			return false;
-		}
+		const seasonIndex = this.selected[tvShowindex].seasons.findIndex((x) => x.id === seasonId);
 
 		const numberOfSelected = this.selected[tvShowindex].seasons[seasonIndex].episodes.filter((x) => x.selected).length;
-		if (numberOfSelected === this.selected[tvShowindex].seasons[seasonIndex].episodes.length) {
-			this.selected[tvShowindex].seasons[seasonIndex].selected = true;
-		}
+
+		// Set Season selected state based on how the episodes are selected
+		this.selected[tvShowindex].seasons[seasonIndex].selected =
+			numberOfSelected === this.selected[tvShowindex].seasons[seasonIndex].episodes.length;
 
 		return this.selected[tvShowindex].seasons[seasonIndex].selected;
 	}
@@ -196,12 +190,11 @@ export default class TVShowsTable extends Vue {
 		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
 		const seasonIndex = this.selected[tvShowindex].seasons.findIndex((x) => x.id === seasonId);
 
-		this.selected[tvShowindex].seasons[seasonIndex].selected = state;
 		this.selected[tvShowindex].seasons[seasonIndex].episodes.forEach((episode) =>
 			this.episodeSelected(tvShowId, seasonId, episode.id, state),
 		);
-
-		Log.debug(this.selected);
+		this.selected[tvShowindex].seasons[seasonIndex].selected = state;
+		this.$emit('selected', this.selected);
 	}
 
 	episodeValue(tvShowId: number, seasonId: number, episodeId: number): boolean {
@@ -226,8 +219,7 @@ export default class TVShowsTable extends Vue {
 		}
 
 		this.selected[tvShowindex].seasons[seasonIndex].episodes[episodeIndex].selected = state;
-
-		Log.debug(this.selected);
+		this.$emit('selected', this.selected);
 	}
 
 	downloadMovie(item: PlexTvShowDTO): void {

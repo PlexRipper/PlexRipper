@@ -118,8 +118,10 @@ namespace PlexRipper.Application.PlexDownloads
             return _mediator.Send(new DeleteDownloadTaskByIdCommand(downloadTaskId));
         }
 
-
-
+        public async Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int plexMovieId, PlexMediaType type)
+        {
+            throw new System.NotImplementedException();
+        }
 
         #endregion
     }

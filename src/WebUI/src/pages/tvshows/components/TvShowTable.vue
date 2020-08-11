@@ -1,81 +1,77 @@
 <template>
-	<v-data-table
-		v-model="selected"
-		fixed-header
-		show-select
-		disable-pagination
-		hide-default-footer
-		:headers="getHeaders"
-		:items="tvshows"
-		:server-items-length="tvshows.length"
-		:dark="$vuetify.theme.dark"
-		:loading="loading"
-		show-expand
-		:expanded.sync="expanded"
-	>
-		<template v-slot:top>
-			<v-toolbar flat>
-				<v-toolbar-title>Expandable Table</v-toolbar-title>
-				<v-spacer></v-spacer>
-				<v-switch v-model="singleExpand" label="Single expand" class="mt-2"></v-switch>
-			</v-toolbar>
-		</template>
-
-		<template v-slot:item.data-table-select="{ item }">
-			<v-checkbox
-				:value="tvShowValue(item.id)"
-				:indeterminate="isTvShowIndeterminate(item.id)"
-				@click="tvShowSelected(item.id, !item.selected)"
-			/>
-		</template>
-
-		<template v-slot:expanded-item="{ headers, item }">
-			<td :colspan="24">
-				<v-list>
-					<!-- Season -->
-					<v-list-group v-for="(season, index) in item.seasons" :key="`${item.id}-${index}`" sub-group>
-						<!-- The season header -->
-						<template v-slot:activator>
-							<v-checkbox
-								:value="seasonValue(item.id, season.id)"
-								:indeterminate="isSeasonIndeterminate(item.id, season.id)"
-								@click.self.stop="seasonSelected(item.id, season.id, !seasonValue(item.id, season.id))"
-							></v-checkbox>
-							<v-list-item-title>{{ season.title }}</v-list-item-title>
+	<v-row justify="center">
+		<!-- Loading -->
+		<v-col v-if="loading" cols="auto" align-self="center">
+			<v-layout row justify-center align-center>
+				<v-progress-circular :size="70" :width="7" color="red" indeterminate></v-progress-circular>
+			</v-layout>
+			<h1>Retrieving library from database</h1>
+		</v-col>
+		<v-col v-else cols="12">
+			<!-- Table Headers -->
+			<v-row class="table-header">
+				<v-col class="ml-6" style="max-width: 50px">
+					<v-checkbox
+						:dark="$vuetify.theme.dark"
+						:indeterminate="isIndeterminate"
+						color="red"
+						@change="selectAll($event)"
+					></v-checkbox>
+				</v-col>
+				<v-col>
+					Title
+				</v-col>
+				<v-col class="year-column">Year </v-col>
+				<v-col class="type-column">Type </v-col>
+				<v-col class="action-column">Actions </v-col>
+			</v-row>
+			<!-- Treeview Table -->
+			<v-row no-gutters>
+				<v-col>
+					<v-treeview
+						v-model="selected"
+						selectable
+						selected-color="red"
+						selection-type="leaf"
+						:dark="$vuetify.theme.dark"
+						hoverable
+						expand-icon="mdi-chevron-down"
+						:items="getItems"
+						transition
+					>
+						<template v-slot:label="{ item }">
+							<v-row>
+								<v-col class="ml-4">{{ item.name }} </v-col>
+							</v-row>
 						</template>
-						<!-- Episodes -->
-						<v-list-item v-for="(episode, y) in season.episodes" :key="`${item.id}-${index}-${y}`" style="padding-left: 90px">
-							<v-list-item-action>
-								<v-checkbox
-									:value="episodeValue(item.id, season.id, episode.id)"
-									@click.self.stop="
-										episodeSelected(item.id, season.id, episode.id, !episodeValue(item.id, season.id, episode.id))
-									"
-								></v-checkbox>
-							</v-list-item-action>
-							<v-list-item-title> {{ episode.title }} </v-list-item-title>
-						</v-list-item>
-					</v-list-group>
-				</v-list>
-			</td>
-		</template>
-		<!-- Tv Show actions -->
-		<template v-slot:item.actions="{ item }">
-			<v-icon small @click="downloadMovie(item)">
-				mdi-download
-			</v-icon>
-		</template>
-	</v-data-table>
+						<template v-slot:append="{ item }">
+							<v-row>
+								<v-col class="year-column"> {{ item.year }} </v-col>
+								<v-col class="type-column"> {{ item.type }}</v-col>
+								<v-col class="action-column" style="text-align: center;">
+									<v-icon small @click="downloadMovie(item.id, item.type)">
+										mdi-download
+									</v-icon>
+								</v-col>
+							</v-row>
+						</template>
+					</v-treeview>
+				</v-col>
+			</v-row>
+		</v-col>
+	</v-row>
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify/types';
 import DownloadService from '@service/downloadService';
-import { PlexAccountDTO, PlexTvShowDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexTvShowDTO, PlexMediaType } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import { downloadPlexMovie } from '@/types/api/plexDownloadApi';
-import { ITvShowSelector } from '../types/iTvShowSelector';
+import { downloadTvShow } from '@/types/api/plexDownloadApi';
+import ITreeViewItem from '../types/iTreeViewItem';
+
 @Component({
 	components: {
 		LoadingSpinner,
@@ -88,14 +84,32 @@ export default class TVShowsTable extends Vue {
 	@Prop({ required: true, type: Array as () => PlexTvShowDTO[] })
 	readonly tvshows!: PlexTvShowDTO[];
 
-	@Prop({ required: true, type: Array as () => ITvShowSelector[] })
-	readonly selected!: ITvShowSelector[];
-
 	@Prop({ required: true, type: Boolean, default: true })
 	readonly loading!: Boolean;
 
 	expanded: string[] = [];
 	singleExpand: boolean = false;
+	selected: number[] = [];
+
+	get getItems(): ITreeViewItem[] {
+		const items: ITreeViewItem[] = [];
+		this.tvshows.forEach((x) => {
+			const seasons: ITreeViewItem[] = [];
+			if (x.seasons) {
+				x.seasons.forEach((season) => {
+					const episodes: ITreeViewItem[] = [];
+					if (season.episodes) {
+						season.episodes.forEach((episode) => {
+							episodes.push({ id: episode.id, name: episode.title ?? '', type: 'episode', children: [] });
+						});
+						seasons.push({ id: season.id, name: season.title ?? '', type: 'season', children: episodes });
+					}
+				});
+				items.push({ id: x.id, name: x.title ?? '', year: x.year, type: 'tvshow', children: seasons });
+			}
+		});
+		return items;
+	}
 
 	get getHeaders(): DataTableHeader<PlexTvShowDTO>[] {
 		return [
@@ -132,98 +146,25 @@ export default class TVShowsTable extends Vue {
 		];
 	}
 
-	tvShowSelected(id: number, state: boolean): void {
-		const index = this.selected.findIndex((x) => x.id === id);
-
-		// Set all seasons
-		this.selected[index].seasons.forEach((season) => this.seasonSelected(id, season.id, state));
-		this.selected[index].selected = state;
+	get getLeafs(): number[] {
+		return this.getItems.map((x) => x.children?.map((y) => y.children?.map((z) => z.id))).flat(2);
 	}
 
-	isTvShowIndeterminate(tvShowId: number): boolean {
-		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
-		const numberOfSelected = this.selected[tvShowindex].seasons.filter((season) => {
-			return this.isSeasonIndeterminate(tvShowId, season.id) || season.selected;
-		}).length;
-		return !(numberOfSelected === 0 || numberOfSelected === this.selected[tvShowindex].seasons.length);
+	get isIndeterminate(): boolean {
+		return this.getLeafs.length !== this.selected.length && this.selected.length > 0;
 	}
 
-	tvShowValue(tvShowId: number): boolean {
-		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
-		if (tvShowindex === -1) {
-			return false;
+	selectAll(state: boolean): void {
+		Log.debug(state);
+		if (state) {
+			this.selected = this.getLeafs;
+		} else {
+			this.selected = [];
 		}
-
-		const numberOfSelected = this.selected[tvShowindex].seasons.filter((season) => {
-			return this.seasonValue(tvShowId, season.id);
-		}).length;
-
-		// Set TvShow selected state based on how the seasons are selected
-		this.selected[tvShowindex].selected = numberOfSelected === this.selected[tvShowindex].seasons.length;
-
-		return this.selected[tvShowindex].selected;
 	}
 
-	seasonValue(tvShowId: number, seasonId: number): boolean {
-		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
-		const seasonIndex = this.selected[tvShowindex].seasons.findIndex((x) => x.id === seasonId);
-
-		const numberOfSelected = this.selected[tvShowindex].seasons[seasonIndex].episodes.filter((x) => x.selected).length;
-
-		// Set Season selected state based on how the episodes are selected
-		this.selected[tvShowindex].seasons[seasonIndex].selected =
-			numberOfSelected === this.selected[tvShowindex].seasons[seasonIndex].episodes.length;
-
-		return this.selected[tvShowindex].seasons[seasonIndex].selected;
-	}
-
-	isSeasonIndeterminate(tvShowId: number, seasonId: number): boolean {
-		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
-		const seasonIndex = this.selected[tvShowindex].seasons.findIndex((x) => x.id === seasonId);
-
-		const numberOfSelected = this.selected[tvShowindex].seasons[seasonIndex].episodes.filter((x) => x.selected).length;
-
-		return !(numberOfSelected === 0 || numberOfSelected === this.selected[tvShowindex].seasons[seasonIndex].episodes.length);
-	}
-
-	seasonSelected(tvShowId: number, seasonId: number, state: boolean): void {
-		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId);
-		const seasonIndex = this.selected[tvShowindex].seasons.findIndex((x) => x.id === seasonId);
-
-		this.selected[tvShowindex].seasons[seasonIndex].episodes.forEach((episode) =>
-			this.episodeSelected(tvShowId, seasonId, episode.id, state),
-		);
-		this.selected[tvShowindex].seasons[seasonIndex].selected = state;
-		this.$emit('selected', this.selected);
-	}
-
-	episodeValue(tvShowId: number, seasonId: number, episodeId: number): boolean {
-		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId) ?? -1;
-		const seasonIndex = this.selected[tvShowindex]?.seasons.findIndex((x) => x.id === seasonId) ?? -1;
-		const episodeIndex = this.selected[tvShowindex]?.seasons[seasonIndex]?.episodes.findIndex((x) => x.id === episodeId) ?? -1;
-
-		if (tvShowindex === -1 || seasonIndex === -1 || episodeIndex === -1) {
-			return false;
-		}
-
-		return this.selected[tvShowindex].seasons[seasonIndex].episodes[episodeIndex].selected;
-	}
-
-	episodeSelected(tvShowId: number, seasonId: number, episodeId: number, state: boolean): void {
-		const tvShowindex = this.selected.findIndex((x) => x.id === tvShowId) ?? -1;
-		const seasonIndex = this.selected[tvShowindex]?.seasons.findIndex((x) => x.id === seasonId) ?? -1;
-		const episodeIndex = this.selected[tvShowindex]?.seasons[seasonIndex]?.episodes.findIndex((x) => x.id === episodeId) ?? -1;
-
-		if (tvShowindex === -1 || seasonIndex === -1 || episodeIndex === -1) {
-			return;
-		}
-
-		this.selected[tvShowindex].seasons[seasonIndex].episodes[episodeIndex].selected = state;
-		this.$emit('selected', this.selected);
-	}
-
-	downloadMovie(item: PlexTvShowDTO): void {
-		downloadPlexMovie(item?.id ?? 0, this.activeAccount?.id ?? 0).subscribe(() => {
+	downloadMovie(itemId: number, type: PlexMediaType): void {
+		downloadTvShow(itemId, this.activeAccount?.id ?? 0, type).subscribe(() => {
 			DownloadService.fetchDownloadList();
 		});
 	}
@@ -231,7 +172,33 @@ export default class TVShowsTable extends Vue {
 </script>
 
 <style lang="scss">
-tr.v-data-table__selected {
-	background: none !important;
+.v-treeview-node {
+	background: #505050 !important;
+	border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
+}
+
+.table-header {
+	background: rgb(30, 30, 30);
+	border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
+	margin: 0;
+	height: 50px;
+	.col {
+		.v-input--selection-controls {
+			padding: 0 0 0 2px !important;
+			margin: 0 !important;
+		}
+	}
+}
+.year-column {
+	min-width: 80px;
+	max-width: 80px;
+}
+.type-column {
+	min-width: 100px;
+	max-width: 100px;
+}
+.action-column {
+	min-width: 100px;
+	max-width: 100px;
 }
 </style>

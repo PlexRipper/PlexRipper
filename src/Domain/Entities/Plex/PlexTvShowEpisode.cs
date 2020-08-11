@@ -1,18 +1,17 @@
 ﻿using System;
 using PlexRipper.Domain.Entities.Base;
+using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.Domain.Entities
 {
     public class PlexTvShowEpisode : BaseEntity
     {
-       
         public int RatingKey { get; set; }
         public string Key { get; set; }
         public string Guid { get; set; }
         public string Title { get; set; }
         public string Summary { get; set; }
         public int Index { get; set; }
-        public string Type { get; set; }
         public int LeafCount { get; set; }
         public int ViewedLeafCount { get; set; }
         public int ChildCount { get; set; }
@@ -23,12 +22,14 @@ namespace PlexRipper.Domain.Entities
 
         #region Helpers
 
-
+        public PlexMediaType Type => PlexMediaType.Episode;
         #endregion
-        
+
         #region Relationships
+
         public PlexTvShowSeason TvShowSeason { get; set; }
         public int TvShowSeasonId { get; set; }
+
         #endregion
     }
 }

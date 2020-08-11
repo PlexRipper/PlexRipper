@@ -8,16 +8,10 @@
 				<v-btn @click="refreshLibrary">Refresh Library</v-btn>
 			</v-col>
 		</v-row>
-		<!-- The movie table -->
+		<!-- The tv show table -->
 		<v-row v-if="activeAccount">
 			<v-col>
-				<tv-show-table
-					:tvshows="tvshows"
-					:active-account="activeAccount"
-					:selected="selected"
-					:loading="isLoading"
-					@selected="setSelected"
-				/>
+				<tv-show-table :tvshows="tvshows" :active-account="activeAccount" :selected="selected" :loading="isLoading" />
 			</v-col>
 		</v-row>
 	</v-container>

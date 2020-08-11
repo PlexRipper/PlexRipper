@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
+using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
@@ -27,8 +29,9 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("index")]
         public int Index { get; set; }
 
-        [JsonProperty("type")]
-        public string Type { get; set; }
+        [JsonProperty("type", Required = Required.Always)]
+        [EnumDataType(typeof(PlexMediaType))]
+        public PlexMediaType Type { get; set; }
 
         [JsonProperty("leafCount")]
         public int LeafCount { get; set; }

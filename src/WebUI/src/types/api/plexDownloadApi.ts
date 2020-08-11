@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
-import { DownloadTaskDTO } from '@dto/mainApi';
+import { DownloadTaskDTO, DownloadTvShowDTO, PlexMediaType } from '@dto/mainApi';
 import { checkResponse, preApiRequest } from './baseApi';
 
 const logText = 'From PlexDownloadApi => ';
@@ -14,6 +14,13 @@ export function downloadPlexMovie(movieId: number, plexAccountId: number): Obser
 		plexMovieId: movieId,
 	});
 	return checkResponse<boolean>(result, logText, 'downloadPlexMovie');
+}
+
+export function downloadTvShow(mediaId: number, plexAccountId: number, type: PlexMediaType): Observable<boolean> {
+	preApiRequest(logText, 'downloadTvShow', `Sending request with tvShowId ${mediaId} and plexAccountId ${plexAccountId}`);
+	const command: DownloadTvShowDTO = { plexAccountId, plexMediaId: mediaId, type };
+	const result: Observable<AxiosResponse> = Axios.post(`${apiPath}/tvshow`, command);
+	return checkResponse<boolean>(result, logText, 'downloadTvShow');
 }
 
 export function deleteDownloadTask(downloadTaskId: number): Observable<boolean> {

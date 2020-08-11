@@ -15,6 +15,7 @@ using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.WebAPI
 {
@@ -30,23 +31,19 @@ namespace PlexRipper.WebAPI
         /// <param name="app"></param>
         public void Configure(IApplicationBuilder app)
         {
-
             // TODO Make sure to configure this correctly when setting up security
             app.UseCors(builder => builder
-                .AllowAnyOrigin()
-                // .WithOrigins("http://localhost:3000")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
+                    .AllowAnyOrigin()
+                    // .WithOrigins("http://localhost:3000")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
                 // .AllowCredentials()
             );
 
             // app.UseHttpsRedirection();
-
             app.UseOpenApi(); // serve OpenAPI/Swagger documents
             app.UseSwaggerUi3(); // serve Swagger UI
-
             app.UseRouting();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -65,34 +62,30 @@ namespace PlexRipper.WebAPI
         {
             // General
             services.AddCors();
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
             services.AddHttpContextAccessor();
 
             // Fluent Validator
-            services.AddMvc(options =>
-                {
-                    options.Filters.Add<ValidateFilter>();
-                })
+            services.AddMvc(options => { options.Filters.Add<ValidateFilter>(); })
                 .AddFluentValidation(fv =>
-            {
-                fv.RegisterValidatorsFromAssemblyContaining<ApplicationModule>();
-                fv.RegisterValidatorsFromAssemblyContaining<ValidateFilter>();
-                fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
-            });
-
+                {
+                    fv.RegisterValidatorsFromAssemblyContaining<ApplicationModule>();
+                    fv.RegisterValidatorsFromAssemblyContaining<ValidateFilter>();
+                    fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
+                });
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             // SignalR
             services.AddSignalR();
 
             // Customise default API behaviour
-            services.Configure<ApiBehaviorOptions>(options =>
-            {
-                options.SuppressModelStateInvalidFilter = true;
-            });
-
+            services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
             services.AddOpenApiDocument(configure =>
             {
+                configure.GenerateEnumMappingDescription = true;
                 configure.Title = "PlexRipper API";
                 configure.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
                 {
@@ -101,7 +94,6 @@ namespace PlexRipper.WebAPI
                     In = OpenApiSecurityApiKeyLocation.Header,
                     Description = "Type into the textbox: Bearer {your JWT token}."
                 });
-
                 configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
             });
 
@@ -115,8 +107,6 @@ namespace PlexRipper.WebAPI
             ContainerConfig.ConfigureContainer(builder);
             builder.RegisterLogger(autowireProperties: true);
             Log.Debug("Finished setting up Autofac Containers");
-
         }
-
     }
 }

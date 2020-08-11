@@ -25,7 +25,7 @@ export default ({ $axios }: NuxtAppOptions): void => {
 			return response;
 		},
 		(error) => {
-			if (error.response.data as Result) {
+			if (error?.response?.data as Result) {
 				(error.response.data as Result).statusCode = error.response.status;
 			}
 			return error.response;

@@ -42,6 +42,12 @@ export interface DownloadMovieDTO {
   plexMovieId: number;
 }
 
+export interface DownloadTvShowDTO {
+  plexAccountId: number;
+  plexMediaId: number;
+  type: string;
+}
+
 export type ResultDTOOfIEnumerableOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[] };
 
 export interface FolderPathDTO {
@@ -68,6 +74,12 @@ export interface FileSystemModelDTO {
   lastModified: string | null;
 }
 
+/**
+ * 0 = Parent
+1 = Drive
+2 = Folder
+3 = File
+ */
 export type FileSystemEntityType = 0 | 1 | 2 | 3;
 
 export type ResultDTOOfIEnumerableOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO[] };
@@ -158,7 +170,35 @@ export interface PlexMediaDTO {
   plexLibraryId: number;
 }
 
-export type PlexTvShowDTO = PlexMediaDTO & { seasons?: PlexTvShowSeasonDTO[] | null | null };
+export interface PlexTvShowDTO {
+  id: number;
+  ratingKey?: number;
+  key?: any;
+  guid?: any;
+  studio?: any;
+  title?: any;
+  contentRating?: any;
+  summary?: any;
+  index?: number;
+  rating?: number;
+  year?: number;
+  thumb?: any;
+  art?: any;
+  banner?: any;
+  duration?: number;
+  originallyAvailableAt?: string;
+  leafCount?: number;
+  viewedLeafCount?: number;
+  childCount?: number;
+  addedAt?: string;
+  updatedAt?: string;
+  viewCount?: any;
+  lastViewedAt?: any;
+  theme?: any;
+  plexLibraryId: number;
+  seasons?: PlexTvShowSeasonDTO[] | null | null;
+  type: PlexMediaType;
+}
 
 export interface PlexTvShowSeasonDTO {
   id: number;
@@ -168,7 +208,7 @@ export interface PlexTvShowSeasonDTO {
   title?: string | null;
   summary?: string | null;
   index?: number;
-  type?: string | null;
+  type: PlexMediaType;
   leafCount?: number;
   viewedLeafCount?: number;
   childCount?: number;
@@ -179,6 +219,8 @@ export interface PlexTvShowSeasonDTO {
   episodes?: PlexTvShowEpisodeDTO[] | null | null;
 }
 
+export type PlexMediaType = "None" | "Movie" | "TvShow" | "Season" | "Episode" | "Unknown";
+
 export interface PlexTvShowEpisodeDTO {
   id: number;
   ratingKey?: number;
@@ -187,7 +229,7 @@ export interface PlexTvShowEpisodeDTO {
   title?: string | null;
   summary?: string | null;
   index?: number;
-  type?: string | null;
+  type: PlexMediaType;
   leafCount?: number;
   viewedLeafCount?: number;
   childCount?: number;

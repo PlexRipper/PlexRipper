@@ -2,6 +2,7 @@
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.Application.Common.Interfaces
 {
@@ -13,5 +14,6 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<Result<DownloadTask>> GetDownloadRequestAsync(int plexAccountId, PlexMovie plexMovie);
         Task<Result<List<DownloadTask>>> GetAllDownloadsAsync();
         Task<Result<bool>> DeleteDownloadsAsync(int downloadTaskId);
+        Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int plexMovieId, PlexMediaType type);
     }
 }

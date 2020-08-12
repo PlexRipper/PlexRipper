@@ -29,7 +29,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         public int Index { get; set; }
 
         [JsonProperty("type", Required = Required.Always)]
-        [EnumDataType(typeof(PlexMediaType))]
         public PlexMediaType Type { get; set; }
 
         [JsonProperty("leafCount")]

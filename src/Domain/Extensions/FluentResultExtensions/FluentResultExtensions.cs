@@ -20,42 +20,42 @@ namespace PlexRipper.Domain.FluentResultExtensions
             }
 
             return false;
-        }   
-        
+        }
+
         private static void SetStatusCode(Result result, int statusCode, string message = "")
         {
             result.WithError(new Error(message).WithMetadata(_statusCode, HttpCodes.Status400BadRequest));
         }
-        
+
         private static bool _has400Error(Result result)
         {
             return FindStatusCode(result, HttpCodes.Status400BadRequest);
-        }  
-        
+        }
+
         private static bool _has404Error(Result result)
         {
             return FindStatusCode(result, HttpCodes.Status404NotFound);
-        }    
-        
+        }
+
         private static void _set400Error(Result result, string message = "")
         {
             SetStatusCode(result, HttpCodes.Status400BadRequest, message);
         }
-        
+
         private static void _set404Error(Result result, string message = "")
         {
             SetStatusCode(result, HttpCodes.Status404NotFound, message);
-        }   
-        
+        }
+
         #region Result Signatures
 
         #region 400
-        
+
         public static bool Has400Error(this Result result)
         {
             return _has400Error(result);
-        }    
-        
+        }
+
         public static void Set400Error(this Result result)
         {
             _set400Error(result);
@@ -64,15 +64,16 @@ namespace PlexRipper.Domain.FluentResultExtensions
 
         #region 404
 
-        public static bool Has404Error(this Result result)
+        public static bool Has404NotFoundError(this Result result)
         {
             return _has404Error(result);
-        }    
-        
-        public static void Set404Error(this Result result)
+        }
+
+        public static Result Set404NotFoundError(this Result result)
         {
             _set404Error(result);
-        }   
+            return result;
+        }
 
         #endregion
 
@@ -94,25 +95,27 @@ namespace PlexRipper.Domain.FluentResultExtensions
         {
             _set400Error(result);
         }
-        
+
         #endregion
 
 
         #region 404
 
-        public static bool Has404Error<T>(this Result<T> result)
+        public static bool Has404NotFoundError<T>(this Result<T> result)
         {
             return _has404Error(result);
         }
 
-        public static void Set404Error<T>(this Result<T> result)
+        public static void Set404NotFoundError<T>(this Result<T> result)
         {
             _set404Error(result);
-        }  
+        }
 
         #endregion
 
-        
+
         #endregion
     }
+
+
 }

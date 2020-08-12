@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Threading;
+using PlexRipper.Domain.Common;
 
 namespace PlexRipper.DownloadManager.Download
 {

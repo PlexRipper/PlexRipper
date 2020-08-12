@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using PlexRipper.Domain.Common;
 
 namespace PlexRipper.DownloadManager
 {

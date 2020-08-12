@@ -1,7 +1,7 @@
-﻿using PlexRipper.Domain.Types;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using PlexRipper.Domain.Types;
 
-namespace PlexRipper.Application.Common.Interfaces.WebApi
+namespace PlexRipper.Application.Common.Interfaces.SignalR
 {
     public interface IDownloadProgressHub
     {

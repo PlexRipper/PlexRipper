@@ -11,6 +11,8 @@ export const baseApiUrl = `${baseUrl}/api`;
 
 export const signalRDownloadProgressUrl = `${baseUrl}/download/progress`;
 
+export const signalRPlexLibraryProgressUrl = `${baseUrl}/plexLibrary/progress`;
+
 export function preApiRequest(logText: string, fnName: string, msg: string = ''): void {
 	Log.debug(`${logText} ${fnName} => sending request ${msg}`);
 }

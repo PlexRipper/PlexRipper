@@ -1,13 +1,8 @@
 <template>
 	<v-row justify="center">
 		<!-- Loading -->
-		<v-col v-if="loading" cols="auto" align-self="center">
-			<v-layout row justify-center align-center>
-				<v-progress-circular :size="70" :width="7" color="red" indeterminate></v-progress-circular>
-			</v-layout>
-			<h1>Retrieving library from database</h1>
-		</v-col>
-		<v-col v-else cols="12">
+
+		<v-col cols="12">
 			<!-- Table Headers -->
 			<v-row class="table-header">
 				<v-col class="ml-6" style="max-width: 50px">
@@ -100,12 +95,12 @@ export default class TVShowsTable extends Vue {
 					const episodes: ITreeViewItem[] = [];
 					if (season.episodes) {
 						season.episodes.forEach((episode) => {
-							episodes.push({ id: episode.id, name: episode.title ?? '', type: 'episode', children: [] });
+							episodes.push({ id: episode.id, name: episode.title ?? '', type: 'Episode', children: [] });
 						});
-						seasons.push({ id: season.id, name: season.title ?? '', type: 'season', children: episodes });
+						seasons.push({ id: season.id, name: season.title ?? '', type: 'Season', children: episodes });
 					}
 				});
-				items.push({ id: x.id, name: x.title ?? '', year: x.year, type: 'tvshow', children: seasons });
+				items.push({ id: x.id, name: x.title ?? '', year: x.year, type: 'TvShow', children: seasons });
 			}
 		});
 		return items;

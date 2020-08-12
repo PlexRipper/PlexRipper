@@ -33,11 +33,11 @@ namespace PlexRipper.WebAPI
         {
             // TODO Make sure to configure this correctly when setting up security
             app.UseCors(builder => builder
-                    .AllowAnyOrigin()
-                    // .WithOrigins("http://localhost:3000")
+                    // .AllowAnyOrigin()
+                    .WithOrigins("http://localhost:3000")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                // .AllowCredentials()
+                    .AllowCredentials()
             );
 
             // app.UseHttpsRedirection();
@@ -48,6 +48,7 @@ namespace PlexRipper.WebAPI
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<DownloadProgressHub>("/download/progress");
+                endpoints.MapHub<LibraryProgressHub>("/plexLibrary/progress");
             });
 
             // app.UseAuthorization();

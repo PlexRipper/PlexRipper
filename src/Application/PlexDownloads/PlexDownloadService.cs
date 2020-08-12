@@ -13,6 +13,7 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Application.PlexTvShows.Queries;
 
 namespace PlexRipper.Application.PlexDownloads
 {
@@ -42,6 +43,7 @@ namespace PlexRipper.Application.PlexDownloads
         {
             return _plexAuthenticationService.GetPlexTokenAsync(plexAccount);
         }
+
         public async Task<Result<DownloadTask>> GetDownloadRequestAsync(int plexAccountId, PlexMovie plexMovie)
         {
             if (plexMovie == null)
@@ -89,6 +91,53 @@ namespace PlexRipper.Application.PlexDownloads
             return Result.Fail($"Failed to retrieve metadata for plex movie with id: {plexMovie.Id}");
         }
 
+        public async Task<Result<DownloadTask>> GetDownloadRequestAsync(int plexAccountId, PlexTvShow plexTvShow)
+        {
+            if (plexTvShow == null)
+            {
+                return Result.Fail("plexMovie parameter is null");
+            }
+
+            Log.Debug($"Creating download request for movie {plexTvShow.Title}");
+
+            var server = plexTvShow.PlexLibrary.PlexServer;
+            var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccountId, server.Id);
+
+            if (token.IsFailed)
+            {
+                return token.ToResult<DownloadTask>();
+            }
+
+            // TODO make this dynamic
+            // Get the destination folder
+            var folderPath = await _mediator.Send(new GetFolderPathByIdQuery(1));
+            if (folderPath.IsFailed)
+            {
+                return Result.Fail("folderPath was null");
+            }
+
+            // Retrieve Metadata for this PlexMovie
+            var metaData = await _plexApiService.GetMediaMetaDataAsync(token.Value, server.BaseUrl, plexTvShow.RatingKey);
+
+            if (metaData != null)
+            {
+                return Result.Ok(new DownloadTask
+                {
+                    PlexServerId = server.Id,
+                    FolderPathId = folderPath.Value.Id,
+                    FolderPath = folderPath.Value,
+                    FileLocationUrl = metaData.ObfuscatedFilePath,
+                    Title = plexTvShow.Title,
+                    Status = DownloadStatus.Initialized,
+                    FileName = metaData.FileName,
+                    PlexServerAuthToken = token.Value,
+                    DownloadDirectory = _fileSystem.RootDirectory + "/Movies"
+                });
+            }
+
+            return Result.Fail($"Failed to retrieve metadata for plex movie with id: {plexTvShow.Id}");
+        }
+
         public async Task<Result<bool>> DownloadMovieAsync(int plexAccountId, int plexMovieId)
         {
             var plexMovie = await _mediator.Send(new GetPlexMovieByIdQuery(plexMovieId));
@@ -106,6 +155,23 @@ namespace PlexRipper.Application.PlexDownloads
             return await StartDownloadAsync(downloadTask.Value);
         }
 
+        public async Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int plexMovieId, PlexMediaType type)
+        {
+            var plexTvShow = await _mediator.Send(new GetPlexTvShowByIdQuery(plexMovieId));
+            if (plexTvShow.IsFailed)
+            {
+                return plexTvShow.ToResult<bool>();
+            }
+
+            var downloadTask = await GetDownloadRequestAsync(plexAccountId, plexTvShow.Value);
+            if (downloadTask.IsFailed)
+            {
+                return downloadTask.ToResult<bool>();
+            }
+
+            return await StartDownloadAsync(downloadTask.Value);
+
+        }
         #region CRUD
         public Task<Result<List<DownloadTask>>> GetAllDownloadsAsync()
         {
@@ -118,10 +184,7 @@ namespace PlexRipper.Application.PlexDownloads
             return _mediator.Send(new DeleteDownloadTaskByIdCommand(downloadTaskId));
         }
 
-        public async Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int plexMovieId, PlexMediaType type)
-        {
-            throw new System.NotImplementedException();
-        }
+
 
         #endregion
     }

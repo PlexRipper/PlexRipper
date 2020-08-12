@@ -6,18 +6,13 @@ using PlexRipper.Application.Common.Interfaces.SignalR;
 
 namespace PlexRipper.SignalR.Hubs
 {
-    public class DownloadProgressHub : Hub, IDownloadProgressHub
+    public class LibraryProgressHub : Hub
     {
-        public Task SendMessageAsync(string user, string message)
-        {
-            return Clients?.All.SendAsync("ReceiveMessage", user, message);
-        }
-
-        public Task SendDownloadProgressAsync(DownloadProgress downloadProgress)
+        public Task SendDownloadProgressAsync(LibraryProgress libraryProgress)
         {
             if (Clients != null)
             {
-                return Clients.All.SendAsync("DownloadProgress", downloadProgress);
+                return Clients.All.SendAsync("LibraryProgress", libraryProgress);
             }
             Log.Error("Clients is null, make sure a client has been subscribed!");
             return new Task(() => { });

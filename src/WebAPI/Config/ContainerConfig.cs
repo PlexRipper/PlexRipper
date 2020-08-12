@@ -9,13 +9,14 @@ using PlexRipper.FileSystem.config;
 using PlexRipper.PlexApi.Config;
 using PlexRipper.PlexApi.Config.Mappings;
 using PlexRipper.Settings.Config;
+using PlexRipper.SignalR.Config;
 
 namespace PlexRipper.WebAPI.Config
 {
     public static class ContainerConfig
     {
         /// <summary>
-        /// Autofac container builder, Serilog registration is left out due to being context dependent. Integration tests have a different configuration than the application. 
+        /// Autofac container builder, Serilog registration is left out due to being context dependent. Integration tests have a different configuration than the application.
         /// </summary>
         /// <param name="builder"></param>
         public static void ConfigureContainer(ContainerBuilder builder)
@@ -25,10 +26,11 @@ namespace PlexRipper.WebAPI.Config
 
             // Infrastructure
             builder.RegisterModule<DataModule>();
-            builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<DownloadManagerModule>();
-            builder.RegisterModule<PlexApiModule>();
             builder.RegisterModule<FileSystemModule>();
+            builder.RegisterModule<PlexApiModule>();
+            builder.RegisterModule<SettingsModule>();
+            builder.RegisterModule<SignalRModule>();
 
             // Presentation
             builder.RegisterModule<WebApiModule>();

@@ -14,8 +14,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         public int PlexMediaId { get; set; }
 
         [JsonProperty("type", Required = Required.Always)]
-        [EnumDataType(typeof(PlexMediaType))]
-        [JsonConverter(typeof(StringEnumConverter))]
         public PlexMediaType Type { get; set; }
     }
 }

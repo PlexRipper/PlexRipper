@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Common\Interfaces\WebApi" />
     <Folder Include="PlexAuthentication\Commands\" />
   </ItemGroup>
 

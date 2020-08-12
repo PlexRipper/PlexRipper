@@ -68,7 +68,7 @@ namespace PlexRipper.WebAPI.Controllers
             }
         }
 
-        // POST api/<PlexLibrary>/
+        // POST api/<PlexLibrary>/refresh
         [HttpPost("refresh")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
@@ -83,9 +83,9 @@ namespace PlexRipper.WebAPI.Controllers
 
             if (data.Value != null)
             {
-                var result = _mapper.Map<PlexLibraryDTO>(data.Value);
+                var mapResult = _mapper.Map<PlexLibraryDTO>(data.Value);
                 Log.Debug($"Found {data.Value.GetMediaCount} in library {data.Value.Title} of type {data.Value.Type} after refreshing");
-                return Ok(result);
+                return Ok(Result.Ok(mapResult));
             }
 
             string msg = $"Could not refresh {nameof(PlexLibrary)} with Id: {refreshPlexLibraryDto.PlexLibraryId}";

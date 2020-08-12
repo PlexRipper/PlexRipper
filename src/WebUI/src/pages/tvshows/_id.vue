@@ -5,7 +5,7 @@
 				<h1>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</h1>
 			</v-col>
 			<v-col cols="auto">
-				<v-btn @click="refreshLibrary">Refresh Library</v-btn>
+				<v-btn :disabled="getIsRefreshing" @click="refreshLibrary">Refresh Library</v-btn>
 			</v-col>
 		</v-row>
 		<!-- The tv show table -->
@@ -38,8 +38,8 @@ import SettingsService from '@service/settingsService';
 import { PlexAccountDTO, PlexTvShowDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import SignalrService from '@service/signalrService';
-import { finalize, takeWhile, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
+import { takeWhile, tap, switchMap } from 'rxjs/operators';
+import { Subscription, merge } from 'rxjs';
 import { ITvShowSelector } from './types/iTvShowSelector';
 
 import TvShowTable from './components/TvShowTable.vue';
@@ -84,20 +84,41 @@ export default class TvShowsDetail extends Vue {
 		return this.progress?.isRefreshing ?? this.isRefreshing;
 	}
 
+	resetProgress(isRefreshing: boolean): void {
+		this.progress = {
+			id: this.libraryId,
+			percentage: 0,
+			received: 0,
+			total: 0,
+			isRefreshing,
+			isComplete: false,
+		};
+	}
+
 	refreshLibrary(): void {
 		this.isRefreshing = true;
 		this.isLoading = true;
-
-		refreshPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0)
-			.pipe(
-				finalize(() => {
+		this.resetProgress(true);
+		merge(
+			// Refresh Library
+			refreshPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).pipe(
+				tap((data) => {
+					Log.debug(`TvShowsDetail => refreshPlexLibrary: ${data?.id}`, data);
+					this.library = data;
+					this.isLoading = false;
 					this.isRefreshing = false;
 				}),
-			)
-			.subscribe((data) => {
-				this.library = data;
-				this.isLoading = false;
-			});
+			),
+			// Setup progress bar
+			SignalrService.getLibraryProgress().pipe(
+				tap((data) => {
+					this.progress = data;
+					this.isRefreshing = data.isRefreshing;
+					Log.debug(data);
+				}),
+				takeWhile((data) => !data.isComplete),
+			),
+		).subscribe();
 	}
 
 	setSelected(selected: ITvShowSelector[]): void {
@@ -105,51 +126,39 @@ export default class TvShowsDetail extends Vue {
 		this.selected = selected;
 	}
 
-	getLibrary(): void {
-		this.isLoading = true;
-
-		this.libraryProgressSubscription = SignalrService.getLibraryProgress()
-			.pipe(
-				tap((data) => Log.debug(data)),
-				takeWhile((data) => !data.isComplete),
-				finalize(() =>
-					getPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).subscribe((data) => {
-						this.library = data;
-						Log.debug(`TvShowsDetail => Library: ${data?.id}`, data);
-						this.isLoading = false;
-					}),
-				),
-			)
-			.subscribe((data) => {
-				Log.debug(data);
-				this.progress = data;
-				this.isRefreshing = data.isRefreshing;
-			});
-
-		getPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).subscribe((data) => {
-			this.library = data;
-			Log.debug(`TvShowsDetail => Library: ${data?.id}`, data);
-			this.isLoading = false;
-		});
-	}
-
 	created(): void {
 		this.libraryId = +this.$route.params.id;
+		this.resetProgress(false);
+		this.isLoading = true;
 
-		// const x = concat(
-		// 	SignalrService.getLibraryProgress().pipe(
-		// 		tap((data) => Log.debug(data)),
-		// 		takeWhile((data) => !data.isComplete),
-		// 	),
-		// 	getPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0),
-		// ).subscribe((data) => {
-		// 	Log.debug('Test:', data);
-		// });
-
-		SettingsService.getActiveAccount().subscribe((data) => {
-			this.activeAccount = data ?? null;
-			this.getLibrary();
-		});
+		SettingsService.getActiveAccount()
+			.pipe(
+				tap((data) => {
+					this.activeAccount = data ?? null;
+				}),
+				switchMap((data) =>
+					merge(
+						// Setup progress bar
+						SignalrService.getLibraryProgress().pipe(
+							tap((data) => {
+								this.progress = data;
+								this.isRefreshing = data.isRefreshing;
+								Log.debug(data);
+							}),
+							takeWhile((data) => !data.isComplete),
+						),
+						// Retrieve library
+						getPlexLibrary(this.libraryId, data?.id ?? 0).pipe(
+							tap((data) => {
+								this.library = data;
+								Log.debug(`TvShowsDetail => Library: ${data?.id}`, data);
+								this.isLoading = false;
+							}),
+						),
+					),
+				),
+			)
+			.subscribe();
 	}
 
 	destroyed() {

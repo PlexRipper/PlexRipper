@@ -12,9 +12,9 @@ using PlexRipper.Domain.FluentResultExtensions;
 
 namespace PlexRipper.Application.PlexTvShows.Queries
 {
-    public class GetPlexTvShowByIdQuery : IRequest<Result<PlexTvShow>>
+    public class GetPlexTvShowByIdWithEpisodesQuery : IRequest<Result<PlexTvShow>>
     {
-        public GetPlexTvShowByIdQuery(int id)
+        public GetPlexTvShowByIdWithEpisodesQuery(int id)
         {
             Id = id;
         }
@@ -22,32 +22,32 @@ namespace PlexRipper.Application.PlexTvShows.Queries
         public int Id { get; }
     }
 
-    public class GetPlexTvShowByIdQueryValidator : AbstractValidator<GetPlexTvShowByIdQuery>
+    public class GetPlexTvShowByIdWithEpisodesQueryValidator : AbstractValidator<GetPlexTvShowByIdWithEpisodesQuery>
     {
-        public GetPlexTvShowByIdQueryValidator()
+        public GetPlexTvShowByIdWithEpisodesQueryValidator()
         {
             RuleFor(x => x.Id).GreaterThan(0);
         }
     }
 
 
-    public class GetPlexTvShowByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowByIdQuery, Result<PlexTvShow>>
+    public class GetPlexTvShowByIdWithEpisodesQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowByIdWithEpisodesQuery, Result<PlexTvShow>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
-        public GetPlexTvShowByIdQueryHandler(IPlexRipperDbContext dbContext)
+        public GetPlexTvShowByIdWithEpisodesQueryHandler(IPlexRipperDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdWithEpisodesQuery request, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetPlexTvShowByIdQuery, GetPlexTvShowByIdQueryValidator>(request);
+            var result = await ValidateAsync<GetPlexTvShowByIdWithEpisodesQuery, GetPlexTvShowByIdWithEpisodesQueryValidator>(request);
             if (result.IsFailed) return result;
             var plexTvShow = await _dbContext.PlexTvShows
                 .Include(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)
-                .OrderBy(x => x.Title)
+                .OrderBy(x => x.RatingKey)
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (plexTvShow == null)

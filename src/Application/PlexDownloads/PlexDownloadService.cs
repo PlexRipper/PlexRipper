@@ -13,6 +13,7 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Application.PlexServers.Queries;
 using PlexRipper.Application.PlexTvShows.Queries;
 
 namespace PlexRipper.Application.PlexDownloads
@@ -25,7 +26,9 @@ namespace PlexRipper.Application.PlexDownloads
         private readonly IFileSystem _fileSystem;
         private readonly IPlexApiService _plexApiService;
 
-        public PlexDownloadService(IMediator mediator, IDownloadManager downloadManager, IPlexAuthenticationService plexAuthenticationService, IFileSystem fileSystem, IPlexApiService plexApiService)
+        public PlexDownloadService(IMediator mediator, IDownloadManager downloadManager,
+            IPlexAuthenticationService plexAuthenticationService, IFileSystem fileSystem,
+            IPlexApiService plexApiService)
         {
             _mediator = mediator;
             _downloadManager = downloadManager;
@@ -51,56 +54,56 @@ namespace PlexRipper.Application.PlexDownloads
                 return Result.Fail("plexMovie parameter is null");
             }
 
-            Log.Debug($"Creating download request for movie {plexMovie.Title}");
-
-            var server = plexMovie.PlexLibrary.PlexServer;
-            var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccountId, server.Id);
-
-            if (token.IsFailed)
+            if (plexMovie.PlexLibraryId <= 0)
             {
-                return token.ToResult<DownloadTask>();
+                return Result.Fail(
+                    $"The plexMovie parameter should contain a valid PlexLibraryId, is: {plexMovie.PlexLibraryId}");
             }
 
-            // TODO make this dynamic
-            // Get the destination folder
-            var folderPath = await _mediator.Send(new GetFolderPathByIdQuery(1));
-            if (folderPath.IsFailed)
+            Log.Debug($"Creating download request for Movie: {plexMovie.Title}");
+
+            var server = await _mediator.Send(new GetPlexServerByPlexLibraryIdQuery(plexMovie.PlexLibraryId));
+
+            if (server.IsFailed)
             {
-                return Result.Fail("folderPath was null");
+                return server.ToResult();
             }
-
-            // Retrieve Metadata for this PlexMovie
-            var metaData = await _plexApiService.GetMediaMetaDataAsync(token.Value, server.BaseUrl, plexMovie.RatingKey);
-
-            if (metaData != null)
-            {
-                return Result.Ok(new DownloadTask
-                {
-                    PlexServerId = server.Id,
-                    FolderPathId = folderPath.Value.Id,
-                    FolderPath = folderPath.Value,
-                    FileLocationUrl = metaData.ObfuscatedFilePath,
-                    Title = plexMovie.Title,
-                    Status = DownloadStatus.Initialized,
-                    FileName = metaData.FileName,
-                    PlexServerAuthToken = token.Value,
-                    DownloadDirectory = _fileSystem.RootDirectory + "/Movies"
-                });
-            }
-
-            return Result.Fail($"Failed to retrieve metadata for plex movie with id: {plexMovie.Id}");
+            return await CreateDownloadTaskAsync(server.Value, plexAccountId, plexMovie.RatingKey);
         }
 
         public async Task<Result<DownloadTask>> GetDownloadRequestAsync(int plexAccountId, PlexTvShow plexTvShow)
         {
             if (plexTvShow == null)
             {
-                return Result.Fail("plexMovie parameter is null");
+                return Result.Fail("plexTvShow parameter is null");
             }
 
-            Log.Debug($"Creating download request for movie {plexTvShow.Title}");
+            if (plexTvShow.PlexLibraryId <= 0)
+            {
+                return Result.Fail(
+                    $"The plexTvShow parameter should contain a valid PlexLibraryId, is: {plexTvShow.PlexLibraryId}");
+            }
 
-            var server = plexTvShow.PlexLibrary.PlexServer;
+            Log.Debug($"Creating download request for TvShow: {plexTvShow.Title}");
+
+            var server = await _mediator.Send(new GetPlexServerByPlexLibraryIdQuery(plexTvShow.PlexLibraryId));
+            if (server.IsFailed)
+            {
+                return server.ToResult();
+            }
+            return await CreateDownloadTaskAsync(server.Value, plexAccountId, plexTvShow.RatingKey);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="DownloadTask"/> which can be send to the <see cref="PlexDownloadService"/> to start a download of PlexMedia.
+        /// </summary>
+        /// <param name="server">The <see cref="PlexServer"/> to download from.</param>
+        /// <param name="plexAccountId">The <see cref="PlexAccount"/> used to authenticate</param>
+        /// <param name="ratingKey">The Plex version of the media id</param>
+        /// <returns></returns>
+        private async Task<Result<DownloadTask>> CreateDownloadTaskAsync(PlexServer server, int plexAccountId,
+            int ratingKey)
+        {
             var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccountId, server.Id);
 
             if (token.IsFailed)
@@ -109,25 +112,32 @@ namespace PlexRipper.Application.PlexDownloads
             }
 
             // TODO make this dynamic
-            // Get the destination folder
-            var folderPath = await _mediator.Send(new GetFolderPathByIdQuery(1));
-            if (folderPath.IsFailed)
+            // Get the download folder
+            var downloadFolder = await _mediator.Send(new GetFolderPathByIdQuery(1));
+            if (downloadFolder.IsFailed)
             {
-                return Result.Fail("folderPath was null");
+                return Result.Fail("the downloadFolder was null");
+            }
+
+            // Get the download folder
+            var destinationFolder = await _mediator.Send(new GetFolderPathByIdQuery(1));
+            if (destinationFolder.IsFailed)
+            {
+                return Result.Fail("the destinationFolder was null");
             }
 
             // Retrieve Metadata for this PlexMovie
-            var metaData = await _plexApiService.GetMediaMetaDataAsync(token.Value, server.BaseUrl, plexTvShow.RatingKey);
+            var metaData = await _plexApiService.GetMediaMetaDataAsync(token.Value, server.BaseUrl, ratingKey);
 
             if (metaData != null)
             {
                 return Result.Ok(new DownloadTask
                 {
                     PlexServerId = server.Id,
-                    FolderPathId = folderPath.Value.Id,
-                    FolderPath = folderPath.Value,
+                    FolderPathId = downloadFolder.Value.Id,
+                    FolderPath = downloadFolder.Value,
                     FileLocationUrl = metaData.ObfuscatedFilePath,
-                    Title = plexTvShow.Title,
+                    Title = metaData.Title,
                     Status = DownloadStatus.Initialized,
                     FileName = metaData.FileName,
                     PlexServerAuthToken = token.Value,
@@ -135,7 +145,7 @@ namespace PlexRipper.Application.PlexDownloads
                 });
             }
 
-            return Result.Fail($"Failed to retrieve metadata for plex movie with id: {plexTvShow.Id}");
+            return Result.Fail($"Failed to retrieve metadata for plex media with rating key: {ratingKey}");
         }
 
         public async Task<Result<bool>> DownloadMovieAsync(int plexAccountId, int plexMovieId)
@@ -155,9 +165,9 @@ namespace PlexRipper.Application.PlexDownloads
             return await StartDownloadAsync(downloadTask.Value);
         }
 
-        public async Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int plexMovieId, PlexMediaType type)
+        public async Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int plexTvShowId, PlexMediaType type)
         {
-            var plexTvShow = await _mediator.Send(new GetPlexTvShowByIdQuery(plexMovieId));
+            var plexTvShow = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(plexTvShowId));
             if (plexTvShow.IsFailed)
             {
                 return plexTvShow.ToResult<bool>();
@@ -170,9 +180,10 @@ namespace PlexRipper.Application.PlexDownloads
             }
 
             return await StartDownloadAsync(downloadTask.Value);
-
         }
+
         #region CRUD
+
         public Task<Result<List<DownloadTask>>> GetAllDownloadsAsync()
         {
             return _mediator.Send(new GetAllDownloadTasksQuery());
@@ -183,8 +194,6 @@ namespace PlexRipper.Application.PlexDownloads
             _downloadManager.CancelDownload(downloadTaskId);
             return _mediator.Send(new DeleteDownloadTaskByIdCommand(downloadTaskId));
         }
-
-
 
         #endregion
     }

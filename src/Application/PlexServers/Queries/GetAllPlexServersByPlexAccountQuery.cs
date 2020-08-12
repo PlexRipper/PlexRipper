@@ -56,7 +56,7 @@ namespace PlexRipper.Application.PlexServers.Queries
                 .Include(x => x.PlexServer)
                 .Where(x => x.PlexAccountId == request.Id)
                 .ProjectTo<PlexServer>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return ReturnResult(serverList);
 

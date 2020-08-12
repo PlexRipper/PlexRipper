@@ -1,7 +1,7 @@
 import Log from 'consola';
 import { LogLevel } from '@aspnet/signalr';
 import { Observable } from 'rxjs';
-import { HubConnectionFactory } from '@ssv/signalr-client';
+import { HubConnectionFactory, ConnectionOptions } from '@ssv/signalr-client';
 import { signalRDownloadProgressUrl, signalRPlexLibraryProgressUrl } from '@api/baseApi';
 import IDownloadProgress from '@dto/IDownloadProgress';
 import ILibraryProgress from '@dto/ILibraryProgress';
@@ -10,20 +10,22 @@ export class SignalrService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();
 
 	public constructor() {
+		const options: ConnectionOptions = {
+			logger: LogLevel.Debug,
+			retry: {
+				maximumAttempts: 5,
+			},
+		};
 		this._hubFactory.create(
 			{
 				key: 'DownloadProgress',
 				endpointUri: signalRDownloadProgressUrl,
-				options: {
-					logger: LogLevel.Debug,
-				},
+				options,
 			},
 			{
 				key: 'LibraryProgress',
 				endpointUri: signalRPlexLibraryProgressUrl,
-				options: {
-					logger: LogLevel.Debug,
-				},
+				options,
 			},
 		);
 	}

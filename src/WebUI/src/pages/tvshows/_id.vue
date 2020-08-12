@@ -1,20 +1,12 @@
 <template>
-	<v-container>
-		<v-row justify="space-between">
-			<v-col cols="6">
-				<h1>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</h1>
-			</v-col>
-			<v-col cols="auto">
-				<v-btn :disabled="getIsRefreshing" @click="refreshLibrary">Refresh Library</v-btn>
-			</v-col>
-		</v-row>
+	<v-container v-if="activeAccount">
 		<!-- The tv show table -->
-		<v-row v-if="activeAccount" justify="center">
-			<v-col v-if="isLoading" cols="auto">
+		<v-row v-if="isLoading" justify="center">
+			<v-col cols="auto">
 				<v-layout row justify-center align-center>
 					<v-progress-circular :size="70" :width="7" color="red" indeterminate></v-progress-circular>
 				</v-layout>
-				<h1 v-if="getIsRefreshing">Refreshing library data from {{ server ? server.name : 'unknown' }}</h1>
+				<h1 v-if="isRefreshing">Refreshing library data from {{ server ? server.name : 'unknown' }}</h1>
 				<h1 v-else>Retrieving library from PlexRipper database</h1>
 				<!-- Library progress bar -->
 				<v-progress-linear :value="getPercentage" height="20" striped color="deep-orange">
@@ -23,8 +15,16 @@
 					</template>
 				</v-progress-linear>
 			</v-col>
-			<v-col v-else>
-				<tv-show-table :tvshows="tvshows" :active-account="activeAccount" :selected="selected" :loading="isLoading" />
+		</v-row>
+		<v-row v-else justify="space-between">
+			<v-col cols="6">
+				<h1>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</h1>
+			</v-col>
+			<v-col cols="auto">
+				<v-btn :disabled="isRefreshing" @click="refreshLibrary">Refresh Library</v-btn>
+			</v-col>
+			<v-col cols="12">
+				<tv-show-table :tvshows="tvshows" :active-account="activeAccount" :loading="isLoading" />
 			</v-col>
 		</v-row>
 	</v-container>
@@ -38,9 +38,8 @@ import SettingsService from '@service/settingsService';
 import { PlexAccountDTO, PlexTvShowDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import SignalrService from '@service/signalrService';
-import { takeWhile, tap, switchMap } from 'rxjs/operators';
+import { takeWhile, tap, switchMap, takeLast } from 'rxjs/operators';
 import { Subscription, merge } from 'rxjs';
-import { ITvShowSelector } from './types/iTvShowSelector';
 
 import TvShowTable from './components/TvShowTable.vue';
 import ILibraryProgress from '~/types/dto/ILibraryProgress';
@@ -54,15 +53,11 @@ import ILibraryProgress from '~/types/dto/ILibraryProgress';
 export default class TvShowsDetail extends Vue {
 	activeAccount: PlexAccountDTO | null = null;
 
-	libraryId: number = 0;
-
 	library: PlexLibraryDTO | null = null;
 
 	isLoading: boolean = true;
 
 	isRefreshing: boolean = false;
-
-	selected: ITvShowSelector[] = [];
 
 	progress: ILibraryProgress | null = null;
 
@@ -73,20 +68,22 @@ export default class TvShowsDetail extends Vue {
 	}
 
 	get server(): PlexServerDTO | null {
-		return this.activeAccount?.plexServers.find((x) => x.id === this.library?.plexServerId) ?? null;
+		return (
+			this.activeAccount?.plexServers.find((x) => x.plexLibraries?.find((x) => x.id === this.getLibraryId) !== undefined) ?? null
+		);
 	}
 
 	get getPercentage(): number {
 		return this.progress?.percentage ?? 0;
 	}
 
-	get getIsRefreshing(): boolean {
-		return this.progress?.isRefreshing ?? this.isRefreshing;
+	get getLibraryId(): number {
+		return +this.$route?.params?.id ?? 0;
 	}
 
 	resetProgress(isRefreshing: boolean): void {
 		this.progress = {
-			id: this.libraryId,
+			id: this.getLibraryId,
 			percentage: 0,
 			received: 0,
 			total: 0,
@@ -100,35 +97,29 @@ export default class TvShowsDetail extends Vue {
 		this.isLoading = true;
 		this.resetProgress(true);
 		merge(
+			// Setup progress bar
+			SignalrService.getLibraryProgress().pipe(
+				tap((data) => {
+					this.progress = data;
+				}),
+				takeWhile((data) => !data.isComplete),
+			),
 			// Refresh Library
-			refreshPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).pipe(
+			refreshPlexLibrary(this.getLibraryId, this.activeAccount?.id ?? 0).pipe(
 				tap((data) => {
 					Log.debug(`TvShowsDetail => refreshPlexLibrary: ${data?.id}`, data);
 					this.library = data;
 					this.isLoading = false;
 					this.isRefreshing = false;
 				}),
-			),
-			// Setup progress bar
-			SignalrService.getLibraryProgress().pipe(
-				tap((data) => {
-					this.progress = data;
-					this.isRefreshing = data.isRefreshing;
-					Log.debug(data);
-				}),
-				takeWhile((data) => !data.isComplete),
+				takeLast(1),
 			),
 		).subscribe();
 	}
 
-	setSelected(selected: ITvShowSelector[]): void {
-		Log.debug(selected);
-		this.selected = selected;
-	}
-
 	created(): void {
-		this.libraryId = +this.$route.params.id;
 		this.resetProgress(false);
+		this.isRefreshing = false;
 		this.isLoading = true;
 
 		SettingsService.getActiveAccount()
@@ -143,28 +134,22 @@ export default class TvShowsDetail extends Vue {
 							tap((data) => {
 								this.progress = data;
 								this.isRefreshing = data.isRefreshing;
-								Log.debug(data);
 							}),
 							takeWhile((data) => !data.isComplete),
 						),
 						// Retrieve library
-						getPlexLibrary(this.libraryId, data?.id ?? 0).pipe(
+						getPlexLibrary(this.getLibraryId, data?.id ?? 0).pipe(
 							tap((data) => {
 								this.library = data;
 								Log.debug(`TvShowsDetail => Library: ${data?.id}`, data);
 								this.isLoading = false;
 							}),
+							takeLast(1),
 						),
 					),
 				),
 			)
 			.subscribe();
-	}
-
-	destroyed() {
-		if (this.libraryProgressSubscription) {
-			this.libraryProgressSubscription.unsubscribe();
-		}
 	}
 }
 </script>

@@ -1,7 +1,7 @@
 ﻿using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
 
-namespace PlexRipper.Application.PlexSeries
+namespace PlexRipper.Application.PlexTvShows
 {
     public class PlexTvShowService : IPlexTvShowService
     {

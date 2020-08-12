@@ -52,7 +52,7 @@ namespace PlexRipper.Application.PlexServers.Queries
                 .ThenInclude(x => x.PlexAccount)
                 .Where(x => x.PlexAccountServers
                     .Any(y => y.PlexAccount.Id == request.Id))
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return ReturnResult(plexServers);
         }

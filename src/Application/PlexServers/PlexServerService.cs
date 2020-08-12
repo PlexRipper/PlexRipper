@@ -100,7 +100,7 @@ namespace PlexRipper.Application.PlexServers
         /// <returns></returns>
         public async Task<Result<PlexServer>> GetAllLibraryMediaAsync(PlexAccount plexAccount, PlexServer plexServer, bool refresh = false)
         {
-            var plexServerDB = await _mediator.Send(new GetPlexServerByIdQuery(plexServer.Id));
+            var plexServerDB = await _mediator.Send(new GetPlexServerByIdWithLibrariesQuery(plexServer.Id));
 
             if (refresh)
             {
@@ -108,7 +108,7 @@ namespace PlexRipper.Application.PlexServers
                 {
                     await _plexLibraryService.GetLibraryMediaAsync(plexAccount, plexServerDB.Value, library.Key, true);
                 }
-                return await _mediator.Send(new GetPlexServerByIdQuery(plexServer.Id));
+                return await _mediator.Send(new GetPlexServerByIdWithLibrariesQuery(plexServer.Id));
             }
             return plexServerDB;
         }
@@ -118,7 +118,7 @@ namespace PlexRipper.Application.PlexServers
 
         public Task<Result<PlexServer>> GetServerAsync(int plexServerId)
         {
-            return _mediator.Send(new GetPlexServerByIdQuery(plexServerId));
+            return _mediator.Send(new GetPlexServerByIdWithLibrariesQuery(plexServerId));
         }
 
         public async Task<Result<List<PlexServer>>> GetServersAsync(PlexAccount plexAccount, bool refresh = false)

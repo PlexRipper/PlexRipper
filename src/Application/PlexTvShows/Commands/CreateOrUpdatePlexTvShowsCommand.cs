@@ -1,4 +1,8 @@
-﻿using FluentResults;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -6,14 +10,10 @@ using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace PlexRipper.Application.PlexSeries
+namespace PlexRipper.Application.PlexTvShows
 {
-    public class CreateOrUpdatePlexTvShowsCommand : IRequest<Result<PlexLibrary>>
+    public class CreateOrUpdatePlexTvShowsCommand : IRequest<Result<bool>>
     {
         public PlexLibrary PlexLibrary { get; }
         public List<PlexTvShow> PlexTvShows { get; }
@@ -36,7 +36,7 @@ namespace PlexRipper.Application.PlexSeries
         }
     }
 
-    public class CreateOrUpdatePlexTvShowsHandler : BaseHandler, IRequestHandler<CreateOrUpdatePlexTvShowsCommand, Result<PlexLibrary>>
+    public class CreateOrUpdatePlexTvShowsHandler : BaseHandler, IRequestHandler<CreateOrUpdatePlexTvShowsCommand, Result<bool>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
@@ -45,7 +45,7 @@ namespace PlexRipper.Application.PlexSeries
             _dbContext = dbContext;
         }
 
-        public async Task<Result<PlexLibrary>> Handle(CreateOrUpdatePlexTvShowsCommand command, CancellationToken cancellationToken)
+        public async Task<Result<bool>> Handle(CreateOrUpdatePlexTvShowsCommand command, CancellationToken cancellationToken)
         {
             var result = await ValidateAsync<CreateOrUpdatePlexTvShowsCommand, CreateOrUpdatePlexTvShowsValidator>(command);
             if (result.IsFailed) return result;
@@ -57,12 +57,12 @@ namespace PlexRipper.Application.PlexSeries
             // Remove all movies and re-add them
             var currentTvShows = await _dbContext.PlexTvShows
                 .AsTracking().Where(x => x.PlexLibraryId == plexLibrary.Id)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
             _dbContext.PlexTvShows.RemoveRange(currentTvShows);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
 
-            // Ensure the correct ID is added. 
+            // Ensure the correct ID is added.
             foreach (var tvShow in plexTvShows)
             {
                 tvShow.PlexLibraryId = plexLibrary.Id;
@@ -70,13 +70,10 @@ namespace PlexRipper.Application.PlexSeries
 
             // TODO update Roles and tags
 
-            await _dbContext.PlexTvShows.AddRangeAsync(plexTvShows);
+            await _dbContext.PlexTvShows.AddRangeAsync(plexTvShows, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            var entity = await _dbContext.PlexLibraries.Include(x => x.TvShows)
-                .FirstOrDefaultAsync(x => x.Id == plexLibrary.Id);
-
-            return Result.Ok(entity);
+            return Result.Ok(true);
 
         }
     }

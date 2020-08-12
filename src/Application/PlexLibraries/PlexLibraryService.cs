@@ -6,7 +6,6 @@ using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Application.PlexLibraries.Commands;
 using PlexRipper.Application.PlexLibraries.Queries;
 using PlexRipper.Application.PlexMovies;
-using PlexRipper.Application.PlexSeries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
@@ -14,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common.Interfaces.SignalR;
+using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain.Common;
 using PlexRipper.Domain.Types;
 
@@ -254,13 +254,19 @@ namespace PlexRipper.Application.PlexLibraries
                 // Send progress update to clients
                 await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, i, plexLibrary.TvShows.Count);
             }
-            Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title}");
-            result = await _mediator.Send(new CreateOrUpdatePlexTvShowsCommand(plexLibrary, plexLibrary.TvShows));
 
+            Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title}");
+            var updateResult = await _mediator.Send(new CreateOrUpdatePlexTvShowsCommand(plexLibrary, plexLibrary.TvShows));
+            if (updateResult.IsFailed)
+            {
+                return updateResult.ToResult();
+            }
+
+            var freshPlexLibrary = await _mediator.Send(new GetPlexLibraryByIdWithMediaQuery(plexLibrary.Id));
             // Complete progress update
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.TvShows.Count,
                 plexLibrary.TvShows.Count);
-            return result;
+            return freshPlexLibrary;
         }
 
         #region CRUD

@@ -8,8 +8,7 @@ namespace PlexRipper.Domain.Behavior.Pipelines
 {
     public class ValidationPipeline<TRequest, TResponse>
         : IPipelineBehavior<TRequest, TResponse>
-        where TResponse : Result
-        where TRequest : IRequest<Result>
+        where TResponse : ResultBase, new()
     {
         private readonly IValidator<TRequest> _compositeValidator;
 
@@ -18,28 +17,24 @@ namespace PlexRipper.Domain.Behavior.Pipelines
             _compositeValidator = compositeValidator;
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken,
+            RequestHandlerDelegate<TResponse> next)
         {
+            var fluentValidationResult = await _compositeValidator.ValidateAsync(request, cancellationToken);
 
-            var result = await _compositeValidator.ValidateAsync(request, cancellationToken);
-
-            if (!result.IsValid)
+            if (!fluentValidationResult.IsValid)
             {
-                Error error = new Error();
-                var responseType = typeof(TResponse);
+                var result = new TResponse();
 
-                foreach (var validationFailure in result.Errors)
+                foreach (var reason in fluentValidationResult.Errors)
                 {
-                    Log.Warning($"{responseType} - {validationFailure.ErrorMessage}");
-                    error.Reasons.Add(new Error(validationFailure.ErrorMessage));
+                    result.Reasons.Add(new Error(reason.ErrorMessage));
                 }
 
-                return Result.Fail(error) as TResponse;
+                return result;
             }
 
             return await next();
         }
     }
-
-
 }

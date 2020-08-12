@@ -42,6 +42,7 @@ namespace PlexRipper.DownloadManager
             get
             {
                 int active = 0;
+
                 //foreach (WebDownloadClient d in DownloadsList)
                 //{
                 //    if (!d.HasError)
@@ -58,6 +59,7 @@ namespace PlexRipper.DownloadManager
             get
             {
                 int completed = 0;
+
                 //foreach (WebDownloadClient d in DownloadsList)
                 //{
                 //    if (d.Status == DownloadStatus.Completed)
@@ -86,12 +88,12 @@ namespace PlexRipper.DownloadManager
 
         #region Methods
 
-
         private PlexDownloadClient CreateDownloadClient(DownloadTask downloadTask)
         {
             PlexDownloadClient newClient = new PlexDownloadClient(downloadTask, _fileSystem);
 
             newClient.DownloadProgressChanged += OnDownloadProgressChanged;
+
             //newClient.DownloadFileCompleted += OnDownloadFileCompleted;
 
             DownloadsList.Add(newClient);
@@ -109,7 +111,8 @@ namespace PlexRipper.DownloadManager
 
             _hubContext.Clients.All.SendAsync("DownloadProgress", downloadProgress);
 
-            Log.Information($"({plexDownloadClient.ClientId}){plexDownloadClient.DownloadTask.FileName} => Downloaded {DataFormat.FormatSizeString(downloadProgress.DataReceived)} of {DataFormat.FormatSizeString(downloadProgress.DataTotal)} bytes ({downloadProgress.DownloadSpeed}). {downloadProgress.Percentage} % complete...");
+            Log.Information(
+                $"({plexDownloadClient.ClientId}){plexDownloadClient.DownloadTask.FileName} => Downloaded {DataFormat.FormatSizeString(downloadProgress.DataReceived)} of {DataFormat.FormatSizeString(downloadProgress.DataTotal)} bytes ({downloadProgress.DownloadSpeed}). {downloadProgress.Percentage} % complete...");
         }
 
         public async Task<Result> StartDownloadAsync(DownloadTask downloadTask)
@@ -142,6 +145,12 @@ namespace PlexRipper.DownloadManager
             }
         }
 
+        public Task<Result> StartDownloadAsync(List<DownloadTask> downloadTasks)
+        {
+            Log.Error("Not Implemented");
+            return Task.Run(Result.Ok);
+        }
+
         private PlexDownloadClient GetDownloadClient(int downloadTaskId)
         {
             return DownloadsList.Find(x => x.ClientId == downloadTaskId);
@@ -166,6 +175,5 @@ namespace PlexRipper.DownloadManager
         }
 
         #endregion Methods
-
     }
 }

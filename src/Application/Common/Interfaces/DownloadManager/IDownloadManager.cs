@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using System.Collections.Generic;
+using FluentResults;
 using PlexRipper.Domain.Entities;
 using System.Threading.Tasks;
 
@@ -11,5 +12,6 @@ namespace PlexRipper.Application.Common.Interfaces.DownloadManager
         int TotalDownloads { get; }
         Task<Result> StartDownloadAsync(DownloadTask downloadTask);
         Result<bool> CancelDownload(int downloadTaskId);
+        Task<Result> StartDownloadAsync(List<DownloadTask> downloadTasks);
     }
 }

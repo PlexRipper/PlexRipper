@@ -1,8 +1,10 @@
-﻿using FluentResults;
+﻿using System.Runtime.CompilerServices;
+using FluentResults;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Domain.FluentResultExtensions
 {
-    public static class FluentResultExtensions
+    public static class ResultExtensions
     {
         private static string _statusCode = "StatusCode";
 
@@ -12,7 +14,7 @@ namespace PlexRipper.Domain.FluentResultExtensions
             {
                 foreach (var (key, metaData) in error.Metadata)
                 {
-                    if (key == _statusCode && (int)metaData == statusCode)
+                    if (key == _statusCode && (int) metaData == statusCode)
                     {
                         return true;
                     }
@@ -49,6 +51,61 @@ namespace PlexRipper.Domain.FluentResultExtensions
 
         #region Result Signatures
 
+        #region General
+
+        public static Result IsNull(this Result result, string parameterName = "")
+        {
+            return result.WithError(new Error($"The {parameterName} parameter is null."));
+        }
+
+        public static Result IsNull(string parameterName = "")
+        {
+            return new Result().IsNull(parameterName);
+        }
+
+        public static Result IsInvalidId(this Result result, string parameterName, int value = 0)
+        {
+            return result.WithError(new Error($"The {parameterName} parameter contained an invalid id of {value}"));
+        }
+
+        public static Result IsInvalidId(string parameterName, int value = 0)
+        {
+            return new Result().IsInvalidId(parameterName, value);
+        }
+
+        public static Result IsEmpty(this Result result, string parameterName)
+        {
+            return result.WithError(new Error($"The {parameterName} parameter was empty"));
+        }
+
+        public static Result IsEmpty(string parameterName)
+        {
+            return new Result().IsEmpty(parameterName);
+        }
+
+        public static Result LogWarning(this Result result, [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "")
+        {
+            foreach (var error in result.Errors)
+            {
+                Log.Warning(error.Message, memberName, sourceFilePath);
+            }
+            return result;
+        }
+
+        public static Result LogError(this Result result, [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "")
+        {
+            foreach (var error in result.Errors)
+            {
+                Log.Error(error.Message, memberName, sourceFilePath);
+            }
+            return result;
+        }
+
+        #endregion
+
+
         #region 400
 
         public static bool Has400Error(this Result result)
@@ -60,6 +117,7 @@ namespace PlexRipper.Domain.FluentResultExtensions
         {
             _set400Error(result);
         }
+
         #endregion
 
         #region 404
@@ -75,14 +133,16 @@ namespace PlexRipper.Domain.FluentResultExtensions
             return result;
         }
 
+        public static Result Get404NotFoundError()
+        {
+            return new Result().Set404NotFoundError();
+        }
+
         #endregion
-
-
 
         #endregion
 
         #region Result<T> Signatures
-
 
         #region 400
 
@@ -113,9 +173,6 @@ namespace PlexRipper.Domain.FluentResultExtensions
 
         #endregion
 
-
         #endregion
     }
-
-
 }

@@ -23,6 +23,8 @@ namespace PlexRipper.Application.Common.Interfaces.DataAccess
         DbSet<PlexMovieRole> PlexMovieRoles { get; set; }
         DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
         DbSet<PlexTvShow> PlexTvShows { get; set; }
+        DbSet<PlexTvShowSeason> PlexTvShowSeason { get; set; }
+        DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 

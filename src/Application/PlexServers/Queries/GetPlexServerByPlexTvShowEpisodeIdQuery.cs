@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using PlexRipper.Domain.FluentResultExtensions;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexServers.Queries
 {
@@ -54,7 +54,7 @@ namespace PlexRipper.Application.PlexServers.Queries
 
             if (plexTvShowEpisode == null)
             {
-                return ResultExtensions.Get404NotFoundError();
+                return ResultExtensions.Get404NotFoundResult();
             }
 
             var plexServer = plexTvShowEpisode?.TvShowSeason?.TvShow?.PlexLibrary?.PlexServer ?? null;

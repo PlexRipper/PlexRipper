@@ -6,14 +6,9 @@ using PlexRipper.Application.Common.Interfaces.SignalR;
 
 namespace PlexRipper.SignalR.Hubs
 {
-    public class DownloadProgressHub : Hub, IDownloadProgressHub
+    public class DownloadHub : Hub
     {
-        public Task SendMessageAsync(string user, string message)
-        {
-            return Clients?.All.SendAsync("ReceiveMessage", user, message);
-        }
-
-        public Task SendDownloadProgressAsync(DownloadProgress downloadProgress)
+        public Task DownloadProgressAsync(DownloadProgress downloadProgress)
         {
             if (Clients != null)
             {

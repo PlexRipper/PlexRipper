@@ -12,12 +12,11 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import IDownloadProgress from '@dto/IDownloadProgress';
 import { deleteDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
 import { tap, switchMap } from 'rxjs/operators';
-import { DownloadTaskDTO } from '@dto/mainApi';
+import { DownloadTaskDTO, DownloadProgress } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import DownloadsTable from './components/DownloadsTable.vue';
 import IDownloadRow from './types/IDownloadRow';
@@ -30,7 +29,7 @@ import IDownloadRow from './types/IDownloadRow';
 })
 export default class Downloads extends Vue {
 	downloads: DownloadTaskDTO[] = [];
-	downloadProgressList: IDownloadProgress[] = [];
+	downloadProgressList: DownloadProgress[] = [];
 
 	get getDownloadRows(): IDownloadRow[] {
 		const downloadRows: IDownloadRow[] = [];
@@ -43,7 +42,7 @@ export default class Downloads extends Vue {
 		return downloadRows;
 	}
 
-	updateDownloadProgress(downloadProgress: IDownloadProgress): void {
+	updateDownloadProgress(downloadProgress: DownloadProgress): void {
 		// Check if there is already a progress object for this Id
 		const i = this.downloadProgressList.findIndex((x) => x.id === downloadProgress.id);
 		if (i > -1) {

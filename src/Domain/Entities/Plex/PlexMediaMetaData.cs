@@ -1,12 +1,17 @@
 using PlexRipper.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
+using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.Domain.Entities
 {
     public class PlexMediaMetaData : BaseEntity
     {
         public string Title { get; set; }
+        public string TitleTvShow { get; set; }
+        public string TitleTvShowSeason { get; set; }
+
+
         public long Duration { get; set; }
 
         public int Bitrate { get; set; }

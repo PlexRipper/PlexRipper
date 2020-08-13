@@ -25,7 +25,7 @@ namespace PlexRipper.DownloadManager
         #region Fields
 
         private readonly IMediator _mediator;
-        private readonly IHubContext<DownloadProgressHub> _hubContext;
+        private readonly IHubContext<DownloadHub> _hubContext;
         private readonly IUserSettings _userSettings;
         private readonly IFileSystem _fileSystem;
 
@@ -76,7 +76,7 @@ namespace PlexRipper.DownloadManager
 
         #region Constructors
 
-        public DownloadManager(IMediator mediator, IHubContext<DownloadProgressHub> hubContext, IUserSettings userSettings, IFileSystem fileSystem)
+        public DownloadManager(IMediator mediator, IHubContext<DownloadHub> hubContext, IUserSettings userSettings, IFileSystem fileSystem)
         {
             _mediator = mediator;
             _hubContext = hubContext;
@@ -118,6 +118,7 @@ namespace PlexRipper.DownloadManager
         public async Task<Result> StartDownloadAsync(DownloadTask downloadTask)
         {
             // Add to DB
+            Log.Debug($"Adding new downloadTask: {downloadTask.Title}");
             var result = await _mediator.Send(new AddDownloadTaskCommand(downloadTask));
             if (result.IsFailed)
             {
@@ -151,27 +152,40 @@ namespace PlexRipper.DownloadManager
             return Task.Run(Result.Ok);
         }
 
-        private PlexDownloadClient GetDownloadClient(int downloadTaskId)
+        private Result<PlexDownloadClient> GetDownloadClient(int downloadTaskId)
         {
-            return DownloadsList.Find(x => x.ClientId == downloadTaskId);
+            var downloadClient = DownloadsList.Find(x => x.ClientId == downloadTaskId);
+            if (downloadClient == null)
+            {
+                return ResultExtensions.Get404NotFoundResult();
+            }
+            return Result.Ok(downloadClient);
         }
 
         /// <summary>
-        /// Cancels the <see cref="PlexDownloadClient"/> executing the <see cref="DownloadTask"/> if it is downloading. Returns true if no client is executing the DownloadTask.
+        /// Cancels the <see cref="PlexDownloadClient"/> executing the <see cref="DownloadTask"/> if it is downloading.
+        /// Returns true if no client is executing the DownloadTask.
         /// </summary>
         /// <param name="downloadTaskId"></param>
         /// <returns></returns>
-        public Result<bool> CancelDownload(int downloadTaskId)
+        public Result<bool> StopDownload(int downloadTaskId)
         {
+            // Retrieve download client
             var downloadClient = GetDownloadClient(downloadTaskId);
-            if (downloadClient != null)
+            if (downloadClient.IsFailed)
             {
-                var result = downloadClient.Cancel();
-                return result
-                    ? Result.Ok(true)
-                    : Result.Fail<bool>($"Failed to cancel downloadTask with id {downloadTaskId}");
+                return downloadClient.ToResult();
             }
-            return Result.Ok(true);
+
+            // TODO Check for status here first to give a better response back
+
+            // Stop and cancel the download task
+            var result = downloadClient.Value.Stop();
+            if (result.IsFailed)
+            {
+                return result.WithError($"Failed to cancel downloadTask with id {downloadTaskId}").LogError();
+            }
+            return result;
         }
 
         #endregion Methods

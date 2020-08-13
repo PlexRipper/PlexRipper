@@ -6,9 +6,9 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.FluentResultExtensions;
 
 namespace PlexRipper.Application.PlexTvShows.Queries
 {

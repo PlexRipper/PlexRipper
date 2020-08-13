@@ -45,8 +45,10 @@ export interface DownloadMovieDTO {
 export interface DownloadTvShowDTO {
   plexAccountId: number;
   plexMediaId: number;
-  type: string;
+  type: PlexMediaType;
 }
+
+export type PlexMediaType = "None" | "Movie" | "TvShow" | "Season" | "Episode" | "Unknown";
 
 export type ResultDTOOfIEnumerableOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[] };
 
@@ -219,8 +221,6 @@ export interface PlexTvShowSeasonDTO {
   episodes?: PlexTvShowEpisodeDTO[] | null | null;
 }
 
-export type PlexMediaType = "None" | "Movie" | "TvShow" | "Season" | "Episode" | "Unknown";
-
 export interface PlexTvShowEpisodeDTO {
   id: number;
   ratingKey?: number;
@@ -269,3 +269,30 @@ export interface RefreshPlexLibraryDTO {
 }
 
 export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };
+
+export interface DownloadProgress {
+  id: number;
+  status: string;
+  percentage: number;
+  downloadSpeed: number;
+  dataReceived: number;
+  dataTotal: number;
+  timeRemaining: number;
+}
+
+export interface DownloadTaskCreationProgress {
+  plexLibraryId: number;
+  percentage: number;
+  current: number;
+  total: number;
+  isComplete: boolean;
+}
+
+export interface LibraryProgress {
+  id?: number;
+  percentage?: number;
+  received?: number;
+  total?: number;
+  isRefreshing?: boolean;
+  isComplete?: boolean;
+}

@@ -153,12 +153,12 @@ namespace PlexRipper.DownloadManager.Download
                 Log.Error(e, msg);
                 var result = Result.Fail(new ExceptionalError(e));
                 result.Errors.Add(new Error(msg));
-                Cancel();
+                Stop();
                 return result;
             }
         }
 
-        public bool Cancel()
+        public Result<bool> Stop()
         {
             // TODO using exception like this might be dangerous
             try
@@ -170,17 +170,16 @@ namespace PlexRipper.DownloadManager.Download
             }
             catch (Exception e)
             {
-                Log.Error(e, $"Failed to cancel downloadTask with client id: {ClientId}");
-                return false;
+                return Result.Fail($"Failed to cancel downloadTask with client id: {ClientId}").LogError();
             }
-            return true;
+            return Result.Ok(true);
         }
         protected virtual void OnDownloadProgressChanged(long bytesReceived)
         {
             var downloadProgress = new DownloadProgress
             {
                 Id = ClientId,
-                Status = DownloadTask.DownloadStatus,
+                Status = DownloadTask.DownloadStatus.ToString(),
                 Percentage = DataFormat.GetPercentage(bytesReceived, TotalBytesToReceive),
                 DataReceived = bytesReceived,
                 DataTotal = TotalBytesToReceive,

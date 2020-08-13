@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Domain.FluentResultExtensions
+﻿namespace PlexRipper.Domain
 {
     // Status Codes listed at http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
     // These status codes are copied here from Microsoft.AspNetCore.Http package to avoid a large dependancy

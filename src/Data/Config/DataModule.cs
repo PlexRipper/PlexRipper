@@ -55,6 +55,16 @@ namespace PlexRipper.Data.Config
                 {
                     Log.Information("Database does not exist, creating one now.");
                     await DB.Database.EnsureCreatedAsync();
+                    exist = await DB.Database.CanConnectAsync();
+
+                    if (exist)
+                    {
+                        Log.Information("Database was successfully created!");
+                    }
+                    else
+                    {
+                        Log.Error("Database could not be created.");
+                    }
                 }
             });
         }

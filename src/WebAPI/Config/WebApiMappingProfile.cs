@@ -58,7 +58,7 @@ namespace PlexRipper.WebAPI.Config
 
             //DownloadTask -> DownloadTaskDTO
             CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.DownloadStatus));
+                .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x._DownloadStatus));
 
             //FolderPath -> FolderPathDTO
             CreateMap<FolderPath, FolderPathDTO>(MemberList.Destination).ReverseMap();

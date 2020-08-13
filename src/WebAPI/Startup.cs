@@ -33,11 +33,12 @@ namespace PlexRipper.WebAPI
         {
             // TODO Make sure to configure this correctly when setting up security
             app.UseCors(builder => builder
-                    // .AllowAnyOrigin()
-                    .WithOrigins("http://localhost:3000")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials()
+
+                // .AllowAnyOrigin()
+                .WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
             );
 
             // app.UseHttpsRedirection();
@@ -47,7 +48,7 @@ namespace PlexRipper.WebAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<DownloadProgressHub>("/download/progress");
+                endpoints.MapHub<DownloadHub>("/download/progress");
                 endpoints.MapHub<LibraryProgressHub>("/plexLibrary/progress");
             });
 
@@ -63,10 +64,7 @@ namespace PlexRipper.WebAPI
         {
             // General
             services.AddCors();
-            services.AddControllers().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+            services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
             services.AddHttpContextAccessor();
 
             // Fluent Validator
@@ -96,6 +94,7 @@ namespace PlexRipper.WebAPI
                     Description = "Type into the textbox: Bearer {your JWT token}."
                 });
                 configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
+                configure.DocumentProcessors.Add(new NSwagAddExtraTypes());
             });
 
             // Autofac

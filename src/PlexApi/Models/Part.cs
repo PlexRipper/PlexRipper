@@ -22,7 +22,7 @@ namespace PlexRipper.PlexApi.Models
     /// </summary>
     public class Part
     {
-        // General 
+        // General
         [JsonPropertyName("id")]
         [JsonConverter(typeof(IntValueConverter))]
         public int Id { get; set; }
@@ -43,11 +43,11 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("container")]
         public string Container { get; set; }
-        
+
         [JsonPropertyName("videoProfile")]
         public string VideoProfile { get; set; }
-        
-        [JsonPropertyName("stream")]
+
+        [JsonPropertyName("Stream")]
         public Stream[] Stream { get; set; }
 
         // TV Show Episode
@@ -57,10 +57,10 @@ namespace PlexRipper.PlexApi.Models
         // Movie Section
         [JsonPropertyName("hasThumbnail")]
         public string HasThumbnail { get; set; }
-        
+
         [JsonPropertyName("indexes")]
         public string Indexes { get; set; }
-        
+
         [JsonPropertyName("hasChapterTextStream")]
         public bool? HasChapterTextStream { get; set; }
     }

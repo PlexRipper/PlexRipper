@@ -82,11 +82,22 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(plexAccountId, nameof(plexAccountId));
             }
             var result = await _plexDownloadService.DownloadTvShowAsync(plexAccountId, plexMovieId, type);
-            if (result.IsFailed)
+            return result.IsFailed ? BadRequest(result) : Ok(result);
+        }
+
+        // Post api/<DownloadController>/stop/
+        [HttpGet("stop/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> Stop(int id)
+        {
+            if (id <= 0)
             {
-                return BadRequest(result);
+                return BadRequest(id, "Download Task Id");
             }
-            return Ok(result);
+
+            var result = _plexDownloadService.StopDownloadTask(id);
+            return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 
 
@@ -101,11 +112,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(downloadTaskId, nameof(downloadTaskId));
             }
             var result = await _plexDownloadService.DeleteDownloadsAsync(downloadTaskId);
-            if (result.IsFailed)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
+            return result.IsFailed ? BadRequest(result) : Ok(result);
         }
     }
 }

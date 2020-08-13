@@ -11,7 +11,7 @@ namespace PlexRipper.Application.Common.Interfaces.DownloadManager
         int CompletedDownloads { get; }
         int TotalDownloads { get; }
         Task<Result> StartDownloadAsync(DownloadTask downloadTask);
-        Result<bool> CancelDownload(int downloadTaskId);
+        Result<bool> StopDownload(int downloadTaskId);
         Task<Result> StartDownloadAsync(List<DownloadTask> downloadTasks);
     }
 }

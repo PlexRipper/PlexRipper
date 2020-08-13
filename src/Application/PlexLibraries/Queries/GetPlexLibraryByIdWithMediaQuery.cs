@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using System.Linq;
+using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexLibraries.Queries
 {
@@ -26,7 +28,6 @@ namespace PlexRipper.Application.PlexLibraries.Queries
         {
             RuleFor(x => x.Id).GreaterThan(0);
         }
-
     }
 
 
@@ -51,6 +52,32 @@ namespace PlexRipper.Application.PlexLibraries.Queries
                 .ThenInclude(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+
+            if (plexLibrary == null)
+            {
+                return ResultExtensions.Get404NotFoundResult();
+            }
+
+            // Sort Movies
+            if (plexLibrary.Movies.Count > 0)
+            {
+                plexLibrary.Movies = plexLibrary.Movies.OrderByNatural(x => x.Title).ToList();
+            }
+
+            // Sort TvShows
+            if (plexLibrary.TvShows.Count > 0)
+            {
+                plexLibrary.TvShows = plexLibrary.TvShows.OrderBy(x => x.Title).ThenBy(y => y.RatingKey).ToList();
+                for (int i = 0; i < plexLibrary.TvShows.Count; i++)
+                {
+                    plexLibrary.TvShows[i].Seasons = plexLibrary.TvShows[i].Seasons.OrderByNatural(x => x.Title).ToList();
+
+                    for (int j = 0; j < plexLibrary.TvShows[i].Seasons.Count; j++)
+                    {
+                        plexLibrary.TvShows[i].Seasons[j].Episodes = plexLibrary.TvShows[i].Seasons[j].Episodes.OrderBy(x => x.RatingKey).ToList();
+                    }
+                }
+            }
 
             return ReturnResult(plexLibrary, request.Id);
         }

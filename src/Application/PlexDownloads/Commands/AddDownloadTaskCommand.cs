@@ -45,7 +45,7 @@ namespace PlexRipper.Application.PlexDownloads.Commands
             var result = await ValidateAsync<AddDownloadTaskCommand, AddDownloadTaskCommandValidator>(command);
             if (result.IsFailed) return result;
 
-            await _dbContext.DownloadTasks.AddAsync(command.DownloadTask);
+            await _dbContext.DownloadTasks.AddAsync(command.DownloadTask, cancellationToken);
             if (command.DownloadTask.FolderPath != null)
             {
                 _dbContext.Entry(command.DownloadTask.FolderPath).State = EntityState.Unchanged;

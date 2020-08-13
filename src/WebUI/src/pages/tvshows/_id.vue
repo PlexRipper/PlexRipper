@@ -35,14 +35,13 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 import SettingsService from '@service/settingsService';
-import { PlexAccountDTO, PlexTvShowDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexTvShowDTO, PlexLibraryDTO, PlexServerDTO, LibraryProgress } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import SignalrService from '@service/signalrService';
-import { takeWhile, tap, switchMap, takeLast } from 'rxjs/operators';
+import { takeWhile, tap, switchMap, takeLast, finalize } from 'rxjs/operators';
 import { Subscription, merge } from 'rxjs';
 
 import TvShowTable from './components/TvShowTable.vue';
-import ILibraryProgress from '~/types/dto/ILibraryProgress';
 
 @Component<TvShowsDetail>({
 	components: {
@@ -59,7 +58,7 @@ export default class TvShowsDetail extends Vue {
 
 	isRefreshing: boolean = false;
 
-	progress: ILibraryProgress | null = null;
+	progress: LibraryProgress | null = null;
 
 	libraryProgressSubscription: Subscription | null = null;
 
@@ -102,6 +101,9 @@ export default class TvShowsDetail extends Vue {
 				tap((data) => {
 					this.progress = data;
 				}),
+				finalize(() => {
+					this.progress = null;
+				}),
 				takeWhile((data) => !data.isComplete),
 			),
 			// Refresh Library
@@ -133,7 +135,7 @@ export default class TvShowsDetail extends Vue {
 						SignalrService.getLibraryProgress().pipe(
 							tap((data) => {
 								this.progress = data;
-								this.isRefreshing = data.isRefreshing;
+								this.isRefreshing = data.isRefreshing ?? false;
 							}),
 							takeWhile((data) => !data.isComplete),
 						),

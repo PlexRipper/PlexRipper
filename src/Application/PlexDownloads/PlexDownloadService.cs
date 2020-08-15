@@ -44,7 +44,8 @@ namespace PlexRipper.Application.PlexDownloads
 
         public Task<Result> StartDownloadAsync(DownloadTask downloadTask)
         {
-            return _downloadManager.StartDownloadAsync(downloadTask);
+            throw new NotImplementedException();
+            // return _downloadManager.AddToDownloadQueueAsync(downloadTask);
         }
 
         public Task<string> GetPlexTokenAsync(PlexAccount plexAccount)
@@ -236,6 +237,8 @@ namespace PlexRipper.Application.PlexDownloads
                     DownloadDirectory = downloadFolder.Value.Directory,
                     TitleTvShow = metaData.TitleTvShow,
                     TitleTvShowSeason = metaData.TitleTvShowSeason,
+                    RatingKey = metaData.RatingKey,
+                    Priority = server.Id * 10000000,
                     MediaType = mediaType
                 });
             }
@@ -315,10 +318,10 @@ namespace PlexRipper.Application.PlexDownloads
 
             if (downloadTasks.Count == 1)
             {
-                return await _downloadManager.StartDownloadAsync(downloadTasks[0]);
+                return await _downloadManager.AddToDownloadQueueAsync(downloadTasks[0]);
             }
 
-            return await _downloadManager.StartDownloadAsync(downloadTasks);
+            return await _downloadManager.AddToDownloadQueueAsync(downloadTasks);
         }
 
         public Result<bool> StopDownloadTask(int downloadTaskId)

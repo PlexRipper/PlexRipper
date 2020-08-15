@@ -15,12 +15,14 @@ namespace PlexRipper.Application.PlexServers.Queries
 {
     public class GetPlexServerByPlexLibraryIdQuery : IRequest<Result<PlexServer>>
     {
-        public GetPlexServerByPlexLibraryIdQuery(int id)
+        public GetPlexServerByPlexLibraryIdQuery(int id, bool includePlexLibraries = false)
         {
             Id = id;
+            IncludePlexLibraries = includePlexLibraries;
         }
 
         public int Id { get; }
+        public bool IncludePlexLibraries { get; }
     }
 
     public class GetPlexServerByPlexLibraryIdQueryValidator : AbstractValidator<GetPlexServerByPlexLibraryIdQuery>
@@ -45,20 +47,23 @@ namespace PlexRipper.Application.PlexServers.Queries
         public async Task<Result<PlexServer>> Handle(GetPlexServerByPlexLibraryIdQuery request,
             CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetPlexServerByPlexLibraryIdQuery, GetPlexServerByPlexLibraryIdQueryValidator>(request);
-            if (result.IsFailed) return result;
+            var query = _dbContext.PlexServers.AsQueryable();
 
-            var plexServer = await _dbContext.PlexServers
-                .Include(x => x.PlexLibraries)
+            if (request.IncludePlexLibraries)
+            {
+                query = query.Include(x => x.PlexLibraries);
+            }
+
+            var plexServer = await query
                 .Where(x => x.PlexLibraries.Any(y => y.Id == request.Id))
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (plexServer == null)
             {
-                return result.Set404NotFoundError();
+                return ResultExtensions.Get404NotFoundResult($"Could not find PlexLibrary with Id {request.Id} in any PlexServer");
             }
 
-            return ReturnResult(plexServer);
+            return Result.Ok(plexServer);
         }
     }
 }

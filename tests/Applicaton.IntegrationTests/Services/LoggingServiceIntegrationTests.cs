@@ -32,8 +32,6 @@ namespace PlexRipper.Application.IntegrationTests.Services
             Log.Information("This is an information string");
             Log.Error("This is an error string");
             Log.Fatal("This is a fatal string");
-
-            Container.GetTestClass.TestLogging();
         }
     }
 }

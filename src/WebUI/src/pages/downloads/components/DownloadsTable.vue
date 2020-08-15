@@ -40,13 +40,13 @@
 		</template>
 		<!-- Actions -->
 		<template v-slot:item.actions="{ item }">
-			<v-btn icon @click="pauseMovie(item)">
+			<v-btn icon @click="pauseDownloadTask(item.id)">
 				<v-icon> mdi-pause </v-icon>
 			</v-btn>
-			<v-btn icon @click="pauseMovie(item)">
+			<v-btn icon @click="stopDownloadTask(item.id)">
 				<v-icon> mdi-stop </v-icon>
 			</v-btn>
-			<v-btn icon @click="deleteMovie(item)">
+			<v-btn icon @click="deleteDownloadTask(item.id)">
 				<v-icon> mdi-delete </v-icon>
 			</v-btn>
 		</template>
@@ -54,10 +54,8 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify/types';
-import { PlexMovieDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import IDownloadRow from '../types/IDownloadRow';
 
@@ -115,16 +113,16 @@ export default class DownloadsTable extends Vue {
 		];
 	}
 
-	pauseMovie(item: PlexMovieDTO): void {
-		Log.debug(item);
+	pauseDownloadTask(itemId: number): void {
+		this.$emit('pause', itemId);
 	}
 
-	cancelMovie(item: PlexMovieDTO): void {
-		Log.debug(item);
+	stopDownloadTask(itemId: number) {
+		this.$emit('stop', itemId);
 	}
 
-	deleteMovie(item: IDownloadRow): void {
-		this.$emit('delete', item.id);
+	deleteDownloadTask(itemId: number): void {
+		this.$emit('delete', itemId);
 	}
 }
 </script>

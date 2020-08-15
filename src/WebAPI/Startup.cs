@@ -48,6 +48,7 @@ namespace PlexRipper.WebAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                //SignalR configuration
                 endpoints.MapHub<DownloadHub>("/download/progress");
                 endpoints.MapHub<LibraryProgressHub>("/plexLibrary/progress");
             });

@@ -42,6 +42,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                     ObfuscatedFilePath = part != null ? part.Key : "",
                     TitleTvShow = metaData.GrandparentTitle,
                     TitleTvShowSeason = metaData.ParentTitle,
+                    RatingKey = Int32.TryParse(metaData.RatingKey, out int result) ? result : 0,
                 };
             }
             catch (Exception e)

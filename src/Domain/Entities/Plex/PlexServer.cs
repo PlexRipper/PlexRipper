@@ -41,6 +41,8 @@ namespace PlexRipper.Domain.Entities
         public virtual ICollection<PlexLibrary> PlexLibraries { get; set; }
 
         public virtual ICollection<PlexServerStatus> ServerStatus { get; set; }
+
+        public virtual ICollection<DownloadTask> DownloadTasks { get; set; }
         #endregion
 
         #region Helpers

@@ -6,6 +6,7 @@ using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.WebAPI.Common.FluentResult;
@@ -28,32 +29,47 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         // GET api/<PlexServerController>/5
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerDTO>>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _plexServerService.GetServersAsync();
+            if (result.IsFailed)
+            {
+                if (result.Has400BadRequestError())
+                {
+                    return BadRequest(result.LogError());
+                }
+
+            }
+            var mapResult = _mapper.Map<List<PlexServerDTO>>(result);
+            return Ok(Result.Ok(mapResult));
+        }
+
+        // GET api/<PlexServerController>/5
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            if (id <= 0)
+            var result = await _plexServerService.GetServerAsync(id);
+            if (result.IsFailed)
             {
-                return BadRequestInvalidId();
-            }
-            try
-            {
-                var data = await _plexServerService.GetServerAsync(id);
-                if (data.IsFailed)
+                if (result.Has400BadRequestError())
                 {
-                    string message = $"Could not find a {nameof(PlexServer)} with Id: {id}";
-                    Log.Warning(message);
-                    return NotFound(message);
+                    return BadRequest(result.LogError());
                 }
-                return Ok(_mapper.Map<PlexServerDTO>(data));
+
+                if (result.Has404NotFoundError())
+                {
+                    return NotFound(result.LogWarning());
+                }
             }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            var mapResult = _mapper.Map<PlexServerDTO>(result);
+            return Ok(Result.Ok(mapResult));
         }
     }
 }

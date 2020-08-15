@@ -3,7 +3,12 @@
 		<v-row>
 			<v-col>
 				<p>Downloads</p>
-				<downloads-table :downloads="getDownloadRows" @delete="deleteDownloadTasks" />
+				<downloads-table
+					:downloads="getDownloadRows"
+					@pause="pauseDownloadTask"
+					@delete="deleteDownloadTasks"
+					@stop="stopDownloadTask"
+				/>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -12,10 +17,10 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import { deleteDownloadTask } from '@api/plexDownloadApi';
+import { deleteDownloadTask, stopDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
-import { tap, switchMap } from 'rxjs/operators';
+import { tap, switchMap, finalize } from 'rxjs/operators';
 import { DownloadTaskDTO, DownloadProgress } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import DownloadsTable from './components/DownloadsTable.vue';
@@ -59,6 +64,16 @@ export default class Downloads extends Vue {
 			// Refresh downloadTasks
 			DownloadService.fetchDownloadList();
 		});
+	}
+
+	stopDownloadTask(downloadTaskId: number): void {
+		stopDownloadTask(downloadTaskId)
+			.pipe(finalize(() => DownloadService.fetchDownloadList))
+			.subscribe();
+	}
+
+	pauseDownloadTask(downloadTaskId: number): void {
+		Log.debug(`Pausing download task with id ${downloadTaskId}, which is doing nothing as of now`);
 	}
 
 	created(): void {

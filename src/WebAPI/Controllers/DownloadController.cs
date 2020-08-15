@@ -7,6 +7,7 @@ using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.WebAPI.Common.DTO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Enums;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -82,14 +83,18 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(plexAccountId, nameof(plexAccountId));
             }
             var result = await _plexDownloadService.DownloadTvShowAsync(plexAccountId, plexMovieId, type);
-            return result.IsFailed ? BadRequest(result) : Ok(result);
+            if (result.Has400BadRequestError())
+            {
+                return BadRequest(result.ToResult());
+            }
+            return  Ok(result);
         }
 
-        // Post api/<DownloadController>/stop/
+        // GET api/<DownloadController>/stop/{id:int}
         [HttpGet("stop/{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Stop(int id)
+        public IActionResult Stop(int id)
         {
             if (id <= 0)
             {

@@ -7,7 +7,7 @@ namespace PlexRipper.Application.Common.Interfaces
 {
     public interface IPlexAccountService
     {
-        Task<FluentResults.Result<List<PlexServer>>> GetPlexServersAsync(PlexAccount plexAccount, bool refresh = false);
+        Task<Result<List<PlexServer>>> GetPlexServersAsync(PlexAccount plexAccount, bool refresh = false);
 
         /// <summary>
         /// Check if this account is valid by querying the Plex API

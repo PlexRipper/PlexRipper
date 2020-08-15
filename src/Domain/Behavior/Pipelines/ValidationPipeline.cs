@@ -26,6 +26,7 @@ namespace PlexRipper.Domain.Behavior.Pipelines
             {
                 var result = new TResponse();
 
+                result.Reasons.Add(ResultExtensions.Get400BadRequestError());
                 foreach (var reason in fluentValidationResult.Errors)
                 {
                     result.Reasons.Add(new Error(reason.ErrorMessage));

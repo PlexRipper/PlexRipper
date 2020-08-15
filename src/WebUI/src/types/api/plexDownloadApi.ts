@@ -29,6 +29,12 @@ export function deleteDownloadTask(downloadTaskId: number): Observable<boolean> 
 	return checkResponse<boolean>(result, logText, 'deleteDownloadTask');
 }
 
+export function stopDownloadTask(downloadTaskId: number): Observable<boolean> {
+	preApiRequest(logText, 'stopDownloadTask', `Sending stop request with downloadTaskId ${downloadTaskId}`);
+	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/stop/${downloadTaskId}`);
+	return checkResponse<boolean>(result, logText, 'stopDownloadTask');
+}
+
 export function getAllDownloads(): Observable<DownloadTaskDTO[]> {
 	preApiRequest(logText, 'getAllDownloads');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/`);

@@ -79,7 +79,6 @@ namespace PlexRipper.Application.PlexServers
                 return Result.Fail(new Error("Failed to retrieve the server auth token"));
             }
 
-
             // Request status
             var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.BaseUrl);
 
@@ -100,7 +99,7 @@ namespace PlexRipper.Application.PlexServers
         /// <returns></returns>
         public async Task<Result<PlexServer>> GetAllLibraryMediaAsync(PlexAccount plexAccount, PlexServer plexServer, bool refresh = false)
         {
-            var plexServerDB = await _mediator.Send(new GetPlexServerByIdWithLibrariesQuery(plexServer.Id));
+            var plexServerDB = await _mediator.Send(new GetPlexServerByIdQuery(plexServer.Id, true));
 
             if (refresh)
             {
@@ -108,19 +107,24 @@ namespace PlexRipper.Application.PlexServers
                 {
                     await _plexLibraryService.GetLibraryMediaAsync(plexAccount, plexServerDB.Value, library.Key, true);
                 }
-                return await _mediator.Send(new GetPlexServerByIdWithLibrariesQuery(plexServer.Id));
+                return await _mediator.Send(new GetPlexServerByIdQuery(plexServer.Id, true));
             }
             return plexServerDB;
         }
 
         #region CRUD
 
-
         public Task<Result<PlexServer>> GetServerAsync(int plexServerId)
         {
-            return _mediator.Send(new GetPlexServerByIdWithLibrariesQuery(plexServerId));
+            return _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
         }
 
+        /// <summary>
+        /// Retrieves all <see cref="PlexServer"/>s accessible by this <see cref="PlexAccount"/> from the Database.
+        /// </summary>
+        /// <param name="plexAccount">The <see cref="PlexAccount"/> to check with</param>
+        /// <param name="refresh">Should the <see cref="PlexServer"/>s data be retrieved from the PlexApi</param>
+        /// <returns>The list of <see cref="PlexServer"/>s</returns>
         public async Task<Result<List<PlexServer>>> GetServersAsync(PlexAccount plexAccount, bool refresh = false)
         {
             if (plexAccount == null)
@@ -130,7 +134,7 @@ namespace PlexRipper.Application.PlexServers
             }
 
             // Retrieve all servers
-            var serverList = await _mediator.Send(new GetAllPlexServersByPlexAccountQuery(plexAccount.Id));
+            var serverList = await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccount.Id));
             if (refresh || !serverList.Value.Any())
             {
                 if (!serverList.Value.Any())
@@ -144,12 +148,20 @@ namespace PlexRipper.Application.PlexServers
                     return refreshSuccess;
                 }
 
-
                 serverList = refreshSuccess;
-
             }
 
             return serverList;
+        }
+
+        /// <summary>
+        /// Retrieves all <see cref="PlexServer"/>s from the Database with the included <see cref="PlexLibrary"/>s.
+        /// </summary>
+        /// <returns>The list of <see cref="PlexServer"/>s</returns>
+        public async Task<Result<List<PlexServer>>> GetServersAsync()
+        {
+            // Retrieve all servers
+            return await _mediator.Send(new GetAllPlexServersQuery(true));
         }
 
         #endregion

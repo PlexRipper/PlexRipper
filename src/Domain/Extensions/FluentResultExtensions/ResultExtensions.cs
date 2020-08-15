@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using FluentResults;
 
 namespace PlexRipper.Domain
@@ -25,26 +26,44 @@ namespace PlexRipper.Domain
             return false;
         }
 
-        private static Result SetStatusCode(Result result, int statusCode, string message = "")
+        private static Result _SetStatusCode(Result result, int statusCode, string message = "")
         {
-            return result.WithError(new Error(message).WithMetadata(_statusCode, HttpCodes.Status400BadRequest));
+            return result.WithError(new Error(message).WithMetadata(_statusCode, statusCode));
+        }
+
+        private static Result _SetStatusCode(Result result, Error error)
+        {
+            return result.WithError(error);
         }
 
         #region General
 
-        private static Result _IsNull(this Result result, string parameterName = "")
+        private static Result _IsNull(this Result result, string parameterName = "",
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "")
         {
-            return result.WithError(new Error($"The {parameterName} parameter is null."));
+            return result.WithError(new Error($"The {parameterName} parameter is null."))
+                .LogError(memberName: memberName, sourceFilePath: sourceFilePath);
         }
 
-        private static Result _IsEmpty(this Result result, string parameterName)
+        private static Result _IsEmpty(this Result result, string parameterName,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "")
         {
-            return result.WithError(new Error($"The {parameterName} parameter was empty"));
+            return result.WithError(new Error($"The {parameterName} parameter was empty"))
+                .LogWarning(memberName, sourceFilePath);
         }
 
-        private static Result _IsInvalidId(this Result result, string parameterName, int value = 0)
+        private static Result _IsInvalidId(this Result result, string parameterName, int value = 0,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "")
         {
-            return result.WithError(new Error($"The {parameterName} parameter contained an invalid id of {value}")).b;
+            return result.WithError(new Error($"The {parameterName} parameter contained an invalid id of {value}"))
+                .LogWarning(memberName, sourceFilePath).Set400BadRequestError();
+        }
+
+        private static Result _EntityNotFound(this Result result, string entityType, int id,
+            string memberName = "", string sourceFilePath = "")
+        {
+            return result.WithError(new Error($"The entity of type {entityType} with id {id} could not be found"))
+                .LogWarning(memberName, sourceFilePath).Set404NotFoundError();
         }
 
         private static Result _LogWarning(this Result result, [CallerMemberName] string memberName = "",
@@ -57,13 +76,19 @@ namespace PlexRipper.Domain
             return result;
         }
 
-        private static Result _LogError(this Result result, [CallerMemberName] string memberName = "",
+        private static Result _LogError(this Result result, Exception e = null, [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
             foreach (var error in result.Errors)
             {
                 Log.Error(error.Message, memberName, sourceFilePath);
             }
+
+            if (e != null)
+            {
+                Log.Error(e, memberName, sourceFilePath);
+            }
+
             return result;
         }
 
@@ -79,7 +104,12 @@ namespace PlexRipper.Domain
 
         private static Result _set400Error(Result result, string message = "")
         {
-            return SetStatusCode(result, HttpCodes.Status400BadRequest, message);
+            if (string.IsNullOrEmpty(message))
+            {
+                message = "Could not find object";
+            }
+
+            return _SetStatusCode(result, Get400BadRequestError(message));
         }
 
         #endregion
@@ -93,10 +123,29 @@ namespace PlexRipper.Domain
 
         private static void _set404Error(Result result, string message = "")
         {
-            SetStatusCode(result, HttpCodes.Status404NotFound, message);
+            if (string.IsNullOrEmpty(message))
+            {
+                message = "Could not find object";
+            }
+
+            _SetStatusCode(result, Get404NotFoundError(message));
         }
 
         #endregion
+
+        #endregion
+
+        #region Errors
+
+        public static Error Get400BadRequestError(string message = "")
+        {
+            return new Error(message).WithMetadata(_statusCode, HttpCodes.Status400BadRequest);
+        }
+
+        public static Error Get404NotFoundError(string message = "")
+        {
+            return new Error(message).WithMetadata(_statusCode, HttpCodes.Status404NotFound);
+        }
 
         #endregion
 
@@ -120,16 +169,22 @@ namespace PlexRipper.Domain
             return _IsEmpty(result, parameterName);
         }
 
+        public static Result EntityNotFound(this Result result, string entityType, int id,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "")
+        {
+            return _EntityNotFound(result, entityType, id, memberName, sourceFilePath);
+        }
+
         public static Result LogWarning(this Result result, [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
             return _LogWarning(result, memberName, sourceFilePath);
         }
 
-        public static Result LogError(this Result result, [CallerMemberName] string memberName = "",
+        public static Result LogError(this Result result, Exception e = null, [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            return _LogError(result, memberName, sourceFilePath);
+            return _LogError(result, e, memberName, sourceFilePath);
         }
 
         #endregion
@@ -151,6 +206,20 @@ namespace PlexRipper.Domain
             return _IsInvalidId(new Result(), parameterName, value);
         }
 
+        /// <summary>
+        /// Creates a new Result with a 404NotFound error set and will also log as a warning.
+        /// </summary>
+        /// <param name="entityType"> The name of the entity, e.g. nameof(EntityType)</param>
+        /// <param name="entityId">The entityId which failed to be found</param>
+        /// <param name="memberName">Used for logging, can be left empty</param>
+        /// <param name="sourceFilePath">Used for logging, can be left empty</param>
+        /// <returns>A Result.Fail() with a 404 Error</returns>
+        public static Result GetEntityNotFound(string entityType, int entityId,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "")
+        {
+            return new Result()._EntityNotFound(entityType, entityId, memberName, sourceFilePath);
+        }
+
         #endregion
 
         #region 400
@@ -167,7 +236,7 @@ namespace PlexRipper.Domain
 
         public static Result Get400BadRequestResult(string message = "")
         {
-            return _set400Error(new Result(), message) ;
+            return _set400Error(new Result(), message);
         }
 
         #endregion
@@ -185,9 +254,9 @@ namespace PlexRipper.Domain
             return result;
         }
 
-        public static Result Get404NotFoundResult()
+        public static Result Get404NotFoundResult(string message = "")
         {
-            return new Result().Set404NotFoundError();
+            return new Result().Set404NotFoundError(message);
         }
 
         #endregion
@@ -220,7 +289,7 @@ namespace PlexRipper.Domain
 
         public static Result<T> IsEmpty<T>(this Result<T> result, string parameterName)
         {
-            return IsEmpty(result, parameterName);
+            return _IsEmpty(result, parameterName);
         }
 
         public static Result<T> IsEmpty<T>(string parameterName)
@@ -234,10 +303,10 @@ namespace PlexRipper.Domain
             return _LogWarning(result, memberName, sourceFilePath);
         }
 
-        public static Result<T> LogError<T>(this Result<T> result, [CallerMemberName] string memberName = "",
+        public static Result<T> LogError<T>(this Result<T> result, Exception e = null, [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            return _LogError(result, memberName, sourceFilePath);
+            return _LogError(result, e, memberName, sourceFilePath);
         }
 
         #endregion

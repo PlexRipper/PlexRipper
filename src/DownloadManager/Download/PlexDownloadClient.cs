@@ -11,12 +11,12 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using PlexRipper.Domain.Common;
+using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.DownloadManager.Download
 {
     public class PlexDownloadClient : HttpClient
     {
-
         #region Fields
 
         private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
@@ -25,7 +25,7 @@ namespace PlexRipper.DownloadManager.Download
         private Task _copyTask;
         private Stream _fileStream;
         private Stream _responseStream;
-        private System.Timers.Timer _progressTimer = new System.Timers.Timer(1000) { AutoReset = true };
+        private System.Timers.Timer _progressTimer = new System.Timers.Timer(1000) {AutoReset = true};
 
         #endregion Fields
 
@@ -33,7 +33,6 @@ namespace PlexRipper.DownloadManager.Download
 
         public PlexDownloadClient(DownloadTask downloadTask, IFileSystem fileSystem)
         {
-
             _fileSystem = fileSystem;
             DownloadTask = downloadTask;
             AddHeaders();
@@ -59,11 +58,10 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Properties
 
-
         /// <summary>
         /// The ClientId is always the same id that is assigned to the <see cref="DownloadTask"/>
         /// </summary>
-        public int ClientId => DownloadTask.Id;
+        public int DownloadTaskId => DownloadTask.Id;
 
         // Size of downloaded data which was written to the local file
         public long DownloadedSize { get; set; }
@@ -82,6 +80,7 @@ namespace PlexRipper.DownloadManager.Download
         public long BytesRemaining { get; internal set; }
 
         public long TotalBytesToReceive { get; internal set; }
+        public DownloadStatus DownloadStatus => DownloadTask.DownloadStatus;
 
         #endregion Properties
 
@@ -95,6 +94,11 @@ namespace PlexRipper.DownloadManager.Download
             }
         }
 
+        private void SetDownloadStatus(DownloadStatus downloadStatus)
+        {
+            DownloadTask.DownloadStatus = downloadStatus;
+        }
+
         private void CalculateDownloadSpeed(long bytesReceived)
         {
             DownloadSpeed = Convert.ToInt64(Math.Round(bytesReceived / ElapsedTime.TotalSeconds, 2));
@@ -104,11 +108,13 @@ namespace PlexRipper.DownloadManager.Download
         /// Start the download of the DownloadTask passed during the construction.
         /// </summary>
         /// <returns></returns>
-        public async Task<Result> StartAsync()
+        public async Task<Result<bool>> StartAsync()
         {
             Log.Debug(DownloadTask.DownloadUrl);
             try
             {
+                SetDownloadStatus(DownloadStatus.Starting);
+
                 // Source: https://stackoverflow.com/a/48190014/8205497
                 var response = await GetAsync(DownloadTask.DownloadUri, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
@@ -116,6 +122,7 @@ namespace PlexRipper.DownloadManager.Download
                 TotalBytesToReceive = response.Content.Headers.ContentLength ?? -1L;
                 if (TotalBytesToReceive <= 0)
                 {
+                    SetDownloadStatus(DownloadStatus.Error);
                     return Result.Fail("File size could not be determined of the media that will be downloaded");
                 }
 
@@ -123,11 +130,13 @@ namespace PlexRipper.DownloadManager.Download
                 var result = _fileSystem.SaveFile(DownloadPath, DownloadTask.FileName, TotalBytesToReceive);
                 if (result.IsFailed)
                 {
-                    return result;
+                    SetDownloadStatus(DownloadStatus.Error);
+                    return result.ToResult();
                 }
                 _fileStream = result.Value;
                 if (_fileStream == null)
                 {
+                    SetDownloadStatus(DownloadStatus.Error);
                     return Result.Fail($"The file stream was null with destination {DownloadPath}");
                 }
 
@@ -135,6 +144,7 @@ namespace PlexRipper.DownloadManager.Download
                 DownloadStartAt = DateTime.UtcNow;
                 _progressTimer.Start();
 
+                SetDownloadStatus(DownloadStatus.Downloading);
                 _copyTask = _responseStream
                     .CopyToAsync(_fileStream, _progress, 81920, _cancellationToken.Token)
                     .ContinueWith(task =>
@@ -144,8 +154,7 @@ namespace PlexRipper.DownloadManager.Download
                         _fileStream.Dispose();
                     });
 
-                return Result.Ok();
-
+                return Result.Ok(true);
             }
             catch (Exception e)
             {
@@ -167,34 +176,42 @@ namespace PlexRipper.DownloadManager.Download
                 _cancellationToken?.Cancel();
                 _responseStream?.Dispose();
                 _fileStream?.Dispose();
+              //  _copyTask.
             }
             catch (Exception e)
             {
-                return Result.Fail($"Failed to cancel downloadTask with client id: {ClientId}").LogError();
+                return Result.Fail($"Failed to cancel downloadTask with id: {DownloadTaskId}").LogError(e);
             }
             return Result.Ok(true);
         }
+
         protected virtual void OnDownloadProgressChanged(long bytesReceived)
         {
             var downloadProgress = new DownloadProgress
             {
-                Id = ClientId,
+                Id = DownloadTaskId,
                 Status = DownloadTask.DownloadStatus.ToString(),
                 Percentage = DataFormat.GetPercentage(bytesReceived, TotalBytesToReceive),
                 DataReceived = bytesReceived,
                 DataTotal = TotalBytesToReceive,
                 DownloadSpeed = DownloadSpeed,
-                TimeRemaining = (int)Math.Floor(BytesRemaining / (double)DownloadSpeed),
+                TimeRemaining = (int) Math.Floor(BytesRemaining / (double) DownloadSpeed),
             };
 
             DownloadProgressChanged?.Invoke(this, downloadProgress);
-
         }
 
         #endregion Methods
+
         #region Events
 
         public event EventHandler<DownloadProgress> DownloadProgressChanged;
+
+        public event EventHandler<DownloadProgress> DownloadFileCompleted;
+
+        public event EventHandler<DownloadStatus> DownloadStatusChanged;
+
+
 
         #endregion Events
     }

@@ -34,6 +34,16 @@ namespace PlexRipper.Domain.Entities
         [Column("DownloadStatus")]
         public string _DownloadStatus { get; set; }
 
+        /// <summary>
+        /// The identifier used by Plex to keep track of media.
+        /// </summary>
+        public int RatingKey { get; set; }
+
+        /// <summary>
+        /// The download priority, the higher the more important.
+        /// </summary>
+        public int Priority { get; set; }
+
         #region Relationships
 
         public virtual PlexServer PlexServer { get; set; }
@@ -67,7 +77,7 @@ namespace PlexRipper.Domain.Entities
 
         [NotMapped]
         public string DownloadUrl =>
-            $"{PlexServer.BaseUrl}{FileLocationUrl}?download=1&X-Plex-Token={PlexServerAuthToken}";
+            $"{PlexServer?.BaseUrl}{FileLocationUrl}?download=1&X-Plex-Token={PlexServerAuthToken}" ?? "";
 
         [NotMapped]
         public string DownloadDirectory { get; set; }

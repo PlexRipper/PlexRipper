@@ -11,11 +11,8 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common.Interfaces.SignalR;
 using PlexRipper.Application.PlexTvShows;
-using PlexRipper.Domain.Common;
-using PlexRipper.Domain.Types;
 
 namespace PlexRipper.Application.PlexLibraries
 {

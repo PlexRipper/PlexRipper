@@ -14,47 +14,47 @@ using System.Threading.Tasks;
 
 namespace PlexRipper.Application.PlexServers.Queries
 {
-    public class GetAllPlexServersByPlexAccountQuery : IRequest<Result<List<PlexServer>>>
+    public class GetAllPlexServersByPlexAccountIdQuery : IRequest<Result<List<PlexServer>>>
     {
-        public GetAllPlexServersByPlexAccountQuery(int id)
+        public GetAllPlexServersByPlexAccountIdQuery(int plexAccountId)
         {
-            Id = id;
+            PlexAccountId = plexAccountId;
         }
 
-        public int Id { get; }
+        public int PlexAccountId { get; }
     }
 
-    public class GetAllPlexServersByPlexAccountQueryValidator : AbstractValidator<GetAllPlexServersByPlexAccountQuery>
+    public class GetAllPlexServersByPlexAccountIdQueryValidator : AbstractValidator<GetAllPlexServersByPlexAccountIdQuery>
     {
-        public GetAllPlexServersByPlexAccountQueryValidator()
+        public GetAllPlexServersByPlexAccountIdQueryValidator()
         {
-            RuleFor(x => x.Id).GreaterThan(0);
+            RuleFor(x => x.PlexAccountId).GreaterThan(0);
         }
     }
 
 
-    public class GetAllPlexServersByPlexAccountQueryHandler : BaseHandler,
-        IRequestHandler<GetAllPlexServersByPlexAccountQuery, Result<List<PlexServer>>>
+    public class GetAllPlexServersByPlexAccountIdQueryHandler : BaseHandler,
+        IRequestHandler<GetAllPlexServersByPlexAccountIdQuery, Result<List<PlexServer>>>
     {
         private readonly IPlexRipperDbContext _dbContext;
         private readonly IMapper _mapper;
 
-        public GetAllPlexServersByPlexAccountQueryHandler(IPlexRipperDbContext dbContext, IMapper mapper)
+        public GetAllPlexServersByPlexAccountIdQueryHandler(IPlexRipperDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
             _mapper = mapper;
         }
 
-        public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersByPlexAccountQuery request,
+        public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersByPlexAccountIdQuery request,
             CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetAllPlexServersByPlexAccountQuery, GetAllPlexServersByPlexAccountQueryValidator>(request);
+            var result = await ValidateAsync<GetAllPlexServersByPlexAccountIdQuery, GetAllPlexServersByPlexAccountIdQueryValidator>(request);
             if (result.IsFailed) return result;
 
             var serverList = await _dbContext
                 .PlexAccountServers
                 .Include(x => x.PlexServer)
-                .Where(x => x.PlexAccountId == request.Id)
+                .Where(x => x.PlexAccountId == request.PlexAccountId)
                 .ProjectTo<PlexServer>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
 

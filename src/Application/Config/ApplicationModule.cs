@@ -2,8 +2,6 @@
 using FluentValidation;
 using MediatR;
 using MediatR.Extensions.Autofac.DependencyInjection;
-using PlexRipper.Application.Common.Interfaces.Application;
-using PlexRipper.Application.Common.TestClass;
 using PlexRipper.Domain.Behavior.Pipelines;
 using System.Reflection;
 
@@ -32,9 +30,6 @@ namespace PlexRipper.Application.Config
                 .Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces()
                 .InstancePerDependency();
-
-            // Used for testing purposes
-            builder.RegisterType<TestClass>().As<ITestClass>().SingleInstance();
         }
     }
 }

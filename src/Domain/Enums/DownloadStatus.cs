@@ -4,22 +4,27 @@ namespace PlexRipper.Domain.Enums
     public enum DownloadStatus
     {
         /// <summary>
-        /// Client object is created and set to default values
+        /// Download Task is created and set to default values
         /// </summary>
         Initialized,
 
         /// <summary>
-        /// Client is waiting for the file to begin downloading
+        /// Download Task is created and is preparing to start downloading
+        /// </summary>
+        Starting,
+
+        /// <summary>
+        /// Download Task is waiting for the file to begin downloading
         /// </summary>
         Waiting,
 
         /// <summary>
-        /// Client is downloading data from the server
+        /// Download Task is downloading data from the server
         /// </summary>
         Downloading,
 
         /// <summary>
-        /// Client releases used resources, so the download can be paused
+        /// Download Task releases used resources, so the download can be paused
         /// </summary>
         Pausing,
 
@@ -34,7 +39,7 @@ namespace PlexRipper.Domain.Enums
         Queued,
 
         /// <summary>
-        /// Client releases used resources, so the download can be deleted
+        /// Download Task releases used resources, so the download can be deleted
         /// </summary>
         Deleting,
 

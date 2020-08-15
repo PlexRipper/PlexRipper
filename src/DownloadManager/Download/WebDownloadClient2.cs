@@ -11,6 +11,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using PlexRipper.Domain.Common;
+using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.DownloadManager.Download
 {

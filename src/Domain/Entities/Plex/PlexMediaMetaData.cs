@@ -11,6 +11,7 @@ namespace PlexRipper.Domain.Entities
         public string TitleTvShow { get; set; }
         public string TitleTvShowSeason { get; set; }
 
+        public int RatingKey { get; set; }
 
         public long Duration { get; set; }
 

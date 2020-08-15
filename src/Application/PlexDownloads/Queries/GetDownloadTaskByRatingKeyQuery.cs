@@ -11,39 +11,39 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexDownloads.Queries
 {
-    public class GetDownloadTaskByIdQuery : IRequest<Result<DownloadTask>>
+    public class GetDownloadTaskByRatingKeyQuery : IRequest<Result<DownloadTask>>
     {
-        public GetDownloadTaskByIdQuery(int id, bool includeServer = false, bool includeFolderPath = false)
+        public GetDownloadTaskByRatingKeyQuery(int ratingKey, bool includeServer = false, bool includeFolderPath = false)
         {
-            Id = id;
+            RatingKey = ratingKey;
             IncludeServer = includeServer;
             IncludeFolderPath = includeFolderPath;
         }
 
-        public int Id { get; }
+        public int RatingKey { get; }
         public bool IncludeServer { get; }
         public bool IncludeFolderPath { get; }
     }
 
-    public class GetDownloadTaskByIdQueryValidator : AbstractValidator<GetDownloadTaskByIdQuery>
+    public class GetDownloadTaskByRatingKeyQueryValidator : AbstractValidator<GetDownloadTaskByRatingKeyQuery>
     {
-        public GetDownloadTaskByIdQueryValidator()
+        public GetDownloadTaskByRatingKeyQueryValidator()
         {
-            RuleFor(x => x.Id).GreaterThan(0);
+            RuleFor(x => x.RatingKey).GreaterThan(0);
         }
     }
 
 
-    public class GetDownloadTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetDownloadTaskByIdQuery, Result<DownloadTask>>
+    public class GetDownloadTaskByRatingKeyQueryHandler : BaseHandler, IRequestHandler<GetDownloadTaskByRatingKeyQuery, Result<DownloadTask>>
     {
         private readonly IPlexRipperDbContext _dbContext;
 
-        public GetDownloadTaskByIdQueryHandler(IPlexRipperDbContext dbContext)
+        public GetDownloadTaskByRatingKeyQueryHandler(IPlexRipperDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByRatingKeyQuery request, CancellationToken cancellationToken)
         {
             var query = _dbContext.DownloadTasks.AsQueryable();
 
@@ -57,11 +57,11 @@ namespace PlexRipper.Application.PlexDownloads.Queries
                 query = query.Include(x => x.FolderPath);
             }
 
-            var downloadTask = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var downloadTask = await query.FirstOrDefaultAsync(x => x.RatingKey == request.RatingKey, cancellationToken);
 
             if (downloadTask == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(DownloadTask), request.Id);
+                return ResultExtensions.Get404NotFoundResult($"Could not find {nameof(downloadTask)} with ratingKey: {request.RatingKey}");
             }
 
             return Result.Ok(downloadTask);

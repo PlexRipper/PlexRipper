@@ -15,8 +15,10 @@ using PlexRipper.SignalR.Hubs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using PlexRipper.Domain.Common;
+using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.DownloadManager
 {
@@ -88,21 +90,32 @@ namespace PlexRipper.DownloadManager
 
         #region Methods
 
-        private PlexDownloadClient CreateDownloadClient(DownloadTask downloadTask)
+        private Result<PlexDownloadClient> CreateDownloadClient(DownloadTask downloadTask)
         {
             PlexDownloadClient newClient = new PlexDownloadClient(downloadTask, _fileSystem);
 
             newClient.DownloadProgressChanged += OnDownloadProgressChanged;
 
-            //newClient.DownloadFileCompleted += OnDownloadFileCompleted;
+            newClient.DownloadFileCompleted += OnDownloadFileCompleted;
 
+            newClient.DownloadStatusChanged += OnDownloadStatusChanged;
             DownloadsList.Add(newClient);
-            return newClient;
+            return Result.Ok(newClient);
         }
 
-        private void OnDownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        private async void OnDownloadStatusChanged(object sender, DownloadStatus status)
         {
-            Log.Information("The download has completed!");
+            var plexDownloadClient = sender as PlexDownloadClient;
+            Log.Debug($"DownloadClient changed downloadStatus for downloadTask {plexDownloadClient.DownloadTaskId} to {status.ToString()}");
+
+            await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(plexDownloadClient.DownloadTaskId, status));
+        }
+
+        private async void OnDownloadFileCompleted(object sender, DownloadProgress downloadProgress)
+        {
+            var plexDownloadClient = sender as PlexDownloadClient;
+            Log.Information($"The download of {plexDownloadClient.DownloadTask.Title} has completed!");
+            await CheckDownloadQueue();
         }
 
         private void OnDownloadProgressChanged(object sender, DownloadProgress downloadProgress)
@@ -112,49 +125,193 @@ namespace PlexRipper.DownloadManager
             _hubContext.Clients.All.SendAsync("DownloadProgress", downloadProgress);
 
             Log.Information(
-                $"({plexDownloadClient.ClientId}){plexDownloadClient.DownloadTask.FileName} => Downloaded {DataFormat.FormatSizeString(downloadProgress.DataReceived)} of {DataFormat.FormatSizeString(downloadProgress.DataTotal)} bytes ({downloadProgress.DownloadSpeed}). {downloadProgress.Percentage} % complete...");
+                $"({plexDownloadClient.DownloadTaskId}){plexDownloadClient.DownloadTask.FileName} => Downloaded {DataFormat.FormatSizeString(downloadProgress.DataReceived)} of {DataFormat.FormatSizeString(downloadProgress.DataTotal)} bytes ({downloadProgress.DownloadSpeed}). {downloadProgress.Percentage} % complete...");
         }
 
-        public async Task<Result> StartDownloadAsync(DownloadTask downloadTask)
+        private async Task<Result<bool>> DownloadTaskExistsAsync(DownloadTask downloadTask)
         {
-            // Add to DB
-            Log.Debug($"Adding new downloadTask: {downloadTask.Title}");
+            if (downloadTask == null)
+            {
+                return ResultExtensions.IsNull(nameof(downloadTask)).LogError();
+            }
+
+            Result<DownloadTask> downloadTaskDB = null;
+
+            // Download tasks added here might not contain an Id, which is why we also search on ratingKey.
+            if (downloadTask.Id > 0)
+            {
+                // First check if there is an downloadClient with that downloadTask, as that is faster
+                var downloadClient = DownloadsList.Find(x => x.DownloadTaskId == downloadTask.Id);
+                if (downloadClient != null)
+                {
+                    return Result.Ok(true);
+                }
+
+                // Check DataBase
+                downloadTaskDB = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTask.Id));
+            }
+            else if (downloadTask.RatingKey > 0)
+            {
+                // First check if there is an downloadClient with that downloadTask, as that is faster
+                var downloadClient = DownloadsList.Find(x => x.DownloadTask.RatingKey == downloadTask.RatingKey);
+                if (downloadClient != null)
+                {
+                    return Result.Ok(true);
+                }
+
+                // Check DataBase
+                downloadTaskDB = await _mediator.Send(new GetDownloadTaskByRatingKeyQuery(downloadTask.RatingKey));
+            }
+            else
+            {
+                return Result.Fail("There was no valid Id or RatingKey available in the downloadTask").LogError();
+            }
+
+            if (downloadTaskDB.IsFailed)
+            {
+                if (downloadTaskDB.Has404NotFoundError())
+                {
+                    return Result.Ok(false);
+                }
+                return downloadTaskDB.ToResult();
+            }
+
+            // The only possibility now is that the DownloadTask exists
+            return Result.Ok(true);
+        }
+
+        /// <summary>
+        /// Adds a single DownloadTask to the Download queue
+        /// </summary>
+        /// <param name="downloadTask">The <see cref="DownloadTask"/> that will be checked and added.</param>
+        /// <param name="performCheck">Should the CheckDownloadQueue() be called at the end</param>
+        /// <returns>Returns true if successfully added and false if the downloadTask already exists</returns>
+        public async Task<Result<bool>> AddToDownloadQueueAsync(DownloadTask downloadTask, bool performCheck = true)
+        {
+            // Download tasks added here do not contain an Id since they have not been added to the database yet.
+            if (downloadTask == null)
+            {
+                return ResultExtensions.IsNull(nameof(downloadTask)).LogError();
+            }
+
+            var downloadTaskExists = await DownloadTaskExistsAsync(downloadTask);
+            if (downloadTaskExists.IsFailed)
+            {
+                return downloadTaskExists;
+            }
+
+            if (downloadTaskExists.Value)
+            {
+                return Result.Fail($"DownloadTask with id: {downloadTask.Id} or ratingKey: {downloadTask.RatingKey} already exists").LogError();
+            }
+
+            // Add to Database
+            Log.Debug($"Adding new downloadTask: {downloadTask.Title} with ratingKey: {downloadTask.RatingKey}");
             var result = await _mediator.Send(new AddDownloadTaskCommand(downloadTask));
             if (result.IsFailed)
             {
-                return result;
+                return result.ToResult();
             }
+
             var downloadTaskDB = await _mediator.Send(new GetDownloadTaskByIdQuery(result.Value.Id));
             if (downloadTaskDB.IsFailed)
             {
-                return result;
+                return result.ToResult();
             }
 
-            try
+            if (performCheck)
             {
-                // TODO This might be removed if the authToken is stored in the database.
-                downloadTaskDB.Value.PlexServerAuthToken = downloadTask.PlexServerAuthToken;
+                await CheckDownloadQueue();
+            }
 
-                Log.Debug(downloadTaskDB.Value.ToString());
-                var downloadClient = CreateDownloadClient(downloadTaskDB.Value);
-                return await downloadClient.StartAsync();
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, $"Failed to start the Download of {downloadTask.FileName}");
-                throw;
-            }
+            return Result.Ok(downloadTaskDB.Value != null);
         }
 
-        public Task<Result> StartDownloadAsync(List<DownloadTask> downloadTasks)
+        /// <summary>
+        /// Check the DownloadQueue for downloadTasks which can be started.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<Result> CheckDownloadQueue()
         {
-            Log.Error("Not Implemented");
-            return Task.Run(Result.Ok);
+            Log.Debug("Checking for download tasks which can be processed.");
+            var downloadTasks = await _mediator.Send(new GetAllDownloadTasksQuery(true, true));
+            if (!downloadTasks.Value.Any())
+            {
+                Log.Debug("No download tasks found to start processing.");
+                return new Result();
+            }
+
+            Log.Information($"Starting the check of {downloadTasks.Value.Count} downloadTasks.");
+            foreach (var downloadTask in downloadTasks.Value)
+            {
+                var downloadClient = GetDownloadClient(downloadTask.Id);
+                if (downloadClient.Has404NotFoundError())
+                {
+                    downloadClient = CreateDownloadClient(downloadTask);
+
+                    // There is an downloadClient which already has this downloadTask
+                    // downloadClient.Value.DownloadStatus
+                }
+
+                // Check if already added to a downloadClient
+                // Check if the server of that downloadTask already has a running download task
+            }
+
+            // try
+            // {
+            //     // TODO This might be removed if the authToken is stored in the database.
+            //     downloadTaskDB.Value.PlexServerAuthToken = downloadTask.PlexServerAuthToken;
+            //
+            //     Log.Debug(downloadTaskDB.Value.ToString());
+            //     var downloadClient = CreateDownloadClient(downloadTaskDB.Value);
+            //     return await downloadClient.StartAsync();
+            // }
+            // catch (Exception e)
+            // {
+            //     return Result.Fail($"Failed to start the Download of {downloadTask.FileName}").LogError(e);
+            // }
+            return Result.Ok(true);
+        }
+
+        /// <summary>
+        /// Adds a list of <see cref="DownloadTask"/>s to the download queue.
+        /// </summary>
+        /// <param name="downloadTasks">The list of <see cref="DownloadTask"/>s that will be checked and added.</param>
+        /// <returns>Returns true if all downloadTasks were added successfully.</returns>
+        public async Task<Result<bool>> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks)
+        {
+            var failedList = new List<DownloadTask>();
+            foreach (var downloadTask in downloadTasks)
+            {
+                var result = await AddToDownloadQueueAsync(downloadTask, false);
+                if (result.IsFailed || !result.Value)
+                {
+                    failedList.Add(downloadTask);
+                }
+            }
+
+            if (failedList.Count > 0)
+            {
+                var result = new Result();
+                var error = new Error();
+                foreach (var downloadTask in failedList)
+                {
+                    error.Reasons.Add(new Error("Download task failed to be added to the downloadQueue")
+                        .WithMetadata("downloadTask", downloadTask));
+                }
+                return Result.Fail(error).Set400BadRequestError();
+            }
+
+            Log.Debug($"Successfully added all {downloadTasks.Count} DownloadTasks");
+
+            await CheckDownloadQueue();
+
+            return Result.Ok(true);
         }
 
         private Result<PlexDownloadClient> GetDownloadClient(int downloadTaskId)
         {
-            var downloadClient = DownloadsList.Find(x => x.ClientId == downloadTaskId);
+            var downloadClient = DownloadsList.Find(x => x.DownloadTaskId == downloadTaskId);
             if (downloadClient == null)
             {
                 return ResultExtensions.Get404NotFoundResult();

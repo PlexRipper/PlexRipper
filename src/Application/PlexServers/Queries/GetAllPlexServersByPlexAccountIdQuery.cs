@@ -5,12 +5,12 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexServers.Queries
 {
@@ -36,21 +36,16 @@ namespace PlexRipper.Application.PlexServers.Queries
     public class GetAllPlexServersByPlexAccountIdQueryHandler : BaseHandler,
         IRequestHandler<GetAllPlexServersByPlexAccountIdQuery, Result<List<PlexServer>>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
         private readonly IMapper _mapper;
 
-        public GetAllPlexServersByPlexAccountIdQueryHandler(IPlexRipperDbContext dbContext, IMapper mapper)
+        public GetAllPlexServersByPlexAccountIdQueryHandler(IPlexRipperDbContext dbContext, IMapper mapper): base(dbContext)
         {
-            _dbContext = dbContext;
             _mapper = mapper;
         }
 
         public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersByPlexAccountIdQuery request,
             CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetAllPlexServersByPlexAccountIdQuery, GetAllPlexServersByPlexAccountIdQueryValidator>(request);
-            if (result.IsFailed) return result;
-
             var serverList = await _dbContext
                 .PlexAccountServers
                 .Include(x => x.PlexServer)

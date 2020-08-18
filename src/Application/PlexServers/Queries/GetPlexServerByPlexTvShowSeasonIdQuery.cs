@@ -3,12 +3,12 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexServers.Queries
@@ -35,12 +35,7 @@ namespace PlexRipper.Application.PlexServers.Queries
     public class GetPlexServerByPlexTvShowSeasonIdQueryHandler : BaseHandler,
         IRequestHandler<GetPlexServerByPlexTvShowSeasonIdQuery, Result<PlexServer>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetPlexServerByPlexTvShowSeasonIdQueryHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetPlexServerByPlexTvShowSeasonIdQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<PlexServer>> Handle(GetPlexServerByPlexTvShowSeasonIdQuery request,
             CancellationToken cancellationToken)
@@ -53,7 +48,7 @@ namespace PlexRipper.Application.PlexServers.Queries
 
             if (plexTvShowEpisode == null)
             {
-                return ResultExtensions.Get404NotFoundResult();
+                return ResultExtensions.Create404NotFoundResult();
             }
 
             var plexServer = plexTvShowEpisode?.TvShow?.PlexLibrary?.PlexServer ?? null;

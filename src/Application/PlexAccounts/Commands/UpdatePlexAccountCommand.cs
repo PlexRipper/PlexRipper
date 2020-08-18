@@ -3,14 +3,15 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexAccounts
 {
-    public class UpdatePlexAccountCommand : IRequest<Result<PlexAccount>>
+    public class UpdatePlexAccountCommand : IRequest<Result<bool>>
     {
         public PlexAccount PlexAccount { get; }
 
@@ -37,31 +38,26 @@ namespace PlexRipper.Application.PlexAccounts
         }
     }
 
-    public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexAccountCommand, Result<PlexAccount>>
+    public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexAccountCommand, Result<bool>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
+        public UpdatePlexAccountHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
-        public UpdatePlexAccountHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
-
-        public async Task<Result<PlexAccount>> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
+        public async Task<Result<bool>> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
         {
             var plexAccount = command.PlexAccount;
             var accountInDb = await _dbContext.PlexAccounts
                 .Include(x => x.PlexAccountServers)
                 .ThenInclude(x => x.PlexServer)
-                .AsTracking().FirstOrDefaultAsync(x => x.Id == plexAccount.Id);
+                .AsTracking().FirstOrDefaultAsync(x => x.Id == plexAccount.Id, cancellationToken);
 
             if (accountInDb == null)
             {
-                return Result.Fail(new Error($"Could not find a PlexAccount to update with id: {plexAccount.Id}"));
+                return ResultExtensions.GetEntityNotFound(nameof(PlexAccount), plexAccount.Id);
             }
 
             _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
             await _dbContext.SaveChangesAsync(cancellationToken);
-            return Result.Ok();
+            return Result.Ok(true);
         }
     }
 }

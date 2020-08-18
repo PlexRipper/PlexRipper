@@ -25,13 +25,13 @@ namespace PlexRipper.Domain.Behavior.Pipelines
             if (!fluentValidationResult.IsValid)
             {
                 var result = new TResponse();
-
-                result.Reasons.Add(ResultExtensions.Get400BadRequestError());
+                var error = ResultExtensions.Get400BadRequestError();
                 foreach (var reason in fluentValidationResult.Errors)
                 {
-                    result.Reasons.Add(new Error(reason.ErrorMessage));
+                    error.Reasons.Add(new Error(reason.ErrorMessage));
                 }
 
+                result.Reasons.Add(error);
                 return result;
             }
 

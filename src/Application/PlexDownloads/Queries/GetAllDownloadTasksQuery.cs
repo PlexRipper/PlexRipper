@@ -3,11 +3,11 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexDownloads.Queries
 {
@@ -33,12 +33,7 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 
     public class GetAllDownloadTasksQueryHandler : BaseHandler, IRequestHandler<GetAllDownloadTasksQuery, Result<List<DownloadTask>>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetAllDownloadTasksQueryHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetAllDownloadTasksQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<List<DownloadTask>>> Handle(GetAllDownloadTasksQuery request, CancellationToken cancellationToken)
         {

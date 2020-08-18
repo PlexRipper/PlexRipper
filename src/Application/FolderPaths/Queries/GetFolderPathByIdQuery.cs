@@ -2,10 +2,11 @@
 using FluentValidation;
 using MediatR;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.FolderPaths.Queries
 {
@@ -30,21 +31,18 @@ namespace PlexRipper.Application.FolderPaths.Queries
 
     public class GetFolderPathByIdQueryHandler : BaseHandler, IRequestHandler<GetFolderPathByIdQuery, Result<FolderPath>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetFolderPathByIdQueryHandler(IPlexRipperDbContext dbContext)
+        public GetFolderPathByIdQueryHandler(IPlexRipperDbContext dbContext) : base(dbContext)
         {
-            _dbContext = dbContext;
         }
 
         public async Task<Result<FolderPath>> Handle(GetFolderPathByIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetFolderPathByIdQuery, GetFolderPathByIdQueryValidator>(request);
-            if (result.IsFailed) return result;
-
             var folderPath = await _dbContext.FolderPaths.FindAsync(request.Id);
-            return ReturnResult(folderPath, request.Id);
-
+            if (folderPath == null)
+            {
+                return ResultExtensions.GetEntityNotFound(nameof(FolderPath), request.Id);
+            }
+            return Result.Ok(folderPath);
         }
     }
 }

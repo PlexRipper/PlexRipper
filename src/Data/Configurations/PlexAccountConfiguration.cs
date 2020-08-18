@@ -8,7 +8,7 @@ namespace PlexRipper.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<PlexAccount> builder)
         {
-
+            builder.HasMany(x => x.PlexAccountServers).WithOne(x => x.PlexAccount).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -3,6 +3,7 @@ using PlexRipper.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using PlexRipper.Domain.Entities.JoinTables;
 
 namespace PlexRipper.Domain.Entities
 {
@@ -56,6 +57,8 @@ namespace PlexRipper.Domain.Entities
 
         public virtual List<PlexMovie> Movies { get; set; }
         public virtual List<PlexTvShow> TvShows { get; set; }
+
+        public List<PlexAccountLibrary> PlexAccountLibraries { get; set; }
 
         #endregion
 

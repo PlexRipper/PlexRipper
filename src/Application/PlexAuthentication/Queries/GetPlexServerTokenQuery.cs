@@ -3,9 +3,10 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexAuthentication.Queries
 {
@@ -34,19 +35,11 @@ namespace PlexRipper.Application.PlexAuthentication.Queries
 
     public class GetPlexServerTokenHandler : BaseHandler, IRequestHandler<GetPlexServerTokenQuery, Result<string>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetPlexServerTokenHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetPlexServerTokenHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<string>> Handle(GetPlexServerTokenQuery request, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetPlexServerTokenQuery, GetPlexServerTokenQueryValidator>(request);
-            if (result.IsFailed) return result;
-
-            var authToken = await _dbContext.PlexAccountServers.FirstOrDefaultAsync(x => x.PlexAccountId == request.PlexAccountId && x.PlexServerId == request.PlexServerId, cancellationToken: cancellationToken);
+            var authToken = await _dbContext.PlexAccountServers.FirstOrDefaultAsync(x => x.PlexAccountId == request.PlexAccountId && x.PlexServerId == request.PlexServerId, cancellationToken);
 
             if (authToken != null)
             {

@@ -3,10 +3,10 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexMovies
 {
@@ -31,12 +31,7 @@ namespace PlexRipper.Application.PlexMovies
 
     public class GetPlexMovieByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexMovieByIdQuery, Result<PlexMovie>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetPlexMovieByIdQueryHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetPlexMovieByIdQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<PlexMovie>> Handle(GetPlexMovieByIdQuery request, CancellationToken cancellationToken)
         {

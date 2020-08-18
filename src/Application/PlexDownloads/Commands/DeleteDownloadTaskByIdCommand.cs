@@ -3,9 +3,11 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain;
+using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.Application.PlexDownloads.Commands
 {
@@ -29,22 +31,17 @@ namespace PlexRipper.Application.PlexDownloads.Commands
 
     public class DeleteDownloadTaskByIDHandler : BaseHandler, IRequestHandler<DeleteDownloadTaskByIdCommand, Result<bool>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public DeleteDownloadTaskByIDHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public DeleteDownloadTaskByIDHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<bool>> Handle(DeleteDownloadTaskByIdCommand command, CancellationToken cancellationToken)
         {
             var result = await ValidateAsync<DeleteDownloadTaskByIdCommand, DeleteDownloadTaskByIdCommandValidator>(command);
             if (result.IsFailed) return result;
 
-            var entity = await _dbContext.DownloadTasks.AsTracking().FirstOrDefaultAsync(x => x.Id == command.DownloadTaskId);
+            var entity = await _dbContext.DownloadTasks.AsTracking().FirstOrDefaultAsync(x => x.Id == command.DownloadTaskId, cancellationToken: cancellationToken);
             if (entity == null)
             {
-                return Result.Fail($"Could not find a DownloadTask with id: {command.DownloadTaskId}");
+                return ResultExtensions.GetEntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogError();
             }
 
             _dbContext.DownloadTasks.Remove(entity);

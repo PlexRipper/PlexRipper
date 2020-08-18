@@ -4,12 +4,12 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexMovies
 {
@@ -38,12 +38,7 @@ namespace PlexRipper.Application.PlexMovies
 
     public class CreateOrUpdatePlexMoviesHandler : BaseHandler, IRequestHandler<CreateOrUpdatePlexMoviesCommand, Result<PlexLibrary>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public CreateOrUpdatePlexMoviesHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public CreateOrUpdatePlexMoviesHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<PlexLibrary>> Handle(CreateOrUpdatePlexMoviesCommand command, CancellationToken cancellationToken)
         {
@@ -62,7 +57,7 @@ namespace PlexRipper.Application.PlexMovies
             await _dbContext.SaveChangesAsync(cancellationToken);
 
 
-            // Ensure the correct ID is added. 
+            // Ensure the correct ID is added.
             foreach (var movie in plexMovies)
             {
                 movie.PlexLibraryId = plexLibrary.Id;

@@ -4,13 +4,14 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Base;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.Application.PlexAccounts
 {
-    public class DeletePlexAccountCommand : IRequest<Result>
+    public class DeletePlexAccountCommand : IRequest<Result<bool>>
     {
         public int Id { get; }
 
@@ -28,31 +29,24 @@ namespace PlexRipper.Application.PlexAccounts
         }
     }
 
-    public class DeletePlexAccountHandler : BaseHandler, IRequestHandler<DeletePlexAccountCommand, Result>
+    public class DeletePlexAccountHandler : BaseHandler, IRequestHandler<DeletePlexAccountCommand, Result<bool>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
+        public DeletePlexAccountHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
-        public DeletePlexAccountHandler(IPlexRipperDbContext dbContext)
+        public async Task<Result<bool>> Handle(DeletePlexAccountCommand command, CancellationToken cancellationToken)
         {
-            _dbContext = dbContext;
-        }
+            var plexAccount = await _dbContext.PlexAccounts.AsTracking().FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
 
-        public async Task<Result> Handle(DeletePlexAccountCommand command, CancellationToken cancellationToken)
-        {
-            var entity = await _dbContext.PlexAccounts.AsTracking().FirstOrDefaultAsync(x => x.Id == command.Id);
-
-            if (entity == null)
+            if (plexAccount == null)
             {
-                string msg = $"Entity of type PlexAccount with Id {command.Id} could not be found to be removed";
-                Log.Warning(msg);
-                return Result.Fail(msg);
+                return ResultExtensions.GetEntityNotFound(nameof(PlexAccount), command.Id);
             }
 
-            _dbContext.PlexAccounts.Remove(entity);
+            _dbContext.PlexAccounts.Remove(plexAccount);
             await _dbContext.SaveChangesAsync(cancellationToken);
             Log.Debug($"Deleted PlexAccount with Id: {command.Id} from the database");
 
-            return Result.Ok();
+            return Result.Ok(true);
         }
     }
 }

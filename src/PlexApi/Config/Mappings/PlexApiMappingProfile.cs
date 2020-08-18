@@ -44,6 +44,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
                 .ForMember(dest => dest.Movies, opt => opt.Ignore())
                 .ForMember(dest => dest.TvShows, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexAccountLibraries, opt => opt.Ignore())
                 .ForMember(dest => dest.LibraryLocationId,
                     opt => opt.MapFrom(src => src.Location.First().Id))
                 // Location[0].Path -> LibraryLocationPath

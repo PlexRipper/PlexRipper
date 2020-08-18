@@ -4,7 +4,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.JoinTables;
 using System;
@@ -12,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexServers.Commands
 {
@@ -39,12 +39,7 @@ namespace PlexRipper.Application.PlexServers.Commands
 
     public class AddOrUpdatePlexServersHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexServer>>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public AddOrUpdatePlexServersHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public AddOrUpdatePlexServersHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<List<PlexServer>>> Handle(AddOrUpdatePlexLibrariesCommand command, CancellationToken cancellationToken)
         {
@@ -81,7 +76,7 @@ namespace PlexRipper.Application.PlexServers.Commands
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            // Add or update the PlexAccount and PlexServer relationships 
+            // Add or update the PlexAccount and PlexServer relationships
             Log.Information("Adding or updating the PlexAccount association with PlexServers now.");
             foreach (var plexServer in plexServers)
             {
@@ -124,7 +119,7 @@ namespace PlexRipper.Application.PlexServers.Commands
             // The list which contains the serverId's the plexAccount has access too after the update.
             List<int> newList = plexServers.Select(x => x.Id).ToList();
 
-            // Remove plexServer associations which the PlexAccount has no longer access too. 
+            // Remove plexServer associations which the PlexAccount has no longer access too.
             List<int> removalList = currentList.Except(newList).ToList();
             foreach (int serverId in removalList)
             {

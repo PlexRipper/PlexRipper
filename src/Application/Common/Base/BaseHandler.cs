@@ -1,16 +1,24 @@
-﻿using FluentResults;
-using FluentValidation;
-using FluentValidation.Results;
-using PlexRipper.Domain.Entities.Base;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentResults;
+using FluentValidation;
+using FluentValidation.Results;
+using PlexRipper.Application.Common.Interfaces.DataAccess;
+using PlexRipper.Domain;
+using PlexRipper.Domain.Entities.Base;
 
-namespace PlexRipper.Domain.Base
+namespace PlexRipper.Application.Common.Base
 {
-    public class BaseHandler
+    public abstract class BaseHandler
     {
+        private protected readonly IPlexRipperDbContext _dbContext;
+
+        public BaseHandler(IPlexRipperDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
         public Result<T> ReturnResult<T>(T value, int id = 0) where T : BaseEntity
         {
             if (value != null)

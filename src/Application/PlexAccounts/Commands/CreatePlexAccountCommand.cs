@@ -3,10 +3,10 @@ using FluentValidation;
 using MediatR;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexAccounts
 {
@@ -33,20 +33,15 @@ namespace PlexRipper.Application.PlexAccounts
 
     public class CreateAccountHandler : BaseHandler, IRequestHandler<CreatePlexAccountCommand, Result<int>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public CreateAccountHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public CreateAccountHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<int>> Handle(CreatePlexAccountCommand command, CancellationToken cancellationToken)
         {
             Log.Debug("Creating a new Account in DB");
 
-            await _dbContext.PlexAccounts.AddAsync(command.PlexAccount);
+            await _dbContext.PlexAccounts.AddAsync(command.PlexAccount, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
-            await _dbContext.Entry(command.PlexAccount).GetDatabaseValuesAsync();
+            await _dbContext.Entry(command.PlexAccount).GetDatabaseValuesAsync(cancellationToken);
 
             return Result.Ok(command.PlexAccount.Id);
         }

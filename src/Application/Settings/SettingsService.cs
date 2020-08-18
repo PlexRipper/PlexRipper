@@ -22,7 +22,7 @@ namespace PlexRipper.Application.Settings
 
         public async Task<Result<PlexAccount>> SetActivePlexAccountAsync(int accountId)
         {
-            var result = await _mediator.Send(new GetPlexAccountByIdWithPlexLibrariesQuery(accountId));
+            var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId, true, true));
             if (result.IsFailed)
             {
                 return result;
@@ -40,7 +40,7 @@ namespace PlexRipper.Application.Settings
             if (id == 0)
             {
                 Log.Warning("The ActivePlexAccountId was the default value of 0, will set to the first plex account found in the database.");
-                var result = await _mediator.Send(new GetAllPlexAccountsQuery());
+                var result = await _mediator.Send(new GetAllPlexAccountsQuery(true, true));
                 if (result.IsFailed)
                 {
                     return result.ToResult();
@@ -57,7 +57,8 @@ namespace PlexRipper.Application.Settings
             }
             else
             {
-                var result = await _mediator.Send(new GetPlexAccountByIdWithPlexLibrariesQuery(id));
+                // Retrieve with PlexLibraries
+                var result = await _mediator.Send(new GetPlexAccountByIdQuery(id, true, true));
                 if (result.IsFailed)
                 {
                     return result;

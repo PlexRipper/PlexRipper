@@ -4,10 +4,10 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexServers.Commands
 {
@@ -38,12 +38,7 @@ namespace PlexRipper.Application.PlexServers.Commands
 
     public class CreatePlexServerStatusCommandHandler : BaseHandler, IRequestHandler<CreatePlexServerStatusCommand, Result<PlexServerStatus>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public CreatePlexServerStatusCommandHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public CreatePlexServerStatusCommandHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<PlexServerStatus>> Handle(CreatePlexServerStatusCommand command, CancellationToken cancellationToken)
         {

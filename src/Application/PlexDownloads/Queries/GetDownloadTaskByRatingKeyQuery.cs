@@ -3,10 +3,10 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexDownloads.Queries
@@ -36,12 +36,7 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 
     public class GetDownloadTaskByRatingKeyQueryHandler : BaseHandler, IRequestHandler<GetDownloadTaskByRatingKeyQuery, Result<DownloadTask>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetDownloadTaskByRatingKeyQueryHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetDownloadTaskByRatingKeyQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByRatingKeyQuery request, CancellationToken cancellationToken)
         {
@@ -61,7 +56,7 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 
             if (downloadTask == null)
             {
-                return ResultExtensions.Get404NotFoundResult($"Could not find {nameof(downloadTask)} with ratingKey: {request.RatingKey}");
+                return ResultExtensions.Create404NotFoundResult($"Could not find {nameof(downloadTask)} with ratingKey: {request.RatingKey}");
             }
 
             return Result.Ok(downloadTask);

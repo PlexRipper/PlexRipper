@@ -5,9 +5,9 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application.Common.Base;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.Application.PlexTvShows.Queries
@@ -33,12 +33,7 @@ namespace PlexRipper.Application.PlexTvShows.Queries
 
     public class GetPlexTvShowEpisodeByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowEpisodeByIdQuery, Result<PlexTvShowEpisode>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetPlexTvShowEpisodeByIdQueryHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetPlexTvShowEpisodeByIdQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<PlexTvShowEpisode>> Handle(GetPlexTvShowEpisodeByIdQuery request, CancellationToken cancellationToken)
         {
@@ -47,7 +42,7 @@ namespace PlexRipper.Application.PlexTvShows.Queries
 
             if (plexTvShowEpisode == null)
             {
-                return ResultExtensions.Get404NotFoundResult();
+                return ResultExtensions.Create404NotFoundResult();
             }
 
             return Result.Ok(plexTvShowEpisode);

@@ -6,9 +6,9 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application.Common.Base;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.Application.PlexTvShows
@@ -38,12 +38,7 @@ namespace PlexRipper.Application.PlexTvShows
 
     public class CreateOrUpdatePlexTvShowsHandler : BaseHandler, IRequestHandler<CreateOrUpdatePlexTvShowsCommand, Result<bool>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public CreateOrUpdatePlexTvShowsHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public CreateOrUpdatePlexTvShowsHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<bool>> Handle(CreateOrUpdatePlexTvShowsCommand command, CancellationToken cancellationToken)
         {

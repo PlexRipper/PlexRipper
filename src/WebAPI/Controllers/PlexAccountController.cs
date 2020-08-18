@@ -16,7 +16,6 @@ namespace PlexRipper.WebAPI.Controllers
 {
     public class PlexAccountController : BaseController
     {
-
         private readonly IPlexAccountService _plexAccountService;
         private readonly IMapper _mapper;
 
@@ -34,30 +33,23 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> GetAll([FromQuery] bool enabledOnly = false)
         {
-            try
+            var result = await _plexAccountService.GetAllPlexAccountsAsync(enabledOnly);
+            if (result.IsFailed)
             {
-                var result = await _plexAccountService.GetAllPlexAccountsAsync(enabledOnly);
-                if (result.IsFailed)
-                {
-                    return BadRequest(result);
-                }
-
-                var mapResult = _mapper.Map<List<PlexAccountDTO>>(result.Value);
-                if (!mapResult.Any() && enabledOnly)
-                {
-                    string msg = "Could not find any enabled accounts";
-                    Log.Warning(msg);
-                    return NotFound(Result.Fail(msg));
-                }
-
-                string msg2 = $"Returned {mapResult.Count} accounts";
-                Log.Debug(msg2);
-                return Ok(Result.Ok(mapResult).WithSuccess(msg2));
+                return BadRequest(result);
             }
-            catch (Exception e)
+
+            var mapResult = _mapper.Map<List<PlexAccountDTO>>(result.Value);
+            if (!mapResult.Any() && enabledOnly)
             {
-                return InternalServerError(e);
+                string msg = "Could not find any enabled accounts";
+                Log.Warning(msg);
+                return NotFound(Result.Fail(msg));
             }
+
+            string msg2 = $"Returned {mapResult.Count} accounts";
+            Log.Debug(msg2);
+            return Ok(Result.Ok(mapResult).WithSuccess(msg2));
         }
 
         // GET api/<PlexAccountController>/5
@@ -68,7 +60,10 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Get(int id)
         {
-            if (id <= 0) { return BadRequestInvalidId(); }
+            if (id <= 0)
+            {
+                return BadRequestInvalidId();
+            }
 
             try
             {
@@ -96,7 +91,10 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Put(int id, [FromBody] UpdatePlexAccountDTO account)
         {
-            if (id <= 0) { return BadRequestInvalidId(); }
+            if (id <= 0)
+            {
+                return BadRequestInvalidId();
+            }
 
             try
             {
@@ -135,14 +133,14 @@ namespace PlexRipper.WebAPI.Controllers
 
                 var msg = $"Account with id {result.Value?.Id} was created and/or retrieved successfully";
                 Log.Information(msg);
-                return Created(msg, Result.Ok(_mapper.Map<PlexAccountDTO>(result.Value)).WithSuccess(msg));
+                var mapResultDto = _mapper.Map<PlexAccountDTO>(result.Value);
+                return Created(msg, Result.Ok(mapResultDto).WithSuccess(msg));
             }
             catch (Exception e)
             {
                 return InternalServerError(e);
             }
         }
-
 
 
         // DELETE api/<AccountController>/5
@@ -153,7 +151,10 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Delete(int id)
         {
-            if (id <= 0) { return BadRequestInvalidId(); }
+            if (id <= 0)
+            {
+                return BadRequestInvalidId();
+            }
 
             try
             {
@@ -215,7 +216,10 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> CheckUsername(string username)
         {
-            if (string.IsNullOrEmpty(username) || username.Length < 5) { return BadRequest(Result.Fail("Invalid username")); }
+            if (string.IsNullOrEmpty(username) || username.Length < 5)
+            {
+                return BadRequest(Result.Fail("Invalid username"));
+            }
             try
             {
                 var result = await _plexAccountService.CheckIfUsernameIsAvailableAsync(username);

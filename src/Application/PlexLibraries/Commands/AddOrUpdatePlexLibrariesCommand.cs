@@ -4,7 +4,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.JoinTables;
 using System;
@@ -12,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexLibraries.Commands
 {
@@ -41,18 +41,10 @@ namespace PlexRipper.Application.PlexLibraries.Commands
 
     public class AddOrUpdatePlexLibrariesHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<bool>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public AddOrUpdatePlexLibrariesHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public AddOrUpdatePlexLibrariesHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<bool>> Handle(AddOrUpdatePlexLibrariesCommand command, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<AddOrUpdatePlexLibrariesCommand, AddOrUpdatePlexLibrariesValidator>(command);
-            if (result.IsFailed) return result;
-
             var plexAccount = command.PlexAccount;
             var plexServer = command.PlexServer;
             var plexLibraries = command.PlexLibraries;
@@ -68,14 +60,14 @@ namespace PlexRipper.Application.PlexLibraries.Commands
                     var plexLibraryDB = await _dbContext.PlexLibraries
                         .Include(x => x.PlexServer)
                         .FirstOrDefaultAsync(x =>
-                        x.PlexServer.Id == plexServer.Id && x.Key == plexLibrary.Key);
+                        x.PlexServer.Id == plexServer.Id && x.Key == plexLibrary.Key, cancellationToken);
 
                     if (plexLibraryDB == null)
                     {
                         // Create plexServer
                         Log.Debug($"Adding PlexLibrary {plexLibrary.Title} to the database.");
                         plexLibrary.PlexServerId = plexServer.Id;
-                        await _dbContext.PlexLibraries.AddAsync(plexLibrary);
+                        await _dbContext.PlexLibraries.AddAsync(plexLibrary, cancellationToken);
                     }
                     else
                     {
@@ -89,7 +81,7 @@ namespace PlexRipper.Application.PlexLibraries.Commands
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
 
-                // Add or update the PlexAccount, PlexServer and PlexLibrary relationships 
+                // Add or update the PlexAccount, PlexServer and PlexLibrary relationships
                 Log.Information("Adding or updating the PlexAccount association with PlexLibraries now.");
                 foreach (var plexLibrary in plexLibraries)
                 {
@@ -99,7 +91,7 @@ namespace PlexRipper.Application.PlexLibraries.Commands
                         .Where(x => x.PlexAccountId == plexAccount.Id
                                     && x.PlexLibraryId == plexLibrary.Id
                                     && x.PlexServerId == plexServer.Id)
-                        .FirstOrDefaultAsync();
+                        .FirstOrDefaultAsync(cancellationToken);
 
                     if (plexAccountLibrary == null)
                     {
@@ -138,7 +130,7 @@ namespace PlexRipper.Application.PlexLibraries.Commands
                 //    currentList.Add(plexAccountLibrary);
                 //}
 
-                // Check if there are plexLibraries that can be deleted because there no PlexAccounts who have access to them anymore. 
+                // Check if there are plexLibraries that can be deleted because there no PlexAccounts who have access to them anymore.
                 //var removalList = await _dbContext.PlexAccountLibraries.AsTracking()
                 //    .Where(x => x.PlexAccountId == plexAccount.Id && x.PlexServerId == plexServer.Id)
                 //    .ToListAsync();

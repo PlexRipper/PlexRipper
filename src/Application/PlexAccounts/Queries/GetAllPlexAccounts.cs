@@ -3,122 +3,97 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore.Internal;
+using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexAccounts
 {
     public class GetAllPlexAccountsQuery : IRequest<Result<List<PlexAccount>>>
     {
-
-        public bool OnlyEnabled { get; }
-
-        public GetAllPlexAccountsQuery(bool onlyEnabled = false)
+        public GetAllPlexAccountsQuery(bool includePlexServers = false, bool includePlexLibraries = false, bool onlyEnabled = false)
         {
+            IncludePlexServers = includePlexServers;
+            IncludePlexLibraries = includePlexLibraries;
             OnlyEnabled = onlyEnabled;
         }
+
+        public bool IncludePlexServers { get; }
+        public bool IncludePlexLibraries { get; }
+        public bool OnlyEnabled { get; }
     }
+
 
     public class GetAllPlexAccountsQueryValidator : AbstractValidator<GetAllPlexAccountsQuery>
     {
         public GetAllPlexAccountsQueryValidator()
         {
-
         }
     }
 
-
-    public class
-        GetAllPlexAccountsHandler : BaseHandler, IRequestHandler<GetAllPlexAccountsQuery, Result<List<PlexAccount>>>
+    public class GetAllPlexAccountsHandler : BaseHandler, IRequestHandler<GetAllPlexAccountsQuery, Result<List<PlexAccount>>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
+        private readonly IMapper _mapper;
 
-        public GetAllPlexAccountsHandler(IPlexRipperDbContext dbContext)
+        public GetAllPlexAccountsHandler(IPlexRipperDbContext dbContext, IMapper mapper) : base(dbContext)
         {
-            _dbContext = dbContext;
+            _mapper = mapper;
         }
 
         public async Task<Result<List<PlexAccount>>> Handle(GetAllPlexAccountsQuery request,
             CancellationToken cancellationToken)
         {
-            // TODO There might be a better way of retrieving this data
-            var plexAccounts = await _dbContext.PlexAccounts
+            var query = _dbContext.PlexAccounts.AsQueryable();
+
+            if (request.IncludePlexServers && !request.IncludePlexLibraries)
+            {
+                query = query
                     .Include(x => x.PlexAccountServers)
+                    .ThenInclude(x => x.PlexServer);
+            }
+
+            if (request.IncludePlexServers && request.IncludePlexLibraries)
+            {
+                query = query
+                    .Include(v => v.PlexAccountServers)
                     .ThenInclude(x => x.PlexServer)
-                    .Select(plexAccount => new PlexAccount
-                    {
-                        Id = plexAccount.Id,
-                        DisplayName = plexAccount.DisplayName,
-                        Username = plexAccount.Username,
-                        Password = plexAccount.Password,
-                        IsEnabled = plexAccount.IsEnabled,
-                        IsValidated = plexAccount.IsValidated,
-                        ValidatedAt = plexAccount.ValidatedAt,
-                        PlexId = plexAccount.PlexId,
-                        Uuid = plexAccount.Uuid,
-                        Email = plexAccount.Email,
-                        JoinedAt = plexAccount.JoinedAt,
-                        Title = plexAccount.Title,
-                        HasPassword = plexAccount.HasPassword,
-                        AuthenticationToken = plexAccount.AuthenticationToken,
-                        ForumId = plexAccount.ForumId,
-                        PlexAccountServers = plexAccount.PlexAccountServers,
-                        PlexServers = plexAccount.PlexAccountServers
-                            .Where(z => z.PlexAccountId == plexAccount.Id)
-                            .Select(c => new PlexServer
-                            {
-                                Id = c.PlexServer.Id,
-                                Name = c.PlexServer.Name,
-                                Scheme = c.PlexServer.Scheme,
-                                Address = c.PlexServer.Address,
-                                Port = c.PlexServer.Port,
-                                Version = c.PlexServer.Version,
-                                Host = c.PlexServer.Host,
-                                LocalAddresses = c.PlexServer.LocalAddresses,
-                                MachineIdentifier = c.PlexServer.MachineIdentifier,
-                                CreatedAt = c.PlexServer.CreatedAt,
-                                UpdatedAt = c.PlexServer.UpdatedAt,
-                                Owned = c.PlexServer.Owned,
-                                Synced = c.PlexServer.Synced,
-                                OwnerId = c.PlexServer.OwnerId,
-                                Home = c.PlexServer.Home,
-                                PlexAccountServers = c.PlexServer.PlexAccountServers,
-                                // Only select the PlexLibraries this PlexAccount has access to by looking at the PlexAccountLibraries table.
-                                ServerStatus = null,
-                                PlexLibraries = _dbContext.PlexAccountLibraries
-                                    .Include(f => f.PlexLibrary)
-                                    .Where(d => d.PlexAccountId == c.PlexAccountId && d.PlexServerId == c.PlexServer.Id)
-                                    .Select(v => new PlexLibrary
-                                    {
-                                        Id = v.PlexLibraryId,
-                                        Key = v.PlexLibrary.Key,
-                                        Title = v.PlexLibrary.Title,
-                                        Type = v.PlexLibrary.Type,
-                                        UpdatedAt = v.PlexLibrary.UpdatedAt,
-                                        CreatedAt = v.PlexLibrary.CreatedAt,
-                                        ScannedAt = v.PlexLibrary.ScannedAt,
-                                        ContentChangedAt = v.PlexLibrary.ContentChangedAt,
-                                        Uuid = v.PlexLibrary.Uuid,
-                                        LibraryLocationId = v.PlexLibrary.LibraryLocationId,
-                                        LibraryLocationPath = v.PlexLibrary.LibraryLocationPath,
-                                        PlexServerId = v.PlexLibrary.PlexServerId,
-                                        Movies = v.PlexLibrary.Movies,
-                                        TvShows = v.PlexLibrary.TvShows
-                                    })
-                                    .ToList(),
-                            })
-                            .ToList(),
-                    })
-                    .ToListAsync(cancellationToken);
+                    .ThenInclude(x => x.PlexLibraries)
+                    .ThenInclude(x => x.PlexAccountLibraries);
+            }
 
-
+            List<PlexAccount> plexAccounts;
             if (request.OnlyEnabled)
             {
-                return Result.Ok(plexAccounts.Where(x => x.IsEnabled).ToList());
+                plexAccounts = await query.Where(x => x.IsEnabled).ToListAsync(cancellationToken);
+            }
+            else
+            {
+                plexAccounts = await query.ToListAsync(cancellationToken);
+            }
+
+            // Remove any PlexLibraries the plexAccount has no access to
+            // TODO This might be improved further since now all PlexLibraries will be retrieved from the database.
+            foreach (var plexAccount in plexAccounts)
+            {
+                var plexServers = plexAccount.PlexAccountServers.Select(x => x.PlexServer).ToList();
+                foreach (var plexServer in plexServers)
+                {
+                    // Remove inaccessible PlexLibraries
+                    for (int i = plexServer.PlexLibraries.Count - 1; i >= 0; i--)
+                    {
+                        var x = plexServer?.PlexLibraries[i].PlexAccountLibraries.Select(y => y.PlexAccountId).ToList();
+                        if (!x.Contains(plexAccount.Id))
+                        {
+                            plexServer.PlexLibraries.RemoveAt(i);
+                        }
+                    }
+                }
             }
 
             return Result.Ok(plexAccounts);

@@ -4,10 +4,10 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexLibraries.Queries
@@ -33,12 +33,7 @@ namespace PlexRipper.Application.PlexLibraries.Queries
 
     public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdWithMediaQuery, Result<PlexLibrary>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetPlexLibraryByIdWithMediaHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetPlexLibraryByIdWithMediaHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdWithMediaQuery request, CancellationToken cancellationToken)
         {
@@ -55,7 +50,7 @@ namespace PlexRipper.Application.PlexLibraries.Queries
 
             if (plexLibrary == null)
             {
-                return ResultExtensions.Get404NotFoundResult();
+                return ResultExtensions.Create404NotFoundResult();
             }
 
             // Sort Movies

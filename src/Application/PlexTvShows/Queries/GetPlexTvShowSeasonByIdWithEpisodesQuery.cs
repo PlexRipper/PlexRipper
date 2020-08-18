@@ -5,9 +5,9 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application.Common.Base;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.Application.PlexTvShows.Queries
@@ -33,12 +33,7 @@ namespace PlexRipper.Application.PlexTvShows.Queries
 
     public class GetPlexTvShowSeasonByIdWithEpisodesQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowSeasonByIdWithEpisodesQuery, Result<PlexTvShowSeason>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetPlexTvShowSeasonByIdWithEpisodesQueryHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetPlexTvShowSeasonByIdWithEpisodesQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<PlexTvShowSeason>> Handle(GetPlexTvShowSeasonByIdWithEpisodesQuery request, CancellationToken cancellationToken)
         {
@@ -51,7 +46,7 @@ namespace PlexRipper.Application.PlexTvShows.Queries
 
             if (plexTvShowSeason == null)
             {
-                return result.Set404NotFoundError();
+                return result.Add404NotFoundError();
             }
 
             plexTvShowSeason.Episodes = plexTvShowSeason.Episodes.OrderBy(x => x.RatingKey).ToList();

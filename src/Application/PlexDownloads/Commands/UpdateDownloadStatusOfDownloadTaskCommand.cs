@@ -3,10 +3,10 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Enums;
 
@@ -36,12 +36,7 @@ namespace PlexRipper.Application.PlexDownloads.Commands
     public class UpdateDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
         IRequestHandler<UpdateDownloadStatusOfDownloadTaskCommand, Result<bool>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public UpdateDownloadStatusOfDownloadTaskCommandHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public UpdateDownloadStatusOfDownloadTaskCommandHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<bool>> Handle(UpdateDownloadStatusOfDownloadTaskCommand command, CancellationToken cancellationToken)
         {
@@ -55,7 +50,7 @@ namespace PlexRipper.Application.PlexDownloads.Commands
                 return Result.Ok(true);
             }
 
-            return ResultExtensions.Get404NotFoundResult();
+            return ResultExtensions.Create404NotFoundResult();
         }
     }
 }

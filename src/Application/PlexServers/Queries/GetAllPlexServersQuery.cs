@@ -4,10 +4,10 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexServers.Queries
@@ -27,12 +27,7 @@ namespace PlexRipper.Application.PlexServers.Queries
     public class GetAllPlexServersQueryHandler : BaseHandler,
         IRequestHandler<GetAllPlexServersQuery, Result<List<PlexServer>>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetAllPlexServersQueryHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetAllPlexServersQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersQuery request,
             CancellationToken cancellationToken)

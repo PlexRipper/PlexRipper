@@ -299,7 +299,7 @@ namespace PlexRipper.DownloadManager
                     error.Reasons.Add(new Error("Download task failed to be added to the downloadQueue")
                         .WithMetadata("downloadTask", downloadTask));
                 }
-                return Result.Fail(error).Set400BadRequestError();
+                return Result.Fail(error).Add400BadRequestError();
             }
 
             Log.Debug($"Successfully added all {downloadTasks.Count} DownloadTasks");
@@ -314,7 +314,7 @@ namespace PlexRipper.DownloadManager
             var downloadClient = DownloadsList.Find(x => x.DownloadTaskId == downloadTaskId);
             if (downloadClient == null)
             {
-                return ResultExtensions.Get404NotFoundResult();
+                return ResultExtensions.Create404NotFoundResult();
             }
             return Result.Ok(downloadClient);
         }

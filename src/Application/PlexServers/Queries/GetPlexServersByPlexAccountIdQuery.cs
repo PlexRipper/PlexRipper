@@ -3,12 +3,12 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexServers.Queries
 {
@@ -34,12 +34,7 @@ namespace PlexRipper.Application.PlexServers.Queries
     public class GetPlexServersByAccountIdQueryHandler : BaseHandler,
         IRequestHandler<GetPlexServersByPlexAccountIdQuery, Result<List<PlexServer>>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public GetPlexServersByAccountIdQueryHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetPlexServersByAccountIdQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<List<PlexServer>>> Handle(GetPlexServersByPlexAccountIdQuery request,
             CancellationToken cancellationToken)

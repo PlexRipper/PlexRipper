@@ -3,10 +3,10 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexDownloads.Commands
 {
@@ -33,18 +33,10 @@ namespace PlexRipper.Application.PlexDownloads.Commands
 
     public class AddDownloadTaskCommandHandler : BaseHandler, IRequestHandler<AddDownloadTaskCommand, Result<DownloadTask>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public AddDownloadTaskCommandHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public AddDownloadTaskCommandHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<DownloadTask>> Handle(AddDownloadTaskCommand command, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<AddDownloadTaskCommand, AddDownloadTaskCommandValidator>(command);
-            if (result.IsFailed) return result;
-
             await _dbContext.DownloadTasks.AddAsync(command.DownloadTask, cancellationToken);
             if (command.DownloadTask.FolderPath != null)
             {

@@ -3,10 +3,11 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Base;
 using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.FolderPaths.Commands
 {
@@ -35,26 +36,21 @@ namespace PlexRipper.Application.FolderPaths.Commands
 
     public class UpdateFolderPathCommandHandler : BaseHandler, IRequestHandler<UpdateFolderPathCommand, Result<FolderPath>>
     {
-        private readonly IPlexRipperDbContext _dbContext;
-
-        public UpdateFolderPathCommandHandler(IPlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public UpdateFolderPathCommandHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
         public async Task<Result<FolderPath>> Handle(UpdateFolderPathCommand command, CancellationToken cancellationToken)
         {
-            var folderPathInDb = await _dbContext.FolderPaths.AsTracking().FirstOrDefaultAsync(x => x.Id == command.FolderPath.Id);
+            var folderPath = await _dbContext.FolderPaths.AsTracking().FirstOrDefaultAsync(x => x.Id == command.FolderPath.Id, cancellationToken: cancellationToken);
 
-            if (folderPathInDb == null)
+            if (folderPath == null)
             {
-                return Result.Fail(new Error($"Could not find a FolderPath to update with id: {command.FolderPath.Id}"));
+                return ResultExtensions.GetEntityNotFound(nameof(FolderPath), command.FolderPath.Id);
             }
 
-            _dbContext.Entry(folderPathInDb).CurrentValues.SetValues(command.FolderPath);
+            _dbContext.Entry(folderPath).CurrentValues.SetValues(command.FolderPath);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return Result.Ok(folderPathInDb);
+            return Result.Ok(folderPath);
 
         }
     }

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Linq;
+using AutoMapper;
 using FluentResults;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Types.FileSystem;
@@ -29,16 +30,14 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(x => x.PlexAccountServers, opt => opt.Ignore());
             CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
                 .ForMember(dto => dto.AuthToken, opt => opt.MapFrom(x => x.AuthenticationToken))
-                .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexServers));
+                .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));
 
             //PlexServer <-> PlexServerDTO
             CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination).ReverseMap();
 
-
             //PlexLibrary <-> PlexLibraryDTO
             CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount)).ReverseMap();
-
 
             //PlexLibrary -> PlexLibraryDTO
             CreateMap<PlexLibrary, PlexLibraryContainerDTO>(MemberList.Destination)
@@ -68,7 +67,6 @@ namespace PlexRipper.WebAPI.Config
 
             //FileSystemModel -> FileSystemModelDTO
             CreateMap<FileSystemModel, FileSystemModelDTO>(MemberList.Destination).ReverseMap();
-
         }
     }
 }

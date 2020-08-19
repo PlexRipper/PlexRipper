@@ -1,4 +1,5 @@
-﻿using Autofac;
+using System;
+using Autofac;
 using AutofacSerilogIntegration;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -21,9 +22,7 @@ namespace PlexRipper.WebAPI
 {
     public class Startup
     {
-        public IConfigurationRoot Configuration { get; private set; }
-
-        public ILifetimeScope AutofacContainer { get; private set; }
+        readonly string CORSConfiguration = "CORS_Configuration";
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -31,20 +30,15 @@ namespace PlexRipper.WebAPI
         /// <param name="app"></param>
         public void Configure(IApplicationBuilder app)
         {
-            // TODO Make sure to configure this correctly when setting up security
-            app.UseCors(builder => builder
+            app.UseHttpsRedirection();
 
-                // .AllowAnyOrigin()
-                .WithOrigins("http://localhost:3000")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials()
-            );
-
-            // app.UseHttpsRedirection();
             app.UseOpenApi(); // serve OpenAPI/Swagger documents
             app.UseSwaggerUi3(); // serve Swagger UI
             app.UseRouting();
+
+            app.UseCors(CORSConfiguration);
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -52,8 +46,6 @@ namespace PlexRipper.WebAPI
                 endpoints.MapHub<DownloadHub>("/download/progress");
                 endpoints.MapHub<LibraryProgressHub>("/plexLibrary/progress");
             });
-
-            // app.UseAuthorization();
         }
 
 
@@ -64,7 +56,19 @@ namespace PlexRipper.WebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             // General
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy(CORSConfiguration,
+                    builder =>
+                    {
+                        // builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost");
+                        builder
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            //.AllowCredentials()
+                            .AllowAnyOrigin();
+                    });
+            });
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
             services.AddHttpContextAccessor();
 

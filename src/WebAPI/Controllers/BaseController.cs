@@ -5,6 +5,7 @@ using PlexRipper.Domain;
 using System;
 using System.Net.Mime;
 using AutoMapper;
+using Microsoft.AspNetCore.Cors;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -12,6 +13,7 @@ namespace PlexRipper.WebAPI.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces(MediaTypeNames.Application.Json)]
+    [EnableCors("CORS_Configuration")]
     public abstract class BaseController : ControllerBase
     {
         private readonly IMapper _mapper;

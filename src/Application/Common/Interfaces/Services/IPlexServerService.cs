@@ -8,7 +8,7 @@ namespace PlexRipper.Application.Common.Interfaces
     public interface IPlexServerService
     {
         Task<Result<List<PlexServer>>> GetServersAsync(PlexAccount plexAccount, bool refresh = false);
-        Task<Result<List<PlexServer>>> RefreshPlexServersAsync(PlexAccount plexAccount);
+        Task<Result<bool>> RefreshPlexServersAsync(PlexAccount plexAccount);
 
         Task<Result<PlexServer>> GetAllLibraryMediaAsync(PlexAccount plexAccount, PlexServer plexServer,
             bool refresh = false);

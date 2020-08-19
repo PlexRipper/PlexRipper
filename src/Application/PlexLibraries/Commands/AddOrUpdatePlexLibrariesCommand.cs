@@ -41,7 +41,9 @@ namespace PlexRipper.Application.PlexLibraries.Commands
 
     public class AddOrUpdatePlexLibrariesHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<bool>>
     {
-        public AddOrUpdatePlexLibrariesHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
+        public AddOrUpdatePlexLibrariesHandler(IPlexRipperDbContext dbContext) : base(dbContext)
+        {
+        }
 
         public async Task<Result<bool>> Handle(AddOrUpdatePlexLibrariesCommand command, CancellationToken cancellationToken)
         {
@@ -51,7 +53,6 @@ namespace PlexRipper.Application.PlexLibraries.Commands
 
             try
             {
-
                 // Add or update the PlexLibraries in the database
                 Log.Information($"Starting the add or update process of the PlexLibraries for PlexServer: {plexServer.Name}.");
                 Log.Information("Adding or updating PlexServers now.");
@@ -60,7 +61,7 @@ namespace PlexRipper.Application.PlexLibraries.Commands
                     var plexLibraryDB = await _dbContext.PlexLibraries
                         .Include(x => x.PlexServer)
                         .FirstOrDefaultAsync(x =>
-                        x.PlexServer.Id == plexServer.Id && x.Key == plexLibrary.Key, cancellationToken);
+                            x.PlexServer.Id == plexServer.Id && x.Key == plexLibrary.Key, cancellationToken);
 
                     if (plexLibraryDB == null)
                     {
@@ -96,7 +97,8 @@ namespace PlexRipper.Application.PlexLibraries.Commands
                     if (plexAccountLibrary == null)
                     {
                         // Add entry
-                        Log.Debug($"PlexAccount: {plexAccount.DisplayName} does not have an association with PlexLibrary: {plexLibrary.Name} of PlexServer: {plexServer.Name} creating one now with the authentication token now.");
+                        Log.Debug(
+                            $"PlexAccount: {plexAccount.DisplayName} does not have an association with PlexLibrary: {plexLibrary.Name} of PlexServer: {plexServer.Name} creating one now with the authentication token now.");
 
                         await _dbContext.PlexAccountLibraries.AddAsync(new PlexAccountLibrary
                         {
@@ -104,14 +106,13 @@ namespace PlexRipper.Application.PlexLibraries.Commands
                             PlexLibraryId = plexLibrary.Id,
                             PlexServerId = plexServer.Id
                         }, cancellationToken);
-
                     }
                     else
                     {
                         // Update entry
-                        Log.Debug($"PlexAccount: {plexAccount.DisplayName} already has an association with PlexLibrary: {plexLibrary.Name} of PlexServer: {plexServer.Name} skipping for now.");
+                        Log.Debug(
+                            $"PlexAccount: {plexAccount.DisplayName} already has an association with PlexLibrary: {plexLibrary.Name} of PlexServer: {plexServer.Name} skipping for now.");
                     }
-
                 }
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
@@ -139,7 +140,6 @@ namespace PlexRipper.Application.PlexLibraries.Commands
 
                 //removalList.Where(x => !currentList.Any(y => y.))
 
-
                 //if (removalList.Any())
                 //{
                 //    _dbContext.PlexAccountLibraries.RemoveRange(removalList);
@@ -162,12 +162,11 @@ namespace PlexRipper.Application.PlexLibraries.Commands
                 //}
 
                 return Result.Ok(true);
-
             }
             catch (Exception e)
             {
                 Log.Error(e);
-                throw;
+                return Result.Fail(new ExceptionalError(e));
             }
         }
     }

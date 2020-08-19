@@ -190,7 +190,7 @@ namespace PlexRipper.Application.PlexLibraries
                 return plexAccount.ToResult<PlexLibrary>();
             }
 
-            var plexLibrary = await _mediator.Send(new GetPlexLibraryByIdWithMediaQuery(plexLibraryId));
+            var plexLibrary = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibraryId, true));
             if (plexLibrary.IsFailed)
             {
                 return plexLibrary;
@@ -259,7 +259,7 @@ namespace PlexRipper.Application.PlexLibraries
                 return updateResult.ToResult();
             }
 
-            var freshPlexLibrary = await _mediator.Send(new GetPlexLibraryByIdWithMediaQuery(plexLibrary.Id));
+            var freshPlexLibrary = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id, false, true));
             // Complete progress update
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.TvShows.Count,
                 plexLibrary.TvShows.Count);
@@ -278,7 +278,7 @@ namespace PlexRipper.Application.PlexLibraries
         {
             await _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
 
-            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdWithMediaQuery(libraryId));
+            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, false, true));
 
             if (libraryDB.IsFailed)
             {

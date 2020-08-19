@@ -9,6 +9,7 @@ using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PlexRipper.Application.PlexAuthentication.Queries;
 
 namespace PlexRipper.Application.PlexServers
 {
@@ -37,7 +38,7 @@ namespace PlexRipper.Application.PlexServers
         /// </summary>
         /// <param name="plexAccount">PlexAccount to use to retrieve the servers</param>
         /// <returns>Is successful</returns>
-        public async Task<Result<List<PlexServer>>> RefreshPlexServersAsync(PlexAccount plexAccount)
+        public async Task<Result<bool>> RefreshPlexServersAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
             {
@@ -59,8 +60,11 @@ namespace PlexRipper.Application.PlexServers
 
             // First add or update the plex servers
             var result = await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, serverList));
-
-            return result;
+            if (result.IsFailed)
+            {
+                return result.ToResult();
+            }
+            return Result.Ok(true);
         }
 
         /// <summary>
@@ -86,7 +90,13 @@ namespace PlexRipper.Application.PlexServers
             serverStatus.PlexServerId = plexServer.Id;
 
             // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
-            return await _mediator.Send(new CreatePlexServerStatusCommand(serverStatus));
+            var result = await _mediator.Send(new CreatePlexServerStatusCommand(serverStatus));
+            if (result.IsFailed)
+            {
+                return result.ToResult();
+            }
+
+            return await _mediator.Send(new GetPlexServerStatusByIdQuery(result.Value));
         }
 
 
@@ -145,10 +155,14 @@ namespace PlexRipper.Application.PlexServers
                 var refreshSuccess = await RefreshPlexServersAsync(plexAccount);
                 if (refreshSuccess.IsFailed)
                 {
-                    return refreshSuccess;
+                    return refreshSuccess.ToResult();
                 }
 
-                serverList = refreshSuccess;
+                serverList = await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccount.Id));
+                if (serverList.IsFailed)
+                {
+                    return serverList;
+                }
             }
 
             return serverList;

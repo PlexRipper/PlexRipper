@@ -47,7 +47,7 @@ namespace PlexRipper.Application.PlexTvShows.Queries
 
             if (plexTvShow == null)
             {
-                return result.Add404NotFoundError();
+                return ResultExtensions.GetEntityNotFound(nameof(PlexTvShow), request.Id);
             }
 
             plexTvShow.Seasons = plexTvShow.Seasons.OrderBy(x => x.Title).ToList();

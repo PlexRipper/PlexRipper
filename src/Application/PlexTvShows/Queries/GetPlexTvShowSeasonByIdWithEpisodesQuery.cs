@@ -37,8 +37,6 @@ namespace PlexRipper.Application.PlexTvShows.Queries
 
         public async Task<Result<PlexTvShowSeason>> Handle(GetPlexTvShowSeasonByIdWithEpisodesQuery request, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetPlexTvShowSeasonByIdWithEpisodesQuery, GetPlexTvShowSeasonByIdWithEpisodesQueryValidator>(request);
-            if (result.IsFailed) return result;
             var plexTvShowSeason = await _dbContext.PlexTvShowSeason
                 .Include(x => x.Episodes)
                 .OrderBy(x => x.RatingKey)
@@ -46,7 +44,7 @@ namespace PlexRipper.Application.PlexTvShows.Queries
 
             if (plexTvShowSeason == null)
             {
-                return result.Add404NotFoundError();
+                return ResultExtensions.GetEntityNotFound(nameof(PlexTvShowSeason), request.Id);
             }
 
             plexTvShowSeason.Episodes = plexTvShowSeason.Episodes.OrderBy(x => x.RatingKey).ToList();

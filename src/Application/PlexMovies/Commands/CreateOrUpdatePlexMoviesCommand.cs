@@ -13,7 +13,7 @@ using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexMovies
 {
-    public class CreateOrUpdatePlexMoviesCommand : IRequest<Result<PlexLibrary>>
+    public class CreateOrUpdatePlexMoviesCommand : IRequest<Result<bool>>
     {
         public PlexLibrary PlexLibrary { get; }
         public List<PlexMovie> PlexMovies { get; }
@@ -36,23 +36,23 @@ namespace PlexRipper.Application.PlexMovies
         }
     }
 
-    public class CreateOrUpdatePlexMoviesHandler : BaseHandler, IRequestHandler<CreateOrUpdatePlexMoviesCommand, Result<PlexLibrary>>
+    public class CreateOrUpdatePlexMoviesHandler : BaseHandler, IRequestHandler<CreateOrUpdatePlexMoviesCommand, Result<bool>>
     {
         public CreateOrUpdatePlexMoviesHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
-        public async Task<Result<PlexLibrary>> Handle(CreateOrUpdatePlexMoviesCommand command, CancellationToken cancellationToken)
+        public async Task<Result<bool>> Handle(CreateOrUpdatePlexMoviesCommand command, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<CreateOrUpdatePlexMoviesCommand, CreateOrUpdatePlexMoviesValidator>(command);
-            if (result.IsFailed) return result;
 
             var plexLibrary = command.PlexLibrary;
             var plexMovies = command.PlexMovies;
 
             Log.Debug($"Starting adding or updating movies in library: {plexLibrary.Title}");
+
             // Remove all movies and re-add them
+            // TODO Write a better method of only removing the movies that are missing and adding only the new ones
             var currentMovies = await _dbContext.PlexMovies
                 .AsTracking().Where(x => x.PlexLibraryId == plexLibrary.Id)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
             _dbContext.PlexMovies.RemoveRange(currentMovies);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -65,14 +65,10 @@ namespace PlexRipper.Application.PlexMovies
 
             // TODO update Roles and tags
 
-            await _dbContext.PlexMovies.AddRangeAsync(plexMovies);
+            await _dbContext.PlexMovies.AddRangeAsync(plexMovies, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            var entity = await _dbContext.PlexLibraries.Include(x => x.Movies)
-                .FirstOrDefaultAsync(x => x.Id == plexLibrary.Id);
-
-            ReturnResult(entity, plexLibrary.Id);
-            return Result.Ok(entity);
+            return Result.Ok(true);
 
         }
     }

@@ -42,7 +42,7 @@ namespace PlexRipper.Application.PlexTvShows.Queries
 
             if (plexTvShowEpisode == null)
             {
-                return ResultExtensions.Create404NotFoundResult();
+                return ResultExtensions.GetEntityNotFound(nameof(PlexTvShowEpisode), request.Id);
             }
 
             return Result.Ok(plexTvShowEpisode);

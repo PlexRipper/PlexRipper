@@ -11,7 +11,7 @@ using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexServers.Commands
 {
-    public class CreatePlexServerStatusCommand : IRequest<Result<PlexServerStatus>>
+    public class CreatePlexServerStatusCommand : IRequest<Result<int>>
     {
         public PlexServerStatus PlexServerStatus { get; }
 
@@ -32,28 +32,28 @@ namespace PlexRipper.Application.PlexServers.Commands
             RuleFor(x => x.PlexServerStatus.StatusMessage).NotEmpty();
             RuleFor(x => x.PlexServerStatus.PlexServer).NotNull();
             RuleFor(x => x.PlexServerStatus.PlexServer.Id).GreaterThan(0);
-
         }
     }
 
-    public class CreatePlexServerStatusCommandHandler : BaseHandler, IRequestHandler<CreatePlexServerStatusCommand, Result<PlexServerStatus>>
+    public class CreatePlexServerStatusCommandHandler : BaseHandler, IRequestHandler<CreatePlexServerStatusCommand, Result<int>>
     {
-        public CreatePlexServerStatusCommandHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
-
-        public async Task<Result<PlexServerStatus>> Handle(CreatePlexServerStatusCommand command, CancellationToken cancellationToken)
+        public CreatePlexServerStatusCommandHandler(IPlexRipperDbContext dbContext) : base(dbContext)
         {
-            var result = await ValidateAsync<CreatePlexServerStatusCommand, CreatePlexServerStatusCommandValidator>(command);
-            if (result.IsFailed) return result;
+        }
 
-
+        public async Task<Result<int>> Handle(CreatePlexServerStatusCommand command, CancellationToken cancellationToken)
+        {
             Log.Debug("Creating a new PlexServerStatus in the DB");
 
-            await _dbContext.PlexServerStatuses.AddAsync(command.PlexServerStatus);
-            _dbContext.Entry(command.PlexServerStatus.PlexServer).State = EntityState.Unchanged;
+            await _dbContext.PlexServerStatuses.AddAsync(command.PlexServerStatus, cancellationToken);
+            if (command.PlexServerStatus.PlexServer != null)
+            {
+                _dbContext.Entry(command.PlexServerStatus.PlexServer).State = EntityState.Unchanged;
+            }
             await _dbContext.SaveChangesAsync(cancellationToken);
-            await _dbContext.Entry(command.PlexServerStatus).GetDatabaseValuesAsync();
+            await _dbContext.Entry(command.PlexServerStatus).GetDatabaseValuesAsync(cancellationToken);
 
-            return ReturnResult(command.PlexServerStatus, command.PlexServerStatus.Id);
+            return Result.Ok(command.PlexServerStatus.Id);
         }
     }
 }

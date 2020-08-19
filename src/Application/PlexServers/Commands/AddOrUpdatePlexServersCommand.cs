@@ -15,7 +15,7 @@ using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexServers.Commands
 {
-    public class AddOrUpdatePlexLibrariesCommand : IRequest<Result<List<PlexServer>>>
+    public class AddOrUpdatePlexLibrariesCommand : IRequest<Result<bool>>
     {
         public PlexAccount PlexAccount { get; }
         public List<PlexServer> PlexServers { get; }
@@ -37,15 +37,12 @@ namespace PlexRipper.Application.PlexServers.Commands
         }
     }
 
-    public class AddOrUpdatePlexServersHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexServer>>>
+    public class AddOrUpdatePlexServersHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<bool>>
     {
         public AddOrUpdatePlexServersHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
-        public async Task<Result<List<PlexServer>>> Handle(AddOrUpdatePlexLibrariesCommand command, CancellationToken cancellationToken)
+        public async Task<Result<bool>> Handle(AddOrUpdatePlexLibrariesCommand command, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<AddOrUpdatePlexLibrariesCommand, AddOrUpdatePlexServersValidator>(command);
-            if (result.IsFailed) return result;
-
             var plexAccount = command.PlexAccount;
             var plexServers = command.PlexServers;
 
@@ -55,7 +52,7 @@ namespace PlexRipper.Application.PlexServers.Commands
             foreach (var plexServer in plexServers)
             {
                 var plexServerDB = await _dbContext.PlexServers.FirstOrDefaultAsync(x =>
-                    x.OwnerId == plexServer.OwnerId && x.MachineIdentifier == plexServer.MachineIdentifier);
+                    x.OwnerId == plexServer.OwnerId && x.MachineIdentifier == plexServer.MachineIdentifier, cancellationToken);
 
 
                 if (plexServerDB != null)
@@ -69,7 +66,7 @@ namespace PlexRipper.Application.PlexServers.Commands
                 {
                     // Create plexServer
                     Log.Debug($"Adding PlexServer with name: {plexServer.Name} to the database.");
-                    await _dbContext.PlexServers.AddAsync(plexServer);
+                    await _dbContext.PlexServers.AddAsync(plexServer, cancellationToken);
                 }
 
             }
@@ -85,7 +82,7 @@ namespace PlexRipper.Application.PlexServers.Commands
                     .PlexAccountServers
                     .AsTracking()
                     .Where(x => x.PlexAccountId == plexAccount.Id && x.PlexServerId == plexServer.Id)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(cancellationToken);
 
                 if (plexAccountServer != null)
                 {
@@ -114,7 +111,7 @@ namespace PlexRipper.Application.PlexServers.Commands
             // The list of all past and current serverId's the plexAccount has access too
             List<int> currentList = await _dbContext.PlexAccountServers
                 .Where(x => x.PlexAccountId == plexAccount.Id)
-                .Select(x => x.PlexServerId).ToListAsync();
+                .Select(x => x.PlexServerId).ToListAsync(cancellationToken);
 
             // The list which contains the serverId's the plexAccount has access too after the update.
             List<int> newList = plexServers.Select(x => x.Id).ToList();
@@ -124,7 +121,7 @@ namespace PlexRipper.Application.PlexServers.Commands
             foreach (int serverId in removalList)
             {
                 var entity = await _dbContext.PlexAccountServers.AsTracking()
-                    .FirstOrDefaultAsync(x => x.PlexAccountId == plexAccount.Id && x.PlexServerId == serverId);
+                    .FirstOrDefaultAsync(x => x.PlexAccountId == plexAccount.Id && x.PlexServerId == serverId, cancellationToken);
                 if (entity != null)
                 {
                     _dbContext.PlexAccountServers.Remove(entity);
@@ -132,7 +129,7 @@ namespace PlexRipper.Application.PlexServers.Commands
             }
 
 
-            return Result.Ok(plexServers);
+            return Result.Ok(true);
 
         }
     }

@@ -55,7 +55,8 @@ namespace PlexRipper.Application.PlexServers.Queries
             var plexServer = plexTvShowEpisode?.TvShowSeason?.TvShow?.PlexLibrary?.PlexServer;
             if (plexServer == null)
             {
-                return Result.Fail($"Could not retrieve the PlexServer from PlexTvShowEpisode with id: {request.Id}");
+                return ResultExtensions.GetEntityNotFound(nameof(PlexServer), request.Id)
+                    .LogError(null, $"Could not retrieve the PlexServer from PlexTvShowEpisode with id: {request.Id}");
             }
             return Result.Ok(plexServer);
         }

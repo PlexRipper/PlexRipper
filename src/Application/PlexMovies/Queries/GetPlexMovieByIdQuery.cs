@@ -7,17 +7,22 @@ using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexMovies
 {
     public class GetPlexMovieByIdQuery : IRequest<Result<PlexMovie>>
     {
-        public GetPlexMovieByIdQuery(int id)
+        public GetPlexMovieByIdQuery(int id, bool includePlexLibrary = false, bool includePlexServer = false)
         {
             Id = id;
+            IncludePlexLibrary = includePlexLibrary;
+            IncludePlexServer = includePlexServer;
         }
 
         public int Id { get; }
+        public bool IncludePlexLibrary { get; }
+        public bool IncludePlexServer { get; }
     }
 
     public class GetPlexMovieByIdQueryValidator : AbstractValidator<GetPlexMovieByIdQuery>
@@ -35,15 +40,28 @@ namespace PlexRipper.Application.PlexMovies
 
         public async Task<Result<PlexMovie>> Handle(GetPlexMovieByIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetPlexMovieByIdQuery, GetPlexMovieByIdQueryValidator>(request);
-            if (result.IsFailed) return result;
+            var query = _dbContext.PlexMovies.AsQueryable();
 
-            var plexMovie = await _dbContext.PlexMovies
-                                    .Include(x => x.PlexLibrary)
-                                    .ThenInclude(x => x.PlexServer)
-                                    .FirstOrDefaultAsync(x => x.Id == request.Id);
+            if (request.IncludePlexLibrary && !request.IncludePlexServer)
+            {
+                query = query
+                    .Include(x => x.PlexLibrary);
+            }
 
-            return ReturnResult(plexMovie, request.Id);
+            if (request.IncludePlexLibrary && request.IncludePlexServer)
+            {
+                query = query
+                    .Include(v => v.PlexLibrary)
+                    .ThenInclude(x => x.PlexServer);
+            }
+
+            var plexMovie = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+
+            if (plexMovie == null)
+            {
+                return ResultExtensions.GetEntityNotFound(nameof(PlexMovie), request.Id);
+            }
+            return Result.Ok(plexMovie);
         }
     }
 }

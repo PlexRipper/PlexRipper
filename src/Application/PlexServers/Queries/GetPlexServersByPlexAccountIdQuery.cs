@@ -46,7 +46,7 @@ namespace PlexRipper.Application.PlexServers.Queries
                     .Any(y => y.PlexAccount.Id == request.Id))
                 .ToListAsync(cancellationToken);
 
-            return ReturnResult(plexServers);
+            return Result.Ok(plexServers);
         }
     }
 }

@@ -6,6 +6,7 @@ using PlexRipper.Application.PlexServers.Queries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PlexRipper.Application.PlexAccounts
@@ -135,10 +136,16 @@ namespace PlexRipper.Application.PlexAccounts
                 return refreshResult.ToResult().WithError(msg);
             }
 
-            // Retrieve and store the corresponding PlexLibraries
-            if (refreshResult.Value.Count > 0)
+            var plexServerList = await _mediator.Send(new GetPlexServersByPlexAccountIdQuery(plexAccount.Id));
+            if (plexServerList.IsFailed)
             {
-                foreach (var plexServer in refreshResult.Value)
+                return plexServerList.ToResult();
+            }
+
+            // Retrieve and store the corresponding PlexLibraries
+            if (plexServerList.Value.Any())
+            {
+                foreach (var plexServer in plexServerList.Value)
                 {
                     await _plexLibraryService.RefreshLibrariesAsync(plexAccount, plexServer);
                 }

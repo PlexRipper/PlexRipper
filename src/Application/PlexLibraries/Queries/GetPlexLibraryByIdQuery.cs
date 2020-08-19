@@ -12,45 +12,57 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexLibraries.Queries
 {
-    public class GetPlexLibraryByIdWithMediaQuery : IRequest<Result<PlexLibrary>>
+    public class GetPlexLibraryByIdQuery : IRequest<Result<PlexLibrary>>
     {
-        public GetPlexLibraryByIdWithMediaQuery(int id)
+        public GetPlexLibraryByIdQuery(int id, bool includePlexServer = false, bool includeMedia = false)
         {
             Id = id;
+            IncludePlexServer = includePlexServer;
+            IncludeMedia = includeMedia;
         }
 
         public int Id { get; }
+        public bool IncludePlexServer { get; }
+        public bool IncludeMedia { get; }
     }
 
-    public class GetPlexLibraryByIdWithMediaQueryValidator : AbstractValidator<GetPlexLibraryByIdWithMediaQuery>
+    public class GetPlexLibraryByIdQueryValidator : AbstractValidator<GetPlexLibraryByIdQuery>
     {
-        public GetPlexLibraryByIdWithMediaQueryValidator()
+        public GetPlexLibraryByIdQueryValidator()
         {
             RuleFor(x => x.Id).GreaterThan(0);
         }
     }
 
 
-    public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdWithMediaQuery, Result<PlexLibrary>>
+    public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdQuery, Result<PlexLibrary>>
     {
         public GetPlexLibraryByIdWithMediaHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
 
-        public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdWithMediaQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetPlexLibraryByIdWithMediaQuery, GetPlexLibraryByIdWithMediaQueryValidator>(request);
-            if (result.IsFailed) return result;
+            var query = _dbContext.PlexLibraries.AsQueryable();
 
-            var plexLibrary = await _dbContext.PlexLibraries
-                .Include(x => x.PlexServer)
-                .Include(x => x.Movies)
-                .Include(x => x.TvShows)
-                .ThenInclude(x => x.Seasons)
-                .ThenInclude(x => x.Episodes)
-                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            if (request.IncludePlexServer)
+            {
+                query = query
+                    .Include(x => x.PlexServer);
+            }
+
+            if (request.IncludeMedia)
+            {
+                query = query
+                    .Include(x => x.Movies)
+                    .Include(x => x.TvShows)
+                    .ThenInclude(x => x.Seasons)
+                    .ThenInclude(x => x.Episodes);
+            }
+
+            var plexLibrary = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (plexLibrary == null)
             {
-                return ResultExtensions.Create404NotFoundResult();
+                return ResultExtensions.GetEntityNotFound(nameof(PlexLibrary), request.Id);
             }
 
             // Sort Movies

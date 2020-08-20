@@ -7,13 +7,13 @@ PlexRipper allows you to download all types of media from Plex servers that are 
 ## Features
  - Runs in a Docker container and can be deployed on any type of platform that can host a Docker container. 
  - Add multiple Plex accounts to download from the accessible Plex servers
- 
+ - Light and Dark-mode
   
  ## Upcoming features
  - Download music and photo's, currently only movies and tv shows
  - Pause and resume downloads
  - Search through media and download entire tvshows or seasons with ease
- - Light and Dark-mode
+
  
  ## Back-end
  - [Based on the Clean Architecture template](https://github.com/jasontaylordev/CleanArchitecture) adhering to the SOLID principles.

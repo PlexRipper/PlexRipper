@@ -37,6 +37,6 @@ export function stopDownloadTask(downloadTaskId: number): Observable<boolean> {
 
 export function getAllDownloads(): Observable<DownloadTaskDTO[]> {
 	preApiRequest(logText, 'getAllDownloads');
-	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/`);
+	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}`);
 	return checkResponse<DownloadTaskDTO[]>(result, logText, 'getAllDownloads');
 }

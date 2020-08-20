@@ -204,23 +204,17 @@ namespace PlexRipper.Application.PlexLibraries
         {
             if (plexLibrary == null)
             {
-                string msg = "The plexLibrary was null";
-                Log.Warning(msg);
-                return Result.Fail(msg);
+                return ResultExtensions.IsNull("plexLibrary").LogError();
             }
 
             if (plexLibrary.GetMediaType != PlexMediaType.TvShow)
             {
-                string msg = "PlexLibrary is not of type TvShow";
-                Log.Warning(msg);
-                return Result.Fail(msg);
+                return Result.Fail("PlexLibrary is not of type TvShow").LogError();
             }
 
             if (plexLibrary.TvShows.Count == 0)
             {
-                string msg = "PlexLibrary does not contain any TvShows and thus cannot request the corresponding media";
-                Log.Warning(msg);
-                return Result.Fail(msg);
+                return Result.Fail("PlexLibrary does not contain any TvShows and thus cannot request the corresponding media").LogError();
             }
 
             var result = await _mediator.Send(new GetPlexLibraryByIdWithServerQuery(plexLibrary.Id));
@@ -240,12 +234,14 @@ namespace PlexRipper.Application.PlexLibraries
                 plexTvShow.Seasons = await _plexServiceApi.GetSeasonsAsync(authToken, serverUrl, plexTvShow);
 
                 // Retrieve the episodes for every season
-                if (plexTvShow.Seasons.Any())
+                if (!plexTvShow.Seasons.Any())
                 {
-                    foreach (var showSeason in plexTvShow.Seasons)
-                    {
-                        showSeason.Episodes = await _plexServiceApi.GetEpisodesAsync(authToken, serverUrl, showSeason);
-                    }
+                    continue;
+                }
+
+                foreach (var showSeason in plexTvShow.Seasons)
+                {
+                    showSeason.Episodes = await _plexServiceApi.GetEpisodesAsync(authToken, serverUrl, showSeason);
                 }
 
                 // Send progress update to clients
@@ -260,6 +256,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             var freshPlexLibrary = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id, false, true));
+
             // Complete progress update
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.TvShows.Count,
                 plexLibrary.TvShows.Count);

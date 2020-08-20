@@ -4,8 +4,8 @@ import { map, tap } from 'rxjs/operators';
 import { AxiosResponse } from 'axios';
 import Result from 'fluent-type-results';
 
-export const baseUrl = 'https://localhost:5001';
-// export const baseUrlHttp = "http://localhost:5000";
+//export const baseUrl = 'https://localhost:5001';
+export const baseUrl = 'http://localhost:5000';
 
 export const baseApiUrl = `${baseUrl}/api`;
 

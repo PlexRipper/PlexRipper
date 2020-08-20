@@ -29,6 +29,7 @@ PlexRipper allows you to download all types of media from Plex servers that are 
   
  ## Front-end
  - [Vue.js](https://vuejs.org/) with [Nuxt.js](https://nuxtjs.org/)
+ - Typescript
  - Rx.js
  - Vuetify
  

@@ -43,6 +43,10 @@ export class SignalrService {
 		this._downloadHubConnection.connectionState$.subscribe((connectionState) => {
 			this._downloadHubConnectionstate = connectionState.status;
 		});
+
+		this._libraryHubConnection.connectionState$.subscribe((connectionState) => {
+			this._libraryHubConnectionstate = connectionState.status;
+		});
 	}
 
 	public startLibraryHubConnection(): void {
@@ -90,6 +94,7 @@ export class SignalrService {
 	}
 
 	public getLibraryProgress(): Observable<LibraryProgress> {
+		this.startLibraryHubConnection();
 		return this._libraryHubConnection.on<LibraryProgress>('LibraryProgress');
 	}
 }

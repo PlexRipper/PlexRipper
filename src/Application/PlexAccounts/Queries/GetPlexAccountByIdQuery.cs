@@ -67,28 +67,29 @@ namespace PlexRipper.Application.PlexAccounts
             var plexAccount = await query
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-
             if (plexAccount == null)
             {
                 return ResultExtensions.GetEntityNotFound(nameof(PlexAccount), request.Id);
             }
 
-            // Remove any PlexLibraries the plexAccount has no access to
-            // TODO This might be improved further since now all PlexLibraries will be retrieved from the database.
-            var plexServers = plexAccount.PlexAccountServers.Select(x => x.PlexServer).ToList();
-            foreach (var plexServer in plexServers)
+            if (request.IncludePlexServers && request.IncludePlexLibraries)
             {
-                // Remove inaccessible PlexLibraries
-                for (int i = plexServer.PlexLibraries.Count - 1; i >= 0; i--)
+                // Remove any PlexLibraries the plexAccount has no access to
+                // TODO This might be improved further since now all PlexLibraries will be retrieved from the database.
+                var plexServers = plexAccount.PlexAccountServers.Select(x => x.PlexServer).ToList();
+                foreach (var plexServer in plexServers)
                 {
-                    var x = plexServer?.PlexLibraries[i].PlexAccountLibraries.Select(y => y.PlexAccountId).ToList();
-                    if (!x.Contains(plexAccount.Id))
+                    // Remove inaccessible PlexLibraries
+                    for (int i = plexServer.PlexLibraries.Count - 1; i >= 0; i--)
                     {
-                        plexServer.PlexLibraries.RemoveAt(i);
+                        var x = plexServer?.PlexLibraries[i].PlexAccountLibraries.Select(y => y.PlexAccountId).ToList();
+                        if (!x.Contains(plexAccount.Id))
+                        {
+                            plexServer.PlexLibraries.RemoveAt(i);
+                        }
                     }
                 }
             }
-
 
             return Result.Ok(plexAccount);
         }

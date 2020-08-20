@@ -37,7 +37,9 @@ namespace PlexRipper.Application.PlexLibraries.Queries
 
     public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdQuery, Result<PlexLibrary>>
     {
-        public GetPlexLibraryByIdWithMediaHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
+        public GetPlexLibraryByIdWithMediaHandler(IPlexRipperDbContext dbContext) : base(dbContext)
+        {
+        }
 
         public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdQuery request, CancellationToken cancellationToken)
         {
@@ -65,28 +67,32 @@ namespace PlexRipper.Application.PlexLibraries.Queries
                 return ResultExtensions.GetEntityNotFound(nameof(PlexLibrary), request.Id);
             }
 
-            // Sort Movies
-            if (plexLibrary.Movies.Count > 0)
+            if (request.IncludeMedia)
             {
-                plexLibrary.Movies = plexLibrary.Movies.OrderByNatural(x => x.Title).ToList();
-            }
-
-            // Sort TvShows
-            if (plexLibrary.TvShows.Count > 0)
-            {
-                plexLibrary.TvShows = plexLibrary.TvShows.OrderBy(x => x.Title).ThenBy(y => y.RatingKey).ToList();
-                for (int i = 0; i < plexLibrary.TvShows.Count; i++)
+                // Sort Movies
+                if (plexLibrary.Movies?.Count > 0)
                 {
-                    plexLibrary.TvShows[i].Seasons = plexLibrary.TvShows[i].Seasons.OrderByNatural(x => x.Title).ToList();
+                    plexLibrary.Movies = plexLibrary.Movies.OrderByNatural(x => x.Title).ToList();
+                }
 
-                    for (int j = 0; j < plexLibrary.TvShows[i].Seasons.Count; j++)
+                // Sort TvShows
+                if (plexLibrary.TvShows?.Count > 0)
+                {
+                    plexLibrary.TvShows = plexLibrary.TvShows.OrderBy(x => x.Title).ThenBy(y => y.RatingKey).ToList();
+                    for (int i = 0; i < plexLibrary.TvShows.Count; i++)
                     {
-                        plexLibrary.TvShows[i].Seasons[j].Episodes = plexLibrary.TvShows[i].Seasons[j].Episodes.OrderBy(x => x.RatingKey).ToList();
+                        plexLibrary.TvShows[i].Seasons = plexLibrary.TvShows[i].Seasons.OrderByNatural(x => x.Title).ToList();
+
+                        for (int j = 0; j < plexLibrary.TvShows[i].Seasons.Count; j++)
+                        {
+                            plexLibrary.TvShows[i].Seasons[j].Episodes =
+                                plexLibrary.TvShows[i].Seasons[j].Episodes.OrderBy(x => x.RatingKey).ToList();
+                        }
                     }
                 }
             }
 
-            return ReturnResult(plexLibrary, request.Id);
+            return Result.Ok(plexLibrary);
         }
     }
 }

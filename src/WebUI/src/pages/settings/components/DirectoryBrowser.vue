@@ -2,7 +2,7 @@
 	<v-row justify="start">
 		<v-col>
 			<v-dialog :value="open" persistent scrollable max-width="900px">
-				<v-card style="position: absolute; top: 200px; bottom:200px;  max-width: 900px; max-height:900px">
+				<v-card style="position: absolute; top: 200px; bottom: 200px; max-width: 900px; max-height: 900px;">
 					<v-card-title>
 						<v-row>
 							<v-col cols="12">
@@ -49,7 +49,7 @@
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify';
 import { getDirectoryPath } from '@api/pathApi';
-import { FolderPathDTO, FileSystemModelDTO } from '~/types/dto/mainApi';
+import type { FolderPathDTO, FileSystemModelDTO } from '@dto/mainApi';
 
 @Component
 export default class DirectoryBrowser extends Vue {

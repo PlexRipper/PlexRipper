@@ -275,7 +275,7 @@ namespace PlexRipper.Application.PlexLibraries
         {
             await _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
 
-            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, false, true));
+            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true));
 
             if (libraryDB.IsFailed)
             {

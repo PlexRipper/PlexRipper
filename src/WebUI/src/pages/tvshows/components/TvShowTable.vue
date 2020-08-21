@@ -1,62 +1,17 @@
 <template>
 	<v-row justify="center">
 		<v-col cols="12">
-			<!-- Table Headers -->
-			<v-row class="table-header">
-				<v-col class="ml-6" style="max-width: 50px">
-					<v-checkbox
-						:dark="$vuetify.theme.dark"
-						:indeterminate="isIndeterminate"
-						color="red"
-						@change="selectAll($event)"
-					></v-checkbox>
-				</v-col>
-				<v-col>
-					Title
-				</v-col>
-				<v-col class="year-column">Year </v-col>
-				<v-col class="type-column">Type </v-col>
-				<v-col class="action-column">Actions </v-col>
-			</v-row>
-			<!-- Treeview Table -->
-			<v-row no-gutters>
-				<v-col>
-					<v-treeview
-						v-model="selected"
-						selectable
-						selected-color="red"
-						selection-type="leaf"
-						:dark="$vuetify.theme.dark"
-						hoverable
-						expand-icon="mdi-chevron-down"
-						:items="getItems"
-						transition
-						item-key="key"
-					>
-						<template v-slot:label="{ item }">
-							<v-row>
-								<v-col class="ml-4">{{ item.name }} </v-col>
-							</v-row>
-						</template>
-						<template v-slot:append="{ item }">
-							<v-row>
-								<v-col> {{ item.key }} </v-col>
-								<v-col class="year-column"> {{ item.year }} </v-col>
-								<v-col class="type-column"> {{ item.type }}</v-col>
-								<v-col class="action-column" style="text-align: center;">
-									<v-icon small @click="openDownloadConfirmationDialog(item.id, item.type)">
-										mdi-download
-									</v-icon>
-								</v-col>
-							</v-row>
-						</template>
-					</v-treeview>
-				</v-col>
-			</v-row>
+			<media-table
+				:headers="getHeaders"
+				:items="getItems"
+				:loading="loading"
+				:media-type="getType"
+				@download="openDownloadConfirmationDialog($event.itemId, $event.type)"
+			/>
 		</v-col>
 		<!-- The "Are you sure" dialog -->
 		<v-col cols="12">
-			<v-dialog v-model="showDialog" :max-width="500" :dark="$vuetify.theme.dark" scrollable>
+			<v-dialog v-model="showDialog" :dark="$vuetify.theme.dark" :max-width="500" scrollable>
 				<v-card v-if="progress === null" :dark="$vuetify.theme.dark">
 					<v-card-title>
 						Are you sure?
@@ -66,7 +21,7 @@
 					</v-card-subtitle>
 					<!-- Show Download Task Preview -->
 					<v-card-text>
-						<v-treeview open-all :items="downloadPreview" :open.sync="openDownloadPreviews"></v-treeview>
+						<v-treeview :items="downloadPreview" item-text="title" :open.sync="openDownloadPreviews" open-all></v-treeview>
 					</v-card-text>
 					<v-divider></v-divider>
 
@@ -87,7 +42,7 @@
 						Creating download tasks {{ progress.current }} of {{ progress.total }}
 					</v-card-title>
 					<v-card-text>
-						<progress-component text="" :percentage="progress.percentage" />
+						<progress-component :percentage="progress.percentage" text="" />
 					</v-card-text>
 				</v-card>
 			</v-dialog>
@@ -97,22 +52,23 @@
 
 <script lang="ts">
 import Log from 'consola';
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify/types';
 import DownloadService from '@service/downloadService';
-import { PlexAccountDTO, PlexTvShowDTO, PlexMediaType, DownloadTaskCreationProgress } from '@dto/mainApi';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import type { PlexAccountDTO } from '@dto/mainApi';
+import { DownloadTaskCreationProgress, PlexMediaType, PlexTvShowDTO } from '@dto/mainApi';
 import { downloadTvShow } from '@/types/api/plexDownloadApi';
 import { clone } from 'lodash';
-import { takeWhile, tap, finalize } from 'rxjs/operators';
+import { catchError, finalize, takeWhile, tap } from 'rxjs/operators';
 import SignalrService from '@service/signalrService';
-import { merge } from 'rxjs';
+import { merge, of } from 'rxjs';
 import ProgressComponent from '@/components/ProgressComponent.vue';
-import ITreeViewItem from '../types/iTreeViewItem';
+import MediaTable from '~/components/MediaTable/MediaTable.vue';
+import ITreeViewItem from '~/components/MediaTable/types/iTreeViewItem';
 
 @Component({
 	components: {
-		LoadingSpinner,
+		MediaTable,
 		ProgressComponent,
 	},
 })
@@ -121,7 +77,7 @@ export default class TVShowsTable extends Vue {
 	readonly activeAccount!: PlexAccountDTO;
 
 	@Prop({ required: true, type: Array as () => PlexTvShowDTO[] })
-	readonly tvshows!: PlexTvShowDTO[];
+	readonly tvShows!: PlexTvShowDTO[];
 
 	@Prop({ required: true, type: Boolean, default: true })
 	readonly loading!: Boolean;
@@ -132,14 +88,18 @@ export default class TVShowsTable extends Vue {
 
 	showDialog: boolean = false;
 	downloadPreview: ITreeViewItem[] = [];
-	downloadPreviewtype: PlexMediaType = 'None';
+	downloadPreviewType: PlexMediaType = PlexMediaType.None;
 	openDownloadPreviews: number[] = [];
 
 	progress: DownloadTaskCreationProgress | null = null;
 
+	get getType(): PlexMediaType {
+		return PlexMediaType.TvShow;
+	}
+
 	get getItems(): ITreeViewItem[] {
 		const items: ITreeViewItem[] = [];
-		this.tvshows.forEach((tvShow) => {
+		this.tvShows.forEach((tvShow: PlexTvShowDTO) => {
 			const seasons: ITreeViewItem[] = [];
 			if (tvShow.seasons) {
 				tvShow.seasons.forEach((season) => {
@@ -150,20 +110,24 @@ export default class TVShowsTable extends Vue {
 							episodes.push({
 								id: episode.id,
 								key: `${tvShow.id}-${season.id}-${episode.id}`,
-								name: episode.title ?? '',
-								type: 'Episode',
+								title: episode.title ?? '',
+								type: PlexMediaType.Episode,
 								children: [],
 								item: episode,
+								addedAt: episode.addedAt ?? '',
+								updatedAt: episode.updatedAt ?? '',
 							});
 						});
 						// Add seasons
 						seasons.push({
 							id: season.id,
 							key: `${tvShow.id}-${season.id}`,
-							name: season.title ?? '',
-							type: 'Season',
+							title: season.title ?? '',
+							type: PlexMediaType.Season,
 							children: episodes,
 							item: season,
+							addedAt: season.addedAt ?? '',
+							updatedAt: season.updatedAt ?? '',
 						});
 					}
 				});
@@ -171,11 +135,13 @@ export default class TVShowsTable extends Vue {
 				items.push({
 					id: tvShow.id,
 					key: `${tvShow.id}`,
-					name: tvShow.title ?? '',
+					title: tvShow.title ?? '',
 					year: tvShow.year,
-					type: 'TvShow',
+					type: PlexMediaType.TvShow,
 					item: tvShow,
 					children: seasons,
+					addedAt: tvShow.addedAt ?? '',
+					updatedAt: tvShow.updatedAt ?? '',
 				});
 			}
 		});
@@ -191,7 +157,7 @@ export default class TVShowsTable extends Vue {
 			{
 				text: 'Title',
 				value: 'title',
-				width: 500,
+				width: 400,
 			},
 			{
 				text: 'Year',
@@ -208,12 +174,6 @@ export default class TVShowsTable extends Vue {
 				value: 'updatedAt',
 				width: 150,
 			},
-			{
-				text: 'Actions',
-				value: 'actions',
-				width: 50,
-				sortable: false,
-			},
 		];
 	}
 
@@ -221,24 +181,11 @@ export default class TVShowsTable extends Vue {
 		return this.getItems.map((x) => x.children?.map((y) => y.children?.map((z) => z.id))).flat(2);
 	}
 
-	get isIndeterminate(): boolean {
-		return this.getLeafs.length !== this.selected.length && this.selected.length > 0;
-	}
-
-	selectAll(state: boolean): void {
-		Log.debug(state);
-		if (state) {
-			this.selected = this.getLeafs;
-		} else {
-			this.selected = [];
-		}
-	}
-
 	createPreview(itemId: number, type: PlexMediaType): ITreeViewItem[] {
 		const result: ITreeViewItem[] = [];
 		this.openDownloadPreviews = [];
 
-		// Tv show: Show tvshow -> with all seasons -> with all episodes
+		// Tv show: Show tvShow -> with all seasons -> with all episodes
 		if (type === 'TvShow') {
 			const tvShow: ITreeViewItem | undefined = this.getItems.find((x) => x.id === itemId);
 			if (tvShow) {
@@ -251,7 +198,7 @@ export default class TVShowsTable extends Vue {
 			}
 		}
 
-		// Season: Show tvshow -> season -> with all episodes
+		// Season: Show tvShow -> season -> with all episodes
 		if (type === 'Season') {
 			let tvShow: ITreeViewItem = {} as ITreeViewItem;
 			for (let i = 0; i < this.getItems.length; i++) {
@@ -269,7 +216,7 @@ export default class TVShowsTable extends Vue {
 			result.push(tvShow);
 		}
 
-		// Episode: Show tvshow -> season -> episode without anything else
+		// Episode: Show tvShow -> season -> episode without anything else
 		if (type === 'Episode') {
 			let tvShow: ITreeViewItem = {} as ITreeViewItem;
 			for (let i = 0; i < this.getItems.length; i++) {
@@ -295,21 +242,21 @@ export default class TVShowsTable extends Vue {
 
 	openDownloadConfirmationDialog(itemId: number, type: PlexMediaType): void {
 		this.downloadPreview = this.createPreview(itemId, type);
-		this.downloadPreviewtype = type;
+		this.downloadPreviewType = type;
 		this.showDialog = true;
 	}
 
 	downloadTvShows(): void {
 		let itemId = 0;
-		if (this.downloadPreviewtype === 'TvShow') {
+		if (this.downloadPreviewType === 'TvShow') {
 			itemId = this.downloadPreview[0].id;
 		}
 
-		if (this.downloadPreviewtype === 'Season') {
+		if (this.downloadPreviewType === 'Season') {
 			itemId = this.downloadPreview[0].children[0].id;
 		}
 
-		if (this.downloadPreviewtype === 'Episode') {
+		if (this.downloadPreviewType === 'Episode') {
 			itemId = this.downloadPreview[0].children[0].children[0].id;
 		}
 
@@ -325,44 +272,26 @@ export default class TVShowsTable extends Vue {
 					this.progress = null;
 				}),
 				takeWhile((data) => !data.isComplete),
+				catchError(() => {
+					return of(undefined);
+				}),
 			),
 			// Download tvShows
-			downloadTvShow(itemId, this.activeAccount?.id ?? 0, this.downloadPreviewtype).pipe(
+			downloadTvShow(itemId, this.activeAccount?.id ?? 0, this.downloadPreviewType).pipe(
 				finalize(() => DownloadService.fetchDownloadList()),
+				catchError(() => {
+					return of(undefined);
+				}),
 			),
-		).subscribe();
+		)
+			.pipe(
+				catchError(() => {
+					this.showDialog = false;
+					this.progress = null;
+					return of(false);
+				}),
+			)
+			.subscribe();
 	}
 }
 </script>
-
-<style lang="scss">
-.v-treeview-node {
-	background: #505050 !important;
-	border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
-}
-
-.table-header {
-	background: rgb(30, 30, 30);
-	border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
-	margin: 0;
-	height: 50px;
-	.col {
-		.v-input--selection-controls {
-			padding: 0 0 0 2px !important;
-			margin: 0 !important;
-		}
-	}
-}
-.year-column {
-	min-width: 80px;
-	max-width: 80px;
-}
-.type-column {
-	min-width: 100px;
-	max-width: 100px;
-}
-.action-column {
-	min-width: 100px;
-	max-width: 100px;
-}
-</style>

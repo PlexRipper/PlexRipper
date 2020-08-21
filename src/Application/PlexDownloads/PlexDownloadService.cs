@@ -42,12 +42,6 @@ namespace PlexRipper.Application.PlexDownloads
             _signalRService = signalRService;
         }
 
-        public Task<Result> StartDownloadAsync(DownloadTask downloadTask)
-        {
-            throw new NotImplementedException();
-            // return _downloadManager.AddToDownloadQueueAsync(downloadTask);
-        }
-
         public Task<string> GetPlexTokenAsync(PlexAccount plexAccount)
         {
             return _plexAuthenticationService.GetPlexTokenAsync(plexAccount);
@@ -260,7 +254,7 @@ namespace PlexRipper.Application.PlexDownloads
                 return downloadTask.ToResult<bool>();
             }
 
-            return await StartDownloadAsync(downloadTask.Value);
+            return await _downloadManager.AddToDownloadQueueAsync(downloadTask.Value);
         }
 
         public async Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int mediaId, PlexMediaType type)

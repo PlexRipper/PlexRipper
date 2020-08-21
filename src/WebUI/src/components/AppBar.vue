@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { PlexAccountDTO } from '@dto/mainApi';
+import type { PlexAccountDTO } from '@dto/mainApi';
 import AccountService from '@service/accountService';
 import SettingsService from '@service/settingsService';
 

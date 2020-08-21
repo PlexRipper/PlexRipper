@@ -9,7 +9,6 @@ namespace PlexRipper.Application.Common.Interfaces
     public interface IPlexDownloadService
     {
         Task<string> GetPlexTokenAsync(PlexAccount plexAccount);
-        Task<Result> StartDownloadAsync(DownloadTask downloadTask);
         Task<Result<bool>> DownloadMovieAsync(int plexAccountId, int plexMovieId);
         Task<Result<DownloadTask>> GetDownloadTaskAsync(int plexAccountId, PlexMovie plexMovie);
         Task<Result<List<DownloadTask>>> GetAllDownloadsAsync();

@@ -24,7 +24,7 @@
 				<v-btn :disabled="isRefreshing" @click="refreshLibrary">Refresh Library</v-btn>
 			</v-col>
 			<v-col cols="12">
-				<tv-show-table :tvshows="tvshows" :active-account="activeAccount" :loading="isLoading" />
+				<tv-show-table :tv-shows="tvshows" :active-account="activeAccount" :loading="isLoading" />
 			</v-col>
 		</v-row>
 	</v-container>

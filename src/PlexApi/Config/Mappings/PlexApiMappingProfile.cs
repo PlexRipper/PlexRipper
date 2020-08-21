@@ -59,7 +59,6 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
                 .ForMember(dest => dest.LastViewedAt, opt => opt.Ignore())
-                .ForMember(dest => dest.RatingKey, opt => opt.Ignore())
                 .ForMember(dest => dest.OriginallyAvailableAt,
                     opt => opt.ConvertUsing(new StringToDateTimeUTC()));
 

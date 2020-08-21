@@ -34,7 +34,7 @@ namespace PlexRipper.WebAPI
 
             app.UseCors(CORSConfiguration);
             app.UseAuthorization();
-            // Enabeling this causes CORS errors as the front-end is in http and cannot connect with an https back-end
+            // Enabling this causes CORS errors as the front-end is in http and cannot connect with an https back-end
             // app.UseHttpsRedirection();
 
             app.UseOpenApi(); // serve OpenAPI/Swagger documents

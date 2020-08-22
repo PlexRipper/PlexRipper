@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common.Interfaces.SignalR;
 using PlexRipper.Domain.Common;
@@ -48,6 +48,9 @@ namespace PlexRipper.SignalR
             await _downloadHub.Clients.All.SendAsync("DownloadTaskCreation", progress);
         }
 
-
+        public async Task SendDownloadProgressUpdate(DownloadProgress downloadProgress)
+        {
+            await _downloadHub.Clients.All.SendAsync("DownloadProgress", downloadProgress);
+        }
     }
 }

@@ -11,10 +11,6 @@ namespace PlexRipper.SignalR.Config
         {
             builder.RegisterType<SignalRService>().As<ISignalRService>();
 
-            // TODO This might be removed
-            builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
-                .Where(t => typeof(Hub).IsAssignableFrom(t))
-                .ExternallyOwned();
         }
     }
 }

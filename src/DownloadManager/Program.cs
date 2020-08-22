@@ -14,7 +14,7 @@ namespace PlexRipper.DownloadManager
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddHostedService<DownloadWorker>();
+                    services.AddHostedService<DownloadService>();
                 });
     }
 }

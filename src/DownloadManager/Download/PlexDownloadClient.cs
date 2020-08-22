@@ -6,7 +6,10 @@ using PlexRipper.Domain.Types;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.PlexApi.Api;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,6 +61,8 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Properties
 
+        public string PlexServerAuthToken { get; set; }
+
         /// <summary>
         /// The ClientId is always the same id that is assigned to the <see cref="DownloadTask"/>
         /// </summary>
@@ -81,6 +86,13 @@ namespace PlexRipper.DownloadManager.Download
 
         public long TotalBytesToReceive { get; internal set; }
         public DownloadStatus DownloadStatus => DownloadTask.DownloadStatus;
+
+        public string DownloadUrl => $"{DownloadTask.DownloadUrl}?download=1&X-Plex-Token={PlexServerAuthToken}";
+
+        /// <summary>
+        /// In how many parts/segments should the media be downloaded.
+        /// </summary>
+        public long Parts { get; set; } = 1;
 
         #endregion Properties
 
@@ -110,13 +122,13 @@ namespace PlexRipper.DownloadManager.Download
         /// <returns></returns>
         public async Task<Result<bool>> StartAsync()
         {
-            Log.Debug(DownloadTask.DownloadUrl);
+            Log.Debug($"Start downloading from {DownloadUrl}");
             try
             {
                 SetDownloadStatus(DownloadStatus.Starting);
 
                 // Source: https://stackoverflow.com/a/48190014/8205497
-                var response = await GetAsync(DownloadTask.DownloadUri, HttpCompletionOption.ResponseHeadersRead);
+                var response = await GetAsync(DownloadUrl, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
 
                 TotalBytesToReceive = response.Content.Headers.ContentLength ?? -1L;
@@ -125,6 +137,8 @@ namespace PlexRipper.DownloadManager.Download
                     SetDownloadStatus(DownloadStatus.Error);
                     return Result.Fail("File size could not be determined of the media that will be downloaded");
                 }
+
+                var list = CreateDownloadRanges();
 
                 _responseStream = await response.Content.ReadAsStreamAsync();
                 var result = _fileSystem.SaveFile(DownloadPath, DownloadTask.FileName, TotalBytesToReceive);
@@ -155,7 +169,6 @@ namespace PlexRipper.DownloadManager.Download
                         _fileStream.Dispose();
                     });
 
-
                 return Result.Ok(true);
             }
             catch (Exception e)
@@ -178,7 +191,8 @@ namespace PlexRipper.DownloadManager.Download
                 _cancellationToken?.Cancel();
                 _responseStream?.Dispose();
                 _fileStream?.Dispose();
-              //  _copyTask.
+
+                //  _copyTask.
             }
             catch (Exception e)
             {
@@ -203,6 +217,28 @@ namespace PlexRipper.DownloadManager.Download
             DownloadProgressChanged?.Invoke(this, downloadProgress);
         }
 
+        private List<DownloadRange> CreateDownloadRanges()
+        {
+            // Divide into equal parts
+            var partSize = TotalBytesToReceive / Parts;
+            var rangeList = new List<DownloadRange>((int) Parts);
+            var remainder = TotalBytesToReceive - (partSize * Parts);
+
+            for (int i = 0; i < Parts; i++)
+            {
+                long start = partSize * i;
+                long end = start + partSize;
+                if (i == Parts - 1 && remainder > 0)
+                {
+                    // Add the remainder to the last download range
+                    end += remainder;
+                }
+                rangeList.Add(new DownloadRange(start, end));
+            }
+
+            return rangeList;
+        }
+
         #endregion Methods
 
         #region Events
@@ -212,8 +248,6 @@ namespace PlexRipper.DownloadManager.Download
         public event EventHandler<DownloadProgress> DownloadFileCompleted;
 
         public event EventHandler<DownloadStatus> DownloadStatusChanged;
-
-
 
         #endregion Events
     }

@@ -49,15 +49,15 @@ namespace PlexRipper.Domain.Entities
         public virtual PlexServer PlexServer { get; set; }
         public int PlexServerId { get; set; }
 
+        public virtual PlexAccount PlexAccount { get; set; }
+        public int PlexAccountId { get; set; }
+
         public virtual FolderPath FolderPath { get; set; }
         public int FolderPathId { get; set; }
 
         #endregion
 
         #region Helpers
-        [NotMapped] //TODO Debate if the token should be stored in the database or retrieved
-        public string PlexServerAuthToken { get; set; }
-
         [NotMapped]
         public DownloadStatus DownloadStatus
         {
@@ -76,8 +76,7 @@ namespace PlexRipper.Domain.Entities
         public Uri DownloadUri => new Uri(DownloadUrl, UriKind.Absolute);
 
         [NotMapped]
-        public string DownloadUrl =>
-            $"{PlexServer?.BaseUrl}{FileLocationUrl}?download=1&X-Plex-Token={PlexServerAuthToken}" ?? "";
+        public string DownloadUrl => $"{PlexServer?.BaseUrl}{FileLocationUrl}" ?? "";
 
         [NotMapped]
         public string DownloadDirectory { get; set; }

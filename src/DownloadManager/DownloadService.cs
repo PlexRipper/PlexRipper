@@ -1,17 +1,13 @@
 ﻿using Microsoft.Extensions.Hosting;
-using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace PlexRipper.DownloadManager
 {
-    public class DownloadWorker : BackgroundService
+    public class DownloadService : BackgroundService
     {
-        private readonly IDownloadManager _downloadManager;
-
-        public DownloadWorker(IDownloadManager downloadManager)
+        public DownloadService()
         {
-            _downloadManager = downloadManager;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

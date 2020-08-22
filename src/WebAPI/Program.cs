@@ -39,7 +39,7 @@ namespace PlexRipper.WebAPI
                         config.ClearProviders();
                         config.AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
                     })
-                    .ConfigureServices((hostContext, services) => { services.AddHostedService<DownloadWorker>(); })
+                    .ConfigureServices((hostContext, services) => { services.AddHostedService<DownloadService>(); })
                     .UseSerilog()
                     .Build();
 

@@ -13,16 +13,18 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 {
     public class GetDownloadTaskByIdQuery : IRequest<Result<DownloadTask>>
     {
-        public GetDownloadTaskByIdQuery(int id, bool includeServer = false, bool includeFolderPath = false)
+        public GetDownloadTaskByIdQuery(int id, bool includeServer = false, bool includeFolderPath = false, bool includePlexAccount = false)
         {
             Id = id;
             IncludeServer = includeServer;
             IncludeFolderPath = includeFolderPath;
+            IncludePlexAccount = includePlexAccount;
         }
 
         public int Id { get; }
         public bool IncludeServer { get; }
         public bool IncludeFolderPath { get; }
+        public bool IncludePlexAccount { get; }
     }
 
     public class GetDownloadTaskByIdQueryValidator : AbstractValidator<GetDownloadTaskByIdQuery>
@@ -36,7 +38,9 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 
     public class GetDownloadTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetDownloadTaskByIdQuery, Result<DownloadTask>>
     {
-        public GetDownloadTaskByIdQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
+        public GetDownloadTaskByIdQueryHandler(IPlexRipperDbContext dbContext) : base(dbContext)
+        {
+        }
 
         public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
         {
@@ -50,6 +54,11 @@ namespace PlexRipper.Application.PlexDownloads.Queries
             if (request.IncludeFolderPath)
             {
                 query = query.Include(x => x.FolderPath);
+            }
+
+            if (request.IncludePlexAccount)
+            {
+                query = query.Include(x => x.PlexAccount);
             }
 
             var downloadTask = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);

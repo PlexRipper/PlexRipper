@@ -31,7 +31,7 @@ namespace PlexRipper.Application.PlexAuthentication
 
             if (plexAccount.AuthenticationToken != string.Empty)
             {
-                // TODO Make the token refresh limit configurable 
+                // TODO Make the token refresh limit configurable
                 if ((plexAccount.ValidatedAt - DateTime.Now).TotalDays < 30)
                 {
                     Log.Information("Plex AuthToken was still valid, using from local DB.");
@@ -53,6 +53,7 @@ namespace PlexRipper.Application.PlexAuthentication
         /// <returns></returns>
         public Task<Result<string>> GetPlexServerTokenAsync(int plexAccountId, int plexServerId)
         {
+            // TODO if there is no token then is should refresh a token
             return _mediator.Send(new GetPlexServerTokenQuery(plexAccountId, plexServerId));
         }
     }

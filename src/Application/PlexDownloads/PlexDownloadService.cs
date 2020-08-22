@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common.Interfaces;
@@ -233,7 +233,8 @@ namespace PlexRipper.Application.PlexDownloads
                     TitleTvShowSeason = metaData.TitleTvShowSeason,
                     RatingKey = metaData.RatingKey,
                     Priority = server.Id * 10000000,
-                    MediaType = mediaType
+                    MediaType = mediaType,
+                    PlexServer = server
                 });
             }
 
@@ -248,12 +249,14 @@ namespace PlexRipper.Application.PlexDownloads
                 return plexMovie.ToResult<bool>();
             }
 
+            Log.Debug($"Start download setup process for movie: {plexMovie.Value.Title}");
             var downloadTask = await GetDownloadTaskAsync(plexAccountId, plexMovie.Value);
             if (downloadTask.IsFailed)
             {
                 return downloadTask.ToResult<bool>();
             }
 
+            Log.Debug($"Created download task for movie: {plexMovie.Value.Title}");
             return await _downloadManager.AddToDownloadQueueAsync(downloadTask.Value);
         }
 

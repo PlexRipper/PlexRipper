@@ -198,10 +198,12 @@ export default class MovieTable extends Vue {
 				}),
 			),
 			// Download Movie
-			downloadPlexMovie(itemId, this.activeAccount?.id ?? 0).pipe(finalize(() => DownloadService.fetchDownloadList())),
-			catchError(() => {
-				return of(false);
-			}),
+			downloadPlexMovie(itemId, this.activeAccount?.id ?? 0).pipe(
+				finalize(() => DownloadService.fetchDownloadList()),
+				catchError(() => {
+					return of(false);
+				}),
+			),
 		)
 			.pipe(
 				catchError(() => {

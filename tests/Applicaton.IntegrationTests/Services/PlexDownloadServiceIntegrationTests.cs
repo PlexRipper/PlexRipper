@@ -28,7 +28,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var plexDownloadService = Container.GetPlexDownloadService;
             var credentials = Secrets.Account1;
 
-            //Act 
+            //Act
             var newAccount = new PlexAccount
             {
                 Username = credentials.Username,
@@ -45,8 +45,8 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
             var downloadRequest = await plexDownloadService.GetDownloadTaskAsync(account.Value.Id, movie);
             var downloadRequest2 = await plexDownloadService.GetDownloadTaskAsync(account.Value.Id, movie2);
-            await plexDownloadService.StartDownloadAsync(downloadRequest.Value);
-            await plexDownloadService.StartDownloadAsync(downloadRequest2.Value);
+            // await plexDownloadService.StartDownloadAsync(downloadRequest.Value);
+            // await plexDownloadService.StartDownloadAsync(downloadRequest2.Value);
 
             await Task.Delay(15000);
 

@@ -145,6 +145,7 @@ namespace PlexRipper.DownloadManager.Download
                 _progressTimer.Start();
 
                 SetDownloadStatus(DownloadStatus.Downloading);
+
                 _copyTask = _responseStream
                     .CopyToAsync(_fileStream, _progress, 81920, _cancellationToken.Token)
                     .ContinueWith(task =>
@@ -153,6 +154,7 @@ namespace PlexRipper.DownloadManager.Download
                         _responseStream.Dispose();
                         _fileStream.Dispose();
                     });
+
 
                 return Result.Ok(true);
             }

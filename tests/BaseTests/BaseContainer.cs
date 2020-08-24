@@ -1,11 +1,8 @@
 ﻿using Autofac;
 using AutofacSerilogIntegration;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.PlexApi;
-using PlexRipper.WebAPI;
 using PlexRipper.WebAPI.Config;
 
 namespace PlexRipper.BaseTests
@@ -16,7 +13,6 @@ namespace PlexRipper.BaseTests
 
         public BaseContainer()
         {
-
             var builder = new ContainerBuilder();
             ContainerConfig.ConfigureContainer(builder);
 
@@ -31,6 +27,5 @@ namespace PlexRipper.BaseTests
         public IPlexLibraryService GetPlexLibraryService => AutofacContainer.Resolve<IPlexLibraryService>();
         public IPlexApiService GetPlexApiService => AutofacContainer.Resolve<IPlexApiService>();
         public IDownloadManager GetDownloadManager => AutofacContainer.Resolve<IDownloadManager>();
-
     }
 }

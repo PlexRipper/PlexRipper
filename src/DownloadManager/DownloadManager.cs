@@ -20,6 +20,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.Common.Interfaces.SignalR;
+using PlexRipper.Application.FolderPaths.Queries;
 using PlexRipper.Domain.Common;
 using PlexRipper.Domain.Enums;
 
@@ -91,6 +92,7 @@ namespace PlexRipper.DownloadManager
             _userSettings = userSettings;
             _fileSystem = fileSystem;
             SetMaxThreads();
+            System.Net.ServicePointManager.DefaultConnectionLimit = 1000;
         }
 
         #endregion Constructors
@@ -100,15 +102,22 @@ namespace PlexRipper.DownloadManager
         private async Task<Result<PlexDownloadClient>> CreateDownloadClientAsync(DownloadTask downloadTask)
         {
             PlexDownloadClient newClient = new PlexDownloadClient(downloadTask, _fileSystem);
-
             var token = await _plexAuthenticationService.GetPlexServerTokenAsync(downloadTask.PlexAccountId, downloadTask.PlexServerId);
             if (token.IsFailed)
             {
                 return token.ToResult();
             }
 
+            // Get the download folder
+            var downloadFolder = await _mediator.Send(new GetFolderPathByIdQuery(1));
+            if (downloadFolder.IsFailed)
+            {
+                return ResultExtensions.IsNull(nameof(downloadFolder)).LogError();
+            }
+            downloadTask.DownloadDirectory = downloadFolder.Value.Directory;
+
             newClient.PlexServerAuthToken = token.Value;
-            newClient.Parts = 8;
+            newClient.Parts = 4;
 
             newClient.DownloadProgressChanged += OnDownloadProgressChanged;
 
@@ -211,7 +220,6 @@ namespace PlexRipper.DownloadManager
                 return ResultExtensions.IsNull(nameof(downloadTask)).LogError();
             }
 
-
             // TODO Re-enable checking for existing download task after testing
             // var downloadTaskExists = await DownloadTaskExistsAsync(downloadTask);
             // if (downloadTaskExists.IsFailed)
@@ -262,6 +270,7 @@ namespace PlexRipper.DownloadManager
                 {
                     downloadClient = await CreateDownloadClientAsync(downloadTask);
                     await downloadClient.Value.StartAsync();
+                    break;
 
                     // There is an downloadClient which already has this downloadTask
                     // downloadClient.Value.DownloadStatus

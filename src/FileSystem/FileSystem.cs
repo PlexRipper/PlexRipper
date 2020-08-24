@@ -161,13 +161,14 @@ namespace PlexRipper.FileSystem
 
                 if (availableSpace < fileSize)
                 {
-                    return Result.Fail<FileStream>(
+                    return Result.Fail(
                         $"There is not enough space available in root directory {directory}");
                 }
 
-                var fileStream = File.Create(fullPath);
+                var fileStream = File.Create(fullPath, 2048, FileOptions.Asynchronous);
                 // Pre-allocate the required file size
                 fileStream.SetLength(fileSize);
+
                 return Result.Ok(fileStream);
 
             }

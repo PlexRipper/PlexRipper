@@ -228,7 +228,6 @@ namespace PlexRipper.Application.PlexDownloads
                     Title = metaData.Title,
                     DownloadStatus = DownloadStatus.Initialized,
                     FileName = metaData.FileName,
-                    DownloadDirectory = downloadFolder.Value.Directory,
                     TitleTvShow = metaData.TitleTvShow,
                     TitleTvShowSeason = metaData.TitleTvShowSeason,
                     RatingKey = metaData.RatingKey,

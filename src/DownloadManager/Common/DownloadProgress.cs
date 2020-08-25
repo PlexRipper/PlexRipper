@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using PlexRipper.Application.Common.Interfaces.DownloadManager;
+using PlexRipper.Domain.Common;
 
 namespace PlexRipper.DownloadManager.Common
 {
-    public class DownloadProgress
+    public class DownloadProgress : IDownloadProgress
     {
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
@@ -18,7 +20,7 @@ namespace PlexRipper.DownloadManager.Common
         public decimal Percentage => WorkerProgresses.AsQueryable().Average(x => x.Percentage);
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
-        public long DownloadSpeed { get; set; }
+        public int DownloadSpeed => WorkerProgresses.AsQueryable().Sum(x => x.DownloadSpeed);
 
         [JsonProperty("dataReceived", Required = Required.Always)]
         public long DataReceived => WorkerProgresses.AsQueryable().Sum(x => x.DataReceived);
@@ -26,15 +28,20 @@ namespace PlexRipper.DownloadManager.Common
         [JsonProperty("dataTotal", Required = Required.Always)]
         public long DataTotal { get; set; }
 
+        public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
+
         /// <summary>
         /// The download time remaining in seconds
         /// </summary>
         [JsonProperty("timeRemaining", Required = Required.Always)]
-        public int TimeRemaining { get; set; }
+        public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, DownloadSpeed);
 
-        public List<DownloadWorkerProgress> WorkerProgresses { get; }
+        public long BytesRemaining => DataTotal - DataReceived;
 
-        public DownloadProgress(List<DownloadWorkerProgress> progresses)
+
+        public List<IDownloadWorkerProgress> WorkerProgresses { get; }
+
+        public DownloadProgress(List<IDownloadWorkerProgress> progresses)
         {
             WorkerProgresses = progresses;
         }

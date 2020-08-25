@@ -2,13 +2,14 @@
 using PlexRipper.Domain;
 using PlexRipper.Domain.Types;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.SignalR;
 
 namespace PlexRipper.SignalR.Hubs
 {
     public class DownloadHub : Hub
     {
-        public Task DownloadProgressAsync(DownloadProgress downloadProgress)
+        public Task DownloadProgressAsync(IDownloadProgress downloadProgress)
         {
             if (Clients != null)
             {

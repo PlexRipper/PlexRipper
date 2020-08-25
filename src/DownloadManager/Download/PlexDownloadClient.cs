@@ -2,14 +2,11 @@
 using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Types;
 using PlexRipper.DownloadManager.Common;
-using PlexRipper.PlexApi.Api;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -17,6 +14,7 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Domain.Common;
 using PlexRipper.Domain.Enums;
 
@@ -43,7 +41,7 @@ namespace PlexRipper.DownloadManager.Download
         {
             _fileSystem = fileSystem;
             DownloadTask = downloadTask;
-            AddHeaders();
+            // AddHeaders();
 
             // Setup progress changed event
             _progress.ProgressChanged += (sender, l) =>
@@ -51,7 +49,6 @@ namespace PlexRipper.DownloadManager.Download
                 BytesReceived = l;
                 BytesRemaining = TotalBytesToReceive - BytesReceived;
             };
-
         }
 
         #endregion Constructors
@@ -69,8 +66,6 @@ namespace PlexRipper.DownloadManager.Download
         public long DownloadedSize { get; set; }
 
         public string DownloadPath => _fileSystem.ToAbsolutePath(DownloadTask.FolderPath?.Directory);
-
-        public long DownloadSpeed { get; internal set; }
 
         public DateTime DownloadStartAt { get; internal set; }
 
@@ -95,19 +90,18 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Methods
 
-        private void AddHeaders()
-        {
-            foreach ((string key, string value) in PlexHeaderData.GetBasicHeaders)
-            {
-                this.DefaultRequestHeaders.Add(key, value);
-            }
-        }
+        // private void AddHeaders()
+        // {
+        //     foreach ((string key, string value) in PlexHeaderData.GetBasicHeaders)
+        //     {
+        //         this.DefaultRequestHeaders.Add(key, value);
+        //     }
+        // }
 
         private void SetDownloadStatus(DownloadStatus downloadStatus)
         {
             DownloadTask.DownloadStatus = downloadStatus;
         }
-
 
 
         /// <summary>
@@ -124,14 +118,12 @@ namespace PlexRipper.DownloadManager.Download
                 // Source: https://stackoverflow.com/a/48190014/8205497
                 var response = await GetAsync(DownloadUrl, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
-
                 TotalBytesToReceive = response.Content.Headers.ContentLength ?? -1L;
                 if (TotalBytesToReceive <= 0)
                 {
                     SetDownloadStatus(DownloadStatus.Error);
                     return Result.Fail("File size could not be determined of the media that will be downloaded");
                 }
-
                 await CreateDownloadWorkers();
 
                 // _responseStream = await response.Content.ReadAsStreamAsync();
@@ -162,7 +154,6 @@ namespace PlexRipper.DownloadManager.Download
                 //         _responseStream.Dispose();
                 //         _fileStream.Dispose();
                 //     });
-
                 return Result.Ok(true);
             }
             catch (Exception e)
@@ -201,7 +192,6 @@ namespace PlexRipper.DownloadManager.Download
             var partSize = TotalBytesToReceive / Parts;
             var rangeList = new List<DownloadRange>((int) Parts);
             var remainder = TotalBytesToReceive - (partSize * Parts);
-
             for (int i = 0; i < Parts; i++)
             {
                 long start = partSize * i;
@@ -213,7 +203,6 @@ namespace PlexRipper.DownloadManager.Download
                 }
                 rangeList.Add(new DownloadRange(DownloadUrl, start, end));
             }
-
             return rangeList;
         }
 
@@ -226,54 +215,77 @@ namespace PlexRipper.DownloadManager.Download
                 var downloadWorker = new DownloadWorker(i++, DownloadTask, downloadRange, _fileSystem);
                 _downloadWorkers.Add(downloadWorker);
             }
-
             _downloadWorkers
-                .Select(x => x.DownloadWorkerProgressSubject)
+                .Select(x => x.DownloadWorkerProgress)
                 .Merge()
                 .DistinctUntilChanged()
                 .Buffer(_downloadWorkers.Count)
-
-                //.Throttle(TimeSpan.FromSeconds(1), Scheduler.CurrentThread)
                 .Subscribe(OnDownloadProgressChanged);
 
+            _downloadWorkers
+                .Select(x => x.DownloadWorkerComplete)
+                .Merge()
+                .Buffer(_downloadWorkers.Count)
+                .Subscribe(OnDownloadComplete);
             await StartDownloadWorkers();
         }
 
-        private void OnDownloadProgressChanged(IList<DownloadWorkerProgress> progressList)
+        private void OnDownloadComplete(IList<DownloadWorkerComplete> completeList)
         {
-            var listOrdered = progressList.ToList().OrderBy(x => x.Id).ToList();
-            StringBuilder builder = new StringBuilder();
-            foreach (var progress in listOrdered)
+            if (completeList.Count != Parts)
             {
-                builder.Append($"({progress.Id} - {progress.Percentage}) + ");
+                return;
+            }
+
+            var orderedList = completeList.ToList().OrderBy(x => x.Id).ToList();
+            StringBuilder builder = new StringBuilder();
+            foreach (var progress in orderedList)
+            {
+                builder.Append($"({progress.Id} - {progress.FileName} download completed!) + ");
+            }
+
+            // Remove the last " + "
+            if (builder.Length > 3)
+            {
+                builder.Length -= 3;
             }
 
             Log.Debug(builder.ToString());
 
-            var downloadProgress = new DownloadProgress(listOrdered)
+            var downloadComplete = new DownloadComplete(DownloadTaskId)
+            {
+                DestinationPath = DownloadPath,
+                FileName = DownloadTask.FileName,
+                DownloadWorkerCompletes = orderedList
+            };
+            Log.Debug($"Download of {DownloadTask.FileName} finished!");
+            DownloadFileCompleted.OnNext(downloadComplete);
+        }
+
+        private void OnDownloadProgressChanged(IList<IDownloadWorkerProgress> progressList)
+        {
+            var orderedList = progressList.ToList().OrderBy(x => x.Id).ToList();
+            StringBuilder builder = new StringBuilder();
+            foreach (var progress in orderedList)
+            {
+                builder.Append($"({progress.Id} - {progress.Percentage} {progress.DownloadSpeedFormatted}) + ");
+            }
+
+            // Remove the last " + "
+            if (builder.Length > 3)
+            {
+                builder.Length -= 3;
+            }
+
+            var downloadProgress = new DownloadProgress(orderedList)
             {
                 Id = DownloadTaskId,
                 Status = DownloadTask.DownloadStatus.ToString(),
                 DataTotal = TotalBytesToReceive,
-                DownloadSpeed = DownloadSpeed,
-                TimeRemaining = (int) Math.Floor(BytesRemaining / (double) DownloadSpeed),
             };
-
+            builder.Append($" = ({downloadProgress.DownloadSpeedFormatted} - {downloadProgress.TimeRemaining})");
+            Log.Debug(builder.ToString());
             DownloadProgressChanged.OnNext(downloadProgress);
-
-            if (listOrdered.All(x => x.IsCompleted))
-            {
-                var downloadComplete = new DownloadComplete(DownloadTaskId)
-                {
-                    ChuckPaths = _downloadWorkers.Select(x => x.FilePath).ToList(),
-                    DestinationPath = DownloadPath,
-                    FileName = DownloadTask.FileName
-                };
-
-                Log.Debug($"Download of {DownloadTask.FileName} finished!");
-
-                DownloadFileCompleted.OnNext(downloadComplete);
-            }
         }
 
         private async Task StartDownloadWorkers()
@@ -287,7 +299,6 @@ namespace PlexRipper.DownloadManager.Download
         #region Events
 
         public Subject<DownloadProgress> DownloadProgressChanged { get; } = new Subject<DownloadProgress>();
-
 
         public Subject<DownloadComplete> DownloadFileCompleted { get; } = new Subject<DownloadComplete>();
 

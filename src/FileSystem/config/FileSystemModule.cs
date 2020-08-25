@@ -8,6 +8,7 @@ namespace PlexRipper.FileSystem.config
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
+            builder.RegisterType<FileManagement>().As<IFileManagement>().SingleInstance();
             builder.RegisterType<DiskProvider>().As<IDiskProvider>().SingleInstance();
         }
     }

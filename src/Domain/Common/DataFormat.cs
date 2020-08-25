@@ -17,7 +17,6 @@ namespace PlexRipper.Domain.Common
             double kiloByteSize = byteSize / 1024D;
             double megaByteSize = kiloByteSize / 1024D;
             double gigaByteSize = megaByteSize / 1024D;
-
             if (byteSize < 1024)
                 return string.Format(numberFormat, "{0} B", byteSize);
             if (byteSize < 1048576)
@@ -36,7 +35,6 @@ namespace PlexRipper.Domain.Common
         {
             float kbSpeed = speed / 1024F;
             float mbSpeed = kbSpeed / 1024F;
-
             if (speed <= 0)
                 return string.Empty;
             if (speed < 1024)
@@ -62,7 +60,6 @@ namespace PlexRipper.Domain.Common
                 minutes = "0" + minutes;
             if (span.Seconds < 10)
                 seconds = "0" + seconds;
-
             return $"{hours}:{minutes}:{seconds}";
         }
 
@@ -74,6 +71,22 @@ namespace PlexRipper.Domain.Common
         public static decimal GetPercentage(int current, int total)
         {
             return (decimal) Math.Round((current / (double) total) * 100, 2, MidpointRounding.AwayFromZero);
+        }
+
+        public static int GetDownloadSpeed(long bytesReceived, double elapsedTimeInSeconds)
+        {
+            return Convert.ToInt32(Math.Round(bytesReceived / elapsedTimeInSeconds, 2));
+        }
+
+        public static long GetTimeRemaining(long BytesRemaining, double downloadSpeed)
+        {
+
+
+            if (downloadSpeed <= 0)
+            {
+                return 0;
+            }
+            return Convert.ToInt64(Math.Floor(BytesRemaining / downloadSpeed));
         }
     }
 }

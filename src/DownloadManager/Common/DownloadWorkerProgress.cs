@@ -12,7 +12,7 @@ namespace PlexRipper.DownloadManager.Common
 
         public long DataTotal { get; }
 
-        public bool IsCompleted { get; set; }
+        public bool IsCompleted => DataReceived == DataTotal;
 
         public decimal Percentage => DataFormat.GetPercentage(DataReceived, DataTotal);
         public DownloadWorkerProgress(int id, long dataReceived, long dataTotal)

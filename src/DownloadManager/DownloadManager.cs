@@ -35,6 +35,7 @@ namespace PlexRipper.DownloadManager
         private readonly IPlexAuthenticationService _plexAuthenticationService;
         private readonly IUserSettings _userSettings;
         private readonly IFileSystem _fileSystem;
+        private readonly IFileManagement _fileManagement;
 
         // Collection which contains all download clients, bound to the DataGrid control
         public List<PlexDownloadClient> DownloadsList = new List<PlexDownloadClient>();
@@ -84,13 +85,14 @@ namespace PlexRipper.DownloadManager
         #region Constructors
 
         public DownloadManager(IMediator mediator, ISignalRService signalRService, IPlexAuthenticationService plexAuthenticationService,
-            IUserSettings userSettings, IFileSystem fileSystem)
+            IUserSettings userSettings, IFileSystem fileSystem, IFileManagement fileManagement)
         {
             _mediator = mediator;
             _signalRService = signalRService;
             _plexAuthenticationService = plexAuthenticationService;
             _userSettings = userSettings;
             _fileSystem = fileSystem;
+            _fileManagement = fileManagement;
             SetMaxThreads();
             System.Net.ServicePointManager.DefaultConnectionLimit = 1000;
         }
@@ -119,15 +121,19 @@ namespace PlexRipper.DownloadManager
             newClient.PlexServerAuthToken = token.Value;
             newClient.Parts = 4;
 
-            newClient.DownloadProgressChanged += OnDownloadProgressChanged;
+            newClient.DownloadProgressChanged.Subscribe(OnDownloadProgressChanged);
 
-            newClient.DownloadFileCompleted += OnDownloadFileCompleted;
+            newClient.DownloadFileCompleted.Subscribe(complete =>
+            {
+                _fileManagement.CombineFiles(complete.ChuckPaths, complete.DestinationPath, complete.FileName);
+            });
 
             newClient.DownloadStatusChanged += OnDownloadStatusChanged;
 
             DownloadsList.Add(newClient);
             return Result.Ok(newClient);
         }
+
 
         private async void OnDownloadStatusChanged(object sender, DownloadStatus status)
         {
@@ -144,10 +150,8 @@ namespace PlexRipper.DownloadManager
             await CheckDownloadQueue();
         }
 
-        private void OnDownloadProgressChanged(object sender, DownloadProgress downloadProgress)
+        private void OnDownloadProgressChanged( DownloadProgress downloadProgress)
         {
-            var plexDownloadClient = sender as PlexDownloadClient;
-
             _signalRService.SendDownloadProgressUpdate(downloadProgress);
 
             Log.Information(

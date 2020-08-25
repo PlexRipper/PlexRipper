@@ -1,10 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
@@ -16,11 +18,10 @@ namespace PlexRipper.DownloadManager.Download
     public class DownloadWorker
     {
         private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
-        private readonly IFileSystem _fileSystem;
-        private readonly Progress<long> _progress = new Progress<long>();
-        private Task _copyTask;
 
-        public Subject<DownloadWorkerProgress> DownloadWorkerProgressSubject { get; } = new Subject<DownloadWorkerProgress>();
+        private readonly string _fileName;
+        private readonly IFileSystem _fileSystem;
+
         private Task _task;
 
         public DownloadWorker(int id, DownloadTask downloadTask, DownloadRange downloadRange, IFileSystem fileSystem)
@@ -29,10 +30,18 @@ namespace PlexRipper.DownloadManager.Download
             {
                 DownloadRange = downloadRange;
             }
+            _fileSystem = fileSystem;
+
             Id = id;
             DownloadTask = downloadTask;
-            _fileSystem = fileSystem;
+            _fileName = $"{Id}-{DownloadTask.FileName}";
         }
+
+        public Subject<DownloadWorkerProgress> DownloadWorkerProgressSubject { get; } = new Subject<DownloadWorkerProgress>();
+
+        public long DownloadSpeed { get; internal set; }
+        public TimeSpan ElapsedTime => DateTime.UtcNow.Subtract(DownloadStartAt);
+        public DateTime DownloadStartAt { get; internal set; }
 
         /// <summary>
         /// The download worker id
@@ -42,14 +51,17 @@ namespace PlexRipper.DownloadManager.Download
         public DownloadTask DownloadTask { get; }
         public DownloadRange DownloadRange { get; }
 
-        public void Start()
+        public string FileName => _fileName;
+        public string FilePath => Path.Combine(DownloadTask.DownloadDirectory, _fileName);
+
+        public Result<Task> Start()
         {
             Log.Debug($"Download worker {Id} start for {DownloadTask.FileName}");
 
-            var fileStreamResult = _fileSystem.SaveFile(DownloadTask.DownloadDirectory, $"{Id}-{DownloadTask.FileName}", DownloadRange.RangeSize);
+            var fileStreamResult = _fileSystem.SaveFile(DownloadTask.DownloadDirectory, _fileName, DownloadRange.RangeSize);
             if (fileStreamResult.IsFailed)
             {
-                return;
+                return fileStreamResult.ToResult();
             }
 
             _task = Task.Factory.StartNew(() =>
@@ -84,13 +96,15 @@ namespace PlexRipper.DownloadManager.Download
                     fileStream.Write(buffer, 0, bytesRead);
                     fileStream.Flush();
 
-                    DownloadRange.BytesReceived += bytesRead;
                     DownloadWorkerProgressSubject.OnNext(new DownloadWorkerProgress(Id, DownloadRange.BytesReceived, DownloadRange.RangeSize));
-
-                    // _copyTask = _responseStream
-                    //     .CopyToAsync(fileStream, _progress, 2048, _cancellationToken.Token);
                 }
             }, TaskCreationOptions.LongRunning);
+            return Result.Ok(_task);
+        }
+
+        private void CalculateDownloadSpeed(long bytesReceived)
+        {
+            DownloadSpeed = Convert.ToInt64(Math.Round(bytesReceived / ElapsedTime.TotalSeconds, 2));
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Reflection;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using PlexRipper.Domain.Types;
+using PlexRipper.DownloadManager.Common;
 using PlexRipper.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Config

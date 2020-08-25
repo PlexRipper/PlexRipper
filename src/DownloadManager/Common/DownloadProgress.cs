@@ -1,6 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
-namespace PlexRipper.Domain.Types
+namespace PlexRipper.DownloadManager.Common
 {
     public class DownloadProgress
     {
@@ -11,13 +15,13 @@ namespace PlexRipper.Domain.Types
         public string Status { get; set; }
 
         [JsonProperty("percentage", Required = Required.Always)]
-        public decimal Percentage { get; set; }
+        public decimal Percentage => WorkerProgresses.AsQueryable().Average(x => x.Percentage);
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
         public long DownloadSpeed { get; set; }
 
         [JsonProperty("dataReceived", Required = Required.Always)]
-        public long DataReceived { get; set; }
+        public long DataReceived => WorkerProgresses.AsQueryable().Sum(x => x.DataReceived);
 
         [JsonProperty("dataTotal", Required = Required.Always)]
         public long DataTotal { get; set; }
@@ -28,5 +32,11 @@ namespace PlexRipper.Domain.Types
         [JsonProperty("timeRemaining", Required = Required.Always)]
         public int TimeRemaining { get; set; }
 
+        public List<DownloadWorkerProgress> WorkerProgresses { get; }
+
+        public DownloadProgress(List<DownloadWorkerProgress> progresses)
+        {
+            WorkerProgresses = progresses;
+        }
     }
 }

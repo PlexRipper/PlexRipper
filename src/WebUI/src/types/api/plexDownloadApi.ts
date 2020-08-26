@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
-import { DownloadTaskDTO, DownloadTvShowDTO, PlexMediaType } from '@dto/mainApi';
+import { DownloadTvShowDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import { checkResponse, preApiRequest } from './baseApi';
 
 const logText = 'From PlexDownloadApi => ';
@@ -19,7 +19,7 @@ export function downloadPlexMovie(movieId: number, plexAccountId: number): Obser
 export function downloadTvShow(mediaId: number, plexAccountId: number, type: PlexMediaType): Observable<boolean> {
 	preApiRequest(logText, 'downloadTvShow', `Sending request with tvShowId ${mediaId} and plexAccountId ${plexAccountId}`);
 	const command: DownloadTvShowDTO = { plexAccountId, plexMediaId: mediaId, type };
-	const result: Observable<AxiosResponse> = Axios.post(`${apiPath}/tvshow`, command);
+	const result: Observable<AxiosResponse> = Axios.post(`${apiPath}/tvShow`, command);
 	return checkResponse<boolean>(result, logText, 'downloadTvShow');
 }
 
@@ -35,8 +35,8 @@ export function stopDownloadTask(downloadTaskId: number): Observable<boolean> {
 	return checkResponse<boolean>(result, logText, 'stopDownloadTask');
 }
 
-export function getAllDownloads(): Observable<DownloadTaskDTO[]> {
+export function getAllDownloads(): Observable<PlexServerDTO[]> {
 	preApiRequest(logText, 'getAllDownloads');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}`);
-	return checkResponse<DownloadTaskDTO[]>(result, logText, 'getAllDownloads');
+	return checkResponse<PlexServerDTO[]>(result, logText, 'getAllDownloads');
 }

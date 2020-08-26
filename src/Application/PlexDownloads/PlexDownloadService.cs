@@ -53,21 +53,17 @@ namespace PlexRipper.Application.PlexDownloads
             {
                 return ResultExtensions.IsNull(nameof(plexMovie)).LogError();
             }
-
             if (plexMovie.PlexLibraryId <= 0)
             {
                 return ResultExtensions.IsInvalidId(nameof(plexMovie.PlexLibraryId)).LogWarning();
             }
-
             Log.Debug($"Creating download request for Movie: {plexMovie.Title}");
-
             var server = await _mediator.Send(new GetPlexServerByPlexLibraryIdQuery(plexMovie.PlexLibraryId));
-
             if (server.IsFailed)
             {
                 return server.ToResult();
             }
-            return await CreateDownloadTaskAsync(server.Value, plexAccountId, plexMovie.RatingKey, PlexMediaType.Movie);
+            return await CreateDownloadTaskAsync(server.Value, plexMovie.PlexLibraryId, plexAccountId, plexMovie.RatingKey, PlexMediaType.Movie);
         }
 
         private async Task<Result<List<DownloadTask>>> GetDownloadTaskAsync(int plexAccountId, PlexTvShow plexTvShow)
@@ -76,19 +72,15 @@ namespace PlexRipper.Application.PlexDownloads
             {
                 return ResultExtensions.IsNull(nameof(plexTvShow)).LogError();
             }
-
             if (plexTvShow.PlexLibraryId <= 0)
             {
                 return ResultExtensions.IsInvalidId(nameof(plexTvShow), plexTvShow.PlexLibraryId).LogWarning();
             }
-
             if (!plexTvShow.Seasons.Any())
             {
                 return ResultExtensions.IsEmpty(nameof(plexTvShow.Seasons)).LogWarning();
             }
-
             Log.Debug($"Creating download tasks for TvShow: {plexTvShow.Title}");
-
             var server = await _mediator.Send(new GetPlexServerByPlexLibraryIdQuery(plexTvShow.PlexLibraryId));
             if (server.IsFailed)
             {
@@ -99,15 +91,13 @@ namespace PlexRipper.Application.PlexDownloads
             var downloadTasks = new List<DownloadTask>();
             int i = 0;
             int totalCount = plexTvShow.Seasons.Sum(x => x.Episodes.Count);
-
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShow.PlexLibraryId, i, totalCount);
-
             foreach (var season in plexTvShow.Seasons)
             {
                 foreach (var episode in season.Episodes)
                 {
-                    var downloadTask = await CreateDownloadTaskAsync(server.Value, plexAccountId, episode.RatingKey, PlexMediaType.Episode);
-
+                    var downloadTask = await CreateDownloadTaskAsync(server.Value, plexTvShow.PlexLibraryId, plexAccountId, episode.RatingKey,
+                        PlexMediaType.Episode);
                     if (downloadTask.IsFailed)
                     {
                         return downloadTask.ToResult();
@@ -127,15 +117,12 @@ namespace PlexRipper.Application.PlexDownloads
             {
                 return ResultExtensions.IsNull(nameof(plexTvShowShowSeason)).LogError();
             }
-
             Log.Debug($"Creating download request for TvShow season: {plexTvShowShowSeason.Title}");
-
             var server = await _mediator.Send(new GetPlexServerByPlexTvShowSeasonIdQuery(plexTvShowShowSeason.Id));
             if (server.IsFailed)
             {
                 return server.ToResult();
             }
-
             var downloadTasks = new List<DownloadTask>();
             var totalCount = plexTvShowShowSeason.Episodes.Count;
             var index = 0;
@@ -145,7 +132,8 @@ namespace PlexRipper.Application.PlexDownloads
             {
                 // Using GetDownloadRequestAsync(int plexAccountId, int plexTvShowEpisodeId)
                 // will result in the same server request being sent multiple times
-                var downloadTask = await CreateDownloadTaskAsync(server.Value, plexAccountId, episode.RatingKey, PlexMediaType.Episode);
+                var downloadTask = await CreateDownloadTaskAsync(server.Value, plexTvShowShowSeason.PlexLibraryId, plexAccountId, episode.RatingKey,
+                    PlexMediaType.Episode);
                 if (downloadTask.IsFailed)
                 {
                     return downloadTask.ToResult();
@@ -153,7 +141,6 @@ namespace PlexRipper.Application.PlexDownloads
                 await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShowShowSeason.Id, ++index, totalCount);
                 downloadTasks.Add(downloadTask.Value);
             }
-
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShowShowSeason.Id, totalCount, totalCount);
             return Result.Ok(downloadTasks);
         }
@@ -165,34 +152,33 @@ namespace PlexRipper.Application.PlexDownloads
             {
                 return plexTvShowEpisode.ToResult();
             }
-
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShowEpisodeId, 0, 1);
             var plexServer = await _mediator.Send(new GetPlexServerByPlexTvShowEpisodeIdQuery(plexTvShowEpisode.Value.Id));
             if (plexServer.IsFailed)
             {
                 return plexServer.ToResult();
             }
-
             Log.Debug($"Creating download request for TvShow: {plexTvShowEpisode.Value.Title}");
 
             // TODO Wrong Id is passed here, not sure how it will be used
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShowEpisodeId, 1, 1);
-            return await CreateDownloadTaskAsync(plexServer.Value, plexAccountId, plexTvShowEpisode.Value.RatingKey, PlexMediaType.Episode);
+            return await CreateDownloadTaskAsync(plexServer.Value, plexTvShowEpisode.Value.PlexLibraryId, plexAccountId,
+                plexTvShowEpisode.Value.RatingKey, PlexMediaType.Episode);
         }
 
         /// <summary>
         /// Creates a <see cref="DownloadTask"/> which can be send to the <see cref="PlexDownloadService"/> to start a download of PlexMedia.
         /// </summary>
         /// <param name="server">The <see cref="PlexServer"/> to download from.</param>
-        /// <param name="plexAccountId">The <see cref="PlexAccount"/> used to authenticate</param>
-        /// <param name="ratingKey">The Plex version of the media id</param>
-        /// <param name="mediaType">The media type of the ratingkey</param>
+        /// <param name="plexLibraryId">The <see cref="PlexLibrary"/> the media belongs too.</param>
+        /// <param name="plexAccountId">The <see cref="PlexAccount"/> used to authenticate.</param>
+        /// <param name="ratingKey">The Plex version of the media id.</param>
+        /// <param name="mediaType">The media type of the ratingKey.</param>
         /// <returns></returns>
-        private async Task<Result<DownloadTask>> CreateDownloadTaskAsync(PlexServer server, int plexAccountId,
+        private async Task<Result<DownloadTask>> CreateDownloadTaskAsync(PlexServer server, int plexLibraryId, int plexAccountId,
             int ratingKey, PlexMediaType mediaType)
         {
             var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccountId, server.Id);
-
             if (token.IsFailed)
             {
                 return token.ToResult<DownloadTask>();
@@ -215,7 +201,6 @@ namespace PlexRipper.Application.PlexDownloads
 
             // Retrieve Metadata for this PlexMovie
             var metaData = await _plexApiService.GetMediaMetaDataAsync(token.Value, server.BaseUrl, ratingKey);
-
             if (metaData != null)
             {
                 return Result.Ok(new DownloadTask
@@ -233,10 +218,10 @@ namespace PlexRipper.Application.PlexDownloads
                     RatingKey = metaData.RatingKey,
                     Priority = server.Id * 10000000,
                     MediaType = mediaType,
-                    PlexServer = server
+                    PlexServer = server,
+                    PlexLibraryId = plexLibraryId
                 });
             }
-
             return Result.Fail($"Failed to retrieve metadata for plex media with rating key: {ratingKey}");
         }
 
@@ -247,14 +232,12 @@ namespace PlexRipper.Application.PlexDownloads
             {
                 return plexMovie.ToResult<bool>();
             }
-
             Log.Debug($"Start download setup process for movie: {plexMovie.Value.Title}");
             var downloadTask = await GetDownloadTaskAsync(plexAccountId, plexMovie.Value);
             if (downloadTask.IsFailed)
             {
                 return downloadTask.ToResult<bool>();
             }
-
             Log.Debug($"Created download task for movie: {plexMovie.Value.Title}");
             return await _downloadManager.AddToDownloadQueueAsync(downloadTask.Value);
         }
@@ -262,7 +245,6 @@ namespace PlexRipper.Application.PlexDownloads
         public async Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int mediaId, PlexMediaType type)
         {
             var downloadTasks = new List<DownloadTask>();
-
             switch (type)
             {
                 case PlexMediaType.TvShow:
@@ -278,7 +260,6 @@ namespace PlexRipper.Application.PlexDownloads
                     }
                     downloadTasks = y.Value;
                     break;
-
                 case PlexMediaType.Season:
                     var plexTvShowSeason = await _mediator.Send(new GetPlexTvShowSeasonByIdWithEpisodesQuery(mediaId));
                     if (plexTvShowSeason.IsFailed)
@@ -292,9 +273,7 @@ namespace PlexRipper.Application.PlexDownloads
                     }
                     downloadTasks = x.Value;
                     break;
-
                 case PlexMediaType.Episode:
-
                     var downloadTask = await GetDownloadTaskAsync(plexAccountId, mediaId);
                     if (downloadTask.IsFailed)
                     {
@@ -302,21 +281,17 @@ namespace PlexRipper.Application.PlexDownloads
                     }
                     downloadTasks.Add(downloadTask.Value);
                     break;
-
                 default:
                     return Result.Fail("The type has to be either, TvShow, Season or Episode").LogError();
             }
-
             if (downloadTasks.Count == 0)
             {
                 return Result.Fail("Could not create download tasks").LogError();
             }
-
             if (downloadTasks.Count == 1)
             {
                 return await _downloadManager.AddToDownloadQueueAsync(downloadTasks[0]);
             }
-
             return await _downloadManager.AddToDownloadQueueAsync(downloadTasks);
         }
 
@@ -326,15 +301,14 @@ namespace PlexRipper.Application.PlexDownloads
             {
                 return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
             }
-
             return _downloadManager.StopDownload(downloadTaskId);
         }
 
         #region CRUD
 
-        public Task<Result<List<DownloadTask>>> GetAllDownloadsAsync()
+        public Task<Result<List<PlexServer>>> GetAllDownloadsAsync()
         {
-            return _mediator.Send(new GetAllDownloadTasksQuery());
+            return _mediator.Send(new GetAllDownloadTasksByPlexServerQuery(true, true));
         }
 
         public Task<Result<bool>> DeleteDownloadsAsync(int downloadTaskId)

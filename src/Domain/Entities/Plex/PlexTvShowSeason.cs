@@ -7,7 +7,6 @@ namespace PlexRipper.Domain.Entities
 {
     public class PlexTvShowSeason : BaseEntity
     {
-
         public int RatingKey { get; set; }
         public string Key { get; set; }
         public string Guid { get; set; }
@@ -23,16 +22,21 @@ namespace PlexRipper.Domain.Entities
 
 
         #region Helpers
-        public PlexMediaType Type => PlexMediaType.Season;
 
+        public PlexMediaType Type => PlexMediaType.Season;
 
         #endregion
 
         #region Relationships
+
         public PlexTvShow TvShow { get; set; }
         public int TvShowId { get; set; }
 
+        public PlexLibrary PlexLibrary { get; set; }
+        public int PlexLibraryId { get; set; }
+
         public List<PlexTvShowEpisode> Episodes { get; set; }
+
         #endregion
     }
 }

@@ -32,7 +32,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET: api/<FolderPathController>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<FolderPathDTO>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<FolderPathDTO>>))]
         public async Task<IActionResult> Get()
         {
             var result = await _folderPathService.GetAllFolderPathsAsync();
@@ -51,7 +51,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         // POST: api/<FolderPathController>
         [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<FolderPathDTO>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<FolderPathDTO>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Put([FromBody] FolderPathDTO folderPathDto)
         {

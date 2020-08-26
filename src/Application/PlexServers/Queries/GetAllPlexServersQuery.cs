@@ -14,14 +14,12 @@ namespace PlexRipper.Application.PlexServers.Queries
 {
     public class GetAllPlexServersQuery : IRequest<Result<List<PlexServer>>>
     {
-        public GetAllPlexServersQuery(bool includeLibraries = false, bool includeDownloadTasks = false)
+        public GetAllPlexServersQuery(bool includeLibraries = false)
         {
             IncludeLibraries = includeLibraries;
-            IncludeDownloadTasks = includeDownloadTasks;
         }
 
         public bool IncludeLibraries { get; }
-        public bool IncludeDownloadTasks { get; }
     }
 
     public class GetAllPlexServersQueryHandler : BaseHandler,
@@ -37,11 +35,6 @@ namespace PlexRipper.Application.PlexServers.Queries
             if (request.IncludeLibraries)
             {
                 query = query.Include(x => x.PlexLibraries);
-            }
-
-            if (request.IncludeDownloadTasks)
-            {
-                query = query.Include(x => x.DownloadTasks);
             }
 
             var plexServer = await query

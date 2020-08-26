@@ -90,14 +90,6 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Methods
 
-        // private void AddHeaders()
-        // {
-        //     foreach ((string key, string value) in PlexHeaderData.GetBasicHeaders)
-        //     {
-        //         this.DefaultRequestHeaders.Add(key, value);
-        //     }
-        // }
-
         private void SetDownloadStatus(DownloadStatus downloadStatus)
         {
             DownloadTask.DownloadStatus = downloadStatus;
@@ -124,36 +116,8 @@ namespace PlexRipper.DownloadManager.Download
                     SetDownloadStatus(DownloadStatus.Error);
                     return Result.Fail("File size could not be determined of the media that will be downloaded");
                 }
-                await CreateDownloadWorkers();
-
-                // _responseStream = await response.Content.ReadAsStreamAsync();
-                // var result = _fileSystem.SaveFile(DownloadPath, DownloadTask.FileName, TotalBytesToReceive);
-                // if (result.IsFailed)
-                // {
-                //     SetDownloadStatus(DownloadStatus.Error);
-                //     return result.ToResult();
-                // }
-                // _fileStream = result.Value;
-                // if (_fileStream == null)
-                // {
-                //     SetDownloadStatus(DownloadStatus.Error);
-                //     return Result.Fail($"The file stream was null with destination {DownloadPath}");
-                // }
-                //
-                // // Set Timings
-
-                // _progressTimer.Start();
-                //
-                // SetDownloadStatus(DownloadStatus.Downloading);
-                //
-                // _copyTask = _responseStream
-                //     .CopyToAsync(_fileStream, _progress, 81920, _cancellationToken.Token)
-                //     .ContinueWith(task =>
-                //     {
-                //         if (task.IsCanceled) return;
-                //         _responseStream.Dispose();
-                //         _fileStream.Dispose();
-                //     });
+                CreateDownloadWorkers();
+                StartDownloadWorkers();
                 return Result.Ok(true);
             }
             catch (Exception e)
@@ -186,11 +150,10 @@ namespace PlexRipper.DownloadManager.Download
             return Result.Ok(true);
         }
 
-        private List<DownloadRange> CreateDownloadRanges()
+        private void CreateDownloadWorkers()
         {
-            // Divide into equal parts
+            // Create download segments/ranges
             var partSize = TotalBytesToReceive / Parts;
-            var rangeList = new List<DownloadRange>((int) Parts);
             var remainder = TotalBytesToReceive - (partSize * Parts);
             for (int i = 0; i < Parts; i++)
             {
@@ -201,33 +164,30 @@ namespace PlexRipper.DownloadManager.Download
                     // Add the remainder to the last download range
                     end += remainder;
                 }
-                rangeList.Add(new DownloadRange(DownloadUrl, start, end));
-            }
-            return rangeList;
-        }
+                var downloadRange = new DownloadRange(DownloadUrl, start, end);
 
-        private async Task CreateDownloadWorkers()
-        {
-            var list = CreateDownloadRanges();
-            var i = 1;
-            foreach (var downloadRange in list)
-            {
                 var downloadWorker = new DownloadWorker(i++, DownloadTask, downloadRange, _fileSystem);
                 _downloadWorkers.Add(downloadWorker);
             }
+
             _downloadWorkers
                 .Select(x => x.DownloadWorkerProgress)
-                .Merge()
+                .CombineLatest()
                 .DistinctUntilChanged()
-                .Buffer(_downloadWorkers.Count)
+                // .Sample(TimeSpan.FromMilliseconds(1000))
                 .Subscribe(OnDownloadProgressChanged);
 
             _downloadWorkers
-                .Select(x => x.DownloadWorkerComplete)
-                .Merge()
-                .Buffer(_downloadWorkers.Count)
+                .Select(x => x.DownloadWorkerComplete.DistinctUntilChanged())
+                .CombineLatest()
                 .Subscribe(OnDownloadComplete);
-            await StartDownloadWorkers();
+        }
+
+        private void StartDownloadWorkers()
+        {
+            DownloadStartAt = DateTime.UtcNow;
+            SetDownloadStatus(DownloadStatus.Downloading);
+            Task.WhenAll(_downloadWorkers.Select(x => x.StartAsync().ValueOrDefault).ToList());
         }
 
         private void OnDownloadComplete(IList<DownloadWorkerComplete> completeList)
@@ -236,7 +196,6 @@ namespace PlexRipper.DownloadManager.Download
             {
                 return;
             }
-
             var orderedList = completeList.ToList().OrderBy(x => x.Id).ToList();
             StringBuilder builder = new StringBuilder();
             foreach (var progress in orderedList)
@@ -249,9 +208,7 @@ namespace PlexRipper.DownloadManager.Download
             {
                 builder.Length -= 3;
             }
-
             Log.Debug(builder.ToString());
-
             var downloadComplete = new DownloadComplete(DownloadTaskId)
             {
                 DestinationPath = DownloadPath,
@@ -276,7 +233,6 @@ namespace PlexRipper.DownloadManager.Download
             {
                 builder.Length -= 3;
             }
-
             var downloadProgress = new DownloadProgress(orderedList)
             {
                 Id = DownloadTaskId,
@@ -288,11 +244,7 @@ namespace PlexRipper.DownloadManager.Download
             DownloadProgressChanged.OnNext(downloadProgress);
         }
 
-        private async Task StartDownloadWorkers()
-        {
-            DownloadStartAt = DateTime.UtcNow;
-            await Task.WhenAll(_downloadWorkers.Select(x => x.Start().ValueOrDefault).ToList());
-        }
+
 
         #endregion Methods
 

@@ -16,10 +16,10 @@ export default ({ $axios }: NuxtAppOptions): void => {
 	Axios.defaults.baseURL = baseApiUrl;
 
 	Axios.defaults.headers.get['Content-Type'] = 'application/json';
-	// Axios.defaults.headers.get['Access-Control-Allow-Origin'] = '*';
+	Axios.defaults.headers.get['Access-Control-Allow-Origin'] = '*';
 
 	Axios.defaults.headers.post['Content-Type'] = 'application/json';
-	// Axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
+	Axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 	// Axios.defaults.withCredentials = false;
 
 	Axios.interceptors.response.use(

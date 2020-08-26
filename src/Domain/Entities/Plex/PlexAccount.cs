@@ -29,7 +29,7 @@ namespace PlexRipper.Domain.Entities
         // public Uri Thumb { get; set; }
         public bool HasPassword { get; set; }
         /// <summary>
-        /// The general plex authentication token used to retrieve account data such as the <see cref="PlexServer"/>s the account has access to. 
+        /// The general plex authentication token used to retrieve account data such as the <see cref="PlexServer"/>s the account has access to.
         /// </summary>
         public string AuthenticationToken { get; set; }
         public int ForumId { get; set; }
@@ -39,7 +39,7 @@ namespace PlexRipper.Domain.Entities
         /// <summary>
         /// The associated PlexAccountServers the user has access to
         /// </summary>
-        public virtual ICollection<PlexAccountServer> PlexAccountServers { get; set; }
+        public List<PlexAccountServer> PlexAccountServers { get; set; }
 
         #endregion
 

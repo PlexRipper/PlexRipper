@@ -27,20 +27,19 @@ namespace PlexRipper.WebAPI.Config
 
             //PlexAccountDTO <-> PlexAccount
             CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
+                .ForMember(x => x.PlexServers, opt => opt.Ignore())
                 .ForMember(x => x.PlexAccountServers, opt => opt.Ignore());
+
             CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
                 .ForMember(dto => dto.AuthToken, opt => opt.MapFrom(x => x.AuthenticationToken))
                 .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));
 
-            //PlexServer <-> PlexServerDTO
-            CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination).ReverseMap();
-
-            //PlexLibrary <-> PlexLibraryDTO
-            CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount)).ReverseMap();
+            //PlexServer -> PlexServerDTO
+            CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination);
 
             //PlexLibrary -> PlexLibraryDTO
-            CreateMap<PlexLibrary, PlexLibraryContainerDTO>(MemberList.Destination)
+            CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Type, entity => entity.MapFrom(x => x.GetMediaType))
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount));
 
             //PlexTvShow <-> PlexTvShowDTO

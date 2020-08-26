@@ -49,6 +49,9 @@ namespace PlexRipper.Domain.Entities
         public virtual PlexServer PlexServer { get; set; }
         public int PlexServerId { get; set; }
 
+        public virtual PlexLibrary PlexLibrary { get; set; }
+        public int PlexLibraryId { get; set; }
+
         public virtual PlexAccount PlexAccount { get; set; }
         public int PlexAccountId { get; set; }
 

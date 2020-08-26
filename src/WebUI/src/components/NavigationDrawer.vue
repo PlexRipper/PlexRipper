@@ -31,8 +31,15 @@
 						</v-list-item-icon>
 
 						<v-list-item-content>
-							<v-list-item-title>{{ item.title }}</v-list-item-title>
+							<v-list-item-title>
+								{{ item.title }}
+							</v-list-item-title>
 						</v-list-item-content>
+						<v-list-item-action v-if="item.title === 'Downloads'">
+							<v-avatar left class="red" size="36" :dark="$vuetify.theme.dark">
+								<b>{{ downloadTaskCount }}</b>
+							</v-avatar>
+						</v-list-item-action>
 					</v-list-item>
 				</template>
 			</v-list>
@@ -42,6 +49,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import DownloadService from '@service/downloadService';
 import ServerDrawer from './ServerDrawer.vue';
 
 interface INavItem {
@@ -56,7 +64,7 @@ interface INavItem {
 })
 export default class NavigationDrawer extends Vue {
 	items: object[] = [];
-
+	downloadTaskCount = 0;
 	get getNavItems(): INavItem[] {
 		return [
 			{
@@ -82,6 +90,12 @@ export default class NavigationDrawer extends Vue {
 				],
 			},
 		];
+	}
+
+	created(): void {
+		DownloadService.getDownloadList().subscribe((downloadTasks) => {
+			this.downloadTaskCount = downloadTasks.length;
+		});
 	}
 }
 </script>

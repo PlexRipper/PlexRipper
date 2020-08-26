@@ -24,7 +24,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibraries, opt => opt.Ignore())
                 .ForMember(dest => dest.ServerStatus, opt => opt.Ignore())
-                .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt,
                     opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
                 .ForMember(dest => dest.UpdatedAt,
@@ -44,6 +44,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
                 .ForMember(dest => dest.Movies, opt => opt.Ignore())
                 .ForMember(dest => dest.TvShows, opt => opt.Ignore())
+                .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexAccountLibraries, opt => opt.Ignore())
                 .ForMember(dest => dest.LibraryLocationId,
                     opt => opt.MapFrom(src => src.Location.First().Id))
@@ -79,13 +80,17 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.TvShow, opt => opt.Ignore())
                 .ForMember(dest => dest.TvShowId, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
                 .ForMember(dest => dest.Episodes, opt => opt.Ignore());
 
             // Metadata -> PlexTvShowEpisode
             CreateMap<Metadata, PlexTvShowEpisode>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.TvShowSeason, opt => opt.Ignore())
-                .ForMember(dest => dest.TvShowSeasonId, opt => opt.Ignore());
+                .ForMember(dest => dest.TvShowSeasonId, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore());
 
 
             // PlexMediaContainer -> PlexMediaMetaData

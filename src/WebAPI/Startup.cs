@@ -92,17 +92,13 @@ namespace PlexRipper.WebAPI
         public void Configure(IApplicationBuilder app)
         {
             app.UseRouting();
-
             app.UseCors(CORSConfiguration);
             app.UseAuthorization();
 
             // Enabling this causes CORS errors as the front-end is in http and cannot connect with an https back-end
             // app.UseHttpsRedirection();
-
             app.UseOpenApi(); // serve OpenAPI/Swagger documents
             app.UseSwaggerUi3(); // serve Swagger UI
-
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

@@ -30,6 +30,9 @@ namespace PlexRipper.Domain.Entities
         public PlexTvShowSeason TvShowSeason { get; set; }
         public int TvShowSeasonId { get; set; }
 
+        public PlexLibrary PlexLibrary { get; set; }
+        public int PlexLibraryId { get; set; }
+
         #endregion
     }
 }

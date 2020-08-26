@@ -28,7 +28,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET: api/<DownloadController>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<DownloadTaskDTO>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerDTO>>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Get()
         {
@@ -37,7 +37,7 @@ namespace PlexRipper.WebAPI.Controllers
             {
                 return InternalServerError(result);
             }
-            var mapResult = _mapper.Map<List<DownloadTaskDTO>>(result.Value);
+            var mapResult = _mapper.Map<List<PlexServerDTO>>(result.Value);
             return Ok(Result.Ok(mapResult));
         }
 

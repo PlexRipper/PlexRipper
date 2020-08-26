@@ -25,6 +25,23 @@ namespace PlexRipper.DownloadManager
 {
     public class DownloadManager : IDownloadManager
     {
+        #region Constructors
+
+        public DownloadManager(IMediator mediator, ISignalRService signalRService, IPlexAuthenticationService plexAuthenticationService,
+            IUserSettings userSettings, IFileSystem fileSystem, IFileManagement fileManagement)
+        {
+            _mediator = mediator;
+            _signalRService = signalRService;
+            _plexAuthenticationService = plexAuthenticationService;
+            _userSettings = userSettings;
+            _fileSystem = fileSystem;
+            _fileManagement = fileManagement;
+            SetMaxThreads();
+            System.Net.ServicePointManager.DefaultConnectionLimit = 1000;
+        }
+
+        #endregion Constructors
+
         #region Fields
 
         private readonly IMediator _mediator;
@@ -33,6 +50,8 @@ namespace PlexRipper.DownloadManager
         private readonly IUserSettings _userSettings;
         private readonly IFileSystem _fileSystem;
         private readonly IFileManagement _fileManagement;
+
+        private bool _isChecking = false;
 
         // Collection which contains all download clients, bound to the DataGrid control
         public List<PlexDownloadClient> DownloadsList = new List<PlexDownloadClient>();
@@ -78,23 +97,6 @@ namespace PlexRipper.DownloadManager
         public int TotalDownloads => DownloadsList.Count;
 
         #endregion Properties
-
-        #region Constructors
-
-        public DownloadManager(IMediator mediator, ISignalRService signalRService, IPlexAuthenticationService plexAuthenticationService,
-            IUserSettings userSettings, IFileSystem fileSystem, IFileManagement fileManagement)
-        {
-            _mediator = mediator;
-            _signalRService = signalRService;
-            _plexAuthenticationService = plexAuthenticationService;
-            _userSettings = userSettings;
-            _fileSystem = fileSystem;
-            _fileManagement = fileManagement;
-            SetMaxThreads();
-            System.Net.ServicePointManager.DefaultConnectionLimit = 1000;
-        }
-
-        #endregion Constructors
 
         #region Methods
 
@@ -254,7 +256,7 @@ namespace PlexRipper.DownloadManager
             }
             if (performCheck)
             {
-                await CheckDownloadQueue();
+                CheckDownloadQueue();
             }
             return Result.Ok(true);
         }
@@ -263,47 +265,57 @@ namespace PlexRipper.DownloadManager
         /// Check the DownloadQueue for downloadTasks which can be started.
         /// </summary>
         /// <returns></returns>
-        public async Task<Result> CheckDownloadQueue()
+        public Result CheckDownloadQueue()
         {
-            Log.Debug("Checking for download tasks which can be processed.");
-            var downloadTasks = await _mediator.Send(new GetAllDownloadTasksQuery(true, true, true));
-            if (!downloadTasks.Value.Any())
+            if (_isChecking)
             {
-                Log.Debug("No download tasks found to start processing.");
-                return new Result();
+                return Result.Fail("Check download Queue already in progress").LogWarning();
             }
-            Log.Information($"Starting the check of {downloadTasks.Value.Count} downloadTasks.");
-            foreach (var downloadTask in downloadTasks.Value)
-            {
-                var downloadClient = GetDownloadClient(downloadTask.Id);
-                if (downloadClient.Has404NotFoundError())
-                {
-                    downloadClient = await CreateDownloadClientAsync(downloadTask);
-                    await downloadClient.Value.StartAsync();
-                    break;
 
-                    // There is an downloadClient which already has this downloadTask
-                    // downloadClient.Value.DownloadStatus
+            var _task = Task.Factory.StartNew(async () =>
+            {
+                Log.Debug("Checking for download tasks which can be processed.");
+                var downloadTasks = await _mediator.Send(new GetAllDownloadTasksQuery(true, true, true));
+                if (!downloadTasks.Value.Any())
+                {
+                    Log.Debug("No download tasks found to start processing.");
+                    return;
+                }
+                Log.Information($"Starting the check of {downloadTasks.Value.Count} downloadTasks.");
+                foreach (var downloadTask in downloadTasks.Value)
+                {
+                    var downloadClient = GetDownloadClient(downloadTask.Id);
+                    if (downloadClient.Has404NotFoundError())
+                    {
+                        downloadClient = await CreateDownloadClientAsync(downloadTask);
+                        downloadClient.Value.StartAsync();
+                        break;
+
+                        // There is an downloadClient which already has this downloadTask
+                        // downloadClient.Value.DownloadStatus
+                    }
+
+                    // Check if already added to a downloadClient
+                    // Check if the server of that downloadTask already has a running download task
                 }
 
-                // Check if already added to a downloadClient
-                // Check if the server of that downloadTask already has a running download task
-            }
+                // try
+                // {
+                //     // TODO This might be removed if the authToken is stored in the database.
+                //     downloadTaskDB.Value.PlexServerAuthToken = downloadTask.PlexServerAuthToken;
+                //
+                //     Log.Debug(downloadTaskDB.Value.ToString());
+                //     var downloadClient = CreateDownloadClient(downloadTaskDB.Value);
+                //     return await downloadClient.StartAsync();
+                // }
+                // catch (Exception e)
+                // {
+                //     return Result.Fail($"Failed to start the Download of {downloadTask.FileName}").LogError(e);
+                // }
+                _isChecking = false;
+            }, TaskCreationOptions.LongRunning);
 
-            // try
-            // {
-            //     // TODO This might be removed if the authToken is stored in the database.
-            //     downloadTaskDB.Value.PlexServerAuthToken = downloadTask.PlexServerAuthToken;
-            //
-            //     Log.Debug(downloadTaskDB.Value.ToString());
-            //     var downloadClient = CreateDownloadClient(downloadTaskDB.Value);
-            //     return await downloadClient.StartAsync();
-            // }
-            // catch (Exception e)
-            // {
-            //     return Result.Fail($"Failed to start the Download of {downloadTask.FileName}").LogError(e);
-            // }
-            return Result.Ok(true);
+            return Result.Ok();
         }
 
         /// <summary>
@@ -334,7 +346,7 @@ namespace PlexRipper.DownloadManager
                 return Result.Fail(error).Add400BadRequestError();
             }
             Log.Debug($"Successfully added all {downloadTasks.Count} DownloadTasks");
-            await CheckDownloadQueue();
+            CheckDownloadQueue();
             return Result.Ok(true);
         }
 

@@ -51,5 +51,8 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("tvShowSeasonId", Required = Required.Always)]
         public int TvShowSeasonId { get; set; }
+
+        [JsonProperty("plexLibraryId", Required = Required.Always)]
+        public int PlexLibraryId { get; set; }
     }
 }

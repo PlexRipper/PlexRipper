@@ -6,8 +6,8 @@ namespace PlexRipper.Domain.Entities
 {
     public class PlexMovie : PlexMedia
     {
-        public virtual List<PlexMovieGenre> PlexMovieGenres { get; set; }
-        public virtual List<PlexMovieRole> PlexMovieRoles { get; set; }
+        public List<PlexMovieGenre> PlexMovieGenres { get; set; }
+        public List<PlexMovieRole> PlexMovieRoles { get; set; }
 
     }
 }

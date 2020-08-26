@@ -55,7 +55,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("home", Required = Required.DisallowNull)]
         public bool Home { get; set; }
 
-        [JsonProperty("plexLibraries", Required = Required.DisallowNull)]
+        [JsonProperty("plexLibraries", Required = Required.Always)]
         public List<PlexLibraryDTO> PlexLibraries { get; set; }
 
     }

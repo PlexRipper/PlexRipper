@@ -2,7 +2,6 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +11,6 @@ using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Common;
 using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Types;
 using PlexRipper.DownloadManager.Common;
 
 namespace PlexRipper.DownloadManager.Download
@@ -65,7 +63,7 @@ namespace PlexRipper.DownloadManager.Download
 
         public int DownloadSpeedAverage { get; set; }
 
-        public Result<Task> Start()
+        public Result<Task> StartAsync()
         {
             Log.Debug($"Download worker {Id} start for {DownloadTask.FileName}");
             var fileStreamResult = _fileSystem.SaveFile(DownloadTask.DownloadDirectory, _fileName, DownloadRange.RangeSize);
@@ -73,6 +71,7 @@ namespace PlexRipper.DownloadManager.Download
             {
                 return fileStreamResult.ToResult();
             }
+
             _task = Task.Factory.StartNew(() =>
             {
                 using var httpClient = new HttpClient();
@@ -97,6 +96,7 @@ namespace PlexRipper.DownloadManager.Download
                     if (bytesRead <= 0)
                     {
                         UpdateProgress();
+
                         Complete();
                         break;
                     }
@@ -104,7 +104,7 @@ namespace PlexRipper.DownloadManager.Download
                     BytesReceived += bytesRead;
                     fileStream.Write(buffer, 0, bytesRead);
                     fileStream.Flush();
-                    if (ElapsedTime.Subtract(_lastProgress).TotalMilliseconds >= 1000d)
+                    if (ElapsedTime.Subtract(_lastProgress).TotalMilliseconds >= 500d)
                     {
                         UpdateProgress();
                     }
@@ -123,6 +123,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private void Complete()
         {
+            DownloadWorkerProgress.OnCompleted();
             var complete = new DownloadWorkerComplete(Id)
             {
                 FilePath = FilePath,

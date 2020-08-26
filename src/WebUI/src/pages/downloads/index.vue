@@ -20,8 +20,8 @@ import { Component, Vue } from 'vue-property-decorator';
 import { deleteDownloadTask, stopDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
-import { tap, switchMap, finalize } from 'rxjs/operators';
-import { DownloadTaskDTO, DownloadProgress } from '@dto/mainApi';
+import { finalize } from 'rxjs/operators';
+import { DownloadTaskDTO, DownloadProgress, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import DownloadsTable from './components/DownloadsTable.vue';
 import IDownloadRow from './types/IDownloadRow';
@@ -33,6 +33,7 @@ import IDownloadRow from './types/IDownloadRow';
 	},
 })
 export default class Downloads extends Vue {
+	plexServers: PlexServerDTO[] = [];
 	downloads: DownloadTaskDTO[] = [];
 	downloadProgressList: DownloadProgress[] = [];
 
@@ -77,21 +78,22 @@ export default class Downloads extends Vue {
 	}
 
 	created(): void {
+		DownloadService.getDownloadListInServers().subscribe((data) => {
+			this.plexServers = data;
+		});
+
 		// Retrieve download list and then retrieve the signalR download progress
-		DownloadService.getDownloadList()
-			.pipe(
-				tap((data) => {
-					this.downloads = data ?? [];
-				}),
-				switchMap(() => SignalrService.getDownloadProgress()),
-			)
-			.subscribe((data) => {
-				if (data) {
-					this.updateDownloadProgress(data);
-				} else {
-					Log.error(`DownloadProgress was undefined`);
-				}
-			});
+		DownloadService.getDownloadList().subscribe((data) => {
+			this.downloads = data ?? [];
+		});
+
+		SignalrService.getDownloadProgress().subscribe((data) => {
+			if (data) {
+				this.updateDownloadProgress(data);
+			} else {
+				Log.error(`DownloadProgress was undefined`);
+			}
+		});
 	}
 }
 </script>

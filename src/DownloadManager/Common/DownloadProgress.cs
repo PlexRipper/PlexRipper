@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Domain.Common;
+using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.DownloadManager.Common
 {
@@ -14,7 +15,7 @@ namespace PlexRipper.DownloadManager.Common
         public int Id { get; set; }
 
         [JsonProperty("status", Required = Required.Always)]
-        public string Status { get; set; }
+        public DownloadStatus Status { get; set; }
 
         [JsonProperty("percentage", Required = Required.Always)]
         public decimal Percentage => WorkerProgresses.AsQueryable().Average(x => x.Percentage);
@@ -28,6 +29,7 @@ namespace PlexRipper.DownloadManager.Common
         [JsonProperty("dataTotal", Required = Required.Always)]
         public long DataTotal { get; set; }
 
+        [JsonProperty("downloadSpeedFormatted", Required = Required.Always)]
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
 
         /// <summary>
@@ -36,9 +38,11 @@ namespace PlexRipper.DownloadManager.Common
         [JsonProperty("timeRemaining", Required = Required.Always)]
         public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, DownloadSpeed);
 
+        [JsonProperty("bytesRemaining", Required = Required.Always)]
         public long BytesRemaining => DataTotal - DataReceived;
 
 
+        [JsonProperty("workerProgresses", Required = Required.Always)]
         public List<IDownloadWorkerProgress> WorkerProgresses { get; }
 
         public DownloadProgress(List<IDownloadWorkerProgress> progresses)

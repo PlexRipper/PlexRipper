@@ -27,11 +27,10 @@ namespace PlexRipper.DownloadManager.Download
         private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
         private readonly IFileSystem _fileSystem;
         private readonly Progress<long> _progress = new Progress<long>();
-        private Task _copyTask;
-        private Stream _fileStream;
-        private Stream _responseStream;
-        private System.Timers.Timer _progressTimer = new System.Timers.Timer(1000) {AutoReset = true};
         private List<DownloadWorker> _downloadWorkers = new List<DownloadWorker>();
+        private readonly Subject<DownloadProgress> _downloadProgressChanged = new Subject<DownloadProgress>();
+        private readonly Subject<DownloadComplete> _downloadFileCompleted = new Subject<DownloadComplete>();
+        private readonly Subject<DownloadStatusChanged> _statusChanged = new Subject<DownloadStatusChanged>();
 
         #endregion Fields
 
@@ -41,6 +40,7 @@ namespace PlexRipper.DownloadManager.Download
         {
             _fileSystem = fileSystem;
             DownloadTask = downloadTask;
+            DownloadStatus = downloadTask.DownloadStatus;
             // AddHeaders();
 
             // Setup progress changed event
@@ -77,7 +77,7 @@ namespace PlexRipper.DownloadManager.Download
         public long BytesRemaining { get; internal set; }
 
         public long TotalBytesToReceive { get; internal set; }
-        public DownloadStatus DownloadStatus => DownloadTask.DownloadStatus;
+        public DownloadStatus DownloadStatus { get; internal set; }
 
         public string DownloadUrl => $"{DownloadTask.DownloadUrl}?download=1&X-Plex-Token={PlexServerAuthToken}";
 
@@ -92,7 +92,8 @@ namespace PlexRipper.DownloadManager.Download
 
         private void SetDownloadStatus(DownloadStatus downloadStatus)
         {
-            DownloadTask.DownloadStatus = downloadStatus;
+            DownloadStatus = downloadStatus;
+            _statusChanged.OnNext(new DownloadStatusChanged(DownloadTaskId, downloadStatus));
         }
 
 
@@ -136,10 +137,7 @@ namespace PlexRipper.DownloadManager.Download
             // TODO using exception like this might be dangerous
             try
             {
-                _progressTimer.Stop();
                 _cancellationToken?.Cancel();
-                _responseStream?.Dispose();
-                _fileStream?.Dispose();
 
                 //  _copyTask.
             }
@@ -165,29 +163,80 @@ namespace PlexRipper.DownloadManager.Download
                     end += remainder;
                 }
                 var downloadRange = new DownloadRange(DownloadUrl, start, end);
-
                 var downloadWorker = new DownloadWorker(i++, DownloadTask, downloadRange, _fileSystem);
                 _downloadWorkers.Add(downloadWorker);
             }
-
             _downloadWorkers
                 .Select(x => x.DownloadWorkerProgress)
                 .CombineLatest()
                 .DistinctUntilChanged()
                 // .Sample(TimeSpan.FromMilliseconds(1000))
                 .Subscribe(OnDownloadProgressChanged);
-
+            _downloadWorkers
+                .Select(x => x.DownloadStatusChanged)
+                .CombineLatest()
+                .DistinctUntilChanged()
+                // .Sample(TimeSpan.FromMilliseconds(1000))
+                .Subscribe(OnDownloadStatusChanged);
             _downloadWorkers
                 .Select(x => x.DownloadWorkerComplete.DistinctUntilChanged())
                 .CombineLatest()
                 .Subscribe(OnDownloadComplete);
         }
 
+
         private void StartDownloadWorkers()
         {
             DownloadStartAt = DateTime.UtcNow;
             SetDownloadStatus(DownloadStatus.Downloading);
             Task.WhenAll(_downloadWorkers.Select(x => x.StartAsync().ValueOrDefault).ToList());
+        }
+
+        #region Subscriptions
+
+        private void OnDownloadProgressChanged(IList<IDownloadWorkerProgress> progressList)
+        {
+            var orderedList = progressList.ToList().OrderBy(x => x.Id).ToList();
+            StringBuilder builder = new StringBuilder();
+            foreach (var progress in orderedList)
+            {
+                builder.Append($"({progress.Id} - {progress.Percentage} {progress.DownloadSpeedFormatted}) + ");
+            }
+
+            // Remove the last " + "
+            if (builder.Length > 3)
+            {
+                builder.Length -= 3;
+            }
+            var downloadProgress = new DownloadProgress(orderedList)
+            {
+                Id = DownloadTaskId,
+                Status = DownloadTask.DownloadStatus,
+                DataTotal = TotalBytesToReceive,
+            };
+            builder.Append($" = ({downloadProgress.DownloadSpeedFormatted} - {downloadProgress.TimeRemaining})");
+            Log.Debug(builder.ToString());
+            _downloadProgressChanged.OnNext(downloadProgress);
+        }
+
+        private void OnDownloadStatusChanged(IList<DownloadStatusChanged> statuses)
+        {
+            foreach (var downloadStatusChanged in statuses)
+            {
+                if (downloadStatusChanged.Status == DownloadStatus.Error)
+                {
+                    // TODO Add error handling and functionality to communicate to the front-end
+                    SetDownloadStatus(DownloadStatus.Error);
+                    break;
+                }
+
+                // Check recursively if all _downloadWorkers have the same download status
+                if (_downloadWorkers.All(x => x.Status == downloadStatusChanged.Status))
+                {
+                    SetDownloadStatus(downloadStatusChanged.Status);
+                    break;
+                }
+            }
         }
 
         private void OnDownloadComplete(IList<DownloadWorkerComplete> completeList)
@@ -216,45 +265,21 @@ namespace PlexRipper.DownloadManager.Download
                 DownloadWorkerCompletes = orderedList
             };
             Log.Debug($"Download of {DownloadTask.FileName} finished!");
-            DownloadFileCompleted.OnNext(downloadComplete);
+            SetDownloadStatus(DownloadStatus.Completed);
+            _downloadFileCompleted.OnNext(downloadComplete);
         }
 
-        private void OnDownloadProgressChanged(IList<IDownloadWorkerProgress> progressList)
-        {
-            var orderedList = progressList.ToList().OrderBy(x => x.Id).ToList();
-            StringBuilder builder = new StringBuilder();
-            foreach (var progress in orderedList)
-            {
-                builder.Append($"({progress.Id} - {progress.Percentage} {progress.DownloadSpeedFormatted}) + ");
-            }
-
-            // Remove the last " + "
-            if (builder.Length > 3)
-            {
-                builder.Length -= 3;
-            }
-            var downloadProgress = new DownloadProgress(orderedList)
-            {
-                Id = DownloadTaskId,
-                Status = DownloadTask.DownloadStatus.ToString(),
-                DataTotal = TotalBytesToReceive,
-            };
-            builder.Append($" = ({downloadProgress.DownloadSpeedFormatted} - {downloadProgress.TimeRemaining})");
-            Log.Debug(builder.ToString());
-            DownloadProgressChanged.OnNext(downloadProgress);
-        }
-
-
+        #endregion
 
         #endregion Methods
 
-        #region Events
+        #region Observables
 
-        public Subject<DownloadProgress> DownloadProgressChanged { get; } = new Subject<DownloadProgress>();
+        public IObservable<DownloadProgress> DownloadProgressChanged => _downloadProgressChanged.AsObservable();
 
-        public Subject<DownloadComplete> DownloadFileCompleted { get; } = new Subject<DownloadComplete>();
+        public IObservable<DownloadComplete> DownloadFileCompleted => _downloadFileCompleted.AsObservable();
 
-        public event EventHandler<DownloadStatus> DownloadStatusChanged;
+        public IObservable<DownloadStatusChanged> DownloadStatusChanged => _statusChanged.AsObservable();
 
         #endregion Events
     }

@@ -18,16 +18,16 @@ namespace PlexRipper.WebAPI.Common.DTO
         public object Guid { get; set; }
 
         [JsonProperty("studio")]
-        public object Studio { get; set; }
+        public string Studio { get; set; }
 
         [JsonProperty("title")]
-        public object Title { get; set; }
+        public string Title { get; set; }
 
         [JsonProperty("contentRating")]
-        public object ContentRating { get; set; }
+        public string ContentRating { get; set; }
 
         [JsonProperty("summary")]
-        public object Summary { get; set; }
+        public string Summary { get; set; }
 
         [JsonProperty("index")]
         public int Index { get; set; }

@@ -3,13 +3,23 @@
 		<v-row>
 			<v-col>
 				<p>Downloads</p>
-				<downloads-table
-					:downloads="getDownloadRows"
-					@pause="pauseDownloadTask"
-					@delete="deleteDownloadTasks"
-					@stop="stopDownloadTask"
-				/>
 			</v-col>
+		</v-row>
+		<v-row>
+			<v-expansion-panels v-model="openExpansions" multiple :dark="$vuetify.theme.dark">
+				<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
+					<v-expansion-panel-header>{{ plexServer.name }}</v-expansion-panel-header>
+					<v-expansion-panel-content>
+						<downloads-table
+							:downloads="getDownloadRows"
+							@pause="pauseDownloadTask"
+							@delete="deleteDownloadTasks"
+							@stop="stopDownloadTask"
+							@restart="restartDownloadTask"
+						/>
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+			</v-expansion-panels>
 		</v-row>
 	</v-container>
 </template>
@@ -36,6 +46,7 @@ export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
 	downloads: DownloadTaskDTO[] = [];
 	downloadProgressList: DownloadProgress[] = [];
+	openExpansions: number[] = [];
 
 	get getDownloadRows(): IDownloadRow[] {
 		const downloadRows: IDownloadRow[] = [];
@@ -77,12 +88,21 @@ export default class Downloads extends Vue {
 		Log.debug(`Pausing download task with id ${downloadTaskId}, which is doing nothing as of now`);
 	}
 
+	startDownloadTask(downloadTaskId: number): void {
+		Log.debug(`Starting download task with id ${downloadTaskId}, which is doing nothing as of now`);
+	}
+
+	restartDownloadTask(downloadTaskId: number): void {
+		Log.debug(`Restarting download task with id ${downloadTaskId}, which is doing nothing as of now`);
+	}
+
 	created(): void {
 		DownloadService.getDownloadListInServers().subscribe((data) => {
 			this.plexServers = data;
+			this.openExpansions = [...Array(this.plexServers?.length).keys()] ?? [];
 		});
 
-		// Retrieve download list and then retrieve the signalR download progress
+		// Retrieve download list
 		DownloadService.getDownloadList().subscribe((data) => {
 			this.downloads = data ?? [];
 		});

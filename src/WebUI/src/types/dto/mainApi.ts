@@ -13,22 +13,21 @@
 export type ResultDTOOfListOfPlexServerDTO = ResultDTO & { value: PlexServerDTO[] };
 
 export interface PlexServerDTO {
-  id?: number;
-  accessToken?: string;
-  name?: string;
-  address?: string;
-  port?: number;
-  version?: string;
-  scheme?: string;
-  host?: string;
-  localAddresses?: string;
-  machineIdentifier?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  owned?: boolean;
-  synced?: boolean;
-  ownerId?: number;
-  home?: boolean;
+  id: number;
+  name: string;
+  address: string;
+  port: number;
+  version: string;
+  scheme: string;
+  host: string;
+  localAddresses: string;
+  machineIdentifier: string;
+  createdAt: string;
+  updatedAt: string;
+  owned: boolean;
+  synced: boolean;
+  ownerId: number;
+  home: boolean;
   plexLibraries: PlexLibraryDTO[];
 }
 
@@ -36,7 +35,7 @@ export interface PlexLibraryDTO {
   id?: number;
   key?: string;
   title?: string;
-  type?: PlexMediaType;
+  type: PlexMediaType;
   updatedAt?: string;
   createdAt?: string;
   scannedAt?: string;
@@ -65,10 +64,10 @@ export interface PlexMovieDTO {
   ratingKey?: number;
   key?: any;
   guid?: any;
-  studio?: any;
-  title?: any;
-  contentRating?: any;
-  summary?: any;
+  studio?: string | null;
+  title?: string | null;
+  contentRating?: string | null;
+  summary?: string | null;
   index?: number;
   rating?: number;
   year?: number;
@@ -160,17 +159,30 @@ export interface PlexTvShowEpisodeDTO {
 export interface DownloadTaskDTO {
   id: number;
   title: string;
-  status: string;
+  status: DownloadStatus;
   fileLocationUrl: string;
   FileName: string;
   titleTvShow: string;
   titleTvShowSeason: string;
   type: PlexMediaType;
-  downloadStatus: string;
   ratingKey: number;
   priority: number;
   plexServerId: number;
   plexLibraryId: number;
+}
+
+export enum DownloadStatus {
+  Unknown = "Unknown",
+  Initialized = "Initialized",
+  Starting = "Starting",
+  Downloading = "Downloading",
+  Pausing = "Pausing",
+  Paused = "Paused",
+  Queued = "Queued",
+  Deleting = "Deleting",
+  Deleted = "Deleted",
+  Completed = "Completed",
+  Error = "Error",
 }
 
 export interface ResultDTO {
@@ -290,15 +302,15 @@ export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };
 
 export interface DownloadProgress {
   id: number;
-  status: string;
+  status: DownloadStatus;
   percentage: number;
   downloadSpeed: number;
   dataReceived: number;
   dataTotal: number;
-  downloadSpeedFormatted?: string | null;
+  downloadSpeedFormatted: string;
   timeRemaining: number;
-  bytesRemaining?: number;
-  workerProgresses?: IDownloadWorkerProgress[] | null | null;
+  bytesRemaining: number;
+  workerProgresses: IDownloadWorkerProgress[];
 }
 
 export interface IDownloadWorkerProgress {

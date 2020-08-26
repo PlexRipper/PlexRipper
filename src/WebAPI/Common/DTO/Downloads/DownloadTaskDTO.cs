@@ -15,7 +15,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         public string Title { get; set; }
 
         [JsonProperty("status", Required = Required.Always)]
-        public string Status { get; set; }
+        public DownloadStatus Status { get; set; }
 
         /// <summary>
         /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv
@@ -41,9 +41,6 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType MediaType { get; set; }
-
-        [JsonProperty("downloadStatus", Required = Required.Always)]
-        public string DownloadStatus { get; set; }
 
         /// <summary>
         /// The identifier used by Plex to keep track of media.

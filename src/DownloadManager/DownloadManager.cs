@@ -120,7 +120,7 @@ namespace PlexRipper.DownloadManager
             newClient.Parts = 8;
             newClient.DownloadProgressChanged.Subscribe(OnDownloadProgressChanged);
             newClient.DownloadFileCompleted.Subscribe(OnDownloadFileCompleted);
-            newClient.DownloadStatusChanged += OnDownloadStatusChanged;
+            newClient.DownloadStatusChanged.Subscribe(OnDownloadStatusChanged);
             DownloadsList.Add(newClient);
             return Result.Ok(newClient);
         }
@@ -142,13 +142,11 @@ namespace PlexRipper.DownloadManager
         }
 
 
-        private async void OnDownloadStatusChanged(object sender, DownloadStatus status)
+        private async void OnDownloadStatusChanged(DownloadStatusChanged downloadStatusChanged)
         {
-            var plexDownloadClient = sender as PlexDownloadClient;
-            Log.Debug($"DownloadClient changed downloadStatus for downloadTask {plexDownloadClient.DownloadTaskId} to {status.ToString()}");
-            await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(plexDownloadClient.DownloadTaskId, status));
+            Log.Debug($"DownloadClient changed downloadStatus for downloadTask {downloadStatusChanged.Id} to {downloadStatusChanged.Status.ToString()}");
+            await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadStatusChanged.Id, downloadStatusChanged.Status));
         }
-
 
         private void OnDownloadProgressChanged(DownloadProgress downloadProgress)
         {
@@ -161,7 +159,7 @@ namespace PlexRipper.DownloadManager
                     .LogError();
                 return;
             }
-            var client = plexDownloadClient.Value;
+            // var client = plexDownloadClient.Value;
 
             // StringBuilder msg = new StringBuilder();
             // msg.Append($"({client.DownloadTaskId}){client.DownloadTask.FileName}");

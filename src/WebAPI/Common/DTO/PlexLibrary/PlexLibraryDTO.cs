@@ -16,7 +16,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("title", Required = Required.DisallowNull)]
         public string Title { get; set; }
 
-        [JsonProperty("type", Required = Required.DisallowNull)]
+        [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType Type { get; set; }
 
         [JsonProperty("updatedAt", Required = Required.DisallowNull)]

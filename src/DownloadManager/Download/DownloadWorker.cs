@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Common;
 using PlexRipper.Domain.Entities;
+using PlexRipper.Domain.Enums;
 using PlexRipper.DownloadManager.Common;
 
 namespace PlexRipper.DownloadManager.Download
@@ -24,6 +26,9 @@ namespace PlexRipper.DownloadManager.Download
         private int _count = 0;
 
         private Task _task;
+        private readonly Subject<IDownloadWorkerProgress> _downloadWorkerProgress = new Subject<IDownloadWorkerProgress>();
+        private readonly Subject<DownloadWorkerComplete> _downloadWorkerComplete = new Subject<DownloadWorkerComplete>();
+        private readonly Subject<DownloadStatusChanged> _statusChanged = new Subject<DownloadStatusChanged>();
 
         public DownloadWorker(int id, DownloadTask downloadTask, DownloadRange downloadRange, IFileSystem fileSystem)
         {
@@ -37,8 +42,13 @@ namespace PlexRipper.DownloadManager.Download
             _fileName = $"{Id}-{DownloadTask.FileName}";
         }
 
-        public Subject<IDownloadWorkerProgress> DownloadWorkerProgress { get; } = new Subject<IDownloadWorkerProgress>();
-        public Subject<DownloadWorkerComplete> DownloadWorkerComplete { get; } = new Subject<DownloadWorkerComplete>();
+        public IObservable<IDownloadWorkerProgress> DownloadWorkerProgress => _downloadWorkerProgress.AsObservable();
+
+        public IObservable<DownloadWorkerComplete> DownloadWorkerComplete => _downloadWorkerComplete.AsObservable();
+
+        public DownloadStatus Status { get; internal set; }
+
+        public IObservable<DownloadStatusChanged> DownloadStatusChanged => _statusChanged.AsObservable();
 
         /// <summary>
         /// Bytes per second download speed
@@ -66,64 +76,73 @@ namespace PlexRipper.DownloadManager.Download
         public Result<Task> StartAsync()
         {
             Log.Debug($"Download worker {Id} start for {DownloadTask.FileName}");
+            SetDownloadStatus(DownloadStatus.Initialized);
             var fileStreamResult = _fileSystem.SaveFile(DownloadTask.DownloadDirectory, _fileName, DownloadRange.RangeSize);
             if (fileStreamResult.IsFailed)
             {
+                SetDownloadStatus(DownloadStatus.Error);
                 return fileStreamResult.ToResult();
             }
-
+            SetDownloadStatus(DownloadStatus.Starting);
             _task = Task.Factory.StartNew(() =>
-            {
-                using var httpClient = new HttpClient();
-                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, DownloadRange.Uri);
-                HttpWebRequest request = (HttpWebRequest) WebRequest.Create(DownloadRange.Uri);
-                request.AddRange(DownloadRange.StartByte, DownloadRange.EndByte);
-                var response = (HttpWebResponse) request.GetResponse();
-
-                // var response = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, _cancellationToken);
-                using var _responseStream = response.GetResponseStream();
-                using var fileStream = fileStreamResult.Value;
-                var buffer = new byte[2048];
-                DownloadStartAt = DateTime.UtcNow;
-                while (true)
                 {
-                    int bytesRead = _responseStream.Read(buffer, 0, buffer.Length);
-                    if (response.ContentLength > 0)
+                    try
                     {
-                        bytesRead = (int) Math.Min(DownloadRange.RangeSize - DownloadRange.BytesReceived, bytesRead);
-                    }
+                        using var httpClient = new HttpClient();
+                        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, DownloadRange.Uri);
+                        HttpWebRequest request = (HttpWebRequest) WebRequest.Create(DownloadRange.Uri);
+                        request.AddRange(DownloadRange.StartByte, DownloadRange.EndByte);
+                        var response = (HttpWebResponse) request.GetResponse();
 
-                    if (bytesRead <= 0)
+                        // var response = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, _cancellationToken);
+                        using var _responseStream = response.GetResponseStream();
+                        using var fileStream = fileStreamResult.Value;
+                        var buffer = new byte[2048];
+                        DownloadStartAt = DateTime.UtcNow;
+                        SetDownloadStatus(DownloadStatus.Downloading);
+                        while (true)
+                        {
+                            int bytesRead = _responseStream.Read(buffer, 0, buffer.Length);
+                            if (response.ContentLength > 0)
+                            {
+                                bytesRead = (int) Math.Min(DownloadRange.RangeSize - DownloadRange.BytesReceived, bytesRead);
+                            }
+                            if (bytesRead <= 0)
+                            {
+                                UpdateProgress();
+                                Complete();
+                                break;
+                            }
+                            BytesReceived += bytesRead;
+                            fileStream.Write(buffer, 0, bytesRead);
+                            fileStream.Flush();
+                            if (ElapsedTime.Subtract(_lastProgress).TotalMilliseconds >= 500d)
+                            {
+                                UpdateProgress();
+                            }
+                        }
+                    }
+                    catch (Exception e)
                     {
-                        UpdateProgress();
-
-                        Complete();
-                        break;
+                        Log.Error(e);
+                        return Result.Fail(new ExceptionalError(e));
+                        throw;
                     }
-
-                    BytesReceived += bytesRead;
-                    fileStream.Write(buffer, 0, bytesRead);
-                    fileStream.Flush();
-                    if (ElapsedTime.Subtract(_lastProgress).TotalMilliseconds >= 500d)
-                    {
-                        UpdateProgress();
-                    }
-                }
-            }, TaskCreationOptions.LongRunning);
+                    return Result.Ok();
+                }, TaskCreationOptions.LongRunning);
             return Result.Ok(_task);
         }
 
         private void UpdateProgress()
         {
             UpdateAverage(DownloadSpeed);
-            DownloadWorkerProgress.OnNext(new DownloadWorkerProgress(Id, BytesReceived, DownloadRange.RangeSize, DownloadSpeed,
+            _downloadWorkerProgress.OnNext(new DownloadWorkerProgress(Id, BytesReceived, DownloadRange.RangeSize, DownloadSpeed,
                 DownloadSpeedAverage));
             _lastProgress = ElapsedTime;
         }
 
         private void Complete()
         {
-            DownloadWorkerProgress.OnCompleted();
             var complete = new DownloadWorkerComplete(Id)
             {
                 FilePath = FilePath,
@@ -131,7 +150,8 @@ namespace PlexRipper.DownloadManager.Download
                 DestinationPath = DownloadTask.DownloadDirectory,
                 DownloadSpeedAverage = DownloadSpeedAverage
             };
-            DownloadWorkerComplete.OnNext(complete);
+            SetDownloadStatus(DownloadStatus.Completed);
+            _downloadWorkerComplete.OnNext(complete);
         }
 
         private void UpdateAverage(int newValue)
@@ -143,6 +163,12 @@ namespace PlexRipper.DownloadManager.Download
                 return;
             }
             DownloadSpeedAverage = DownloadSpeedAverage * (_count - 1) / _count + newValue / _count;
+        }
+
+        private void SetDownloadStatus(DownloadStatus downloadStatus)
+        {
+            Status = downloadStatus;
+            _statusChanged.OnNext(new DownloadStatusChanged(Id, downloadStatus));
         }
     }
 }

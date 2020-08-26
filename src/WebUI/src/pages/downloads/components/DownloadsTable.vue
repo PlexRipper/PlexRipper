@@ -26,9 +26,9 @@
 		<template v-slot:item.downloadSpeed="{ item }">
 			<strong> {{ item.downloadSpeed | prettyBytes }}/s </strong>
 		</template>
-		<!-- Download speed -->
+		<!-- Download Time Remaining -->
 		<template v-slot:item.timeRemaining="{ item }">
-			<strong> {{ [item.timeRemaining, 'minutes'] | duration('humanize', true) }} </strong>
+			<strong> {{ [item.timeRemaining, 'seconds'] | duration('humanize', true) }} </strong>
 		</template>
 		<!-- Percentage -->
 		<template v-slot:item.percentage="{ item }">
@@ -40,21 +40,28 @@
 		</template>
 		<!-- Actions -->
 		<template v-slot:item.actions="{ item }">
-			<v-btn icon @click="pauseDownloadTask(item.id)">
-				<v-icon> mdi-pause </v-icon>
-			</v-btn>
-			<v-btn icon @click="stopDownloadTask(item.id)">
-				<v-icon> mdi-stop </v-icon>
-			</v-btn>
-			<v-btn icon @click="deleteDownloadTask(item.id)">
-				<v-icon> mdi-delete </v-icon>
-			</v-btn>
+			<template v-for="(action, i) in availableActions(item)">
+				<!-- Render buttons -->
+				<template v-for="(button, y) in getButtons">
+					<v-btn v-if="action === button.value" :key="`${i}-${y}`" icon @click="command(button.value, item.id)">
+						<v-tooltip top>
+							<template v-slot:activator="{ on, attrs }">
+								<!-- Button icon-->
+								<v-icon v-bind="attrs" :dark="$vuetify.theme.dark" v-on="on"> {{ button.icon }} </v-icon>
+							</template>
+							<!-- Tooltip text -->
+							<span>{{ button.name }}</span>
+						</v-tooltip>
+					</v-btn>
+				</template>
+			</template>
 		</template>
 	</v-data-table>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
+import { DownloadStatus } from '@dto/mainApi';
 import { DataTableHeader } from 'vuetify/types';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import IDownloadRow from '../types/IDownloadRow';
@@ -113,16 +120,47 @@ export default class DownloadsTable extends Vue {
 		];
 	}
 
-	pauseDownloadTask(itemId: number): void {
-		this.$emit('pause', itemId);
+	get getButtons(): any {
+		return [
+			{
+				name: 'Restart',
+				value: 'restart',
+				icon: 'mdi-refresh',
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				icon: 'mdi-delete',
+			},
+			{
+				name: 'Pause',
+				value: 'pause',
+				icon: 'mdi-pause',
+			},
+			{
+				name: 'Stop',
+				value: 'stop',
+				icon: 'mdi-stop',
+			},
+		];
 	}
 
-	stopDownloadTask(itemId: number) {
-		this.$emit('stop', itemId);
+	availableActions(item: IDownloadRow): string[] {
+		const actions: string[] = ['restart'];
+		switch (item.status) {
+			case DownloadStatus.Initialized:
+				actions.push('delete');
+				actions.push('pause');
+				break;
+			case DownloadStatus.Completed:
+				actions.push('pause');
+				break;
+		}
+		return actions;
 	}
 
-	deleteDownloadTask(itemId: number): void {
-		this.$emit('delete', itemId);
+	command(action: string, itemId: number): void {
+		this.$emit(action, itemId);
 	}
 }
 </script>

@@ -51,7 +51,7 @@
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import SettingsService from '@service/settingsService';
-import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 
 interface INavItem {
 	title: string;
@@ -91,10 +91,10 @@ export default class ServerDrawer extends Vue {
 	openMediaPage(library: PlexLibraryDTO): void {
 		Log.debug(library);
 		switch (library.type) {
-			case 'movie':
+			case PlexMediaType.Movie:
 				this.$router.push(`/movies/${library.id}`);
 				break;
-			case 'show':
+			case PlexMediaType.TvShow:
 				this.$router.push(`/tvshows/${library.id}`);
 				break;
 			default:

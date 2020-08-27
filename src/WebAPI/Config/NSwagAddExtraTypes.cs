@@ -19,6 +19,7 @@ namespace PlexRipper.WebAPI.Config
                 typeof(DownloadProgress),
                 typeof(DownloadTaskCreationProgress),
                 typeof(LibraryProgress),
+                typeof(DownloadStatusChanged),
             };
 
             foreach (var type in types)

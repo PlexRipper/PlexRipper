@@ -35,6 +35,12 @@ export function stopDownloadTask(downloadTaskId: number): Observable<boolean> {
 	return checkResponse<boolean>(result, logText, 'stopDownloadTask');
 }
 
+export function restartDownloadTask(downloadTaskId: number): Observable<boolean> {
+	preApiRequest(logText, 'restartDownloadTask', `Sending restart request with downloadTaskId ${downloadTaskId}`);
+	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/restart/${downloadTaskId}`);
+	return checkResponse<boolean>(result, logText, 'restartDownloadTask');
+}
+
 export function getAllDownloads(): Observable<PlexServerDTO[]> {
 	preApiRequest(logText, 'getAllDownloads');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}`);

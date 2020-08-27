@@ -29,10 +29,11 @@ namespace PlexRipper.Application.PlexDownloads
         private readonly IFileSystem _fileSystem;
         private readonly IPlexApiService _plexApiService;
         private readonly ISignalRService _signalRService;
+        private readonly IFolderPathService _folderPathService;
 
         public PlexDownloadService(IMediator mediator, IDownloadManager downloadManager,
             IPlexAuthenticationService plexAuthenticationService, IFileSystem fileSystem,
-            IPlexApiService plexApiService, ISignalRService signalRService)
+            IPlexApiService plexApiService, ISignalRService signalRService, IFolderPathService folderPathService)
         {
             _mediator = mediator;
             _downloadManager = downloadManager;
@@ -40,6 +41,7 @@ namespace PlexRipper.Application.PlexDownloads
             _fileSystem = fileSystem;
             _plexApiService = plexApiService;
             _signalRService = signalRService;
+            _folderPathService = folderPathService;
         }
 
         public Task<string> GetPlexTokenAsync(PlexAccount plexAccount)
@@ -186,13 +188,13 @@ namespace PlexRipper.Application.PlexDownloads
 
             // TODO make this dynamic
             // Get the download folder
-            var downloadFolder = await _mediator.Send(new GetFolderPathByIdQuery(1));
+            var downloadFolder = await _folderPathService.GetDownloadFolderAsync();
             if (downloadFolder.IsFailed)
             {
                 return ResultExtensions.IsNull(nameof(downloadFolder)).LogError();
             }
 
-            // Get the download folder
+            // Get the destination folder
             var destinationFolder = await _mediator.Send(new GetFolderPathByIdQuery(1));
             if (destinationFolder.IsFailed)
             {
@@ -206,8 +208,10 @@ namespace PlexRipper.Application.PlexDownloads
                 return Result.Ok(new DownloadTask
                 {
                     PlexServerId = server.Id,
-                    FolderPathId = downloadFolder.Value.Id,
-                    FolderPath = downloadFolder.Value,
+                    DownloadFolderId =  downloadFolder.Value.Id,
+                    DownloadFolder = downloadFolder.Value,
+                    DestinationFolderId = destinationFolder.Value.Id,
+                    DestinationFolder = destinationFolder.Value,
                     PlexAccountId = plexAccountId,
                     FileLocationUrl = metaData.ObfuscatedFilePath,
                     Title = metaData.Title,
@@ -219,7 +223,8 @@ namespace PlexRipper.Application.PlexDownloads
                     Priority = server.Id * 10000000,
                     MediaType = mediaType,
                     PlexServer = server,
-                    PlexLibraryId = plexLibraryId
+                    PlexLibraryId = plexLibraryId,
+
                 });
             }
             return Result.Fail($"Failed to retrieve metadata for plex media with rating key: {ratingKey}");
@@ -304,11 +309,20 @@ namespace PlexRipper.Application.PlexDownloads
             return _downloadManager.StopDownload(downloadTaskId);
         }
 
+        public async Task<Result<bool>> RestartDownloadTask(int downloadTaskId)
+        {
+            if (downloadTaskId <= 0)
+            {
+                return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
+            }
+            return await _downloadManager.RestartDownloadAsync(downloadTaskId);
+        }
+
         #region CRUD
 
         public Task<Result<List<PlexServer>>> GetAllDownloadsAsync()
         {
-            return _mediator.Send(new GetAllDownloadTasksByPlexServerQuery(true, true));
+            return _mediator.Send(new GetAllDownloadTasksByPlexServerQuery(true, true, true));
         }
 
         public Task<Result<bool>> DeleteDownloadsAsync(int downloadTaskId)

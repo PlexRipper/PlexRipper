@@ -11,6 +11,7 @@ namespace PlexRipper.Domain.Entities
         /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv
         /// </summary>
         public string FileLocationUrl { get; set; }
+
         public string FileName { get; set; }
 
         /// <summary>
@@ -46,21 +47,25 @@ namespace PlexRipper.Domain.Entities
 
         #region Relationships
 
-        public virtual PlexServer PlexServer { get; set; }
+        public PlexServer PlexServer { get; set; }
         public int PlexServerId { get; set; }
 
-        public virtual PlexLibrary PlexLibrary { get; set; }
+        public PlexLibrary PlexLibrary { get; set; }
         public int PlexLibraryId { get; set; }
 
-        public virtual PlexAccount PlexAccount { get; set; }
+        public PlexAccount PlexAccount { get; set; }
         public int PlexAccountId { get; set; }
 
-        public virtual FolderPath FolderPath { get; set; }
-        public int FolderPathId { get; set; }
+        public FolderPath DestinationFolder { get; set; }
+        public int DestinationFolderId { get; set; }
+
+        public FolderPath DownloadFolder { get; set; }
+        public int DownloadFolderId { get; set; }
 
         #endregion
 
         #region Helpers
+
         [NotMapped]
         public DownloadStatus DownloadStatus
         {
@@ -81,8 +86,7 @@ namespace PlexRipper.Domain.Entities
         [NotMapped]
         public string DownloadUrl => $"{PlexServer?.BaseUrl}{FileLocationUrl}" ?? "";
 
-        [NotMapped]
-        public string DownloadDirectory { get; set; }
+        public string DownloadPath => DownloadFolder?.Directory ?? "";
 
         #endregion
     }

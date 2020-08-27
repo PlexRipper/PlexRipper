@@ -28,6 +28,10 @@ namespace PlexRipper.Application.FolderPaths
             return _mediator.Send(new UpdateFolderPathCommand(folderPath));
         }
 
-
+        public async Task<Result<FolderPath>> GetDownloadFolderAsync()
+        {
+            // Get the download folder
+            return await _mediator.Send(new GetFolderPathByIdQuery(1));
+        }
     }
 }

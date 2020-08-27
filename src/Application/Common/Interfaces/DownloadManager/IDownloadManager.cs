@@ -27,5 +27,6 @@ namespace PlexRipper.Application.Common.Interfaces.DownloadManager
         /// <returns>Returns true if all downloadTasks were added successfully.</returns>
         Task<Result<bool>> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks);
 
+        Task<Result<bool>> RestartDownloadAsync(int downloadTaskId);
     }
 }

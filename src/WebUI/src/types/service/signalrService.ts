@@ -3,7 +3,7 @@ import { LogLevel } from '@aspnet/signalr';
 import { Observable, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
 import { signalRDownloadProgressUrl, signalRPlexLibraryProgressUrl } from '@api/baseApi';
-import { DownloadProgress, LibraryProgress, DownloadTaskCreationProgress } from '@dto/mainApi';
+import { DownloadProgress, LibraryProgress, DownloadTaskCreationProgress, DownloadStatusChanged } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
 
 export class SignalrService {
@@ -93,6 +93,11 @@ export class SignalrService {
 		return this._downloadHubConnection.on<DownloadProgress>('DownloadProgress');
 	}
 
+	public getDownloadStatus(): Observable<DownloadStatusChanged> {
+		this.startDownloadHubConnection();
+		return this._downloadHubConnection.on<DownloadStatusChanged>('DownloadStatus');
+	}
+
 	public getLibraryProgress(): Observable<LibraryProgress> {
 		this.startLibraryHubConnection();
 		return this._libraryHubConnection.on<LibraryProgress>('LibraryProgress');
@@ -105,6 +110,7 @@ export default signalrService;
 export interface DownloadHub {
 	DownloadProgress: DownloadProgress;
 	DownloadTaskCreation: DownloadTaskCreationProgress;
+	DownloadStatus: DownloadStatusChanged;
 }
 
 export interface LibraryHub {

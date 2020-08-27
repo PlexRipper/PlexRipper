@@ -32,7 +32,7 @@
 		</template>
 		<!-- Percentage -->
 		<template v-slot:item.percentage="{ item }">
-			<v-progress-linear v-model="item.percentage" striped color="blue-grey" :dark="$vuetify.theme.dark" height="25">
+			<v-progress-linear :value="item.percentage" stream striped color="blue-grey" :dark="$vuetify.theme.dark" height="25">
 				<template v-slot="{ value }">
 					<strong>{{ value }}%</strong>
 				</template>
@@ -43,7 +43,7 @@
 			<template v-for="(action, i) in availableActions(item)">
 				<!-- Render buttons -->
 				<template v-for="(button, y) in getButtons">
-					<v-btn v-if="action === button.value" :key="`${i}-${y}`" icon @click="command(button.value, item.id)">
+					<v-btn v-if="action === button.value" :key="`${i}-${y}`" icon @click="command(action, item.id)">
 						<v-tooltip top>
 							<template v-slot:activator="{ on, attrs }">
 								<!-- Button icon-->
@@ -127,11 +127,7 @@ export default class DownloadsTable extends Vue {
 				value: 'restart',
 				icon: 'mdi-refresh',
 			},
-			{
-				name: 'Delete',
-				value: 'delete',
-				icon: 'mdi-delete',
-			},
+
 			{
 				name: 'Pause',
 				value: 'pause',
@@ -142,18 +138,44 @@ export default class DownloadsTable extends Vue {
 				value: 'stop',
 				icon: 'mdi-stop',
 			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				icon: 'mdi-delete',
+			},
+			{
+				name: 'Details',
+				value: 'details',
+				icon: 'mdi-chart-box-outline',
+			},
 		];
 	}
 
 	availableActions(item: IDownloadRow): string[] {
-		const actions: string[] = ['restart'];
+		const actions: string[] = ['details'];
 		switch (item.status) {
 			case DownloadStatus.Initialized:
 				actions.push('delete');
+				break;
+			case DownloadStatus.Starting:
+				actions.push('stop');
+				actions.push('delete');
+				break;
+			case DownloadStatus.Downloading:
 				actions.push('pause');
+				actions.push('stop');
 				break;
 			case DownloadStatus.Completed:
-				actions.push('pause');
+				actions.push('restart');
+				actions.push('delete');
+				break;
+			case DownloadStatus.Stopped:
+				actions.push('restart');
+				actions.push('delete');
+				break;
+			case DownloadStatus.Error:
+				actions.push('restart');
+				actions.push('delete');
 				break;
 		}
 		return actions;

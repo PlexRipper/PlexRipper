@@ -27,11 +27,11 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import { deleteDownloadTask, stopDownloadTask } from '@api/plexDownloadApi';
+import { deleteDownloadTask, stopDownloadTask, restartDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
 import { finalize } from 'rxjs/operators';
-import { DownloadTaskDTO, DownloadProgress, PlexServerDTO } from '@dto/mainApi';
+import { DownloadTaskDTO, DownloadProgress, PlexServerDTO, DownloadStatusChanged } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import DownloadsTable from './components/DownloadsTable.vue';
 import IDownloadRow from './types/IDownloadRow';
@@ -46,15 +46,25 @@ export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
 	downloads: DownloadTaskDTO[] = [];
 	downloadProgressList: DownloadProgress[] = [];
+	downloadStatusList: DownloadStatusChanged[] = [];
 	openExpansions: number[] = [];
 
+	/**
+	 * Merge the SignalR feeds into 1 update IDownloadRow
+	 */
 	get getDownloadRows(): IDownloadRow[] {
 		const downloadRows: IDownloadRow[] = [];
 		for (let i = 0; i < this.downloads.length; i++) {
-			downloadRows.push({
-				...this.downloads[i],
+			const downloadRow: IDownloadRow = {
+				...({
+					...this.downloads[i],
+					// Add the download status from SignalR feed
+					status: this.downloadStatusList.find((x) => x.id === this.downloads[i].id)?.status ?? this.downloads[i].status,
+				} as DownloadTaskDTO),
 				...this.downloadProgressList.find((x) => x.id === this.downloads[i].id),
-			} as IDownloadRow);
+			} as IDownloadRow;
+
+			downloadRows.push(downloadRow);
 		}
 		return downloadRows;
 	}
@@ -93,7 +103,7 @@ export default class Downloads extends Vue {
 	}
 
 	restartDownloadTask(downloadTaskId: number): void {
-		Log.debug(`Restarting download task with id ${downloadTaskId}, which is doing nothing as of now`);
+		restartDownloadTask(downloadTaskId).subscribe();
 	}
 
 	created(): void {
@@ -105,6 +115,15 @@ export default class Downloads extends Vue {
 		// Retrieve download list
 		DownloadService.getDownloadList().subscribe((data) => {
 			this.downloads = data ?? [];
+		});
+
+		// Retrieve download status from SignalR
+		SignalrService.getDownloadStatus().subscribe((data) => {
+			const index = this.downloadStatusList.findIndex((x) => x.id === data.id);
+			if (index > -1) {
+				this.downloadStatusList.splice(index, 1);
+			}
+			this.downloadStatusList.push(data);
 		});
 
 		SignalrService.getDownloadProgress().subscribe((data) => {

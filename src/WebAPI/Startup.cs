@@ -62,7 +62,11 @@ namespace PlexRipper.WebAPI
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             // SignalR
-            services.AddSignalR();
+            services.AddSignalR().AddJsonProtocol(options =>
+            {
+                options.PayloadSerializerOptions.Converters
+                    .Add(new JsonStringEnumConverter());
+            });
 
             // Customise default API behaviour
             services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });

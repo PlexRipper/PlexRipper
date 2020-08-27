@@ -15,5 +15,6 @@ namespace PlexRipper.Application.Common.Interfaces
         Task<Result<bool>> DeleteDownloadsAsync(int downloadTaskId);
         Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int mediaId, PlexMediaType type);
         Result<bool> StopDownloadTask(int downloadTaskId);
+        Task<Result<bool>> RestartDownloadTask(int downloadTaskId);
     }
 }

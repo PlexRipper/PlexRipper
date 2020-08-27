@@ -53,6 +53,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import DownloadService from '@service/downloadService';
 import { DataTableHeader } from 'vuetify/types';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, PlexMediaType, PlexMovieDTO } from '@dto/mainApi';
@@ -198,7 +199,11 @@ export default class MovieTable extends Vue {
 			),
 			// Download Movie
 			downloadPlexMovie(itemId, this.activeAccount?.id ?? 0).pipe(
-				// finalize(() => DownloadService.fetchDownloadList()),
+				finalize(() => {
+					this.showDialog = false;
+					this.progress = null;
+					DownloadService.fetchDownloadList();
+				}),
 				catchError(() => {
 					return of(false);
 				}),

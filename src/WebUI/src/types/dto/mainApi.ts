@@ -56,6 +56,9 @@ export enum PlexMediaType {
   TvShow = "TvShow",
   Season = "Season",
   Episode = "Episode",
+  Music = "Music",
+  Album = "Album",
+  Song = "Song",
   Unknown = "Unknown",
 }
 
@@ -178,6 +181,8 @@ export enum DownloadStatus {
   Downloading = "Downloading",
   Pausing = "Pausing",
   Paused = "Paused",
+  Stopping = "Stopping",
+  Stopped = "Stopped",
   Queued = "Queued",
   Deleting = "Deleting",
   Deleted = "Deleted",
@@ -341,4 +346,9 @@ export interface LibraryProgress {
   total?: number;
   isRefreshing?: boolean;
   isComplete?: boolean;
+}
+
+export interface DownloadStatusChanged {
+  id?: number;
+  status?: DownloadStatus;
 }

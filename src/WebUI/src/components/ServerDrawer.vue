@@ -75,13 +75,13 @@ export default class ServerDrawer extends Vue {
 		];
 	}
 
-	findIcon(type: string): string {
+	findIcon(type: PlexMediaType): string {
 		switch (type) {
-			case 'show':
+			case PlexMediaType.TvShow:
 				return 'mdi-television-classic';
-			case 'movie':
+			case PlexMediaType.Movie:
 				return 'mdi-filmstrip';
-			case 'artist':
+			case PlexMediaType.Music:
 				return 'mdi-music';
 			default:
 				return 'mdi-help-circle-outline';

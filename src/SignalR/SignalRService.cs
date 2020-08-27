@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Application.Common.Interfaces.SignalR;
 using PlexRipper.Domain.Common;
+using PlexRipper.Domain.Enums;
 using PlexRipper.Domain.Types;
+using PlexRipper.DownloadManager.Common;
 using PlexRipper.SignalR.Common;
 using PlexRipper.SignalR.Hubs;
 
@@ -52,6 +54,12 @@ namespace PlexRipper.SignalR
         public async Task SendDownloadProgressUpdate(IDownloadProgress downloadProgress)
         {
             await _downloadHub.Clients.All.SendAsync("DownloadProgress", downloadProgress);
+        }
+
+        public async Task SendDownloadStatusUpdate(int id, DownloadStatus downloadStatus)
+        {
+            var downloadStatusChanged = new DownloadStatusChanged(id, downloadStatus);
+            await _downloadHub.Clients.All.SendAsync("DownloadStatus", downloadStatusChanged);
         }
     }
 }

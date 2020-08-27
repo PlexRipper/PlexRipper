@@ -49,7 +49,8 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 
             if (request.IncludeFolderPath)
             {
-                query = query.Include(x => x.FolderPath);
+                query = query.Include(x => x.DownloadFolder);
+                query = query.Include(x => x.DestinationFolder);
             }
 
             var downloadTask = await query.FirstOrDefaultAsync(x => x.RatingKey == request.RatingKey, cancellationToken);

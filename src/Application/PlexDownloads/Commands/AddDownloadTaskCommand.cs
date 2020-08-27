@@ -26,7 +26,7 @@ namespace PlexRipper.Application.PlexDownloads.Commands
         {
             RuleFor(x => x.DownloadTask.Id).Equal(0);
             RuleFor(x => x.DownloadTask.PlexServerId).GreaterThanOrEqualTo(0);
-            RuleFor(x => x.DownloadTask.FolderPathId).GreaterThanOrEqualTo(0);
+            RuleFor(x => x.DownloadTask.DestinationFolderId).GreaterThanOrEqualTo(0);
             RuleFor(x => x.DownloadTask.PlexAccountId).GreaterThanOrEqualTo(0);
             RuleFor(x => x.DownloadTask.FileName).NotEmpty();
         }
@@ -40,9 +40,9 @@ namespace PlexRipper.Application.PlexDownloads.Commands
         {
             await _dbContext.DownloadTasks.AddAsync(command.DownloadTask, cancellationToken);
 
-            if (command.DownloadTask.FolderPath != null)
+            if (command.DownloadTask.DestinationFolder != null)
             {
-                _dbContext.Entry(command.DownloadTask.FolderPath).State = EntityState.Unchanged;
+                _dbContext.Entry(command.DownloadTask.DestinationFolder).State = EntityState.Unchanged;
             }
 
             if (command.DownloadTask.PlexServer != null)

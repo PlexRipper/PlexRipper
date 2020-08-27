@@ -13,16 +13,18 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 {
     public class GetAllDownloadTasksQuery : IRequest<Result<List<DownloadTask>>>
     {
-        public GetAllDownloadTasksQuery(bool includeServer = false, bool includeFolderPath = false, bool includePlexAccount = false)
+        public GetAllDownloadTasksQuery(bool includeServer = false, bool includeFolderPaths = false, bool includePlexAccount = false, bool includePlexLibrary = false)
         {
             IncludeServer = includeServer;
-            IncludeFolderPath = includeFolderPath;
+            IncludeFolderPaths = includeFolderPaths;
             IncludePlexAccount = includePlexAccount;
+            IncludePlexLibrary = includePlexLibrary;
         }
 
         public bool IncludeServer { get; }
-        public bool IncludeFolderPath { get; }
+        public bool IncludeFolderPaths { get; }
         public bool IncludePlexAccount { get; }
+        public bool IncludePlexLibrary { get; }
     }
 
     public class GetAllDownloadTasksQueryValidator : AbstractValidator<GetAllDownloadTasksQuery>
@@ -48,14 +50,20 @@ namespace PlexRipper.Application.PlexDownloads.Queries
                 query = query.Include(x => x.PlexServer);
             }
 
-            if (request.IncludeFolderPath)
+            if (request.IncludeFolderPaths)
             {
-                query = query.Include(x => x.FolderPath);
+                query = query.Include(x => x.DownloadFolder);
+                query = query.Include(x => x.DestinationFolder);
             }
 
             if (request.IncludePlexAccount)
             {
                 query = query.Include(x => x.PlexAccount);
+            }
+
+            if (request.IncludePlexLibrary)
+            {
+                query = query.Include(x => x.PlexLibrary);
             }
 
             var downloadList = await query.ToListAsync(cancellationToken);

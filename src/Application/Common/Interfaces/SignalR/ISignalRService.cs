@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using PlexRipper.Application.Common.Interfaces.DownloadManager;
+using PlexRipper.Domain.Enums;
 using PlexRipper.Domain.Types;
 
 namespace PlexRipper.Application.Common.Interfaces.SignalR
@@ -9,5 +10,6 @@ namespace PlexRipper.Application.Common.Interfaces.SignalR
         Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true);
         Task SendDownloadTaskCreationProgressUpdate(int plexLibraryId, int current, int total);
         Task SendDownloadProgressUpdate(IDownloadProgress downloadProgress);
+        Task SendDownloadStatusUpdate(int id, DownloadStatus downloadStatus);
     }
 }

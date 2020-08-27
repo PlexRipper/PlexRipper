@@ -7,7 +7,6 @@ namespace PlexRipper.DownloadManager.Common
     {
         public int Id { get; }
         public string FilePath { get; set; }
-        public string DestinationPath { get; set; }
         public string FileName { get; set; }
         public int DownloadSpeedAverage { get; set; }
 

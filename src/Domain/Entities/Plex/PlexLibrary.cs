@@ -74,6 +74,7 @@ namespace PlexRipper.Domain.Entities
                 {
                     "movie" => PlexMediaType.Movie,
                     "show" => PlexMediaType.TvShow,
+                    "artist" => PlexMediaType.Music,
                     _ => PlexMediaType.Unknown
                 };
             }

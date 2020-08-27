@@ -14,9 +14,6 @@ namespace PlexRipper.DownloadManager.Common
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
-        [JsonProperty("status", Required = Required.Always)]
-        public DownloadStatus Status { get; set; }
-
         [JsonProperty("percentage", Required = Required.Always)]
         public decimal Percentage => WorkerProgresses.AsQueryable().Average(x => x.Percentage);
 

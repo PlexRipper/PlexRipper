@@ -54,7 +54,7 @@ namespace PlexRipper.DownloadManager
         private bool _isChecking = false;
 
         // Collection which contains all download clients, bound to the DataGrid control
-        public readonly List<PlexDownloadClient> DownloadsList = new List<PlexDownloadClient>();
+        private readonly List<PlexDownloadClient> _downloadsList = new List<PlexDownloadClient>();
 
         #endregion Fields
 
@@ -94,7 +94,7 @@ namespace PlexRipper.DownloadManager
         }
 
         // Total number of downloads in the list
-        public int TotalDownloads => DownloadsList.Count;
+        public int TotalDownloads => _downloadsList.Count;
 
         #endregion Properties
 
@@ -190,13 +190,14 @@ namespace PlexRipper.DownloadManager
         /// Check the DownloadQueue for downloadTasks which can be started.
         /// </summary>
         /// <returns></returns>
-        public async Task<Result> CheckDownloadQueue()
+        public Result CheckDownloadQueue()
         {
             Log.Debug("Executing download queue check!");
             if (_isChecking)
             {
                 return Result.Fail("Check download Queue already in progress").LogWarning();
             }
+            _isChecking = true;
             var _task = Task.Factory.StartNew(async () =>
             {
                 Log.Debug("Checking for download tasks which can be processed.");
@@ -209,19 +210,36 @@ namespace PlexRipper.DownloadManager
                 Log.Information($"Starting the check of {serverList.Value.Count} downloadTasks.");
                 foreach (var server in serverList.Value)
                 {
+                    PlexDownloadClient currentDownload = null;
                     foreach (var plexLibrary in server.PlexLibraries)
                     {
                         foreach (var downloadTask in plexLibrary.DownloadTasks)
                         {
+                            // Check if there is already a client working this downloadTask
                             var downloadClient = GetDownloadClient(downloadTask.Id);
-                            if (downloadClient.Has404NotFoundError())
+                            if (downloadClient.IsFailed)
                             {
+
+                                // This server has no current download
+                                if (currentDownload == null)
+                                {
+
+                                }
+
                                 downloadClient = await CreateDownloadClientAsync(downloadTask);
                                 await downloadClient.Value.StartAsync();
                                 break;
 
                                 // There is an downloadClient which already has this downloadTask
                                 // downloadClient.Value.DownloadStatus
+                            }
+                            else
+                            {
+                                if (downloadClient.Value.DownloadStatus == DownloadStatus.Queued)
+                                {
+
+                                }
+
                             }
 
                             // Check if already added to a downloadClient
@@ -281,10 +299,9 @@ namespace PlexRipper.DownloadManager
             var downloadClient = GetDownloadClient(downloadTaskId);
             if (downloadClient.IsSuccess)
             {
-               return downloadClient.Value.Stop();
+                return downloadClient.Value.Stop();
             }
             SetDownloadStatus(new DownloadStatusChanged(downloadTaskId, DownloadStatus.Stopped));
-
             return Result.Ok(true);
         }
 
@@ -303,9 +320,9 @@ namespace PlexRipper.DownloadManager
                     .LogError();
                 return;
             }
+            CleanupPlexDownloadClient(downloadComplete.Id);
             Log.Information($"The download of {plexDownloadClient.Value.DownloadTask.Title} has completed!");
-            // TODO Clean-up the client and check for new downloads
-            // await CheckDownloadQueue();
+            CheckDownloadQueue();
         }
 
 
@@ -350,7 +367,7 @@ namespace PlexRipper.DownloadManager
             newClient.DownloadProgressChanged.Subscribe(OnDownloadProgressChanged);
             newClient.DownloadFileCompleted.Subscribe(OnDownloadFileCompleted);
             newClient.DownloadStatusChanged.Subscribe(OnDownloadStatusChanged);
-            DownloadsList.Add(newClient);
+            _downloadsList.Add(newClient);
             return Result.Ok(newClient);
         }
 
@@ -367,7 +384,7 @@ namespace PlexRipper.DownloadManager
             if (downloadTask.Id > 0)
             {
                 // First check if there is an downloadClient with that downloadTask, as that is faster
-                var downloadClient = DownloadsList.Find(x => x.DownloadTaskId == downloadTask.Id);
+                var downloadClient = _downloadsList.Find(x => x.DownloadTaskId == downloadTask.Id);
                 if (downloadClient != null)
                 {
                     return Result.Ok(true);
@@ -379,7 +396,7 @@ namespace PlexRipper.DownloadManager
             else if (downloadTask.RatingKey > 0)
             {
                 // First check if there is an downloadClient with that downloadTask, as that is faster
-                var downloadClient = DownloadsList.Find(x => x.DownloadTask.RatingKey == downloadTask.RatingKey);
+                var downloadClient = _downloadsList.Find(x => x.DownloadTask.RatingKey == downloadTask.RatingKey);
                 if (downloadClient != null)
                 {
                     return Result.Ok(true);
@@ -408,7 +425,7 @@ namespace PlexRipper.DownloadManager
 
         private Result<PlexDownloadClient> GetDownloadClient(int downloadTaskId)
         {
-            var downloadClient = DownloadsList.Find(x => x.DownloadTaskId == downloadTaskId);
+            var downloadClient = _downloadsList.Find(x => x.DownloadTaskId == downloadTaskId);
             if (downloadClient == null)
             {
                 return ResultExtensions.Create404NotFoundResult();
@@ -440,6 +457,19 @@ namespace PlexRipper.DownloadManager
                 $"DownloadClient changed downloadStatus for downloadTask {downloadStatusChanged.Id} to {downloadStatusChanged.Status.ToString()}");
             Task.Run(() => _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadStatusChanged.Id, downloadStatusChanged.Status)));
             _signalRService.SendDownloadStatusUpdate(downloadStatusChanged.Id, downloadStatusChanged.Status);
+        }
+
+
+        private void CleanupPlexDownloadClient(int clientId)
+        {
+            Log.Debug($"Cleaning-up downloadClient with id {clientId}");
+            var index = _downloadsList.FindIndex(x => x.DownloadTaskId == clientId);
+            if (index > -1)
+            {
+                _downloadsList[index].Dispose();
+                _downloadsList.RemoveAt(index);
+                Log.Debug($"Cleaned-up downloadClient with id {clientId}");
+            }
         }
 
         #endregion Methods

@@ -3,6 +3,8 @@
 		<v-row>
 			<v-col>
 				<p>Downloads</p>
+				<p>{{ downloadStatusList }}</p>
+				<p>{{ downloadProgressList }}</p>
 			</v-col>
 		</v-row>
 		<v-row>
@@ -55,13 +57,15 @@ export default class Downloads extends Vue {
 	get getDownloadRows(): IDownloadRow[] {
 		const downloadRows: IDownloadRow[] = [];
 		for (let i = 0; i < this.downloads.length; i++) {
+			const download = this.downloads[i];
+			const downloadProgress = this.downloadProgressList.find((x) => x.id === download.id);
+			const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === download.id);
+			// Merge the various feeds
 			const downloadRow: IDownloadRow = {
-				...({
-					...this.downloads[i],
-					// Add the download status from SignalR feed
-					status: this.downloadStatusList.find((x) => x.id === this.downloads[i].id)?.status ?? this.downloads[i].status,
-				} as DownloadTaskDTO),
-				...this.downloadProgressList.find((x) => x.id === this.downloads[i].id),
+				...download,
+				...downloadProgress,
+				// Status priority: downloadProgress > downloadStatusUpdate > getDownloadList
+				status: downloadStatusUpdate?.status ?? download.status,
 			} as IDownloadRow;
 
 			downloadRows.push(downloadRow);

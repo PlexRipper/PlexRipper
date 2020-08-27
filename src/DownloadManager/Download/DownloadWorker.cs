@@ -182,6 +182,7 @@ namespace PlexRipper.DownloadManager.Download
             catch (Exception e)
             {
                 Log.Error(e);
+                SetDownloadStatus(DownloadStatus.Error);
                 throw;
             }
         }

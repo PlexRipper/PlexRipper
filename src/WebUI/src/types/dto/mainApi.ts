@@ -307,7 +307,6 @@ export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };
 
 export interface DownloadProgress {
   id: number;
-  status: DownloadStatus;
   percentage: number;
   downloadSpeed: number;
   dataReceived: number;

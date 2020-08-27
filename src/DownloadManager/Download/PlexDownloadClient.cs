@@ -22,6 +22,8 @@ namespace PlexRipper.DownloadManager.Download
 {
     public class PlexDownloadClient : HttpClient
     {
+
+
         #region Fields
 
         private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
@@ -199,7 +201,10 @@ namespace PlexRipper.DownloadManager.Download
 
         public async Task<Result<bool>> Restart()
         {
-            Stop();
+            if (DownloadStatus == DownloadStatus.Downloading)
+            {
+                Stop();
+            }
             await StartAsync();
             return Result.Ok(true);
         }
@@ -233,11 +238,10 @@ namespace PlexRipper.DownloadManager.Download
             var downloadProgress = new DownloadProgress(orderedList)
             {
                 Id = DownloadTaskId,
-                Status = DownloadTask.DownloadStatus,
                 DataTotal = TotalBytesToReceive,
             };
             builder.Append($" = ({downloadProgress.DownloadSpeedFormatted} - {downloadProgress.TimeRemaining})");
-            Log.Debug(builder.ToString());
+            //Log.Debug(builder.ToString());
             _downloadProgressChanged.OnNext(downloadProgress);
         }
 
@@ -304,6 +308,18 @@ namespace PlexRipper.DownloadManager.Download
 
         public IObservable<DownloadStatusChanged> DownloadStatusChanged => _statusChanged.AsObservable();
 
-        #endregion Events
+        #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _cancellationToken?.Dispose();
+                _downloadProgressChanged?.Dispose();
+                _downloadFileCompleted?.Dispose();
+                _statusChanged?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
     }
 }

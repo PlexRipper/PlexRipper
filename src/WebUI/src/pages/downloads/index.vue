@@ -1,27 +1,80 @@
 <template>
-	<v-container>
+	<v-container fluid>
 		<v-row>
 			<v-col>
 				<p>Downloads</p>
-				<p>{{ downloadStatusList }}</p>
-				<p>{{ downloadProgressList }}</p>
 			</v-col>
 		</v-row>
+		<!-- Download Toolbar -->
 		<v-row>
-			<v-expansion-panels v-model="openExpansions" multiple :dark="$vuetify.theme.dark">
-				<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
-					<v-expansion-panel-header>{{ plexServer.name }}</v-expansion-panel-header>
-					<v-expansion-panel-content>
-						<downloads-table
-							:downloads="getDownloadRows"
-							@pause="pauseDownloadTask"
-							@delete="deleteDownloadTasks"
-							@stop="stopDownloadTask"
-							@restart="restartDownloadTask"
-						/>
-					</v-expansion-panel-content>
-				</v-expansion-panel>
-			</v-expansion-panels>
+			<v-col>
+				<v-toolbar>
+					<!--Prioritize buttons-->
+					<v-btn-toggle borderless group tile :dark="$vuetify.theme.dark">
+						<v-btn>
+							<v-icon large>mdi-arrow-collapse-up</v-icon>
+						</v-btn>
+
+						<v-btn>
+							<v-icon large>mdi-arrow-up</v-icon>
+						</v-btn>
+
+						<v-btn>
+							<v-icon large>mdi-arrow-down</v-icon>
+						</v-btn>
+
+						<v-btn>
+							<v-icon large>mdi-arrow-collapse-down</v-icon>
+						</v-btn>
+					</v-btn-toggle>
+
+					<v-spacer />
+
+					<!--Command buttons-->
+					<v-btn-toggle borderless group tile :dark="$vuetify.theme.dark">
+						<v-btn value="justify">
+							<v-icon large left>mdi-notification-clear-all</v-icon>
+							<span class="hidden-sm-and-down">Clear Completed</span>
+						</v-btn>
+						<v-btn value="left">
+							<v-icon large left>mdi-pause</v-icon>
+							<span class="hidden-sm-and-down">Pause</span>
+						</v-btn>
+
+						<v-btn value="center">
+							<v-icon large left>mdi-play</v-icon>
+							<span class="hidden-sm-and-down">Resume</span>
+						</v-btn>
+
+						<v-btn value="right">
+							<v-icon large left>mdi-delete</v-icon>
+							<span class="hidden-sm-and-down">Delete</span>
+						</v-btn>
+					</v-btn-toggle>
+				</v-toolbar>
+			</v-col>
+		</v-row>
+		<!--	The Download Table	-->
+		<v-row>
+			<v-col>
+				<v-expansion-panels v-model="openExpansions" multiple :dark="$vuetify.theme.dark">
+					<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
+						<v-expansion-panel-header>
+							<h2>{{ plexServer.name }}</h2>
+						</v-expansion-panel-header>
+						<v-expansion-panel-content>
+							<downloads-table
+								v-model="selected"
+								:downloads="getDownloadRows"
+								@pause="pauseDownloadTask"
+								@delete="deleteDownloadTasks"
+								@stop="stopDownloadTask"
+								@restart="restartDownloadTask"
+							/>
+						</v-expansion-panel-content>
+					</v-expansion-panel>
+				</v-expansion-panels>
+			</v-col>
 		</v-row>
 	</v-container>
 </template>
@@ -29,11 +82,11 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import { deleteDownloadTask, stopDownloadTask, restartDownloadTask } from '@api/plexDownloadApi';
+import { deleteDownloadTask, restartDownloadTask, stopDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
 import { finalize } from 'rxjs/operators';
-import { DownloadTaskDTO, DownloadProgress, PlexServerDTO, DownloadStatusChanged } from '@dto/mainApi';
+import { DownloadProgress, DownloadStatus, DownloadStatusChanged, DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import DownloadsTable from './components/DownloadsTable.vue';
 import IDownloadRow from './types/IDownloadRow';
@@ -50,7 +103,7 @@ export default class Downloads extends Vue {
 	downloadProgressList: DownloadProgress[] = [];
 	downloadStatusList: DownloadStatusChanged[] = [];
 	openExpansions: number[] = [];
-
+	selected: IDownloadRow[] = [];
 	/**
 	 * Merge the SignalR feeds into 1 update IDownloadRow
 	 */
@@ -68,9 +121,18 @@ export default class Downloads extends Vue {
 				status: downloadStatusUpdate?.status ?? download.status,
 			} as IDownloadRow;
 
+			if (downloadRow.status === DownloadStatus.Completed) {
+				downloadRow.percentage = 100;
+				downloadRow.timeRemaining = 0;
+				downloadRow.downloadSpeed = 0;
+			}
 			downloadRows.push(downloadRow);
 		}
 		return downloadRows;
+	}
+
+	get selectedIds(): number[] {
+		return this.selected.map((x) => x.id);
 	}
 
 	updateDownloadProgress(downloadProgress: DownloadProgress): void {
@@ -126,6 +188,13 @@ export default class Downloads extends Vue {
 			const index = this.downloadStatusList.findIndex((x) => x.id === data.id);
 			if (index > -1) {
 				this.downloadStatusList.splice(index, 1);
+				// Clean-up progress result if the download has finished
+				if (data.status === DownloadStatus.Completed) {
+					const progressIndex = this.downloadProgressList.findIndex((x) => x.id === data.id);
+					if (progressIndex > -1) {
+						this.downloadProgressList.splice(progressIndex, 1);
+					}
+				}
 			}
 			this.downloadStatusList.push(data);
 		});
@@ -140,3 +209,8 @@ export default class Downloads extends Vue {
 	}
 }
 </script>
+<style scoped lang="scss">
+tr.v-data-table__selected {
+	background: transparent !important;
+}
+</style>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace PlexRipper.Domain.Common
@@ -23,6 +24,7 @@ namespace PlexRipper.Domain.Common
                 return string.Format(numberFormat, "{0:0.00} kB", kiloByteSize);
             if (byteSize < 1073741824)
                 return string.Format(numberFormat, "{0:0.00} MB", megaByteSize);
+
             return string.Format(numberFormat, "{0:0.00} GB", gigaByteSize);
         }
 
@@ -41,6 +43,7 @@ namespace PlexRipper.Domain.Common
                 return speed + " B/s";
             if (speed < 1048576)
                 return kbSpeed.ToString("#.00", numberFormat) + " kB/s";
+
             return mbSpeed.ToString("#.00", numberFormat) + " MB/s";
         }
 
@@ -80,13 +83,36 @@ namespace PlexRipper.Domain.Common
 
         public static long GetTimeRemaining(long BytesRemaining, double downloadSpeed)
         {
-
-
             if (downloadSpeed <= 0)
             {
                 return 0;
             }
+
             return Convert.ToInt64(Math.Floor(BytesRemaining / downloadSpeed));
+        }
+
+        /// <summary>
+        /// Returns a random priority based on the Date of creation.
+        /// </summary>
+        /// <returns></returns>
+        public static long GetPriority()
+        {
+            return Convert.ToInt64((DateTime.Now - DateTime.UnixEpoch).TotalSeconds);
+        }
+
+        /// <summary>
+        /// Returns a list of priorities based on the Date of creation
+        /// </summary>
+        /// <returns></returns>
+        public static List<long> GetPriority(int count)
+        {
+            var list = new List<long>();
+            for (int i = 0; i < count; i++)
+            {
+                list.Add(Convert.ToInt64((DateTime.Now - DateTime.UnixEpoch).TotalSeconds) + i);
+            }
+
+            return list;
         }
     }
 }

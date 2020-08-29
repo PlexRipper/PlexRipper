@@ -22,10 +22,15 @@ namespace PlexRipper.Application.PlexServers.Queries
         public bool IncludeLibraries { get; }
     }
 
+    public class GetAllPlexServersQueryValidator : AbstractValidator<GetAllPlexServersQuery>
+    {
+        public GetAllPlexServersQueryValidator() { }
+    }
+
     public class GetAllPlexServersQueryHandler : BaseHandler,
         IRequestHandler<GetAllPlexServersQuery, Result<List<PlexServer>>>
     {
-        public GetAllPlexServersQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
+        public GetAllPlexServersQueryHandler(IPlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersQuery request,
             CancellationToken cancellationToken)

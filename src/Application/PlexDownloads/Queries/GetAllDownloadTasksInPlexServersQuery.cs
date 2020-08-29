@@ -12,9 +12,12 @@ using PlexRipper.Application.Common.Base;
 
 namespace PlexRipper.Application.PlexDownloads.Queries
 {
-    public class GetAllDownloadTasksByPlexServerQuery : IRequest<Result<List<PlexServer>>>
+    /// <summary>
+    /// Request all downloadTasks sorted in their respective <see cref="PlexServer"/> and <see cref="PlexLibrary"/>
+    /// </summary>
+    public class GetAllDownloadTasksInPlexServersQuery : IRequest<Result<List<PlexServer>>>
     {
-        public GetAllDownloadTasksByPlexServerQuery(bool includePlexAccount = false, bool includeFolderPaths = false,
+        public GetAllDownloadTasksInPlexServersQuery(bool includePlexAccount = false, bool includeFolderPaths = false,
             bool includeServerStatus = false)
         {
             IncludeServerStatus = includeServerStatus;
@@ -27,18 +30,18 @@ namespace PlexRipper.Application.PlexDownloads.Queries
         public bool IncludeFolderPaths { get; }
     }
 
-    public class GetAllDownloadTasksByPlexServerQueryValidator : AbstractValidator<GetAllDownloadTasksByPlexServerQuery>
+    public class GetAllDownloadTasksInPlexServersQueryValidator : AbstractValidator<GetAllDownloadTasksInPlexServersQuery>
     {
-        public GetAllDownloadTasksByPlexServerQueryValidator() { }
+        public GetAllDownloadTasksInPlexServersQueryValidator() { }
     }
 
 
-    public class GetAllDownloadTasksByPlexServerQueryHandler : BaseHandler,
-        IRequestHandler<GetAllDownloadTasksByPlexServerQuery, Result<List<PlexServer>>>
+    public class GetAllDownloadTasksInPlexServersQueryHandler : BaseHandler,
+        IRequestHandler<GetAllDownloadTasksInPlexServersQuery, Result<List<PlexServer>>>
     {
-        public GetAllDownloadTasksByPlexServerQueryHandler(IPlexRipperDbContext dbContext) : base(dbContext) { }
+        public GetAllDownloadTasksInPlexServersQueryHandler(IPlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<List<PlexServer>>> Handle(GetAllDownloadTasksByPlexServerQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<PlexServer>>> Handle(GetAllDownloadTasksInPlexServersQuery request, CancellationToken cancellationToken)
         {
             IQueryable<PlexServer> query = _dbContext.PlexServers
                 .Include(x => x.PlexLibraries)

@@ -288,7 +288,10 @@ namespace PlexRipper.DownloadManager.Download
             {
                 DestinationPath = DownloadPath,
                 FileName = DownloadTask.FileName,
-                DownloadWorkerCompletes = orderedList
+                DownloadWorkerCompletes = orderedList,
+                // TODO Count the actual bytes downloaded
+                DataReceived = TotalBytesToReceive,
+                DataTotal = TotalBytesToReceive
             };
             Log.Debug($"Download of {DownloadTask.FileName} finished!");
             SetDownloadStatus(DownloadStatus.Completed);
@@ -307,6 +310,8 @@ namespace PlexRipper.DownloadManager.Download
         public IObservable<DownloadComplete> DownloadFileCompleted => _downloadFileCompleted.AsObservable();
 
         public IObservable<DownloadStatusChanged> DownloadStatusChanged => _statusChanged.AsObservable();
+
+        public IObservable<DownloadStatusChanged> DownloadMetaChanged => _statusChanged.AsObservable();
 
         #endregion
 

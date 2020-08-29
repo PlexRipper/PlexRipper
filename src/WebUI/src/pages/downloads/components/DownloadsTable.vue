@@ -9,6 +9,8 @@
 		:server-items-length="downloads.length"
 		:dark="$vuetify.theme.dark"
 		:loading="loading"
+		:value="value"
+		@input="$emit('input', $event)"
 	>
 		<!-- Data received -->
 		<template v-slot:item.dataReceived="{ item }">
@@ -28,7 +30,7 @@
 		</template>
 		<!-- Download Time Remaining -->
 		<template v-slot:item.timeRemaining="{ item }">
-			<strong> {{ [item.timeRemaining, 'seconds'] | duration('humanize', true) }} </strong>
+			<strong> {{ formatCountdown(item.timeRemaining) }} </strong>
 		</template>
 		<!-- Percentage -->
 		<template v-slot:item.percentage="{ item }">
@@ -40,21 +42,23 @@
 		</template>
 		<!-- Actions -->
 		<template v-slot:item.actions="{ item }">
-			<template v-for="(action, i) in availableActions(item)">
-				<!-- Render buttons -->
-				<template v-for="(button, y) in getButtons">
-					<v-btn v-if="action === button.value" :key="`${i}-${y}`" icon @click="command(action, item.id)">
-						<v-tooltip top>
-							<template v-slot:activator="{ on, attrs }">
-								<!-- Button icon-->
-								<v-icon v-bind="attrs" :dark="$vuetify.theme.dark" v-on="on"> {{ button.icon }} </v-icon>
-							</template>
-							<!-- Tooltip text -->
-							<span>{{ button.name }}</span>
-						</v-tooltip>
-					</v-btn>
+			<v-btn-toggle borderless dense group tile :dark="$vuetify.theme.dark">
+				<template v-for="(action, i) in availableActions(item)">
+					<!-- Render buttons -->
+					<template v-for="(button, y) in getButtons">
+						<v-btn v-if="action === button.value" :key="`${i}-${y}`" icon @click="command(action, item.id)">
+							<v-tooltip top>
+								<template v-slot:activator="{ on, attrs }">
+									<!-- Button icon-->
+									<v-icon v-bind="attrs" :dark="$vuetify.theme.dark" v-on="on"> {{ button.icon }} </v-icon>
+								</template>
+								<!-- Tooltip text -->
+								<span>{{ button.name }}</span>
+							</v-tooltip>
+						</v-btn>
+					</template>
 				</template>
-			</template>
+			</v-btn-toggle>
 		</template>
 	</v-data-table>
 </template>
@@ -65,7 +69,6 @@ import { DownloadStatus } from '@dto/mainApi';
 import { DataTableHeader } from 'vuetify/types';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import IDownloadRow from '../types/IDownloadRow';
-
 @Component({
 	components: {
 		LoadingSpinner,
@@ -78,12 +81,15 @@ export default class DownloadsTable extends Vue {
 	@Prop({ type: Boolean })
 	readonly loading: Boolean = false;
 
+	@Prop({ type: Array as () => IDownloadRow[] })
+	readonly value: IDownloadRow[] = [];
+
 	get getHeaders(): DataTableHeader<IDownloadRow>[] {
 		return [
-			{
-				text: 'Id',
-				value: 'id',
-			},
+			// {
+			// 	text: 'Id',
+			// 	value: 'id',
+			// },
 			{
 				text: 'Title',
 				value: 'title',
@@ -115,6 +121,7 @@ export default class DownloadsTable extends Vue {
 			{
 				text: 'Actions',
 				value: 'actions',
+				width: '100px',
 				sortable: false,
 			},
 		];
@@ -149,6 +156,14 @@ export default class DownloadsTable extends Vue {
 				icon: 'mdi-chart-box-outline',
 			},
 		];
+	}
+
+	formatCountdown(seconds: number): string {
+		if (seconds <= 0) {
+			return '00:00';
+		}
+
+		return new Date(seconds * 1000).toISOString().substr(11, 8).toString();
 	}
 
 	availableActions(item: IDownloadRow): string[] {

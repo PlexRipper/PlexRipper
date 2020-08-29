@@ -38,22 +38,14 @@ namespace PlexRipper.Application.PlexDownloads.Commands
 
         public async Task<Result<int>> Handle(AddDownloadTaskCommand command, CancellationToken cancellationToken)
         {
-            await _dbContext.DownloadTasks.AddAsync(command.DownloadTask, cancellationToken);
+            command.DownloadTask.DownloadFolder = null;
+            command.DownloadTask.DestinationFolder = null;
+            command.DownloadTask.PlexAccount = null;
+            command.DownloadTask.PlexServer = null;
+            command.DownloadTask.PlexLibrary = null;
 
-            if (command.DownloadTask.DestinationFolder != null)
-            {
-                _dbContext.Entry(command.DownloadTask.DestinationFolder).State = EntityState.Unchanged;
-            }
-
-            if (command.DownloadTask.PlexServer != null)
-            {
-                _dbContext.Entry(command.DownloadTask.PlexServer).State = EntityState.Unchanged;
-            }
-
-            if (command.DownloadTask.PlexAccount != null)
-            {
-                _dbContext.Entry(command.DownloadTask.PlexAccount).State = EntityState.Unchanged;
-            }
+             _dbContext.DownloadTasks.Attach(command.DownloadTask);
+             _dbContext.Entry(command.DownloadTask).State = EntityState.Added;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
             await _dbContext.Entry(command.DownloadTask).GetDatabaseValuesAsync(cancellationToken);

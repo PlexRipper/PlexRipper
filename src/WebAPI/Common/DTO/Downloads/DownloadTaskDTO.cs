@@ -48,6 +48,13 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("ratingKey", Required = Required.Always)]
         public int RatingKey { get; set; }
 
+        [JsonProperty("dataReceived", Required = Required.Always)]
+        public long DataReceived { get; set; }
+
+        [JsonProperty("dataTotal", Required = Required.Always)]
+        public long DataTotal { get; set; }
+
+
         /// <summary>
         /// The download priority, the higher the more important.
         /// </summary>

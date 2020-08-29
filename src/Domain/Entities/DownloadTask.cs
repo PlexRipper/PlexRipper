@@ -20,12 +20,12 @@ namespace PlexRipper.Domain.Entities
         public string Title { get; set; }
 
         /// <summary>
-        /// If this type is an episode of a tv show then this will be the title of that tv show.
+        /// If the type is an episode of a tv show then this will be the title of that tv show.
         /// </summary>
         public string TitleTvShow { get; set; }
 
         /// <summary>
-        /// If this type is an episode of a tv show then this will be the title of that tv show season.
+        /// If the type is an episode of a tv show then this will be the title of that tv show season.
         /// </summary>
         public string TitleTvShowSeason { get; set; }
 
@@ -35,6 +35,8 @@ namespace PlexRipper.Domain.Entities
         [Column("DownloadStatus")]
         public string _DownloadStatus { get; set; }
 
+        public DateTime Created { get; set; }
+
         /// <summary>
         /// The identifier used by Plex to keep track of media.
         /// </summary>
@@ -43,7 +45,11 @@ namespace PlexRipper.Domain.Entities
         /// <summary>
         /// The download priority, the higher the more important.
         /// </summary>
-        public int Priority { get; set; }
+        public long Priority { get; set; }
+
+        public long DataReceived { get; set; }
+
+        public long DataTotal { get; set; }
 
         #region Relationships
 

@@ -8,6 +8,7 @@ namespace PlexRipper.DownloadManager.Config
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<DownloadManager>().As<IDownloadManager>().SingleInstance();
+            builder.RegisterType<DownloadQueue>().SingleInstance();
         }
     }
 }

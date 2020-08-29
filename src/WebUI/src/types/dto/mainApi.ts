@@ -169,6 +169,8 @@ export interface DownloadTaskDTO {
   titleTvShowSeason: string;
   type: PlexMediaType;
   ratingKey: number;
+  dataReceived: number;
+  dataTotal: number;
   priority: number;
   plexServerId: number;
   plexLibraryId: number;

@@ -23,7 +23,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly Subject<DownloadWorkerComplete> _downloadWorkerComplete = new Subject<DownloadWorkerComplete>();
         private readonly Subject<IDownloadWorkerProgress> _downloadWorkerProgress = new Subject<IDownloadWorkerProgress>();
-        private readonly Subject<DownloadStatusChanged> _statusChanged = new Subject<DownloadStatusChanged>();
+        private readonly Subject<DownloadStatusChanged> _downloadStatusChanged = new Subject<DownloadStatusChanged>();
 
         private readonly IFileSystem _fileSystem;
         private readonly CancellationToken _cancellationToken;
@@ -43,6 +43,7 @@ namespace PlexRipper.DownloadManager.Download
             {
                 DownloadRange = downloadRange;
             }
+
             _fileSystem = fileSystem;
             _cancellationToken = cancellationToken;
         }
@@ -62,7 +63,6 @@ namespace PlexRipper.DownloadManager.Download
         public DateTime DownloadStartAt { get; internal set; }
 
 
-
         public TimeSpan ElapsedTime => DateTime.UtcNow.Subtract(DownloadStartAt);
         public string FileName => DownloadRange.TempFileName;
         public string FilePath => DownloadRange.TempFilePath;
@@ -76,11 +76,12 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Observables
 
-        public IObservable<DownloadStatusChanged> DownloadStatusChanged => _statusChanged.AsObservable();
+        public IObservable<DownloadStatusChanged> DownloadStatusChanged => _downloadStatusChanged.AsObservable();
         public IObservable<DownloadWorkerComplete> DownloadWorkerComplete => _downloadWorkerComplete.AsObservable();
         public IObservable<IDownloadWorkerProgress> DownloadWorkerProgress => _downloadWorkerProgress.AsObservable();
 
         #endregion
+
         #endregion Properties
 
         #region Methods
@@ -99,6 +100,8 @@ namespace PlexRipper.DownloadManager.Download
                 return fileStreamResult.ToResult();
             }
             _fileStream = fileStreamResult.Value;
+            _fileStream.Position = 0;
+
             SetDownloadStatus(DownloadStatus.Starting);
             _downloadTask = Task.Factory.StartNew(DownloadClient, TaskCreationOptions.LongRunning);
             return Result.Ok(_downloadTask);
@@ -122,18 +125,6 @@ namespace PlexRipper.DownloadManager.Download
 
         #endregion
 
-        private void Complete()
-        {
-            var complete = new DownloadWorkerComplete(Id)
-            {
-                FilePath = FilePath,
-                FileName = FileName,
-                DownloadSpeedAverage = DownloadSpeedAverage
-            };
-            SetDownloadStatus(DownloadStatus.Completed);
-            _downloadWorkerComplete.OnNext(complete);
-            Dispose();
-        }
 
         private void DownloadClient()
         {
@@ -145,9 +136,8 @@ namespace PlexRipper.DownloadManager.Download
                 request.AddRange(DownloadRange.StartByte, DownloadRange.EndByte);
                 var response = (HttpWebResponse) request.GetResponse();
 
-                // var response = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, _cancellationToken);
                 using var _responseStream = response.GetResponseStream();
-                var buffer = new byte[2048];
+                var buffer = new byte[1024 * 2];
                 DownloadStartAt = DateTime.UtcNow;
                 SetDownloadStatus(DownloadStatus.Downloading);
                 while (true)
@@ -159,24 +149,28 @@ namespace PlexRipper.DownloadManager.Download
                         Stop();
                         break;
                     }
+
                     int bytesRead = _responseStream.Read(buffer, 0, buffer.Length);
-                    if (response.ContentLength > 0)
+                    if (bytesRead > 0)
                     {
-                        bytesRead = (int) Math.Min(DownloadRange.RangeSize - DownloadRange.BytesReceived, bytesRead);
+                        bytesRead = (int) Math.Min(DownloadRange.RangeSize - BytesReceived, bytesRead);
                     }
+
                     if (bytesRead <= 0)
                     {
                         UpdateProgress();
                         Complete();
                         break;
                     }
+
                     BytesReceived += bytesRead;
                     _fileStream.Write(buffer, 0, bytesRead);
                     _fileStream.Flush();
-                    if (ElapsedTime.Subtract(_lastProgress).TotalMilliseconds >= 500d)
-                    {
-                        UpdateProgress();
-                    }
+                    UpdateProgress();
+                    // if (ElapsedTime.Subtract(_lastProgress).TotalMilliseconds >= 1000d)
+                    // {
+                    //     UpdateProgress();
+                    // }
                 }
             }
             catch (Exception e)
@@ -190,7 +184,7 @@ namespace PlexRipper.DownloadManager.Download
         private void SetDownloadStatus(DownloadStatus downloadStatus)
         {
             Status = downloadStatus;
-            _statusChanged.OnNext(new DownloadStatusChanged(Id, downloadStatus));
+            _downloadStatusChanged.OnNext(new DownloadStatusChanged(Id, downloadStatus));
         }
 
         private void UpdateAverage(int newValue)
@@ -201,16 +195,35 @@ namespace PlexRipper.DownloadManager.Download
                 _count++;
                 return;
             }
+
             DownloadSpeedAverage = DownloadSpeedAverage * (_count - 1) / _count + newValue / _count;
         }
 
         private void UpdateProgress()
         {
             UpdateAverage(DownloadSpeed);
-            _downloadWorkerProgress.OnNext(new DownloadWorkerProgress(Id, BytesReceived, DownloadRange.RangeSize,
-                DownloadSpeed,
-                DownloadSpeedAverage));
+            _downloadWorkerProgress.OnNext(
+                new DownloadWorkerProgress(
+                    Id,
+                    BytesReceived,
+                    DownloadRange.RangeSize,
+                    DownloadSpeed,
+                    DownloadSpeedAverage));
             _lastProgress = ElapsedTime;
+        }
+
+        private void Complete()
+        {
+            var complete = new DownloadWorkerComplete(Id)
+            {
+                FilePath = FilePath,
+                FileName = FileName,
+                DownloadSpeedAverage = DownloadSpeedAverage,
+                BytesReceived = BytesReceived,
+                BytesReceivedGoal = DownloadRange.RangeSize
+            };
+            SetDownloadStatus(DownloadStatus.Completed);
+            _downloadWorkerComplete.OnNext(complete);
         }
 
         #endregion Methods
@@ -220,9 +233,9 @@ namespace PlexRipper.DownloadManager.Download
         {
             _downloadWorkerComplete?.Dispose();
             _downloadWorkerProgress?.Dispose();
-            _statusChanged?.Dispose();
+            _downloadStatusChanged?.Dispose();
             _fileStream?.Dispose();
-           // _downloadTask?.Dispose();
+            // _downloadTask?.Dispose();
         }
     }
 }

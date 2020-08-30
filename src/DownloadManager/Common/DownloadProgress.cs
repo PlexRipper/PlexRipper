@@ -15,7 +15,7 @@ namespace PlexRipper.DownloadManager.Common
         public int Id { get; set; }
 
         [JsonProperty("percentage", Required = Required.Always)]
-        public decimal Percentage => WorkerProgresses.AsQueryable().Average(x => x.Percentage);
+        public decimal Percentage => Decimal.Round(WorkerProgresses.AsQueryable().Average(x => x.Percentage), 2);
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
         public int DownloadSpeed => WorkerProgresses.AsQueryable().Sum(x => x.DownloadSpeed);

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using PlexRipper.Domain.Common;
+using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.DownloadManager.Common
 {
@@ -18,6 +19,11 @@ namespace PlexRipper.DownloadManager.Common
         public DownloadComplete(int id)
         {
             Id = id;
+        }
+
+        public FileTask ToFileTask()
+        {
+            return new FileTask(DestinationPath,FileName, FilePaths);
         }
     }
 }

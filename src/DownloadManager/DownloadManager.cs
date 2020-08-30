@@ -12,6 +12,7 @@ using PlexRipper.DownloadManager.Download;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -251,7 +252,8 @@ namespace PlexRipper.DownloadManager
         {
             _mediator.Send(new UpdateDownloadCompleteOfDownloadTaskCommand(downloadComplete.Id, downloadComplete.DataReceived,
                 downloadComplete.DataTotal));
-            _fileManagement.CombineFiles(downloadComplete.FilePaths, downloadComplete.DestinationPath, downloadComplete.FileName);
+
+            _fileManagement.AddFileTask(downloadComplete.ToFileTask());
             var plexDownloadClient = GetDownloadClient(downloadComplete.Id);
             if (plexDownloadClient.IsFailed)
             {
@@ -263,7 +265,7 @@ namespace PlexRipper.DownloadManager
 
             CleanupPlexDownloadClient(downloadComplete.Id);
             Log.Information($"The download of {plexDownloadClient.Value.DownloadTask.Title} has completed!");
-            CheckDownloadQueue();
+            // CheckDownloadQueue();
         }
 
         private void OnDownloadStatusChanged(DownloadStatusChanged downloadStatusChanged)
@@ -274,22 +276,6 @@ namespace PlexRipper.DownloadManager
         private void OnDownloadProgressChanged(DownloadProgress downloadProgress)
         {
             _signalRService.SendDownloadProgressUpdate(downloadProgress);
-            var plexDownloadClient = GetDownloadClient(downloadProgress.Id);
-            if (plexDownloadClient.IsFailed)
-            {
-                plexDownloadClient
-                    .WithError(new Error($"Could not retrieve a PlexDownloadClient with id {downloadProgress.Id}"))
-                    .LogError();
-                return;
-            }
-            // var client = plexDownloadClient.Value;
-
-            // StringBuilder msg = new StringBuilder();
-            // msg.Append($"({client.DownloadTaskId}){client.DownloadTask.FileName}");
-            // msg.Append($" => Downloaded {DataFormat.FormatSizeString(downloadProgress.DataReceived)}");
-            // msg.Append($"of {DataFormat.FormatSizeString(downloadProgress.DataTotal)} bytes");
-            // msg.Append($"({downloadProgress.DownloadSpeed}). {downloadProgress.Percentage} % complete...");
-            // Log.Information(msg.ToString());
         }
 
         #endregion
@@ -305,9 +291,9 @@ namespace PlexRipper.DownloadManager
 
             newClient.PlexServerAuthToken = token.Value;
             newClient.Parts = 8;
-            newClient.DownloadProgressChanged.Subscribe(OnDownloadProgressChanged);
-            newClient.DownloadFileCompleted.Subscribe(OnDownloadFileCompleted);
+            newClient.DownloadProgressChanged.TakeUntil(newClient.DownloadFileCompleted).Subscribe(OnDownloadProgressChanged);
             newClient.DownloadStatusChanged.Subscribe(OnDownloadStatusChanged);
+            newClient.DownloadFileCompleted.Take(1).Subscribe(OnDownloadFileCompleted);
             _downloadsList.Add(newClient);
             return Result.Ok(newClient);
         }

@@ -22,8 +22,6 @@ namespace PlexRipper.DownloadManager.Download
 {
     public class PlexDownloadClient : HttpClient
     {
-
-
         #region Fields
 
         private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
@@ -33,6 +31,7 @@ namespace PlexRipper.DownloadManager.Download
         private readonly Subject<DownloadProgress> _downloadProgressChanged = new Subject<DownloadProgress>();
         private readonly Subject<DownloadComplete> _downloadFileCompleted = new Subject<DownloadComplete>();
         private readonly Subject<DownloadStatusChanged> _statusChanged = new Subject<DownloadStatusChanged>();
+        private IDisposable _workerProgressSubscription;
 
         #endregion Fields
 
@@ -101,7 +100,7 @@ namespace PlexRipper.DownloadManager.Download
         private void CreateDownloadWorkers()
         {
             // Create download segments/ranges
-            var partSize = TotalBytesToReceive / Parts;
+            var partSize = (long)Math.Round(TotalBytesToReceive / (double)Parts);
             var remainder = TotalBytesToReceive - (partSize * Parts);
             for (int i = 0; i < Parts; i++)
             {
@@ -112,25 +111,47 @@ namespace PlexRipper.DownloadManager.Download
                     // Add the remainder to the last download range
                     end += remainder;
                 }
+
                 var downloadRange = new DownloadRange(i + 1, DownloadUrl, start, end, DownloadTask.FileName, DownloadTask.DownloadPath);
                 var downloadWorker = new DownloadWorker(downloadRange, _fileSystem, _cancellationToken.Token);
                 _downloadWorkers.Add(downloadWorker);
             }
-            _downloadWorkers
+
+            // Verify bytes have been correctly divided
+            var totalBytesInWorkers = _downloadWorkers.Sum(x => x.DownloadRange.RangeSize);
+            if (totalBytesInWorkers != TotalBytesToReceive)
+            {
+                Log.Error($"The bytes were incorrectly divided, expected {TotalBytesToReceive} but the sum was " +
+                          $"{totalBytesInWorkers} with a difference of {TotalBytesToReceive - totalBytesInWorkers}");
+            }
+
+            SetupSubscriptions();
+        }
+
+        private void SetupSubscriptions()
+        {
+            var downloadCompleteStream = _downloadWorkers
+                .Select(x => x.DownloadWorkerComplete)
+                .Merge()
+                //.CombineLatest()
+                .Buffer(_downloadWorkers.Count)
+                .Take(1);
+
+            // On download progress
+            _workerProgressSubscription = _downloadWorkers
                 .Select(x => x.DownloadWorkerProgress)
                 .CombineLatest()
-                .DistinctUntilChanged()
-                // .Sample(TimeSpan.FromMilliseconds(1000))
+                .TakeUntil(downloadCompleteStream)
+                .Sample(TimeSpan.FromMilliseconds(1000))
                 .Subscribe(OnDownloadProgressChanged);
+            // On download change
             _downloadWorkers
                 .Select(x => x.DownloadStatusChanged)
                 .CombineLatest()
-                .DistinctUntilChanged()
-                // .Sample(TimeSpan.FromMilliseconds(1000))
+                .TakeUntil(downloadCompleteStream)
                 .Subscribe(OnDownloadStatusChanged);
-            _downloadWorkers
-                .Select(x => x.DownloadWorkerComplete.DistinctUntilChanged())
-                .CombineLatest()
+            // On download complete
+            downloadCompleteStream
                 .Subscribe(OnDownloadComplete);
         }
 
@@ -156,6 +177,7 @@ namespace PlexRipper.DownloadManager.Download
                     SetDownloadStatus(DownloadStatus.Error);
                     return Result.Fail("File size could not be determined of the media that will be downloaded");
                 }
+
                 CreateDownloadWorkers();
                 StartDownloadWorkers();
                 return Result.Ok(true);
@@ -177,6 +199,7 @@ namespace PlexRipper.DownloadManager.Download
             {
                 downloadWorker.Dispose();
             }
+
             _downloadWorkers.Clear();
             return Result.Ok(true);
         }
@@ -195,6 +218,7 @@ namespace PlexRipper.DownloadManager.Download
             {
                 return Result.Fail($"Failed to cancel downloadTask with id: {DownloadTaskId}").LogError(e);
             }
+
             ClearDownloadWorkers();
             return Result.Ok(true);
         }
@@ -205,6 +229,7 @@ namespace PlexRipper.DownloadManager.Download
             {
                 Stop();
             }
+
             await StartAsync();
             return Result.Ok(true);
         }
@@ -235,14 +260,17 @@ namespace PlexRipper.DownloadManager.Download
             {
                 builder.Length -= 3;
             }
+
             var downloadProgress = new DownloadProgress(orderedList)
             {
                 Id = DownloadTaskId,
                 DataTotal = TotalBytesToReceive,
             };
             builder.Append($" = ({downloadProgress.DownloadSpeedFormatted} - {downloadProgress.TimeRemaining})");
-            //Log.Debug(builder.ToString());
+            Log.Debug(builder.ToString());
             _downloadProgressChanged.OnNext(downloadProgress);
+
+            if (progressList.All(x => x.IsCompleted)) { }
         }
 
         private void OnDownloadStatusChanged(IList<DownloadStatusChanged> statuses)
@@ -267,15 +295,19 @@ namespace PlexRipper.DownloadManager.Download
 
         private void OnDownloadComplete(IList<DownloadWorkerComplete> completeList)
         {
-            if (completeList.Count != Parts)
-            {
-                return;
-            }
+            _workerProgressSubscription.Dispose();
             var orderedList = completeList.ToList().OrderBy(x => x.Id).ToList();
             StringBuilder builder = new StringBuilder();
             foreach (var progress in orderedList)
             {
                 builder.Append($"({progress.Id} - {progress.FileName} download completed!) + ");
+                if (!progress.ReceivedAllBytes)
+                {
+                    var msg = $"Did not receive the correct number of bytes for download worker {progress.Id}.";
+                    msg +=
+                        $" Received {progress.BytesReceived} and not {progress.BytesReceivedGoal} with a difference of {progress.BytesReceivedGoal - progress.BytesReceived}";
+                    Log.Error(msg);
+                }
             }
 
             // Remove the last " + "
@@ -283,19 +315,19 @@ namespace PlexRipper.DownloadManager.Download
             {
                 builder.Length -= 3;
             }
+
             Log.Debug(builder.ToString());
             var downloadComplete = new DownloadComplete(DownloadTaskId)
             {
                 DestinationPath = DownloadPath,
                 FileName = DownloadTask.FileName,
                 DownloadWorkerCompletes = orderedList,
-                // TODO Count the actual bytes downloaded
-                DataReceived = TotalBytesToReceive,
+                DataReceived = completeList.Sum(x => x.BytesReceived),
                 DataTotal = TotalBytesToReceive
             };
             Log.Debug($"Download of {DownloadTask.FileName} finished!");
-            SetDownloadStatus(DownloadStatus.Completed);
             ClearDownloadWorkers();
+            SetDownloadStatus(DownloadStatus.Completed);
             _downloadFileCompleted.OnNext(downloadComplete);
         }
 
@@ -324,6 +356,7 @@ namespace PlexRipper.DownloadManager.Download
                 _downloadFileCompleted?.Dispose();
                 _statusChanged?.Dispose();
             }
+
             base.Dispose(disposing);
         }
     }

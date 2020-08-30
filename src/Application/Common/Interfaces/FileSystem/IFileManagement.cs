@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.Application.Common.Interfaces.FileSystem
 {
     public interface IFileManagement
     {
-        void CombineFiles(List<string> filePaths, string outputFilePath, string fileName);
+        void AddFileTask(FileTask fileTask);
     }
 }

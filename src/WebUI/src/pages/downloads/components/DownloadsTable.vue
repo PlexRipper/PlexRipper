@@ -68,6 +68,7 @@ import { Component, Vue, Prop } from 'vue-property-decorator';
 import { DownloadStatus } from '@dto/mainApi';
 import { DataTableHeader } from 'vuetify/types';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import Log from 'consola';
 import IDownloadRow from '../types/IDownloadRow';
 @Component({
 	components: {
@@ -159,11 +160,11 @@ export default class DownloadsTable extends Vue {
 	}
 
 	formatCountdown(seconds: number): string {
-		if (seconds <= 0) {
-			return '00:00';
+		if (!seconds || seconds <= 0) {
+			return '0:00';
 		}
-
-		return new Date(seconds * 1000).toISOString().substr(11, 8).toString();
+		Log.debug(seconds);
+		return new Date(seconds * 1000)?.toISOString()?.substr(11, 8)?.toString() ?? '?';
 	}
 
 	availableActions(item: IDownloadRow): string[] {

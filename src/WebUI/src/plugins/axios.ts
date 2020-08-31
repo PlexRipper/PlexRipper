@@ -25,7 +25,11 @@ export default ({ $axios }: NuxtAppOptions): void => {
 	Axios.interceptors.response.use(
 		(response): AxiosResponse<Result<any>> => {
 			if (response?.data && (response.data as Result)) {
-				(response.data as Result).statusCode = response.status;
+				const result = response.data as Result;
+				// eslint-disable-next-line no-prototype-builtins
+				if (result.hasOwnProperty('statusCode')) {
+					result.statusCode = response.status;
+				}
 			}
 			return response;
 		},

@@ -100,7 +100,7 @@ namespace PlexRipper.DownloadManager.Download
         private void CreateDownloadWorkers()
         {
             // Create download segments/ranges
-            var partSize = (long)Math.Round(TotalBytesToReceive / (double)Parts);
+            var partSize = TotalBytesToReceive / Parts;
             var remainder = TotalBytesToReceive - (partSize * Parts);
             for (int i = 0; i < Parts; i++)
             {

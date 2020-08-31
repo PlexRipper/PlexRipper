@@ -5,7 +5,7 @@ import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnectio
 import { signalRDownloadProgressUrl, signalRPlexLibraryProgressUrl } from '@api/baseApi';
 import { DownloadProgress, LibraryProgress, DownloadTaskCreationProgress, DownloadStatusChanged } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
-
+import HealthService from '@service/healthService';
 export class SignalrService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();
 
@@ -19,7 +19,7 @@ export class SignalrService {
 
 	public constructor() {
 		const options: ConnectionOptions = {
-			logger: LogLevel.Debug,
+			logger: LogLevel.Error,
 			retry: {
 				maximumAttempts: 5,
 			},
@@ -36,22 +36,32 @@ export class SignalrService {
 				options,
 			},
 		);
+		// Disable connections when server is offline
+		HealthService.getServerStatus().subscribe((status) => {
+			if (status) {
+				this.startDownloadHubConnection();
+				this.startLibraryHubConnection();
+			} else {
+				this.stopDownloadHubConnection();
+				this.stopLibraryHubConnection();
+			}
+		});
 
 		this._downloadHubConnection = this._hubFactory.get<DownloadHub>('DownloadHub');
 		this._libraryHubConnection = this._hubFactory.get<LibraryHub>('LibraryHub');
 
-		this._downloadHubConnection.connectionState$.subscribe((connectionState) => {
+		this._downloadHubConnection?.connectionState$.subscribe((connectionState) => {
 			this._downloadHubConnectionstate = connectionState.status;
 		});
 
-		this._libraryHubConnection.connectionState$.subscribe((connectionState) => {
+		this._libraryHubConnection?.connectionState$.subscribe((connectionState) => {
 			this._libraryHubConnectionstate = connectionState.status;
 		});
 	}
 
 	public startLibraryHubConnection(): void {
 		if (this._libraryHubConnectionstate === ConnectionStatus.disconnected) {
-			this._libraryHubSubscription = this._libraryHubConnection.connect().subscribe(() => {
+			this._libraryHubSubscription = this._libraryHubConnection?.connect().subscribe(() => {
 				Log.debug('LibraryHub is now connected!');
 			});
 		}
@@ -59,7 +69,7 @@ export class SignalrService {
 
 	public stopLibraryHubConnection(): void {
 		if (this._libraryHubConnectionstate !== ConnectionStatus.disconnected) {
-			this._libraryHubSubscription = this._libraryHubConnection.disconnect().subscribe(() => {
+			this._libraryHubSubscription = this._libraryHubConnection?.disconnect().subscribe(() => {
 				Log.debug('LibraryHub is now disconnected!');
 			});
 		}
@@ -67,7 +77,7 @@ export class SignalrService {
 
 	public startDownloadHubConnection(): void {
 		if (this._downloadHubConnectionstate === ConnectionStatus.disconnected) {
-			this._downloadHubSubscription = this._downloadHubConnection.connect().subscribe(() => {
+			this._downloadHubSubscription = this._downloadHubConnection?.connect().subscribe(() => {
 				Log.debug('DownloadHub is now connected!');
 			});
 		}
@@ -75,31 +85,31 @@ export class SignalrService {
 
 	public stopDownloadHubConnection(): void {
 		if (this._downloadHubConnectionstate !== ConnectionStatus.disconnected) {
-			this._downloadHubSubscription = this._downloadHubConnection.disconnect().subscribe(() => {
+			this._downloadHubSubscription = this._downloadHubConnection?.disconnect().subscribe(() => {
 				Log.debug('DownloadHub is now disconnected!');
 			});
 		}
 	}
 
 	public getDownloadTaskCreationProgress(): Observable<DownloadTaskCreationProgress> {
-		this.startDownloadHubConnection();
+		// this.startDownloadHubConnection();
 		return this._downloadHubConnection
 			.on<DownloadTaskCreationProgress>('DownloadTaskCreation')
 			.pipe(takeWhile((data) => !data.isComplete));
 	}
 
 	public getDownloadProgress(): Observable<DownloadProgress> {
-		this.startDownloadHubConnection();
+		// this.startDownloadHubConnection();
 		return this._downloadHubConnection.on<DownloadProgress>('DownloadProgress');
 	}
 
 	public getDownloadStatus(): Observable<DownloadStatusChanged> {
-		this.startDownloadHubConnection();
+		// this.startDownloadHubConnection();
 		return this._downloadHubConnection.on<DownloadStatusChanged>('DownloadStatus');
 	}
 
 	public getLibraryProgress(): Observable<LibraryProgress> {
-		this.startLibraryHubConnection();
+		// this.startLibraryHubConnection();
 		return this._libraryHubConnection.on<LibraryProgress>('LibraryProgress');
 	}
 }

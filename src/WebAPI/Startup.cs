@@ -37,19 +37,17 @@ namespace PlexRipper.WebAPI
                 options.AddPolicy(CORSConfiguration,
                     builder =>
                     {
-                        // builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost");
                         builder
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials()
                             .WithOrigins("http://localhost:3000")
                             .SetPreflightMaxAge(TimeSpan.FromMinutes(100));
-
-                        //.AllowAnyOrigin();
                     });
             });
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
             services.AddHttpContextAccessor();
+            services.AddHealthChecks();
 
             // Fluent Validator
             services.AddMvc(options => { options.Filters.Add<ValidateFilter>(); })
@@ -106,6 +104,7 @@ namespace PlexRipper.WebAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/api/health");
 
                 //SignalR configuration
                 endpoints.MapHub<DownloadHub>("/download/progress");

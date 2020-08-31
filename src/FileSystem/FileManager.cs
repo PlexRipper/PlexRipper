@@ -15,8 +15,6 @@ namespace PlexRipper.FileSystem
     public class FileManager : IFileManagement
     {
         private readonly Progress<long> _progress = new Progress<long>();
-        private readonly ConcurrentQueue<FileTask> _queue = new ConcurrentQueue<FileTask>();
-        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(0);
         private readonly Channel<FileTask> _channel = Channel.CreateUnbounded<FileTask>();
         private readonly CancellationToken _token = new CancellationToken();
 

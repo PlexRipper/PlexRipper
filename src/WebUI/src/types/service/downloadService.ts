@@ -1,6 +1,6 @@
 import { ReplaySubject, Observable } from 'rxjs';
 import { getAllDownloads } from '@api/plexDownloadApi';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import GlobalService from '@service/globalService';
 import Log from 'consola';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
@@ -9,10 +9,12 @@ export class DownloadService {
 	private _downloadServerList: ReplaySubject<PlexServerDTO[]> = new ReplaySubject();
 
 	public constructor() {
-		GlobalService.getAxiosReady().subscribe(() => {
-			Log.debug('Retrieving downloadlist');
-			this.fetchDownloadList();
-		});
+		GlobalService.getAxiosReady()
+			.pipe(switchMap(() => getAllDownloads()))
+			.subscribe((value) => {
+				Log.debug('Retrieving downloadlist');
+				this._downloadServerList.next(value ?? []);
+			});
 	}
 
 	/**

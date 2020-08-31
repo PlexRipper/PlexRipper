@@ -65,7 +65,7 @@
 						<v-expansion-panel-content>
 							<downloads-table
 								v-model="selected"
-								:downloads="getDownloadRows"
+								:downloads="getDownloadRows(plexServer.id)"
 								@pause="pauseDownloadTask"
 								@delete="deleteDownloadTasks"
 								@stop="stopDownloadTask"
@@ -107,7 +107,7 @@ export default class Downloads extends Vue {
 	/**
 	 * Merge the SignalR feeds into 1 update IDownloadRow
 	 */
-	get getDownloadRows(): IDownloadRow[] {
+	getDownloadRows(serverId: number): IDownloadRow[] {
 		const downloadRows: IDownloadRow[] = [];
 		for (let i = 0; i < this.downloads.length; i++) {
 			const download = this.downloads[i];
@@ -128,7 +128,7 @@ export default class Downloads extends Vue {
 			}
 			downloadRows.push(downloadRow);
 		}
-		return downloadRows;
+		return downloadRows.filter((x) => x.plexServerId === serverId);
 	}
 
 	get selectedIds(): number[] {

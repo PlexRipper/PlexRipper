@@ -82,8 +82,8 @@ export default class DownloadsTable extends Vue {
 	@Prop({ type: Boolean })
 	readonly loading: Boolean = false;
 
-	@Prop({ type: Array as () => IDownloadRow[] })
-	readonly value: IDownloadRow[] = [];
+	@Prop({ required: true, type: Array as () => IDownloadRow[] })
+	readonly value!: IDownloadRow[];
 
 	get getHeaders(): DataTableHeader<IDownloadRow>[] {
 		return [

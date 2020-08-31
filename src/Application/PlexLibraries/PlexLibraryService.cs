@@ -1,7 +1,5 @@
 ﻿using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Application.PlexLibraries.Commands;
 using PlexRipper.Application.PlexLibraries.Queries;
@@ -11,7 +9,7 @@ using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
 using System.Linq;
 using System.Threading.Tasks;
-using PlexRipper.Application.Common.Interfaces.SignalR;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexTvShows;
 
 namespace PlexRipper.Application.PlexLibraries

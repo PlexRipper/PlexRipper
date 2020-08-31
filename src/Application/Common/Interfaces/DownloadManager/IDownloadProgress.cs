@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using PlexRipper.Domain.Enums;
 
-namespace PlexRipper.Application.Common.Interfaces.DownloadManager
+namespace PlexRipper.Application.Common
 {
     public interface IDownloadProgress
     {

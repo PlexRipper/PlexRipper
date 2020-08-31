@@ -1,6 +1,5 @@
 ﻿using Autofac;
-using PlexRipper.Application.Common.Interfaces.DownloadManager;
-using PlexRipper.Application.Common.Interfaces.Settings;
+using PlexRipper.Application.Common;
 using PlexRipper.Settings.Models;
 
 

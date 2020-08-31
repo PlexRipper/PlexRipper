@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using PlexRipper.Application.Common.Interfaces.DownloadManager;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain.Common;
 using PlexRipper.Domain.Enums;
 

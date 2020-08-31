@@ -1,11 +1,11 @@
 ﻿using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.FolderPaths.Commands;
 using PlexRipper.Application.FolderPaths.Queries;
 using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 
 namespace PlexRipper.Application.FolderPaths
 {

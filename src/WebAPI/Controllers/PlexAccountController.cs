@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
@@ -10,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using PlexRipper.Application.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers

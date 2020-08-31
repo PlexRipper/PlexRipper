@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.JoinTables;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace PlexRipper.Application.Common.Interfaces.DataAccess
+namespace PlexRipper.Application.Common
 {
     public interface IPlexRipperDbContext
     {

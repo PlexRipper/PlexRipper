@@ -1,13 +1,12 @@
 ﻿using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Types.FileSystem;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;

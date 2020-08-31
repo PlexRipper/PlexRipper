@@ -1,8 +1,8 @@
-﻿using FluentResults;
+﻿using System.IO;
+using FluentResults;
 using PlexRipper.Domain.Types.FileSystem;
-using System.IO;
 
-namespace PlexRipper.Application.Common.Interfaces.FileSystem
+namespace PlexRipper.Application.Common
 {
     public interface IFileSystem
     {

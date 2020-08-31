@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Entities.JoinTables;
 using System.IO;
 using System.Reflection;
+using PlexRipper.Application.Common;
 
 namespace PlexRipper.Data
 {

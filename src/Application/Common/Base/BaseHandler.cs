@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
 using FluentValidation.Results;
-using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities.Base;
 

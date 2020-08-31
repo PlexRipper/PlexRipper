@@ -1,8 +1,6 @@
 ﻿using Autofac;
 using AutofacSerilogIntegration;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Common.Interfaces.DownloadManager;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
+using PlexRipper.Application.Common;
 using PlexRipper.WebAPI.Config;
 
 namespace PlexRipper.BaseTests

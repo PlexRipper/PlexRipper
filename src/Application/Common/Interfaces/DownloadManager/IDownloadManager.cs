@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Domain.Entities;
-using System.Threading.Tasks;
 
-namespace PlexRipper.Application.Common.Interfaces.DownloadManager
+namespace PlexRipper.Application.Common
 {
     public interface IDownloadManager
     {

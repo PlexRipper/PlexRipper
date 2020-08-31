@@ -1,27 +1,19 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Application.Common.Interfaces.DownloadManager;
-using PlexRipper.Application.Common.Interfaces.FileSystem;
-using PlexRipper.Application.Common.Interfaces.Settings;
-using PlexRipper.Application.PlexDownloads.Commands;
-using PlexRipper.Application.PlexDownloads.Queries;
-using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
-using PlexRipper.DownloadManager.Common;
-using PlexRipper.DownloadManager.Download;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Common.Interfaces.SignalR;
-using PlexRipper.Application.FolderPaths.Queries;
+using FluentResults;
+using MediatR;
+using PlexRipper.Application.Common;
+using PlexRipper.Application.PlexDownloads.Commands;
+using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Application.PlexServers.Queries;
-using PlexRipper.Domain.Common;
+using PlexRipper.Domain;
+using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
+using PlexRipper.DownloadManager.Common;
+using PlexRipper.DownloadManager.Download;
 
 namespace PlexRipper.DownloadManager
 {
@@ -87,8 +79,7 @@ namespace PlexRipper.DownloadManager
                 return Result.Fail(new Error($"The url {downloadTask.DownloadUri.ToString()} is not absolute and thus not valid."));
             }
 
-            Uri outUri;
-            if (!Uri.TryCreate(downloadTask.DownloadUri.ToString(), UriKind.Absolute, out outUri)
+            if (!Uri.TryCreate(downloadTask.DownloadUri.ToString(), UriKind.Absolute, out Uri outUri)
                 && !(outUri.Scheme == Uri.UriSchemeHttp || outUri.Scheme == Uri.UriSchemeHttps))
             {
                 return Result.Fail(new Error($"The uri {downloadTask.DownloadUri} is not valid.").WithMetadata("Uri", downloadTask.DownloadUri));
@@ -265,7 +256,7 @@ namespace PlexRipper.DownloadManager
 
             CleanupPlexDownloadClient(downloadComplete.Id);
             Log.Information($"The download of {plexDownloadClient.Value.DownloadTask.Title} has completed!");
-            // CheckDownloadQueue();
+            CheckDownloadQueue();
         }
 
         private void OnDownloadStatusChanged(DownloadStatusChanged downloadStatusChanged)
@@ -290,7 +281,8 @@ namespace PlexRipper.DownloadManager
             }
 
             newClient.PlexServerAuthToken = token.Value;
-            newClient.Parts = 8;
+            // TODO Make this configurable from the front-end
+            newClient.Parts = 4;
             newClient.DownloadProgressChanged.TakeUntil(newClient.DownloadFileCompleted).Subscribe(OnDownloadProgressChanged);
             newClient.DownloadStatusChanged.Subscribe(OnDownloadStatusChanged);
             newClient.DownloadFileCompleted.Take(1).Subscribe(OnDownloadFileCompleted);

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using PlexRipper.Application.Common.Interfaces.FileSystem;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 

@@ -1,9 +1,7 @@
 ﻿using System.Threading.Tasks;
-using PlexRipper.Application.Common.Interfaces.DownloadManager;
 using PlexRipper.Domain.Enums;
-using PlexRipper.Domain.Types;
 
-namespace PlexRipper.Application.Common.Interfaces.SignalR
+namespace PlexRipper.Application.Common
 {
     public interface ISignalRService
     {

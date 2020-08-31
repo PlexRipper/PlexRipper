@@ -1,4 +1,4 @@
-﻿using PlexRipper.Application.Common.Interfaces.DownloadManager;
+﻿using PlexRipper.Application.Common;
 using PlexRipper.Domain.Common;
 
 namespace PlexRipper.DownloadManager.Common
@@ -29,6 +29,7 @@ namespace PlexRipper.DownloadManager.Common
         public bool IsCompleted => DataReceived == DataTotal;
 
         public decimal Percentage => DataFormat.GetPercentage(DataReceived, DataTotal);
+
         public DownloadWorkerProgress(int id, long dataReceived, long dataTotal, int downloadSpeed, int downloadSpeedAverage)
         {
             Id = id;

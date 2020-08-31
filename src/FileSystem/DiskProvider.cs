@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using IDiskProvider = PlexRipper.Application.Common.Interfaces.FileSystem.IDiskProvider;
+using IDiskProvider = PlexRipper.Application.Common.IDiskProvider;
 
 namespace PlexRipper.FileSystem
 {
-    public class DiskProvider : IDiskProvider
+    public class DiskProvider : Application.Common.IDiskProvider
     {
         private readonly HashSet<string> _setToRemove = new HashSet<string>
         {

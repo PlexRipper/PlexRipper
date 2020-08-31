@@ -1,7 +1,5 @@
 ﻿using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.PlexServers.Commands;
 using PlexRipper.Application.PlexServers.Queries;
 using PlexRipper.Domain;
@@ -9,6 +7,7 @@ using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexAuthentication.Queries;
 
 namespace PlexRipper.Application.PlexServers

@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using PlexRipper.Domain.Entities;
+﻿using PlexRipper.Domain.Entities;
 
-namespace PlexRipper.Application.Common.Interfaces.FileSystem
+namespace PlexRipper.Application.Common
 {
     public interface IFileManagement
     {

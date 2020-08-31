@@ -1,8 +1,8 @@
 ﻿using Autofac;
-using PlexRipper.Application.Common.Interfaces.DataAccess;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Config

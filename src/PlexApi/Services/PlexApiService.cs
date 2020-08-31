@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 
 namespace PlexRipper.PlexApi.Services
 {

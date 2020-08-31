@@ -1,5 +1,4 @@
 ﻿using FluentResults;
-using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Types.FileSystem;
 using System;
@@ -7,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using PlexRipper.Application.Common;
 
 namespace PlexRipper.FileSystem
 {

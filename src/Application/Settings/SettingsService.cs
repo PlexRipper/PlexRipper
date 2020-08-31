@@ -1,11 +1,10 @@
 ﻿using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Common.Interfaces.Settings;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 
 namespace PlexRipper.Application.Settings
 {

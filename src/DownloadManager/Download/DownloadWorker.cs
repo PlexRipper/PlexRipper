@@ -1,6 +1,4 @@
 ﻿using FluentResults;
-using PlexRipper.Application.Common.Interfaces.DownloadManager;
-using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Common;
 using PlexRipper.Domain.Entities;
@@ -14,6 +12,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 
 namespace PlexRipper.DownloadManager.Download
 {

@@ -25,5 +25,6 @@ namespace PlexRipper.Application.Common
         Task<Result<bool>> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks);
 
         Task<Result<bool>> RestartDownloadAsync(int downloadTaskId);
+        Task<Result<bool>> ClearCompletedAsync();
     }
 }

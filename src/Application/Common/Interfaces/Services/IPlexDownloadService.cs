@@ -16,5 +16,6 @@ namespace PlexRipper.Application.Common
         Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int mediaId, PlexMediaType type);
         Result<bool> StopDownloadTask(int downloadTaskId);
         Task<Result<bool>> RestartDownloadTask(int downloadTaskId);
+        Task<Result<bool>> ClearCompleted();
     }
 }

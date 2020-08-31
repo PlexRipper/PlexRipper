@@ -35,9 +35,6 @@ namespace PlexRipper.Application.PlexDownloads.Commands
 
         public async Task<Result<bool>> Handle(DeleteDownloadTaskByIdCommand command, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<DeleteDownloadTaskByIdCommand, DeleteDownloadTaskByIdCommandValidator>(command);
-            if (result.IsFailed) return result;
-
             var entity = await _dbContext.DownloadTasks.AsTracking().FirstOrDefaultAsync(x => x.Id == command.DownloadTaskId, cancellationToken: cancellationToken);
             if (entity == null)
             {

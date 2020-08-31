@@ -135,7 +135,11 @@ export default class DownloadsTable extends Vue {
 				value: 'restart',
 				icon: 'mdi-refresh',
 			},
-
+			{
+				name: 'Start',
+				value: 'start',
+				icon: 'mdi-play',
+			},
 			{
 				name: 'Pause',
 				value: 'pause',
@@ -175,6 +179,10 @@ export default class DownloadsTable extends Vue {
 				break;
 			case DownloadStatus.Starting:
 				actions.push('stop');
+				actions.push('delete');
+				break;
+			case DownloadStatus.Queued:
+				actions.push('start');
 				actions.push('delete');
 				break;
 			case DownloadStatus.Downloading:

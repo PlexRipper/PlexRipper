@@ -32,7 +32,7 @@
 
 					<!--Command buttons-->
 					<v-btn-toggle borderless group tile :dark="$vuetify.theme.dark">
-						<v-btn value="justify">
+						<v-btn value="justify" @click="clearDownloadTasks">
 							<v-icon large left>mdi-notification-clear-all</v-icon>
 							<span class="hidden-sm-and-down">Clear Completed</span>
 						</v-btn>
@@ -70,6 +70,7 @@
 								@delete="deleteDownloadTasks"
 								@stop="stopDownloadTask"
 								@restart="restartDownloadTask"
+								@start="startDownloadTask"
 							/>
 						</v-expansion-panel-content>
 					</v-expansion-panel>
@@ -82,10 +83,10 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import { deleteDownloadTask, restartDownloadTask, stopDownloadTask } from '@api/plexDownloadApi';
+import { deleteDownloadTask, restartDownloadTask, stopDownloadTask, clearDownloadTasks } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
-import { finalize } from 'rxjs/operators';
+import { finalize, switchMap } from 'rxjs/operators';
 import { DownloadProgress, DownloadStatus, DownloadStatusChanged, DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import DownloadsTable from './components/DownloadsTable.vue';
@@ -170,6 +171,12 @@ export default class Downloads extends Vue {
 
 	restartDownloadTask(downloadTaskId: number): void {
 		restartDownloadTask(downloadTaskId).subscribe();
+	}
+
+	clearDownloadTasks(): void {
+		clearDownloadTasks()
+			.pipe(switchMap(() => DownloadService.fetchDownloadList()))
+			.subscribe();
 	}
 
 	created(): void {

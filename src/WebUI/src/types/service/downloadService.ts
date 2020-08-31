@@ -33,8 +33,9 @@ export class DownloadService {
 	/**
 	 * Fetch the download list and signal to the observers that it is done.
 	 */
-	public fetchDownloadList(): void {
+	public fetchDownloadList(): Observable<PlexServerDTO[]> {
 		getAllDownloads().subscribe((value) => this._downloadServerList.next(value ?? []));
+		return this.getDownloadListInServers();
 	}
 }
 

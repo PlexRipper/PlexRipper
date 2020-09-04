@@ -15,5 +15,7 @@ namespace PlexRipper.Application.Common
         /// <param name="plexServerId"></param>
         /// <returns></returns>
         Task<Result<string>> GetPlexServerTokenAsync(int plexAccountId, int plexServerId);
+
+        Task<Result<string>> GetPlexServerTokenWithUrl(int plexAccountId, int plexServerId, string downloadUrl);
     }
 }

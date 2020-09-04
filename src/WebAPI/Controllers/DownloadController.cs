@@ -126,6 +126,21 @@ namespace PlexRipper.WebAPI.Controllers
             return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 
+        // GET api/<DownloadController>/start/{id:int}
+        [HttpGet("start/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> Start(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(id, "Download Task Id");
+            }
+
+            var result = await _plexDownloadService.StartDownloadTask(id);
+            return result.IsFailed ? BadRequest(result) : Ok(result);
+        }
+
         // GET api/<DownloadController>/restart/{id:int}
         [HttpGet("restart/{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]

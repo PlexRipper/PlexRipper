@@ -78,16 +78,22 @@ namespace PlexRipper.Domain.Enums
         Deleted = 10,
 
         /// <summary>
+        /// Download segments are being merged into 1 media file.
+        /// </summary>
+        [EnumMember(Value = "Merging")]
+        Merging = 11,
+
+        /// <summary>
         /// Download is completed
         /// </summary>
         [EnumMember(Value = "Completed")]
-        Completed = 11,
+        Completed = 12,
 
         /// <summary>
         /// There was an error during download
         /// </summary>
         [EnumMember(Value = "Error")]
-        Error = 12,
+        Error = 13,
 
 
     }

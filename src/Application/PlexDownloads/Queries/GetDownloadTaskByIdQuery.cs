@@ -69,7 +69,9 @@ namespace PlexRipper.Application.PlexDownloads.Queries
                 query = query.Include(x => x.PlexLibrary);
             }
 
-            var downloadTask = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var downloadTask = await query
+                .Include(x => x.DownloadWorkerTasks)
+                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (downloadTask == null)
             {

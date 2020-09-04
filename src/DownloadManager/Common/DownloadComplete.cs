@@ -7,23 +7,36 @@ namespace PlexRipper.DownloadManager.Common
 {
     public class DownloadComplete
     {
-        public int Id { get; }
-        public List<string> FilePaths => DownloadWorkerCompletes.Select(x => x.FilePath).ToList();
-        public string DestinationPath { get; set; }
-        public string FileName { get; set; }
+        #region Constructors
+
+        public DownloadComplete(DownloadTask downloadTask)
+        {
+            DownloadTask = downloadTask;
+        }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// This id is the same as assigned to the <see cref="DownloadTask"/>.
+        /// </summary>
+        public int Id => DownloadTask.Id;
+
         public long DataReceived { get; set; }
+
         public long DataTotal { get; set; }
+
+        public string DestinationPath { get; set; }
+
+        public DownloadTask DownloadTask { get; internal set; }
 
         public List<DownloadWorkerComplete> DownloadWorkerCompletes { get; set; }
 
-        public DownloadComplete(int id)
-        {
-            Id = id;
-        }
+        public string FileName => DownloadTask.FileName;
 
-        public FileTask ToFileTask()
-        {
-            return new FileTask(DestinationPath,FileName, FilePaths);
-        }
+        public List<string> FilePaths => DownloadWorkerCompletes.Select(x => x.FilePath).ToList();
+
+        #endregion
     }
 }

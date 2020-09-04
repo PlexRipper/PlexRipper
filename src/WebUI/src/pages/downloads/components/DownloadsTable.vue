@@ -68,7 +68,6 @@ import { Component, Vue, Prop } from 'vue-property-decorator';
 import { DownloadStatus } from '@dto/mainApi';
 import { DataTableHeader } from 'vuetify/types';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import Log from 'consola';
 import IDownloadRow from '../types/IDownloadRow';
 @Component({
 	components: {
@@ -167,7 +166,6 @@ export default class DownloadsTable extends Vue {
 		if (!seconds || seconds <= 0) {
 			return '0:00';
 		}
-		Log.debug(seconds);
 		return new Date(seconds * 1000)?.toISOString()?.substr(11, 8)?.toString() ?? '?';
 	}
 
@@ -193,8 +191,15 @@ export default class DownloadsTable extends Vue {
 				actions.push('restart');
 				actions.push('delete');
 				break;
+			case DownloadStatus.Stopping:
+				actions.push('delete');
+				break;
 			case DownloadStatus.Stopped:
 				actions.push('restart');
+				actions.push('delete');
+				break;
+			case DownloadStatus.Merging:
+				actions.push('stop');
 				actions.push('delete');
 				break;
 			case DownloadStatus.Error:

@@ -36,10 +36,12 @@ namespace PlexRipper.Application.PlexAuthentication
                     Log.Information("Plex AuthToken was still valid, using from local DB.");
                     return plexAccount.AuthenticationToken;
                 }
+
                 Log.Information("Plex AuthToken has expired, refreshing Plex AuthToken now.");
 
                 return await _plexApiService.RefreshPlexAuthTokenAsync(plexAccount);
             }
+
             Log.Error($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!");
             return string.Empty;
         }
@@ -54,6 +56,22 @@ namespace PlexRipper.Application.PlexAuthentication
         {
             // TODO if there is no token then is should refresh a token
             return _mediator.Send(new GetPlexServerTokenQuery(plexAccountId, plexServerId));
+        }
+
+        public async Task<Result<string>> GetPlexServerTokenWithUrl(int plexAccountId, int plexServerId, string downloadUrl)
+        {
+            if (string.IsNullOrEmpty(downloadUrl))
+            {
+                return ResultExtensions.IsNull(nameof(downloadUrl));
+            }
+
+            var token = await GetPlexServerTokenAsync(plexAccountId, plexServerId);
+            if (token.IsFailed)
+            {
+                return token;
+            }
+
+            return Result.Ok($"{downloadUrl}?download=1&X-Plex-Token={token.Value}");
         }
     }
 }

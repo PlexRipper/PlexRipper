@@ -1,13 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using PlexRipper.Domain.Common;
 using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.DownloadManager.Common
 {
+    /// <summary>
+    /// Used to send any <see cref="DownloadStatus"/> changes to the front-end.
+    /// </summary>
     public class DownloadStatusChanged
     {
+        [JsonProperty("id", Required = Required.Always)]
         public int Id { get; }
+
+        [JsonProperty("status", Required = Required.Always)]
         public DownloadStatus Status { get; }
 
         public DownloadStatusChanged(int id, DownloadStatus downloadStatus)

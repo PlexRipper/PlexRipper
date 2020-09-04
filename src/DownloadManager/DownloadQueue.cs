@@ -1,14 +1,13 @@
-﻿using FluentResults;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using FluentResults;
 using MediatR;
-using Microsoft.EntityFrameworkCore.Internal;
+using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
 using PlexRipper.DownloadManager.Download;
-using System.Linq;
-using System.Threading.Tasks;
-using PlexRipper.Application.PlexDownloads.Commands;
 
 namespace PlexRipper.DownloadManager
 {
@@ -20,6 +19,10 @@ namespace PlexRipper.DownloadManager
         private readonly IMediator _mediator;
         private bool _isChecking = false;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DownloadQueue"/> class.
+        /// </summary>
+        /// <param name="mediator">Defines a mediator to encapsulate request/response and publishing interaction patterns.</param>
         public DownloadQueue(IMediator mediator)
         {
             _mediator = mediator;

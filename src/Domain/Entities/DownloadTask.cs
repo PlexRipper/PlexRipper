@@ -1,6 +1,7 @@
 ﻿using PlexRipper.Domain.Entities.Base;
 using PlexRipper.Domain.Enums;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain.Entities
@@ -67,6 +68,8 @@ namespace PlexRipper.Domain.Entities
 
         public FolderPath DownloadFolder { get; set; }
         public int DownloadFolderId { get; set; }
+
+        public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
 
         #endregion
 

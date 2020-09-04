@@ -4,6 +4,7 @@ using PlexRipper.Domain.Entities.JoinTables;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace PlexRipper.Domain.Entities
 {
@@ -64,6 +65,13 @@ namespace PlexRipper.Domain.Entities
         /// </summary>
         [NotMapped]
         public string AccessToken { get; set; }
+
+        /// <summary>
+        /// Check if any nested <see cref="PlexLibrary"/> has a <see cref="DownloadTask"/>.
+        /// </summary>
+        [NotMapped]
+        public bool HasDownloadTasks => PlexLibraries?.Any(x => x.DownloadTasks?.Any() ?? false) ?? false;
+
         #endregion
 
     }

@@ -3,6 +3,8 @@
 		<v-row>
 			<v-col>
 				<p>Downloads</p>
+				<p>{{ downloadStatusList }}</p>
+				<p>{{ downloadProgressList }}</p>
 			</v-col>
 		</v-row>
 		<!-- Download Toolbar -->
@@ -83,7 +85,13 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import { deleteDownloadTask, restartDownloadTask, stopDownloadTask, clearDownloadTasks } from '@api/plexDownloadApi';
+import {
+	deleteDownloadTask,
+	restartDownloadTask,
+	stopDownloadTask,
+	clearDownloadTasks,
+	startDownloadTask,
+} from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
 import { finalize, switchMap } from 'rxjs/operators';
@@ -118,7 +126,7 @@ export default class Downloads extends Vue {
 			const downloadRow: IDownloadRow = {
 				...download,
 				...downloadProgress,
-				// Status priority: downloadProgress > downloadStatusUpdate > getDownloadList
+				// Status priority: downloadStatusUpdate > getDownloadList
 				status: downloadStatusUpdate?.status ?? download.status,
 			} as IDownloadRow;
 
@@ -166,7 +174,7 @@ export default class Downloads extends Vue {
 	}
 
 	startDownloadTask(downloadTaskId: number): void {
-		Log.debug(`Starting download task with id ${downloadTaskId}, which is doing nothing as of now`);
+		startDownloadTask(downloadTaskId).subscribe();
 	}
 
 	restartDownloadTask(downloadTaskId: number): void {
@@ -192,18 +200,20 @@ export default class Downloads extends Vue {
 
 		// Retrieve download status from SignalR
 		SignalrService.getDownloadStatus().subscribe((data) => {
-			const index = this.downloadStatusList.findIndex((x) => x.id === data.id);
-			if (index > -1) {
-				this.downloadStatusList.splice(index, 1);
-				// Clean-up progress result if the download has finished
-				if (data.status === DownloadStatus.Completed) {
-					const progressIndex = this.downloadProgressList.findIndex((x) => x.id === data.id);
-					if (progressIndex > -1) {
-						this.downloadProgressList.splice(progressIndex, 1);
+			if (data) {
+				const index = this.downloadStatusList.findIndex((x) => x.id === data.id);
+				if (index > -1) {
+					this.downloadStatusList.splice(index, 1);
+					// Clean-up progress result if the download has finished
+					if (data.status === DownloadStatus.Completed) {
+						const progressIndex = this.downloadProgressList.findIndex((x) => x.id === data.id);
+						if (progressIndex > -1) {
+							this.downloadProgressList.splice(progressIndex, 1);
+						}
 					}
 				}
+				this.downloadStatusList.push(data);
 			}
-			this.downloadStatusList.push(data);
 		});
 
 		SignalrService.getDownloadProgress().subscribe((data) => {

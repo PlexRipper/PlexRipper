@@ -188,6 +188,7 @@ export enum DownloadStatus {
   Queued = "Queued",
   Deleting = "Deleting",
   Deleted = "Deleted",
+  Merging = "Merging",
   Completed = "Completed",
   Error = "Error",
 }
@@ -341,15 +342,15 @@ export interface DownloadTaskCreationProgress {
 }
 
 export interface LibraryProgress {
-  id?: number;
-  percentage?: number;
-  received?: number;
-  total?: number;
-  isRefreshing?: boolean;
-  isComplete?: boolean;
+  id: number;
+  percentage: number;
+  received: number;
+  total: number;
+  isRefreshing: boolean;
+  isComplete: boolean;
 }
 
 export interface DownloadStatusChanged {
-  id?: number;
-  status?: DownloadStatus;
+  id: number;
+  status: DownloadStatus;
 }

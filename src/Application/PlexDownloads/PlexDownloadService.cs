@@ -312,6 +312,13 @@ namespace PlexRipper.Application.PlexDownloads
             return _downloadManager.StopDownload(downloadTaskId);
         }
 
+        public async Task<Result<bool>> StartDownloadTask(int downloadTaskId)
+        {
+            if (downloadTaskId <= 0) return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
+
+            return await _downloadManager.StartDownload(downloadTaskId);
+        }
+
         #endregion
 
         #endregion

@@ -25,6 +25,8 @@ namespace PlexRipper.Application.Common
         DbSet<PlexTvShow> PlexTvShows { get; set; }
         DbSet<PlexTvShowSeason> PlexTvShowSeason { get; set; }
         DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
+        DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
+        DbSet<FileTask> FileTasks { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 

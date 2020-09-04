@@ -15,7 +15,9 @@ namespace PlexRipper.Data
         #region Tables
         public DbSet<PlexAccount> PlexAccounts { get; set; }
         public DbSet<DownloadTask> DownloadTasks { get; set; }
+        public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
         public DbSet<FolderPath> FolderPaths { get; set; }
+        public DbSet<FileTask> FileTasks { get; set; }
 
         public DbSet<PlexGenre> PlexGenres { get; set; }
         public DbSet<PlexLibrary> PlexLibraries { get; set; }

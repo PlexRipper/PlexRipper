@@ -26,5 +26,12 @@ namespace PlexRipper.Application.Common
 
         Task<Result<bool>> RestartDownloadAsync(int downloadTaskId);
         Task<Result<bool>> ClearCompletedAsync();
+
+        /// <summary>
+        /// Starts a queued task immediately.
+        /// </summary>
+        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to start.</param>
+        /// <returns>Is successful.</returns>
+        Task<Result<bool>> StartDownload(int downloadTaskId);
     }
 }

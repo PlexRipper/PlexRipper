@@ -74,6 +74,9 @@ namespace PlexRipper.Application.PlexDownloads.Queries
                 query = query.Include(x => x.ServerStatus);
             }
             var server = await query
+                .Include(x => x.PlexLibraries)
+                .ThenInclude(x => x.DownloadTasks)
+                .ThenInclude(x => x.DownloadWorkerTasks)
                 .FirstOrDefaultAsync(x => x.Id == request.PlexServerId);
             return Result.Ok(server);
         }

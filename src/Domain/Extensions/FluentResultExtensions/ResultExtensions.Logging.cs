@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using FluentResults;
 
@@ -13,6 +14,10 @@ namespace PlexRipper.Domain
             foreach (var error in result.Errors)
             {
                 Log.Warning(error.Message, memberName, sourceFilePath);
+                if (error.Reasons.Any())
+                {
+                    error.Reasons.ForEach(x => Log.Warning(x.Message, memberName, sourceFilePath));
+                }
             }
             return result;
         }
@@ -22,6 +27,10 @@ namespace PlexRipper.Domain
             foreach (var error in result.Errors)
             {
                 Log.Error(error.Message, memberName, sourceFilePath);
+                if (error.Reasons.Any())
+                {
+                    error.Reasons.ForEach(x => Log.Error(x.Message, memberName, sourceFilePath));
+                }
             }
 
             if (e != null)

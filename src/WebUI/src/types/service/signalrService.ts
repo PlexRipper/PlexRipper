@@ -1,6 +1,6 @@
 import Log from 'consola';
 import { LogLevel } from '@aspnet/signalr';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
 import { signalRDownloadProgressUrl, signalRPlexLibraryProgressUrl } from '@api/baseApi';
 import { DownloadProgress, LibraryProgress, DownloadTaskCreationProgress, DownloadStatusChanged } from '@dto/mainApi';
@@ -17,9 +17,11 @@ export class SignalrService {
 	private _downloadHubConnection: HubConnection<DownloadHub>;
 	private _downloadHubSubscription: Subscription | null = null;
 
+	private _downloadStatusChangedSubject: ReplaySubject<DownloadStatusChanged> = new ReplaySubject<DownloadStatusChanged>();
+
 	public constructor() {
 		const options: ConnectionOptions = {
-			logger: LogLevel.Error,
+			logger: LogLevel.None,
 			retry: {
 				maximumAttempts: 5,
 			},
@@ -36,6 +38,26 @@ export class SignalrService {
 				options,
 			},
 		);
+
+		this._downloadHubConnection = this._hubFactory.get<DownloadHub>('DownloadHub');
+		this._libraryHubConnection = this._hubFactory.get<LibraryHub>('LibraryHub');
+
+		this.setupSubscriptions();
+	}
+
+	private setupSubscriptions(): void {
+		this._downloadHubConnection?.connectionState$.subscribe((connectionState) => {
+			this._downloadHubConnectionstate = connectionState.status;
+		});
+
+		this._libraryHubConnection?.connectionState$.subscribe((connectionState) => {
+			this._libraryHubConnectionstate = connectionState.status;
+		});
+
+		this._downloadHubConnection.on<DownloadStatusChanged>('DownloadStatus').subscribe((data) => {
+			this._downloadStatusChangedSubject.next(data);
+		});
+
 		// Disable connections when server is offline
 		HealthService.getServerStatus().subscribe((status) => {
 			if (status) {
@@ -45,17 +67,6 @@ export class SignalrService {
 				this.stopDownloadHubConnection();
 				this.stopLibraryHubConnection();
 			}
-		});
-
-		this._downloadHubConnection = this._hubFactory.get<DownloadHub>('DownloadHub');
-		this._libraryHubConnection = this._hubFactory.get<LibraryHub>('LibraryHub');
-
-		this._downloadHubConnection?.connectionState$.subscribe((connectionState) => {
-			this._downloadHubConnectionstate = connectionState.status;
-		});
-
-		this._libraryHubConnection?.connectionState$.subscribe((connectionState) => {
-			this._libraryHubConnectionstate = connectionState.status;
 		});
 	}
 
@@ -99,17 +110,14 @@ export class SignalrService {
 	}
 
 	public getDownloadProgress(): Observable<DownloadProgress> {
-		// this.startDownloadHubConnection();
 		return this._downloadHubConnection.on<DownloadProgress>('DownloadProgress');
 	}
 
 	public getDownloadStatus(): Observable<DownloadStatusChanged> {
-		// this.startDownloadHubConnection();
-		return this._downloadHubConnection.on<DownloadStatusChanged>('DownloadStatus');
+		return this._downloadStatusChangedSubject.asObservable();
 	}
 
 	public getLibraryProgress(): Observable<LibraryProgress> {
-		// this.startLibraryHubConnection();
 		return this._libraryHubConnection.on<LibraryProgress>('LibraryProgress');
 	}
 }

@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
+using MediatR;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.PlexDownloads.Commands;
+using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
@@ -29,10 +33,13 @@ namespace PlexRipper.DownloadManager.Download
         private readonly Subject<DownloadProgress> _downloadProgressChanged = new Subject<DownloadProgress>();
 
         private readonly List<DownloadWorker> _downloadWorkers = new List<DownloadWorker>();
+        private readonly IMediator _mediator;
         private readonly IFileSystem _fileSystem;
         private readonly Subject<DownloadStatusChanged> _statusChanged = new Subject<DownloadStatusChanged>();
 
+        private readonly EventLoopScheduler _timeThreadContext = new EventLoopScheduler();
         private IDisposable _workerProgressSubscription;
+        private bool _isSetup = false;
 
         #endregion
 
@@ -42,9 +49,11 @@ namespace PlexRipper.DownloadManager.Download
         /// Initializes a new instance of the <see cref="PlexDownloadClient"/> class.
         /// </summary>
         /// <param name="downloadTask">The <see cref="DownloadTask"/> to start executing.</param>
+        /// <param name="mediator"></param>
         /// <param name="fileSystem">Used to get fileStreams in which to store the download data.</param>
-        public PlexDownloadClient(DownloadTask downloadTask, IFileSystem fileSystem)
+        public PlexDownloadClient(DownloadTask downloadTask, IMediator mediator, IFileSystem fileSystem)
         {
+            _mediator = mediator;
             _fileSystem = fileSystem;
             DownloadTask = downloadTask;
             DownloadStatus = downloadTask.DownloadStatus;
@@ -67,7 +76,7 @@ namespace PlexRipper.DownloadManager.Download
         /// </summary>
         public int DownloadTaskId => DownloadTask.Id;
 
-        public string DownloadUrl => $"{DownloadTask.DownloadUrl}?download=1&X-Plex-Token={PlexServerAuthToken}";
+        public string DownloadUrl { get; set; }
 
         public TimeSpan ElapsedTime => DateTime.UtcNow.Subtract(DownloadStartAt);
 
@@ -76,9 +85,7 @@ namespace PlexRipper.DownloadManager.Download
         /// </summary>
         public long Parts { get; set; } = 1;
 
-        public string PlexServerAuthToken { get; set; }
-
-        public long TotalBytesToReceive { get; internal set; }
+        public long TotalBytesToReceive => DownloadTask.DataTotal;
 
         #endregion
 
@@ -103,52 +110,22 @@ namespace PlexRipper.DownloadManager.Download
             base.Dispose(disposing);
         }
 
-        private void CreateDownloadWorkers()
-        {
-            // Create download segments/ranges
-            var partSize = TotalBytesToReceive / Parts;
-            var remainder = TotalBytesToReceive - (partSize * Parts);
-            for (int i = 0; i < Parts; i++)
-            {
-                long start = partSize * i;
-                long end = start + partSize;
-                if (i == Parts - 1 && remainder > 0)
-                {
-                    // Add the remainder to the last download range
-                    end += remainder;
-                }
-
-                var downloadRange = new DownloadRange(
-                    i + 1,
-                    DownloadUrl,
-                    start,
-                    end,
-                    DownloadTask.FileName,
-                    DownloadTask.DownloadPath);
-
-                var downloadWorker = new DownloadWorker(downloadRange, _fileSystem, _cancellationToken.Token);
-                _downloadWorkers.Add(downloadWorker);
-            }
-
-            // Verify bytes have been correctly divided
-            var totalBytesInWorkers = _downloadWorkers.Sum(x => x.DownloadRange.RangeSize);
-            if (totalBytesInWorkers != TotalBytesToReceive)
-            {
-                Log.Error($"The bytes were incorrectly divided, expected {TotalBytesToReceive} but the sum was " +
-                          $"{totalBytesInWorkers} with a difference of {TotalBytesToReceive - totalBytesInWorkers}");
-            }
-
-            SetupSubscriptions();
-        }
 
         private void SetDownloadStatus(DownloadStatus downloadStatus)
         {
             DownloadStatus = downloadStatus;
+            DownloadTask.DownloadStatus = downloadStatus;
             _statusChanged.OnNext(new DownloadStatusChanged(DownloadTaskId, downloadStatus));
         }
 
         private void SetupSubscriptions()
         {
+            if (!_downloadWorkers.Any())
+            {
+                Log.Warning("No download workers have been made yet, cannot setup subscriptions.");
+                return;
+            }
+
             var downloadCompleteStream = _downloadWorkers
                 .Select(x => x.DownloadWorkerComplete)
                 .Merge()
@@ -160,10 +137,10 @@ namespace PlexRipper.DownloadManager.Download
                 .Select(x => x.DownloadWorkerProgress)
                 .CombineLatest()
                 .TakeUntil(downloadCompleteStream)
-                .Sample(TimeSpan.FromMilliseconds(1000))
+                .Sample(TimeSpan.FromMilliseconds(1000), _timeThreadContext)
                 .Subscribe(OnDownloadProgressChanged);
 
-            // On download change
+            // On download status change
             _downloadWorkers
                 .Select(x => x.DownloadStatusChanged)
                 .CombineLatest()
@@ -175,10 +152,33 @@ namespace PlexRipper.DownloadManager.Download
                 .Subscribe(OnDownloadComplete);
         }
 
+        private Result<bool> StartDownloadWorkers()
+        {
+            DownloadStartAt = DateTime.UtcNow;
+            try
+            {
+                Task.WhenAll(_downloadWorkers.Select(x => x.Start().ValueOrDefault).ToList());
+            }
+            catch (Exception e)
+            {
+                Stop();
+                return Result.Fail(new ExceptionalError(e)
+                        .WithMessage($"Could not download {DownloadTask.FileName} from {DownloadTask.DownloadUrl}"))
+                    .LogError();
+            }
+
+            return Result.Ok(true);
+        }
+
         #region Subscriptions
 
         private void OnDownloadProgressChanged(IList<IDownloadWorkerProgress> progressList)
         {
+            if (_downloadProgressChanged.IsDisposed)
+            {
+                return;
+            }
+
             var orderedList = progressList.ToList().OrderBy(x => x.Id).ToList();
             StringBuilder builder = new StringBuilder();
             foreach (var progress in orderedList)
@@ -199,9 +199,8 @@ namespace PlexRipper.DownloadManager.Download
             };
             builder.Append($" = ({downloadProgress.DownloadSpeedFormatted} - {downloadProgress.TimeRemaining})");
             Log.Debug(builder.ToString());
-            _downloadProgressChanged.OnNext(downloadProgress);
 
-            if (progressList.All(x => x.IsCompleted)) { }
+            _downloadProgressChanged.OnNext(downloadProgress);
         }
 
         private void OnDownloadStatusChanged(IList<DownloadStatusChanged> statuses)
@@ -226,7 +225,8 @@ namespace PlexRipper.DownloadManager.Download
 
         private void OnDownloadComplete(IList<DownloadWorkerComplete> completeList)
         {
-            _workerProgressSubscription.Dispose();
+            _timeThreadContext.Dispose();
+
             var orderedList = completeList.ToList().OrderBy(x => x.Id).ToList();
             StringBuilder builder = new StringBuilder();
             foreach (var progress in orderedList)
@@ -248,10 +248,9 @@ namespace PlexRipper.DownloadManager.Download
             }
 
             Log.Debug(builder.ToString());
-            var downloadComplete = new DownloadComplete(DownloadTaskId)
+            var downloadComplete = new DownloadComplete(DownloadTask)
             {
-                DestinationPath = DownloadPath,
-                FileName = DownloadTask.FileName,
+                DestinationPath = DownloadTask.DownloadPath,
                 DownloadWorkerCompletes = orderedList,
                 DataReceived = completeList.Sum(x => x.BytesReceived),
                 DataTotal = TotalBytesToReceive,
@@ -273,37 +272,112 @@ namespace PlexRipper.DownloadManager.Download
         /// <summary>
         /// Start the download of the DownloadTask passed during the construction.
         /// </summary>
-        /// <returns></returns>
-        public async Task<Result<bool>> StartAsync()
+        /// <returns>Is successful.</returns>
+        public Result<bool> Start()
         {
-            Log.Debug($"Start downloading from {DownloadUrl}");
-            try
+            if (!_isSetup)
             {
-                SetDownloadStatus(DownloadStatus.Starting);
+                return Result.Fail(new Error("This plex download client has not been setup, run SetupAsync() first"));
+            }
 
-                // Source: https://stackoverflow.com/a/48190014/8205497
-                var response = await GetAsync(DownloadUrl, HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
-                TotalBytesToReceive = response.Content.Headers.ContentLength ?? -1L;
+            Log.Debug($"Start downloading from {DownloadUrl}");
+            StartDownloadWorkers();
+            return Result.Ok(true);
+        }
+
+        /// <summary>
+        /// Setup this PlexDownloadClient to get ready for downloading
+        /// </summary>
+        /// <param name="downloadWorkerTasks">Optional: If the <see cref="DownloadWorkerTask"/>s are already made then use those,
+        /// otherwise they will be created.</param>
+        /// <returns>Is successful.</returns>
+        public async Task<Result<bool>> SetupAsync(List<DownloadWorkerTask> downloadWorkerTasks = null)
+        {
+            if (downloadWorkerTasks == null || !downloadWorkerTasks.Any())
+            {
                 if (TotalBytesToReceive <= 0)
                 {
                     SetDownloadStatus(DownloadStatus.Error);
                     return Result.Fail("File size could not be determined of the media that will be downloaded");
                 }
 
-                CreateDownloadWorkers();
-                StartDownloadWorkers();
-                return Result.Ok(true);
+                // Create download worker tasks/segments/ranges
+                var partSize = TotalBytesToReceive / Parts;
+                var remainder = TotalBytesToReceive - (partSize * Parts);
+                downloadWorkerTasks = new List<DownloadWorkerTask>();
+                for (int i = 0; i < Parts; i++)
+                {
+                    long start = partSize * i;
+                    long end = start + partSize;
+                    if (i == Parts - 1 && remainder > 0)
+                    {
+                        // Add the remainder to the last download range
+                        end += remainder;
+                    }
+
+                    downloadWorkerTasks.Add(new DownloadWorkerTask
+                    {
+                        PartIndex = i + 1,
+                        Url = DownloadUrl,
+                        StartByte = start,
+                        EndByte = end,
+                        FileName = DownloadTask.FileName,
+                        DownloadDirectory = DownloadTask.DownloadPath,
+                        DownloadTask = DownloadTask,
+                        DownloadTaskId = DownloadTask.Id,
+                    });
+                }
+
+                // Verify bytes have been correctly divided
+                var totalBytesInWorkers = downloadWorkerTasks.Sum(x => x.BytesRangeSize);
+                if (totalBytesInWorkers != TotalBytesToReceive)
+                {
+                    Log.Error($"The bytes were incorrectly divided, expected {TotalBytesToReceive} but the sum was " +
+                              $"{totalBytesInWorkers} with a difference of {TotalBytesToReceive - totalBytesInWorkers}");
+                }
+
+                // Send downloadWorkerTasks to the database and retrieve entries
+                var result = await _mediator.Send(new AddDownloadWorkerTaskCommand(downloadWorkerTasks));
+                if (result.IsFailed)
+                {
+                    return result.ToResult();
+                }
             }
-            catch (Exception e)
+
+            var createResult = await CreateDownloadWorkers(DownloadTask.Id);
+            if (createResult.IsFailed)
             {
-                var msg = $"Could not download {DownloadTask.FileName} from {DownloadTask.DownloadUrl}";
-                Log.Error(e, msg);
-                var result = Result.Fail(new ExceptionalError(e));
-                result.Errors.Add(new Error(msg));
-                Stop();
-                return result;
+                return createResult;
             }
+
+            SetupSubscriptions();
+            _isSetup = true;
+            return Result.Ok(true);
+        }
+
+        private async Task<Result<bool>> CreateDownloadWorkers(int downloadTaskId)
+        {
+            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true, true, true));
+            if (downloadTask.IsFailed)
+            {
+                return downloadTask.ToResult();
+            }
+
+            if (!downloadTask.Value.DownloadWorkerTasks.Any())
+            {
+                return Result.Fail($"Could not find any download worker tasks attached to download task {downloadTaskId}").LogError();
+            }
+
+            // Update the Download Task set in this client
+            DownloadTask = downloadTask.Value;
+
+            // Create workers
+            foreach (var downloadWorkerTask in downloadTask.Value.DownloadWorkerTasks)
+            {
+                _downloadWorkers.Add(new DownloadWorker(downloadWorkerTask, _fileSystem, _cancellationToken.Token));
+            }
+
+            return Result.Ok(true);
         }
 
         public Result<bool> ClearDownloadWorkers()
@@ -324,40 +398,43 @@ namespace PlexRipper.DownloadManager.Download
         /// <returns>Is successful.</returns>
         public Result<bool> Stop()
         {
-            try
+            SetDownloadStatus(DownloadStatus.Stopping);
+            _cancellationToken?.Cancel();
+            foreach (var downloadWorker in _downloadWorkers)
             {
-                _cancellationToken?.Cancel();
-                foreach (var downloadWorker in _downloadWorkers)
+                var stopResult = downloadWorker.Stop();
+                if (stopResult.IsFailed)
                 {
-                    downloadWorker.Stop();
+                    return stopResult.WithError(new Error($"Failed to stop downloadWorkerTask with id: {downloadWorker.Id}"))
+                        .LogError();
                 }
-            }
-            catch (Exception e)
-            {
-                return Result.Fail($"Failed to cancel downloadTask with id: {DownloadTaskId}").LogError(e);
             }
 
             ClearDownloadWorkers();
+            SetDownloadStatus(DownloadStatus.Stopped);
             return Result.Ok(true);
         }
 
-        public async Task<Result<bool>> Restart()
+        public Result<bool> Resume()
+        {
+            if (DownloadStatus == DownloadStatus.Paused)
+            {
+                _downloadWorkers.ForEach(downloadWorker => downloadWorker.Resume());
+            }
+
+            return Result.Ok(false);
+        }
+
+        public Result<bool> Pause()
         {
             if (DownloadStatus == DownloadStatus.Downloading)
             {
-                Stop();
+                _downloadWorkers.ForEach(downloadWorker => downloadWorker.Pause());
+
+                return Result.Ok(true);
             }
 
-            await StartAsync();
-            return Result.Ok(true);
-        }
-
-
-        private void StartDownloadWorkers()
-        {
-            DownloadStartAt = DateTime.UtcNow;
-            SetDownloadStatus(DownloadStatus.Downloading);
-            Task.WhenAll(_downloadWorkers.Select(x => x.Start().ValueOrDefault).ToList());
+            return Result.Ok(false);
         }
 
         #endregion

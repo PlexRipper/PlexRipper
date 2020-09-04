@@ -69,6 +69,9 @@ namespace PlexRipper.Application.PlexDownloads.Queries
                 query = query.Include(x => x.ServerStatus);
             }
             var serverList = await query
+                .Include(x => x.PlexLibraries)
+                .ThenInclude(x => x.DownloadTasks)
+                .ThenInclude(x => x.DownloadWorkerTasks)
                 .Where(x => x.PlexLibraries.Any(y => y.DownloadTasks.Any()))
                 .ToListAsync(cancellationToken);
             return Result.Ok(serverList);

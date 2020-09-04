@@ -4,6 +4,7 @@ import { map, switchMap } from 'rxjs/operators';
 import GlobalService from '@service/globalService';
 import Log from 'consola';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
+import HealthService from '@service/healthService';
 
 export class DownloadService {
 	private _downloadServerList: ReplaySubject<PlexServerDTO[]> = new ReplaySubject();
@@ -15,6 +16,12 @@ export class DownloadService {
 				Log.debug('Retrieving downloadlist');
 				this._downloadServerList.next(value ?? []);
 			});
+
+		HealthService.getServerStatus().subscribe((status) => {
+			if (status) {
+				this.fetchDownloadList();
+			}
+		});
 	}
 
 	/**

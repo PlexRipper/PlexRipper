@@ -41,7 +41,8 @@ namespace PlexRipper.Domain.Entities
         /// <summary>
         /// The elapsed time in milliseconds with an accuracy of 100 milliseconds.
         /// </summary>
-        public int ElapsedTime { get; set; }
+        public long ElapsedTime { get; set; }
+
         #endregion
 
         #region Relationships
@@ -80,6 +81,21 @@ namespace PlexRipper.Domain.Entities
         /// </summary>
         [NotMapped]
         public long CurrentByte => StartByte + BytesReceived;
+
+
+        /// <summary>
+        /// Has then <see cref="DownloadWorkerTask"/> been partially completed.
+        /// </summary>
+        [NotMapped]
+        public bool IsResumed => BytesReceived > 0;
+
+        /// <summary>
+        /// The elapsed time this <see cref="DownloadWorkerTask"/> has been downloading for.
+        /// </summary>
+        [NotMapped]
+        public TimeSpan ElapsedTimeSpan => TimeSpan.FromMilliseconds(ElapsedTime);
+
+
         #endregion
     }
 }

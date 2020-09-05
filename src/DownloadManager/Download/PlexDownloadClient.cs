@@ -28,14 +28,14 @@ namespace PlexRipper.DownloadManager.Download
     {
         #region Fields
 
-        private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
         private readonly Subject<DownloadComplete> _downloadFileCompleted = new Subject<DownloadComplete>();
         private readonly Subject<DownloadProgress> _downloadProgressChanged = new Subject<DownloadProgress>();
+        private readonly Subject<DownloadStatusChanged> _statusChanged = new Subject<DownloadStatusChanged>();
+        private readonly Subject<IList<DownloadWorkerTask>> _downloadWorkerTaskChanged = new Subject<IList<DownloadWorkerTask>>();
 
         private readonly List<DownloadWorker> _downloadWorkers = new List<DownloadWorker>();
         private readonly IMediator _mediator;
         private readonly IFileSystem _fileSystem;
-        private readonly Subject<DownloadStatusChanged> _statusChanged = new Subject<DownloadStatusChanged>();
 
         private readonly EventLoopScheduler _timeThreadContext = new EventLoopScheduler();
         private IDisposable _workerProgressSubscription;
@@ -87,6 +87,18 @@ namespace PlexRipper.DownloadManager.Download
 
         public long TotalBytesToReceive => DownloadTask.DataTotal;
 
+        #region Observables
+
+        public IObservable<DownloadProgress> DownloadProgressChanged => _downloadProgressChanged.AsObservable();
+
+        public IObservable<DownloadComplete> DownloadFileCompleted => _downloadFileCompleted.AsObservable();
+
+        public IObservable<DownloadStatusChanged> DownloadStatusChanged => _statusChanged.AsObservable();
+
+        public IObservable<IList<DownloadWorkerTask>> DownloadWorkerTaskChanged => _downloadWorkerTaskChanged.AsObservable();
+
+        #endregion
+
         #endregion
 
         #region Methods
@@ -101,9 +113,9 @@ namespace PlexRipper.DownloadManager.Download
         {
             if (disposing)
             {
-                _cancellationToken?.Dispose();
                 _downloadProgressChanged?.Dispose();
                 _downloadFileCompleted?.Dispose();
+                _downloadWorkerTaskChanged?.Dispose();
                 _statusChanged?.Dispose();
             }
 
@@ -147,10 +159,18 @@ namespace PlexRipper.DownloadManager.Download
                 .TakeUntil(downloadCompleteStream)
                 .Subscribe(OnDownloadStatusChanged);
 
+            // On download status change
+            _downloadWorkers
+                .Select(x => x.DownloadWorkerTaskChanged)
+                .CombineLatest()
+                .TakeUntil(downloadCompleteStream)
+                .Subscribe(OnDownloadWorkerTaskChange);
+
             // On download complete
             downloadCompleteStream
                 .Subscribe(OnDownloadComplete);
         }
+
 
         private Result<bool> StartDownloadWorkers()
         {
@@ -161,12 +181,27 @@ namespace PlexRipper.DownloadManager.Download
             }
             catch (Exception e)
             {
-                Stop();
+                ClearDownloadWorkers();
                 return Result.Fail(new ExceptionalError(e)
                         .WithMessage($"Could not download {DownloadTask.FileName} from {DownloadTask.DownloadUrl}"))
                     .LogError();
             }
 
+            return Result.Ok(true);
+        }
+
+        /// <summary>
+        /// Calls Dispose on all DownloadWorkers and clears the downloadWorkersList.
+        /// </summary>
+        /// <returns>Is successful.</returns>
+        private Result<bool> ClearDownloadWorkers()
+        {
+            foreach (var downloadWorker in _downloadWorkers)
+            {
+                downloadWorker.Dispose();
+            }
+
+            _downloadWorkers.Clear();
             return Result.Ok(true);
         }
 
@@ -221,6 +256,11 @@ namespace PlexRipper.DownloadManager.Download
                     break;
                 }
             }
+        }
+
+        private void OnDownloadWorkerTaskChange(IList<DownloadWorkerTask> taskList)
+        {
+            _downloadWorkerTaskChanged.OnNext(taskList);
         }
 
         private void OnDownloadComplete(IList<DownloadWorkerComplete> completeList)
@@ -374,22 +414,12 @@ namespace PlexRipper.DownloadManager.Download
             // Create workers
             foreach (var downloadWorkerTask in downloadTask.Value.DownloadWorkerTasks)
             {
-                _downloadWorkers.Add(new DownloadWorker(downloadWorkerTask, _fileSystem, _cancellationToken.Token));
+                _downloadWorkers.Add(new DownloadWorker(downloadWorkerTask, _fileSystem));
             }
 
             return Result.Ok(true);
         }
 
-        public Result<bool> ClearDownloadWorkers()
-        {
-            foreach (var downloadWorker in _downloadWorkers)
-            {
-                downloadWorker.Dispose();
-            }
-
-            _downloadWorkers.Clear();
-            return Result.Ok(true);
-        }
 
         /// <summary>
         /// Immediately stops all <see cref="DownloadWorker"/>s and destroys them.
@@ -399,7 +429,6 @@ namespace PlexRipper.DownloadManager.Download
         public Result<bool> Stop()
         {
             SetDownloadStatus(DownloadStatus.Stopping);
-            _cancellationToken?.Cancel();
             foreach (var downloadWorker in _downloadWorkers)
             {
                 var stopResult = downloadWorker.Stop();
@@ -415,39 +444,18 @@ namespace PlexRipper.DownloadManager.Download
             return Result.Ok(true);
         }
 
-        public Result<bool> Resume()
-        {
-            if (DownloadStatus == DownloadStatus.Paused)
-            {
-                _downloadWorkers.ForEach(downloadWorker => downloadWorker.Resume());
-            }
-
-            return Result.Ok(false);
-        }
-
         public Result<bool> Pause()
         {
             if (DownloadStatus == DownloadStatus.Downloading)
             {
                 _downloadWorkers.ForEach(downloadWorker => downloadWorker.Pause());
-
+                ClearDownloadWorkers();
+                SetDownloadStatus(DownloadStatus.Paused);
                 return Result.Ok(true);
             }
 
             return Result.Ok(false);
         }
-
-        #endregion
-
-        #region Observables
-
-        public IObservable<DownloadProgress> DownloadProgressChanged => _downloadProgressChanged.AsObservable();
-
-        public IObservable<DownloadComplete> DownloadFileCompleted => _downloadFileCompleted.AsObservable();
-
-        public IObservable<DownloadStatusChanged> DownloadStatusChanged => _statusChanged.AsObservable();
-
-        public IObservable<DownloadStatusChanged> DownloadMetaChanged => _statusChanged.AsObservable();
 
         #endregion
 

@@ -11,5 +11,6 @@ namespace PlexRipper.Application.Common
         Result<FileStream> SaveFile(string directory, string fileName, long fileSize);
         string ToAbsolutePath(string relativePath);
         FileSystemResult LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
+        Result<FileStream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize);
     }
 }

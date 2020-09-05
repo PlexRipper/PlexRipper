@@ -25,9 +25,9 @@ namespace PlexRipper.DownloadManager.Download
     {
         #region Fields
 
-        private readonly CancellationToken _cancellationToken;
-        private readonly Subject<DownloadStatusChanged> _downloadStatusChanged = new Subject<DownloadStatusChanged>();
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
+        private readonly Subject<DownloadStatusChanged> _downloadStatusChanged = new Subject<DownloadStatusChanged>();
         private readonly Subject<DownloadWorkerComplete> _downloadWorkerComplete = new Subject<DownloadWorkerComplete>();
         private readonly Subject<IDownloadWorkerProgress> _downloadWorkerProgress = new Subject<IDownloadWorkerProgress>();
         private readonly Subject<DownloadWorkerTask> _downloadWorkerTaskChanged = new Subject<DownloadWorkerTask>();
@@ -49,16 +49,13 @@ namespace PlexRipper.DownloadManager.Download
         /// </summary>
         /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
         /// <param name="fileSystem">The filesystem used to store the downloaded data.</param>
-        /// <param name="cancellationToken">Token to cancel.</param>
-        public DownloadWorker(DownloadWorkerTask downloadWorkerTask, IFileSystem fileSystem, CancellationToken cancellationToken)
+        public DownloadWorker(DownloadWorkerTask downloadWorkerTask, IFileSystem fileSystem)
         {
             DownloadWorkerTask = downloadWorkerTask;
-
             _fileSystem = fileSystem;
-            _cancellationToken = cancellationToken;
 
             _timer.AutoReset = true;
-            _timer.Elapsed += (sender, args) => { DownloadWorkerTask.ElapsedTime += (int)_timer.Interval; };
+            _timer.Elapsed += (sender, args) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
         }
 
         #endregion
@@ -71,19 +68,20 @@ namespace PlexRipper.DownloadManager.Download
             set => DownloadWorkerTask.BytesReceived = value;
         }
 
-        public int DownloadSpeed => DataFormat.GetDownloadSpeed(BytesReceived, ElapsedTime.TotalSeconds);
+        public int DownloadSpeed => DataFormat.GetDownloadSpeed(BytesReceived, DownloadWorkerTask.ElapsedTimeSpan.TotalSeconds);
 
         public int DownloadSpeedAverage { get; set; }
 
         /// <summary>
-        /// Bytes per second download speed
+        /// Gets the <see cref="DateTime"/> from when this <see cref="DownloadWorkerTask"/> was started.
         /// </summary>
         public DateTime DownloadStartAt { get; internal set; }
 
+        /// <summary>
+        /// Gets the current <see cref="DownloadWorkerTask"/> being executed.
+        /// </summary>
         public DownloadWorkerTask DownloadWorkerTask { get; }
 
-
-        public TimeSpan ElapsedTime => DateTime.UtcNow.Subtract(DownloadStartAt);
 
         public string FileName => DownloadWorkerTask.TempFileName;
 
@@ -95,12 +93,6 @@ namespace PlexRipper.DownloadManager.Download
         public int Id => DownloadWorkerTask.Id;
 
         public DownloadStatus Status { get; internal set; }
-
-        public int TimeElapsed
-        {
-            get => DownloadWorkerTask.ElapsedTime;
-            set => DownloadWorkerTask.ElapsedTime = value;
-        }
 
         #region Observables
 
@@ -143,32 +135,30 @@ namespace PlexRipper.DownloadManager.Download
 
         private Task StartDownloadClient()
         {
-            return Task.Factory.StartNew(() =>
+            return Task.Factory.StartNew(async () =>
             {
                 try
                 {
                     using var httpClient = new HttpClient();
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, DownloadWorkerTask.Uri);
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(DownloadWorkerTask.Uri);
-                    request.AddRange(DownloadWorkerTask.StartByte, DownloadWorkerTask.EndByte);
+                    var request = (HttpWebRequest)WebRequest.Create(DownloadWorkerTask.Uri);
+                    request.AddRange(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte);
                     var response = (HttpWebResponse)request.GetResponse();
 
-                    using var responseStream = response.GetResponseStream();
-                    var buffer = new byte[4096];
+                    await using Stream responseStream = response.GetResponseStream();
+                    if (responseStream == null)
+                    {
+                        Log.Error($"The ResponseStream was null");
+                        return;
+                    }
+
+                    byte[] buffer = new byte[4096];
 
                     SetDownloadStatus(DownloadStatus.Downloading);
                     _timer.Start();
                     while (_isDownloading)
                     {
-                        if (_cancellationToken.IsCancellationRequested)
-                        {
-                            SetDownloadStatus(DownloadStatus.Stopping);
-                            Log.Information($"Canceling Download worker {Id}");
-                            Stop();
-                            break;
-                        }
-
-                        int bytesRead = responseStream.Read(buffer, 0, buffer.Length);
+                        int bytesRead = await responseStream.ReadAsync(buffer, 0, buffer.Length, _cancellationTokenSource.Token);
                         if (bytesRead > 0)
                         {
                             bytesRead = (int)Math.Min(DownloadWorkerTask.BytesRangeSize - BytesReceived, bytesRead);
@@ -181,14 +171,17 @@ namespace PlexRipper.DownloadManager.Download
                             break;
                         }
 
-                        BytesReceived += bytesRead;
-
                         // TODO Add snapshot every n mb downloaded e.g.: _downloadWorkerTaskChanged.OnNext(DownloadWorkerTask);
-                        _fileStream.Write(buffer, 0, bytesRead);
-                        _fileStream.Flush();
+                        await _fileStream.WriteAsync(buffer, 0, bytesRead, _cancellationTokenSource.Token);
+                        await _fileStream.FlushAsync(_cancellationTokenSource.Token);
 
+                        BytesReceived += bytesRead;
                         UpdateProgress();
                     }
+                }
+                catch (TaskCanceledException e)
+                {
+                    // Ignore cancellation exceptions
                 }
                 catch (Exception e)
                 {
@@ -223,6 +216,11 @@ namespace PlexRipper.DownloadManager.Download
                     DownloadSpeedAverage));
         }
 
+        private void CloseFileStream()
+        {
+            _fileStream?.Close();
+        }
+
         #endregion
 
         #region Public
@@ -234,7 +232,7 @@ namespace PlexRipper.DownloadManager.Download
             Log.Debug($"Download worker {Id} start for {FileName}");
             SetDownloadStatus(DownloadStatus.Initialized);
             var fileStreamResult =
-                _fileSystem.SaveFile(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.BytesRangeSize);
+                _fileSystem.DownloadWorkerTempFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.BytesRangeSize);
             if (fileStreamResult.IsFailed)
             {
                 SetDownloadStatus(DownloadStatus.Error);
@@ -242,15 +240,17 @@ namespace PlexRipper.DownloadManager.Download
             }
 
             _fileStream = fileStreamResult.Value;
-            _fileStream.Position = 0;
+
+            // Is 0 when starting new and > 0 when resuming.
+            _fileStream.Position = DownloadWorkerTask.BytesReceived;
 
             DownloadStartAt = DateTime.UtcNow;
-            _downloadTask = Task.Factory.StartNew(StartDownloadClient, TaskCreationOptions.LongRunning);
+            _downloadTask = StartDownloadClient();
             return Result.Ok(_downloadTask);
         }
 
         /// <summary>
-        /// Stops the downloading, removes all temp files and disposes itself.
+        /// Stops the downloading and removes all temp files.
         /// </summary>
         /// <returns>Is successful.</returns>
         public Result<bool> Stop()
@@ -259,7 +259,6 @@ namespace PlexRipper.DownloadManager.Download
             {
                 SetDownloadStatus(DownloadStatus.Stopped);
                 File.Delete(FilePath);
-                Dispose();
                 return Result.Ok(true);
             }
             catch (Exception e)
@@ -269,23 +268,14 @@ namespace PlexRipper.DownloadManager.Download
         }
 
         /// <summary>
-        /// Pauses the <see cref="DownloadWorker"/>.
+        /// Pauses the <see cref="DownloadWorker"/> by storing the current <see cref="DownloadWorkerTask"/> in the database.
         /// </summary>
         public void Pause()
         {
-            _isDownloading = false;
             _timer.Stop();
-            SetDownloadStatus(DownloadStatus.Paused);
+            _isDownloading = false;
+            _cancellationTokenSource.Cancel();
             _downloadWorkerTaskChanged.OnNext(DownloadWorkerTask);
-        }
-
-        /// <summary>
-        /// Resumes the <see cref="DownloadWorker"/>.
-        /// </summary>
-        public void Resume()
-        {
-            _isDownloading = true;
-            StartDownloadClient();
         }
 
         #endregion
@@ -293,12 +283,20 @@ namespace PlexRipper.DownloadManager.Download
         /// <inheritdoc/>
         public void Dispose()
         {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+
+            // Dispose subscriptions
             _downloadWorkerComplete?.Dispose();
             _downloadWorkerProgress?.Dispose();
             _downloadStatusChanged?.Dispose();
+            _downloadWorkerTaskChanged?.Dispose();
+
+            // Dispose timer
             _timer?.Dispose();
-            _fileStream?.Close();
-            _fileStream?.Dispose();
+
+            // Dispose FileStream
+            CloseFileStream();
         }
 
         #endregion

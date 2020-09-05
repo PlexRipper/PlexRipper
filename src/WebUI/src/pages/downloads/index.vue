@@ -89,6 +89,7 @@ import {
 	stopDownloadTask,
 	clearDownloadTasks,
 	startDownloadTask,
+	pauseDownloadTask,
 } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
@@ -171,10 +172,19 @@ export default class Downloads extends Vue {
 	}
 
 	deleteDownloadTasks(downloadTaskId: number): void {
-		deleteDownloadTask(downloadTaskId).subscribe(() => {
-			// Refresh downloadTasks
-			DownloadService.fetchDownloadList();
-		});
+		deleteDownloadTask(downloadTaskId)
+			.pipe(finalize(() => DownloadService.fetchDownloadList))
+			.subscribe(() => {
+				// Clean-up progress objects
+				const downloadProgressIndex = this.downloadProgressList.findIndex((x) => x.id === downloadTaskId);
+				this.downloadProgressList.splice(downloadProgressIndex, 1);
+
+				const downloadStatusUpdateIndex = this.downloadStatusList.findIndex((x) => x.id === downloadTaskId);
+				this.downloadStatusList.splice(downloadStatusUpdateIndex, 1);
+
+				const fileMergeProgressIndex = this.fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
+				this.fileMergeProgressList.splice(fileMergeProgressIndex, 1);
+			});
 	}
 
 	stopDownloadTask(downloadTaskId: number): void {
@@ -184,7 +194,7 @@ export default class Downloads extends Vue {
 	}
 
 	pauseDownloadTask(downloadTaskId: number): void {
-		Log.debug(`Pausing download task with id ${downloadTaskId}, which is doing nothing as of now`);
+		pauseDownloadTask(downloadTaskId).subscribe();
 	}
 
 	startDownloadTask(downloadTaskId: number): void {
@@ -249,7 +259,6 @@ export default class Downloads extends Vue {
 					// Add
 					this.fileMergeProgressList.push(fileMergeProgress);
 				}
-				Log.debug(fileMergeProgress);
 			} else {
 				Log.error(`FileMergeProgress was undefined`);
 			}

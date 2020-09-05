@@ -217,7 +217,7 @@ namespace PlexRipper.Application.PlexDownloads
 
         public Task<Result<bool>> DeleteDownloadsAsync(int downloadTaskId)
         {
-            _downloadManager.StopDownload(downloadTaskId);
+            _downloadManager.DeleteDownloadClient(downloadTaskId);
             return _mediator.Send(new DeleteDownloadTaskByIdCommand(downloadTaskId));
         }
 
@@ -317,6 +317,13 @@ namespace PlexRipper.Application.PlexDownloads
             if (downloadTaskId <= 0) return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
             return await _downloadManager.StartDownload(downloadTaskId);
+        }
+
+        public Result<bool> PauseDownloadTask(int downloadTaskId)
+        {
+            if (downloadTaskId <= 0) return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
+
+            return _downloadManager.PauseDownload(downloadTaskId);
         }
 
         #endregion

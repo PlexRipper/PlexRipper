@@ -76,9 +76,15 @@ namespace PlexRipper.Domain.Common
             return (decimal) Math.Round((current / (double) total) * 100, 2, MidpointRounding.AwayFromZero);
         }
 
+        /// <summary>
+        /// Returns the bytes per second.
+        /// </summary>
+        /// <param name="bytesReceived"></param>
+        /// <param name="elapsedTimeInSeconds"></param>
+        /// <returns></returns>
         public static int GetDownloadSpeed(long bytesReceived, double elapsedTimeInSeconds)
         {
-            return Convert.ToInt32(Math.Round(bytesReceived / elapsedTimeInSeconds, 2));
+            return elapsedTimeInSeconds <= 0 ? 0 : (int)Math.Round(bytesReceived / elapsedTimeInSeconds, 2);
         }
 
         public static long GetTimeRemaining(long BytesRemaining, double downloadSpeed)

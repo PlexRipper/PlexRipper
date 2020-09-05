@@ -41,6 +41,12 @@ export function startDownloadTask(downloadTaskId: number): Observable<boolean> {
 	return checkResponse<boolean>(result, logText, 'startDownloadTask');
 }
 
+export function pauseDownloadTask(downloadTaskId: number): Observable<boolean> {
+	preApiRequest(logText, 'pauseDownloadTask', `Sending restart request with downloadTaskId ${downloadTaskId}`);
+	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/pause/${downloadTaskId}`);
+	return checkResponse<boolean>(result, logText, 'pauseDownloadTask');
+}
+
 export function restartDownloadTask(downloadTaskId: number): Observable<boolean> {
 	preApiRequest(logText, 'restartDownloadTask', `Sending restart request with downloadTaskId ${downloadTaskId}`);
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/restart/${downloadTaskId}`);

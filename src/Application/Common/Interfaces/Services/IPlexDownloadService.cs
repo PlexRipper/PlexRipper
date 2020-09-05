@@ -18,5 +18,6 @@ namespace PlexRipper.Application.Common
         Task<Result<bool>> RestartDownloadTask(int downloadTaskId);
         Task<Result<bool>> ClearCompleted();
         Task<Result<bool>> StartDownloadTask(int downloadTaskId);
+        Result<bool> PauseDownloadTask(int downloadTaskId);
     }
 }

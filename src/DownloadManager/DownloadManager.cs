@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
-using PlexRipper.Application.PlexServers.Queries;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Enums;
@@ -20,6 +18,9 @@ using PlexRipper.DownloadManager.Download;
 
 namespace PlexRipper.DownloadManager
 {
+    /// <summary>
+    /// Handles all <see cref="DownloadTask"/> management, all download related commands should be handled here.
+    /// </summary>
     public class DownloadManager : IDownloadManager
     {
         #region Fields
@@ -27,7 +28,6 @@ namespace PlexRipper.DownloadManager
         private readonly IMediator _mediator;
         private readonly ISignalRService _signalRService;
         private readonly IPlexAuthenticationService _plexAuthenticationService;
-        private readonly IUserSettings _userSettings;
         private readonly IFileSystem _fileSystem;
         private readonly IFileManager _fileManager;
 
@@ -38,9 +38,6 @@ namespace PlexRipper.DownloadManager
 
         private readonly DownloadQueue _downloadQueue;
 
-        private bool _isChecking = false;
-
-        private object _downloadLock = new object();
         private Task<Task> _checkDownloadTask;
 
         #endregion Fields
@@ -53,7 +50,6 @@ namespace PlexRipper.DownloadManager
         /// <param name="mediator">Defines a mediator to encapsulate request/response and publishing interaction patterns.</param>
         /// <param name="signalRService"></param>
         /// <param name="plexAuthenticationService"></param>
-        /// <param name="userSettings"></param>
         /// <param name="fileSystem"></param>
         /// <param name="fileManager"></param>
         /// <param name="downloadQueue"></param>
@@ -61,7 +57,6 @@ namespace PlexRipper.DownloadManager
             IMediator mediator,
             ISignalRService signalRService,
             IPlexAuthenticationService plexAuthenticationService,
-            IUserSettings userSettings,
             IFileSystem fileSystem,
             IFileManager fileManager,
             DownloadQueue downloadQueue)
@@ -69,18 +64,12 @@ namespace PlexRipper.DownloadManager
             _mediator = mediator;
             _signalRService = signalRService;
             _plexAuthenticationService = plexAuthenticationService;
-            _userSettings = userSettings;
             _fileSystem = fileSystem;
             _fileManager = fileManager;
             _downloadQueue = downloadQueue;
             System.Net.ServicePointManager.DefaultConnectionLimit = 1000;
 
             _fileManager.FileMergeProgressObservable.Subscribe(OnFileMergeProgress);
-        }
-
-        private void OnFileMergeProgress(FileMergeProgress progress)
-        {
-            Log.Debug($"Merge Progress: {progress.BytesTransferred} / {progress.BytesTotal}");
         }
 
         #endregion Constructors
@@ -106,7 +95,7 @@ namespace PlexRipper.DownloadManager
             if (!downloadTask.DownloadUri.IsAbsoluteUri)
             {
                 return Result.Fail(
-                    new Error($"The url {downloadTask.DownloadUri.ToString()} is not absolute and thus not valid."));
+                    new Error($"The url {downloadTask.DownloadUri} is not absolute and thus not valid."));
             }
 
             if (!Uri.TryCreate(downloadTask.DownloadUri.ToString(), UriKind.Absolute, out Uri outUri)
@@ -144,7 +133,6 @@ namespace PlexRipper.DownloadManager
 
             return Result.Ok(true);
         }
-
 
         /// <summary>
         /// Adds a list of <see cref="DownloadTask"/>s to the download queue.
@@ -236,16 +224,17 @@ namespace PlexRipper.DownloadManager
             return await _mediator.Send(new ClearCompletedDownloadTasksCommand());
         }
 
+        /// <summary>
+        /// Restart the <see cref="DownloadTask"/> by deleting the <see cref="PlexDownloadClient"/> and starting a new one.
+        /// </summary>
+        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to restart.</param>
+        /// <returns>Is successful.</returns>
         public async Task<Result<bool>> RestartDownloadAsync(int downloadTaskId)
         {
-            // Retrieve download client
             DeleteDownloadClient(downloadTaskId);
 
-            await StartDownload(downloadTaskId);
-
-            return Result.Ok(true);
+            return await StartDownload(downloadTaskId);
         }
-
 
         /// <summary>
         /// Cancels the <see cref="PlexDownloadClient"/> executing the <see cref="DownloadTask"/> if it is downloading.
@@ -362,6 +351,17 @@ namespace PlexRipper.DownloadManager
         private void OnDownloadProgressChanged(DownloadProgress downloadProgress)
         {
             _signalRService.SendDownloadProgressUpdate(downloadProgress);
+        }
+
+        private void OnFileMergeProgress(FileMergeProgress progress)
+        {
+            Log.Debug(
+                $"Merge Progress: {progress.DataTransferred} / {progress.DataTotal} - {progress.Percentage} - {progress.TransferSpeedFormatted}");
+            _signalRService.SendFileMergeProgressUpdate(progress);
+            if (progress.Percentage >= 100)
+            {
+                SetDownloadStatus(new DownloadStatusChanged(progress.DownloadTaskId, DownloadStatus.Completed));
+            }
         }
 
         #endregion

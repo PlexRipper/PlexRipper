@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -13,6 +14,7 @@ using PlexRipper.Application.Common;
 using PlexRipper.Application.FileManager.Command;
 using PlexRipper.Application.FileManager.Queries;
 using PlexRipper.Domain;
+using PlexRipper.Domain.Common;
 using PlexRipper.Domain.Entities;
 using PlexRipper.Domain.Types.FileSystem;
 
@@ -27,6 +29,7 @@ namespace PlexRipper.FileSystem
         private readonly Channel<FileTask> _channel = Channel.CreateUnbounded<FileTask>();
         private readonly Subject<FileMergeProgress> _fileMergeProgressSubject = new Subject<FileMergeProgress>();
         private readonly CancellationToken _token = new CancellationToken();
+        private Task<Task> _copytask;
 
         #endregion
 
@@ -35,7 +38,7 @@ namespace PlexRipper.FileSystem
         public FileManager(IMediator mediator)
         {
             _mediator = mediator;
-            Task.Factory.StartNew(ExecuteFileTasks, TaskCreationOptions.LongRunning);
+            _copytask = Task.Factory.StartNew(ExecuteFileTasks, TaskCreationOptions.LongRunning);
         }
 
         #endregion
@@ -51,39 +54,47 @@ namespace PlexRipper.FileSystem
             Log.Debug("Running FileTask executor");
             await foreach (var fileTask in _channel.Reader.ReadAllAsync(_token))
             {
-                var _progress = new Progress<long>();
-                _progress.ProgressChanged += (sender, l) =>
+                if (!fileTask.FilePaths.Any())
                 {
-                    var progress = new FileMergeProgress
-                    {
-                        FileTaskId = fileTask.Id,
-                        BytesTransferred = l,
-                        BytesTotal = fileTask.FileSize
-                    };
-                    _fileMergeProgressSubject.OnNext(progress);
-                };
-
-                using (var outputStream = File.Create(fileTask.OutputFilePath, 2048, FileOptions.Asynchronous))
-                {
-                    if (!fileTask.FilePaths.Any())
-                    {
-                        return;
-                    }
-
-                    Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
-                    foreach (var filePath in fileTask.FilePaths)
-                    {
-                        using (var inputStream = File.OpenRead(filePath))
-                        {
-                            // Buffer size can be passed as the second argument.
-                            await inputStream.CopyToAsync(outputStream, _progress, 2048);
-                        }
-
-                        Log.Debug($"The file at {filePath} has been combined into {fileTask.FileName}");
-                        File.Delete(filePath);
-                    }
+                    return;
                 }
 
+                var transferStarted = DateTime.UtcNow;
+                var _timeContext = new EventLoopScheduler();
+                Subject<long> _bytesReceivedProgress = new Subject<long>();
+
+                // Create FileMergeProgress from bytes received progress
+                _bytesReceivedProgress
+                    .TakeUntil(x => x == fileTask.FileSize)
+                    .Sample(TimeSpan.FromSeconds(1), _timeContext)
+                    .Select(dataTransferred =>
+                    {
+                        TimeSpan ElapsedTime = DateTime.UtcNow.Subtract(transferStarted);
+
+                        return new FileMergeProgress
+                        {
+                            Id = fileTask.Id,
+                            DataTransferred = dataTransferred,
+                            DataTotal = fileTask.FileSize,
+                            DownloadTaskId = fileTask.DownloadTaskId,
+                            TransferSpeed = DataFormat.GetDownloadSpeed(dataTransferred, ElapsedTime.TotalSeconds)
+                        };
+                    })
+                    .Subscribe(data => _fileMergeProgressSubject.OnNext(data), () =>
+                    {
+                        _timeContext.Dispose();
+                    });
+
+                // Merge files
+                await using (var outputStream = File.Create(fileTask.OutputFilePath, 4096, FileOptions.SequentialScan))
+                {
+                    Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
+                    await StreamExtensions.CopyMultipleToAsync(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
+                }
+
+                // Clean-up
+                _bytesReceivedProgress.OnCompleted();
+                _bytesReceivedProgress.Dispose();
                 Log.Information($"Finished combining {fileTask.FilePaths.Count} files into {fileTask.FileName}");
             }
         }
@@ -120,6 +131,7 @@ namespace PlexRipper.FileSystem
                     fileTask.LogError();
                     return;
                 }
+
                 AddFileTask(fileTask.Value);
             });
         }

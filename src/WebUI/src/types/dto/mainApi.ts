@@ -354,3 +354,15 @@ export interface DownloadStatusChanged {
   id: number;
   status: DownloadStatus;
 }
+
+export interface FileMergeProgress {
+  id: number;
+  downloadTaskId: number;
+  dataTransferred: number;
+  dataTotal: number;
+  percentage: number;
+  transferSpeed: number;
+  transferSpeedFormatted: string;
+  timeRemaining: number;
+  bytesRemaining: number;
+}

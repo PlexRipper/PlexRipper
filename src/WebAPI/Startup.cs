@@ -107,7 +107,7 @@ namespace PlexRipper.WebAPI
                 endpoints.MapHealthChecks("/api/health");
 
                 //SignalR configuration
-                endpoints.MapHub<DownloadHub>("/download/progress");
+                endpoints.MapHub<ProgressHub>("/progress");
                 endpoints.MapHub<LibraryProgressHub>("/plexLibrary/progress");
             });
         }

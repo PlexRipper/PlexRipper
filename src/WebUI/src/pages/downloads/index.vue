@@ -3,8 +3,6 @@
 		<v-row>
 			<v-col>
 				<p>Downloads</p>
-				<p>{{ downloadStatusList }}</p>
-				<p>{{ downloadProgressList }}</p>
 			</v-col>
 		</v-row>
 		<!-- Download Toolbar -->
@@ -95,7 +93,14 @@ import {
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
 import { finalize, switchMap } from 'rxjs/operators';
-import { DownloadProgress, DownloadStatus, DownloadStatusChanged, DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
+import {
+	DownloadProgress,
+	DownloadStatus,
+	DownloadStatusChanged,
+	DownloadTaskDTO,
+	FileMergeProgress,
+	PlexServerDTO,
+} from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import DownloadsTable from './components/DownloadsTable.vue';
 import IDownloadRow from './types/IDownloadRow';
@@ -110,6 +115,7 @@ export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
 	downloads: DownloadTaskDTO[] = [];
 	downloadProgressList: DownloadProgress[] = [];
+	fileMergeProgressList: FileMergeProgress[] = [];
 	downloadStatusList: DownloadStatusChanged[] = [];
 	openExpansions: number[] = [];
 	selected: IDownloadRow[] = [];
@@ -129,6 +135,14 @@ export default class Downloads extends Vue {
 				// Status priority: downloadStatusUpdate > getDownloadList
 				status: downloadStatusUpdate?.status ?? download.status,
 			} as IDownloadRow;
+
+			if (downloadRow.status === DownloadStatus.Merging) {
+				const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === download.id);
+				downloadRow.percentage = fileMergeProgress?.percentage ?? 0;
+				downloadRow.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
+				downloadRow.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
+				downloadRow.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
+			}
 
 			if (downloadRow.status === DownloadStatus.Completed) {
 				downloadRow.percentage = 100;
@@ -221,6 +235,23 @@ export default class Downloads extends Vue {
 				this.updateDownloadProgress(data);
 			} else {
 				Log.error(`DownloadProgress was undefined`);
+			}
+		});
+
+		SignalrService.getFileMergeProgress().subscribe((fileMergeProgress) => {
+			if (fileMergeProgress) {
+				// Check if there is already a progress object for this Id
+				const i = this.fileMergeProgressList.findIndex((x) => x.id === fileMergeProgress.id);
+				if (i > -1) {
+					// Update
+					this.fileMergeProgressList.splice(i, 1, fileMergeProgress);
+				} else {
+					// Add
+					this.fileMergeProgressList.push(fileMergeProgress);
+				}
+				Log.debug(fileMergeProgress);
+			} else {
+				Log.error(`FileMergeProgress was undefined`);
 			}
 		});
 	}

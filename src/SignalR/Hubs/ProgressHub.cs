@@ -6,7 +6,7 @@ using PlexRipper.Application.Common;
 
 namespace PlexRipper.SignalR.Hubs
 {
-    public class DownloadHub : Hub
+    public class ProgressHub : Hub
     {
         public Task DownloadProgressAsync(IDownloadProgress downloadProgress)
         {

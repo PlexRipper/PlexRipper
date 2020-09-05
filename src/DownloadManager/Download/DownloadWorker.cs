@@ -38,7 +38,6 @@ namespace PlexRipper.DownloadManager.Download
 
         private FileStream _fileStream;
         private bool _isDownloading = true;
-        private TimeSpan _lastProgress = TimeSpan.Zero;
         private System.Timers.Timer _timer = new System.Timers.Timer(100);
 
         #endregion
@@ -155,7 +154,7 @@ namespace PlexRipper.DownloadManager.Download
                     var response = (HttpWebResponse)request.GetResponse();
 
                     using var responseStream = response.GetResponseStream();
-                    var buffer = new byte[1024 * 2];
+                    var buffer = new byte[4096];
 
                     SetDownloadStatus(DownloadStatus.Downloading);
                     _timer.Start();
@@ -222,7 +221,6 @@ namespace PlexRipper.DownloadManager.Download
                     DownloadWorkerTask.BytesRangeSize,
                     DownloadSpeed,
                     DownloadSpeedAverage));
-            _lastProgress = ElapsedTime;
         }
 
         #endregion

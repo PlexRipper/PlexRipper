@@ -26,7 +26,8 @@
 		</template>
 		<!-- Download speed -->
 		<template v-slot:item.downloadSpeed="{ item }">
-			<strong> {{ item.downloadSpeed | prettyBytes }}/s </strong>
+			<strong v-if="item.downloadSpeed > 0"> {{ item.downloadSpeed | prettyBytes }}/s </strong>
+			<strong v-else> - </strong>
 		</template>
 		<!-- Download Time Remaining -->
 		<template v-slot:item.timeRemaining="{ item }">
@@ -103,15 +104,15 @@ export default class DownloadsTable extends Vue {
 				value: 'dataReceived',
 			},
 			{
-				text: 'Data Total',
+				text: 'Size',
 				value: 'dataTotal',
 			},
 			{
-				text: 'Download Speed',
+				text: 'Speed',
 				value: 'downloadSpeed',
 			},
 			{
-				text: 'Time Remaining',
+				text: 'ETA',
 				value: 'timeRemaining',
 			},
 			{

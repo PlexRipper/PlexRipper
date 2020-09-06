@@ -1,11 +1,11 @@
 <template>
 	<v-container fluid>
 		<v-row>
-			<v-col>
-				<p>Downloads</p>
-				<p>{{ downloadProgressList }}</p>
-				<p>{{ fileMergeProgressList }}</p>
-				<p>{{ downloadStatusList }}</p>
+			<v-col cols="auto">
+				<h2>Downloads</h2>
+				<!--				<p>{{ downloadProgressList }}</p>-->
+				<!--				<p>{{ fileMergeProgressList }}</p>-->
+				<!--				<p>{{ downloadStatusList }}</p>-->
 			</v-col>
 		</v-row>
 		<!-- Download Toolbar -->
@@ -13,7 +13,7 @@
 			<v-col>
 				<v-toolbar>
 					<!--Prioritize buttons-->
-					<v-btn-toggle borderless group tile :dark="$vuetify.theme.dark">
+					<v-btn-toggle borderless group tile :max="0" :dark="$vuetify.theme.dark">
 						<v-btn>
 							<v-icon large>mdi-arrow-collapse-up</v-icon>
 						</v-btn>
@@ -34,31 +34,34 @@
 					<v-spacer />
 
 					<!--Command buttons-->
-					<v-btn-toggle borderless group tile :dark="$vuetify.theme.dark">
-						<v-btn value="justify" @click="clearDownloadTasks">
-							<v-icon large left>mdi-notification-clear-all</v-icon>
-							<span class="hidden-sm-and-down">Clear Completed</span>
-						</v-btn>
-						<v-btn value="left">
-							<v-icon large left>mdi-pause</v-icon>
-							<span class="hidden-sm-and-down">Pause</span>
-						</v-btn>
+					<v-btn depressed tile @click="clearDownloadTasks">
+						<v-icon large left>mdi-notification-clear-all</v-icon>
+						<span class="hidden-sm-and-down">Clear Completed</span>
+					</v-btn>
+					<v-btn depressed tile>
+						<v-icon large left>mdi-pause</v-icon>
+						<span class="hidden-sm-and-down">Pause</span>
+					</v-btn>
 
-						<v-btn value="center">
-							<v-icon large left>mdi-play</v-icon>
-							<span class="hidden-sm-and-down">Resume</span>
-						</v-btn>
+					<v-btn depressed tile>
+						<v-icon large left>mdi-play</v-icon>
+						<span class="hidden-sm-and-down">Start</span>
+					</v-btn>
 
-						<v-btn value="right">
-							<v-icon large left>mdi-delete</v-icon>
-							<span class="hidden-sm-and-down">Delete</span>
-						</v-btn>
-					</v-btn-toggle>
+					<v-btn depressed tile>
+						<v-icon large left>mdi-restart</v-icon>
+						<span class="hidden-sm-and-down">Restart</span>
+					</v-btn>
+
+					<v-btn depressed tile>
+						<v-icon large left>mdi-delete</v-icon>
+						<span class="hidden-sm-and-down">Delete</span>
+					</v-btn>
 				</v-toolbar>
 			</v-col>
 		</v-row>
 		<!--	The Download Table	-->
-		<v-row>
+		<v-row v-if="plexServers.length > 0">
 			<v-col>
 				<v-expansion-panels v-model="openExpansions" multiple :dark="$vuetify.theme.dark">
 					<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
@@ -78,6 +81,11 @@
 						</v-expansion-panel-content>
 					</v-expansion-panel>
 				</v-expansion-panels>
+			</v-col>
+		</v-row>
+		<v-row v-else justify="center">
+			<v-col cols="auto">
+				<h2>There are currently no downloads in progress</h2>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -128,8 +136,9 @@ export default class Downloads extends Vue {
 	 */
 	getDownloadRows(serverId: number): IDownloadRow[] {
 		const downloadRows: IDownloadRow[] = [];
-		for (let i = 0; i < this.downloads.filter((x) => x.plexServerId === serverId).length; i++) {
-			const download = this.downloads[i];
+		const downloads: DownloadTaskDTO[] = this.downloads.filter((x) => x.plexServerId === serverId);
+		for (let i = 0; i < downloads.length; i++) {
+			const download = downloads[i];
 			const downloadProgress = this.downloadProgressList.find((x) => x.id === download.id);
 			const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === download.id);
 			// Merge the various feeds
@@ -142,7 +151,7 @@ export default class Downloads extends Vue {
 
 			if (downloadRow.status === DownloadStatus.Merging) {
 				const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === download.id);
-				downloadRow.percentage = fileMergeProgress?.percentage ?? -1;
+				downloadRow.percentage = fileMergeProgress?.percentage ?? 0;
 				downloadRow.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
 				downloadRow.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
 				downloadRow.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
@@ -152,6 +161,7 @@ export default class Downloads extends Vue {
 				downloadRow.percentage = 100;
 				downloadRow.timeRemaining = 0;
 				downloadRow.downloadSpeed = 0;
+				this.cleanupProgress(download.id);
 			}
 			downloadRows.push(downloadRow);
 		}
@@ -217,10 +227,10 @@ export default class Downloads extends Vue {
 			this.downloadProgressList.splice(downloadProgressIndex, 1);
 		}
 
-		const downloadStatusUpdateIndex = this.downloadStatusList.findIndex((x) => x.id === downloadTaskId);
-		if (downloadStatusUpdateIndex > -1) {
-			this.downloadStatusList.splice(downloadStatusUpdateIndex, 1);
-		}
+		// const downloadStatusUpdateIndex = this.downloadStatusList.findIndex((x) => x.id === downloadTaskId);
+		// if (downloadStatusUpdateIndex > -1) {
+		// 	this.downloadStatusList.splice(downloadStatusUpdateIndex, 1);
+		// }
 
 		const fileMergeProgressIndex = this.fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
 		if (fileMergeProgressIndex > -1) {

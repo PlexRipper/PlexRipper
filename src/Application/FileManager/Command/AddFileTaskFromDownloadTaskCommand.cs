@@ -30,6 +30,8 @@ namespace PlexRipper.Application.FileManager.Command
             RuleFor(x => x.DownloadTask.DownloadStatus).IsInEnum();
             RuleFor(x => x.DownloadTask.DownloadStatus).Must(x => x == DownloadStatus.Completed);
             RuleFor(x => x.DownloadTask.DownloadWorkerTasks).NotEmpty();
+            RuleFor(x => x.DownloadTask.DestinationFolder).NotNull();
+            RuleFor(x => x.DownloadTask.DestinationFolderId).GreaterThan(0);
         }
     }
 
@@ -43,6 +45,9 @@ namespace PlexRipper.Application.FileManager.Command
             {
                 CreatedAt = DateTime.UtcNow,
             };
+            fileTask.DownloadTask = null;
+            fileTask.DestinationFolder = null;
+
             await _dbContext.FileTasks.AddAsync(fileTask);
             await _dbContext.SaveChangesAsync(cancellationToken);
             await _dbContext.Entry(fileTask).GetDatabaseValuesAsync(cancellationToken);

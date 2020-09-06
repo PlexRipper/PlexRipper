@@ -199,7 +199,7 @@ namespace PlexRipper.FileSystem
                 FileStream fileStream;
                 if (File.Exists(filePath))
                 {
-                    fileStream = File.Open(filePath, FileMode.Open, FileAccess.Write, FileShare.None);
+                    fileStream = File.Open(filePath, FileMode.Open, FileAccess.Write, FileShare.Delete);
                 }
                 else
                 {

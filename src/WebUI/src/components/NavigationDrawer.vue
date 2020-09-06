@@ -36,7 +36,7 @@
 							</v-list-item-title>
 						</v-list-item-content>
 						<v-list-item-action v-if="item.title === 'Downloads'">
-							<v-avatar left class="red" size="36" :dark="$vuetify.theme.dark">
+							<v-avatar v-if="downloadTaskCount > 0" class="red" size="32" :dark="$vuetify.theme.dark">
 								<b>{{ downloadTaskCount }}</b>
 							</v-avatar>
 						</v-list-item-action>

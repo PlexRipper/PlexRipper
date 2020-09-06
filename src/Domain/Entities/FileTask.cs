@@ -19,6 +19,8 @@ namespace PlexRipper.Domain
         {
             DownloadTaskId = downloadTask.Id;
             DownloadTask = downloadTask;
+            DestinationFolder = downloadTask.DestinationFolder;
+            DestinationFolderId = downloadTask.DestinationFolderId;
             TempDirectory = downloadTask.TempDirectory;
         }
 

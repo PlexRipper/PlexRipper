@@ -2,11 +2,9 @@
 	<v-data-table
 		fixed-header
 		show-select
-		disable-pagination
-		hide-default-footer
 		:headers="getHeaders"
+		:items-per-page="30"
 		:items="downloads"
-		:server-items-length="downloads.length"
 		:dark="$vuetify.theme.dark"
 		:loading="loading"
 		:value="value"
@@ -205,8 +203,6 @@ export default class DownloadsTable extends Vue {
 				actions.push('delete');
 				break;
 			case DownloadStatus.Merging:
-				actions.push('stop');
-				actions.push('delete');
 				break;
 			case DownloadStatus.Error:
 				actions.push('restart');

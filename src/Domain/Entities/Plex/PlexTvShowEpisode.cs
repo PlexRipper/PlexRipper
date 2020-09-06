@@ -1,8 +1,6 @@
 ﻿using System;
-using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Enums;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class PlexTvShowEpisode : BaseEntity
     {
@@ -29,6 +27,9 @@ namespace PlexRipper.Domain.Entities
 
         public PlexTvShowSeason TvShowSeason { get; set; }
         public int TvShowSeasonId { get; set; }
+
+        public PlexLibrary PlexLibrary { get; set; }
+        public int PlexLibraryId { get; set; }
 
         #endregion
     }

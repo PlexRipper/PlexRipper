@@ -1,19 +1,22 @@
-﻿using FluentResults;
-using PlexRipper.Domain.Entities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using PlexRipper.Domain.Enums;
+using FluentResults;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.Interfaces
+namespace PlexRipper.Application.Common
 {
     public interface IPlexDownloadService
     {
         Task<string> GetPlexTokenAsync(PlexAccount plexAccount);
         Task<Result<bool>> DownloadMovieAsync(int plexAccountId, int plexMovieId);
         Task<Result<DownloadTask>> GetDownloadTaskAsync(int plexAccountId, PlexMovie plexMovie);
-        Task<Result<List<DownloadTask>>> GetAllDownloadsAsync();
+        Task<Result<List<PlexServer>>> GetAllDownloadsAsync();
         Task<Result<bool>> DeleteDownloadsAsync(int downloadTaskId);
         Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int mediaId, PlexMediaType type);
-        Result<bool> StopDownloadTask(int downloadTaskId);
+        Task<Result<bool>> StopDownloadTask(int downloadTaskId);
+        Task<Result<bool>> RestartDownloadTask(int downloadTaskId);
+        Task<Result<bool>> ClearCompleted();
+        Task<Result<bool>> StartDownloadTask(int downloadTaskId);
+        Result<bool> PauseDownloadTask(int downloadTaskId);
     }
 }

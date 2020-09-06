@@ -1,8 +1,8 @@
-﻿using FluentResults;
-using PlexRipper.Domain.Entities;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using FluentResults;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.Interfaces
+namespace PlexRipper.Application.Common
 {
     public interface IPlexLibraryService
     {

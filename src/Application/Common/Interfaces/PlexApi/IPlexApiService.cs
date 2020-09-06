@@ -1,8 +1,8 @@
-﻿using PlexRipper.Domain.Entities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.Interfaces.PlexApi
+namespace PlexRipper.Application.Common
 {
     public interface
         IPlexApiService

@@ -1,6 +1,5 @@
 ﻿using System;
 using AutoMapper;
-using PlexRipper.Domain.Entities;
 using PlexRipper.PlexApi.Models;
 using System.Linq;
 using PlexRipper.Domain;

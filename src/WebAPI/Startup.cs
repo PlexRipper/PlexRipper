@@ -24,31 +24,6 @@ namespace PlexRipper.WebAPI
     {
         readonly string CORSConfiguration = "CORS_Configuration";
 
-        /// <summary>
-        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        /// </summary>
-        /// <param name="app"></param>
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseRouting();
-
-            app.UseCors(CORSConfiguration);
-            app.UseAuthorization();
-            // Enabling this causes CORS errors as the front-end is in http and cannot connect with an https back-end
-            // app.UseHttpsRedirection();
-
-            app.UseOpenApi(); // serve OpenAPI/Swagger documents
-            app.UseSwaggerUi3(); // serve Swagger UI
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                //SignalR configuration
-                endpoints.MapHub<DownloadHub>("/download/progress");
-                endpoints.MapHub<LibraryProgressHub>("/plexLibrary/progress");
-            });
-        }
-
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
@@ -62,19 +37,17 @@ namespace PlexRipper.WebAPI
                 options.AddPolicy(CORSConfiguration,
                     builder =>
                     {
-                        // builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost");
                         builder
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials()
                             .WithOrigins("http://localhost:3000")
                             .SetPreflightMaxAge(TimeSpan.FromMinutes(100));
-
-                        //.AllowAnyOrigin();
                     });
             });
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
             services.AddHttpContextAccessor();
+            services.AddHealthChecks();
 
             // Fluent Validator
             services.AddMvc(options => { options.Filters.Add<ValidateFilter>(); })
@@ -87,7 +60,11 @@ namespace PlexRipper.WebAPI
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             // SignalR
-            services.AddSignalR();
+            services.AddSignalR().AddJsonProtocol(options =>
+            {
+                options.PayloadSerializerOptions.Converters
+                    .Add(new JsonStringEnumConverter());
+            });
 
             // Customise default API behaviour
             services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
@@ -108,6 +85,31 @@ namespace PlexRipper.WebAPI
 
             // Autofac
             services.AddOptions();
+        }
+
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseRouting();
+            app.UseCors(CORSConfiguration);
+            app.UseAuthorization();
+
+            // Enabling this causes CORS errors as the front-end is in http and cannot connect with an https back-end
+            // app.UseHttpsRedirection();
+            app.UseOpenApi(); // serve OpenAPI/Swagger documents
+            app.UseSwaggerUi3(); // serve Swagger UI
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/api/health");
+
+                //SignalR configuration
+                endpoints.MapHub<ProgressHub>("/progress");
+                endpoints.MapHub<LibraryProgressHub>("/plexLibrary/progress");
+            });
         }
 
         public void ConfigureContainer(ContainerBuilder builder)

@@ -1,8 +1,8 @@
-﻿using PlexRipper.Domain.Entities;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentResults;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.Interfaces
+namespace PlexRipper.Application.Common
 {
     public interface IPlexAuthenticationService
     {
@@ -15,5 +15,7 @@ namespace PlexRipper.Application.Common.Interfaces
         /// <param name="plexServerId"></param>
         /// <returns></returns>
         Task<Result<string>> GetPlexServerTokenAsync(int plexAccountId, int plexServerId);
+
+        Task<Result<string>> GetPlexServerTokenWithUrl(int plexAccountId, int plexServerId, string downloadUrl);
     }
 }

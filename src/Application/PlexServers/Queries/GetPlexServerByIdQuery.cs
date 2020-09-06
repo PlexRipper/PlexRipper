@@ -2,10 +2,9 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 
@@ -13,16 +12,14 @@ namespace PlexRipper.Application.PlexServers.Queries
 {
     public class GetPlexServerByIdQuery : IRequest<Result<PlexServer>>
     {
-        public GetPlexServerByIdQuery(int id, bool includeLibraries = false, bool includeDownloadTasks = false)
+        public GetPlexServerByIdQuery(int id, bool includeLibraries = false)
         {
             Id = id;
             IncludeLibraries = includeLibraries;
-            IncludeDownloadTasks = includeDownloadTasks;
         }
 
         public int Id { get; }
         public bool IncludeLibraries { get; }
-        public bool IncludeDownloadTasks { get; }
     }
 
     public class GetPlexServerByIdQueryValidator : AbstractValidator<GetPlexServerByIdQuery>
@@ -47,11 +44,6 @@ namespace PlexRipper.Application.PlexServers.Queries
             if (request.IncludeLibraries)
             {
                 query = query.Include(x => x.PlexLibraries);
-            }
-
-            if (request.IncludeDownloadTasks)
-            {
-                query = query.Include(x => x.DownloadTasks);
             }
 
             var plexServer = await query

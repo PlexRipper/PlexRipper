@@ -1,11 +1,10 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Application.Common.Interfaces.FileSystem;
-using PlexRipper.Application.Common.Interfaces.Settings;
 using PlexRipper.Domain;
 using PlexRipper.Settings.Models;
 using System;
 using System.IO;
 using System.Linq;
+using PlexRipper.Application.Common;
 
 namespace PlexRipper.Settings
 {

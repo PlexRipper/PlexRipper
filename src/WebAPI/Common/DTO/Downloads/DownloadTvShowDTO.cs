@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using PlexRipper.Domain.Enums;
+using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {

@@ -1,11 +1,11 @@
 ﻿using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common.Interfaces;
 using PlexRipper.Application.FolderPaths.Commands;
 using PlexRipper.Application.FolderPaths.Queries;
-using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.FolderPaths
 {
@@ -28,6 +28,10 @@ namespace PlexRipper.Application.FolderPaths
             return _mediator.Send(new UpdateFolderPathCommand(folderPath));
         }
 
-
+        public async Task<Result<FolderPath>> GetDownloadFolderAsync()
+        {
+            // Get the download folder
+            return await _mediator.Send(new GetFolderPathByIdQuery(1));
+        }
     }
 }

@@ -39,6 +39,7 @@
 		"fluent-type-results": "^1.0.11",
 		"lodash": "^4.17.20",
 		"material-design-icons-iconfont": "^5.0.1",
+		"moment-duration-format": "^2.3.2",
 		"nuxt": "^2.14.3",
 		"rxjs": "^6.6.2",
 		"swagger-typescript-api": "^1.12.0",

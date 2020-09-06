@@ -1,8 +1,8 @@
-﻿using PlexRipper.Domain.Types.FileSystem;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.Interfaces.FileSystem
+namespace PlexRipper.Application.Common
 {
     public interface IDiskProvider
     {

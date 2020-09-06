@@ -1,12 +1,11 @@
 ﻿using FluentResults;
-using PlexRipper.Application.Common.Interfaces.FileSystem;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Types.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using PlexRipper.Application.Common;
 
 namespace PlexRipper.FileSystem
 {
@@ -17,7 +16,9 @@ namespace PlexRipper.FileSystem
         private readonly IDiskProvider _diskProvider;
         private static string _rootDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
         private static string _configDirectory = $"{_rootDirectory}/config";
+
         #endregion Fields
+
         #region Constructors
 
         public FileSystem(IDiskProvider diskProvider)
@@ -39,6 +40,7 @@ namespace PlexRipper.FileSystem
         }
 
         public string RootDirectory => _rootDirectory;
+
         #endregion Properties
 
         #region Methods
@@ -83,7 +85,7 @@ namespace PlexRipper.FileSystem
 
             catch (DirectoryNotFoundException)
             {
-                return new FileSystemResult { Parent = _diskProvider.GetParent(path) };
+                return new FileSystemResult {Parent = _diskProvider.GetParent(path)};
             }
             catch (ArgumentException)
             {
@@ -91,11 +93,11 @@ namespace PlexRipper.FileSystem
             }
             catch (IOException)
             {
-                return new FileSystemResult { Parent = _diskProvider.GetParent(path) };
+                return new FileSystemResult {Parent = _diskProvider.GetParent(path)};
             }
             catch (UnauthorizedAccessException)
             {
-                return new FileSystemResult { Parent = _diskProvider.GetParent(path) };
+                return new FileSystemResult {Parent = _diskProvider.GetParent(path)};
             }
 
             return result;
@@ -120,13 +122,14 @@ namespace PlexRipper.FileSystem
             {
                 if (OsInfo.IsWindows)
                 {
-                    var result = new FileSystemResult { Directories = GetDrives() };
+                    var result = new FileSystemResult {Directories = GetDrives()};
 
                     return result;
                 }
 
                 query = "/";
             }
+
             if (
                 allowFoldersWithoutTrailingSlashes &&
                 //query.IsPathValid() &&
@@ -155,21 +158,22 @@ namespace PlexRipper.FileSystem
                 {
                     Log.Warning($"Path: {fullPath} already exists, will overwrite now");
                 }
+
                 Directory.CreateDirectory(directory);
 
                 var availableSpace = CheckDirectoryAvailableSpace(directory);
 
                 if (availableSpace < fileSize)
                 {
-                    return Result.Fail<FileStream>(
+                    return Result.Fail(
                         $"There is not enough space available in root directory {directory}");
                 }
 
-                var fileStream = File.Create(fullPath);
+                var fileStream = File.Create(fullPath, 4096, FileOptions.Asynchronous);
                 // Pre-allocate the required file size
                 fileStream.SetLength(fileSize);
-                return Result.Ok(fileStream);
 
+                return Result.Ok(fileStream);
             }
             catch (Exception e)
             {
@@ -177,6 +181,43 @@ namespace PlexRipper.FileSystem
                 throw;
             }
         }
+
+        public Result<FileStream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize)
+        {
+            try
+            {
+                Directory.CreateDirectory(directory);
+                var availableSpace = CheckDirectoryAvailableSpace(directory);
+                if (availableSpace < fileSize)
+                {
+                    return Result.Fail(
+                        $"There is not enough space available in root directory {directory}");
+                }
+
+                var filePath = Path.Combine(directory, fileName);
+
+                FileStream fileStream;
+                if (File.Exists(filePath))
+                {
+                    fileStream = File.Open(filePath, FileMode.Open, FileAccess.Write, FileShare.Delete);
+                }
+                else
+                {
+                    fileStream = File.Create(filePath, 2048, FileOptions.Asynchronous);
+                }
+
+                // var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous);
+                // Pre-allocate the required file size
+                fileStream.SetLength(fileSize);
+                return Result.Ok(fileStream);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                throw;
+            }
+        }
+
 
         public string ToAbsolutePath(string relativePath)
         {

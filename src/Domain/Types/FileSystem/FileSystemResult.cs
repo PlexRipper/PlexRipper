@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PlexRipper.Domain.Types.FileSystem
+namespace PlexRipper.Domain
 {
     public class FileSystemResult
     {

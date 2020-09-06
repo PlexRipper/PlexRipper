@@ -1,11 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.JoinTables;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.Interfaces.DataAccess
+namespace PlexRipper.Application.Common
 {
     public interface IPlexRipperDbContext
     {
@@ -25,6 +24,8 @@ namespace PlexRipper.Application.Common.Interfaces.DataAccess
         DbSet<PlexTvShow> PlexTvShows { get; set; }
         DbSet<PlexTvShowSeason> PlexTvShowSeason { get; set; }
         DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
+        DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
+        DbSet<FileTask> FileTasks { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 

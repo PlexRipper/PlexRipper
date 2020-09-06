@@ -1,9 +1,8 @@
-﻿using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Enums;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class FolderPath : BaseEntity
     {
@@ -17,7 +16,7 @@ namespace PlexRipper.Domain.Entities
         public string DisplayName { get; set; }
 
         [Column(Order = 3)]
-        public string Directory { get; set; }
+        public string DirectoryPath { get; set; }
 
 
         #region Helpers
@@ -27,6 +26,11 @@ namespace PlexRipper.Domain.Entities
         {
             get => Enum.TryParse(Type, out FolderType status) ? status : FolderType.Unknown;
             set => Type = value.ToString();
+        }
+
+        public bool IsValid()
+        {
+            return Directory.Exists(DirectoryPath);
         }
 
         #endregion

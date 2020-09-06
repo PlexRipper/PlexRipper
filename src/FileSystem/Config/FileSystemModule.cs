@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using PlexRipper.Application.Common.Interfaces.FileSystem;
+using PlexRipper.Application.Common;
 
 namespace PlexRipper.FileSystem.config
 {
@@ -8,6 +8,7 @@ namespace PlexRipper.FileSystem.config
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
+            builder.RegisterType<FileManager>().As<IFileManager>().SingleInstance();
             builder.RegisterType<DiskProvider>().As<IDiskProvider>().SingleInstance();
         }
     }

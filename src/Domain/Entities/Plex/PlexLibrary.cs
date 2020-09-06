@@ -1,15 +1,11 @@
-﻿using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using PlexRipper.Domain.Entities.JoinTables;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class PlexLibrary : BaseEntity
     {
-
         #region Properties
 
         /// <summary>
@@ -41,24 +37,26 @@ namespace PlexRipper.Domain.Entities
         /// </summary>
         public string LibraryLocationPath { get; set; }
 
-
         #endregion
 
         #region Relationships
+
         /// <summary>
         /// The PlexServer this PlexLibrary belongs to
         /// </summary>
-        public virtual PlexServer PlexServer { get; set; }
+        public PlexServer PlexServer { get; set; }
 
         /// <summary>
         /// The PlexServerId of the PlexServer this PlexLibrary belongs to
         /// </summary>
         public int PlexServerId { get; set; }
 
-        public virtual List<PlexMovie> Movies { get; set; }
-        public virtual List<PlexTvShow> TvShows { get; set; }
+        public List<PlexMovie> Movies { get; set; }
+        public List<PlexTvShow> TvShows { get; set; }
 
         public List<PlexAccountLibrary> PlexAccountLibraries { get; set; }
+
+        public List<DownloadTask> DownloadTasks { get; set; }
 
         #endregion
 
@@ -73,11 +71,12 @@ namespace PlexRipper.Domain.Entities
                 {
                     "movie" => PlexMediaType.Movie,
                     "show" => PlexMediaType.TvShow,
+                    "artist" => PlexMediaType.Music,
                     _ => PlexMediaType.Unknown
                 };
             }
-
         }
+
         [NotMapped]
         public bool HasMedia
         {
@@ -110,8 +109,5 @@ namespace PlexRipper.Domain.Entities
         public string Name => Title;
 
         #endregion
-
-
-
     }
 }

@@ -1,5 +1,4 @@
-﻿using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
+﻿using PlexRipper.Application.Common;
 
 namespace PlexRipper.Application.PlexTvShows
 {

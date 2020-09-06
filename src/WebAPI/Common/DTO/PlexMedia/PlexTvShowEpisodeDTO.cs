@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
-using PlexRipper.Domain.Enums;
+using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
@@ -51,5 +51,8 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("tvShowSeasonId", Required = Required.Always)]
         public int TvShowSeasonId { get; set; }
+
+        [JsonProperty("plexLibraryId", Required = Required.Always)]
+        public int PlexLibraryId { get; set; }
     }
 }

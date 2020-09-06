@@ -1,13 +1,11 @@
 ﻿using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Common.Interfaces.FileSystem;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Types.FileSystem;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using PlexRipper.Application.Common;
+using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -32,7 +30,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET: api/<FolderPathController>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<FolderPathDTO>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<FolderPathDTO>>))]
         public async Task<IActionResult> Get()
         {
             var result = await _folderPathService.GetAllFolderPathsAsync();
@@ -51,15 +49,16 @@ namespace PlexRipper.WebAPI.Controllers
 
         // POST: api/<FolderPathController>
         [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<IEnumerable<FolderPathDTO>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<FolderPathDTO>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Put([FromBody] FolderPathDTO folderPathDto)
         {
+            Log.Debug($"Updating the folderPathId {folderPathDto.Id} to {folderPathDto.Directory}");
             var folderPath = _mapper.Map<FolderPath>(folderPathDto);
             var result = await _folderPathService.UpdateFolderPathAsync(folderPath);
 
             folderPathDto = _mapper.Map<FolderPathDTO>(result.Value);
-            return result.IsFailed ? BadRequest(result) : Ok(result.ToResult<FolderPathDTO>().WithValue(folderPathDto));
+            return result.IsFailed ? BadRequest(result) : Ok(Result.Ok(folderPathDto));
         }
     }
 }

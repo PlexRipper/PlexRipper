@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace PlexRipper.Domain.Types.FileSystem
+namespace PlexRipper.Domain
 {
 
     public static class OsInfo

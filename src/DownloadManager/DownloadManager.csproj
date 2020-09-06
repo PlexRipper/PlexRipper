@@ -5,15 +5,27 @@
     <UserSecretsId>dotnet-DownloadManager-16C3225A-ED7F-4F82-B8FA-04EA6CE86447</UserSecretsId>
     <RootNamespace>PlexRipper.DownloadManager</RootNamespace>
     <AssemblyName>PlexRipper.DownloadManager</AssemblyName>
+    <CodeAnalysisRuleSet>StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.5" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.205" />
+    <PackageReference Include="System.Reactive" Version="4.4.1" />
+    <PackageReference Include="System.Reactive.Core" Version="4.4.1" />
+    <PackageReference Include="System.Reactive.Interfaces" Version="4.4.1" />
+    <PackageReference Include="System.Reactive.Linq" Version="4.4.1" />
+    <PackageReference Include="System.Reactive.Windows.Threading" Version="4.4.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
-    <ProjectReference Include="..\PlexApi\PlexApi.csproj" />
-    <ProjectReference Include="..\SignalR\SignalR.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="stylecop.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 </Project>

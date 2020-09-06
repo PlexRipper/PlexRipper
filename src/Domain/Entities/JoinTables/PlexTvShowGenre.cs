@@ -1,6 +1,4 @@
-﻿using PlexRipper.Domain.Entities.Base;
-
-namespace PlexRipper.Domain.Entities.JoinTables
+﻿namespace PlexRipper.Domain
 {
     public class PlexTvShowGenre : BaseEntity
     {

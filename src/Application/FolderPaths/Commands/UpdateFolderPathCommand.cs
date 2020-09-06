@@ -2,10 +2,9 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 
@@ -29,7 +28,7 @@ namespace PlexRipper.Application.FolderPaths.Commands
             RuleFor(x => x.FolderPath.Id).GreaterThan(0);
             RuleFor(x => x.FolderPath.DisplayName).NotEmpty();
             RuleFor(x => x.FolderPath.Type).NotEmpty();
-            RuleFor(x => x.FolderPath.Directory).NotEmpty();
+            RuleFor(x => x.FolderPath.DirectoryPath).NotEmpty();
 
         }
     }

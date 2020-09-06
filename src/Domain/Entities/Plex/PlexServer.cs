@@ -1,11 +1,9 @@
-﻿using AutoMapper;
-using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Entities.JoinTables;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class PlexServer : BaseEntity
     {
@@ -35,14 +33,12 @@ namespace PlexRipper.Domain.Entities
 
         #region Relationships
 
-        [IgnoreMap] // TODO remove IgnoreMap
-        public virtual List<PlexAccountServer> PlexAccountServers { get; set; }
+        public List<PlexAccountServer> PlexAccountServers { get; set; }
 
-        public virtual List<PlexLibrary> PlexLibraries { get; set; }
+        public List<PlexLibrary> PlexLibraries { get; set; }
 
-        public virtual List<PlexServerStatus> ServerStatus { get; set; }
+        public List<PlexServerStatus> ServerStatus { get; set; }
 
-        public virtual List<DownloadTask> DownloadTasks { get; set; }
         #endregion
 
         #region Helpers
@@ -66,6 +62,13 @@ namespace PlexRipper.Domain.Entities
         /// </summary>
         [NotMapped]
         public string AccessToken { get; set; }
+
+        /// <summary>
+        /// Check if any nested <see cref="PlexLibrary"/> has a <see cref="DownloadTask"/>.
+        /// </summary>
+        [NotMapped]
+        public bool HasDownloadTasks => PlexLibraries?.Any(x => x.DownloadTasks?.Any() ?? false) ?? false;
+
         #endregion
 
     }

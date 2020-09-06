@@ -2,15 +2,15 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexDownloads.Commands
 {
-    public class AddDownloadTaskCommand : IRequest<Result<DownloadTask>>
+    public class AddDownloadTaskCommand : IRequest<Result<int>>
     {
         public DownloadTask DownloadTask { get; }
 
@@ -26,30 +26,42 @@ namespace PlexRipper.Application.PlexDownloads.Commands
         {
             RuleFor(x => x.DownloadTask.Id).Equal(0);
             RuleFor(x => x.DownloadTask.PlexServerId).GreaterThanOrEqualTo(0);
+            RuleFor(x => x.DownloadTask.PlexServer).NotNull();
+
+            RuleFor(x => x.DownloadTask.PlexAccountId).GreaterThanOrEqualTo(0);
+
+            RuleFor(x => x.DownloadTask.DownloadFolderId).GreaterThanOrEqualTo(0);
+            RuleFor(x => x.DownloadTask.DownloadFolder).NotNull();
+            RuleFor(x => x.DownloadTask.DownloadFolder.IsValid()).Must(x => x).WithMessage("The Download folder is not a valid directory");
+
+            RuleFor(x => x.DownloadTask.DestinationFolderId).GreaterThanOrEqualTo(0);
+            RuleFor(x => x.DownloadTask.DestinationFolder).NotNull();
+            RuleFor(x => x.DownloadTask.DestinationFolder.IsValid()).Must(x => x).WithMessage("The Destination folder is not a valid directory");
+
             RuleFor(x => x.DownloadTask.FileName).NotEmpty();
-            RuleFor(x => x.DownloadTask.FolderPathId).GreaterThanOrEqualTo(0);
         }
     }
 
-    public class AddDownloadTaskCommandHandler : BaseHandler, IRequestHandler<AddDownloadTaskCommand, Result<DownloadTask>>
+    public class AddDownloadTaskCommandHandler : BaseHandler, IRequestHandler<AddDownloadTaskCommand, Result<int>>
     {
-        public AddDownloadTaskCommandHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
+        public AddDownloadTaskCommandHandler(IPlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<DownloadTask>> Handle(AddDownloadTaskCommand command, CancellationToken cancellationToken)
+        public async Task<Result<int>> Handle(AddDownloadTaskCommand command, CancellationToken cancellationToken)
         {
-            await _dbContext.DownloadTasks.AddAsync(command.DownloadTask, cancellationToken);
-            if (command.DownloadTask.FolderPath != null)
-            {
-                _dbContext.Entry(command.DownloadTask.FolderPath).State = EntityState.Unchanged;
-            }
-            if (command.DownloadTask.PlexServer != null)
-            {
-                _dbContext.Entry(command.DownloadTask.PlexServer).State = EntityState.Unchanged;
-            }
+            // This is nulled as to prevent EF Core thinking these should be added
+            command.DownloadTask.DownloadFolder = null;
+            command.DownloadTask.DestinationFolder = null;
+            command.DownloadTask.PlexAccount = null;
+            command.DownloadTask.PlexServer = null;
+            command.DownloadTask.PlexLibrary = null;
+
+            _dbContext.DownloadTasks.Attach(command.DownloadTask);
+            _dbContext.Entry(command.DownloadTask).State = EntityState.Added;
+
             await _dbContext.SaveChangesAsync(cancellationToken);
             await _dbContext.Entry(command.DownloadTask).GetDatabaseValuesAsync(cancellationToken);
 
-            return ReturnResult(command.DownloadTask, command.DownloadTask.Id);
+            return Result.Ok(command.DownloadTask.Id);
         }
     }
 }

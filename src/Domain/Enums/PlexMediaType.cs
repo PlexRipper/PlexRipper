@@ -2,11 +2,14 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace PlexRipper.Domain.Enums
+namespace PlexRipper.Domain
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum PlexMediaType
     {
+        //NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc and that there is no skip in between
+        // Otherwise the Typescript DTO translator in the front-end starts messing up
+
         [EnumMember(Value = "None")]
         None = 0,
 
@@ -21,6 +24,15 @@ namespace PlexRipper.Domain.Enums
 
         [EnumMember(Value = "Episode")]
         Episode = 4,
+
+        [EnumMember(Value = "Music")]
+        Music = 5,
+
+        [EnumMember(Value = "Album")]
+        Album = 6,
+
+        [EnumMember(Value = "Song")]
+        Song = 6,
 
         [EnumMember(Value = "Unknown")]
         Unknown = 10

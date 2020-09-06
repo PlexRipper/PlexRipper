@@ -9,7 +9,7 @@ export const baseUrl = 'http://localhost:5000';
 
 export const baseApiUrl = `${baseUrl}/api`;
 
-export const signalRDownloadProgressUrl = `${baseUrl}/download/progress`;
+export const signalRProgressHubUrl = `${baseUrl}/progress`;
 
 export const signalRPlexLibraryProgressUrl = `${baseUrl}/plexLibrary/progress`;
 

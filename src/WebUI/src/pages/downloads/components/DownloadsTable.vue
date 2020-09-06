@@ -2,13 +2,13 @@
 	<v-data-table
 		fixed-header
 		show-select
-		disable-pagination
-		hide-default-footer
 		:headers="getHeaders"
+		:items-per-page="30"
 		:items="downloads"
-		:server-items-length="downloads.length"
 		:dark="$vuetify.theme.dark"
 		:loading="loading"
+		:value="value"
+		@input="$emit('input', $event)"
 	>
 		<!-- Data received -->
 		<template v-slot:item.dataReceived="{ item }">
@@ -24,15 +24,16 @@
 		</template>
 		<!-- Download speed -->
 		<template v-slot:item.downloadSpeed="{ item }">
-			<strong> {{ item.downloadSpeed | prettyBytes }}/s </strong>
+			<strong v-if="item.downloadSpeed > 0"> {{ item.downloadSpeed | prettyBytes }}/s </strong>
+			<strong v-else> - </strong>
 		</template>
-		<!-- Download speed -->
+		<!-- Download Time Remaining -->
 		<template v-slot:item.timeRemaining="{ item }">
-			<strong> {{ [item.timeRemaining, 'minutes'] | duration('humanize', true) }} </strong>
+			<strong> {{ formatCountdown(item.timeRemaining) }} </strong>
 		</template>
 		<!-- Percentage -->
 		<template v-slot:item.percentage="{ item }">
-			<v-progress-linear v-model="item.percentage" striped color="blue-grey" :dark="$vuetify.theme.dark" height="25">
+			<v-progress-linear :value="item.percentage" stream striped color="blue-grey" :dark="$vuetify.theme.dark" height="25">
 				<template v-slot="{ value }">
 					<strong>{{ value }}%</strong>
 				</template>
@@ -40,25 +41,33 @@
 		</template>
 		<!-- Actions -->
 		<template v-slot:item.actions="{ item }">
-			<v-btn icon @click="pauseDownloadTask(item.id)">
-				<v-icon> mdi-pause </v-icon>
-			</v-btn>
-			<v-btn icon @click="stopDownloadTask(item.id)">
-				<v-icon> mdi-stop </v-icon>
-			</v-btn>
-			<v-btn icon @click="deleteDownloadTask(item.id)">
-				<v-icon> mdi-delete </v-icon>
-			</v-btn>
+			<v-btn-toggle borderless dense group tile :dark="$vuetify.theme.dark">
+				<template v-for="(action, i) in availableActions(item)">
+					<!-- Render buttons -->
+					<template v-for="(button, y) in getButtons">
+						<v-btn v-if="action === button.value" :key="`${i}-${y}`" icon @click="command(action, item.id)">
+							<v-tooltip top>
+								<template v-slot:activator="{ on, attrs }">
+									<!-- Button icon-->
+									<v-icon v-bind="attrs" :dark="$vuetify.theme.dark" v-on="on"> {{ button.icon }} </v-icon>
+								</template>
+								<!-- Tooltip text -->
+								<span>{{ button.name }}</span>
+							</v-tooltip>
+						</v-btn>
+					</template>
+				</template>
+			</v-btn-toggle>
 		</template>
 	</v-data-table>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
+import { DownloadStatus } from '@dto/mainApi';
 import { DataTableHeader } from 'vuetify/types';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import IDownloadRow from '../types/IDownloadRow';
-
 @Component({
 	components: {
 		LoadingSpinner,
@@ -71,12 +80,15 @@ export default class DownloadsTable extends Vue {
 	@Prop({ type: Boolean })
 	readonly loading: Boolean = false;
 
+	@Prop({ required: true, type: Array as () => IDownloadRow[] })
+	readonly value!: IDownloadRow[];
+
 	get getHeaders(): DataTableHeader<IDownloadRow>[] {
 		return [
-			{
-				text: 'Id',
-				value: 'id',
-			},
+			// {
+			// 	text: 'Id',
+			// 	value: 'id',
+			// },
 			{
 				text: 'Title',
 				value: 'title',
@@ -90,15 +102,15 @@ export default class DownloadsTable extends Vue {
 				value: 'dataReceived',
 			},
 			{
-				text: 'Data Total',
+				text: 'Size',
 				value: 'dataTotal',
 			},
 			{
-				text: 'Download Speed',
+				text: 'Speed',
 				value: 'downloadSpeed',
 			},
 			{
-				text: 'Time Remaining',
+				text: 'ETA',
 				value: 'timeRemaining',
 			},
 			{
@@ -108,21 +120,100 @@ export default class DownloadsTable extends Vue {
 			{
 				text: 'Actions',
 				value: 'actions',
+				width: '100px',
 				sortable: false,
 			},
 		];
 	}
 
-	pauseDownloadTask(itemId: number): void {
-		this.$emit('pause', itemId);
+	get getButtons(): any {
+		return [
+			{
+				name: 'Restart',
+				value: 'restart',
+				icon: 'mdi-refresh',
+			},
+			{
+				name: 'Start / Resume',
+				value: 'start',
+				icon: 'mdi-play',
+			},
+			{
+				name: 'Pause',
+				value: 'pause',
+				icon: 'mdi-pause',
+			},
+			{
+				name: 'Stop',
+				value: 'stop',
+				icon: 'mdi-stop',
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				icon: 'mdi-delete',
+			},
+			{
+				name: 'Details',
+				value: 'details',
+				icon: 'mdi-chart-box-outline',
+			},
+		];
 	}
 
-	stopDownloadTask(itemId: number) {
-		this.$emit('stop', itemId);
+	formatCountdown(seconds: number): string {
+		if (!seconds || seconds <= 0) {
+			return '0:00';
+		}
+		return new Date(seconds * 1000)?.toISOString()?.substr(11, 8)?.toString() ?? '?';
 	}
 
-	deleteDownloadTask(itemId: number): void {
-		this.$emit('delete', itemId);
+	availableActions(item: IDownloadRow): string[] {
+		const actions: string[] = ['details'];
+		switch (item.status) {
+			case DownloadStatus.Initialized:
+				actions.push('delete');
+				break;
+			case DownloadStatus.Starting:
+				actions.push('stop');
+				actions.push('delete');
+				break;
+			case DownloadStatus.Queued:
+				actions.push('start');
+				actions.push('delete');
+				break;
+			case DownloadStatus.Downloading:
+				actions.push('pause');
+				actions.push('stop');
+				break;
+			case DownloadStatus.Paused:
+				actions.push('start');
+				actions.push('restart');
+				actions.push('stop');
+				break;
+			case DownloadStatus.Completed:
+				actions.push('restart');
+				actions.push('delete');
+				break;
+			case DownloadStatus.Stopping:
+				actions.push('delete');
+				break;
+			case DownloadStatus.Stopped:
+				actions.push('restart');
+				actions.push('delete');
+				break;
+			case DownloadStatus.Merging:
+				break;
+			case DownloadStatus.Error:
+				actions.push('restart');
+				actions.push('delete');
+				break;
+		}
+		return actions;
+	}
+
+	command(action: string, itemId: number): void {
+		this.$emit(action, itemId);
 	}
 }
 </script>

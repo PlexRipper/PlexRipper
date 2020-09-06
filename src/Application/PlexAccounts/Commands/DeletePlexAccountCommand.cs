@@ -2,12 +2,11 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces.DataAccess;
 using PlexRipper.Domain;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
-using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.Application.PlexAccounts
 {

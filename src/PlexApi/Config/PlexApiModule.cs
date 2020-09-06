@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
+using PlexRipper.Application.Common;
 using PlexRipper.PlexApi.Services;
 
 namespace PlexRipper.PlexApi.Config

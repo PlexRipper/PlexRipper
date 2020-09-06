@@ -1,9 +1,9 @@
-﻿using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Enums;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class DownloadTask : BaseEntity
     {
@@ -11,6 +11,7 @@ namespace PlexRipper.Domain.Entities
         /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv
         /// </summary>
         public string FileLocationUrl { get; set; }
+
         public string FileName { get; set; }
 
         /// <summary>
@@ -19,12 +20,12 @@ namespace PlexRipper.Domain.Entities
         public string Title { get; set; }
 
         /// <summary>
-        /// If this type is an episode of a tv show then this will be the title of that tv show.
+        /// If the type is an episode of a tv show then this will be the title of that tv show.
         /// </summary>
         public string TitleTvShow { get; set; }
 
         /// <summary>
-        /// If this type is an episode of a tv show then this will be the title of that tv show season.
+        /// If the type is an episode of a tv show then this will be the title of that tv show season.
         /// </summary>
         public string TitleTvShowSeason { get; set; }
 
@@ -34,6 +35,8 @@ namespace PlexRipper.Domain.Entities
         [Column("DownloadStatus")]
         public string _DownloadStatus { get; set; }
 
+        public DateTime Created { get; set; }
+
         /// <summary>
         /// The identifier used by Plex to keep track of media.
         /// </summary>
@@ -42,21 +45,34 @@ namespace PlexRipper.Domain.Entities
         /// <summary>
         /// The download priority, the higher the more important.
         /// </summary>
-        public int Priority { get; set; }
+        public long Priority { get; set; }
+
+        public long DataReceived { get; set; }
+
+        public long DataTotal { get; set; }
 
         #region Relationships
 
-        public virtual PlexServer PlexServer { get; set; }
+        public PlexServer PlexServer { get; set; }
         public int PlexServerId { get; set; }
 
-        public virtual FolderPath FolderPath { get; set; }
-        public int FolderPathId { get; set; }
+        public PlexLibrary PlexLibrary { get; set; }
+        public int PlexLibraryId { get; set; }
+
+        public PlexAccount PlexAccount { get; set; }
+        public int PlexAccountId { get; set; }
+
+        public FolderPath DestinationFolder { get; set; }
+        public int DestinationFolderId { get; set; }
+
+        public FolderPath DownloadFolder { get; set; }
+        public int DownloadFolderId { get; set; }
+
+        public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
 
         #endregion
 
         #region Helpers
-        [NotMapped] //TODO Debate if the token should be stored in the database or retrieved
-        public string PlexServerAuthToken { get; set; }
 
         [NotMapped]
         public DownloadStatus DownloadStatus
@@ -76,11 +92,37 @@ namespace PlexRipper.Domain.Entities
         public Uri DownloadUri => new Uri(DownloadUrl, UriKind.Absolute);
 
         [NotMapped]
-        public string DownloadUrl =>
-            $"{PlexServer?.BaseUrl}{FileLocationUrl}?download=1&X-Plex-Token={PlexServerAuthToken}" ?? "";
+        public string DownloadUrl => $"{PlexServer?.BaseUrl}{FileLocationUrl}" ?? "";
 
         [NotMapped]
-        public string DownloadDirectory { get; set; }
+        public string DownloadPath => DownloadFolder?.DirectoryPath ?? "";
+
+        /// <summary>
+        /// The download directory with a folder named after the filename
+        /// </summary>
+        [NotMapped]
+        public string TempDirectory
+        {
+            get
+            {
+                switch (MediaType)
+                {
+                    case PlexMediaType.Movie:
+                        return Path.Combine(DownloadPath, $"{Path.GetFileNameWithoutExtension(FileName)}");
+                    case PlexMediaType.Episode:
+                        return Path.Combine(DownloadPath, TitleTvShow, TitleTvShowSeason);
+                    default:
+                        return Path.Combine(DownloadPath, $"{Path.GetFileNameWithoutExtension(FileName)}");
+                }
+            }
+        }
+
+        public bool CheckDownloadTask()
+        {
+            return DownloadFolder.IsValid()
+                   && DestinationFolder.IsValid()
+                   && !string.IsNullOrEmpty(DownloadUrl);
+        }
 
         #endregion
     }

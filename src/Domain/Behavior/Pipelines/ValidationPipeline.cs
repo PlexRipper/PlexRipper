@@ -12,6 +12,10 @@ namespace PlexRipper.Domain.Behavior.Pipelines
     {
         private readonly IValidator<TRequest> _compositeValidator;
 
+        /// <summary>
+        /// Note: Every Query or Command should have a Validator class added otherwise it will silently fail the execution
+        /// </summary>
+        /// <param name="compositeValidator"></param>
         public ValidationPipeline(IValidator<TRequest> compositeValidator)
         {
             _compositeValidator = compositeValidator;

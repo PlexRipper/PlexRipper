@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PlexRipper.Domain.Entities;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Configurations
 {
@@ -14,11 +14,6 @@ namespace PlexRipper.Data.Configurations
                 .HasForeignKey(x => x.PlexServerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //builder
-            //    .HasMany(x => x.ServerStatus)
-            //    .WithOne(x => x.PlexServer)
-            //    .HasForeignKey(x => x.PlexServerId)
-            //    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

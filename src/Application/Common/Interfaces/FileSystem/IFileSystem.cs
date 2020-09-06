@@ -1,8 +1,8 @@
-﻿using FluentResults;
-using PlexRipper.Domain.Types.FileSystem;
-using System.IO;
+﻿using System.IO;
+using FluentResults;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.Interfaces.FileSystem
+namespace PlexRipper.Application.Common
 {
     public interface IFileSystem
     {
@@ -11,5 +11,6 @@ namespace PlexRipper.Application.Common.Interfaces.FileSystem
         Result<FileStream> SaveFile(string directory, string fileName, long fileSize);
         string ToAbsolutePath(string relativePath);
         FileSystemResult LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
+        Result<FileStream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize);
     }
 }

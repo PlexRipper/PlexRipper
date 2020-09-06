@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 
-namespace PlexRipper.Domain.Common
+namespace PlexRipper.Domain
 {
     public static class DataFormat
     {
@@ -17,13 +18,13 @@ namespace PlexRipper.Domain.Common
             double kiloByteSize = byteSize / 1024D;
             double megaByteSize = kiloByteSize / 1024D;
             double gigaByteSize = megaByteSize / 1024D;
-
             if (byteSize < 1024)
                 return string.Format(numberFormat, "{0} B", byteSize);
             if (byteSize < 1048576)
                 return string.Format(numberFormat, "{0:0.00} kB", kiloByteSize);
             if (byteSize < 1073741824)
                 return string.Format(numberFormat, "{0:0.00} MB", megaByteSize);
+
             return string.Format(numberFormat, "{0:0.00} GB", gigaByteSize);
         }
 
@@ -36,13 +37,13 @@ namespace PlexRipper.Domain.Common
         {
             float kbSpeed = speed / 1024F;
             float mbSpeed = kbSpeed / 1024F;
-
             if (speed <= 0)
                 return string.Empty;
             if (speed < 1024)
                 return speed + " B/s";
             if (speed < 1048576)
                 return kbSpeed.ToString("#.00", numberFormat) + " kB/s";
+
             return mbSpeed.ToString("#.00", numberFormat) + " MB/s";
         }
 
@@ -62,7 +63,6 @@ namespace PlexRipper.Domain.Common
                 minutes = "0" + minutes;
             if (span.Seconds < 10)
                 seconds = "0" + seconds;
-
             return $"{hours}:{minutes}:{seconds}";
         }
 
@@ -74,6 +74,51 @@ namespace PlexRipper.Domain.Common
         public static decimal GetPercentage(int current, int total)
         {
             return (decimal) Math.Round((current / (double) total) * 100, 2, MidpointRounding.AwayFromZero);
+        }
+
+        /// <summary>
+        /// Returns the bytes per second.
+        /// </summary>
+        /// <param name="bytesReceived"></param>
+        /// <param name="elapsedTimeInSeconds"></param>
+        /// <returns></returns>
+        public static int GetDownloadSpeed(long bytesReceived, double elapsedTimeInSeconds)
+        {
+            return elapsedTimeInSeconds <= 0 ? 0 : (int)Math.Round(bytesReceived / elapsedTimeInSeconds, 2);
+        }
+
+        public static long GetTimeRemaining(long BytesRemaining, double downloadSpeed)
+        {
+            if (downloadSpeed <= 0)
+            {
+                return 0;
+            }
+
+            return Convert.ToInt64(Math.Floor(BytesRemaining / downloadSpeed));
+        }
+
+        /// <summary>
+        /// Returns a random priority based on the Date of creation.
+        /// </summary>
+        /// <returns></returns>
+        public static long GetPriority()
+        {
+            return Convert.ToInt64((DateTime.Now - DateTime.UnixEpoch).TotalSeconds);
+        }
+
+        /// <summary>
+        /// Returns a list of priorities based on the Date of creation
+        /// </summary>
+        /// <returns></returns>
+        public static List<long> GetPriority(int count)
+        {
+            var list = new List<long>();
+            for (int i = 0; i < count; i++)
+            {
+                list.Add(Convert.ToInt64((DateTime.Now - DateTime.UnixEpoch).TotalSeconds) + i);
+            }
+
+            return list;
         }
     }
 }

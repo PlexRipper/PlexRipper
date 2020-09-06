@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PlexRipper.Domain.Entities;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Configurations
 {
@@ -8,7 +8,11 @@ namespace PlexRipper.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<DownloadTask> builder)
         {
-
+            builder
+                .HasMany(x => x.DownloadWorkerTasks)
+                .WithOne(x => x.DownloadTask)
+                .HasForeignKey(x => x.DownloadTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

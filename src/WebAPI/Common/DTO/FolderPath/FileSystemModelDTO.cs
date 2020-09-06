@@ -1,6 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
-using PlexRipper.Domain.Types.FileSystem;
+using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI.Common.DTO.FolderPath
 {

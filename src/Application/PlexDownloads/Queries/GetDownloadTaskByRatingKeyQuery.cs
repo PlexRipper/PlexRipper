@@ -2,10 +2,9 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 
@@ -13,16 +12,14 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 {
     public class GetDownloadTaskByRatingKeyQuery : IRequest<Result<DownloadTask>>
     {
-        public GetDownloadTaskByRatingKeyQuery(int ratingKey, bool includeServer = false, bool includeFolderPath = false)
+        public GetDownloadTaskByRatingKeyQuery(int ratingKey, bool includeServer = false)
         {
             RatingKey = ratingKey;
             IncludeServer = includeServer;
-            IncludeFolderPath = includeFolderPath;
         }
 
         public int RatingKey { get; }
         public bool IncludeServer { get; }
-        public bool IncludeFolderPath { get; }
     }
 
     public class GetDownloadTaskByRatingKeyQueryValidator : AbstractValidator<GetDownloadTaskByRatingKeyQuery>
@@ -47,12 +44,11 @@ namespace PlexRipper.Application.PlexDownloads.Queries
                 query = query.Include(x => x.PlexServer);
             }
 
-            if (request.IncludeFolderPath)
-            {
-                query = query.Include(x => x.FolderPath);
-            }
-
-            var downloadTask = await query.FirstOrDefaultAsync(x => x.RatingKey == request.RatingKey, cancellationToken);
+            var downloadTask = await query
+                .Include(x => x.DownloadWorkerTasks)
+                .Include(x => x.DestinationFolder)
+                .Include(x => x.DownloadFolder)
+                .FirstOrDefaultAsync(x => x.RatingKey == request.RatingKey, cancellationToken);
 
             if (downloadTask == null)
             {

@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Types.FileSystem;
 using PlexRipper.DownloadManager;
 using Serilog;
 using System;
@@ -39,7 +38,7 @@ namespace PlexRipper.WebAPI
                         config.ClearProviders();
                         config.AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
                     })
-                    .ConfigureServices((hostContext, services) => { services.AddHostedService<DownloadWorker>(); })
+                    .ConfigureServices((hostContext, services) => { services.AddHostedService<DownloadService>(); })
                     .UseSerilog()
                     .Build();
 

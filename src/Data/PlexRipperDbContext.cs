@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.JoinTables;
 using System.IO;
 using System.Reflection;
+using PlexRipper.Application.Common;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
@@ -15,7 +14,9 @@ namespace PlexRipper.Data
         #region Tables
         public DbSet<PlexAccount> PlexAccounts { get; set; }
         public DbSet<DownloadTask> DownloadTasks { get; set; }
+        public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
         public DbSet<FolderPath> FolderPaths { get; set; }
+        public DbSet<FileTask> FileTasks { get; set; }
 
         public DbSet<PlexGenre> PlexGenres { get; set; }
         public DbSet<PlexLibrary> PlexLibraries { get; set; }

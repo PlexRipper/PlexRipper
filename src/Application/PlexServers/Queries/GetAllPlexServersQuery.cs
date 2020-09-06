@@ -3,10 +3,9 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common.Interfaces.DataAccess;
-using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 
@@ -14,20 +13,23 @@ namespace PlexRipper.Application.PlexServers.Queries
 {
     public class GetAllPlexServersQuery : IRequest<Result<List<PlexServer>>>
     {
-        public GetAllPlexServersQuery(bool includeLibraries = false, bool includeDownloadTasks = false)
+        public GetAllPlexServersQuery(bool includeLibraries = false)
         {
             IncludeLibraries = includeLibraries;
-            IncludeDownloadTasks = includeDownloadTasks;
         }
 
         public bool IncludeLibraries { get; }
-        public bool IncludeDownloadTasks { get; }
+    }
+
+    public class GetAllPlexServersQueryValidator : AbstractValidator<GetAllPlexServersQuery>
+    {
+        public GetAllPlexServersQueryValidator() { }
     }
 
     public class GetAllPlexServersQueryHandler : BaseHandler,
         IRequestHandler<GetAllPlexServersQuery, Result<List<PlexServer>>>
     {
-        public GetAllPlexServersQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
+        public GetAllPlexServersQueryHandler(IPlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersQuery request,
             CancellationToken cancellationToken)
@@ -37,11 +39,6 @@ namespace PlexRipper.Application.PlexServers.Queries
             if (request.IncludeLibraries)
             {
                 query = query.Include(x => x.PlexLibraries);
-            }
-
-            if (request.IncludeDownloadTasks)
-            {
-                query = query.Include(x => x.DownloadTasks);
             }
 
             var plexServer = await query

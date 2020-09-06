@@ -1,17 +1,13 @@
 ﻿using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common.Interfaces;
-using PlexRipper.Application.Common.Interfaces.PlexApi;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Application.PlexLibraries.Commands;
 using PlexRipper.Application.PlexLibraries.Queries;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
 using System.Linq;
 using System.Threading.Tasks;
-using PlexRipper.Application.Common.Interfaces.SignalR;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexTvShows;
 
 namespace PlexRipper.Application.PlexLibraries
@@ -169,7 +165,7 @@ namespace PlexRipper.Application.PlexLibraries
             {
                 case PlexMediaType.Movie:
                     result = await _mediator.Send(
-                        new CreateOrUpdatePlexMoviesCommand(newPlexLibrary, newPlexLibrary.Movies));
+                        new CreateOrUpdatePlexMoviesCommand(newPlexLibrary, newPlexLibrary.Movies.ToList()));
                     break;
                 case PlexMediaType.TvShow:
                     return await RefreshPlexTvShowLibrary(authToken.Value, newPlexLibrary);
@@ -241,7 +237,15 @@ namespace PlexRipper.Application.PlexLibraries
 
                 foreach (var showSeason in plexTvShow.Seasons)
                 {
-                    showSeason.Episodes = await _plexServiceApi.GetEpisodesAsync(authToken, serverUrl, showSeason);
+                    showSeason.PlexLibraryId = plexLibrary.Id;
+
+                    var episodes = await _plexServiceApi.GetEpisodesAsync(authToken, serverUrl, showSeason);
+                    // Set the correct plexLibraryId
+                    foreach (var episode in episodes)
+                    {
+                        episode.PlexLibraryId = plexLibrary.Id;
+                    }
+                    showSeason.Episodes = episodes;
                 }
 
                 // Send progress update to clients

@@ -4,13 +4,13 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexServers.Queries
 {

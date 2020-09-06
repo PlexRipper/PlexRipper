@@ -3,6 +3,9 @@
 		<v-row>
 			<v-col>
 				<p>Downloads</p>
+				<p>{{ downloadProgressList }}</p>
+				<p>{{ fileMergeProgressList }}</p>
+				<p>{{ downloadStatusList }}</p>
 			</v-col>
 		</v-row>
 		<!-- Download Toolbar -->
@@ -125,7 +128,7 @@ export default class Downloads extends Vue {
 	 */
 	getDownloadRows(serverId: number): IDownloadRow[] {
 		const downloadRows: IDownloadRow[] = [];
-		for (let i = 0; i < this.downloads.length; i++) {
+		for (let i = 0; i < this.downloads.filter((x) => x.plexServerId === serverId).length; i++) {
 			const download = this.downloads[i];
 			const downloadProgress = this.downloadProgressList.find((x) => x.id === download.id);
 			const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === download.id);
@@ -139,7 +142,7 @@ export default class Downloads extends Vue {
 
 			if (downloadRow.status === DownloadStatus.Merging) {
 				const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === download.id);
-				downloadRow.percentage = fileMergeProgress?.percentage ?? 0;
+				downloadRow.percentage = fileMergeProgress?.percentage ?? -1;
 				downloadRow.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
 				downloadRow.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
 				downloadRow.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
@@ -152,7 +155,7 @@ export default class Downloads extends Vue {
 			}
 			downloadRows.push(downloadRow);
 		}
-		return downloadRows.filter((x) => x.plexServerId === serverId);
+		return downloadRows;
 	}
 
 	get selectedIds(): number[] {
@@ -172,24 +175,20 @@ export default class Downloads extends Vue {
 	}
 
 	deleteDownloadTasks(downloadTaskId: number): void {
+		const i = this.downloads.findIndex((x) => x.id === downloadTaskId);
+		if (i > -1) {
+			this.downloads.splice(i, 1);
+		}
 		deleteDownloadTask(downloadTaskId)
-			.pipe(finalize(() => DownloadService.fetchDownloadList))
+			.pipe(finalize(() => DownloadService.fetchDownloadList()))
 			.subscribe(() => {
-				// Clean-up progress objects
-				const downloadProgressIndex = this.downloadProgressList.findIndex((x) => x.id === downloadTaskId);
-				this.downloadProgressList.splice(downloadProgressIndex, 1);
-
-				const downloadStatusUpdateIndex = this.downloadStatusList.findIndex((x) => x.id === downloadTaskId);
-				this.downloadStatusList.splice(downloadStatusUpdateIndex, 1);
-
-				const fileMergeProgressIndex = this.fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
-				this.fileMergeProgressList.splice(fileMergeProgressIndex, 1);
+				this.cleanupProgress(downloadTaskId);
 			});
 	}
 
 	stopDownloadTask(downloadTaskId: number): void {
 		stopDownloadTask(downloadTaskId)
-			.pipe(finalize(() => DownloadService.fetchDownloadList))
+			.pipe(switchMap(() => DownloadService.fetchDownloadList))
 			.subscribe();
 	}
 
@@ -209,6 +208,24 @@ export default class Downloads extends Vue {
 		clearDownloadTasks()
 			.pipe(switchMap(() => DownloadService.fetchDownloadList()))
 			.subscribe();
+	}
+
+	cleanupProgress(downloadTaskId: number): void {
+		// Clean-up progress objects
+		const downloadProgressIndex = this.downloadProgressList.findIndex((x) => x.id === downloadTaskId);
+		if (downloadProgressIndex > -1) {
+			this.downloadProgressList.splice(downloadProgressIndex, 1);
+		}
+
+		const downloadStatusUpdateIndex = this.downloadStatusList.findIndex((x) => x.id === downloadTaskId);
+		if (downloadStatusUpdateIndex > -1) {
+			this.downloadStatusList.splice(downloadStatusUpdateIndex, 1);
+		}
+
+		const fileMergeProgressIndex = this.fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
+		if (fileMergeProgressIndex > -1) {
+			this.fileMergeProgressList.splice(fileMergeProgressIndex, 1);
+		}
 	}
 
 	created(): void {

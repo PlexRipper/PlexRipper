@@ -1,8 +1,6 @@
 ﻿using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Types.FileSystem;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;

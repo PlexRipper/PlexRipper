@@ -5,8 +5,6 @@ using PlexRipper.Application.PlexLibraries.Commands;
 using PlexRipper.Application.PlexLibraries.Queries;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
 using System.Linq;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common;

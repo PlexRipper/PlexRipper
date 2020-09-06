@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.Application.FileManager.Command
 {
@@ -41,12 +39,9 @@ namespace PlexRipper.Application.FileManager.Command
 
         public async Task<Result<int>> Handle(AddFileTaskFromDownloadTaskCommand command, CancellationToken cancellationToken)
         {
-            var fileTask = new FileTask
+            var fileTask = new FileTask(command.DownloadTask)
             {
-                CreatedAt = DateTime.Now,
-                DownloadTaskId = command.DownloadTask.Id,
-                FileName = command.DownloadTask.FileName,
-                OutputDirectory = command.DownloadTask.DestinationFolder.Directory,
+                CreatedAt = DateTime.UtcNow,
             };
             await _dbContext.FileTasks.AddAsync(fileTask);
             await _dbContext.SaveChangesAsync(cancellationToken);

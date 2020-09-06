@@ -1,10 +1,8 @@
-﻿using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Entities.JoinTables;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class PlexAccount : BaseEntity
     {

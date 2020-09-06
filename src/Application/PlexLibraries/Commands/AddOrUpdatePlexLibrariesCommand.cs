@@ -3,8 +3,6 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.JoinTables;
 using System;
 using System.Collections.Generic;
 using System.Linq;

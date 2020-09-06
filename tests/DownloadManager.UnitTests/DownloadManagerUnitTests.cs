@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using PlexRipper.BaseTests;
-using PlexRipper.Domain.Entities;
+using PlexRipper.Domain;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;

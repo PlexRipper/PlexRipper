@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PlexRipper.Domain.Entities.JoinTables
+namespace PlexRipper.Domain
 {
     public class PlexAccountServer
     {

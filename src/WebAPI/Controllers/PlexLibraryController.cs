@@ -3,7 +3,6 @@ using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
 using PlexRipper.WebAPI.Common.DTO;
 using System;
 using System.Threading.Tasks;

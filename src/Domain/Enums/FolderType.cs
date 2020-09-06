@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Domain.Enums
+﻿namespace PlexRipper.Domain
 {
     public enum FolderType
     {

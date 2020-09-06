@@ -9,14 +9,12 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.FileManager.Command;
 using PlexRipper.Application.FileManager.Queries;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Common;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Types.FileSystem;
 
 namespace PlexRipper.FileSystem
 {
@@ -59,6 +57,16 @@ namespace PlexRipper.FileSystem
                     return;
                 }
 
+                Log.Debug($"Executing FileTask {fileTask.Id}");
+                foreach (var path in fileTask.FilePaths)
+                {
+                    if (!File.Exists(path))
+                    {
+                        Log.Error($"Filepath: {path} does not exist!");
+                        return;
+                    }
+                }
+
                 var transferStarted = DateTime.UtcNow;
                 var _timeContext = new EventLoopScheduler();
                 Subject<long> _bytesReceivedProgress = new Subject<long>();
@@ -80,16 +88,21 @@ namespace PlexRipper.FileSystem
                             TransferSpeed = DataFormat.GetDownloadSpeed(dataTransferred, ElapsedTime.TotalSeconds)
                         };
                     })
-                    .Subscribe(data => _fileMergeProgressSubject.OnNext(data), () =>
-                    {
-                        _timeContext.Dispose();
-                    });
+                    .Subscribe(data => _fileMergeProgressSubject.OnNext(data), () => { _timeContext.Dispose(); });
 
-                // Merge files
-                await using (var outputStream = File.Create(fileTask.OutputFilePath, 4096, FileOptions.SequentialScan))
+                try
                 {
-                    Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
-                    await StreamExtensions.CopyMultipleToAsync(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
+                    // Merge files
+                    await using (var outputStream = File.Create(fileTask.OutputFilePath, 4096, FileOptions.SequentialScan))
+                    {
+                        Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
+                        await StreamExtensions.CopyMultipleToAsync(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e);
+                    throw;
                 }
 
                 // Clean-up
@@ -103,37 +116,28 @@ namespace PlexRipper.FileSystem
 
         #region Public
 
-        public void AddFileTask(FileTask fileTask)
-        {
-            _channel.Writer.TryWrite(fileTask);
-        }
-
         /// <summary>
         /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
         /// </summary>
         /// <param name="downloadTask">The <see cref="DownloadTask"/> to be added as a <see cref="FileTask"/>.</param>
-        public void AddFileTask(DownloadTask downloadTask)
+        public async Task<Result> AddFileTask(DownloadTask downloadTask)
         {
-            Task.Run(async () =>
+            Log.Debug($"Adding DownloadTask {downloadTask.Title} to a FileTask to be merged");
+            var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask));
+            if (result.IsFailed)
             {
-                Log.Debug($"Adding DownloadTask {downloadTask.Title} to a FileTask to be merged");
-                var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask));
-                if (result.IsFailed)
-                {
-                    // TODO Add notification here for front-end
-                    result.LogError();
-                    return;
-                }
+                // TODO Add notification here for front-end
+                return result.LogError();
+            }
 
-                var fileTask = await _mediator.Send(new GetFileTaskByIdQuery(result.Value));
-                if (fileTask.IsFailed)
-                {
-                    fileTask.LogError();
-                    return;
-                }
+            var fileTask = await _mediator.Send(new GetFileTaskByIdQuery(result.Value));
+            if (fileTask.IsFailed)
+            {
+                return fileTask.LogError();
+            }
 
-                AddFileTask(fileTask.Value);
-            });
+            _channel.Writer.TryWrite(fileTask.Value);
+            return Result.Ok(true);
         }
 
         #endregion

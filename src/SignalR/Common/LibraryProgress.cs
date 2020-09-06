@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.Domain.Types
 {

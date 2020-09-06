@@ -6,7 +6,6 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
@@ -14,8 +13,6 @@ using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
 using PlexRipper.DownloadManager.Common;
 
 namespace PlexRipper.DownloadManager.Download
@@ -63,7 +60,7 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Properties
 
-        public string DownloadPath => _fileSystem.ToAbsolutePath(DownloadTask.DestinationFolder?.Directory);
+        public string DownloadPath => _fileSystem.ToAbsolutePath(DownloadTask.DestinationFolder?.DirectoryPath);
 
         public DateTime DownloadStartAt { get; internal set; }
 
@@ -355,16 +352,12 @@ namespace PlexRipper.DownloadManager.Download
                         end += remainder;
                     }
 
-                    downloadWorkerTasks.Add(new DownloadWorkerTask
+                    downloadWorkerTasks.Add(new DownloadWorkerTask(DownloadTask)
                     {
                         PartIndex = i + 1,
                         Url = DownloadUrl,
                         StartByte = start,
                         EndByte = end,
-                        FileName = DownloadTask.FileName,
-                        DownloadDirectory = DownloadTask.DownloadPath,
-                        DownloadTask = DownloadTask,
-                        DownloadTaskId = DownloadTask.Id,
                     });
                 }
 
@@ -377,7 +370,7 @@ namespace PlexRipper.DownloadManager.Download
                 }
 
                 // Send downloadWorkerTasks to the database and retrieve entries
-                var result = await _mediator.Send(new AddDownloadWorkerTaskCommand(downloadWorkerTasks));
+                var result = await _mediator.Send(new AddDownloadWorkerTasksCommand(downloadWorkerTasks));
                 if (result.IsFailed)
                 {
                     return result.ToResult();
@@ -397,7 +390,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private async Task<Result<bool>> CreateDownloadWorkers(int downloadTaskId)
         {
-            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true, true, true));
+            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true, true));
             if (downloadTask.IsFailed)
             {
                 return downloadTask.ToResult();

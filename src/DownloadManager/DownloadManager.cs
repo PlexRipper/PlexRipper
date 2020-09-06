@@ -10,9 +10,6 @@ using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
-using PlexRipper.Domain.Types.FileSystem;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.DownloadManager.Download;
 
@@ -123,7 +120,7 @@ namespace PlexRipper.DownloadManager
             var result = await _mediator.Send(new AddDownloadTaskCommand(downloadTask));
             if (result.IsFailed)
             {
-                return result.ToResult();
+                return result.ToResult().LogError();
             }
 
             if (performCheck)
@@ -162,7 +159,7 @@ namespace PlexRipper.DownloadManager
                         .WithMetadata("downloadTask", downloadTask));
                 }
 
-                return Result.Fail(error).Add400BadRequestError();
+                return Result.Fail(error).Add400BadRequestError().LogError();
             }
 
             Log.Debug($"Successfully added all {downloadTasks.Count} DownloadTasks");
@@ -184,7 +181,7 @@ namespace PlexRipper.DownloadManager
             _checkDownloadTask = Task.Factory.StartNew(async () =>
             {
                 Log.Debug("Checking for download tasks which can be processed.");
-                var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true, true));
+                var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true));
                 var serverList = serverListResult.Value.Where(x => x.HasDownloadTasks).ToList();
 
                 Log.Information($"Starting the check of {serverList.Count} PlexServers.");
@@ -241,7 +238,7 @@ namespace PlexRipper.DownloadManager
         /// </summary>
         /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to stop.</param>
         /// <returns>Is successful.</returns>
-        public Result<bool> StopDownload(int downloadTaskId)
+        public async Task<Result<bool>> StopDownloadAsync(int downloadTaskId)
         {
             // Retrieve download client
             var downloadClient = GetDownloadClient(downloadTaskId);
@@ -250,7 +247,7 @@ namespace PlexRipper.DownloadManager
                 downloadClient.Value.Stop();
             }
 
-            SetDownloadStatus(new DownloadStatusChanged(downloadTaskId, DownloadStatus.Stopped));
+            await SetDownloadStatusAsync(new DownloadStatusChanged(downloadTaskId, DownloadStatus.Stopped));
             return Result.Ok(true);
         }
 
@@ -333,21 +330,24 @@ namespace PlexRipper.DownloadManager
 
         private void OnDownloadFileCompleted(DownloadComplete downloadComplete)
         {
-            _mediator.Send(new UpdateDownloadCompleteOfDownloadTaskCommand(
-                downloadComplete.Id,
-                downloadComplete.DataReceived,
-                downloadComplete.DataTotal));
+            Task.Run(async () =>
+            {
+                await _mediator.Send(new UpdateDownloadCompleteOfDownloadTaskCommand(
+                    downloadComplete.Id,
+                    downloadComplete.DataReceived,
+                    downloadComplete.DataTotal));
 
-            _fileManager.AddFileTask(downloadComplete.DownloadTask);
-            SetDownloadStatus(new DownloadStatusChanged(downloadComplete.Id, DownloadStatus.Merging));
-            DeleteDownloadClient(downloadComplete.Id);
-            Log.Information($"The download of {downloadComplete.DownloadTask.Title} has completed!");
-            CheckDownloadQueue();
+                await _fileManager.AddFileTask(downloadComplete.DownloadTask);
+                await SetDownloadStatusAsync(new DownloadStatusChanged(downloadComplete.Id, DownloadStatus.Merging));
+                DeleteDownloadClient(downloadComplete.Id);
+                Log.Information($"The download of {downloadComplete.DownloadTask.Title} has completed!");
+                CheckDownloadQueue();
+            });
         }
 
         private void OnDownloadStatusChanged(DownloadStatusChanged downloadStatusChanged)
         {
-            SetDownloadStatus(downloadStatusChanged);
+            Task.Run(async () => { await SetDownloadStatusAsync(downloadStatusChanged); });
         }
 
         private void OnDownloadProgressChanged(DownloadProgress downloadProgress)
@@ -362,7 +362,7 @@ namespace PlexRipper.DownloadManager
             _signalRService.SendFileMergeProgressUpdate(progress);
             if (progress.Percentage >= 100)
             {
-                SetDownloadStatus(new DownloadStatusChanged(progress.DownloadTaskId, DownloadStatus.Completed));
+                Task.Run(async () => { await SetDownloadStatusAsync(new DownloadStatusChanged(progress.DownloadTaskId, DownloadStatus.Completed)); });
             }
         }
 
@@ -413,7 +413,7 @@ namespace PlexRipper.DownloadManager
             }
 
             // Retrieve latest downloadTask row in database
-            var downloadTaskDb = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTask.Id, true, true, true, true));
+            var downloadTaskDb = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTask.Id, true, true, true));
             if (downloadTaskDb.IsFailed)
             {
                 return result.ToResult().LogError();
@@ -512,14 +512,19 @@ namespace PlexRipper.DownloadManager
             return Result.Ok(downloadClient);
         }
 
-        private void SetDownloadStatus(DownloadStatusChanged downloadStatusChanged)
+        private async Task<Result> SetDownloadStatusAsync(DownloadStatusChanged downloadStatusChanged)
         {
-            Log.Debug(
-                $"DownloadClient changed downloadStatus for downloadTask {downloadStatusChanged.Id} to {downloadStatusChanged.Status.ToString()}");
-            Task.Run(() =>
-                _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadStatusChanged.Id,
-                    downloadStatusChanged.Status)));
-            _signalRService.SendDownloadStatusUpdate(downloadStatusChanged.Id, downloadStatusChanged.Status);
+            Log.Debug($"DownloadClient changed downloadStatus for downloadTask {downloadStatusChanged.Id} " +
+                      $"to {downloadStatusChanged.Status.ToString()}");
+
+            var result = await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadStatusChanged.Id, downloadStatusChanged.Status));
+            if (result.IsFailed)
+            {
+                return result;
+            }
+
+            await _signalRService.SendDownloadStatusUpdate(downloadStatusChanged.Id, downloadStatusChanged.Status);
+            return Result.Ok();
         }
 
         /// <summary>

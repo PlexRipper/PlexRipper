@@ -14,9 +14,6 @@ using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexServers.Queries;
 using PlexRipper.Application.PlexTvShows.Queries;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Common;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
 
 #endregion
 
@@ -277,7 +274,7 @@ namespace PlexRipper.Application.PlexDownloads
 
         public Task<Result<List<PlexServer>>> GetAllDownloadsAsync()
         {
-            return _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true, true));
+            return _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true));
         }
 
         public async Task<Result<DownloadTask>> GetDownloadTaskAsync(int plexAccountId, PlexMovie plexMovie)
@@ -305,11 +302,11 @@ namespace PlexRipper.Application.PlexDownloads
             return await _downloadManager.RestartDownloadAsync(downloadTaskId);
         }
 
-        public Result<bool> StopDownloadTask(int downloadTaskId)
+        public async Task<Result<bool>> StopDownloadTask(int downloadTaskId)
         {
             if (downloadTaskId <= 0) return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
-            return _downloadManager.StopDownload(downloadTaskId);
+            return await _downloadManager.StopDownloadAsync(downloadTaskId);
         }
 
         public async Task<Result<bool>> StartDownloadTask(int downloadTaskId)

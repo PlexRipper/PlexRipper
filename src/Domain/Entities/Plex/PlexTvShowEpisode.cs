@@ -1,8 +1,6 @@
 ﻿using System;
-using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Enums;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class PlexTvShowEpisode : BaseEntity
     {

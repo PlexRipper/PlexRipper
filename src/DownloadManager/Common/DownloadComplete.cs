@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using PlexRipper.Domain.Common;
-using PlexRipper.Domain.Entities;
+using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager.Common
 {

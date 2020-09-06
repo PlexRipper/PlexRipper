@@ -5,8 +5,6 @@ using MediatR;
 using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
 using PlexRipper.DownloadManager.Download;
 
 namespace PlexRipper.DownloadManager
@@ -38,7 +36,7 @@ namespace PlexRipper.DownloadManager
             _isChecking = true;
 
             Log.Debug("Checking for download tasks which can be processed.");
-            var serverList = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true, true));
+            var serverList = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true));
 
             if (!serverList.Value.Any())
             {
@@ -80,7 +78,7 @@ namespace PlexRipper.DownloadManager
 
             await UpdateDownloadQueue();
 
-            var serverResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServer.Id, true, true, true));
+            var serverResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServer.Id, true, true));
             if (serverResult.IsFailed)
             {
                 return serverResult.ToResult();

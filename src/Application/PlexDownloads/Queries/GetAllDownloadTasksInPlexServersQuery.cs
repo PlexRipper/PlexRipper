@@ -2,13 +2,13 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexDownloads.Queries
 {
@@ -17,17 +17,14 @@ namespace PlexRipper.Application.PlexDownloads.Queries
     /// </summary>
     public class GetAllDownloadTasksInPlexServersQuery : IRequest<Result<List<PlexServer>>>
     {
-        public GetAllDownloadTasksInPlexServersQuery(bool includePlexAccount = false, bool includeFolderPaths = false,
-            bool includeServerStatus = false)
+        public GetAllDownloadTasksInPlexServersQuery(bool includePlexAccount = false, bool includeServerStatus = false)
         {
             IncludeServerStatus = includeServerStatus;
             IncludePlexAccount = includePlexAccount;
-            IncludeFolderPaths = includeFolderPaths;
         }
 
         public bool IncludeServerStatus { get; }
         public bool IncludePlexAccount { get; }
-        public bool IncludeFolderPaths { get; }
     }
 
     public class GetAllDownloadTasksInPlexServersQueryValidator : AbstractValidator<GetAllDownloadTasksInPlexServersQuery>
@@ -54,24 +51,25 @@ namespace PlexRipper.Application.PlexDownloads.Queries
                     .ThenInclude(x => x.DownloadTasks)
                     .ThenInclude(x => x.PlexAccount);
             }
-            if (request.IncludeFolderPaths)
-            {
-                query = query
-                    .Include(x => x.PlexLibraries)
-                    .ThenInclude(x => x.DownloadTasks)
-                    .ThenInclude(x => x.DownloadFolder)
-                    .Include(x => x.PlexLibraries)
-                    .ThenInclude(x => x.DownloadTasks)
-                    .ThenInclude(x => x.DestinationFolder);
-            }
+
             if (request.IncludeServerStatus)
             {
                 query = query.Include(x => x.ServerStatus);
             }
+
             var serverList = await query
+                // Include DownloadWorkerTasks
                 .Include(x => x.PlexLibraries)
                 .ThenInclude(x => x.DownloadTasks)
                 .ThenInclude(x => x.DownloadWorkerTasks)
+                // Include DownloadFolder
+                .Include(x => x.PlexLibraries)
+                .ThenInclude(x => x.DownloadTasks)
+                .ThenInclude(x => x.DownloadFolder)
+                // Include DestinationFolder
+                .Include(x => x.PlexLibraries)
+                .ThenInclude(x => x.DownloadTasks)
+                .ThenInclude(x => x.DestinationFolder)
                 .Where(x => x.PlexLibraries.Any(y => y.DownloadTasks.Any()))
                 .ToListAsync(cancellationToken);
             return Result.Ok(serverList);

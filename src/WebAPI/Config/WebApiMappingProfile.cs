@@ -1,8 +1,7 @@
 ﻿using System.Linq;
 using AutoMapper;
 using FluentResults;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Types.FileSystem;
+using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;
@@ -13,19 +12,19 @@ namespace PlexRipper.WebAPI.Config
     {
         public WebApiMappingProfile()
         {
-            //Result -> ResultDTO
+            // Result -> ResultDTO
             CreateMap<Result, ResultDTO>(MemberList.None);
             CreateMap(typeof(Result<>), typeof(ResultDTO<>), MemberList.None);
 
-            //CreatePlexAccountDTO -> PlexAccount
+            // CreatePlexAccountDTO -> PlexAccount
             CreateMap<CreatePlexAccountDTO, PlexAccount>(MemberList.Source)
                 .ReverseMap();
 
-            //CreatePlexAccountDTO -> PlexAccount
+            // CreatePlexAccountDTO -> PlexAccount
             CreateMap<UpdatePlexAccountDTO, PlexAccount>(MemberList.Source)
                 .ReverseMap();
 
-            //PlexAccountDTO <-> PlexAccount
+            // PlexAccountDTO <-> PlexAccount
             CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
                 .ForMember(x => x.PlexServers, opt => opt.Ignore())
                 .ForMember(x => x.PlexAccountServers, opt => opt.Ignore());
@@ -34,37 +33,39 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.AuthToken, opt => opt.MapFrom(x => x.AuthenticationToken))
                 .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));
 
-            //PlexServer -> PlexServerDTO
+            // PlexServer -> PlexServerDTO
             CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination);
 
-            //PlexLibrary -> PlexLibraryDTO
+            // PlexLibrary -> PlexLibraryDTO
             CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Type, entity => entity.MapFrom(x => x.GetMediaType))
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount));
 
-            //PlexTvShow <-> PlexTvShowDTO
+            // PlexTvShow <-> PlexTvShowDTO
             CreateMap<PlexTvShow, PlexTvShowDTO>(MemberList.Destination).ReverseMap();
 
-            //PlexTvShowSeason <-> PlexTvShowSeasonDTO
+            // PlexTvShowSeason <-> PlexTvShowSeasonDTO
             CreateMap<PlexTvShowSeason, PlexTvShowSeasonDTO>(MemberList.Destination).ReverseMap();
 
-            //PlexTvShowSeason <-> PlexTvShowSeasonDTO
+            // PlexTvShowSeason <-> PlexTvShowSeasonDTO
             CreateMap<PlexTvShowEpisode, PlexTvShowEpisodeDTO>(MemberList.Destination).ReverseMap();
 
-            //PlexMovie -> PlexMovieDTO
+            // PlexMovie -> PlexMovieDTO
             CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination).ReverseMap();
 
-            //DownloadTask -> DownloadTaskDTO
+            // DownloadTask -> DownloadTaskDTO
             CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.DownloadStatus));
 
-            //FolderPath -> FolderPathDTO
-            CreateMap<FolderPath, FolderPathDTO>(MemberList.Destination).ReverseMap();
+            // FolderPath -> FolderPathDTO
+            CreateMap<FolderPath, FolderPathDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Directory, entity => entity.MapFrom(x => x.DirectoryPath))
+                .ReverseMap();
 
-            //FileSystemResult -> FileSystemDTO
+            // FileSystemResult -> FileSystemDTO
             CreateMap<FileSystemResult, FileSystemDTO>(MemberList.Destination).ReverseMap();
 
-            //FileSystemModel -> FileSystemModelDTO
+            // FileSystemModel -> FileSystemModelDTO
             CreateMap<FileSystemModel, FileSystemModelDTO>(MemberList.Destination).ReverseMap();
         }
     }

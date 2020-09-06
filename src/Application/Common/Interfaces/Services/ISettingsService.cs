@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using FluentResults;
-using PlexRipper.Domain.Entities;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {

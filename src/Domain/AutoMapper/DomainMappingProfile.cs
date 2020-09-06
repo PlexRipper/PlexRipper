@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.JoinTables;
 using System;
 
 namespace PlexRipper.Domain.AutoMapper

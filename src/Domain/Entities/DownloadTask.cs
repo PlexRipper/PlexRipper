@@ -1,10 +1,9 @@
-﻿using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class DownloadTask : BaseEntity
     {
@@ -95,7 +94,35 @@ namespace PlexRipper.Domain.Entities
         [NotMapped]
         public string DownloadUrl => $"{PlexServer?.BaseUrl}{FileLocationUrl}" ?? "";
 
-        public string DownloadPath => DownloadFolder?.Directory ?? "";
+        [NotMapped]
+        public string DownloadPath => DownloadFolder?.DirectoryPath ?? "";
+
+        /// <summary>
+        /// The download directory with a folder named after the filename
+        /// </summary>
+        [NotMapped]
+        public string TempDirectory
+        {
+            get
+            {
+                switch (MediaType)
+                {
+                    case PlexMediaType.Movie:
+                        return Path.Combine(DownloadPath, $"{Path.GetFileNameWithoutExtension(FileName)}");
+                    case PlexMediaType.Episode:
+                        return Path.Combine(DownloadPath, TitleTvShow, TitleTvShowSeason);
+                    default:
+                        return Path.Combine(DownloadPath, $"{Path.GetFileNameWithoutExtension(FileName)}");
+                }
+            }
+        }
+
+        public bool CheckDownloadTask()
+        {
+            return DownloadFolder.IsValid()
+                   && DestinationFolder.IsValid()
+                   && !string.IsNullOrEmpty(DownloadUrl);
+        }
 
         #endregion
     }

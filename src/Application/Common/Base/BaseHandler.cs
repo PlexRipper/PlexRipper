@@ -6,7 +6,6 @@ using FluentResults;
 using FluentValidation;
 using FluentValidation.Results;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities.Base;
 
 namespace PlexRipper.Application.Common.Base
 {

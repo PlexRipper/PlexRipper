@@ -2,8 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Entities.JoinTables;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {

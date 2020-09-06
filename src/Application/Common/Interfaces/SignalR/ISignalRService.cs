@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
-using PlexRipper.Domain.Enums;
-using PlexRipper.Domain.Types.FileSystem;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {

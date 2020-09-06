@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
 
 namespace PlexRipper.Application.PlexDownloads.Commands
 {
@@ -35,7 +34,7 @@ namespace PlexRipper.Application.PlexDownloads.Commands
 
         public async Task<Result<bool>> Handle(DeleteDownloadTaskByIdCommand command, CancellationToken cancellationToken)
         {
-            var entity = await _dbContext.DownloadTasks.AsTracking().FirstOrDefaultAsync(x => x.Id == command.DownloadTaskId, cancellationToken: cancellationToken);
+            var entity = await _dbContext.DownloadTasks.AsTracking().FirstOrDefaultAsync(x => x.Id == command.DownloadTaskId, cancellationToken);
             if (entity == null)
             {
                 return ResultExtensions.GetEntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogError();

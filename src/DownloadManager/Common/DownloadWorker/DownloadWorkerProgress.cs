@@ -1,5 +1,5 @@
 ﻿using PlexRipper.Application.Common;
-using PlexRipper.Domain.Common;
+using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager.Common
 {

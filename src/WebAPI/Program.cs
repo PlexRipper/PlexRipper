@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Types.FileSystem;
 using PlexRipper.DownloadManager;
 using Serilog;
 using System;

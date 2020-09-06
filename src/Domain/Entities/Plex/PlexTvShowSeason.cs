@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Enums;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class PlexTvShowSeason : BaseEntity
     {

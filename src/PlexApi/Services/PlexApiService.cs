@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,7 +9,7 @@ namespace PlexRipper.PlexApi.Services
 {
     /// <summary>
     /// This service is an extra layer of abstraction to convert incoming DTO's from the PlexAPI to workable entities.
-    /// This was done in order to keep all PlexApi related DTO's in the infrastructure layer. 
+    /// This was done in order to keep all PlexApi related DTO's in the infrastructure layer.
     /// </summary>
     public class PlexApiService : IPlexApiService
     {
@@ -92,7 +91,7 @@ namespace PlexRipper.PlexApi.Services
         }
 
         /// <summary>
-        /// Returns a PlexLibrary container with either Movies, Series, Music or Photos depending on the type. 
+        /// Returns a PlexLibrary container with either Movies, Series, Music or Photos depending on the type.
         /// </summary>
         /// <param name="library"></param>
         /// <param name="authToken"></param>
@@ -138,8 +137,8 @@ namespace PlexRipper.PlexApi.Services
         {
             var result = await _plexApi.GetSeasonsAsync(serverAuthToken, plexFullHost, plexTvShow.RatingKey);
             return _mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata);
-        }      
-        
+        }
+
         public async Task<List<PlexTvShowEpisode>> GetEpisodesAsync(string serverAuthToken, string plexFullHost, PlexTvShowSeason plexTvShowSeason)
         {
             var result = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexTvShowSeason.RatingKey);
@@ -147,7 +146,7 @@ namespace PlexRipper.PlexApi.Services
         }
 
         /// <summary>
-        /// Some PlexServers are misconfigured so we have to fix that. 
+        /// Some PlexServers are misconfigured so we have to fix that.
         /// </summary>
         /// <param name="plexServers"></param>
         /// <returns></returns>

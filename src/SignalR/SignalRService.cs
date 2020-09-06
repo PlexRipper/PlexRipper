@@ -1,10 +1,8 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common;
-using PlexRipper.Domain.Common;
-using PlexRipper.Domain.Enums;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Types;
-using PlexRipper.Domain.Types.FileSystem;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.SignalR.Common;
 using PlexRipper.SignalR.Hubs;

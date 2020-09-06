@@ -2,7 +2,6 @@
 using MediatR;
 using PlexRipper.Application.PlexAuthentication.Queries;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
 using System;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common;

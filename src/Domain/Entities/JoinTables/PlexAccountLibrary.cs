@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Domain.Entities.JoinTables
+﻿namespace PlexRipper.Domain
 {
     /// <summary>
     /// This is a join table entity that will return the specific libraries the PlexAccount has access to.

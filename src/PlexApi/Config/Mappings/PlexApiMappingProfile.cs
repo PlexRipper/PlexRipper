@@ -1,10 +1,10 @@
 ﻿using System.Linq;
 using AutoMapper;
+using PlexRipper.Domain;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
-using PlexRipper.Domain.Entities;
 using PlexRipper.PlexApi.Models;
 using PlexRipper.PlexApi.Models.Server;
-using PlexAccount = PlexRipper.Domain.Entities.PlexAccount;
+using PlexAccount = PlexRipper.Domain.PlexAccount;
 
 namespace PlexRipper.PlexApi.Config.Mappings
 {

@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Domain.Common;
-using PlexRipper.Domain.Entities;
 
-namespace PlexRipper.Domain.Types.FileSystem
+namespace PlexRipper.Domain
 {
     public class FileMergeProgress
     {

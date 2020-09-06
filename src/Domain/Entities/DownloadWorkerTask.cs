@@ -1,9 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
-using PlexRipper.Domain.Entities.Base;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     /// <summary>
     /// This holds the task and state of individual DownloadWorkers.
@@ -12,35 +11,54 @@ namespace PlexRipper.Domain.Entities
     {
         #region Constructors
 
-        public DownloadWorkerTask() { }
+        private DownloadWorkerTask() { }
+
+        public DownloadWorkerTask(DownloadTask downloadTask)
+        {
+            FileName = downloadTask.FileName;
+            TempDirectory = downloadTask.TempDirectory;
+            DownloadTask = downloadTask;
+            DownloadTaskId = downloadTask.Id;
+        }
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Gets the total bytes received so far.
-        /// </summary>
-        public long BytesReceived { get; set; }
-
-        /// <summary>
         /// The base filename of the media that will be downloaded.
         /// </summary>
-        public string FileName { get; set; }
+        [Column(Order = 1)]
+        public string FileName { get; internal set; }
 
-        public long EndByte { get; set; }
-
+        [Column(Order = 2)]
         public int PartIndex { get; set; }
 
+        [Column(Order = 3)]
         public long StartByte { get; set; }
 
+        [Column(Order = 4)]
+        public long EndByte { get; set; }
+
+        /// <summary>
+        /// Gets the total bytes received so far.
+        /// </summary>
+        [Column(Order = 5)]
+        public long BytesReceived { get; set; }
+
+        [Column(Order = 6)]
         public string Url { get; set; }
 
-        public string DownloadDirectory { get; set; }
+        /// <summary>
+        /// The download directory where the part is downloaded into
+        /// </summary>
+        [Column(Order = 7)]
+        public string TempDirectory { get; internal set; }
 
         /// <summary>
         /// The elapsed time in milliseconds with an accuracy of 100 milliseconds.
         /// </summary>
+        [Column(Order = 8)]
         public long ElapsedTime { get; set; }
 
         #endregion
@@ -54,15 +72,8 @@ namespace PlexRipper.Domain.Entities
 
         #region Helpers
 
-        /// <summary>
-        /// The download directory with a folder named after the filename
-        /// </summary>
         [NotMapped]
-        public string TempDirectory =>
-            Path.Combine(DownloadDirectory, $"{Path.GetFileNameWithoutExtension(FileName)}");
-
-        [NotMapped]
-        public string TempFileName => $"{PartIndex}-{FileName}";
+        public string TempFileName => $"{Path.GetFileNameWithoutExtension(FileName)}.part{PartIndex}{Path.GetExtension(FileName)}";
 
         [NotMapped]
         public string TempFilePath => Path.Combine(TempDirectory, TempFileName);
@@ -94,7 +105,6 @@ namespace PlexRipper.Domain.Entities
         /// </summary>
         [NotMapped]
         public TimeSpan ElapsedTimeSpan => TimeSpan.FromMilliseconds(ElapsedTime);
-
 
         #endregion
     }

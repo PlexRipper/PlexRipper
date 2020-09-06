@@ -1,5 +1,4 @@
 ﻿using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
 using PlexRipper.PlexApi.Models;
 using PlexRipper.PlexApi.Models.Friends;
 using PlexRipper.PlexApi.Models.Server;
@@ -7,7 +6,8 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PlexAccount = PlexRipper.Domain.Entities.PlexAccount;
+using DataFormat = RestSharp.DataFormat;
+using PlexAccount = PlexRipper.Domain.PlexAccount;
 
 namespace PlexRipper.PlexApi.Api
 {

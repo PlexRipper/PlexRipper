@@ -2,7 +2,6 @@
 using FluentValidation;
 using MediatR;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common;

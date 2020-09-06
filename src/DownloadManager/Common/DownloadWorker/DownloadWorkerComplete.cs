@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using PlexRipper.Domain.Common;
-
-namespace PlexRipper.DownloadManager.Common
+﻿namespace PlexRipper.DownloadManager.Common
 {
     public class DownloadWorkerComplete
     {

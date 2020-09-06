@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Enums;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -115,14 +114,14 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpGet("stop/{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public IActionResult Stop(int id)
+        public async Task<IActionResult> Stop(int id)
         {
             if (id <= 0)
             {
                 return BadRequest(id, "Download Task Id");
             }
 
-            var result = _plexDownloadService.StopDownloadTask(id);
+            var result = await _plexDownloadService.StopDownloadTask(id);
             return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 

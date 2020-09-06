@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace PlexRipper.Domain.Common
+namespace PlexRipper.Domain
 {
     public static class DataFormat
     {

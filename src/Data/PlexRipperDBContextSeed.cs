@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
@@ -9,11 +8,11 @@ namespace PlexRipper.Data
         public static ModelBuilder SeedDatabase(ModelBuilder builder)
         {
             builder.Entity<FolderPath>().HasData(
-                new FolderPath { Id = 1, DisplayName = "DownloadPath", Directory = "/Downloads", FolderType = FolderType.DownloadFolder });
+                new FolderPath { Id = 1, DisplayName = "DownloadPath", DirectoryPath = "/Downloads", FolderType = FolderType.DownloadFolder });
             builder.Entity<FolderPath>().HasData(
-                new FolderPath { Id = 2, DisplayName = "MoviePath", Directory = "/Movies", FolderType = FolderType.MovieFolder });
+                new FolderPath { Id = 2, DisplayName = "MoviePath", DirectoryPath = "/Movies", FolderType = FolderType.MovieFolder });
             builder.Entity<FolderPath>().HasData(
-                new FolderPath { Id = 3, DisplayName = "SeriesPath", Directory = "/Series", FolderType = FolderType.TvShowFolder });
+                new FolderPath { Id = 3, DisplayName = "SeriesPath", DirectoryPath = "/Series", FolderType = FolderType.TvShowFolder });
 
             return builder;
         }

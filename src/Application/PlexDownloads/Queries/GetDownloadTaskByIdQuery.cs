@@ -2,7 +2,6 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain.Entities;
 using System.Threading;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common;
@@ -13,18 +12,16 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 {
     public class GetDownloadTaskByIdQuery : IRequest<Result<DownloadTask>>
     {
-        public GetDownloadTaskByIdQuery(int id, bool includeServer = false, bool includeFolderPaths = false, bool includePlexAccount = false, bool includePlexLibrary = false)
+        public GetDownloadTaskByIdQuery(int id, bool includeServer = false, bool includePlexAccount = false, bool includePlexLibrary = false)
         {
             Id = id;
             IncludeServer = includeServer;
-            IncludeFolderPaths = includeFolderPaths;
             IncludePlexAccount = includePlexAccount;
             IncludePlexLibrary = includePlexLibrary;
         }
 
         public int Id { get; }
         public bool IncludeServer { get; }
-        public bool IncludeFolderPaths { get; }
         public bool IncludePlexAccount { get; }
         public bool IncludePlexLibrary { get; }
     }
@@ -53,12 +50,6 @@ namespace PlexRipper.Application.PlexDownloads.Queries
                 query = query.Include(x => x.PlexServer);
             }
 
-            if (request.IncludeFolderPaths)
-            {
-                query = query.Include(x => x.DownloadFolder);
-                query = query.Include(x => x.DestinationFolder);
-            }
-
             if (request.IncludePlexAccount)
             {
                 query = query.Include(x => x.PlexAccount);
@@ -71,6 +62,8 @@ namespace PlexRipper.Application.PlexDownloads.Queries
 
             var downloadTask = await query
                 .Include(x => x.DownloadWorkerTasks)
+                .Include(x => x.DownloadFolder)
+                .Include(x => x.DestinationFolder)
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (downloadTask == null)

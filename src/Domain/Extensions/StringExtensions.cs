@@ -1,5 +1,4 @@
-﻿using PlexRipper.Domain.Types.FileSystem;
-using System.IO;
+﻿using System.IO;
 
 namespace PlexRipper.Domain
 {

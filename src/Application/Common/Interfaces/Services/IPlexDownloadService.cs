@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
@@ -14,7 +13,7 @@ namespace PlexRipper.Application.Common
         Task<Result<List<PlexServer>>> GetAllDownloadsAsync();
         Task<Result<bool>> DeleteDownloadsAsync(int downloadTaskId);
         Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int mediaId, PlexMediaType type);
-        Result<bool> StopDownloadTask(int downloadTaskId);
+        Task<Result<bool>> StopDownloadTask(int downloadTaskId);
         Task<Result<bool>> RestartDownloadTask(int downloadTaskId);
         Task<Result<bool>> ClearCompleted();
         Task<Result<bool>> StartDownloadTask(int downloadTaskId);

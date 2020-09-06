@@ -2,7 +2,6 @@
 using MediatR;
 using PlexRipper.Application.PlexServers.Queries;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

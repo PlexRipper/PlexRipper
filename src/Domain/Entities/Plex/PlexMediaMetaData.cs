@@ -1,9 +1,7 @@
-using PlexRipper.Domain.Entities.Base;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
-using PlexRipper.Domain.Enums;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class PlexMediaMetaData : BaseEntity
     {

@@ -1,11 +1,8 @@
-﻿using PlexRipper.Domain.Entities.Base;
-using PlexRipper.Domain.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using PlexRipper.Domain.Entities.JoinTables;
 
-namespace PlexRipper.Domain.Entities
+namespace PlexRipper.Domain
 {
     public class PlexLibrary : BaseEntity
     {

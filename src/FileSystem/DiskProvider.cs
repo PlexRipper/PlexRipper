@@ -1,5 +1,4 @@
 ﻿using PlexRipper.Domain;
-using PlexRipper.Domain.Types.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.IO;

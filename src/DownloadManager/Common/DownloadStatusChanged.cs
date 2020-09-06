@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Newtonsoft.Json;
-using PlexRipper.Domain.Common;
-using PlexRipper.Domain.Enums;
+﻿using Newtonsoft.Json;
+using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager.Common
 {

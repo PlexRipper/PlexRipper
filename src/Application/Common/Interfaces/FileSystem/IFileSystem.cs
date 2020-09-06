@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using FluentResults;
-using PlexRipper.Domain.Types.FileSystem;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {

@@ -1,7 +1,7 @@
 ﻿using PlexRipper.BaseTests;
-using PlexRipper.Domain.Entities;
 using Shouldly;
 using System.Threading.Tasks;
+using PlexRipper.Domain;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -24,7 +24,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var accountService = Container.GetPlexAccountService;
             var credentials = Secrets.Account1;
 
-            //Act 
+            //Act
             var newAccount = new PlexAccount
             {
                 DisplayName = "Test Account 1",
@@ -53,7 +53,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var accountService = Container.GetPlexAccountService;
             var credentials = Secrets.Account1;
 
-            //Act 
+            //Act
             var newAccount = new PlexAccount
             {
                 DisplayName = "Test Account",

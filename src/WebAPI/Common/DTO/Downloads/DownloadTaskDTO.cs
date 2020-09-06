@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Domain.Enums;
+using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {

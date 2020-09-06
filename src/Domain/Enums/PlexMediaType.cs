@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace PlexRipper.Domain.Enums
+namespace PlexRipper.Domain
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum PlexMediaType

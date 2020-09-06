@@ -1,11 +1,4 @@
-﻿using FluentResults;
-using PlexRipper.Domain;
-using PlexRipper.Domain.Common;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
-using PlexRipper.DownloadManager.Common;
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -13,7 +6,10 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PlexRipper.Application.Common;
+using PlexRipper.Domain;
+using PlexRipper.DownloadManager.Common;
 
 namespace PlexRipper.DownloadManager.Download
 {

@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Entities;
-using PlexRipper.Domain.Enums;
 
 namespace PlexRipper.Application.PlexDownloads.Commands
 {

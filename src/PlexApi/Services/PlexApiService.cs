@@ -189,9 +189,9 @@ namespace PlexRipper.PlexApi.Services
             return _plexApi.RefreshPlexAuthTokenAsync(account);
         }
 
-        public async Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken)
+        public async Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
         {
-            return await _plexApi.GetThumbnailAsync(thumbUrl, authToken);
+            return await _plexApi.GetThumbnailAsync(thumbUrl, authToken, width, height);
         }
 
         #endregion

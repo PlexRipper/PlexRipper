@@ -33,7 +33,7 @@ namespace PlexRipper.Application.Common
         Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl);
         Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
         Task<List<PlexTvShowEpisode>> GetEpisodesAsync(string serverAuthToken, string plexFullHost, PlexTvShowSeason plexTvShowSeason);
-        Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken);
+        Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken, int width = 0, int height = 0);
     }
 
 

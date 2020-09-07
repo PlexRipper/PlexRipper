@@ -104,14 +104,16 @@ namespace PlexRipper.WebAPI.Controllers
             var result = await _plexLibraryService.GetImage(
                 thumbnailRequestDto.PlexAccountId,
                 thumbnailRequestDto.PlexMediaId,
-                thumbnailRequestDto.PlexMediaType);
+                thumbnailRequestDto.PlexMediaType,
+                thumbnailRequestDto.Width,
+                thumbnailRequestDto.Height);
 
             if (result.IsSuccess)
             {
                 return File(result.Value, "image/jpeg");
             }
 
-            return null;
+            return BadRequest();
         }
     }
 }

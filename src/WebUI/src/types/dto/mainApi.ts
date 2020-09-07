@@ -309,6 +309,8 @@ export interface RefreshPlexLibraryDTO {
 export interface ThumbnailRequestDTO {
   plexAccountId: number;
   plexMediaId: number;
+  width: number;
+  height: number;
   plexMediaType: PlexMediaType;
 }
 

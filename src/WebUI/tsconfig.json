@@ -23,7 +23,9 @@
 			"@store/*": ["./types/store/*"],
 			"@dto/*": ["./types/dto/*"],
 			"@api/*": ["./types/api/*"],
-			"@service/*": ["./types/service/*"]
+			"@service/*": ["./types/service/*"],
+			"@components/*": ["./components/*"],
+			"@mediaOverview/*": ["./components/MediaOverview/*"]
 		},
 		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify"]
 	},

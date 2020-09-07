@@ -4,7 +4,6 @@
 			<media-table
 				:headers="getHeaders"
 				:items="getItems"
-				:loading="loading"
 				:media-type="getType"
 				@download="openDownloadConfirmationDialog($event.itemId, $event.type)"
 			/>
@@ -55,16 +54,15 @@ import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import DownloadService from '@service/downloadService';
 import { DataTableHeader } from 'vuetify/types';
-import type { PlexAccountDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, PlexMediaType, PlexMovieDTO } from '@dto/mainApi';
-import { downloadPlexMovie } from '@/types/api/plexDownloadApi';
+import { downloadPlexMovie } from '@api/plexDownloadApi';
 import { clone } from 'lodash';
 import { catchError, finalize, takeWhile, tap } from 'rxjs/operators';
 import SignalrService from '@service/signalrService';
 import { merge, of } from 'rxjs';
-import ProgressComponent from '@/components/ProgressComponent.vue';
-import MediaTable from '~/components/MediaTable/MediaTable.vue';
-import ITreeViewItem from '~/components/MediaTable/types/iTreeViewItem';
+import ProgressComponent from '@components/ProgressComponent.vue';
+import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
+import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
 
 @Component({
 	components: {
@@ -73,14 +71,11 @@ import ITreeViewItem from '~/components/MediaTable/types/iTreeViewItem';
 	},
 })
 export default class MovieTable extends Vue {
-	@Prop({ required: true, type: Object as () => PlexAccountDTO })
-	readonly activeAccount!: PlexAccountDTO;
+	@Prop({ required: true, type: Number })
+	readonly accountId!: number;
 
 	@Prop({ required: true, type: Array as () => PlexMovieDTO[] })
 	readonly movies!: PlexMovieDTO[];
-
-	@Prop({ required: true, type: Boolean, default: true })
-	readonly loading!: Boolean;
 
 	expanded: string[] = [];
 	singleExpand: boolean = false;
@@ -198,7 +193,7 @@ export default class MovieTable extends Vue {
 				}),
 			),
 			// Download Movie
-			downloadPlexMovie(itemId, this.activeAccount?.id ?? 0).pipe(
+			downloadPlexMovie(itemId, this.accountId).pipe(
 				finalize(() => {
 					this.showDialog = false;
 					this.progress = null;

@@ -11,14 +11,6 @@ namespace PlexRipper.Domain
 
         #endregion
 
-        #region Helpers
 
-        /// <summary>
-        /// Gets the absolute url of the thumb image, which requires a <see cref="PlexLibrary"/> and <see cref="PlexServer"/> navigation property.
-        /// Result is empty if invalid.
-        /// </summary>
-        public string ThumbUrl => PlexLibrary?.PlexServer?.BaseUrl + Thumb ?? string.Empty;
-
-        #endregion
     }
 }

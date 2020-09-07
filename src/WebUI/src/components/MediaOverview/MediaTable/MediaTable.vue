@@ -60,8 +60,8 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify/types';
 import { DownloadTaskCreationProgress, PlexMediaType, PlexTvShowDTO } from '@dto/mainApi';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import ProgressComponent from '@/components/ProgressComponent.vue';
+import ProgressComponent from '@components/ProgressComponent.vue';
+import LoadingSpinner from '@components/LoadingSpinner.vue';
 import ITreeViewItem from './types/iTreeViewItem';
 
 @Component({
@@ -76,9 +76,6 @@ export default class MediaTable extends Vue {
 
 	@Prop({ required: true, type: Array as () => ITreeViewItem[] })
 	readonly items!: ITreeViewItem[];
-
-	@Prop({ required: true, type: Boolean, default: true })
-	readonly loading!: Boolean;
 
 	@Prop({ required: true, type: String })
 	readonly mediaType!: PlexMediaType;

@@ -177,9 +177,16 @@ namespace PlexRipper.PlexApi.Api
             return Client.SendRequestAsync<PlexMediaContainer>(request);
         }
 
-        public Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken)
+        public Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
         {
-            var request = new RestRequest(new Uri(thumbUrl + "?width=150&height=226&minSize=1&upscale=1"), Method.GET);
+            if (width > 0 && height > 0)
+            {
+                var uri = new Uri(thumbUrl);
+                thumbUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&width={width}&height={height}&minSize=1&upscale=1";
+            }
+
+            var request = new RestRequest(new Uri(thumbUrl), Method.GET);
+
             request = AddToken(request, authToken);
             request = AddLimitHeaders(request, 0, 50);
             return Client.SendImageRequestAsync(request);

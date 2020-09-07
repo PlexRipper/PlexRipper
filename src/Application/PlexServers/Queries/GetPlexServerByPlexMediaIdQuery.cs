@@ -52,6 +52,11 @@ namespace PlexRipper.Application.PlexLibraries.Queries
                     plexServer = movie?.PlexLibrary?.PlexServer;
                     break;
                 case PlexMediaType.TvShow:
+                    var tvshow = await _dbContext.PlexTvShows
+                        .Include(x => x.PlexLibrary)
+                        .ThenInclude(x => x.PlexServer)
+                        .FirstOrDefaultAsync(x => x.Id == request.MediaId, cancellationToken);
+                    plexServer = tvshow?.PlexLibrary?.PlexServer;
                     break;
                 case PlexMediaType.Season:
                     break;

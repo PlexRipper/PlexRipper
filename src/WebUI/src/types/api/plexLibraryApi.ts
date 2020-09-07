@@ -25,16 +25,19 @@ export function getThumbnail(
 	plexMediaId: number,
 	plexAccountId: number,
 	plexMediaType: PlexMediaType,
+	width: number = 0,
+	height: number = 0,
 ): Observable<AxiosResponse> {
 	preApiRequest(logText, 'getThumbnail');
-	const result: Observable<AxiosResponse> = Axios.post(
+	return Axios.post(
 		`${apiPath}/thumb`,
 		{
 			plexMediaId,
 			plexAccountId,
 			plexMediaType,
+			width,
+			height,
 		} as ThumbnailRequestDTO,
 		{ responseType: 'blob' },
 	);
-	return result;
 }

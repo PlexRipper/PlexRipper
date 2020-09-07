@@ -52,6 +52,11 @@ namespace PlexRipper.Application.PlexLibraries.Queries
                     thumbUrl = movie?.ThumbUrl ?? string.Empty;
                     break;
                 case PlexMediaType.TvShow:
+                    var tvShow = await _dbContext.PlexTvShows
+                        .Include(x => x.PlexLibrary)
+                        .ThenInclude(x => x.PlexServer)
+                        .FirstOrDefaultAsync(x => x.Id == request.MediaId, cancellationToken);
+                    thumbUrl = tvShow?.ThumbUrl ?? string.Empty;
                     break;
                 case PlexMediaType.Season:
                     break;

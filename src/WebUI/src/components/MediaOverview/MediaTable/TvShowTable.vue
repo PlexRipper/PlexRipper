@@ -4,7 +4,6 @@
 			<media-table
 				:headers="getHeaders"
 				:items="getItems"
-				:loading="loading"
 				:media-type="getType"
 				@download="openDownloadConfirmationDialog($event.itemId, $event.type)"
 			/>
@@ -57,14 +56,14 @@ import { DataTableHeader } from 'vuetify/types';
 import DownloadService from '@service/downloadService';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, PlexMediaType, PlexTvShowDTO } from '@dto/mainApi';
-import { downloadTvShow } from '@/types/api/plexDownloadApi';
+import { downloadTvShow } from '@api/plexDownloadApi';
 import { clone } from 'lodash';
 import { catchError, finalize, takeWhile, tap } from 'rxjs/operators';
 import SignalrService from '@service/signalrService';
 import { merge, of } from 'rxjs';
-import ProgressComponent from '@/components/ProgressComponent.vue';
-import MediaTable from '~/components/MediaTable/MediaTable.vue';
-import ITreeViewItem from '~/components/MediaTable/types/iTreeViewItem';
+import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
+import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
+import ProgressComponent from '@components/ProgressComponent.vue';
 
 @Component({
 	components: {
@@ -78,9 +77,6 @@ export default class TVShowsTable extends Vue {
 
 	@Prop({ required: true, type: Array as () => PlexTvShowDTO[] })
 	readonly tvShows!: PlexTvShowDTO[];
-
-	@Prop({ required: true, type: Boolean, default: true })
-	readonly loading!: Boolean;
 
 	expanded: string[] = [];
 	singleExpand: boolean = false;

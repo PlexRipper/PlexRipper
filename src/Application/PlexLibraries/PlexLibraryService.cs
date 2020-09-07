@@ -332,7 +332,7 @@ namespace PlexRipper.Application.PlexLibraries
             return await RefreshLibraryMediaAsync(plexAccount.Value, plexLibrary.Value);
         }
 
-        public async Task<Result<byte[]>> GetImage(int plexAccountId, int mediaId, PlexMediaType mediaType)
+        public async Task<Result<byte[]>> GetImage(int plexAccountId, int mediaId, PlexMediaType mediaType, int width = 0, int height = 0)
         {
             var thumbUrl = await _mediator.Send(new GetThumbUrlByPlexMediaIdQuery(mediaId, mediaType));
             if (thumbUrl.IsFailed)
@@ -349,10 +349,10 @@ namespace PlexRipper.Application.PlexLibraries
             var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccountId, plexServer.Value.Id);
             if (token.IsFailed)
             {
-                return thumbUrl.ToResult();
+                return token.ToResult();
             }
 
-            byte[] image = await _plexServiceApi.GetThumbnailAsync(thumbUrl.Value, token.Value);
+            byte[] image = await _plexServiceApi.GetThumbnailAsync(thumbUrl.Value, token.Value, width, height);
             if (image == null || image.Length == 0)
             {
                 return Result.Fail("Failed to retrieve image.");

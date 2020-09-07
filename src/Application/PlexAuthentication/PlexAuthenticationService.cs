@@ -57,11 +57,11 @@ namespace PlexRipper.Application.PlexAuthentication
             return _mediator.Send(new GetPlexServerTokenQuery(plexAccountId, plexServerId));
         }
 
-        public async Task<Result<string>> GetPlexServerTokenWithUrl(int plexAccountId, int plexServerId, string downloadUrl)
+        public async Task<Result<string>> GetPlexServerTokenWithUrl(int plexAccountId, int plexServerId, string serverUrl)
         {
-            if (string.IsNullOrEmpty(downloadUrl))
+            if (string.IsNullOrEmpty(serverUrl))
             {
-                return ResultExtensions.IsNull(nameof(downloadUrl));
+                return ResultExtensions.IsNull(nameof(serverUrl));
             }
 
             var token = await GetPlexServerTokenAsync(plexAccountId, plexServerId);
@@ -70,7 +70,8 @@ namespace PlexRipper.Application.PlexAuthentication
                 return token;
             }
 
-            return Result.Ok($"{downloadUrl}?download=1&X-Plex-Token={token.Value}");
+            // TODO verify that download=1 is not needed.
+            return Result.Ok($"{serverUrl}?X-Plex-Token={token.Value}");
         }
     }
 }

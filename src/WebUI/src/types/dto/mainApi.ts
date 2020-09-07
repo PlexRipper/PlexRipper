@@ -32,19 +32,19 @@ export interface PlexServerDTO {
 }
 
 export interface PlexLibraryDTO {
-  id?: number;
-  key?: string;
-  title?: string;
+  id: number;
+  key: string;
+  title: string;
   type: PlexMediaType;
-  updatedAt?: string;
-  createdAt?: string;
-  scannedAt?: string;
-  contentChangedAt?: string;
-  uuid?: string;
-  libraryLocationId?: number;
-  libraryLocationPath?: string;
-  plexServerId?: number;
-  count?: number;
+  updatedAt: string;
+  createdAt: string;
+  scannedAt: string;
+  contentChangedAt: string;
+  uuid: string;
+  libraryLocationId: number;
+  libraryLocationPath: string;
+  plexServerId: number;
+  count: number;
   movies: PlexMovieDTO[];
   tvShows: PlexTvShowDTO[];
   downloadTasks: DownloadTaskDTO[];
@@ -64,57 +64,57 @@ export enum PlexMediaType {
 
 export interface PlexMovieDTO {
   id: number;
-  ratingKey?: number;
-  key?: any;
-  guid?: any;
-  studio?: string | null;
-  title?: string | null;
-  contentRating?: string | null;
-  summary?: string | null;
-  index?: number;
-  rating?: number;
-  year?: number;
-  thumb?: any;
-  art?: any;
-  banner?: any;
-  duration?: number;
-  originallyAvailableAt?: string;
-  leafCount?: number;
-  viewedLeafCount?: number;
-  childCount?: number;
-  addedAt?: string;
-  updatedAt?: string;
-  viewCount?: any;
-  lastViewedAt?: any;
-  theme?: any;
+  ratingKey: number;
+  key: any;
+  guid: any;
+  studio: string;
+  title: string;
+  contentRating: string;
+  summary: string;
+  index: number;
+  rating: number;
+  year: number;
+  thumb: any;
+  art: any;
+  banner: any;
+  duration: number;
+  originallyAvailableAt: string;
+  leafCount: number;
+  viewedLeafCount: number;
+  childCount: number;
+  addedAt: string;
+  updatedAt: string;
+  viewCount: any;
+  lastViewedAt: any;
+  theme: any;
   plexLibraryId: number;
 }
 
 export interface PlexTvShowDTO {
   id: number;
-  ratingKey?: number;
-  key?: any;
-  guid?: any;
-  studio?: any;
-  title?: any;
-  contentRating?: any;
-  summary?: any;
-  index?: number;
-  rating?: number;
-  year?: number;
-  thumb?: any;
-  art?: any;
-  banner?: any;
-  duration?: number;
-  originallyAvailableAt?: string;
-  leafCount?: number;
-  viewedLeafCount?: number;
-  childCount?: number;
-  addedAt?: string;
-  updatedAt?: string;
-  viewCount?: any;
-  lastViewedAt?: any;
-  theme?: any;
+  ratingKey: number;
+  key: any;
+  guid: any;
+  studio: any;
+  title: any;
+  contentRating: any;
+  summary: any;
+  index: number;
+  rating: number;
+  year: number;
+  thumb: any;
+  art: any;
+  banner: any;
+  duration: number;
+  originallyAvailableAt: string;
+  leafCount: number;
+  viewedLeafCount: number;
+  childCount: number;
+  addedAt: string;
+  updatedAt: string;
+  viewCount: any;
+  lastViewedAt: any;
+  theme: any;
   plexLibraryId: number;
   seasons: PlexTvShowSeasonDTO[];
   type: PlexMediaType;
@@ -122,19 +122,19 @@ export interface PlexTvShowDTO {
 
 export interface PlexTvShowSeasonDTO {
   id: number;
-  ratingKey?: number;
-  key?: string | null;
-  guid?: string | null;
-  title?: string | null;
-  summary?: string | null;
-  index?: number;
+  ratingKey: number;
+  key: string;
+  guid: string;
+  title: string;
+  summary: string;
+  index: number;
   type: PlexMediaType;
-  leafCount?: number;
-  viewedLeafCount?: number;
-  childCount?: number;
-  addedAt?: string;
-  updatedAt?: string;
-  originallyAvailableAt?: string;
+  leafCount: number;
+  viewedLeafCount: number;
+  childCount: number;
+  addedAt: string;
+  updatedAt: string;
+  originallyAvailableAt: string;
   tvShowId: number;
   episodes: PlexTvShowEpisodeDTO[];
   plexLibraryId: number;
@@ -142,19 +142,19 @@ export interface PlexTvShowSeasonDTO {
 
 export interface PlexTvShowEpisodeDTO {
   id: number;
-  ratingKey?: number;
-  key?: string | null;
-  guid?: string | null;
-  title?: string | null;
-  summary?: string | null;
-  index?: number;
+  ratingKey: number;
+  key: string;
+  guid: string;
+  title: string;
+  summary: string;
+  index: number;
   type: PlexMediaType;
-  leafCount?: number;
-  viewedLeafCount?: number;
-  childCount?: number;
-  addedAt?: string;
-  updatedAt?: string;
-  originallyAvailableAt?: string;
+  leafCount: number;
+  viewedLeafCount: number;
+  childCount: number;
+  addedAt: string;
+  updatedAt: string;
+  originallyAvailableAt: string;
   tvShowSeasonId: number;
   plexLibraryId: number;
 }
@@ -304,6 +304,12 @@ export type ResultDTOOfPlexLibraryDTO = ResultDTO & { value: PlexLibraryDTO };
 export interface RefreshPlexLibraryDTO {
   plexAccountId?: number;
   plexLibraryId?: number;
+}
+
+export interface ThumbnailRequestDTO {
+  plexAccountId: number;
+  plexMediaId: number;
+  plexMediaType: PlexMediaType;
 }
 
 export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };

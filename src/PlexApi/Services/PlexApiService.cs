@@ -13,8 +13,14 @@ namespace PlexRipper.PlexApi.Services
     /// </summary>
     public class PlexApiService : IPlexApiService
     {
-        private readonly Api.PlexApi _plexApi;
+        #region Fields
+
         private readonly IMapper _mapper;
+        private readonly Api.PlexApi _plexApi;
+
+        #endregion
+
+        #region Constructors
 
         public PlexApiService(Api.PlexApi plexApi, IMapper mapper)
         {
@@ -22,33 +28,36 @@ namespace PlexRipper.PlexApi.Services
             _mapper = mapper;
         }
 
-        public async Task<PlexAccount> PlexSignInAsync(string username, string password)
+        #endregion
+
+        #region Methods
+
+        #region Private
+
+        /// <summary>
+        /// Some PlexServers are misconfigured so we have to fix that.
+        /// </summary>
+        /// <param name="plexServers"></param>
+        /// <returns></returns>
+        private List<PlexServer> CleanupPlexServers(List<PlexServer> plexServers)
         {
-            var result = await _plexApi.PlexSignInAsync(username, password);
-            if (result != null)
+            if (plexServers.Count > 0)
             {
-                var mapResult = _mapper.Map<PlexAccount>(result.User);
-                if (mapResult != null)
+                foreach (var plexServer in plexServers)
                 {
-                    mapResult.IsValidated = true;
-                    mapResult.ValidatedAt = DateTime.Now;
-                    Log.Information($"Successfully retrieved the PlexAccount data for user {username} from the PlexApi");
-                    return mapResult;
+                    if (plexServer.Port == 443 && plexServer.Scheme == "http")
+                    {
+                        plexServer.Scheme = "https";
+                    }
                 }
             }
-            Log.Warning("The result from the PlexSignIn was null");
-            return null;
+
+            return plexServers;
         }
 
-        public Task<string> RefreshPlexAuthTokenAsync(PlexAccount account)
-        {
-            return _plexApi.RefreshPlexAuthTokenAsync(account);
-        }
+        #endregion
 
-        public Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl)
-        {
-            return _plexApi.GetServerStatusAsync(authToken, serverBaseUrl);
-        }
+        #region Public
 
         public async Task<PlexAccount> GetAccountAsync(string authToken)
         {
@@ -56,17 +65,45 @@ namespace PlexRipper.PlexApi.Services
             return _mapper.Map<PlexAccount>(result);
         }
 
-        public async Task<List<PlexServer>> GetServerAsync(string authToken)
+        public async Task<List<PlexTvShowEpisode>> GetEpisodesAsync(string serverAuthToken, string plexFullHost, PlexTvShowSeason plexTvShowSeason)
         {
-            var result = await _plexApi.GetServerAsync(authToken);
-            if (result != null)
-            {
-                var convertedList = _mapper.Map<List<PlexServer>>(result);
-                return CleanupPlexServers(convertedList);
-            }
-            Log.Warning("Failed to retrieve PlexServers");
-            return new List<PlexServer>();
+            var result = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexTvShowSeason.RatingKey);
+            return _mapper.Map<List<PlexTvShowEpisode>>(result.MediaContainer.Metadata);
         }
+
+        /// <summary>
+        /// Returns a PlexLibrary container with either Movies, Series, Music or Photos depending on the type.
+        /// </summary>
+        /// <param name="library"></param>
+        /// <param name="authToken"></param>
+        /// <param name="plexFullHost"></param>
+        /// <returns></returns>
+        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary library, string authToken, string plexFullHost)
+        {
+            var result = await _plexApi.GetMetadataForLibraryAsync(authToken, plexFullHost, library.Key);
+
+            if (result == null)
+            {
+                return null;
+            }
+
+            var libraryContainer = _mapper.Map<PlexLibrary>(result.MediaContainer);
+            libraryContainer.Id = library.Id;
+
+            // Determine how to map based on the Library type.
+            switch (result.MediaContainer.ViewGroup)
+            {
+                case "movie":
+                    libraryContainer.Movies = _mapper.Map<List<PlexMovie>>(result.MediaContainer.Metadata);
+                    break;
+                case "show":
+                    libraryContainer.TvShows = _mapper.Map<List<PlexTvShow>>(result.MediaContainer.Metadata);
+                    break;
+            }
+
+            return libraryContainer;
+        }
+
         public async Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexLibraryUrl)
         {
             var result = await _plexApi.GetLibrarySectionsAsync(authToken, plexLibraryUrl);
@@ -87,37 +124,8 @@ namespace PlexRipper.PlexApi.Services
                 Console.WriteLine(e);
                 throw;
             }
+
             return map;
-        }
-
-        /// <summary>
-        /// Returns a PlexLibrary container with either Movies, Series, Music or Photos depending on the type.
-        /// </summary>
-        /// <param name="library"></param>
-        /// <param name="authToken"></param>
-        /// <param name="plexFullHost"></param>
-        /// <returns></returns>
-        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary library, string authToken, string plexFullHost)
-        {
-            var result = await _plexApi.GetMetadataForLibraryAsync(authToken, plexFullHost, library.Key);
-
-            if (result == null) { return null; }
-
-            var libraryContainer = _mapper.Map<PlexLibrary>(result.MediaContainer);
-            libraryContainer.Id = library.Id;
-
-            // Determine how to map based on the Library type.
-            switch (result.MediaContainer.ViewGroup)
-            {
-                case "movie":
-                    libraryContainer.Movies = _mapper.Map<List<PlexMovie>>(result.MediaContainer.Metadata);
-                    break;
-                case "show":
-                    libraryContainer.TvShows = _mapper.Map<List<PlexTvShow>>(result.MediaContainer.Metadata);
-                    break;
-            }
-
-            return libraryContainer;
         }
 
 
@@ -133,36 +141,61 @@ namespace PlexRipper.PlexApi.Services
             return _mapper.Map<PlexMediaMetaData>(result);
         }
 
+        public Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl)
+        {
+            return _plexApi.GetServerStatusAsync(authToken, serverBaseUrl);
+        }
+
         public async Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow)
         {
             var result = await _plexApi.GetSeasonsAsync(serverAuthToken, plexFullHost, plexTvShow.RatingKey);
             return _mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata);
         }
 
-        public async Task<List<PlexTvShowEpisode>> GetEpisodesAsync(string serverAuthToken, string plexFullHost, PlexTvShowSeason plexTvShowSeason)
+        public async Task<List<PlexServer>> GetServerAsync(string authToken)
         {
-            var result = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexTvShowSeason.RatingKey);
-            return _mapper.Map<List<PlexTvShowEpisode>>(result.MediaContainer.Metadata);
+            var result = await _plexApi.GetServerAsync(authToken);
+            if (result != null)
+            {
+                var convertedList = _mapper.Map<List<PlexServer>>(result);
+                return CleanupPlexServers(convertedList);
+            }
+
+            Log.Warning("Failed to retrieve PlexServers");
+            return new List<PlexServer>();
         }
 
-        /// <summary>
-        /// Some PlexServers are misconfigured so we have to fix that.
-        /// </summary>
-        /// <param name="plexServers"></param>
-        /// <returns></returns>
-        private List<PlexServer> CleanupPlexServers(List<PlexServer> plexServers)
+        public async Task<PlexAccount> PlexSignInAsync(string username, string password)
         {
-            if (plexServers.Count > 0)
+            var result = await _plexApi.PlexSignInAsync(username, password);
+            if (result != null)
             {
-                foreach (var plexServer in plexServers)
+                var mapResult = _mapper.Map<PlexAccount>(result.User);
+                if (mapResult != null)
                 {
-                    if (plexServer.Port == 443 && plexServer.Scheme == "http")
-                    {
-                        plexServer.Scheme = "https";
-                    }
+                    mapResult.IsValidated = true;
+                    mapResult.ValidatedAt = DateTime.Now;
+                    Log.Information($"Successfully retrieved the PlexAccount data for user {username} from the PlexApi");
+                    return mapResult;
                 }
             }
-            return plexServers;
+
+            Log.Warning("The result from the PlexSignIn was null");
+            return null;
         }
+
+        public Task<string> RefreshPlexAuthTokenAsync(PlexAccount account)
+        {
+            return _plexApi.RefreshPlexAuthTokenAsync(account);
+        }
+
+        public async Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken)
+        {
+            return await _plexApi.GetThumbnailAsync(thumbUrl, authToken);
+        }
+
+        #endregion
+
+        #endregion
     }
 }

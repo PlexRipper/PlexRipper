@@ -13,12 +13,12 @@ namespace PlexRipper.PlexApi.Api
 {
     public class PlexApi
     {
-        public PlexApi(PlexWebClient client)
+        public PlexApi(PlexApiClient client)
         {
             Client = client;
         }
 
-        public PlexWebClient Client { get; }
+        public PlexApiClient Client { get; }
 
         private const string SignInUri = "https://plex.tv/users/sign_in.json";
         private const string FriendsUri = "https://plex.tv/pms/friends/all";
@@ -57,6 +57,7 @@ namespace PlexRipper.PlexApi.Api
                 Log.Information($"Returned token was: {result.User.AuthenticationToken}");
                 return result.User.AuthenticationToken;
             }
+
             Log.Error("Result from RequestPlexSignInDataAsync() was null.");
             return string.Empty;
         }
@@ -91,7 +92,6 @@ namespace PlexRipper.PlexApi.Api
             request = AddToken(request, authToken);
             var serverContainer = await Client.SendRequestAsync<ServerContainer>(request);
             return serverContainer?.Servers;
-
         }
 
         /// <summary>
@@ -146,7 +146,8 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="start">The start count.</param>
         /// <param name="retCount">The return count, how many items you want returned.</param>
         /// <returns></returns>
-        public Task<PlexMediaContainer> GetAllEpisodesAsync(string authToken, string plexFullHost, int plexTvShowSeasonKey, int start = 0, int retCount = 100)
+        public Task<PlexMediaContainer> GetAllEpisodesAsync(string authToken, string plexFullHost, int plexTvShowSeasonKey, int start = 0,
+            int retCount = 100)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{plexTvShowSeasonKey}/children"), Method.GET);
             request = AddToken(request, authToken);
@@ -176,8 +177,16 @@ namespace PlexRipper.PlexApi.Api
             return Client.SendRequestAsync<PlexMediaContainer>(request);
         }
 
+        public Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken)
+        {
+            var request = new RestRequest(new Uri(thumbUrl + "?width=150&height=226&minSize=1&upscale=1"), Method.GET);
+            request = AddToken(request, authToken);
+            request = AddLimitHeaders(request, 0, 50);
+            return Client.SendImageRequestAsync(request);
+        }
+
         /// <summary>
-        /// Adds the required headers and also the authorization header
+        /// Adds the required headers and also the authorization header.
         /// </summary>
         /// <param name="request"></param>
         /// <param name="authToken"></param>
@@ -194,7 +203,5 @@ namespace PlexRipper.PlexApi.Api
             request.AddHeader("X-Plex-Container-Size", to.ToString());
             return request;
         }
-
-
     }
 }

@@ -12,7 +12,7 @@ namespace PlexRipper.PlexApi.Config
 
             builder.RegisterType<Api.PlexApi>();
 
-            builder.RegisterType<PlexWebClient>().SingleInstance();
+            builder.RegisterType<PlexApiClient>().SingleInstance();
         }
     }
 }

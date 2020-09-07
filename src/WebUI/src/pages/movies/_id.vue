@@ -8,10 +8,18 @@
 				<v-btn @click="refreshLibrary">Refresh Library</v-btn>
 			</v-col>
 		</v-row>
-		<!-- The movie table -->
 		<v-row v-if="activeAccount">
-			<v-col cols="12">
+			<v-col cols="12"> <v-switch v-model="imageView" label="Show images"></v-switch></v-col>
+			<!-- The movie table -->
+			<v-col v-if="!imageView" cols="12">
 				<movie-table :movies="movies" :active-account="activeAccount" :loading="isLoading" />
+			</v-col>
+			<v-col v-else cols="12">
+				<v-row>
+					<template v-for="(movie, i) in movies">
+						<media-poster :key="i" :movie="movie" :account-id="activeAccountId" :media-type="libraryType"></media-poster>
+					</template>
+				</v-row>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -22,14 +30,14 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 import SettingsService from '@service/settingsService';
-import { PlexAccountDTO, PlexMovieDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexLibraryDTO, PlexMediaType, PlexMovieDTO, PlexServerDTO } from '@dto/mainApi';
 
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import MovieTable from './components/MovieTable.vue';
+import MediaPoster from './components/MediaPoster.vue';
 
 @Component<MoviesDetail>({
 	components: {
-		LoadingSpinner,
+		MediaPoster,
 		MovieTable,
 	},
 })
@@ -42,6 +50,10 @@ export default class MoviesDetail extends Vue {
 
 	isLoading: boolean = true;
 
+	imageUrl: string = '';
+
+	imageView: boolean = true;
+
 	get movies(): PlexMovieDTO[] {
 		return this.library?.movies ?? [];
 	}
@@ -50,10 +62,18 @@ export default class MoviesDetail extends Vue {
 		return this.activeAccount?.plexServers.find((x) => x.id === this.library?.plexServerId) ?? null;
 	}
 
+	get activeAccountId(): number {
+		return this.activeAccount?.id ?? 0;
+	}
+
+	get libraryType(): PlexMediaType {
+		return this.library?.type ?? PlexMediaType.Unknown;
+	}
+
 	refreshLibrary(): void {
 		this.isLoading = true;
 
-		refreshPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).subscribe((data) => {
+		refreshPlexLibrary(this.libraryId, this.activeAccountId).subscribe((data) => {
 			this.library = data;
 			this.isLoading = false;
 		});
@@ -61,7 +81,7 @@ export default class MoviesDetail extends Vue {
 
 	getLibrary(): void {
 		this.isLoading = true;
-		getPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).subscribe((data) => {
+		getPlexLibrary(this.libraryId, this.activeAccountId).subscribe((data) => {
 			this.library = data;
 			this.isLoading = false;
 		});

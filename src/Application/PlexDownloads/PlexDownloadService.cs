@@ -35,9 +35,14 @@ namespace PlexRipper.Application.PlexDownloads
 
         #region Constructors
 
-        public PlexDownloadService(IMediator mediator, IDownloadManager downloadManager,
-            IPlexAuthenticationService plexAuthenticationService, IFileSystem fileSystem,
-            IPlexApiService plexApiService, ISignalRService signalRService, IFolderPathService folderPathService)
+        public PlexDownloadService(
+            IMediator mediator,
+            IDownloadManager downloadManager,
+            IPlexAuthenticationService plexAuthenticationService,
+            IFileSystem fileSystem,
+            IPlexApiService plexApiService,
+            ISignalRService signalRService,
+            IFolderPathService folderPathService)
         {
             _mediator = mediator;
             _downloadManager = downloadManager;
@@ -84,7 +89,7 @@ namespace PlexRipper.Application.PlexDownloads
                 return Result.Ok(new DownloadTask
                 {
                     PlexServerId = server.Id,
-                    DownloadFolderId =  downloadFolder.Value.Id,
+                    DownloadFolderId = downloadFolder.Value.Id,
                     DownloadFolder = downloadFolder.Value,
                     DestinationFolderId = destinationFolder.Value.Id,
                     DestinationFolder = destinationFolder.Value,
@@ -123,15 +128,15 @@ namespace PlexRipper.Application.PlexDownloads
             int totalCount = plexTvShow.Seasons.Sum(x => x.Episodes.Count);
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShow.PlexLibraryId, i, totalCount);
             foreach (PlexTvShowSeason season in plexTvShow.Seasons)
-            foreach (PlexTvShowEpisode episode in season.Episodes)
-            {
-                Result<DownloadTask> downloadTask = await CreateDownloadTaskAsync(server.Value, plexTvShow.PlexLibraryId, plexAccountId, episode.RatingKey,
-                    PlexMediaType.Episode);
-                if (downloadTask.IsFailed) return downloadTask.ToResult();
+                foreach (PlexTvShowEpisode episode in season.Episodes)
+                {
+                    Result<DownloadTask> downloadTask = await CreateDownloadTaskAsync(server.Value, plexTvShow.PlexLibraryId, plexAccountId, episode.RatingKey,
+                        PlexMediaType.Episode);
+                    if (downloadTask.IsFailed) return downloadTask.ToResult();
 
-                downloadTasks.Add(downloadTask.Value);
-                await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShow.PlexLibraryId, ++i, totalCount);
-            }
+                    downloadTasks.Add(downloadTask.Value);
+                    await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShow.PlexLibraryId, ++i, totalCount);
+                }
 
             Log.Debug($"Finished creating download tasks for tv show: {plexTvShow.Title}");
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShow.PlexLibraryId, totalCount, totalCount);

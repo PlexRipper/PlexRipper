@@ -1,11 +1,13 @@
 using System;
+using System.Linq;
+using System.Reflection;
+using System.Text.Json.Serialization;
 using Autofac;
 using AutofacSerilogIntegration;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSwag;
 using NSwag.Generation.Processors.Security;
@@ -14,9 +16,6 @@ using PlexRipper.Domain;
 using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
-using System.Linq;
-using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace PlexRipper.WebAPI
 {
@@ -34,7 +33,8 @@ namespace PlexRipper.WebAPI
             // General
             services.AddCors(options =>
             {
-                options.AddPolicy(CORSConfiguration,
+                options.AddPolicy(
+                    CORSConfiguration,
                     builder =>
                     {
                         builder
@@ -77,7 +77,7 @@ namespace PlexRipper.WebAPI
                     Type = OpenApiSecuritySchemeType.ApiKey,
                     Name = "Authorization",
                     In = OpenApiSecurityApiKeyLocation.Header,
-                    Description = "Type into the textbox: Bearer {your JWT token}."
+                    Description = "Type into the textbox: Bearer {your JWT token}.",
                 });
                 configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
                 configure.DocumentProcessors.Add(new NSwagAddExtraTypes());

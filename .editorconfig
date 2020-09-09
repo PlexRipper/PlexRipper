@@ -1,4 +1,4 @@
-
+root = true
 [*]
 charset=utf-8
 end_of_line=lf
@@ -48,7 +48,6 @@ resharper_built_in_type_reference_style_highlighting=hint
 resharper_class_never_instantiated_global_highlighting=hint
 resharper_convert_if_statement_to_conditional_ternary_expression_highlighting=hint
 resharper_convert_to_using_declaration_highlighting=hint
-resharper_ef1001_highlighting=suggestion
 resharper_explicit_caller_info_argument_highlighting=none
 resharper_inconsistent_naming_highlighting=hint
 resharper_invert_if_highlighting=none
@@ -57,13 +56,6 @@ resharper_member_can_be_private_global_highlighting=hint
 resharper_method_supports_cancellation_highlighting=none
 resharper_possible_invalid_operation_exception_highlighting=hint
 resharper_possible_null_reference_exception_highlighting=hint
-resharper_sa1101_highlighting=none
-resharper_sa1116_highlighting=hint
-resharper_sa1124_highlighting=none
-resharper_sa1200_highlighting=none
-resharper_sa1309_highlighting=none
-resharper_sa1502_highlighting=hint
-resharper_sa1633_highlighting=none
 resharper_suggest_var_or_type_built_in_types_highlighting=hint
 resharper_unused_member_global_highlighting=hint
 resharper_web_config_module_not_resolved_highlighting=warning
@@ -90,3 +82,24 @@ indent_size=2
 indent_style=space
 indent_size=4
 tab_width=4
+
+# SA1101: Prefix local calls with this
+dotnet_diagnostic.SA1101.severity = none
+
+# SA1200: Using directives should be placed correctly
+dotnet_diagnostic.SA1200.severity = none
+
+# SA1124: Do not use regions
+dotnet_diagnostic.SA1124.severity = none
+
+# SA1502: Element should not be on a single line
+dotnet_diagnostic.SA1502.severity = none
+
+# SA1128: Put constructor initializers on their own line
+dotnet_diagnostic.SA1128.severity = none
+
+# SA1309: Field names should not begin with underscore
+dotnet_diagnostic.SA1309.severity = none
+
+# SA1633: File should have header
+dotnet_diagnostic.SA1633.severity = none

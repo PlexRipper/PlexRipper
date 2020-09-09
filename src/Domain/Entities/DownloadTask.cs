@@ -57,6 +57,7 @@ namespace PlexRipper.Domain
         public int PlexServerId { get; set; }
 
         public PlexLibrary PlexLibrary { get; set; }
+
         public int PlexLibraryId { get; set; }
 
         public PlexAccount PlexAccount { get; set; }

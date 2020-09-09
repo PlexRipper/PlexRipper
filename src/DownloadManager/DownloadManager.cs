@@ -104,16 +104,16 @@ namespace PlexRipper.DownloadManager
             }
 
             // TODO Re-enable checking for existing download task after testing
-            // var downloadTaskExists = await DownloadTaskExistsAsync(downloadTask);
-            // if (downloadTaskExists.IsFailed)
-            // {
-            //     return downloadTaskExists;
-            // }
-            //
-            // if (downloadTaskExists.Value)
-            // {
-            //     return Result.Fail($"DownloadTask with id: {downloadTask.Id} or ratingKey: {downloadTask.RatingKey} already exists").LogError();
-            // }
+            var downloadTaskExists = await DownloadTaskExistsAsync(downloadTask);
+            if (downloadTaskExists.IsFailed)
+            {
+                return downloadTaskExists;
+            }
+
+            if (downloadTaskExists.Value)
+            {
+                return Result.Fail($"DownloadTask with id: {downloadTask.Id} or ratingKey: {downloadTask.RatingKey} already exists").LogError();
+            }
 
             // Add to Database
             Log.Debug($"Adding new downloadTask: {downloadTask.Title} with ratingKey: {downloadTask.RatingKey}");
@@ -178,38 +178,39 @@ namespace PlexRipper.DownloadManager
                 Log.Warning("Check download Queue already in progress");
             }
 
-            _checkDownloadTask = Task.Factory.StartNew(async () =>
-            {
-                Log.Debug("Checking for download tasks which can be processed.");
-                var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true));
-                var serverList = serverListResult.Value.Where(x => x.HasDownloadTasks).ToList();
-
-                Log.Information($"Starting the check of {serverList.Count} PlexServers.");
-                if (serverList.Any())
+            _checkDownloadTask = Task.Factory.StartNew(
+                async () =>
                 {
-                    foreach (var server in serverList)
+                    Log.Debug("Checking for download tasks which can be processed.");
+                    var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true));
+                    var serverList = serverListResult.Value.Where(x => x.HasDownloadTasks).ToList();
+
+                    Log.Information($"Starting the check of {serverList.Count} PlexServers.");
+                    if (serverList.Any())
                     {
-                        var downloadTask = await _downloadQueue.NextDownloadAsync(server);
-
-                        if (downloadTask.IsFailed)
+                        foreach (var server in serverList)
                         {
-                            continue;
-                        }
+                            var downloadTask = await _downloadQueue.NextDownloadAsync(server);
 
-                        // Check if there is already a client working this downloadTask
-                        var downloadClient = GetDownloadClient(downloadTask.Value.Id);
-                        if (downloadClient.IsFailed)
-                        {
-                            downloadClient = await CreateDownloadClientAsync(downloadTask.Value);
-                            downloadClient.Value.Start();
+                            if (downloadTask.IsFailed)
+                            {
+                                continue;
+                            }
+
+                            // Check if there is already a client working this downloadTask
+                            var downloadClient = GetDownloadClient(downloadTask.Value.Id);
+                            if (downloadClient.IsFailed)
+                            {
+                                downloadClient = await CreateDownloadClientAsync(downloadTask.Value);
+                                downloadClient.Value.Start();
+                            }
                         }
                     }
-                }
-                else
-                {
-                    Log.Information("There are no PlexServers with DownloadTasks");
-                }
-            }, TaskCreationOptions.LongRunning);
+                    else
+                    {
+                        Log.Information("There are no PlexServers with DownloadTasks");
+                    }
+                }, TaskCreationOptions.LongRunning);
         }
 
         /// <summary>

@@ -21,7 +21,7 @@ import { Component, Vue, Prop } from 'vue-property-decorator';
 @Component
 export default class ProgressComponent extends Vue {
 	@Prop({ required: true, type: String })
-	readonly text!: string[];
+	readonly text!: string;
 
 	@Prop({ required: true, type: Number })
 	readonly percentage: number = 0;

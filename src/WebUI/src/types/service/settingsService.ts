@@ -1,40 +1,38 @@
-import { ReplaySubject, Observable, iif } from 'rxjs';
-import { tap, mergeMap } from 'rxjs/operators';
-import { getActiveAccount, setActiveAccount } from '@api/settingsApi';
-import { PlexAccountDTO } from '@dto/mainApi';
+import { ReplaySubject, Observable } from 'rxjs';
+import { tap, switchMap, finalize } from 'rxjs/operators';
+import { getSettings, updateSettings } from '@api/settingsApi';
+import { SettingsModel } from '@dto/mainApi';
 import GlobalService from '@service/globalService';
-import AccountService from '@service/accountService';
 import Log from 'consola';
 
 export class SettingsService {
-	private _activeAccount: ReplaySubject<PlexAccountDTO | null> = new ReplaySubject();
+	private _settings: ReplaySubject<SettingsModel> = new ReplaySubject<SettingsModel>();
 
 	public constructor() {
 		GlobalService.getAxiosReady()
 			.pipe(
-				tap(() => Log.debug('Retrieving accounts')),
-				mergeMap(() =>
-					AccountService.getAccounts().pipe(
-						// Only retrieve the active account if any accounts are available in the database
-						mergeMap((accounts) => iif(() => accounts && accounts.length > 0, getActiveAccount())),
-					),
-				),
+				tap(() => Log.debug('Retrieving settings')),
+				switchMap(() => getSettings()),
 			)
-			.subscribe((account) => {
-				this._activeAccount.next(account);
+			.subscribe((settings) => {
+				this._settings.next(settings);
 			});
 	}
 
-	public getActiveAccount(): Observable<PlexAccountDTO | null> {
-		return this._activeAccount.asObservable();
+	public getSettings(): Observable<SettingsModel> {
+		return this._settings.asObservable();
 	}
 
-	public setActiveAccount(accountId: number): void {
-		setActiveAccount(accountId)
-			.pipe(tap((value) => Log.debug(`SetActiveAccount => ${value?.displayName}`)))
-			.subscribe((value) => {
-				this._activeAccount.next(value);
-			});
+	public updateSettings(settings: SettingsModel): void {
+		updateSettings(settings)
+			.pipe(finalize(() => this.fetchSettings()))
+			.subscribe();
+	}
+
+	public fetchSettings(): void {
+		getSettings().subscribe((value) => {
+			this._settings.next(value);
+		});
 	}
 }
 

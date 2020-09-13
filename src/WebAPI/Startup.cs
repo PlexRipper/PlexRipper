@@ -41,8 +41,9 @@ namespace PlexRipper.WebAPI
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials()
-                            .WithOrigins("http://localhost:3000")
-                            .SetPreflightMaxAge(TimeSpan.FromMinutes(100));
+                            .WithOrigins("http://localhost:3000");
+
+                        // .SetPreflightMaxAge(TimeSpan.FromMinutes(100));
                     });
             });
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
@@ -95,6 +96,7 @@ namespace PlexRipper.WebAPI
         {
             app.UseRouting();
             app.UseCors(CORSConfiguration);
+            app.UseCorsMiddleware();
             app.UseAuthorization();
 
             // Enabling this causes CORS errors as the front-end is in http and cannot connect with an https back-end
@@ -108,7 +110,6 @@ namespace PlexRipper.WebAPI
 
                 // SignalR configuration
                 endpoints.MapHub<ProgressHub>("/progress");
-                endpoints.MapHub<LibraryProgressHub>("/plexLibrary/progress");
             });
         }
 

@@ -70,7 +70,7 @@ namespace PlexRipper.Data
         {
             // optionsBuilder.UseLazyLoadingProxies();
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+            var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
             string dbName = isTest ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
             string dbPath = Path.Combine(rootDir + "/config", dbName);
 

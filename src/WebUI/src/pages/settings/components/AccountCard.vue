@@ -4,7 +4,7 @@
 			<!-- Add new account -->
 			<v-card v-if="isNew" hover max-height="130" v-on="on" @click="openDialog()">
 				<v-card-text class="text-center">
-					<v-icon style="font-size: 100px;">mdi-plus-box-outline</v-icon>
+					<v-icon style="font-size: 100px">mdi-plus-box-outline</v-icon>
 				</v-card-text>
 			</v-card>
 			<!-- Edit Account -->
@@ -12,20 +12,12 @@
 				<v-card-title class="headline">{{ account ? account.displayName : '' }}</v-card-title>
 				<v-card-text>
 					<template>
-						<v-chip v-if="account.isValidated" class="ma-2" color="green" text-color="white">
-							Validated
-						</v-chip>
-						<v-chip v-else class="ma-2" color="red" text-color="white">
-							NotValidated
-						</v-chip>
+						<v-chip v-if="account.isValidated" class="ma-2" color="green" text-color="white"> Validated </v-chip>
+						<v-chip v-else class="ma-2" color="red" text-color="white"> NotValidated </v-chip>
 					</template>
 
-					<v-chip v-if="account.isEnabled" class="ma-2" color="green" text-color="white">
-						Enabled
-					</v-chip>
-					<v-chip v-else class="ma-2" color="red" text-color="white">
-						Disabled
-					</v-chip>
+					<v-chip v-if="account.isEnabled" class="ma-2" color="green" text-color="white"> Enabled </v-chip>
+					<v-chip v-else class="ma-2" color="red" text-color="white"> Disabled </v-chip>
 				</v-card-text>
 			</v-card>
 		</template>
@@ -35,7 +27,7 @@
 			<v-card-text>
 				<v-form ref="form" v-model="valid">
 					<!-- Is account enabled -->
-					<v-switch v-model="isEnabled" :dark="$vuetify.theme.dark" label="Is Enabled:"></v-switch>
+					<v-switch v-model="isEnabled" label="Is Enabled:"></v-switch>
 					<!-- Display Name -->
 					<v-text-field
 						v-model="displayName"
@@ -44,7 +36,6 @@
 						full-width
 						single-line
 						outlined
-						:dark="$vuetify.theme.dark"
 						required
 					/>
 					<!-- Username -->
@@ -55,7 +46,6 @@
 						full-width
 						single-line
 						outlined
-						:dark="$vuetify.theme.dark"
 						required
 						@input="inputChanged"
 					/>
@@ -68,7 +58,6 @@
 						full-width
 						single-line
 						outlined
-						:dark="$vuetify.theme.dark"
 						required
 						@input="inputChanged"
 					/>

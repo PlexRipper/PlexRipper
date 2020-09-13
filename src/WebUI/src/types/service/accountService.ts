@@ -1,16 +1,20 @@
-import { ReplaySubject, Observable } from 'rxjs';
+import { ReplaySubject, Observable, of, combineLatest } from 'rxjs';
 import { getAllAccounts } from '@api/accountApi';
+import { setActiveAccount } from '@api/settingsApi';
 import { PlexAccountDTO } from '@dto/mainApi';
-import GlobalService from '@service/globalService';
+import SettingsService from '@service/./settingsService';
 import Log from 'consola';
-import { switchMap } from 'rxjs/operators';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 
 export class AccountService {
 	private _accounts: ReplaySubject<PlexAccountDTO[]> = new ReplaySubject();
 
 	public constructor() {
-		GlobalService.getAxiosReady()
-			.pipe(switchMap(() => getAllAccounts()))
+		SettingsService.getSettings()
+			.pipe(
+				tap(() => Log.debug('Retrieving all accounts')),
+				switchMap(() => getAllAccounts()),
+			)
 			.subscribe((value) => {
 				Log.debug(`AccountService => Fetch Accounts`, value);
 				this._accounts.next(value ?? []);
@@ -26,6 +30,23 @@ export class AccountService {
 
 	public getAccounts(): Observable<PlexAccountDTO[]> {
 		return this._accounts.asObservable();
+	}
+
+	public getActiveAccount(): Observable<PlexAccountDTO | null> {
+		return combineLatest(SettingsService.getSettings(), this.getAccounts()).pipe(
+			switchMap((result) => {
+				return of(result[1].find((account) => account.id === result[0].activeAccountId) ?? null);
+			}),
+		);
+	}
+
+	public setActiveAccount(accountId: number): void {
+		setActiveAccount(accountId)
+			.pipe(
+				tap((value) => Log.debug(`SetActiveAccount => ${value?.displayName}`)),
+				finalize(() => SettingsService.fetchSettings()),
+			)
+			.subscribe();
 	}
 }
 

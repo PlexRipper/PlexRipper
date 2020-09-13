@@ -10,11 +10,9 @@
 		</v-col>
 		<!-- The "Are you sure" dialog -->
 		<v-col cols="12">
-			<v-dialog v-model="showDialog" :dark="$vuetify.theme.dark" :max-width="500" scrollable>
-				<v-card v-if="progress === null" :dark="$vuetify.theme.dark">
-					<v-card-title>
-						Are you sure?
-					</v-card-title>
+			<v-dialog v-model="showDialog" :max-width="500" scrollable>
+				<v-card v-if="progress === null">
+					<v-card-title> Are you sure? </v-card-title>
 					<v-card-subtitle>
 						<p>Plex Ripper will start downloading the following:</p>
 					</v-card-subtitle>
@@ -25,13 +23,9 @@
 					<v-divider></v-divider>
 
 					<v-card-actions>
-						<v-btn large @click="showDialog = false">
-							Cancel
-						</v-btn>
+						<v-btn large @click="showDialog = false"> Cancel </v-btn>
 						<v-spacer></v-spacer>
-						<v-btn color="success" large @click="downloadMovie()">
-							Yes!
-						</v-btn>
+						<v-btn color="success" large @click="downloadMovie()"> Yes! </v-btn>
 					</v-card-actions>
 				</v-card>
 

@@ -1,9 +1,10 @@
-﻿using FluentResults;
+﻿using System.Threading.Tasks;
+using FluentResults;
 using MediatR;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Domain;
-using System.Threading.Tasks;
-using PlexRipper.Application.Common;
+using PlexRipper.Domain.Settings;
 
 namespace PlexRipper.Application.Settings
 {
@@ -49,6 +50,7 @@ namespace PlexRipper.Application.Settings
                     _userSettings.ActiveAccountId = result.Value[0].Id;
                     return Result.Ok(result.Value[0]);
                 }
+
                 string msg = "There are no plexAccounts available to set as the active one";
                 Log.Error(msg);
                 return Result.Fail(msg);
@@ -61,8 +63,21 @@ namespace PlexRipper.Application.Settings
                 {
                     return result;
                 }
+
                 return Result.Ok(result.Value);
             }
+        }
+
+        public Result<SettingsModel> GetSettings()
+        {
+            return Result.Ok(_userSettings as SettingsModel);
+        }
+
+        public async Task<Result<bool>> UpdateSettings(SettingsModel settingsModel)
+        {
+            _userSettings.UpdateSettings(settingsModel);
+            // _userSettings.AdvancedSettings.DownloadManager.DownloadSegments;
+            return Result.Ok(true);
         }
     }
 }

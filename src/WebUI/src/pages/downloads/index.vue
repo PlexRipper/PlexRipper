@@ -13,7 +13,7 @@
 			<v-col>
 				<v-toolbar>
 					<!--Prioritize buttons-->
-					<v-btn-toggle borderless group tile :max="0" :dark="$vuetify.theme.dark">
+					<v-btn-toggle borderless group tile :max="0">
 						<v-btn>
 							<v-icon large>mdi-arrow-collapse-up</v-icon>
 						</v-btn>
@@ -63,7 +63,7 @@
 		<!--	The Download Table	-->
 		<v-row v-if="plexServers.length > 0">
 			<v-col>
-				<v-expansion-panels v-model="openExpansions" multiple :dark="$vuetify.theme.dark">
+				<v-expansion-panels v-model="openExpansions" multiple>
 					<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
 						<v-expansion-panel-header>
 							<h2>{{ plexServer.name }}</h2>

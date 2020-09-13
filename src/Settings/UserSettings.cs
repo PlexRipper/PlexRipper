@@ -1,28 +1,22 @@
-﻿using Newtonsoft.Json;
-using PlexRipper.Domain;
-using PlexRipper.Settings.Models;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using PlexRipper.Application.Common;
+using PlexRipper.Domain;
+using PlexRipper.Domain.Settings;
 
 namespace PlexRipper.Settings
 {
+    /// <inheritdoc cref="IUserSettings"/>
     public class UserSettings : SettingsModel, IUserSettings
     {
+        #region Fields
+
         private readonly IFileSystem _fileSystem;
+        private bool _allowSave = true;
 
-        #region Properties
-
-        [JsonIgnore]
-        private string FileLocation => Path.Join(_fileSystem.ConfigDirectory, FileName);
-
-        [JsonIgnore]
-        private static string FileName { get; } = "PlexRipperSettings.json";
-
-        #endregion Properties
-
-
+        #endregion
 
         #region Constructors
 
@@ -34,17 +28,21 @@ namespace PlexRipper.Settings
             Load();
         }
 
-        #endregion Constructors
+        #endregion
+
+        #region Properties
+
+        [JsonIgnore]
+        private string FileLocation => Path.Join(_fileSystem.ConfigDirectory, FileName);
+
+        [JsonIgnore]
+        private static string FileName { get; } = "PlexRipperSettings.json";
+
+        #endregion
 
         #region Methods
 
-        public void Reset()
-        {
-            Log.Debug("Resetting UserSettings");
-
-            SetValues(new SettingsModel());
-            Save();
-        }
+        #region Private
 
         private void CreateSettingsFile()
         {
@@ -52,6 +50,10 @@ namespace PlexRipper.Settings
             string jsonString = JsonConvert.SerializeObject(new SettingsModel(), Formatting.Indented);
             File.WriteAllText(FileLocation, jsonString);
         }
+
+        #endregion
+
+        #region Public
 
         public bool Load()
         {
@@ -67,18 +69,34 @@ namespace PlexRipper.Settings
                 string jsonString = File.ReadAllText(FileLocation);
                 var loadedSettings =
                     JsonConvert.DeserializeObject<SettingsModel>(jsonString);
-                SetValues(loadedSettings);
+                UpdateSettings(loadedSettings);
             }
             catch (Exception e)
             {
                 Log.Error(e, "Failed to load the UserSettings to json file.");
                 throw;
             }
+
             return true;
         }
 
+        public void Reset()
+        {
+            Log.Debug("Resetting UserSettings");
+
+            UpdateSettings(new SettingsModel());
+            Save();
+        }
+
+        /// <inheritdoc/>
         public bool Save()
         {
+            if (!_allowSave)
+            {
+                Log.Warning("UserSettings is denied from saving by the allowSave lock");
+                return false;
+            }
+
             Log.Debug("Saving UserSettings now.");
 
             try
@@ -95,26 +113,19 @@ namespace PlexRipper.Settings
             }
         }
 
-        /// <summary>
-        /// This will copy values from the sourceSettings and set them to this <see cref="UserSettings"/> instance through reflection. The <see cref="UserSettings"/> also inherits from <see cref="SettingsModel"/> such that we can simply do "userSettings.ApiKey" instead of having a separate instance of the <see cref="SettingsModel"/> in the <see cref="UserSettings"/>.
-        /// </summary>
-        /// <param name="sourceSettings">The values to be used to set this <see cref="UserSettings"/> instance.</param>
-        public void SetValues(SettingsModel sourceSettings)
+
+        /// <inheritdoc/>
+        public void UpdateSettings(SettingsModel sourceSettings)
         {
-            // Get a list of all properties in the sourceSettings.
-            sourceSettings.GetType().GetProperties().Where(x => x.CanWrite).ToList().ForEach(sourceSettingsProperty =>
-            {
-                // check whether target object has the source property, which will always be true due to inheritance. 
-                var targetSettingsProperty = this.GetType().GetProperty(sourceSettingsProperty.Name);
-                if (targetSettingsProperty != null)
-                {
-                    // Now copy the value to the matching property in this UserSettings instance.
-                    var value = sourceSettingsProperty.GetValue(sourceSettings, null);
-                    this.GetType().GetProperty(sourceSettingsProperty.Name).SetValue(this, value, null);
-                }
-            });
+            _allowSave = false;
+            this.AdvancedSettings = sourceSettings.AdvancedSettings;
+            this.ActiveAccountId = sourceSettings.ActiveAccountId;
+            _allowSave = true;
+            Save();
         }
 
-        #endregion Methods
+        #endregion
+
+        #endregion
     }
 }

@@ -36,7 +36,7 @@
 							</v-list-item-title>
 						</v-list-item-content>
 						<v-list-item-action v-if="item.title === 'Downloads'">
-							<v-avatar v-if="downloadTaskCount > 0" class="red" size="32" :dark="$vuetify.theme.dark">
+							<v-avatar v-if="downloadTaskCount > 0" class="red" size="32">
 								<b>{{ downloadTaskCount }}</b>
 							</v-avatar>
 						</v-list-item-action>
@@ -86,6 +86,16 @@ export default class NavigationDrawer extends Vue {
 						title: 'Paths',
 						icon: 'mdi-folder',
 						link: '/settings/paths',
+					},
+					{
+						title: 'UI',
+						icon: 'mdi-television-guide',
+						link: '/settings/ui',
+					},
+					{
+						title: 'Advanced',
+						icon: 'mdi-wrench',
+						link: '/settings/advanced',
 					},
 				],
 			},

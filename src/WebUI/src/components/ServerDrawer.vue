@@ -50,7 +50,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import SettingsService from '@service/settingsService';
+import AccountService from '@service/accountService';
 import { PlexAccountDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 
 interface INavItem {
@@ -103,7 +103,7 @@ export default class ServerDrawer extends Vue {
 	}
 
 	created(): void {
-		SettingsService.getActiveAccount().subscribe((data) => {
+		AccountService.getActiveAccount().subscribe((data) => {
 			Log.debug(`ServerDrawer => ${data}`);
 			this.activeAccount = data;
 			this.plexServers = data?.plexServers ?? [];

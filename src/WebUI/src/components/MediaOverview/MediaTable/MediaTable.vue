@@ -2,14 +2,9 @@
 	<v-row justify="center">
 		<v-col cols="12">
 			<!-- Table Headers -->
-			<v-row :class="$classNames({ 'table-header-dark': $vuetify.theme.dark })" style="height: 50px; margin: 0;">
-				<v-col class="ml-6 select-all-check" style="max-width: 50px;">
-					<v-checkbox
-						:dark="$vuetify.theme.dark"
-						:indeterminate="isIndeterminate"
-						color="red"
-						@change="selectAll($event)"
-					></v-checkbox>
+			<v-row :class="$classNames({ 'table-header-dark': $vuetify.theme.dark })" style="height: 50px; margin: 0">
+				<v-col class="ml-6 select-all-check" style="max-width: 50px">
+					<v-checkbox :indeterminate="isIndeterminate" color="red" @change="selectAll($event)"></v-checkbox>
 				</v-col>
 				<v-col v-for="(header, index) in headers" :key="index" :class="$classNames({ 'col-auto': index > 0 }, 'col')">
 					<v-sheet :width="header.width" :max-width="header.width">{{ header.text }}</v-sheet>
@@ -26,7 +21,6 @@
 						selectable
 						selected-color="red"
 						selection-type="leaf"
-						:dark="$vuetify.theme.dark"
 						hoverable
 						expand-icon="mdi-chevron-down"
 						:items="items"
@@ -41,10 +35,8 @@
 								</v-col>
 								<!-- Actions -->
 								<v-col cols="auto">
-									<v-sheet width="70" style="text-align: center;">
-										<v-icon small @click="openDownloadConfirmationDialog(item.id, item.type)">
-											mdi-download
-										</v-icon>
+									<v-sheet width="70" style="text-align: center">
+										<v-icon small @click="openDownloadConfirmationDialog(item.id, item.type)"> mdi-download </v-icon>
 									</v-sheet>
 								</v-col>
 							</v-row>

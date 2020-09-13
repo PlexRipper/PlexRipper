@@ -1,0 +1,87 @@
+<template>
+	<v-container fluid>
+		<v-row>
+			<v-col>
+				<v-sheet width="100%" class="pa-4">
+					<v-row>
+						<v-col>
+							<h1>Download Manager</h1>
+							<v-divider />
+						</v-col>
+					</v-row>
+					<!--	Max segmented downloads	-->
+					<v-row>
+						<v-col cols="4">
+							<help-icon id="advanced-1" label="Download Segments"></help-icon>
+						</v-col>
+						<v-col cols="8">
+							<v-slider v-model="SegmentedDownloads" min="1" max="8">
+								<template v-slot:append>
+									<p>{{ SegmentedDownloads }}</p>
+								</template>
+							</v-slider>
+						</v-col>
+					</v-row>
+				</v-sheet>
+			</v-col>
+		</v-row>
+	</v-container>
+</template>
+
+<script lang="ts">
+import Log from 'consola';
+import { Vue, Component } from 'vue-property-decorator';
+import { FolderPathDTO, SettingsModel } from '@dto/mainApi';
+import SettingsService from '@service/settingsService';
+import HelpIcon from '@components/Help/HelpIcon.vue';
+import { Subject, timer } from 'rxjs';
+import { debounce } from 'rxjs/operators';
+
+@Component({
+	components: {
+		HelpIcon,
+	},
+})
+export default class AdvancedSettings extends Vue {
+	settings: SettingsModel | null = null;
+
+	isDirectoryBrowserOpen: boolean = false;
+
+	selectedPath: FolderPathDTO | null = null;
+
+	segmentedDownloadsSubject: Subject<number> = new Subject<number>();
+
+	openDirectoryBrowser(path: FolderPathDTO): void {
+		this.selectedPath = path;
+		this.isDirectoryBrowserOpen = true;
+	}
+
+	get SegmentedDownloads(): number {
+		return this.settings?.advancedSettings?.downloadManager?.downloadSegments ?? -1;
+	}
+
+	set SegmentedDownloads(value: number) {
+		if (this.settings?.advancedSettings?.downloadManager) {
+			if (this.settings.advancedSettings.downloadManager.downloadSegments !== value) {
+				this.settings.advancedSettings.downloadManager.downloadSegments = value;
+				this.segmentedDownloadsSubject.next(value);
+			}
+		}
+	}
+
+	updateSettings(): void {
+		if (this.settings) {
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+
+	created(): void {
+		SettingsService.getSettings().subscribe((data) => {
+			Log.debug(data);
+			this.settings = data;
+		});
+
+		this.segmentedDownloadsSubject.pipe(debounce(() => timer(1000))).subscribe(() => this.updateSettings());
+	}
+}
+</script>

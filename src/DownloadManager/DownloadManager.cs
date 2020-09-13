@@ -46,10 +46,10 @@ namespace PlexRipper.DownloadManager
         /// </summary>
         /// <param name="mediator">Defines a mediator to encapsulate request/response and publishing interaction patterns.</param>
         /// <param name="signalRService"></param>
-        /// <param name="plexAuthenticationService"></param>
-        /// <param name="fileSystem"></param>
-        /// <param name="fileManager"></param>
-        /// <param name="downloadQueue"></param>
+        /// <param name="plexAuthenticationService">.</param>
+        /// <param name="fileSystem">.</param>
+        /// <param name="fileManager">.</param>
+        /// <param name="downloadQueue">Used to retrieve the next <see cref="DownloadTask"/> from the <see cref="DownloadQueue"/>.</param>
         public DownloadManager(
             IMediator mediator,
             ISignalRService signalRService,

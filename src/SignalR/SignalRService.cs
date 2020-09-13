@@ -14,18 +14,15 @@ namespace PlexRipper.SignalR
     /// </summary>
     public class SignalRService : ISignalRService
     {
-        private readonly IHubContext<LibraryProgressHub> _libraryProgress;
         private readonly IHubContext<ProgressHub> _progressHub;
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SignalRService"/> class.
         /// </summary>
         /// <param name="libraryProgress">The <see cref="LibraryProgressHub"/>.</param>
         /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
-        public SignalRService(IHubContext<LibraryProgressHub> libraryProgress, IHubContext<ProgressHub> progressHub)
+        public SignalRService(IHubContext<ProgressHub> progressHub)
         {
-            _libraryProgress = libraryProgress;
             _progressHub = progressHub;
         }
 
@@ -41,7 +38,7 @@ namespace PlexRipper.SignalR
                 IsComplete = received >= total,
             };
 
-            await _libraryProgress.Clients.All.SendAsync("LibraryProgress", progress);
+            await _progressHub.Clients.All.SendAsync("LibraryProgress", progress);
         }
 
         public async Task SendDownloadTaskCreationProgressUpdate(int plexLibraryId, int current, int total)

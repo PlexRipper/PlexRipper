@@ -316,6 +316,16 @@ export interface ThumbnailRequestDTO {
 
 export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };
 
+export type ResultDTOOfSettingsModel = ResultDTO & { value: SettingsModel };
+
+export type SettingsModel = BaseModel & { activeAccountId: number; advancedSettings: AdvancedSettingsModel };
+
+export type AdvancedSettingsModel = BaseModel & { downloadManager: DownloadManagerModel };
+
+export type DownloadManagerModel = BaseModel & { downloadSegments: number };
+
+export type BaseModel = object;
+
 export interface DownloadProgress {
   id: number;
   percentage: number;

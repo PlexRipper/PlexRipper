@@ -2,16 +2,19 @@ import Log from 'consola';
 import { LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
-import { signalRProgressHubUrl, signalRPlexLibraryProgressUrl } from '@api/baseApi';
-import { DownloadProgress, LibraryProgress, DownloadTaskCreationProgress, DownloadStatusChanged, FileMergeProgress } from '@dto/mainApi';
-import { takeWhile } from 'rxjs/operators';
+import { signalRProgressHubUrl } from '@api/baseApi';
+import {
+	DownloadProgress,
+	LibraryProgress,
+	DownloadTaskCreationProgress,
+	DownloadStatusChanged,
+	FileMergeProgress,
+} from '@dto/mainApi';
+import { takeWhile, switchMap, finalize } from 'rxjs/operators';
 import HealthService from '@service/healthService';
+import globalService, { GlobalService } from '@service/globalService';
 export class SignalrService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();
-
-	private _libraryHubConnection: HubConnection<LibraryHub>;
-	private _libraryHubConnectionstate: ConnectionStatus = ConnectionStatus.disconnected;
-	private _libraryHubSubscription: Subscription | null = null;
 
 	private _progressHubConnectionState: ConnectionStatus = ConnectionStatus.disconnected;
 	private _progressHubConnection: HubConnection<ProgressHub>;
@@ -19,29 +22,22 @@ export class SignalrService {
 
 	private _downloadStatusChangedSubject: ReplaySubject<DownloadStatusChanged> = new ReplaySubject<DownloadStatusChanged>();
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
+	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
 
 	public constructor() {
 		const options: ConnectionOptions = {
 			logger: LogLevel.None,
 			retry: {
-				maximumAttempts: 5,
+				maximumAttempts: 0,
 			},
 		};
-		this._hubFactory.create(
-			{
-				key: 'ProgressHub',
-				endpointUri: signalRProgressHubUrl,
-				options,
-			},
-			{
-				key: 'LibraryHub',
-				endpointUri: signalRPlexLibraryProgressUrl,
-				options,
-			},
-		);
+		this._hubFactory.create({
+			key: 'ProgressHub',
+			endpointUri: signalRProgressHubUrl,
+			options,
+		});
 
 		this._progressHubConnection = this._hubFactory.get<ProgressHub>('ProgressHub');
-		this._libraryHubConnection = this._hubFactory.get<LibraryHub>('LibraryHub');
 
 		this.setupSubscriptions();
 	}
@@ -49,10 +45,6 @@ export class SignalrService {
 	private setupSubscriptions(): void {
 		this._progressHubConnection?.connectionState$.subscribe((connectionState) => {
 			this._progressHubConnectionState = connectionState.status;
-		});
-
-		this._libraryHubConnection?.connectionState$.subscribe((connectionState) => {
-			this._libraryHubConnectionstate = connectionState.status;
 		});
 
 		this._progressHubConnection.on<DownloadStatusChanged>('DownloadStatus').subscribe((data) => {
@@ -63,32 +55,23 @@ export class SignalrService {
 			this._fileMergeProgressSubject.next(data);
 		});
 
+		this._progressHubConnection.on<LibraryProgress>('LibraryProgress').subscribe((data) => {
+			this._libraryProgressSubject.next(data);
+		});
+
+		globalService
+			.getAxiosReady()
+			.pipe(finalize(() => this.startProgressHubConnection()))
+			.subscribe();
+
 		// Disable connections when server is offline
 		HealthService.getServerStatus().subscribe((status) => {
 			if (status) {
 				this.startProgressHubConnection();
-				this.startLibraryHubConnection();
 			} else {
 				this.stopProgressHubConnection();
-				this.stopLibraryHubConnection();
 			}
 		});
-	}
-
-	public startLibraryHubConnection(): void {
-		if (this._libraryHubConnectionstate === ConnectionStatus.disconnected) {
-			this._libraryHubSubscription = this._libraryHubConnection?.connect().subscribe(() => {
-				Log.debug('LibraryHub is now connected!');
-			});
-		}
-	}
-
-	public stopLibraryHubConnection(): void {
-		if (this._libraryHubConnectionstate !== ConnectionStatus.disconnected) {
-			this._libraryHubSubscription = this._libraryHubConnection?.disconnect().subscribe(() => {
-				Log.debug('LibraryHub is now disconnected!');
-			});
-		}
 	}
 
 	public startProgressHubConnection(): void {
@@ -126,7 +109,7 @@ export class SignalrService {
 	}
 
 	public getLibraryProgress(): Observable<LibraryProgress> {
-		return this._libraryHubConnection.on<LibraryProgress>('LibraryProgress');
+		return this._libraryProgressSubject.asObservable();
 	}
 }
 
@@ -138,8 +121,5 @@ export interface ProgressHub {
 	FileMergeProgress: FileMergeProgress;
 	DownloadTaskCreation: DownloadTaskCreationProgress;
 	DownloadStatus: DownloadStatusChanged;
-}
-
-export interface LibraryHub {
 	LibraryProgress: LibraryProgress;
 }

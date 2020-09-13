@@ -1,9 +1,7 @@
 <template>
-	<v-app-bar color="red" dense :dark="$vuetify.theme.dark" app clipped-left>
+	<v-app-bar color="red" dense app clipped-left>
 		<v-toolbar-title>
-			<v-btn to="/" text>
-				Plex Ripper
-			</v-btn>
+			<v-btn to="/" text> Plex Ripper </v-btn>
 		</v-toolbar-title>
 
 		<v-spacer></v-spacer>
@@ -42,7 +40,6 @@
 import { Component, Vue } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import AccountService from '@service/accountService';
-import SettingsService from '@service/settingsService';
 
 @Component
 export default class AppBar extends Vue {
@@ -53,7 +50,7 @@ export default class AppBar extends Vue {
 	}
 
 	setActiveAccount(account: PlexAccountDTO): void {
-		SettingsService.setActiveAccount(account.id);
+		AccountService.setActiveAccount(account.id);
 	}
 
 	created(): void {

@@ -63,7 +63,7 @@ import SignalrService from '@service/signalrService';
 import { finalize, switchMap, takeLast, takeWhile, tap } from 'rxjs/operators';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 import Log from 'consola';
-import SettingsService from '@service/settingsService';
+import AccountService from '@service/accountService';
 
 @Component<MediaOverview>({
 	components: {
@@ -172,7 +172,7 @@ export default class MediaOverview extends Vue {
 		this.isRefreshing = false;
 		this.isLoading = true;
 
-		SettingsService.getActiveAccount()
+		AccountService.getActiveAccount()
 			.pipe(
 				tap((data) => {
 					this.activeAccount = data ?? null;

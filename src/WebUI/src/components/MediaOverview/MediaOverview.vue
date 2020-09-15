@@ -36,23 +36,45 @@
 			<!--	Data table display	-->
 			<template v-if="!imageView">
 				<!-- The movie table -->
-				<movie-table v-if="isMovieLibrary" :movies="movies" :account-id="activeAccountId" @download="downloadMedia" />
+				<movie-table
+					v-if="isMovieLibrary"
+					:movies="movies"
+					:account-id="activeAccountId"
+					:items="getItems"
+					@download="downloadMediaCommand"
+				/>
 				<!-- The tv-show table -->
-				<tv-show-table v-if="isTvShowLibrary" :tv-shows="tvShows" :active-account="activeAccount" @download="downloadMedia" />
+				<tv-show-table
+					v-if="isTvShowLibrary"
+					:tv-shows="tvShows"
+					:active-account="activeAccount"
+					:items="getItems"
+					@download="downloadMediaCommand"
+				/>
 			</template>
 
 			<!-- Poster display-->
 			<v-row v-else>
 				<template v-for="mediaId in mediaIds">
-					<media-poster :key="mediaId" :media-id="mediaId" :account-id="activeAccountId" :media-type="mediaType"></media-poster>
+					<media-poster
+						:key="mediaId"
+						:media-id="mediaId"
+						:account-id="activeAccountId"
+						:media-type="mediaType"
+						@download="downloadMediaCommand"
+					></media-poster>
 				</template>
+			</v-row>
+			<!--	Download confirmation dialog	-->
+			<v-row>
+				<download-confirmation ref="downloadConfirmationRef" :items="getItems" @download="downloadMedia"></download-confirmation>
 			</v-row>
 		</template>
 	</v-container>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Ref } from 'vue-property-decorator';
 import {
 	DownloadTaskCreationProgress,
 	LibraryProgress,
@@ -74,17 +96,26 @@ import Log from 'consola';
 import AccountService from '@service/accountService';
 import { downloadMedia } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
-
+import ProgressComponent from '@components/ProgressComponent.vue';
+import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
+import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
+import Convert from '@mediaOverview/MediaTable/types/Convert';
+import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 @Component<MediaOverview>({
 	components: {
 		MediaPoster,
 		MovieTable,
 		TvShowTable,
+		ProgressComponent,
+		DownloadConfirmation,
 	},
 })
 export default class MediaOverview extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly libraryId!: number;
+
+	@Ref('downloadConfirmationRef')
+	readonly downloadConfirmationRef!: DownloadConfirmation;
 
 	activeAccount: PlexAccountDTO | null = null;
 
@@ -94,7 +125,7 @@ export default class MediaOverview extends Vue {
 	progress: LibraryProgress | null = null;
 	library: PlexLibraryDTO | null = null;
 	downloadTaskCreationProgress: DownloadTaskCreationProgress | null = null;
-	showDialog: boolean = false;
+	downloadPreviewType: PlexMediaType = PlexMediaType.None;
 
 	get activeAccountId(): number {
 		return this.activeAccount?.id ?? 0;
@@ -105,15 +136,7 @@ export default class MediaOverview extends Vue {
 	}
 
 	get mediaIds(): number[] {
-		switch (this.mediaType) {
-			case PlexMediaType.Movie:
-				return this.movies.map((x) => x.id);
-			case PlexMediaType.TvShow:
-				// Return the id's of the epi
-				return this.tvShows.map((x) => x.id);
-			default:
-				return [];
-		}
+		return this.getItems.map((x) => x.id);
 	}
 
 	get server(): PlexServerDTO | null {
@@ -151,7 +174,34 @@ export default class MediaOverview extends Vue {
 		};
 	}
 
-	downloadMedia(mediaId: number): void {
+	get getItems(): ITreeViewItem[] {
+		let items: ITreeViewItem[] = [];
+		switch (this.mediaType) {
+			case PlexMediaType.Movie:
+				items = Convert.moviesToTreeViewItems(this.movies);
+				break;
+			case PlexMediaType.TvShow:
+				items = Convert.tvShowsToTreeViewItems(this.tvShows);
+				break;
+		}
+
+		return items;
+	}
+
+	downloadMediaCommand(mediaId: IMediaId): void {
+		const confirmationEnabled = true;
+		if (confirmationEnabled) {
+			this.openDownloadConfirmationDialog(mediaId);
+		} else {
+			this.downloadMedia(mediaId);
+		}
+	}
+
+	openDownloadConfirmationDialog(mediaId: IMediaId): void {
+		this.downloadConfirmationRef.openDialog(mediaId);
+	}
+
+	downloadMedia(mediaId: IMediaId): void {
 		merge(
 			// Setup progress bar
 			SignalrService.getDownloadTaskCreationProgress().pipe(
@@ -160,7 +210,6 @@ export default class MediaOverview extends Vue {
 					Log.debug(data);
 				}),
 				finalize(() => {
-					this.showDialog = false;
 					this.progress = null;
 				}),
 				takeWhile((data) => !data.isComplete),
@@ -169,9 +218,8 @@ export default class MediaOverview extends Vue {
 				}),
 			),
 			// Download Media
-			downloadMedia(mediaId, this.activeAccountId, this.mediaType).pipe(
+			downloadMedia(mediaId.id, this.activeAccountId, mediaId.type).pipe(
 				finalize(() => {
-					this.showDialog = false;
 					this.downloadTaskCreationProgress = null;
 					DownloadService.fetchDownloadList();
 				}),
@@ -182,7 +230,6 @@ export default class MediaOverview extends Vue {
 		)
 			.pipe(
 				catchError(() => {
-					this.showDialog = false;
 					this.downloadTaskCreationProgress = null;
 					return of(false);
 				}),

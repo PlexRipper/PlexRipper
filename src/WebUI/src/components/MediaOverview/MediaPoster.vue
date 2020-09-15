@@ -15,7 +15,7 @@
 						<v-container fluid :class="$classNames('poster-overlay', { 'on-hover': hover }, 'white--text')">
 							<v-row justify="center" align="end" style="height: 100%">
 								<v-col cols="auto">
-									<v-btn icon large @click="emiteDownload()">
+									<v-btn icon large @click="downloadMedia()">
 										<v-icon large> mdi-download </v-icon>
 									</v-btn>
 								</v-col>
@@ -32,6 +32,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { getThumbnail } from '@api/plexLibraryApi';
 import { PlexMediaType } from '@dto/mainApi';
+import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 
 @Component<MediaPoster>({
 	components: {},
@@ -61,8 +62,8 @@ export default class MediaPoster extends Vue {
 		}
 	}
 
-	emiteDownload(): void {
-		this.$emit('download', { itemId: this.mediaId, type: this.mediaType });
+	downloadMedia(): void {
+		this.$emit('download', { id: this.mediaId, type: this.mediaType } as IMediaId);
 	}
 }
 </script>

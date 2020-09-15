@@ -36,7 +36,7 @@
 								<!-- Actions -->
 								<v-col cols="auto">
 									<v-sheet width="70" style="text-align: center">
-										<v-icon small @click="openDownloadConfirmationDialog(item.id, item.type)"> mdi-download </v-icon>
+										<v-icon small @click="downloadMedia(item.id, item.type)"> mdi-download </v-icon>
 									</v-sheet>
 								</v-col>
 							</v-row>
@@ -54,6 +54,7 @@ import { DataTableHeader } from 'vuetify/types';
 import { DownloadTaskCreationProgress, PlexMediaType, PlexTvShowDTO } from '@dto/mainApi';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
+import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 import ITreeViewItem from './types/iTreeViewItem';
 
 @Component({
@@ -99,8 +100,8 @@ export default class MediaTable extends Vue {
 		}
 	}
 
-	openDownloadConfirmationDialog(itemId: number, type: PlexMediaType): void {
-		this.$emit('download', { itemId, type });
+	downloadMedia(mediaId: number, type: PlexMediaType): void {
+		this.$emit('download', { id: mediaId, type } as IMediaId);
 	}
 }
 </script>

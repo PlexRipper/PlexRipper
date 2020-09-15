@@ -212,12 +212,7 @@ export type Success = Reason & object;
 
 export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
 
-export interface DownloadMovieDTO {
-  plexAccountId: number;
-  plexMovieId: number;
-}
-
-export interface DownloadTvShowDTO {
+export interface DownloadMediaDTO {
   plexAccountId: number;
   plexMediaId: number;
   type: PlexMediaType;

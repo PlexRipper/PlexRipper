@@ -44,16 +44,10 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import DownloadService from '@service/downloadService';
 import { DataTableHeader } from 'vuetify/types';
-import { DownloadTaskCreationProgress, PlexMediaType, PlexMovieDTO } from '@dto/mainApi';
-import { downloadPlexMovie } from '@api/plexDownloadApi';
+import { PlexMediaType, PlexMovieDTO } from '@dto/mainApi';
 import { clone } from 'lodash';
-import { catchError, finalize, takeWhile, tap } from 'rxjs/operators';
-import SignalrService from '@service/signalrService';
-import { merge, of } from 'rxjs';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
@@ -79,8 +73,6 @@ export default class MovieTable extends Vue {
 	downloadPreview: ITreeViewItem[] = [];
 	downloadPreviewType: PlexMediaType = PlexMediaType.None;
 	openDownloadPreviews: number[] = [];
-
-	progress: DownloadTaskCreationProgress | null = null;
 
 	get getType(): PlexMediaType {
 		return PlexMediaType.Movie;
@@ -170,42 +162,7 @@ export default class MovieTable extends Vue {
 			itemId = this.downloadPreview[0].id;
 		}
 
-		merge(
-			// Setup progress bar
-			SignalrService.getDownloadTaskCreationProgress().pipe(
-				tap((data) => {
-					this.progress = data;
-					Log.debug(data);
-				}),
-				finalize(() => {
-					this.showDialog = false;
-					this.progress = null;
-				}),
-				takeWhile((data) => !data.isComplete),
-				catchError(() => {
-					return of(null);
-				}),
-			),
-			// Download Movie
-			downloadPlexMovie(itemId, this.accountId).pipe(
-				finalize(() => {
-					this.showDialog = false;
-					this.progress = null;
-					DownloadService.fetchDownloadList();
-				}),
-				catchError(() => {
-					return of(false);
-				}),
-			),
-		)
-			.pipe(
-				catchError(() => {
-					this.showDialog = false;
-					this.progress = null;
-					return of(false);
-				}),
-			)
-			.subscribe();
+		this.$emit('download', itemId);
 	}
 }
 </script>

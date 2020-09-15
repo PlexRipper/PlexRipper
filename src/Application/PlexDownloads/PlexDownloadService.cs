@@ -86,6 +86,7 @@ namespace PlexRipper.Application.PlexDownloads
             // Retrieve Metadata for this PlexMovie
             PlexMediaMetaData metaData = await _plexApiService.GetMediaMetaDataAsync(token.Value, server.BaseUrl, ratingKey);
             if (metaData != null)
+            {
                 return Result.Ok(new DownloadTask
                 {
                     PlexServerId = server.Id,
@@ -106,6 +107,7 @@ namespace PlexRipper.Application.PlexDownloads
                     PlexLibraryId = plexLibraryId,
                     Created = DateTime.Now,
                 });
+            }
 
             return Result.Fail($"Failed to retrieve metadata for plex media with rating key: {ratingKey}");
         }
@@ -128,15 +130,18 @@ namespace PlexRipper.Application.PlexDownloads
             int totalCount = plexTvShow.Seasons.Sum(x => x.Episodes.Count);
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShow.PlexLibraryId, i, totalCount);
             foreach (PlexTvShowSeason season in plexTvShow.Seasons)
+            {
                 foreach (PlexTvShowEpisode episode in season.Episodes)
                 {
-                    Result<DownloadTask> downloadTask = await CreateDownloadTaskAsync(server.Value, plexTvShow.PlexLibraryId, plexAccountId, episode.RatingKey,
+                    Result<DownloadTask> downloadTask = await CreateDownloadTaskAsync(server.Value, plexTvShow.PlexLibraryId, plexAccountId,
+                        episode.RatingKey,
                         PlexMediaType.Episode);
                     if (downloadTask.IsFailed) return downloadTask.ToResult();
 
                     downloadTasks.Add(downloadTask.Value);
                     await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShow.PlexLibraryId, ++i, totalCount);
                 }
+            }
 
             Log.Debug($"Finished creating download tasks for tv show: {plexTvShow.Title}");
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShow.PlexLibraryId, totalCount, totalCount);
@@ -161,13 +166,15 @@ namespace PlexRipper.Application.PlexDownloads
             {
                 // Using GetDownloadRequestAsync(int plexAccountId, int plexTvShowEpisodeId)
                 // will result in the same server request being sent multiple times
-                Result<DownloadTask> downloadTask = await CreateDownloadTaskAsync(server.Value, plexTvShowShowSeason.PlexLibraryId, plexAccountId, episode.RatingKey,
+                Result<DownloadTask> downloadTask = await CreateDownloadTaskAsync(server.Value, plexTvShowShowSeason.PlexLibraryId, plexAccountId,
+                    episode.RatingKey,
                     PlexMediaType.Episode);
                 if (downloadTask.IsFailed) return downloadTask.ToResult();
 
                 await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShowShowSeason.Id, ++index, totalCount);
                 downloadTasks.Add(downloadTask.Value);
             }
+
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShowShowSeason.Id, totalCount, totalCount);
             // Add the priorities to each downloadTask
             return PrioritizeDownloadTasks(downloadTasks);
@@ -205,6 +212,7 @@ namespace PlexRipper.Application.PlexDownloads
             {
                 downloadTasks[i].Priority = priorities[i];
             }
+
             return Result.Ok(downloadTasks);
         }
 
@@ -221,6 +229,28 @@ namespace PlexRipper.Application.PlexDownloads
         {
             _downloadManager.DeleteDownloadClient(downloadTaskId);
             return _mediator.Send(new DeleteDownloadTaskByIdCommand(downloadTaskId));
+        }
+
+        public async Task<Result<bool>> DownloadMediaAsync(int plexAccountId, int mediaId, PlexMediaType type)
+        {
+            switch (type)
+            {
+                case PlexMediaType.None:
+                    return Result.Fail("PlexMediaType was none in DownloadMediaAsync").LogWarning();
+                case PlexMediaType.Movie:
+                    return await DownloadMovieAsync(plexAccountId, mediaId);
+                case PlexMediaType.TvShow:
+                case PlexMediaType.Season:
+                case PlexMediaType.Episode:
+                    return await DownloadTvShowAsync(plexAccountId, mediaId, type);
+                case PlexMediaType.Music:
+                case PlexMediaType.Album:
+                    return Result.Fail("PlexMediaType was Music or Album, this is not yet supported").LogWarning();
+                case PlexMediaType.Unknown:
+                    return Result.Fail("PlexMediaType was Unknown in DownloadMediaAsync").LogWarning();
+                default:
+                    return Result.Fail($"PlexMediaType defaulted with value {type.ToString()} in DownloadMediaAsync").LogWarning();
+            }
         }
 
         public async Task<Result<bool>> DownloadMovieAsync(int plexAccountId, int plexMovieId)
@@ -269,6 +299,7 @@ namespace PlexRipper.Application.PlexDownloads
                 default:
                     return Result.Fail("The type has to be either, TvShow, Season or Episode").LogError();
             }
+
             if (downloadTasks.Count == 0) return Result.Fail("Could not create download tasks").LogError();
 
             if (downloadTasks.Count == 1) return await _downloadManager.AddToDownloadQueueAsync(downloadTasks[0]);

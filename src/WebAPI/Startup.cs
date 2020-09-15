@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application.Config;
+using PlexRipper.Data;
 using PlexRipper.Domain;
 using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
@@ -83,6 +84,9 @@ namespace PlexRipper.WebAPI
                 configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
                 configure.DocumentProcessors.Add(new NSwagAddExtraTypes());
             });
+
+            // Database setup
+            PlexRipperDBSetup.Setup();
 
             // Autofac
             services.AddOptions();

@@ -47,14 +47,9 @@
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify/types';
-import DownloadService from '@service/downloadService';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, PlexMediaType, PlexTvShowDTO } from '@dto/mainApi';
-import { downloadTvShow } from '@api/plexDownloadApi';
 import { clone } from 'lodash';
-import { catchError, finalize, takeWhile, tap } from 'rxjs/operators';
-import SignalrService from '@service/signalrService';
-import { merge, of } from 'rxjs';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
 import ProgressComponent from '@components/ProgressComponent.vue';
@@ -250,38 +245,7 @@ export default class TVShowsTable extends Vue {
 			itemId = this.downloadPreview[0].children[0].children[0].id;
 		}
 
-		merge(
-			// Setup progress bar
-			SignalrService.getDownloadTaskCreationProgress().pipe(
-				tap((data) => {
-					this.progress = data;
-					Log.debug(data);
-				}),
-				finalize(() => {
-					this.showDialog = false;
-					this.progress = null;
-				}),
-				takeWhile((data) => !data.isComplete),
-				catchError(() => {
-					return of(undefined);
-				}),
-			),
-			// Download tvShows
-			downloadTvShow(itemId, this.activeAccount?.id ?? 0, this.downloadPreviewType).pipe(
-				finalize(() => DownloadService.fetchDownloadList()),
-				catchError(() => {
-					return of(undefined);
-				}),
-			),
-		)
-			.pipe(
-				catchError(() => {
-					this.showDialog = false;
-					this.progress = null;
-					return of(false);
-				}),
-			)
-			.subscribe();
+		this.$emit('download', itemId);
 	}
 }
 </script>

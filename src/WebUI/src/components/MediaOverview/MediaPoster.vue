@@ -3,15 +3,27 @@
 		<v-lazy
 			v-model="isVisible"
 			:options="{
-				threshold: 0.5,
+				threshold: 0.1,
 			}"
 			:width="thumbWidth"
 			:height="thumbHeight"
 			transition="fade-transition"
 		>
-			<v-card :max-width="thumbWidth" :width="thumbWidth">
-				<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight"></v-img>
-			</v-card>
+			<v-hover v-slot:default="{ hover }">
+				<v-card :max-width="thumbWidth" :width="thumbWidth" :elevation="hover ? 12 : 2">
+					<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight">
+						<v-container fluid :class="$classNames('poster-overlay', { 'on-hover': hover }, 'white--text')">
+							<v-row justify="center" align="end" style="height: 100%">
+								<v-col cols="auto">
+									<v-btn icon large @click="emiteDownload()">
+										<v-icon large> mdi-download </v-icon>
+									</v-btn>
+								</v-col>
+							</v-row>
+						</v-container>
+					</v-img>
+				</v-card>
+			</v-hover>
 		</v-lazy>
 	</v-col>
 </template>
@@ -47,6 +59,10 @@ export default class MediaPoster extends Vue {
 				this.imageUrl = URL.createObjectURL(response.data);
 			});
 		}
+	}
+
+	emiteDownload(): void {
+		this.$emit('download', { itemId: this.mediaId, type: this.mediaType });
 	}
 }
 </script>

@@ -5,7 +5,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
-    public class DownloadTvShowDTO
+    public class DownloadMediaDTO
     {
         [JsonProperty("plexAccountId", Required = Required.Always)]
         public int PlexAccountId { get; set; }

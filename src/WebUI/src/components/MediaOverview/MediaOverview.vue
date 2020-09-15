@@ -36,9 +36,9 @@
 			<!--	Data table display	-->
 			<template v-if="!imageView">
 				<!-- The movie table -->
-				<movie-table v-if="isMovieLibrary" :movies="movies" :account-id="activeAccountId" />
+				<movie-table v-if="isMovieLibrary" :movies="movies" :account-id="activeAccountId" @download="downloadMedia" />
 				<!-- The tv-show table -->
-				<tv-show-table v-if="isTvShowLibrary" :tv-shows="tvShows" :active-account="activeAccount" />
+				<tv-show-table v-if="isTvShowLibrary" :tv-shows="tvShows" :active-account="activeAccount" @download="downloadMedia" />
 			</template>
 
 			<!-- Poster display-->
@@ -53,17 +53,27 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { LibraryProgress, PlexLibraryDTO, PlexMediaType, PlexMovieDTO, PlexServerDTO, PlexTvShowDTO } from '@dto/mainApi';
+import {
+	DownloadTaskCreationProgress,
+	LibraryProgress,
+	PlexLibraryDTO,
+	PlexMediaType,
+	PlexMovieDTO,
+	PlexServerDTO,
+	PlexTvShowDTO,
+} from '@dto/mainApi';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import MovieTable from '@mediaOverview/MediaTable/MovieTable.vue';
 import MediaPoster from '@mediaOverview/MediaPoster.vue';
 import TvShowTable from '@mediaOverview/MediaTable/TvShowTable.vue';
-import { merge } from 'rxjs';
+import { merge, of } from 'rxjs';
 import SignalrService from '@service/signalrService';
-import { finalize, switchMap, takeLast, takeWhile, tap } from 'rxjs/operators';
+import { catchError, finalize, switchMap, takeLast, takeWhile, tap } from 'rxjs/operators';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 import Log from 'consola';
 import AccountService from '@service/accountService';
+import { downloadMedia } from '@api/plexDownloadApi';
+import DownloadService from '@service/downloadService';
 
 @Component<MediaOverview>({
 	components: {
@@ -83,6 +93,8 @@ export default class MediaOverview extends Vue {
 	isRefreshing: boolean = false;
 	progress: LibraryProgress | null = null;
 	library: PlexLibraryDTO | null = null;
+	downloadTaskCreationProgress: DownloadTaskCreationProgress | null = null;
+	showDialog: boolean = false;
 
 	get activeAccountId(): number {
 		return this.activeAccount?.id ?? 0;
@@ -139,6 +151,45 @@ export default class MediaOverview extends Vue {
 		};
 	}
 
+	downloadMedia(mediaId: number): void {
+		merge(
+			// Setup progress bar
+			SignalrService.getDownloadTaskCreationProgress().pipe(
+				tap((data) => {
+					this.downloadTaskCreationProgress = data;
+					Log.debug(data);
+				}),
+				finalize(() => {
+					this.showDialog = false;
+					this.progress = null;
+				}),
+				takeWhile((data) => !data.isComplete),
+				catchError(() => {
+					return of(null);
+				}),
+			),
+			// Download Media
+			downloadMedia(mediaId, this.activeAccountId, this.mediaType).pipe(
+				finalize(() => {
+					this.showDialog = false;
+					this.downloadTaskCreationProgress = null;
+					DownloadService.fetchDownloadList();
+				}),
+				catchError(() => {
+					return of(false);
+				}),
+			),
+		)
+			.pipe(
+				catchError(() => {
+					this.showDialog = false;
+					this.downloadTaskCreationProgress = null;
+					return of(false);
+				}),
+			)
+			.subscribe();
+	}
+
 	refreshLibrary(): void {
 		this.isRefreshing = true;
 		this.isLoading = true;
@@ -175,6 +226,7 @@ export default class MediaOverview extends Vue {
 		AccountService.getActiveAccount()
 			.pipe(
 				tap((data) => {
+					Log.debug('ActiveAccount is:', data);
 					this.activeAccount = data ?? null;
 				}),
 				switchMap((data) =>

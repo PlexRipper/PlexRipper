@@ -1,40 +1,64 @@
 <template>
-	<v-container>
-		<v-row v-for="(path, i) in paths" :key="i">
-			<v-col cols="2">
-				<v-subheader>{{ path.type }}</v-subheader>
-				<help-icon></help-icon>
-			</v-col>
-			<v-col cols="10">
-				<v-text-field
-					append-icon="mdi-folder-open"
-					name="input-10-2"
-					:value="path.directory"
-					class="input-group--focused"
-					solo
-					readonly
-					@click:append="openDirectoryBrowser(path)"
-				></v-text-field>
-			</v-col>
-		</v-row>
-		<v-row v-if="selectedPath">
+	<v-container fluid>
+		<v-row>
 			<v-col>
-				<directory-browser
-					:open="isDirectoryBrowserOpen"
-					:path="selectedPath"
-					@confirm="confirmDirectoryBrowser"
-					@cancel="cancelDirectoryBrowser"
-				/>
+				<v-sheet width="100%" class="pa-4">
+					<v-row>
+						<v-col>
+							<h1>Confirmation Settings</h1>
+							<v-divider />
+						</v-col>
+					</v-row>
+
+					<!--	Ask Download Movie Confirmation	-->
+					<v-row>
+						<v-col cols="4">
+							<help-icon label="Ask Download Movie Confirmation" />
+						</v-col>
+						<v-col cols="8">
+							<v-checkbox v-model="askDownloadMovieConfirmation" class="mt-0"></v-checkbox>
+						</v-col>
+					</v-row>
+
+					<!--	Ask Download TvShow Confirmation	-->
+					<v-row>
+						<v-col cols="4">
+							<help-icon label="Ask Download TvShow Confirmation" />
+						</v-col>
+						<v-col cols="8">
+							<v-checkbox v-model="askDownloadTvShowConfirmation" class="mt-0"></v-checkbox>
+						</v-col>
+					</v-row>
+
+					<!--	Ask Download Season Confirmation	-->
+					<v-row>
+						<v-col cols="4">
+							<help-icon label="Ask Download Season Confirmation" />
+						</v-col>
+						<v-col cols="8">
+							<v-checkbox v-model="askDownloadSeasonConfirmation" class="mt-0"></v-checkbox>
+						</v-col>
+					</v-row>
+
+					<!--	Ask Download Episode Confirmation	-->
+					<v-row>
+						<v-col cols="4">
+							<help-icon label="Ask Download Episode Confirmation" />
+						</v-col>
+						<v-col cols="8">
+							<v-checkbox v-model="askDownloadEpisodeConfirmation" class="mt-0"></v-checkbox>
+						</v-col>
+					</v-row>
+				</v-sheet>
 			</v-col>
 		</v-row>
 	</v-container>
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Vue, Component } from 'vue-property-decorator';
-import { FolderPathDTO } from '@dto/mainApi';
-import { getFolderPaths, updateFolderPath } from '@api/pathApi';
+import { SettingsModelDTO } from '@dto/mainApi';
+import SettingsService from '@service/settingsService';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import DirectoryBrowser from './components/DirectoryBrowser.vue';
 
@@ -45,37 +69,69 @@ import DirectoryBrowser from './components/DirectoryBrowser.vue';
 	},
 })
 export default class UiSettings extends Vue {
-	moduleName: string = 'Settings Paths';
+	settings: SettingsModelDTO | null = null;
 
-	paths: FolderPathDTO[] = [];
-
-	isDirectoryBrowserOpen: boolean = false;
-
-	selectedPath: FolderPathDTO | null = null;
-
-	openDirectoryBrowser(path: FolderPathDTO): void {
-		this.selectedPath = path;
-		this.isDirectoryBrowserOpen = true;
+	get askDownloadMovieConfirmation(): boolean {
+		return this.settings?.userInterfaceSettings?.confirmationSettings?.askDownloadMovieConfirmation ?? false;
 	}
 
-	confirmDirectoryBrowser(path: FolderPathDTO): void {
-		this.selectedPath = path;
-		Log.debug(path);
-		this.isDirectoryBrowserOpen = false;
-
-		updateFolderPath(path).subscribe((data) => {
-			Log.debug(`Succesfully updated folderpath ${path.displayName}`, data);
-		});
+	set askDownloadMovieConfirmation(value: boolean) {
+		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
+			if (this.settings?.userInterfaceSettings?.confirmationSettings.askDownloadMovieConfirmation !== value) {
+				this.settings.userInterfaceSettings.confirmationSettings.askDownloadMovieConfirmation = value;
+				this.updateSettings();
+			}
+		}
 	}
 
-	cancelDirectoryBrowser(): void {
-		this.isDirectoryBrowserOpen = false;
+	get askDownloadTvShowConfirmation(): boolean {
+		return this.settings?.userInterfaceSettings?.confirmationSettings?.askDownloadTvShowConfirmation ?? false;
+	}
+
+	set askDownloadTvShowConfirmation(value: boolean) {
+		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
+			if (this.settings?.userInterfaceSettings?.confirmationSettings.askDownloadTvShowConfirmation !== value) {
+				this.settings.userInterfaceSettings.confirmationSettings.askDownloadTvShowConfirmation = value;
+				this.updateSettings();
+			}
+		}
+	}
+
+	get askDownloadSeasonConfirmation(): boolean {
+		return this.settings?.userInterfaceSettings?.confirmationSettings?.askDownloadSeasonConfirmation ?? false;
+	}
+
+	set askDownloadSeasonConfirmation(value: boolean) {
+		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
+			if (this.settings?.userInterfaceSettings?.confirmationSettings.askDownloadSeasonConfirmation !== value) {
+				this.settings.userInterfaceSettings.confirmationSettings.askDownloadSeasonConfirmation = value;
+				this.updateSettings();
+			}
+		}
+	}
+
+	get askDownloadEpisodeConfirmation(): boolean {
+		return this.settings?.userInterfaceSettings?.confirmationSettings?.askDownloadEpisodeConfirmation ?? false;
+	}
+
+	set askDownloadEpisodeConfirmation(value: boolean) {
+		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
+			if (this.settings?.userInterfaceSettings?.confirmationSettings.askDownloadEpisodeConfirmation !== value) {
+				this.settings.userInterfaceSettings.confirmationSettings.askDownloadEpisodeConfirmation = value;
+				this.updateSettings();
+			}
+		}
+	}
+
+	updateSettings(): void {
+		if (this.settings) {
+			SettingsService.updateSettings(this.settings);
+		}
 	}
 
 	created(): void {
-		getFolderPaths().subscribe((data) => {
-			this.paths = data;
-			Log.debug(this.paths);
+		SettingsService.getSettings().subscribe((data) => {
+			this.settings = data;
 		});
 	}
 }

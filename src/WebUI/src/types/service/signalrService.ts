@@ -10,9 +10,10 @@ import {
 	DownloadStatusChanged,
 	FileMergeProgress,
 } from '@dto/mainApi';
-import { takeWhile, switchMap, finalize } from 'rxjs/operators';
+import { takeWhile, finalize } from 'rxjs/operators';
 import HealthService from '@service/healthService';
-import globalService, { GlobalService } from '@service/globalService';
+import globalService from '@service/globalService';
+
 export class SignalrService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();
 

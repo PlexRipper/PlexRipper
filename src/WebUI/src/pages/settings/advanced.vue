@@ -29,7 +29,6 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Vue, Component } from 'vue-property-decorator';
 import { FolderPathDTO, SettingsModelDTO } from '@dto/mainApi';
 import SettingsService from '@service/settingsService';
@@ -77,7 +76,6 @@ export default class AdvancedSettings extends Vue {
 
 	created(): void {
 		SettingsService.getSettings().subscribe((data) => {
-			Log.debug(data);
 			this.settings = data;
 		});
 

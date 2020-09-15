@@ -4,7 +4,7 @@
 			<p style="margin-top: 6px">{{ label }}</p>
 		</v-col>
 		<v-col cols="auto">
-			<v-btn icon @click="openDialog">
+			<v-btn v-if="id" icon @click="openDialog">
 				<v-icon> mdi-help-circle-outline </v-icon>
 			</v-btn>
 		</v-col>
@@ -20,7 +20,7 @@ export default class HelpIcon extends Vue {
 	@Prop({ required: true, type: String })
 	readonly label!: string;
 
-	@Prop({ required: true, type: String })
+	@Prop({ required: false, type: String, default: '' })
 	readonly id!: string;
 
 	openDialog(): void {

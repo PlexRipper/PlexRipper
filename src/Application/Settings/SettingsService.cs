@@ -19,17 +19,16 @@ namespace PlexRipper.Application.Settings
             _userSettings = userSettings;
         }
 
-        public async Task<Result<PlexAccount>> SetActivePlexAccountAsync(int accountId)
+        public Result<bool> SetActivePlexAccountAsync(int accountId)
         {
-            var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId, true, true));
-            if (result.IsFailed)
+            _userSettings.AccountSettings.ActiveAccountId = accountId;
+            if (_userSettings.AccountSettings.ActiveAccountId == accountId)
             {
-                return result;
+                return Result.Ok(true);
             }
 
-            _userSettings.AccountSettings.ActiveAccountId = result.Value.Id;
-
-            return result;
+            return Result.Fail(
+                $"Could not set value {accountId} to the ActiveAccountId, value remains {_userSettings.AccountSettings.ActiveAccountId}");
         }
 
         public async Task<Result<PlexAccount>> GetActivePlexAccountAsync()

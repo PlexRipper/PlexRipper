@@ -311,28 +311,36 @@ export interface ThumbnailRequestDTO {
 
 export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };
 
-export type ResultDTOOfSettingsModel = ResultDTO & { value: SettingsModel };
+export type ResultDTOOfSettingsModelDTO = ResultDTO & { value: SettingsModelDTO };
 
-export type SettingsModel = BaseModel & {
+export interface SettingsModelDTO {
+  accountSettings: AccountSettingsModelDTO;
+  advancedSettings: AdvancedSettingsModelDTO;
+  userInterfaceSettings: UserInterfaceSettingsModelDTO;
+}
+
+export interface AccountSettingsModelDTO {
   activeAccountId: number;
-  advancedSettings: AdvancedSettingsModel;
-  userInterfaceSettings?: UserInterfaceSettingsModel | null;
-};
+}
 
-export type AdvancedSettingsModel = BaseModel & { downloadManager: DownloadManagerModel };
+export interface AdvancedSettingsModelDTO {
+  downloadManager: DownloadManagerModelDTO;
+}
 
-export type DownloadManagerModel = BaseModel & { downloadSegments: number };
+export interface DownloadManagerModelDTO {
+  downloadSegments: number;
+}
 
-export type BaseModel = object;
+export interface UserInterfaceSettingsModelDTO {
+  confirmations: ConfirmationSettingsModelDTO;
+}
 
-export type UserInterfaceSettingsModel = BaseModel & { confirmations?: ConfirmationSettingsModel | null };
-
-export type ConfirmationSettingsModel = BaseModel & {
+export interface ConfirmationSettingsModelDTO {
   askDownloadMovieConfirmation: boolean;
   askDownloadTvShowConfirmation: boolean;
   askDownloadSeasonConfirmation: boolean;
   askDownloadEpisodeConfirmation: boolean;
-};
+}
 
 export interface DownloadProgress {
   id: number;

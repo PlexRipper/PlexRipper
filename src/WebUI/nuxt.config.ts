@@ -4,7 +4,7 @@ import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
 
 const config: NuxtConfig = {
-	mode: 'spa',
+	srr: false,
 	target: 'static',
 	srcDir: 'src/',
 	/*

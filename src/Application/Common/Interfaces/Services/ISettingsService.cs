@@ -7,7 +7,7 @@ namespace PlexRipper.Application.Common
 {
     public interface ISettingsService
     {
-        Task<Result<PlexAccount>> SetActivePlexAccountAsync(int accountId);
+        Result<bool> SetActivePlexAccountAsync(int accountId);
 
         Task<Result<PlexAccount>> GetActivePlexAccountAsync();
 

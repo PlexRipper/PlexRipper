@@ -11,10 +11,9 @@ namespace PlexRipper.Application.Settings.Models
 
         #endregion
 
-
         #region Properties
 
-        public virtual int ActiveAccountId
+        public int ActiveAccountId
         {
             get => _activeAccountId;
             set

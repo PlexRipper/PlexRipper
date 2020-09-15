@@ -31,7 +31,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Vue, Component } from 'vue-property-decorator';
-import { FolderPathDTO, SettingsModel } from '@dto/mainApi';
+import { FolderPathDTO, SettingsModelDTO } from '@dto/mainApi';
 import SettingsService from '@service/settingsService';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import { Subject, timer } from 'rxjs';
@@ -43,7 +43,7 @@ import { debounce } from 'rxjs/operators';
 	},
 })
 export default class AdvancedSettings extends Vue {
-	settings: SettingsModel | null = null;
+	settings: SettingsModelDTO | null = null;
 
 	isDirectoryBrowserOpen: boolean = false;
 

@@ -5,12 +5,20 @@ namespace PlexRipper.Application.Settings.Models
 {
     public class AdvancedSettingsModel : BaseModel
     {
+        private DownloadManagerModel _downloadManager = new DownloadManagerModel();
 
         #region Properties
 
-        public DownloadManagerModel DownloadManager { get; set; } = new DownloadManagerModel();
+        public DownloadManagerModel DownloadManager
+        {
+            get => _downloadManager;
+            set
+            {
+                _downloadManager = value;
+                _downloadManager.PropertyChanged += (sender, args) => OnPropertyChanged();
+            }
+        }
 
         #endregion Properties
-
     }
 }

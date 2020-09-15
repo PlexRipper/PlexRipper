@@ -8,7 +8,7 @@ namespace PlexRipper.Application.Settings.Models
         #region Properties
 
         [JsonProperty("confirmations", Required = Required.Always)]
-        public ConfirmationSettingsModelDTO Confirmations { get; set; } = new ConfirmationSettingsModelDTO();
+        public ConfirmationSettingsModelDTO ConfirmationSettings { get; set; } = new ConfirmationSettingsModelDTO();
 
         #endregion Properties
     }

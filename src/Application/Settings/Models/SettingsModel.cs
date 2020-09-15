@@ -8,13 +8,44 @@ namespace PlexRipper.Application.Settings.Models
     /// </summary>
     public class SettingsModel : BaseModel, ISettingsModel
     {
+        private AccountSettingsModel _accountSettings = new AccountSettingsModel();
+        private UserInterfaceSettingsModel _userInterfaceSettings = new UserInterfaceSettingsModel();
+        private AdvancedSettingsModel _advancedSettings = new AdvancedSettingsModel();
+
         #region Properties
 
-        public virtual AccountSettingsModel AccountSettings { get; set; } = new AccountSettingsModel();
+        public AccountSettingsModel AccountSettings
+        {
+            get => _accountSettings;
+            set
+            {
+                // During every settings load this needs to be subscribed to again
+                _accountSettings = value;
+                _accountSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+            }
+        }
 
-        public virtual AdvancedSettingsModel AdvancedSettings { get; set; } = new AdvancedSettingsModel();
+        public AdvancedSettingsModel AdvancedSettings
+        {
+            get => _advancedSettings;
+            set
+            {
+                // During every settings load this needs to be subscribed to again
+                _advancedSettings = value;
+                _advancedSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+            }
+        }
 
-        public virtual UserInterfaceSettingsModel UserInterfaceSettings { get; set; } = new UserInterfaceSettingsModel();
+        public UserInterfaceSettingsModel UserInterfaceSettings
+        {
+            get => _userInterfaceSettings;
+            set
+            {
+                // During every settings load this needs to be subscribed to again
+                _userInterfaceSettings = value;
+                _userInterfaceSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+            }
+        }
 
         #endregion Properties
     }

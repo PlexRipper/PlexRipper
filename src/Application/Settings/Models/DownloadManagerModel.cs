@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
+using PlexRipper.Application.Settings.Models.Base;
 
-namespace PlexRipper.Domain.Settings
+namespace PlexRipper.Application.Settings.Models
 {
     public class DownloadManagerModel : BaseModel
     {
@@ -12,8 +13,7 @@ namespace PlexRipper.Domain.Settings
 
         #region Properties
 
-        [JsonProperty("downloadSegments", Required = Required.Always)]
-        public int DownloadSegments
+        public virtual int DownloadSegments
         {
             get => _downloadSegments;
             set

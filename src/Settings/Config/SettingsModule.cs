@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using PlexRipper.Application.Common;
-using PlexRipper.Domain.Settings;
+using PlexRipper.Application.Settings.Models;
 
 
 namespace PlexRipper.Settings.Config

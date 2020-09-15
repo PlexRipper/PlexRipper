@@ -1,4 +1,4 @@
-﻿using PlexRipper.Domain.Settings;
+﻿using PlexRipper.Application.Settings.Models;
 
 namespace PlexRipper.Application.Common
 {

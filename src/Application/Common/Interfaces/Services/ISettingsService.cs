@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using FluentResults;
+using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Settings;
 
 namespace PlexRipper.Application.Common
 {

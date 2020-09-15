@@ -3,8 +3,8 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexAccounts;
+using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Settings;
 
 namespace PlexRipper.Application.Settings
 {
@@ -27,14 +27,14 @@ namespace PlexRipper.Application.Settings
                 return result;
             }
 
-            _userSettings.ActiveAccountId = result.Value.Id;
+            _userSettings.AccountSettings.ActiveAccountId = result.Value.Id;
 
             return result;
         }
 
         public async Task<Result<PlexAccount>> GetActivePlexAccountAsync()
         {
-            int id = _userSettings.ActiveAccountId;
+            int id = _userSettings.AccountSettings.ActiveAccountId;
 
             if (id == 0)
             {
@@ -47,7 +47,7 @@ namespace PlexRipper.Application.Settings
 
                 if (result.Value.Count > 0)
                 {
-                    _userSettings.ActiveAccountId = result.Value[0].Id;
+                    _userSettings.AccountSettings.ActiveAccountId = result.Value[0].Id;
                     return Result.Ok(result.Value[0]);
                 }
 

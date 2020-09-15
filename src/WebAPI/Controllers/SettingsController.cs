@@ -5,9 +5,10 @@ using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Settings;
 using PlexRipper.WebAPI.Common.DTO;
+using PlexRipper.WebAPI.Common.DTO.Settings;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -28,7 +29,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET api/<SettingsController>/
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModel>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModelDTO>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult GetSettings()
         {
@@ -40,7 +41,8 @@ namespace PlexRipper.WebAPI.Controllers
                     return InternalServerError(result);
                 }
 
-                return Ok(Result.Ok(result.Value));
+                var mapResult = _mapper.Map<SettingsModelDTO>(result.Value);
+                return Ok(Result.Ok(mapResult));
             }
             catch (Exception e)
             {

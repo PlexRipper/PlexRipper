@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
+using PlexRipper.Application.Settings.Models.Base;
 
-namespace PlexRipper.Domain.Settings
+namespace PlexRipper.Application.Settings.Models
 {
     public class AdvancedSettingsModel : BaseModel
     {
 
         #region Properties
 
-        [JsonProperty("downloadManager", Required = Required.Always)]
         public DownloadManagerModel DownloadManager { get; set; } = new DownloadManagerModel();
 
         #endregion Properties

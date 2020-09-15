@@ -2,10 +2,12 @@
 using AutoMapper;
 using FluentResults;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
 using PlexRipper.Settings;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
+using PlexRipper.WebAPI.Common.DTO.Settings;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Config
@@ -69,6 +71,24 @@ namespace PlexRipper.WebAPI.Config
 
             // FileSystemModel -> FileSystemModelDTO
             CreateMap<FileSystemModel, FileSystemModelDTO>(MemberList.Destination).ReverseMap();
+
+            // SettingsModel -> SettingsModelDTO
+            CreateMap<SettingsModel, SettingsModelDTO>(MemberList.Destination).ReverseMap();
+
+            // AccountSettingsModel -> AccountSettingsModelDTO
+            CreateMap<AccountSettingsModel, AccountSettingsModelDTO>(MemberList.Destination).ReverseMap();
+
+            // AdvancedSettingsModel -> AdvancedSettingsModelDTO
+            CreateMap<AdvancedSettingsModel, AdvancedSettingsModelDTO>(MemberList.Destination).ReverseMap();
+
+            // DownloadManagerModel -> DownloadManagerModelDTO
+            CreateMap<DownloadManagerModel, DownloadManagerModelDTO>(MemberList.Destination).ReverseMap();
+
+            // UserInterfaceSettingsModel -> UserInterfaceSettingsModelDTO
+            CreateMap<UserInterfaceSettingsModel, UserInterfaceSettingsModelDTO>(MemberList.Destination).ReverseMap();
+
+            // ConfirmationSettingsModel -> ConfirmationSettingsModelDTO
+            CreateMap<ConfirmationSettingsModel, ConfirmationSettingsModelDTO>(MemberList.Destination).ReverseMap();
         }
     }
 }

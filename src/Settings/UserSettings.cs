@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Settings;
 
 namespace PlexRipper.Settings
 {
@@ -15,6 +15,14 @@ namespace PlexRipper.Settings
 
         private readonly IFileSystem _fileSystem;
         private bool _allowSave = true;
+
+        private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
+        {
+            MissingMemberHandling = MissingMemberHandling.Ignore,
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Populate,
+        };
 
         #endregion
 
@@ -47,7 +55,7 @@ namespace PlexRipper.Settings
         private void CreateSettingsFile()
         {
             Log.Information($"{FileName} doesn't exist, will create now.");
-            string jsonString = JsonConvert.SerializeObject(new SettingsModel(), Formatting.Indented);
+            string jsonString = JsonConvert.SerializeObject(new SettingsModel(), _jsonSerializerSettings);
             File.WriteAllText(FileLocation, jsonString);
         }
 
@@ -67,8 +75,7 @@ namespace PlexRipper.Settings
             try
             {
                 string jsonString = File.ReadAllText(FileLocation);
-                var loadedSettings =
-                    JsonConvert.DeserializeObject<SettingsModel>(jsonString);
+                var loadedSettings = JsonConvert.DeserializeObject<SettingsModel>(jsonString, _jsonSerializerSettings);
                 UpdateSettings(loadedSettings);
             }
             catch (Exception e)
@@ -118,8 +125,27 @@ namespace PlexRipper.Settings
         public void UpdateSettings(SettingsModel sourceSettings)
         {
             _allowSave = false;
-            this.AdvancedSettings = sourceSettings.AdvancedSettings;
-            this.ActiveAccountId = sourceSettings.ActiveAccountId;
+
+            // Get a list of all properties in the sourceSettings.
+            sourceSettings.GetType().GetProperties().Where(x => x.CanWrite).ToList().ForEach(sourceSettingsProperty =>
+            {
+                // Check whether target object has the source property, which will always be true due to inheritance.
+                var targetSettingsProperty = this.GetType().GetProperty(sourceSettingsProperty.Name);
+                if (targetSettingsProperty != null)
+                {
+                    // Now copy the value to the matching property in this UserSettings instance.
+                    var value = sourceSettingsProperty.GetValue(sourceSettings, null);
+                    if (value != null)
+                    {
+                        this.GetType().GetProperty(sourceSettingsProperty.Name).SetValue(this, value, null);
+                    }
+                    else
+                    {
+                        Log.Debug($"Value was read from jsonSettings as null for property {targetSettingsProperty}, will maintain default value.");
+                    }
+                }
+            });
+
             _allowSave = true;
             Save();
         }

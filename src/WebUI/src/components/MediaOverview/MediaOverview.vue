@@ -1,5 +1,5 @@
 <template>
-	<v-container>
+	<v-container fluid>
 		<template v-if="isLoading">
 			<v-row justify="center">
 				<v-col cols="auto">
@@ -19,22 +19,18 @@
 		</template>
 		<!-- Header -->
 		<template v-else>
-			<v-row justify="space-between">
-				<v-col cols="6">
-					<h1>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</h1>
-				</v-col>
-				<v-col cols="auto">
-					<v-btn @click="refreshLibrary">Refresh Library</v-btn>
-				</v-col>
-			</v-row>
 			<!--	Overview bar	-->
 			<v-row>
-				<v-col cols="12">
-					<v-switch v-model="imageView" label="Show images" />
-				</v-col>
+				<media-overview-bar
+					:server="server"
+					:library="library"
+					:view-mode="viewMode"
+					@view-change="changeView"
+					@refresh-library="refreshLibrary"
+				></media-overview-bar>
 			</v-row>
 			<!--	Data table display	-->
-			<template v-if="!imageView">
+			<template v-if="isTableView">
 				<!-- The movie table -->
 				<movie-table
 					v-if="isMovieLibrary"
@@ -54,13 +50,14 @@
 			</template>
 
 			<!-- Poster display-->
-			<v-row v-else>
-				<template v-for="mediaId in mediaIds">
+			<v-row v-if="isPosterView">
+				<template v-for="item in getItems">
 					<media-poster
-						:key="mediaId"
-						:media-id="mediaId"
+						:key="item.id"
+						:media-id="item.id"
 						:account-id="activeAccountId"
 						:media-type="mediaType"
+						:title="item.title"
 						@download="downloadMediaCommand"
 					></media-poster>
 				</template>
@@ -74,7 +71,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Ref } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import type { PlexAccountDTO } from '@dto/mainApi';
 import {
 	DownloadTaskCreationProgress,
 	LibraryProgress,
@@ -83,8 +81,8 @@ import {
 	PlexMovieDTO,
 	PlexServerDTO,
 	PlexTvShowDTO,
+	ViewMode,
 } from '@dto/mainApi';
-import type { PlexAccountDTO } from '@dto/mainApi';
 import MovieTable from '@mediaOverview/MediaTable/MovieTable.vue';
 import MediaPoster from '@mediaOverview/MediaPoster.vue';
 import TvShowTable from '@mediaOverview/MediaTable/TvShowTable.vue';
@@ -101,6 +99,9 @@ import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
 import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
+import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
+import SettingsService from '@service/settingsService';
+
 @Component<MediaOverview>({
 	components: {
 		MediaPoster,
@@ -108,6 +109,7 @@ import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 		TvShowTable,
 		ProgressComponent,
 		DownloadConfirmation,
+		MediaOverviewBar,
 	},
 })
 export default class MediaOverview extends Vue {
@@ -120,7 +122,7 @@ export default class MediaOverview extends Vue {
 	activeAccount: PlexAccountDTO | null = null;
 
 	isLoading: boolean = true;
-	imageView: boolean = true;
+	viewMode: ViewMode = ViewMode.Poster;
 	isRefreshing: boolean = false;
 	progress: LibraryProgress | null = null;
 	library: PlexLibraryDTO | null = null;
@@ -163,6 +165,10 @@ export default class MediaOverview extends Vue {
 		return this.progress?.percentage ?? 0;
 	}
 
+	changeView(viewMode: ViewMode): void {
+		this.viewMode = viewMode;
+	}
+
 	resetProgress(isRefreshing: boolean): void {
 		this.progress = {
 			id: this.libraryId,
@@ -186,6 +192,14 @@ export default class MediaOverview extends Vue {
 		}
 
 		return items;
+	}
+
+	get isPosterView(): boolean {
+		return this.viewMode === ViewMode.Poster;
+	}
+
+	get isTableView(): boolean {
+		return this.viewMode === ViewMode.Table;
 	}
 
 	downloadMediaCommand(mediaId: IMediaId): void {
@@ -269,6 +283,14 @@ export default class MediaOverview extends Vue {
 		this.resetProgress(false);
 		this.isRefreshing = false;
 		this.isLoading = true;
+
+		SettingsService.getSettings().subscribe((data) => {
+			if (this.isMovieLibrary) {
+				this.viewMode = data?.userInterfaceSettings?.displaySettings?.movieViewMode ?? ViewMode.Poster;
+			} else if (this.isTvShowLibrary) {
+				this.viewMode = data?.userInterfaceSettings?.displaySettings?.tvShowViewMode ?? ViewMode.Poster;
+			}
+		});
 
 		AccountService.getActiveAccount()
 			.pipe(

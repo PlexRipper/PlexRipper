@@ -14,8 +14,11 @@ namespace PlexRipper.Application.Settings.Models
             get => _downloadManager;
             set
             {
-                _downloadManager = value;
-                _downloadManager.PropertyChanged += (sender, args) => OnPropertyChanged();
+                if (value != null)
+                {
+                    _downloadManager = value;
+                    _downloadManager.PropertyChanged += (sender, args) => OnPropertyChanged();
+                }
             }
         }
 

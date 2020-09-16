@@ -89,6 +89,9 @@ namespace PlexRipper.WebAPI.Config
 
             // ConfirmationSettingsModel -> ConfirmationSettingsModelDTO
             CreateMap<ConfirmationSettingsModel, ConfirmationSettingsModelDTO>(MemberList.Destination).ReverseMap();
+
+            // DisplaySettingsModel -> DisplaySettingsModelDTO
+            CreateMap<DisplaySettingsModel, DisplaySettingsModelDTO>(MemberList.Destination).ReverseMap();
         }
     }
 }

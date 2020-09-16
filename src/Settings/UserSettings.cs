@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -22,6 +23,10 @@ namespace PlexRipper.Settings
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Populate,
+            Converters = new List<JsonConverter>
+            {
+                new Newtonsoft.Json.Converters.StringEnumConverter(),
+            },
         };
 
         #endregion
@@ -108,7 +113,7 @@ namespace PlexRipper.Settings
 
             try
             {
-                string jsonString = JsonConvert.SerializeObject(this, Formatting.Indented);
+                string jsonString = JsonConvert.SerializeObject(this, _jsonSerializerSettings);
                 File.WriteAllText(FileLocation, jsonString);
 
                 return true;

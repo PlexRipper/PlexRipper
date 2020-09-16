@@ -11,7 +11,19 @@
 		>
 			<v-hover v-slot:default="{ hover }">
 				<v-card :max-width="thumbWidth" :width="thumbWidth" :elevation="hover ? 12 : 2">
-					<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight">
+					<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight" :alt="title">
+						<!--	Placeholder	-->
+						<template v-slot:placeholder>
+							<v-row class="fill-height ma-0" align="center" justify="center">
+								<v-col cols="12">
+									<h4 class="text-center">{{ title }}</h4>
+								</v-col>
+								<v-col cols="auto">
+									<v-progress-circular indeterminate color="grey lighten-5" />
+								</v-col>
+							</v-row>
+						</template>
+						<!--	Overlay	-->
 						<v-container fluid :class="$classNames('poster-overlay', { 'on-hover': hover }, 'white--text')">
 							<v-row justify="center" align="end" style="height: 100%">
 								<v-col cols="auto">
@@ -43,6 +55,9 @@ export default class MediaPoster extends Vue {
 
 	@Prop({ required: true, type: Number })
 	readonly mediaId!: number;
+
+	@Prop({ required: true, type: String })
+	readonly title!: number;
 
 	@Prop({ required: true, type: String })
 	readonly mediaType!: PlexMediaType;

@@ -19,9 +19,12 @@ namespace PlexRipper.Application.Settings.Models
             get => _accountSettings;
             set
             {
-                // During every settings load this needs to be subscribed to again
-                _accountSettings = value;
-                _accountSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                if (value != null)
+                {
+                    // During every settings load this needs to be subscribed to again
+                    _accountSettings = value;
+                    _accountSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                }
             }
         }
 
@@ -30,9 +33,12 @@ namespace PlexRipper.Application.Settings.Models
             get => _advancedSettings;
             set
             {
-                // During every settings load this needs to be subscribed to again
-                _advancedSettings = value;
-                _advancedSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                if (value != null)
+                {
+                    // During every settings load this needs to be subscribed to again
+                    _advancedSettings = value;
+                    _advancedSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                }
             }
         }
 
@@ -41,9 +47,12 @@ namespace PlexRipper.Application.Settings.Models
             get => _userInterfaceSettings;
             set
             {
-                // During every settings load this needs to be subscribed to again
-                _userInterfaceSettings = value;
-                _userInterfaceSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                if (value != null)
+                {
+                    // During every settings load this needs to be subscribed to again
+                    _userInterfaceSettings = value;
+                    _userInterfaceSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                }
             }
         }
 

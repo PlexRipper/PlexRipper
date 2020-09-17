@@ -3,22 +3,23 @@ import Vuex from 'vuex';
 import { getModule, config } from 'vuex-module-decorators';
 
 // Modules
-import globalStore from '@/store/globalStore';
-import userStore from '@/store/userStore';
+import SettingsStore from '~/store/settingsStore';
 
 config.rawError = true;
 
 // The Vuex store must be defined in Vue before anything else!
 Vue.use(Vuex);
 
+interface StoreType {
+	settingsStore: SettingsStore;
+}
+
 // This will allows access in each component without having to initialize in each component.
 // Doc: https://typescript.nuxtjs.org/cookbook/store.html#class-based
-export const store = new Vuex.Store<unknown>({
+export const store = new Vuex.Store<StoreType>({
 	modules: {
-		globalStore,
-		userStore,
+		SettingsStore,
 	},
 });
 
-export const GlobalStore: globalStore = getModule(globalStore, store);
-export const UserStore: userStore = getModule(userStore, store);
+export const settingsStore: SettingsStore = getModule(SettingsStore, store);

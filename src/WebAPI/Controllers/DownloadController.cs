@@ -55,17 +55,18 @@ namespace PlexRipper.WebAPI.Controllers
             return result.IsFailed ? InternalServerError(result) : Ok(result);
         }
 
-        // Post api/<DownloadController>/movie/
-        [HttpPost("movie")]
+        // Post api/<DownloadController>/download/
+        [HttpPost("download")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Post([FromBody] DownloadMovieDTO downloadMovie)
+        public async Task<IActionResult> DownloadMedia([FromBody] DownloadMediaDTO downloadMedia)
         {
-            int plexMovieId = downloadMovie.PlexMovieId;
-            int plexAccountId = downloadMovie.PlexAccountId;
-            if (plexMovieId <= 0)
+            int plexMediaId = downloadMedia.PlexMediaId;
+            int plexAccountId = downloadMedia.PlexAccountId;
+            PlexMediaType type = downloadMedia.Type;
+            if (plexMediaId <= 0)
             {
-                return BadRequest(plexMovieId, nameof(plexMovieId));
+                return BadRequest(plexMediaId, nameof(plexMediaId));
             }
 
             if (plexAccountId <= 0)
@@ -73,35 +74,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(plexAccountId, nameof(plexAccountId));
             }
 
-            var result = await _plexDownloadService.DownloadMovieAsync(plexAccountId, plexMovieId);
-            if (result.IsFailed)
-            {
-                return BadRequest(result);
-            }
-
-            return Ok(result);
-        }
-
-        // Post api/<DownloadController>/tvshow/
-        [HttpPost("tvshow")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Post([FromBody] DownloadTvShowDTO downloadTvShow)
-        {
-            int plexMovieId = downloadTvShow.PlexMediaId;
-            int plexAccountId = downloadTvShow.PlexAccountId;
-            PlexMediaType type = downloadTvShow.Type;
-            if (plexMovieId <= 0)
-            {
-                return BadRequest(plexMovieId, nameof(plexMovieId));
-            }
-
-            if (plexAccountId <= 0)
-            {
-                return BadRequest(plexAccountId, nameof(plexAccountId));
-            }
-
-            var result = await _plexDownloadService.DownloadTvShowAsync(plexAccountId, plexMovieId, type);
+            var result = await _plexDownloadService.DownloadMediaAsync(plexAccountId, plexMediaId, type);
             if (result.Has400BadRequestError())
             {
                 return BadRequest(result.ToResult());
@@ -171,8 +144,12 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
 
-        // DELETE api/<DownloadController>/5
-        [HttpDelete("{downloadTaskId:int}")]
+        /// <summary>
+        /// DELETE api/(DownloadController)/5.
+        /// </summary>
+        /// <param name="downloadTaskId">The downloadTask to delete by id.</param>
+        /// <returns>HTTP Response.</returns>
+        [HttpDelete("delete/{downloadTaskId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Delete(int downloadTaskId)
@@ -182,8 +159,37 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(downloadTaskId, nameof(downloadTaskId));
             }
 
-            var result = await _plexDownloadService.DeleteDownloadsAsync(downloadTaskId);
+            var result = await _plexDownloadService.DeleteDownloadTaskAsync(downloadTaskId);
+            if (result.Has400BadRequestError())
+            {
+                return BadRequest(result);
+            }
+
             return result.IsFailed ? BadRequest(result) : Ok(result);
+        }
+
+        /// <summary>
+        /// DELETE api/(DownloadController)/.
+        /// </summary>
+        /// <param name="downloadTaskIds">The list of downloadTasks to delete by id.</param>
+        /// <returns>HTTP Response.</returns>
+        [HttpPost("delete")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> DeleteRange([FromBody] List<int> downloadTaskIds)
+        {
+            if (downloadTaskIds.Count <= 0)
+            {
+                return BadRequest(Result.Fail($"No list of download task Id's was given in the request body"));
+            }
+
+            var result = await _plexDownloadService.DeleteDownloadTasksAsync(downloadTaskIds);
+            if (result.Has400BadRequestError())
+            {
+                return BadRequest(result);
+            }
+
+            return result.IsFailed ? InternalServerError(result) : Ok(result);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace PlexRipper.Application.Common
         Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexLibraryUrl);
 
         /// <summary>
-        /// Returns and PlexLibrary container with either Movies, Series, Music or Photos depending on the type. 
+        /// Returns and PlexLibrary container with either Movies, Series, Music or Photos depending on the type.
         /// </summary>
         /// <param name="library"></param>
         /// <param name="authToken"></param>
@@ -33,6 +33,7 @@ namespace PlexRipper.Application.Common
         Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl);
         Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
         Task<List<PlexTvShowEpisode>> GetEpisodesAsync(string serverAuthToken, string plexFullHost, PlexTvShowSeason plexTvShowSeason);
+        Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken, int width = 0, int height = 0);
     }
 
 

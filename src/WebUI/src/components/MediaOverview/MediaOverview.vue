@@ -1,0 +1,328 @@
+<template>
+	<v-container fluid>
+		<template v-if="isLoading">
+			<v-row justify="center">
+				<v-col cols="auto">
+					<v-layout row justify-center align-center>
+						<v-progress-circular :size="70" :width="7" color="red" indeterminate></v-progress-circular>
+					</v-layout>
+					<h1 v-if="isRefreshing">Refreshing library data from {{ server ? server.name : 'unknown' }}</h1>
+					<h1 v-else>Retrieving library from PlexRipper database</h1>
+					<!-- Library progress bar -->
+					<v-progress-linear :value="getPercentage" height="20" striped color="deep-orange">
+						<template v-slot="{ value }">
+							<strong>{{ value }}%</strong>
+						</template>
+					</v-progress-linear>
+				</v-col>
+			</v-row>
+		</template>
+		<!-- Header -->
+		<template v-else>
+			<!--	Overview bar	-->
+			<v-row>
+				<media-overview-bar
+					:server="server"
+					:library="library"
+					:view-mode="viewMode"
+					@view-change="changeView"
+					@refresh-library="refreshLibrary"
+				></media-overview-bar>
+			</v-row>
+			<!--	Data table display	-->
+			<template v-if="isTableView">
+				<!-- The movie table -->
+				<movie-table
+					v-if="isMovieLibrary"
+					:movies="movies"
+					:account-id="activeAccountId"
+					:items="getItems"
+					@download="openDownloadDialog"
+				/>
+				<!-- The tv-show table -->
+				<tv-show-table
+					v-if="isTvShowLibrary"
+					:tv-shows="tvShows"
+					:active-account="activeAccount"
+					:items="getItems"
+					@download="openDownloadDialog"
+				/>
+			</template>
+
+			<!-- Poster display-->
+			<v-row v-if="isPosterView">
+				<template v-for="item in getItems">
+					<media-poster
+						:key="item.id"
+						:media-id="item.id"
+						:account-id="activeAccountId"
+						:media-type="mediaType"
+						:title="item.title"
+						@download="openDownloadDialog"
+					></media-poster>
+				</template>
+			</v-row>
+			<!--	Download confirmation dialog	-->
+			<v-row>
+				<download-confirmation
+					ref="downloadConfirmationRef"
+					:items="getItems"
+					:progress="downloadTaskCreationProgress"
+					@download="downloadMedia"
+				/>
+			</v-row>
+		</template>
+	</v-container>
+</template>
+
+<script lang="ts">
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import type { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
+import {
+	DownloadTaskCreationProgress,
+	LibraryProgress,
+	PlexLibraryDTO,
+	PlexMediaType,
+	PlexMovieDTO,
+	PlexTvShowDTO,
+	ViewMode,
+} from '@dto/mainApi';
+import MovieTable from '@mediaOverview/MediaTable/MovieTable.vue';
+import MediaPoster from '@mediaOverview/MediaPoster.vue';
+import TvShowTable from '@mediaOverview/MediaTable/TvShowTable.vue';
+import { merge, of } from 'rxjs';
+import SignalrService from '@service/signalrService';
+import { catchError, finalize, switchMap, takeLast, takeWhile, tap } from 'rxjs/operators';
+import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
+import Log from 'consola';
+import AccountService from '@service/accountService';
+import { downloadMedia } from '@api/plexDownloadApi';
+import DownloadService from '@service/downloadService';
+import ProgressComponent from '@components/ProgressComponent.vue';
+import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
+import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
+import Convert from '@mediaOverview/MediaTable/types/Convert';
+import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
+import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
+import SettingsService from '@service/settingsService';
+
+@Component<MediaOverview>({
+	components: {
+		MediaPoster,
+		MovieTable,
+		TvShowTable,
+		ProgressComponent,
+		DownloadConfirmation,
+		MediaOverviewBar,
+	},
+})
+export default class MediaOverview extends Vue {
+	@Prop({ required: true, type: Number })
+	readonly libraryId!: number;
+
+	@Ref('downloadConfirmationRef')
+	readonly downloadConfirmationRef!: DownloadConfirmation;
+
+	activeAccount: PlexAccountDTO | null = null;
+
+	isLoading: boolean = true;
+	viewMode: ViewMode = ViewMode.Poster;
+	isRefreshing: boolean = false;
+	library: PlexLibraryDTO | null = null;
+	libraryProgress: LibraryProgress | null = null;
+	downloadTaskCreationProgress: DownloadTaskCreationProgress | null = null;
+	downloadPreviewType: PlexMediaType = PlexMediaType.None;
+
+	get activeAccountId(): number {
+		return this.activeAccount?.id ?? 0;
+	}
+
+	get mediaType(): PlexMediaType {
+		return this.library?.type ?? PlexMediaType.Unknown;
+	}
+
+	get mediaIds(): number[] {
+		return this.getItems.map((x) => x.id);
+	}
+
+	get server(): PlexServerDTO | null {
+		return this.activeAccount?.plexServers.find((x) => x.id === this.library?.plexServerId) ?? null;
+	}
+
+	get isMovieLibrary(): boolean {
+		return this.mediaType === PlexMediaType.Movie;
+	}
+
+	get isTvShowLibrary(): boolean {
+		return this.mediaType === PlexMediaType.TvShow;
+	}
+
+	get movies(): PlexMovieDTO[] {
+		return this.library?.movies ?? [];
+	}
+
+	get tvShows(): PlexTvShowDTO[] {
+		return this.library?.tvShows ?? [];
+	}
+
+	get getPercentage(): number {
+		return this.libraryProgress?.percentage ?? 0;
+	}
+
+	changeView(viewMode: ViewMode): void {
+		this.viewMode = viewMode;
+	}
+
+	resetProgress(isRefreshing: boolean): void {
+		this.libraryProgress = {
+			id: this.libraryId,
+			percentage: 0,
+			received: 0,
+			total: 0,
+			isRefreshing,
+			isComplete: false,
+		};
+	}
+
+	get getItems(): ITreeViewItem[] {
+		let items: ITreeViewItem[] = [];
+		switch (this.mediaType) {
+			case PlexMediaType.Movie:
+				items = Convert.moviesToTreeViewItems(this.movies);
+				break;
+			case PlexMediaType.TvShow:
+				items = Convert.tvShowsToTreeViewItems(this.tvShows);
+				break;
+		}
+
+		return items;
+	}
+
+	get isPosterView(): boolean {
+		return this.viewMode === ViewMode.Poster;
+	}
+
+	get isTableView(): boolean {
+		return this.viewMode === ViewMode.Table;
+	}
+
+	openDownloadDialog(mediaId: IMediaId): void {
+		this.downloadConfirmationRef.openDialog(mediaId);
+	}
+
+	downloadMedia(mediaId: IMediaId): void {
+		merge(
+			// Setup progress bar
+			SignalrService.getDownloadTaskCreationProgress().pipe(
+				tap((data) => {
+					this.downloadTaskCreationProgress = data;
+					Log.debug(data);
+				}),
+				finalize(() => {
+					setTimeout(() => {
+						this.downloadConfirmationRef.closeDialog();
+						this.downloadTaskCreationProgress = null;
+					}, 2000);
+				}),
+				takeWhile((data) => !data.isComplete),
+				catchError(() => {
+					return of(null);
+				}),
+			),
+			// Download Media
+			downloadMedia(mediaId.id, this.activeAccountId, mediaId.type).pipe(
+				finalize(() => {
+					setTimeout(() => {
+						this.downloadConfirmationRef.closeDialog();
+						this.downloadTaskCreationProgress = null;
+					}, 2000);
+					DownloadService.fetchDownloadList();
+				}),
+				catchError(() => {
+					return of(false);
+				}),
+			),
+		)
+			.pipe(
+				catchError(() => {
+					this.downloadConfirmationRef.closeDialog();
+					this.downloadTaskCreationProgress = null;
+					return of(false);
+				}),
+			)
+			.subscribe();
+	}
+
+	refreshLibrary(): void {
+		this.isRefreshing = true;
+		this.isLoading = true;
+		this.resetProgress(true);
+		merge(
+			// Setup progress bar
+			SignalrService.getLibraryProgress().pipe(
+				tap((data) => {
+					this.libraryProgress = data;
+				}),
+				finalize(() => {
+					this.libraryProgress = null;
+				}),
+				takeWhile((data) => !data.isComplete),
+			),
+			// Refresh Library
+			refreshPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).pipe(
+				tap((data) => {
+					Log.debug(`TvShowsDetail => refreshPlexLibrary: ${data?.id}`, data);
+					this.library = data;
+					this.isLoading = false;
+					this.isRefreshing = false;
+				}),
+				takeLast(1),
+			),
+		).subscribe();
+	}
+
+	created(): void {
+		this.resetProgress(false);
+		this.isRefreshing = false;
+		this.isLoading = true;
+
+		SettingsService.getSettings().subscribe((data) => {
+			if (this.isMovieLibrary) {
+				this.viewMode = data?.userInterfaceSettings?.displaySettings?.movieViewMode ?? ViewMode.Poster;
+			} else if (this.isTvShowLibrary) {
+				this.viewMode = data?.userInterfaceSettings?.displaySettings?.tvShowViewMode ?? ViewMode.Poster;
+			}
+		});
+
+		AccountService.getActiveAccount()
+			.pipe(
+				tap((data) => {
+					Log.debug('ActiveAccount is:', data);
+					this.activeAccount = data ?? null;
+				}),
+				switchMap((data) =>
+					merge(
+						// Setup progress bar
+						SignalrService.getLibraryProgress().pipe(
+							tap((data) => {
+								this.libraryProgress = data;
+								this.isRefreshing = data.isRefreshing ?? false;
+							}),
+							takeWhile((data) => !data.isComplete),
+						),
+						// Retrieve library
+						getPlexLibrary(this.libraryId, data?.id ?? 0).pipe(
+							tap((data) => {
+								this.library = data;
+								Log.debug(`TvShowsDetail => Library: ${data?.id}`, data);
+								this.isLoading = false;
+							}),
+							takeLast(1),
+						),
+					),
+				),
+			)
+			.subscribe();
+	}
+}
+</script>

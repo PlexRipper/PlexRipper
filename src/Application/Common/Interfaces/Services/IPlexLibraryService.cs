@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Domain;
 
@@ -6,7 +7,6 @@ namespace PlexRipper.Application.Common
 {
     public interface IPlexLibraryService
     {
-
         /// <summary>
         /// Returns the <see cref="PlexLibrary"/> containing the media content.
         /// </summary>
@@ -56,5 +56,7 @@ namespace PlexRipper.Application.Common
 
         Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexAccountId,
             int plexLibraryId);
+
+        Task<Result<byte[]>> GetImage(int plexAccountId, int mediaId, PlexMediaType mediaType, int width = 0, int height = 0);
     }
 }

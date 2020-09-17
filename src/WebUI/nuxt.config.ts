@@ -39,6 +39,7 @@ const config: NuxtConfig = {
 		{ src: '@plugins/consola.ts', mode: 'client' },
 		{ src: '@plugins/filters.ts', mode: 'client' },
 		{ src: '@plugins/axios.ts', mode: 'client' },
+		{ src: '@plugins/perfect-scrollbar.ts', mode: 'client' },
 	],
 	/*
 	 ** Nuxt.js dev-modules
@@ -91,6 +92,8 @@ const config: NuxtConfig = {
 				config.resolve.alias['@dto'] = path.resolve(__dirname, 'src/types/dto/');
 				config.resolve.alias['@api'] = path.resolve(__dirname, 'src/types/api/');
 				config.resolve.alias['@service'] = path.resolve(__dirname, 'src/types/service/');
+				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
+				config.resolve.alias['@mediaOverview'] = path.resolve(__dirname, 'src/components/MediaOverview/');
 			}
 		},
 	},

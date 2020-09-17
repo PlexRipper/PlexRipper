@@ -1,14 +1,14 @@
-﻿using AutoMapper;
-using FluentResults;
-using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Domain;
-using PlexRipper.WebAPI.Common.DTO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using FluentResults;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
+using PlexRipper.Domain;
+using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -25,7 +25,7 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
 
-        //GET: api/<PlexAccountController>
+        // GET: api/<PlexAccountController>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexAccountDTO>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]

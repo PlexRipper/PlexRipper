@@ -17,14 +17,12 @@ namespace PlexRipper.WebAPI.Controllers
     [ApiController]
     public class PlexLibraryController : BaseController
     {
-
         private readonly IPlexLibraryService _plexLibraryService;
         private readonly IMapper _mapper;
 
 
         public PlexLibraryController(IPlexLibraryService plexLibraryService, IMapper mapper) : base(mapper)
         {
-
             _plexLibraryService = plexLibraryService;
             _mapper = mapper;
         }
@@ -37,8 +35,15 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Get(int id, int plexAccountId)
         {
-            if (id <= 0) { return BadRequest(id, nameof(id)); }
-            if (plexAccountId <= 0) { return BadRequest(plexAccountId, nameof(plexAccountId)); }
+            if (id <= 0)
+            {
+                return BadRequest(id, nameof(id));
+            }
+
+            if (plexAccountId <= 0)
+            {
+                return BadRequest(plexAccountId, nameof(plexAccountId));
+            }
 
             try
             {
@@ -59,7 +64,6 @@ namespace PlexRipper.WebAPI.Controllers
                 string message = $"Could not find a {nameof(PlexLibrary)} with Id: {id}";
                 Log.Warning(message);
                 return NotFound(message);
-
             }
             catch (Exception e)
             {
@@ -90,6 +94,26 @@ namespace PlexRipper.WebAPI.Controllers
             string msg = $"Could not refresh {nameof(PlexLibrary)} with Id: {refreshPlexLibraryDto.PlexLibraryId}";
             Log.Warning(msg);
             return InternalServerError(Result.Fail(msg));
+        }
+
+        // GET api/<PlexLibrary>/5
+        [HttpPost("thumb")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileContentResult))]
+        public async Task<IActionResult> GetThumb([FromBody] ThumbnailRequestDTO thumbnailRequestDto)
+        {
+            var result = await _plexLibraryService.GetImage(
+                thumbnailRequestDto.PlexAccountId,
+                thumbnailRequestDto.PlexMediaId,
+                thumbnailRequestDto.PlexMediaType,
+                thumbnailRequestDto.Width,
+                thumbnailRequestDto.Height);
+
+            if (result.IsSuccess)
+            {
+                return File(result.Value, "image/jpeg");
+            }
+
+            return BadRequest();
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using AutoMapper;
-using System;
+﻿using System;
+using AutoMapper;
 
 namespace PlexRipper.Domain.AutoMapper
 {
@@ -10,7 +10,7 @@ namespace PlexRipper.Domain.AutoMapper
     {
         public DomainMappingProfile()
         {
-            //String -> Guid
+            // String -> Guid
             CreateMap<string, Guid>().ConvertUsing(s => Guid.Parse(s));
             CreateMap<Guid, string>().ConvertUsing(g => g.ToString("N"));
             CreateMap<long, DateTime>().ConvertUsing(g => DateTimeOffset.FromUnixTimeSeconds(g).DateTime.ToUniversalTime());
@@ -21,7 +21,6 @@ namespace PlexRipper.Domain.AutoMapper
             // PlexAccountServer => PlexServer
             CreateMap<PlexAccountServer, PlexServer>(MemberList.Destination)
                 .ConvertUsing(source => source.PlexServer ?? null);
-
         }
     }
 }

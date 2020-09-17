@@ -7,43 +7,43 @@ namespace PlexRipper.WebAPI.Common.DTO
 {
     public sealed class PlexLibraryDTO
     {
-        [JsonProperty("id", Required = Required.DisallowNull)]
+        [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
-        [JsonProperty("key", Required = Required.DisallowNull)]
+        [JsonProperty("key", Required = Required.Always)]
         public string Key { get; set; }
 
-        [JsonProperty("title", Required = Required.DisallowNull)]
+        [JsonProperty("title", Required = Required.Always)]
         public string Title { get; set; }
 
         [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType Type { get; set; }
 
-        [JsonProperty("updatedAt", Required = Required.DisallowNull)]
+        [JsonProperty("updatedAt", Required = Required.Always)]
         public DateTime UpdatedAt { get; set; }
 
-        [JsonProperty("createdAt", Required = Required.DisallowNull)]
+        [JsonProperty("createdAt", Required = Required.Always)]
         public DateTime CreatedAt { get; set; }
 
-        [JsonProperty("scannedAt", Required = Required.DisallowNull)]
+        [JsonProperty("scannedAt", Required = Required.Always)]
         public DateTime ScannedAt { get; set; }
 
-        [JsonProperty("contentChangedAt", Required = Required.DisallowNull)]
+        [JsonProperty("contentChangedAt", Required = Required.Always)]
         public DateTime ContentChangedAt { get; set; }
 
-        [JsonProperty("uuid", Required = Required.DisallowNull)]
+        [JsonProperty("uuid", Required = Required.Always)]
         public Guid Uuid { get; set; }
 
-        [JsonProperty("libraryLocationId", Required = Required.DisallowNull)]
+        [JsonProperty("libraryLocationId", Required = Required.Always)]
         public int LibraryLocationId { get; set; }
 
-        [JsonProperty("libraryLocationPath", Required = Required.DisallowNull)]
+        [JsonProperty("libraryLocationPath", Required = Required.Always)]
         public string LibraryLocationPath { get; set; }
 
-        [JsonProperty("plexServerId", Required = Required.DisallowNull)]
+        [JsonProperty("plexServerId", Required = Required.Always)]
         public int PlexServerId { get; set; }
 
-        [JsonProperty("count", Required = Required.DisallowNull)]
+        [JsonProperty("count", Required = Required.Always)]
         public int Count { get; set; }
 
         [JsonProperty("movies", Required = Required.Always)]

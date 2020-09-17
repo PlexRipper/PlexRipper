@@ -8,34 +8,52 @@ namespace PlexRipper.Data
 {
     public class PlexRipperDbContext : DbContext, IPlexRipperDbContext
     {
-
         #region Properties
 
         #region Tables
+
         public DbSet<PlexAccount> PlexAccounts { get; set; }
+
         public DbSet<DownloadTask> DownloadTasks { get; set; }
+
         public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
+
         public DbSet<FolderPath> FolderPaths { get; set; }
+
         public DbSet<FileTask> FileTasks { get; set; }
 
         public DbSet<PlexGenre> PlexGenres { get; set; }
+
         public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
         public DbSet<PlexMovie> PlexMovies { get; set; }
+
         public DbSet<PlexTvShow> PlexTvShows { get; set; }
+
         public DbSet<PlexTvShowSeason> PlexTvShowSeason { get; set; }
+
         public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
+
         public DbSet<PlexRole> PlexRoles { get; set; }
+
         public DbSet<PlexServer> PlexServers { get; set; }
+
         public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
+
         #endregion
 
         #region JoinTables
+
         public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
+
         public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
+
         public DbSet<PlexMovieGenre> PlexMovieGenres { get; set; }
+
         public DbSet<PlexMovieRole> PlexMovieRoles { get; set; }
+
         #endregion
+
         #endregion Properties
 
         #region Constructors
@@ -52,7 +70,7 @@ namespace PlexRipper.Data
         {
             // optionsBuilder.UseLazyLoadingProxies();
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+            var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
             string dbName = isTest ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
             string dbPath = Path.Combine(rootDir + "/config", dbName);
 
@@ -91,6 +109,5 @@ namespace PlexRipper.Data
         }
 
         #endregion Methods
-
     }
 }

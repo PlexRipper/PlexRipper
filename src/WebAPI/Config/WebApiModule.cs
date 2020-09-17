@@ -8,7 +8,6 @@ namespace PlexRipper.WebAPI.Config
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<ProgressHub>().ExternallyOwned();
-            builder.RegisterType<LibraryProgressHub>().ExternallyOwned();
         }
     }
 }

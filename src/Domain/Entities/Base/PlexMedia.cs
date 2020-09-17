@@ -34,14 +34,25 @@ namespace PlexRipper.Domain
         public DateTime? LastViewedAt { get; set; }
         public string Theme { get; set; }
 
+        #region Relationships
+
         public virtual PlexLibrary PlexLibrary { get; set; }
         public int PlexLibraryId { get; set; }
 
+        #endregion
 
         #region Helpers
 
         [NotMapped]
         public string MetaDataUrl => $"{PlexLibrary.PlexServer.BaseUrl}{Key}";
+
+
+        /// <summary>
+        /// Gets the absolute url of the thumb image, which requires a <see cref="PlexLibrary"/> and <see cref="PlexServer"/> navigation property.
+        /// Result is empty if invalid.
+        /// </summary>
+        [NotMapped]
+        public string ThumbUrl => PlexLibrary?.PlexServer?.BaseUrl + Thumb ?? string.Empty;
 
         #endregion
     }

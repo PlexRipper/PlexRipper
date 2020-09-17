@@ -1,9 +1,7 @@
 <template>
 	<v-app dark>
 		<h1>{{ error }}</h1>
-		<NuxtLink to="/">
-			Home page
-		</NuxtLink>
+		<NuxtLink to="/"> Home page </NuxtLink>
 	</v-app>
 </template>
 

@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using PlexRipper.Application.Common;
-using PlexRipper.Settings.Models;
+using PlexRipper.Application.Settings.Models;
 
 
 namespace PlexRipper.Settings.Config
@@ -14,8 +14,7 @@ namespace PlexRipper.Settings.Config
                 .As<IUserSettings>()
                 .SingleInstance();
 
-            builder.RegisterType<DownloadManagerModel>().As<IDownloadManagerModel>();
-
+            builder.RegisterType<DownloadManagerModel>();
         }
     }
 }

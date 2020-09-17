@@ -8,7 +8,7 @@ export class HealthService {
 	public constructor() {
 		GlobalService.getAxiosReady()
 			.pipe(
-				switchMap(() => interval(1000)),
+				switchMap(() => interval(20000)),
 				switchMap(() => getHealthStatus()),
 				distinctUntilChanged(),
 			)

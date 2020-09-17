@@ -1,7 +1,7 @@
-﻿using Autofac;
-using System;
+﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Autofac;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
@@ -32,41 +32,6 @@ namespace PlexRipper.Data.Config
                 .WithParameter("options", dbContextOptions)
                 .As<IPlexRipperDbContext>()
                 .InstancePerDependency(); // TODO this might need to be InstancePerLifetime
-
-            // Create Database
-            // TODO Move the creation of the Database to a better place, unknown where
-            var DB = new PlexRipperDbContext(dbContextOptions);
-
-            // Should the Database be deleted and re-created
-            var resetDb = Environment.GetEnvironmentVariable("ResetDB");
-            if (resetDb != null && resetDb == "true")
-            {
-                Log.Warning("ResetDB command is true, database will be deleted and re-created.");
-                DB.Database.EnsureDeleted();
-            }
-
-            // TODO Re-enable Migrate when stable
-            // DB.Database.Migrate();
-            // TODO This should maybe be setup with Reactive extensions
-            Task.Run(async () =>
-            {
-                var exist = await DB.Database.CanConnectAsync();
-                if (!exist)
-                {
-                    Log.Information("Database does not exist, creating one now.");
-                    await DB.Database.EnsureCreatedAsync();
-                    exist = await DB.Database.CanConnectAsync();
-
-                    if (exist)
-                    {
-                        Log.Information("Database was successfully created!");
-                    }
-                    else
-                    {
-                        Log.Error("Database could not be created.");
-                    }
-                }
-            });
         }
     }
 }

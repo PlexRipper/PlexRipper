@@ -1,22 +1,22 @@
 using System;
+using System.Linq;
+using System.Reflection;
+using System.Text.Json.Serialization;
 using Autofac;
 using AutofacSerilogIntegration;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application.Config;
+using PlexRipper.Data;
 using PlexRipper.Domain;
 using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
-using System.Linq;
-using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace PlexRipper.WebAPI
 {
@@ -34,15 +34,17 @@ namespace PlexRipper.WebAPI
             // General
             services.AddCors(options =>
             {
-                options.AddPolicy(CORSConfiguration,
+                options.AddPolicy(
+                    CORSConfiguration,
                     builder =>
                     {
                         builder
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials()
-                            .WithOrigins("http://localhost:3000")
-                            .SetPreflightMaxAge(TimeSpan.FromMinutes(100));
+                            .WithOrigins("http://localhost:3000");
+
+                        // .SetPreflightMaxAge(TimeSpan.FromMinutes(100));
                     });
             });
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
@@ -77,11 +79,14 @@ namespace PlexRipper.WebAPI
                     Type = OpenApiSecuritySchemeType.ApiKey,
                     Name = "Authorization",
                     In = OpenApiSecurityApiKeyLocation.Header,
-                    Description = "Type into the textbox: Bearer {your JWT token}."
+                    Description = "Type into the textbox: Bearer {your JWT token}.",
                 });
                 configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
                 configure.DocumentProcessors.Add(new NSwagAddExtraTypes());
             });
+
+            // Database setup
+            PlexRipperDBSetup.Setup();
 
             // Autofac
             services.AddOptions();
@@ -95,6 +100,7 @@ namespace PlexRipper.WebAPI
         {
             app.UseRouting();
             app.UseCors(CORSConfiguration);
+            app.UseCorsMiddleware();
             app.UseAuthorization();
 
             // Enabling this causes CORS errors as the front-end is in http and cannot connect with an https back-end
@@ -106,9 +112,8 @@ namespace PlexRipper.WebAPI
                 endpoints.MapControllers();
                 endpoints.MapHealthChecks("/api/health");
 
-                //SignalR configuration
+                // SignalR configuration
                 endpoints.MapHub<ProgressHub>("/progress");
-                endpoints.MapHub<LibraryProgressHub>("/plexLibrary/progress");
             });
         }
 

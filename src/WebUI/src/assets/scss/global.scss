@@ -1,6 +1,0 @@
-// Fixes
-html {
-	// This is used as a fix for the scrolling functionality related to freezing header rows of the CDateView.
-	// See: https://vuetifyjs.com/en/introduction/frequently-asked-questions/#the-scrollbar-is-showing-even-though-my-content-is-not-overflowing-vertically
-	overflow-y: auto !important;
-}

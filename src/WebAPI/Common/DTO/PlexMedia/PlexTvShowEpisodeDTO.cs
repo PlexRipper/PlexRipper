@@ -10,43 +10,43 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
-        [JsonProperty("ratingKey")]
+        [JsonProperty("ratingKey", Required = Required.Always)]
         public int RatingKey { get; set; }
 
-        [JsonProperty("key")]
+        [JsonProperty("key", Required = Required.Always)]
         public string Key { get; set; }
 
-        [JsonProperty("guid")]
+        [JsonProperty("guid", Required = Required.Always)]
         public string Guid { get; set; }
 
-        [JsonProperty("title")]
+        [JsonProperty("title", Required = Required.Always)]
         public string Title { get; set; }
 
-        [JsonProperty("summary")]
+        [JsonProperty("summary", Required = Required.Always)]
         public string Summary { get; set; }
 
-        [JsonProperty("index")]
+        [JsonProperty("index", Required = Required.Always)]
         public int Index { get; set; }
 
         [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType Type { get; set; }
 
-        [JsonProperty("leafCount")]
+        [JsonProperty("leafCount", Required = Required.Always)]
         public int LeafCount { get; set; }
 
-        [JsonProperty("viewedLeafCount")]
+        [JsonProperty("viewedLeafCount", Required = Required.Always)]
         public int ViewedLeafCount { get; set; }
 
-        [JsonProperty("childCount")]
+        [JsonProperty("childCount", Required = Required.Always)]
         public int ChildCount { get; set; }
 
-        [JsonProperty("addedAt")]
+        [JsonProperty("addedAt", Required = Required.Always)]
         public DateTime AddedAt { get; set; }
 
-        [JsonProperty("updatedAt")]
+        [JsonProperty("updatedAt", Required = Required.Always)]
         public DateTime UpdatedAt { get; set; }
 
-        [JsonProperty("originallyAvailableAt")]
+        [JsonProperty("originallyAvailableAt", Required = Required.Always)]
         public DateTime OriginallyAvailableAt { get; set; }
 
         [JsonProperty("tvShowSeasonId", Required = Required.Always)]

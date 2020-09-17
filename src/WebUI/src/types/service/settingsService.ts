@@ -1,40 +1,46 @@
-import { ReplaySubject, Observable, iif } from 'rxjs';
-import { tap, mergeMap } from 'rxjs/operators';
-import { getActiveAccount, setActiveAccount } from '@api/settingsApi';
-import { PlexAccountDTO } from '@dto/mainApi';
-import GlobalService from '@service/globalService';
-import AccountService from '@service/accountService';
 import Log from 'consola';
+import { ReplaySubject, Observable } from 'rxjs';
+import { tap, switchMap, finalize } from 'rxjs/operators';
+import { getSettings, updateSettings } from '@api/settingsApi';
+import { SettingsModelDTO } from '@dto/mainApi';
+import GlobalService from '@service/globalService';
+import { settingsStore as SettingsStore } from '@/store';
 
 export class SettingsService {
-	private _activeAccount: ReplaySubject<PlexAccountDTO | null> = new ReplaySubject();
+	private _settings: ReplaySubject<SettingsModelDTO> = new ReplaySubject<SettingsModelDTO>();
 
 	public constructor() {
 		GlobalService.getAxiosReady()
 			.pipe(
-				tap(() => Log.debug('Retrieving accounts')),
-				mergeMap(() =>
-					AccountService.getAccounts().pipe(
-						// Only retrieve the active account if any accounts are available in the database
-						mergeMap((accounts) => iif(() => accounts && accounts.length > 0, getActiveAccount())),
-					),
-				),
+				tap(() => Log.debug('Retrieving settings')),
+				switchMap(() => getSettings()),
 			)
-			.subscribe((account) => {
-				this._activeAccount.next(account);
+			.subscribe((settings) => {
+				this._settings.next(settings);
 			});
+
+		// Update the Vuex store with settings
+		this.getSettings().subscribe((data) => SettingsStore.setSettings(data));
 	}
 
-	public getActiveAccount(): Observable<PlexAccountDTO | null> {
-		return this._activeAccount.asObservable();
+	public getSettings(): Observable<SettingsModelDTO> {
+		return this._settings.asObservable();
 	}
 
-	public setActiveAccount(accountId: number): void {
-		setActiveAccount(accountId)
-			.pipe(tap((value) => Log.debug(`SetActiveAccount => ${value?.displayName}`)))
-			.subscribe((value) => {
-				this._activeAccount.next(value);
-			});
+	public updateSettings(settings: SettingsModelDTO): void {
+		if (settings) {
+			updateSettings(settings)
+				.pipe(finalize(() => this.fetchSettings()))
+				.subscribe();
+		} else {
+			Log.warn('SettingsService => updateSettings: settings was invalid, will not send as an update.');
+		}
+	}
+
+	public fetchSettings(): void {
+		getSettings().subscribe((value) => {
+			this._settings.next(value);
+		});
 	}
 }
 

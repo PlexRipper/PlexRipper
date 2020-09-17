@@ -1,12 +1,14 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Threading.Tasks;
+using AutoMapper;
+using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application.Common;
+using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
-using System;
-using System.Threading.Tasks;
-using FluentResults;
-using PlexRipper.Application.Common;
+using PlexRipper.WebAPI.Common.DTO.Settings;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -24,11 +26,35 @@ namespace PlexRipper.WebAPI.Controllers
             _mapper = mapper;
         }
 
+
+        // GET api/<SettingsController>/
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModelDTO>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public IActionResult GetSettings()
+        {
+            try
+            {
+                var result = _settingsService.GetSettings();
+                if (result.IsFailed)
+                {
+                    return InternalServerError(result);
+                }
+
+                var mapResult = _mapper.Map<SettingsModelDTO>(result.Value);
+                return Ok(Result.Ok(mapResult));
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
+        }
+
         // GET api/<SettingsController>/activeaccount/
         [HttpGet("activeaccount/")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetActiveAccount()
         {
             try
             {
@@ -37,9 +63,33 @@ namespace PlexRipper.WebAPI.Controllers
                 {
                     return InternalServerError(result);
                 }
+
                 var mapResult = _mapper.Map<PlexAccountDTO>(result.Value);
                 return Ok(Result.Ok(mapResult));
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
+        }
 
+        // PUT api/<SettingsController>/
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> UpdateSettings([FromBody] SettingsModelDTO settingsModel)
+        {
+            try
+            {
+                var mapResult = _mapper.Map<SettingsModel>(settingsModel);
+                var result = await _settingsService.UpdateSettings(mapResult);
+                if (result.IsFailed)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(Result.Ok(true));
             }
             catch (Exception e)
             {
@@ -49,25 +99,27 @@ namespace PlexRipper.WebAPI.Controllers
 
         // PUT api/<SettingsController>/activeaccount/5
         [HttpPut("activeaccount/{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Put(int id)
+        public IActionResult UpdateActiveAccount(int id)
         {
-            if (id <= 0) { return BadRequestInvalidId(); }
+            if (id <= 0)
+            {
+                return BadRequestInvalidId();
+            }
 
             try
             {
                 Log.Debug($"Setting the active plex account to {id}");
 
-                var result = await _settingsService.SetActivePlexAccountAsync(id);
+                var result = _settingsService.SetActivePlexAccountAsync(id);
                 if (result.IsFailed)
                 {
                     return BadRequest(result);
                 }
 
-                var mapResult = _mapper.Map<PlexAccountDTO>(result.Value);
-                return Ok(Result.Ok(mapResult));
+                return Ok(result);
             }
             catch (Exception e)
             {

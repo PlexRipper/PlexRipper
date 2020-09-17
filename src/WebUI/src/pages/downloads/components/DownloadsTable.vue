@@ -5,7 +5,6 @@
 		:headers="getHeaders"
 		:items-per-page="30"
 		:items="downloads"
-		:dark="$vuetify.theme.dark"
 		:loading="loading"
 		:value="value"
 		@input="$emit('input', $event)"
@@ -33,7 +32,7 @@
 		</template>
 		<!-- Percentage -->
 		<template v-slot:item.percentage="{ item }">
-			<v-progress-linear :value="item.percentage" stream striped color="blue-grey" :dark="$vuetify.theme.dark" height="25">
+			<v-progress-linear :value="item.percentage" stream striped color="blue-grey" height="25">
 				<template v-slot="{ value }">
 					<strong>{{ value }}%</strong>
 				</template>
@@ -41,7 +40,7 @@
 		</template>
 		<!-- Actions -->
 		<template v-slot:item.actions="{ item }">
-			<v-btn-toggle borderless dense group tile :dark="$vuetify.theme.dark">
+			<v-btn-toggle borderless dense group tile>
 				<template v-for="(action, i) in availableActions(item)">
 					<!-- Render buttons -->
 					<template v-for="(button, y) in getButtons">
@@ -49,7 +48,7 @@
 							<v-tooltip top>
 								<template v-slot:activator="{ on, attrs }">
 									<!-- Button icon-->
-									<v-icon v-bind="attrs" :dark="$vuetify.theme.dark" v-on="on"> {{ button.icon }} </v-icon>
+									<v-icon v-bind="attrs" v-on="on"> {{ button.icon }} </v-icon>
 								</template>
 								<!-- Tooltip text -->
 								<span>{{ button.name }}</span>

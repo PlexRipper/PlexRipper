@@ -1,0 +1,20 @@
+/*
+MediaPoster.vue
+*/
+.poster-overlay {
+	align-items: center;
+	justify-content: center;
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	background-color: rgba(0, 0, 0, 0);
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
+	&.on-hover {
+		background-color: rgba(0, 0, 0, 0.8);
+		opacity: 0.8;
+		.v-btn {
+			opacity: 1;
+		}
+	}
+}

@@ -13,7 +13,7 @@
 			<v-col>
 				<v-toolbar>
 					<!--Prioritize buttons-->
-					<v-btn-toggle borderless group tile :max="0" :dark="$vuetify.theme.dark">
+					<v-btn-toggle borderless group tile :max="0">
 						<v-btn>
 							<v-icon large>mdi-arrow-collapse-up</v-icon>
 						</v-btn>
@@ -53,7 +53,7 @@
 						<span class="hidden-sm-and-down">Restart</span>
 					</v-btn>
 
-					<v-btn depressed tile>
+					<v-btn depressed tile @click="deleteDownloadTasks">
 						<v-icon large left>mdi-delete</v-icon>
 						<span class="hidden-sm-and-down">Delete</span>
 					</v-btn>
@@ -63,7 +63,7 @@
 		<!--	The Download Table	-->
 		<v-row v-if="plexServers.length > 0">
 			<v-col>
-				<v-expansion-panels v-model="openExpansions" multiple :dark="$vuetify.theme.dark">
+				<v-expansion-panels v-model="openExpansions" multiple>
 					<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
 						<v-expansion-panel-header>
 							<h2>{{ plexServer.name }}</h2>
@@ -73,7 +73,7 @@
 								v-model="selected"
 								:downloads="getDownloadRows(plexServer.id)"
 								@pause="pauseDownloadTask"
-								@delete="deleteDownloadTasks"
+								@delete="deleteDownloadTask"
 								@stop="stopDownloadTask"
 								@restart="restartDownloadTask"
 								@start="startDownloadTask"
@@ -101,6 +101,7 @@ import {
 	clearDownloadTasks,
 	startDownloadTask,
 	pauseDownloadTask,
+	deleteDownloadTasks,
 } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import SignalrService from '@service/signalrService';
@@ -184,7 +185,7 @@ export default class Downloads extends Vue {
 		}
 	}
 
-	deleteDownloadTasks(downloadTaskId: number): void {
+	deleteDownloadTask(downloadTaskId: number): void {
 		const i = this.downloads.findIndex((x) => x.id === downloadTaskId);
 		if (i > -1) {
 			this.downloads.splice(i, 1);
@@ -216,6 +217,12 @@ export default class Downloads extends Vue {
 
 	clearDownloadTasks(): void {
 		clearDownloadTasks()
+			.pipe(switchMap(() => DownloadService.fetchDownloadList()))
+			.subscribe();
+	}
+
+	deleteDownloadTasks(): void {
+		deleteDownloadTasks(this.selected.map((x) => x.id))
 			.pipe(switchMap(() => DownloadService.fetchDownloadList()))
 			.subscribe();
 	}

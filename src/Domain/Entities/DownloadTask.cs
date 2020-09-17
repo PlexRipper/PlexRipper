@@ -57,6 +57,7 @@ namespace PlexRipper.Domain
         public int PlexServerId { get; set; }
 
         public PlexLibrary PlexLibrary { get; set; }
+
         public int PlexLibraryId { get; set; }
 
         public PlexAccount PlexAccount { get; set; }
@@ -110,7 +111,7 @@ namespace PlexRipper.Domain
                     case PlexMediaType.Movie:
                         return Path.Combine(DownloadPath, $"{Path.GetFileNameWithoutExtension(FileName)}");
                     case PlexMediaType.Episode:
-                        return Path.Combine(DownloadPath, TitleTvShow, TitleTvShowSeason);
+                        return Path.Combine(DownloadPath, TitleTvShow.Replace(":", "-"), TitleTvShowSeason);
                     default:
                         return Path.Combine(DownloadPath, $"{Path.GetFileNameWithoutExtension(FileName)}");
                 }

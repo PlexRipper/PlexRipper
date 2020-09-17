@@ -3,7 +3,7 @@ import type { SettingsModelDTO } from '@dto/mainApi';
 import SettingsService from '@service/settingsService';
 
 // Doc: https://typescript.nuxtjs.org/cookbook/store.html#class-based
-@Module({ name: 'settingsStore' })
+@Module({ name: 'settingsStore', stateFactory: true })
 export default class SettingsStore extends VuexModule {
 	settings: SettingsModelDTO | null = null;
 

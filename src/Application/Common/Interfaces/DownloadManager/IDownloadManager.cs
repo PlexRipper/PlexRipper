@@ -42,10 +42,20 @@ namespace PlexRipper.Application.Common
         Result<bool> PauseDownload(int downloadTaskId);
 
         /// <summary>
-        /// Deletes the PlexDownloadClient from the _downloadList and executes its disposal.
+        /// Deletes the PlexDownloadClient, if active, from the _downloadList, executes its disposal and deletes from database.
         /// </summary>
         /// <param name="downloadTaskId">The id of PlexDownloadClient to delete,
         /// the <see cref="DownloadTask"/> id can be used as these are always the same.</param>
-        void DeleteDownloadClient(int downloadTaskId);
+        /// <returns><see cref="Result"/> fails on error.</returns>
+        Task<Result> DeleteDownloadClient(int downloadTaskId);
+
+
+        /// <summary>
+        /// Deletes multiple (active) PlexDownloadClients and <see cref="DownloadTask"/> from the database.
+        /// </summary>
+        /// <param name="downloadTaskIds">The list of <see cref="DownloadTask"/> to delete.</param>
+        /// <returns><see cref="Result"/> fails on error.</returns>
+        Task<Result> DeleteDownloadClients(IEnumerable<int> downloadTaskIds);
     }
 }
+

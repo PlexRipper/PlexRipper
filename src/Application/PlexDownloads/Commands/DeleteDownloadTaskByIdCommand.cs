@@ -30,21 +30,21 @@ namespace PlexRipper.Application.PlexDownloads.Commands
 
     public class DeleteDownloadTaskByIDHandler : BaseHandler, IRequestHandler<DeleteDownloadTaskByIdCommand, Result<bool>>
     {
-        public DeleteDownloadTaskByIDHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
+        public DeleteDownloadTaskByIDHandler(IPlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<bool>> Handle(DeleteDownloadTaskByIdCommand command, CancellationToken cancellationToken)
         {
             var entity = await _dbContext.DownloadTasks.AsTracking().FirstOrDefaultAsync(x => x.Id == command.DownloadTaskId, cancellationToken);
             if (entity == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogError();
+                Log.Warning($"The entity of type DownloadTask with id {command.DownloadTaskId} could not be found");
+                return Result.Ok(false);
             }
 
             _dbContext.DownloadTasks.Remove(entity);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return Result.Ok(true);
-
         }
     }
 }

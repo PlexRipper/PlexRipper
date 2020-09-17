@@ -1,10 +1,10 @@
+import Log from 'consola';
 import { ReplaySubject, Observable } from 'rxjs';
 import { tap, switchMap, finalize } from 'rxjs/operators';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import { SettingsModelDTO } from '@dto/mainApi';
 import GlobalService from '@service/globalService';
-import Log from 'consola';
-import SettingsStore from '@/store/settingsStore';
+import { settingsStore as SettingsStore } from '@/store';
 
 export class SettingsService {
 	private _settings: ReplaySubject<SettingsModelDTO> = new ReplaySubject<SettingsModelDTO>();
@@ -20,7 +20,7 @@ export class SettingsService {
 			});
 
 		// Update the Vuex store with settings
-		// this.getSettings().subscribe((data) => SettingsStore.setSettings(data));
+		this.getSettings().subscribe((data) => SettingsStore.setSettings(data));
 	}
 
 	public getSettings(): Observable<SettingsModelDTO> {

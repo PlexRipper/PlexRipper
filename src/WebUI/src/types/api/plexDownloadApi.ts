@@ -16,7 +16,13 @@ export function downloadMedia(mediaId: number, plexAccountId: number, type: Plex
 
 export function deleteDownloadTask(downloadTaskId: number): Observable<boolean> {
 	preApiRequest(logText, 'deleteDownloadTask', `Sending delete request with downloadTaskId ${downloadTaskId}`);
-	const result: Observable<AxiosResponse> = Axios.delete(`${apiPath}/${downloadTaskId}`);
+	const result: Observable<AxiosResponse> = Axios.delete(`${apiPath}/delete/${downloadTaskId}`);
+	return checkResponse<boolean>(result, logText, 'deleteDownloadTask');
+}
+
+export function deleteDownloadTasks(downloadTaskIds: number[]): Observable<boolean> {
+	preApiRequest(logText, 'deleteDownloadTask', `Sending bulk delete request with ${downloadTaskIds.length} downloadTaskIds`);
+	const result: Observable<AxiosResponse> = Axios.post(`${apiPath}/delete/`, downloadTaskIds);
 	return checkResponse<boolean>(result, logText, 'deleteDownloadTask');
 }
 

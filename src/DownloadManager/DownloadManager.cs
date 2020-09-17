@@ -528,25 +528,52 @@ namespace PlexRipper.DownloadManager
             return Result.Ok();
         }
 
-        /// <summary>
-        /// Deletes the <see cref="PlexDownloadClient"/> from the _downloadList and executes its disposal.
-        /// </summary>
-        /// <param name="downloadTaskId">The id of <see cref="PlexDownloadClient"/> to delete,
-        /// the <see cref="DownloadTask"/> id can be used as these are always the same.</param>
-        public void DeleteDownloadClient(int downloadTaskId)
+
+        /// <inheritdoc/>
+        public async Task<Result> DeleteDownloadClient(int downloadTaskId)
         {
             Log.Debug($"Cleaning-up downloadClient with id {downloadTaskId}");
             var index = _downloadsList.FindIndex(x => x.DownloadTaskId == downloadTaskId);
             if (index > -1)
             {
+                var stopResult = _downloadsList[index].Stop();
+                if (stopResult.IsFailed)
+                {
+                    return stopResult;
+                }
+
                 _downloadsList[index].Dispose();
                 _downloadsList.RemoveAt(index);
-                Log.Debug($"Cleaned-up downloadClient with id {downloadTaskId}");
+
+                Log.Debug($"Cleaned-up PlexDownloadClient with id {downloadTaskId} from the DownloadManager");
             }
             else
             {
-                Log.Warning($"Download client with Id does not exist and could therefore not be deleted.");
+                Log.Warning($"PlexDownloadClient with Id is currently not in use and could therefore not be deleted from the DownloadManager.");
             }
+
+            var result = await _mediator.Send(new DeleteDownloadTaskByIdCommand(downloadTaskId));
+            if (result.IsFailed)
+            {
+                return result;
+            }
+
+            return Result.Ok();
+        }
+
+        /// <inheritdoc/>
+        public async Task<Result> DeleteDownloadClients(IEnumerable<int> downloadTaskIds)
+        {
+            foreach (int downloadTaskId in downloadTaskIds)
+            {
+                var result = await DeleteDownloadClient(downloadTaskId);
+                if (result.IsFailed)
+                {
+                    return result;
+                }
+            }
+
+            return Result.Ok();
         }
 
         #endregion Methods

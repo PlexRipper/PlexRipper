@@ -37,7 +37,7 @@
 					:movies="movies"
 					:account-id="activeAccountId"
 					:items="getItems"
-					@download="downloadMediaCommand"
+					@download="openDownloadDialog"
 				/>
 				<!-- The tv-show table -->
 				<tv-show-table
@@ -45,7 +45,7 @@
 					:tv-shows="tvShows"
 					:active-account="activeAccount"
 					:items="getItems"
-					@download="downloadMediaCommand"
+					@download="openDownloadDialog"
 				/>
 			</template>
 
@@ -58,13 +58,18 @@
 						:account-id="activeAccountId"
 						:media-type="mediaType"
 						:title="item.title"
-						@download="downloadMediaCommand"
+						@download="openDownloadDialog"
 					></media-poster>
 				</template>
 			</v-row>
 			<!--	Download confirmation dialog	-->
 			<v-row>
-				<download-confirmation ref="downloadConfirmationRef" :items="getItems" @download="downloadMedia"></download-confirmation>
+				<download-confirmation
+					ref="downloadConfirmationRef"
+					:items="getItems"
+					:progress="downloadTaskCreationProgress"
+					@download="downloadMedia"
+				/>
 			</v-row>
 		</template>
 	</v-container>
@@ -123,8 +128,8 @@ export default class MediaOverview extends Vue {
 	isLoading: boolean = true;
 	viewMode: ViewMode = ViewMode.Poster;
 	isRefreshing: boolean = false;
-	progress: LibraryProgress | null = null;
 	library: PlexLibraryDTO | null = null;
+	libraryProgress: LibraryProgress | null = null;
 	downloadTaskCreationProgress: DownloadTaskCreationProgress | null = null;
 	downloadPreviewType: PlexMediaType = PlexMediaType.None;
 
@@ -161,7 +166,7 @@ export default class MediaOverview extends Vue {
 	}
 
 	get getPercentage(): number {
-		return this.progress?.percentage ?? 0;
+		return this.libraryProgress?.percentage ?? 0;
 	}
 
 	changeView(viewMode: ViewMode): void {
@@ -169,7 +174,7 @@ export default class MediaOverview extends Vue {
 	}
 
 	resetProgress(isRefreshing: boolean): void {
-		this.progress = {
+		this.libraryProgress = {
 			id: this.libraryId,
 			percentage: 0,
 			received: 0,
@@ -201,16 +206,7 @@ export default class MediaOverview extends Vue {
 		return this.viewMode === ViewMode.Table;
 	}
 
-	downloadMediaCommand(mediaId: IMediaId): void {
-		const confirmationEnabled = true;
-		if (confirmationEnabled) {
-			this.openDownloadConfirmationDialog(mediaId);
-		} else {
-			this.downloadMedia(mediaId);
-		}
-	}
-
-	openDownloadConfirmationDialog(mediaId: IMediaId): void {
+	openDownloadDialog(mediaId: IMediaId): void {
 		this.downloadConfirmationRef.openDialog(mediaId);
 	}
 
@@ -223,7 +219,10 @@ export default class MediaOverview extends Vue {
 					Log.debug(data);
 				}),
 				finalize(() => {
-					this.progress = null;
+					setTimeout(() => {
+						this.downloadConfirmationRef.closeDialog();
+						this.downloadTaskCreationProgress = null;
+					}, 2000);
 				}),
 				takeWhile((data) => !data.isComplete),
 				catchError(() => {
@@ -233,7 +232,10 @@ export default class MediaOverview extends Vue {
 			// Download Media
 			downloadMedia(mediaId.id, this.activeAccountId, mediaId.type).pipe(
 				finalize(() => {
-					this.downloadTaskCreationProgress = null;
+					setTimeout(() => {
+						this.downloadConfirmationRef.closeDialog();
+						this.downloadTaskCreationProgress = null;
+					}, 2000);
 					DownloadService.fetchDownloadList();
 				}),
 				catchError(() => {
@@ -243,6 +245,7 @@ export default class MediaOverview extends Vue {
 		)
 			.pipe(
 				catchError(() => {
+					this.downloadConfirmationRef.closeDialog();
 					this.downloadTaskCreationProgress = null;
 					return of(false);
 				}),
@@ -258,10 +261,10 @@ export default class MediaOverview extends Vue {
 			// Setup progress bar
 			SignalrService.getLibraryProgress().pipe(
 				tap((data) => {
-					this.progress = data;
+					this.libraryProgress = data;
 				}),
 				finalize(() => {
-					this.progress = null;
+					this.libraryProgress = null;
 				}),
 				takeWhile((data) => !data.isComplete),
 			),
@@ -302,7 +305,7 @@ export default class MediaOverview extends Vue {
 						// Setup progress bar
 						SignalrService.getLibraryProgress().pipe(
 							tap((data) => {
-								this.progress = data;
+								this.libraryProgress = data;
 								this.isRefreshing = data.isRefreshing ?? false;
 							}),
 							takeWhile((data) => !data.isComplete),

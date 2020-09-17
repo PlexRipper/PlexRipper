@@ -2,11 +2,10 @@
 	<!-- The "Are you sure" dialog -->
 	<v-col cols="12">
 		<v-dialog v-model="showDialog" :max-width="500" scrollable>
-			<v-card v-if="progress === null">
+			<v-card v-if="isConfirmationEnabled && progress === null">
 				<v-card-title> Are you sure? </v-card-title>
 				<v-card-subtitle>
 					<p>Plex Ripper will start downloading the following:</p>
-					<p>{{ openDownloadPreviews }}</p>
 				</v-card-subtitle>
 				<!-- Show Download Task Preview -->
 				<v-card-text>
@@ -28,7 +27,7 @@
 			</v-card>
 
 			<!-- Download Task Creation Progressbar -->
-			<v-card v-else>
+			<v-card v-if="progress">
 				<v-card-title class="justify-center">
 					Creating download tasks {{ progress.current }} of {{ progress.total }}
 				</v-card-title>
@@ -47,6 +46,7 @@ import { DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
 import { clone } from 'lodash';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
+import { settingsStore as SettingsStore } from '@/store';
 
 @Component<DownloadConfirmation>({
 	components: {
@@ -57,11 +57,28 @@ export default class DownloadConfirmation extends Vue {
 	@Prop({ required: true, type: Array as () => ITreeViewItem[] })
 	readonly items!: ITreeViewItem[];
 
+	@Prop({ required: true })
+	readonly progress!: DownloadTaskCreationProgress | null;
+
 	openDownloadPreviews: string[] = [];
 	downloadPreview: ITreeViewItem[] = [];
 	showDialog: boolean = false;
 	mediaId: IMediaId = { id: 0, type: PlexMediaType.None };
-	progress: DownloadTaskCreationProgress | null = null;
+
+	get isConfirmationEnabled(): boolean {
+		switch (this.mediaId.type) {
+			case PlexMediaType.Movie:
+				return SettingsStore.askDownloadMovieConfirmation;
+			case PlexMediaType.TvShow:
+				return SettingsStore.askDownloadTvShowConfirmation;
+			case PlexMediaType.Season:
+				return SettingsStore.askDownloadSeasonConfirmation;
+			case PlexMediaType.Episode:
+				return SettingsStore.askDownloadEpisodeConfirmation;
+			default:
+				return true;
+		}
+	}
 
 	private createPreview(mediaId: IMediaId): void {
 		const result: ITreeViewItem[] = [];
@@ -141,8 +158,16 @@ export default class DownloadConfirmation extends Vue {
 
 	openDialog(mediaId: IMediaId): void {
 		this.mediaId = mediaId;
-		this.createPreview(mediaId);
+		if (this.isConfirmationEnabled) {
+			this.createPreview(mediaId);
+		} else {
+			this.confirmDownload();
+		}
 		this.showDialog = true;
+	}
+
+	closeDialog(): void {
+		this.showDialog = false;
 	}
 
 	confirmDownload(): void {

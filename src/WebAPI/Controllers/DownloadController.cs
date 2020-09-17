@@ -144,8 +144,12 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
 
-        // DELETE api/<DownloadController>/5
-        [HttpDelete("{downloadTaskId:int}")]
+        /// <summary>
+        /// DELETE api/(DownloadController)/5.
+        /// </summary>
+        /// <param name="downloadTaskId">The downloadTask to delete by id.</param>
+        /// <returns>HTTP Response.</returns>
+        [HttpDelete("delete/{downloadTaskId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Delete(int downloadTaskId)
@@ -155,8 +159,37 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(downloadTaskId, nameof(downloadTaskId));
             }
 
-            var result = await _plexDownloadService.DeleteDownloadsAsync(downloadTaskId);
+            var result = await _plexDownloadService.DeleteDownloadTaskAsync(downloadTaskId);
+            if (result.Has400BadRequestError())
+            {
+                return BadRequest(result);
+            }
+
             return result.IsFailed ? BadRequest(result) : Ok(result);
+        }
+
+        /// <summary>
+        /// DELETE api/(DownloadController)/.
+        /// </summary>
+        /// <param name="downloadTaskIds">The list of downloadTasks to delete by id.</param>
+        /// <returns>HTTP Response.</returns>
+        [HttpPost("delete")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> DeleteRange([FromBody] List<int> downloadTaskIds)
+        {
+            if (downloadTaskIds.Count <= 0)
+            {
+                return BadRequest(Result.Fail($"No list of download task Id's was given in the request body"));
+            }
+
+            var result = await _plexDownloadService.DeleteDownloadTasksAsync(downloadTaskIds);
+            if (result.Has400BadRequestError())
+            {
+                return BadRequest(result);
+            }
+
+            return result.IsFailed ? InternalServerError(result) : Ok(result);
         }
     }
 }

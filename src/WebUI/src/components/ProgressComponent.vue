@@ -6,7 +6,7 @@
 			</v-layout>
 			<h1>{{ text }}</h1>
 			<!-- Library progress bar -->
-			<v-progress-linear :value="percentage" height="20" class="mt-3" striped color="red">
+			<v-progress-linear :value="percentage" height="20" class="mt-3" striped stream color="red">
 				<template v-slot="{ value }">
 					<strong>{{ value }}%</strong>
 				</template>

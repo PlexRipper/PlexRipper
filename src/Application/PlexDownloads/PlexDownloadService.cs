@@ -225,10 +225,14 @@ namespace PlexRipper.Application.PlexDownloads
             return _downloadManager.ClearCompletedAsync();
         }
 
-        public Task<Result<bool>> DeleteDownloadsAsync(int downloadTaskId)
+        public async Task<Result<bool>> DeleteDownloadTaskAsync(int downloadTaskId)
         {
-            _downloadManager.DeleteDownloadClient(downloadTaskId);
-            return _mediator.Send(new DeleteDownloadTaskByIdCommand(downloadTaskId));
+            return await _downloadManager.DeleteDownloadClient(downloadTaskId);
+        }
+
+        public async Task<Result<bool>> DeleteDownloadTasksAsync(IEnumerable<int> downloadTaskIds)
+        {
+            return await _downloadManager.DeleteDownloadClients(downloadTaskIds);
         }
 
         public async Task<Result<bool>> DownloadMediaAsync(int plexAccountId, int mediaId, PlexMediaType type)

@@ -33,7 +33,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { PlexLibraryDTO, PlexServerDTO, ViewMode } from '@dto/mainApi';
+import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { ViewMode } from '@dto/mainApi';
 import VerticalButton from '@components/General/VerticalButton.vue';
 
 interface IViewOptions {

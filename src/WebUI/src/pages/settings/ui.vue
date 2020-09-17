@@ -57,10 +57,9 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
-import { SettingsModelDTO } from '@dto/mainApi';
-import SettingsService from '@service/settingsService';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import DirectoryBrowser from './components/DirectoryBrowser.vue';
+import { settingsStore as SettingsStore } from '~/store';
 
 @Component({
 	components: {
@@ -69,70 +68,36 @@ import DirectoryBrowser from './components/DirectoryBrowser.vue';
 	},
 })
 export default class UiSettings extends Vue {
-	settings: SettingsModelDTO | null = null;
-
 	get askDownloadMovieConfirmation(): boolean {
-		return this.settings?.userInterfaceSettings?.confirmationSettings?.askDownloadMovieConfirmation ?? false;
+		return SettingsStore.askDownloadMovieConfirmation;
 	}
 
 	set askDownloadMovieConfirmation(value: boolean) {
-		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
-			if (this.settings?.userInterfaceSettings?.confirmationSettings.askDownloadMovieConfirmation !== value) {
-				this.settings.userInterfaceSettings.confirmationSettings.askDownloadMovieConfirmation = value;
-				this.updateSettings();
-			}
-		}
+		SettingsStore.setAskDownloadMovieConfirmation(value);
 	}
 
 	get askDownloadTvShowConfirmation(): boolean {
-		return this.settings?.userInterfaceSettings?.confirmationSettings?.askDownloadTvShowConfirmation ?? false;
+		return SettingsStore.askDownloadTvShowConfirmation;
 	}
 
 	set askDownloadTvShowConfirmation(value: boolean) {
-		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
-			if (this.settings?.userInterfaceSettings?.confirmationSettings.askDownloadTvShowConfirmation !== value) {
-				this.settings.userInterfaceSettings.confirmationSettings.askDownloadTvShowConfirmation = value;
-				this.updateSettings();
-			}
-		}
+		SettingsStore.setAskDownloadTvShowConfirmation(value);
 	}
 
 	get askDownloadSeasonConfirmation(): boolean {
-		return this.settings?.userInterfaceSettings?.confirmationSettings?.askDownloadSeasonConfirmation ?? false;
+		return SettingsStore.askDownloadSeasonConfirmation;
 	}
 
 	set askDownloadSeasonConfirmation(value: boolean) {
-		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
-			if (this.settings?.userInterfaceSettings?.confirmationSettings.askDownloadSeasonConfirmation !== value) {
-				this.settings.userInterfaceSettings.confirmationSettings.askDownloadSeasonConfirmation = value;
-				this.updateSettings();
-			}
-		}
+		SettingsStore.setAskDownloadSeasonConfirmation(value);
 	}
 
 	get askDownloadEpisodeConfirmation(): boolean {
-		return this.settings?.userInterfaceSettings?.confirmationSettings?.askDownloadEpisodeConfirmation ?? false;
+		return SettingsStore.askDownloadEpisodeConfirmation;
 	}
 
 	set askDownloadEpisodeConfirmation(value: boolean) {
-		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
-			if (this.settings?.userInterfaceSettings?.confirmationSettings.askDownloadEpisodeConfirmation !== value) {
-				this.settings.userInterfaceSettings.confirmationSettings.askDownloadEpisodeConfirmation = value;
-				this.updateSettings();
-			}
-		}
-	}
-
-	updateSettings(): void {
-		if (this.settings) {
-			SettingsService.updateSettings(this.settings);
-		}
-	}
-
-	created(): void {
-		SettingsService.getSettings().subscribe((data) => {
-			this.settings = data;
-		});
+		SettingsStore.setAskDownloadEpisodeConfirmation(value);
 	}
 }
 </script>

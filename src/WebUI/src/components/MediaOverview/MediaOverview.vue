@@ -72,14 +72,13 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import type { PlexAccountDTO } from '@dto/mainApi';
+import type { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 import {
 	DownloadTaskCreationProgress,
 	LibraryProgress,
 	PlexLibraryDTO,
 	PlexMediaType,
 	PlexMovieDTO,
-	PlexServerDTO,
 	PlexTvShowDTO,
 	ViewMode,
 } from '@dto/mainApi';

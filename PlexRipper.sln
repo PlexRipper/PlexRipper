@@ -45,7 +45,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR", "src\SignalR\Sign
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileSystem", "src\FileSystem\FileSystem.csproj", "{E19F855E-B9CC-4A8D-982E-6BCCE0A58348}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DownloadManager.UnitTests", "tests\DownloadManager.UnitTests\DownloadManager.UnitTests.csproj", "{E0E9AA81-AF60-4019-9AB8-811AFC39DE24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DownloadManager.UnitTests", "tests\DownloadManager.UnitTests\DownloadManager.UnitTests.csproj", "{E0E9AA81-AF60-4019-9AB8-811AFC39DE24}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B5DD9F30-A643-4E3C-B375-5EBF2FB2CBAC}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

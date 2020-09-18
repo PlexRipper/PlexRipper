@@ -101,7 +101,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileContentResult))]
         public async Task<IActionResult> GetThumb([FromBody] ThumbnailRequestDTO thumbnailRequestDto)
         {
-            var result = await _plexLibraryService.GetImage(
+            var result = await _plexLibraryService.GetThumbnailImage(
                 thumbnailRequestDto.PlexAccountId,
                 thumbnailRequestDto.PlexMediaId,
                 thumbnailRequestDto.PlexMediaType,

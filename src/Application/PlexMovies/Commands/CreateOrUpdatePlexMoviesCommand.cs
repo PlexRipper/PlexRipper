@@ -14,14 +14,15 @@ namespace PlexRipper.Application.PlexMovies
 {
     public class CreateOrUpdatePlexMoviesCommand : IRequest<Result<bool>>
     {
-        public PlexLibrary PlexLibrary { get; }
-        public List<PlexMovie> PlexMovies { get; }
-
         public CreateOrUpdatePlexMoviesCommand(PlexLibrary plexLibrary, List<PlexMovie> plexMovies)
         {
             PlexLibrary = plexLibrary;
             PlexMovies = plexMovies;
         }
+
+        public PlexLibrary PlexLibrary { get; }
+
+        public List<PlexMovie> PlexMovies { get; }
     }
 
     public class CreateOrUpdatePlexMoviesValidator : AbstractValidator<CreateOrUpdatePlexMoviesCommand>
@@ -37,11 +38,10 @@ namespace PlexRipper.Application.PlexMovies
 
     public class CreateOrUpdatePlexMoviesHandler : BaseHandler, IRequestHandler<CreateOrUpdatePlexMoviesCommand, Result<bool>>
     {
-        public CreateOrUpdatePlexMoviesHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
+        public CreateOrUpdatePlexMoviesHandler(IPlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<bool>> Handle(CreateOrUpdatePlexMoviesCommand command, CancellationToken cancellationToken)
         {
-
             var plexLibrary = command.PlexLibrary;
             var plexMovies = command.PlexMovies;
 
@@ -55,7 +55,6 @@ namespace PlexRipper.Application.PlexMovies
             _dbContext.PlexMovies.RemoveRange(currentMovies);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-
             // Ensure the correct ID is added.
             foreach (var movie in plexMovies)
             {
@@ -68,7 +67,6 @@ namespace PlexRipper.Application.PlexMovies
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return Result.Ok(true);
-
         }
     }
 }

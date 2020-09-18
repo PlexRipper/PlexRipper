@@ -21,7 +21,9 @@ namespace PlexRipper.Application.PlexLibraries.Queries
         }
 
         public int Id { get; }
+
         public bool IncludePlexServer { get; }
+
         public bool IncludeMedia { get; }
     }
 
@@ -36,9 +38,7 @@ namespace PlexRipper.Application.PlexLibraries.Queries
 
     public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdQuery, Result<PlexLibrary>>
     {
-        public GetPlexLibraryByIdWithMediaHandler(IPlexRipperDbContext dbContext) : base(dbContext)
-        {
-        }
+        public GetPlexLibraryByIdWithMediaHandler(IPlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdQuery request, CancellationToken cancellationToken)
         {

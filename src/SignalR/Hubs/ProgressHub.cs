@@ -8,14 +8,6 @@ namespace PlexRipper.SignalR.Hubs
 {
     public class ProgressHub : Hub
     {
-        public Task DownloadProgressAsync(IDownloadProgress downloadProgress)
-        {
-            if (Clients != null)
-            {
-                return Clients.All.SendAsync("DownloadProgress", downloadProgress);
-            }
-            Log.Error("Clients is null, make sure a client has been subscribed!");
-            return new Task(() => { });
-        }
+        public ProgressHub() { }
     }
 }

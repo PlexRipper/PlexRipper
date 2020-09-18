@@ -38,17 +38,18 @@ namespace PlexRipper.Application.PlexAccounts
                 Log.Warning("Validation failed when attempting to retrieve the PlexServers by PlexAccount id");
                 return result;
             }
+
             Log.Information($"Retrieved {result.Value.Count} PlexServers from the database"
-                            + (refresh ? ", after refresh from the plexApi" : ""));
+                            + (refresh ? ", after refresh from the plexApi" : string.Empty));
             return result;
         }
 
         /// <summary>
-        /// Check if this account is valid by querying the Plex API
+        /// Check if this account is valid by querying the Plex API.
         /// </summary>
         /// <param name="username"></param>
         /// <param name="password"></param>
-        /// <returns>If the account credentials valid</returns>
+        /// <returns>If the account credentials valid.</returns>
         public async Task<Result<bool>> ValidatePlexAccountAsync(string username, string password)
         {
             if (username == string.Empty || password == string.Empty)
@@ -94,6 +95,7 @@ namespace PlexRipper.Application.PlexAccounts
                 Log.Warning(msg);
                 return Result.Fail(msg);
             }
+
             if (plexAccount.Id <= 0)
             {
                 string msg = $"plexAccount.id was {plexAccount.Id}";
@@ -185,13 +187,13 @@ namespace PlexRipper.Application.PlexAccounts
         #region CRUD
 
         /// <summary>
-        /// Returns the <see cref="PlexAccount"/> and the accessible <see cref="PlexServer"/>s
+        /// Returns the <see cref="PlexAccount"/> with the accessible <see cref="PlexServer"/>s and all <see cref="PlexLibrary"/>.
         /// </summary>
-        /// <param name="accountId">The Id to retrieve the <see cref="PlexAccount"/> by</param>
+        /// <param name="accountId">The Id to retrieve the <see cref="PlexAccount"/> by.</param>
         /// <returns>The account found</returns>
         public async Task<Result<PlexAccount>> GetPlexAccountAsync(int accountId)
         {
-            var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId));
+            var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId, true, true));
 
             if (result.IsFailed)
             {
@@ -300,7 +302,6 @@ namespace PlexRipper.Application.PlexAccounts
                 return plexAccountDb;
             }
 
-
             // Re-validate if the password changed
             if (plexAccountDb.Value != null && plexAccountDb.Value.Password != plexAccount.Password)
             {
@@ -318,7 +319,7 @@ namespace PlexRipper.Application.PlexAccounts
         /// <returns></returns>
         public async Task<Result<bool>> DeletePlexAccountAsync(int plexAccountId)
         {
-           return await _mediator.Send(new DeletePlexAccountCommand(plexAccountId));
+            return await _mediator.Send(new DeletePlexAccountCommand(plexAccountId));
         }
 
         #endregion

@@ -176,6 +176,7 @@ namespace PlexRipper.Application.PlexDownloads
             }
 
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShowShowSeason.Id, totalCount, totalCount);
+
             // Add the priorities to each downloadTask
             return PrioritizeDownloadTasks(downloadTasks);
         }
@@ -195,6 +196,7 @@ namespace PlexRipper.Application.PlexDownloads
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShowEpisodeId, 1, 1);
             var downloadTask = await CreateDownloadTaskAsync(plexServer.Value, plexTvShowEpisode.Value.PlexLibraryId, plexAccountId,
                 plexTvShowEpisode.Value.RatingKey, PlexMediaType.Episode);
+
             // Add the priorities to each downloadTask
             return PrioritizeDownloadTask(downloadTask.Value);
         }

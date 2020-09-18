@@ -52,6 +52,7 @@ namespace PlexRipper.Domain
         public int PlexServerId { get; set; }
 
         public List<PlexMovie> Movies { get; set; }
+
         public List<PlexTvShow> TvShows { get; set; }
 
         public List<PlexAccountLibrary> PlexAccountLibraries { get; set; }
@@ -86,7 +87,7 @@ namespace PlexRipper.Domain
                 {
                     PlexMediaType.Movie => Movies != null && Movies.Count > 0,
                     PlexMediaType.TvShow => TvShows != null && TvShows.Count > 0,
-                    _ => false
+                    _ => false,
                 };
             }
         }
@@ -100,7 +101,7 @@ namespace PlexRipper.Domain
                 {
                     PlexMediaType.Movie => Movies?.Count ?? -1,
                     PlexMediaType.TvShow => TvShows?.Count ?? -1,
-                    _ => -1
+                    _ => -1,
                 };
             }
         }

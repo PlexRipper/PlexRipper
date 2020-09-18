@@ -15,7 +15,7 @@ namespace PlexRipper.BaseTests
     {
         static ITestOutputHelper Output;
 
-        public static Serilog.ILogger GetLogger<T>()
+        public static ILogger GetLogger<T>()
         {
             return GetLoggerConfig().ForContext<T>();
         }

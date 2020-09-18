@@ -14,14 +14,13 @@ namespace PlexRipper.SignalR
     /// </summary>
     public class SignalRService : ISignalRService
     {
-        private readonly IHubContext<ProgressHub> _progressHub;
+        private readonly ProgressHub _progressHub;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SignalRService"/> class.
         /// </summary>
-        /// <param name="libraryProgress">The <see cref="LibraryProgressHub"/>.</param>
         /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
-        public SignalRService(IHubContext<ProgressHub> progressHub)
+        public SignalRService(ProgressHub progressHub)
         {
             _progressHub = progressHub;
         }
@@ -38,6 +37,11 @@ namespace PlexRipper.SignalR
                 IsComplete = received >= total,
             };
 
+            if (_progressHub?.Clients?.All == null)
+            {
+                return;
+            }
+
             await _progressHub.Clients.All.SendAsync("LibraryProgress", progress);
         }
 
@@ -52,25 +56,46 @@ namespace PlexRipper.SignalR
                 IsComplete = current >= total,
             };
 
+            if (_progressHub?.Clients?.All == null)
+            {
+                return;
+            }
+
             await _progressHub.Clients.All.SendAsync("DownloadTaskCreation", progress);
         }
 
         /// <inheritdoc/>
         public async Task SendDownloadProgressUpdate(IDownloadProgress downloadProgress)
         {
+            if (_progressHub?.Clients?.All == null)
+            {
+                return;
+            }
+
             await _progressHub.Clients.All.SendAsync("DownloadProgress", downloadProgress);
         }
 
         /// <inheritdoc/>
         public async Task SendDownloadStatusUpdate(int id, DownloadStatus downloadStatus)
         {
+            if (_progressHub?.Clients?.All == null)
+            {
+                return;
+            }
+
             var downloadStatusChanged = new DownloadStatusChanged(id, downloadStatus);
+
             await _progressHub.Clients.All.SendAsync("DownloadStatus", downloadStatusChanged);
         }
 
         /// <inheritdoc/>
         public void SendFileMergeProgressUpdate(FileMergeProgress fileMergeProgress)
         {
+            if (_progressHub?.Clients?.All == null)
+            {
+                return;
+            }
+
             Task.Run(() => _progressHub.Clients.All.SendAsync("FileMergeProgress", fileMergeProgress));
         }
     }

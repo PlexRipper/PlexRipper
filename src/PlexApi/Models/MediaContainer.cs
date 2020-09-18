@@ -16,10 +16,10 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("allowSync")]
         public bool AllowSync { get; set; }
-        
+
         [JsonPropertyName("identifier")]
         public string Identifier { get; set; }
-        
+
         [JsonPropertyName("librarySectionID")]
         public int LibrarySectionID { get; set; }
 
@@ -31,17 +31,17 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("mediaTagPrefix")]
         public string MediaTagPrefix { get; set; }
-        
+
         [JsonPropertyName("mediaTagVersion")]
         public int MediaTagVersion { get; set; }
-        
+
         [JsonPropertyName("Metadata")]
         public List<Metadata> Metadata { get; set; }
 
         //Library Sections
         [JsonPropertyName("art")]
         public string Art { get; set; }
-        
+
         [JsonPropertyName("nocache")]
         public bool Nocache { get; set; }
 
@@ -66,22 +66,22 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("key")]
         public string Key { get; set; }
-        
+
         [JsonPropertyName("parentIndex")]
         public int ParentIndex { get; set; }
-        
+
         [JsonPropertyName("parentTitle")]
         public string ParentTitle { get; set; }
-        
+
         [JsonPropertyName("parentYear")]
         public int ParentYear { get; set; }
-        
+
         [JsonPropertyName("sortAsc")]
         public bool SortAsc { get; set; }
-        
+
         [JsonPropertyName("summary")]
         public string Summary { get; set; }
-        
+
         [JsonPropertyName("theme")]
         public string Theme { get; set; }
 
@@ -94,19 +94,19 @@ namespace PlexRipper.PlexApi.Models
         //TV Show Episode
         [JsonPropertyName("grandparentContentRating")]
         public string GrandparentContentRating { get; set; }
-        
+
         [JsonPropertyName("grandparentRatingKey")]
         public int GrandparentRatingKey { get; set; }
-        
+
         [JsonPropertyName("grandparentStudio")]
         public string GrandparentStudio { get; set; }
-        
+
         [JsonPropertyName("grandparentTheme")]
         public string GrandparentTheme { get; set; }
-        
+
         [JsonPropertyName("grandparentThumb")]
         public string GrandparentThumb { get; set; }
-        
+
         [JsonPropertyName("grandparentTitle")]
         public string GrandparentTitle { get; set; }
 
@@ -122,10 +122,10 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("allowSharing")]
         public bool AllowSharing { get; set; }
-        
+
         [JsonPropertyName("allowTuners")]
         public bool AllowTuners { get; set; }
-        
+
         [JsonPropertyName("backgroundProcessing")]
         public bool BackgroundProcessing { get; set; }
 
@@ -152,10 +152,10 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("itemClusters")]
         public bool ItemClusters { get; set; }
-        
+
         [JsonPropertyName("liveTv")]
         public int LiveTv { get; set; }
-        
+
         [JsonPropertyName("machineIdentifier")]
         public object MachineIdentifier { get; set; }
 
@@ -179,13 +179,13 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("myPlexUsername")]
         public object MyPlexUsername { get; set; }
-        
+
         [JsonPropertyName("ownerFeatures")]
         public string OwnerFeatures { get; set; }
 
         [JsonPropertyName("photoAutoTag")]
         public bool PhotoAutoTag { get; set; }
-        
+
         [JsonPropertyName("platform")]
         public object Platform { get; set; }
 
@@ -203,10 +203,10 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("streamingBrainVersion")]
         public int StreamingBrainVersion { get; set; }
-        
+
         [JsonPropertyName("streamingBrainAbrVersion")]
         public int StreamingBrainAbrVersion { get; set; }
-        
+
         [JsonPropertyName("sync")]
         public bool Sync { get; set; }
 
@@ -236,11 +236,11 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("transcoderVideoResolutions")]
         public object TranscoderVideoResolutions { get; set; }
-        
+
         [JsonPropertyName("createdAt")]
         [JsonConverter(typeof(LongToDateTime))]
-        public DateTime CreatedAt { get; set; }  
-        
+        public DateTime CreatedAt { get; set; }
+
         [JsonPropertyName("updatedAt")]
         [JsonConverter(typeof(LongToDateTime))]
         public DateTime UpdatedAt { get; set; }

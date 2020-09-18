@@ -1,13 +1,16 @@
-﻿using PlexRipper.BaseTests;
-using Shouldly;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using PlexRipper.BaseTests;
 using PlexRipper.Domain;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Priority;
 
 namespace PlexRipper.Application.IntegrationTests.Services
 {
+    [Collection("PlexLibrary")]
+    [TestCaseOrderer(PriorityOrderer.Name, PriorityOrderer.Assembly)]
     public class PlexLibraryServiceIntegrationTests
     {
         private BaseContainer Container { get; }
@@ -18,7 +21,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             Container = new BaseContainer();
         }
 
-        [Fact]
+        [Fact, Priority(1)]
         public async Task CreatePlexAccountAndRequestLibrary_ShouldReturnValidLibrary()
         {
             // Arrange
@@ -26,7 +29,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var plexLibraryService = Container.GetPlexLibraryService;
             var credentials = Secrets.Account2;
 
-            //Act 
+            // Act
             var newAccount = new PlexAccount
             {
                 DisplayName = "Test Account 1",
@@ -34,12 +37,17 @@ namespace PlexRipper.Application.IntegrationTests.Services
                 Password = credentials.Password
             };
 
-
             // Act
             var result = await accountService.CreatePlexAccountAsync(newAccount);
-            var library = result.Value.PlexServers.First()?.PlexLibraries.ToList()?[6];
-            var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(library.Id, result.Value.Id);
 
+            // Retrieve account with included PlexServers and PlexLibraries
+            result = await accountService.GetPlexAccountAsync(result.Value.Id);
+
+            // This is very specific to the plex account used
+            var library = GetLibraryFromPlexAccount(result.Value);
+            library.ShouldNotBeNull();
+
+            var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(library.Id, result.Value.Id);
 
             // Assert
             result.IsSuccess.ShouldBeTrue();
@@ -53,6 +61,24 @@ namespace PlexRipper.Application.IntegrationTests.Services
             plexLibrary.Value.Movies.ShouldNotBeEmpty();
             plexLibrary.Value.PlexServer.ShouldNotBeNull();
             plexLibrary.Value.HasMedia.ShouldBeTrue();
+        }
+
+        [Fact, Priority(2)]
+        public async Task RequestMetadataForPlexLibrary_ShouldReturnValidMediaList()
+        {
+            // Arrange
+            var accountService = Container.GetPlexAccountService;
+            var plexLibraryService = Container.GetPlexLibraryService;
+
+            var account = await accountService.GetPlexAccountAsync(1);
+
+            account.Value.ShouldNotBeNull();
+        }
+
+        private PlexLibrary GetLibraryFromPlexAccount(PlexAccount plexAccount)
+        {
+            // Retrieve the movies library
+            return plexAccount.PlexServers.First()?.PlexLibraries?.Find(x => x.Title == "Movies") ?? null;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace PlexRipper.Domain.UnitTests
 
         public ResultExtensionsTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.Setup(output);
+            BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
         }
 

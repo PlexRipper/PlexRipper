@@ -11,7 +11,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
         public LoggingServiceIntegrationTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.Setup(output);
+            BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
         }
 

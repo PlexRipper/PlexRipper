@@ -13,7 +13,7 @@ namespace DownloadManager.UnitTests
 
         public DownloadManagerUnitTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.Setup(output);
+            BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
         }
 

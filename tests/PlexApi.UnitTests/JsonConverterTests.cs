@@ -14,7 +14,7 @@ namespace PlexApi.UnitTests
 
         public JsonConverterTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.Setup(output);
+            BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
         }
 

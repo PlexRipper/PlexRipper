@@ -13,7 +13,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
         public PlexAccountServiceIntegrationTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.Setup(output);
+            BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
         }
 

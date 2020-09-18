@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using PlexRipper.BaseTests;
+using PlexRipper.BaseTests.Fixtures;
 using PlexRipper.Domain;
 using Shouldly;
 using Xunit;
@@ -11,14 +12,14 @@ namespace PlexRipper.Application.IntegrationTests.Services
 {
     [Collection("PlexLibrary")]
     [TestCaseOrderer(PriorityOrderer.Name, PriorityOrderer.Assembly)]
-    public class PlexLibraryServiceIntegrationTests
+    public class PlexLibraryServiceIntegrationTests : IClassFixture<DatabaseFixture>
     {
         private BaseContainer Container { get; }
 
-        public PlexLibraryServiceIntegrationTests(ITestOutputHelper output)
+        public PlexLibraryServiceIntegrationTests(DatabaseFixture fixture, ITestOutputHelper output)
         {
-            BaseDependanciesTest.Setup(output);
-            Container = new BaseContainer();
+            BaseDependanciesTest.SetupLogging(output);
+            Container = fixture.Container;
         }
 
         [Fact, Priority(1)]
@@ -34,11 +35,12 @@ namespace PlexRipper.Application.IntegrationTests.Services
             {
                 DisplayName = "Test Account 1",
                 Username = credentials.Username,
-                Password = credentials.Password
+                Password = credentials.Password,
             };
 
             // Act
             var result = await accountService.CreatePlexAccountAsync(newAccount);
+            result.IsFailed.ShouldBeFalse();
 
             // Retrieve account with included PlexServers and PlexLibraries
             result = await accountService.GetPlexAccountAsync(result.Value.Id);

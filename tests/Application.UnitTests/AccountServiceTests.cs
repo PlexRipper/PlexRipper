@@ -14,7 +14,7 @@ namespace PlexRipper.Application.UnitTests
 
         public AccountServiceTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.Setup(output);
+            BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
 
         }

@@ -12,7 +12,7 @@ namespace PlexApi.UnitTests
 
         public PlexApiServiceTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.Setup(output);
+            BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
         }
 

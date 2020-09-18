@@ -14,7 +14,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
         public PlexDownloadServiceIntegrationTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.Setup(output);
+            BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
         }
 

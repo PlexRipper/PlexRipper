@@ -1,13 +1,6 @@
-﻿using AutoMapper;
-using PlexRipper.Application.Config.Mappings;
-using PlexRipper.Domain;
-using PlexRipper.Domain.AutoMapper;
-using PlexRipper.PlexApi.Config.Mappings;
-using PlexRipper.WebAPI.Config;
+﻿using PlexRipper.Domain;
 using Serilog;
-using System;
 using Xunit.Abstractions;
-using Log = Serilog.Log;
 
 namespace PlexRipper.BaseTests
 {
@@ -20,13 +13,10 @@ namespace PlexRipper.BaseTests
             return GetLoggerConfig().ForContext<T>();
         }
 
-        public static void Setup(ITestOutputHelper output)
+        public static void SetupLogging(ITestOutputHelper output)
         {
-            Environment.SetEnvironmentVariable("IntegrationTestMode", "true");
-            Environment.SetEnvironmentVariable("ResetDB", "true");
-
             Output = output;
-            SetupLogging();
+            Serilog.Log.Logger = GetLoggerConfig();
         }
 
         public static ILogger GetLoggerConfig()
@@ -36,25 +26,5 @@ namespace PlexRipper.BaseTests
                 .WriteTo.TestOutput(Output, outputTemplate: LogConfigurationExtensions.Template)
                 .CreateLogger();
         }
-
-        public static void SetupLogging()
-        {
-            Log.Logger = GetLoggerConfig();
-        }
-
-        public static Mapper GetMapper()
-        {
-            var configuration = new MapperConfiguration(
-                cfg =>
-                {
-                    cfg.AddProfile(new DomainMappingProfile());
-                    cfg.AddProfile(new ApplicationMappingProfile());
-                    cfg.AddProfile(new PlexApiMappingProfile());
-                    cfg.AddProfile(new WebApiMappingProfile());
-                });
-            configuration.AssertConfigurationIsValid();
-            return new Mapper(configuration);
-        }
-
     }
 }

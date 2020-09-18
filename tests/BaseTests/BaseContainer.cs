@@ -1,10 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutofacSerilogIntegration;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application.Common;
+using PlexRipper.Data;
 using PlexRipper.WebAPI;
 using PlexRipper.WebAPI.Config;
 
@@ -16,14 +18,20 @@ namespace PlexRipper.BaseTests
 
         public BaseContainer()
         {
+            Environment.SetEnvironmentVariable("IntegrationTestMode", "true");
+            Environment.SetEnvironmentVariable("ResetDB", "true");
+
             var builder = new ContainerBuilder();
             ContainerConfig.ConfigureContainer(builder);
 
             // re-create the startup service collection and add to builder.
-            var services = new ServiceCollection();
-            var startUp = new Startup();
-            startUp.ConfigureServices(services);
-            builder.Populate(services);
+            // var services = new ServiceCollection();
+            // var startUp = new Startup();
+            // startUp.ConfigureServices(services);
+            // builder.Populate(services);
+
+            // Database setup
+            PlexRipperDBSetup.Setup();
 
             builder.RegisterLogger(autowireProperties: true);
             AutofacContainer = builder.Build();

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -72,7 +73,7 @@ namespace PlexRipper.Application.PlexAccounts
 
             // Remove any PlexLibraries the plexAccount has no access to
             // TODO This might be improved further since now all PlexLibraries will be retrieved from the database.
-            var plexServers = plexAccount.PlexAccountServers.Select(x => x.PlexServer).ToList();
+            var plexServers = plexAccount?.PlexAccountServers?.Select(x => x.PlexServer).ToList() ?? new List<PlexServer>();
             foreach (var plexServer in plexServers)
             {
                 // Remove inaccessible PlexLibraries

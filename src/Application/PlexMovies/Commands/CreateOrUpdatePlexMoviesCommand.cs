@@ -52,18 +52,54 @@ namespace PlexRipper.Application.PlexMovies
             var currentMovies = await _dbContext.PlexMovies
                 .AsTracking().Where(x => x.PlexLibraryId == plexLibrary.Id)
                 .ToListAsync(cancellationToken);
-            _dbContext.PlexMovies.RemoveRange(currentMovies);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            if (currentMovies.Any())
+            {
+                _dbContext.PlexMovies.RemoveRange(currentMovies);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            plexMovies.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
+
+            if (plexMovies.Count > currentMovies.Count)
+            {
+                var newPlexMovies = new List<PlexMovie>();
+                foreach (var plexMovie in plexMovies)
+                {
+                    var result = currentMovies.Find(x => x.RatingKey == plexMovie.RatingKey);
+                    if (result != null)
+                    {
+                        plexMovie.Id = result.Id;
+                        _dbContext.Entry(result).CurrentValues.SetValues(plexMovie);
+                    }
+                    else
+                    {
+                        newPlexMovies.Add(plexMovie);
+                    }
+                }
+
+                await _dbContext.PlexMovies.AddRangeAsync(newPlexMovies, cancellationToken);
+            }
 
             // Ensure the correct ID is added.
-            foreach (var movie in plexMovies)
-            {
-                movie.PlexLibraryId = plexLibrary.Id;
-            }
+            // foreach (var movie in plexMovies)
+            // {
+            //     movie.PlexLibraryId = plexLibrary.Id;
+            //     _dbContext.PlexMediaData.Add(movie.MediaData1);
+            //     await _dbContext.Entry(movie.MediaData1).GetDatabaseValuesAsync(cancellationToken);
+            //
+            //     _dbContext.PlexMediaData.Add(movie.MediaData2);
+            //     await _dbContext.Entry(movie.MediaData1).GetDatabaseValuesAsync(cancellationToken);
+            //     await _dbContext.SaveChangesAsync(cancellationToken);
+            //
+            //     movie.MediaData1Id = movie.MediaData1.Id;
+            //     movie.MediaData2Id = movie.MediaData2.Id;
+            // }
 
             // TODO update Roles and tags
 
             await _dbContext.PlexMovies.AddRangeAsync(plexMovies, cancellationToken);
+
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return Result.Ok(true);

@@ -16,11 +16,16 @@ namespace PlexRipper.Domain.AutoMapper
             CreateMap<long, DateTime>().ConvertUsing(g => DateTimeOffset.FromUnixTimeSeconds(g).DateTime.ToUniversalTime());
             CreateMap<DateTime, long>().ConvertUsing(g => new DateTimeOffset(g).ToUnixTimeSeconds());
 
-
             // Entities
             // PlexAccountServer => PlexServer
             CreateMap<PlexAccountServer, PlexServer>(MemberList.Destination)
                 .ConvertUsing(source => source.PlexServer ?? null);
+
+            // PlexMediaData -> PlexMovieData
+            CreateMap<PlexMediaData, PlexMovieData>(MemberList.Source).ReverseMap();
+
+            // PlexMediaDataPart -> PlexMovieDataPart
+            CreateMap<PlexMediaDataPart, PlexMovieDataPart>(MemberList.Source).ReverseMap();
         }
     }
 }

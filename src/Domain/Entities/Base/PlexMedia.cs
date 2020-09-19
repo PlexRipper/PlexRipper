@@ -53,15 +53,14 @@ namespace PlexRipper.Domain
 
         public int? ViewCount { get; set; }
 
-        public DateTime? LastViewedAt { get; set; }
-
         public string Theme { get; set; }
 
         #endregion
 
         #region Relationships
 
-        public virtual PlexLibrary PlexLibrary { get; set; }
+        public PlexLibrary PlexLibrary { get; set; }
+
         public int PlexLibraryId { get; set; }
 
         #endregion

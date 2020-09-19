@@ -73,14 +73,19 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var plexLibraryService = Container.GetPlexLibraryService;
 
             var account = await accountService.GetPlexAccountAsync(1);
+            var plexLibraryPick = GetLibraryFromPlexAccount(account.Value);
+
+            // Refresh library
+            var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(plexLibraryPick.Id, account.Value.Id);
 
             account.Value.ShouldNotBeNull();
+            plexLibrary.Value.HasMedia.ShouldBeTrue();
         }
 
         private PlexLibrary GetLibraryFromPlexAccount(PlexAccount plexAccount)
         {
             // Retrieve the movies library
-            return plexAccount.PlexServers.First()?.PlexLibraries?.Find(x => x.Title == "Movies") ?? null;
+            return plexAccount.PlexServers[1]?.PlexLibraries?.Find(x => x.Title == "Movies") ?? null;
         }
     }
 }

@@ -74,9 +74,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("viewCount", Required = Required.Always)]
         public object ViewCount { get; set; }
 
-        [JsonProperty("lastViewedAt", Required = Required.Always)]
-        public object LastViewedAt { get; set; }
-
         [JsonProperty("theme", Required = Required.Always)]
         public object Theme { get; set; }
 

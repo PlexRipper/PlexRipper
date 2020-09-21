@@ -49,5 +49,7 @@ namespace PlexRipper.BaseTests
         public IPlexApiService GetPlexApiService => AutofacContainer.Resolve<IPlexApiService>();
 
         public IDownloadManager GetDownloadManager => AutofacContainer.Resolve<IDownloadManager>();
+
+        public PlexRipperDbContext PlexRipperDbContext => AutofacContainer.Resolve<PlexRipperDbContext>();
     }
 }

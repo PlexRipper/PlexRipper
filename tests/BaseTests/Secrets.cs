@@ -7,10 +7,7 @@ namespace PlexRipper.BaseTests
 {
     public class Secrets
     {
-        public Secrets()
-        {
-
-        }
+        public Secrets() { }
 
         public static TestCredentialsDTO GetCredentials()
         {
@@ -27,8 +24,8 @@ namespace PlexRipper.BaseTests
                 {
                     return JsonConvert.DeserializeObject<TestCredentialsDTO>(json);
                 }
-
             }
+
             //LoggerExtensions.LogWarning(BaseDependanciesTest
             //        .GetLogger<BaseServiceTest>(), "MAKE SURE TO CREATE A \"secretCredentials.json\" IN THE Infrastructure.UnitTests project TO START TESTING!");
             return new TestCredentialsDTO();

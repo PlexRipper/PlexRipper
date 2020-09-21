@@ -44,42 +44,6 @@ namespace PlexRipper.Domain
         [NotMapped]
         public List<PlexMediaDataPart> Parts { get; set; }
 
-        /// <summary>
-        /// Up to 8 parts of individual media files are supported by Plex.
-        /// Src: https://support.plex.tv/articles/naming-and-organizing-your-movie-media-files/
-        /// </summary>
-        // public PlexMediaDataPart Part1 { get; set; }
-        //
-        // public int Part1Id { get; set; }
-        //
-        // public PlexMediaDataPart Part2 { get; set; }
-        //
-        // public int? Part2Id { get; set; }
-        //
-        // public PlexMediaDataPart Part3 { get; set; }
-        //
-        // public int? Part3Id { get; set; }
-        //
-        // public PlexMediaDataPart Part4 { get; set; }
-        //
-        // public int? Part4Id { get; set; }
-        //
-        // public PlexMediaDataPart Part5 { get; set; }
-        //
-        // public int? Part5Id { get; set; }
-        //
-        // public PlexMediaDataPart Part6 { get; set; }
-        //
-        // public int? Part6Id { get; set; }
-        //
-        // public PlexMediaDataPart Part7 { get; set; }
-        //
-        // public int? Part7Id { get; set; }
-        //
-        // public PlexMediaDataPart Part8 { get; set; }
-        //
-        // public int? Part8Id { get; set; }
-
         #endregion
 
         #endregion

@@ -2,6 +2,9 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
+using FluentValidation;
+using MediatR;
+using MediatR.Extensions.Autofac.DependencyInjection;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
@@ -13,10 +16,17 @@ namespace PlexRipper.Data.Config
         {
             var assembly = Assembly.GetExecutingAssembly();
 
-            // register all I*Repository
+            // MediatR
+            builder.AddMediatR(assembly);
+
+            // Register the Command's Validators (Validators based on FluentValidation library)
             builder.RegisterAssemblyTypes(assembly)
-                .Where(t => t.Name.EndsWith("Repository"))
+                .Where(t => t.IsClosedTypeOf(typeof(IValidator<>)))
                 .AsImplementedInterfaces();
+
+            // Register all the Command classes (they implement IRequestHandler) in assembly holding the Commands
+            builder.RegisterAssemblyTypes(assembly)
+                .AsClosedTypesOf(typeof(IRequestHandler<,>));
 
             // Setup Database
             var dbContextOptions = PlexRipperDbContext.GetConfig().Options;
@@ -31,6 +41,10 @@ namespace PlexRipper.Data.Config
             builder.RegisterType<PlexRipperDbContext>()
                 .WithParameter("options", dbContextOptions)
                 .As<IPlexRipperDbContext>()
+                .InstancePerDependency();
+
+            builder.RegisterType<PlexRipperDbContext>()
+                .WithParameter("options", dbContextOptions)
                 .InstancePerDependency(); // TODO this might need to be InstancePerLifetime
         }
     }

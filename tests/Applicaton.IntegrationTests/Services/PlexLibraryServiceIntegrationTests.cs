@@ -77,6 +77,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
             // Refresh library
             var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(plexLibraryPick.Id, account.Value.Id);
+            plexLibrary = await plexLibraryService.RefreshLibraryMediaAsync(account.Value, plexLibraryPick);
 
             account.Value.ShouldNotBeNull();
             plexLibrary.Value.HasMedia.ShouldBeTrue();

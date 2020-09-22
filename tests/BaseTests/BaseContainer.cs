@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutofacSerilogIntegration;
+using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application.Common;
@@ -51,5 +52,7 @@ namespace PlexRipper.BaseTests
         public IDownloadManager GetDownloadManager => AutofacContainer.Resolve<IDownloadManager>();
 
         public PlexRipperDbContext PlexRipperDbContext => AutofacContainer.Resolve<PlexRipperDbContext>();
+
+        public IMediator Mediator => AutofacContainer.Resolve<IMediator>();
     }
 }

@@ -300,7 +300,7 @@ namespace PlexRipper.Application.PlexLibraries
             {
                 case PlexMediaType.Movie:
                     result = await _mediator.Send(
-                        new CreateOrUpdatePlexMoviesCommand(newPlexLibrary, newPlexLibrary.Movies.ToList()));
+                        new CreateUpdateOrDeletePlexMoviesCommand(newPlexLibrary, newPlexLibrary.Movies.ToList()));
                     break;
                 case PlexMediaType.TvShow:
                     return await RefreshPlexTvShowLibrary(authToken.Value, newPlexLibrary);

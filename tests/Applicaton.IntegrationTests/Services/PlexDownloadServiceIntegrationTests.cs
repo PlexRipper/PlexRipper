@@ -1,7 +1,7 @@
 ﻿using PlexRipper.BaseTests;
-using Shouldly;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 using PlexRipper.Domain;
 using Xunit;
 using Xunit.Abstractions;
@@ -51,7 +51,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             await Task.Delay(15000);
 
             //Assert
-            plexLibrary.ShouldNotBeNull();
+            plexLibrary.Should().NotBeNull();
         }
 
 

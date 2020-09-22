@@ -19,7 +19,6 @@ namespace PlexRipper.Data
             }
 
             // Create Database
-            // TODO Move the creation of the Database to a better place, unknown where
             var DB = new PlexRipperDbContext(dbContextOptions);
 
             // Should the Database be deleted and re-created
@@ -32,26 +31,22 @@ namespace PlexRipper.Data
 
             // TODO Re-enable Migrate when stable
             // DB.Database.Migrate();
-            // TODO This should maybe be setup with Reactive extensions
-            Task.Run(async () =>
+            var exist = DB.Database.CanConnect();
+            if (!exist)
             {
-                var exist = await DB.Database.CanConnectAsync();
-                if (!exist)
-                {
-                    Log.Information("Database does not exist, creating one now.");
-                    await DB.Database.EnsureCreatedAsync();
-                    exist = await DB.Database.CanConnectAsync();
+                Log.Information("Database does not exist, creating one now.");
+                DB.Database.EnsureCreated();
+                exist = DB.Database.CanConnect();
 
-                    if (exist)
-                    {
-                        Log.Information("Database was successfully created!");
-                    }
-                    else
-                    {
-                        Log.Error("Database could not be created.");
-                    }
+                if (exist)
+                {
+                    Log.Information("Database was successfully created!");
                 }
-            });
+                else
+                {
+                    Log.Error("Database could not be created.");
+                }
+            }
         }
     }
 }

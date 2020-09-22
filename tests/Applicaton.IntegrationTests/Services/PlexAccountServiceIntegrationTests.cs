@@ -1,6 +1,6 @@
 ﻿using PlexRipper.BaseTests;
-using Shouldly;
 using System.Threading.Tasks;
+using FluentAssertions;
 using PlexRipper.Domain;
 using Xunit;
 using Xunit.Abstractions;
@@ -37,13 +37,13 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var result = await accountService.CreatePlexAccountAsync(newAccount);
 
             // Assert
-            result.IsSuccess.ShouldBeTrue();
-            result.Value.ShouldNotBeNull();
-            result.Value.DisplayName.ShouldBe(newAccount.DisplayName);
-            result.Value.Username.ShouldBe(newAccount.Username);
-            result.Value.Password.ShouldBe(newAccount.Password);
-            result.Value.PlexAccountServers.ShouldNotBeEmpty();
-            result.Value.AuthenticationToken.ShouldNotBeEmpty();
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().NotBeNull();
+            result.Value.DisplayName.Should().Be(newAccount.DisplayName);
+            result.Value.Username.Should().Be(newAccount.Username);
+            result.Value.Password.Should().Be(newAccount.Password);
+            result.Value.PlexAccountServers.Should().NotBeEmpty();
+            result.Value.AuthenticationToken.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -69,20 +69,20 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var updateResult = await accountService.UpdateAccountAsync(createResult.Value);
 
             // Assert
-            createResult.IsSuccess.ShouldBeTrue();
-            createResult.Value.ShouldNotBeNull();
-            createResult.Value.Username.ShouldBe(newAccount.Username);
-            createResult.Value.Password.ShouldBe(newAccount.Password);
-            createResult.Value.PlexAccountServers.ShouldNotBeEmpty();
-            createResult.Value.AuthenticationToken.ShouldNotBeEmpty();
+            createResult.IsSuccess.Should().BeTrue();
+            createResult.Value.Should().NotBeNull();
+            createResult.Value.Username.Should().Be(newAccount.Username);
+            createResult.Value.Password.Should().Be(newAccount.Password);
+            createResult.Value.PlexAccountServers.Should().NotBeEmpty();
+            createResult.Value.AuthenticationToken.Should().NotBeEmpty();
 
-            updateResult.IsSuccess.ShouldBeTrue();
-            updateResult.Value.ShouldNotBeNull();
-            updateResult.Value.DisplayName.ShouldBe("Updated Test Account 999");
-            updateResult.Value.Username.ShouldBe(createResult.Value.Username);
-            updateResult.Value.Password.ShouldBe(createResult.Value.Password);
-            updateResult.Value.PlexAccountServers.ShouldNotBeEmpty();
-            updateResult.Value.AuthenticationToken.ShouldNotBeEmpty();
+            updateResult.IsSuccess.Should().BeTrue();
+            updateResult.Value.Should().NotBeNull();
+            updateResult.Value.DisplayName.Should().Be("Updated Test Account 999");
+            updateResult.Value.Username.Should().Be(createResult.Value.Username);
+            updateResult.Value.Password.Should().Be(createResult.Value.Password);
+            updateResult.Value.PlexAccountServers.Should().NotBeEmpty();
+            updateResult.Value.AuthenticationToken.Should().NotBeEmpty();
 
         }
 

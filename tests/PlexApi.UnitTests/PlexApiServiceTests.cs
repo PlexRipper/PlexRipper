@@ -1,6 +1,6 @@
 ﻿using PlexRipper.BaseTests;
-using Shouldly;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -27,8 +27,8 @@ namespace PlexApi.UnitTests
             var plexAccount = await plexApiService.PlexSignInAsync(credentials.Username, credentials.Password);
 
             // Assert
-            plexAccount.ShouldNotBeNull();
-        }   
-        
+            plexAccount.Should().NotBeNull();
+        }
+
       }
 }

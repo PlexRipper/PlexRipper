@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
-using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -30,16 +29,15 @@ namespace DownloadManager.UnitTests
                     Scheme = "http",
                     Address = "80.112.5.167",
                     Port = 43234,
-
-                }
+                },
             };
 
-           //  // Act
-           // var result = await downloadManager.CreateDownload(downloadTask);
-           //
-           //  // Assert
-           //  result.IsFailed.ShouldBeFalse();
-           //  result.Value.ShouldBeTrue();
+            //  // Act
+            // var result = await downloadManager.CreateDownload(downloadTask);
+            //
+            //  // Assert
+            //  result.IsFailed.ShouldBeFalse();
+            //  result.Value.ShouldBeTrue();
         }
     }
 }

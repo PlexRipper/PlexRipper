@@ -51,6 +51,8 @@ namespace PlexRipper.Application.Common
         DbSet<PlexMovieData> PlexMovieData { get; set; }
 
         DbSet<PlexMovieDataPart> PlexMovieDataParts { get; set; }
+        DbSet<PlexTvShowEpisodeData> PlexTvShowEpisodeData { get; set; }
+        DbSet<PlexTvShowEpisodeDataPart> PlexTvShowEpisodeDataParts { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 

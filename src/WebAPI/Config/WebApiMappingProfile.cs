@@ -42,7 +42,7 @@ namespace PlexRipper.WebAPI.Config
 
             // PlexLibrary -> PlexLibraryDTO
             CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Type, entity => entity.MapFrom(x => x.GetMediaType))
+                .ForMember(dto => dto.Type, entity => entity.MapFrom(x => x.MediaType))
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount));
 
             // PlexTvShow <-> PlexTvShowDTO

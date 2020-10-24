@@ -1,4 +1,4 @@
-root = true
+root=true
 [*]
 charset=utf-8
 end_of_line=lf
@@ -36,6 +36,7 @@ resharper_empty_block_style=together_same_line
 resharper_for_other_types=use_explicit_type
 resharper_for_simple_types=use_var_when_evident
 resharper_place_accessorholder_attribute_on_same_line=false
+resharper_space_within_single_line_array_initializer_braces=true
 resharper_use_indent_from_vs=false
 
 # ReSharper inspection severities
@@ -84,25 +85,25 @@ indent_size=4
 tab_width=4
 
 # SA1101: Prefix local calls with this
-dotnet_diagnostic.SA1101.severity = none
+dotnet_diagnostic.sa1101.severity=none
 
 # SA1200: Using directives should be placed correctly
-dotnet_diagnostic.SA1200.severity = none
+dotnet_diagnostic.sa1200.severity=none
 
 # SA1124: Do not use regions
-dotnet_diagnostic.SA1124.severity = none
+dotnet_diagnostic.sa1124.severity=none
 
 # SA1502: Element should not be on a single line
-dotnet_diagnostic.SA1502.severity = none
+dotnet_diagnostic.sa1502.severity=none
 
 # SA1128: Put constructor initializers on their own line
-dotnet_diagnostic.SA1128.severity = none
+dotnet_diagnostic.sa1128.severity=none
 
 # SA1309: Field names should not begin with underscore
-dotnet_diagnostic.SA1309.severity = none
+dotnet_diagnostic.sa1309.severity=none
 
 # SA1633: File should have header
-dotnet_diagnostic.SA1633.severity = none
+dotnet_diagnostic.sa1633.severity=none
 
 # SA1503: Braces should not be omitted
-dotnet_diagnostic.SA1503.severity = none
+dotnet_diagnostic.sa1503.severity=none

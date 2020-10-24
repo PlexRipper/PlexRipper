@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace PlexRipper.Domain
 {
@@ -11,6 +12,8 @@ namespace PlexRipper.Domain
         #endregion
 
         #region Relationships
+
+        public List<PlexTvShowEpisodeData> EpisodeData { get; set; } = new List<PlexTvShowEpisodeData>();
 
         public PlexTvShowSeason TvShowSeason { get; set; }
 

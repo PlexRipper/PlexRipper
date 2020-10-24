@@ -21,8 +21,11 @@ namespace PlexRipper.Domain
         public string Type { get; set; }
 
         public DateTime UpdatedAt { get; set; }
+
         public DateTime CreatedAt { get; set; }
+
         public DateTime ScannedAt { get; set; }
+
         public DateTime ContentChangedAt { get; set; }
 
         public Guid Uuid { get; set; }
@@ -64,7 +67,7 @@ namespace PlexRipper.Domain
         #region Helpers
 
         [NotMapped]
-        public PlexMediaType GetMediaType
+        public PlexMediaType MediaType
         {
             get
             {
@@ -76,6 +79,37 @@ namespace PlexRipper.Domain
                     _ => PlexMediaType.Unknown
                 };
             }
+
+            set
+            {
+                switch (value)
+                {
+                    case PlexMediaType.None:
+                        Type = "none";
+                        return;
+                    case PlexMediaType.Movie:
+                        Type = "movie";
+                        return;
+                    case PlexMediaType.TvShow:
+                        Type = "show";
+                        return;
+                    case PlexMediaType.Season:
+                        Type = "show";
+                        return;
+                    case PlexMediaType.Episode:
+                        Type = "episode";
+                        return;
+                    case PlexMediaType.Music:
+                        Type = "music";
+                        return;
+                    case PlexMediaType.Album:
+                        Type = "album";
+                        return;
+                    case PlexMediaType.Unknown:
+                        Type = "unknown";
+                        return;
+                }
+            }
         }
 
         [NotMapped]
@@ -83,7 +117,7 @@ namespace PlexRipper.Domain
         {
             get
             {
-                return GetMediaType switch
+                return MediaType switch
                 {
                     PlexMediaType.Movie => Movies != null && Movies.Count > 0,
                     PlexMediaType.TvShow => TvShows != null && TvShows.Count > 0,
@@ -97,7 +131,7 @@ namespace PlexRipper.Domain
         {
             get
             {
-                return GetMediaType switch
+                return MediaType switch
                 {
                     PlexMediaType.Movie => Movies?.Count ?? -1,
                     PlexMediaType.TvShow => TvShows?.Count ?? -1,

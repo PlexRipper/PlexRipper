@@ -26,7 +26,17 @@ namespace PlexRipper.Data
 
         public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
+        #region PlexMovie
+
         public DbSet<PlexMovie> PlexMovies { get; set; }
+
+        public DbSet<PlexMovieData> PlexMovieData { get; set; }
+
+        public DbSet<PlexMovieDataPart> PlexMovieDataParts { get; set; }
+
+        #endregion
+
+        #region PlexTvShow
 
         public DbSet<PlexTvShow> PlexTvShows { get; set; }
 
@@ -34,9 +44,11 @@ namespace PlexRipper.Data
 
         public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
 
-        public DbSet<PlexMovieData> PlexMovieData { get; set; }
+        public DbSet<PlexTvShowEpisodeData> PlexTvShowEpisodeData { get; set; }
 
-        public DbSet<PlexMovieDataPart> PlexMovieDataParts { get; set; }
+        public DbSet<PlexTvShowEpisodeDataPart> PlexTvShowEpisodeDataParts { get; set; }
+
+        #endregion
 
 
         public DbSet<PlexRole> PlexRoles { get; set; }

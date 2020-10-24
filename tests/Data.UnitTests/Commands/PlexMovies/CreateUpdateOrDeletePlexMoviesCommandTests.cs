@@ -4,21 +4,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.BaseTests;
-using PlexRipper.BaseTests.Fixtures;
 using PlexRipper.Data;
-using PlexRipper.Data.Commands.PlexMovies;
 using PlexRipper.Domain;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Data.UnitTests
+namespace Data.UnitTests.Commands
 {
     [Collection("PlexMoviesCommandTests")]
-    public class PlexMoviesCommandTests : IDisposable
+    public class CreateUpdateOrDeletePlexMoviesCommandTests : IDisposable
     {
         private BaseContainer Container { get; }
 
@@ -27,8 +23,9 @@ namespace Data.UnitTests
         private IMediator _mediator { get; }
 
         private const int _numberOfMovies = 100;
+        private int _numberOfMoviesHalf = (int)Math.Floor(_numberOfMovies / (double)2);
 
-        public PlexMoviesCommandTests(ITestOutputHelper output)
+        public CreateUpdateOrDeletePlexMoviesCommandTests(ITestOutputHelper output)
         {
             BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
@@ -38,78 +35,28 @@ namespace Data.UnitTests
 
         private void SetupDatabase()
         {
-            _dbContext.PlexServers.Add(new PlexServer
-            {
-                Id = 1,
-                Name = "TestPlexServer",
-            });
-            _dbContext.PlexLibraries.Add(new PlexLibrary
-            {
-                Id = 1,
-                Title = "TestMovieLibrary",
-                Type = "movie",
-                PlexServerId = 1,
-            });
+            _dbContext.PlexServers.Add(FakeDbData.GetPlexServer());
+            _dbContext.PlexLibraries.Add(FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow).Generate());
             _dbContext.SaveChanges();
         }
 
-        private List<PlexMovie> GetFakePlexMovies()
-        {
-            var plexMovies = new List<PlexMovie>();
-            for (int i = 1; i <= _numberOfMovies; i++)
-            {
-                plexMovies.Add(new PlexMovie
-                {
-                    RatingKey = i,
-                    Title = $"Fake movie {i}",
-                    PlexLibraryId = 1,
-                    PlexMovieDatas = new List<PlexMovieData>
-                    {
-                        new PlexMovieData
-                        {
-                            MediaFormat = "ADDED",
-                            Height = i * 100,
-                            Width = i * 100,
-                            Parts = new List<PlexMovieDataPart>
-                            {
-                                new PlexMovieDataPart
-                                {
-                                    Container = "mkv",
-                                    File = "ADDED",
-                                    Key = (i * 5).ToString(),
-                                },
-                            },
-                        },
-                    },
-                });
-            }
-
-            return plexMovies;
-        }
-
         [Fact]
-        public async Task CreateOrUpdatePlexMoviesCommand_CreateMovies()
+        public async Task CreateUpdateOrDeletePlexMoviesCommand_CreateMovies()
         {
             // Arrange
             SetupDatabase();
-
-            var command = new CreateUpdateOrDeletePlexMoviesCommand(new PlexLibrary
-            {
-                Id = 1,
-                Title = "TestMovieLibrary",
-                UpdatedAt = DateTime.MinValue,
-            }, GetFakePlexMovies());
+            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie).Generate();
 
             // Act
-            var result = await _mediator.Send(command);
-            var dbResult = _dbContext.PlexMovies.Where(x => x.PlexLibraryId == 1).ToList();
+            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary, plexLibrary.Movies));
+            var dbResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
 
             // Assert
-            result.IsFailed.Should().BeFalse();
-            result.Value.Should().BeTrue();
+            createResult.IsFailed.Should().BeFalse();
+            createResult.Value.Should().BeTrue();
 
-            dbResult.Count.Should().Be(_numberOfMovies);
-            foreach (var plexMovie in dbResult)
+            dbResult.Value.Count.Should().Be(_numberOfMovies);
+            foreach (var plexMovie in dbResult.Value)
             {
                 plexMovie.Should().NotBeNull();
                 plexMovie.Title.Should().NotBeEmpty();
@@ -119,17 +66,12 @@ namespace Data.UnitTests
         }
 
         [Fact]
-        public async Task CreateOrUpdatePlexMoviesCommand_UpdateMovies()
+        public async Task CreateUpdateOrDeletePlexMoviesCommand_UpdateMovies()
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = new PlexLibrary
-            {
-                Id = 1,
-                Title = "TestMovieLibrary",
-            };
-            var plexMovies = GetFakePlexMovies();
-            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary, plexMovies));
+            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie).Generate();
+            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary, plexLibrary.Movies));
             createResult.IsSuccess.Should().BeTrue(createResult.Errors.ToString());
 
             var dbResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
@@ -185,6 +127,45 @@ namespace Data.UnitTests
                 {
                     plexMovie.Title.Contains("Updated!").Should().BeTrue();
                 }
+            }
+        }
+
+        [Fact]
+        public async Task CreateUpdateOrDeletePlexMoviesCommand_DeleteMovies()
+        {
+            // Arrange
+            SetupDatabase();
+            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie).Generate();
+            var plexMovies = FakeDbData.GetPlexMovies(_numberOfMovies);
+            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary, plexLibrary.Movies));
+            createResult.IsSuccess.Should().BeTrue(createResult.Errors.ToString());
+
+            var dbResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
+            dbResult.IsSuccess.Should().BeTrue();
+
+            // remove the plexMovies
+            dbResult.Value.RemoveRange(_numberOfMoviesHalf, _numberOfMoviesHalf);
+            var updatePlexMovies = dbResult.Value;
+
+            // Act
+            var updatedResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary, updatePlexMovies));
+            updatedResult.IsSuccess.Should().BeTrue();
+
+            var dbUpdateResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
+            dbUpdateResult.IsSuccess.Should().BeTrue();
+
+            // Assert
+            createResult.Value.Should().BeTrue();
+            updatedResult.IsFailed.Should().BeFalse();
+            updatedResult.Value.Should().BeTrue();
+
+            dbUpdateResult.Value.Count.Should().Be(_numberOfMoviesHalf);
+            foreach (var plexMovie in dbUpdateResult.Value)
+            {
+                plexMovie.Should().NotBeNull();
+                plexMovie.Title.Should().NotBeEmpty();
+                plexMovie.RatingKey.Should().BeGreaterThan(0);
+                plexMovie.Id.Should().BeGreaterThan(0);
             }
         }
 

@@ -46,12 +46,18 @@ namespace PlexRipper.Application.PlexLibraries
 
         #region Private
 
+        /// <summary>
+        /// Retrieves all tvshow, season and episode data and stores it in the database.
+        /// </summary>
+        /// <param name="authToken"></param>
+        /// <param name="plexLibrary"></param>
+        /// <returns></returns>
         private async Task<Result<PlexLibrary>> RefreshPlexTvShowLibrary(string authToken, PlexLibrary plexLibrary)
         {
             if (plexLibrary == null)
                 return ResultExtensions.IsNull("plexLibrary").LogError();
 
-            if (plexLibrary.GetMediaType != PlexMediaType.TvShow)
+            if (plexLibrary.MediaType != PlexMediaType.TvShow)
                 return Result.Fail("PlexLibrary is not of type TvShow").LogError();
 
             if (plexLibrary.TvShows.Count == 0)
@@ -95,7 +101,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title}");
-            var updateResult = await _mediator.Send(new CreateOrUpdatePlexTvShowsCommand(plexLibrary, plexLibrary.TvShows));
+            var updateResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
             if (updateResult.IsFailed)
             {
                 return updateResult.ToResult();
@@ -296,11 +302,10 @@ namespace PlexRipper.Application.PlexLibraries
                 return result;
             }
 
-            switch (newPlexLibrary.GetMediaType)
+            switch (newPlexLibrary.MediaType)
             {
                 case PlexMediaType.Movie:
-                    result = await _mediator.Send(
-                        new CreateUpdateOrDeletePlexMoviesCommand(newPlexLibrary, newPlexLibrary.Movies.ToList()));
+                    result = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(newPlexLibrary, newPlexLibrary.Movies));
                     break;
                 case PlexMediaType.TvShow:
                     return await RefreshPlexTvShowLibrary(authToken.Value, newPlexLibrary);

@@ -60,14 +60,14 @@ namespace PlexRipper.Data.Commands.PlexMovies
             try
             {
                 var plexLibrary = command.PlexLibrary;
-                Dictionary<int, PlexMovie> plexMoviesDict = new Dictionary<int, PlexMovie>();
+                var plexMoviesDict = new Dictionary<int, PlexMovie>();
+                Log.Debug($"Starting adding or updating movies in library: {plexLibrary.Title}");
+
                 command.PlexMovies.ForEach(x =>
                 {
                     x.PlexLibraryId = plexLibrary.Id;
                     plexMoviesDict.Add(x.RatingKey, x);
                 });
-
-                Log.Debug($"Starting adding or updating movies in library: {plexLibrary.Title}");
 
                 // Retrieve current movies
                 var plexMoviesInDb = await _dbContext.PlexMovies
@@ -86,13 +86,13 @@ namespace PlexRipper.Data.Commands.PlexMovies
                 Dictionary<int, PlexMovie> plexMoviesDbDict = new Dictionary<int, PlexMovie>();
                 plexMoviesInDb.ForEach(x => plexMoviesDbDict.Add(x.RatingKey, x));
 
-                // Create lists on how to update the database.
+                // Create dictionaries on how to update the database.
                 var addDict = plexMoviesDict.Where(x => !plexMoviesDbDict.ContainsKey(x.Key)).ToDictionary(k => k.Key, v => v.Value);
                 var deleteDict = plexMoviesDbDict.Where(x => !plexMoviesDict.ContainsKey(x.Key)).ToDictionary(k => k.Key, v => v.Value);
                 var updateDict = plexMoviesDict.Where(x => !deleteDict.ContainsKey(x.Key) && !addDict.ContainsKey(x.Key))
                     .ToDictionary(k => k.Key, v => v.Value);
 
-                // Remove any that are not updated
+                // Remove any that are not updated based on UpdatedAt
                 foreach (var keyValuePair in updateDict)
                 {
                     var plexMovieDb = plexMoviesDbDict[keyValuePair.Key];

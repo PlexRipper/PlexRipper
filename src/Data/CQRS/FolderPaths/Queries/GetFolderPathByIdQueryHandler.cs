@@ -4,7 +4,7 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using PlexRipper.Application.FolderPaths.Queries;
-using PlexRipper.Data.Common.Base;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.FolderPaths

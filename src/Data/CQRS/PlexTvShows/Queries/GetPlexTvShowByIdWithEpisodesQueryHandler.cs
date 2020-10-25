@@ -6,7 +6,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexTvShows.Queries;
-using PlexRipper.Data.Common.Base;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexTvShows
@@ -25,9 +25,6 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
         public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdWithEpisodesQuery request, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetPlexTvShowByIdWithEpisodesQuery, GetPlexTvShowByIdWithEpisodesQueryValidator>(request);
-            if (result.IsFailed) return result;
-
             var plexTvShow = await _dbContext.PlexTvShows
                 .Include(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)

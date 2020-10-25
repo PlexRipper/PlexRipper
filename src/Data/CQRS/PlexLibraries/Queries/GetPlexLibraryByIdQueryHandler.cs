@@ -6,12 +6,11 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexLibraries.Queries;
-using PlexRipper.Data.Common.Base;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexLibraries
 {
-
     public class GetPlexLibraryByIdQueryValidator : AbstractValidator<GetPlexLibraryByIdQuery>
     {
         public GetPlexLibraryByIdQueryValidator()
@@ -20,30 +19,22 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
         }
     }
 
-
     public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdQuery, Result<PlexLibrary>>
     {
         public GetPlexLibraryByIdWithMediaHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdQuery request, CancellationToken cancellationToken)
         {
-            var query = _dbContext.PlexLibraries.AsQueryable();
+            var query = PlexLibraryQueryable;
 
             if (request.IncludePlexServer)
             {
-                query = query
-                    .Include(x => x.PlexServer);
+                query = query.IncludeServer();
             }
 
             if (request.IncludeMedia)
             {
-                query = query
-                    .Include(x => x.Movies)
-                    .ThenInclude(x => x.PlexMovieDatas)
-                    .ThenInclude(x => x.Parts)
-                    .Include(x => x.TvShows)
-                    .ThenInclude(x => x.Seasons)
-                    .ThenInclude(x => x.Episodes);
+                query = query.IncludeMedia();
             }
 
             var plexLibrary = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);

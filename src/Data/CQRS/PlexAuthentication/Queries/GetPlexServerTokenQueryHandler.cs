@@ -5,7 +5,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexAuthentication.Queries;
-using PlexRipper.Data.Common.Base;
+using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.CQRS.PlexAuthentication
 {

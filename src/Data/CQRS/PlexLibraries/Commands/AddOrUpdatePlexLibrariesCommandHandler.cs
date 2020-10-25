@@ -7,7 +7,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexLibraries.Commands;
-using PlexRipper.Data.Common.Base;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexLibraries
@@ -41,8 +41,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
                 {
                     var plexLibraryDB = await _dbContext.PlexLibraries
                         .Include(x => x.PlexServer)
-                        .FirstOrDefaultAsync(x =>
-                            x.PlexServer.Id == plexServer.Id && x.Key == plexLibrary.Key, cancellationToken);
+                        .FirstOrDefaultAsync(x => x.PlexServer.Id == plexServer.Id && x.Key == plexLibrary.Key, cancellationToken);
 
                     if (plexLibraryDB == null)
                     {
@@ -85,7 +84,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
                         {
                             PlexAccountId = plexAccount.Id,
                             PlexLibraryId = plexLibrary.Id,
-                            PlexServerId = plexServer.Id
+                            PlexServerId = plexServer.Id,
                         }, cancellationToken);
                     }
                     else

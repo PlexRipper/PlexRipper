@@ -5,7 +5,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexLibraries.Queries;
-using PlexRipper.Data.Common.Base;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexLibraries
@@ -24,12 +24,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
 
         public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdWithServerQuery request, CancellationToken cancellationToken)
         {
-            var result = await ValidateAsync<GetPlexLibraryByIdWithServerQuery, GetPlexLibraryByIdWithServerQueryValidator>(request);
-            if (result.IsFailed) return result;
-
-            var plexLibrary = await _dbContext.PlexLibraries
-                .Include(x => x.PlexServer)
-                .FirstOrDefaultAsync(x => x.Id == request.Id);
+            var plexLibrary = await PlexLibraryQueryable.IncludeServer().FirstOrDefaultAsync(x => x.Id == request.Id);
 
             return ReturnResult(plexLibrary, request.Id);
         }

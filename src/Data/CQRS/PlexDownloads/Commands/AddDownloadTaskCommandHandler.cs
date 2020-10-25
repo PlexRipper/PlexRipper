@@ -6,7 +6,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexDownloads.Commands;
-using PlexRipper.Data.Common.Base;
+using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.CQRS.PlexDownloads
 {

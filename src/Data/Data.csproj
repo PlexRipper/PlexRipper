@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common" />
     <Folder Include="CQRS\PlexAuthentication\Commands" />
   </ItemGroup>
 

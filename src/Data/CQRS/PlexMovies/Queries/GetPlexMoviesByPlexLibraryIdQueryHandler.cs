@@ -7,7 +7,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexMovies;
-using PlexRipper.Data.Common.Base;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexMovies
@@ -26,9 +26,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies
 
         public async Task<Result<List<PlexMovie>>> Handle(GetPlexMoviesByPlexLibraryId request, CancellationToken cancellationToken)
         {
-            var plexMovies = await _dbContext.PlexMovies
-                .Include(x => x.PlexMovieDatas)
-                .ThenInclude(x => x.Parts)
+            var plexMovies = await PlexMoviesQueryable
                 .Where(x => x.PlexLibraryId == request.PlexLibraryId)
                 .ToListAsync(cancellationToken);
 

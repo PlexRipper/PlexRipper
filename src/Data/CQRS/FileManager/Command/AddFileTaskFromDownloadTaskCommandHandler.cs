@@ -5,7 +5,7 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using PlexRipper.Application.FileManager.Command;
-using PlexRipper.Data.Common.Base;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.FileManager

@@ -20,7 +20,7 @@
 		<!-- Header -->
 		<template v-else>
 			<!--	Overview bar	-->
-			<v-row>
+			<v-row style="height: 6rem">
 				<media-overview-bar
 					:server="server"
 					:library="library"
@@ -54,12 +54,11 @@
 				<template v-for="item in getItems">
 					<media-poster
 						:key="item.id"
-						:media-id="item.id"
+						:media-item="item"
 						:account-id="activeAccountId"
 						:media-type="mediaType"
-						:title="item.title"
 						@download="openDownloadDialog"
-					></media-poster>
+					/>
 				</template>
 			</v-row>
 			<!--	Download confirmation dialog	-->

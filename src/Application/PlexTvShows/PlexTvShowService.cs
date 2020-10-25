@@ -6,11 +6,9 @@ namespace PlexRipper.Application.PlexTvShows
     {
         private readonly IPlexApiService _plexServiceApi;
 
-
         public PlexTvShowService(IPlexApiService plexServiceApi)
         {
             _plexServiceApi = plexServiceApi;
         }
-
     }
 }

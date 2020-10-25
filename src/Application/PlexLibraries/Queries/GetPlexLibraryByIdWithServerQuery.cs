@@ -1,11 +1,5 @@
 ﻿using FluentResults;
-using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.Threading;
-using System.Threading.Tasks;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexLibraries.Queries
@@ -18,31 +12,5 @@ namespace PlexRipper.Application.PlexLibraries.Queries
         }
 
         public int Id { get; }
-    }
-
-    public class GetPlexLibraryByIdWithServerQueryValidator : AbstractValidator<GetPlexLibraryByIdWithServerQuery>
-    {
-        public GetPlexLibraryByIdWithServerQueryValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
-    }
-
-
-    public class GetPlexLibraryByIdWithServerQueryHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdWithServerQuery, Result<PlexLibrary>>
-    {
-        public GetPlexLibraryByIdWithServerQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
-
-        public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdWithServerQuery request, CancellationToken cancellationToken)
-        {
-            var result = await ValidateAsync<GetPlexLibraryByIdWithServerQuery, GetPlexLibraryByIdWithServerQueryValidator>(request);
-            if (result.IsFailed) return result;
-
-            var plexLibrary = await _dbContext.PlexLibraries
-                .Include(x => x.PlexServer)
-                .FirstOrDefaultAsync(x => x.Id == request.Id);
-
-            return ReturnResult(plexLibrary, request.Id);
-        }
     }
 }

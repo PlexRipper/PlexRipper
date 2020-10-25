@@ -1,12 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
-using PlexRipper.Application.Common;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
-    public class PlexRipperDbContext : DbContext, IPlexRipperDbContext
+    public class PlexRipperDbContext : DbContext
     {
         #region Properties
 
@@ -49,7 +48,6 @@ namespace PlexRipper.Data
         public DbSet<PlexTvShowEpisodeDataPart> PlexTvShowEpisodeDataParts { get; set; }
 
         #endregion
-
 
         public DbSet<PlexRole> PlexRoles { get; set; }
 

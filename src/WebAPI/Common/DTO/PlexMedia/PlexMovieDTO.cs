@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
@@ -76,5 +78,8 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }
+
+        [JsonProperty("plexMovieDatas", Required = Required.Always)]
+        public List<PlexMovieDataDTO> PlexMovieDatas { get; set; }
     }
 }

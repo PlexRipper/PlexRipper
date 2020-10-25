@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.Commands.PlexMovies
+namespace PlexRipper.Data.CQRS.PlexMovies.Commands
 {
     public class CreateUpdateOrDeletePlexMoviesValidator : AbstractValidator<CreateUpdateOrDeletePlexMoviesCommand>
     {

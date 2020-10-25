@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.Commands
+namespace PlexRipper.Data.CQRS.PlexTvShows
 {
     public class CreateUpdateOrDeletePlexTvShowsCommandValidator : AbstractValidator<CreateUpdateOrDeletePlexTvShowsCommand>
     {
@@ -31,7 +31,7 @@ namespace PlexRipper.Data.Commands
         private readonly BulkConfig _config = new BulkConfig
         {
             SetOutputIdentity = true,
-            PreserveInsertOrder = true,
+            PreserveInsertOrder = true
         };
 
         public CreateUpdateOrDeletePlexTvShowsCommandHandler(PlexRipperDbContext dbContext)

@@ -7,6 +7,7 @@ using PlexRipper.Domain;
 using PlexRipper.Settings;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
+using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 using PlexRipper.WebAPI.Common.DTO.Settings;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -55,7 +56,13 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<PlexTvShowEpisode, PlexTvShowEpisodeDTO>(MemberList.Destination).ReverseMap();
 
             // PlexMovie -> PlexMovieDTO
-            CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination);
+
+            // PlexMovieData -> PlexMovieDataDTO
+            CreateMap<PlexMovieData, PlexMovieDataDTO>(MemberList.Destination);
+
+            // PlexMovieDataPart -> PlexMovieDataPartDTO
+            CreateMap<PlexMovieDataPart, PlexMovieDataPartDTO>(MemberList.Destination);
 
             // DownloadTask -> DownloadTaskDTO
             CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)

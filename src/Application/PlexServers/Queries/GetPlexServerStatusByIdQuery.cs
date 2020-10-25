@@ -1,11 +1,5 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
+﻿using FluentResults;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.Base;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexServers.Queries
@@ -19,38 +13,7 @@ namespace PlexRipper.Application.PlexServers.Queries
         }
 
         public int Id { get; }
+
         public bool IncludePlexServer { get; }
-    }
-
-    public class GetPlexServerStatusByIdQueryValidator : AbstractValidator<GetPlexServerStatusByIdQuery>
-    {
-        public GetPlexServerStatusByIdQueryValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
-    }
-
-
-    public class GetPlexServerStatusByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexServerStatusByIdQuery, Result<PlexServerStatus>>
-    {
-        public GetPlexServerStatusByIdQueryHandler(IPlexRipperDbContext dbContext) : base(dbContext) { }
-
-        public async Task<Result<PlexServerStatus>> Handle(GetPlexServerStatusByIdQuery request, CancellationToken cancellationToken)
-        {
-            var query = _dbContext.PlexServerStatuses.AsQueryable();
-
-            if (request.IncludePlexServer)
-            {
-                query = query
-                    .Include(x => x.PlexServer);
-            }
-
-            var status = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-            if (status == null)
-            {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexServerStatus), request.Id);
-            }
-            return Result.Ok(status);
-        }
     }
 }

@@ -40,11 +40,6 @@ namespace PlexRipper.Data.Config
 
             builder.RegisterType<PlexRipperDbContext>()
                 .WithParameter("options", dbContextOptions)
-                .As<IPlexRipperDbContext>()
-                .InstancePerDependency();
-
-            builder.RegisterType<PlexRipperDbContext>()
-                .WithParameter("options", dbContextOptions)
                 .InstancePerDependency(); // TODO this might need to be InstancePerLifetime
         }
     }

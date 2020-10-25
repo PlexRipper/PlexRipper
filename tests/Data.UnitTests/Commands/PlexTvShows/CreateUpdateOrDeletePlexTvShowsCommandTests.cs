@@ -63,7 +63,7 @@ namespace Data.UnitTests.Commands
             // Act
             var createResult =
                 await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
-            var dbResult = await _mediator.Send(new GetPlexTvShowsByPlexLibraryId(plexLibrary.Id));
+            var dbResult = await _mediator.Send(new GetPlexTvShowsByPlexLibraryIdQuery(plexLibrary.Id));
 
             // Assert
             createResult.IsFailed.Should().BeFalse();
@@ -89,7 +89,7 @@ namespace Data.UnitTests.Commands
             var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
 
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
-            var dbResult = await _mediator.Send(new GetPlexTvShowsByPlexLibraryId(plexLibrary.Id));
+            var dbResult = await _mediator.Send(new GetPlexTvShowsByPlexLibraryIdQuery(plexLibrary.Id));
 
             // Change values
             var updatePlexTvShows = dbResult.Value.Select(x =>
@@ -129,7 +129,7 @@ namespace Data.UnitTests.Commands
              * Act
              */
             var updatedResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
-            var dbUpdateResult = await _mediator.Send(new GetPlexTvShowsByPlexLibraryId(plexLibrary.Id));
+            var dbUpdateResult = await _mediator.Send(new GetPlexTvShowsByPlexLibraryIdQuery(plexLibrary.Id));
 
             /*
              * Assert

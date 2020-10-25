@@ -18,7 +18,7 @@ namespace PlexRipper.Domain
 
         public string VideoProfile { get; set; }
 
-        // TODO Debate if streams should be stored, is it relevant for PlexRipper.
+        // TODO Debate if streams should be stored, is it relevant for PlexRipper?
         // public Stream[] Stream { get; set; }
 
         public string AudioProfile { get; set; }

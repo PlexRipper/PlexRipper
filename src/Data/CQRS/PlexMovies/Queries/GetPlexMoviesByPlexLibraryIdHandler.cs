@@ -7,9 +7,10 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexMovies;
+using PlexRipper.Data.Common.Base;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.Queries.PlexMovies
+namespace PlexRipper.Data.CQRS.PlexMovies
 {
     public class GetPlexMoviesByPlexLibraryIdValidator : AbstractValidator<GetPlexMoviesByPlexLibraryId>
     {
@@ -19,14 +20,9 @@ namespace PlexRipper.Data.Queries.PlexMovies
         }
     }
 
-    public class GetPlexMoviesByPlexLibraryIdHandler : IRequestHandler<GetPlexMoviesByPlexLibraryId, Result<List<PlexMovie>>>
+    public class GetPlexMoviesByPlexLibraryIdHandler : BaseHandler, IRequestHandler<GetPlexMoviesByPlexLibraryId, Result<List<PlexMovie>>>
     {
-        private readonly PlexRipperDbContext _dbContext;
-
-        public GetPlexMoviesByPlexLibraryIdHandler(PlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public GetPlexMoviesByPlexLibraryIdHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<List<PlexMovie>>> Handle(GetPlexMoviesByPlexLibraryId request, CancellationToken cancellationToken)
         {

@@ -79,7 +79,6 @@ namespace PlexRipper.Domain
         [NotMapped]
         public string MetaDataUrl => $"{PlexLibrary.PlexServer.BaseUrl}{Key}";
 
-
         /// <summary>
         ///     Gets the absolute url of the thumb image, which requires a <see cref="PlexLibrary" /> and <see cref="PlexServer" />
         ///     navigation property.

@@ -3,23 +3,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
-using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexTvShows.Queries;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.Queries
+namespace PlexRipper.Data.CQRS.PlexTvShows
 {
-    public class GetPlexTvShowsByPlexLibraryIdValidator : AbstractValidator<GetPlexTvShowsByPlexLibraryId>
-    {
-        public GetPlexTvShowsByPlexLibraryIdValidator()
-        {
-            RuleFor(x => x.PlexLibraryId).GreaterThan(0);
-        }
-    }
-
-    public class GetPlexTvShowsByPlexLibraryIdHandler : IRequestHandler<GetPlexTvShowsByPlexLibraryId, Result<List<PlexTvShow>>>
+    public class GetPlexTvShowsByPlexLibraryIdHandler : IRequestHandler<GetPlexTvShowsByPlexLibraryIdQuery, Result<List<PlexTvShow>>>
     {
         private readonly PlexRipperDbContext _dbContext;
 
@@ -28,7 +19,7 @@ namespace PlexRipper.Data.Queries
             _dbContext = dbContext;
         }
 
-        public async Task<Result<List<PlexTvShow>>> Handle(GetPlexTvShowsByPlexLibraryId request, CancellationToken cancellationToken)
+        public async Task<Result<List<PlexTvShow>>> Handle(GetPlexTvShowsByPlexLibraryIdQuery request, CancellationToken cancellationToken)
         {
             var plexTvShows = await _dbContext.PlexTvShows
                 .Include(x => x.Seasons)

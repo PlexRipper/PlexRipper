@@ -1,17 +1,14 @@
-﻿using System;
-using System.IO;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Application.PlexLibraries.Commands;
 using PlexRipper.Application.PlexLibraries.Queries;
 using PlexRipper.Application.PlexMovies;
-using PlexRipper.Domain;
-using System.Linq;
-using System.Threading.Tasks;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexTvShows;
-using PlexRipper.Application.PlexTvShows.Queries;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexLibraries
 {
@@ -20,8 +17,11 @@ namespace PlexRipper.Application.PlexLibraries
         #region Fields
 
         private readonly IMediator _mediator;
+
         private readonly IPlexAuthenticationService _plexAuthenticationService;
+
         private readonly IPlexApiService _plexServiceApi;
+
         private readonly ISignalRService _signalRService;
 
         #endregion
@@ -183,7 +183,6 @@ namespace PlexRipper.Application.PlexLibraries
             return Result.Fail(new Error($"Failed to retrieve the metadata for movie {movie.Title}"));
         }
 
-
         /// <summary>
         /// Returns the PlexLibrary by the Id, will refresh if the library has no media assigned.
         /// </summary>
@@ -269,7 +268,6 @@ namespace PlexRipper.Application.PlexLibraries
 
             return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, plexServer, libraries));
         }
-
 
         /// <summary>
         /// Retrieves the new media metadata from the PlexApi and stores it in the database.

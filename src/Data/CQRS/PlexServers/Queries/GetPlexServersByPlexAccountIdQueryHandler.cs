@@ -1,27 +1,17 @@
-﻿using FluentResults;
-using FluentValidation;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.Base;
+using FluentResults;
+using FluentValidation;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application.PlexServers.Queries;
+using PlexRipper.Data.Common.Base;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexServers.Queries
+namespace PlexRipper.Data.CQRS.PlexServers
 {
-    public class GetPlexServersByPlexAccountIdQuery : IRequest<Result<List<PlexServer>>>
-    {
-        public GetPlexServersByPlexAccountIdQuery(int id)
-        {
-            Id = id;
-        }
-
-        public int Id { get; }
-    }
-
     public class GetPlexServersByAccountIdQueryValidator : AbstractValidator<GetPlexServersByPlexAccountIdQuery>
     {
         public GetPlexServersByAccountIdQueryValidator()
@@ -30,11 +20,10 @@ namespace PlexRipper.Application.PlexServers.Queries
         }
     }
 
-
     public class GetPlexServersByAccountIdQueryHandler : BaseHandler,
         IRequestHandler<GetPlexServersByPlexAccountIdQuery, Result<List<PlexServer>>>
     {
-        public GetPlexServersByAccountIdQueryHandler(IPlexRipperDbContext dbContext): base(dbContext) { }
+        public GetPlexServersByAccountIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<List<PlexServer>>> Handle(GetPlexServersByPlexAccountIdQuery request,
             CancellationToken cancellationToken)

@@ -7,16 +7,17 @@ using FluentValidation;
 using FluentValidation.Results;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.Base
+namespace PlexRipper.Data.Common.Base
 {
     public abstract class BaseHandler
     {
-        private protected readonly IPlexRipperDbContext _dbContext;
+        private protected readonly PlexRipperDbContext _dbContext;
 
-        public BaseHandler(IPlexRipperDbContext dbContext)
+        protected BaseHandler(PlexRipperDbContext dbContext)
         {
             _dbContext = dbContext;
         }
+
         public Result<T> ReturnResult<T>(T value, int id = 0) where T : BaseEntity
         {
             if (value != null)
@@ -69,8 +70,10 @@ namespace PlexRipper.Application.Common.Base
                     Log.Warning($"{validationFailure.ErrorMessage}");
                     error.Reasons.Add(new Error(validationFailure.ErrorMessage));
                 }
+
                 return Result.Fail(error);
             }
+
             return Result.Ok();
         }
     }

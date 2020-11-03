@@ -55,7 +55,7 @@ import { DownloadTaskCreationProgress, PlexMediaType, PlexTvShowDTO } from '@dto
 import ProgressComponent from '@components/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
-import ITreeViewItem from './types/iTreeViewItem';
+import ITreeViewItem from './types/ITreeViewItem';
 
 @Component({
 	components: {

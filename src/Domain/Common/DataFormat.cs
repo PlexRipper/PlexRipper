@@ -54,10 +54,10 @@ namespace PlexRipper.Domain
         /// <returns></returns>
         public static string FormatTimeSpanString(TimeSpan span)
         {
-            string hours = ((int) span.TotalHours).ToString();
+            string hours = ((int)span.TotalHours).ToString();
             string minutes = span.Minutes.ToString();
             string seconds = span.Seconds.ToString();
-            if ((int) span.TotalHours < 10)
+            if ((int)span.TotalHours < 10)
                 hours = "0" + hours;
             if (span.Minutes < 10)
                 minutes = "0" + minutes;
@@ -68,12 +68,38 @@ namespace PlexRipper.Domain
 
         public static decimal GetPercentage(long bytesReceived, long totalBytes)
         {
-            return (decimal) Math.Round((bytesReceived / (double) totalBytes) * 100, 2, MidpointRounding.AwayFromZero);
+            if (totalBytes == 0)
+            {
+                return 0;
+            }
+
+            try
+            {
+                return (decimal)Math.Round(bytesReceived / (double)totalBytes * 100, 2, MidpointRounding.AwayFromZero);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                throw;
+            }
         }
 
         public static decimal GetPercentage(int current, int total)
         {
-            return (decimal) Math.Round((current / (double) total) * 100, 2, MidpointRounding.AwayFromZero);
+            if (total == 0)
+            {
+                return 0;
+            }
+
+            try
+            {
+                return (decimal)Math.Round(current / (double)total * 100, 2, MidpointRounding.AwayFromZero);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                throw;
+            }
         }
 
         /// <summary>

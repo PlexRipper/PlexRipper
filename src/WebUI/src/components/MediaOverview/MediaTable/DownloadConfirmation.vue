@@ -43,7 +43,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import { DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
-import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
+import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { clone } from 'lodash';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 import { settingsStore as SettingsStore } from '@/store';

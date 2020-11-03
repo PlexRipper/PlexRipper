@@ -35,6 +35,33 @@ namespace PlexRipper.Data.Common
 
         #region Methods
 
+        /// <summary>
+        /// Only include <see cref="PlexLibrary"/> related data based on the <see cref="PlexMediaType"/>.
+        /// </summary>
+        /// <param name="type">The <see cref="PlexMediaType"/> to use to include the related data.</param>
+        /// <param name="includeServer">Optionally include the <see cref="PlexServer"/> this <see cref="PlexLibrary"/> belongs to.</param>
+        /// <returns>The <see cref="IQueryable"/> of <see cref="PlexLibrary"/>.</returns>
+        protected IQueryable<PlexLibrary> GetPlexLibraryQueryableByType(PlexMediaType type, bool includeServer = false)
+        {
+            IQueryable<PlexLibrary> plexLibraryQuery = PlexLibraryQueryable;
+
+            if (includeServer)
+            {
+                plexLibraryQuery.IncludeServer();
+            }
+
+            switch (type)
+            {
+                case PlexMediaType.Movie:
+                    return plexLibraryQuery.IncludeMovies();
+                case PlexMediaType.TvShow:
+                    return plexLibraryQuery.IncludeTvShows();
+                default:
+                    Log.Error($"PlexLibrary with MediaType {type} is currently not supported");
+                    return plexLibraryQuery;
+            }
+        }
+
         protected Result<T> ReturnResult<T>(T value, int id = 0)
             where T : BaseEntity
         {

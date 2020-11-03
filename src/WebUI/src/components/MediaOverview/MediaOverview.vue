@@ -98,7 +98,7 @@ import AccountService from '@service/accountService';
 import { downloadMedia } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
 import ProgressComponent from '@components/ProgressComponent.vue';
-import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
+import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';

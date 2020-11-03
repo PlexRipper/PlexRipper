@@ -44,6 +44,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.Movies, opt => opt.Ignore())
                 .ForMember(dest => dest.TvShows, opt => opt.Ignore())
                 .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
+                .ForMember(dest => dest.CheckedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexAccountLibraries, opt => opt.Ignore())
                 .ForMember(dest => dest.MediaType, opt => opt.Ignore())
                 .ForMember(dest => dest.LibraryLocationId,

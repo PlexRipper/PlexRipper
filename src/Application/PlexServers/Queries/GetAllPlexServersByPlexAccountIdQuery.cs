@@ -3,7 +3,7 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexServers.Queries
+namespace PlexRipper.Application.PlexServers
 {
     public class GetAllPlexServersByPlexAccountIdQuery : IRequest<Result<List<PlexServer>>>
     {

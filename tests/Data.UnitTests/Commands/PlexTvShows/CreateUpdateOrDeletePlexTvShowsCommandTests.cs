@@ -6,7 +6,6 @@ using FluentAssertions;
 using MediatR;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexTvShows;
-using PlexRipper.Application.PlexTvShows.Queries;
 using PlexRipper.BaseTests;
 using PlexRipper.Data;
 using PlexRipper.Domain;

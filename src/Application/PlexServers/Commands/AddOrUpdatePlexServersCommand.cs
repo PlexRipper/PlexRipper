@@ -3,7 +3,7 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexServers.Commands
+namespace PlexRipper.Application.PlexServers
 {
     public class AddOrUpdatePlexLibrariesCommand : IRequest<Result<bool>>
     {

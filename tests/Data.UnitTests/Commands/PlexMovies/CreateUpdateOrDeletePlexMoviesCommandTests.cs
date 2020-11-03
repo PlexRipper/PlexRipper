@@ -48,7 +48,7 @@ namespace Data.UnitTests.Commands
             var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie).Generate();
 
             // Act
-            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary, plexLibrary.Movies));
+            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             var dbResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
 
             // Assert
@@ -71,7 +71,7 @@ namespace Data.UnitTests.Commands
             // Arrange
             SetupDatabase();
             var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie).Generate();
-            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary, plexLibrary.Movies));
+            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             createResult.IsSuccess.Should().BeTrue(createResult.Errors.ToString());
 
             var dbResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
@@ -105,7 +105,7 @@ namespace Data.UnitTests.Commands
             }).ToList();
 
             // Act
-            var updatedResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary, updatePlexMovies));
+            var updatedResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             updatedResult.IsSuccess.Should().BeTrue();
 
             var dbUpdateResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
@@ -137,7 +137,7 @@ namespace Data.UnitTests.Commands
             SetupDatabase();
             var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie).Generate();
             var plexMovies = FakeDbData.GetPlexMovies(_numberOfMovies);
-            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary, plexLibrary.Movies));
+            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             createResult.IsSuccess.Should().BeTrue(createResult.Errors.ToString());
 
             var dbResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
@@ -148,7 +148,8 @@ namespace Data.UnitTests.Commands
             var updatePlexMovies = dbResult.Value;
 
             // Act
-            var updatedResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary, updatePlexMovies));
+            plexLibrary.Movies = updatePlexMovies;
+            var updatedResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             updatedResult.IsSuccess.Should().BeTrue();
 
             var dbUpdateResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));

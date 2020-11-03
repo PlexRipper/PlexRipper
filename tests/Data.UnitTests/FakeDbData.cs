@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Bogus;
 using PlexRipper.Domain;
@@ -110,6 +109,7 @@ namespace Data.UnitTests
             var episodes = new Faker<PlexTvShowEpisode>()
                 .RuleFor(x => x.RatingKey, f => f.Random.Int(1, 10000))
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
+                .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
                 .RuleFor(x => x.EpisodeData, f => episodeData.Generate(f.Random.Int(1, 3)).ToList())
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
@@ -118,6 +118,7 @@ namespace Data.UnitTests
             var seasons = new Faker<PlexTvShowSeason>()
                 .RuleFor(x => x.Title, f => $"Season {seasonIndex++}")
                 .RuleFor(x => x.RatingKey, f => f.Random.Int(1, 1000))
+                .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
                 .RuleFor(x => x.Episodes, f => episodes.Generate(f.Random.Int(5, 25)).ToList())
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));

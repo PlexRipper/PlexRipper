@@ -107,9 +107,9 @@ namespace PlexRipper.PlexApi.Api
             return Client.SendRequestAsync<PlexMediaContainer>(request);
         }
 
-        public Task<PlexMediaContainer> GetMetadataForLibraryAsync(string authToken, string plexFullHost, string libraryId)
+        public Task<PlexMediaContainer> GetMetadataForLibraryAsync(string authToken, string plexServerBaseUrl, string libraryId)
         {
-            var request = new RestRequest(new Uri($"{plexFullHost}/library/sections/{libraryId}/all"), Method.GET);
+            var request = new RestRequest(new Uri($"{plexServerBaseUrl}/library/sections/{libraryId}/all"), Method.GET);
             request = AddToken(request, authToken);
             return Client.SendRequestAsync<PlexMediaContainer>(request);
         }

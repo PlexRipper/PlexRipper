@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexTvShows.Queries;
+using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexTvShows

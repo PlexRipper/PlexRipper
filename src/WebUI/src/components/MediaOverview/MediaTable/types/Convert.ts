@@ -1,4 +1,4 @@
-import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
+import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { PlexMediaType, PlexMovieDTO, PlexTvShowDTO } from '@dto/mainApi';
 import IMediaData from '@mediaOverview/MediaTable/types/IMediaData';
 
@@ -20,7 +20,7 @@ export default abstract class Convert {
 								title: episode.title ?? '',
 								type: PlexMediaType.Episode,
 								children: [],
-								mediaData: [],
+								mediaData: [] as IMediaData[],
 								item: episode,
 								addedAt: episode.addedAt ?? '',
 								updatedAt: episode.updatedAt ?? '',
@@ -33,7 +33,7 @@ export default abstract class Convert {
 							title: season.title ?? '',
 							type: PlexMediaType.Season,
 							children: episodes,
-							mediaData: [],
+							mediaData: [] as IMediaData[],
 							item: season,
 							addedAt: season.addedAt ?? '',
 							updatedAt: season.updatedAt ?? '',
@@ -48,7 +48,7 @@ export default abstract class Convert {
 					year: tvShow.year,
 					type: PlexMediaType.TvShow,
 					item: tvShow,
-					mediaData: [],
+					mediaData: [] as IMediaData[],
 					children: seasons,
 					addedAt: tvShow.addedAt ?? '',
 					updatedAt: tvShow.updatedAt ?? '',

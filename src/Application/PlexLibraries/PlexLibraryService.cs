@@ -4,9 +4,8 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexAccounts;
-using PlexRipper.Application.PlexLibraries.Commands;
-using PlexRipper.Application.PlexLibraries.Queries;
 using PlexRipper.Application.PlexMovies;
+using PlexRipper.Application.PlexServers;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
@@ -112,6 +111,39 @@ namespace PlexRipper.Application.PlexLibraries
             // Complete progress update
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.TvShows.Count, plexLibrary.TvShows.Count);
             return freshPlexLibrary;
+        }
+
+        /// <summary>
+        /// Refresh the <see cref="PlexLibrary"/>, by first deleting all (related) media and the re-adding the media again.
+        /// </summary>
+        /// <param name="plexLibrary">The <see cref="PlexLibrary"/> to refresh.</param>
+        /// <returns>The refreshed <see cref="PlexLibrary"/> with all its media and <see cref="PlexServer"/> reference.</returns>
+        private async Task<Result<PlexLibrary>> RefreshPlexMovieLibrary(PlexLibrary plexLibrary)
+        {
+            if (plexLibrary == null)
+            {
+                return ResultExtensions.IsNull(nameof(plexLibrary));
+            }
+
+            var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
+            if (updateResult.IsFailed)
+            {
+                return updateResult.ToResult();
+            }
+
+            var deleteResult = await _mediator.Send(new DeleteMediaFromPlexLibraryCommand(plexLibrary.Id));
+            if (deleteResult.IsFailed)
+            {
+                return deleteResult.ToResult();
+            }
+
+            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
+            if (createResult.IsFailed)
+            {
+                return createResult.ToResult();
+            }
+
+            return await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id));
         }
 
         #endregion
@@ -279,21 +311,30 @@ namespace PlexRipper.Application.PlexLibraries
         {
             if (plexLibrary == null)
             {
-                const string msg = "The plexLibrary was null";
+                string msg = "The plexLibrary was null";
+                Log.Warning(msg);
+                return Result.Fail(msg);
+            }
+
+            if (plexLibrary.MediaType != PlexMediaType.Movie && plexLibrary.MediaType != PlexMediaType.TvShow)
+            {
+                // TODO Remove this if all media types are supported
+                string msg = $"Library type {plexLibrary.MediaType} is currently not supported by PlexRipper";
                 Log.Warning(msg);
                 return Result.Fail(msg);
             }
 
             // Get plexServer authToken
-            var authToken =
-                await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccount.Id, plexLibrary.PlexServer.Id);
-
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccount.Id, plexLibrary.PlexServer.Id);
             if (authToken.IsFailed)
             {
-                return Result.Fail(new Error("Failed to retrieve the server auth token"));
+                return authToken.ToResult();
             }
 
-            var newPlexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value, plexLibrary.PlexServer.BaseUrl);
+            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 0, plexLibrary.GetMediaCount);
+
+            // Retrieve overview of all media belonging to this PlexLibrary
+            var newPlexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value);
             var result = Result.Fail($"Failed to refresh library {plexLibrary.Id}");
             if (newPlexLibrary == null)
             {
@@ -303,8 +344,7 @@ namespace PlexRipper.Application.PlexLibraries
             switch (newPlexLibrary.MediaType)
             {
                 case PlexMediaType.Movie:
-                    result = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(newPlexLibrary, newPlexLibrary.Movies));
-                    break;
+                    return await RefreshPlexMovieLibrary(newPlexLibrary);
                 case PlexMediaType.TvShow:
                     return await RefreshPlexTvShowLibrary(authToken.Value, newPlexLibrary);
             }

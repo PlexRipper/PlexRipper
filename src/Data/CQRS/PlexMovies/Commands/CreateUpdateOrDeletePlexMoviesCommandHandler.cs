@@ -9,6 +9,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexMovies;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexMovies.Commands
@@ -20,8 +21,8 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
             RuleFor(x => x.PlexLibrary).NotNull();
             RuleFor(x => x.PlexLibrary.Id).GreaterThan(0);
             RuleFor(x => x.PlexLibrary.Title).NotEmpty();
-            RuleFor(x => x.PlexMovies).NotEmpty();
-            RuleForEach(x => x.PlexMovies).ChildRules(plexMovie =>
+            RuleFor(x => x.PlexLibrary.Movies).NotEmpty();
+            RuleForEach(x => x.PlexLibrary.Movies).ChildRules(plexMovie =>
             {
                 plexMovie.RuleFor(x => x.RatingKey).GreaterThan(0);
                 plexMovie.RuleFor(x => x.PlexMovieDatas).NotEmpty();
@@ -40,20 +41,15 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
         }
     }
 
-    public class CreateUpdateOrDeletePlexMoviesHandler : IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result<bool>>
+    public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result<bool>>
     {
-        private protected readonly PlexRipperDbContext _dbContext;
-
         private readonly BulkConfig _config = new BulkConfig
         {
             SetOutputIdentity = true,
             PreserveInsertOrder = true,
         };
 
-        public CreateUpdateOrDeletePlexMoviesHandler(PlexRipperDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public CreateUpdateOrDeletePlexMoviesHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<bool>> Handle(CreateUpdateOrDeletePlexMoviesCommand command, CancellationToken cancellationToken)
         {
@@ -63,7 +59,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
                 var plexMoviesDict = new Dictionary<int, PlexMovie>();
                 Log.Debug($"Starting adding or updating movies in library: {plexLibrary.Title}");
 
-                command.PlexMovies.ForEach(x =>
+                command.PlexLibrary.Movies.ForEach(x =>
                 {
                     x.PlexLibraryId = plexLibrary.Id;
                     plexMoviesDict.Add(x.RatingKey, x);

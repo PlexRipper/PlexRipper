@@ -1,11 +1,11 @@
 ﻿using FluentResults;
 using MediatR;
-using PlexRipper.Application.PlexServers.Queries;
 using PlexRipper.Domain;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.PlexServers;
 
 namespace PlexRipper.Application.PlexAccounts
 {

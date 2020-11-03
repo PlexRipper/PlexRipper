@@ -7,14 +7,11 @@ namespace PlexRipper.Application.PlexMovies
 {
     public class CreateUpdateOrDeletePlexMoviesCommand : IRequest<Result<bool>>
     {
-        public CreateUpdateOrDeletePlexMoviesCommand(PlexLibrary plexLibrary, List<PlexMovie> plexMovies)
+        public CreateUpdateOrDeletePlexMoviesCommand(PlexLibrary plexLibrary)
         {
             PlexLibrary = plexLibrary;
-            PlexMovies = plexMovies;
         }
 
         public PlexLibrary PlexLibrary { get; }
-
-        public List<PlexMovie> PlexMovies { get; }
     }
 }

@@ -9,14 +9,14 @@
 			:height="getLazyLoadingHeight"
 			transition="fade-transition"
 		>
-			<v-card :max-width="thumbWidth" :width="thumbWidth" :elevation="hover ? 12 : 2">
-				<v-hover v-slot:default="{ hover }">
-					<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight" :alt="title">
+			<v-hover v-slot:default="{ hover }">
+				<v-card :max-width="thumbWidth" :width="thumbWidth" :elevation="hover ? 12 : 2">
+					<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight" :alt="mediaItem.title">
 						<!--	Placeholder	-->
 						<template v-slot:placeholder>
 							<v-row class="fill-height ma-0" align="center" justify="center">
 								<v-col cols="12">
-									<h4 class="text-center">{{ title }}</h4>
+									<h4 class="text-center">{{ mediaItem.title }}</h4>
 								</v-col>
 								<v-col cols="auto">
 									<v-progress-circular indeterminate color="grey lighten-5" />
@@ -39,17 +39,22 @@
 							</v-row>
 						</v-container>
 					</v-img>
-				</v-hover>
-				<v-chip
-					v-for="item in mediaItem.mediaData"
-					:key="item.id"
-					class="my-2"
-					:color="getQualityColor(item.videoResolution)"
-					text
-				>
-					{{ item.videoResolution }}
-				</v-chip>
-			</v-card>
+					<v-row justify="center" no-gutters>
+						<v-col cols="auto">
+							<v-chip
+								v-for="item in mediaItem.mediaData"
+								:key="item.id"
+								class="my-2"
+								:color="getQualityColor(item.videoResolution)"
+								text
+								small
+							>
+								{{ getQualityString(item.videoResolution) }}
+							</v-chip>
+						</v-col>
+					</v-row>
+				</v-card>
+			</v-hover>
 		</v-lazy>
 	</v-col>
 </template>
@@ -59,7 +64,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { getThumbnail } from '@api/plexLibraryApi';
 import { PlexMediaType } from '@dto/mainApi';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
-import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
+import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 
 @Component<MediaPoster>({
 	components: {},
@@ -84,6 +89,10 @@ export default class MediaPoster extends Vue {
 		return this.thumbHeight + 80;
 	}
 
+	get hover(): boolean {
+		return true;
+	}
+
 	getQualityColor(quality: string): string {
 		switch (quality) {
 			case 'sd':
@@ -100,6 +109,23 @@ export default class MediaPoster extends Vue {
 				return 'red darken-4';
 			default:
 				return 'white';
+		}
+	}
+
+	getQualityString(quality: string): string {
+		switch (quality) {
+			case '480':
+				return '480p';
+			case '576':
+				return '576p';
+			case '720':
+				return '720p';
+			case '1080':
+				return '1080p';
+			case '1440':
+				return '1440p';
+			default:
+				return quality;
 		}
 	}
 

@@ -1,7 +1,5 @@
 ﻿using FluentResults;
 using MediatR;
-using PlexRipper.Application.PlexServers.Commands;
-using PlexRipper.Application.PlexServers.Queries;
 using PlexRipper.Domain;
 using System.Collections.Generic;
 using System.Linq;

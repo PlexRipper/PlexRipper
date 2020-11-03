@@ -1,9 +1,9 @@
-﻿using AutoMapper;
-using PlexRipper.Domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper;
 using PlexRipper.Application.Common;
+using PlexRipper.Domain;
 
 namespace PlexRipper.PlexApi.Services
 {
@@ -16,6 +16,7 @@ namespace PlexRipper.PlexApi.Services
         #region Fields
 
         private readonly IMapper _mapper;
+
         private readonly Api.PlexApi _plexApi;
 
         #endregion
@@ -72,44 +73,55 @@ namespace PlexRipper.PlexApi.Services
         }
 
         /// <summary>
-        /// Returns a PlexLibrary container with either Movies, Series, Music or Photos depending on the type.
+        /// Returns the latest version of the <see cref="PlexLibrary"/> with the included media. Id and PlexServerId are copied over from the input parameter.
         /// </summary>
-        /// <param name="library"></param>
-        /// <param name="authToken"></param>
-        /// <param name="plexFullHost"></param>
+        /// <param name="plexLibrary"></param>
+        /// <param name="authToken">The token used to authenticate with the <see cref="PlexServer"/>.</param>
+        /// <param name="plexServerBaseUrl"></param>
         /// <returns></returns>
-        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary library, string authToken, string plexFullHost)
+        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken)
         {
-            var result = await _plexApi.GetMetadataForLibraryAsync(authToken, plexFullHost, library.Key);
+            // Retrieve updated version of the PlexLibrary
+            var plexLibraries = await GetLibrarySectionsAsync(authToken, plexLibrary.ServerUrl);
+
+            var updatedPlexLibrary = plexLibraries.Find(x => x.Key == plexLibrary.Key);
+            updatedPlexLibrary.Id = plexLibrary.Id;
+            updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
+            updatedPlexLibrary.CheckedAt = DateTime.Now;
+
+            var result = await _plexApi.GetMetadataForLibraryAsync(authToken, plexLibrary.ServerUrl, plexLibrary.Key);
 
             if (result == null)
             {
                 return null;
             }
 
-            var libraryContainer = _mapper.Map<PlexLibrary>(result.MediaContainer);
-            libraryContainer.Id = library.Id;
-
             // Determine how to map based on the Library type.
             switch (result.MediaContainer.ViewGroup)
             {
                 case "movie":
-                    libraryContainer.Movies = _mapper.Map<List<PlexMovie>>(result.MediaContainer.Metadata);
+                    updatedPlexLibrary.Movies = _mapper.Map<List<PlexMovie>>(result.MediaContainer.Metadata);
                     break;
                 case "show":
-                    libraryContainer.TvShows = _mapper.Map<List<PlexTvShow>>(result.MediaContainer.Metadata);
+                    updatedPlexLibrary.TvShows = _mapper.Map<List<PlexTvShow>>(result.MediaContainer.Metadata);
                     break;
             }
 
-            return libraryContainer;
+            return updatedPlexLibrary;
         }
 
-        public async Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexLibraryUrl)
+        /// <summary>
+        /// Retrieves all accessible <see cref="PlexLibrary"/> from this <see cref="PlexServer"/> by this AuthToken.
+        /// </summary>
+        /// <param name="authToken">The token used to authenticate with the <see cref="PlexServer"/>.</param>
+        /// <param name="plexServerBaseUrl">The full PlexServer Url.</param>
+        /// <returns>List of accessible <see cref="PlexLibrary"/>.</returns>
+        public async Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl)
         {
-            var result = await _plexApi.GetLibrarySectionsAsync(authToken, plexLibraryUrl);
+            var result = await _plexApi.GetLibrarySectionsAsync(authToken, plexServerBaseUrl);
             if (result == null)
             {
-                Log.Warning($"{plexLibraryUrl} returned no libraries");
+                Log.Warning($"{plexServerBaseUrl} returned no libraries");
                 return new List<PlexLibrary>();
             }
 
@@ -127,7 +139,6 @@ namespace PlexRipper.PlexApi.Services
 
             return map;
         }
-
 
         public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey)
         {

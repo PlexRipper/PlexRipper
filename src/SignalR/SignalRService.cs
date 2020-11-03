@@ -14,13 +14,13 @@ namespace PlexRipper.SignalR
     /// </summary>
     public class SignalRService : ISignalRService
     {
-        private readonly ProgressHub _progressHub;
+        private readonly IHubContext<ProgressHub> _progressHub;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SignalRService"/> class.
         /// </summary>
         /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
-        public SignalRService(ProgressHub progressHub)
+        public SignalRService(IHubContext<ProgressHub> progressHub)
         {
             _progressHub = progressHub;
         }

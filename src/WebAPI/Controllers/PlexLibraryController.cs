@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 using PlexRipper.Application.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace PlexRipper.WebAPI.Controllers
 {
     [Route("api/[controller]")]

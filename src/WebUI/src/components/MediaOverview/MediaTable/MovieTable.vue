@@ -11,7 +11,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify/types';
 import { PlexMediaType, PlexMovieDTO } from '@dto/mainApi';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
-import ITreeViewItem from '@mediaOverview/MediaTable/types/iTreeViewItem';
+import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 
 @Component({

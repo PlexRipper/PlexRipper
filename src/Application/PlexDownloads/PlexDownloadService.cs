@@ -11,8 +11,8 @@ using PlexRipper.Application.FolderPaths.Queries;
 using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Application.PlexMovies;
-using PlexRipper.Application.PlexServers.Queries;
-using PlexRipper.Application.PlexTvShows.Queries;
+using PlexRipper.Application.PlexServers;
+using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
 #endregion

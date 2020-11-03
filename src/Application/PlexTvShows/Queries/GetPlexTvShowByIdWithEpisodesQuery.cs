@@ -2,7 +2,7 @@
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexTvShows.Queries
+namespace PlexRipper.Application.PlexTvShows
 {
     public class GetPlexTvShowByIdWithEpisodesQuery : IRequest<Result<PlexTvShow>>
     {

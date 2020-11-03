@@ -26,6 +26,8 @@ export class SignalrService {
 	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
 
 	public constructor() {
+		Log.info('Setting up SignalR Service');
+
 		const options: ConnectionOptions = {
 			logger: LogLevel.None,
 			retry: {
@@ -62,23 +64,23 @@ export class SignalrService {
 
 		globalService
 			.getAxiosReady()
-			.pipe(finalize(() => this.startProgressHubConnection()))
-			.subscribe();
+			// .pipe(finalize(() => this.startProgressHubConnection()))
+			.subscribe(() => this.startProgressHubConnection());
 
 		// Disable connections when server is offline
-		HealthService.getServerStatus().subscribe((status) => {
-			if (status) {
-				this.startProgressHubConnection();
-			} else {
-				this.stopProgressHubConnection();
-			}
-		});
+		// HealthService.getServerStatus().subscribe((status) => {
+		// 	if (status) {
+		// 		this.startProgressHubConnection();
+		// 	} else {
+		// 		this.stopProgressHubConnection();
+		// 	}
+		// });
 	}
 
 	public startProgressHubConnection(): void {
 		if (this._progressHubConnectionState === ConnectionStatus.disconnected) {
 			this._progressHubSubscription = this._progressHubConnection?.connect().subscribe(() => {
-				Log.debug('ProgressHub is now connected!');
+				Log.info('ProgressHub is now connected!');
 			});
 		}
 	}
@@ -86,7 +88,7 @@ export class SignalrService {
 	public stopProgressHubConnection(): void {
 		if (this._progressHubConnectionState !== ConnectionStatus.disconnected) {
 			this._progressHubSubscription = this._progressHubConnection?.disconnect().subscribe(() => {
-				Log.debug('ProgressHub is now disconnected!');
+				Log.info('ProgressHub is now disconnected!');
 			});
 		}
 	}

@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using MediatR;
-using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.BaseTests;
 using PlexRipper.Data;

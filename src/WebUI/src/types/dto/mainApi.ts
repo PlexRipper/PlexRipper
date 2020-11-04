@@ -438,3 +438,20 @@ export interface FileMergeProgress {
   timeRemaining: number;
   bytesRemaining: number;
 }
+
+export interface NotificationUpdate {
+  id: number;
+  level: NotificationLevel;
+  createdAt: string;
+  message: string;
+  hidden: boolean;
+}
+
+export enum NotificationLevel {
+  None = "none",
+  Debug = "debug",
+  Info = "info",
+  Success = "success",
+  Warning = "warning",
+  Error = "error",
+}

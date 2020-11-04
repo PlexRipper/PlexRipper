@@ -43,11 +43,11 @@ namespace PlexRipper.Data.Common
         /// <returns>The <see cref="IQueryable"/> of <see cref="PlexLibrary"/>.</returns>
         protected IQueryable<PlexLibrary> GetPlexLibraryQueryableByType(PlexMediaType type, bool includeServer = false)
         {
-            IQueryable<PlexLibrary> plexLibraryQuery = PlexLibraryQueryable;
+            var plexLibraryQuery = PlexLibraryQueryable;
 
             if (includeServer)
             {
-                plexLibraryQuery.IncludeServer();
+                plexLibraryQuery = plexLibraryQuery.IncludeServer();
             }
 
             switch (type)

@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Text.Json.Serialization;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using AutofacSerilogIntegration;
 using MediatR;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application.Common;
 using PlexRipper.Data;
-using PlexRipper.WebAPI;
 using PlexRipper.WebAPI.Config;
 
 namespace PlexRipper.BaseTests

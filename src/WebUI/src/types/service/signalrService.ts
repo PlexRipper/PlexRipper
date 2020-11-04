@@ -2,15 +2,16 @@ import Log from 'consola';
 import { LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
-import { signalRProgressHubUrl } from '@api/baseApi';
+import { signalRProgressHubUrl, signalRNotificationHubUrl } from '@api/baseApi';
 import {
 	DownloadProgress,
 	LibraryProgress,
 	DownloadTaskCreationProgress,
 	DownloadStatusChanged,
 	FileMergeProgress,
+	NotificationUpdate,
 } from '@dto/mainApi';
-import { takeWhile, finalize } from 'rxjs/operators';
+import { takeWhile } from 'rxjs/operators';
 import HealthService from '@service/healthService';
 import globalService from '@service/globalService';
 
@@ -21,9 +22,16 @@ export class SignalrService {
 	private _progressHubConnection: HubConnection<ProgressHub>;
 	private _progressHubSubscription: Subscription | null = null;
 
+	private _notificationHubConnectionState: ConnectionStatus = ConnectionStatus.disconnected;
+	private _notificationHubConnection: HubConnection<NotificationHub>;
+	private _notificationHubSubscription: Subscription | null = null;
+
+	private _downloadProgressSubject: ReplaySubject<DownloadProgress> = new ReplaySubject<DownloadProgress>();
 	private _downloadStatusChangedSubject: ReplaySubject<DownloadStatusChanged> = new ReplaySubject<DownloadStatusChanged>();
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
 	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
+
+	private _notificationUpdateSubject: ReplaySubject<NotificationUpdate> = new ReplaySubject<NotificationUpdate>();
 
 	public constructor() {
 		Log.info('Setting up SignalR Service');
@@ -34,13 +42,21 @@ export class SignalrService {
 				maximumAttempts: 0,
 			},
 		};
-		this._hubFactory.create({
-			key: 'ProgressHub',
-			endpointUri: signalRProgressHubUrl,
-			options,
-		});
+		this._hubFactory.create(
+			{
+				key: 'ProgressHub',
+				endpointUri: signalRProgressHubUrl,
+				options,
+			},
+			{
+				key: 'NotificationHub',
+				endpointUri: signalRNotificationHubUrl,
+				options,
+			},
+		);
 
 		this._progressHubConnection = this._hubFactory.get<ProgressHub>('ProgressHub');
+		this._notificationHubConnection = this._hubFactory.get<NotificationHub>('NotificationHub');
 
 		this.setupSubscriptions();
 	}
@@ -48,6 +64,14 @@ export class SignalrService {
 	private setupSubscriptions(): void {
 		this._progressHubConnection?.connectionState$.subscribe((connectionState) => {
 			this._progressHubConnectionState = connectionState.status;
+		});
+
+		this._notificationHubConnection?.connectionState$.subscribe((connectionState) => {
+			this._notificationHubConnectionState = connectionState.status;
+		});
+
+		this._progressHubConnection.on<DownloadProgress>('DownloadProgress').subscribe((data) => {
+			this._downloadProgressSubject.next(data);
 		});
 
 		this._progressHubConnection.on<DownloadStatusChanged>('DownloadStatus').subscribe((data) => {
@@ -60,6 +84,10 @@ export class SignalrService {
 
 		this._progressHubConnection.on<LibraryProgress>('LibraryProgress').subscribe((data) => {
 			this._libraryProgressSubject.next(data);
+		});
+
+		this._notificationHubConnection.on<NotificationUpdate>('Notification').subscribe((data) => {
+			this._notificationUpdateSubject.next(data);
 		});
 
 		globalService
@@ -114,6 +142,10 @@ export class SignalrService {
 	public getLibraryProgress(): Observable<LibraryProgress> {
 		return this._libraryProgressSubject.asObservable();
 	}
+
+	public getNotificationUpdate(): Observable<NotificationUpdate> {
+		return this._notificationUpdateSubject.asObservable();
+	}
 }
 
 const signalrService = new SignalrService();
@@ -125,4 +157,8 @@ export interface ProgressHub {
 	DownloadTaskCreation: DownloadTaskCreationProgress;
 	DownloadStatus: DownloadStatusChanged;
 	LibraryProgress: LibraryProgress;
+}
+
+export interface NotificationHub {
+	Notification: NotificationUpdate;
 }

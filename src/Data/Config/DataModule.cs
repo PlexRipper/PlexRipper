@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using System.Threading.Tasks;
 using Autofac;
 using FluentValidation;
 using MediatR;
 using MediatR.Extensions.Autofac.DependencyInjection;
-using PlexRipper.Application.Common;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Config
 {

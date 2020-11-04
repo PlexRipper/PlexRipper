@@ -45,6 +45,7 @@ namespace PlexRipper.WebAPI.Config
                     cfg.AddProfile(new ApplicationMappingProfile());
                     cfg.AddProfile(new PlexApiMappingProfile());
                     cfg.AddProfile(new WebApiMappingProfile());
+                    cfg.AddProfile(new SignalRMappingProfile());
                 });
                 config.AssertConfigurationIsValid();
                 return config;

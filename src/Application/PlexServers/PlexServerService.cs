@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.PlexAuthentication.Queries;
 
 namespace PlexRipper.Application.PlexServers
 {

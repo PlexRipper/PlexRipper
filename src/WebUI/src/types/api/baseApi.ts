@@ -10,8 +10,7 @@ export const baseUrl = 'http://localhost:5000';
 export const baseApiUrl = `${baseUrl}/api`;
 
 export const signalRProgressHubUrl = `${baseUrl}/progress`;
-
-export const signalRPlexLibraryProgressUrl = `${baseUrl}/plexLibrary/progress`;
+export const signalRNotificationHubUrl = `${baseUrl}/notifications`;
 
 export function preApiRequest(logText: string, fnName: string, msg: string = ''): void {
 	Log.debug(`${logText} ${fnName} => sending request ${msg}`);

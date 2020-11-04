@@ -9,12 +9,13 @@
 		<v-btn icon href="https://github.com/PlexRipper/PlexRipper" target="_blank">
 			<v-icon>mdi-github</v-icon>
 		</v-btn>
-
+		<!-- DarkMode toggle -->
 		<v-btn icon @click="setDarkMode">
 			<v-icon v-if="$vuetify.theme.dark">mdi-white-balance-sunny</v-icon>
 			<v-icon v-else>mdi-moon-waxing-crescent</v-icon>
 		</v-btn>
 
+		<!-- Account Selector -->
 		<v-menu left bottom offset-y>
 			<template v-slot:activator="{ on }">
 				<v-btn icon v-on="on">
@@ -32,6 +33,22 @@
 					<v-list-item-title> No Accounts available</v-list-item-title>
 				</v-list-item>
 			</v-list>
+		</v-menu>
+
+		<!-- Notifications Selector -->
+		<v-menu left bottom offset-y>
+			<template v-slot:activator="{ on }">
+				<v-btn icon v-on="on">
+					<v-icon>mdi-bell</v-icon>
+				</v-btn>
+			</template>
+
+			<template v-if="accounts.length > 0">
+				<v-alert type="success" dismissible> I'm a success alert. </v-alert>
+				<v-alert type="info" dismissible> I'm an info alert. </v-alert>
+				<v-alert type="warning" dismissible> I'm a warning alert. </v-alert>
+				<v-alert type="error" dismissible> I'm an error alert. </v-alert>
+			</template>
 		</v-menu>
 	</v-app-bar>
 </template>

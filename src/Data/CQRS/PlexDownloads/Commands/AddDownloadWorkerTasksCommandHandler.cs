@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
 using MediatR;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Data.Common;
 

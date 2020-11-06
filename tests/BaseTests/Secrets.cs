@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PlexRipper.PlexApi.Common.DTO;
 using System.IO;
 
 namespace PlexRipper.BaseTests

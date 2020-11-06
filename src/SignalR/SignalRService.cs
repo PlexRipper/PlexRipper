@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Types;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.SignalR.Common;
 using PlexRipper.SignalR.Hubs;
@@ -16,17 +16,31 @@ namespace PlexRipper.SignalR
     {
         private readonly IHubContext<ProgressHub> _progressHub;
 
+        private readonly IHubContext<NotificationHub> _notificationHub;
+
+        private readonly IMapper _mapper;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SignalRService"/> class.
         /// </summary>
         /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
-        public SignalRService(IHubContext<ProgressHub> progressHub)
+        /// <param name="notificationHub">The <see cref="NotificationHub"/>.</param>
+        public SignalRService(IHubContext<ProgressHub> progressHub, IHubContext<NotificationHub> notificationHub, IMapper mapper)
         {
             _progressHub = progressHub;
+            _notificationHub = notificationHub;
+            _mapper = mapper;
         }
+
+        #region ProgressHub
 
         public async Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)
         {
+            if (_progressHub?.Clients?.All == null)
+            {
+                return;
+            }
+
             var progress = new LibraryProgress
             {
                 Id = id,
@@ -37,12 +51,7 @@ namespace PlexRipper.SignalR
                 IsComplete = received >= total,
             };
 
-            if (_progressHub?.Clients?.All == null)
-            {
-                return;
-            }
-
-            await _progressHub.Clients.All.SendAsync("LibraryProgress", progress);
+            await _progressHub.Clients.All.SendAsync(nameof(LibraryProgress), progress);
         }
 
         public async Task SendDownloadTaskCreationProgressUpdate(int plexLibraryId, int current, int total)
@@ -61,7 +70,7 @@ namespace PlexRipper.SignalR
                 return;
             }
 
-            await _progressHub.Clients.All.SendAsync("DownloadTaskCreation", progress);
+            await _progressHub.Clients.All.SendAsync(nameof(DownloadTaskCreationProgress), progress);
         }
 
         /// <inheritdoc/>
@@ -85,7 +94,7 @@ namespace PlexRipper.SignalR
 
             var downloadStatusChanged = new DownloadStatusChanged(id, downloadStatus);
 
-            await _progressHub.Clients.All.SendAsync("DownloadStatus", downloadStatusChanged);
+            await _progressHub.Clients.All.SendAsync(nameof(DownloadStatusChanged), downloadStatusChanged);
         }
 
         /// <inheritdoc/>
@@ -96,7 +105,24 @@ namespace PlexRipper.SignalR
                 return;
             }
 
-            Task.Run(() => _progressHub.Clients.All.SendAsync("FileMergeProgress", fileMergeProgress));
+            Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(FileMergeProgress), fileMergeProgress));
         }
+
+        #endregion
+
+        #region NotificationHub
+
+        public async Task SendNotification(Notification notification)
+        {
+            if (_notificationHub?.Clients?.All == null)
+            {
+                return;
+            }
+
+            var notificationUpdate = _mapper.Map<NotificationDTO>(notification);
+            await _notificationHub.Clients.All.SendAsync(nameof(Notification), notificationUpdate);
+        }
+
+        #endregion
     }
 }

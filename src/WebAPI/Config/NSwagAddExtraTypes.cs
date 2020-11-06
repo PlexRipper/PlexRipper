@@ -4,7 +4,6 @@ using System.Linq;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Types;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.SignalR.Common;
 
@@ -29,6 +28,7 @@ namespace PlexRipper.WebAPI.Config
                 typeof(LibraryProgress),
                 typeof(DownloadStatusChanged),
                 typeof(FileMergeProgress),
+                typeof(NotificationDTO),
             };
 
             foreach (Type type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))

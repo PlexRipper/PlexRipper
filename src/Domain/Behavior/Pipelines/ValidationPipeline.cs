@@ -1,18 +1,19 @@
-﻿using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
+using FluentValidation;
+using MediatR;
 
 namespace PlexRipper.Domain.Behavior.Pipelines
 {
-    public class ValidationPipeline<TRequest, TResponse>
-        : IPipelineBehavior<TRequest, TResponse>
+    public class ValidationPipeline<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
         where TResponse : ResultBase, new()
     {
         private readonly IValidator<TRequest> _compositeValidator;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ValidationPipeline{TRequest, TResponse}"/> class.
         /// Note: Every Query or Command should have a Validator class added otherwise it will silently fail the execution
         /// </summary>
         /// <param name="compositeValidator"></param>
@@ -39,7 +40,18 @@ namespace PlexRipper.Domain.Behavior.Pipelines
                 return result;
             }
 
-            return await next();
+            // Encapsulate all handlers with this try/catch block as not to do this in every handler itself.
+            try
+            {
+                return await next();
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                var result = new TResponse();
+                result.Errors.Add(new ExceptionalError(e));
+                return result;
+            }
         }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using Autofac;
-using Microsoft.AspNetCore.SignalR;
-using System.Reflection;
 using PlexRipper.Application.Common;
 
 namespace PlexRipper.SignalR.Config

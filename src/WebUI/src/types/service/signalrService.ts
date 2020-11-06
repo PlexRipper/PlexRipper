@@ -2,16 +2,16 @@ import Log from 'consola';
 import { LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
-import { signalRProgressHubUrl } from '@api/baseApi';
+import { signalRProgressHubUrl, signalRNotificationHubUrl } from '@api/baseApi';
 import {
 	DownloadProgress,
 	LibraryProgress,
 	DownloadTaskCreationProgress,
 	DownloadStatusChanged,
 	FileMergeProgress,
+	NotificationDTO,
 } from '@dto/mainApi';
-import { takeWhile, finalize } from 'rxjs/operators';
-import HealthService from '@service/healthService';
+import { takeWhile } from 'rxjs/operators';
 import globalService from '@service/globalService';
 
 export class SignalrService {
@@ -21,9 +21,16 @@ export class SignalrService {
 	private _progressHubConnection: HubConnection<ProgressHub>;
 	private _progressHubSubscription: Subscription | null = null;
 
+	private _notificationHubConnectionState: ConnectionStatus = ConnectionStatus.disconnected;
+	private _notificationHubConnection: HubConnection<NotificationHub>;
+	private _notificationHubSubscription: Subscription | null = null;
+
+	private _downloadProgressSubject: ReplaySubject<DownloadProgress> = new ReplaySubject<DownloadProgress>();
 	private _downloadStatusChangedSubject: ReplaySubject<DownloadStatusChanged> = new ReplaySubject<DownloadStatusChanged>();
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
 	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
+
+	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
 	public constructor() {
 		Log.info('Setting up SignalR Service');
@@ -34,13 +41,21 @@ export class SignalrService {
 				maximumAttempts: 0,
 			},
 		};
-		this._hubFactory.create({
-			key: 'ProgressHub',
-			endpointUri: signalRProgressHubUrl,
-			options,
-		});
+		this._hubFactory.create(
+			{
+				key: 'ProgressHub',
+				endpointUri: signalRProgressHubUrl,
+				options,
+			},
+			{
+				key: 'NotificationHub',
+				endpointUri: signalRNotificationHubUrl,
+				options,
+			},
+		);
 
 		this._progressHubConnection = this._hubFactory.get<ProgressHub>('ProgressHub');
+		this._notificationHubConnection = this._hubFactory.get<NotificationHub>('NotificationHub');
 
 		this.setupSubscriptions();
 	}
@@ -48,6 +63,14 @@ export class SignalrService {
 	private setupSubscriptions(): void {
 		this._progressHubConnection?.connectionState$.subscribe((connectionState) => {
 			this._progressHubConnectionState = connectionState.status;
+		});
+
+		this._notificationHubConnection?.connectionState$.subscribe((connectionState) => {
+			this._notificationHubConnectionState = connectionState.status;
+		});
+
+		this._progressHubConnection.on<DownloadProgress>('DownloadProgress').subscribe((data) => {
+			this._downloadProgressSubject.next(data);
 		});
 
 		this._progressHubConnection.on<DownloadStatusChanged>('DownloadStatus').subscribe((data) => {
@@ -62,10 +85,17 @@ export class SignalrService {
 			this._libraryProgressSubject.next(data);
 		});
 
+		this._notificationHubConnection.on<NotificationDTO>('Notification').subscribe((data) => {
+			this._NotificationUpdateSubject.next(data);
+		});
+
 		globalService
 			.getAxiosReady()
 			// .pipe(finalize(() => this.startProgressHubConnection()))
-			.subscribe(() => this.startProgressHubConnection());
+			.subscribe(() => {
+				this.startProgressHubConnection();
+				this.startNotificationHubConnection();
+			});
 
 		// Disable connections when server is offline
 		// HealthService.getServerStatus().subscribe((status) => {
@@ -73,6 +103,7 @@ export class SignalrService {
 		// 		this.startProgressHubConnection();
 		// 	} else {
 		// 		this.stopProgressHubConnection();
+		// 		this.stopNotificationHubConnection();
 		// 	}
 		// });
 	}
@@ -89,6 +120,22 @@ export class SignalrService {
 		if (this._progressHubConnectionState !== ConnectionStatus.disconnected) {
 			this._progressHubSubscription = this._progressHubConnection?.disconnect().subscribe(() => {
 				Log.info('ProgressHub is now disconnected!');
+			});
+		}
+	}
+
+	public startNotificationHubConnection(): void {
+		if (this._notificationHubConnectionState === ConnectionStatus.disconnected) {
+			this._notificationHubSubscription = this._progressHubConnection?.connect().subscribe(() => {
+				Log.info('NotificationHub is now connected!');
+			});
+		}
+	}
+
+	public stopNotificationHubConnection(): void {
+		if (this._notificationHubConnectionState !== ConnectionStatus.disconnected) {
+			this._notificationHubSubscription = this._progressHubConnection?.disconnect().subscribe(() => {
+				Log.info('NotificationHub is now disconnected!');
 			});
 		}
 	}
@@ -114,6 +161,10 @@ export class SignalrService {
 	public getLibraryProgress(): Observable<LibraryProgress> {
 		return this._libraryProgressSubject.asObservable();
 	}
+
+	public getNotificationUpdates(): Observable<NotificationDTO> {
+		return this._NotificationUpdateSubject.asObservable();
+	}
 }
 
 const signalrService = new SignalrService();
@@ -125,4 +176,8 @@ export interface ProgressHub {
 	DownloadTaskCreation: DownloadTaskCreationProgress;
 	DownloadStatus: DownloadStatusChanged;
 	LibraryProgress: LibraryProgress;
+}
+
+export interface NotificationHub {
+	Notification: NotificationDTO;
 }

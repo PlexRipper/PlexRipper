@@ -1,7 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI.Common.DTO

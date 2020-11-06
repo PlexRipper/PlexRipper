@@ -1,7 +1,5 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 using PlexRipper.BaseTests;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;

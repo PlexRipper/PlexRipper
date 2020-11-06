@@ -9,12 +9,13 @@
 		<v-btn icon href="https://github.com/PlexRipper/PlexRipper" target="_blank">
 			<v-icon>mdi-github</v-icon>
 		</v-btn>
-
+		<!-- DarkMode toggle -->
 		<v-btn icon @click="setDarkMode">
 			<v-icon v-if="$vuetify.theme.dark">mdi-white-balance-sunny</v-icon>
 			<v-icon v-else>mdi-moon-waxing-crescent</v-icon>
 		</v-btn>
 
+		<!-- Account Selector -->
 		<v-menu left bottom offset-y>
 			<template v-slot:activator="{ on }">
 				<v-btn icon v-on="on">
@@ -33,6 +34,9 @@
 				</v-list-item>
 			</v-list>
 		</v-menu>
+
+		<!-- Notifications Selector -->
+		<notification-button />
 	</v-app-bar>
 </template>
 
@@ -40,8 +44,13 @@
 import { Component, Vue } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import AccountService from '@service/accountService';
+import NotificationButton from '@components/AppBar/NotificationButton.vue';
 
-@Component
+@Component<AppBar>({
+	components: {
+		NotificationButton,
+	},
+})
 export default class AppBar extends Vue {
 	private accounts: PlexAccountDTO[] = [];
 

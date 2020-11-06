@@ -8,7 +8,6 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.FolderPaths.Queries;
-using PlexRipper.Application.PlexDownloads.Commands;
 using PlexRipper.Application.PlexDownloads.Queries;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexServers;

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using PlexRipper.Application.Settings.Models.Base;
+﻿using PlexRipper.Application.Settings.Models.Base;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Settings.Models

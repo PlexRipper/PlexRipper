@@ -16,7 +16,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import NavigationDrawer from '@/components/NavigationDrawer.vue';
-import AppBar from '@/components/AppBar.vue';
+import AppBar from '@components/AppBar/AppBar.vue';
 import HealthService from '@service/healthService';
 import HelpService from '@service/helpService';
 import HelpDialog from '@components/Help/HelpDialog.vue';

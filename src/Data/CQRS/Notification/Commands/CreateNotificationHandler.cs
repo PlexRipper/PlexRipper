@@ -1,0 +1,43 @@
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentResults;
+using FluentValidation;
+using MediatR;
+using PlexRipper.Application.Notifications;
+using PlexRipper.Data.Common;
+using PlexRipper.Domain;
+
+namespace PlexRipper.Data.CQRS
+{
+    public class CreateNotificationValidator : AbstractValidator<CreateNotificationCommand>
+    {
+        public CreateNotificationValidator()
+        {
+            RuleFor(x => x.Notification).NotNull();
+            RuleFor(x => x.Notification.Message).NotEmpty();
+            RuleFor(x => x.Notification.NotificationLevel).NotEqual(NotificationLevel.None);
+            RuleFor(x => x.Notification.CreatedAt).NotEqual(DateTime.MinValue);
+        }
+    }
+
+    public class CreateNotificationHandler : BaseHandler, IRequestHandler<CreateNotificationCommand, Result<bool>>
+    {
+        public CreateNotificationHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+        public async Task<Result<bool>> Handle(CreateNotificationCommand command, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _dbContext.Notifications.AddAsync(command.Notification);
+                await _dbContext.SaveChangesAsync();
+                return Result.Ok(true);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return Result.Fail(new ExceptionalError(e));
+            }
+        }
+    }
+}

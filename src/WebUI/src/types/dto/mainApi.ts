@@ -279,6 +279,25 @@ export interface FileSystemModelDTO {
  */
 export type FileSystemEntityType = 0 | 1 | 2 | 3;
 
+export type ResultDTOOfListOfNotificationDTO = ResultDTO & { value: NotificationDTO[] };
+
+export interface NotificationDTO {
+  id: number;
+  level: NotificationLevel;
+  createdAt: string;
+  message: string;
+  hidden: boolean;
+}
+
+export enum NotificationLevel {
+  None = "none",
+  Debug = "debug",
+  Info = "info",
+  Success = "success",
+  Warning = "warning",
+  Error = "error",
+}
+
 export type ResultDTOOfListOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO[] };
 
 export interface PlexAccountDTO {

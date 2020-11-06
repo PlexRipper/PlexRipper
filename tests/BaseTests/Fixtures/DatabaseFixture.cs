@@ -1,6 +1,4 @@
-﻿using Xunit.Abstractions;
-
-namespace PlexRipper.BaseTests.Fixtures
+﻿namespace PlexRipper.BaseTests.Fixtures
 {
     public class DatabaseFixture
     {

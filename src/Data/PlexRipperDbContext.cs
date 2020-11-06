@@ -21,6 +21,8 @@ namespace PlexRipper.Data
 
         public DbSet<FileTask> FileTasks { get; set; }
 
+        public DbSet<Notification> Notifications { get; set; }
+
         public DbSet<PlexGenre> PlexGenres { get; set; }
 
         public DbSet<PlexLibrary> PlexLibraries { get; set; }

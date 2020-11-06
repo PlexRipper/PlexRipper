@@ -25,7 +25,6 @@ namespace PlexRipper.Domain
                 return Level switch
                 {
                     "none" => NotificationLevel.None,
-                    "debug" => NotificationLevel.Debug,
                     "info" => NotificationLevel.Info,
                     "success" => NotificationLevel.Success,
                     "warning" => NotificationLevel.Warning,
@@ -39,9 +38,6 @@ namespace PlexRipper.Domain
                 {
                     case NotificationLevel.None:
                         Level = "none";
-                        return;
-                    case NotificationLevel.Debug:
-                        Level = "debug";
                         return;
                     case NotificationLevel.Info:
                         Level = "info";

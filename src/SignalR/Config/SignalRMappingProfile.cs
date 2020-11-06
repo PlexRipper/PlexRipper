@@ -9,7 +9,7 @@ namespace PlexRipper.SignalR.Config
         public SignalRMappingProfile()
         {
             // Notification <-> NotificationUpdate
-            CreateMap<Notification, NotificationUpdate>(MemberList.Destination)
+            CreateMap<Notification, NotificationDTO>(MemberList.Destination)
                 .ForSourceMember(x => x.Level, opt => opt.DoNotValidate())
                 .ForMember(x => x.Level, opt => opt.MapFrom(x => x.NotificationLevel)).ReverseMap();
         }

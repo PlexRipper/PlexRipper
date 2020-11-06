@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.SignalR.Common
 {
-    public class NotificationUpdate
+    public class NotificationDTO
     {
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }

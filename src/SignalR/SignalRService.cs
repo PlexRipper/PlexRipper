@@ -119,7 +119,7 @@ namespace PlexRipper.SignalR
                 return;
             }
 
-            var notificationUpdate = _mapper.Map<NotificationUpdate>(notification);
+            var notificationUpdate = _mapper.Map<NotificationDTO>(notification);
             await _notificationHub.Clients.All.SendAsync(nameof(Notification), notificationUpdate);
         }
 

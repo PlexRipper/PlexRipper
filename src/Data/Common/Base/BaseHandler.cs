@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Domain;
 
@@ -75,6 +76,11 @@ namespace PlexRipper.Data.Common
             if (value != null && value.Any()) return Result.Ok(value);
 
             return Result.Fail(new Error($"Could not find entities of {typeof(T)}"));
+        }
+
+        protected async Task SaveChangesAsync()
+        {
+            await _dbContext.SaveChangesAsync();
         }
 
         #endregion

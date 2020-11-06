@@ -10,19 +10,16 @@ namespace PlexRipper.Domain
         [EnumMember(Value = "none")]
         None = 0,
 
-        [EnumMember(Value = "debug")]
-        Debug = 1,
-
         [EnumMember(Value = "info")]
-        Info = 2,
+        Info = 1,
 
         [EnumMember(Value = "success")]
-        Success = 3,
+        Success = 2,
 
         [EnumMember(Value = "warning")]
-        Warning = 4,
+        Warning = 3,
 
         [EnumMember(Value = "error")]
-        Error = 5,
+        Error = 4,
     }
 }

@@ -10,5 +10,7 @@ namespace PlexRipper.Application.Common
         Task<Result<bool>> CreateNotification(Notification notification);
 
         Task<Result<List<Notification>>> GetNotifications();
+
+        Task<Result<bool>> HideNotification(int id);
     }
 }

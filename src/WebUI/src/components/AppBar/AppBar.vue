@@ -36,20 +36,7 @@
 		</v-menu>
 
 		<!-- Notifications Selector -->
-		<v-menu left bottom offset-y>
-			<template v-slot:activator="{ on }">
-				<v-btn icon v-on="on">
-					<v-icon>mdi-bell</v-icon>
-				</v-btn>
-			</template>
-
-			<template v-if="accounts.length > 0">
-				<v-alert type="success" dismissible> I'm a success alert. </v-alert>
-				<v-alert type="info" dismissible> I'm an info alert. </v-alert>
-				<v-alert type="warning" dismissible> I'm a warning alert. </v-alert>
-				<v-alert type="error" dismissible> I'm an error alert. </v-alert>
-			</template>
-		</v-menu>
+		<notification-button />
 	</v-app-bar>
 </template>
 
@@ -57,8 +44,13 @@
 import { Component, Vue } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import AccountService from '@service/accountService';
+import NotificationButton from '@components/AppBar/NotificationButton.vue';
 
-@Component
+@Component<AppBar>({
+	components: {
+		NotificationButton,
+	},
+})
 export default class AppBar extends Vue {
 	private accounts: PlexAccountDTO[] = [];
 

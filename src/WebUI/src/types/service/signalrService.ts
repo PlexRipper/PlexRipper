@@ -9,10 +9,9 @@ import {
 	DownloadTaskCreationProgress,
 	DownloadStatusChanged,
 	FileMergeProgress,
-	NotificationUpdate,
+	NotificationDTO,
 } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
-import HealthService from '@service/healthService';
 import globalService from '@service/globalService';
 
 export class SignalrService {
@@ -31,7 +30,7 @@ export class SignalrService {
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
 	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
 
-	private _notificationUpdateSubject: ReplaySubject<NotificationUpdate> = new ReplaySubject<NotificationUpdate>();
+	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
 	public constructor() {
 		Log.info('Setting up SignalR Service');
@@ -86,14 +85,17 @@ export class SignalrService {
 			this._libraryProgressSubject.next(data);
 		});
 
-		this._notificationHubConnection.on<NotificationUpdate>('Notification').subscribe((data) => {
-			this._notificationUpdateSubject.next(data);
+		this._notificationHubConnection.on<NotificationDTO>('Notification').subscribe((data) => {
+			this._NotificationUpdateSubject.next(data);
 		});
 
 		globalService
 			.getAxiosReady()
 			// .pipe(finalize(() => this.startProgressHubConnection()))
-			.subscribe(() => this.startProgressHubConnection());
+			.subscribe(() => {
+				this.startProgressHubConnection();
+				this.startNotificationHubConnection();
+			});
 
 		// Disable connections when server is offline
 		// HealthService.getServerStatus().subscribe((status) => {
@@ -101,6 +103,7 @@ export class SignalrService {
 		// 		this.startProgressHubConnection();
 		// 	} else {
 		// 		this.stopProgressHubConnection();
+		// 		this.stopNotificationHubConnection();
 		// 	}
 		// });
 	}
@@ -117,6 +120,22 @@ export class SignalrService {
 		if (this._progressHubConnectionState !== ConnectionStatus.disconnected) {
 			this._progressHubSubscription = this._progressHubConnection?.disconnect().subscribe(() => {
 				Log.info('ProgressHub is now disconnected!');
+			});
+		}
+	}
+
+	public startNotificationHubConnection(): void {
+		if (this._notificationHubConnectionState === ConnectionStatus.disconnected) {
+			this._notificationHubSubscription = this._progressHubConnection?.connect().subscribe(() => {
+				Log.info('NotificationHub is now connected!');
+			});
+		}
+	}
+
+	public stopNotificationHubConnection(): void {
+		if (this._notificationHubConnectionState !== ConnectionStatus.disconnected) {
+			this._notificationHubSubscription = this._progressHubConnection?.disconnect().subscribe(() => {
+				Log.info('NotificationHub is now disconnected!');
 			});
 		}
 	}
@@ -143,8 +162,8 @@ export class SignalrService {
 		return this._libraryProgressSubject.asObservable();
 	}
 
-	public getNotificationUpdate(): Observable<NotificationUpdate> {
-		return this._notificationUpdateSubject.asObservable();
+	public getNotificationUpdates(): Observable<NotificationDTO> {
+		return this._NotificationUpdateSubject.asObservable();
 	}
 }
 
@@ -160,5 +179,5 @@ export interface ProgressHub {
 }
 
 export interface NotificationHub {
-	Notification: NotificationUpdate;
+	Notification: NotificationDTO;
 }

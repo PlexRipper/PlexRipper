@@ -28,7 +28,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET api/<NotificationController>/
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<NotificationUpdate>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<NotificationDTO>>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> GetNotifications()
         {
@@ -40,7 +40,7 @@ namespace PlexRipper.WebAPI.Controllers
                     return InternalServerError(result);
                 }
 
-                var mapResult = _mapper.Map<List<NotificationUpdate>>(result.Value);
+                var mapResult = _mapper.Map<List<NotificationDTO>>(result.Value);
                 return Ok(Result.Ok(mapResult));
             }
             catch (Exception e)
@@ -54,7 +54,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public IActionResult HideNotification(int id)
+        public async Task<IActionResult> HideNotification(int id)
         {
             if (id <= 0)
             {
@@ -63,6 +63,7 @@ namespace PlexRipper.WebAPI.Controllers
 
             try
             {
+                await _notificationsService.HideNotification(id);
                 Log.Debug($"Setting the active plex account to {id}");
                 return Ok(Result.Ok(true));
             }
@@ -76,9 +77,9 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> CreateNotification([FromBody] NotificationUpdate notificationUpdate)
+        public async Task<IActionResult> CreateNotification([FromBody] NotificationDTO notificationDto)
         {
-            var notification = _mapper.Map<Notification>(notificationUpdate);
+            var notification = _mapper.Map<Notification>(notificationDto);
 
             var result = await _notificationsService.CreateNotification(notification);
             if (result.IsFailed)

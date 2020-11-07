@@ -165,7 +165,8 @@ export default class MediaOverview extends Vue {
 	}
 
 	get getPercentage(): number {
-		return this.libraryProgress?.percentage ?? 0;
+		Log.info(this.libraryProgress);
+		return this.libraryProgress?.percentage ?? -1;
 	}
 
 	changeView(viewMode: ViewMode): void {
@@ -256,28 +257,17 @@ export default class MediaOverview extends Vue {
 		this.isRefreshing = true;
 		this.isLoading = true;
 		this.resetProgress(true);
-		merge(
-			// Setup progress bar
-			SignalrService.getLibraryProgress().pipe(
+		// Refresh Library
+		refreshPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0)
+			.pipe(
 				tap((data) => {
-					this.libraryProgress = data;
-				}),
-				finalize(() => {
-					this.libraryProgress = null;
-				}),
-				takeWhile((data) => !data.isComplete),
-			),
-			// Refresh Library
-			refreshPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0).pipe(
-				tap((data) => {
-					Log.debug(`TvShowsDetail => refreshPlexLibrary: ${data?.id}`, data);
 					this.library = data;
 					this.isLoading = false;
 					this.isRefreshing = false;
 				}),
 				takeLast(1),
-			),
-		).subscribe();
+			)
+			.subscribe();
 	}
 
 	created(): void {
@@ -293,6 +283,15 @@ export default class MediaOverview extends Vue {
 			}
 		});
 
+		// Setup progress bar
+		SignalrService.getLibraryProgress().subscribe((data) => {
+			Log.info(data);
+			if (data.id === this.libraryId) {
+				this.libraryProgress = data;
+				this.isRefreshing = data.isRefreshing ?? false;
+			}
+		});
+
 		AccountService.getActiveAccount()
 			.pipe(
 				tap((data) => {
@@ -300,24 +299,13 @@ export default class MediaOverview extends Vue {
 					this.activeAccount = data ?? null;
 				}),
 				switchMap((data) =>
-					merge(
-						// Setup progress bar
-						SignalrService.getLibraryProgress().pipe(
-							tap((data) => {
-								this.libraryProgress = data;
-								this.isRefreshing = data.isRefreshing ?? false;
-							}),
-							takeWhile((data) => !data.isComplete),
-						),
-						// Retrieve library
-						getPlexLibrary(this.libraryId, data?.id ?? 0).pipe(
-							tap((data) => {
-								this.library = data;
-								Log.debug(`TvShowsDetail => Library: ${data?.id}`, data);
-								this.isLoading = false;
-							}),
-							takeLast(1),
-						),
+					// Retrieve library
+					getPlexLibrary(this.libraryId, data?.id ?? 0).pipe(
+						tap((data) => {
+							this.library = data;
+							this.isLoading = false;
+						}),
+						takeLast(1),
 					),
 				),
 			)

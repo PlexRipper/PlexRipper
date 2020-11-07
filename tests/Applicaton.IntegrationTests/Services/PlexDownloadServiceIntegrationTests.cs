@@ -50,7 +50,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
             await Task.Delay(15000);
 
-            //Assert
+            // Assert
             plexLibrary.Should().NotBeNull();
         }
 

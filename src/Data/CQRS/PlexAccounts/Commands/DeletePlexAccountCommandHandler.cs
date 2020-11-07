@@ -8,7 +8,7 @@ using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexAccounts
+namespace PlexRipper.Data.CQRS
 {
     public class DeletePlexAccountValidator : AbstractValidator<DeletePlexAccountCommand>
     {

@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Notifications
 {
-    public class CreateNotificationCommand : IRequest<Result<bool>>
+    public class CreateNotificationCommand : IRequest<Result<int>>
     {
         public Notification Notification { get; }
 

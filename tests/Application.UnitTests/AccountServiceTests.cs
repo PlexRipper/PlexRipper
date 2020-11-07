@@ -60,7 +60,7 @@ namespace PlexRipper.Application.UnitTests
             // Act
             var accountDB = (await accountService.CreatePlexAccountAsync(newAccount)).Value;
             updatedAccount.Id = accountDB.Id;
-            accountDB = (await accountService.UpdateAccountAsync(updatedAccount)).Value;
+            accountDB = (await accountService.UpdatePlexAccountAsync(updatedAccount)).Value;
 
             // Assert
             accountDB.Should().NotBeNull();

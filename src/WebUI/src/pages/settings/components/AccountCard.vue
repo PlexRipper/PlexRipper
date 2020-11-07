@@ -23,44 +23,75 @@
 		</template>
 		<!-- The account pop-up -->
 		<v-card>
-			<v-card-title class="headline">{{ getDisplayName }}</v-card-title>
-			<v-card-text>
+			<v-card-title class="headline">
+				{{ getDisplayName }}
+			</v-card-title>
+			<v-divider></v-divider>
+			<v-card-text class="mt-2">
 				<v-form ref="form" v-model="valid">
 					<!-- Is account enabled -->
-					<v-switch v-model="isEnabled" label="Is Enabled:"></v-switch>
+					<v-row no-gutters>
+						<v-col cols="3">
+							<help-icon label="Is Enabled:" />
+						</v-col>
+						<v-col>
+							<v-checkbox v-model="isEnabled" color="red" class="mt-0 pt-0" hide-details></v-checkbox>
+						</v-col>
+					</v-row>
+					<!-- Is main account -->
+					<v-row no-gutters>
+						<v-col cols="3">
+							<help-icon label="Is Main Account:" />
+						</v-col>
+						<v-col>
+							<v-checkbox v-model="isMain" color="red" class="mt-0 pt-0" hide-details></v-checkbox>
+						</v-col>
+					</v-row>
 					<!-- Display Name -->
-					<v-text-field
-						v-model="displayName"
-						:rules="getDisplayNameRules"
-						label="Display Name"
-						full-width
-						single-line
-						outlined
-						required
-					/>
+					<v-row no-gutters>
+						<v-col cols="3">
+							<help-icon label="Display Name:" />
+						</v-col>
+						<v-col>
+							<v-text-field v-model="displayName" :rules="getDisplayNameRules" color="red" full-width outlined required />
+						</v-col>
+					</v-row>
+
 					<!-- Username -->
-					<v-text-field
-						v-model="username"
-						:rules="getUsernameRules"
-						label="Username"
-						full-width
-						single-line
-						outlined
-						required
-						@input="inputChanged"
-					/>
+					<v-row no-gutters>
+						<v-col cols="3">
+							<help-icon label="Username:" />
+						</v-col>
+						<v-col>
+							<v-text-field
+								v-model="username"
+								:rules="getUsernameRules"
+								color="red"
+								full-width
+								outlined
+								required
+								@input="inputChanged"
+							/>
+						</v-col>
+					</v-row>
 
 					<!-- Password -->
-					<v-text-field
-						v-model="password"
-						:rules="getPasswordRules"
-						label="Password"
-						full-width
-						single-line
-						outlined
-						required
-						@input="inputChanged"
-					/>
+					<v-row no-gutters>
+						<v-col cols="3">
+							<help-icon label="Password:" />
+						</v-col>
+						<v-col>
+							<v-text-field
+								v-model="password"
+								:rules="getPasswordRules"
+								color="red"
+								full-width
+								outlined
+								required
+								@input="inputChanged"
+							/>
+						</v-col>
+					</v-row>
 				</v-form>
 			</v-card-text>
 			<v-card-actions>
@@ -113,10 +144,12 @@ import Log from 'consola';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import { validateAccount, createAccount, deleteAccount, updateAccount } from '@api/accountApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import HelpIcon from '@components/Help/HelpIcon.vue';
 
 @Component({
 	components: {
 		LoadingSpinner,
+		HelpIcon,
 	},
 })
 export default class AccountCard extends Vue {
@@ -137,6 +170,8 @@ export default class AccountCard extends Vue {
 
 	isEnabled: boolean = true;
 
+	isMain: boolean = true;
+
 	isValidated: string = '';
 
 	get isNew(): boolean {
@@ -147,6 +182,7 @@ export default class AccountCard extends Vue {
 		return {
 			id: this.isNew ? 0 : this.account.id,
 			isEnabled: this.isEnabled,
+			isMain: this.isMain,
 			displayName: this.displayName,
 			username: this.username,
 			password: this.password,
@@ -216,6 +252,7 @@ export default class AccountCard extends Vue {
 
 	reset(): void {
 		Log.debug('Reset form');
+		this.isMain = false;
 		this.displayName = '';
 		this.username = '';
 		this.password = '';
@@ -253,6 +290,7 @@ export default class AccountCard extends Vue {
 	openDialog(): void {
 		if (this.account) {
 			this.isEnabled = this.account.isEnabled;
+			this.isMain = this.account.isMain;
 			this.displayName = this.account.displayName;
 			this.username = this.account.username;
 			this.password = this.account.password;

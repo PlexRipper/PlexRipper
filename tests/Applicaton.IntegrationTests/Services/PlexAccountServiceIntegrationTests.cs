@@ -66,7 +66,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
             createResult.Value.DisplayName = "Updated Test Account 999";
 
-            var updateResult = await accountService.UpdateAccountAsync(createResult.Value);
+            var updateResult = await accountService.UpdatePlexAccountAsync(createResult.Value);
 
             // Assert
             createResult.IsSuccess.Should().BeTrue();

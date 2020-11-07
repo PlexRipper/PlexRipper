@@ -2,3 +2,10 @@
 @import './icons.scss';
 @import './components.scss';
 @import './overwriting.scss';
+
+/*
+Nuxt-i18n
+*/
+.i18n-formatting {
+	white-space: pre-line;
+}

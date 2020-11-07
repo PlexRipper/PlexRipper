@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
-    <PackageReference Include="FluentResults" Version="2.2.0" />
+    <PackageReference Include="FluentResults" Version="2.3.0" />
     <PackageReference Include="FluentValidation" Version="8.6.2" />
     <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
     <PackageReference Include="MediatR" Version="8.0.1" />
@@ -19,11 +19,6 @@
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.205" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Base" />
-    <Folder Include="Types\Settings" />
   </ItemGroup>
 
 </Project>

@@ -143,6 +143,7 @@ namespace PlexRipper.Application.PlexLibraries
                 return createResult.ToResult();
             }
 
+            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.GetMediaCount, plexLibrary.GetMediaCount);
             return await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id));
         }
 
@@ -309,6 +310,7 @@ namespace PlexRipper.Application.PlexLibraries
         /// <returns>Returns the PlexLibrary with the containing media.</returns>
         public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(PlexAccount plexAccount, PlexLibrary plexLibrary)
         {
+            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 0, plexLibrary.GetMediaCount);
             if (plexLibrary == null)
             {
                 string msg = "The plexLibrary was null";
@@ -330,8 +332,6 @@ namespace PlexRipper.Application.PlexLibraries
             {
                 return authToken.ToResult();
             }
-
-            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 0, plexLibrary.GetMediaCount);
 
             // Retrieve overview of all media belonging to this PlexLibrary
             var newPlexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value);

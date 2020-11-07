@@ -1,11 +1,11 @@
-﻿using FluentResults;
-using PlexRipper.Domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using FluentResults;
 using PlexRipper.Application.Common;
+using PlexRipper.Domain;
 
 namespace PlexRipper.FileSystem
 {
@@ -14,7 +14,9 @@ namespace PlexRipper.FileSystem
         #region Fields
 
         private readonly IDiskProvider _diskProvider;
+
         private static string _rootDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+
         private static string _configDirectory = $"{_rootDirectory}/config";
 
         #endregion Fields
@@ -63,7 +65,7 @@ namespace PlexRipper.FileSystem
                     Type = FileSystemEntityType.Drive,
                     Name = _diskProvider.GetVolumeName(d),
                     Path = d.RootDirectory,
-                    LastModified = null
+                    LastModified = null,
                 })
                 .ToList();
         }
@@ -82,10 +84,9 @@ namespace PlexRipper.FileSystem
                     result.Files = _diskProvider.GetFiles(path);
                 }
             }
-
             catch (DirectoryNotFoundException)
             {
-                return new FileSystemResult {Parent = _diskProvider.GetParent(path)};
+                return new FileSystemResult { Parent = _diskProvider.GetParent(path) };
             }
             catch (ArgumentException)
             {
@@ -93,11 +94,11 @@ namespace PlexRipper.FileSystem
             }
             catch (IOException)
             {
-                return new FileSystemResult {Parent = _diskProvider.GetParent(path)};
+                return new FileSystemResult { Parent = _diskProvider.GetParent(path) };
             }
             catch (UnauthorizedAccessException)
             {
-                return new FileSystemResult {Parent = _diskProvider.GetParent(path)};
+                return new FileSystemResult { Parent = _diskProvider.GetParent(path) };
             }
 
             return result;
@@ -118,22 +119,16 @@ namespace PlexRipper.FileSystem
 
         public FileSystemResult LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
         {
-            if (string.IsNullOrWhiteSpace(query))
+            // If path is invalid return root file system
+            if (string.IsNullOrWhiteSpace(query) || !Directory.Exists(query))
             {
-                if (OsInfo.IsWindows)
+                return new FileSystemResult
                 {
-                    var result = new FileSystemResult {Directories = GetDrives()};
-
-                    return result;
-                }
-
-                query = "/";
+                    Directories = GetDrives(),
+                };
             }
 
-            if (
-                allowFoldersWithoutTrailingSlashes &&
-                //query.IsPathValid() &&
-                Directory.Exists(query))
+            if (allowFoldersWithoutTrailingSlashes)
             {
                 return GetResult(query, includeFiles);
             }
@@ -170,6 +165,7 @@ namespace PlexRipper.FileSystem
                 }
 
                 var fileStream = File.Create(fullPath, 4096, FileOptions.Asynchronous);
+
                 // Pre-allocate the required file size
                 fileStream.SetLength(fileSize);
 
@@ -217,7 +213,6 @@ namespace PlexRipper.FileSystem
                 throw;
             }
         }
-
 
         public string ToAbsolutePath(string relativePath)
         {

@@ -1,19 +1,22 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentResults;
+using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexServers;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexAccounts
 {
     public class PlexAccountService : IPlexAccountService
     {
         private readonly IMediator _mediator;
+
         private readonly IPlexServerService _plexServerService;
+
         private readonly IPlexLibraryService _plexLibraryService;
+
         private readonly IPlexApiService _plexApiService;
 
         public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexLibraryService plexLibraryService,
@@ -285,15 +288,31 @@ namespace PlexRipper.Application.PlexAccounts
             return isSuccessful.ToResult<PlexAccount>();
         }
 
-        public async Task<Result<PlexAccount>> UpdateAccountAsync(PlexAccount plexAccount)
+        public async Task<Result<PlexAccount>> UpdatePlexAccountAsync(dynamic plexAccountDto)
+        {
+            var plexAccountDb = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountDto.Id));
+            if (plexAccountDb.IsFailed)
+            {
+                return plexAccountDb;
+            }
+
+            plexAccountDb.Value.IsEnabled = plexAccountDto.IsEnabled;
+            plexAccountDb.Value.IsMain = plexAccountDto.IsMain;
+            plexAccountDb.Value.DisplayName = plexAccountDto.DisplayName;
+            plexAccountDb.Value.Username = plexAccountDto.Username;
+            plexAccountDb.Value.Password = plexAccountDto.Password;
+
+            return await UpdatePlexAccountAsync(plexAccountDb.Value);
+        }
+
+        public async Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount)
         {
             var result = await _mediator.Send(new UpdatePlexAccountCommand(plexAccount));
             if (result.IsFailed)
             {
                 string msg = "Failed to validate the PlexAccount that will be updated";
-                Log.Warning(msg);
                 result.Errors.Add(new Error(msg));
-                return result.ToResult();
+                return result.ToResult().LogError();
             }
 
             var plexAccountDb = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccount.Id));

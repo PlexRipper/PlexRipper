@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using FluentResults;
 
 namespace PlexRipper.Domain
 {
@@ -16,6 +17,19 @@ namespace PlexRipper.Domain
 
         [Column(Order = 3)]
         public bool Hidden { get; set; }
+
+        public Notification()
+        {
+
+        }
+
+        public Notification(Error error)
+        {
+            this.NotificationLevel = NotificationLevel.Error;
+            this.CreatedAt = DateTime.Now;
+            this.Message = error.Message;
+
+        }
 
         [NotMapped]
         public NotificationLevel NotificationLevel

@@ -18,5 +18,8 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("isEnabled")]
         public bool IsEnabled { get; set; }
+
+        [JsonProperty("isMain")]
+        public bool IsMain { get; set; }
     }
 }

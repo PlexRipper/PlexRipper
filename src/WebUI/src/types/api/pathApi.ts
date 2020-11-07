@@ -13,7 +13,7 @@ export function getFolderPaths(): Observable<FolderPathDTO[]> {
 	return checkResponse<FolderPathDTO[]>(result, logText, 'getFolderPaths');
 }
 
-export function getDirectoryPath(path: string): Observable<FileSystemDTO> {
+export function getDirectoryPath(path: string = ''): Observable<FileSystemDTO> {
 	preApiRequest(logText, 'getDirectoryPath');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/directory/?path=${path}`);
 	return checkResponse<FileSystemDTO>(result, logText, 'getDirectoryPath');

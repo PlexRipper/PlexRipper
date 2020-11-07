@@ -41,6 +41,7 @@
 		"material-design-icons-iconfont": "latest",
 		"moment-duration-format": "^2.3.2",
 		"nuxt": "^2.14.5",
+		"nuxt-i18n": "^6.15.4",
 		"rxjs": "^6.6.3",
 		"swagger-typescript-api": "^1.12.0",
 		"vue": "^2.6.12",

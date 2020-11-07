@@ -1,12 +1,12 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AutoMapper;
 using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.WebAPI.Common.DTO;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
+using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -16,12 +16,16 @@ namespace PlexRipper.WebAPI.Controllers
     public class DownloadController : BaseController
     {
         private readonly IPlexDownloadService _plexDownloadService;
+
         private readonly IMapper _mapper;
 
-        public DownloadController(IPlexDownloadService plexDownloadService, IMapper mapper) : base(mapper)
+        private readonly INotificationsService _notificationsService;
+
+        public DownloadController(IPlexDownloadService plexDownloadService, IMapper mapper, INotificationsService notificationsService) : base(mapper)
         {
             _plexDownloadService = plexDownloadService;
             _mapper = mapper;
+            _notificationsService = notificationsService;
         }
 
         // GET: api/<DownloadController>
@@ -39,7 +43,6 @@ namespace PlexRipper.WebAPI.Controllers
             var mapResult = _mapper.Map<List<PlexServerDTO>>(result.Value);
             return Ok(Result.Ok(mapResult));
         }
-
 
         /// <summary>
         /// GET: "api/(DownloadController)".
@@ -74,6 +77,12 @@ namespace PlexRipper.WebAPI.Controllers
             }
 
             var result = await _plexDownloadService.DownloadMediaAsync(plexAccountId, plexMediaId, type);
+            if (result.IsFailed)
+            {
+                await _notificationsService.SendResult(result);
+                return InternalServerError(result);
+            }
+
             if (result.Has400BadRequestError())
             {
                 return BadRequest(result.ToResult());
@@ -142,7 +151,6 @@ namespace PlexRipper.WebAPI.Controllers
             return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 
-
         /// <summary>
         /// DELETE api/(DownloadController)/5.
         /// </summary>
@@ -179,7 +187,7 @@ namespace PlexRipper.WebAPI.Controllers
         {
             if (downloadTaskIds.Count <= 0)
             {
-                return BadRequest(Result.Fail($"No list of download task Id's was given in the request body"));
+                return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
             }
 
             var result = await _plexDownloadService.DeleteDownloadTasksAsync(downloadTaskIds);

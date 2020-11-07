@@ -91,8 +91,7 @@ namespace PlexRipper.DownloadManager
 
             if (!downloadTask.DownloadUri.IsAbsoluteUri)
             {
-                return Result.Fail(
-                    new Error($"The url {downloadTask.DownloadUri} is not absolute and thus not valid."));
+                return Result.Fail($"The url {downloadTask.DownloadUri} is not absolute and thus not valid.").LogError();
             }
 
             if (!Uri.TryCreate(downloadTask.DownloadUri.ToString(), UriKind.Absolute, out Uri outUri)
@@ -100,7 +99,7 @@ namespace PlexRipper.DownloadManager
             {
                 return Result.Fail(
                     new Error($"The uri {downloadTask.DownloadUri} is not valid.")
-                        .WithMetadata("Uri", downloadTask.DownloadUri));
+                        .WithMetadata("Uri", downloadTask.DownloadUri)).LogError();
             }
 
             // TODO Re-enable checking for existing download task after testing

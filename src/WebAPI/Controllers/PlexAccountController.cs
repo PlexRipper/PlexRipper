@@ -98,7 +98,7 @@ namespace PlexRipper.WebAPI.Controllers
             try
             {
                 account.Id = id;
-                var result = await _plexAccountService.UpdateAccountAsync(_mapper.Map<PlexAccount>(account));
+                var result = await _plexAccountService.UpdatePlexAccountAsync(account);
                 if (result.IsFailed)
                 {
                     return BadRequest(result);

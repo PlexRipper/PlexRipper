@@ -21,6 +21,9 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("isEnabled", Required = Required.Always)]
         public bool IsEnabled { get; set; }
 
+        [JsonProperty("isMain", Required = Required.Always)]
+        public bool IsMain { get; set; }
+
         [JsonProperty("isValidated", Required = Required.Always)]
         public bool IsValidated { get; set; }
 

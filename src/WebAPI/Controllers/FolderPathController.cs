@@ -1,9 +1,9 @@
-﻿using FluentResults;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentResults;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
@@ -18,7 +18,9 @@ namespace PlexRipper.WebAPI.Controllers
     public class FolderPathController : BaseController
     {
         private readonly IFolderPathService _folderPathService;
+
         private readonly IFileSystem _fileSystem;
+
         private readonly IMapper _mapper;
 
         public FolderPathController(IFolderPathService folderPathService, IFileSystem fileSystem, IMapper mapper) : base(mapper)
@@ -43,6 +45,8 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<FileSystemDTO>))]
         public IActionResult Get(string path)
         {
+            path = path == "null" ? string.Empty : path;
+
             var mapResult = _mapper.Map<FileSystemDTO>(_fileSystem.LookupContents(path, false, true));
             return Ok(Result.Ok(mapResult));
         }

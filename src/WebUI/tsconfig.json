@@ -27,7 +27,7 @@
 			"@components/*": ["./components/*"],
 			"@mediaOverview/*": ["./components/MediaOverview/*"]
 		},
-		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify"]
+		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify", "nuxt-i18n"]
 	},
 	"exclude": ["node_modules", ".nuxt", "node_modules/dist", ".vscode"]
 }

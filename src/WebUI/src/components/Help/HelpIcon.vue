@@ -1,7 +1,7 @@
 <template>
 	<v-row justify="space-between" no-gutters>
 		<v-col cols="auto">
-			<p style="margin-top: 6px">{{ label }}</p>
+			<p class="form-label">{{ label }}</p>
 		</v-col>
 		<v-col cols="auto">
 			<v-btn v-if="id" icon @click="openDialog">

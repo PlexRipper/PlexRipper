@@ -291,7 +291,6 @@ export interface NotificationDTO {
 
 export enum NotificationLevel {
   None = "none",
-  Debug = "debug",
   Info = "info",
   Success = "success",
   Warning = "warning",
@@ -306,6 +305,7 @@ export interface PlexAccountDTO {
   username: string;
   password: string;
   isEnabled: boolean;
+  isMain: boolean;
   isValidated: boolean;
   validatedAt: string;
   uuid: string;

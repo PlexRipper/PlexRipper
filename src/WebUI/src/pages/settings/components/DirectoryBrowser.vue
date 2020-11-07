@@ -97,7 +97,7 @@ export default class DirectoryBrowser extends Vue {
 	@Watch('open', { immediate: true, deep: true })
 	onDialogOpen(val: boolean): void {
 		if (val) {
-			this.newDirectory = this.path.directory;
+			this.newDirectory = this.path?.directory ?? '';
 			this.requestDirectories(this.newDirectory);
 		}
 	}

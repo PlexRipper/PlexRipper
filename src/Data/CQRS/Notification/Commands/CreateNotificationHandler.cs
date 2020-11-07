@@ -21,17 +21,17 @@ namespace PlexRipper.Data.CQRS
         }
     }
 
-    public class CreateNotificationHandler : BaseHandler, IRequestHandler<CreateNotificationCommand, Result<bool>>
+    public class CreateNotificationHandler : BaseHandler, IRequestHandler<CreateNotificationCommand, Result<int>>
     {
         public CreateNotificationHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<bool>> Handle(CreateNotificationCommand command, CancellationToken cancellationToken)
+        public async Task<Result<int>> Handle(CreateNotificationCommand command, CancellationToken cancellationToken)
         {
             try
             {
                 await _dbContext.Notifications.AddAsync(command.Notification);
                 await _dbContext.SaveChangesAsync();
-                return Result.Ok(true);
+                return Result.Ok(command.Notification.Id);
             }
             catch (Exception e)
             {

@@ -25,6 +25,7 @@ namespace PlexRipper.Application.Common
         Task<Result<bool>> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks);
 
         Task<Result<bool>> RestartDownloadAsync(int downloadTaskId);
+
         Task<Result<bool>> ClearCompletedAsync();
 
         /// <summary>
@@ -49,7 +50,6 @@ namespace PlexRipper.Application.Common
         /// <returns><see cref="Result"/> fails on error.</returns>
         Task<Result> DeleteDownloadClient(int downloadTaskId);
 
-
         /// <summary>
         /// Deletes multiple (active) PlexDownloadClients and <see cref="DownloadTask"/> from the database.
         /// </summary>
@@ -58,4 +58,3 @@ namespace PlexRipper.Application.Common
         Task<Result> DeleteDownloadClients(IEnumerable<int> downloadTaskIds);
     }
 }
-

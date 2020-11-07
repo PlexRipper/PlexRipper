@@ -77,16 +77,6 @@ namespace PlexRipper.PlexApi
             request = AddHeaders(request);
 
             var response = await ExecuteAsync(request);
-            if (response.IsSuccessful)
-            {
-                Log.Information($"Request to {request.Resource} was successful!");
-                Log.Debug($"Response length was: {response.Content.Length}");
-            }
-            else
-            {
-                Log.Error(response.ErrorException,
-                    $"PlexApi Error: Error on request to {request.Resource} ({response.StatusCode})");
-            }
 
             return response.RawBytes;
         }

@@ -23,11 +23,17 @@ namespace PlexRipper.Application.PlexDownloads
         #region Fields
 
         private readonly IDownloadManager _downloadManager;
+
         private readonly IFileSystem _fileSystem;
+
         private readonly IFolderPathService _folderPathService;
+
         private readonly IMediator _mediator;
+
         private readonly IPlexApiService _plexApiService;
+
         private readonly IPlexAuthenticationService _plexAuthenticationService;
+
         private readonly ISignalRService _signalRService;
 
         #endregion
@@ -144,6 +150,7 @@ namespace PlexRipper.Application.PlexDownloads
 
             Log.Debug($"Finished creating download tasks for tv show: {plexTvShow.Title}");
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShow.PlexLibraryId, totalCount, totalCount);
+
             // Add the priorities to each downloadTask
             return PrioritizeDownloadTasks(downloadTasks);
         }
@@ -159,6 +166,7 @@ namespace PlexRipper.Application.PlexDownloads
             List<DownloadTask> downloadTasks = new List<DownloadTask>();
             int totalCount = plexTvShowShowSeason.Episodes.Count;
             int index = 0;
+
             // TODO Wrong Id is passed here, not sure how it will be used
             await _signalRService.SendDownloadTaskCreationProgressUpdate(plexTvShowShowSeason.Id, index, totalCount);
             foreach (PlexTvShowEpisode episode in plexTvShowShowSeason.Episodes)
@@ -238,6 +246,12 @@ namespace PlexRipper.Application.PlexDownloads
 
         public async Task<Result<bool>> DownloadMediaAsync(int plexAccountId, int mediaId, PlexMediaType type)
         {
+            var result = await _folderPathService.CheckIfFolderPathsAreValid();
+            if (result.IsFailed)
+            {
+                return result;
+            }
+
             switch (type)
             {
                 case PlexMediaType.None:
@@ -311,7 +325,6 @@ namespace PlexRipper.Application.PlexDownloads
 
             return await _downloadManager.AddToDownloadQueueAsync(downloadTasks);
         }
-
 
         public Task<Result<List<PlexServer>>> GetAllDownloadsAsync()
         {

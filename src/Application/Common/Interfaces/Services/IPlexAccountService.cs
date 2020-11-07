@@ -54,6 +54,8 @@ namespace PlexRipper.Application.Common
         /// <returns></returns>
         Task<Result<bool>> DeletePlexAccountAsync(int plexAccountId);
 
-        Task<Result<PlexAccount>> UpdateAccountAsync(PlexAccount plexAccount);
+        Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount);
+
+        Task<Result<PlexAccount>> UpdatePlexAccountAsync(dynamic plexAccountDto);
     }
 }

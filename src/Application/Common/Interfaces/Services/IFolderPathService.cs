@@ -10,5 +10,7 @@ namespace PlexRipper.Application.Common
         Task<Result<List<FolderPath>>> GetAllFolderPathsAsync();
         Task<Result<FolderPath>> UpdateFolderPathAsync(FolderPath folderPath);
         Task<Result<FolderPath>> GetDownloadFolderAsync();
+
+        Task<Result> CheckIfFolderPathsAreValid();
     }
 }

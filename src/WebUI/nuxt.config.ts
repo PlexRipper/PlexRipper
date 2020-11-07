@@ -39,6 +39,7 @@ const config: NuxtConfig = {
 		{ src: '@plugins/consola.ts', mode: 'client' },
 		{ src: '@plugins/filters.ts', mode: 'client' },
 		{ src: '@plugins/axios.ts', mode: 'client' },
+		{ src: '@plugins/i18nPlugin.ts', mode: 'client' },
 		{ src: '@plugins/perfect-scrollbar.ts', mode: 'client' },
 	],
 	/*
@@ -70,7 +71,18 @@ const config: NuxtConfig = {
 		'@nuxtjs/axios',
 		// Doc: https://github.com/nuxt-community/dotenv-module
 		'@nuxtjs/dotenv',
+		// Doc: https://i18n.nuxtjs.org/
+		'nuxt-i18n',
 	],
+	/*
+	 ** Build configuration
+	 */
+	i18n: {
+		lazy: true,
+		langDir: '/lang/',
+		locales: [{ code: 'en', iso: 'en-US', file: 'en-US.json' }],
+		defaultLocale: 'en',
+	},
 	/*
 	 ** Build configuration
 	 */

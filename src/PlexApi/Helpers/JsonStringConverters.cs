@@ -14,21 +14,21 @@ namespace PlexRipper.PlexApi.Helpers
             {
                 // The minimum long value UnixTime seconds that can be used to parse to DateTime.MinValue
                 var value = -62135596800;
-                
-               // try to parse number directly from bytes
+
+                // try to parse number directly from bytes
                 ReadOnlySpan<byte> span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-                
-               // span.Length
-               if (Utf8Parser.TryParse(span, out long number, out int bytesConsumed) && span.Length == bytesConsumed)
-               {
-                   if (value >= -62135596800 && value <= 253402300799)
-                   {
-                       return number;
-                   }
-               }
-                
+
+                // span.Length
+                if (Utf8Parser.TryParse(span, out long number, out int bytesConsumed) && span.Length == bytesConsumed)
+                {
+                    if (value >= -62135596800 && value <= 253402300799)
+                    {
+                        return number;
+                    }
+                }
+
                 // try to parse from a string if the above failed, this covers cases with other escaped/UTF characters
-                if (Int64.TryParse(reader.GetString(), out number))
+                if (long.TryParse(reader.GetString(), out number))
                 {
                     if (value >= -62135596800 && value <= 253402300799)
                     {
@@ -38,7 +38,7 @@ namespace PlexRipper.PlexApi.Helpers
             }
 
             // fallback to default handling
-            return long.MaxValue;
+            return -1;
         }
 
         public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options)
@@ -72,7 +72,7 @@ namespace PlexRipper.PlexApi.Helpers
             writer.WriteStringValue(value.ToString());
         }
     }
-    
+
     public class IntValueConverter : JsonConverter<int>
     {
         public override int Read(ref Utf8JsonReader reader, Type type, JsonSerializerOptions options)
@@ -98,7 +98,7 @@ namespace PlexRipper.PlexApi.Helpers
             writer.WriteStringValue(value.ToString());
         }
     }
-    
+
     public class BooleanValueConverter : JsonConverter<bool>
     {
         public override bool Read(ref Utf8JsonReader reader, Type type, JsonSerializerOptions options)
@@ -110,7 +110,7 @@ namespace PlexRipper.PlexApi.Helpers
                 {
                     return Convert.ToBoolean(Convert.ToInt16(reader.GetString()));
                 }
-                
+
                 // try to parse number directly from bytes
                 ReadOnlySpan<byte> span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
                 if (Utf8Parser.TryParse(span, out bool boolean, out int bytesConsumed) && span.Length == bytesConsumed)

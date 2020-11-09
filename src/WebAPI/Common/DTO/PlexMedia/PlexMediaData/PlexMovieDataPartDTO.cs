@@ -9,8 +9,8 @@ namespace PlexRipper.WebAPI.Common.DTO.PlexMediaData
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
-        [JsonProperty("Key", Required = Required.Always)]
-        public string Key { get; set; }
+        [JsonProperty("obfuscatedFilePath", Required = Required.Always)]
+        public string ObfuscatedFilePath { get; set; }
 
         [JsonProperty("Duration", Required = Required.Always)]
         public int Duration { get; set; }

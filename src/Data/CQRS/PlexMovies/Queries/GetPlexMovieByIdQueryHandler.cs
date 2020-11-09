@@ -24,19 +24,16 @@ namespace PlexRipper.Data.CQRS.PlexMovies
 
         public async Task<Result<PlexMovie>> Handle(GetPlexMovieByIdQuery request, CancellationToken cancellationToken)
         {
-            var query = _dbContext.PlexMovies.AsQueryable();
+            var query = PlexMoviesQueryable;
 
             if (request.IncludePlexLibrary && !request.IncludePlexServer)
             {
-                query = query
-                    .Include(x => x.PlexLibrary);
+                query = query.IncludePlexLibrary();
             }
 
             if (request.IncludePlexLibrary && request.IncludePlexServer)
             {
-                query = query
-                    .Include(v => v.PlexLibrary)
-                    .ThenInclude(x => x.PlexServer);
+                query = query.IncludeServer();
             }
 
             var plexMovie = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);

@@ -10,8 +10,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.PlexDownloads.Commands;
-using PlexRipper.Application.PlexDownloads.Queries;
+using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Common;
 
@@ -72,8 +71,6 @@ namespace PlexRipper.DownloadManager.Download
         /// The ClientId/DownloadTaskId is always the same id that is assigned to the <see cref="DownloadTask"/>
         /// </summary>
         public int DownloadTaskId => DownloadTask.Id;
-
-        public string DownloadUrl { get; set; }
 
         public TimeSpan ElapsedTime => DateTime.UtcNow.Subtract(DownloadStartAt);
 
@@ -317,7 +314,7 @@ namespace PlexRipper.DownloadManager.Download
                 return Result.Fail(new Error("This plex download client has not been setup, run SetupAsync() first"));
             }
 
-            Log.Debug($"Start downloading from {DownloadUrl}");
+            Log.Debug($"Start downloading from {DownloadTask.DownloadUrl}");
             StartDownloadWorkers();
             return Result.Ok(true);
         }
@@ -355,7 +352,7 @@ namespace PlexRipper.DownloadManager.Download
                     downloadWorkerTasks.Add(new DownloadWorkerTask(DownloadTask)
                     {
                         PartIndex = i + 1,
-                        Url = DownloadUrl,
+                        Url = DownloadTask.DownloadUrl,
                         StartByte = start,
                         EndByte = end,
                     });

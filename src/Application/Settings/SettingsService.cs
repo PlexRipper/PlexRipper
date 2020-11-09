@@ -8,9 +8,13 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Settings
 {
+    /// <summary>
+    /// Handles API requests concerning the <see cref="IUserSettings"/>.
+    /// </summary>
     public class SettingsService : ISettingsService
     {
         private readonly IMediator _mediator;
+
         private readonly IUserSettings _userSettings;
 
         public SettingsService(IMediator mediator, IUserSettings userSettings)
@@ -75,7 +79,6 @@ namespace PlexRipper.Application.Settings
         public async Task<Result<bool>> UpdateSettings(SettingsModel settingsModel)
         {
             _userSettings.UpdateSettings(settingsModel);
-            // _userSettings.AdvancedSettings.DownloadManager.DownloadSegments;
             return Result.Ok(true);
         }
     }

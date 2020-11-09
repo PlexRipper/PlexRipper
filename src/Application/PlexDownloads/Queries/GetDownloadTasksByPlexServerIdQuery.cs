@@ -2,7 +2,7 @@
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexDownloads.Queries
+namespace PlexRipper.Application.PlexDownloads
 {
     /// <summary>
     ///     Request all downloadTasks sorted in their respective <see cref="PlexServer" /> and <see cref="PlexLibrary" />

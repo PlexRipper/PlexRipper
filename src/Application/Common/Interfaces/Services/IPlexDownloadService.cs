@@ -9,15 +9,9 @@ namespace PlexRipper.Application.Common
     {
         Task<string> GetPlexTokenAsync(PlexAccount plexAccount);
 
-        Task<Result<bool>> DownloadMovieAsync(int plexAccountId, int plexMovieId);
-
-        Task<Result<DownloadTask>> GetDownloadTaskAsync(int plexAccountId, PlexMovie plexMovie);
-
         Task<Result<List<PlexServer>>> GetAllDownloadsAsync();
 
         Task<Result<bool>> DeleteDownloadTaskAsync(int downloadTaskId);
-
-        Task<Result<bool>> DownloadTvShowAsync(int plexAccountId, int mediaId, PlexMediaType type);
 
         Task<Result<bool>> StopDownloadTask(int downloadTaskId);
 

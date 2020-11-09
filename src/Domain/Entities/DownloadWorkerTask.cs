@@ -66,6 +66,7 @@ namespace PlexRipper.Domain
         #region Relationships
 
         public DownloadTask DownloadTask { get; set; }
+
         public int DownloadTaskId { get; set; }
 
         #endregion
@@ -92,7 +93,6 @@ namespace PlexRipper.Domain
         /// </summary>
         [NotMapped]
         public long CurrentByte => StartByte + BytesReceived;
-
 
         /// <summary>
         /// Has then <see cref="DownloadWorkerTask"/> been partially completed.

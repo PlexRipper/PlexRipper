@@ -2,7 +2,7 @@
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexDownloads.Queries
+namespace PlexRipper.Application.PlexDownloads
 {
     public class GetDownloadTaskByIdQuery : IRequest<Result<DownloadTask>>
     {

@@ -4,7 +4,7 @@
     {
         #region Properties
 
-        public string Key { get; set; }
+        public string ObfuscatedFilePath { get; set; }
 
         public int Duration { get; set; }
 

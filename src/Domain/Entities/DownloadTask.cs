@@ -51,9 +51,15 @@ namespace PlexRipper.Domain
 
         public long DataTotal { get; set; }
 
+        /// <summary>
+        /// Used to authenticate download request with the server.
+        /// </summary>
+        public string ServerToken { get; set; }
+
         #region Relationships
 
         public PlexServer PlexServer { get; set; }
+
         public int PlexServerId { get; set; }
 
         public PlexLibrary PlexLibrary { get; set; }
@@ -61,12 +67,15 @@ namespace PlexRipper.Domain
         public int PlexLibraryId { get; set; }
 
         public PlexAccount PlexAccount { get; set; }
+
         public int PlexAccountId { get; set; }
 
         public FolderPath DestinationFolder { get; set; }
+
         public int DestinationFolderId { get; set; }
 
         public FolderPath DownloadFolder { get; set; }
+
         public int DownloadFolderId { get; set; }
 
         public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
@@ -90,16 +99,16 @@ namespace PlexRipper.Domain
         }
 
         [NotMapped]
+        public string DownloadUrl => PlexServer != null ? $"{PlexServer?.BaseUrl}{FileLocationUrl}?X-Plex-Token={ServerToken}" : string.Empty;
+
+        [NotMapped]
         public Uri DownloadUri => new Uri(DownloadUrl, UriKind.Absolute);
 
         [NotMapped]
-        public string DownloadUrl => $"{PlexServer?.BaseUrl}{FileLocationUrl}" ?? "";
-
-        [NotMapped]
-        public string DownloadPath => DownloadFolder?.DirectoryPath ?? "";
+        public string DownloadPath => DownloadFolder?.DirectoryPath ?? string.Empty;
 
         /// <summary>
-        /// The download directory with a folder named after the filename
+        /// The download directory with a folder named after the filename.
         /// </summary>
         [NotMapped]
         public string TempDirectory
@@ -118,11 +127,13 @@ namespace PlexRipper.Domain
             }
         }
 
-        public bool CheckDownloadTask()
+        public bool IsValid()
         {
             return DownloadFolder.IsValid()
                    && DestinationFolder.IsValid()
-                   && !string.IsNullOrEmpty(DownloadUrl);
+                   && !string.IsNullOrEmpty(DownloadUrl)
+                   && DownloadUri.IsAbsoluteUri
+                   && Uri.IsWellFormedUriString(DownloadUri.AbsoluteUri, UriKind.Absolute);
         }
 
         #endregion

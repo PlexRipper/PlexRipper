@@ -3,7 +3,7 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexDownloads.Commands
+namespace PlexRipper.Application.PlexDownloads
 {
     public class AddDownloadWorkerTasksCommand : IRequest<Result<bool>>
     {

@@ -2,7 +2,7 @@
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexDownloads.Commands
+namespace PlexRipper.Application.PlexDownloads
 {
     public class UpdateDownloadStatusOfDownloadTaskCommand : IRequest<Result<bool>>
     {

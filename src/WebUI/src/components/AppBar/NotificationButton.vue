@@ -16,7 +16,6 @@
 				:type="notification.level.toLowerCase()"
 				dismissible
 				@click="hideNotification(notification.id)"
-				@input="hideNotification(notification.id)"
 			>
 				{{ notification.message }}
 			</v-alert>
@@ -25,7 +24,6 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import NotificationService from '@service/notificationService';
 import { NotificationDTO } from '@dto/mainApi';
@@ -40,14 +38,11 @@ export default class NotificationButton extends Vue {
 
 	hideNotification(id: number): void {
 		NotificationService.hideNotification(id);
-		const i = this.notifications.findIndex((x) => x.id === id);
-		this.notifications.splice(i, 1);
 	}
 
 	created(): void {
 		NotificationService.getNotifications().subscribe((value) => {
 			this.notifications = value;
-			Log.warn(this.notifications);
 		});
 	}
 }

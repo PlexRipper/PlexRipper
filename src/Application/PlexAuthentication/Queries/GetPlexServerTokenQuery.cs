@@ -9,10 +9,17 @@ namespace PlexRipper.Application.PlexAuthentication.Queries
 
         public int PlexServerId { get; }
 
-        public GetPlexServerTokenQuery(int plexAccountId, int plexServerId)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetPlexServerTokenQuery"/> class.
+        /// Retrieves an <see cref="PlexServer"/> authentication token associated with a <see cref="PlexAccount"/>.
+        /// Note: An PlexAccountId of 0 can be passed to automatically retrieve first a non-main account token, and if not found a main account server token.
+        /// </summary>
+        /// <param name="plexServerId">The <see cref="PlexServer"/> to retrieve an authToken for.</param>
+        /// <param name="plexAccountId"> An PlexAccountId of 0 can be passed to automatically retrieve first a non-main account token, and if not found a main account server token.</param>
+        public GetPlexServerTokenQuery(int plexServerId, int plexAccountId = 0)
         {
-            PlexAccountId = plexAccountId;
             PlexServerId = plexServerId;
+            PlexAccountId = plexAccountId;
         }
     }
 }

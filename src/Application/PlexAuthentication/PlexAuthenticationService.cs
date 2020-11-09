@@ -1,16 +1,17 @@
-﻿using FluentResults;
+﻿using System;
+using System.Threading.Tasks;
+using FluentResults;
 using MediatR;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexAuthentication.Queries;
 using PlexRipper.Domain;
-using System;
-using System.Threading.Tasks;
-using PlexRipper.Application.Common;
 
 namespace PlexRipper.Application.PlexAuthentication
 {
     public class PlexAuthenticationService : IPlexAuthenticationService
     {
         private readonly IMediator _mediator;
+
         private readonly IPlexApiService _plexApiService;
 
         public PlexAuthenticationService(IMediator mediator, IPlexApiService plexApiService)
@@ -51,9 +52,9 @@ namespace PlexRipper.Application.PlexAuthentication
         /// <param name="plexAccountId"></param>
         /// <param name="plexServerId"></param>
         /// <returns></returns>
-        public Task<Result<string>> GetPlexServerTokenAsync(int plexAccountId, int plexServerId)
+        public Task<Result<string>> GetPlexServerTokenAsync(int plexServerId, int plexAccountId = 0)
         {
-            // TODO if there is no token then is should refresh a token
+            // TODO if there is no token then it should refresh a token
             return _mediator.Send(new GetPlexServerTokenQuery(plexAccountId, plexServerId));
         }
 

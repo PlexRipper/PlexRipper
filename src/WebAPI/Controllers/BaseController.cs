@@ -29,7 +29,7 @@ namespace PlexRipper.WebAPI.Controllers
         protected IActionResult InternalServerError(Exception e)
         {
             string msg = $"Internal server error: {e.Message}";
-            Log.Error(e, msg);
+            Log.Error(e);
             var resultDTO = _mapper.Map<ResultDTO>(Result.Fail(msg));
             return StatusCode(StatusCodes.Status500InternalServerError, resultDTO);
         }
@@ -38,6 +38,7 @@ namespace PlexRipper.WebAPI.Controllers
         protected IActionResult InternalServerError(Result result)
         {
             Log.Error("Internal server error:");
+            result.LogError();
             var resultDTO = _mapper.Map<ResultDTO>(result);
             return StatusCode(StatusCodes.Status500InternalServerError, resultDTO);
         }

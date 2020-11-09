@@ -2,8 +2,7 @@
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
-using PlexRipper.Application.PlexDownloads.Commands;
-using PlexRipper.Application.PlexDownloads.Queries;
+using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Download;
 

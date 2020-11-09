@@ -31,11 +31,9 @@ namespace PlexRipper.PlexApi.Models
     public class Medium
     {
         [JsonPropertyName("id")]
-        [JsonConverter(typeof(IntValueConverter))]
         public int Id { get; set; }
 
         [JsonPropertyName("aspectRatio")]
-        [JsonConverter(typeof(DoubleValueConverter))]
         public double AspectRatio { get; set; }
 
         [JsonPropertyName("audioProfile")]
@@ -45,29 +43,24 @@ namespace PlexRipper.PlexApi.Models
         public string VideoProfile { get; set; }
 
         [JsonPropertyName("audioChannels")]
-        [JsonConverter(typeof(IntValueConverter))]
         public int AudioChannels { get; set; }
 
         [JsonPropertyName("audioCodec")]
         public string AudioCodec { get; set; }
 
         [JsonPropertyName("bitrate")]
-        [JsonConverter(typeof(IntValueConverter))]
         public int Bitrate { get; set; }
 
         [JsonPropertyName("container")]
         public string Container { get; set; }
 
         [JsonPropertyName("duration")]
-        [JsonConverter(typeof(LongValueConverter))]
         public long Duration { get; set; }
 
         [JsonPropertyName("height")]
-        [JsonConverter(typeof(IntValueConverter))]
         public int Height { get; set; }
 
         [JsonPropertyName("optimizedForStreaming")]
-        [JsonConverter(typeof(IntValueConverter))]
         public int OptimizedForStreaming { get; set; } // TODO Convert to boolean at some point.
 
         [JsonPropertyName("protocol")]
@@ -83,7 +76,6 @@ namespace PlexRipper.PlexApi.Models
         public string VideoResolution { get; set; }
 
         [JsonPropertyName("width")]
-        [JsonConverter(typeof(IntValueConverter))]
         public int Width { get; set; }
 
         [JsonPropertyName("selected")]

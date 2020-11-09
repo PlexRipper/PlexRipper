@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using FluentResults;
 using PlexRipper.Domain;
 
@@ -11,7 +12,11 @@ namespace PlexRipper.Data.Common
         #region Fields
 
         private protected readonly PlexRipperDbContext _dbContext;
-
+        private protected readonly BulkConfig _bulkConfig = new BulkConfig
+        {
+            SetOutputIdentity = true,
+            PreserveInsertOrder = true,
+        };
         #endregion
 
         #region Constructors

@@ -95,7 +95,7 @@ namespace Data.UnitTests.Commands
                             {
                                 Container = "mkv",
                                 File = "Updated!",
-                                Key = x.Id.ToString(),
+                                ObfuscatedFilePath = x.Id.ToString(),
                             },
                         },
                     });

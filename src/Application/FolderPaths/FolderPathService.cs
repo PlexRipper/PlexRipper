@@ -28,10 +28,22 @@ namespace PlexRipper.Application.FolderPaths
             return _mediator.Send(new UpdateFolderPathCommand(folderPath));
         }
 
+        /// <inheritdoc/>
         public async Task<Result<FolderPath>> GetDownloadFolderAsync()
         {
-            // Get the download folder
             return await _mediator.Send(new GetFolderPathByIdQuery(1));
+        }
+
+        /// <inheritdoc/>
+        public async Task<Result<FolderPath>> GetMovieDestinationFolderAsync()
+        {
+            return await _mediator.Send(new GetFolderPathByIdQuery(2));
+        }
+
+        /// <inheritdoc/>
+        public async Task<Result<FolderPath>> GetTvShowDestinationFolderAsync()
+        {
+            return await _mediator.Send(new GetFolderPathByIdQuery(3));
         }
 
         public async Task<Result> CheckIfFolderPathsAreValid()

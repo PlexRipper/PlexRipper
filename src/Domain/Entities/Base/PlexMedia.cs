@@ -87,6 +87,29 @@ namespace PlexRipper.Domain
         [NotMapped]
         public string ThumbUrl => PlexLibrary?.PlexServer?.BaseUrl + Thumb ?? string.Empty;
 
+        [NotMapped]
+        public PlexServer PlexServer => PlexLibrary?.PlexServer;
+
+        [NotMapped]
+        public virtual PlexMediaType MediaType => PlexMediaType.None;
+
+        /// <summary>
+        /// The base <see cref="DownloadTask"/> used as a template to create DownloadTasks in child classes.
+        /// </summary>
+        /// <returns>The base <see cref="DownloadTask"/>.</returns>
+        protected DownloadTask CreateBaseDownloadTask()
+        {
+            return new DownloadTask
+            {
+                PlexServer = PlexServer,
+                PlexServerId = PlexServer.Id,
+                PlexLibraryId = PlexLibraryId,
+                Created = DateTime.Now,
+                DownloadStatus = DownloadStatus.Initialized,
+                RatingKey = RatingKey,
+            };
+        }
+
         #endregion
     }
 }

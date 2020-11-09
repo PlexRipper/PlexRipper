@@ -1,6 +1,6 @@
-﻿using PlexRipper.BaseTests;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
+using PlexRipper.BaseTests;
 using Xunit;
 using Xunit.Abstractions;
 

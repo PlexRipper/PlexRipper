@@ -3,7 +3,7 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexDownloads.Queries
+namespace PlexRipper.Application.PlexDownloads
 {
     public class GetAllDownloadTasksQuery : IRequest<Result<List<DownloadTask>>>
     {

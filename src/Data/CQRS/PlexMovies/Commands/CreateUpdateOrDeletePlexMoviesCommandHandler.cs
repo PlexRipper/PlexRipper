@@ -33,7 +33,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
                     plexMovieData.RuleFor(x => x.Parts).NotEmpty();
                     plexMovieData.RuleForEach(x => x.Parts).ChildRules(part =>
                     {
-                        part.RuleFor(x => x.Key).NotEmpty();
+                        part.RuleFor(x => x.ObfuscatedFilePath).NotEmpty();
                         part.RuleFor(x => x.Container).NotEmpty();
                     });
                 });
@@ -43,11 +43,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
 
     public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result<bool>>
     {
-        private readonly BulkConfig _config = new BulkConfig
-        {
-            SetOutputIdentity = true,
-            PreserveInsertOrder = true,
-        };
+
 
         public CreateUpdateOrDeletePlexMoviesHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
@@ -121,16 +117,16 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
                 return;
             }
 
-            _dbContext.BulkInsert(plexMovies, _config);
+            _dbContext.BulkInsert(plexMovies, _bulkConfig);
 
             // Update the PlexMovieId of every PlexMovieData
             plexMovies.ForEach(x => x.PlexMovieDatas.ForEach(y => y.PlexMovieId = x.Id));
             var plexMovieDataList = plexMovies.SelectMany(x => x.PlexMovieDatas.Select(y => y)).ToList();
-            _dbContext.BulkInsert(plexMovieDataList, _config);
+            _dbContext.BulkInsert(plexMovieDataList, _bulkConfig);
 
             plexMovieDataList.ForEach(x => x.Parts.ForEach(y => y.PlexMovieDataId = x.Id));
             var plexMovieDataPartList = plexMovieDataList.SelectMany(x => x.Parts.Select(y => y)).ToList();
-            _dbContext.BulkInsert(plexMovieDataPartList, _config);
+            _dbContext.BulkInsert(plexMovieDataPartList, _bulkConfig);
         }
 
         private void BulkUpdate(List<PlexMovie> plexMovies)
@@ -152,7 +148,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
 
             // Select all PlexMovieData and insert them
             var plexMovieDataList = plexMovies.SelectMany(x => x.PlexMovieDatas.Select(y => y)).ToList();
-            _dbContext.BulkInsert(plexMovieDataList, _config);
+            _dbContext.BulkInsert(plexMovieDataList, _bulkConfig);
 
             // Remove old data and re-add PlexMovieDataPart
             var plexMovieDataPartDeleteList = new List<PlexMovieDataPart>();

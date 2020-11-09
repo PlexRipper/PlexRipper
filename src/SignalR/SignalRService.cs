@@ -38,6 +38,7 @@ namespace PlexRipper.SignalR
         {
             if (_progressHub?.Clients?.All == null)
             {
+                Log.Error("No Clients connected to ProgressHub");
                 return;
             }
 
@@ -56,6 +57,12 @@ namespace PlexRipper.SignalR
 
         public async Task SendDownloadTaskCreationProgressUpdate(int plexLibraryId, int current, int total)
         {
+            if (_progressHub?.Clients?.All == null)
+            {
+                Log.Error("No Clients connected to ProgressHub");
+                return;
+            }
+
             var progress = new DownloadTaskCreationProgress
             {
                 PlexLibraryId = plexLibraryId,
@@ -65,11 +72,6 @@ namespace PlexRipper.SignalR
                 IsComplete = current >= total,
             };
 
-            if (_progressHub?.Clients?.All == null)
-            {
-                return;
-            }
-
             await _progressHub.Clients.All.SendAsync(nameof(DownloadTaskCreationProgress), progress);
         }
 
@@ -78,6 +80,7 @@ namespace PlexRipper.SignalR
         {
             if (_progressHub?.Clients?.All == null)
             {
+                Log.Error("No Clients connected to ProgressHub");
                 return;
             }
 
@@ -89,6 +92,7 @@ namespace PlexRipper.SignalR
         {
             if (_progressHub?.Clients?.All == null)
             {
+                Log.Error("No Clients connected to ProgressHub");
                 return;
             }
 
@@ -102,6 +106,7 @@ namespace PlexRipper.SignalR
         {
             if (_progressHub?.Clients?.All == null)
             {
+                Log.Error("No Clients connected to ProgressHub");
                 return;
             }
 
@@ -116,6 +121,7 @@ namespace PlexRipper.SignalR
         {
             if (_notificationHub?.Clients?.All == null)
             {
+                Log.Error("No Clients connected to NotificationHub");
                 return;
             }
 

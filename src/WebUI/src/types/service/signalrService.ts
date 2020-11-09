@@ -27,6 +27,7 @@ export class SignalrService {
 
 	private _downloadProgressSubject: ReplaySubject<DownloadProgress> = new ReplaySubject<DownloadProgress>();
 	private _downloadStatusChangedSubject: ReplaySubject<DownloadStatusChanged> = new ReplaySubject<DownloadStatusChanged>();
+	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> = new ReplaySubject<DownloadTaskCreationProgress>();
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
 	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
 
@@ -73,8 +74,12 @@ export class SignalrService {
 			this._downloadProgressSubject.next(data);
 		});
 
-		this._progressHubConnection.on<DownloadStatusChanged>('DownloadStatus').subscribe((data) => {
+		this._progressHubConnection.on<DownloadStatusChanged>('DownloadStatusChanged').subscribe((data) => {
 			this._downloadStatusChangedSubject.next(data);
+		});
+
+		this._progressHubConnection.on<DownloadTaskCreationProgress>('DownloadTaskCreationProgress').subscribe((data) => {
+			this._downloadTaskCreationProgressSubject.next(data);
 		});
 
 		this._progressHubConnection.on<FileMergeProgress>('FileMergeProgress').subscribe((data) => {
@@ -126,7 +131,7 @@ export class SignalrService {
 
 	public startNotificationHubConnection(): void {
 		if (this._notificationHubConnectionState === ConnectionStatus.disconnected) {
-			this._notificationHubSubscription = this._progressHubConnection?.connect().subscribe(() => {
+			this._notificationHubSubscription = this._notificationHubConnection?.connect().subscribe(() => {
 				Log.info('NotificationHub is now connected!');
 			});
 		}
@@ -134,7 +139,7 @@ export class SignalrService {
 
 	public stopNotificationHubConnection(): void {
 		if (this._notificationHubConnectionState !== ConnectionStatus.disconnected) {
-			this._notificationHubSubscription = this._progressHubConnection?.disconnect().subscribe(() => {
+			this._notificationHubSubscription = this._notificationHubConnection?.disconnect().subscribe(() => {
 				Log.info('NotificationHub is now disconnected!');
 			});
 		}
@@ -174,7 +179,8 @@ export interface ProgressHub {
 	DownloadProgress: DownloadProgress;
 	FileMergeProgress: FileMergeProgress;
 	DownloadTaskCreation: DownloadTaskCreationProgress;
-	DownloadStatus: DownloadStatusChanged;
+	DownloadStatusChanged: DownloadStatusChanged;
+	DownloadTaskCreationProgress: DownloadTaskCreationProgress;
 	LibraryProgress: LibraryProgress;
 }
 

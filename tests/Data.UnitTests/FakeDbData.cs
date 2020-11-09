@@ -74,7 +74,7 @@ namespace Data.UnitTests
             var plexMovieDataPart = new Faker<PlexMovieDataPart>()
                 .RuleFor(x => x.Container, f => f.PickRandom(mediaContainer))
                 .RuleFor(x => x.File, f => f.System.FileName())
-                .RuleFor(x => x.Key, f => f.Random.Int(1, 500).ToString());
+                .RuleFor(x => x.ObfuscatedFilePath, f => f.Random.Int(1, 500).ToString());
 
             var plexMovieData = new Faker<PlexMovieData>()
                 .RuleFor(x => x.MediaFormat, f => f.PickRandom(mediaContainer))
@@ -98,7 +98,7 @@ namespace Data.UnitTests
             var episodeDataPart = new Faker<PlexTvShowEpisodeDataPart>()
                 .RuleFor(x => x.Container, f => f.PickRandom(mediaContainer))
                 .RuleFor(x => x.File, f => f.System.FileName())
-                .RuleFor(x => x.Key, f => f.Random.Int(1, 500).ToString());
+                .RuleFor(x => x.ObfuscatedFilePath, f => f.Random.Int(1, 500).ToString());
 
             var episodeData = new Faker<PlexTvShowEpisodeData>()
                 .RuleFor(x => x.MediaFormat, f => f.PickRandom(mediaContainer))

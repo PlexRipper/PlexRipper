@@ -6,7 +6,9 @@ namespace PlexRipper.Domain
     public class PlexMediaMetaData : BaseEntity
     {
         public string Title { get; set; }
+
         public string TitleTvShow { get; set; }
+
         public string TitleTvShowSeason { get; set; }
 
         public int RatingKey { get; set; }
@@ -38,6 +40,7 @@ namespace PlexRipper.Domain
         public string VideoProfile { get; set; }
 
         public string FilePath { get; set; }
+
         public string ObfuscatedFilePath { get; set; }
 
         #region Helpers

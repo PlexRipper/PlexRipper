@@ -19,15 +19,19 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
         }
     }
 
-    public class GetPlexTvShowSeasonByIdWithEpisodesQueryHandler : BaseHandler,
-        IRequestHandler<GetPlexTvShowSeasonByIdWithEpisodesQuery, Result<PlexTvShowSeason>>
+    public class GetPlexTvShowSeasonByIdWithEpisodesQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowSeasonByIdWithEpisodesQuery, Result<PlexTvShowSeason>>
     {
         public GetPlexTvShowSeasonByIdWithEpisodesQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<PlexTvShowSeason>> Handle(GetPlexTvShowSeasonByIdWithEpisodesQuery request, CancellationToken cancellationToken)
         {
             var plexTvShowSeason = await _dbContext.PlexTvShowSeason
+                .Include(x => x.TvShow)
+                .Include(x => x.PlexLibrary)
+                .ThenInclude(x => x.PlexServer)
                 .Include(x => x.Episodes)
+                .ThenInclude(x => x.EpisodeData)
+                .ThenInclude(x => x.Parts)
                 .OrderBy(x => x.RatingKey)
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 

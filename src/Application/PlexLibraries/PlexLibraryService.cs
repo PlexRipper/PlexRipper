@@ -92,6 +92,7 @@ namespace PlexRipper.Application.PlexLibraries
 
                     // Set the correct plexLibraryId
                     episodes.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
+
                     showSeason.Episodes = episodes;
                 }
 

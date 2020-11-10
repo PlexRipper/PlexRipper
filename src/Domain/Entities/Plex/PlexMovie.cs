@@ -7,7 +7,7 @@ using AutoMapper.Configuration.Annotations;
 namespace PlexRipper.Domain
 {
     [Table("PlexMovie")]
-    public class PlexMovie : PlexMedia
+    public class PlexMovie : PlexMedia, IToDownloadTask
     {
         #region Properties
 

@@ -88,9 +88,6 @@ namespace PlexRipper.Domain
         public string ThumbUrl => PlexLibrary?.PlexServer?.BaseUrl + Thumb ?? string.Empty;
 
         [NotMapped]
-        public PlexServer PlexServer => PlexLibrary?.PlexServer;
-
-        [NotMapped]
         public virtual PlexMediaType MediaType => PlexMediaType.None;
 
         /// <summary>
@@ -101,8 +98,8 @@ namespace PlexRipper.Domain
         {
             return new DownloadTask
             {
-                PlexServer = PlexServer,
-                PlexServerId = PlexServer.Id,
+                PlexServer = PlexLibrary?.PlexServer,
+                PlexServerId = PlexLibrary?.PlexServer?.Id ?? 0,
                 PlexLibraryId = PlexLibraryId,
                 Created = DateTime.Now,
                 DownloadStatus = DownloadStatus.Initialized,

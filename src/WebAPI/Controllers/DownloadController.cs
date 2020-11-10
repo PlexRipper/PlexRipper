@@ -71,12 +71,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(plexMediaId, nameof(plexMediaId));
             }
 
-            if (plexAccountId <= 0)
-            {
-                return BadRequest(plexAccountId, nameof(plexAccountId));
-            }
-
-            var result = await _plexDownloadService.DownloadMediaAsync(plexAccountId, plexMediaId, type);
+            var result = await _plexDownloadService.DownloadMediaAsync(plexMediaId, type, plexAccountId);
             if (result.IsFailed)
             {
                 await _notificationsService.SendResult(result);

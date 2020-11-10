@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace PlexRipper.Domain
 {
-    public class PlexTvShowSeason : BaseEntity
+    public class PlexTvShowSeason : BaseEntity, IToDownloadTask
     {
         /// <summary>
         /// Unique key identifying this item by the Plex Api. This is used by the PlexServers to differentiate between media items.
@@ -38,13 +40,6 @@ namespace PlexRipper.Domain
 
         public DateTime OriginallyAvailableAt { get; set; }
 
-
-        #region Helpers
-
-        public PlexMediaType Type => PlexMediaType.Season;
-
-        #endregion
-
         #region Relationships
 
         public PlexTvShow TvShow { get; set; }
@@ -56,6 +51,25 @@ namespace PlexRipper.Domain
         public int PlexLibraryId { get; set; }
 
         public List<PlexTvShowEpisode> Episodes { get; set; }
+
+        #endregion
+
+        #region Helpers
+
+        [NotMapped]
+        public PlexMediaType Type => PlexMediaType.Season;
+
+        public List<DownloadTask> CreateDownloadTasks()
+        {
+            var downloadTasks = Episodes.SelectMany(x => x.CreateDownloadTasks()).ToList();
+
+            foreach (var downloadTask in downloadTasks)
+            {
+                downloadTask.TitleTvShowSeason = Title;
+            }
+
+            return downloadTasks;
+        }
 
         #endregion
     }

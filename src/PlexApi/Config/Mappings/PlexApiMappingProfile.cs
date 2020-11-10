@@ -53,6 +53,47 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.LibraryLocationPath,
                     opt => opt.MapFrom(src => src.Location.First().Path));
 
+            // PlexMediaContainer -> PlexMediaMetaData
+            CreateMap<PlexMediaContainer, PlexMediaMetaData>(MemberList.Destination)
+                .ConvertUsing<PlexMediaMetaDataDTOPlexMediaMetaData>();
+
+            // Medium -> PlexMediaData
+            CreateMap<Medium, PlexMediaData>(MemberList.Destination)
+                .ForMember(dest => dest.MediaFormat, opt => opt.MapFrom(src => src.Container))
+                .ForMember(dest => dest.Parts, opt => opt.MapFrom(src => src.Part.ToList()));
+
+            // Part -> PlexMediaDataPart
+            CreateMap<Part, PlexMediaDataPart>(MemberList.Destination)
+                .ForMember(dest => dest.ObfuscatedFilePath, opt => opt.MapFrom(x => x.Key));
+
+            PlexMovieMappings();
+            PlexTvShowMappings();
+        }
+
+        private void PlexMovieMappings()
+        {
+            // Metadata -> PlexMovie
+            CreateMap<Metadata, PlexMovie>(MemberList.Destination)
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexMovieGenres, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexMovieRoles, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
+                .ForMember(dest => dest.PlexMovieDatas, opt => opt.MapFrom(x => x.Media))
+                .ForMember(dest => dest.GetParts, opt => opt.Ignore())
+                .ForMember(dest => dest.OriginallyAvailableAt, opt => opt.ConvertUsing(new StringToDateTimeUTC()));
+
+            // Medium -> PlexMovieData
+            CreateMap<Medium, PlexMovieData>(MemberList.Destination)
+                .ConvertUsing<MediumToPlexMovieData>();
+
+            // Part -> PlexMovieDataPart
+            CreateMap<Part, PlexMovieDataPart>(MemberList.Destination)
+                .ConvertUsing<PartToPlexMovieDataPart>();
+        }
+
+        private void PlexTvShowMappings()
+        {
             // Metadata -> PlexTvShow
             CreateMap<Metadata, PlexTvShow>(MemberList.None)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -78,44 +119,22 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.TvShowSeason, opt => opt.Ignore())
                 .ForMember(dest => dest.TvShowSeasonId, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore());
-
-            // PlexMediaContainer -> PlexMediaMetaData
-            CreateMap<PlexMediaContainer, PlexMediaMetaData>(MemberList.Destination)
-                .ConvertUsing<PlexMediaMetaDataDTOPlexMediaMetaData>();
-
-            // Medium -> PlexMediaData
-            CreateMap<Medium, PlexMediaData>(MemberList.Destination)
-                .ForMember(dest => dest.MediaFormat, opt => opt.MapFrom(src => src.Container))
-                .ForMember(dest => dest.Parts, opt => opt.MapFrom(src => src.Part.ToList()));
-
-            // Part -> PlexMediaDataPart
-            CreateMap<Part, PlexMediaDataPart>(MemberList.Destination)
-                .ForMember(dest => dest.ObfuscatedFilePath, opt => opt.MapFrom(x => x.Key));
-
-            PlexMovieMappings();
-        }
-
-        private void PlexMovieMappings()
-        {
-            // Metadata -> PlexMovie
-            CreateMap<Metadata, PlexMovie>(MemberList.Destination)
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexMovieGenres, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexMovieRoles, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexMovieDatas, opt => opt.MapFrom(x => x.Media))
-                .ForMember(dest => dest.GetParts, opt => opt.Ignore())
-                .ForMember(dest => dest.OriginallyAvailableAt, opt => opt.ConvertUsing(new StringToDateTimeUTC()));
+                .ForMember(dest => dest.EpisodeData, opt => opt.MapFrom(x => x.Media));
 
-            // Medium -> PlexMovieData
-            CreateMap<Medium, PlexMovieData>(MemberList.Destination)
-                .ConvertUsing<MediumToPlexMovieData>();
+            // PlexMediaData -> PlexTvShowEpisodeData
+            CreateMap<PlexMediaData, PlexTvShowEpisodeData>(MemberList.Source);
 
-            // Part -> PlexMovieDataPart
-            CreateMap<Part, PlexMovieDataPart>(MemberList.Destination)
-                .ConvertUsing<PartToPlexMovieDataPart>();
+            // PlexMediaDataPart -> PlexTvShowEpisodeDataPart
+            CreateMap<PlexMediaDataPart, PlexTvShowEpisodeDataPart>(MemberList.Source);
+
+            // Medium -> PlexTvShowEpisodeData
+            CreateMap<Medium, PlexTvShowEpisodeData>(MemberList.Destination)
+                .ConvertUsing<MediumToPlexTvShowEpisodeData>();
+
+            // Part -> PartToPlexTvShowEpisodeDataPart
+            CreateMap<Part, PlexTvShowEpisodeDataPart>(MemberList.Destination)
+                .ConvertUsing<PartToPlexTvShowEpisodeDataPart>();
         }
     }
 }

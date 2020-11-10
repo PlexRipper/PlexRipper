@@ -373,18 +373,19 @@ namespace PlexRipper.DownloadManager
                     continue;
                 }
 
+                // TODO Need a different way to check for duplicate, media consisting of multiple parts have the same rating key
                 // Check if this DownloadTask is a duplicate
-                var downloadTaskExists = await DownloadTaskExistsAsync(downloadTask);
-                if (downloadTaskExists.IsFailed)
-                {
-                    // If it fails then there are bigger problems..
-                    return downloadTaskExists;
-                }
-
-                if (downloadTaskExists.Value)
-                {
-                    failedList.Add(downloadTask);
-                }
+                // var downloadTaskExists = await DownloadTaskExistsAsync(downloadTask);
+                // if (downloadTaskExists.IsFailed)
+                // {
+                //     // If it fails then there are bigger problems..
+                //     return downloadTaskExists;
+                // }
+                //
+                // if (downloadTaskExists.Value)
+                // {
+                //     failedList.Add(downloadTask);
+                // }
             }
 
             if (failedList.Count > 0)

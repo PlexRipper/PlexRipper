@@ -8,7 +8,7 @@ namespace PlexRipper.Domain
     {
         #region Helpers
 
-        public PlexMediaType Type => PlexMediaType.Episode;
+        public override PlexMediaType Type => PlexMediaType.Episode;
 
         #endregion
 
@@ -19,10 +19,6 @@ namespace PlexRipper.Domain
         public PlexTvShowSeason TvShowSeason { get; set; }
 
         public int TvShowSeasonId { get; set; }
-
-        public PlexLibrary PlexLibrary { get; set; }
-
-        public int PlexLibraryId { get; set; }
 
         #endregion
 
@@ -38,7 +34,11 @@ namespace PlexRipper.Domain
                 downloadTask.FileLocationUrl = part.ObfuscatedFilePath;
                 downloadTask.DataTotal = part.Size;
                 downloadTask.FileName = Path.GetFileName(part.File);
-                downloadTask.MediaType = MediaType;
+                downloadTask.MediaType = Type;
+                downloadTask.PlexLibraryId = PlexLibrary?.Id ?? 0;
+                downloadTask.PlexLibrary = PlexLibrary;
+                downloadTask.PlexServerId = PlexLibrary?.PlexServer?.Id ?? 0;
+                downloadTask.PlexServer = PlexLibrary?.PlexServer;
                 if (TvShowSeason != null)
                 {
                     downloadTask.TitleTvShowSeason = TvShowSeason.Title;

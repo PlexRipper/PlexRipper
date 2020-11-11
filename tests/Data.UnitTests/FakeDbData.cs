@@ -31,7 +31,7 @@ namespace Data.UnitTests
                     .RuleFor(x => x.Id, f => plexLibraryId++)
                     .RuleFor(x => x.Title, f => f.Company.CompanyName())
                     .RuleFor(x => x.PlexServerId, f => serverId)
-                    .RuleFor(x => x.MediaType, f => f.PickRandom(libraryTypes));
+                    .RuleFor(x => x.Type, f => f.PickRandom(libraryTypes));
                 plexServer.RuleFor(x => x.PlexLibraries, f => plexLibraries.Generate(5).ToList());
             }
 
@@ -43,7 +43,7 @@ namespace Data.UnitTests
             var plexLibrary = new Faker<PlexLibrary>()
                 .RuleFor(x => x.Id, f => plexLibraryId)
                 .RuleFor(x => x.Title, f => f.Company.CompanyName())
-                .RuleFor(x => x.MediaType, f => type)
+                .RuleFor(x => x.Type, f => type)
                 .RuleFor(x => x.PlexServerId, f => serverId)
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent());
 

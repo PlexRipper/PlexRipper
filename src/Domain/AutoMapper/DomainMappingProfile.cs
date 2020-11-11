@@ -1,5 +1,6 @@
 ﻿using System;
 using AutoMapper;
+using PlexRipper.Domain.AutoMapper.ValueConverters;
 
 namespace PlexRipper.Domain.AutoMapper
 {

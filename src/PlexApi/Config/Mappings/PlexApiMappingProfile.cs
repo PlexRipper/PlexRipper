@@ -32,7 +32,8 @@ namespace PlexRipper.PlexApi.Config.Mappings
             // MediaContainer -> PlexLibrary
             CreateMap<MediaContainer, PlexLibrary>(MemberList.None)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.Type, opt => opt.MapFrom(x => x.ViewGroup))
+                .ForMember(dest => dest.Type,
+                    opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter()))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
 
             // Directory -> PlexLibrary
@@ -45,7 +46,8 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
                 .ForMember(dest => dest.CheckedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexAccountLibraries, opt => opt.Ignore())
-                .ForMember(dest => dest.MediaType, opt => opt.Ignore())
+                .ForMember(dest => dest.Type,
+                    opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter(), x => x.Type))
                 .ForMember(dest => dest.LibraryLocationId,
                     opt => opt.MapFrom(src => src.Location.First().Id))
 

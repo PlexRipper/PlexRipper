@@ -28,6 +28,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 downloadTask.RuleFor(x => x.PlexServer).NotNull();
                 downloadTask.RuleFor(x => x.DownloadFolderId).GreaterThan(0);
                 downloadTask.RuleFor(x => x.DestinationFolderId).GreaterThan(0);
+                downloadTask.RuleFor(x => x.PlexLibraryId).GreaterThan(0);
                 downloadTask.RuleFor(x => x.FileName).NotEmpty();
                 downloadTask.RuleFor(x => x.FileLocationUrl).NotEmpty();
             });

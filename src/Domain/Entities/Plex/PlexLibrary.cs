@@ -10,7 +10,7 @@ namespace PlexRipper.Domain
         #region Properties
 
         /// <summary>
-        /// The Library Section Identifier used by Plex
+        /// The Library Section Identifier used by Plex.
         /// </summary>
         [Column(Order = 1)]
         public string Key { get; set; }
@@ -19,10 +19,10 @@ namespace PlexRipper.Domain
         public string Title { get; set; }
 
         /// <summary>
-        /// Plex Library type, see: https://github.com/Arcanemagus/plex-api/wiki/MediaTypes
+        /// Plex Library type, see: https://github.com/Arcanemagus/plex-api/wiki/MediaTypes.
         /// </summary>
         [Column(Order = 3)]
-        public string Type { get; set; }
+        public PlexMediaType Type { get; set; }
 
         [Column(Order = 4)]
         public DateTime CreatedAt { get; set; }
@@ -46,13 +46,13 @@ namespace PlexRipper.Domain
         public Guid Uuid { get; set; }
 
         /// <summary>
-        /// This is the relative path Id of the Library location
+        /// This is the relative path Id of the Library location.
         /// </summary>
         [Column(Order = 10)]
         public int LibraryLocationId { get; set; }
 
         /// <summary>
-        /// This is a relative path of the Library location, e.g: /AnimeSeries
+        /// This is a relative path of the Library location, e.g: /AnimeSeries.
         /// </summary>
         [Column(Order = 11)]
         public string LibraryLocationPath { get; set; }
@@ -62,12 +62,12 @@ namespace PlexRipper.Domain
         #region Relationships
 
         /// <summary>
-        /// The PlexServer this PlexLibrary belongs to
+        /// The PlexServer this PlexLibrary belongs to.
         /// </summary>
         public PlexServer PlexServer { get; set; }
 
         /// <summary>
-        /// The PlexServerId of the PlexServer this PlexLibrary belongs to
+        /// The PlexServerId of the PlexServer this PlexLibrary belongs to.
         /// </summary>
         public int PlexServerId { get; set; }
 
@@ -82,59 +82,12 @@ namespace PlexRipper.Domain
         #endregion
 
         #region Helpers
-
-        [NotMapped]
-        public PlexMediaType MediaType
-        {
-            get
-            {
-                return Type switch
-                {
-                    "movie" => PlexMediaType.Movie,
-                    "show" => PlexMediaType.TvShow,
-                    "artist" => PlexMediaType.Music,
-                    _ => PlexMediaType.Unknown
-                };
-            }
-
-            set
-            {
-                switch (value)
-                {
-                    case PlexMediaType.None:
-                        Type = "none";
-                        return;
-                    case PlexMediaType.Movie:
-                        Type = "movie";
-                        return;
-                    case PlexMediaType.TvShow:
-                        Type = "show";
-                        return;
-                    case PlexMediaType.Season:
-                        Type = "show";
-                        return;
-                    case PlexMediaType.Episode:
-                        Type = "episode";
-                        return;
-                    case PlexMediaType.Music:
-                        Type = "music";
-                        return;
-                    case PlexMediaType.Album:
-                        Type = "album";
-                        return;
-                    case PlexMediaType.Unknown:
-                        Type = "unknown";
-                        return;
-                }
-            }
-        }
-
         [NotMapped]
         public bool HasMedia
         {
             get
             {
-                return MediaType switch
+                return Type switch
                 {
                     PlexMediaType.Movie => Movies != null && Movies.Count > 0,
                     PlexMediaType.TvShow => TvShows != null && TvShows.Count > 0,
@@ -148,7 +101,7 @@ namespace PlexRipper.Domain
         {
             get
             {
-                return MediaType switch
+                return Type switch
                 {
                     PlexMediaType.Movie => Movies?.Count ?? -1,
                     PlexMediaType.TvShow => TvShows?.Count ?? -1,
@@ -158,7 +111,7 @@ namespace PlexRipper.Domain
         }
 
         [NotMapped]
-        public string ServerUrl => PlexServer?.BaseUrl ?? "";
+        public string ServerUrl => PlexServer?.BaseUrl ?? string.Empty;
 
         [NotMapped]
         public string Name => Title;

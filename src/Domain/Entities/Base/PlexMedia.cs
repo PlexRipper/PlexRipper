@@ -88,7 +88,7 @@ namespace PlexRipper.Domain
         public string ThumbUrl => PlexLibrary?.PlexServer?.BaseUrl + Thumb ?? string.Empty;
 
         [NotMapped]
-        public virtual PlexMediaType MediaType => PlexMediaType.None;
+        public virtual PlexMediaType Type => PlexMediaType.None;
 
         /// <summary>
         /// The base <see cref="DownloadTask"/> used as a template to create DownloadTasks in child classes.

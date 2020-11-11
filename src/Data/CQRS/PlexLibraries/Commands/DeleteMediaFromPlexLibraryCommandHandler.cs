@@ -36,11 +36,11 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
 
                 // Then construct the database query,
                 // this improves performance such as not to check the tables which will return no result anyway.
-                var plexLibraryQuery = GetPlexLibraryQueryableByType(entity.MediaType);
+                var plexLibraryQuery = GetPlexLibraryQueryableByType(entity.Type);
 
                 // We only want to delete the media and preserve the PlexLibrary entry in the Db.
                 var plexLibrary = await plexLibraryQuery.AsTracking().FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
-                switch (plexLibrary.MediaType)
+                switch (plexLibrary.Type)
                 {
                     case PlexMediaType.Movie:
                         _dbContext.PlexMovies.RemoveRange(plexLibrary.Movies);
@@ -49,7 +49,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
                         _dbContext.PlexTvShows.RemoveRange(plexLibrary.TvShows);
                         break;
                     default:
-                        return Result.Fail($"PlexLibrary with Id {plexLibrary.Id} and MediaType {plexLibrary.MediaType} is currently not supported");
+                        return Result.Fail($"PlexLibrary with Id {plexLibrary.Id} and MediaType {plexLibrary.Type} is currently not supported");
                 }
 
                 await _dbContext.SaveChangesAsync(cancellationToken);

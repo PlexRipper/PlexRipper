@@ -25,7 +25,7 @@ namespace PlexRipper.Domain
         public List<PlexMovieDataPart> GetParts => PlexMovieDatas.SelectMany(x => x.Parts).ToList();
 
         [NotMapped]
-        public override PlexMediaType MediaType => PlexMediaType.Movie;
+        public override PlexMediaType Type => PlexMediaType.Movie;
 
         /// <summary>
         /// A <see cref="PlexMovie"/> can have multiple media parts, which is why we return a list.
@@ -43,7 +43,7 @@ namespace PlexRipper.Domain
                 downloadTask.FileLocationUrl = part.ObfuscatedFilePath;
                 downloadTask.DataTotal = part.Size;
                 downloadTask.FileName = Path.GetFileName(part.File);
-                downloadTask.MediaType = MediaType;
+                downloadTask.MediaType = Type;
 
                 downloadTasks.Add(downloadTask);
             }

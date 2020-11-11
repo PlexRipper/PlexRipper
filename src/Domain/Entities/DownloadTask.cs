@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
+using FluentResults;
 
 namespace PlexRipper.Domain
 {
@@ -127,13 +128,9 @@ namespace PlexRipper.Domain
             }
         }
 
-        public bool IsValid()
+        public Result IsValid()
         {
-            return DownloadFolder.IsValid()
-                   && DestinationFolder.IsValid()
-                   && !string.IsNullOrEmpty(DownloadUrl)
-                   && DownloadUri.IsAbsoluteUri
-                   && Uri.IsWellFormedUriString(DownloadUri.AbsoluteUri, UriKind.Absolute);
+            return new DownloadTaskValidator().Validate(this).ToFluentResult();
         }
 
         #endregion

@@ -43,6 +43,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
         {
             try
             {
+                // TODO Currently this handler only creates as it is expected to delete everything beforehand
                 var plexLibrary = command.PlexLibrary;
 
                 Log.Debug($"Starting adding or updating tv shows in library: {plexLibrary.Title}");

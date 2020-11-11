@@ -56,7 +56,7 @@ namespace PlexRipper.Application.PlexLibraries
             if (plexLibrary == null)
                 return ResultExtensions.IsNull("plexLibrary").LogError();
 
-            if (plexLibrary.MediaType != PlexMediaType.TvShow)
+            if (plexLibrary.Type != PlexMediaType.TvShow)
                 return Result.Fail("PlexLibrary is not of type TvShow").LogError();
 
             if (plexLibrary.TvShows.Count == 0)
@@ -101,10 +101,23 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title}");
-            var updateResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
+
+            var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
             if (updateResult.IsFailed)
             {
                 return updateResult.ToResult();
+            }
+
+            var deleteResult = await _mediator.Send(new DeleteMediaFromPlexLibraryCommand(plexLibrary.Id));
+            if (deleteResult.IsFailed)
+            {
+                return deleteResult.ToResult();
+            }
+
+            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
+            if (createResult.IsFailed)
+            {
+                return createResult.ToResult();
             }
 
             var freshPlexLibrary = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id, false, true));
@@ -319,10 +332,10 @@ namespace PlexRipper.Application.PlexLibraries
                 return Result.Fail(msg);
             }
 
-            if (plexLibrary.MediaType != PlexMediaType.Movie && plexLibrary.MediaType != PlexMediaType.TvShow)
+            if (plexLibrary.Type != PlexMediaType.Movie && plexLibrary.Type != PlexMediaType.TvShow)
             {
                 // TODO Remove this if all media types are supported
-                string msg = $"Library type {plexLibrary.MediaType} is currently not supported by PlexRipper";
+                string msg = $"Library type {plexLibrary.Type} is currently not supported by PlexRipper";
                 Log.Warning(msg);
                 return Result.Fail(msg);
             }
@@ -342,7 +355,7 @@ namespace PlexRipper.Application.PlexLibraries
                 return result;
             }
 
-            switch (newPlexLibrary.MediaType)
+            switch (newPlexLibrary.Type)
             {
                 case PlexMediaType.Movie:
                     return await RefreshPlexMovieLibrary(newPlexLibrary);

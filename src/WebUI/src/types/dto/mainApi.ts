@@ -110,7 +110,7 @@ export interface PlexMovieDataDTO {
 
 export interface PlexMovieDataPartDTO {
   id: number;
-  Key: string;
+  obfuscatedFilePath: string;
   Duration: number;
   File: string;
   Size: number;
@@ -326,6 +326,7 @@ export interface UpdatePlexAccountDTO {
   username?: string | null;
   password?: string | null;
   isEnabled?: boolean;
+  isMain?: boolean;
 }
 
 export interface CreatePlexAccountDTO {

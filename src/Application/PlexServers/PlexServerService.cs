@@ -1,20 +1,22 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentResults;
+using MediatR;
 using PlexRipper.Application.Common;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexServers
 {
     public class PlexServerService : IPlexServerService
     {
         private readonly IMediator _mediator;
-        private readonly IPlexLibraryService _plexLibraryService;
-        private readonly IPlexApiService _plexServiceApi;
-        private readonly IPlexAuthenticationService _plexAuthenticationService;
 
+        private readonly IPlexLibraryService _plexLibraryService;
+
+        private readonly IPlexApiService _plexServiceApi;
+
+        private readonly IPlexAuthenticationService _plexAuthenticationService;
 
         public PlexServerService(
             IMediator mediator,
@@ -59,11 +61,12 @@ namespace PlexRipper.Application.PlexServers
             {
                 return result.ToResult();
             }
+
             return Result.Ok(true);
         }
 
         /// <summary>
-        /// Check if the <see cref="PlexServer"/> is available and log the status
+        /// Check if the <see cref="PlexServer"/> is available and log the status.
         /// </summary>
         /// <param name="plexAccount"></param>
         /// <param name="plexServer"></param>
@@ -94,7 +97,6 @@ namespace PlexRipper.Application.PlexServers
             return await _mediator.Send(new GetPlexServerStatusByIdQuery(result.Value));
         }
 
-
         /// <summary>
         /// This will get all <see cref="PlexLibrary"/>s with their media in the parent <see cref="PlexServer"/>
         /// </summary>
@@ -112,8 +114,10 @@ namespace PlexRipper.Application.PlexServers
                 {
                     await _plexLibraryService.GetLibraryMediaAsync(plexAccount, plexServerDB.Value, library.Key, true);
                 }
+
                 return await _mediator.Send(new GetPlexServerByIdQuery(plexServer.Id, true));
             }
+
             return plexServerDB;
         }
 

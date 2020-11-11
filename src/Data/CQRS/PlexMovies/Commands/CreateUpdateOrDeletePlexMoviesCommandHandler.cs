@@ -43,14 +43,13 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
 
     public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result<bool>>
     {
-
-
         public CreateUpdateOrDeletePlexMoviesHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<bool>> Handle(CreateUpdateOrDeletePlexMoviesCommand command, CancellationToken cancellationToken)
         {
             try
             {
+                // TODO Currently this handler only creates as it is expected to delete everything beforehand
                 var plexLibrary = command.PlexLibrary;
                 var plexMoviesDict = new Dictionary<int, PlexMovie>();
                 Log.Debug($"Starting adding or updating movies in library: {plexLibrary.Title}");

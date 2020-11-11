@@ -147,7 +147,7 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="retCount">The return count, how many items you want returned.</param>
         /// <returns></returns>
         public Task<PlexMediaContainer> GetAllEpisodesAsync(string authToken, string plexFullHost, int plexTvShowSeasonKey, int start = 0,
-            int retCount = 100)
+            int retCount = 5000)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{plexTvShowSeasonKey}/children"), Method.GET);
             request = AddToken(request, authToken);

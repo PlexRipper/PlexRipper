@@ -18,7 +18,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
             RuleFor(x => x.PlexLibrary).NotNull();
             RuleFor(x => x.PlexLibrary.Id).GreaterThan(0);
             RuleFor(x => x.PlexLibrary.PlexServerId).GreaterThan(0);
-            RuleFor(x => x.PlexLibrary.MediaType).NotEqual(PlexMediaType.None);
+            RuleFor(x => x.PlexLibrary.Type).NotEqual(PlexMediaType.None);
         }
     }
 

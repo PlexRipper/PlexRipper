@@ -125,19 +125,9 @@ namespace PlexRipper.PlexApi.Services
                 return new List<PlexLibrary>();
             }
 
-            var librariesDTOs = result.MediaContainer.Directory;
-            var map = new List<PlexLibrary>();
-            try
-            {
-                map = _mapper.Map<List<PlexLibrary>>(librariesDTOs);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            var directories = result.MediaContainer.Directory;
 
-            return map;
+            return _mapper.Map<List<PlexLibrary>>(directories);
         }
 
         public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey)

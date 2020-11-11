@@ -363,43 +363,7 @@ namespace PlexRipper.DownloadManager
         public async Task<Result<bool>> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks)
         {
             Log.Debug($"Attempt to add {downloadTasks.Count} DownloadTasks");
-            var failedList = new List<DownloadTask>();
-            foreach (var downloadTask in downloadTasks)
-            {
-                // Check validity
-                if (!downloadTask.IsValid())
-                {
-                    failedList.Add(downloadTask);
-                    continue;
-                }
 
-                // TODO Need a different way to check for duplicate, media consisting of multiple parts have the same rating key
-                // Check if this DownloadTask is a duplicate
-                // var downloadTaskExists = await DownloadTaskExistsAsync(downloadTask);
-                // if (downloadTaskExists.IsFailed)
-                // {
-                //     // If it fails then there are bigger problems..
-                //     return downloadTaskExists;
-                // }
-                //
-                // if (downloadTaskExists.Value)
-                // {
-                //     failedList.Add(downloadTask);
-                // }
-            }
-
-            if (failedList.Count > 0)
-            {
-                var result = new Result();
-                var error = new Error();
-                foreach (var downloadTask in failedList)
-                {
-                    error.Reasons.Add(new Error("Download task failed to be added to the downloadQueue")
-                        .WithMetadata("downloadTask", downloadTask));
-                }
-
-                return Result.Fail(error).Add400BadRequestError().LogError();
-            }
 
             Log.Debug($"Successfully added all {downloadTasks.Count} DownloadTasks");
             CheckDownloadQueue();

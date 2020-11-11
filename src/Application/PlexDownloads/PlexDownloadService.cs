@@ -25,6 +25,8 @@ namespace PlexRipper.Application.PlexDownloads
 
         private readonly IFolderPathService _folderPathService;
 
+        private readonly INotificationsService _notificationsService;
+
         private readonly IMediator _mediator;
 
         private readonly IPlexApiService _plexApiService;
@@ -54,7 +56,8 @@ namespace PlexRipper.Application.PlexDownloads
             IFileSystem fileSystem,
             IPlexApiService plexApiService,
             ISignalRService signalRService,
-            IFolderPathService folderPathService)
+            IFolderPathService folderPathService,
+            INotificationsService notificationsService)
         {
             _mediator = mediator;
             _downloadManager = downloadManager;
@@ -63,6 +66,7 @@ namespace PlexRipper.Application.PlexDownloads
             _plexApiService = plexApiService;
             _signalRService = signalRService;
             _folderPathService = folderPathService;
+            _notificationsService = notificationsService;
         }
 
         #endregion
@@ -180,6 +184,8 @@ namespace PlexRipper.Application.PlexDownloads
                 downloadTask.ServerToken = serverToken.Value;
             }
 
+            downloadTasks = ValidateDownloadTasks(downloadTasks);
+
             // Add to Database
             var createResult = await _mediator.Send(new CreateDownloadTasksCommand(downloadTasks));
             if (createResult.IsFailed)
@@ -194,6 +200,54 @@ namespace PlexRipper.Application.PlexDownloads
             }
 
             return await _downloadManager.AddToDownloadQueueAsync(downloadTasks);
+        }
+
+        /// <summary>
+        /// Validates the <see cref="DownloadTask"/>s and returns only the valid one while notifying of any failed ones.
+        /// </summary>
+        /// <param name="downloadTasks">The <see cref="DownloadTask"/>s to validate.</param>
+        /// <returns>Only the valid <see cref="DownloadTask"/>s.</returns>
+        private List<DownloadTask> ValidateDownloadTasks(List<DownloadTask> downloadTasks)
+        {
+            var failedList = new List<DownloadTask>();
+            var result = Result.Fail("Failed to add the following DownloadTasks");
+            foreach (var downloadTask in downloadTasks)
+            {
+                // Check validity
+                var validationResult = downloadTask.IsValid();
+                if (validationResult.IsFailed)
+                {
+                    failedList.Add(downloadTask);
+                    result = Result.Merge(
+                        result,
+                        validationResult
+                            .WithError(new Error(downloadTask.Title)
+                                .WithMetadata("downloadTask", downloadTask)));
+                    result.LogError();
+                }
+
+                // TODO Need a different way to check for duplicate, media consisting of multiple parts have the same rating key
+                // Check if this DownloadTask is a duplicate
+                // var downloadTaskExists = await DownloadTaskExistsAsync(downloadTask);
+                // if (downloadTaskExists.IsFailed)
+                // {
+                //     // If it fails then there are bigger problems..
+                //     return downloadTaskExists;
+                // }
+                //
+                // if (downloadTaskExists.Value)
+                // {
+                //     failedList.Add(downloadTask);
+                // }
+            }
+
+            if (failedList.Count > 0)
+            {
+                _notificationsService.SendResult(result);
+                return downloadTasks.Except(failedList).ToList();
+            }
+
+            return downloadTasks;
         }
 
         private Result<DownloadTask> PrioritizeDownloadTask(DownloadTask downloadTask)

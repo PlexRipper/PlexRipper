@@ -1,4 +1,6 @@
-﻿using FluentResults;
+﻿using System.Collections.Generic;
+using FluentResults;
+using FluentValidation.Results;
 
 namespace PlexRipper.Domain
 {
@@ -40,7 +42,6 @@ namespace PlexRipper.Domain
         {
             return _IsNull(parameterName);
         }
-
 
         public static Result IsInvalidId(this Result result, string parameterName, int value = 0)
         {
@@ -126,6 +127,22 @@ namespace PlexRipper.Domain
         }
 
         #endregion
+
+        public static Result ToFluentResult(this ValidationResult validationResult)
+        {
+            if (validationResult.IsValid)
+            {
+                return Result.Ok();
+            }
+
+            var error = new Error("Validation Error");
+            foreach (var validationError in validationResult.Errors)
+            {
+                error.Reasons.Add(new Error(validationError.ErrorMessage).WithMetadata(validationError.ErrorCode, validationError));
+            }
+
+            return Result.Fail(error);
+        }
 
         #endregion
     }

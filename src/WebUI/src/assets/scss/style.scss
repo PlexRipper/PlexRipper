@@ -1,7 +1,48 @@
 @import './fonts.scss';
 @import './icons.scss';
 @import './components.scss';
+@import './pages.scss';
 @import './overwriting.scss';
+/*
+default
+*/
+
+h1 {
+	&.theme--dark {
+		color: white;
+	}
+	&.theme--light {
+		color: black;
+	}
+	text-align: center;
+	padding: 10px 0;
+}
+
+h2 {
+	&.theme--dark {
+		color: white;
+	}
+	&.theme--light {
+		color: black;
+	}
+	text-align: center;
+	padding: 10px 0;
+}
+
+p {
+	&.theme--dark {
+		color: white;
+	}
+	&.theme--light {
+		color: black;
+	}
+	font-size: 18px;
+}
+
+ul li {
+	font-size: 18px;
+	margin: 10px 0;
+}
 
 /*
 Nuxt-i18n

@@ -143,7 +143,7 @@ import { Component, Vue, Prop } from 'vue-property-decorator';
 import Log from 'consola';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import { validateAccount, createAccount, deleteAccount, updateAccount } from '@api/accountApi';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import LoadingSpinner from '@components/LoadingSpinner.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 
 @Component({

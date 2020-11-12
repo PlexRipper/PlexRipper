@@ -252,6 +252,7 @@ export interface FolderPathDTO {
   type: string;
   displayName: string;
   directory: string;
+  isValid: boolean;
 }
 
 export type ResultDTOOfFileSystemDTO = ResultDTO & { value: FileSystemDTO };

@@ -25,6 +25,7 @@
 			"@api/*": ["./types/api/*"],
 			"@service/*": ["./types/service/*"],
 			"@components/*": ["./components/*"],
+			"@overviews/*": ["./components/overviews/*"],
 			"@mediaOverview/*": ["./components/MediaOverview/*"]
 		},
 		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify", "nuxt-i18n"]

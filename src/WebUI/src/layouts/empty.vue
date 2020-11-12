@@ -1,8 +1,6 @@
 <template>
 	<v-app>
 		<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
-		<navigation-drawer />
-		<app-bar />
 
 		<v-main>
 			<nuxt />
@@ -13,21 +11,17 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import NavigationDrawer from '@/components/NavigationDrawer.vue';
-import AppBar from '@components/AppBar/AppBar.vue';
-import HelpService from '@service/helpService';
 import HelpDialog from '@components/Help/HelpDialog.vue';
 import Footer from '@components/Footer/Footer.vue';
+import HelpService from '@service/helpService';
 
 @Component({
 	components: {
-		NavigationDrawer,
-		AppBar,
 		HelpDialog,
 		Footer,
 	},
 })
-export default class Default extends Vue {
+export default class Empty extends Vue {
 	helpDialogState: boolean = false;
 	helpId: string = '';
 

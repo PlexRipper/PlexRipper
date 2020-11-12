@@ -1,11 +1,11 @@
 <template>
 	<v-row justify="space-between" no-gutters>
 		<v-col cols="auto">
-			<p class="form-label">{{ label }}</p>
+			<v-subheader class="form-label">{{ label }}</v-subheader>
 		</v-col>
 		<v-col cols="auto">
-			<v-btn v-if="id" icon @click="openDialog">
-				<v-icon> mdi-help-circle-outline </v-icon>
+			<v-btn v-if="id" style="margin: 8px" icon @click="openDialog">
+				<v-icon :size="30"> mdi-help-circle-outline </v-icon>
 			</v-btn>
 		</v-col>
 	</v-row>

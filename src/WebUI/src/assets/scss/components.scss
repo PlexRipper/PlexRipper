@@ -20,19 +20,16 @@ MediaPoster.vue
 }
 
 /*
-HelpDialog.vue
-*/
-
-.i18n-formatting {
-	white-space: pre-line;
-}
-
-/*
 HelpIcon.vue
 */
 
 .form-label {
-	color: white;
+	&.theme--dark {
+		color: white;
+	}
+	&.theme--light {
+		color: black;
+	}
 	font-size: 16px;
 	line-height: 34px;
 }

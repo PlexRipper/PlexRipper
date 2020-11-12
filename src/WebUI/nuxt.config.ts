@@ -57,6 +57,12 @@ const config: NuxtConfig = {
 				theme: {
 					options: {
 						customProperties: true,
+						defaultAssets: {
+							font: {
+								family: 'Roboto',
+							},
+							icons: 'mdi',
+						},
 					},
 					dark: true,
 				},
@@ -105,6 +111,8 @@ const config: NuxtConfig = {
 				config.resolve.alias['@api'] = path.resolve(__dirname, 'src/types/api/');
 				config.resolve.alias['@service'] = path.resolve(__dirname, 'src/types/service/');
 				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
+				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
+				config.resolve.alias['@overviews'] = path.resolve(__dirname, 'src/components/overviews');
 				config.resolve.alias['@mediaOverview'] = path.resolve(__dirname, 'src/components/MediaOverview/');
 			}
 		},

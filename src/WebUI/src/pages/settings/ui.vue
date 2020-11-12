@@ -59,7 +59,7 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { settingsStore as SettingsStore } from '@/store';
 import HelpIcon from '@components/Help/HelpIcon.vue';
-import DirectoryBrowser from './components/DirectoryBrowser.vue';
+import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
 
 @Component({
 	components: {

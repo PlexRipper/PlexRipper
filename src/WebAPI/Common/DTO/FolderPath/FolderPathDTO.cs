@@ -16,5 +16,7 @@ namespace PlexRipper.WebAPI.Common.DTO.FolderPath
         [JsonProperty("directory", Required = Required.Always)]
         public string Directory { get; set; }
 
+        [JsonProperty("isValid", Required = Required.Always)]
+        public bool IsValid { get; set; }
     }
 }

@@ -1,0 +1,19 @@
+@import '~vuetify/src/styles/styles.sass';
+@import '~vuetify/src/styles/main.sass';
+
+/*
+pages/setup/index.vue
+*/
+#stepper-main {
+	&.theme--dark {
+		background: rgba(0, 0, 0, 0.8);
+	}
+	&.theme--light {
+		background: rgba(255, 255, 255, 0.8);
+	}
+	.stepper-page {
+		background: transparent;
+		@extend .mb-12;
+		@extend .px-3;
+	}
+}

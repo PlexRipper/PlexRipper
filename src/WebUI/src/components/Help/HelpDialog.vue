@@ -15,14 +15,8 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-
-interface IHelpText {
-	id: string;
-	title: string;
-	text: string;
-}
+import IText from '@interfaces/IText';
 
 @Component
 export default class HelpDialog extends Vue {
@@ -32,13 +26,13 @@ export default class HelpDialog extends Vue {
 	@Prop({ required: true, type: String })
 	readonly id!: string;
 
-	helpText: IHelpText[] = [];
+	helpText: IText[] = [];
 
 	close(): void {
 		this.$emit('close');
 	}
 
-	get getHelpText(): IHelpText {
+	get getHelpText(): IText {
 		if (this.id === '') {
 			return {
 				id: 'null',
@@ -46,7 +40,6 @@ export default class HelpDialog extends Vue {
 				text: '?',
 			};
 		}
-		Log.debug(this);
 
 		return {
 			id: this.id,

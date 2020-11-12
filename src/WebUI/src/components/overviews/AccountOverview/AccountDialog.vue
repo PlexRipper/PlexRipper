@@ -1,0 +1,349 @@
+<template>
+	<v-dialog :value="dialog" persistent max-width="800">
+		<!-- The setup account progress -->
+		<v-card v-if="accountSetupProgress">
+			<progress-component
+				:percentage="accountSetupProgress.percentage"
+				:text="`Retrieving accessible servers ${accountSetupProgress.received} of ${accountSetupProgress.total}`"
+			/>
+		</v-card>
+		<!-- The account pop-up -->
+		<v-card v-else>
+			<v-card-title class="headline">
+				{{ getDisplayName }}
+			</v-card-title>
+			<v-divider></v-divider>
+			<v-card-text class="mt-2">
+				<v-form ref="form" v-model="valid">
+					<!-- Is account enabled -->
+					<v-row no-gutters>
+						<v-col cols="3">
+							<help-icon label="Is Enabled:" />
+						</v-col>
+						<v-col>
+							<v-checkbox v-model="isEnabled" color="red" class="mt-0 pt-0" hide-details></v-checkbox>
+						</v-col>
+					</v-row>
+					<!-- Is main account -->
+					<v-row no-gutters>
+						<v-col cols="3">
+							<help-icon label="Is Main Account:" />
+						</v-col>
+						<v-col>
+							<v-checkbox v-model="isMain" color="red" class="mt-0 pt-0" hide-details></v-checkbox>
+						</v-col>
+					</v-row>
+					<!-- Display Name -->
+					<v-row no-gutters>
+						<v-col cols="3">
+							<help-icon label="Display Name:" />
+						</v-col>
+						<v-col>
+							<v-text-field v-model="displayName" :rules="getDisplayNameRules" color="red" full-width outlined required />
+						</v-col>
+					</v-row>
+
+					<!-- Username -->
+					<v-row no-gutters>
+						<v-col cols="3">
+							<help-icon label="Username:" />
+						</v-col>
+						<v-col>
+							<v-text-field
+								v-model="username"
+								:rules="getUsernameRules"
+								color="red"
+								full-width
+								outlined
+								required
+								@input="inputChanged"
+							/>
+						</v-col>
+					</v-row>
+
+					<!-- Password -->
+					<v-row no-gutters>
+						<v-col cols="3">
+							<help-icon label="Password:" />
+						</v-col>
+						<v-col>
+							<v-text-field
+								v-model="password"
+								:rules="getPasswordRules"
+								color="red"
+								full-width
+								outlined
+								required
+								@input="inputChanged"
+							/>
+						</v-col>
+					</v-row>
+				</v-form>
+			</v-card-text>
+
+			<!-- Dialog Actions	-->
+			<v-card-actions>
+				<!-- Delete account -->
+				<confirmation-button
+					v-if="!isNew"
+					class="mr-4"
+					text-id="delete-account"
+					button-text="Delete"
+					icon="mdi-delete"
+					:button-type="getDeleteButtonType"
+					:width="130"
+					@confirm="deleteAccount"
+				/>
+				<!-- Reset Form -->
+				<p-btn icon="mdi-restore" text-id="reset" :width="130" @click="reset" />
+				<v-spacer />
+
+				<!-- Cancel button -->
+				<p-btn :width="130" :button-type="getCancelButtonType" @click="cancel" />
+
+				<!-- Validation button -->
+				<p-btn
+					:icon="validationIcon"
+					:loading="validateLoading"
+					:disabled="!valid || validateLoading"
+					:color="getValidationBtnColor"
+					class="mr-4"
+					:text-id="!valid ? 'validate' : 'validate'"
+					:width="130"
+					@click="validate"
+				/>
+
+				<!-- Save account -->
+				<p-btn
+					:width="130"
+					:disabled="!(isValidated === 'OK') || saving"
+					:text-id="isNew ? 'create' : 'update'"
+					:button-type="getSaveButtonType"
+					@click="saveAccount"
+				/>
+			</v-card-actions>
+		</v-card>
+	</v-dialog>
+</template>
+
+<script lang="ts">
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import Log from 'consola';
+import type { PlexAccountDTO, ServerRefreshProgress } from '@dto/mainApi';
+import { createAccount, deleteAccount, updateAccount, validateAccount } from '@api/accountApi';
+import LoadingSpinner from '@components/LoadingSpinner.vue';
+import HelpIcon from '@components/Help/HelpIcon.vue';
+import ProgressComponent from '@components/ProgressComponent.vue';
+import SignalrService from '@service/signalrService';
+import ConfirmationButton from '@components/General/ConfirmationDialog.vue';
+import PBtn from '@components/General/PlexRipperButton.vue';
+import ButtonType from '@/types/enums/buttonType';
+
+@Component({
+	components: {
+		LoadingSpinner,
+		HelpIcon,
+		ProgressComponent,
+		ConfirmationButton,
+		PBtn,
+	},
+})
+export default class AccountDialog extends Vue {
+	@Prop({ required: false, type: Object as () => PlexAccountDTO })
+	readonly account!: PlexAccountDTO | null;
+
+	@Prop({ required: true, type: Boolean, default: false })
+	dialog: boolean = false;
+
+	accountSetupProgress: ServerRefreshProgress | null = null;
+
+	validateLoading: boolean = false;
+
+	valid: boolean = false;
+
+	displayName: string = '';
+
+	username: string = '';
+
+	password: string = '';
+
+	isEnabled: boolean = true;
+
+	isMain: boolean = true;
+
+	saving: boolean = false;
+
+	isValidated: string = '';
+
+	get isNew(): boolean {
+		return !this.account;
+	}
+
+	get getDeleteButtonType(): ButtonType {
+		return ButtonType.Delete;
+	}
+
+	get getCancelButtonType(): ButtonType {
+		return ButtonType.Cancel;
+	}
+
+	get getSaveButtonType(): ButtonType {
+		return ButtonType.Save;
+	}
+
+	get validationIcon(): string {
+		if (this.isValidated === 'OK') {
+			return 'mdi-check-bold';
+		} else if (this.isValidated === 'ERROR') {
+			return 'mdi-alert-circle-outline';
+		} else {
+			return 'mdi-text-box-search-outline';
+		}
+	}
+	get getAccount(): PlexAccountDTO {
+		return {
+			id: this.isNew ? 0 : this.account?.id ?? 0,
+			isEnabled: this.isEnabled,
+			isMain: this.isMain,
+			displayName: this.displayName,
+			username: this.username,
+			password: this.password,
+		} as PlexAccountDTO;
+	}
+
+	get getDisplayName(): string {
+		const title = `${this.isNew ? 'Add' : 'Edit'} Plex account`;
+		return this.displayName !== '' ? `${title}: ${this.displayName}` : title;
+	}
+
+	get getDisplayNameRules(): unknown {
+		return [
+			(v: string): boolean | string => !!v || 'Display name is required',
+			(v: string): boolean | string => (v && v.length >= 4) || 'Display name must be at least 4 characters',
+		];
+	}
+
+	get getUsernameRules(): unknown {
+		return [(v: string): boolean | string => !!v || 'Username is required'];
+	}
+
+	get getPasswordRules(): unknown {
+		return [
+			(v: string): boolean | string => !!v || 'Password is required',
+			(v: string): boolean | string => (v && v.length >= 8) || 'Password must be at least 8 characters',
+		];
+	}
+
+	get getValidationBtnColor(): string {
+		if (this.valid) {
+			return 'green';
+		}
+		switch (this.isValidated) {
+			case 'OK':
+				return 'success';
+			case 'ERROR':
+				return 'error';
+			default:
+				return '';
+		}
+	}
+
+	get getForm(): Vue & { validate: () => boolean; reset: () => void; resetValidation: () => void } {
+		return this.$refs.form as Vue & { validate: () => boolean; reset: () => void; resetValidation: () => void };
+	}
+
+	validate(): void {
+		this.getForm.validate();
+
+		if (this.valid) {
+			this.validateLoading = true;
+			validateAccount(this.getAccount).subscribe((data) => {
+				// TODO show notification with errors if any
+				if (data) {
+					this.isValidated = 'OK';
+				} else {
+					this.isValidated = 'ERROR';
+				}
+				this.validateLoading = false;
+			});
+		}
+	}
+
+	inputChanged(): void {
+		if (this.isValidated === 'OK') {
+			this.isValidated = '';
+		}
+	}
+
+	reset(): void {
+		Log.debug('Reset form');
+		this.isMain = false;
+		this.displayName = '';
+		this.username = '';
+		this.password = '';
+		this.isValidated = '';
+		this.resetValidation();
+	}
+
+	resetValidation(): void {
+		this.valid = false;
+		this.getForm.resetValidation();
+	}
+
+	cancel(): void {
+		this.closeDialog();
+	}
+
+	saveAccount(): void {
+		this.saving = true;
+		if (this.getAccount) {
+			if (this.isNew) {
+				createAccount(this.getAccount).subscribe();
+			} else {
+				updateAccount(this.getAccount).subscribe();
+			}
+		}
+	}
+
+	deleteAccount(): void {
+		if (this.account) {
+			deleteAccount(this.account.id).subscribe(() => {
+				this.closeDialog(true);
+			});
+		} else {
+			Log.error('Could not delete account because it was null');
+		}
+	}
+
+	@Watch('dialog')
+	onOpenDialog(dialogState: boolean): void {
+		if (dialogState) {
+			if (this.account) {
+				this.isEnabled = this.account.isEnabled;
+				this.isMain = this.account.isMain;
+				this.displayName = this.account.displayName;
+				this.username = this.account.username;
+				this.password = this.account.password;
+				this.isValidated = this.account.isValidated ? 'OK' : 'ERROR';
+			}
+		} else {
+			this.reset();
+		}
+	}
+
+	closeDialog(refreshAccounts: boolean = false): void {
+		this.accountSetupProgress = null;
+		this.saving = false;
+		this.$emit('dialog-closed', refreshAccounts);
+	}
+
+	created(): void {
+		SignalrService.getServerRefreshProgress().subscribe((data) => {
+			this.accountSetupProgress = data;
+			if (data.isComplete) {
+				this.closeDialog(true);
+			}
+		});
+	}
+}
+</script>

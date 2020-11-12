@@ -1,5 +1,5 @@
 <template>
-	<v-btn icon @click="setDarkMode">
+	<v-btn class="mx-2" icon @click="setDarkMode">
 		<v-icon v-if="$vuetify.theme.dark">mdi-white-balance-sunny</v-icon>
 		<v-icon v-else>mdi-moon-waxing-crescent</v-icon>
 	</v-btn>

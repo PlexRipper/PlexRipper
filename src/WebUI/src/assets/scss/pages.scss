@@ -11,6 +11,10 @@ pages/setup/index.vue
 	&.theme--light {
 		background: rgba(255, 255, 255, 0.8);
 	}
+	.stepper-content {
+		padding: 0;
+		height: 600px;
+	}
 	.stepper-page {
 		background: transparent;
 		@extend .mb-12;

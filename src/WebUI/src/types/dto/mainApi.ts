@@ -443,6 +443,15 @@ export interface LibraryProgress {
   isComplete: boolean;
 }
 
+export interface ServerRefreshProgress {
+  plexAccountId: number;
+  percentage: number;
+  received: number;
+  total: number;
+  isRefreshing: boolean;
+  isComplete: boolean;
+}
+
 export interface DownloadStatusChanged {
   id: number;
   status: DownloadStatus;

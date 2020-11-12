@@ -11,7 +11,7 @@ const config: NuxtConfig = {
 	 ** Headers of the page
 	 */
 	head: {
-		titleTemplate: `%s - ${process.env.npm_package_name}`,
+		titleTemplate: 'PlexRipper',
 		title: process.env.npm_package_name || '',
 		meta: [
 			{ charset: 'utf-8' },
@@ -22,21 +22,18 @@ const config: NuxtConfig = {
 				content: process.env.npm_package_description || '',
 			},
 		],
-		link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+		link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.png' }],
 	},
 	/*
 	 ** Customize the progress-bar color
 	 */
 	loading: { color: '#fff' },
 	/*
-	 ** Global CSS
-	 */
-	css: [],
-	/*
 	 ** Plugins to load before mounting the App
 	 */
 	plugins: [
 		{ src: '@plugins/consola.ts', mode: 'client' },
+		{ src: '@plugins/vuetify.ts', mode: 'client' },
 		{ src: '@plugins/filters.ts', mode: 'client' },
 		{ src: '@plugins/axios.ts', mode: 'client' },
 		{ src: '@plugins/i18nPlugin.ts', mode: 'client' },
@@ -50,24 +47,7 @@ const config: NuxtConfig = {
 		'@nuxt/typescript-build',
 		// Doc: https://github.com/nuxt-community/stylelint-module
 		'@nuxtjs/stylelint-module',
-		[
-			'@nuxtjs/vuetify',
-			{
-				customVariables: ['~/assets/scss/_variables.scss'],
-				theme: {
-					options: {
-						customProperties: true,
-						defaultAssets: {
-							font: {
-								family: 'Roboto',
-							},
-							icons: 'mdi',
-						},
-					},
-					dark: true,
-				},
-			},
-		],
+		'@nuxtjs/vuetify',
 	],
 	/*
 	 ** Nuxt.js modules
@@ -109,6 +89,9 @@ const config: NuxtConfig = {
 				config.resolve.alias['@store'] = path.resolve(__dirname, 'src/store/');
 				config.resolve.alias['@dto'] = path.resolve(__dirname, 'src/types/dto/');
 				config.resolve.alias['@api'] = path.resolve(__dirname, 'src/types/api/');
+				config.resolve.alias['@img'] = path.resolve(__dirname, 'src/assets/img/');
+				config.resolve.alias['@enums'] = path.resolve(__dirname, 'src/types/enums/');
+				config.resolve.alias['@interfaces'] = path.resolve(__dirname, 'src/types/interfaces/');
 				config.resolve.alias['@service'] = path.resolve(__dirname, 'src/types/service/');
 				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
 				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');

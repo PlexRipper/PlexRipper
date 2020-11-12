@@ -33,3 +33,25 @@ HelpIcon.vue
 	font-size: 16px;
 	line-height: 34px;
 }
+
+/*
+P-btn.vue
+*/
+
+.p-btn {
+	border: 2px solid currentColor;
+	&.filled {
+		background-color: currentColor;
+	}
+	&.theme--dark {
+		color: red;
+	}
+	&.theme--light {
+		color: darkred;
+	}
+	&:hover {
+		&::before {
+			opacity: 0.2 !important;
+		}
+	}
+}

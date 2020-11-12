@@ -9,7 +9,7 @@ import {
 	DownloadTaskCreationProgress,
 	DownloadStatusChanged,
 	FileMergeProgress,
-	NotificationDTO,
+	NotificationDTO, ServerRefreshProgress,
 } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
 import globalService from '@service/globalService';
@@ -30,6 +30,7 @@ export class SignalrService {
 	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> = new ReplaySubject<DownloadTaskCreationProgress>();
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
 	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
+	private _serverRefreshProgressSubject: ReplaySubject<ServerRefreshProgress> = new ReplaySubject<ServerRefreshProgress>();
 
 	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
@@ -88,6 +89,10 @@ export class SignalrService {
 
 		this._progressHubConnection.on<LibraryProgress>('LibraryProgress').subscribe((data) => {
 			this._libraryProgressSubject.next(data);
+		});
+
+		this._progressHubConnection.on<ServerRefreshProgress>('ServerRefreshProgress').subscribe((data) => {
+			this._serverRefreshProgressSubject.next(data);
 		});
 
 		this._notificationHubConnection.on<NotificationDTO>('Notification').subscribe((data) => {
@@ -167,6 +172,10 @@ export class SignalrService {
 		return this._libraryProgressSubject.asObservable();
 	}
 
+	public getServerRefreshProgress(): Observable<ServerRefreshProgress> {
+		return this._serverRefreshProgressSubject.asObservable();
+	}
+
 	public getNotificationUpdates(): Observable<NotificationDTO> {
 		return this._NotificationUpdateSubject.asObservable();
 	}
@@ -182,6 +191,7 @@ export interface ProgressHub {
 	DownloadStatusChanged: DownloadStatusChanged;
 	DownloadTaskCreationProgress: DownloadTaskCreationProgress;
 	LibraryProgress: LibraryProgress;
+	ServerRefreshProgress: ServerRefreshProgress;
 }
 
 export interface NotificationHub {

@@ -19,13 +19,16 @@ namespace PlexRipper.Application.PlexAccounts
 
         private readonly IPlexApiService _plexApiService;
 
+        private readonly ISignalRService _signalRService;
+
         public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexLibraryService plexLibraryService,
-            IPlexApiService plexApiService)
+            IPlexApiService plexApiService, ISignalRService signalRService)
         {
             _mediator = mediator;
             _plexServerService = plexServerService;
             _plexLibraryService = plexLibraryService;
             _plexApiService = plexApiService;
+            _signalRService = signalRService;
         }
 
         public async Task<Result<List<PlexServer>>> GetPlexServersAsync(PlexAccount plexAccount, bool refresh = false)
@@ -108,6 +111,8 @@ namespace PlexRipper.Application.PlexAccounts
 
             Log.Debug("Setting up new PlexAccount");
 
+            await _signalRService.SendServerRefreshUpdate(plexAccount.Id, 0, 1);
+
             // Request new PlexAccount
             var plexAccountFromApi = await _plexApiService.PlexSignInAsync(plexAccount.Username, plexAccount.Password);
             if (plexAccountFromApi == null)
@@ -145,12 +150,16 @@ namespace PlexRipper.Application.PlexAccounts
                 return plexServerList.ToResult();
             }
 
+            await _signalRService.SendServerRefreshUpdate(plexAccount.Id, 0, plexServerList.Value.Count);
+
             // Retrieve and store the corresponding PlexLibraries
             if (plexServerList.Value.Any())
             {
-                foreach (var plexServer in plexServerList.Value)
+                for (int i = 0; i < plexServerList.Value.Count; i++)
                 {
+                    var plexServer = plexServerList.Value[i];
                     await _plexLibraryService.RefreshLibrariesAsync(plexAccount, plexServer);
+                    await _signalRService.SendServerRefreshUpdate(plexAccount.Id, i + 1, plexServerList.Value.Count);
                 }
             }
 
@@ -159,10 +168,10 @@ namespace PlexRipper.Application.PlexAccounts
         }
 
         /// <summary>
-        /// Checks if an <see cref="PlexAccount"/> with the same username already exists
+        /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
         /// </summary>
-        /// <param name="username">The username to check for</param>
-        /// <returns>true if username is available</returns>
+        /// <param name="username">The username to check for.</param>
+        /// <returns>true if username is available.</returns>
         public async Task<Result<bool>> CheckIfUsernameIsAvailableAsync(string username)
         {
             var result = await _mediator.Send(new GetPlexAccountByUsernameQuery(username));

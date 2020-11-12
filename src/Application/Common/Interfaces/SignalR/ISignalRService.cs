@@ -20,5 +20,7 @@ namespace PlexRipper.Application.Common
         void SendFileMergeProgressUpdate(FileMergeProgress fileMergeProgress);
 
         Task SendNotification(Notification notification);
+
+        Task SendServerRefreshUpdate(int plexAccountId, int received, int total, bool isRefreshing = true);
     }
 }

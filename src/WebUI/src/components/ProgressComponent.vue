@@ -1,16 +1,28 @@
 <template>
-	<v-row justify="center">
+	<v-row justify="center" no-gutters>
 		<v-col cols="10">
-			<v-layout row justify-center align-center>
-				<v-progress-circular :size="70" :width="7" color="red" indeterminate></v-progress-circular>
-			</v-layout>
-			<h1>{{ text }}</h1>
+			<!-- Circular progress -->
+			<v-row justify="center" no-gutters class="my-3">
+				<v-col cols="auto">
+					<v-progress-circular :size="70" :width="7" color="red" indeterminate></v-progress-circular>
+				</v-col>
+			</v-row>
+			<!-- Progress text -->
+			<v-row justify="center" no-gutters>
+				<v-col cols="auto">
+					<h2>{{ text }}</h2>
+				</v-col>
+			</v-row>
 			<!-- Library progress bar -->
-			<v-progress-linear :value="percentage" height="20" class="mt-3" striped stream color="red">
-				<template v-slot="{ value }">
-					<strong>{{ value }}%</strong>
-				</template>
-			</v-progress-linear>
+			<v-row justify="center" class="my-3" no-gutters>
+				<v-col>
+					<v-progress-linear :value="percentage" height="20" class="mx-3" striped stream color="red">
+						<template v-slot="{ value }">
+							<strong>{{ value }}%</strong>
+						</template>
+					</v-progress-linear>
+				</v-col>
+			</v-row>
 		</v-col>
 	</v-row>
 </template>

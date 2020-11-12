@@ -1,13 +1,18 @@
 <template>
 	<v-container>
-		<v-row>
+		<v-row justify="center">
 			<!-- Plex Accounts -->
 			<v-col v-for="(account, index) in accounts" :key="index" cols="4" style="min-width: 395px">
-				<account-card :account="account" @dialog-closed="refreshAccounts()" />
+				<account-card :account="account" @open-dialog="openDialog(account)" @dialog-closed="dialog = false" />
 			</v-col>
 			<!-- Add new Account card -->
 			<v-col cols="4" style="min-width: 395px">
-				<account-card @dialog-closed="refreshAccounts()" />
+				<account-card @open-dialog="openDialog" />
+			</v-col>
+		</v-row>
+		<v-row>
+			<v-col>
+				<account-dialog :dialog="dialog" :account="selectedAccount" @dialog-closed="closeDialog" />
 			</v-col>
 		</v-row>
 	</v-container>
@@ -17,29 +22,42 @@
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import AccountService from '@service/accountService';
+import SignalrService from '@service/signalrService';
 import { PlexAccountDTO } from '@dto/mainApi';
 import AccountCard from './AccountCard.vue';
+import AccountDialog from '@overviews/AccountOverview/AccountDialog.vue';
 
 @Component({
 	components: {
 		AccountCard,
+		AccountDialog,
 	},
 })
 export default class AccountOverview extends Vue {
 	private accounts: PlexAccountDTO[] = [];
+	private dialog: boolean = false;
+	private selectedAccount: PlexAccountDTO | null = null;
 
-	checkAccount(account: PlexAccountDTO): void {
-		Log.debug(account);
+	openDialog(account: PlexAccountDTO | null = null): void {
+		this.selectedAccount = account;
+		this.dialog = true;
 	}
 
-	refreshAccounts(): void {
-		AccountService.fetchAccounts();
+	closeDialog(refreshAccounts: boolean = false): void {
+		this.dialog = false;
+		if (refreshAccounts) {
+			AccountService.fetchAccounts();
+		}
 	}
 
 	created(): void {
 		AccountService.getAccounts().subscribe((data) => {
 			this.accounts = data ?? [];
 			Log.debug(this.accounts);
+		});
+
+		SignalrService.getServerRefreshProgress().subscribe((data) => {
+			Log.debug(data);
 		});
 	}
 }

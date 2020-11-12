@@ -1,8 +1,29 @@
 {
+	"general": {
+		"commands": {
+			"cancel": "Cancel",
+			"confirm": "Confirm",
+			"save": "Save",
+			"create": "Create",
+			"update": "Update",
+			"delete": "Delete",
+			"reset": "Reset",
+			"back": "Back",
+			"next": "Next",
+			"error": "Error",
+			"validate": "Validate"
+		}
+	},
 	"help": {
 		"advanced-1": {
 			"title": "Download Segments",
 			"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
+		}
+	},
+	"confirmation": {
+		"delete-account": {
+			"title": "Are you sure?",
+			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
 		}
 	}
 }

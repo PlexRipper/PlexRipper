@@ -24,8 +24,8 @@ import { Component, Vue } from 'vue-property-decorator';
 import AccountService from '@service/accountService';
 import SignalrService from '@service/signalrService';
 import { PlexAccountDTO } from '@dto/mainApi';
-import AccountCard from './AccountCard.vue';
 import AccountDialog from '@overviews/AccountOverview/AccountDialog.vue';
+import AccountCard from './AccountCard.vue';
 
 @Component({
 	components: {

@@ -4,7 +4,7 @@
 			<!-- Logo	-->
 			<v-row justify="center">
 				<v-col cols="auto">
-<!--					<v-img :height="128" :width="128" :src="require('@img/logo/full-logo-256.png')"></v-img>-->
+					<v-img :height="128" :width="128" :src="require('@img/logo/full-logo-256.png')"></v-img>
 				</v-col>
 			</v-row>
 			<!--	Steppers	-->

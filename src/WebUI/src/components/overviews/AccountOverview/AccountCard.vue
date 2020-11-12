@@ -22,7 +22,6 @@ import { Component, Vue, Prop } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
-import Log from 'consola';
 
 @Component({
 	components: {

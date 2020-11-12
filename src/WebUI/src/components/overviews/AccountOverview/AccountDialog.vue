@@ -200,6 +200,7 @@ export default class AccountDialog extends Vue {
 			return 'mdi-text-box-search-outline';
 		}
 	}
+
 	get getAccount(): PlexAccountDTO {
 		return {
 			id: this.isNew ? 0 : this.account?.id ?? 0,

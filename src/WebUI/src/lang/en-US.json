@@ -17,6 +17,33 @@
 		}
 	},
 	"help": {
+		"account-form": {
+			"is-enabled": {
+				"label": "Is Enabled:",
+				"title": "Is enabled",
+				"text": "Should this account be used for downloading and retrieving data from the Plex Servers."
+			},
+			"is-main": {
+				"label": "Is Main:",
+				"title": "Is main",
+				"text": "A main account is the account which owns your Plex libraries. If a non-main account exists, which has access to the same Plex library of a shared Plex server as a main account, then that will be used first to protect the main account."
+			},
+			"display-name": {
+				"label": "Display Name:",
+				"title": "Display Name",
+				"text": "The name used to display this account in the UI."
+			},
+			"username": {
+				"label": "Username:",
+				"title": "Username",
+				"text": "The username of your Plex account"
+			},
+			"password": {
+				"label": "Password:",
+				"title": "Password",
+				"text": "The password of your Plex account."
+			}
+		},
 		"advanced-1": {
 			"title": "Download Segments",
 			"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
@@ -29,6 +56,42 @@
 		}
 	},
 	"setup": {
+		"page-1": {
+			"header": "Being called awesome!",
+			"title": "You are awesome for trying out Plex Ripper!",
+			"text": {
+				"p-1": "Here is some useful info:"
+			},
+			"list": {
+				"item-1": "Plex Ripper is currently under active development, so there might be some bugs here and there. Please make sure to report any you may find on the Github issues page.",
+				"item-2": "Feedback or feature requests are really appreciated! Especially on the source code as this is a personal project meant to improve my coding skills.",
+				"item-3": "Plex Ripper has dark mode support! With that I mean that the light mode is \"working\" but not optimal so for now use the dark mode, which is enabled by default.",
+				"item-4": "Plex Ripper can download Movies and TvShows, other types such as music is currently not supported, but will in the future!",
+				"item-5": "Plex Ripper does not, and will not, collect any data about you or any of your activities. The only data that is sent to Plex is your username and password to authenticate your Plex account. After which, all communication is directly with the shared servers you have access to.",
+				"item-6": "A word of caution: Plex, and maybe Plex server owners, do not like you to download all \"their\" 100% legally acquired copies of media. Which is why there are some safe guards in place to protect Plex Ripper users from being banned by Plex. However, be respectful to Plex server owners by not taking up all their precious bandwidth and don't complain to me about being kicked of a server. In the future I would also like to protect Plex server owners from Plex Ripper abuse, any ideas or input are welcome."
+			}
+		},
+		"page-2": {
+			"header": "Future plans!",
+			"title": "You are now ready to start using PlexRipper!",
+			"text": {
+				"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+			}
+		},
+		"page-3": {
+			"header": "Checking paths",
+			"title": "You are now ready to start using PlexRipper!",
+			"text": {
+				"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+			}
+		},
+		"page-4": {
+			"header": "Plex Accounts",
+			"title": "You are now ready to start using PlexRipper!",
+			"text": {
+				"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+			}
+		},
 		"page-5": {
 			"header": "Finished!",
 			"title": "You are now ready to start using PlexRipper!",

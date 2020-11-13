@@ -11,7 +11,7 @@
 				:loading="loading"
 				:width="width"
 				:block="block"
-				:icon="!getText"
+				:icon="iconMode"
 				:href="href"
 				:to="to"
 				:target="href ? '_blank' : '_self'"
@@ -52,12 +52,15 @@ export default class PBtn extends Vue {
 	readonly filled!: boolean;
 
 	@Prop({ required: false, type: Boolean, default: false })
+	readonly iconMode!: boolean;
+
+	@Prop({ required: false, type: Boolean, default: false })
 	readonly disabled!: boolean;
 
 	@Prop({ required: false, type: Boolean, default: false })
 	readonly loading!: boolean;
 
-	@Prop({ required: false, type: Number, default: 40 })
+	@Prop({ required: false, type: Number, default: 36 })
 	readonly width!: number;
 
 	@Prop({ required: false, type: Boolean, default: false })

@@ -36,38 +36,18 @@
 									<v-container fluid>
 										<v-row no-gutters>
 											<v-col>
-												<h2>You are awesome for trying out Plex Ripper!</h2>
-												<p>Here is some useful info:</p>
+												<h2 class="mt-2">{{ $t('setup.page-1.title') }}</h2>
+												<p>{{ $t('setup.page-1.text.p-1') }}</p>
 												<ul>
 													<li>
-														Plex Ripper is currently under active development, so there might be some bugs here and there. Please
-														make sure to report any you may find on the
-														<a href="https://github.com/PlexRipper/PlexRipper/issues" target="_blank"> Github issues page</a> .
+														{{ $t('setup.page-1.list.item-1') }}
+														<external-link href="https://github.com/PlexRipper/PlexRipper/issues" />
 													</li>
-													<li>
-														Feedback or feature requests are really appreciated! Especially on the source code as this is a
-														personal project meant to improve my coding skills.
-													</li>
-													<li>
-														Plex Ripper has dark mode support! With that I mean that the light mode is "working" but not optimal
-														so for now use the dark mode, which is enabled by default.
-													</li>
-													<li>
-														Plex Ripper can download Movies and TvShows, other types such as music is currently not supported, but
-														will in the future!
-													</li>
-													<li>
-														Plex Ripper does not, and will not, collect any data about you or any of your activities. The only
-														data that is sent to Plex is your username and password to authenticate your Plex account. After
-														which, all communication is directly with the shared servers you have access to.
-													</li>
-													<li>
-														A word of caution: Plex, and maybe Plex server owners, do not like you to download all "their" 100%
-														legally acquired copies of media. Which is why there are some safe guards in place to protect Plex
-														Ripper users from being banned by Plex. However, be respectful to Plex server owners by not taking up
-														all their precious bandwidth and don't complain to me about being kicked of a server. In the future I
-														would also like to protect Plex server owners from Plex Ripper abuse, any ideas or input are welcome.
-													</li>
+													<li v-html="$t('setup.page-1.list.item-2')"></li>
+													<li v-html="$t('setup.page-1.list.item-3')"></li>
+													<li v-html="$t('setup.page-1.list.item-4')"></li>
+													<li v-html="$t('setup.page-1.list.item-5')"></li>
+													<li v-html="$t('setup.page-1.list.item-6')"></li>
 												</ul>
 											</v-col>
 										</v-row>
@@ -155,7 +135,7 @@
 									</v-container>
 								</v-stepper-content>
 							</v-stepper-items>
-							<hr />
+							<v-divider />
 							<!-- Stepper navigation bar	-->
 							<navigation-bar
 								:disable-back="isBackDisabled"
@@ -180,7 +160,6 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import PathsOverview from '@overviews/PathsOverview.vue';
 import * as THREE from 'three';
@@ -198,7 +177,7 @@ export default class Setup extends Vue {
 	stepIndex: number = 1;
 
 	sliderHeight: number = 600;
-	headers: string[] = ['Being called awesome!', 'Future plans!', 'Checking paths', 'Plex Accounts', 'Finished!'];
+	headers: string[] = ['Being called awesome!', '', '', '', 'Finished!'];
 
 	links: string[] = [
 		'https://github.com/PlexRipper/PlexRipper/',
@@ -230,8 +209,7 @@ export default class Setup extends Vue {
 	}
 
 	get messages(): any {
-		Log.warn(this.$i18n.messages[this.$i18n.locale]?.setup);
-		return this.$i18n.messages[this.$i18n.locale]?.setup ?? null;
+		return this.$messages();
 	}
 
 	mounted(): void {

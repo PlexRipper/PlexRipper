@@ -53,6 +53,7 @@ An absolute massive thank you to the following people!
 
 - [Ninthwalker](https://github.com/ninthwalker) for his great work on [Saverr](https://github.com/ninthwalker/saverr), which showed me the method of downloading media from Plex!
 - [Michael Altmann](https://github.com/altmann) for his awesome work on [Fluent Results](https://github.com/altmann/FluentResults) and the time he spent helping with making Fluent Results work in PlexRipper!
+- [Lenty Sprangers](https://github.com/LentySprangers) for the logo design!
 - [Jetbrains](https://www.jetbrains.com/) for their awesome development tools, in paticular [Rider](https://www.jetbrains.com/rider/) and [Webstorm](https://www.jetbrains.com/webstorm/)!
 - The developers and contributers behind the amazing [Vue.js](https://vuejs.org/), [Vuetify](https://vuetifyjs.com/en/), [Nuxt.js](https://nuxtjs.org/) and [RxJS](https://www.learnrxjs.io/)!
 - The developers and contributers behind the beautiful [Vanta.js](https://www.vantajs.com/) project that is used to show some of the awesome backgrounds in PlexRipper!

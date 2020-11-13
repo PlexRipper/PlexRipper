@@ -17,26 +17,26 @@
 				<v-form ref="form" v-model="valid">
 					<!-- Is account enabled -->
 					<v-row no-gutters>
-						<v-col cols="3">
-							<help-icon label="Is Enabled:" />
+						<v-col :cols="labelCol">
+							<help-icon id="account-form.is-enabled" />
 						</v-col>
 						<v-col>
-							<v-checkbox v-model="isEnabled" color="red" class="mt-0 pt-0" hide-details></v-checkbox>
+							<v-checkbox v-model="isEnabled" color="red" class="ma-3 pt-0" hide-details></v-checkbox>
 						</v-col>
 					</v-row>
 					<!-- Is main account -->
 					<v-row no-gutters>
-						<v-col cols="3">
-							<help-icon label="Is Main Account:" />
+						<v-col :cols="labelCol">
+							<help-icon id="account-form.is-main" />
 						</v-col>
 						<v-col>
-							<v-checkbox v-model="isMain" color="red" class="mt-0 pt-0" hide-details></v-checkbox>
+							<v-checkbox v-model="isMain" color="red" class="ma-3 pt-0" hide-details></v-checkbox>
 						</v-col>
 					</v-row>
 					<!-- Display Name -->
 					<v-row no-gutters>
-						<v-col cols="3">
-							<help-icon label="Display Name:" />
+						<v-col :cols="labelCol">
+							<help-icon id="account-form.display-name" />
 						</v-col>
 						<v-col>
 							<v-text-field v-model="displayName" :rules="getDisplayNameRules" color="red" full-width outlined required />
@@ -45,8 +45,8 @@
 
 					<!-- Username -->
 					<v-row no-gutters>
-						<v-col cols="3">
-							<help-icon label="Username:" />
+						<v-col :cols="labelCol">
+							<help-icon id="account-form.username" />
 						</v-col>
 						<v-col>
 							<v-text-field
@@ -63,8 +63,8 @@
 
 					<!-- Password -->
 					<v-row no-gutters>
-						<v-col cols="3">
-							<help-icon label="Password:" />
+						<v-col :cols="labelCol">
+							<help-icon id="account-form.password" />
 						</v-col>
 						<v-col>
 							<v-text-field
@@ -172,6 +172,8 @@ export default class AccountDialog extends Vue {
 	isMain: boolean = true;
 
 	saving: boolean = false;
+
+	labelCol: number = 3;
 
 	isValidated: string = '';
 

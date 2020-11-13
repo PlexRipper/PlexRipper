@@ -15,5 +15,6 @@ module.exports = {
 	// add your custom rules here
 	rules: {
 		'vue/valid-v-slot': 0,
+		'vue/no-v-html': 'off',
 	},
 };

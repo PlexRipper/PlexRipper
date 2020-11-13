@@ -1,9 +1,9 @@
 <template>
-	<p-btn :href="href" :button-type="externalLinkButtonType" />
+	<p-btn :href="href" icon-mode :button-type="externalLinkButtonType" />
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'nuxt-property-decorator';
 import PBtn from '@components/General/PlexRipperButton.vue';
 import ButtonType from '@enums/buttonType';
 

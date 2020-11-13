@@ -11,7 +11,9 @@
 			"back": "Back",
 			"next": "Next",
 			"error": "Error",
-			"validate": "Validate"
+			"validate": "Validate",
+			"skip-setup": "Skip setup",
+			"finish-setup": "Finish setup"
 		}
 	},
 	"help": {
@@ -24,6 +26,21 @@
 		"delete-account": {
 			"title": "Are you sure?",
 			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
+		}
+	},
+	"setup": {
+		"page-5": {
+			"header": "Finished!",
+			"title": "You are now ready to start using PlexRipper!",
+			"text": {
+				"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+			},
+			"list": {
+				"item-1": "Give a star on the Github page!",
+				"item-2": "Request features and provide bug reports!",
+				"item-3": "Translate PlexRipper to your language!",
+				"item-4": "Go through the code and give feedback or suggest improvements!"
+			}
 		}
 	}
 }

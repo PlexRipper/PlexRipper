@@ -3,6 +3,7 @@ enum ButtonType {
 	Info = 'info',
 	Warning = 'warning',
 	Navigation = 'navigation',
+	ExternalLink = 'external-link',
 	Error = 'error',
 	Cancel = 'cancel',
 	Confirm = 'confirm',

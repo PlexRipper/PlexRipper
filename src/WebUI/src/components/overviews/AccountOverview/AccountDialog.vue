@@ -108,7 +108,7 @@
 					:disabled="!valid || validateLoading"
 					:color="getValidationBtnColor"
 					class="mr-4"
-					:text-id="!valid ? 'validate' : 'validate'"
+					:text-id="!valid ? 'validate' : ''"
 					:width="130"
 					@click="validate"
 				/>
@@ -236,14 +236,11 @@ export default class AccountDialog extends Vue {
 	}
 
 	get getValidationBtnColor(): string {
-		if (this.valid) {
-			return 'green';
-		}
 		switch (this.isValidated) {
 			case 'OK':
-				return 'success';
+				return 'green';
 			case 'ERROR':
-				return 'error';
+				return 'red';
 			default:
 				return '';
 		}

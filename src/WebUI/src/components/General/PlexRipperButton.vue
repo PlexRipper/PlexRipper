@@ -1,17 +1,30 @@
 <template>
-	<v-btn
-		:class="[getIsFilled ? 'filled' : '', 'p-btn', 'mx-2', 'i18n-formatting']"
-		:color="getColor"
-		outlined
-		raised
-		:disabled="disabled"
-		:loading="loading"
-		:width="width"
-		@click="click"
-	>
-		<v-icon v-if="getIcon" class="mx-2" :color="getColor">{{ getIcon }}</v-icon>
-		<span v-if="getText !== ''">{{ $t(getText) }}</span>
-	</v-btn>
+	<v-tooltip :disabled="showTooltip" top>
+		<template v-slot:activator="{ on, attrs }">
+			<v-btn
+				raised
+				nuxt
+				:class="[getIsFilled ? 'filled' : '', getIsOutlined ? 'outlined' : '', 'p-btn', 'mx-2', 'i18n-formatting']"
+				:color="getColor"
+				:outlined="getIsOutlined"
+				:disabled="isDisabled"
+				:loading="loading"
+				:width="width"
+				:block="block"
+				:icon="!getText"
+				:href="href"
+				:to="to"
+				:target="href ? '_blank' : '_self'"
+				v-bind="attrs"
+				v-on="on"
+				@click="click"
+			>
+				<v-icon v-if="getIcon" class="mx-2" :color="getColor">{{ getIcon }}</v-icon>
+				<span v-if="getText !== ''">{{ $t(getText) }}</span>
+			</v-btn>
+		</template>
+		<span>{{ $t(getText) }}</span>
+	</v-tooltip>
 </template>
 
 <script lang="ts">
@@ -25,6 +38,9 @@ export default class PBtn extends Vue {
 
 	@Prop({ required: false, type: String, default: '' })
 	readonly textId!: string;
+
+	@Prop({ required: false, type: String, default: '' })
+	readonly tooltipId!: string;
 
 	@Prop({ required: false, type: String, default: '' })
 	readonly icon!: string;
@@ -41,8 +57,29 @@ export default class PBtn extends Vue {
 	@Prop({ required: false, type: Boolean, default: false })
 	readonly loading!: boolean;
 
-	@Prop({ required: false, type: Number, default: 150 })
+	@Prop({ required: false, type: Number, default: 40 })
 	readonly width!: number;
+
+	@Prop({ required: false, type: Boolean, default: false })
+	readonly block!: boolean;
+
+	@Prop({ required: false, type: String })
+	readonly href!: string;
+
+	@Prop({ required: false, type: String })
+	readonly to!: string;
+
+	get isDark(): boolean {
+		return this.$vuetify.theme.dark;
+	}
+
+	get showTooltip(): boolean {
+		return this.tooltipId === '';
+	}
+
+	get isDisabled(): boolean {
+		return this.disabled;
+	}
 
 	get getText(): string {
 		const prefix = 'general.commands.';
@@ -77,6 +114,8 @@ export default class PBtn extends Vue {
 				return 'mdi-delete';
 			case ButtonType.Error:
 				return 'mdi-alert-circle';
+			case ButtonType.ExternalLink:
+				return 'mdi-open-in-new';
 		}
 		return '';
 	}
@@ -87,19 +126,32 @@ export default class PBtn extends Vue {
 		}
 		switch (this.buttonType) {
 			case ButtonType.None:
-				return 'white';
+				return this.isDark ? 'white' : 'black';
 			case ButtonType.Navigation:
-				return 'white';
+				return this.isDark ? 'white' : 'black';
 			case ButtonType.Cancel:
-				return 'white';
+				return this.isDark ? 'white' : 'black';
+			case ButtonType.ExternalLink:
+				return this.isDark ? 'white' : 'black';
 			case ButtonType.Confirm:
 				return 'green';
 			case ButtonType.Save:
 				return 'green';
 			case ButtonType.Delete:
 				return 'red';
+			case ButtonType.Error:
+				return 'red';
 		}
-		return 'white';
+		return this.isDark ? 'white' : 'black';
+	}
+
+	get getIsOutlined(): boolean {
+		switch (this.buttonType) {
+			case ButtonType.ExternalLink:
+				return false;
+			default:
+				return true;
+		}
 	}
 
 	get getIsFilled(): boolean {

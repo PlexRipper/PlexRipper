@@ -18,8 +18,8 @@
 									<v-stepper-step
 										:key="i"
 										:step="i + 1"
-										:color="stepIndex > i + 1 ? 'green' : 'red'"
-										:complete="stepIndex > i + 1"
+										:color="i + 1 === headers.length ? 'green' : stepIndex > i + 1 ? 'green' : 'red'"
+										:complete="i + 1 === headers.length ? stepIndex > i : stepIndex > i + 1"
 										editable
 										edit-icon="$complete"
 									>
@@ -32,7 +32,7 @@
 							<!-- Step pages	-->
 							<v-stepper-items>
 								<!-- Introduction	-->
-								<v-stepper-content class="stepper-content" step="1">
+								<v-stepper-content class="stepper-content" :step="1">
 									<v-container fluid>
 										<v-row no-gutters>
 											<v-col>
@@ -75,7 +75,7 @@
 								</v-stepper-content>
 
 								<!-- Future plans!	-->
-								<v-stepper-content class="stepper-content" step="2">
+								<v-stepper-content class="stepper-content" :step="2">
 									<v-container fluid>
 										<v-row no-gutters>
 											<v-col>
@@ -112,29 +112,58 @@
 								</v-stepper-content>
 
 								<!-- Checking paths	-->
-								<v-stepper-content class="stepper-content" step="3">
+								<v-stepper-content class="stepper-content" :step="3">
 									<h2 class="mt-2">Ensure that all paths are valid!</h2>
 									<paths-overview />
 								</v-stepper-content>
 
 								<!-- Plex Accounts	-->
-								<v-stepper-content class="stepper-content" step="4">
+								<v-stepper-content class="stepper-content" :step="4">
 									<h2 class="mt-2">Add your Plex Accounts!</h2>
 									<account-overview />
 								</v-stepper-content>
 
 								<!-- Finished	-->
-								<v-stepper-content class="stepper-content" step="5">
+								<v-stepper-content class="stepper-content" :step="5">
 									<v-container fluid>
 										<v-row no-gutters>
-											<v-col> </v-col>
+											<v-col>
+												<h2 class="mt-2">{{ $t('setup.page-5.title') }}</h2>
+											</v-col>
+										</v-row>
+										<v-row no-gutters>
+											<v-col>
+												<p>{{ $t('setup.page-5.text.p-1') }}</p>
+												<v-list dense class="no-background">
+													<v-list-item v-for="(link, i) in links" :key="i" :href="link" target="_blank">
+														<v-list-item-title>
+															<ul>
+																<li>
+																	<span v-if="messages" style="font-weight: normal">
+																		{{ messages['page-5'].list['item-' + (i + 1)] }}
+																	</span>
+																</li>
+															</ul>
+														</v-list-item-title>
+														<v-list-item-action>
+															<external-link :href="link" />
+														</v-list-item-action>
+													</v-list-item>
+												</v-list>
+											</v-col>
 										</v-row>
 									</v-container>
 								</v-stepper-content>
 							</v-stepper-items>
 							<hr />
 							<!-- Stepper navigation bar	-->
-							<navigation-bar @back="back" @next="next" />
+							<navigation-bar
+								:disable-back="isBackDisabled"
+								:disable-next="isNextDisabled"
+								:is-last="isNextDisabled"
+								@back="back"
+								@next="next"
+							/>
 						</v-stepper>
 					</template>
 				</v-col>
@@ -142,8 +171,8 @@
 
 			<!--	Skip button	-->
 			<v-row justify="center">
-				<v-col cols="auto">
-					<v-btn nuxt to="/"> Skip setup </v-btn>
+				<v-col cols="3">
+					<p-btn to="/" :disabled="isNextDisabled" block :width="100" text-id="skip-setup" />
 				</v-col>
 			</v-row>
 		</v-container>
@@ -151,33 +180,58 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import PathsOverview from '@overviews/PathsOverview.vue';
 import * as THREE from 'three';
 import WAVES from 'vanta/dist/vanta.waves.min';
 import AccountOverview from '@overviews/AccountOverview/AccountOverview.vue';
+import ExternalLink from '@components/General/ExternalLink.vue';
+import PBtn from '@components/General/PlexRipperButton.vue';
 import NavigationBar from './components/NavigationBar.vue';
 
 @Component({
 	layout: 'empty',
-	components: { NavigationBar, PathsOverview, AccountOverview },
+	components: { NavigationBar, PathsOverview, AccountOverview, ExternalLink, PBtn },
 })
 export default class Setup extends Vue {
-	stepIndex: number = 4;
+	stepIndex: number = 1;
 
 	sliderHeight: number = 600;
-	headers: string[] = ['Being called awesome!', 'Future plans!', 'Checking paths', 'Plex Accounts', 'Finished'];
+	headers: string[] = ['Being called awesome!', 'Future plans!', 'Checking paths', 'Plex Accounts', 'Finished!'];
+
+	links: string[] = [
+		'https://github.com/PlexRipper/PlexRipper/',
+		'https://github.com/PlexRipper/PlexRipper/issues',
+		'https://github.com/PlexRipper/PlexRipper#translate-plexripper',
+		'https://github.com/PlexRipper/PlexRipper/',
+	];
 
 	vantaEffect: any;
 
 	back(): void {
-		if (this.stepIndex > 0) {
+		if (this.stepIndex > 1) {
 			this.stepIndex--;
 		}
 	}
 
 	next(): void {
-		this.stepIndex++;
+		if (this.stepIndex < this.headers.length) {
+			this.stepIndex++;
+		}
+	}
+
+	get isBackDisabled(): boolean {
+		return this.stepIndex === 1;
+	}
+
+	get isNextDisabled(): boolean {
+		return this.stepIndex === this.headers.length;
+	}
+
+	get messages(): any {
+		Log.warn(this.$i18n.messages[this.$i18n.locale]?.setup);
+		return this.$i18n.messages[this.$i18n.locale]?.setup ?? null;
 	}
 
 	mounted(): void {

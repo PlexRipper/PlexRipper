@@ -39,9 +39,11 @@ P-btn.vue
 */
 
 .p-btn {
-	border: 2px solid currentColor;
 	&.filled {
 		background-color: currentColor;
+	}
+	&.outlined {
+		border: 2px solid currentColor;
 	}
 	&.theme--dark {
 		color: red;

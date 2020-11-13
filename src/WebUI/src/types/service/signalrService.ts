@@ -9,7 +9,8 @@ import {
 	DownloadTaskCreationProgress,
 	DownloadStatusChanged,
 	FileMergeProgress,
-	NotificationDTO, ServerRefreshProgress,
+	NotificationDTO,
+	ServerRefreshProgress,
 } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
 import globalService from '@service/globalService';

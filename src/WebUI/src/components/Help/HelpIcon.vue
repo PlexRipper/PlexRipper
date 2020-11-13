@@ -27,7 +27,7 @@ export default class HelpIcon extends Vue {
 		if (this.label) {
 			return this.label;
 		}
-		return this.$t('help.' + this.id + '.label');
+		return this.$ts('help.' + this.id + '.label');
 	}
 
 	openDialog(): void {

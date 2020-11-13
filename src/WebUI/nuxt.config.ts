@@ -4,7 +4,7 @@ import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
 
 const config: NuxtConfig = {
-	mode: 'spa',
+	ssr: false,
 	target: 'static',
 	srcDir: 'src/',
 	/*
@@ -38,7 +38,6 @@ const config: NuxtConfig = {
 		{ src: '@plugins/axios.ts', mode: 'client' },
 		{ src: '@plugins/i18nPlugin.ts', mode: 'client' },
 		{ src: '@plugins/perfect-scrollbar.ts', mode: 'client' },
-		{ src: '@plugins/generalPlugin.ts', mode: 'client' },
 	],
 	/*
 	 ** Nuxt.js dev-modules

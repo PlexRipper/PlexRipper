@@ -209,7 +209,7 @@ export default class Setup extends Vue {
 	}
 
 	get messages(): any {
-		return this.$messages();
+		return this.$messages().setup;
 	}
 
 	mounted(): void {

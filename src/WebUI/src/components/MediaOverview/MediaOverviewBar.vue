@@ -42,7 +42,7 @@ interface IViewOptions {
 	viewMode: ViewMode;
 }
 
-@Component<MediaOverviewBar>({
+@Component({
 	components: { VerticalButton },
 })
 export default class MediaOverviewBar extends Vue {

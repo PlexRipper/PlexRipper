@@ -26,7 +26,7 @@ import PBtn from '@components/General/PlexRipperButton.vue';
 import IText from '@interfaces/IText';
 import ButtonType from '@enums/buttonType';
 
-@Component<ConfirmationButton>({
+@Component({
 	components: {
 		PBtn,
 	},

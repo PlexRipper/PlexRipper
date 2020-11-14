@@ -18,14 +18,14 @@
 									<v-stepper-step
 										:key="i"
 										:step="i + 1"
-										:color="i + 1 === headers.length ? 'green' : stepIndex > i + 1 ? 'green' : 'red'"
-										:complete="i + 1 === headers.length ? stepIndex > i : stepIndex > i + 1"
+										:color="i + 1 === stepPagesCount ? 'green' : stepIndex > i + 1 ? 'green' : 'red'"
+										:complete="i + 1 === stepPagesCount ? stepIndex > i : stepIndex > i + 1"
 										editable
 										edit-icon="$complete"
 									>
 										{{ header }}
 									</v-stepper-step>
-									<v-divider v-if="i < headers.length - 1" :key="i + 100" />
+									<v-divider v-if="i < stepPagesCount - 1" :key="i + 100" />
 								</template>
 							</v-stepper-header>
 
@@ -47,7 +47,6 @@
 													<li v-html="$t('setup.page-1.list.item-3')"></li>
 													<li v-html="$t('setup.page-1.list.item-4')"></li>
 													<li v-html="$t('setup.page-1.list.item-5')"></li>
-													<li v-html="$t('setup.page-1.list.item-6')"></li>
 												</ul>
 											</v-col>
 										</v-row>
@@ -175,9 +174,9 @@ import NavigationBar from './components/NavigationBar.vue';
 })
 export default class Setup extends Vue {
 	stepIndex: number = 1;
+	stepPagesCount: number = 5;
 
 	sliderHeight: number = 600;
-	headers: string[] = ['Being called awesome!', '', '', '', 'Finished!'];
 
 	links: string[] = [
 		'https://github.com/PlexRipper/PlexRipper/',
@@ -195,9 +194,17 @@ export default class Setup extends Vue {
 	}
 
 	next(): void {
-		if (this.stepIndex < this.headers.length) {
+		if (this.stepIndex < this.stepPagesCount) {
 			this.stepIndex++;
 		}
+	}
+
+	get headers(): string[] {
+		const headers: string[] = [];
+		for (let i = 1; i <= this.stepPagesCount; i++) {
+			headers.push(this.messages['page-' + i].header);
+		}
+		return headers;
 	}
 
 	get isBackDisabled(): boolean {
@@ -205,7 +212,7 @@ export default class Setup extends Vue {
 	}
 
 	get isNextDisabled(): boolean {
-		return this.stepIndex === this.headers.length;
+		return this.stepIndex === this.stepPagesCount;
 	}
 
 	get messages(): any {

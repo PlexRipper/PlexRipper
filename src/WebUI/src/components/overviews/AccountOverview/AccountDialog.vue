@@ -74,6 +74,9 @@
 								full-width
 								outlined
 								required
+								:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+								:type="showPassword ? 'text' : 'password'"
+								@click:append="showPassword = !showPassword"
 								@input="inputChanged"
 							/>
 						</v-col>
@@ -160,6 +163,8 @@ export default class AccountDialog extends Vue {
 	validateLoading: boolean = false;
 
 	valid: boolean = false;
+
+	showPassword: boolean = false;
 
 	displayName: string = '';
 

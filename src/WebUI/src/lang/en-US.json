@@ -65,10 +65,9 @@
 			"list": {
 				"item-1": "Plex Ripper is currently under active development, so there might be some bugs here and there. Please make sure to report any you may find on the Github issues page.",
 				"item-2": "Feedback or feature requests are really appreciated! Especially on the source code as this is a personal project meant to improve my coding skills.",
-				"item-3": "Plex Ripper has dark mode support! With that I mean that the light mode is \"working\" but not optimal so for now use the dark mode, which is enabled by default.",
-				"item-4": "Plex Ripper can download Movies and TvShows, other types such as music is currently not supported, but will in the future!",
-				"item-5": "Plex Ripper does not, and will not, collect any data about you or any of your activities. The only data that is sent to Plex is your username and password to authenticate your Plex account. After which, all communication is directly with the shared servers you have access to.",
-				"item-6": "A word of caution: Plex, and maybe Plex server owners, do not like you to download all \"their\" 100% legally acquired copies of media. Which is why there are some safe guards in place to protect Plex Ripper users from being banned by Plex. However, be respectful to Plex server owners by not taking up all their precious bandwidth and don't complain to me about being kicked of a server. In the future I would also like to protect Plex server owners from Plex Ripper abuse, any ideas or input are welcome."
+				"item-3": "Plex Ripper can download Movies and TvShows, other types such as music is currently not supported, but will in the future!",
+				"item-4": "Plex Ripper does not, and will not, collect any data about you or any of your activities. The only data that is sent to Plex is your username and password to authenticate your Plex account. After which, all communication is directly with the shared servers you have access to.",
+				"item-5": "A word of caution: Plex, and maybe Plex server owners, do not like you to download all \"their\" 100% legally acquired copies of media. Which is why there are some safe guards in place to protect Plex Ripper users from being banned by Plex. However, be respectful to Plex server owners by not taking up all their precious bandwidth and don't complain to me about being kicked of a server. In the future I would also like to protect Plex server owners from Plex Ripper abuse, any ideas or input are welcome."
 			}
 		},
 		"page-2": {

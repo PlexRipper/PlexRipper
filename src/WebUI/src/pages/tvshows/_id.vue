@@ -7,7 +7,7 @@ import { Component, Vue } from 'vue-property-decorator';
 
 import MediaOverview from '@mediaOverview/MediaOverview.vue';
 
-@Component<TvShowsDetail>({
+@Component({
 	components: {
 		MediaOverview,
 	},

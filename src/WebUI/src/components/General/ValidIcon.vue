@@ -12,9 +12,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
-@Component<ValidIcon>({
-	components: {},
-})
+@Component
 export default class ValidIcon extends Vue {
 	@Prop({ required: true, type: Boolean })
 	readonly valid!: boolean;

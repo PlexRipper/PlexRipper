@@ -37,7 +37,7 @@ import DarkModeToggle from '@components/General/DarkModeToggle.vue';
 import PBtn from '@components/General/PlexRipperButton.vue';
 import ButtonType from '@enums/buttonType';
 
-@Component<NavigationBar>({
+@Component({
 	components: {
 		DarkModeToggle,
 		PBtn,

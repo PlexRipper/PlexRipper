@@ -8,9 +8,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import HealthService from '@service/healthService';
 
-@Component<Footer>({
-	components: {},
-})
+@Component
 export default class Footer extends Vue {
 	status: boolean = false;
 

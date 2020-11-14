@@ -7,7 +7,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import PBtn from '@components/General/PlexRipperButton.vue';
 import ButtonType from '@enums/buttonType';
 
-@Component<ExternalLink>({
+@Component({
 	components: {
 		PBtn,
 	},

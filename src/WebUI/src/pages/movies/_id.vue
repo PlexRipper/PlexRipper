@@ -7,7 +7,7 @@ import { Component, Vue } from 'vue-property-decorator';
 
 import MediaOverview from '~/components/MediaOverview/MediaOverview.vue';
 
-@Component<MoviesDetail>({
+@Component({
 	components: {
 		MediaOverview,
 	},

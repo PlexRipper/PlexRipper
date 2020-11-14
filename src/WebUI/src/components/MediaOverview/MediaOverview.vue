@@ -105,7 +105,7 @@ import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
 import SettingsService from '@service/settingsService';
 
-@Component<MediaOverview>({
+@Component({
 	components: {
 		MediaPoster,
 		MovieTable,

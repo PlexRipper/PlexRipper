@@ -48,7 +48,7 @@ import { clone } from 'lodash';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 import { settingsStore as SettingsStore } from '@/store';
 
-@Component<DownloadConfirmation>({
+@Component({
 	components: {
 		ProgressComponent,
 	},

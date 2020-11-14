@@ -10,7 +10,7 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
 
-@Component<VerticalButton>({
+@Component({
 	components: {},
 })
 export default class VerticalButton extends Vue {

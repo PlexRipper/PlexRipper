@@ -8,9 +8,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 
-@Component<DarkModeToggle>({
-	components: {},
-})
+@Component
 export default class DarkModeToggle extends Vue {
 	setDarkMode(): void {
 		this.$vuetify.theme.dark = !this.$vuetify.theme.dark;

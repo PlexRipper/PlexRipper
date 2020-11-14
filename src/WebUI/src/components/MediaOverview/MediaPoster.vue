@@ -66,9 +66,7 @@ import { PlexMediaType } from '@dto/mainApi';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 
-@Component<MediaPoster>({
-	components: {},
-})
+@Component
 export default class MediaPoster extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly accountId!: number;

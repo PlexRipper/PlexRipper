@@ -45,7 +45,7 @@ import AccountService from '@service/accountService';
 import NotificationButton from '@components/AppBar/NotificationButton.vue';
 import DarkModeToggle from '@components/General/DarkModeToggle.vue';
 
-@Component<AppBar>({
+@Component({
 	components: {
 		NotificationButton,
 		DarkModeToggle,

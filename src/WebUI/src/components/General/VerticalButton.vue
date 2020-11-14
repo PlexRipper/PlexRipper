@@ -10,9 +10,7 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
 
-@Component({
-	components: {},
-})
+@Component
 export default class VerticalButton extends Vue {
 	@Prop({ required: true, type: String })
 	readonly icon!: string;

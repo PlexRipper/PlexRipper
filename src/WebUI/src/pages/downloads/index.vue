@@ -1,5 +1,5 @@
 <template>
-	<v-container fluid>
+	<page>
 		<v-row>
 			<v-col cols="auto">
 				<h2>Downloads</h2>
@@ -88,7 +88,7 @@
 				<h2>There are currently no downloads in progress</h2>
 			</v-col>
 		</v-row>
-	</v-container>
+	</page>
 </template>
 
 <script lang="ts">

@@ -1,5 +1,5 @@
 <template>
-	<v-toolbar class="media-overview-bar" :height="barHeight">
+	<v-toolbar class="media-overview-bar no-background" :height="barHeight">
 		<v-toolbar-title>
 			<h3>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</h3>
 		</v-toolbar-title>
@@ -87,13 +87,4 @@ export default class MediaOverviewBar extends Vue {
 	}
 }
 </script>
-<style lang="scss" scoped>
-.media-overview-bar {
-	border: red 2px solid !important;
-	position: fixed;
-	left: 300px;
-	right: 0;
-	top: 3rem;
-	z-index: 2;
-}
-</style>
+<style lang="scss" scoped></style>

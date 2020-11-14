@@ -1,10 +1,10 @@
 <template>
-	<div id="background" style="height: 100%">
+	<background>
 		<v-container style="max-width: 900px">
 			<!-- Logo	-->
 			<v-row justify="center">
 				<v-col cols="auto">
-					<v-img :height="128" :width="128" :src="require('@img/logo/full-logo-256.png')"></v-img>
+					<logo :size="128" />
 				</v-col>
 			</v-row>
 			<!--	Steppers	-->
@@ -155,14 +155,12 @@
 				</v-col>
 			</v-row>
 		</v-container>
-	</div>
+	</background>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import PathsOverview from '@overviews/PathsOverview.vue';
-import * as THREE from 'three';
-import WAVES from 'vanta/dist/vanta.waves.min';
 import AccountOverview from '@overviews/AccountOverview/AccountOverview.vue';
 import ExternalLink from '@components/General/ExternalLink.vue';
 import PBtn from '@components/General/PlexRipperButton.vue';
@@ -184,8 +182,6 @@ export default class Setup extends Vue {
 		'https://github.com/PlexRipper/PlexRipper#translate-plexripper',
 		'https://github.com/PlexRipper/PlexRipper/',
 	];
-
-	vantaEffect: any;
 
 	back(): void {
 		if (this.stepIndex > 1) {
@@ -217,31 +213,6 @@ export default class Setup extends Vue {
 
 	get messages(): any {
 		return this.$messages().setup;
-	}
-
-	mounted(): void {
-		this.vantaEffect = WAVES({
-			THREE,
-			el: '#background',
-			mouseControls: true,
-			touchControls: true,
-			gyroControls: false,
-			minHeight: 200.0,
-			minWidth: 200.0,
-			scale: 1.0,
-			scaleMobile: 1.0,
-			color: 0x880000,
-			shininess: 43.0,
-			waveHeight: 4.0,
-			waveSpeed: 1.25,
-			zoom: 0.65,
-		});
-	}
-
-	beforeDestroy(): void {
-		if (this.vantaEffect) {
-			this.vantaEffect.destroy();
-		}
 	}
 }
 </script>

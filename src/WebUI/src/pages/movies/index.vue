@@ -1,5 +1,7 @@
 <template>
-	<p>Movies Overview</p>
+	<page>
+		<p>Movies Overview</p>
+	</page>
 </template>
 
 <script lang="ts">

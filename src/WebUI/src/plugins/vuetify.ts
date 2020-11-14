@@ -3,12 +3,13 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { Context } from '@nuxt/types';
+import { Inject } from '@nuxt/types/app';
 
 /*
  ** vuetify module configuration
  ** https://github.com/nuxt-community/vuetify-module
  */
-export default (ctx: Context): void => {
+export default (ctx: Context, inject: Inject): void => {
 	Vue.use(Vuetify);
 
 	const vuetify = new Vuetify({
@@ -23,4 +24,7 @@ export default (ctx: Context): void => {
 
 	ctx.app.vuetify = vuetify;
 	ctx.$vuetify = vuetify.framework;
+
+	inject('isDark', ctx.$vuetify.theme.dark);
+	inject('getThemeClass', (): String => (ctx.$vuetify.theme.dark ? 'theme--dark' : 'theme--light'));
 };

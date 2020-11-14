@@ -7,6 +7,10 @@
 default
 */
 
+html {
+	overflow-y: auto;
+}
+
 h1 {
 	&.theme--dark {
 		color: white;

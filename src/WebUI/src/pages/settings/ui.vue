@@ -1,5 +1,5 @@
 <template>
-	<v-container fluid>
+	<page>
 		<v-row>
 			<v-col>
 				<v-sheet width="100%" class="pa-4">
@@ -52,7 +52,7 @@
 				</v-sheet>
 			</v-col>
 		</v-row>
-	</v-container>
+	</page>
 </template>
 
 <script lang="ts">
@@ -60,11 +60,13 @@ import { Vue, Component } from 'vue-property-decorator';
 import { settingsStore as SettingsStore } from '@/store';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
+import Page from '@components/General/Page.vue';
 
 @Component({
 	components: {
 		DirectoryBrowser,
 		HelpIcon,
+		Page,
 	},
 })
 export default class UiSettings extends Vue {

@@ -1,11 +1,11 @@
 <template>
-	<v-container>
+	<page>
 		<v-row>
 			<v-col>
 				<h1>WORKING!</h1>
 			</v-col>
 		</v-row>
-	</v-container>
+	</page>
 </template>
 
 <script lang="ts">

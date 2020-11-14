@@ -1,5 +1,5 @@
 <template>
-	<v-container fluid>
+	<page>
 		<template v-if="isLoading">
 			<v-row justify="center">
 				<v-col cols="auto">
@@ -50,7 +50,7 @@
 			</template>
 
 			<!-- Poster display-->
-			<v-row v-if="isPosterView">
+			<v-row v-if="isPosterView" justify="center">
 				<template v-for="item in getItems">
 					<media-poster
 						:key="item.id"
@@ -71,7 +71,7 @@
 				/>
 			</v-row>
 		</template>
-	</v-container>
+	</page>
 </template>
 
 <script lang="ts">

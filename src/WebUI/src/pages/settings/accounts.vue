@@ -1,5 +1,7 @@
 <template>
-	<account-overview />
+	<page>
+		<account-overview />
+	</page>
 </template>
 
 <script lang="ts">

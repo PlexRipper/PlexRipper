@@ -1,5 +1,5 @@
 <template>
-	<v-container fluid>
+	<page>
 		<v-row>
 			<v-col>
 				<v-sheet width="100%" class="pa-4">
@@ -25,7 +25,7 @@
 				</v-sheet>
 			</v-col>
 		</v-row>
-	</v-container>
+	</page>
 </template>
 
 <script lang="ts">
@@ -35,10 +35,12 @@ import SettingsService from '@service/settingsService';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import { Subject, timer } from 'rxjs';
 import { debounce } from 'rxjs/operators';
+import Page from '@components/General/Page.vue';
 
 @Component({
 	components: {
 		HelpIcon,
+		Page,
 	},
 })
 export default class AdvancedSettings extends Vue {

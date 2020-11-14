@@ -1,5 +1,5 @@
 <template>
-	<v-navigation-drawer app clipped permanent width="300">
+	<v-navigation-drawer app clipped class="navigation-drawer no-background" permanent width="300">
 		<!-- Server drawer -->
 		<server-drawer />
 		<!-- Menu items -->

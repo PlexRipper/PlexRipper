@@ -1,6 +1,6 @@
 <template>
 	<perfect-scrollbar>
-		<v-expansion-panels class="server-panel">
+		<v-expansion-panels class="server-panels">
 			<!-- With valid server available -->
 			<template v-if="plexServers.length > 0">
 				<v-expansion-panel v-for="(server, i) in plexServers" :key="i">
@@ -129,16 +129,3 @@ export default class ServerDrawer extends Vue {
 	}
 }
 </script>
-<style lang="scss" scoped>
-.server-name {
-	width: 190px;
-	text-overflow: ellipsis;
-	overflow: hidden;
-}
-.server-panel {
-	z-index: 0;
-}
-.ps {
-	height: 100%;
-}
-</style>

@@ -1,5 +1,5 @@
 <template>
-	<div id="background">
+	<div>
 		<slot />
 	</div>
 </template>
@@ -18,7 +18,7 @@ export default class Background extends Vue {
 		Log.info('Wave effect created!');
 		this.vantaEffect = WAVES({
 			THREE,
-			el: '#background',
+			el: 'body',
 			mouseControls: true,
 			touchControls: true,
 			gyroControls: false,

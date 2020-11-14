@@ -1,5 +1,5 @@
 <template>
-	<v-app class="no-background">
+	<v-app class="default-layout">
 		<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
 		<navigation-drawer />
 		<app-bar />

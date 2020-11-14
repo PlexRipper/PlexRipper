@@ -44,7 +44,10 @@ namespace PlexRipper.Domain
                 downloadTask.DataTotal = part.Size;
                 downloadTask.FileName = Path.GetFileName(part.File);
                 downloadTask.MediaType = Type;
-
+                downloadTask.PlexLibraryId = PlexLibrary?.Id ?? 0;
+                downloadTask.PlexLibrary = PlexLibrary;
+                downloadTask.PlexServerId = PlexLibrary?.PlexServer?.Id ?? 0;
+                downloadTask.PlexServer = PlexLibrary?.PlexServer;
                 downloadTasks.Add(downloadTask);
             }
 

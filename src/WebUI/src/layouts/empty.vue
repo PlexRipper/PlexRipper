@@ -1,9 +1,10 @@
 <template>
-	<v-app>
+	<v-app class="no-background">
 		<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
 
 		<v-main>
 			<nuxt />
+			<background />
 		</v-main>
 		<footer />
 	</v-app>

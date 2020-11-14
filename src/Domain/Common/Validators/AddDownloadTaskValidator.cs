@@ -3,11 +3,11 @@ using FluentValidation;
 
 namespace PlexRipper.Domain
 {
-    public class DownloadTaskValidator : AbstractValidator<DownloadTask>
+    public class AddDownloadTaskValidator : AbstractValidator<DownloadTask>
     {
-        public DownloadTaskValidator()
+        public AddDownloadTaskValidator()
         {
-            RuleFor(x => x.Id).GreaterThan(0);
+            RuleFor(x => x.Id).Equal(0);
             RuleFor(x => x.DataReceived).Equal(0);
             RuleFor(x => x.DataTotal).GreaterThan(0);
             RuleFor(x => x.RatingKey).GreaterThan(0);

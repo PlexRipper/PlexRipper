@@ -1,0 +1,13 @@
+/*
+v-app
+*/
+.v-application {
+	&.default-layout {
+		&.theme--dark {
+			background: rgba(0, 0, 0, 0.8);
+		}
+		&.theme--light {
+			background: rgba(255, 255, 255, 0.8);
+		}
+	}
+}

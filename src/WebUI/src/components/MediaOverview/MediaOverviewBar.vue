@@ -87,4 +87,3 @@ export default class MediaOverviewBar extends Vue {
 	}
 }
 </script>
-<style lang="scss" scoped></style>

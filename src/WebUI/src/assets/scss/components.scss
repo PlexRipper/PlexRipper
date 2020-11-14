@@ -16,6 +16,7 @@ Background.vue
 Page.vue
 */
 .page {
+	padding-top: 0;
 	position: absolute;
 	top: 0;
 	min-height: 100%;
@@ -33,7 +34,6 @@ Page.vue
 AppBar.vue
 */
 .app-bar {
-
 }
 
 /*
@@ -101,9 +101,11 @@ MediaOverviewBar.vue
 */
 .media-overview-bar {
 	border: red 2px solid !important;
-	position: fixed;
-	left: 300px;
-	right: 0;
-	top: 3rem;
-	z-index: 2;
+	position: relative;
+}
+
+.poster-overview {
+	overflow-y: scroll;
+	// 8% reserved for the media-overview-bar
+	height: 92%;
 }

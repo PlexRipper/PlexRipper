@@ -20,7 +20,7 @@
 		<!-- Header -->
 		<template v-else>
 			<!--	Overview bar	-->
-			<v-row style="height: 6rem">
+			<v-row>
 				<media-overview-bar
 					:server="server"
 					:library="library"
@@ -50,7 +50,7 @@
 			</template>
 
 			<!-- Poster display-->
-			<v-row v-if="isPosterView" justify="center">
+			<v-row v-if="isPosterView" class="poster-overview" justify="center">
 				<template v-for="item in getItems">
 					<media-poster
 						:key="item.id"

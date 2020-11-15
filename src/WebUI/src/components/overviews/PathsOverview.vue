@@ -2,7 +2,7 @@
 	<v-container fluid>
 		<v-row v-for="(folderPath, i) in folderPaths" :key="i" no-gutters>
 			<v-col cols="3">
-				<help-icon id="asd" :label="folderPath.displayName" />
+				<help-icon :help-id="toTranslation(folderPath.type)" />
 			</v-col>
 			<v-col>
 				<v-text-field
@@ -38,6 +38,7 @@ import Log from 'consola';
 import { getFolderPaths, updateFolderPath } from '@api/pathApi';
 import ValidIcon from '@components/General/ValidIcon.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
+import _ from 'lodash';
 import DirectoryBrowser from '../General/DirectoryBrowser.vue';
 
 @Component({
@@ -75,6 +76,10 @@ export default class PathsOverview extends Vue {
 
 	cancelDirectoryBrowser(): void {
 		this.isDirectoryBrowserOpen = false;
+	}
+
+	toTranslation(type: string): string {
+		return `help.settings.paths.${_.kebabCase(type)}`;
 	}
 
 	created(): void {

@@ -15,6 +15,14 @@ export default (ctx: Context, inject: Inject): void => {
 	const vuetify = new Vuetify({
 		customVariables: ['~/assets/scss/_variables.scss'],
 		theme: {
+			themes: {
+				light: {
+					primary: '#ff0000',
+				},
+				dark: {
+					primary: '#ff0000',
+				},
+			},
 			options: {
 				customProperties: true,
 			},

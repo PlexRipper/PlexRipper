@@ -58,3 +58,29 @@ Nuxt-i18n
 .i18n-formatting {
 	white-space: pre-line;
 }
+
+/*
+SectionTable
+*/
+.section-table {
+	@extend .no-background;
+	tr {
+		height: 65px;
+		// This is to disable the hover highlight
+		@extend .no-background;
+	}
+}
+
+/*
+SectionTable
+*/
+.menu-background {
+	.v-list {
+		&.theme--dark {
+			background: rgba(0, 0, 0, 1);
+		}
+		&.theme--light {
+			background: rgba(255, 255, 255, 1);
+		}
+	}
+}

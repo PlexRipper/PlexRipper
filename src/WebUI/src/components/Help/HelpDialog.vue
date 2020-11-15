@@ -43,8 +43,8 @@ export default class HelpDialog extends Vue {
 
 		return {
 			id: this.id,
-			title: `help.${this.id}.title`,
-			text: `help.${this.id}.text`,
+			title: `${this.id}.title`,
+			text: `${this.id}.text`,
 		};
 	}
 }

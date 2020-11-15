@@ -20,27 +20,27 @@
 	"help": {
 		"account-form": {
 			"is-enabled": {
-				"label": "Is Enabled:",
+				"label": "Is Enabled",
 				"title": "Is enabled",
 				"text": "Should this account be used for downloading and retrieving data from the Plex Servers."
 			},
 			"is-main": {
-				"label": "Is Main:",
+				"label": "Is Main",
 				"title": "Is main",
 				"text": "A main account is the account which owns your Plex libraries. If a non-main account exists, which has access to the same Plex library of a shared Plex server as a main account, then that will be used first to protect the main account."
 			},
 			"display-name": {
-				"label": "Display Name:",
+				"label": "Display Name",
 				"title": "Display Name",
 				"text": "The name used to display this account in the UI."
 			},
 			"username": {
-				"label": "Username:",
+				"label": "Username",
 				"title": "Username",
 				"text": "The username of your Plex account"
 			},
 			"password": {
-				"label": "Password:",
+				"label": "Password",
 				"title": "Password",
 				"text": "The password of your Plex account."
 			}
@@ -48,61 +48,110 @@
 		"advanced-1": {
 			"title": "Download Segments",
 			"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
-		}
-	},
-	"confirmation": {
-		"delete-account": {
-			"title": "Are you sure?",
-			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
-		}
-	},
-	"setup": {
-		"page-1": {
-			"header": "Being called awesome!",
-			"title": "You are awesome for trying out Plex Ripper!",
-			"text": {
-				"p-1": "Here is some useful info:"
+		},
+		"settings": {
+			"paths": {
+				"download-folder": {
+					"label": "Download Path",
+					"title": "Download Path",
+					"text": "The password of your Plex account."
+				},
+				"movie-folder": {
+					"label": "Movie Path",
+					"title": "Movie Path",
+					"text": "The username of your Plex account"
+				},
+				"tv-show-folder": {
+					"label": "Tv Show Path",
+					"title": "Tv Show Path",
+					"text": "The password of your Plex account."
+				}
 			},
-			"list": {
-				"item-1": "Plex Ripper is currently under active development, so there might be some bugs here and there. Please make sure to report any you may find on the Github issues page.",
-				"item-2": "Feedback or feature requests are really appreciated! Especially on the source code as this is a personal project meant to improve my coding skills.",
-				"item-3": "Plex Ripper can download Movies and TvShows, other types such as music is currently not supported, but will in the future!",
-				"item-4": "Plex Ripper does not, and will not, collect any data about you or any of your activities. The only data that is sent to Plex is your username and password to authenticate your Plex account. After which, all communication is directly with the shared servers you have access to.",
-				"item-5": "A word of caution: Plex, and maybe Plex server owners, do not like you to download all \"their\" 100% legally acquired copies of media. Which is why there are some safe guards in place to protect Plex Ripper users from being banned by Plex. However, be respectful to Plex server owners by not taking up all their precious bandwidth and don't complain to me about being kicked of a server. In the future I would also like to protect Plex server owners from Plex Ripper abuse, any ideas or input are welcome."
+			"ui": {
+				"date-and-time": {
+					"short-date-format": "Short Date Format",
+					"long-date-format": "Long Date Format",
+					"time-format": "Time Format",
+					"show-relative-dates": "Show Relative Dates"
+				},
+				"confirmation-settings": {
+					"download-movie-confirmation": {
+						"label": "Ask Download Movie Confirmation",
+						"title": "Ask Download Movie Confirmation",
+						"text": ""
+					},
+					"download-tvshow-confirmation": {
+						"label": "Ask Download TvShow Confirmation",
+						"title": "Ask Download TvShow Confirmation",
+						"text": ""
+					},
+					"download-season-confirmation": {
+						"label": "Ask Download Season Confirmation",
+						"title": "Ask Download Season Confirmation",
+						"text": ""
+					},
+					"download-episode-confirmation": {
+						"label": "Ask Download Episode Confirmation",
+						"title": "Ask Download Episode Confirmation",
+						"text": ""
+					}
+				}
 			}
 		},
-		"page-2": {
-			"header": "Future plans!",
-			"title": "You are now ready to start using PlexRipper!",
-			"text": {
-				"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+		"confirmation": {
+			"delete-account": {
+				"title": "Are you sure?",
+				"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
 			}
 		},
-		"page-3": {
-			"header": "Checking paths",
-			"title": "You are now ready to start using PlexRipper!",
-			"text": {
-				"p-1": "If you like this project and would like to show your appreciation then consider the following:"
-			}
-		},
-		"page-4": {
-			"header": "Plex Accounts",
-			"title": "You are now ready to start using PlexRipper!",
-			"text": {
-				"p-1": "If you like this project and would like to show your appreciation then consider the following:"
-			}
-		},
-		"page-5": {
-			"header": "Finished!",
-			"title": "You are now ready to start using PlexRipper!",
-			"text": {
-				"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+		"setup": {
+			"page-1": {
+				"header": "Being called awesome!",
+				"title": "You are awesome for trying out Plex Ripper!",
+				"text": {
+					"p-1": "Here is some useful info:"
+				},
+				"list": {
+					"item-1": "Plex Ripper is currently under active development, so there might be some bugs here and there. Please make sure to report any you may find on the Github issues page.",
+					"item-2": "Feedback or feature requests are really appreciated! Especially on the source code as this is a personal project meant to improve my coding skills.",
+					"item-3": "Plex Ripper can download Movies and TvShows, other types such as music is currently not supported, but will in the future!",
+					"item-4": "Plex Ripper does not, and will not, collect any data about you or any of your activities. The only data that is sent to Plex is your username and password to authenticate your Plex account. After which, all communication is directly with the shared servers you have access to.",
+					"item-5": "A word of caution: Plex, and maybe Plex server owners, do not like you to download all \"their\" 100% legally acquired copies of media. Which is why there are some safe guards in place to protect Plex Ripper users from being banned by Plex. However, be respectful to Plex server owners by not taking up all their precious bandwidth and don't complain to me about being kicked of a server. In the future I would also like to protect Plex server owners from Plex Ripper abuse, any ideas or input are welcome."
+				}
 			},
-			"list": {
-				"item-1": "Give a star on the Github page!",
-				"item-2": "Request features and provide bug reports!",
-				"item-3": "Translate PlexRipper to your language!",
-				"item-4": "Go through the code and give feedback or suggest improvements!"
+			"page-2": {
+				"header": "Future plans!",
+				"title": "You are now ready to start using PlexRipper!",
+				"text": {
+					"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+				}
+			},
+			"page-3": {
+				"header": "Checking paths",
+				"title": "You are now ready to start using PlexRipper!",
+				"text": {
+					"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+				}
+			},
+			"page-4": {
+				"header": "Plex Accounts",
+				"title": "You are now ready to start using PlexRipper!",
+				"text": {
+					"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+				}
+			},
+			"page-5": {
+				"header": "Finished!",
+				"title": "You are now ready to start using PlexRipper!",
+				"text": {
+					"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+				},
+				"list": {
+					"item-1": "Give a star on the Github page!",
+					"item-2": "Request features and provide bug reports!",
+					"item-3": "Translate PlexRipper to your language!",
+					"item-4": "Go through the code and give feedback or suggest improvements!"
+				}
 			}
 		}
 	}

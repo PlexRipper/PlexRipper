@@ -297,7 +297,7 @@
           "description": "",
           "attributes": [
             {
-              "name": "label",
+              "name": "labelId",
               "required": false,
               "value": {
                 "kind": "expression",
@@ -306,7 +306,7 @@
               "default": "''"
             },
             {
-              "name": "id",
+              "name": "helpId",
               "required": false,
               "value": {
                 "kind": "expression",
@@ -663,7 +663,7 @@
           }
         },
         {
-          "name": "PCheckBox",
+          "name": "PCheckbox",
           "description": "",
           "attributes": [
             {

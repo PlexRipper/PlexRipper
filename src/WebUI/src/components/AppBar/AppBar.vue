@@ -1,5 +1,5 @@
 <template>
-	<v-app-bar class="app-bar" color="red" dense app clipped-left>
+	<v-app-bar class="app-bar" dense app clipped-left>
 		<v-toolbar-title>
 			<v-btn to="/" outlined nuxt><logo :size="24" class="mr-3" /> PlexRipper </v-btn>
 		</v-toolbar-title>

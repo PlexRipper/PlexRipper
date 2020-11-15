@@ -1,6 +1,6 @@
 <template>
 	<v-row no-gutters style="width: 100%">
-		<v-col>
+		<v-col cols="12">
 			<slot></slot>
 		</v-col>
 	</v-row>

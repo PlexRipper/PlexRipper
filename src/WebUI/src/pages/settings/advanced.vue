@@ -12,7 +12,7 @@
 					<!--	Max segmented downloads	-->
 					<v-row>
 						<v-col cols="4">
-							<help-icon id="advanced-1" label="Download Segments"></help-icon>
+							<help-icon help-id="help.advanced-1"></help-icon>
 						</v-col>
 						<v-col cols="8">
 							<v-slider v-model="SegmentedDownloads" min="1" max="8">

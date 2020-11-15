@@ -5,6 +5,7 @@ declare module 'vue/types/vue' {
 		$getThemeClass(): string;
 
 		$messages(): VueI18n.LocaleMessageObject;
+		$getMessage(path: string): object;
 		$ts(path: string): string;
 		$moment(path: string): string;
 	}

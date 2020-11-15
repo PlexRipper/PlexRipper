@@ -1,10 +1,10 @@
 <template>
 	<v-row justify="space-between" no-gutters>
 		<v-col cols="auto">
-			<v-subheader class="form-label">{{ getLabel }}</v-subheader>
+			<v-subheader class="form-label">{{ getLabel }}:</v-subheader>
 		</v-col>
-		<v-col cols="auto">
-			<v-btn v-if="id" style="margin: 8px" icon @click="openDialog">
+		<v-col v-if="hasHelpPage" cols="auto">
+			<v-btn style="margin: 8px" icon @click="openDialog">
 				<v-icon :size="24"> mdi-help-circle-outline </v-icon>
 			</v-btn>
 		</v-col>
@@ -18,20 +18,29 @@ import HelpService from '@service/helpService';
 @Component
 export default class HelpIcon extends Vue {
 	@Prop({ required: false, type: String, default: '' })
-	readonly label!: string;
+	readonly labelId!: string;
 
 	@Prop({ required: false, type: String, default: '' })
-	readonly id!: string;
+	readonly helpId!: string;
 
 	get getLabel(): string {
-		if (this.label) {
-			return this.label;
+		if (this.hasHelpPage) {
+			return this.$ts(`${this.helpId}.label`);
+		} else {
+			return this.$ts(this.helpId);
 		}
-		return this.$ts('help.' + this.id + '.label');
+	}
+
+	get hasHelpPage(): boolean {
+		if (this.helpId) {
+			// Is true if it has an object with label, title and text
+			return typeof this.$getMessage(this.helpId) === 'object';
+		}
+		return false;
 	}
 
 	openDialog(): void {
-		HelpService.openHelpDialog(this.id);
+		HelpService.openHelpDialog(this.helpId);
 	}
 }
 </script>

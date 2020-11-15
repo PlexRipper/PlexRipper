@@ -18,7 +18,7 @@
 					<!-- Is account enabled -->
 					<v-row no-gutters>
 						<v-col :cols="labelCol">
-							<help-icon id="account-form.is-enabled" />
+							<help-icon help-id="help.account-form.is-enabled" />
 						</v-col>
 						<v-col>
 							<v-checkbox v-model="isEnabled" color="red" class="ma-3 pt-0" hide-details></v-checkbox>
@@ -27,7 +27,7 @@
 					<!-- Is main account -->
 					<v-row no-gutters>
 						<v-col :cols="labelCol">
-							<help-icon id="account-form.is-main" />
+							<help-icon help-id="help.account-form.is-main" />
 						</v-col>
 						<v-col>
 							<v-checkbox v-model="isMain" color="red" class="ma-3 pt-0" hide-details></v-checkbox>
@@ -36,7 +36,7 @@
 					<!-- Display Name -->
 					<v-row no-gutters>
 						<v-col :cols="labelCol">
-							<help-icon id="account-form.display-name" />
+							<help-icon help-id="help.account-form.display-name" />
 						</v-col>
 						<v-col>
 							<v-text-field v-model="displayName" :rules="getDisplayNameRules" color="red" full-width outlined required />
@@ -46,7 +46,7 @@
 					<!-- Username -->
 					<v-row no-gutters>
 						<v-col :cols="labelCol">
-							<help-icon id="account-form.username" />
+							<help-icon help-id="help.account-form.username" />
 						</v-col>
 						<v-col>
 							<v-text-field
@@ -64,7 +64,7 @@
 					<!-- Password -->
 					<v-row no-gutters>
 						<v-col :cols="labelCol">
-							<help-icon id="account-form.password" />
+							<help-icon help-id="help.account-form.password" />
 						</v-col>
 						<v-col>
 							<v-text-field

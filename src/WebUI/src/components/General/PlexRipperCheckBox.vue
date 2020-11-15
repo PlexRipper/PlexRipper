@@ -6,7 +6,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
-export default class PCheckBox extends Vue {
+export default class PCheckbox extends Vue {
 	@Prop({ required: true, type: Boolean })
 	readonly value!: boolean;
 

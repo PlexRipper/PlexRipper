@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { format } from 'date-fns';
 
 @Component
 export default class DateTime extends Vue {
@@ -12,8 +12,7 @@ export default class DateTime extends Vue {
 	readonly text!: string;
 
 	get getFormattedDateTime(): string {
-		Log.warn(this.$moment(this.text));
-		return this.$moment(this.text);
+		return format(new Date(this.text), 'MM/dd/yyyy');
 	}
 }
 </script>

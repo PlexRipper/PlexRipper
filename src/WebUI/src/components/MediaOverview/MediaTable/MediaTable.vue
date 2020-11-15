@@ -2,11 +2,11 @@
 	<v-row justify="center">
 		<v-col cols="12">
 			<!-- Table Headers -->
-			<v-row :class="$classNames({ 'table-header-dark': $vuetify.theme.dark })" style="height: 50px; margin: 0">
+			<v-row :class="[$vuetify.theme.dark ? 'table-header-dark' : '']" style="height: 50px; margin: 0">
 				<v-col class="ml-6 select-all-check" style="max-width: 50px">
 					<v-checkbox :indeterminate="isIndeterminate" color="red" @change="selectAll($event)"></v-checkbox>
 				</v-col>
-				<v-col v-for="(header, index) in headers" :key="index" :class="$classNames({ 'col-auto': index > 0 }, 'col')">
+				<v-col v-for="(header, index) in headers" :key="index" :class="[index > 0 ? 'col-auto' : '', 'col']">
 					<v-sheet :width="header.width" :max-width="header.width">{{ header.text }}</v-sheet>
 				</v-col>
 				<v-col cols="auto" class="text-center">
@@ -30,7 +30,7 @@
 					>
 						<template #label="{ item }">
 							<v-row class="ml-2">
-								<v-col v-for="(header, index) in headers" :key="index" :class="$classNames({ 'col-auto': index > 0 }, 'col')">
+								<v-col v-for="(header, index) in headers" :key="index" :class="[index > 0 ? 'col-auto' : '', 'col']">
 									<v-sheet :width="header.width" :max-width="header.width">{{ item[header.value] }}</v-sheet>
 								</v-col>
 								<!-- Actions -->

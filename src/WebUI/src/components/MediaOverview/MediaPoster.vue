@@ -24,7 +24,7 @@
 							</v-row>
 						</template>
 						<!--	Overlay	-->
-						<v-container fluid :class="$classNames('poster-overlay', { 'on-hover': hover }, 'white--text')">
+						<v-container fluid :class="['poster-overlay', hover ? 'on-hover' : '', 'white--text']">
 							<v-row justify="center" align="end" style="height: 100%">
 								<v-col cols="12" class="text-center">
 									<h2>

@@ -1,20 +1,8 @@
 import Vue from 'vue';
 import Log from 'consola';
-import { NuxtAppOptions } from '@nuxt/types';
-// @ts-ignore
-import classNames from 'classnames';
-// @ts-ignore
-import { ClassValue } from 'classnames/types';
 
-export default (app: NuxtAppOptions): void => {
+export default (): void => {
 	Log.debug('Setup Vue filters');
-
-	/*
-	 * ClassNames filters
-	 */
-
-	Vue.prototype.$classNames = (...classes: ClassValue[]): string => classNames(...classes);
-	app.$classNames = Vue.prototype.$classNames;
 
 	/*
 	 * String filters

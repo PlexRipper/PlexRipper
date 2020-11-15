@@ -68,24 +68,29 @@ namespace PlexRipper.Application.PlexServers
         /// <summary>
         /// Check if the <see cref="PlexServer"/> is available and log the status.
         /// </summary>
-        /// <param name="plexAccount"></param>
-        /// <param name="plexServer"></param>
-        /// <returns></returns>
-        public async Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(PlexAccount plexAccount, PlexServer plexServer)
+        /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to get the latest status for.</param>
+        /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to authenticate with.</param>
+        /// <returns>The latest <see cref="PlexServerStatus"/>.</returns>
+        public async Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(int plexServerId, int plexAccountId = 0)
         {
-            // Get plexServer authToken
-            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccount.Id, plexServer.Id);
+            // Get plexServer entity
+            var plexServer = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId));
+            if (plexServer.IsFailed)
+            {
+                return plexServer.ToResult();
+            }
 
+            // Get plexServer authToken
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServerId, plexAccountId);
             if (authToken.IsFailed)
             {
-                return Result.Fail(new Error("Failed to retrieve the server auth token"));
+                return authToken.ToResult();
             }
 
             // Request status
-            var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.BaseUrl);
-
-            serverStatus.PlexServer = plexServer;
-            serverStatus.PlexServerId = plexServer.Id;
+            var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.Value.BaseUrl);
+            serverStatus.PlexServer = plexServer.Value;
+            serverStatus.PlexServerId = plexServer.Value.Id;
 
             // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
             var result = await _mediator.Send(new CreatePlexServerStatusCommand(serverStatus));

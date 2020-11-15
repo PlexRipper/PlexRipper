@@ -46,26 +46,21 @@ namespace PlexRipper.Application.PlexAuthentication
             return string.Empty;
         }
 
-        /// <summary>
-        /// Returns the authentication token needed to communicate with a <see cref="PlexServer"/>
-        /// </summary>
-        /// <param name="plexAccountId"></param>
-        /// <param name="plexServerId"></param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public Task<Result<string>> GetPlexServerTokenAsync(int plexServerId, int plexAccountId = 0)
         {
             // TODO if there is no token then it should refresh a token
-            return _mediator.Send(new GetPlexServerTokenQuery(plexAccountId, plexServerId));
+            return _mediator.Send(new GetPlexServerTokenQuery(plexServerId, plexAccountId));
         }
 
-        public async Task<Result<string>> GetPlexServerTokenWithUrl(int plexAccountId, int plexServerId, string serverUrl)
+        public async Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId = 0)
         {
             if (string.IsNullOrEmpty(serverUrl))
             {
                 return ResultExtensions.IsNull(nameof(serverUrl));
             }
 
-            var token = await GetPlexServerTokenAsync(plexAccountId, plexServerId);
+            var token = await GetPlexServerTokenAsync(plexServerId, plexAccountId);
             if (token.IsFailed)
             {
                 return token;

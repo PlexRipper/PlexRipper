@@ -1,13 +1,13 @@
-﻿using PlexRipper.Domain;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using PlexRipper.Domain;
 using PlexRipper.PlexApi.Models;
 using PlexRipper.PlexApi.Models.Friends;
 using PlexRipper.PlexApi.Models.Server;
 using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using DataFormat = RestSharp.DataFormat;
-using PlexAccount = PlexRipper.Domain.PlexAccount;
 
 namespace PlexRipper.PlexApi.Api
 {
@@ -21,8 +21,11 @@ namespace PlexRipper.PlexApi.Api
         public PlexApiClient Client { get; }
 
         private const string SignInUri = "https://plex.tv/users/sign_in.json";
+
         private const string FriendsUri = "https://plex.tv/pms/friends/all";
+
         private const string GetAccountUri = "https://plex.tv/users/account.json";
+
         private const string ServerUri = "https://plex.tv/pms/servers.xml";
 
         /// <summary>
@@ -40,14 +43,13 @@ namespace PlexRipper.PlexApi.Api
                 User = new UserRequest
                 {
                     Login = username,
-                    Password = password
-                }
+                    Password = password,
+                },
             };
             var request = new RestRequest(new Uri(SignInUri), Method.POST);
             request.AddJsonBody(userModel);
             return Client.SendRequestAsync<PlexAccountDTO>(request);
         }
-
 
         public async Task<string> RefreshPlexAuthTokenAsync(PlexAccount plexAccount)
         {
@@ -66,17 +68,31 @@ namespace PlexRipper.PlexApi.Api
         {
             // TODO Use healthCheck from here:
             // https://github.com/Arcanemagus/plex-api/wiki/Plex-Web-API-Overview
-            var request = new RestRequest(new Uri(serverBaseUrl), Method.GET);
+            var request = new RestRequest(new Uri($"{serverBaseUrl}/identity"), Method.GET);
             request = AddToken(request, authToken);
             var response = await Client.SendRequestAsync(request);
-            var status = new PlexServerStatus
+            if (response.IsFailed)
             {
-                StatusCode = (int)response.StatusCode,
-                IsSuccessful = response.IsSuccessful,
-                StatusMessage = response.IsSuccessful ? response.StatusDescription : response.ErrorMessage,
-                LastChecked = DateTime.Now.ToUniversalTime()
+                var error = response.Errors.First();
+                if (error != null)
+                {
+                    return new PlexServerStatus
+                    {
+                        StatusCode = Convert.ToInt32(error.Metadata["StatusCode"]?.ToString() ?? "-1"),
+                        StatusMessage = error.Metadata["Message"]?.ToString() ?? "Message not found",
+                        LastChecked = DateTime.Now.ToUniversalTime(),
+                        IsSuccessful = false,
+                    };
+                }
+            }
+
+            return new PlexServerStatus
+            {
+                StatusCode = (int)response.Value.StatusCode,
+                IsSuccessful = response.Value.IsSuccessful,
+                StatusMessage = response.Value.IsSuccessful ? response.Value.StatusDescription : response.Value.ErrorMessage,
+                LastChecked = DateTime.Now.ToUniversalTime(),
             };
-            return status;
         }
 
         public Task<PlexAccountDTO> GetAccountAsync(string authToken)
@@ -127,7 +143,6 @@ namespace PlexRipper.PlexApi.Api
             request = AddToken(request, authToken);
             return Client.SendRequestAsync<PlexMediaContainer>(request);
         }
-
 
         public Task<PlexMediaContainer> GetSeasonsAsync(string authToken, string plexFullHost, int ratingKey)
         {
@@ -182,7 +197,8 @@ namespace PlexRipper.PlexApi.Api
             if (width > 0 && height > 0)
             {
                 var uri = new Uri(thumbUrl);
-                thumbUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&width={width}&height={height}&minSize=1&upscale=1";
+                thumbUrl =
+                    $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&width={width}&height={height}&minSize=1&upscale=1";
             }
 
             var request = new RestRequest(new Uri(thumbUrl), Method.GET);
@@ -202,7 +218,6 @@ namespace PlexRipper.PlexApi.Api
             request.AddHeader("X-Plex-Token", authToken);
             return request;
         }
-
 
         private RestRequest AddLimitHeaders(RestRequest request, int from, int to)
         {

@@ -1,12 +1,12 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AutoMapper;
+using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using FluentResults;
-using PlexRipper.Application.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -18,6 +18,7 @@ namespace PlexRipper.WebAPI.Controllers
     public class PlexServerController : BaseController
     {
         private readonly IPlexServerService _plexServerService;
+
         private readonly IMapper _mapper;
 
         public PlexServerController(IPlexServerService plexServerService, IMapper mapper) : base(mapper)
@@ -40,8 +41,8 @@ namespace PlexRipper.WebAPI.Controllers
                 {
                     return BadRequest(result.LogError());
                 }
-
             }
+
             var mapResult = _mapper.Map<List<PlexServerDTO>>(result);
             return Ok(Result.Ok(mapResult));
         }
@@ -66,7 +67,33 @@ namespace PlexRipper.WebAPI.Controllers
                     return NotFound(result.LogWarning());
                 }
             }
+
             var mapResult = _mapper.Map<PlexServerDTO>(result);
+            return Ok(Result.Ok(mapResult));
+        }
+
+        // GET api/<PlexServerController>/5
+        [HttpGet("{id:int}/check")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerStatusDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> CheckStatus(int id, [FromQuery] int plexAccountId = 0)
+        {
+            var result = await _plexServerService.CheckPlexServerStatusAsync(id, plexAccountId);
+            if (result.IsFailed)
+            {
+                if (result.Has400BadRequestError())
+                {
+                    return BadRequest(result.LogError());
+                }
+
+                if (result.Has404NotFoundError())
+                {
+                    return NotFound(result.LogWarning());
+                }
+            }
+
+            var mapResult = _mapper.Map<PlexServerStatusDTO>(result.Value);
             return Ok(Result.Ok(mapResult));
         }
     }

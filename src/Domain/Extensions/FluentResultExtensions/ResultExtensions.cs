@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using FluentResults;
+﻿using FluentResults;
 using FluentValidation.Results;
 
 namespace PlexRipper.Domain

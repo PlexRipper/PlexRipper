@@ -14,7 +14,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
     {
         public GetPlexServerByIdQueryValidator()
         {
-            RuleFor(x => x.Id).GreaterThan(5);
+            RuleFor(x => x.Id).GreaterThan(0);
         }
     }
 

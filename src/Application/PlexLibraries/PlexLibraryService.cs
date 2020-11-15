@@ -213,7 +213,7 @@ namespace PlexRipper.Application.PlexLibraries
             var plexServer = movie.PlexLibrary?.PlexServer;
 
             // Get plexServer authToken
-            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccount.Id, plexServer.Id);
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id, plexAccount.Id);
 
             if (authToken.IsFailed)
             {
@@ -297,7 +297,7 @@ namespace PlexRipper.Application.PlexLibraries
 
             Log.Debug($"Refreshing PlexLibraries for plexServer: {plexServer.Name}");
 
-            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccount.Id, plexServer.Id);
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id, plexAccount.Id);
 
             if (authToken.IsFailed)
             {
@@ -341,7 +341,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             // Get plexServer authToken
-            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccount.Id, plexLibrary.PlexServer.Id);
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexLibrary.PlexServer.Id, plexAccount.Id);
             if (authToken.IsFailed)
             {
                 return authToken.ToResult();
@@ -405,7 +405,7 @@ namespace PlexRipper.Application.PlexLibraries
                 return plexServer.ToResult();
             }
 
-            var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccountId, plexServer.Value.Id);
+            var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Value.Id, plexAccountId);
             if (token.IsFailed)
             {
                 return token.ToResult();

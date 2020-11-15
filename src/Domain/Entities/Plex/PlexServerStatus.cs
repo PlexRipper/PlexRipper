@@ -4,6 +4,8 @@ namespace PlexRipper.Domain
 {
     public class PlexServerStatus : BaseEntity
     {
+        #region Properties
+
         public int StatusCode { get; set; }
 
         public bool IsSuccessful { get; set; }
@@ -12,10 +14,14 @@ namespace PlexRipper.Domain
 
         public DateTime LastChecked { get; set; }
 
-        #region Relationships
-        public virtual PlexServer PlexServer { get; set; }
-        public int PlexServerId { get; set; }
         #endregion
 
+        #region Relationships
+
+        public PlexServer PlexServer { get; set; }
+
+        public int PlexServerId { get; set; }
+
+        #endregion
     }
 }

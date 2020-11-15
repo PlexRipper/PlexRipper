@@ -36,6 +36,8 @@ Tired of searching for media on different torrent websites or paying for Usenet 
 - Rx.js
 - Vuetify
 
+https://github.com/labs42io/clean-code-typescript
+
 ## Translate PlexRipper
 
 Make PlexRipper easier to use for everyone by translating it to your native language.

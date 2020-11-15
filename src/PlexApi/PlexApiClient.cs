@@ -1,35 +1,32 @@
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading.Tasks;
+using FluentResults;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Config.Converters;
 using RestSharp;
 using RestSharp.Serialization.Xml;
 using RestSharp.Serializers.SystemTextJson;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace PlexRipper.PlexApi
 {
     public class PlexApiClient : RestClient
     {
-        public static JsonSerializerOptions SerializerOptions
-        {
-            get
+        public static JsonSerializerOptions SerializerOptions =>
+            new JsonSerializerOptions
             {
-                return new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    PropertyNameCaseInsensitive = true,
-                    WriteIndented = true,
-                    Converters = {new LongToDateTime()}
-                };
-            }
-        }
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true,
+                WriteIndented = true,
+                Converters = { new LongToDateTime() },
+            };
 
         public PlexApiClient()
         {
             this.UseSystemTextJson();
             this.UseDotNetXmlSerializer();
-            this.Timeout = 10000;
+            Timeout = 10000;
 
             // TODO Ignore all bad SSL certificates based on user option set
         }
@@ -53,23 +50,12 @@ namespace PlexRipper.PlexApi
             return response.Data;
         }
 
-        public async Task<IRestResponse> SendRequestAsync(RestRequest request)
+        public async Task<Result<IRestResponse>> SendRequestAsync(RestRequest request)
         {
             request = AddHeaders(request);
 
             var response = await ExecuteAsync(request);
-            if (response.IsSuccessful)
-            {
-                Log.Information($"Request to {request.Resource} was successful!");
-                Log.Debug($"Response was: {response.Content}");
-            }
-            else
-            {
-                Log.Error(response.ErrorException,
-                    $"PlexApi Error: Error on request to {request.Resource} ({response.StatusCode}) - {response.Content}");
-            }
-
-            return response;
+            return ResultFromResponse(response);
         }
 
         public async Task<byte[]> SendImageRequestAsync(RestRequest request)
@@ -94,6 +80,28 @@ namespace PlexRipper.PlexApi
             }
 
             return request;
+        }
+
+        private Result<IRestResponse> ResultFromResponse(IRestResponse response)
+        {
+            if (response.IsSuccessful)
+            {
+                Log.Information($"Request to {response.Request.Resource} was successful!");
+                Log.Debug($"Response was: {response.Content}");
+                return Result.Ok(response);
+            }
+
+            var msg = $"PlexApi Error: Error on request to {response.Request.Resource} ({response.StatusCode}) - {response.Content}";
+            Log.Error(response.ErrorException, msg);
+
+            var metadata = new Dictionary<string, object>
+            {
+                { "StatusCode", response.StatusCode },
+                { "Message", response.ErrorMessage },
+                { "Resource", response.Request.Resource },
+            };
+            var error = new Error("Plex Api Request Error").WithMetadata(metadata);
+            return Result.Fail(error);
         }
     }
 }

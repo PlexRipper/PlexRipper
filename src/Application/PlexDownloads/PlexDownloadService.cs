@@ -170,7 +170,7 @@ namespace PlexRipper.Application.PlexDownloads
                 return destinationFolder.ToResult();
 
             // Get plex server access token
-            var serverToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexAccountId, downloadTasks.First().PlexServerId);
+            var serverToken = await _plexAuthenticationService.GetPlexServerTokenAsync(downloadTasks.First().PlexServerId, plexAccountId);
             if (serverToken.IsFailed)
                 return serverToken.ToResult();
 

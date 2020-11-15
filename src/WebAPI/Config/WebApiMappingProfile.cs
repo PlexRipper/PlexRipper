@@ -39,6 +39,9 @@ namespace PlexRipper.WebAPI.Config
             // PlexServer -> PlexServerDTO
             CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination);
 
+            // PlexServerStatus -> PlexServerStatusDTO
+            CreateMap<PlexServerStatus, PlexServerStatusDTO>(MemberList.Destination);
+
             // PlexLibrary -> PlexLibraryDTO
             CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.GetMediaCount));

@@ -85,7 +85,7 @@ namespace PlexRipper.DownloadManager
 
         private async Task<Result<DownloadTask>> AuthenticateDownloadTask(DownloadTask downloadTask)
         {
-            var tokenResult = await _plexAuthenticationService.GetPlexServerTokenAsync(downloadTask.PlexAccountId, downloadTask.PlexServerId);
+            var tokenResult = await _plexAuthenticationService.GetPlexServerTokenAsync(downloadTask.PlexServerId, downloadTask.PlexAccountId);
             if (tokenResult.IsFailed)
             {
                 return tokenResult.ToResult();

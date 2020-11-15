@@ -9,13 +9,14 @@ namespace PlexRipper.Application.Common
         Task<string> GetPlexTokenAsync(PlexAccount plexAccount);
 
         /// <summary>
-        /// Returns the authentication token needed to communicate with a <see cref="PlexServer"/>
+        /// Returns the authentication token needed to authenticate communication with the <see cref="PlexServer"/>.
+        /// Note: If no plexAccountId is specified then it will search for a valid <see cref="PlexAccount"/> automatically.
         /// </summary>
-        /// <param name="plexAccountId"></param>
-        /// <param name="plexServerId"></param>
-        /// <returns></returns>
+        /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to retrieve a token for.</param>
+        /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to authenticate with.</param>
+        /// <returns>The authentication token.</returns>
         Task<Result<string>> GetPlexServerTokenAsync(int plexAccountId, int plexServerId);
 
-        Task<Result<string>> GetPlexServerTokenWithUrl(int plexAccountId, int plexServerId, string serverUrl);
+        Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId);
     }
 }

@@ -1,6 +1,6 @@
 <template>
 	<v-menu left bottom offset-y :close-on-content-click="false">
-		<template v-slot:activator="{ on }">
+		<template #activator="{ on }">
 			<v-btn icon v-on="on">
 				<v-badge :content="getVisibleNotifications.length" :value="getVisibleNotifications.length > 0" color="green" overlap>
 					<v-icon>mdi-bell</v-icon>

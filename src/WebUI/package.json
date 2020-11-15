@@ -57,7 +57,7 @@
 	},
 	"devDependencies": {
 		"@nuxt/typescript-build": "^2.0.3",
-		"@nuxtjs/eslint-config-typescript": "^4.0.0",
+		"@nuxtjs/eslint-config-typescript": "^5.0.0",
 		"@nuxtjs/eslint-module": "^3.0.1",
 		"@nuxtjs/stylelint-module": "^4.0.0",
 		"@nuxtjs/vuetify": "^1.0.0",
@@ -68,7 +68,7 @@
 		"babel-jest": "^26.6.3",
 		"eslint": "^7.13.0",
 		"eslint-config-prettier": "^6.15.0",
-		"eslint-plugin-nuxt": "^1.0.0",
+		"eslint-plugin-nuxt": "^2.0.0",
 		"eslint-plugin-prettier": "^3.1.4",
 		"husky": "^4.3.0",
 		"jest": "^26.6.3",

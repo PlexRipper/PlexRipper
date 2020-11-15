@@ -3,12 +3,12 @@
 		<!-- Server drawer -->
 		<server-drawer />
 		<!-- Menu items -->
-		<template v-slot:append>
+		<template #append>
 			<v-list>
 				<template v-for="(item, i) in getNavItems">
 					<!-- Grouped nav items -->
 					<v-list-group v-if="item.children && item.children.length > 0" :key="item.title" color="">
-						<template v-slot:activator>
+						<template #activator>
 							<v-list-item-icon>
 								<v-icon>{{ item.icon }}</v-icon>
 							</v-list-item-icon>

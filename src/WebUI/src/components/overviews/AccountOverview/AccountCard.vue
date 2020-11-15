@@ -7,10 +7,8 @@
 		</v-card-text>
 		<!-- Edit Account -->
 		<v-card-text v-else>
-			<template>
-				<v-chip v-if="account.isValidated" class="ma-2" color="green" text-color="white"> Validated </v-chip>
-				<v-chip v-else class="ma-2" color="red" text-color="white"> NotValidated </v-chip>
-			</template>
+			<v-chip v-if="account.isValidated" class="ma-2" color="green" text-color="white"> Validated </v-chip>
+			<v-chip v-else class="ma-2" color="red" text-color="white"> NotValidated </v-chip>
 			<v-chip v-if="account.isEnabled" class="ma-2" color="green" text-color="white"> Enabled </v-chip>
 			<v-chip v-else class="ma-2" color="red" text-color="white"> Disabled </v-chip>
 		</v-card-text>

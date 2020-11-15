@@ -30,7 +30,7 @@
 							item-class="class"
 							@click:row="directoryNavigate"
 						>
-							<template v-slot:item.type="{ item }">
+							<template #item.type="{ item }">
 								<v-icon>{{ getIcon(item.type) }}</v-icon>
 							</template>
 						</v-data-table>

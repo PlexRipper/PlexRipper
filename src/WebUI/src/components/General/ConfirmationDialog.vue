@@ -1,6 +1,6 @@
 <template>
 	<v-dialog v-model="dialog" width="500" persistent>
-		<template v-slot:activator="{}">
+		<template #activator="{}">
 			<p-btn :button-type="buttonType" :width="width" :text="buttonText" @click="openDialog" />
 		</template>
 

@@ -10,43 +10,43 @@
 		@input="$emit('input', $event)"
 	>
 		<!-- Data received -->
-		<template v-slot:item.dataReceived="{ item }">
+		<template #item.dataReceived="{ item }">
 			<strong>
 				{{ item.dataReceived | prettyBytes }}
 			</strong>
 		</template>
 		<!-- Data total -->
-		<template v-slot:item.dataTotal="{ item }">
+		<template #item.dataTotal="{ item }">
 			<strong>
 				{{ item.dataTotal | prettyBytes }}
 			</strong>
 		</template>
 		<!-- Download speed -->
-		<template v-slot:item.downloadSpeed="{ item }">
+		<template #item.downloadSpeed="{ item }">
 			<strong v-if="item.downloadSpeed > 0"> {{ item.downloadSpeed | prettyBytes }}/s </strong>
 			<strong v-else> - </strong>
 		</template>
 		<!-- Download Time Remaining -->
-		<template v-slot:item.timeRemaining="{ item }">
+		<template #item.timeRemaining="{ item }">
 			<strong> {{ formatCountdown(item.timeRemaining) }} </strong>
 		</template>
 		<!-- Percentage -->
-		<template v-slot:item.percentage="{ item }">
+		<template #item.percentage="{ item }">
 			<v-progress-linear :value="item.percentage" stream striped color="blue-grey" height="25">
-				<template v-slot="{ value }">
+				<template #default="{ value }">
 					<strong>{{ value }}%</strong>
 				</template>
 			</v-progress-linear>
 		</template>
 		<!-- Actions -->
-		<template v-slot:item.actions="{ item }">
+		<template #item.actions="{ item }">
 			<v-btn-toggle borderless dense group tile>
 				<template v-for="(action, i) in availableActions(item)">
 					<!-- Render buttons -->
 					<template v-for="(button, y) in getButtons">
 						<v-btn v-if="action === button.value" :key="`${i}-${y}`" icon @click="command(action, item.id)">
 							<v-tooltip top>
-								<template v-slot:activator="{ on, attrs }">
+								<template #activator="{ on, attrs }">
 									<!-- Button icon-->
 									<v-icon v-bind="attrs" v-on="on"> {{ button.icon }} </v-icon>
 								</template>

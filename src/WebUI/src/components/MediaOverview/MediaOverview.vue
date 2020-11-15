@@ -10,7 +10,7 @@
 					<h1 v-else>Retrieving library from PlexRipper database</h1>
 					<!-- Library progress bar -->
 					<v-progress-linear :value="getPercentage" height="20" striped color="deep-orange">
-						<template v-slot="{ value }">
+						<template #default="{ value }">
 							<strong>{{ value }}%</strong>
 						</template>
 					</v-progress-linear>

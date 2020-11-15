@@ -25,7 +25,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\overviews\\AccountOverview\\AccountCard.vue",
+            "module": "./src/components/overviews/AccountOverview/AccountCard.vue",
             "symbol": "default"
           }
         },
@@ -57,7 +57,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\overviews\\AccountOverview\\AccountDialog.vue",
+            "module": "./src/components/overviews/AccountOverview/AccountDialog.vue",
             "symbol": "default"
           }
         },
@@ -65,7 +65,7 @@
           "name": "AccountOverview",
           "description": "",
           "source": {
-            "module": "./src\\components\\overviews\\AccountOverview\\AccountOverview.vue",
+            "module": "./src/components/overviews/AccountOverview/AccountOverview.vue",
             "symbol": "default"
           }
         },
@@ -73,7 +73,7 @@
           "name": "AppBar",
           "description": "",
           "source": {
-            "module": "./src\\components\\AppBar\\AppBar.vue",
+            "module": "./src/components/AppBar/AppBar.vue",
             "symbol": "default"
           }
         },
@@ -86,7 +86,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\General\\Background.vue",
+            "module": "./src/components/General/Background.vue",
             "symbol": "default"
           }
         },
@@ -140,7 +140,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\General\\ConfirmationDialog.vue",
+            "module": "./src/components/General/ConfirmationDialog.vue",
             "symbol": "default"
           }
         },
@@ -148,7 +148,7 @@
           "name": "DarkModeToggle",
           "description": "",
           "source": {
-            "module": "./src\\components\\General\\DarkModeToggle.vue",
+            "module": "./src/components/General/DarkModeToggle.vue",
             "symbol": "default"
           }
         },
@@ -166,7 +166,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\General\\DateTime.vue",
+            "module": "./src/components/General/DateTime.vue",
             "symbol": "default"
           }
         },
@@ -200,7 +200,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\General\\DirectoryBrowser.vue",
+            "module": "./src/components/General/DirectoryBrowser.vue",
             "symbol": "default"
           }
         },
@@ -231,7 +231,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\MediaOverview\\MediaTable\\DownloadConfirmation.vue",
+            "module": "./src/components/MediaOverview/MediaTable/DownloadConfirmation.vue",
             "symbol": "default"
           }
         },
@@ -249,7 +249,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\General\\ExternalLink.vue",
+            "module": "./src/components/General/ExternalLink.vue",
             "symbol": "default"
           }
         },
@@ -257,7 +257,7 @@
           "name": "Footer",
           "description": "",
           "source": {
-            "module": "./src\\components\\Footer\\Footer.vue",
+            "module": "./src/components/Footer/Footer.vue",
             "symbol": "default"
           }
         },
@@ -288,7 +288,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\Help\\HelpDialog.vue",
+            "module": "./src/components/Help/HelpDialog.vue",
             "symbol": "default"
           }
         },
@@ -316,7 +316,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\Help\\HelpIcon.vue",
+            "module": "./src/components/Help/HelpIcon.vue",
             "symbol": "default"
           }
         },
@@ -324,7 +324,7 @@
           "name": "LoadingSpinner",
           "description": "",
           "source": {
-            "module": "./src\\components\\LoadingSpinner.vue",
+            "module": "./src/components/LoadingSpinner.vue",
             "symbol": "default"
           }
         },
@@ -343,7 +343,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\General\\Logo.vue",
+            "module": "./src/components/General/Logo.vue",
             "symbol": "default"
           }
         },
@@ -361,7 +361,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\MediaOverview\\MediaOverview.vue",
+            "module": "./src/components/MediaOverview/MediaOverview.vue",
             "symbol": "default"
           }
         },
@@ -403,7 +403,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\MediaOverview\\MediaOverviewBar.vue",
+            "module": "./src/components/MediaOverview/MediaOverviewBar.vue",
             "symbol": "default"
           }
         },
@@ -442,7 +442,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\MediaOverview\\MediaPoster.vue",
+            "module": "./src/components/MediaOverview/MediaPoster.vue",
             "symbol": "default"
           }
         },
@@ -481,7 +481,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\MediaOverview\\MediaTable\\MediaTable.vue",
+            "module": "./src/components/MediaOverview/MediaTable/MediaTable.vue",
             "symbol": "default"
           }
         },
@@ -512,7 +512,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\MediaOverview\\MediaTable\\MovieTable.vue",
+            "module": "./src/components/MediaOverview/MediaTable/MovieTable.vue",
             "symbol": "default"
           }
         },
@@ -520,7 +520,7 @@
           "name": "NavigationDrawer",
           "description": "",
           "source": {
-            "module": "./src\\components\\Navigation\\NavigationDrawer.vue",
+            "module": "./src/components/Navigation/NavigationDrawer.vue",
             "symbol": "default"
           }
         },
@@ -528,7 +528,7 @@
           "name": "NotificationButton",
           "description": "",
           "source": {
-            "module": "./src\\components\\AppBar\\NotificationButton.vue",
+            "module": "./src/components/AppBar/NotificationButton.vue",
             "symbol": "default"
           }
         },
@@ -658,7 +658,43 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\General\\PlexRipperButton.vue",
+            "module": "./src/components/General/PlexRipperButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "PCheckBox",
+          "description": "",
+          "attributes": [
+            {
+              "name": "value",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "input"
+            }
+          ],
+          "source": {
+            "module": "./src/components/General/PlexRipperCheckBox.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "PSection",
+          "description": "",
+          "slots": [
+            {
+              "name": "default"
+            }
+          ],
+          "source": {
+            "module": "./src/components/General/Section.vue",
             "symbol": "default"
           }
         },
@@ -671,7 +707,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\General\\Page.vue",
+            "module": "./src/components/General/Page.vue",
             "symbol": "default"
           }
         },
@@ -679,7 +715,7 @@
           "name": "PathsOverview",
           "description": "",
           "source": {
-            "module": "./src\\components\\overviews\\PathsOverview.vue",
+            "module": "./src/components/overviews/PathsOverview.vue",
             "symbol": "default"
           }
         },
@@ -705,7 +741,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\ProgressComponent.vue",
+            "module": "./src/components/ProgressComponent.vue",
             "symbol": "default"
           }
         },
@@ -729,7 +765,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\Navigation\\ServerDialog.vue",
+            "module": "./src/components/Navigation/ServerDialog.vue",
             "symbol": "default"
           }
         },
@@ -737,7 +773,7 @@
           "name": "ServerDrawer",
           "description": "",
           "source": {
-            "module": "./src\\components\\Navigation\\ServerDrawer.vue",
+            "module": "./src/components/Navigation/ServerDrawer.vue",
             "symbol": "default"
           }
         },
@@ -768,7 +804,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\MediaOverview\\MediaTable\\TvShowTable.vue",
+            "module": "./src/components/MediaOverview/MediaTable/TvShowTable.vue",
             "symbol": "default"
           }
         },
@@ -803,7 +839,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\General\\ValidIcon.vue",
+            "module": "./src/components/General/ValidIcon.vue",
             "symbol": "default"
           }
         },
@@ -842,7 +878,7 @@
             }
           ],
           "source": {
-            "module": "./src\\components\\General\\VerticalButton.vue",
+            "module": "./src/components/General/VerticalButton.vue",
             "symbol": "default"
           }
         }

@@ -1,6 +1,6 @@
 <template>
 	<v-tooltip :disabled="showTooltip" top>
-		<template v-slot:activator="{ on, attrs }">
+		<template #activator="{ on, attrs }">
 			<v-btn
 				raised
 				nuxt

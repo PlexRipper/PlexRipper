@@ -6,5 +6,6 @@ declare module 'vue/types/vue' {
 
 		$messages(): VueI18n.LocaleMessageObject;
 		$ts(path: string): string;
+		$moment(path: string): string;
 	}
 }

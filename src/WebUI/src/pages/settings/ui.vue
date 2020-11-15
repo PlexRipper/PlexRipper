@@ -1,5 +1,6 @@
 <template>
 	<page>
+		<date-and-time-section />
 		<v-row>
 			<v-col>
 				<v-sheet width="100%" class="pa-4">
@@ -61,12 +62,14 @@ import { settingsStore as SettingsStore } from '@/store';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
 import Page from '@components/General/Page.vue';
+import DateAndTimeSection from '~/pages/settings/components/DateAndTimeSection.vue';
 
 @Component({
 	components: {
 		DirectoryBrowser,
 		HelpIcon,
 		Page,
+		DateAndTimeSection,
 	},
 })
 export default class UiSettings extends Vue {

@@ -10,7 +10,7 @@
 
 		<!--	View mode	-->
 		<v-menu left bottom offset-y>
-			<template v-slot:activator="{ on, attrs }">
+			<template #activator="{ on, attrs }">
 				<vertical-button v-bind="attrs" icon="mdi-eye" label="View" :height="barHeight" v-on="on" />
 			</template>
 			<!-- View mode options -->

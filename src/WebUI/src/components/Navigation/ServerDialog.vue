@@ -8,30 +8,28 @@
 					<v-row>
 						<v-col>
 							<v-simple-table>
-								<template v-slot:default>
-									<tbody>
-										<tr>
-											<td>Server URL:</td>
-											<td>{{ plexServer.serverUrl }}</td>
-										</tr>
-										<tr>
-											<td>Machine Identifier:</td>
-											<td>{{ plexServer.machineIdentifier }}</td>
-										</tr>
-										<tr>
-											<td>Plex Version:</td>
-											<td>{{ plexServer.version }}</td>
-										</tr>
-										<tr>
-											<td>Created On:</td>
-											<td><date-time :text="plexServer.createdAt" /></td>
-										</tr>
-										<tr>
-											<td>Last updated on:</td>
-											<td><date-time :text="plexServer.updatedAt" /></td>
-										</tr>
-									</tbody>
-								</template>
+								<tbody>
+									<tr>
+										<td>Server URL:</td>
+										<td>{{ plexServer.serverUrl }}</td>
+									</tr>
+									<tr>
+										<td>Machine Identifier:</td>
+										<td>{{ plexServer.machineIdentifier }}</td>
+									</tr>
+									<tr>
+										<td>Plex Version:</td>
+										<td>{{ plexServer.version }}</td>
+									</tr>
+									<tr>
+										<td>Created On:</td>
+										<td><date-time :text="plexServer.createdAt" /></td>
+									</tr>
+									<tr>
+										<td>Last updated on:</td>
+										<td><date-time :text="plexServer.updatedAt" /></td>
+									</tr>
+								</tbody>
 							</v-simple-table>
 						</v-col>
 					</v-row>

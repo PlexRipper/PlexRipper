@@ -9,11 +9,11 @@
 			:height="getLazyLoadingHeight"
 			transition="fade-transition"
 		>
-			<v-hover v-slot:default="{ hover }">
+			<v-hover v-slot="{ hover }">
 				<v-card :max-width="thumbWidth" :width="thumbWidth" :elevation="hover ? 12 : 2">
 					<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight" :alt="mediaItem.title">
 						<!--	Placeholder	-->
-						<template v-slot:placeholder>
+						<template #placeholder>
 							<v-row class="fill-height ma-0" align="center" justify="center">
 								<v-col cols="12">
 									<h4 class="text-center">{{ mediaItem.title }}</h4>

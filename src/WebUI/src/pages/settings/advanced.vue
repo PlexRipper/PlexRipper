@@ -16,7 +16,7 @@
 						</v-col>
 						<v-col cols="8">
 							<v-slider v-model="SegmentedDownloads" min="1" max="8">
-								<template v-slot:append>
+								<template #append>
 									<p>{{ SegmentedDownloads }}</p>
 								</template>
 							</v-slider>

@@ -15,7 +15,7 @@
 
 		<!-- Account Selector -->
 		<v-menu left bottom offset-y>
-			<template v-slot:activator="{ on }">
+			<template #activator="{ on }">
 				<v-btn icon v-on="on">
 					<v-icon>mdi-account</v-icon>
 				</v-btn>

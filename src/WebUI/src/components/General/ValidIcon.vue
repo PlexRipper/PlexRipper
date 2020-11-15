@@ -1,6 +1,6 @@
 <template>
 	<v-tooltip top :disabled="valid">
-		<template v-slot:activator="{ on }">
+		<template #activator="{ on }">
 			<v-icon class="valid-icon" :size="size" :color="valid ? 'green' : 'red'" dark v-on="on">
 				{{ getIcon }}
 			</v-icon>

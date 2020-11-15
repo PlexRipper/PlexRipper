@@ -17,7 +17,7 @@
 			<v-row justify="center" class="my-3" no-gutters>
 				<v-col>
 					<v-progress-linear :value="percentage" height="20" class="mx-3" striped stream color="red">
-						<template v-slot="{ value }">
+						<template #default="{ value }">
 							<strong>{{ value }}%</strong>
 						</template>
 					</v-progress-linear>

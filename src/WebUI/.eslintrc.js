@@ -16,5 +16,6 @@ module.exports = {
 	rules: {
 		'vue/valid-v-slot': 0,
 		'vue/no-v-html': 'off',
+		'no-use-before-define': 'off',
 	},
 };

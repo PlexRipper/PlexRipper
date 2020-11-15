@@ -28,7 +28,7 @@
 						item-key="key"
 						item-text="title"
 					>
-						<template v-slot:label="{ item }">
+						<template #label="{ item }">
 							<v-row class="ml-2">
 								<v-col v-for="(header, index) in headers" :key="index" :class="$classNames({ 'col-auto': index > 0 }, 'col')">
 									<v-sheet :width="header.width" :max-width="header.width">{{ item[header.value] }}</v-sheet>

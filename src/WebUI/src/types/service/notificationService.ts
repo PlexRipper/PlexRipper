@@ -1,4 +1,4 @@
-import { ReplaySubject, Observable, merge } from 'rxjs';
+import { ReplaySubject, Observable } from 'rxjs';
 import { NotificationDTO } from '@dto/mainApi';
 import Log from 'consola';
 import { switchMap, tap } from 'rxjs/operators';

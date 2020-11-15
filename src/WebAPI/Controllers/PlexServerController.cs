@@ -27,7 +27,7 @@ namespace PlexRipper.WebAPI.Controllers
             _plexServerService = plexServerService;
         }
 
-        // GET api/<PlexServerController>/5
+        // GET api/<PlexServerController>/
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerDTO>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
@@ -43,7 +43,7 @@ namespace PlexRipper.WebAPI.Controllers
                 }
             }
 
-            var mapResult = _mapper.Map<List<PlexServerDTO>>(result);
+            var mapResult = _mapper.Map<List<PlexServerDTO>>(result.Value);
             return Ok(Result.Ok(mapResult));
         }
 
@@ -68,11 +68,11 @@ namespace PlexRipper.WebAPI.Controllers
                 }
             }
 
-            var mapResult = _mapper.Map<PlexServerDTO>(result);
+            var mapResult = _mapper.Map<PlexServerDTO>(result.Value);
             return Ok(Result.Ok(mapResult));
         }
 
-        // GET api/<PlexServerController>/5
+        // GET api/<PlexServerController>/5/check
         [HttpGet("{id:int}/check")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerStatusDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]

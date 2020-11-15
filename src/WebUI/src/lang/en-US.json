@@ -13,7 +13,8 @@
 			"error": "Error",
 			"validate": "Validate",
 			"skip-setup": "Skip setup",
-			"finish-setup": "Finish setup"
+			"finish-setup": "Finish setup",
+			"check-server-status": "Check server status"
 		}
 	},
 	"help": {

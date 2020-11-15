@@ -77,7 +77,7 @@ namespace PlexRipper.Domain
         #region Helpers
 
         [NotMapped]
-        public string MetaDataUrl => $"{PlexLibrary.PlexServer.BaseUrl}{Key}";
+        public string MetaDataUrl => $"{PlexLibrary.PlexServer.ServerUrl}{Key}";
 
         /// <summary>
         ///     Gets the absolute url of the thumb image, which requires a <see cref="PlexLibrary" /> and <see cref="PlexServer" />
@@ -85,7 +85,7 @@ namespace PlexRipper.Domain
         ///     Result is empty if invalid.
         /// </summary>
         [NotMapped]
-        public string ThumbUrl => PlexLibrary?.PlexServer?.BaseUrl + Thumb ?? string.Empty;
+        public string ThumbUrl => PlexLibrary?.PlexServer?.ServerUrl + Thumb ?? string.Empty;
 
         [NotMapped]
         public virtual PlexMediaType Type => PlexMediaType.None;

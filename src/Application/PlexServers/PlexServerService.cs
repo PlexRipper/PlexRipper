@@ -88,7 +88,7 @@ namespace PlexRipper.Application.PlexServers
             }
 
             // Request status
-            var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.Value.BaseUrl);
+            var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.Value.ServerUrl);
             serverStatus.PlexServer = plexServer.Value;
             serverStatus.PlexServerId = plexServer.Value.Id;
 

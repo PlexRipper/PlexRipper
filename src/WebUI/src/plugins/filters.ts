@@ -9,7 +9,6 @@ import { ClassValue } from 'classnames/types';
 export default (app: NuxtAppOptions): void => {
 	Log.debug('Setup Vue filters');
 
-	Vue.use(require('vue-moment'));
 	/*
 	 * ClassNames filters
 	 */

@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
     public class PlexServerDTO
     {
-
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
@@ -31,6 +30,9 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("localAddresses", Required = Required.Always)]
         public string LocalAddresses { get; set; }
 
+        [JsonProperty("serverUrl", Required = Required.Always)]
+        public string ServerUrl { get; set; }
+
         [JsonProperty("machineIdentifier", Required = Required.Always)]
         public string MachineIdentifier { get; set; }
 
@@ -54,7 +56,5 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("plexLibraries", Required = Required.Always)]
         public List<PlexLibraryDTO> PlexLibraries { get; set; }
-
     }
-
 }

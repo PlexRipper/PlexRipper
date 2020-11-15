@@ -111,7 +111,7 @@ namespace PlexRipper.Domain
         }
 
         [NotMapped]
-        public string ServerUrl => PlexServer?.BaseUrl ?? string.Empty;
+        public string ServerUrl => PlexServer?.ServerUrl ?? string.Empty;
 
         [NotMapped]
         public string Name => Title;

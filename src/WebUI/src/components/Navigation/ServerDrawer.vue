@@ -58,6 +58,7 @@
 				</v-expansion-panel>
 			</template>
 		</v-expansion-panels>
+		<server-dialog :server-id="selectedServerId" @close="closeDialog" />
 	</perfect-scrollbar>
 </template>
 
@@ -66,6 +67,7 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import AccountService from '@service/accountService';
 import { PlexAccountDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import ServerDialog from '@components/Navigation/ServerDialog.vue';
 
 interface INavItem {
 	title: string;
@@ -73,11 +75,16 @@ interface INavItem {
 	link: string;
 }
 
-@Component
+@Component({
+	components: {
+		ServerDialog,
+	},
+})
 export default class ServerDrawer extends Vue {
 	items: object[] = [];
 	plexServers: PlexServerDTO[] = [];
 	activeAccount!: PlexAccountDTO | null;
+	selectedServerId: number = 0;
 
 	get getNavItems(): INavItem[] {
 		return [
@@ -104,6 +111,7 @@ export default class ServerDrawer extends Vue {
 
 	openServerSettings(serverId: number): void {
 		Log.debug(`Server ${serverId} settings openend`);
+		this.selectedServerId = serverId;
 	}
 
 	openMediaPage(library: PlexLibraryDTO): void {
@@ -118,6 +126,10 @@ export default class ServerDrawer extends Vue {
 			default:
 				Log.error('Library was neither a movie or tvshows');
 		}
+	}
+
+	closeDialog(): void {
+		this.selectedServerId = 0;
 	}
 
 	created(): void {

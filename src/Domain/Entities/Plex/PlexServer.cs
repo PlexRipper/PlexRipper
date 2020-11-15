@@ -60,13 +60,13 @@ namespace PlexRipper.Domain
         /// The server url, e.g: http://112.202.10.213:32400
         /// </summary>
         [NotMapped]
-        public string BaseUrl => $"{Scheme}://{Address}:{Port}";
+        public string ServerUrl => $"{Scheme}://{Address}:{Port}";
 
         /// <summary>
         /// The library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections
         /// </summary>
         [NotMapped]
-        public string LibraryUrl => $"{BaseUrl}/library/sections";
+        public string LibraryUrl => $"{ServerUrl}/library/sections";
 
         /// <summary>
         /// Do not use this property to retrieve the needed authToken, this is only meant to transfer the incoming authToken from the plexApi to the Database.

@@ -37,7 +37,7 @@ const config: NuxtConfig = {
 		{ src: '@plugins/filters.ts', mode: 'client' },
 		{ src: '@plugins/axios.ts', mode: 'client' },
 		{ src: '@plugins/i18nPlugin.ts', mode: 'client' },
-		{ src: '@plugins/perfect-scrollbar.ts', mode: 'client' },
+		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
 		{ src: '@plugins/registerComponents.ts', mode: 'client' },
 	],
 	/*

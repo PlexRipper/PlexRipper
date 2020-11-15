@@ -100,7 +100,7 @@ namespace PlexRipper.Domain
         }
 
         [NotMapped]
-        public string DownloadUrl => PlexServer != null ? $"{PlexServer?.BaseUrl}{FileLocationUrl}?X-Plex-Token={ServerToken}" : string.Empty;
+        public string DownloadUrl => PlexServer != null ? $"{PlexServer?.ServerUrl}{FileLocationUrl}?X-Plex-Token={ServerToken}" : string.Empty;
 
         [NotMapped]
         public Uri DownloadUri => new Uri(DownloadUrl, UriKind.Absolute);

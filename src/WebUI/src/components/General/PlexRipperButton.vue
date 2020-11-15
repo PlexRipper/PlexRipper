@@ -9,7 +9,7 @@
 				:outlined="getIsOutlined"
 				:disabled="isDisabled"
 				:loading="loading"
-				:width="width"
+				:width="getWidth"
 				:block="block"
 				:icon="iconMode"
 				:href="href"
@@ -82,6 +82,13 @@ export default class PBtn extends Vue {
 
 	get isDisabled(): boolean {
 		return this.disabled;
+	}
+
+	get getWidth(): string | number {
+		if (this.width !== 36) {
+			return this.width;
+		}
+		return 'auto';
 	}
 
 	get getText(): string {

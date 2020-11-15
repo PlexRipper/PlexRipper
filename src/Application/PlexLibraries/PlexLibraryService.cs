@@ -70,7 +70,7 @@ namespace PlexRipper.Application.PlexLibraries
 
             // Request seasons and episodes for every tv show
             var plexLibraryDb = result.Value;
-            var serverUrl = plexLibraryDb.PlexServer.BaseUrl;
+            var serverUrl = plexLibraryDb.PlexServer.ServerUrl;
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 0, plexLibrary.TvShows.Count);
 
             for (int i = 0; i < plexLibrary.TvShows.Count; i++)
@@ -304,11 +304,11 @@ namespace PlexRipper.Application.PlexLibraries
                 return Result.Fail(new Error("Failed to retrieve the server auth token"));
             }
 
-            var libraries = await _plexServiceApi.GetLibrarySectionsAsync(authToken.Value, plexServer.BaseUrl);
+            var libraries = await _plexServiceApi.GetLibrarySectionsAsync(authToken.Value, plexServer.ServerUrl);
 
             if (!libraries.Any())
             {
-                string msg = $"plexLibraries returned for server {plexServer.Name} - {plexServer.BaseUrl} was empty";
+                string msg = $"plexLibraries returned for server {plexServer.Name} - {plexServer.ServerUrl} was empty";
                 Log.Warning(msg);
                 return Result.Fail(msg);
             }

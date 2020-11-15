@@ -1,7 +1,7 @@
 {
 	"name": "plex-ripper-web-ui",
-	"version": "1.0.0",
-	"description": "Plex Ripper Web UI",
+	"version": "0.1.0",
+	"description": "Plex Ripper WebUI",
 	"author": "JasonLandbridge",
 	"private": true,
 	"scripts": {
@@ -12,7 +12,8 @@
 		"start": "nuxt-ts start",
 		"lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
 		"lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier-stylelint --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{css,scss}\" --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\"",
-		"test": "jest"
+		"test": "jest",
+		"update-web-types": "vue-docgen-web-types"
 	},
 	"lint-staged": {
 		"*.{js,vue}": "npm run lint --fix",
@@ -23,6 +24,7 @@
 			"pre-commit": "lint-staged"
 		}
 	},
+	"web-types": "./web-types.json",
 	"dependencies": {
 		"@aspnet/signalr": "^1.1.4",
 		"@mdi/font": "^5.8.55",
@@ -48,6 +50,7 @@
 		"vanta": "^0.5.21",
 		"vue": "^2.6.12",
 		"vue-class-component": "^7.2.6",
+		"vue-docgen-web-types": "^0.1.6",
 		"vue-moment": "^4.1.0",
 		"vue-property-decorator": "^9.0.2",
 		"vue2-perfect-scrollbar": "^1.5.0"

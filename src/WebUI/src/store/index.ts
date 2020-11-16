@@ -4,7 +4,6 @@ import { getModule, config } from 'vuex-module-decorators';
 
 // Modules
 import SettingsStore from '~/store/settingsStore';
-import LibraryStore from '~/store/libraryStore';
 
 config.rawError = true;
 
@@ -13,7 +12,6 @@ Vue.use(Vuex);
 
 interface StoreType {
 	settingsStore: SettingsStore;
-	libraryStore: LibraryStore;
 }
 
 // This will allows access in each component without having to initialize in each component.
@@ -21,9 +19,7 @@ interface StoreType {
 export const store = new Vuex.Store<StoreType>({
 	modules: {
 		SettingsStore,
-		LibraryStore,
 	},
 });
 
 export const settingsStore: SettingsStore = getModule(SettingsStore, store);
-export const libraryStore: LibraryStore = getModule(LibraryStore, store);

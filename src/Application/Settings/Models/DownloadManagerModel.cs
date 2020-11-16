@@ -6,7 +6,7 @@ namespace PlexRipper.Application.Settings.Models
     {
         #region Fields
 
-        private int _downloadSegments = 1;
+        private int _downloadSegments = 4;
 
         #endregion Fields
 

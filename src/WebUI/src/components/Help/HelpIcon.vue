@@ -1,5 +1,5 @@
 <template>
-	<v-row justify="space-between flex-nowrap" no-gutters>
+	<v-row justify="space-between" class="flex-nowrap" no-gutters>
 		<v-col>
 			<v-subheader class="form-label text-no-wrap">{{ getLabel }}:</v-subheader>
 		</v-col>

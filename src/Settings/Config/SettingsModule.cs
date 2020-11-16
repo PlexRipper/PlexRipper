@@ -1,11 +1,9 @@
 ﻿using Autofac;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.Settings.Models;
-
 
 namespace PlexRipper.Settings.Config
 {
-    public class SettingsModule : Autofac.Module
+    public class SettingsModule : Module
     {
         protected override void Load(ContainerBuilder builder)
         {
@@ -13,8 +11,6 @@ namespace PlexRipper.Settings.Config
                 .RegisterType<UserSettings>()
                 .As<IUserSettings>()
                 .SingleInstance();
-
-            builder.RegisterType<DownloadManagerModel>();
         }
     }
 }

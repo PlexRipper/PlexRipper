@@ -1,3 +1,4 @@
+import Log from 'consola';
 import { Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import type { SettingsModelDTO } from '@dto/mainApi';
 import SettingsService from '@service/settingsService';
@@ -9,6 +10,7 @@ export default class SettingsStore extends VuexModule {
 
 	@Mutation
 	setSettings(settings: SettingsModelDTO) {
+		Log.info('Vuex store was updated with settings');
 		this.settings = settings;
 	}
 
@@ -36,6 +38,7 @@ export default class SettingsStore extends VuexModule {
 	@Mutation
 	setAskDownloadMovieConfirmation(value: boolean) {
 		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
+			Log.debug(`Changed setting AskDownloadMovieConfirmation to value ${value}`);
 			this.settings.userInterfaceSettings.confirmationSettings.askDownloadMovieConfirmation = value;
 			SettingsService.updateSettings(this.settings);
 		}

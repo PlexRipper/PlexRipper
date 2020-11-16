@@ -1,5 +1,5 @@
 <template>
-	<v-checkbox :value="value" color="red" class="ma-3 pt-0" hide-details @input="handleInput" />
+	<v-checkbox :value="value" color="red" class="ma-3 pt-0" hide-details @click="handleInput" />
 </template>
 
 <script lang="ts">
@@ -10,8 +10,8 @@ export default class PCheckbox extends Vue {
 	@Prop({ required: true, type: Boolean })
 	readonly value!: boolean;
 
-	handleInput(e): void {
-		this.$emit('input', e);
+	handleInput(): void {
+		this.$emit('input', !this.value);
 	}
 }
 </script>

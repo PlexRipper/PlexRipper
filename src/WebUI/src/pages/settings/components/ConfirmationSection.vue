@@ -55,40 +55,40 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { settingsStore as SettingsStore } from '~/store';
+import { settingsStore } from '~/store';
 
 @Component
 export default class ConfirmationSection extends Vue {
 	get askDownloadMovieConfirmation(): boolean {
-		return SettingsStore.askDownloadMovieConfirmation;
+		return settingsStore.askDownloadMovieConfirmation;
 	}
 
 	set askDownloadMovieConfirmation(value: boolean) {
-		SettingsStore.setAskDownloadMovieConfirmation(value);
+		settingsStore.setAskDownloadMovieConfirmation(value);
 	}
 
 	get askDownloadTvShowConfirmation(): boolean {
-		return SettingsStore.askDownloadTvShowConfirmation;
+		return settingsStore.askDownloadTvShowConfirmation;
 	}
 
 	set askDownloadTvShowConfirmation(value: boolean) {
-		SettingsStore.setAskDownloadTvShowConfirmation(value);
+		settingsStore.setAskDownloadTvShowConfirmation(value);
 	}
 
 	get askDownloadSeasonConfirmation(): boolean {
-		return SettingsStore.askDownloadSeasonConfirmation;
+		return settingsStore.askDownloadSeasonConfirmation;
 	}
 
 	set askDownloadSeasonConfirmation(value: boolean) {
-		SettingsStore.setAskDownloadSeasonConfirmation(value);
+		settingsStore.setAskDownloadSeasonConfirmation(value);
 	}
 
 	get askDownloadEpisodeConfirmation(): boolean {
-		return SettingsStore.askDownloadEpisodeConfirmation;
+		return settingsStore.askDownloadEpisodeConfirmation;
 	}
 
 	set askDownloadEpisodeConfirmation(value: boolean) {
-		SettingsStore.setAskDownloadEpisodeConfirmation(value);
+		settingsStore.setAskDownloadEpisodeConfirmation(value);
 	}
 }
 </script>

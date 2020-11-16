@@ -2,7 +2,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Autofac;
-using AutofacSerilogIntegration;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -121,7 +120,6 @@ namespace PlexRipper.WebAPI
         {
             Log.Debug("Setting up Autofac Containers");
             ContainerConfig.ConfigureContainer(builder);
-            builder.RegisterLogger(autowireProperties: true);
             Log.Debug("Finished setting up Autofac Containers");
         }
     }

@@ -9,7 +9,6 @@ using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
-using EnumerableExtensions = Microsoft.EntityFrameworkCore.Internal.EnumerableExtensions;
 
 #endregion
 
@@ -156,7 +155,7 @@ namespace PlexRipper.Application.PlexDownloads
 
         private async Task<Result<bool>> FinalizeDownloadTasks(List<DownloadTask> downloadTasks, int plexAccountId = 0)
         {
-            if (!EnumerableExtensions.Any(downloadTasks))
+            if (!downloadTasks.Any())
                 return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
 
             // Get the download folder

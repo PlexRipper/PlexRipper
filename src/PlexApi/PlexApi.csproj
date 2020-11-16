@@ -1,15 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
     <RootNamespace>PlexRipper.PlexApi</RootNamespace>
     <AssemblyName>PlexRipper.PlexApi</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RestSharp" Version="106.11.4" />
-    <PackageReference Include="RestSharp.Serializers.SystemTextJson" Version="106.11.4" />
-    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <PackageReference Include="RestSharp" Version="106.11.7" />
+    <PackageReference Include="RestSharp.Serializers.SystemTextJson" Version="106.11.7" />
+    <PackageReference Include="System.Text.Json" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

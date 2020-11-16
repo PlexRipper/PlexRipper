@@ -6,6 +6,7 @@
     <RootNamespace>PlexRipper.DownloadManager</RootNamespace>
     <AssemblyName>PlexRipper.DownloadManager</AssemblyName>
     <CodeAnalysisRuleSet>StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>

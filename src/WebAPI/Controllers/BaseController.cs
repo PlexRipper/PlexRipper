@@ -1,11 +1,11 @@
-﻿using FluentResults;
+﻿using System;
+using System.Net.Mime;
+using AutoMapper;
+using FluentResults;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Domain;
-using System;
-using System.Net.Mime;
-using AutoMapper;
-using Microsoft.AspNetCore.Cors;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -22,8 +22,6 @@ namespace PlexRipper.WebAPI.Controllers
         {
             _mapper = mapper;
         }
-
-
 
         [NonAction]
         protected IActionResult InternalServerError(Exception e)
@@ -46,7 +44,6 @@ namespace PlexRipper.WebAPI.Controllers
         [NonAction]
         protected IActionResult BadRequest(int id, string nameOf = "")
         {
-
             var error = new Error($"The Id: {id} was 0 or lower");
 
             if (nameOf != string.Empty)
@@ -78,7 +75,5 @@ namespace PlexRipper.WebAPI.Controllers
             var resultDTO = _mapper.Map<ResultDTO<T>>(result);
             return new OkObjectResult(resultDTO);
         }
-
-
     }
 }

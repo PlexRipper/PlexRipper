@@ -1,11 +1,12 @@
 ﻿using PlexRipper.Application.Settings.Models;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
     /// <summary>
     /// Used to store and load settings from a json file.
     /// </summary>
-    public interface IUserSettings : ISettingsModel
+    public interface IUserSettings : ISettingsModel, ISetup
     {
         /// <summary>
         /// Writes all (nested) property values in the SettingsModel to the json settings file.
@@ -30,6 +31,7 @@ namespace PlexRipper.Application.Common
         /// instead of having a separate instance of the <see cref="SettingsModel"/> in the UserSettings.
         /// </summary>
         /// <param name="sourceSettings">The values to be used to set this UserSettings instance.</param>
-        void UpdateSettings(SettingsModel sourceSettings);
+        /// <param name="saveAfterUpdate">Should the settings be written to file after update.</param>
+        void UpdateSettings(SettingsModel sourceSettings, bool saveAfterUpdate = true);
     }
 }

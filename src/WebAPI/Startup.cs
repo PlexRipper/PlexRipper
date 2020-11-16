@@ -2,13 +2,16 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.Config;
 using PlexRipper.Data;
 using PlexRipper.Domain;
@@ -21,7 +24,6 @@ namespace PlexRipper.WebAPI
     public class Startup
     {
         readonly string CORSConfiguration = "CORS_Configuration";
-
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.

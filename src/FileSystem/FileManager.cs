@@ -23,8 +23,11 @@ namespace PlexRipper.FileSystem
         #region Fields
 
         private readonly Channel<FileTask> _channel = Channel.CreateUnbounded<FileTask>();
+
         private readonly Subject<FileMergeProgress> _fileMergeProgressSubject = new Subject<FileMergeProgress>();
+
         private readonly CancellationToken _token = new CancellationToken();
+
         private Task<Task> _copytask;
 
         #endregion
@@ -34,7 +37,6 @@ namespace PlexRipper.FileSystem
         public FileManager(IMediator mediator)
         {
             _mediator = mediator;
-            _copytask = Task.Factory.StartNew(ExecuteFileTasks, TaskCreationOptions.LongRunning);
         }
 
         #endregion
@@ -83,7 +85,7 @@ namespace PlexRipper.FileSystem
                             DataTransferred = dataTransferred,
                             DataTotal = fileTask.FileSize,
                             DownloadTaskId = fileTask.DownloadTaskId,
-                            TransferSpeed = DataFormat.GetDownloadSpeed(dataTransferred, ElapsedTime.TotalSeconds)
+                            TransferSpeed = DataFormat.GetDownloadSpeed(dataTransferred, ElapsedTime.TotalSeconds),
                         };
                     })
                     .Subscribe(data => _fileMergeProgressSubject.OnNext(data), () => { _timeContext.Dispose(); });
@@ -113,6 +115,18 @@ namespace PlexRipper.FileSystem
         #endregion
 
         #region Public
+
+        public Result<bool> Setup()
+        {
+            _copytask = Task.Factory.StartNew(ExecuteFileTasks, TaskCreationOptions.LongRunning);
+
+            if (_copytask.IsFaulted)
+            {
+                return Result.Fail("ExecuteFileTasks failed due to an error");
+            }
+
+            return Result.Ok(true);
+        }
 
         /// <summary>
         /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.

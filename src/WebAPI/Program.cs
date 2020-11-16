@@ -1,14 +1,12 @@
-﻿using Autofac.Extensions.DependencyInjection;
+﻿using System;
+using System.IO;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Domain;
-using PlexRipper.DownloadManager;
 using Serilog;
-using System;
-using System.IO;
 using Log = PlexRipper.Domain.Log;
 
 namespace PlexRipper.WebAPI
@@ -38,7 +36,6 @@ namespace PlexRipper.WebAPI
                         config.ClearProviders();
                         config.AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
                     })
-                    .ConfigureServices((hostContext, services) => { services.AddHostedService<DownloadService>(); })
                     .UseSerilog()
                     .Build();
 

@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using FluentResults;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
@@ -15,7 +17,6 @@ namespace PlexRipper.Settings
         #region Fields
 
         private readonly IFileSystem _fileSystem;
-        private bool _allowSave = true;
 
         private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
         {
@@ -25,9 +26,11 @@ namespace PlexRipper.Settings
             DefaultValueHandling = DefaultValueHandling.Populate,
             Converters = new List<JsonConverter>
             {
-                new Newtonsoft.Json.Converters.StringEnumConverter(),
+                new StringEnumConverter(),
             },
         };
+
+        private bool _allowSave = true;
 
         #endregion
 
@@ -36,9 +39,6 @@ namespace PlexRipper.Settings
         public UserSettings(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
-            this.PropertyChanged += (sender, args) => Save();
-
-            Load();
         }
 
         #endregion
@@ -46,42 +46,44 @@ namespace PlexRipper.Settings
         #region Properties
 
         [JsonIgnore]
-        private string FileLocation => Path.Join(_fileSystem.ConfigDirectory, FileName);
+        private static string FileName { get; } = "PlexRipperSettings.json";
 
         [JsonIgnore]
-        private static string FileName { get; } = "PlexRipperSettings.json";
+        private string FileLocation => Path.Join(_fileSystem.ConfigDirectory, FileName);
 
         #endregion
 
         #region Methods
 
-        #region Private
-
-        private void CreateSettingsFile()
-        {
-            Log.Information($"{FileName} doesn't exist, will create now.");
-            string jsonString = JsonConvert.SerializeObject(new SettingsModel(), _jsonSerializerSettings);
-            File.WriteAllText(FileLocation, jsonString);
-        }
-
-        #endregion
-
         #region Public
+
+        public Result<bool> Setup()
+        {
+            // TODO Add result based error handeling here
+            Log.Information("Setting up UserSettings");
+            if (!File.Exists(FileLocation))
+            {
+                Log.Information($"{FileName} doesn't exist, will create new one now.");
+                string jsonString = JsonConvert.SerializeObject(new SettingsModel(), _jsonSerializerSettings);
+                File.WriteAllText(FileLocation, jsonString);
+            }
+
+            Load();
+
+            PropertyChanged += (sender, args) => Save();
+
+            return Result.Ok(true);
+        }
 
         public bool Load()
         {
-            Log.Debug("Loading UserSettings now.");
-
-            if (!File.Exists(FileLocation))
-            {
-                CreateSettingsFile();
-            }
+            Log.Information("Loading UserSettings now.");
 
             try
             {
                 string jsonString = File.ReadAllText(FileLocation);
                 var loadedSettings = JsonConvert.DeserializeObject<SettingsModel>(jsonString, _jsonSerializerSettings);
-                UpdateSettings(loadedSettings);
+                UpdateSettings(loadedSettings, false);
             }
             catch (Exception e)
             {
@@ -89,6 +91,7 @@ namespace PlexRipper.Settings
                 throw;
             }
 
+            Log.Information("UserSettings were loaded successfully!");
             return true;
         }
 
@@ -109,25 +112,25 @@ namespace PlexRipper.Settings
                 return false;
             }
 
-            Log.Debug("Saving UserSettings now.");
+            Log.Information("Saving UserSettings now.");
 
             try
             {
                 string jsonString = JsonConvert.SerializeObject(this, _jsonSerializerSettings);
                 File.WriteAllText(FileLocation, jsonString);
-
-                return true;
             }
             catch (Exception e)
             {
                 Log.Error(e, "Failed to save the UserSettings to json file.");
                 throw;
             }
+
+            Log.Information("UserSettings were saved successfully!");
+            return true;
         }
 
-
         /// <inheritdoc/>
-        public void UpdateSettings(SettingsModel sourceSettings)
+        public void UpdateSettings(SettingsModel sourceSettings, bool saveAfterUpdate = true)
         {
             _allowSave = false;
 
@@ -135,14 +138,14 @@ namespace PlexRipper.Settings
             sourceSettings.GetType().GetProperties().Where(x => x.CanWrite).ToList().ForEach(sourceSettingsProperty =>
             {
                 // Check whether target object has the source property, which will always be true due to inheritance.
-                var targetSettingsProperty = this.GetType().GetProperty(sourceSettingsProperty.Name);
+                var targetSettingsProperty = GetType().GetProperty(sourceSettingsProperty.Name);
                 if (targetSettingsProperty != null)
                 {
                     // Now copy the value to the matching property in this UserSettings instance.
                     var value = sourceSettingsProperty.GetValue(sourceSettings, null);
                     if (value != null)
                     {
-                        this.GetType().GetProperty(sourceSettingsProperty.Name).SetValue(this, value, null);
+                        GetType().GetProperty(sourceSettingsProperty.Name).SetValue(this, value, null);
                     }
                     else
                     {
@@ -152,7 +155,10 @@ namespace PlexRipper.Settings
             });
 
             _allowSave = true;
-            Save();
+            if (saveAfterUpdate)
+            {
+                Save();
+            }
         }
 
         #endregion

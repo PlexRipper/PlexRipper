@@ -701,6 +701,17 @@
         {
           "name": "Page",
           "description": "",
+          "attributes": [
+            {
+              "name": "fluid",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            }
+          ],
           "slots": [
             {
               "name": "default"

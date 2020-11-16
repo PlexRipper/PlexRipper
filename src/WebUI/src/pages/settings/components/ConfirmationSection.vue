@@ -12,7 +12,7 @@
 					<tbody>
 						<!--	Ask Download Movie Confirmation	-->
 						<tr>
-							<td style="width: 35%">
+							<td style="width: 30%">
 								<help-icon help-id="help.settings.ui.confirmation-settings.download-movie-confirmation" />
 							</td>
 							<td>

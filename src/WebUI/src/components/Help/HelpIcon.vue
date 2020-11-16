@@ -1,7 +1,7 @@
 <template>
-	<v-row justify="space-between" no-gutters>
-		<v-col cols="auto">
-			<v-subheader class="form-label">{{ getLabel }}:</v-subheader>
+	<v-row justify="space-between flex-nowrap" no-gutters>
+		<v-col>
+			<v-subheader class="form-label text-no-wrap">{{ getLabel }}:</v-subheader>
 		</v-col>
 		<v-col v-if="hasHelpPage" cols="auto">
 			<v-btn style="margin: 8px" icon @click="openDialog">

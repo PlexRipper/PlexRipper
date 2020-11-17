@@ -1,7 +1,14 @@
 <template>
 	<v-dialog v-model="dialog" width="500" persistent>
 		<template #activator="{}">
-			<p-btn :button-type="buttonType" :width="width" :text="buttonText" @click="openDialog" />
+			<p-btn
+				:button-type="buttonType"
+				:width="width"
+				:block="block"
+				:disabled="disabled"
+				:text-id="buttonTextId"
+				@click="openDialog"
+			/>
 		</template>
 
 		<v-card>
@@ -36,13 +43,19 @@ export default class ConfirmationButton extends Vue {
 	readonly textId!: string;
 
 	@Prop({ required: true, type: String, default: '' })
-	readonly buttonText!: string;
+	readonly buttonTextId!: string;
 
 	@Prop({ required: false, type: Number, default: 150 })
 	readonly width!: number;
 
-	@Prop({ required: true, type: String, default: ButtonType.None })
+	@Prop({ required: false, type: Boolean, default: false })
+	readonly disabled!: boolean;
+
+	@Prop({ required: false, type: String, default: ButtonType.None })
 	readonly buttonType!: ButtonType;
+
+	@Prop({ required: false, type: Boolean, default: false })
+	readonly block!: boolean;
 
 	dialog: boolean = false;
 

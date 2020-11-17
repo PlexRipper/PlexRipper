@@ -374,6 +374,7 @@ export interface PlexServerStatusDTO {
 export type ResultDTOOfSettingsModel = ResultDTO & { value: SettingsModel };
 
 export type SettingsModel = BaseModel & {
+  firstTimeSetup: boolean;
   accountSettings: AccountSettingsModel;
   advancedSettings: AdvancedSettingsModel;
   userInterfaceSettings: UserInterfaceSettingsModel;

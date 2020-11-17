@@ -140,6 +140,7 @@
 						:is-last="isNextDisabled"
 						@back="back"
 						@next="next"
+						@finish="finishSetup"
 					/>
 				</v-stepper>
 			</v-col>
@@ -148,7 +149,14 @@
 		<!--	Skip button	-->
 		<v-row justify="center">
 			<v-col cols="3">
-				<p-btn to="/" :disabled="isNextDisabled" block :width="100" text-id="skip-setup" />
+				<confirmation-button
+					:disabled="isNextDisabled"
+					:width="100"
+					block
+					text-id="skip-setup"
+					button-text-id="skip-setup"
+					@confirm="finishSetup"
+				/>
 			</v-col>
 		</v-row>
 	</v-container>
@@ -160,11 +168,13 @@ import PathsOverview from '@overviews/PathsOverview.vue';
 import AccountOverview from '@overviews/AccountOverview/AccountOverview.vue';
 import ExternalLink from '@components/General/ExternalLink.vue';
 import PBtn from '@components/General/PlexRipperButton.vue';
+import ConfirmationButton from '@components/General/ConfirmationButton.vue';
 import NavigationBar from './components/NavigationBar.vue';
+import { settingsStore } from '~/store';
 
 @Component({
 	layout: 'empty',
-	components: { NavigationBar, PathsOverview, AccountOverview, ExternalLink, PBtn },
+	components: { NavigationBar, PathsOverview, AccountOverview, ExternalLink, PBtn, ConfirmationButton },
 })
 export default class Setup extends Vue {
 	stepIndex: number = 1;
@@ -189,6 +199,11 @@ export default class Setup extends Vue {
 		if (this.stepIndex < this.stepPagesCount) {
 			this.stepIndex++;
 		}
+	}
+
+	finishSetup(): void {
+		settingsStore.setFirstTimeSetup(false);
+		this.$router.push('/');
 	}
 
 	get headers(): string[] {

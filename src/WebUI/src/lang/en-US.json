@@ -100,12 +100,16 @@
 					}
 				}
 			}
+		}
+	},
+	"confirmation": {
+		"skip-setup": {
+			"title": "Are you sure?",
+			"text": "This will skip the setup process and you will have to configure PlexRipper manually"
 		},
-		"confirmation": {
-			"delete-account": {
-				"title": "Are you sure?",
-				"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
-			}
+		"delete-account": {
+			"title": "Are you sure?",
+			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
 		}
 	},
 	"pages": {

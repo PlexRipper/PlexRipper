@@ -91,10 +91,10 @@
 					v-if="!isNew"
 					class="mr-4"
 					text-id="delete-account"
-					button-text="Delete"
 					icon="mdi-delete"
 					:button-type="getDeleteButtonType"
 					:width="130"
+					button-text-id="delete"
 					@confirm="deleteAccount"
 				/>
 				<!-- Reset Form -->
@@ -138,7 +138,7 @@ import LoadingSpinner from '@components/LoadingSpinner.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import SignalrService from '@service/signalrService';
-import ConfirmationButton from '@components/General/ConfirmationDialog.vue';
+import ConfirmationButton from '@components/General/ConfirmationButton.vue';
 import PBtn from '@components/General/PlexRipperButton.vue';
 import ButtonType from '@/types/enums/buttonType';
 

@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using FluentResults;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
@@ -18,16 +16,11 @@ namespace PlexRipper.Settings
 
         private readonly IFileSystem _fileSystem;
 
-        private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
+        private readonly JsonSerializerOptions _jsonSerializerSettings = new JsonSerializerOptions
         {
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Ignore,
-            DefaultValueHandling = DefaultValueHandling.Populate,
-            Converters = new List<JsonConverter>
-            {
-                new StringEnumConverter(),
-            },
+            WriteIndented = true,
+            IncludeFields = false,
+            PropertyNameCaseInsensitive = true,
         };
 
         private bool _allowSave = true;
@@ -45,10 +38,10 @@ namespace PlexRipper.Settings
 
         #region Properties
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         private static string FileName { get; } = "PlexRipperSettings.json";
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         private string FileLocation => Path.Join(_fileSystem.ConfigDirectory, FileName);
 
         #endregion
@@ -64,8 +57,7 @@ namespace PlexRipper.Settings
             if (!File.Exists(FileLocation))
             {
                 Log.Information($"{FileName} doesn't exist, will create new one now.");
-                string jsonString = JsonConvert.SerializeObject(new SettingsModel(), _jsonSerializerSettings);
-                File.WriteAllText(FileLocation, jsonString);
+                Save();
             }
 
             Load();
@@ -82,7 +74,7 @@ namespace PlexRipper.Settings
             try
             {
                 string jsonString = File.ReadAllText(FileLocation);
-                var loadedSettings = JsonConvert.DeserializeObject<SettingsModel>(jsonString, _jsonSerializerSettings);
+                var loadedSettings = JsonSerializer.Deserialize<SettingsModel>(jsonString, _jsonSerializerSettings);
                 UpdateSettings(loadedSettings, false);
             }
             catch (Exception e)
@@ -116,7 +108,7 @@ namespace PlexRipper.Settings
 
             try
             {
-                string jsonString = JsonConvert.SerializeObject(this, _jsonSerializerSettings);
+                string jsonString = JsonSerializer.Serialize(this, _jsonSerializerSettings);
                 File.WriteAllText(FileLocation, jsonString);
             }
             catch (Exception e)

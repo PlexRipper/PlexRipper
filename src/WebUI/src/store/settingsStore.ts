@@ -2,6 +2,7 @@ import Log from 'consola';
 import { Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import type { SettingsModel } from '@dto/mainApi';
 import SettingsService from '@service/settingsService';
+import { ViewMode } from '@dto/mainApi';
 
 // Doc: https://typescript.nuxtjs.org/cookbook/store.html#class-based
 @Module({ name: 'settingsStore', stateFactory: true })
@@ -17,6 +18,46 @@ export default class SettingsStore extends VuexModule {
 	get getSettings(): SettingsModel | null {
 		return this.settings;
 	}
+
+	// region General
+	get firstTimeSetup(): boolean {
+		return this.settings?.firstTimeSetup ?? false;
+	}
+
+	@Mutation
+	setFirstTimeSetup(value: boolean) {
+		if (this.settings?.firstTimeSetup) {
+			this.settings.firstTimeSetup = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+	// endregion
+
+	// region ViewMode
+	get movieViewMode(): ViewMode {
+		return this.settings?.userInterfaceSettings?.displaySettings?.movieViewMode ?? ViewMode.Poster;
+	}
+
+	get tvShowViewMode(): ViewMode {
+		return this.settings?.userInterfaceSettings?.displaySettings?.tvShowViewMode ?? ViewMode.Poster;
+	}
+
+	@Mutation
+	setMovieViewMode(value: ViewMode) {
+		if (this.settings?.userInterfaceSettings?.displaySettings) {
+			this.settings.userInterfaceSettings.displaySettings.movieViewMode = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+
+	@Mutation
+	setTvShowViewMode(value: ViewMode) {
+		if (this.settings?.userInterfaceSettings?.displaySettings) {
+			this.settings.userInterfaceSettings.displaySettings.tvShowViewMode = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+	// endregion
 
 	// region Date Time Settings
 	get shortDateFormat(): string {

@@ -45,9 +45,12 @@
 				"text": "The password of your Plex account."
 			}
 		},
-		"advanced-1": {
-			"title": "Download Segments",
-			"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
+		"download-manager-section": {
+			"download-segments": {
+				"label": "Download Segments",
+				"title": "Download Segments",
+				"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
+			}
 		},
 		"settings": {
 			"paths": {
@@ -103,7 +106,9 @@
 				"title": "Are you sure?",
 				"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
 			}
-		},
+		}
+	},
+	"pages": {
 		"setup": {
 			"page-1": {
 				"header": "Being called awesome!",
@@ -152,6 +157,23 @@
 					"item-3": "Translate PlexRipper to your language!",
 					"item-4": "Go through the code and give feedback or suggest improvements!"
 				}
+			}
+		},
+
+		"settings": {
+			"ui": {
+				"date-and-time": {
+					"header": "Date and Time"
+				},
+				"confirmation-settings": {
+					"header": "Confirmation Settings"
+				}
+			},
+			"advanced": {
+				"header": "Download Manager"
+			},
+			"accounts": {
+				"header": "Plex Accounts"
 			}
 		}
 	}

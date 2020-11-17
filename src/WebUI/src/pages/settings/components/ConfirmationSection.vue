@@ -1,11 +1,6 @@
 <template>
 	<p-section>
-		<v-row no-gutters>
-			<v-col>
-				<h1>Confirmation Settings</h1>
-				<v-divider />
-			</v-col>
-		</v-row>
+		<template #header> {{ $t('pages.settings.ui.confirmation-settings.header') }} </template>
 		<v-row no-gutters>
 			<v-col>
 				<v-simple-table class="section-table">

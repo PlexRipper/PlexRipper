@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application.Settings.Models.Base;
+﻿using Newtonsoft.Json;
+using PlexRipper.Application.Settings.Models.Base;
 
 namespace PlexRipper.Application.Settings.Models
 {
@@ -12,6 +13,7 @@ namespace PlexRipper.Application.Settings.Models
 
         #region Properties
 
+        [JsonProperty("confirmationSettings", Required = Required.Always)]
         public ConfirmationSettingsModel ConfirmationSettings
         {
             get => _confirmationSettings;
@@ -25,6 +27,7 @@ namespace PlexRipper.Application.Settings.Models
             }
         }
 
+        [JsonProperty("displaySettings", Required = Required.Always)]
         public DisplaySettingsModel DisplaySettings
         {
             get => _displaySettings;
@@ -38,6 +41,7 @@ namespace PlexRipper.Application.Settings.Models
             }
         }
 
+        [JsonProperty("dateTimeSettings", Required = Required.Always)]
         public DateTimeModel DateTimeSettings
         {
             get => _dateTimeSettings;

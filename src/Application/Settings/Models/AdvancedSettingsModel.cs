@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application.Settings.Models.Base;
+﻿using Newtonsoft.Json;
+using PlexRipper.Application.Settings.Models.Base;
 
 namespace PlexRipper.Application.Settings.Models
 {
@@ -8,6 +9,7 @@ namespace PlexRipper.Application.Settings.Models
 
         #region Properties
 
+        [JsonProperty("downloadManager", Required = Required.Always)]
         public DownloadManagerModel DownloadManager
         {
             get => _downloadManager;

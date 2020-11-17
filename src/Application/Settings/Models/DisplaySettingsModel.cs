@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application.Settings.Models.Base;
+﻿using Newtonsoft.Json;
+using PlexRipper.Application.Settings.Models.Base;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Settings.Models
@@ -7,8 +8,10 @@ namespace PlexRipper.Application.Settings.Models
     {
         #region Properties
 
+        [JsonProperty("tvShowViewMode", Required = Required.Always)]
         public ViewMode TvShowViewMode { get; set; } = ViewMode.Poster;
 
+        [JsonProperty("movieViewMode", Required = Required.Always)]
         public ViewMode MovieViewMode { get; set; } = ViewMode.Poster;
 
         #endregion Properties

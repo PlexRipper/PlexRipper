@@ -34,17 +34,17 @@
 							<v-container fluid>
 								<v-row no-gutters>
 									<v-col>
-										<h2 class="mt-2">{{ $t('setup.page-1.title') }}</h2>
-										<p>{{ $t('setup.page-1.text.p-1') }}</p>
+										<h2 class="mt-2">{{ $t('pages.setup.page-1.title') }}</h2>
+										<p>{{ $t('pages.setup.page-1.text.p-1') }}</p>
 										<ul>
 											<li>
-												{{ $t('setup.page-1.list.item-1') }}
+												{{ $t('pages.setup.page-1.list.item-1') }}
 												<external-link href="https://github.com/PlexRipper/PlexRipper/issues" />
 											</li>
-											<li v-html="$t('setup.page-1.list.item-2')"></li>
-											<li v-html="$t('setup.page-1.list.item-3')"></li>
-											<li v-html="$t('setup.page-1.list.item-4')"></li>
-											<li v-html="$t('setup.page-1.list.item-5')"></li>
+											<li v-html="$t('pages.setup.page-1.list.item-2')"></li>
+											<li v-html="$t('pages.setup.page-1.list.item-3')"></li>
+											<li v-html="$t('pages.setup.page-1.list.item-4')"></li>
+											<li v-html="$t('pages.setup.page-1.list.item-5')"></li>
 										</ul>
 									</v-col>
 								</v-row>
@@ -105,12 +105,12 @@
 							<v-container fluid>
 								<v-row no-gutters>
 									<v-col>
-										<h2 class="mt-2">{{ $t('setup.page-5.title') }}</h2>
+										<h2 class="mt-2">{{ $t('pages.setup.page-5.title') }}</h2>
 									</v-col>
 								</v-row>
 								<v-row no-gutters>
 									<v-col>
-										<p>{{ $t('setup.page-5.text.p-1') }}</p>
+										<p>{{ $t('pages.setup.page-5.text.p-1') }}</p>
 										<v-list dense class="no-background">
 											<v-list-item v-for="(link, i) in links" :key="i" :href="link" target="_blank">
 												<v-list-item-title>
@@ -192,9 +192,14 @@ export default class Setup extends Vue {
 	}
 
 	get headers(): string[] {
+		if (!this.messages) {
+			return [];
+		}
 		const headers: string[] = [];
 		for (let i = 1; i <= this.stepPagesCount; i++) {
-			headers.push(this.messages['page-' + i].header);
+			if (this.messages['page-' + i]) {
+				headers.push(this.messages['page-' + i].header);
+			}
 		}
 		return headers;
 	}
@@ -208,7 +213,7 @@ export default class Setup extends Vue {
 	}
 
 	get messages(): any {
-		return this.$messages().setup;
+		return this.$getMessage('pages.setup');
 	}
 }
 </script>

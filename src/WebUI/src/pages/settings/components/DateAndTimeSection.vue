@@ -1,11 +1,6 @@
 <template>
 	<p-section>
-		<v-row no-gutters>
-			<v-col>
-				<h1>Date and Time</h1>
-				<v-divider />
-			</v-col>
-		</v-row>
+		<template #header> {{ $t('pages.settings.ui.date-and-time.header') }} </template>
 		<v-row no-gutters>
 			<v-col>
 				<v-simple-table class="section-table">
@@ -16,7 +11,7 @@
 							</td>
 							<td>
 								<v-select
-									v-model="shortDateSelect"
+									v-model="shortDateFormat"
 									color="red"
 									filled
 									outlined
@@ -34,7 +29,7 @@
 							</td>
 							<td>
 								<v-select
-									v-model="longDateSelect"
+									v-model="longDateFormat"
 									color="red"
 									filled
 									outlined
@@ -52,7 +47,7 @@
 							</td>
 							<td>
 								<v-select
-									v-model="timeFormatSelect"
+									v-model="timeFormat"
 									color="red"
 									filled
 									outlined
@@ -82,6 +77,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { format } from 'date-fns';
+import { settingsStore } from '~/store';
 
 interface ISelectItem {
 	text: string | number | object;
@@ -93,10 +89,37 @@ interface ISelectItem {
 
 @Component
 export default class DateAndTimeSection extends Vue {
-	shortDateSelect!: ISelectItem;
-	longDateSelect!: ISelectItem;
-	timeFormatSelect!: ISelectItem;
-	showRelativeDates: boolean = false;
+	get shortDateFormat(): string {
+		return settingsStore.shortDateFormat;
+	}
+
+	set shortDateFormat(value: string) {
+		settingsStore.setShortDateFormat(value);
+	}
+
+	get longDateFormat(): string {
+		return settingsStore.longDateFormat;
+	}
+
+	set longDateFormat(value: string) {
+		settingsStore.setLongDateFormat(value);
+	}
+
+	get timeFormat(): string {
+		return settingsStore.timeFormat;
+	}
+
+	set timeFormat(value: string) {
+		settingsStore.setTimeFormat(value);
+	}
+
+	get showRelativeDates(): boolean {
+		return settingsStore.showRelativeDates;
+	}
+
+	set showRelativeDates(value: boolean) {
+		settingsStore.setShowRelativeDates(value);
+	}
 
 	get getMenuProps(): any {
 		return {
@@ -134,7 +157,7 @@ export default class DateAndTimeSection extends Vue {
 	}
 
 	get timeFormatOptions(): ISelectItem[] {
-		const values: string[] = ['HH:MM', 'hh:mm b'];
+		const values: string[] = ['HH:MM', 'p'];
 		const options: ISelectItem[] = [];
 		const date = Date.now();
 		values.forEach((x) => {
@@ -145,12 +168,6 @@ export default class DateAndTimeSection extends Vue {
 		});
 
 		return options;
-	}
-
-	created(): void {
-		this.shortDateSelect = this.shortDateOptions[0];
-		this.longDateSelect = this.longDateOptions[0];
-		this.timeFormatSelect = this.timeFormatOptions[0];
 	}
 }
 </script>

@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application.Common;
+﻿using Newtonsoft.Json;
+using PlexRipper.Application.Common;
 using PlexRipper.Application.Settings.Models.Base;
 
 namespace PlexRipper.Application.Settings.Models
@@ -8,12 +9,31 @@ namespace PlexRipper.Application.Settings.Models
     /// </summary>
     public class SettingsModel : BaseModel, ISettingsModel
     {
+        private bool _firstTimeSetup = true;
+
         private AccountSettingsModel _accountSettings = new AccountSettingsModel();
+
         private UserInterfaceSettingsModel _userInterfaceSettings = new UserInterfaceSettingsModel();
+
         private AdvancedSettingsModel _advancedSettings = new AdvancedSettingsModel();
 
         #region Properties
 
+        [JsonProperty("firstTimeSetup", Required = Required.Always)]
+        public bool FirstTimeSetup
+        {
+            get => _firstTimeSetup;
+            set
+            {
+                if (value != _firstTimeSetup)
+                {
+                    _firstTimeSetup = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        [JsonProperty("accountSettings", Required = Required.Always)]
         public AccountSettingsModel AccountSettings
         {
             get => _accountSettings;
@@ -28,6 +48,7 @@ namespace PlexRipper.Application.Settings.Models
             }
         }
 
+        [JsonProperty("advancedSettings", Required = Required.Always)]
         public AdvancedSettingsModel AdvancedSettings
         {
             get => _advancedSettings;
@@ -42,6 +63,7 @@ namespace PlexRipper.Application.Settings.Models
             }
         }
 
+        [JsonProperty("userInterfaceSettings", Required = Required.Always)]
         public UserInterfaceSettingsModel UserInterfaceSettings
         {
             get => _userInterfaceSettings;

@@ -1,17 +1,18 @@
 <template>
 	<page>
-		<account-overview />
+		<p-section>
+			<template #header> {{ $t('pages.settings.accounts.header') }} </template>
+			<account-overview />
+		</p-section>
 	</page>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import AccountOverview from '@overviews/AccountOverview/AccountOverview.vue';
-import AccountCard from '@overviews/AccountOverview/AccountCard.vue';
 
 @Component({
 	components: {
-		AccountCard,
 		AccountOverview,
 	},
 })

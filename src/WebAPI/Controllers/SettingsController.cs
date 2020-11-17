@@ -8,7 +8,6 @@ using PlexRipper.Application.Common;
 using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.WebAPI.Common.DTO.Settings;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -18,6 +17,7 @@ namespace PlexRipper.WebAPI.Controllers
     public class SettingsController : BaseController
     {
         private readonly ISettingsService _settingsService;
+
         private readonly IMapper _mapper;
 
         public SettingsController(ISettingsService settingsService, IMapper mapper) : base(mapper)
@@ -26,10 +26,9 @@ namespace PlexRipper.WebAPI.Controllers
             _mapper = mapper;
         }
 
-
         // GET api/<SettingsController>/
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModelDTO>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModel>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult GetSettings()
         {
@@ -41,8 +40,7 @@ namespace PlexRipper.WebAPI.Controllers
                     return InternalServerError(result);
                 }
 
-                var mapResult = _mapper.Map<SettingsModelDTO>(result.Value);
-                return Ok(Result.Ok(mapResult));
+                return Ok(Result.Ok(result.Value));
             }
             catch (Exception e)
             {
@@ -78,12 +76,11 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> UpdateSettings([FromBody] SettingsModelDTO settingsModel)
+        public async Task<IActionResult> UpdateSettings([FromBody] SettingsModel settingsModel)
         {
             try
             {
-                var mapResult = _mapper.Map<SettingsModel>(settingsModel);
-                var result = await _settingsService.UpdateSettings(mapResult);
+                var result = await _settingsService.UpdateSettings(settingsModel);
                 if (result.IsFailed)
                 {
                     return BadRequest(result);

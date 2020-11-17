@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application.Settings.Models.Base;
+﻿using Newtonsoft.Json;
+using PlexRipper.Application.Settings.Models.Base;
 
 namespace PlexRipper.Application.Settings.Models
 {
@@ -6,12 +7,13 @@ namespace PlexRipper.Application.Settings.Models
     {
         #region Fields
 
-        private int _activeAccountId = 0;
+        private int _activeAccountId;
 
         #endregion
 
         #region Properties
 
+        [JsonProperty("activeAccountId", Required = Required.Always)]
         public int ActiveAccountId
         {
             get => _activeAccountId;

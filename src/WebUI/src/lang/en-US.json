@@ -18,6 +18,12 @@
 		}
 	},
 	"help": {
+		"default": {
+			"label": "Missing Label",
+			"title": "Unknown help",
+			"text": "The language path where this text is stored is incorrect"
+		},
+
 		"account-form": {
 			"is-enabled": {
 				"label": "Is Enabled",

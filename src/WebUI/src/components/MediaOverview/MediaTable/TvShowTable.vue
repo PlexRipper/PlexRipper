@@ -1,5 +1,5 @@
 <template>
-	<v-row justify="center">
+	<v-row class="table-overview" justify="center" no-gutters>
 		<v-col cols="12">
 			<media-table :headers="getHeaders" :items="items" :media-type="getType" @download="downloadTvShows" />
 		</v-col>
@@ -62,11 +62,13 @@ export default class TVShowsTable extends Vue {
 				text: 'Added At',
 				value: 'addedAt',
 				width: 150,
+				type: 'date',
 			},
 			{
 				text: 'Updated At',
 				value: 'updatedAt',
 				width: 150,
+				type: 'date',
 			},
 		];
 	}

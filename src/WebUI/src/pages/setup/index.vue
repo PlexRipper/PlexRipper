@@ -173,7 +173,6 @@ import NavigationBar from './components/NavigationBar.vue';
 import { settingsStore } from '~/store';
 
 @Component({
-	layout: 'empty',
 	components: { NavigationBar, PathsOverview, AccountOverview, ExternalLink, PBtn, ConfirmationButton },
 })
 export default class Setup extends Vue {

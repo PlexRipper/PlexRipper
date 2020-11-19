@@ -35,9 +35,9 @@ export default class HelpDialog extends Vue {
 	get getHelpText(): IText {
 		if (this.id === '') {
 			return {
-				id: 'null',
-				title: 'Could not find the correct help page',
-				text: '?',
+				id: 'help.default',
+				title: 'help.default.title',
+				text: 'help.default.text',
 			};
 		}
 

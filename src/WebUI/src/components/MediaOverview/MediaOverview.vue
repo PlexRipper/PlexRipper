@@ -50,17 +50,20 @@
 			</template>
 
 			<!-- Poster display-->
-			<v-row v-if="isPosterView" class="poster-overview" justify="center">
-				<template v-for="item in getItems">
-					<media-poster
-						:key="item.id"
-						:media-item="item"
-						:account-id="activeAccountId"
-						:media-type="mediaType"
-						@download="openDownloadDialog"
-					/>
-				</template>
-			</v-row>
+			<perfect-scrollbar>
+				<v-row v-if="isPosterView" class="poster-overview" justify="center">
+					<template v-for="item in getItems">
+						<media-poster
+							:key="item.id"
+							:media-item="item"
+							:account-id="activeAccountId"
+							:media-type="mediaType"
+							@download="openDownloadDialog"
+						/>
+					</template>
+				</v-row>
+			</perfect-scrollbar>
+
 			<!--	Download confirmation dialog	-->
 			<v-row>
 				<download-confirmation

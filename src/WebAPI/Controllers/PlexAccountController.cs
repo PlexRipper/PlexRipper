@@ -16,14 +16,17 @@ namespace PlexRipper.WebAPI.Controllers
     public class PlexAccountController : BaseController
     {
         private readonly IPlexAccountService _plexAccountService;
+
         private readonly IMapper _mapper;
 
-        public PlexAccountController(IPlexAccountService plexAccountService, IMapper mapper) : base(mapper)
+        public PlexAccountController(
+            IPlexAccountService plexAccountService,
+            IMapper mapper,
+            INotificationsService notificationsService) : base(mapper, notificationsService)
         {
             _plexAccountService = plexAccountService;
             _mapper = mapper;
         }
-
 
         // GET: api/<PlexAccountController>
         [HttpGet]
@@ -81,7 +84,6 @@ namespace PlexRipper.WebAPI.Controllers
             }
         }
 
-
         // PUT api/<PlexAccountController>/5
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
@@ -113,7 +115,6 @@ namespace PlexRipper.WebAPI.Controllers
             }
         }
 
-
         // POST api/<AccountController>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ResultDTO<PlexAccountDTO>))]
@@ -140,7 +141,6 @@ namespace PlexRipper.WebAPI.Controllers
                 return InternalServerError(e);
             }
         }
-
 
         // DELETE api/<AccountController>/5
         [HttpDelete("{id:int}")]
@@ -219,6 +219,7 @@ namespace PlexRipper.WebAPI.Controllers
             {
                 return BadRequest(Result.Fail("Invalid username"));
             }
+
             try
             {
                 var result = await _plexAccountService.CheckIfUsernameIsAvailableAsync(username);

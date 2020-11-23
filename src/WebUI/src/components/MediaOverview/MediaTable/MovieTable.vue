@@ -1,5 +1,5 @@
 <template>
-	<v-row justify="center">
+	<v-row class="table-overview" justify="center" no-gutters>
 		<v-col cols="12">
 			<media-table :headers="getHeaders" :items="items" :media-type="getType" @download="downloadMovie" />
 		</v-col>
@@ -8,11 +8,11 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DataTableHeader } from 'vuetify/types';
 import { PlexMediaType, PlexMovieDTO } from '@dto/mainApi';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
+import IMediaTableHeader from '@interfaces/IMediaTableHeader';
 
 @Component({
 	components: {
@@ -36,7 +36,7 @@ export default class MovieTable extends Vue {
 		return PlexMediaType.Movie;
 	}
 
-	get getHeaders(): DataTableHeader<PlexMovieDTO>[] {
+	get getHeaders(): IMediaTableHeader<PlexMovieDTO>[] {
 		return [
 			// {
 			// 	text: 'Id',
@@ -56,11 +56,13 @@ export default class MovieTable extends Vue {
 				text: 'Added At',
 				value: 'addedAt',
 				width: 150,
+				type: 'date',
 			},
 			{
 				text: 'Updated At',
 				value: 'updatedAt',
 				width: 150,
+				type: 'date',
 			},
 		];
 	}

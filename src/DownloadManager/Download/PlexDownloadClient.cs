@@ -410,7 +410,6 @@ namespace PlexRipper.DownloadManager.Download
             return Result.Ok(true);
         }
 
-
         /// <summary>
         /// Immediately stops all <see cref="DownloadWorker"/>s and destroys them.
         /// This will also remove any downloaded data.

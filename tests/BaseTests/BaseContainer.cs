@@ -1,6 +1,5 @@
 ﻿using System;
 using Autofac;
-using AutofacSerilogIntegration;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Data;
@@ -29,7 +28,6 @@ namespace PlexRipper.BaseTests
             // Database setup
             PlexRipperDBSetup.Setup();
 
-            builder.RegisterLogger(autowireProperties: true);
             AutofacContainer = builder.Build();
         }
 

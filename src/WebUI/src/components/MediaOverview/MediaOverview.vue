@@ -50,17 +50,20 @@
 			</template>
 
 			<!-- Poster display-->
-			<v-row v-if="isPosterView" class="poster-overview" justify="center">
-				<template v-for="item in getItems">
-					<media-poster
-						:key="item.id"
-						:media-item="item"
-						:account-id="activeAccountId"
-						:media-type="mediaType"
-						@download="openDownloadDialog"
-					/>
-				</template>
-			</v-row>
+			<perfect-scrollbar>
+				<v-row v-if="isPosterView" class="poster-overview" justify="center">
+					<template v-for="item in getItems">
+						<media-poster
+							:key="item.id"
+							:media-item="item"
+							:account-id="activeAccountId"
+							:media-type="mediaType"
+							@download="openDownloadDialog"
+						/>
+					</template>
+				</v-row>
+			</perfect-scrollbar>
+
 			<!--	Download confirmation dialog	-->
 			<v-row>
 				<download-confirmation
@@ -103,7 +106,7 @@ import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
-import SettingsService from '@service/settingsService';
+import { settingsStore } from '~/store';
 
 @Component({
 	components: {
@@ -125,7 +128,6 @@ export default class MediaOverview extends Vue {
 	activeAccount: PlexAccountDTO | null = null;
 
 	isLoading: boolean = true;
-	viewMode: ViewMode = ViewMode.Poster;
 	isRefreshing: boolean = false;
 	library: PlexLibraryDTO | null = null;
 	libraryProgress: LibraryProgress | null = null;
@@ -169,8 +171,25 @@ export default class MediaOverview extends Vue {
 		return this.libraryProgress?.percentage ?? -1;
 	}
 
+	get viewMode(): ViewMode {
+		switch (this.mediaType) {
+			case PlexMediaType.Movie:
+				return settingsStore.movieViewMode;
+			case PlexMediaType.TvShow:
+				return settingsStore.tvShowViewMode;
+			default:
+				return ViewMode.Poster;
+		}
+	}
+
 	changeView(viewMode: ViewMode): void {
-		this.viewMode = viewMode;
+		switch (this.mediaType) {
+			case PlexMediaType.Movie:
+				return settingsStore.setMovieViewMode(viewMode);
+			case PlexMediaType.TvShow:
+				return settingsStore.setTvShowViewMode(viewMode);
+		}
+		Log.error('Could not set viewmode for type' + this.mediaType);
 	}
 
 	resetProgress(isRefreshing: boolean): void {
@@ -274,14 +293,6 @@ export default class MediaOverview extends Vue {
 		this.resetProgress(false);
 		this.isRefreshing = false;
 		this.isLoading = true;
-
-		SettingsService.getSettings().subscribe((data) => {
-			if (this.isMovieLibrary) {
-				this.viewMode = data?.userInterfaceSettings?.displaySettings?.movieViewMode ?? ViewMode.Poster;
-			} else if (this.isTvShowLibrary) {
-				this.viewMode = data?.userInterfaceSettings?.displaySettings?.tvShowViewMode ?? ViewMode.Poster;
-			}
-		});
 
 		// Setup progress bar
 		SignalrService.getLibraryProgress().subscribe((data) => {

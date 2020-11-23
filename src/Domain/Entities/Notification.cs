@@ -18,17 +18,13 @@ namespace PlexRipper.Domain
         [Column(Order = 3)]
         public bool Hidden { get; set; }
 
-        public Notification()
-        {
-
-        }
+        public Notification() { }
 
         public Notification(Error error)
         {
-            this.NotificationLevel = NotificationLevel.Error;
-            this.CreatedAt = DateTime.Now;
-            this.Message = error.Message;
-
+            NotificationLevel = NotificationLevel.Error;
+            CreatedAt = DateTime.Now;
+            Message = error.Message;
         }
 
         [NotMapped]

@@ -40,6 +40,9 @@ const config: NuxtConfig = {
 		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
 		{ src: '@plugins/registerComponents.ts', mode: 'client' },
 	],
+	router: {
+		middleware: ['pageRedirect'],
+	},
 	/*
 	 ** Nuxt.js dev-modules
 	 */

@@ -117,9 +117,31 @@ MediaOverviewBar.vue
 }
 
 .poster-overview {
-	overflow-y: scroll;
+	height: calc(100vh - 85px - 48px - 24px);
+
 	// 8% reserved for the media-overview-bar
-	height: 92%;
+	// height: 92%;
+}
+/*
+MediaTable.vue
+*/
+.media-table {
+	.media-table-header {
+		height: 50px;
+		margin: 0;
+		position: sticky;
+		position: -webkit-sticky;
+		top: 0; /* required */
+
+		.media-table-header-columns {
+		}
+	}
+	.media-table-content {
+		// TODO Maybe calculate this in vue
+		// This takes the 100% browser window height, and then subtracts all bars that are above
+		// media-table-content to calculate the height of the actual viewport of the media that is viewed.
+		height: calc(100vh - 50px - 85px - 48px - 24px);
+	}
 }
 
 /*
@@ -145,4 +167,5 @@ ServerDrawer.vue
 }
 .ps {
 	height: 100%;
+	width: 100%;
 }

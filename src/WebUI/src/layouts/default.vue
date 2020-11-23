@@ -1,14 +1,14 @@
 <template>
-	<v-app class="default-layout">
+	<v-app :class="[hasBackgroundOverlay ? 'background' : 'no-background']">
 		<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
-		<navigation-drawer />
-		<app-bar />
+		<navigation-drawer v-if="showNavigationDrawer" />
+		<app-bar v-if="showAppbar" />
 
 		<v-main class="no-background">
 			<nuxt />
-			<background />
 		</v-main>
 		<footer />
+		<background />
 	</v-app>
 </template>
 
@@ -21,6 +21,7 @@ import HelpDialog from '@components/Help/HelpDialog.vue';
 import Footer from '@components/Footer/Footer.vue';
 
 @Component({
+	loading: false,
 	components: {
 		NavigationDrawer,
 		AppBar,
@@ -31,6 +32,18 @@ import Footer from '@components/Footer/Footer.vue';
 export default class Default extends Vue {
 	helpDialogState: boolean = false;
 	helpId: string = '';
+
+	get hasBackgroundOverlay(): boolean {
+		return this.$route.fullPath !== '/setup';
+	}
+
+	get showNavigationDrawer(): boolean {
+		return this.$route.fullPath !== '/setup';
+	}
+
+	get showAppbar(): boolean {
+		return this.$route.fullPath !== '/setup';
+	}
 
 	created(): void {
 		HelpService.getHelpDialog().subscribe((helpId) => {

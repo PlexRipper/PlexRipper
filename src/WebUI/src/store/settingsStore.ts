@@ -1,24 +1,116 @@
 import Log from 'consola';
 import { Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import type { SettingsModelDTO } from '@dto/mainApi';
+import type { SettingsModel } from '@dto/mainApi';
 import SettingsService from '@service/settingsService';
+import { ViewMode } from '@dto/mainApi';
 
 // Doc: https://typescript.nuxtjs.org/cookbook/store.html#class-based
 @Module({ name: 'settingsStore', stateFactory: true })
 export default class SettingsStore extends VuexModule {
-	settings: SettingsModelDTO | null = null;
+	settings: SettingsModel | null = null;
 
 	@Mutation
-	setSettings(settings: SettingsModelDTO) {
+	setSettings(settings: SettingsModel) {
 		Log.info('Vuex store was updated with settings');
 		this.settings = settings;
 	}
 
-	get getSettings(): SettingsModelDTO | null {
+	get getSettings(): SettingsModel | null {
 		return this.settings;
 	}
 
-	// region User Interface Settings
+	// region General
+	get firstTimeSetup(): boolean {
+		return this.settings?.firstTimeSetup ?? false;
+	}
+
+	@Mutation
+	setFirstTimeSetup(value: boolean) {
+		if (this.settings?.firstTimeSetup) {
+			this.settings.firstTimeSetup = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+	// endregion
+
+	// region ViewMode
+	get movieViewMode(): ViewMode {
+		return this.settings?.userInterfaceSettings?.displaySettings?.movieViewMode ?? ViewMode.Poster;
+	}
+
+	get tvShowViewMode(): ViewMode {
+		return this.settings?.userInterfaceSettings?.displaySettings?.tvShowViewMode ?? ViewMode.Poster;
+	}
+
+	@Mutation
+	setMovieViewMode(value: ViewMode) {
+		if (this.settings?.userInterfaceSettings?.displaySettings) {
+			this.settings.userInterfaceSettings.displaySettings.movieViewMode = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+
+	@Mutation
+	setTvShowViewMode(value: ViewMode) {
+		if (this.settings?.userInterfaceSettings?.displaySettings) {
+			this.settings.userInterfaceSettings.displaySettings.tvShowViewMode = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+	// endregion
+
+	// region Date Time Settings
+	get shortDateFormat(): string {
+		return this.settings?.userInterfaceSettings?.dateTimeSettings?.shortDateFormat ?? '';
+	}
+
+	get longDateFormat(): string {
+		return this.settings?.userInterfaceSettings?.dateTimeSettings?.longDateFormat ?? '';
+	}
+
+	get timeFormat(): string {
+		return this.settings?.userInterfaceSettings?.dateTimeSettings?.timeFormat ?? '';
+	}
+
+	get showRelativeDates(): boolean {
+		return this.settings?.userInterfaceSettings?.dateTimeSettings?.showRelativeDates ?? false;
+	}
+
+	@Mutation
+	setShortDateFormat(value: string) {
+		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
+			this.settings.userInterfaceSettings.dateTimeSettings.shortDateFormat = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+
+	@Mutation
+	setLongDateFormat(value: string) {
+		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
+			this.settings.userInterfaceSettings.dateTimeSettings.longDateFormat = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+
+	@Mutation
+	setTimeFormat(value: string) {
+		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
+			this.settings.userInterfaceSettings.dateTimeSettings.timeFormat = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+
+	@Mutation
+	setShowRelativeDates(value: boolean) {
+		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
+			this.settings.userInterfaceSettings.dateTimeSettings.showRelativeDates = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+
+	// endregion
+
+	// region Confirmation Settings
 	get askDownloadMovieConfirmation(): boolean {
 		return this.settings?.userInterfaceSettings?.confirmationSettings?.askDownloadMovieConfirmation ?? false;
 	}
@@ -38,7 +130,6 @@ export default class SettingsStore extends VuexModule {
 	@Mutation
 	setAskDownloadMovieConfirmation(value: boolean) {
 		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
-			Log.debug(`Changed setting AskDownloadMovieConfirmation to value ${value}`);
 			this.settings.userInterfaceSettings.confirmationSettings.askDownloadMovieConfirmation = value;
 			SettingsService.updateSettings(this.settings);
 		}
@@ -64,6 +155,21 @@ export default class SettingsStore extends VuexModule {
 	setAskDownloadEpisodeConfirmation(value: boolean) {
 		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
 			this.settings.userInterfaceSettings.confirmationSettings.askDownloadEpisodeConfirmation = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+	// endregion
+
+	// region Advanced
+
+	get downloadSegments(): number {
+		return this.settings?.advancedSettings?.downloadManager?.downloadSegments ?? 4;
+	}
+
+	@Mutation
+	setDownloadSegments(value: number) {
+		if (this.settings?.advancedSettings?.downloadManager?.downloadSegments) {
+			this.settings.advancedSettings.downloadManager.downloadSegments = value;
 			SettingsService.updateSettings(this.settings);
 		}
 	}

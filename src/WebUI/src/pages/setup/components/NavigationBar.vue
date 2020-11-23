@@ -25,7 +25,7 @@
 			/>
 		</v-col>
 		<v-col v-else cols="3">
-			<p-btn class="mx-2" text-id="finish-setup" :block="true" to="/" :button-type="getNavigationButtonType" />
+			<p-btn class="mx-2" text-id="finish-setup" :block="true" :button-type="getNavigationButtonType" @click="finishSetup" />
 		</v-col>
 		<v-spacer />
 	</v-row>
@@ -63,6 +63,10 @@ export default class NavigationBar extends Vue {
 
 	next(): void {
 		this.$emit('next');
+	}
+
+	finishSetup(): void {
+		this.$emit('finish');
 	}
 }
 </script>

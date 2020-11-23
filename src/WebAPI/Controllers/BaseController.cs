@@ -1,11 +1,12 @@
-﻿using FluentResults;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Domain;
-using System;
+﻿using System;
 using System.Net.Mime;
 using AutoMapper;
+using FluentResults;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application.Common;
+using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -18,12 +19,13 @@ namespace PlexRipper.WebAPI.Controllers
     {
         private readonly IMapper _mapper;
 
-        protected BaseController(IMapper mapper)
+        private readonly INotificationsService _notificationsService;
+
+        protected BaseController(IMapper mapper, INotificationsService notificationsService)
         {
             _mapper = mapper;
+            _notificationsService = notificationsService;
         }
-
-
 
         [NonAction]
         protected IActionResult InternalServerError(Exception e)
@@ -39,6 +41,7 @@ namespace PlexRipper.WebAPI.Controllers
         {
             Log.Error("Internal server error:");
             result.LogError();
+            _notificationsService.SendResult(result);
             var resultDTO = _mapper.Map<ResultDTO>(result);
             return StatusCode(StatusCodes.Status500InternalServerError, resultDTO);
         }
@@ -46,7 +49,6 @@ namespace PlexRipper.WebAPI.Controllers
         [NonAction]
         protected IActionResult BadRequest(int id, string nameOf = "")
         {
-
             var error = new Error($"The Id: {id} was 0 or lower");
 
             if (nameOf != string.Empty)
@@ -67,6 +69,7 @@ namespace PlexRipper.WebAPI.Controllers
         protected IActionResult BadRequest(Result result)
         {
             // Filter our the value type
+            _notificationsService.SendResult(result);
             var resultDTO = _mapper.Map<ResultDTO>(result);
             return new BadRequestObjectResult(resultDTO);
         }
@@ -78,7 +81,5 @@ namespace PlexRipper.WebAPI.Controllers
             var resultDTO = _mapper.Map<ResultDTO<T>>(result);
             return new OkObjectResult(resultDTO);
         }
-
-
     }
 }

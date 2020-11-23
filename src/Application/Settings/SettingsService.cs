@@ -41,22 +41,7 @@ namespace PlexRipper.Application.Settings
 
             if (id == 0)
             {
-                Log.Warning("The ActivePlexAccountId was the default value of 0, will set to the first plex account found in the database.");
-                var result = await _mediator.Send(new GetAllPlexAccountsQuery(true, true));
-                if (result.IsFailed)
-                {
-                    return result.ToResult();
-                }
 
-                if (result.Value.Count > 0)
-                {
-                    _userSettings.AccountSettings.ActiveAccountId = result.Value[0].Id;
-                    return Result.Ok(result.Value[0]);
-                }
-
-                string msg = "There are no plexAccounts available to set as the active one";
-                Log.Error(msg);
-                return Result.Fail(msg);
             }
             else
             {

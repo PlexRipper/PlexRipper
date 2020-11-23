@@ -371,39 +371,37 @@ export interface PlexServerStatusDTO {
   plexServerId: number;
 }
 
-export type ResultDTOOfSettingsModelDTO = ResultDTO & { value: SettingsModelDTO };
+export type ResultDTOOfSettingsModel = ResultDTO & { value: SettingsModel };
 
-export interface SettingsModelDTO {
-  accountSettings: AccountSettingsModelDTO;
-  advancedSettings: AdvancedSettingsModelDTO;
-  userInterfaceSettings: UserInterfaceSettingsModelDTO;
-}
+export type SettingsModel = BaseModel & {
+  firstTimeSetup: boolean;
+  accountSettings: AccountSettingsModel;
+  advancedSettings: AdvancedSettingsModel;
+  userInterfaceSettings: UserInterfaceSettingsModel;
+};
 
-export interface AccountSettingsModelDTO {
-  activeAccountId: number;
-}
+export type AccountSettingsModel = BaseModel & { activeAccountId: number };
 
-export interface AdvancedSettingsModelDTO {
-  downloadManager: DownloadManagerModelDTO;
-}
+export type BaseModel = object;
 
-export interface DownloadManagerModelDTO {
-  downloadSegments: number;
-}
+export type AdvancedSettingsModel = BaseModel & { downloadManager: DownloadManagerModel };
 
-export interface UserInterfaceSettingsModelDTO {
-  confirmationSettings: ConfirmationSettingsModelDTO;
-  displaySettings: DisplaySettingsModelDTO;
-}
+export type DownloadManagerModel = BaseModel & { downloadSegments?: number };
 
-export interface ConfirmationSettingsModelDTO {
+export type UserInterfaceSettingsModel = BaseModel & {
+  confirmationSettings: ConfirmationSettingsModel;
+  displaySettings: DisplaySettingsModel;
+  dateTimeSettings: DateTimeModel;
+};
+
+export type ConfirmationSettingsModel = BaseModel & {
   askDownloadMovieConfirmation: boolean;
   askDownloadTvShowConfirmation: boolean;
   askDownloadSeasonConfirmation: boolean;
   askDownloadEpisodeConfirmation: boolean;
-}
+};
 
-export type DisplaySettingsModelDTO = BaseModel & { tvShowViewMode: ViewMode; movieViewMode: ViewMode };
+export type DisplaySettingsModel = BaseModel & { tvShowViewMode: ViewMode; movieViewMode: ViewMode };
 
 export enum ViewMode {
   Table = "Table",
@@ -411,7 +409,12 @@ export enum ViewMode {
   Overview = "Overview",
 }
 
-export type BaseModel = object;
+export type DateTimeModel = BaseModel & {
+  shortDateFormat: string;
+  longDateFormat: string;
+  timeFormat: string;
+  showRelativeDates: boolean;
+};
 
 export interface DownloadProgress {
   id: number;

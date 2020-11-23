@@ -9,8 +9,6 @@ using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace PlexRipper.WebAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -21,7 +19,8 @@ namespace PlexRipper.WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
-        public PlexServerController(IPlexServerService plexServerService, IMapper mapper) : base(mapper)
+        public PlexServerController(IPlexServerService plexServerService, IMapper mapper, INotificationsService notificationsService) : base(mapper,
+            notificationsService)
         {
             _mapper = mapper;
             _plexServerService = plexServerService;

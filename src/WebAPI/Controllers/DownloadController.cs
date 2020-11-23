@@ -21,7 +21,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         private readonly INotificationsService _notificationsService;
 
-        public DownloadController(IPlexDownloadService plexDownloadService, IMapper mapper, INotificationsService notificationsService) : base(mapper)
+        public DownloadController(IPlexDownloadService plexDownloadService, IMapper mapper, INotificationsService notificationsService) : base(mapper, notificationsService)
         {
             _plexDownloadService = plexDownloadService;
             _mapper = mapper;

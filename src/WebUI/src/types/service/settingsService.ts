@@ -2,12 +2,12 @@ import Log from 'consola';
 import { ReplaySubject, Observable } from 'rxjs';
 import { tap, switchMap, finalize } from 'rxjs/operators';
 import { getSettings, updateSettings } from '@api/settingsApi';
-import { SettingsModelDTO } from '@dto/mainApi';
+import { SettingsModel } from '@dto/mainApi';
 import GlobalService from '@service/globalService';
 import { settingsStore as SettingsStore } from '@/store';
 
 export class SettingsService {
-	private _settings: ReplaySubject<SettingsModelDTO> = new ReplaySubject<SettingsModelDTO>();
+	private _settings: ReplaySubject<SettingsModel> = new ReplaySubject<SettingsModel>();
 
 	public constructor() {
 		GlobalService.getAxiosReady()
@@ -23,11 +23,11 @@ export class SettingsService {
 		this.getSettings().subscribe((data) => SettingsStore.setSettings(data));
 	}
 
-	public getSettings(): Observable<SettingsModelDTO> {
+	public getSettings(): Observable<SettingsModel> {
 		return this._settings.asObservable();
 	}
 
-	public updateSettings(settings: SettingsModelDTO): void {
+	public updateSettings(settings: SettingsModel): void {
 		if (settings) {
 			updateSettings(settings)
 				.pipe(finalize(() => this.fetchSettings()))

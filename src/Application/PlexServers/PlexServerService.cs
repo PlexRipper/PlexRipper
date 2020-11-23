@@ -102,30 +102,6 @@ namespace PlexRipper.Application.PlexServers
             return await _mediator.Send(new GetPlexServerStatusByIdQuery(result.Value));
         }
 
-        /// <summary>
-        /// This will get all <see cref="PlexLibrary"/>s with their media in the parent <see cref="PlexServer"/>
-        /// </summary>
-        /// <param name="plexAccount"></param>
-        /// <param name="plexServer"></param>
-        /// <param name="refresh">Force refresh from PlexApi</param>
-        /// <returns></returns>
-        public async Task<Result<PlexServer>> GetAllLibraryMediaAsync(PlexAccount plexAccount, PlexServer plexServer, bool refresh = false)
-        {
-            var plexServerDB = await _mediator.Send(new GetPlexServerByIdQuery(plexServer.Id, true));
-
-            if (refresh)
-            {
-                foreach (var library in plexServerDB.Value.PlexLibraries)
-                {
-                    await _plexLibraryService.GetLibraryMediaAsync(plexAccount, plexServerDB.Value, library.Key, true);
-                }
-
-                return await _mediator.Send(new GetPlexServerByIdQuery(plexServer.Id, true));
-            }
-
-            return plexServerDB;
-        }
-
         #region CRUD
 
         public Task<Result<PlexServer>> GetServerAsync(int plexServerId)

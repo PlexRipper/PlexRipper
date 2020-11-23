@@ -20,7 +20,10 @@ namespace PlexRipper.WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
-        public SettingsController(ISettingsService settingsService, IMapper mapper) : base(mapper)
+        public SettingsController(
+            ISettingsService settingsService,
+            IMapper mapper,
+            INotificationsService notificationsService) : base(mapper, notificationsService)
         {
             _settingsService = settingsService;
             _mapper = mapper;
@@ -101,11 +104,6 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult UpdateActiveAccount(int id)
         {
-            if (id <= 0)
-            {
-                return BadRequestInvalidId();
-            }
-
             try
             {
                 Log.Debug($"Setting the active plex account to {id}");

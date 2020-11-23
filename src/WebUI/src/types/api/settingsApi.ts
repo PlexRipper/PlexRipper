@@ -20,12 +20,6 @@ export function updateSettings(settings: SettingsModel): Observable<SettingsMode
 	return checkResponse<SettingsModel>(result, logText, 'updateSettings');
 }
 
-export function getActiveAccount(): Observable<PlexAccountDTO | null> {
-	preApiRequest(logText, 'getActiveAccount');
-	const result: Observable<AxiosResponse> = Axios.get<Result<PlexAccountDTO>>(`${apiPath}/activeaccount`);
-	return checkResponse<PlexAccountDTO | null>(result, logText, 'getActiveAccount');
-}
-
 export function setActiveAccount(accountId: number): Observable<PlexAccountDTO | null> {
 	preApiRequest(logText, 'setActiveAccount');
 	const result: Observable<AxiosResponse> = Axios.put<Result<PlexAccountDTO>>(`${apiPath}/activeaccount/${accountId}`);

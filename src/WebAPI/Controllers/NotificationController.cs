@@ -20,7 +20,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
-        public NotificationController(INotificationsService notificationsService, IMapper mapper) : base(mapper)
+        public NotificationController(INotificationsService notificationsService, IMapper mapper) : base(mapper, notificationsService)
         {
             _notificationsService = notificationsService;
             _mapper = mapper;

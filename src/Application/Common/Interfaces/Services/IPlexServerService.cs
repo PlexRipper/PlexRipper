@@ -11,9 +11,6 @@ namespace PlexRipper.Application.Common
 
         Task<Result<bool>> RefreshPlexServersAsync(PlexAccount plexAccount);
 
-        Task<Result<PlexServer>> GetAllLibraryMediaAsync(PlexAccount plexAccount, PlexServer plexServer,
-            bool refresh = false);
-
         Task<Result<PlexServer>> GetServerAsync(int plexServerId);
 
         Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(int plexServerId, int plexAccountId = 0);

@@ -22,6 +22,9 @@
 			</template>
 
 			<v-list>
+				<v-list-item @click="setActiveAccount()">
+					<v-list-item-title> All accounts </v-list-item-title>
+				</v-list-item>
 				<template v-if="accounts.length > 0">
 					<v-list-item v-for="(account, index) in accounts" :key="index" @click="setActiveAccount(account)">
 						<v-list-item-title> {{ account.displayName }}</v-list-item-title>
@@ -54,7 +57,11 @@ import DarkModeToggle from '@components/General/DarkModeToggle.vue';
 export default class AppBar extends Vue {
 	private accounts: PlexAccountDTO[] = [];
 
-	setActiveAccount(account: PlexAccountDTO): void {
+	setActiveAccount(account: PlexAccountDTO | null = null): void {
+		if (account === null) {
+			AccountService.setActiveAccount(0);
+			return;
+		}
 		AccountService.setActiveAccount(account.id);
 	}
 

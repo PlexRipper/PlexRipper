@@ -1,12 +1,12 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Threading.Tasks;
+using AutoMapper;
 using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
-using System;
-using System.Threading.Tasks;
-using PlexRipper.Application.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -19,7 +19,7 @@ namespace PlexRipper.WebAPI.Controllers
         private readonly IMapper _mapper;
 
 
-        public PlexLibraryController(IPlexLibraryService plexLibraryService, IMapper mapper) : base(mapper)
+        public PlexLibraryController(IPlexLibraryService plexLibraryService, IMapper mapper, INotificationsService notificationsService) : base(mapper, notificationsService)
         {
             _plexLibraryService = plexLibraryService;
             _mapper = mapper;
@@ -31,16 +31,11 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Get(int id, int plexAccountId)
+        public async Task<IActionResult> Get(int id, int plexAccountId = 0)
         {
             if (id <= 0)
             {
                 return BadRequest(id, nameof(id));
-            }
-
-            if (plexAccountId <= 0)
-            {
-                return BadRequest(plexAccountId, nameof(plexAccountId));
             }
 
             try
@@ -49,7 +44,7 @@ namespace PlexRipper.WebAPI.Controllers
 
                 if (data.IsFailed)
                 {
-                    return BadRequest(data);
+                    return InternalServerError(data);
                 }
 
                 if (data.Value != null)

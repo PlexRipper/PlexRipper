@@ -32,9 +32,9 @@ namespace PlexRipper.Domain
         Album = 6,
 
         [EnumMember(Value = "Song")]
-        Song = 6,
+        Song = 7,
 
         [EnumMember(Value = "Unknown")]
-        Unknown = 10
+        Unknown = 10,
     }
 }

@@ -42,17 +42,8 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("updatedAt", Required = Required.Always)]
         public DateTime UpdatedAt { get; set; }
 
-        [JsonProperty("owned", Required = Required.Always)]
-        public bool Owned { get; set; }
-
-        [JsonProperty("synced", Required = Required.Always)]
-        public bool Synced { get; set; }
-
         [JsonProperty("ownerId", Required = Required.Always)]
         public int OwnerId { get; set; }
-
-        [JsonProperty("home", Required = Required.Always)]
-        public bool Home { get; set; }
 
         [JsonProperty("plexLibraries", Required = Required.Always)]
         public List<PlexLibraryDTO> PlexLibraries { get; set; }

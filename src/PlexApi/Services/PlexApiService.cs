@@ -154,7 +154,7 @@ namespace PlexRipper.PlexApi.Services
             return _mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata);
         }
 
-        public async Task<List<PlexServer>> GetServerAsync(string authToken)
+        public async Task<List<PlexServer>> GetServersAsync(string authToken)
         {
             var result = await _plexApi.GetServerAsync(authToken);
             if (result != null)

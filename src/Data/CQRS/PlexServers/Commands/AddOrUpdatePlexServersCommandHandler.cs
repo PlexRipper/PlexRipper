@@ -13,7 +13,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexServers
 {
-    public class AddOrUpdatePlexServersValidator : AbstractValidator<AddOrUpdatePlexLibrariesCommand>
+    public class AddOrUpdatePlexServersValidator : AbstractValidator<AddOrUpdatePlexServersCommand>
     {
         public AddOrUpdatePlexServersValidator()
         {
@@ -23,11 +23,11 @@ namespace PlexRipper.Data.CQRS.PlexServers
         }
     }
 
-    public class AddOrUpdatePlexServersHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<bool>>
+    public class AddOrUpdatePlexServersHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexServersCommand, Result<bool>>
     {
         public AddOrUpdatePlexServersHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<bool>> Handle(AddOrUpdatePlexLibrariesCommand command, CancellationToken cancellationToken)
+        public async Task<Result<bool>> Handle(AddOrUpdatePlexServersCommand command, CancellationToken cancellationToken)
         {
             var plexAccount = command.PlexAccount;
             var plexServers = command.PlexServers;
@@ -37,8 +37,8 @@ namespace PlexRipper.Data.CQRS.PlexServers
             Log.Information("Adding or updating PlexServers now.");
             foreach (var plexServer in plexServers)
             {
-                var plexServerDB = await _dbContext.PlexServers.FirstOrDefaultAsync(x =>
-                    x.OwnerId == plexServer.OwnerId && x.MachineIdentifier == plexServer.MachineIdentifier, cancellationToken);
+                var plexServerDB =
+                    await _dbContext.PlexServers.FirstOrDefaultAsync(x => x.MachineIdentifier == plexServer.MachineIdentifier, cancellationToken);
 
                 if (plexServerDB != null)
                 {
@@ -75,6 +75,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
                         $"PlexAccount {plexAccount.DisplayName} already has an association with PlexServer: {plexServer.Name}, updating authentication token now.");
                     plexAccountServer.AuthToken = plexServer.AccessToken; // TODO need a better method to transfer the plexAccount tokens from the DTO
                     plexAccountServer.AuthTokenCreationDate = DateTime.Now;
+                    plexAccountServer.Owned = plexAccount.PlexId == plexServer.OwnerId;
                 }
                 else
                 {
@@ -86,7 +87,8 @@ namespace PlexRipper.Data.CQRS.PlexServers
                         PlexAccountId = plexAccount.Id,
                         PlexServerId = plexServer.Id,
                         AuthToken = plexServer.AccessToken, // TODO need a better method to transfer the plexAccount tokens from the DTO
-                        AuthTokenCreationDate = DateTime.Now
+                        Owned = plexAccount.PlexId == plexServer.OwnerId,
+                        AuthTokenCreationDate = DateTime.Now,
                     }, cancellationToken);
                 }
             }

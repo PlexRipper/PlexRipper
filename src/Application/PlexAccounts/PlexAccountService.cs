@@ -91,7 +91,7 @@ namespace PlexRipper.Application.PlexAccounts
         /// <summary>
         /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi. It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
         /// </summary>
-        /// <param name="plexAccount">The <see cref="PlexAccount"/> to setup</param>
+        /// <param name="plexAccount">The <see cref="PlexAccount"/> to setup.</param>
         /// <returns>If the setup was successful</returns>
         private async Task<Result<bool>> SetupAccountAsync(PlexAccount plexAccount)
         {

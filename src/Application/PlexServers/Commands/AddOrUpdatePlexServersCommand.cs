@@ -5,13 +5,13 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexServers
 {
-    public class AddOrUpdatePlexLibrariesCommand : IRequest<Result<bool>>
+    public class AddOrUpdatePlexServersCommand : IRequest<Result<bool>>
     {
         public PlexAccount PlexAccount { get; }
 
         public List<PlexServer> PlexServers { get; }
 
-        public AddOrUpdatePlexLibrariesCommand(PlexAccount plexAccount, List<PlexServer> plexServers)
+        public AddOrUpdatePlexServersCommand(PlexAccount plexAccount, List<PlexServer> plexServers)
         {
             PlexAccount = plexAccount;
             PlexServers = plexServers;

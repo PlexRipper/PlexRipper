@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
@@ -33,8 +33,8 @@ namespace PlexRipper.Application.PlexServers
         /// <summary>
         /// Retrieves the latest <see cref="PlexServer"/> data, and the corresponding <see cref="PlexLibrary"/>, from the PlexAPI and stores it in the Database.
         /// </summary>
-        /// <param name="plexAccount">PlexAccount to use to retrieve the servers</param>
-        /// <returns>Is successful</returns>
+        /// <param name="plexAccount">PlexAccount to use to retrieve the servers.</param>
+        /// <returns>Is successful.</returns>
         public async Task<Result<bool>> RefreshPlexServersAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
@@ -53,10 +53,19 @@ namespace PlexRipper.Application.PlexServers
                 return Result.Fail("Token was empty");
             }
 
-            var serverList = await _plexServiceApi.GetServerAsync(token);
+            var serverList = await _plexServiceApi.GetServersAsync(token);
+
+            // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
+            serverList.ForEach(server =>
+            {
+                if (server.OwnerId == 0)
+                {
+                    server.OwnerId = plexAccount.PlexId;
+                }
+            });
 
             // First add or update the plex servers
-            var result = await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, serverList));
+            var result = await _mediator.Send(new AddOrUpdatePlexServersCommand(plexAccount, serverList));
             if (result.IsFailed)
             {
                 return result.ToResult();

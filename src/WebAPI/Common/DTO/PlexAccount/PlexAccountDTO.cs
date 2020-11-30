@@ -48,9 +48,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("authToken", Required = Required.Always)]
         public string AuthToken { get; set; }
 
-        [JsonProperty("forumId", Required = Required.Always)]
-        public int ForumId { get; set; }
-
         [JsonProperty("plexServers", Required = Required.Always)]
         public List<PlexServerDTO> PlexServers { get; set; }
     }

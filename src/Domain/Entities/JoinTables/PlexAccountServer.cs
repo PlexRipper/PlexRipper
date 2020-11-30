@@ -20,9 +20,12 @@ namespace PlexRipper.Domain
         #endregion
 
         [Column(Order = 2)]
-        public string AuthToken { get; set; }
+        public bool Owned { get; set; }
 
         [Column(Order = 3)]
+        public string AuthToken { get; set; }
+
+        [Column(Order = 4)]
         public DateTime AuthTokenCreationDate { get; set; }
     }
 }

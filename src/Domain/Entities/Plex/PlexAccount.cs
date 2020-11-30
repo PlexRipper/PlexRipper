@@ -52,8 +52,10 @@ namespace PlexRipper.Domain
         [Column(Order = 6)]
         public DateTime ValidatedAt { get; set; }
 
+        [Column(Order = 7)]
         public long PlexId { get; set; }
 
+        [Column(Order = 8)]
         public string Uuid { get; set; }
 
         public string Email { get; set; }
@@ -70,8 +72,6 @@ namespace PlexRipper.Domain
         ///     account has access to.
         /// </summary>
         public string AuthenticationToken { get; set; }
-
-        public int ForumId { get; set; }
 
         /// <summary>
         /// If this is a main account then it will get a lower priority when downloading media which a non-main account also has access to.
@@ -122,7 +122,6 @@ namespace PlexRipper.Domain
             Title = plexAccount.Title;
             HasPassword = plexAccount.HasPassword;
             AuthenticationToken = plexAccount.AuthenticationToken;
-            ForumId = plexAccount.ForumId;
             IsValidated = true;
             ValidatedAt = DateTime.Now;
         }

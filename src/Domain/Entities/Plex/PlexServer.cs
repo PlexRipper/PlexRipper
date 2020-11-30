@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -35,14 +35,7 @@ namespace PlexRipper.Domain
 
         public DateTime UpdatedAt { get; set; }
 
-        public bool Owned { get; set; }
-
-        public bool Synced { get; set; }
-
         public long OwnerId { get; set; }
-
-        public bool Home { get; set; }
-
 
         #region Relationships
 

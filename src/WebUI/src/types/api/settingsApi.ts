@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
-import { PlexAccountDTO, SettingsModel } from '@dto/mainApi';
+import { SettingsModel } from '@dto/mainApi';
 import Result from 'fluent-type-results';
 import { checkResponse, preApiRequest } from './baseApi';
 
@@ -18,10 +18,4 @@ export function updateSettings(settings: SettingsModel): Observable<SettingsMode
 	preApiRequest(logText, 'updateSettings');
 	const result: Observable<AxiosResponse> = Axios.put<Result<boolean>>(`${apiPath}`, settings);
 	return checkResponse<SettingsModel>(result, logText, 'updateSettings');
-}
-
-export function setActiveAccount(accountId: number): Observable<PlexAccountDTO | null> {
-	preApiRequest(logText, 'setActiveAccount');
-	const result: Observable<AxiosResponse> = Axios.put<Result<PlexAccountDTO>>(`${apiPath}/activeaccount/${accountId}`);
-	return checkResponse<PlexAccountDTO | null>(result, logText, 'setActiveAccount');
 }

@@ -16,9 +16,10 @@ namespace PlexRipper.Application.Common
         Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(int plexServerId, int plexAccountId = 0);
 
         /// <summary>
-        /// Retrieves all <see cref="PlexServer"/>s from the Database with the included <see cref="PlexLibrary"/>s.
+        /// Retrieves all <see cref="PlexServer"/>s from the Database with the included <see cref="PlexLibrary"/>.
         /// </summary>
-        /// <returns>The list of <see cref="PlexServer"/>s</returns>
-        Task<Result<List<PlexServer>>> GetServersAsync();
+        /// <param name="plexAccountId">Retrieve only the <see cref="PlexServer"/> which are accessible by this <see cref="PlexAccount"/>.</param>
+        /// <returns>The list of <see cref="PlexServer"/>s.</returns>
+        Task<Result<List<PlexServer>>> GetServersAsync(int plexAccountId = 0);
     }
 }

@@ -28,9 +28,7 @@ export class SignalrService {
 
 	private _downloadProgressSubject: ReplaySubject<DownloadProgress> = new ReplaySubject<DownloadProgress>();
 	private _downloadStatusChangedSubject: ReplaySubject<DownloadStatusChanged> = new ReplaySubject<DownloadStatusChanged>();
-	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> = new ReplaySubject<
-		DownloadTaskCreationProgress
-	>();
+	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> = new ReplaySubject<DownloadTaskCreationProgress>();
 
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
 	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();

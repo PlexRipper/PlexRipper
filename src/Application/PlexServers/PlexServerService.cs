@@ -148,14 +148,11 @@ namespace PlexRipper.Application.PlexServers
             return serverList;
         }
 
-        /// <summary>
-        /// Retrieves all <see cref="PlexServer"/>s from the Database with the included <see cref="PlexLibrary"/>s.
-        /// </summary>
-        /// <returns>The list of <see cref="PlexServer"/>s</returns>
-        public async Task<Result<List<PlexServer>>> GetServersAsync()
+        /// <inheritdoc/>
+        public async Task<Result<List<PlexServer>>> GetServersAsync(int plexAccountId = 0)
         {
             // Retrieve all servers
-            return await _mediator.Send(new GetAllPlexServersQuery(true));
+            return await _mediator.Send(new GetAllPlexServersQuery(plexAccountId));
         }
 
         #endregion

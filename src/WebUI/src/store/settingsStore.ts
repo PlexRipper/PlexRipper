@@ -24,6 +24,10 @@ export default class SettingsStore extends VuexModule {
 		return this.settings?.firstTimeSetup ?? false;
 	}
 
+	get activeAccount(): number {
+		return this.settings?.accountSettings?.activeAccountId ?? 0;
+	}
+
 	@Mutation
 	setFirstTimeSetup(value: boolean) {
 		if (this.settings?.firstTimeSetup) {
@@ -31,6 +35,15 @@ export default class SettingsStore extends VuexModule {
 			SettingsService.updateSettings(this.settings);
 		}
 	}
+
+	@Mutation
+	setActiveAccount(value: number) {
+		if (this.settings?.accountSettings) {
+			this.settings.accountSettings.activeAccountId = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+
 	// endregion
 
 	// region ViewMode

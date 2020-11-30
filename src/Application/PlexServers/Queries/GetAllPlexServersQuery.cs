@@ -7,11 +7,15 @@ namespace PlexRipper.Application.PlexServers
 {
     public class GetAllPlexServersQuery : IRequest<Result<List<PlexServer>>>
     {
-        public GetAllPlexServersQuery(bool includeLibraries = false)
+        /// <summary>
+        /// Retrieves all the PlexServers currently in the database.
+        /// </summary>
+        /// <param name="plexAccountId">Only retrieve <see cref="PlexServer"/>s accessible by this <see cref="PlexAccount"/>.</param>
+        public GetAllPlexServersQuery(int plexAccountId = 0)
         {
-            IncludeLibraries = includeLibraries;
+            PlexAccountId = plexAccountId;
         }
 
-        public bool IncludeLibraries { get; }
+        public int PlexAccountId { get; }
     }
 }

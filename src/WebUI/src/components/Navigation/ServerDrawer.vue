@@ -66,8 +66,10 @@
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import AccountService from '@service/accountService';
-import { PlexAccountDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import { PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import ServerDialog from '@components/Navigation/ServerDialog.vue';
+import { switchMap } from 'rxjs/operators';
+import { getPlexServers } from '@api/plexServerApi';
 
 interface INavItem {
 	title: string;
@@ -83,7 +85,6 @@ interface INavItem {
 export default class ServerDrawer extends Vue {
 	items: object[] = [];
 	plexServers: PlexServerDTO[] = [];
-	activeAccount!: PlexAccountDTO | null;
 	selectedServerId: number = 0;
 
 	get getNavItems(): INavItem[] {
@@ -110,7 +111,7 @@ export default class ServerDrawer extends Vue {
 	}
 
 	openServerSettings(serverId: number): void {
-		Log.debug(`Server ${serverId} settings openend`);
+		Log.debug(`Server ${serverId} settings opened`);
 		this.selectedServerId = serverId;
 	}
 
@@ -133,11 +134,11 @@ export default class ServerDrawer extends Vue {
 	}
 
 	created(): void {
-		AccountService.getActiveAccount().subscribe((data) => {
-			Log.debug(`ServerDrawer => ${data}`);
-			this.activeAccount = data;
-			this.plexServers = data?.plexServers ?? [];
-		});
+		AccountService.getActiveAccount()
+			.pipe(switchMap(() => getPlexServers()))
+			.subscribe((data: PlexServerDTO[]) => {
+				this.plexServers = data ?? [];
+			});
 	}
 }
 </script>

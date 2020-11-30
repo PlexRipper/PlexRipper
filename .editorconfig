@@ -115,3 +115,6 @@ dotnet_diagnostic.sa1633.severity=none
 
 # SA1503: Braces should not be omitted
 dotnet_diagnostic.sa1503.severity=none
+
+# SA1642: Constructor Summary Documentation Must Begin With StandardText
+dotnet_diagnostic.sa1642.severity=none

@@ -12,6 +12,12 @@ export function getPlexServer(serverId: number): Observable<PlexServerDTO | null
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/${serverId}`);
 	return checkResponse<PlexServerDTO>(result, logText, 'getPlexServer');
 }
+
+export function getPlexServers(): Observable<PlexServerDTO[]> {
+	preApiRequest(logText, 'getPlexServers');
+	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/`);
+	return checkResponse<PlexServerDTO[]>(result, logText, 'getPlexServers');
+}
 export function checkPlexServer(serverId: number): Observable<PlexServerStatusDTO | null> {
 	preApiRequest(logText, 'checkPlexServer');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/${serverId}/check`);

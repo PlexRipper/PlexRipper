@@ -8,12 +8,12 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DataTableHeader } from 'vuetify/types';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, PlexMediaType, PlexTvShowDTO } from '@dto/mainApi';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
+import IMediaTableHeader from '@interfaces/IMediaTableHeader';
 
 @Component({
 	components: {
@@ -42,7 +42,7 @@ export default class TVShowsTable extends Vue {
 		return PlexMediaType.TvShow;
 	}
 
-	get getHeaders(): DataTableHeader<PlexTvShowDTO>[] {
+	get getHeaders(): IMediaTableHeader<PlexTvShowDTO>[] {
 		return [
 			// {
 			// 	text: 'Id',

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
@@ -21,17 +22,24 @@ namespace PlexRipper.Data.CQRS.PlexServers
         public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersQuery request,
             CancellationToken cancellationToken)
         {
-            var query = _dbContext.PlexServers.AsQueryable();
-
-            if (request.IncludeLibraries)
+            if (request.PlexAccountId == 0)
             {
-                query = query.Include(x => x.PlexLibraries);
+                // TODO This might return PlexServers which have no PlexAccounts available that can access them.
+                var query = await _dbContext.PlexServers
+                    .Include(x => x.PlexLibraries)
+                    .ToListAsync(cancellationToken);
+
+                return Result.Ok(query);
             }
-
-            var plexServer = await query
-                .ToListAsync(cancellationToken);
-
-            return Result.Ok(plexServer);
+            else
+            {
+                var query = await _dbContext.PlexAccountServers
+                    .Include(x => x.PlexServer)
+                    .ThenInclude(x => x.PlexLibraries)
+                    .Where(x => x.PlexAccountId == request.PlexAccountId)
+                    .ToListAsync();
+                return Result.Ok(query.Select(x => x.PlexServer).ToList());
+            }
         }
     }
 }

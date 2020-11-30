@@ -33,16 +33,20 @@ export default class Default extends Vue {
 	helpDialogState: boolean = false;
 	helpId: string = '';
 
-	get hasBackgroundOverlay(): boolean {
+	get isSetupPage(): boolean {
 		return this.$route.fullPath !== '/setup';
+	}
+
+	get hasBackgroundOverlay(): boolean {
+		return this.isSetupPage;
 	}
 
 	get showNavigationDrawer(): boolean {
-		return this.$route.fullPath !== '/setup';
+		return this.isSetupPage;
 	}
 
 	get showAppbar(): boolean {
-		return this.$route.fullPath !== '/setup';
+		return this.isSetupPage;
 	}
 
 	created(): void {

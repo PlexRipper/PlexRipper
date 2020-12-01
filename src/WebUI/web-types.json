@@ -91,7 +91,7 @@
           }
         },
         {
-          "name": "ConfirmationDialog",
+          "name": "ConfirmationButton",
           "description": "",
           "attributes": [
             {
@@ -104,7 +104,7 @@
               "default": "''"
             },
             {
-              "name": "buttonText",
+              "name": "buttonTextId",
               "required": true,
               "value": {
                 "kind": "expression",
@@ -122,13 +122,31 @@
               "default": "150"
             },
             {
+              "name": "disabled",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            },
+            {
               "name": "buttonType",
-              "required": true,
+              "required": false,
               "value": {
                 "kind": "expression",
                 "type": "ButtonType"
               },
               "default": "ButtonType.None"
+            },
+            {
+              "name": "block",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
             }
           ],
           "events": [
@@ -140,7 +158,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/General/ConfirmationDialog.vue",
+            "module": "./src/components/General/ConfirmationButton.vue",
             "symbol": "default"
           }
         },
@@ -163,6 +181,33 @@
                 "kind": "expression",
                 "type": "string"
               }
+            },
+            {
+              "name": "shortDate",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "name": "longDate",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "name": "time",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
             }
           ],
           "source": {
@@ -689,6 +734,9 @@
           "name": "PSection",
           "description": "",
           "slots": [
+            {
+              "name": "header"
+            },
             {
               "name": "default"
             }

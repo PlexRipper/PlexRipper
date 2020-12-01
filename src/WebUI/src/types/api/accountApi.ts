@@ -48,3 +48,9 @@ export function getAccount(accountId: Number): Observable<PlexAccountDTO> {
 	const result = Axios.get<Result<PlexAccountDTO>>(`${apiPath}/${accountId}`);
 	return checkResponse<PlexAccountDTO>(result, logText, 'getAccount');
 }
+
+export function refreshAccount(accountId: Number): Observable<boolean> {
+	preApiRequest(logText, 'refreshAccount');
+	const result = Axios.get<Result<boolean>>(`${apiPath}/refresh/${accountId}`);
+	return checkResponse<boolean>(result, logText, 'refreshAccount');
+}

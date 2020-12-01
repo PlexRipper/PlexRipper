@@ -34,7 +34,7 @@ namespace PlexRipper.SignalR
 
         #region ProgressHub
 
-        public async Task SendServerRefreshUpdate(int plexAccountId, int received, int total, bool isRefreshing = true)
+        public async Task SendPlexAccountRefreshUpdate(int plexAccountId, int received, int total, bool isRefreshing = true)
         {
             if (_progressHub?.Clients?.All == null)
             {
@@ -42,7 +42,7 @@ namespace PlexRipper.SignalR
                 return;
             }
 
-            var progress = new ServerRefreshProgress
+            var progress = new PlexAccountRefreshProgress
             {
                 PlexAccountId = plexAccountId,
                 Received = received,
@@ -52,7 +52,7 @@ namespace PlexRipper.SignalR
                 IsComplete = received >= total,
             };
 
-            await _progressHub.Clients.All.SendAsync(nameof(ServerRefreshProgress), progress);
+            await _progressHub.Clients.All.SendAsync(nameof(PlexAccountRefreshProgress), progress);
         }
 
         public async Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)

@@ -24,10 +24,7 @@ export interface PlexServerDTO {
   machineIdentifier: string;
   createdAt: string;
   updatedAt: string;
-  owned: boolean;
-  synced: boolean;
   ownerId: number;
-  home: boolean;
   plexLibraries: PlexLibraryDTO[];
 }
 
@@ -315,7 +312,6 @@ export interface PlexAccountDTO {
   title: string;
   hasPassword: boolean;
   authToken: string;
-  forumId: number;
   plexServers: PlexServerDTO[];
 }
 
@@ -458,7 +454,7 @@ export interface LibraryProgress {
   isComplete: boolean;
 }
 
-export interface ServerRefreshProgress {
+export interface PlexAccountRefreshProgress {
   plexAccountId: number;
   percentage: number;
   received: number;

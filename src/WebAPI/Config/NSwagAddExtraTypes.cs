@@ -26,7 +26,7 @@ namespace PlexRipper.WebAPI.Config
                 typeof(DownloadProgress),
                 typeof(DownloadTaskCreationProgress),
                 typeof(LibraryProgress),
-                typeof(ServerRefreshProgress),
+                typeof(PlexAccountRefreshProgress),
                 typeof(DownloadStatusChanged),
                 typeof(FileMergeProgress),
                 typeof(NotificationDTO),

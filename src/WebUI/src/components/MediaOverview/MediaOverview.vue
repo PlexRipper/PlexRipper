@@ -1,6 +1,6 @@
 <template>
 	<page>
-		<template v-if="isLoading">
+		<template v-if="isLoading && server && library">
 			<v-row justify="center">
 				<v-col cols="auto">
 					<v-layout row justify-center align-center>

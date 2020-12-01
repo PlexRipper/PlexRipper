@@ -56,7 +56,7 @@ export default class AccountOverview extends Vue {
 			Log.debug(this.accounts);
 		});
 
-		SignalrService.getServerRefreshProgress().subscribe((data) => {
+		SignalrService.getPlexAccountRefreshProgress().subscribe((data) => {
 			Log.debug(data);
 		});
 	}

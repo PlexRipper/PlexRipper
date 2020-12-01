@@ -92,7 +92,7 @@ namespace PlexRipper.Application.PlexAccounts
         /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi. It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
         /// </summary>
         /// <param name="plexAccount">The <see cref="PlexAccount"/> to setup.</param>
-        /// <returns>If the setup was successful</returns>
+        /// <returns>If the setup was successful.</returns>
         private async Task<Result<bool>> SetupAccountAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
@@ -111,7 +111,7 @@ namespace PlexRipper.Application.PlexAccounts
 
             Log.Debug("Setting up new PlexAccount");
 
-            await _signalRService.SendServerRefreshUpdate(plexAccount.Id, 0, 1);
+            await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, 0, 1);
 
             // Request new PlexAccount
             var plexAccountFromApi = await _plexApiService.PlexSignInAsync(plexAccount.Username, plexAccount.Password);
@@ -150,7 +150,7 @@ namespace PlexRipper.Application.PlexAccounts
                 return plexServerList.ToResult();
             }
 
-            await _signalRService.SendServerRefreshUpdate(plexAccount.Id, 0, plexServerList.Value.Count);
+            await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, 0, plexServerList.Value.Count);
 
             // Retrieve and store the corresponding PlexLibraries
             if (plexServerList.Value.Any())
@@ -159,11 +159,49 @@ namespace PlexRipper.Application.PlexAccounts
                 {
                     var plexServer = plexServerList.Value[i];
                     await _plexLibraryService.RefreshLibrariesAsync(plexAccount, plexServer);
-                    await _signalRService.SendServerRefreshUpdate(plexAccount.Id, i + 1, plexServerList.Value.Count);
+                    await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, i + 1, plexServerList.Value.Count);
                 }
             }
 
             Log.Debug("Account was setup successfully!");
+            return Result.Ok(true);
+        }
+
+        /// <inheritdoc/>
+        public async Task<Result<bool>> RefreshPlexAccount(int plexAccountId = 0)
+        {
+            if (plexAccountId == 0)
+            {
+                var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(false, false, true));
+                if (enabledAccounts.IsFailed)
+                {
+                    return enabledAccounts.ToResult();
+                }
+
+                foreach (var plexAccount in enabledAccounts.Value)
+                {
+                    var result = await SetupAccountAsync(plexAccount);
+                    if (result.IsFailed)
+                    {
+                        return result;
+                    }
+                }
+            }
+            else
+            {
+                var plexAccount = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
+                if (plexAccount.IsFailed)
+                {
+                    return plexAccount.ToResult();
+                }
+
+                var result = await SetupAccountAsync(plexAccount.Value);
+                if (result.IsFailed)
+                {
+                    return result.ToResult();
+                }
+            }
+
             return Result.Ok(true);
         }
 

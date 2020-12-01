@@ -70,6 +70,7 @@ import { PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import ServerDialog from '@components/Navigation/ServerDialog.vue';
 import { switchMap } from 'rxjs/operators';
 import { getPlexServers } from '@api/plexServerApi';
+import { iif, of } from 'rxjs';
 
 interface INavItem {
 	title: string;
@@ -135,7 +136,7 @@ export default class ServerDrawer extends Vue {
 
 	created(): void {
 		AccountService.getActiveAccount()
-			.pipe(switchMap(() => getPlexServers()))
+			.pipe(switchMap((account) => iif(() => account == null, getPlexServers(), of(account?.plexServers ?? []))))
 			.subscribe((data: PlexServerDTO[]) => {
 				this.plexServers = data ?? [];
 			});

@@ -55,6 +55,11 @@ namespace PlexRipper.Data.CQRS
                 plexAccounts = await query.ToListAsync(cancellationToken);
             }
 
+            if (!request.IncludePlexServers && !request.IncludePlexLibraries)
+            {
+                return Result.Ok(plexAccounts);
+            }
+
             // Remove any PlexLibraries the plexAccount has no access to
             // TODO This might be improved further since now all PlexLibraries will be retrieved from the database.
             foreach (var plexAccount in plexAccounts)
@@ -65,7 +70,12 @@ namespace PlexRipper.Data.CQRS
                     // Remove inaccessible PlexLibraries
                     for (int i = plexServer.PlexLibraries.Count - 1; i >= 0; i--)
                     {
-                        var x = plexServer?.PlexLibraries[i].PlexAccountLibraries.Select(y => y.PlexAccountId).ToList();
+                        if (!plexServer.PlexLibraries.Any())
+                        {
+                            continue;
+                        }
+
+                        var x = plexServer.PlexLibraries[i].PlexAccountLibraries.Select(y => y.PlexAccountId).ToList();
                         if (!x.Contains(plexAccount.Id))
                         {
                             plexServer.PlexLibraries.RemoveAt(i);

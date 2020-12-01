@@ -3,7 +3,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.SignalR.Common
 {
-    public class ServerRefreshProgress
+    public class PlexAccountRefreshProgress
     {
         [JsonProperty("plexAccountId", Required = Required.Always)]
         public int PlexAccountId { get; set; }

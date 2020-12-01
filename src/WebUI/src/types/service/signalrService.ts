@@ -10,7 +10,7 @@ import {
 	DownloadStatusChanged,
 	FileMergeProgress,
 	NotificationDTO,
-	ServerRefreshProgress,
+	PlexAccountRefreshProgress,
 } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
 import globalService from '@service/globalService';
@@ -32,7 +32,7 @@ export class SignalrService {
 
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
 	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
-	private _serverRefreshProgressSubject: ReplaySubject<ServerRefreshProgress> = new ReplaySubject<ServerRefreshProgress>();
+	private _plexAccountRefreshProgressSubject: ReplaySubject<PlexAccountRefreshProgress> = new ReplaySubject<PlexAccountRefreshProgress>();
 
 	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
@@ -93,8 +93,8 @@ export class SignalrService {
 			this._libraryProgressSubject.next(data);
 		});
 
-		this._progressHubConnection.on<ServerRefreshProgress>('ServerRefreshProgress').subscribe((data) => {
-			this._serverRefreshProgressSubject.next(data);
+		this._progressHubConnection.on<PlexAccountRefreshProgress>('PlexAccountRefreshProgress').subscribe((data) => {
+			this._plexAccountRefreshProgressSubject.next(data);
 		});
 
 		this._notificationHubConnection.on<NotificationDTO>('Notification').subscribe((data) => {
@@ -174,8 +174,8 @@ export class SignalrService {
 		return this._libraryProgressSubject.asObservable();
 	}
 
-	public getServerRefreshProgress(): Observable<ServerRefreshProgress> {
-		return this._serverRefreshProgressSubject.asObservable();
+	public getPlexAccountRefreshProgress(): Observable<PlexAccountRefreshProgress> {
+		return this._plexAccountRefreshProgressSubject.asObservable();
 	}
 
 	public getNotificationUpdates(): Observable<NotificationDTO> {
@@ -193,7 +193,7 @@ export interface ProgressHub {
 	DownloadStatusChanged: DownloadStatusChanged;
 	DownloadTaskCreationProgress: DownloadTaskCreationProgress;
 	LibraryProgress: LibraryProgress;
-	ServerRefreshProgress: ServerRefreshProgress;
+	PlexAccountRefreshProgress: PlexAccountRefreshProgress;
 }
 
 export interface NotificationHub {

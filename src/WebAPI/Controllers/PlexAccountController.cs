@@ -247,5 +247,27 @@ namespace PlexRipper.WebAPI.Controllers
                 return InternalServerError(e);
             }
         }
+
+        [HttpGet("refresh/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> RefreshPlexAccount(int id)
+        {
+            try
+            {
+                var result = await _plexAccountService.RefreshPlexAccount(id);
+                if (result.IsFailed)
+                {
+                    InternalServerError(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
+        }
     }
 }

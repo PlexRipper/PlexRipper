@@ -21,6 +21,6 @@ namespace PlexRipper.Application.Common
 
         Task SendNotification(Notification notification);
 
-        Task SendServerRefreshUpdate(int plexAccountId, int received, int total, bool isRefreshing = true);
+        Task SendPlexAccountRefreshUpdate(int plexAccountId, int received, int total, bool isRefreshing = true);
     }
 }

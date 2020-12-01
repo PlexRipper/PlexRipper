@@ -57,5 +57,12 @@ namespace PlexRipper.Application.Common
         Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount);
 
         Task<Result<PlexAccount>> UpdatePlexAccountAsync(dynamic plexAccountDto);
+
+        /// <summary>
+        /// Refreshes the <see cref="PlexServer"/> and <see cref="PlexLibrary"/> access of the <see cref="PlexAccount"/>.
+        /// </summary>
+        /// <param name="plexAccountId">Can be 0 to refresh all enabled PlexAccounts.</param>
+        /// <returns>If successful.</returns>
+        Task<Result<bool>> RefreshPlexAccount(int plexAccountId = 0);
     }
 }

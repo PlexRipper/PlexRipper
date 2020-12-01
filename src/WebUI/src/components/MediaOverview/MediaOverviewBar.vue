@@ -46,11 +46,11 @@ interface IViewOptions {
 	components: { VerticalButton },
 })
 export default class MediaOverviewBar extends Vue {
-	@Prop({ required: true, type: Object as () => PlexServerDTO })
-	readonly server!: PlexServerDTO;
+	@Prop({ required: false, type: Object as () => PlexServerDTO | null })
+	readonly server!: PlexServerDTO | null;
 
-	@Prop({ required: true, type: Object as () => PlexLibraryDTO })
-	readonly library!: PlexLibraryDTO;
+	@Prop({ required: false, type: Object as () => PlexLibraryDTO | null })
+	readonly library!: PlexLibraryDTO | null;
 
 	@Prop({ required: true, type: String })
 	readonly viewMode!: ViewMode;

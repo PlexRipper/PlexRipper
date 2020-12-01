@@ -21,7 +21,7 @@
 				</v-btn>
 			</template>
 			<v-list>
-				<v-list-item-group v-if="accounts.length > 0" v-model="activeAccount">
+				<v-list-item-group v-if="accounts.length > 0" v-model="activeAccountId">
 					<!--	Button per account	-->
 					<v-list-item v-for="(account, index) in accounts" :key="index" @click="setActiveAccount(account.id)">
 						<v-list-item-content>
@@ -81,24 +81,24 @@ export default class AppBar extends Vue {
 	private loading: boolean[] = [false];
 
 	private accountRefreshProgress: PlexAccountRefreshProgress[] = [];
-	get activeAccount(): number {
-		return settingsStore.activeAccount;
+	get activeAccountId(): number {
+		return settingsStore.activeAccountId;
 	}
 
-	set activeAccount(value: number) {
-		settingsStore.setActiveAccount(value);
+	set activeAccountId(value: number) {
+		settingsStore.setActiveAccountId(value);
 	}
 
 	get isLoading(): boolean {
-		this.loading.some((x) => x);
+		return this.loading.some((x) => x);
 	}
 
 	setActiveAccount(accountId: number): void {
-		this.activeAccount = accountId;
+		this.activeAccountId = accountId;
 	}
 
-	getRefreshProgress(plexAccountId: number): PlexAccountRefreshProgress {
-		return this.accountRefreshProgress.find((x) => x.plexAccountId === plexAccountId);
+	getRefreshProgress(plexAccountId: number): PlexAccountRefreshProgress | null {
+		return this.accountRefreshProgress.find((x) => x.plexAccountId === plexAccountId) ?? null;
 	}
 
 	refreshAccount(accountId: number = 0): void {
@@ -113,7 +113,12 @@ export default class AppBar extends Vue {
 
 	created(): void {
 		AccountService.getAccounts().subscribe((data) => {
-			this.accounts = [{ id: 0, displayName: 'All Accounts' }];
+			this.accounts = [
+				{
+					id: 0,
+					displayName: 'All Accounts',
+				} as any,
+			];
 			data?.filter((x) => x.isEnabled).forEach((account) => this.accounts.push(account));
 			this.accounts.forEach(() => this.loading.push(false));
 		});

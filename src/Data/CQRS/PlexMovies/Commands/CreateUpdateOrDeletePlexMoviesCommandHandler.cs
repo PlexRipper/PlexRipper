@@ -28,13 +28,13 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
                 plexMovie.RuleFor(x => x.PlexMovieDatas).NotEmpty();
                 plexMovie.RuleForEach(x => x.PlexMovieDatas).ChildRules(plexMovieData =>
                 {
-                    plexMovieData.RuleFor(x => x.Height).GreaterThan(0);
-                    plexMovieData.RuleFor(x => x.Width).GreaterThan(0);
+                    // plexMovieData.RuleFor(x => x.Height).GreaterThan(0);
+                    // plexMovieData.RuleFor(x => x.Width).GreaterThan(0);
                     plexMovieData.RuleFor(x => x.Parts).NotEmpty();
                     plexMovieData.RuleForEach(x => x.Parts).ChildRules(part =>
                     {
                         part.RuleFor(x => x.ObfuscatedFilePath).NotEmpty();
-                        part.RuleFor(x => x.Container).NotEmpty();
+                        // part.RuleFor(x => x.Container).NotEmpty();
                     });
                 });
             });

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
@@ -84,6 +84,11 @@ namespace PlexRipper.PlexApi.Services
         {
             // Retrieve updated version of the PlexLibrary
             var plexLibraries = await GetLibrarySectionsAsync(authToken, plexLibrary.ServerUrl);
+
+            if (!plexLibraries.Any())
+            {
+                return null;
+            }
 
             var updatedPlexLibrary = plexLibraries.Find(x => x.Key == plexLibrary.Key);
             updatedPlexLibrary.Id = plexLibrary.Id;

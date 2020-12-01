@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexServers;
 using PlexRipper.Application.PlexTvShows;
@@ -199,6 +198,20 @@ namespace PlexRipper.Application.PlexLibraries
 
             await _signalRService.SendLibraryProgressUpdate(libraryId, 1, 1, false);
             return libraryDB;
+        }
+
+        public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0)
+        {
+            var plexLibrary = await GetPlexLibraryAsync(libraryId, plexAccountId);
+            if (plexLibrary.IsFailed)
+            {
+                return plexLibrary.ToResult();
+            }
+
+            var plexServer = plexLibrary.Value.PlexServer;
+            plexServer.PlexLibraries.Clear();
+            plexServer.PlexLibraries.Add(plexLibrary.Value);
+            return Result.Ok(plexServer);
         }
 
         #region RefreshLibrary

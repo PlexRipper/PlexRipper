@@ -1,6 +1,6 @@
 <template>
 	<page>
-		<template v-if="isLoading && server && library">
+		<template v-if="isLoading">
 			<v-row justify="center">
 				<v-col cols="auto">
 					<v-layout row justify-center align-center>
@@ -79,7 +79,7 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import type { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
+import type { PlexServerDTO } from '@dto/mainApi';
 import {
 	DownloadTaskCreationProgress,
 	LibraryProgress,
@@ -95,7 +95,7 @@ import TvShowTable from '@mediaOverview/MediaTable/TvShowTable.vue';
 import { merge, of } from 'rxjs';
 import SignalrService from '@service/signalrService';
 import { catchError, finalize, switchMap, takeLast, takeWhile, tap } from 'rxjs/operators';
-import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
+import { getPlexLibraryInServer, refreshPlexLibrary } from '@api/plexLibraryApi';
 import Log from 'consola';
 import AccountService from '@service/accountService';
 import { downloadMedia } from '@api/plexDownloadApi';
@@ -125,29 +125,30 @@ export default class MediaOverview extends Vue {
 	@Ref('downloadConfirmationRef')
 	readonly downloadConfirmationRef!: DownloadConfirmation;
 
-	activeAccount: PlexAccountDTO | null = null;
-
 	isLoading: boolean = true;
 	isRefreshing: boolean = false;
-	library: PlexLibraryDTO | null = null;
+	server: PlexServerDTO | null = null;
 	libraryProgress: LibraryProgress | null = null;
 	downloadTaskCreationProgress: DownloadTaskCreationProgress | null = null;
 	downloadPreviewType: PlexMediaType = PlexMediaType.None;
 
-	get activeAccountId(): number {
-		return this.activeAccount?.id ?? 0;
-	}
-
 	get mediaType(): PlexMediaType {
 		return this.library?.type ?? PlexMediaType.Unknown;
+	}
+
+	get activeAccountId(): number {
+		return settingsStore.activeAccountId;
 	}
 
 	get mediaIds(): number[] {
 		return this.getItems.map((x) => x.id);
 	}
 
-	get server(): PlexServerDTO | null {
-		return this.activeAccount?.plexServers.find((x) => x.id === this.library?.plexServerId) ?? null;
+	get library(): PlexLibraryDTO | null {
+		if (this.server?.plexLibraries.length === 0) {
+			return null;
+		}
+		return this.server?.plexLibraries[0] ?? null;
 	}
 
 	get isMovieLibrary(): boolean {
@@ -277,10 +278,12 @@ export default class MediaOverview extends Vue {
 		this.isLoading = true;
 		this.resetProgress(true);
 		// Refresh Library
-		refreshPlexLibrary(this.libraryId, this.activeAccount?.id ?? 0)
+		refreshPlexLibrary(this.libraryId, this.activeAccountId)
 			.pipe(
 				tap((data) => {
-					this.library = data;
+					if (data) {
+						this.server?.plexLibraries.splice(0, 1, data);
+					}
 					this.isLoading = false;
 					this.isRefreshing = false;
 				}),
@@ -305,22 +308,16 @@ export default class MediaOverview extends Vue {
 
 		AccountService.getActiveAccount()
 			.pipe(
-				tap((data) => {
-					Log.debug('ActiveAccount is:', data);
-					this.activeAccount = data ?? null;
-				}),
-				switchMap((data) =>
+				switchMap(() =>
 					// Retrieve library
-					getPlexLibrary(this.libraryId, data?.id ?? 0).pipe(
-						tap((data) => {
-							this.library = data;
-							this.isLoading = false;
-						}),
-						takeLast(1),
-					),
+					getPlexLibraryInServer(this.libraryId, this.activeAccountId),
 				),
 			)
-			.subscribe();
+			.subscribe((data) => {
+				Log.debug(data);
+				this.server = data;
+				this.isLoading = false;
+			});
 	}
 }
 </script>

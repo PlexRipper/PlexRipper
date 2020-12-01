@@ -16,10 +16,11 @@ namespace PlexRipper.WebAPI.Controllers
     public class PlexLibraryController : BaseController
     {
         private readonly IPlexLibraryService _plexLibraryService;
+
         private readonly IMapper _mapper;
 
-
-        public PlexLibraryController(IPlexLibraryService plexLibraryService, IMapper mapper, INotificationsService notificationsService) : base(mapper, notificationsService)
+        public PlexLibraryController(IPlexLibraryService plexLibraryService, IMapper mapper, INotificationsService notificationsService) : base(
+            mapper, notificationsService)
         {
             _plexLibraryService = plexLibraryService;
             _mapper = mapper;
@@ -31,7 +32,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Get(int id, int plexAccountId = 0)
+        public async Task<IActionResult> GetPlexLibrary(int id, int plexAccountId = 0)
         {
             if (id <= 0)
             {
@@ -51,6 +52,44 @@ namespace PlexRipper.WebAPI.Controllers
                 {
                     var result = _mapper.Map<PlexLibraryDTO>(data.Value);
                     Log.Debug($"Found {data.Value.GetMediaCount} in library {data.Value.Title} of type {data.Value.Type}");
+                    return Ok(Result.Ok(result));
+                }
+
+                string message = $"Could not find a {nameof(PlexLibrary)} with Id: {id}";
+                Log.Warning(message);
+                return NotFound(message);
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
+        }
+
+        // GET api/<PlexLibrary>/5
+        [HttpGet("inserver/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> GetPlexLibraryInServer(int id, int plexAccountId = 0)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(id, nameof(id));
+            }
+
+            try
+            {
+                var data = await _plexLibraryService.GetPlexLibraryInServerAsync(id, plexAccountId);
+
+                if (data.IsFailed)
+                {
+                    return InternalServerError(data);
+                }
+
+                if (data.Value != null)
+                {
+                    var result = _mapper.Map<PlexServerDTO>(data.Value);
                     return Ok(Result.Ok(result));
                 }
 

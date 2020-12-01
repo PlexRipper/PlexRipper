@@ -58,7 +58,7 @@ export default class MediaOverviewBar extends Vue {
 	readonly barHeight: number = 85;
 
 	refreshLibrary(): void {
-		this.$emit('refresh-library', this.library.id);
+		this.$emit('refresh-library', this.library?.id);
 	}
 
 	changeView(viewMode: ViewMode): void {

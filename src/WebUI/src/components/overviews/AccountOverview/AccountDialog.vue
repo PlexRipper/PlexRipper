@@ -132,7 +132,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import Log from 'consola';
-import type { PlexAccountDTO, ServerRefreshProgress } from '@dto/mainApi';
+import type { PlexAccountDTO, PlexAccountRefreshProgress } from '@dto/mainApi';
 import { createAccount, deleteAccount, updateAccount, validateAccount } from '@api/accountApi';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
@@ -158,7 +158,7 @@ export default class AccountDialog extends Vue {
 	@Prop({ required: true, type: Boolean, default: false })
 	dialog: boolean = false;
 
-	accountSetupProgress: ServerRefreshProgress | null = null;
+	accountSetupProgress: PlexAccountRefreshProgress | null = null;
 
 	validateLoading: boolean = false;
 

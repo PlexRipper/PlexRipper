@@ -341,6 +341,8 @@ export interface CredentialsDTO {
 
 export type ResultDTOOfPlexLibraryDTO = ResultDTO & { value: PlexLibraryDTO };
 
+export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };
+
 export interface RefreshPlexLibraryDTO {
   plexAccountId?: number;
   plexLibraryId?: number;
@@ -353,8 +355,6 @@ export interface ThumbnailRequestDTO {
   height: number;
   plexMediaType: PlexMediaType;
 }
-
-export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };
 
 export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStatusDTO };
 

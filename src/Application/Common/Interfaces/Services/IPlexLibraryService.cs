@@ -31,5 +31,7 @@ namespace PlexRipper.Application.Common
         Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId);
 
         Task<Result<byte[]>> GetThumbnailImage(int plexAccountId, int mediaId, PlexMediaType mediaType, int width = 0, int height = 0);
+
+        Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0);
     }
 }

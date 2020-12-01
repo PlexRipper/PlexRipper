@@ -126,7 +126,7 @@ export default class ServerDrawer extends Vue {
 				this.$router.push(`/tvshows/${library.id}`);
 				break;
 			default:
-				Log.error('Library was neither a movie or tvshows');
+				Log.error(library.type + ' was neither a movie or tvshows');
 		}
 	}
 

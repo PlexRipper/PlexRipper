@@ -47,7 +47,10 @@ namespace PlexRipper.WebAPI
                         // .SetPreflightMaxAge(TimeSpan.FromMinutes(100));
                     });
             });
-            services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
             services.AddHttpContextAccessor();
             services.AddHealthChecks();
 

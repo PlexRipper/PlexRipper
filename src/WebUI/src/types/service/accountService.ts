@@ -34,7 +34,7 @@ export class AccountService {
 	public getActiveAccount(): Observable<PlexAccountDTO | null> {
 		return combineLatest(SettingsService.getSettings(), this.getAccounts()).pipe(
 			switchMap((result: [SettingsModel, PlexAccountDTO[]]) => {
-				const activeAccountId = result[0].accountSettings.activeAccountId ?? 0;
+				const activeAccountId = result[0]?.accountSettings.activeAccountId ?? 0;
 				// Check if there is an valid account
 				if (activeAccountId > 0) {
 					return of(result[1].find((account) => account.id === activeAccountId) ?? null);

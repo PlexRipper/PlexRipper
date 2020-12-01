@@ -24,7 +24,7 @@ export default class SettingsStore extends VuexModule {
 		return this.settings?.firstTimeSetup ?? false;
 	}
 
-	get activeAccount(): number {
+	get activeAccountId(): number {
 		return this.settings?.accountSettings?.activeAccountId ?? 0;
 	}
 
@@ -37,7 +37,7 @@ export default class SettingsStore extends VuexModule {
 	}
 
 	@Mutation
-	setActiveAccount(value: number) {
+	setActiveAccountId(value: number) {
 		if (this.settings?.accountSettings) {
 			this.settings.accountSettings.activeAccountId = value;
 			SettingsService.updateSettings(this.settings);

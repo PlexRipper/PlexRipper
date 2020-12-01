@@ -82,6 +82,11 @@ const config: NuxtConfig = {
 		/*
 		 ** You can extend webpack config here
 		 */
+		hotMiddleware: {
+			client: {
+				overlay: false,
+			},
+		},
 		// Will allow for debugging in Typescript + Nuxt
 		// Doc: https://nordschool.com/enable-vs-code-debugger-for-nuxt-and-typescript/
 		extend(config: WebpackConfiguration, { isDev, isClient }: NuxtWebpackEnv): void {

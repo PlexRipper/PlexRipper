@@ -7,9 +7,10 @@ import DateTime from '@components/General/DateTime.vue';
 import PCheckbox from '@components/General/PlexRipperCheckBox.vue';
 import PSection from '@components/General/Section.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
+import Status from '@components/General/Status.vue';
 
 export default (): void => {
-	const components = { Page, Background, Logo, PBtn, PCheckbox, DateTime, PSection, HelpIcon };
+	const components = { Page, Background, Logo, PBtn, PCheckbox, DateTime, PSection, HelpIcon, Status };
 
 	Object.entries(components).forEach(([name, component]) => {
 		Vue.component(name, component);

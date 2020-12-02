@@ -416,18 +416,18 @@
           "attributes": [
             {
               "name": "server",
-              "required": true,
+              "required": false,
               "value": {
                 "kind": "expression",
-                "type": "PlexServerDTO"
+                "type": "union"
               }
             },
             {
               "name": "library",
-              "required": true,
+              "required": false,
               "value": {
                 "kind": "expression",
-                "type": "PlexLibraryDTO"
+                "type": "union"
               }
             },
             {
@@ -784,11 +784,12 @@
           "attributes": [
             {
               "name": "text",
-              "required": true,
+              "required": false,
               "value": {
                 "kind": "expression",
                 "type": "string"
-              }
+              },
+              "default": "''"
             },
             {
               "name": "percentage",
@@ -797,6 +798,15 @@
                 "kind": "expression",
                 "type": "number"
               }
+            },
+            {
+              "name": "showCircular",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
             }
           ],
           "source": {
@@ -833,6 +843,32 @@
           "description": "",
           "source": {
             "module": "./src/components/Navigation/ServerDrawer.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "Status",
+          "description": "",
+          "attributes": [
+            {
+              "name": "value",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "pulse",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            }
+          ],
+          "source": {
+            "module": "./src/components/General/Status.vue",
             "symbol": "default"
           }
         },

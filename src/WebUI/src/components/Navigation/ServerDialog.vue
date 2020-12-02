@@ -30,6 +30,14 @@
 										<td><date-time short-date :text="plexServer.updatedAt" /></td>
 									</tr>
 									<tr v-if="serverStatus">
+										<td>Current status:</td>
+										<td>
+											<status pulse :value="serverStatus.isSuccessful" />
+											{{ serverStatus.statusCode }} -
+											{{ serverStatus.statusMessage }}
+										</td>
+									</tr>
+									<tr v-if="serverStatus">
 										<td>Last checked on:</td>
 										<td><date-time short-date :text="serverStatus.lastChecked" /></td>
 									</tr>

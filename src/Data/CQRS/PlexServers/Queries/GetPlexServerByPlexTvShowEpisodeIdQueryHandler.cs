@@ -31,6 +31,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
                 .ThenInclude(x => x.TvShow)
                 .ThenInclude(x => x.PlexLibrary)
                 .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.ServerStatus)
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (plexTvShowEpisode == null)

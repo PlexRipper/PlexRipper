@@ -38,6 +38,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
             var serverList = await _dbContext
                 .PlexAccountServers
                 .Include(x => x.PlexServer)
+                .ThenInclude(x => x.ServerStatus)
                 .Where(x => x.PlexAccountId == request.PlexAccountId)
                 .ProjectTo<PlexServer>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);

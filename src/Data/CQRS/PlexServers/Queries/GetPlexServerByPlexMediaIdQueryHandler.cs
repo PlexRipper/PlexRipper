@@ -32,6 +32,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
                     var movie = await _dbContext.PlexMovies
                         .Include(x => x.PlexLibrary)
                         .ThenInclude(x => x.PlexServer)
+                        .ThenInclude(x => x.ServerStatus)
                         .FirstOrDefaultAsync(x => x.Id == request.MediaId, cancellationToken);
                     plexServer = movie?.PlexLibrary?.PlexServer;
                     break;
@@ -39,6 +40,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
                     var tvshow = await _dbContext.PlexTvShows
                         .Include(x => x.PlexLibrary)
                         .ThenInclude(x => x.PlexServer)
+                        .ThenInclude(x => x.ServerStatus)
                         .FirstOrDefaultAsync(x => x.Id == request.MediaId, cancellationToken);
                     plexServer = tvshow?.PlexLibrary?.PlexServer;
                     break;
@@ -48,6 +50,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
                     var episode = await _dbContext.PlexTvShowEpisodes
                         .Include(x => x.PlexLibrary)
                         .ThenInclude(x => x.PlexServer)
+                        .ThenInclude(x => x.ServerStatus)
                         .FirstOrDefaultAsync(x => x.Id == request.MediaId, cancellationToken);
                     plexServer = episode?.PlexLibrary?.PlexServer;
                     break;

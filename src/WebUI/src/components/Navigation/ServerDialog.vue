@@ -23,11 +23,15 @@
 									</tr>
 									<tr>
 										<td>Created On:</td>
-										<td><date-time :text="plexServer.createdAt" /></td>
+										<td><date-time short-date :text="plexServer.createdAt" /></td>
 									</tr>
 									<tr>
 										<td>Last updated on:</td>
-										<td><date-time :text="plexServer.updatedAt" /></td>
+										<td><date-time short-date :text="plexServer.updatedAt" /></td>
+									</tr>
+									<tr v-if="serverStatus">
+										<td>Last checked on:</td>
+										<td><date-time short-date :text="serverStatus.lastChecked" /></td>
 									</tr>
 								</tbody>
 							</v-simple-table>
@@ -39,7 +43,7 @@
 			<!--	Close action	-->
 			<v-card-actions>
 				<v-spacer></v-spacer>
-				<p-btn text-id="check-server-status" />
+				<p-btn text-id="check-server-status" @click="checkServer" />
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -47,8 +51,11 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { PlexServerDTO } from '@dto/mainApi';
-import { getPlexServer } from '@api/plexServerApi';
+import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import ServerService from '@service/serverService';
+import { map } from 'rxjs/operators';
+import Log from 'consola';
+
 @Component
 export default class ServerDialog extends Vue {
 	@Prop({ required: true, type: Number, default: 0 })
@@ -60,15 +67,29 @@ export default class ServerDialog extends Vue {
 	@Watch('serverId')
 	onServerIdChanged(id: number) {
 		this.show = id > 0;
-		this.getServerData();
+		if (this.show) {
+			this.getServerData();
+		}
+	}
+
+	get serverStatus(): PlexServerStatusDTO | null {
+		Log.warn(this.plexServer?.status);
+		return this.plexServer?.status ?? null;
 	}
 
 	getServerData(): void {
-		if (this.serverId > 0) {
-			getPlexServer(this.serverId).subscribe((data) => {
-				this.plexServer = data;
+		ServerService.getServers()
+			.pipe(map((server) => server.find((x) => x.id === this.serverId)))
+			.subscribe((server) => {
+				if (server) {
+					this.plexServer = server;
+				}
 			});
-		}
+		ServerService.getServer(this.serverId);
+	}
+
+	checkServer(): void {
+		ServerService.checkServer(this.serverId);
 	}
 
 	close(): void {

@@ -157,7 +157,7 @@ export default class DateAndTimeSection extends Vue {
 	}
 
 	get timeFormatOptions(): ISelectItem[] {
-		const values: string[] = ['HH:MM', 'p'];
+		const values: string[] = ['HH:mm:ss', 'pp'];
 		const options: ISelectItem[] = [];
 		const date = Date.now();
 		values.forEach((x) => {

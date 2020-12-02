@@ -29,6 +29,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
             CancellationToken cancellationToken)
         {
             var plexServers = await _dbContext.PlexServers
+                .Include(x => x.ServerStatus)
                 .Include(x => x.PlexAccountServers)
                 .ThenInclude(x => x.PlexAccount)
                 .Where(x => x.PlexAccountServers

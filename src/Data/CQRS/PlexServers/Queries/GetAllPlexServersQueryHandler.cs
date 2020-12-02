@@ -35,6 +35,8 @@ namespace PlexRipper.Data.CQRS.PlexServers
             {
                 var query = await _dbContext.PlexAccountServers
                     .Include(x => x.PlexServer)
+                    .ThenInclude(x => x.ServerStatus)
+                    .Include(x => x.PlexServer)
                     .ThenInclude(x => x.PlexLibraries)
                     .Where(x => x.PlexAccountId == request.PlexAccountId)
                     .ToListAsync();

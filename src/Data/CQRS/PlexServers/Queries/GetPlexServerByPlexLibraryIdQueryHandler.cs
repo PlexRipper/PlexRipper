@@ -27,7 +27,9 @@ namespace PlexRipper.Data.CQRS.PlexServers
         public async Task<Result<PlexServer>> Handle(GetPlexServerByPlexLibraryIdQuery request,
             CancellationToken cancellationToken)
         {
-            var query = _dbContext.PlexServers.AsQueryable();
+            var query = _dbContext.PlexServers
+                .Include(x => x.ServerStatus)
+                .AsQueryable();
 
             if (request.IncludePlexLibraries)
             {

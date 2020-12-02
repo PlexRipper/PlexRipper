@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
@@ -26,7 +27,9 @@ namespace PlexRipper.Data.CQRS.PlexServers
         public async Task<Result<PlexServer>> Handle(GetPlexServerByIdQuery request,
             CancellationToken cancellationToken)
         {
-            var query = _dbContext.PlexServers.AsQueryable();
+            var query = _dbContext.PlexServers
+                .Include(x => x.ServerStatus)
+                .AsQueryable();
 
             if (request.IncludeLibraries)
             {

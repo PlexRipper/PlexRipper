@@ -26,6 +26,7 @@ export interface PlexServerDTO {
   updatedAt: string;
   ownerId: number;
   plexLibraries: PlexLibraryDTO[];
+  status: PlexServerStatusDTO;
 }
 
 export interface PlexLibraryDTO {
@@ -217,6 +218,15 @@ export enum DownloadStatus {
   Error = "Error",
 }
 
+export interface PlexServerStatusDTO {
+  id: number;
+  statusCode: number;
+  isSuccessful: boolean;
+  statusMessage: string;
+  lastChecked: string;
+  plexServerId: number;
+}
+
 export interface ResultDTO {
   isFailed?: boolean;
   isSuccess?: boolean;
@@ -357,15 +367,6 @@ export interface ThumbnailRequestDTO {
 }
 
 export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStatusDTO };
-
-export interface PlexServerStatusDTO {
-  id: number;
-  statusCode: number;
-  isSuccessful: boolean;
-  statusMessage: string;
-  lastChecked: string;
-  plexServerId: number;
-}
 
 export type ResultDTOOfSettingsModel = ResultDTO & { value: SettingsModel };
 

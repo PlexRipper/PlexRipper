@@ -1,5 +1,5 @@
 <template>
-	<span> {{ getFormattedDateTime }}</span>
+	<span> {{ dateTimeString }}</span>
 </template>
 
 <script lang="ts">
@@ -20,27 +20,40 @@ export default class DateTime extends Vue {
 	@Prop({ required: false, type: Boolean, default: true })
 	readonly time!: boolean;
 
-	get getFormat(): string {
-		let format = '';
+	get date(): Date {
+		return new Date(this.text);
+	}
+
+	get timeFormatted(): string {
+		return format(this.date, settingsStore.timeFormat);
+	}
+
+	get shortDateFormatted(): string {
+		return format(this.date, settingsStore.shortDateFormat);
+	}
+
+	get longDateFormatted(): string {
+		return format(this.date, settingsStore.longDateFormat);
+	}
+
+	get dateTimeString(): string {
+		let string = '';
 		if (this.time) {
-			format += settingsStore.timeFormat;
-			if (this.longDate || this.shortDate) {
-				format += ' - ';
-			}
+			string += this.timeFormatted;
+		}
+		if (this.time && (this.shortDate || this.longDate)) {
+			string += ' - ';
 		}
 
-		if (this.shortDate || (!this.longDate && !this.shortDate)) {
-			format += settingsStore.shortDateFormat;
+		if (this.shortDate) {
+			string += this.shortDateFormatted;
 		}
 
 		if (this.longDate) {
-			format += settingsStore.longDateFormat;
+			string += this.longDateFormatted;
 		}
-		return format;
-	}
 
-	get getFormattedDateTime(): string {
-		return format(new Date(this.text), this.getFormat);
+		return string;
 	}
 }
 </script>

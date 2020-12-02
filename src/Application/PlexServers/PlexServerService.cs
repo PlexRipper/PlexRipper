@@ -108,6 +108,13 @@ namespace PlexRipper.Application.PlexServers
                 return result.ToResult();
             }
 
+            // Ensure that there are not too many PlexServerStatuses stored.
+            var trimResult = await _mediator.Send(new TrimPlexServerStatusCommand(plexServerId));
+            if (trimResult.IsFailed)
+            {
+                return trimResult.ToResult();
+            }
+
             return await _mediator.Send(new GetPlexServerStatusByIdQuery(result.Value));
         }
 

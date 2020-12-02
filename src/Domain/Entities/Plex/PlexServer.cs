@@ -74,6 +74,32 @@ namespace PlexRipper.Domain
         [NotMapped]
         public bool HasDownloadTasks => PlexLibraries?.Any(x => x.DownloadTasks?.Any() ?? false) ?? false;
 
+        /// <summary>
+        /// Returns the last known server status.
+        /// </summary>
+        [NotMapped]
+        public PlexServerStatus Status
+        {
+            get
+            {
+                if (ServerStatus.Any())
+                {
+                    return ServerStatus.Last();
+                }
+
+                // TODO Add initial server status when server is added to DB. Meaning there is always one.
+                return new PlexServerStatus
+                {
+                    Id = 0,
+                    IsSuccessful = false,
+                    PlexServer = this,
+                    StatusMessage = "Not checked yet",
+                    PlexServerId = Id,
+                    StatusCode = 0,
+                };
+            }
+        }
+
         #endregion
     }
 }

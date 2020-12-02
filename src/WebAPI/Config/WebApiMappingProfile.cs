@@ -35,7 +35,8 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));
 
             // PlexServer -> PlexServerDTO
-            CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination);
+            CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.Status));
 
             // PlexServerStatus -> PlexServerStatusDTO
             CreateMap<PlexServerStatus, PlexServerStatusDTO>(MemberList.Destination);

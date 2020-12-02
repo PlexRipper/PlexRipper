@@ -32,11 +32,8 @@ namespace PlexRipper.Data.CQRS.PlexServers
         {
             Log.Debug("Creating a new PlexServerStatus in the DB");
 
+            command.PlexServerStatus.PlexServer = null;
             await _dbContext.PlexServerStatuses.AddAsync(command.PlexServerStatus, cancellationToken);
-            if (command.PlexServerStatus.PlexServer != null)
-            {
-                _dbContext.Entry(command.PlexServerStatus.PlexServer).State = EntityState.Unchanged;
-            }
 
             await _dbContext.SaveChangesAsync(cancellationToken);
             await _dbContext.Entry(command.PlexServerStatus).GetDatabaseValuesAsync(cancellationToken);

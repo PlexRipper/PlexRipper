@@ -26,6 +26,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
             {
                 // TODO This might return PlexServers which have no PlexAccounts available that can access them.
                 var query = await _dbContext.PlexServers
+                    .Include(x => x.ServerStatus)
                     .Include(x => x.PlexLibraries)
                     .ToListAsync(cancellationToken);
 

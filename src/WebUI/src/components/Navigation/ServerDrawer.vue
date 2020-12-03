@@ -7,7 +7,7 @@
 					<v-expansion-panel-header>
 						<v-row align="center" no-gutters>
 							<v-col cols="auto">
-								<div class="server-name">{{ server.name }}</div>
+								<div class="server-name"><status :value="server.status.isSuccessful" /> {{ server.name }}</div>
 							</v-col>
 							<v-spacer></v-spacer>
 							<v-col cols="auto">

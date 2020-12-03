@@ -72,6 +72,8 @@ namespace PlexRipper.Application.PlexLibraries
             var serverUrl = plexLibraryDb.PlexServer.ServerUrl;
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 0, plexLibrary.TvShows.Count);
 
+            await RequestTvShowData();
+
             for (int i = 0; i < plexLibrary.TvShows.Count; i++)
             {
                 var plexTvShow = plexLibrary.TvShows[i];
@@ -125,6 +127,8 @@ namespace PlexRipper.Application.PlexLibraries
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.TvShows.Count, plexLibrary.TvShows.Count);
             return freshPlexLibrary;
         }
+
+        private async Task<Result<PlexTvShow>> RequestTvShowData(PlexTvShow plexTvShow, string authToken, string serverUrl) { }
 
         /// <summary>
         /// Refresh the <see cref="PlexLibrary"/>, by first deleting all (related) media and the re-adding the media again.

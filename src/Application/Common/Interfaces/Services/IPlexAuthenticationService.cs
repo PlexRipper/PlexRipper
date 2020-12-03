@@ -15,7 +15,7 @@ namespace PlexRipper.Application.Common
         /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to retrieve a token for.</param>
         /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to authenticate with.</param>
         /// <returns>The authentication token.</returns>
-        Task<Result<string>> GetPlexServerTokenAsync(int plexAccountId, int plexServerId);
+        Task<Result<string>> GetPlexServerTokenAsync(int plexServerId, int plexAccountId = 0);
 
         Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId);
     }

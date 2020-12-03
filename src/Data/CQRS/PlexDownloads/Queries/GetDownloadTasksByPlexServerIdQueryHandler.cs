@@ -31,14 +31,6 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 .ThenInclude(x => x.DownloadTasks)
                 .ThenInclude(x => x.PlexServer);
 
-            if (request.IncludePlexAccount)
-            {
-                query = query
-                    .Include(x => x.PlexLibraries)
-                    .ThenInclude(x => x.DownloadTasks)
-                    .ThenInclude(x => x.PlexAccount);
-            }
-
             if (request.IncludeServerStatus)
             {
                 query = query.Include(x => x.ServerStatus);

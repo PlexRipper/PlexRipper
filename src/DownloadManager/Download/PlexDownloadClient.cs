@@ -387,7 +387,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private async Task<Result<bool>> CreateDownloadWorkers(int downloadTaskId)
         {
-            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true, true));
+            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true));
             if (downloadTask.IsFailed)
             {
                 return downloadTask.ToResult();

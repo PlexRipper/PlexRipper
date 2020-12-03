@@ -1,5 +1,5 @@
 <template>
-	<v-dialog :value="show" max-width="600" @click:outside="close">
+	<v-dialog :value="show" max-width="800" @click:outside="close">
 		<v-card v-if="plexServer">
 			<v-card-title class="headline">{{ plexServer.name }} configuration</v-card-title>
 
@@ -7,10 +7,10 @@
 				<v-container>
 					<v-row>
 						<v-col>
-							<v-simple-table>
+							<v-simple-table class="section-table">
 								<tbody>
 									<tr>
-										<td>Server URL:</td>
+										<td style="width: 25%">Server URL:</td>
 										<td>{{ plexServer.serverUrl }}</td>
 									</tr>
 									<tr>

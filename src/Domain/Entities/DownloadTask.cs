@@ -67,10 +67,6 @@ namespace PlexRipper.Domain
 
         public int PlexLibraryId { get; set; }
 
-        public PlexAccount PlexAccount { get; set; }
-
-        public int PlexAccountId { get; set; }
-
         public FolderPath DestinationFolder { get; set; }
 
         public int DestinationFolderId { get; set; }

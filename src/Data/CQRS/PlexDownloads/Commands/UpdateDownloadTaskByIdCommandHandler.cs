@@ -19,7 +19,6 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
             RuleFor(x => x.DownloadTask.DataTotal).GreaterThan(0);
             RuleFor(x => x.DownloadTask.PlexServerId).GreaterThan(0);
             RuleFor(x => x.DownloadTask.PlexLibraryId).GreaterThan(0);
-            RuleFor(x => x.DownloadTask.PlexAccountId).GreaterThan(0);
         }
     }
 

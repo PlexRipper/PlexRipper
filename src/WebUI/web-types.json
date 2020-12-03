@@ -860,11 +860,12 @@
             },
             {
               "name": "pulse",
-              "required": true,
+              "required": false,
               "value": {
                 "kind": "expression",
                 "type": "boolean"
-              }
+              },
+              "default": "true"
             }
           ],
           "source": {

@@ -10,7 +10,7 @@ export default class Status extends Vue {
 	@Prop({ required: true, type: Boolean })
 	readonly value!: boolean;
 
-	@Prop({ required: true, type: Boolean })
+	@Prop({ required: false, type: Boolean, default: true })
 	readonly pulse!: boolean;
 }
 </script>

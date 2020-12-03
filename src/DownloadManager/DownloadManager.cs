@@ -85,7 +85,7 @@ namespace PlexRipper.DownloadManager
 
         private async Task<Result<DownloadTask>> AuthenticateDownloadTask(DownloadTask downloadTask)
         {
-            var tokenResult = await _plexAuthenticationService.GetPlexServerTokenAsync(downloadTask.PlexServerId, downloadTask.PlexAccountId);
+            var tokenResult = await _plexAuthenticationService.GetPlexServerTokenAsync(downloadTask.PlexServerId);
             if (tokenResult.IsFailed)
             {
                 return tokenResult.ToResult();
@@ -385,7 +385,7 @@ namespace PlexRipper.DownloadManager
                 async () =>
                 {
                     Log.Debug("Checking for download tasks which can be processed.");
-                    var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true));
+                    var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
                     var serverList = serverListResult.Value.Where(x => x.HasDownloadTasks).ToList();
 
                     Log.Information($"Starting the check of {serverList.Count} PlexServers.");
@@ -465,7 +465,7 @@ namespace PlexRipper.DownloadManager
             CleanUpDownloadClient(downloadTaskId);
 
             // Client does not exist yet, create one
-            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true, true));
+            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true));
             if (downloadTask.IsFailed)
             {
                 return downloadTask.ToResult();

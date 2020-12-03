@@ -175,7 +175,6 @@ namespace PlexRipper.Application.PlexDownloads
 
             foreach (var downloadTask in downloadTasks)
             {
-                downloadTask.PlexAccountId = plexAccountId;
                 downloadTask.DownloadFolderId = downloadFolder.Value.Id;
                 downloadTask.DownloadFolder = downloadFolder.Value;
                 downloadTask.DestinationFolderId = destinationFolder.Value.Id;
@@ -190,6 +189,13 @@ namespace PlexRipper.Application.PlexDownloads
             if (createResult.IsFailed)
             {
                 return createResult.ToResult().LogError();
+            }
+
+            if (createResult.Value.Count != downloadTasks.Count)
+            {
+                string msg = "The added download tasks are not stored correctly, missing download tasks.";
+                Log.Error(msg);
+                return Result.Fail(msg);
             }
 
             // Set the Id's of the just added downloadTasks
@@ -274,7 +280,7 @@ namespace PlexRipper.Application.PlexDownloads
 
         public Task<Result<List<PlexServer>>> GetAllDownloadsAsync()
         {
-            return _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true));
+            return _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
         }
 
         public Task<string> GetPlexTokenAsync(PlexAccount plexAccount)

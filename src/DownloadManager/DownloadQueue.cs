@@ -35,7 +35,7 @@ namespace PlexRipper.DownloadManager
             _isChecking = true;
 
             Log.Debug("Checking for download tasks which can be processed.");
-            var serverList = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true, true));
+            var serverList = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
 
             if (!serverList.Value.Any())
             {
@@ -77,7 +77,7 @@ namespace PlexRipper.DownloadManager
 
             await UpdateDownloadQueue();
 
-            var serverResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServer.Id, true, true));
+            var serverResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServer.Id, true));
             if (serverResult.IsFailed)
             {
                 return serverResult.ToResult();

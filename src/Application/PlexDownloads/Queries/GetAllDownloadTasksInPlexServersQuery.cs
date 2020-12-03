@@ -10,14 +10,11 @@ namespace PlexRipper.Application.PlexDownloads
     /// </summary>
     public class GetAllDownloadTasksInPlexServersQuery : IRequest<Result<List<PlexServer>>>
     {
-        public GetAllDownloadTasksInPlexServersQuery(bool includePlexAccount = false, bool includeServerStatus = false)
+        public GetAllDownloadTasksInPlexServersQuery(bool includeServerStatus = false)
         {
             IncludeServerStatus = includeServerStatus;
-            IncludePlexAccount = includePlexAccount;
         }
 
         public bool IncludeServerStatus { get; }
-
-        public bool IncludePlexAccount { get; }
     }
 }

@@ -31,11 +31,6 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 query = query.Include(x => x.PlexServer);
             }
 
-            if (request.IncludePlexAccount)
-            {
-                query = query.Include(x => x.PlexAccount);
-            }
-
             if (request.IncludePlexLibrary)
             {
                 query = query.Include(x => x.PlexLibrary);

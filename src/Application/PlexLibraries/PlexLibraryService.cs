@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
@@ -71,37 +74,64 @@ namespace PlexRipper.Application.PlexLibraries
             var plexLibraryDb = result.Value;
             var serverUrl = plexLibraryDb.PlexServer.ServerUrl;
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 0, plexLibrary.TvShows.Count);
+            var timer = new Stopwatch();
+            timer.Start();
 
-            await RequestTvShowData();
+            int finishedCount = 0;
+            int errorCount = 0;
 
-            for (int i = 0; i < plexLibrary.TvShows.Count; i++)
+            async Task SendProgress()
             {
-                var plexTvShow = plexLibrary.TvShows[i];
+                Interlocked.Increment(ref finishedCount);
+
+                // Send progress update to clients
+                await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, finishedCount, plexLibrary.TvShows.Count);
+            }
+
+            var tvShowTasks = plexLibrary.TvShows.Select(async plexTvShow =>
+            {
                 plexTvShow.Seasons = await _plexServiceApi.GetSeasonsAsync(authToken, serverUrl, plexTvShow);
 
                 // Retrieve the episodes for every season
                 if (!plexTvShow.Seasons.Any())
                 {
-                    continue;
+                    return;
                 }
 
-                foreach (var showSeason in plexTvShow.Seasons)
+                var tasks = plexTvShow.Seasons.Select(async season =>
                 {
-                    showSeason.PlexLibraryId = plexLibrary.Id;
+                    season.PlexLibraryId = plexLibrary.Id;
+                    season.PlexLibrary = plexLibrary;
+                    season.TvShow = plexTvShow;
 
-                    var episodes = await _plexServiceApi.GetEpisodesAsync(authToken, serverUrl, showSeason);
+                    var episodes = await _plexServiceApi.GetEpisodesAsync(authToken, serverUrl, season);
+                    if (episodes.IsFailed)
+                    {
+                        Interlocked.Increment(ref errorCount);
+                        return;
+                    }
 
                     // Set the correct plexLibraryId
-                    episodes.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
+                    episodes.Value.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
 
-                    showSeason.Episodes = episodes;
-                }
+                    season.Episodes = episodes.Value;
+                }).ToArray();
 
-                // Send progress update to clients
-                await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, i, plexLibrary.TvShows.Count);
+                await Task.WhenAll(tasks);
+                await SendProgress();
+            });
+
+            // Request data in batches
+            var batchSize = 10;
+            int numberOfBatches = (int)Math.Ceiling((double)tvShowTasks.Count() / batchSize);
+
+            for (int i = 0; i < numberOfBatches; i++)
+            {
+                var currentTasks = tvShowTasks.Skip(i * batchSize).Take(batchSize);
+                await Task.WhenAll(currentTasks);
             }
 
-            Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title}");
+            Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds} with {errorCount} errors.");
 
             var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
             if (updateResult.IsFailed)
@@ -128,7 +158,7 @@ namespace PlexRipper.Application.PlexLibraries
             return freshPlexLibrary;
         }
 
-        private async Task<Result<PlexTvShow>> RequestTvShowData(PlexTvShow plexTvShow, string authToken, string serverUrl) { }
+        // private async Task<Result<PlexTvShow>> RequestTvShowData(PlexTvShow plexTvShow, string authToken, string serverUrl) { }
 
         /// <summary>
         /// Refresh the <see cref="PlexLibrary"/>, by first deleting all (related) media and the re-adding the media again.
@@ -160,7 +190,7 @@ namespace PlexRipper.Application.PlexLibraries
                 return createResult.ToResult();
             }
 
-            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.GetMediaCount, plexLibrary.GetMediaCount);
+            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.MediaCount, plexLibrary.MediaCount);
             return await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id));
         }
 
@@ -267,7 +297,7 @@ namespace PlexRipper.Application.PlexLibraries
 
             var plexLibrary = plexLibraryResult.Value;
 
-            await _signalRService.SendLibraryProgressUpdate(plexLibraryId, 0, plexLibrary.GetMediaCount);
+            await _signalRService.SendLibraryProgressUpdate(plexLibraryId, 0, plexLibrary.MediaCount);
 
             if (plexLibrary.Type != PlexMediaType.Movie && plexLibrary.Type != PlexMediaType.TvShow)
             {
@@ -311,7 +341,7 @@ namespace PlexRipper.Application.PlexLibraries
 
         #endregion
 
-        public async Task<Result<byte[]>> GetThumbnailImage(int plexAccountId, int mediaId, PlexMediaType mediaType, int width = 0, int height = 0)
+        public async Task<Result<byte[]>> GetThumbnailImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0)
         {
             var thumbUrl = await _mediator.Send(new GetThumbUrlByPlexMediaIdQuery(mediaId, mediaType));
             if (thumbUrl.IsFailed)
@@ -325,7 +355,7 @@ namespace PlexRipper.Application.PlexLibraries
                 return plexServer.ToResult();
             }
 
-            var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Value.Id, plexAccountId);
+            var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Value.Id);
             if (token.IsFailed)
             {
                 return token.ToResult();

@@ -68,9 +68,6 @@ import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 
 @Component
 export default class MediaPoster extends Vue {
-	@Prop({ required: true, type: Number })
-	readonly accountId!: number;
-
 	@Prop({ required: true, type: Object as () => ITreeViewItem })
 	readonly mediaItem!: ITreeViewItem;
 
@@ -130,7 +127,7 @@ export default class MediaPoster extends Vue {
 	@Watch('isVisible')
 	getThumbnail(): void {
 		if (this.isVisible && !this.imageUrl) {
-			getThumbnail(this.mediaItem.id, this.accountId, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((response) => {
+			getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((response) => {
 				this.imageUrl = URL.createObjectURL(response.data);
 			});
 		}

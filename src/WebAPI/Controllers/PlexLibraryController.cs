@@ -51,7 +51,7 @@ namespace PlexRipper.WebAPI.Controllers
                 if (data.Value != null)
                 {
                     var result = _mapper.Map<PlexLibraryDTO>(data.Value);
-                    Log.Debug($"Found {data.Value.GetMediaCount} in library {data.Value.Title} of type {data.Value.Type}");
+                    Log.Debug($"Found {data.Value.MediaCount} in library {data.Value.Title} of type {data.Value.Type}");
                     return Ok(Result.Ok(result));
                 }
 
@@ -109,7 +109,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibraryDTO refreshPlexLibraryDto)
         {
-            var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexAccountId, refreshPlexLibraryDto.PlexLibraryId);
+            var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId, refreshPlexLibraryDto.PlexAccountId);
 
             if (data.IsFailed)
             {
@@ -119,7 +119,7 @@ namespace PlexRipper.WebAPI.Controllers
             if (data.Value != null)
             {
                 var mapResult = _mapper.Map<PlexLibraryDTO>(data.Value);
-                Log.Debug($"Found {data.Value.GetMediaCount} in library {data.Value.Title} of type {data.Value.Type} after refreshing");
+                Log.Debug($"Found {data.Value.MediaCount} in library {data.Value.Title} of type {data.Value.Type} after refreshing");
                 return Ok(Result.Ok(mapResult));
             }
 
@@ -134,7 +134,6 @@ namespace PlexRipper.WebAPI.Controllers
         public async Task<IActionResult> GetThumb([FromBody] ThumbnailRequestDTO thumbnailRequestDto)
         {
             var result = await _plexLibraryService.GetThumbnailImage(
-                thumbnailRequestDto.PlexAccountId,
                 thumbnailRequestDto.PlexMediaId,
                 thumbnailRequestDto.PlexMediaType,
                 thumbnailRequestDto.Width,

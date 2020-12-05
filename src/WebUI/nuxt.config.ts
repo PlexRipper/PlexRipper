@@ -101,6 +101,7 @@ const config: NuxtConfig = {
 				config.resolve.alias['@store'] = path.resolve(__dirname, 'src/store/');
 				config.resolve.alias['@dto'] = path.resolve(__dirname, 'src/types/dto/');
 				config.resolve.alias['@api'] = path.resolve(__dirname, 'src/types/api/');
+				config.resolve.alias['@state'] = path.resolve(__dirname, 'src/types/state/');
 				config.resolve.alias['@img'] = path.resolve(__dirname, 'src/assets/img/');
 				config.resolve.alias['@enums'] = path.resolve(__dirname, 'src/types/enums/');
 				config.resolve.alias['@interfaces'] = path.resolve(__dirname, 'src/types/interfaces/');

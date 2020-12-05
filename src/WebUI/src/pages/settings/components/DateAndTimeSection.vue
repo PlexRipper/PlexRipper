@@ -1,6 +1,8 @@
 <template>
 	<p-section>
-		<template #header> {{ $t('pages.settings.ui.date-and-time.header') }} </template>
+		<template #header>
+			{{ $t('pages.settings.ui.date-and-time.header') }}
+		</template>
 		<v-row no-gutters>
 			<v-col>
 				<v-simple-table class="section-table">

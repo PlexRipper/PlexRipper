@@ -18,7 +18,7 @@
 			</v-row>
 		</template>
 		<!-- Header -->
-		<template v-else>
+		<template v-else-if="server && library">
 			<!--	Overview bar	-->
 			<v-row>
 				<media-overview-bar
@@ -32,34 +32,16 @@
 			<!--	Data table display	-->
 			<template v-if="isTableView">
 				<!-- The movie table -->
-				<movie-table
-					v-if="isMovieLibrary"
-					:movies="movies"
-					:account-id="activeAccountId"
-					:items="getItems"
-					@download="openDownloadDialog"
-				/>
+				<movie-table v-if="isMovieLibrary" :movies="movies" :items="getItems" @download="openDownloadDialog" />
 				<!-- The tv-show table -->
-				<tv-show-table
-					v-if="isTvShowLibrary"
-					:tv-shows="tvShows"
-					:active-account="activeAccount"
-					:items="getItems"
-					@download="openDownloadDialog"
-				/>
+				<tv-show-table v-if="isTvShowLibrary" :tv-shows="tvShows" :items="getItems" @download="openDownloadDialog" />
 			</template>
 
 			<!-- Poster display-->
 			<perfect-scrollbar>
 				<v-row v-if="isPosterView" class="poster-overview" justify="center">
 					<template v-for="item in getItems">
-						<media-poster
-							:key="item.id"
-							:media-item="item"
-							:account-id="activeAccountId"
-							:media-type="mediaType"
-							@download="openDownloadDialog"
-						/>
+						<media-poster :key="item.id" :media-item="item" :media-type="mediaType" @download="openDownloadDialog" />
 					</template>
 				</v-row>
 			</perfect-scrollbar>
@@ -73,6 +55,9 @@
 					@download="downloadMedia"
 				/>
 			</v-row>
+		</template>
+		<template v-else>
+			<h1>Could not display this library.</h1>
 		</template>
 	</page>
 </template>
@@ -94,12 +79,11 @@ import MediaPoster from '@mediaOverview/MediaPoster.vue';
 import TvShowTable from '@mediaOverview/MediaTable/TvShowTable.vue';
 import { merge, of } from 'rxjs';
 import SignalrService from '@service/signalrService';
-import { catchError, finalize, switchMap, takeLast, takeWhile, tap } from 'rxjs/operators';
-import { getPlexLibraryInServer, refreshPlexLibrary } from '@api/plexLibraryApi';
+import { catchError, finalize, takeWhile, tap } from 'rxjs/operators';
 import Log from 'consola';
-import AccountService from '@service/accountService';
 import { downloadMedia } from '@api/plexDownloadApi';
 import DownloadService from '@service/downloadService';
+import ServerService from '@state/serverService';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
@@ -128,6 +112,7 @@ export default class MediaOverview extends Vue {
 	isLoading: boolean = true;
 	isRefreshing: boolean = false;
 	server: PlexServerDTO | null = null;
+	library: PlexLibraryDTO | null = null;
 	libraryProgress: LibraryProgress | null = null;
 	downloadTaskCreationProgress: DownloadTaskCreationProgress | null = null;
 	downloadPreviewType: PlexMediaType = PlexMediaType.None;
@@ -142,13 +127,6 @@ export default class MediaOverview extends Vue {
 
 	get mediaIds(): number[] {
 		return this.getItems.map((x) => x.id);
-	}
-
-	get library(): PlexLibraryDTO | null {
-		if (this.server?.plexLibraries.length === 0) {
-			return null;
-		}
-		return this.server?.plexLibraries[0] ?? null;
 	}
 
 	get isMovieLibrary(): boolean {
@@ -168,7 +146,6 @@ export default class MediaOverview extends Vue {
 	}
 
 	get getPercentage(): number {
-		Log.info(this.libraryProgress);
 		return this.libraryProgress?.percentage ?? -1;
 	}
 
@@ -277,19 +254,7 @@ export default class MediaOverview extends Vue {
 		this.isRefreshing = true;
 		this.isLoading = true;
 		this.resetProgress(true);
-		// Refresh Library
-		refreshPlexLibrary(this.libraryId, this.activeAccountId)
-			.pipe(
-				tap((data) => {
-					if (data) {
-						this.server?.plexLibraries.splice(0, 1, data);
-					}
-					this.isLoading = false;
-					this.isRefreshing = false;
-				}),
-				takeLast(1),
-			)
-			.subscribe();
+		ServerService.refreshLibrary(this.libraryId);
 	}
 
 	created(): void {
@@ -299,25 +264,26 @@ export default class MediaOverview extends Vue {
 
 		// Setup progress bar
 		SignalrService.getLibraryProgress().subscribe((data) => {
-			Log.info(data);
 			if (data.id === this.libraryId) {
 				this.libraryProgress = data;
 				this.isRefreshing = data.isRefreshing ?? false;
 			}
 		});
 
-		AccountService.getActiveAccount()
-			.pipe(
-				switchMap(() =>
-					// Retrieve library
-					getPlexLibraryInServer(this.libraryId, this.activeAccountId),
-				),
-			)
-			.subscribe((data) => {
-				Log.debug(data);
-				this.server = data;
-				this.isLoading = false;
-			});
+		ServerService.getServerByLibraryID(this.libraryId).subscribe((server) => {
+			this.server = server ?? null;
+			Log.warn('Server:', this.server);
+		});
+
+		ServerService.getLibrary(this.libraryId).subscribe((library) => {
+			if (library) {
+				this.library = library;
+				Log.warn('Library:', this.library);
+				if (this.library.count > -1) {
+					this.isLoading = false;
+				}
+			}
+		});
 	}
 }
 </script>

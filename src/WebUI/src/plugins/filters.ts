@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Log from 'consola';
+import { PlexMediaType } from '@dto/mainApi';
 
 export default (): void => {
 	Log.debug('Setup Vue filters');
@@ -12,6 +13,19 @@ export default (): void => {
 			return `${value.substring(0, limit)}...`;
 		}
 		return value;
+	});
+
+	Vue.filter('mediaTypeIcon', (type: PlexMediaType): string => {
+		switch (type) {
+			case PlexMediaType.TvShow:
+				return 'mdi-television-classic';
+			case PlexMediaType.Movie:
+				return 'mdi-filmstrip';
+			case PlexMediaType.Music:
+				return 'mdi-music';
+			default:
+				return 'mdi-help-circle-outline';
+		}
 	});
 
 	/*

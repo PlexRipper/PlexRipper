@@ -20,9 +20,6 @@ import IMediaTableHeader from '@interfaces/IMediaTableHeader';
 	},
 })
 export default class MovieTable extends Vue {
-	@Prop({ required: true, type: Number })
-	readonly accountId!: number;
-
 	@Prop({ required: true, type: Array as () => ITreeViewItem[] })
 	readonly items!: ITreeViewItem[];
 

@@ -30,7 +30,6 @@ export function refreshPlexLibrary(libraryId: number, plexAccountId: number): Ob
 
 export function getThumbnail(
 	plexMediaId: number,
-	plexAccountId: number,
 	plexMediaType: PlexMediaType,
 	width: number = 0,
 	height: number = 0,
@@ -40,7 +39,6 @@ export function getThumbnail(
 		`${apiPath}/thumb`,
 		{
 			plexMediaId,
-			plexAccountId,
 			plexMediaType,
 			width,
 			height,

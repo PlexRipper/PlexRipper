@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
@@ -67,10 +68,16 @@ namespace PlexRipper.PlexApi.Services
             return _mapper.Map<PlexAccount>(result);
         }
 
-        public async Task<List<PlexTvShowEpisode>> GetEpisodesAsync(string serverAuthToken, string plexFullHost, PlexTvShowSeason plexTvShowSeason)
+        public async Task<Result<List<PlexTvShowEpisode>>> GetEpisodesAsync(string serverAuthToken, string plexFullHost,
+            PlexTvShowSeason plexTvShowSeason)
         {
             var result = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexTvShowSeason.RatingKey);
-            return _mapper.Map<List<PlexTvShowEpisode>>(result.MediaContainer.Metadata);
+            if (result != null)
+            {
+                return Result.Ok(_mapper.Map<List<PlexTvShowEpisode>>(result.MediaContainer.Metadata));
+            }
+
+            return Result.Fail($"Failed to retrieve episodes for {plexTvShowSeason.TvShow.Title}");
         }
 
         /// <summary>
@@ -156,7 +163,7 @@ namespace PlexRipper.PlexApi.Services
         public async Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow)
         {
             var result = await _plexApi.GetSeasonsAsync(serverAuthToken, plexFullHost, plexTvShow.RatingKey);
-            return _mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata);
+            return result != null ? _mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata) : new List<PlexTvShowSeason>();
         }
 
         public async Task<List<PlexServer>> GetServersAsync(string authToken)

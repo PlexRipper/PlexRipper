@@ -1,7 +1,18 @@
 <template>
-	<v-toolbar class="media-overview-bar no-background" :height="barHeight">
+	<v-toolbar class="media-overview-bar" :height="barHeight">
 		<v-toolbar-title>
-			<h3>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</h3>
+			<v-list subheader two-line class="no-background pa-0">
+				<v-list-item>
+					<v-list-item-avatar>
+						<v-icon large class="mx-3">{{ library.type | mediaTypeIcon }}</v-icon>
+					</v-list-item-avatar>
+					<v-list-item-content>
+						<v-list-item-title>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</v-list-item-title>
+
+						<v-list-item-subtitle>{{ mediaCountFormatted }}</v-list-item-subtitle>
+					</v-list-item-content>
+				</v-list-item>
+			</v-list>
 		</v-toolbar-title>
 
 		<v-spacer></v-spacer>
@@ -34,7 +45,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
-import { ViewMode } from '@dto/mainApi';
+import { PlexMediaType, ViewMode } from '@dto/mainApi';
 import VerticalButton from '@components/General/VerticalButton.vue';
 
 interface IViewOptions {
@@ -67,6 +78,20 @@ export default class MediaOverviewBar extends Vue {
 
 	isSelected(viewMode: ViewMode): boolean {
 		return this.viewMode === viewMode;
+	}
+
+	get mediaCountFormatted(): string {
+		if (this.library) {
+			switch (this.library?.type) {
+				case PlexMediaType.Movie:
+					return `${this.library.count} Movies`;
+				case PlexMediaType.TvShow:
+					return `${this.library.count} TvShows - ${this.library.seasonCount} Seasons - ${this.library.episodeCount} Episodes`;
+				default:
+					return `Library type ${this.library.type} is not supported in the media count`;
+			}
+		}
+		return 'unknown media count';
 	}
 
 	get viewOptions(): IViewOptions[] {

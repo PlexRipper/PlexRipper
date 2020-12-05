@@ -1,3 +1,6 @@
+@import '~vuetify/src/styles/styles.sass';
+@import '~vuetify/src/styles/main.sass';
+
 /*
 Background.vue
 */
@@ -114,6 +117,11 @@ MediaOverviewBar.vue
 .media-overview-bar {
 	border: red 2px solid !important;
 	position: relative;
+	@extend .pa-0;
+	@extend .no-background;
+	.v-toolbar__content {
+		@extend .pa-0;
+	}
 }
 
 .poster-overview {

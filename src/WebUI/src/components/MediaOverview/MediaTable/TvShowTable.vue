@@ -8,7 +8,6 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import type { PlexAccountDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, PlexMediaType, PlexTvShowDTO } from '@dto/mainApi';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
@@ -21,9 +20,6 @@ import IMediaTableHeader from '@interfaces/IMediaTableHeader';
 	},
 })
 export default class TVShowsTable extends Vue {
-	@Prop({ required: true, type: Object as () => PlexAccountDTO })
-	readonly activeAccount!: PlexAccountDTO;
-
 	@Prop({ required: true, type: Array as () => ITreeViewItem[] })
 	readonly items!: ITreeViewItem[];
 

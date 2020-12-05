@@ -60,9 +60,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
-import ServerService from '@service/serverService';
-import { map } from 'rxjs/operators';
-import Log from 'consola';
+import ServerService from '@state/serverService';
 
 @Component
 export default class ServerDialog extends Vue {
@@ -81,19 +79,15 @@ export default class ServerDialog extends Vue {
 	}
 
 	get serverStatus(): PlexServerStatusDTO | null {
-		Log.warn(this.plexServer?.status);
 		return this.plexServer?.status ?? null;
 	}
 
 	getServerData(): void {
-		ServerService.getServers()
-			.pipe(map((server) => server.find((x) => x.id === this.serverId)))
-			.subscribe((server) => {
-				if (server) {
-					this.plexServer = server;
-				}
-			});
-		ServerService.getServer(this.serverId);
+		ServerService.getServer(this.serverId).subscribe((server) => {
+			if (server) {
+				this.plexServer = server;
+			}
+		});
 	}
 
 	checkServer(): void {

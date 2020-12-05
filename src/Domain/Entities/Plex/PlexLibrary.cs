@@ -82,6 +82,7 @@ namespace PlexRipper.Domain
         #endregion
 
         #region Helpers
+
         [NotMapped]
         public bool HasMedia
         {
@@ -91,13 +92,13 @@ namespace PlexRipper.Domain
                 {
                     PlexMediaType.Movie => Movies != null && Movies.Count > 0,
                     PlexMediaType.TvShow => TvShows != null && TvShows.Count > 0,
-                    _ => false
+                    _ => false,
                 };
             }
         }
 
         [NotMapped]
-        public int GetMediaCount
+        public int MediaCount
         {
             get
             {
@@ -105,7 +106,35 @@ namespace PlexRipper.Domain
                 {
                     PlexMediaType.Movie => Movies?.Count ?? -1,
                     PlexMediaType.TvShow => TvShows?.Count ?? -1,
-                    _ => -1
+                    _ => -1,
+                };
+            }
+        }
+
+        [NotMapped]
+        public int SeasonCount
+        {
+            get
+            {
+                return Type switch
+                {
+                    PlexMediaType.Movie => 0,
+                    PlexMediaType.TvShow => TvShows?.Sum(x => x.Seasons.Count) ?? 0,
+                    _ => -1,
+                };
+            }
+        }
+
+        [NotMapped]
+        public int EpisodeCount
+        {
+            get
+            {
+                return Type switch
+                {
+                    PlexMediaType.Movie => 0,
+                    PlexMediaType.TvShow => TvShows?.Sum(x => x.Seasons.Sum(y => y.Episodes.Count)) ?? 0,
+                    _ => -1,
                 };
             }
         }
@@ -126,7 +155,7 @@ namespace PlexRipper.Domain
         /// <summary>
         /// Sort the containing media.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The <see cref="PlexLibrary"/> with its media sorted.</returns>
         public PlexLibrary SortMedia()
         {
             // Sort Movies

@@ -65,7 +65,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import ServerService from '@service/serverService';
+import ServerService from '@state/serverService';
 import { PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import ServerDialog from '@components/Navigation/ServerDialog.vue';
 
@@ -133,7 +133,7 @@ export default class ServerDrawer extends Vue {
 
 	created(): void {
 		ServerService.getServers().subscribe((data: PlexServerDTO[]) => {
-			this.plexServers = data ?? [];
+			this.plexServers = data;
 		});
 	}
 }

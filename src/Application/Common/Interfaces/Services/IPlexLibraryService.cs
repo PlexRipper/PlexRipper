@@ -19,7 +19,7 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="plexAccount"></param>
         /// <param name="plexServer"></param>
-        /// <returns>If successful</returns>
+        /// <returns>If successful.</returns>
         Task<Result<bool>> RefreshLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer);
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace PlexRipper.Application.Common
         /// <returns></returns>
         Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId);
 
-        Task<Result<byte[]>> GetThumbnailImage(int plexAccountId, int mediaId, PlexMediaType mediaType, int width = 0, int height = 0);
+        Task<Result<byte[]>> GetThumbnailImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0);
 
         Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0);
     }

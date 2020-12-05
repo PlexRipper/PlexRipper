@@ -43,6 +43,8 @@ export interface PlexLibraryDTO {
   libraryLocationPath: string;
   plexServerId: number;
   count: number;
+  seasonCount: number;
+  episodeCount: number;
   movies: PlexMovieDTO[];
   tvShows: PlexTvShowDTO[];
   downloadTasks: DownloadTaskDTO[];
@@ -359,7 +361,6 @@ export interface RefreshPlexLibraryDTO {
 }
 
 export interface ThumbnailRequestDTO {
-  plexAccountId: number;
   plexMediaId: number;
   width: number;
   height: number;

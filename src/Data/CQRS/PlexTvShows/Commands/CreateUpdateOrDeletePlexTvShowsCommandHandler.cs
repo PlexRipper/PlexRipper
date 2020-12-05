@@ -31,7 +31,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
         private readonly BulkConfig _config = new BulkConfig
         {
             SetOutputIdentity = true,
-            PreserveInsertOrder = true
+            PreserveInsertOrder = true,
         };
 
         public CreateUpdateOrDeletePlexTvShowsCommandHandler(PlexRipperDbContext dbContext)
@@ -56,7 +56,10 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                     plexTvShow.Seasons.ForEach(x =>
                     {
                         x.PlexLibraryId = plexLibrary.Id;
-                        x.Episodes.ForEach(y => y.PlexLibraryId = plexLibrary.Id);
+                        if (x.Episodes != null && !x.Episodes.Any())
+                        {
+                            x.Episodes.ForEach(y => y.PlexLibraryId = plexLibrary.Id);
+                        }
                     });
 
                     // Add to dictionary to later compare against DB data

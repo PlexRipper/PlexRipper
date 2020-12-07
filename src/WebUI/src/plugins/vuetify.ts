@@ -1,4 +1,3 @@
-import Log from 'consola';
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { Context } from '@nuxt/types';

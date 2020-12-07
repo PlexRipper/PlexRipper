@@ -60,7 +60,6 @@ const config: NuxtConfig = {
 	 ** Nuxt.js modules
 	 */
 	modules: [
-		'@nuxtjs/style-resources',
 		// Doc: https://axios.nuxtjs.org/usage
 		'@nuxtjs/axios',
 		// Doc: https://github.com/nuxt-community/dotenv-module

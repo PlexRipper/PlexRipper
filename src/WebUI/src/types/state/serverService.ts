@@ -6,7 +6,6 @@ import { ObservableStore } from '@codewithdan/observable-store';
 import StoreState from '@state/storeState';
 import AccountService from '@service/accountService';
 import { getPlexLibrary } from '@api/plexLibraryApi';
-import Log from 'consola';
 
 export class ServerService extends ObservableStore<StoreState> {
 	public get servers(): PlexServerDTO[] {

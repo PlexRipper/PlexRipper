@@ -1,5 +1,5 @@
 <template>
-	<v-container :fluid="fluid" :class="['page', $getThemeClass()]">
+	<v-container :fluid="fluid" :class="['page', 'px-0', $getThemeClass()]">
 		<slot></slot>
 	</v-container>
 </template>

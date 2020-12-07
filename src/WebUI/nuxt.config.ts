@@ -53,12 +53,14 @@ const config: NuxtConfig = {
 		'@nuxt/typescript-build',
 		// Doc: https://github.com/nuxt-community/stylelint-module
 		'@nuxtjs/stylelint-module',
+		// Doc: https://github.com/nuxt-community/vuetify-module
 		'@nuxtjs/vuetify',
 	],
 	/*
 	 ** Nuxt.js modules
 	 */
 	modules: [
+		'@nuxtjs/style-resources',
 		// Doc: https://axios.nuxtjs.org/usage
 		'@nuxtjs/axios',
 		// Doc: https://github.com/nuxt-community/dotenv-module
@@ -66,9 +68,6 @@ const config: NuxtConfig = {
 		// Doc: https://i18n.nuxtjs.org/
 		'nuxt-i18n',
 	],
-	/*
-	 ** Build configuration
-	 */
 	i18n: {
 		lazy: true,
 		langDir: '/lang/',

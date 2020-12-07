@@ -1,20 +1,24 @@
-import '@mdi/font/css/materialdesignicons.css';
-import 'material-design-icons-iconfont/dist/material-design-icons.css';
+import Log from 'consola';
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { Context } from '@nuxt/types';
 import { Inject } from '@nuxt/types/app';
+// import 'vuetify/dist/vuetify.min.css';
+import '@mdi/font/css/materialdesignicons.css';
 
+Vue.use(Vuetify);
 /*
  ** vuetify module configuration
  ** https://github.com/nuxt-community/vuetify-module
  */
 export default (ctx: Context, inject: Inject): void => {
-	Vue.use(Vuetify);
-
 	const vuetify = new Vuetify({
 		customVariables: ['~/assets/scss/_variables.scss'],
 		theme: {
+			dark: true,
+			options: {
+				customProperties: true,
+			},
 			themes: {
 				light: {
 					primary: '#ff0000',
@@ -23,10 +27,6 @@ export default (ctx: Context, inject: Inject): void => {
 					primary: '#ff0000',
 				},
 			},
-			options: {
-				customProperties: true,
-			},
-			dark: true,
 		},
 	});
 

@@ -1,7 +1,7 @@
 import Log from 'consola';
 import { Observable, of } from 'rxjs';
 import { getAllDownloads } from '@api/plexDownloadApi';
-import { switchMap, tap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import { ObservableStore } from '@codewithdan/observable-store';
 import StoreState from '@state/storeState';

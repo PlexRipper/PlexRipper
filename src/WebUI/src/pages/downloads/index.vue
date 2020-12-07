@@ -1,93 +1,37 @@
 <template>
 	<page>
-		<v-row>
-			<v-col cols="auto">
-				<h2>Downloads</h2>
-				<!--				<p>{{ downloadProgressList }}</p>-->
-				<!--				<p>{{ fileMergeProgressList }}</p>-->
-				<!--				<p>{{ downloadStatusList }}</p>-->
-			</v-col>
-		</v-row>
 		<!-- Download Toolbar -->
-		<v-row>
-			<v-col>
-				<v-toolbar>
-					<!--Prioritize buttons-->
-					<v-btn-toggle borderless group tile :max="0">
-						<v-btn>
-							<v-icon large>mdi-arrow-collapse-up</v-icon>
-						</v-btn>
-
-						<v-btn>
-							<v-icon large>mdi-arrow-up</v-icon>
-						</v-btn>
-
-						<v-btn>
-							<v-icon large>mdi-arrow-down</v-icon>
-						</v-btn>
-
-						<v-btn>
-							<v-icon large>mdi-arrow-collapse-down</v-icon>
-						</v-btn>
-					</v-btn-toggle>
-
-					<v-spacer />
-
-					<!--Command buttons-->
-					<v-btn depressed tile @click="clearDownloadTasks">
-						<v-icon large left>mdi-notification-clear-all</v-icon>
-						<span class="hidden-sm-and-down">Clear Completed</span>
-					</v-btn>
-					<v-btn depressed tile>
-						<v-icon large left>mdi-pause</v-icon>
-						<span class="hidden-sm-and-down">Pause</span>
-					</v-btn>
-
-					<v-btn depressed tile>
-						<v-icon large left>mdi-play</v-icon>
-						<span class="hidden-sm-and-down">Start</span>
-					</v-btn>
-
-					<v-btn depressed tile>
-						<v-icon large left>mdi-restart</v-icon>
-						<span class="hidden-sm-and-down">Restart</span>
-					</v-btn>
-
-					<v-btn depressed tile @click="deleteDownloadTasks">
-						<v-icon large left>mdi-delete</v-icon>
-						<span class="hidden-sm-and-down">Delete</span>
-					</v-btn>
-				</v-toolbar>
-			</v-col>
-		</v-row>
+		<download-bar @clear="clearDownloadTasks" @delete="deleteDownloadTask" />
 		<!--	The Download Table	-->
-		<v-row v-if="plexServers.length > 0">
-			<v-col>
-				<v-expansion-panels v-model="openExpansions" multiple>
-					<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
-						<v-expansion-panel-header>
-							<h2>{{ plexServer.name }}</h2>
-						</v-expansion-panel-header>
-						<v-expansion-panel-content>
-							<downloads-table
-								v-model="selected"
-								:downloads="getDownloadRows(plexServer.id)"
-								@pause="pauseDownloadTask"
-								@delete="deleteDownloadTask"
-								@stop="stopDownloadTask"
-								@restart="restartDownloadTask"
-								@start="startDownloadTask"
-							/>
-						</v-expansion-panel-content>
-					</v-expansion-panel>
-				</v-expansion-panels>
-			</v-col>
-		</v-row>
-		<v-row v-else justify="center">
-			<v-col cols="auto">
-				<h2>There are currently no downloads in progress</h2>
-			</v-col>
-		</v-row>
+		<perfect-scrollbar>
+			<v-row v-if="plexServers.length > 0" class="px-2" style="height: 1000px">
+				<v-col>
+					<v-expansion-panels v-model="openExpansions" multiple>
+						<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
+							<v-expansion-panel-header>
+								<h2>{{ plexServer.name }}</h2>
+							</v-expansion-panel-header>
+							<v-expansion-panel-content>
+								<downloads-table
+									v-model="selected"
+									:downloads="getDownloadRows(plexServer.id)"
+									@pause="pauseDownloadTask"
+									@delete="deleteDownloadTask"
+									@stop="stopDownloadTask"
+									@restart="restartDownloadTask"
+									@start="startDownloadTask"
+								/>
+							</v-expansion-panel-content>
+						</v-expansion-panel>
+					</v-expansion-panels>
+				</v-col>
+			</v-row>
+			<v-row v-else justify="center">
+				<v-col cols="auto">
+					<h2>There are currently no downloads in progress</h2>
+				</v-col>
+			</v-row>
+		</perfect-scrollbar>
 	</page>
 </template>
 
@@ -117,11 +61,13 @@ import {
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import DownloadsTable from './components/DownloadsTable.vue';
 import IDownloadRow from './types/IDownloadRow';
+import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
 
 @Component({
 	components: {
 		LoadingSpinner,
 		DownloadsTable,
+		DownloadBar,
 	},
 })
 export default class Downloads extends Vue {

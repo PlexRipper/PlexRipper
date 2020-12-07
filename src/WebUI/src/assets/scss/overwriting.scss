@@ -1,13 +1,15 @@
+@import "variables";
+
 /*
 v-app
 */
 .v-application {
 	&.background {
 		&.theme--dark {
-			background: rgba(0, 0, 0, 0.8);
+			background: $dark-background-color;
 		}
 		&.theme--light {
-			background: rgba(255, 255, 255, 0.8);
+			background: $light-background-color;
 		}
 	}
 }

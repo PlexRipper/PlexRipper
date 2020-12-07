@@ -9,7 +9,7 @@ namespace PlexRipper.Application.Common
     {
         Task<string> GetPlexTokenAsync(PlexAccount plexAccount);
 
-        Task<Result<List<PlexServer>>> GetAllDownloadsAsync();
+        Task<Result<List<PlexServer>>> GetDownloadTasksInServerAsync();
 
         Task<Result<bool>> DeleteDownloadTaskAsync(int downloadTaskId);
 
@@ -26,5 +26,7 @@ namespace PlexRipper.Application.Common
         Task<Result<bool>> DownloadMediaAsync(int mediaId, PlexMediaType type, int plexAccountId);
 
         Task<Result<bool>> DeleteDownloadTasksAsync(IEnumerable<int> downloadTaskIds);
+
+        Task<Result<List<DownloadTask>>> GetDownloadTasksAsync();
     }
 }

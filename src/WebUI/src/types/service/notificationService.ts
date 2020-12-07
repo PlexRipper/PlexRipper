@@ -2,7 +2,7 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { NotificationDTO } from '@dto/mainApi';
 import Log from 'consola';
 import { switchMap, tap } from 'rxjs/operators';
-import globalService from '@service/globalService';
+import globalService from '@state/globalService';
 import { getNotifications, hideNotification } from '@api/notificationApi';
 import signalrService from '@service/signalrService';
 

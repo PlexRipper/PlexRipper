@@ -82,7 +82,7 @@ import SignalrService from '@service/signalrService';
 import { catchError, finalize, takeWhile, tap } from 'rxjs/operators';
 import Log from 'consola';
 import { downloadMedia } from '@api/plexDownloadApi';
-import DownloadService from '@service/downloadService';
+import DownloadService from '@state/downloadService';
 import ServerService from '@state/serverService';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';

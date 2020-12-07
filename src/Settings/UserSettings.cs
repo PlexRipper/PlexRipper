@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Settings.Models;
@@ -38,10 +39,10 @@ namespace PlexRipper.Settings
 
         #region Properties
 
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         private static string FileName { get; } = "PlexRipperSettings.json";
 
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         private string FileLocation => Path.Join(_fileSystem.ConfigDirectory, FileName);
 
         #endregion

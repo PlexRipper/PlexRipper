@@ -3,7 +3,7 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { tap, switchMap, finalize } from 'rxjs/operators';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import { SettingsModel } from '@dto/mainApi';
-import GlobalService from '@service/globalService';
+import GlobalService from '@state/globalService';
 import { settingsStore as SettingsStore } from '@/store';
 
 export class SettingsService {

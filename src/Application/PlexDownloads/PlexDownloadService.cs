@@ -278,9 +278,14 @@ namespace PlexRipper.Application.PlexDownloads
 
         #region Public
 
-        public Task<Result<List<PlexServer>>> GetAllDownloadsAsync()
+        public Task<Result<List<PlexServer>>> GetDownloadTasksInServerAsync()
         {
             return _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
+        }
+
+        public Task<Result<List<DownloadTask>>> GetDownloadTasksAsync()
+        {
+            return _mediator.Send(new GetAllDownloadTasksQuery());
         }
 
         public Task<string> GetPlexTokenAsync(PlexAccount plexAccount)

@@ -6,20 +6,15 @@ import { ObservableStore } from '@codewithdan/observable-store';
 import StoreState from '@state/storeState';
 import AccountService from '@service/accountService';
 import { getPlexLibrary } from '@api/plexLibraryApi';
+import Log from 'consola';
 
 export class ServerService extends ObservableStore<StoreState> {
-	get servers(): PlexServerDTO[] {
+	public get servers(): PlexServerDTO[] {
 		return this.getState().servers;
 	}
 
 	public constructor() {
-		const initialState: StoreState = {
-			servers: [],
-		};
-		ObservableStore.initializeState(initialState);
-
 		super({
-			trackStateHistory: true,
 			stateSliceSelector: (state: StoreState) => {
 				return {
 					servers: state.servers,
@@ -31,7 +26,7 @@ export class ServerService extends ObservableStore<StoreState> {
 			.pipe(switchMap((account) => iif(() => account == null, getPlexServers(), of(account?.plexServers ?? []))))
 			.subscribe((data: PlexServerDTO[]) => {
 				if (data) {
-					this.setState({ servers: data });
+					this.setState({ servers: data }, 'Initial Server Data');
 				}
 			});
 	}

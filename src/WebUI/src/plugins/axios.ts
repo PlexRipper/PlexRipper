@@ -3,7 +3,7 @@ import { AxiosResponse } from 'axios';
 import { NuxtAppOptions } from '@nuxt/types';
 import { baseApiUrl } from '@api/baseApi';
 import Axios from 'axios-observable';
-import GlobalService from '@service/globalService';
+import GlobalService from '@state/globalService';
 import Result from 'fluent-type-results';
 
 export default ({ $axios }: NuxtAppOptions): void => {

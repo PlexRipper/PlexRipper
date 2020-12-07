@@ -24,7 +24,7 @@
 								<template v-if="server.plexLibraries.length > 0">
 									<v-list-item v-for="(library, y) in server.plexLibraries" :key="y" @click="openMediaPage(library)">
 										<v-list-item-icon>
-											<v-icon>{{ findIcon(library.type) }}</v-icon>
+											<v-icon>{{ library.type | mediaTypeIcon }}</v-icon>
 										</v-list-item-icon>
 										<v-list-item-content>
 											<v-list-item-title v-text="library.title"></v-list-item-title>
@@ -35,7 +35,7 @@
 								<template v-else>
 									<v-list-item>
 										<v-list-item-icon>
-											<v-icon>{{ findIcon('') }}</v-icon>
+											<v-icon>{{ '' | mediaTypeIcon }}</v-icon>
 										</v-list-item-icon>
 										<v-list-item-content>
 											<v-list-item-title>No libraries available</v-list-item-title>
@@ -95,21 +95,7 @@ export default class ServerDrawer extends Vue {
 		];
 	}
 
-	findIcon(type: PlexMediaType): string {
-		switch (type) {
-			case PlexMediaType.TvShow:
-				return 'mdi-television-classic';
-			case PlexMediaType.Movie:
-				return 'mdi-filmstrip';
-			case PlexMediaType.Music:
-				return 'mdi-music';
-			default:
-				return 'mdi-help-circle-outline';
-		}
-	}
-
 	openServerSettings(serverId: number): void {
-		Log.debug(`Server ${serverId} settings opened`);
 		this.selectedServerId = serverId;
 	}
 

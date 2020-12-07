@@ -13,7 +13,7 @@ import {
 	PlexAccountRefreshProgress,
 } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
-import globalService from '@service/globalService';
+import globalService from '@state/globalService';
 
 export class SignalrService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();

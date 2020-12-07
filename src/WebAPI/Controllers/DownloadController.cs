@@ -21,7 +21,8 @@ namespace PlexRipper.WebAPI.Controllers
 
         private readonly INotificationsService _notificationsService;
 
-        public DownloadController(IPlexDownloadService plexDownloadService, IMapper mapper, INotificationsService notificationsService) : base(mapper, notificationsService)
+        public DownloadController(IPlexDownloadService plexDownloadService, IMapper mapper, INotificationsService notificationsService) : base(mapper,
+            notificationsService)
         {
             _plexDownloadService = plexDownloadService;
             _mapper = mapper;
@@ -30,11 +31,27 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET: api/<DownloadController>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<DownloadTaskDTO>>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> GetDownloadTasks()
+        {
+            var result = await _plexDownloadService.GetDownloadTasksAsync();
+            if (result.IsFailed)
+            {
+                return InternalServerError(result);
+            }
+
+            var mapResult = _mapper.Map<List<DownloadTaskDTO>>(result.Value);
+            return Ok(Result.Ok(mapResult));
+        }
+
+        // GET: api/<DownloadController>/inserver
+        [HttpGet("inserver")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerDTO>>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetDownloadTasksInServer()
         {
-            var result = await _plexDownloadService.GetAllDownloadsAsync();
+            var result = await _plexDownloadService.GetDownloadTasksInServerAsync();
             if (result.IsFailed)
             {
                 return InternalServerError(result);

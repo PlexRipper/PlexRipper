@@ -103,7 +103,7 @@ import {
 	pauseDownloadTask,
 	deleteDownloadTasks,
 } from '@api/plexDownloadApi';
-import DownloadService from '@service/downloadService';
+import DownloadService from '@state/downloadService';
 import SignalrService from '@service/signalrService';
 import { finalize, switchMap } from 'rxjs/operators';
 import {
@@ -247,6 +247,7 @@ export default class Downloads extends Vue {
 
 	created(): void {
 		DownloadService.getDownloadListInServers().subscribe((data) => {
+			Log.warn('getDownloadListInServers', data);
 			this.plexServers = data;
 			this.openExpansions = [...Array(this.plexServers?.length).keys()] ?? [];
 		});

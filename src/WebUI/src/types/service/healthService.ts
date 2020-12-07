@@ -1,6 +1,6 @@
 import { ReplaySubject, Observable, interval } from 'rxjs';
 import { distinctUntilChanged, switchMap } from 'rxjs/operators';
-import GlobalService from '@service/globalService';
+import GlobalService from '@state/globalService';
 import { getHealthStatus } from '@api/healthApi';
 export class HealthService {
 	private _serverPing: ReplaySubject<boolean> = new ReplaySubject();

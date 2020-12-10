@@ -1,12 +1,17 @@
-﻿using System.IO;
+using System;
+using System.IO;
 using System.Reflection;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
     public class PlexRipperDbContext : DbContext
     {
+        private readonly IFileSystem _fileSystem;
+
         #region Properties
 
         #region Tables
@@ -71,11 +76,34 @@ namespace PlexRipper.Data
 
         #endregion
 
+        private static bool IsTestMode
+        {
+            get
+            {
+                var testMode = Environment.GetEnvironmentVariable("IntegrationTestMode");
+                return testMode != null && testMode == "true";
+            }
+        }
+
+        private static bool ResetDatabase
+        {
+            get
+            {
+                var resetDb = Environment.GetEnvironmentVariable("ResetDB");
+                return resetDb != null && resetDb == "true";
+            }
+        }
+
+        private static string DatabaseName => IsTestMode ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
+
         #endregion Properties
 
         #region Constructors
 
-        public PlexRipperDbContext() { }
+        public PlexRipperDbContext(IFileSystem fileSystem)
+        {
+            _fileSystem = fileSystem;
+        }
 
         public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
 
@@ -83,23 +111,52 @@ namespace PlexRipper.Data
 
         #region Methods
 
-        private static void SetConfig(DbContextOptionsBuilder optionsBuilder, bool isTest = false)
+        public Result Setup()
         {
-            // optionsBuilder.UseLazyLoadingProxies();
-            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            var rootDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
-            string dbName = isTest ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
-            string dbPath = Path.Combine(rootDir + "/config", dbName);
+            // Should the Database be deleted and re-created
+            if (ResetDatabase)
+            {
+                Log.Warning("ResetDB command is true, database will be deleted and re-created.");
+                Database.EnsureDeleted();
+            }
 
-            optionsBuilder
-                .UseSqlite(
-                    $"Data Source={dbPath}",
-                    b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+            // TODO Re-enable Migrate when stable
+            // DB.Database.Migrate();
+            // Check if database exists and can be connected to.
+            var exist = Database.CanConnect();
+            if (!exist)
+            {
+                Log.Information("Database does not exist, creating one now.");
+                Database.EnsureCreated();
+                exist = Database.CanConnect();
+
+                if (exist)
+                {
+                    Log.Information("Database was successfully created and connected!");
+                    return Result.Ok();
+                }
+
+                Log.Error("Database could not be created.");
+                return Result.Fail($"Could not create database {DatabaseName} in {_fileSystem.ConfigDirectory}").LogError();
+            }
+
+            Log.Information($"Database {DatabaseName} exists and is successfully connected!");
+            return Result.Ok();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder = GetConfig();
+            if (!optionsBuilder.IsConfigured)
+            {
+                string dbPath = Path.Combine(_fileSystem.ConfigDirectory, DatabaseName);
+
+                // optionsBuilder.UseLazyLoadingProxies();
+                optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                optionsBuilder
+                    .UseSqlite(
+                        $"Data Source={dbPath}",
+                        b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -109,20 +166,6 @@ namespace PlexRipper.Data
             builder = PlexRipperDBContextSeed.SeedDatabase(builder);
 
             base.OnModelCreating(builder);
-        }
-
-        public static DbContextOptionsBuilder<PlexRipperDbContext> GetConfig()
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
-            SetConfig(optionsBuilder);
-            return optionsBuilder;
-        }
-
-        public static DbContextOptionsBuilder<PlexRipperDbContext> GetTestConfig()
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
-            SetConfig(optionsBuilder, true);
-            return optionsBuilder;
         }
 
         #endregion Methods

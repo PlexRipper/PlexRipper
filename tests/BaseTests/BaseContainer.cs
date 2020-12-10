@@ -25,9 +25,6 @@ namespace PlexRipper.BaseTests
             // startUp.ConfigureServices(services);
             // builder.Populate(services);
 
-            // Database setup
-            PlexRipperDBSetup.Setup();
-
             AutofacContainer = builder.Build();
         }
 

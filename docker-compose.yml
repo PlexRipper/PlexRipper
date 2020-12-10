@@ -5,8 +5,8 @@ services:
         image: plexripper/plexripper
         build:
             context: .
-            dockerfile: src/WebAPI/Dockerfile
-        restart: always
+            dockerfile: ./Dockerfile
+        # restart: always
         ports:
             # Web UI
             - '3000:3000'

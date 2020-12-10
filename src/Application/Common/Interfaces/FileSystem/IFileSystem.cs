@@ -17,5 +17,7 @@ namespace PlexRipper.Application.Common
         FileSystemResult LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
 
         Result<FileStream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize);
+
+        Result Setup();
     }
 }

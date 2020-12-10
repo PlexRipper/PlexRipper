@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application.Common;
+using PlexRipper.Data;
 using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI
@@ -12,18 +13,31 @@ namespace PlexRipper.WebAPI
 
         private readonly IUserSettings _userSettings;
 
+        private readonly IFileSystem _fileSystem;
+
         private readonly IFileManager _fileManager;
 
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileManager fileManager)
+        private readonly PlexRipperDbContext _dbContext;
+
+        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileManager fileManager, PlexRipperDbContext dbContext)
         {
             _appLifetime = appLifetime;
             _userSettings = userSettings;
+            _fileSystem = fileSystem;
             _fileManager = fileManager;
+            _dbContext = dbContext;
         }
 
         public async Task WaitForStartAsync(CancellationToken cancellationToken)
         {
             Log.Information("Initiating boot process");
+            var fileSystemSetup = _fileSystem.Setup();
+            if (fileSystemSetup.IsFailed)
+            {
+                return;
+            }
+
+            _dbContext.Setup();
             _userSettings.Setup();
             _fileManager.Setup();
         }

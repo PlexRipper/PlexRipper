@@ -88,9 +88,6 @@ namespace PlexRipper.WebAPI
                 configure.DocumentProcessors.Add(new NSwagAddExtraTypes());
             });
 
-            // Database setup
-            PlexRipperDBSetup.Setup();
-
             // Autofac
             services.AddOptions();
         }

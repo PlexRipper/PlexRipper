@@ -62,8 +62,6 @@ const config: NuxtConfig = {
 	modules: [
 		// Doc: https://axios.nuxtjs.org/usage
 		'@nuxtjs/axios',
-		// Doc: https://github.com/nuxt-community/dotenv-module
-		'@nuxtjs/dotenv',
 		// Doc: https://i18n.nuxtjs.org/
 		'nuxt-i18n',
 	],

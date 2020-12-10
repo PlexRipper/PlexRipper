@@ -17,8 +17,6 @@ namespace PlexRipper.FileSystem
 
         private static string _rootDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
 
-        private static string _configDirectory = $"{_rootDirectory}/config";
-
         #endregion Fields
 
         #region Constructors
@@ -32,14 +30,7 @@ namespace PlexRipper.FileSystem
 
         #region Properties
 
-        public string ConfigDirectory
-        {
-            get
-            {
-                CreateConfigDirectory();
-                return _configDirectory;
-            }
-        }
+        public string ConfigDirectory => Path.Combine(_rootDirectory, "config");
 
         public string RootDirectory => _rootDirectory;
 
@@ -47,13 +38,34 @@ namespace PlexRipper.FileSystem
 
         #region Methods
 
-        private void CreateConfigDirectory()
+        public Result Setup()
         {
-            if (!Directory.Exists(_configDirectory))
-            {
-                Log.Debug("Config directory doesn't exist, will create now.");
+            return CreateConfigDirectory();
+        }
 
-                Directory.CreateDirectory(_configDirectory);
+        private Result CreateConfigDirectory()
+        {
+            try
+            {
+                if (!Directory.Exists(ConfigDirectory))
+                {
+                    Log.Debug("Config directory doesn't exist, will create now.");
+
+                    Directory.CreateDirectory(ConfigDirectory);
+
+                    Log.Debug($"Directory: \"{ConfigDirectory}\" created!");
+                }
+                else
+                {
+                    Log.Debug("Config directory exists!");
+                }
+
+                return Result.Ok();
+            }
+            catch (Exception e)
+            {
+                Log.Fatal(e);
+                return Result.Fail(new ExceptionalError(e));
             }
         }
 

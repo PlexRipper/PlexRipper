@@ -25,18 +25,7 @@ namespace PlexRipper.Data.Config
             builder.RegisterAssemblyTypes(assembly)
                 .AsClosedTypesOf(typeof(IRequestHandler<,>));
 
-            // Setup Database
-            var dbContextOptions = PlexRipperDbContext.GetConfig().Options;
-
-            var testMode = Environment.GetEnvironmentVariable("IntegrationTestMode");
-            if (testMode != null && testMode == "true")
-            {
-                // Register Entity Framework Database in TestMode for IntegrationTests
-                dbContextOptions = PlexRipperDbContext.GetTestConfig().Options;
-            }
-
             builder.RegisterType<PlexRipperDbContext>()
-                .WithParameter("options", dbContextOptions)
                 .InstancePerDependency(); // TODO this might need to be InstancePerLifetime
         }
     }

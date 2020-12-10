@@ -32,21 +32,22 @@ VOLUME /config /downloads
 
 # Setup Nuxt
 #build stage for a Node.js application
-#FROM node:12.20.0-alpine AS build-stage
-#LABEL company="PlexRipper"
-#LABEL maintainer="plexripper@protonmail.com"
-#LABEL version="0.1.0"
-#
-#WORKDIR /app/webui
-## Essential config files
-#COPY ./src/WebUI/package*.json ./
-#COPY ./src/WebUI/tsconfig.json ./
-#COPY ./src/WebUI/nuxt.config.ts ./
-#RUN npm install
+FROM node:12.20.0-alpine AS build-stage
+LABEL company="PlexRipper"
+LABEL maintainer="plexripper@protonmail.com"
+LABEL version="0.1.0"
+
+WORKDIR /usr/src/app
+# Essential config files
+COPY ./src/WebUI/package*.json ./
+COPY ./src/WebUI/tsconfig.json ./
+COPY ./src/WebUI/nuxt.config.ts ./
+RUN npm install 
 ## Copy the rest of the project files
-#COPY ./src/WebUI/ ./
-#RUN npm run generate
-#EXPOSE 3000
+COPY ./src/WebUI/ ./
+RUN npm run generate
+ENV NODE_ENV=production
+# EXPOSE 3000
 
 ##production stage
 #FROM nginx:stable-alpine AS production-stage

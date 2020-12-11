@@ -3,6 +3,9 @@ services:
     plexripper:
         container_name: PlexRipper
         image: plexripper/plexripper
+        environment:
+          - ASPNETCORE_ENVIRONMENT=Production
+          - ASPNETCORE_URLS=http://+:5000
         build:
             context: .
             dockerfile: ./Dockerfile

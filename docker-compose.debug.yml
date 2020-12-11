@@ -1,0 +1,23 @@
+version: '3.4'
+services:
+  plexripper:
+    container_name: PlexRipper
+    image: plexripper/plexripper
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:5001;http://+:5000
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    # restart: always
+    ports:
+      # Web UI
+      - '3000:3000'
+      # Web API
+      - '5000:5000'
+      - '5001:5001'
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+

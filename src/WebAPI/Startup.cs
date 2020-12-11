@@ -1,23 +1,21 @@
-using System.Linq;
-using System.Reflection;
-using System.Text.Json.Serialization;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.Config;
-using PlexRipper.Data;
 using PlexRipper.Domain;
 using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
+using System.Linq;
+using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.WebAPI
 {
@@ -47,10 +45,9 @@ namespace PlexRipper.WebAPI
                         // .SetPreflightMaxAge(TimeSpan.FromMinutes(100));
                     });
             });
-            services.AddControllers().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+            services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "wwwroot"; });
+
             services.AddHttpContextAccessor();
             services.AddHealthChecks();
 
@@ -96,9 +93,10 @@ namespace PlexRipper.WebAPI
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
         /// <param name="app"></param>
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseRouting();
+
             app.UseCors(CORSConfiguration);
             app.UseCorsMiddleware();
             app.UseAuthorization();
@@ -115,6 +113,20 @@ namespace PlexRipper.WebAPI
                 // SignalR configuration
                 endpoints.MapHub<ProgressHub>("/progress");
                 endpoints.MapHub<NotificationHub>("/notifications");
+            });
+
+            app.UseSpaStaticFiles();
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+
+                if (env.IsDevelopment())
+                {
+                    spa.Options.DevServerPort = 3000;
+                    spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
+
+                    // spa.UseVueCli("dev", 3000);
+                }
             });
         }
 

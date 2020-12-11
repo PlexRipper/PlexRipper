@@ -86,7 +86,6 @@ const config: NuxtConfig = {
 		// Will allow for debugging in Typescript + Nuxt
 		// Doc: https://nordschool.com/enable-vs-code-debugger-for-nuxt-and-typescript/
 		extend(config: WebpackConfiguration, { isDev, isClient }: NuxtWebpackEnv): void {
-			// console.log(isDev + ' - ' + isClient);
 			if (isDev) {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
 			}

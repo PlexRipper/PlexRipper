@@ -3,12 +3,13 @@ services:
     plexripper:
         container_name: PlexRipper
         image: plexripper/plexripper
+        environment:
+          - ASPNETCORE_ENVIRONMENT=Production
+          - ASPNETCORE_URLS=http://+:5000
         build:
             context: .
             dockerfile: ./Dockerfile
         # restart: always
         ports:
-            # Web UI
-            - '3000:3000'
-            # Web API
+            # Web UI & Web API
             - '5000:5000'

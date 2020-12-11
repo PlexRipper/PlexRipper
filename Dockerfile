@@ -4,6 +4,25 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
 EXPOSE 5000
 
+LABEL company="PlexRipper"
+LABEL maintainer="plexripper@protonmail.com"
+LABEL version="0.1.0"
+# ENV NODE_ENV=production
+VOLUME /config /downloads /movies /series
+
+## Setup Nuxt front-end
+FROM node:12.20.0-alpine AS client-build
+WORKDIR /tmp/build/ClientApp
+# Essential config files
+COPY ./src/WebAPI/ClientApp/package*.json ./
+COPY ./src/WebAPI/ClientApp/tsconfig.json ./
+COPY ./src/WebAPI/ClientApp/nuxt.config.ts ./
+RUN npm install
+## Copy the rest of the project files
+COPY ./src/WebAPI/ClientApp/ ./
+RUN npm run generate
+
+## Setup .NET Core back-end
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
 COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
@@ -23,34 +42,9 @@ RUN dotnet build "WebAPI.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish
 
+## Merge into one container
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=client-build /tmp/build/ClientApp/dist /app/wwwroot
 ENTRYPOINT ["dotnet", "PlexRipper.WebAPI.dll"]
-
-VOLUME /config /downloads
-
-# Setup Nuxt
-#build stage for a Node.js application
-#FROM node:12.20.0-alpine AS build-stage
-#LABEL company="PlexRipper"
-#LABEL maintainer="plexripper@protonmail.com"
-#LABEL version="0.1.0"
-#
-#WORKDIR /app/webui
-## Essential config files
-#COPY ./src/WebUI/package*.json ./
-#COPY ./src/WebUI/tsconfig.json ./
-#COPY ./src/WebUI/nuxt.config.ts ./
-#RUN npm install
-## Copy the rest of the project files
-#COPY ./src/WebUI/ ./
-#RUN npm run generate
-#EXPOSE 3000
-
-##production stage
-#FROM nginx:stable-alpine AS production-stage
-#COPY --from=build-stage /app/webui/dist /usr/share/nginx/html
-#RUN npm run start
-#EXPOSE 80
-#CMD ["nginx", "-g", "daemon off;"]

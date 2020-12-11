@@ -11,11 +11,8 @@ services:
       dockerfile: ./Dockerfile
     # restart: always
     ports:
-      # Web UI
-      - '3000:3000'
-      # Web API
-      - '5000:5000'
-      - '5001:5001'
+     # Web UI & Web API
+     - '5000:5000'
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro

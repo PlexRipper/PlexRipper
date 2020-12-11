@@ -11,8 +11,5 @@ services:
             dockerfile: ./Dockerfile
         # restart: always
         ports:
-            # Web UI
-            - '3000:3000'
-            # Web API
+            # Web UI & Web API
             - '5000:5000'
-            - '5001:5001'

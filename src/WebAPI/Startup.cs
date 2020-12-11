@@ -40,7 +40,7 @@ namespace PlexRipper.WebAPI
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials()
-                            .WithOrigins("http://localhost:3000");
+                            .WithOrigins("http://localhost:5000");
 
                         // .SetPreflightMaxAge(TimeSpan.FromMinutes(100));
                     });

@@ -15,8 +15,6 @@ namespace PlexRipper.FileSystem
 
         private readonly IDiskProvider _diskProvider;
 
-        private static string _rootDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
-
         #endregion Fields
 
         #region Constructors
@@ -30,9 +28,24 @@ namespace PlexRipper.FileSystem
 
         #region Properties
 
-        public string ConfigDirectory => Path.Combine(_rootDirectory, "config");
+        public string RootDirectory
+        {
+            get
+            {
+                switch (OsInfo.Os)
+                {
+                    case Os.Linux:
+                    case Os.Osx:
+                        return "/";
+                    case Os.Windows:
+                        return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
+                    default:
+                        return "/";
+                }
+            }
+        }
 
-        public string RootDirectory => _rootDirectory;
+        public string ConfigDirectory => Path.Combine(RootDirectory, "config");
 
         #endregion Properties
 

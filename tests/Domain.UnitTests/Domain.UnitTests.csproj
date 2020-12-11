@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp5.0</TargetFramework>
-    <RootNamespace>PlexRipper.Domain.UnitTests</RootNamespace>
+      <TargetFramework>net5.0</TargetFramework>
+      <RootNamespace>PlexRipper.Domain.UnitTests</RootNamespace>
     <AssemblyName>PlexRipper.Domain.UnitTests</AssemblyName>
 
     <IsPackable>false</IsPackable>

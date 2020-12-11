@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp5.0</TargetFramework>
-    <RootNamespace>PlexRipper.Data</RootNamespace>
+      <TargetFramework>net5.0</TargetFramework>
+      <RootNamespace>PlexRipper.Data</RootNamespace>
     <AssemblyName>PlexRipper.Data</AssemblyName>
   </PropertyGroup>
 

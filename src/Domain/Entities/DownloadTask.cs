@@ -9,7 +9,7 @@ namespace PlexRipper.Domain
     public class DownloadTask : BaseEntity
     {
         /// <summary>
-        /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv
+        /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
         /// </summary>
         public string FileLocationUrl { get; set; }
 

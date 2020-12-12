@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -203,7 +203,7 @@ namespace PlexRipper.Application.PlexLibraries
         /// </summary>
         /// <param name="libraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
         /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to use for authentication.</param>
-        /// <returns>Valid result if found</returns>
+        /// <returns>Valid result if found.</returns>
         public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0)
         {
             await _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
@@ -255,7 +255,7 @@ namespace PlexRipper.Application.PlexLibraries
         /// </summary>
         /// <param name="plexAccount"></param>
         /// <param name="plexServer"></param>
-        /// <returns>If successful</returns>
+        /// <returns>If successful.</returns>
         public async Task<Result<bool>> RefreshLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer)
         {
             if (plexServer == null)

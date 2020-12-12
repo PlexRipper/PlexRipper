@@ -17,7 +17,7 @@ namespace PlexRipper.SignalR.Common
         public int Total { get; set; }
 
         /// <summary>
-        /// Has the library finished refreshing
+        /// Has the library finished refreshing.
         /// </summary>
         [JsonProperty("isComplete", Required = Required.Always)]
         public bool IsComplete { get; set; }

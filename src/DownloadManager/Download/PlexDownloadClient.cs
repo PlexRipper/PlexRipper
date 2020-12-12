@@ -75,7 +75,7 @@ namespace PlexRipper.DownloadManager.Download
         public DownloadTask DownloadTask { get; internal set; }
 
         /// <summary>
-        /// The ClientId/DownloadTaskId is always the same id that is assigned to the <see cref="DownloadTask"/>
+        /// The ClientId/DownloadTaskId is always the same id that is assigned to the <see cref="DownloadTask"/>.
         /// </summary>
         public int DownloadTaskId => DownloadTask.Id;
 
@@ -325,7 +325,7 @@ namespace PlexRipper.DownloadManager.Download
         }
 
         /// <summary>
-        /// Setup this PlexDownloadClient to get ready for downloading
+        /// Setup this PlexDownloadClient to get ready for downloading.
         /// </summary>
         /// <param name="downloadWorkerTasks">Optional: If the <see cref="DownloadWorkerTask"/>s are already made then use those,
         /// otherwise they will be created.</param>

@@ -79,9 +79,9 @@ namespace PlexRipper.Domain
         /// <summary>
         /// Creates a new Result with a 404NotFound error set and will also log as a warning.
         /// </summary>
-        /// <param name="entityType"> The name of the entity, e.g. nameof(EntityType)</param>
-        /// <param name="entityId">The entityId which failed to be found</param>
-        /// <returns>A Result.Fail() with a 404 Error</returns>
+        /// <param name="entityType"> The name of the entity, e.g. nameof(EntityType).</param>
+        /// <param name="entityId">The entityId which failed to be found.</param>
+        /// <returns>A Result.Fail() with a 404 Error.</returns>
         public static Result GetEntityNotFound(string entityType, int entityId)
         {
             return _EntityNotFound(entityType, entityId);

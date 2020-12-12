@@ -14,7 +14,7 @@ namespace PlexRipper.Domain.Behavior.Pipelines
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidationPipeline{TRequest, TResponse}"/> class.
-        /// Note: Every Query or Command should have a Validator class added otherwise it will silently fail the execution
+        /// Note: Every Query or Command should have a Validator class added otherwise it will silently fail the execution.
         /// </summary>
         /// <param name="compositeValidator"></param>
         public ValidationPipeline(IValidator<TRequest> compositeValidator)

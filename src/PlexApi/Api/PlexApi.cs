@@ -30,8 +30,8 @@ namespace PlexRipper.PlexApi.Api
 
         /// <summary>
         /// Sign into the Plex API
-        /// This is for authenticating users credentials with Plex
-        /// <para>NOTE: Plex "Managed" users do not work</para>
+        /// This is for authenticating users credentials with Plex.
+        /// <para>NOTE: Plex "Managed" users do not work.</para>
         /// </summary>
         /// <param name="username"></param>
         /// <param name="password"></param>
@@ -157,7 +157,7 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="authToken">The authentication token.</param>
         /// <param name="host">The host.</param>
         /// <param name="plexFullHost"></param>
-        /// <param name="plexTvShowSeasonKey">The rating key from the <see cref="PlexTvShowSeason"/></param>
+        /// <param name="plexTvShowSeasonKey">The rating key from the <see cref="PlexTvShowSeason"/>.</param>
         /// <param name="start">The start count.</param>
         /// <param name="retCount">The return count, how many items you want returned.</param>
         /// <returns></returns>
@@ -173,7 +173,7 @@ namespace PlexRipper.PlexApi.Api
 
         /// <summary>
         /// Returns all the Plex users for this account
-        /// NOTE: For HOME USERS. There is no username or email, the user's home name is under the title property
+        /// NOTE: For HOME USERS. There is no username or email, the user's home name is under the title property.
         /// </summary>
         /// <param name="authToken"></param>
         /// <returns></returns>

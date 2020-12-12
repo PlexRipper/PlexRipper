@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -80,7 +80,7 @@ namespace PlexRipper.Domain
         #region Relationships
 
         /// <summary>
-        ///     The associated PlexAccountServers the user has access to
+        ///     The associated PlexAccountServers the user has access to.
         /// </summary>
         public List<PlexAccountServer> PlexAccountServers { get; set; }
 

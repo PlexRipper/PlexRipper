@@ -9,7 +9,7 @@ using PlexRipper.DownloadManager.Download;
 namespace PlexRipper.DownloadManager
 {
     /// <summary>
-    /// The DownloadQueue is responsible for deciding which downloadTask is handled by the <see cref="DownloadManager"/>
+    /// The DownloadQueue is responsible for deciding which downloadTask is handled by the <see cref="DownloadManager"/>.
     /// </summary>
     public class DownloadQueue
     {

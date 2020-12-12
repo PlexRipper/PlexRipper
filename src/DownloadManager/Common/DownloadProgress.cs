@@ -27,7 +27,7 @@ namespace PlexRipper.DownloadManager.Common
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
 
         /// <summary>
-        /// The download time remaining in seconds
+        /// The download time remaining in seconds.
         /// </summary>
         [JsonProperty("timeRemaining", Required = Required.Always)]
         public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, DownloadSpeed);

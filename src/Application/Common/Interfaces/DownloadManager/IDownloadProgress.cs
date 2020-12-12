@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace PlexRipper.Application.Common
 {
@@ -15,7 +15,7 @@ namespace PlexRipper.Application.Common
         long DataTotal { get; set; }
 
         /// <summary>
-        /// The download time remaining in seconds
+        /// The download time remaining in seconds.
         /// </summary>
         long TimeRemaining { get; }
 

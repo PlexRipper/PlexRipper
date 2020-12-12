@@ -4,7 +4,7 @@ using AutoMapper;
 namespace PlexRipper.Domain.AutoMapper
 {
     /// <summary>
-    /// Contains all generic primitive mappings and entity mappings
+    /// Contains all generic primitive mappings and entity mappings.
     /// </summary>
     public class DomainMappingProfile : Profile
     {

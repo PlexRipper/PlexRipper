@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
@@ -6,7 +6,7 @@ using PlexRipper.Domain;
 namespace PlexRipper.Application.PlexDownloads
 {
     /// <summary>
-    ///     Request all downloadTasks sorted in their respective <see cref="PlexServer" /> and <see cref="PlexLibrary" />
+    ///     Request all downloadTasks sorted in their respective <see cref="PlexServer" /> and <see cref="PlexLibrary" />.
     /// </summary>
     public class GetAllDownloadTasksInPlexServersQuery : IRequest<Result<List<PlexServer>>>
     {

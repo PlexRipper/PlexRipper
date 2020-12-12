@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
@@ -79,10 +79,10 @@ namespace PlexRipper.Application.PlexAccounts
         }
 
         /// /// <summary>
-        /// Check if this account is valid by querying the Plex API
+        /// Check if this account is valid by querying the Plex API.
         /// </summary>
-        /// <param name="plexAccount">The account to check</param>
-        /// <returns>Are the account credentials valid</returns>
+        /// <param name="plexAccount">The account to check.</param>
+        /// <returns>Are the account credentials valid.</returns>
         public Task<Result<bool>> ValidatePlexAccountAsync(PlexAccount plexAccount)
         {
             return ValidatePlexAccountAsync(plexAccount.Username, plexAccount.Password);
@@ -206,7 +206,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
 
         /// <summary>
-        /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
+        /// Checks if an <see cref="PlexAccount"/> with the same username already exists. 
         /// </summary>
         /// <param name="username">The username to check for.</param>
         /// <returns>true if username is available.</returns>
@@ -240,7 +240,7 @@ namespace PlexRipper.Application.PlexAccounts
         /// Returns the <see cref="PlexAccount"/> with the accessible <see cref="PlexServer"/>s and all <see cref="PlexLibrary"/>.
         /// </summary>
         /// <param name="accountId">The Id to retrieve the <see cref="PlexAccount"/> by.</param>
-        /// <returns>The account found</returns>
+        /// <returns>The account found.</returns>
         public async Task<Result<PlexAccount>> GetPlexAccountAsync(int accountId)
         {
             var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId, true, true));
@@ -261,10 +261,10 @@ namespace PlexRipper.Application.PlexAccounts
         }
 
         /// <summary>
-        /// Retrieves all <see cref="PlexAccount"/>s with the included <see cref="PlexServer"/>s and <see cref="PlexLibrary"/>s
+        /// Retrieves all <see cref="PlexAccount"/>s with the included <see cref="PlexServer"/>s and <see cref="PlexLibrary"/>s.
         /// </summary>
-        /// <param name="onlyEnabled">Should only enabled <see cref="PlexAccount"/>s be retrieved</param>
-        /// <returns>A list of all <see cref="PlexAccount"/>s</returns>
+        /// <param name="onlyEnabled">Should only enabled <see cref="PlexAccount"/>s be retrieved.</param>
+        /// <returns>A list of all <see cref="PlexAccount"/>s.</returns>
         public Task<Result<List<PlexAccount>>> GetAllPlexAccountsAsync(bool onlyEnabled = false)
         {
             Log.Debug(onlyEnabled ? "Returning only enabled account" : "Returning all accounts");
@@ -274,8 +274,8 @@ namespace PlexRipper.Application.PlexAccounts
         /// <summary>
         /// Creates an <see cref="PlexAccount"/> in the Database and performs an SetupAccountAsync().
         /// </summary>
-        /// <param name="plexAccount">The unique account</param>
-        /// <returns>Returns the added account after setup</returns>
+        /// <param name="plexAccount">The unique account.</param>
+        /// <returns>Returns the added account after setup.</returns>
         public async Task<Result<PlexAccount>> CreatePlexAccountAsync(PlexAccount plexAccount)
         {
             Log.Debug($"Creating account with username {plexAccount.Username}");
@@ -379,7 +379,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
 
         /// <summary>
-        /// Hard deletes the PlexAccount from the Database
+        /// Hard deletes the PlexAccount from the Database.
         /// </summary>
         /// <param name="plexAccountId"></param>
         /// <returns></returns>

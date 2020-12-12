@@ -26,7 +26,7 @@ namespace PlexRipper.Domain
         public decimal Percentage => DataFormat.GetPercentage(DataTransferred, DataTotal);
 
         /// <summary>
-        /// The transfer speed in bytes per second
+        /// The transfer speed in bytes per second.
         /// </summary>
         [JsonProperty("transferSpeed", Required = Required.Always)]
         public int TransferSpeed { get; set; }

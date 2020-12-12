@@ -9,7 +9,7 @@ namespace PlexRipper.Domain
         private static readonly NumberFormatInfo numberFormat = NumberFormatInfo.InvariantInfo;
 
         /// <summary>
-        /// Format file size or downloaded size string
+        /// Format file size or downloaded size string.
         /// </summary>
         /// <param name="byteSize"></param>
         /// <returns></returns>
@@ -29,7 +29,7 @@ namespace PlexRipper.Domain
         }
 
         /// <summary>
-        /// Format download speed string
+        /// Format download speed string.
         /// </summary>
         /// <param name="speed"></param>
         /// <returns></returns>
@@ -48,7 +48,7 @@ namespace PlexRipper.Domain
         }
 
         /// <summary>
-        /// Format time span string so it can display values of more than 24 hours
+        /// Format time span string so it can display values of more than 24 hours.
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
@@ -133,7 +133,7 @@ namespace PlexRipper.Domain
         }
 
         /// <summary>
-        /// Returns a list of priorities based on the Date of creation
+        /// Returns a list of priorities based on the Date of creation.
         /// </summary>
         /// <returns></returns>
         public static List<long> GetPriority(int count)

@@ -50,7 +50,7 @@ namespace PlexRipper.Domain
         public string Url { get; set; }
 
         /// <summary>
-        /// The download directory where the part is downloaded into
+        /// The download directory where the part is downloaded into.
         /// </summary>
         [Column(Order = 7)]
         public string TempDirectory { get; internal set; }

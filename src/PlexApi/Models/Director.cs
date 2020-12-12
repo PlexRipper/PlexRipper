@@ -4,7 +4,7 @@ using PlexRipper.PlexApi.Helpers;
 namespace PlexRipper.PlexApi.Models
 {
     /// <summary>
-    /// Director Plex Object
+    /// Director Plex Object.
     /// </summary>
     public class Director
     {

@@ -18,7 +18,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         public DownloadStatus Status { get; set; }
 
         /// <summary>
-        /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv
+        /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
         /// </summary>
         [JsonProperty("fileLocationUrl", Required = Required.Always)]
         public string FileLocationUrl { get; set; }

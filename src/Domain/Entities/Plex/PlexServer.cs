@@ -50,13 +50,13 @@ namespace PlexRipper.Domain
         #region Helpers
 
         /// <summary>
-        /// The server url, e.g: http://112.202.10.213:32400
+        /// The server url, e.g: http://112.202.10.213:32400.
         /// </summary>
         [NotMapped]
         public string ServerUrl => $"{Scheme}://{Address}:{Port}";
 
         /// <summary>
-        /// The library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections
+        /// The library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections.
         /// </summary>
         [NotMapped]
         public string LibraryUrl => $"{ServerUrl}/library/sections";

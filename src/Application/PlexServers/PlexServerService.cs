@@ -128,9 +128,9 @@ namespace PlexRipper.Application.PlexServers
         /// <summary>
         /// Retrieves all <see cref="PlexServer"/>s accessible by this <see cref="PlexAccount"/> from the Database.
         /// </summary>
-        /// <param name="plexAccount">The <see cref="PlexAccount"/> to check with</param>
-        /// <param name="refresh">Should the <see cref="PlexServer"/>s data be retrieved from the PlexApi</param>
-        /// <returns>The list of <see cref="PlexServer"/>s</returns>
+        /// <param name="plexAccount">The <see cref="PlexAccount"/> to check with.</param>
+        /// <param name="refresh">Should the <see cref="PlexServer"/>s data be retrieved from the PlexApi.</param>
+        /// <returns>The list of <see cref="PlexServer"/>s.</returns>
         public async Task<Result<List<PlexServer>>> GetServersAsync(PlexAccount plexAccount, bool refresh = false)
         {
             if (plexAccount == null)

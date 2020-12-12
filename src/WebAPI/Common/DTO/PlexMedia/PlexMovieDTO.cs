@@ -25,6 +25,9 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("title", Required = Required.Always)]
         public string Title { get; set; }
 
+        [JsonProperty("size", Required = Required.Always)]
+        public long Size { get; set; }
+
         [JsonProperty("contentRating", Required = Required.Always)]
         public string ContentRating { get; set; }
 

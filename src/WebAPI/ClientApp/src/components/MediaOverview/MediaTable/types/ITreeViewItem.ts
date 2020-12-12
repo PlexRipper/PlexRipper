@@ -6,6 +6,7 @@ export default interface ITreeViewItem {
 	key: string;
 	title: string;
 	year?: number;
+	size?: number;
 	addedAt: string;
 	updatedAt: string;
 	type: PlexMediaType;

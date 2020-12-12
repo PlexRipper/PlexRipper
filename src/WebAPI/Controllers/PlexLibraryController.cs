@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentResults;
@@ -41,6 +42,9 @@ namespace PlexRipper.WebAPI.Controllers
 
             try
             {
+                Log.Debug($"API Request: GetPlexLibrary(plexLibraryId = {id}, plexAccountId = {plexAccountId})");
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
                 var data = await _plexLibraryService.GetPlexLibraryAsync(id, plexAccountId);
 
                 if (data.IsFailed)
@@ -51,10 +55,13 @@ namespace PlexRipper.WebAPI.Controllers
                 if (data.Value != null)
                 {
                     var result = _mapper.Map<PlexLibraryDTO>(data.Value);
-                    Log.Debug($"Found {data.Value.MediaCount} in library {data.Value.Title} of type {data.Value.Type}");
+                    stopWatch.Stop();
+                    Log.Debug(
+                        $"Found {data.Value.MediaCount} in library {data.Value.Title} of type {data.Value.Type} - in {stopWatch.ElapsedMilliseconds}ms");
                     return Ok(Result.Ok(result));
                 }
 
+                stopWatch.Stop();
                 string message = $"Could not find a {nameof(PlexLibrary)} with Id: {id}";
                 Log.Warning(message);
                 return NotFound(message);

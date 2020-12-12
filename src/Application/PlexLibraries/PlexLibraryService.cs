@@ -158,8 +158,6 @@ namespace PlexRipper.Application.PlexLibraries
             return freshPlexLibrary;
         }
 
-        // private async Task<Result<PlexTvShow>> RequestTvShowData(PlexTvShow plexTvShow, string authToken, string serverUrl) { }
-
         /// <summary>
         /// Refresh the <see cref="PlexLibrary"/>, by first deleting all (related) media and the re-adding the media again.
         /// </summary>
@@ -198,12 +196,7 @@ namespace PlexRipper.Application.PlexLibraries
 
         #region Public
 
-        /// <summary>
-        /// Returns the PlexLibrary by the Id, will refresh if the library has no media assigned.
-        /// </summary>
-        /// <param name="libraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
-        /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to use for authentication.</param>
-        /// <returns>Valid result if found.</returns>
+        /// <inheritdoc/>
         public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0)
         {
             await _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
@@ -234,6 +227,7 @@ namespace PlexRipper.Application.PlexLibraries
             return libraryDB;
         }
 
+        /// <inheritdoc/>
         public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0)
         {
             var plexLibrary = await GetPlexLibraryAsync(libraryId, plexAccountId);
@@ -250,12 +244,7 @@ namespace PlexRipper.Application.PlexLibraries
 
         #region RefreshLibrary
 
-        /// <summary>
-        /// Retrieve the latest <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database.
-        /// </summary>
-        /// <param name="plexAccount"></param>
-        /// <param name="plexServer"></param>
-        /// <returns>If successful.</returns>
+        /// <inheritdoc/>
         public async Task<Result<bool>> RefreshLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer)
         {
             if (plexServer == null)

@@ -61,7 +61,10 @@ namespace PlexRipper.WebAPI
 
             // Controllers and Json options
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
-            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "wwwroot"; });
+            if (!CurrentEnvironment.IsDevelopment())
+            {
+                services.AddSpaStaticFiles(configuration => { configuration.RootPath = "wwwroot"; });
+            }
 
             services.AddHttpContextAccessor();
             services.AddHealthChecks();
@@ -130,17 +133,20 @@ namespace PlexRipper.WebAPI
                 endpoints.MapHub<NotificationHub>("/notifications");
             });
 
-            app.UseSpaStaticFiles();
-            app.UseSpa(spa =>
+            if (!CurrentEnvironment.IsDevelopment())
             {
-                spa.Options.SourcePath = "ClientApp";
-
-                if (CurrentEnvironment.IsDevelopment())
+                app.UseSpaStaticFiles();
+                app.UseSpa(spa =>
                 {
-                    spa.Options.DevServerPort = 3000;
-                    spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
-                }
-            });
+                    spa.Options.SourcePath = "ClientApp";
+
+                    if (CurrentEnvironment.IsDevelopment())
+                    {
+                        spa.Options.DevServerPort = 3000;
+                        spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
+                    }
+                });
+            }
         }
 
         public void ConfigureContainer(ContainerBuilder builder)

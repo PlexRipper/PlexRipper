@@ -23,12 +23,12 @@ namespace PlexRipper.Application.Common
         Task<Result<bool>> RefreshLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer);
 
         /// <summary>
-        /// Return the PlexLibrary by the Id, will refresh if the library has no media assigned.
+        /// Returns the PlexLibrary by the Id, will refresh if the library has no media assigned.
         /// </summary>
-        /// <param name="libraryId"></param>
-        /// <param name="plexAccountId"></param>
-        /// <returns></returns>
-        Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId);
+        /// <param name="libraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
+        /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to use for authentication.</param>
+        /// <returns>Valid result if found.</returns>
+        Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0);
 
         Task<Result<byte[]>> GetThumbnailImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0);
 

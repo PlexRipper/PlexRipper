@@ -43,8 +43,7 @@ namespace PlexRipper.Domain
             Serilog.Log.Verbose(
                 message
                     .FormatForException(ex)
-                    .FormatForContext(memberName, sourceFilePath)
-            );
+                    .FormatForContext(memberName, sourceFilePath));
         }
 
         public static void Verbose(
@@ -52,7 +51,7 @@ namespace PlexRipper.Domain
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            Serilog.Log.Verbose((ex != null ? ex.ToString() : "").FormatForContext(memberName, sourceFilePath));
+            Serilog.Log.Verbose((ex != null ? ex.ToString() : string.Empty).FormatForContext(memberName, sourceFilePath));
         }
 
         public static void Debug(

@@ -355,11 +355,7 @@ namespace PlexRipper.DownloadManager
             return Result.Ok();
         }
 
-        /// <summary>
-        /// Adds a list of <see cref="DownloadTask"/>s to the download queue.
-        /// </summary>
-        /// <param name="downloadTasks">The list of <see cref="DownloadTask"/>s that will be checked and added.</param>
-        /// <returns>Returns true if all downloadTasks were added successfully.</returns>
+        /// <inheritdoc/>
         public async Task<Result<bool>> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks)
         {
             Log.Debug($"Attempt to add {downloadTasks.Count} DownloadTasks");
@@ -443,11 +439,7 @@ namespace PlexRipper.DownloadManager
             return Result.Ok(true);
         }
 
-        /// <summary>
-        /// Starts a queued task immediately.
-        /// </summary>
-        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to start.</param>
-        /// <returns>Is successful.</returns>
+        /// <inheritdoc/>
         public async Task<Result<bool>> StartDownload(int downloadTaskId)
         {
             CleanUpDownloadClient(downloadTaskId);
@@ -470,11 +462,7 @@ namespace PlexRipper.DownloadManager
             return downloadClient.Value.Start();
         }
 
-        /// <summary>
-        /// Pause a currently downloading <see cref="DownloadTask"/>.
-        /// </summary>
-        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to pause.</param>
-        /// <returns>Is successful.</returns>
+        /// <inheritdoc/>
         public Result<bool> PauseDownload(int downloadTaskId)
         {
             // Retrieve download client

@@ -22,6 +22,7 @@ namespace Data.UnitTests.Commands
         private IMediator _mediator { get; }
 
         private const int _numberOfTvShow = 50;
+
         private int _numberOfTvShowHalf = (int)Math.Floor(_numberOfTvShow / 2D);
 
         public CreateUpdateOrDeletePlexTvShowsCommandTests(ITestOutputHelper output)
@@ -35,7 +36,7 @@ namespace Data.UnitTests.Commands
         private void SetupDatabase()
         {
             PlexServer plexServer = FakeDbData.GetPlexServer().Generate();
-            PlexLibrary plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, 0).Generate();
+            PlexLibrary plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow).Generate();
             try
             {
                 _dbContext.PlexServers.Add(plexServer);
@@ -48,7 +49,6 @@ namespace Data.UnitTests.Commands
                 throw;
             }
         }
-
 
         [Fact]
         public async Task CreateUpdateOrDeletePlexTvShowsCommand_CreateTvShows()

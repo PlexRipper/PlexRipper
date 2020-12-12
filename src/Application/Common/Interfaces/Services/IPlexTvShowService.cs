@@ -1,6 +1,4 @@
 ﻿namespace PlexRipper.Application.Common
 {
-    public interface IPlexTvShowService
-    {
-    }
+    public interface IPlexTvShowService { }
 }

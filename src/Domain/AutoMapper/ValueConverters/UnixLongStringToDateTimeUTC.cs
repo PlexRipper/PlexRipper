@@ -1,5 +1,5 @@
-﻿using AutoMapper;
-using System;
+﻿using System;
+using AutoMapper;
 
 namespace PlexRipper.Domain.AutoMapper.ValueConverters
 {
@@ -13,6 +13,7 @@ namespace PlexRipper.Domain.AutoMapper.ValueConverters
             {
                 return DateTimeOffset.FromUnixTimeSeconds(l1).UtcDateTime;
             }
+
             return DateTime.MinValue;
         }
     }

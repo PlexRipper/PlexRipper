@@ -9,7 +9,7 @@ namespace PlexRipper.Data.Configurations
         public void Configure(EntityTypeBuilder<PlexTvShowGenre> builder)
         {
             builder
-                .HasKey(bc => new { PlexTvShowId = bc.PlexTvShowId, bc.PlexGenreId });
+                .HasKey(bc => new { bc.PlexTvShowId, bc.PlexGenreId });
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using PlexRipper.Domain;
 using Serilog;
 using Xunit.Abstractions;
+using Log = Serilog.Log;
 
 namespace PlexRipper.BaseTests
 {
@@ -16,7 +17,7 @@ namespace PlexRipper.BaseTests
         public static void SetupLogging(ITestOutputHelper output)
         {
             Output = output;
-            Serilog.Log.Logger = GetLoggerConfig();
+            Log.Logger = GetLoggerConfig();
         }
 
         public static ILogger GetLoggerConfig()

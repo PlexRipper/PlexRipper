@@ -7,6 +7,5 @@ namespace PlexRipper.Domain
         public string Tag { get; set; }
 
         public virtual List<PlexMovieGenre> PlexMovies { get; set; }
-
     }
 }

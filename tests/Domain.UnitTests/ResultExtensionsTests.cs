@@ -16,7 +16,6 @@ namespace PlexRipper.Domain.UnitTests
             Container = new BaseContainer();
         }
 
-
         [Fact]
         public void ShouldHave400BadRequestError()
         {
@@ -37,7 +36,6 @@ namespace PlexRipper.Domain.UnitTests
             result2.Has404NotFoundError().Should().BeFalse();
             result2.Errors.Count.Should().Be(2);
             result2.Errors[1].Message.Should().Be(testMessage);
-
         }
 
         [Fact]
@@ -60,7 +58,6 @@ namespace PlexRipper.Domain.UnitTests
             result2.Has400BadRequestError().Should().BeFalse();
             result2.Errors.Count.Should().Be(2);
             result2.Errors[1].Message.Should().Be(testMessage);
-
         }
     }
 }

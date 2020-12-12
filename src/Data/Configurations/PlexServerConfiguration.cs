@@ -13,7 +13,6 @@ namespace PlexRipper.Data.Configurations
                 .WithOne(x => x.PlexServer)
                 .HasForeignKey(x => x.PlexServerId)
                 .OnDelete(DeleteBehavior.Cascade);
-
         }
     }
 }

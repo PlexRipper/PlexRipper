@@ -18,7 +18,6 @@ namespace PlexRipper.Domain
         [Column(Order = 3)]
         public string DirectoryPath { get; set; }
 
-
         #region Helpers
 
         [NotMapped]

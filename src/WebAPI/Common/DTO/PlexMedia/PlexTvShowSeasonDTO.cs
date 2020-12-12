@@ -57,6 +57,5 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }
-
     }
 }

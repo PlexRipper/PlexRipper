@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using PlexRipper.Application.Common;
@@ -13,7 +12,7 @@ namespace PlexRipper.DownloadManager.Common
         public int Id { get; set; }
 
         [JsonProperty("percentage", Required = Required.Always)]
-        public decimal Percentage => Decimal.Round(WorkerProgresses.AsQueryable().Average(x => x.Percentage), 2);
+        public decimal Percentage => decimal.Round(WorkerProgresses.AsQueryable().Average(x => x.Percentage), 2);
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
         public int DownloadSpeed => WorkerProgresses.AsQueryable().Sum(x => x.DownloadSpeed);
@@ -35,7 +34,6 @@ namespace PlexRipper.DownloadManager.Common
 
         [JsonProperty("bytesRemaining", Required = Required.Always)]
         public long BytesRemaining => DataTotal - DataReceived;
-
 
         [JsonProperty("workerProgresses", Required = Required.Always)]
         public List<IDownloadWorkerProgress> WorkerProgresses { get; }

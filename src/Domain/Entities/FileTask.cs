@@ -6,14 +6,11 @@ using System.Linq;
 
 namespace PlexRipper.Domain
 {
-    public class FileTask: BaseEntity
+    public class FileTask : BaseEntity
     {
         #region Constructors
 
-        public FileTask()
-        {
-
-        }
+        public FileTask() { }
 
         public FileTask(DownloadTask downloadTask)
         {
@@ -35,10 +32,13 @@ namespace PlexRipper.Domain
         #region Relationships
 
         public DownloadTask DownloadTask { get; set; }
+
         public int DownloadTaskId { get; set; }
 
         public FolderPath DestinationFolder { get; set; }
+
         public int DestinationFolderId { get; set; }
+
         #endregion
 
         #region Helpers

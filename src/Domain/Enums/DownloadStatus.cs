@@ -93,7 +93,5 @@ namespace PlexRipper.Domain
         /// </summary>
         [EnumMember(Value = "Error")]
         Error = 13,
-
-
     }
 }

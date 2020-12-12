@@ -25,17 +25,24 @@ namespace PlexRipper.DownloadManager.Download
         #region Fields
 
         private readonly Subject<DownloadComplete> _downloadFileCompleted = new Subject<DownloadComplete>();
+
         private readonly Subject<DownloadProgress> _downloadProgressChanged = new Subject<DownloadProgress>();
+
         private readonly Subject<DownloadStatusChanged> _statusChanged = new Subject<DownloadStatusChanged>();
+
         private readonly Subject<IList<DownloadWorkerTask>> _downloadWorkerTaskChanged = new Subject<IList<DownloadWorkerTask>>();
 
         private readonly List<DownloadWorker> _downloadWorkers = new List<DownloadWorker>();
+
         private readonly IMediator _mediator;
+
         private readonly IFileSystem _fileSystem;
 
         private readonly EventLoopScheduler _timeThreadContext = new EventLoopScheduler();
+
         private IDisposable _workerProgressSubscription;
-        private bool _isSetup = false;
+
+        private bool _isSetup;
 
         #endregion
 
@@ -116,7 +123,6 @@ namespace PlexRipper.DownloadManager.Download
             base.Dispose(disposing);
         }
 
-
         private void SetDownloadStatus(DownloadStatus downloadStatus)
         {
             DownloadStatus = downloadStatus;
@@ -164,7 +170,6 @@ namespace PlexRipper.DownloadManager.Download
             downloadCompleteStream
                 .Subscribe(OnDownloadComplete);
         }
-
 
         private Result<bool> StartDownloadWorkers()
         {
@@ -337,7 +342,7 @@ namespace PlexRipper.DownloadManager.Download
 
                 // Create download worker tasks/segments/ranges
                 var partSize = TotalBytesToReceive / Parts;
-                var remainder = TotalBytesToReceive - (partSize * Parts);
+                var remainder = TotalBytesToReceive - partSize * Parts;
                 downloadWorkerTasks = new List<DownloadWorkerTask>();
                 for (int i = 0; i < Parts; i++)
                 {

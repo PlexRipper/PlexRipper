@@ -17,6 +17,6 @@
         public long TotalBytesToReceive { get; }
 
         // Percentage of downloaded data
-        public float Percentage => (BytesReceived / (float)TotalBytesToReceive) * 100F;
+        public float Percentage => BytesReceived / (float)TotalBytesToReceive * 100F;
     }
 }

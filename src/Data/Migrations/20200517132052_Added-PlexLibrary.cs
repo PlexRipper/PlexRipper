@@ -8,14 +8,14 @@ namespace PlexRipper.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "TodoItems");
+                "TodoItems");
 
             migrationBuilder.DropTable(
-                name: "TodoLists");
+                "TodoLists");
 
             migrationBuilder.CreateTable(
-                name: "PlexLibraries",
-                columns: table => new
+                "PlexLibraries",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
@@ -24,80 +24,77 @@ namespace PlexRipper.Data.Migrations
                     Key = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true),
                     HasAccess = table.Column<bool>(nullable: false),
-                    PlexServerId = table.Column<int>(nullable: true)
+                    PlexServerId = table.Column<int>(nullable: true),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PlexLibraries", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlexLibraries_PlexServers_PlexServerId",
-                        column: x => x.PlexServerId,
-                        principalTable: "PlexServers",
-                        principalColumn: "Id",
+                        "FK_PlexLibraries_PlexServers_PlexServerId",
+                        x => x.PlexServerId,
+                        "PlexServers",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexLibraries_PlexServerId",
-                table: "PlexLibraries",
-                column: "PlexServerId");
+                "IX_PlexLibraries_PlexServerId",
+                "PlexLibraries",
+                "PlexServerId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PlexLibraries");
+                "PlexLibraries");
 
             migrationBuilder.CreateTable(
-                name: "TodoLists",
-                columns: table => new
+                "TodoLists",
+                table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>("INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Colour = table.Column<string>(type: "TEXT", nullable: true),
-                    Created = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", nullable: true),
-                    LastModified = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "TEXT", nullable: true),
-                    Title = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false)
+                    Colour = table.Column<string>("TEXT", nullable: true),
+                    Created = table.Column<DateTime>("TEXT", nullable: false),
+                    CreatedBy = table.Column<string>("TEXT", nullable: true),
+                    LastModified = table.Column<DateTime>("TEXT", nullable: true),
+                    LastModifiedBy = table.Column<string>("TEXT", nullable: true),
+                    Title = table.Column<string>("TEXT", maxLength: 200, nullable: false),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TodoLists", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_TodoLists", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "TodoItems",
-                columns: table => new
+                "TodoItems",
+                table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>("INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Created = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedBy = table.Column<string>(type: "TEXT", nullable: true),
-                    Done = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LastModified = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "TEXT", nullable: true),
-                    ListId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Note = table.Column<string>(type: "TEXT", nullable: true),
-                    Priority = table.Column<int>(type: "INTEGER", nullable: false),
-                    Reminder = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Title = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false)
+                    Created = table.Column<DateTime>("TEXT", nullable: false),
+                    CreatedBy = table.Column<string>("TEXT", nullable: true),
+                    Done = table.Column<bool>("INTEGER", nullable: false),
+                    LastModified = table.Column<DateTime>("TEXT", nullable: true),
+                    LastModifiedBy = table.Column<string>("TEXT", nullable: true),
+                    ListId = table.Column<int>("INTEGER", nullable: false),
+                    Note = table.Column<string>("TEXT", nullable: true),
+                    Priority = table.Column<int>("INTEGER", nullable: false),
+                    Reminder = table.Column<DateTime>("TEXT", nullable: true),
+                    Title = table.Column<string>("TEXT", maxLength: 200, nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TodoItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TodoItems_TodoLists_ListId",
-                        column: x => x.ListId,
-                        principalTable: "TodoLists",
-                        principalColumn: "Id",
+                        "FK_TodoItems_TodoLists_ListId",
+                        x => x.ListId,
+                        "TodoLists",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_TodoItems_ListId",
-                table: "TodoItems",
-                column: "ListId");
+                "IX_TodoItems_ListId",
+                "TodoItems",
+                "ListId");
         }
     }
 }

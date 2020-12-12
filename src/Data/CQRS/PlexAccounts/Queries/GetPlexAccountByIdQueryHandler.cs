@@ -19,12 +19,9 @@ namespace PlexRipper.Data.CQRS
         }
     }
 
-
     public class GetAccountByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexAccountByIdQuery, Result<PlexAccount>>
     {
-        public GetAccountByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext)
-        {
-        }
+        public GetAccountByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<PlexAccount>> Handle(GetPlexAccountByIdQuery request, CancellationToken cancellationToken)
         {

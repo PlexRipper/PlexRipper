@@ -51,8 +51,6 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
                     break;
                 case PlexMediaType.Unknown:
                     break;
-                default:
-                    break;
             }
 
             if (!string.IsNullOrEmpty(thumbUrl))

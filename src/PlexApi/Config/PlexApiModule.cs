@@ -4,7 +4,7 @@ using PlexRipper.PlexApi.Services;
 
 namespace PlexRipper.PlexApi.Config
 {
-    public class PlexApiModule : Autofac.Module
+    public class PlexApiModule : Module
     {
         protected override void Load(ContainerBuilder builder)
         {

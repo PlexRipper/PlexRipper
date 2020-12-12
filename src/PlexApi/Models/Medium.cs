@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using PlexRipper.PlexApi.Helpers;
 
 namespace PlexRipper.PlexApi.Models
 {
@@ -80,7 +79,6 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("selected")]
         public bool Selected { get; set; }
-
 
         [JsonPropertyName("Part")]
         public Part[] Part { get; set; }

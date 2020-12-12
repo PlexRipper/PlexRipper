@@ -46,11 +46,9 @@ namespace PlexRipper.Domain
         [Column(Order = 13)]
         public int AudioChannels { get; set; }
 
-
         public bool OptimizedForStreaming { get; set; }
 
         public string Protocol { get; set; }
-
 
         public bool Selected { get; set; }
 

@@ -14,7 +14,7 @@ namespace PlexRipper.Domain
             {
                 foreach (var (key, metaData) in error.Metadata)
                 {
-                    if (key == _statusCode && (int) metaData == statusCode)
+                    if (key == _statusCode && (int)metaData == statusCode)
                     {
                         return true;
                     }
@@ -62,6 +62,7 @@ namespace PlexRipper.Domain
             {
                 message = "Could not find object";
             }
+
             return _CreateStatusCode(HttpCodes.Status400BadRequest, message);
         }
 
@@ -90,6 +91,7 @@ namespace PlexRipper.Domain
             {
                 message = "Could not find object";
             }
+
             return _CreateStatusCode(HttpCodes.Status400BadRequest, message);
         }
 
@@ -120,6 +122,7 @@ namespace PlexRipper.Domain
             {
                 message = "Bad Request Error";
             }
+
             return GetStatusCodeError(HttpCodes.Status404NotFound, message);
         }
 
@@ -161,7 +164,6 @@ namespace PlexRipper.Domain
             return _add400BadRequestError(result, message);
         }
 
-
         #endregion
 
         #region 404
@@ -196,7 +198,6 @@ namespace PlexRipper.Domain
         }
 
         #endregion
-
 
         #region 404
 

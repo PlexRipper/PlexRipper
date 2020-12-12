@@ -5,8 +5,16 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
+    /// <summary>
+    /// Interface for the DownloadManager.
+    /// </summary>
     public interface IDownloadManager
     {
+        /// <summary>
+        /// Cancels the PlexDownloadClient executing the <see cref="DownloadTask"/> if it is downloading.
+        /// </summary>
+        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to stop.</param>
+        /// <returns>Is successful.</returns>
         Task<Result<bool>> StopDownloadAsync(int downloadTaskId);
 
         /// <summary>
@@ -16,8 +24,17 @@ namespace PlexRipper.Application.Common
         /// <returns>Returns true if all downloadTasks were added successfully.</returns>
         Task<Result<bool>> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks);
 
+        /// <summary>
+        /// Restart the <see cref="DownloadTask"/> by deleting the PlexDownloadClient and starting a new one.
+        /// </summary>
+        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to restart.</param>
+        /// <returns>Is successful.</returns>
         Task<Result<bool>> RestartDownloadAsync(int downloadTaskId);
 
+        /// <summary>
+        /// Will clear any completed <see cref="DownloadTask"/> from the database.
+        /// </summary>
+        /// <returns>Is successful.</returns>
         Task<Result<bool>> ClearCompletedAsync();
 
         /// <summary>

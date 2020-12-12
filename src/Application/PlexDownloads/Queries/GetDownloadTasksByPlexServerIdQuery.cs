@@ -18,6 +18,5 @@ namespace PlexRipper.Application.PlexDownloads
         public int PlexServerId { get; }
 
         public bool IncludeServerStatus { get; }
-
     }
 }

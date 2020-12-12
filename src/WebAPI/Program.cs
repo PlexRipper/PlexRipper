@@ -7,21 +7,20 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Domain;
 using Serilog;
-using Log = PlexRipper.Domain.Log;
+using Log = Serilog.Log;
 
 namespace PlexRipper.WebAPI
 {
     public class Program
     {
-
         public static void Main(string[] args)
         {
-            Serilog.Log.Logger = LogConfigurationExtensions.GetLogger();
+            Log.Logger = LogConfigurationExtensions.GetLogger();
 
             try
             {
-                Log.Information("Starting up");
-                Log.Information($"Currently running on {OsInfo.Os}");
+                Domain.Log.Information("Starting up");
+                Domain.Log.Information($"Currently running on {OsInfo.Os}");
 
                 var host = Host.CreateDefaultBuilder(args)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
@@ -43,12 +42,12 @@ namespace PlexRipper.WebAPI
             }
             catch (Exception e)
             {
-                Log.Fatal(e);
+                Domain.Log.Fatal(e);
             }
             finally
             {
                 // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
-                Serilog.Log.CloseAndFlush();
+                Log.CloseAndFlush();
             }
         }
     }

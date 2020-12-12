@@ -35,7 +35,6 @@ namespace PlexRipper.WebAPI.Config
             // Presentation
             builder.RegisterModule<WebApiModule>();
 
-
             // Auto Mapper
             builder.Register(ctx =>
             {

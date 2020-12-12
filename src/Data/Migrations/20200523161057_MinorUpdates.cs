@@ -7,16 +7,16 @@ namespace PlexRipper.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<int>(
-                name: "PlexServerId",
-                table: "PlexLibraries",
+                "PlexServerId",
+                "PlexLibraries",
                 nullable: false,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
                 oldNullable: true);
 
             migrationBuilder.AddColumn<long>(
-                name: "PlexId",
-                table: "PlexAccounts",
+                "PlexId",
+                "PlexAccounts",
                 nullable: false,
                 defaultValue: 0L);
         }
@@ -24,13 +24,13 @@ namespace PlexRipper.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "PlexId",
-                table: "PlexAccounts");
+                "PlexId",
+                "PlexAccounts");
 
             migrationBuilder.AlterColumn<int>(
-                name: "PlexServerId",
-                table: "PlexLibraries",
-                type: "INTEGER",
+                "PlexServerId",
+                "PlexLibraries",
+                "INTEGER",
                 nullable: true,
                 oldClrType: typeof(int));
         }

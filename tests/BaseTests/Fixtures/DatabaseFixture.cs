@@ -4,7 +4,6 @@
     {
         public BaseContainer Container { get; }
 
-
         public DatabaseFixture()
         {
             Container = new BaseContainer();

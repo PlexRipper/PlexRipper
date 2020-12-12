@@ -3,7 +3,7 @@ using PlexRipper.Application.Common;
 
 namespace PlexRipper.DownloadManager.Config
 {
-    public class DownloadManagerModule : Autofac.Module
+    public class DownloadManagerModule : Module
     {
         protected override void Load(ContainerBuilder builder)
         {

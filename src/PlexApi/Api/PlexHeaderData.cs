@@ -9,6 +9,7 @@ namespace PlexRipper.PlexApi.Api
             get
             {
                 var headers = new Dictionary<string, string>();
+
                 // TODO Debate if we should put PlexRipper here
                 headers.Add("User-Agent", "PlexClient");
                 headers.Add("X-Plex-Client-Identifier", "271938");

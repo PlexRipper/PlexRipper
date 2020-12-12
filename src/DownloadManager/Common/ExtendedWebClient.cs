@@ -18,7 +18,7 @@ namespace PlexRipper.DownloadManager.Common
         /// </summary>
         public ExtendedWebClient()
         {
-            this.ConnectionLimit = 100;
+            ConnectionLimit = 100;
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace PlexRipper.DownloadManager.Common
 
             if (request != null)
             {
-                request.ServicePoint.ConnectionLimit = this.ConnectionLimit;
+                request.ServicePoint.ConnectionLimit = ConnectionLimit;
             }
 
             return request;

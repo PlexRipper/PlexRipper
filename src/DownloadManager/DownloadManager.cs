@@ -364,7 +364,6 @@ namespace PlexRipper.DownloadManager
         {
             Log.Debug($"Attempt to add {downloadTasks.Count} DownloadTasks");
 
-
             Log.Debug($"Successfully added all {downloadTasks.Count} DownloadTasks");
             CheckDownloadQueue();
             return Result.Ok(true);
@@ -416,20 +415,13 @@ namespace PlexRipper.DownloadManager
                 }, TaskCreationOptions.LongRunning);
         }
 
-        /// <summary>
-        /// Will clear any completed <see cref="DownloadTask"/> from the database.
-        /// </summary>
-        /// <returns>Is successful.</returns>
+        /// <inheritdoc/>
         public async Task<Result<bool>> ClearCompletedAsync()
         {
             return await _mediator.Send(new ClearCompletedDownloadTasksCommand());
         }
 
-        /// <summary>
-        /// Restart the <see cref="DownloadTask"/> by deleting the <see cref="PlexDownloadClient"/> and starting a new one.
-        /// </summary>
-        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to restart.</param>
-        /// <returns>Is successful.</returns>
+        /// <inheritdoc/>
         public async Task<Result<bool>> RestartDownloadAsync(int downloadTaskId)
         {
             CleanUpDownloadClient(downloadTaskId);
@@ -437,11 +429,7 @@ namespace PlexRipper.DownloadManager
             return await StartDownload(downloadTaskId);
         }
 
-        /// <summary>
-        /// Cancels the <see cref="PlexDownloadClient"/> executing the <see cref="DownloadTask"/> if it is downloading.
-        /// </summary>
-        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to stop.</param>
-        /// <returns>Is successful.</returns>
+        /// <inheritdoc/>
         public async Task<Result<bool>> StopDownloadAsync(int downloadTaskId)
         {
             // Retrieve download client

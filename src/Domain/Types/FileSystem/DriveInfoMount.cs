@@ -5,6 +5,7 @@ namespace PlexRipper.Domain
     public class DriveInfoMount : IMount
     {
         private readonly DriveInfo _driveInfo;
+
         private readonly DriveType _driveType;
 
         public DriveInfoMount(DriveInfo driveInfo, DriveType driveType = DriveType.Unknown, MountOptions mountOptions = null)

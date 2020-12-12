@@ -2,8 +2,5 @@
 
 namespace PlexRipper.SignalR.Hubs
 {
-    public class ProgressHub : Hub
-    {
-        public ProgressHub() { }
-    }
+    public class ProgressHub : Hub { }
 }

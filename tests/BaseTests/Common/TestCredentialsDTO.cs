@@ -3,11 +3,12 @@ using System.Text.Json.Serialization;
 
 namespace PlexRipper.BaseTests
 {
-    public class TestCredentialsDTO    {
+    public class TestCredentialsDTO
+    {
         [JsonPropertyName("credentials")]
-        public List<TestAccountDTO> Credentials { get; set; } 
+        public List<TestAccountDTO> Credentials { get; set; }
     }
-    
+
     public class TestAccountDTO
     {
         [JsonPropertyName("username")]

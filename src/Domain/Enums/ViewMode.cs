@@ -9,8 +9,10 @@ namespace PlexRipper.Domain
     {
         [EnumMember(Value = "Table")]
         Table = 0,
+
         [EnumMember(Value = "Poster")]
         Poster = 1,
+
         [EnumMember(Value = "Overview")]
         Overview = 2,
     }

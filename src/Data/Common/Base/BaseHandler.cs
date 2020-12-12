@@ -12,11 +12,13 @@ namespace PlexRipper.Data.Common
         #region Fields
 
         private protected readonly PlexRipperDbContext _dbContext;
+
         private protected readonly BulkConfig _bulkConfig = new BulkConfig
         {
             SetOutputIdentity = true,
             PreserveInsertOrder = true,
         };
+
         #endregion
 
         #region Constructors

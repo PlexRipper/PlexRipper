@@ -1,12 +1,13 @@
-﻿using PlexRipper.Domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using PlexRipper.Application.Common;
+using PlexRipper.Domain;
 
 namespace PlexRipper.FileSystem
 {
-    public class DiskProvider : Application.Common.IDiskProvider
+    public class DiskProvider : IDiskProvider
     {
         private readonly HashSet<string> _setToRemove = new HashSet<string>
         {
@@ -35,13 +36,8 @@ namespace PlexRipper.FileSystem
             ".@__thumb",
 
             // Synology
-            "@eadir"
+            "@eadir",
         };
-
-        public DiskProvider()
-        {
-
-        }
 
         public FileSystemResult GetResult(string path, bool includeFiles)
         {
@@ -113,7 +109,7 @@ namespace PlexRipper.FileSystem
                     LastModified = d.LastWriteTimeUtc,
                     Extension = d.Extension,
                     Size = d.Length,
-                    Type = FileSystemEntityType.File
+                    Type = FileSystemEntityType.File,
                 })
                 .ToList();
         }
@@ -127,7 +123,7 @@ namespace PlexRipper.FileSystem
                     Name = d.Name,
                     Path = GetDirectoryPath(d.FullName.GetActualCasing()),
                     LastModified = d.LastWriteTimeUtc,
-                    Type = FileSystemEntityType.Folder
+                    Type = FileSystemEntityType.Folder,
                 })
                 .ToList();
 
@@ -176,7 +172,8 @@ namespace PlexRipper.FileSystem
 
         protected virtual List<IMount> GetAllMounts()
         {
-            return GetDriveInfoMounts().Where(d => d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Network || d.DriveType == DriveType.Removable)
+            return GetDriveInfoMounts().Where(d =>
+                    d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Network || d.DriveType == DriveType.Removable)
                 .Select(d => new DriveInfoMount(d))
                 .Cast<IMount>()
                 .ToList();

@@ -2,7 +2,6 @@
 using Autofac;
 using FluentValidation;
 using MediatR;
-using MediatR.Extensions.Autofac.DependencyInjection;
 using PlexRipper.Domain.Behavior.Pipelines;
 using Module = Autofac.Module;
 

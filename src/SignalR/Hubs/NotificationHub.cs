@@ -2,8 +2,5 @@
 
 namespace PlexRipper.SignalR.Hubs
 {
-    public class NotificationHub : Hub
-    {
-        public NotificationHub() { }
-    }
+    public class NotificationHub : Hub { }
 }

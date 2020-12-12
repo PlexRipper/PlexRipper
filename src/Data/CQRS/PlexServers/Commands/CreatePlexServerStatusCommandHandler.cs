@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexServers;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;

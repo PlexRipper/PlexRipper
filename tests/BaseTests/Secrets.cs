@@ -1,13 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using System.IO;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.IO;
 
 namespace PlexRipper.BaseTests
 {
     public class Secrets
     {
-        public Secrets() { }
-
         public static TestCredentialsDTO GetCredentials()
         {
             // Create a secretCredentials.json in the root of Infrastructure.UnitTests project and add Plex testing credentials.
@@ -31,6 +29,7 @@ namespace PlexRipper.BaseTests
         }
 
         public static TestAccountDTO Account1 => GetCredentials().Credentials.Count > 0 ? GetCredentials().Credentials[0] : new TestAccountDTO();
+
         public static TestAccountDTO Account2 => GetCredentials().Credentials.Count > 1 ? GetCredentials().Credentials[1] : new TestAccountDTO();
     }
 }

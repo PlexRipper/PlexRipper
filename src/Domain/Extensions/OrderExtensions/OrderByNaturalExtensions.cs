@@ -15,8 +15,8 @@ namespace PlexRipper.Domain
                 int x = 0;
                 if (int.TryParse(str, out x))
                     return x;
-                else
-                    return str;
+
+                return str;
             };
 
             return objects.OrderBy(x =>

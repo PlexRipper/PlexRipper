@@ -19,7 +19,8 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
         }
     }
 
-    public class GetPlexTvShowSeasonByIdWithEpisodesQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowSeasonByIdWithEpisodesQuery, Result<PlexTvShowSeason>>
+    public class GetPlexTvShowSeasonByIdWithEpisodesQueryHandler : BaseHandler,
+        IRequestHandler<GetPlexTvShowSeasonByIdWithEpisodesQuery, Result<PlexTvShowSeason>>
     {
         public GetPlexTvShowSeasonByIdWithEpisodesQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 

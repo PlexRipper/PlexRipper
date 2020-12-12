@@ -126,7 +126,7 @@ namespace PlexRipper.PlexApi.Models.Status
         [JsonPropertyName("year")]
         [JsonConverter(typeof(IntValueConverter))]
         public int Year { get; set; }
-        
+
         [JsonPropertyName("Director")]
         public List<Director> Directors { get; set; }
 
@@ -148,7 +148,7 @@ namespace PlexRipper.PlexApi.Models.Status
         [JsonPropertyName("TranscodeSession")]
         public TranscodeSession TranscodeSession { get; set; }
     }
-   
+
     public class Player
     {
         [JsonPropertyName("address")]

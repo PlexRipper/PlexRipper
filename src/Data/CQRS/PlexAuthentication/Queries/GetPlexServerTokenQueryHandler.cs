@@ -48,7 +48,7 @@ namespace PlexRipper.Data.CQRS.PlexAuthentication
             }
 
             var authToken = await _dbContext.PlexAccountServers.FirstOrDefaultAsync(
-                    x => x.PlexAccountId == request.PlexAccountId && x.PlexServerId == request.PlexServerId, cancellationToken);
+                x => x.PlexAccountId == request.PlexAccountId && x.PlexServerId == request.PlexServerId, cancellationToken);
 
             if (authToken != null)
             {

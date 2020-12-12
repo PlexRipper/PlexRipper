@@ -21,7 +21,8 @@ namespace PlexRipper.Application.IntegrationTests.Services
             Container = fixture.Container;
         }
 
-        [Fact, Priority(1)]
+        [Fact]
+        [Priority(1)]
         public async Task CreatePlexAccountAndRequestLibrary_ShouldReturnValidLibrary()
         {
             // Arrange
@@ -64,7 +65,8 @@ namespace PlexRipper.Application.IntegrationTests.Services
             plexLibrary.Value.HasMedia.Should().BeTrue();
         }
 
-        [Fact, Priority(2)]
+        [Fact]
+        [Priority(2)]
         public async Task RequestMetadataForPlexLibrary_ShouldReturnValidMediaList()
         {
             // Arrange

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
-using PlexRipper.BaseTests;
 using FluentAssertions;
+using PlexRipper.BaseTests;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -30,6 +30,5 @@ namespace PlexApi.UnitTests
             longValue.ContentChangedAt.Should().BeGreaterOrEqualTo(long.MinValue);
             longValue.ContentChangedAt.Should().BeLessOrEqualTo(long.MaxValue);
         }
-
-      }
+    }
 }

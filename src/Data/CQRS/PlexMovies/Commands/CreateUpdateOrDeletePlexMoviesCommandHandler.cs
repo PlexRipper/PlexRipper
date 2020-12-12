@@ -34,6 +34,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
                     plexMovieData.RuleForEach(x => x.Parts).ChildRules(part =>
                     {
                         part.RuleFor(x => x.ObfuscatedFilePath).NotEmpty();
+
                         // part.RuleFor(x => x.Container).NotEmpty();
                     });
                 });

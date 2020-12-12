@@ -6,6 +6,7 @@ namespace PlexRipper.WebAPI.Common.DTO.PlexMediaData
     public class PlexMovieDataDTO
     {
         #region Properties
+
         [JsonProperty("id", Required = Required.Always)]
 
         public int Id { get; set; }

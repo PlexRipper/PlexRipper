@@ -1,8 +1,8 @@
 ﻿using System;
-using AutoMapper;
-using PlexRipper.PlexApi.Models;
 using System.Linq;
+using AutoMapper;
 using PlexRipper.Domain;
+using PlexRipper.PlexApi.Models;
 
 namespace PlexRipper.PlexApi.Config.Mappings
 {
@@ -41,7 +41,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                     ObfuscatedFilePath = part != null ? part.Key : "",
                     TitleTvShow = metaData.GrandparentTitle,
                     TitleTvShowSeason = metaData.ParentTitle,
-                    RatingKey = Int32.TryParse(metaData.RatingKey, out int result) ? result : 0,
+                    RatingKey = int.TryParse(metaData.RatingKey, out int result) ? result : 0,
                 };
             }
             catch (Exception e)

@@ -3,7 +3,7 @@ using MediatR;
 
 namespace PlexRipper.Application.PlexServers
 {
-    public class TrimPlexServerStatusCommand: IRequest<Result<bool>>
+    public class TrimPlexServerStatusCommand : IRequest<Result<bool>>
     {
         public int PlexServerId { get; }
 

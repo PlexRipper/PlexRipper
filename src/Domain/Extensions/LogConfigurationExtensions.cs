@@ -6,12 +6,9 @@ namespace PlexRipper.Domain
 {
     public static class LogConfigurationExtensions
     {
-
         public static string Template = "{NewLine}{Timestamp:HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}";
 
-
         public static LoggerConfiguration GetBaseConfiguration =>
-
             new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -22,8 +19,8 @@ namespace PlexRipper.Domain
         public static Logger GetLogger()
         {
             return GetBaseConfiguration
-                    .MinimumLevel.Debug()
-                    .CreateLogger();
+                .MinimumLevel.Debug()
+                .CreateLogger();
         }
     }
 }

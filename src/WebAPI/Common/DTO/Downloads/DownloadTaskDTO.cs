@@ -38,7 +38,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("titleTvShowSeason", Required = Required.Always)]
         public string TitleTvShowSeason { get; set; }
 
-
         [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType MediaType { get; set; }
 
@@ -54,7 +53,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("dataTotal", Required = Required.Always)]
         public long DataTotal { get; set; }
 
-
         /// <summary>
         /// The download priority, the higher the more important.
         /// </summary>
@@ -66,6 +64,5 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }
-
     }
 }

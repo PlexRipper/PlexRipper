@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
-using AutoMapper.Configuration.Annotations;
 
 namespace PlexRipper.Domain
 {

@@ -6,6 +6,7 @@ namespace PlexRipper.PlexApi.Models
     {
         [JsonPropertyName("locked")]
         public bool Locked { get; set; }
+
         [JsonPropertyName("name")]
         public string Name { get; set; }
     }

@@ -6,14 +6,17 @@ namespace Plex.Api
     public static class UriHelper
     {
         private const string Https = "Https";
+
         private const string Http = "Http";
 
         public static Uri ReturnUriFromServerInfo(this string val, Server server)
         {
             if (val == null)
             {
-                throw new ApplicationException("The URI is null, please check your settings to make sure you have configured the applications correctly.");
+                throw new ApplicationException(
+                    "The URI is null, please check your settings to make sure you have configured the applications correctly.");
             }
+
             try
             {
                 UriBuilder uri;
@@ -48,7 +51,6 @@ namespace Plex.Api
             {
                 throw new Exception(exception.Message, exception);
             }
-            
         }
     }
 }

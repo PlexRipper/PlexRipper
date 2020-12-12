@@ -6,7 +6,7 @@ namespace PlexApi.UnitTests
     public class TestDTO
     {
         [JsonPropertyName("contentChangedAt")]
-        [JsonConverter(typeof(LongValueConverter))] 
+        [JsonConverter(typeof(LongValueConverter))]
         public long ContentChangedAt { get; set; }
     }
 }

@@ -1,6 +1,6 @@
-﻿using PlexRipper.BaseTests;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
+using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Xunit;
 using Xunit.Abstractions;
@@ -29,9 +29,8 @@ namespace PlexRipper.Application.IntegrationTests.Services
             {
                 DisplayName = "Test Account 1",
                 Username = credentials.Username,
-                Password = credentials.Password
+                Password = credentials.Password,
             };
-
 
             // Act
             var result = await accountService.CreatePlexAccountAsync(newAccount);
@@ -58,7 +57,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             {
                 DisplayName = "Test Account",
                 Username = credentials.Username,
-                Password = credentials.Password
+                Password = credentials.Password,
             };
 
             // Act
@@ -83,8 +82,6 @@ namespace PlexRipper.Application.IntegrationTests.Services
             updateResult.Value.Password.Should().Be(createResult.Value.Password);
             updateResult.Value.PlexAccountServers.Should().NotBeEmpty();
             updateResult.Value.AuthenticationToken.Should().NotBeEmpty();
-
         }
-
     }
 }

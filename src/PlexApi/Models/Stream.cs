@@ -98,7 +98,6 @@ namespace PlexRipper.PlexApi.Models
         [JsonPropertyName("colorTrc")]
         public string ColorTrc { get; set; }
 
-
         [JsonPropertyName("streamIdentifier")]
         public string StreamIdentifier { get; set; }
 
@@ -114,6 +113,5 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("audioChannelLayout")]
         public string AudioChannelLayout { get; set; }
-
     }
 }

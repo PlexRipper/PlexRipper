@@ -128,7 +128,6 @@ namespace PlexRipper.PlexApi.Models
         [JsonPropertyName("Field")]
         public List<Field> Field { get; set; }
 
-
         #region Library Sections
 
         [JsonPropertyName("TitleSort")]
@@ -154,7 +153,6 @@ namespace PlexRipper.PlexApi.Models
         public string Theme { get; set; }
 
         #endregion
-
 
         #region TV Show Seasons
 

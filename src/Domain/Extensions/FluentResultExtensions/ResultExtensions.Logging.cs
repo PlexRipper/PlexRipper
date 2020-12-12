@@ -19,6 +19,7 @@ namespace PlexRipper.Domain
                     error.Reasons.ForEach(x => Log.Warning(x.Message, memberName, sourceFilePath));
                 }
             }
+
             return result;
         }
 
@@ -58,7 +59,6 @@ namespace PlexRipper.Domain
         }
 
         #endregion
-
 
         #region Result<T> Signatures
 

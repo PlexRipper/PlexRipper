@@ -10,6 +10,7 @@ using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Common;
+using Timer = System.Timers.Timer;
 
 namespace PlexRipper.DownloadManager.Download
 {
@@ -24,17 +25,24 @@ namespace PlexRipper.DownloadManager.Download
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private readonly Subject<DownloadStatusChanged> _downloadStatusChanged = new Subject<DownloadStatusChanged>();
+
         private readonly Subject<DownloadWorkerComplete> _downloadWorkerComplete = new Subject<DownloadWorkerComplete>();
+
         private readonly Subject<IDownloadWorkerProgress> _downloadWorkerProgress = new Subject<IDownloadWorkerProgress>();
+
         private readonly Subject<DownloadWorkerTask> _downloadWorkerTaskChanged = new Subject<DownloadWorkerTask>();
 
         private readonly IFileSystem _fileSystem;
-        private int _count = 0;
+
+        private int _count;
+
         private Task _downloadTask;
 
         private FileStream _fileStream;
+
         private bool _isDownloading = true;
-        private System.Timers.Timer _timer = new System.Timers.Timer(100);
+
+        private Timer _timer = new Timer(100);
 
         #endregion
 
@@ -77,7 +85,6 @@ namespace PlexRipper.DownloadManager.Download
         /// Gets the current <see cref="DownloadWorkerTask"/> being executed.
         /// </summary>
         public DownloadWorkerTask DownloadWorkerTask { get; }
-
 
         public string FileName => DownloadWorkerTask.TempFileName;
 
@@ -128,7 +135,6 @@ namespace PlexRipper.DownloadManager.Download
             _downloadStatusChanged.OnNext(new DownloadStatusChanged(Id, downloadStatus));
         }
 
-
         private Task StartDownloadClient()
         {
             return Task.Factory.StartNew(async () =>
@@ -144,7 +150,7 @@ namespace PlexRipper.DownloadManager.Download
                     await using Stream responseStream = response.GetResponseStream();
                     if (responseStream == null)
                     {
-                        Log.Error($"The ResponseStream was null");
+                        Log.Error("The ResponseStream was null");
                         return;
                     }
 
@@ -197,7 +203,7 @@ namespace PlexRipper.DownloadManager.Download
                 return;
             }
 
-            DownloadSpeedAverage = (DownloadSpeedAverage * (_count - 1) / _count) + (newValue / _count);
+            DownloadSpeedAverage = DownloadSpeedAverage * (_count - 1) / _count + newValue / _count;
         }
 
         private void UpdateProgress()

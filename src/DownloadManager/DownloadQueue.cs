@@ -14,7 +14,8 @@ namespace PlexRipper.DownloadManager
     public class DownloadQueue
     {
         private readonly IMediator _mediator;
-        private bool _isChecking = false;
+
+        private bool _isChecking;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DownloadQueue"/> class.
@@ -57,6 +58,7 @@ namespace PlexRipper.DownloadManager
                     x.DownloadStatus = DownloadStatus.Queued;
                     await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(x.Id, DownloadStatus.Queued));
                 });
+
                 //
                 // if (downloadTasks.FindAll(x => x.DownloadStatus == DownloadStatus.Downloading).Count == 0)
                 // {

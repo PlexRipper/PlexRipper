@@ -7,14 +7,12 @@ namespace PlexRipper.Application.UnitTests.Common.Mappings
     public class MappingTests
     {
         private readonly IConfigurationProvider _configuration;
+
         private readonly IMapper _mapper;
 
         public MappingTests()
         {
-            _configuration = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile<ApplicationMappingProfile>();
-            });
+            _configuration = new MapperConfiguration(cfg => { cfg.AddProfile<ApplicationMappingProfile>(); });
 
             _mapper = _configuration.CreateMapper();
         }
@@ -25,5 +23,4 @@ namespace PlexRipper.Application.UnitTests.Common.Mappings
             _configuration.AssertConfigurationIsValid();
         }
     }
-
 }

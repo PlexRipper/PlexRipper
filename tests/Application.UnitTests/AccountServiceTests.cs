@@ -1,6 +1,6 @@
-﻿using PlexRipper.BaseTests;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
+using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Xunit;
 using Xunit.Abstractions;
@@ -11,12 +11,10 @@ namespace PlexRipper.Application.UnitTests
     {
         private BaseContainer Container { get; }
 
-
         public AccountServiceTests(ITestOutputHelper output)
         {
             BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
-
         }
 
         [Fact]
@@ -66,7 +64,5 @@ namespace PlexRipper.Application.UnitTests
             accountDB.Should().NotBeNull();
             accountDB.Password.Should().Be(updatedAccount.Password);
         }
-
-
     }
 }

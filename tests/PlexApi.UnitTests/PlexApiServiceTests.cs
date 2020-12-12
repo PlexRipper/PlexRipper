@@ -29,6 +29,5 @@ namespace PlexApi.UnitTests
             // Assert
             plexAccount.Should().NotBeNull();
         }
-
-      }
+    }
 }

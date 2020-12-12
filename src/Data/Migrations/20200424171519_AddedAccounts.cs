@@ -8,51 +8,48 @@ namespace PlexRipper.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AspNetRoleClaims");
+                "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserClaims");
+                "AspNetUserClaims");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserLogins");
+                "AspNetUserLogins");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserRoles");
+                "AspNetUserRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserTokens");
+                "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "DeviceCodes");
+                "DeviceCodes");
 
             migrationBuilder.DropTable(
-                name: "PersistedGrants");
+                "PersistedGrants");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                "AspNetUsers");
 
             migrationBuilder.CreateTable(
-                name: "Accounts",
-                columns: table => new
+                "Accounts",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Username = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
                     IsConfirmed = table.Column<bool>(nullable: false),
-                    ConfirmedAt = table.Column<DateTime>(nullable: false)
+                    ConfirmedAt = table.Column<DateTime>(nullable: false),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Accounts", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Accounts", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "PlexAccounts",
-                columns: table => new
+                "PlexAccounts",
+                table => new
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
@@ -65,258 +62,243 @@ namespace PlexRipper.Data.Migrations
                     AuthToken = table.Column<string>(nullable: true),
                     AuthenticationToken = table.Column<string>(nullable: true),
                     ConfirmedAt = table.Column<DateTime>(nullable: false),
-                    ForumId = table.Column<int>(nullable: false)
+                    ForumId = table.Column<int>(nullable: false),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PlexAccounts", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_PlexAccounts", x => x.Id); });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Accounts");
+                "Accounts");
 
             migrationBuilder.DropTable(
-                name: "PlexAccounts");
+                "PlexAccounts");
 
             migrationBuilder.CreateTable(
-                name: "AspNetRoles",
-                columns: table => new
+                "AspNetRoles",
+                table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true)
+                    Id = table.Column<string>("TEXT", nullable: false),
+                    ConcurrencyStamp = table.Column<string>("TEXT", nullable: true),
+                    Name = table.Column<string>("TEXT", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>("TEXT", maxLength: 256, nullable: true),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_AspNetRoles", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUsers",
-                columns: table => new
+                "AspNetUsers",
+                table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    SecurityStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    TwoFactorEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true)
+                    Id = table.Column<string>("TEXT", nullable: false),
+                    AccessFailedCount = table.Column<int>("INTEGER", nullable: false),
+                    ConcurrencyStamp = table.Column<string>("TEXT", nullable: true),
+                    Email = table.Column<string>("TEXT", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>("INTEGER", nullable: false),
+                    LockoutEnabled = table.Column<bool>("INTEGER", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>("TEXT", nullable: true),
+                    NormalizedEmail = table.Column<string>("TEXT", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>("TEXT", maxLength: 256, nullable: true),
+                    PasswordHash = table.Column<string>("TEXT", nullable: true),
+                    PhoneNumber = table.Column<string>("TEXT", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>("INTEGER", nullable: false),
+                    SecurityStamp = table.Column<string>("TEXT", nullable: true),
+                    TwoFactorEnabled = table.Column<bool>("INTEGER", nullable: false),
+                    UserName = table.Column<string>("TEXT", maxLength: 256, nullable: true),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_AspNetUsers", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "DeviceCodes",
-                columns: table => new
+                "DeviceCodes",
+                table => new
                 {
-                    UserCode = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    ClientId = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    CreationTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Data = table.Column<string>(type: "TEXT", maxLength: 50000, nullable: false),
-                    DeviceCode = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Expiration = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    SubjectId = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true)
+                    UserCode = table.Column<string>("TEXT", maxLength: 200, nullable: false),
+                    ClientId = table.Column<string>("TEXT", maxLength: 200, nullable: false),
+                    CreationTime = table.Column<DateTime>("TEXT", nullable: false),
+                    Data = table.Column<string>("TEXT", maxLength: 50000, nullable: false),
+                    DeviceCode = table.Column<string>("TEXT", maxLength: 200, nullable: false),
+                    Expiration = table.Column<DateTime>("TEXT", nullable: false),
+                    SubjectId = table.Column<string>("TEXT", maxLength: 200, nullable: true),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DeviceCodes", x => x.UserCode);
-                });
+                constraints: table => { table.PrimaryKey("PK_DeviceCodes", x => x.UserCode); });
 
             migrationBuilder.CreateTable(
-                name: "PersistedGrants",
-                columns: table => new
+                "PersistedGrants",
+                table => new
                 {
-                    Key = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    ClientId = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    CreationTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Data = table.Column<string>(type: "TEXT", maxLength: 50000, nullable: false),
-                    Expiration = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    SubjectId = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
-                    Type = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false)
+                    Key = table.Column<string>("TEXT", maxLength: 200, nullable: false),
+                    ClientId = table.Column<string>("TEXT", maxLength: 200, nullable: false),
+                    CreationTime = table.Column<DateTime>("TEXT", nullable: false),
+                    Data = table.Column<string>("TEXT", maxLength: 50000, nullable: false),
+                    Expiration = table.Column<DateTime>("TEXT", nullable: true),
+                    SubjectId = table.Column<string>("TEXT", maxLength: 200, nullable: true),
+                    Type = table.Column<string>("TEXT", maxLength: 50, nullable: false),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PersistedGrants", x => x.Key);
-                });
+                constraints: table => { table.PrimaryKey("PK_PersistedGrants", x => x.Key); });
 
             migrationBuilder.CreateTable(
-                name: "AspNetRoleClaims",
-                columns: table => new
+                "AspNetRoleClaims",
+                table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>("INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ClaimType = table.Column<string>(type: "TEXT", nullable: true),
-                    ClaimValue = table.Column<string>(type: "TEXT", nullable: true),
-                    RoleId = table.Column<string>(type: "TEXT", nullable: false)
+                    ClaimType = table.Column<string>("TEXT", nullable: true),
+                    ClaimValue = table.Column<string>("TEXT", nullable: true),
+                    RoleId = table.Column<string>("TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
+                        "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        x => x.RoleId,
+                        "AspNetRoles",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserClaims",
-                columns: table => new
+                "AspNetUserClaims",
+                table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>("INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ClaimType = table.Column<string>(type: "TEXT", nullable: true),
-                    ClaimValue = table.Column<string>(type: "TEXT", nullable: true),
-                    UserId = table.Column<string>(type: "TEXT", nullable: false)
+                    ClaimType = table.Column<string>("TEXT", nullable: true),
+                    ClaimValue = table.Column<string>("TEXT", nullable: true),
+                    UserId = table.Column<string>("TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        "FK_AspNetUserClaims_AspNetUsers_UserId",
+                        x => x.UserId,
+                        "AspNetUsers",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserLogins",
-                columns: table => new
+                "AspNetUserLogins",
+                table => new
                 {
-                    LoginProvider = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
-                    ProviderKey = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
-                    ProviderDisplayName = table.Column<string>(type: "TEXT", nullable: true),
-                    UserId = table.Column<string>(type: "TEXT", nullable: false)
+                    LoginProvider = table.Column<string>("TEXT", maxLength: 128, nullable: false),
+                    ProviderKey = table.Column<string>("TEXT", maxLength: 128, nullable: false),
+                    ProviderDisplayName = table.Column<string>("TEXT", nullable: true),
+                    UserId = table.Column<string>("TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
                     table.ForeignKey(
-                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        "FK_AspNetUserLogins_AspNetUsers_UserId",
+                        x => x.UserId,
+                        "AspNetUsers",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserRoles",
-                columns: table => new
+                "AspNetUserRoles",
+                table => new
                 {
-                    UserId = table.Column<string>(type: "TEXT", nullable: false),
-                    RoleId = table.Column<string>(type: "TEXT", nullable: false)
+                    UserId = table.Column<string>("TEXT", nullable: false),
+                    RoleId = table.Column<string>("TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
                     table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
+                        "FK_AspNetUserRoles_AspNetRoles_RoleId",
+                        x => x.RoleId,
+                        "AspNetRoles",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        "FK_AspNetUserRoles_AspNetUsers_UserId",
+                        x => x.UserId,
+                        "AspNetUsers",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserTokens",
-                columns: table => new
+                "AspNetUserTokens",
+                table => new
                 {
-                    UserId = table.Column<string>(type: "TEXT", nullable: false),
-                    LoginProvider = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
-                    Value = table.Column<string>(type: "TEXT", nullable: true)
+                    UserId = table.Column<string>("TEXT", nullable: false),
+                    LoginProvider = table.Column<string>("TEXT", maxLength: 128, nullable: false),
+                    Name = table.Column<string>("TEXT", maxLength: 128, nullable: false),
+                    Value = table.Column<string>("TEXT", nullable: true),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
                     table.ForeignKey(
-                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        "FK_AspNetUserTokens_AspNetUsers_UserId",
+                        x => x.UserId,
+                        "AspNetUsers",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetRoleClaims_RoleId",
-                table: "AspNetRoleClaims",
-                column: "RoleId");
+                "IX_AspNetRoleClaims_RoleId",
+                "AspNetRoleClaims",
+                "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "RoleNameIndex",
-                table: "AspNetRoles",
-                column: "NormalizedName",
+                "RoleNameIndex",
+                "AspNetRoles",
+                "NormalizedName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserClaims_UserId",
-                table: "AspNetUserClaims",
-                column: "UserId");
+                "IX_AspNetUserClaims_UserId",
+                "AspNetUserClaims",
+                "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserLogins_UserId",
-                table: "AspNetUserLogins",
-                column: "UserId");
+                "IX_AspNetUserLogins_UserId",
+                "AspNetUserLogins",
+                "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_RoleId",
-                table: "AspNetUserRoles",
-                column: "RoleId");
+                "IX_AspNetUserRoles_RoleId",
+                "AspNetUserRoles",
+                "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "EmailIndex",
-                table: "AspNetUsers",
-                column: "NormalizedEmail");
+                "EmailIndex",
+                "AspNetUsers",
+                "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "UserNameIndex",
-                table: "AspNetUsers",
-                column: "NormalizedUserName",
+                "UserNameIndex",
+                "AspNetUsers",
+                "NormalizedUserName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_DeviceCodes_DeviceCode",
-                table: "DeviceCodes",
-                column: "DeviceCode",
+                "IX_DeviceCodes_DeviceCode",
+                "DeviceCodes",
+                "DeviceCode",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_DeviceCodes_Expiration",
-                table: "DeviceCodes",
-                column: "Expiration");
+                "IX_DeviceCodes_Expiration",
+                "DeviceCodes",
+                "Expiration");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PersistedGrants_Expiration",
-                table: "PersistedGrants",
-                column: "Expiration");
+                "IX_PersistedGrants_Expiration",
+                "PersistedGrants",
+                "Expiration");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PersistedGrants_SubjectId_ClientId_Type",
-                table: "PersistedGrants",
-                columns: new[] { "SubjectId", "ClientId", "Type" });
+                "IX_PersistedGrants_SubjectId_ClientId_Type",
+                "PersistedGrants",
+                new[] { "SubjectId", "ClientId", "Type" });
         }
     }
 }

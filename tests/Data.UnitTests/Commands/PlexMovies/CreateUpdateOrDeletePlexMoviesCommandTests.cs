@@ -23,6 +23,7 @@ namespace Data.UnitTests.Commands
         private IMediator _mediator { get; }
 
         private const int _numberOfMovies = 100;
+
         private int _numberOfMoviesHalf = (int)Math.Floor(_numberOfMovies / (double)2);
 
         public CreateUpdateOrDeletePlexMoviesCommandTests(ITestOutputHelper output)

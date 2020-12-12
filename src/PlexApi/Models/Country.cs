@@ -8,7 +8,7 @@ namespace PlexRipper.PlexApi.Models
         [JsonPropertyName("id")]
         [JsonConverter(typeof(IntValueConverter))]
         public int Id { get; set; }
-        
+
         [JsonPropertyName("tag")]
         public string Tag { get; set; }
     }

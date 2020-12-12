@@ -73,11 +73,10 @@ namespace PlexRipper.PlexApi.Models
         public bool HasPassword { get; set; }
 
         [JsonPropertyName("authToken")]
-        public string AuthToken { get; set; }  
-        
+        public string AuthToken { get; set; }
+
         [JsonPropertyName("authentication_token")]
         public string AuthenticationToken { get; set; }
-        
 
         [JsonPropertyName("confirmedAt")]
         public DateTime? ConfirmedAt { get; set; }

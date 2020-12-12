@@ -1,13 +1,13 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using Autofac;
 using FluentValidation;
 using MediatR;
 using MediatR.Extensions.Autofac.DependencyInjection;
+using Module = Autofac.Module;
 
 namespace PlexRipper.Data.Config
 {
-    public class DataModule : Autofac.Module
+    public class DataModule : Module
     {
         protected override void Load(ContainerBuilder builder)
         {

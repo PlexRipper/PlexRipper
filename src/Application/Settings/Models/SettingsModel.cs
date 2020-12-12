@@ -78,8 +78,6 @@ namespace PlexRipper.Application.Settings.Models
             }
         }
 
-
-
         #endregion Properties
     }
 }

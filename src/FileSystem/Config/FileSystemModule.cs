@@ -1,10 +1,14 @@
 ﻿using Autofac;
 using PlexRipper.Application.Common;
 
-namespace PlexRipper.FileSystem.config
+namespace PlexRipper.FileSystem.Config
 {
-    public class FileSystemModule : Autofac.Module
+    /// <summary>
+    /// Used to register all dependancies in Autofac for the FileSystem project.
+    /// </summary>
+    public class FileSystemModule : Module
     {
+        /// <inheritdoc/>
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();

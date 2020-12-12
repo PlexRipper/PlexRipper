@@ -5,7 +5,7 @@ using PlexRipper.Application.Config.Mappings;
 using PlexRipper.Data.Config;
 using PlexRipper.Domain.AutoMapper;
 using PlexRipper.DownloadManager.Config;
-using PlexRipper.FileSystem.config;
+using PlexRipper.FileSystem.Config;
 using PlexRipper.PlexApi.Config;
 using PlexRipper.PlexApi.Config.Mappings;
 using PlexRipper.Settings.Config;
@@ -18,7 +18,7 @@ namespace PlexRipper.WebAPI.Config
         /// <summary>
         /// Autofac container builder, Serilog registration is left out due to being context dependent. Integration tests have a different configuration than the application.
         /// </summary>
-        /// <param name="builder"></param>
+        /// <param name="builder">The builder through which components can be registered.</param>
         public static void ConfigureContainer(ContainerBuilder builder)
         {
             // Application

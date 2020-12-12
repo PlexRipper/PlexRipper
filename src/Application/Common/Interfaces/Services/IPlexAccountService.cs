@@ -27,7 +27,7 @@ namespace PlexRipper.Application.Common
         /// <summary>
         /// Checks if an <see cref="PlexAccount"/> with the same username already exists
         /// </summary>
-        /// <param name="username">The username to check for</param>
+        /// <param name="username">The username to check for.</param>
         /// <returns>true if username is available</returns>
         Task<Result<bool>> CheckIfUsernameIsAvailableAsync(string username);
 

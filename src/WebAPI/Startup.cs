@@ -1,3 +1,6 @@
+using System.Linq;
+using System.Reflection;
+using System.Text.Json.Serialization;
 using Autofac;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -13,15 +16,27 @@ using PlexRipper.Domain;
 using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
-using System.Linq;
-using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace PlexRipper.WebAPI
 {
+    /// <summary>
+    /// The application startUp class.
+    /// </summary>
     public class Startup
     {
         readonly string CORSConfiguration = "CORS_Configuration";
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="env">Provides information about the web hosting environment an application is running in.</param>
+        public Startup(IWebHostEnvironment env)
+        {
+            CurrentEnvironment = env;
+            Log.Information($"PlexRipper running in {CurrentEnvironment.EnvironmentName} mode.");
+        }
+
+        private IWebHostEnvironment CurrentEnvironment { get; }
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
@@ -29,7 +44,7 @@ namespace PlexRipper.WebAPI
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
-            // General
+            // Set CORS Configuration
             services.AddCors(options =>
             {
                 options.AddPolicy(
@@ -40,11 +55,11 @@ namespace PlexRipper.WebAPI
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials()
-                            .WithOrigins("http://localhost:5000");
-
-                        // .SetPreflightMaxAge(TimeSpan.FromMinutes(100));
+                            .WithOrigins(CurrentEnvironment.IsDevelopment() ? "http://localhost:3000" : "http://localhost:5000");
                     });
             });
+
+            // Controllers and Json options
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "wwwroot"; });
 
@@ -92,17 +107,17 @@ namespace PlexRipper.WebAPI
         /// <summary>
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
-        /// <param name="app"></param>
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
+        public void Configure(IApplicationBuilder app)
         {
             app.UseRouting();
 
             app.UseCors(CORSConfiguration);
-            app.UseCorsMiddleware();
+
+            // TODO This might be removed if the CORS is working without it
+            // app.UseCorsMiddleware();
             app.UseAuthorization();
 
-            // Enabling this causes CORS errors as the front-end is in http and cannot connect with an https back-end
-            // app.UseHttpsRedirection();
             app.UseOpenApi(); // serve OpenAPI/Swagger documents
             app.UseSwaggerUi3(); // serve Swagger UI
             app.UseEndpoints(endpoints =>
@@ -120,12 +135,10 @@ namespace PlexRipper.WebAPI
             {
                 spa.Options.SourcePath = "ClientApp";
 
-                if (env.IsDevelopment())
+                if (CurrentEnvironment.IsDevelopment())
                 {
                     spa.Options.DevServerPort = 3000;
                     spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
-
-                    // spa.UseVueCli("dev", 3000);
                 }
             });
         }

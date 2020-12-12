@@ -3,9 +3,13 @@
     public interface IDownloadWorkerProgress
     {
         int Id { get; }
+
         long DataReceived { get; }
+
         long DataTotal { get; }
+
         int DownloadSpeed { get; }
+
         string DownloadSpeedFormatted { get; }
 
         /// <summary>
@@ -14,8 +18,11 @@
         long TimeRemaining { get; }
 
         long BytesRemaining { get; }
+
         bool IsCompleted { get; }
+
         decimal Percentage { get; }
+
         int DownloadSpeedAverage { get; }
     }
 }

@@ -7,6 +7,9 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI
 {
+    /// <summary>
+    /// The Boot class is used to sequentially start various processes needed to start PlexRipper.
+    /// </summary>
     internal class Boot : IHostLifetime, IHostedService
     {
         private readonly IHostApplicationLifetime _appLifetime;
@@ -19,7 +22,8 @@ namespace PlexRipper.WebAPI
 
         private readonly PlexRipperDbContext _dbContext;
 
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileManager fileManager, PlexRipperDbContext dbContext)
+        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileManager fileManager,
+            PlexRipperDbContext dbContext)
         {
             _appLifetime = appLifetime;
             _userSettings = userSettings;
@@ -28,18 +32,19 @@ namespace PlexRipper.WebAPI
             _dbContext = dbContext;
         }
 
-        public async Task WaitForStartAsync(CancellationToken cancellationToken)
+        public Task WaitForStartAsync(CancellationToken cancellationToken)
         {
             Log.Information("Initiating boot process");
             var fileSystemSetup = _fileSystem.Setup();
             if (fileSystemSetup.IsFailed)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             _dbContext.Setup();
             _userSettings.Setup();
             _fileManager.Setup();
+            return Task.CompletedTask;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

@@ -101,25 +101,34 @@ namespace PlexRipper.Domain
         [NotMapped]
         public Uri DownloadUri => new Uri(DownloadUrl, UriKind.Absolute);
 
-        [NotMapped]
-        public string DownloadPath => DownloadFolder?.DirectoryPath ?? string.Empty;
-
         /// <summary>
-        /// The download directory with a folder named after the filename.
+        /// Gets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
         /// </summary>
         [NotMapped]
-        public string TempDirectory
+        public string DownloadPath => Path.Combine(DownloadFolder.DirectoryPath, MediaPath);
+
+        /// <summary>
+        /// Gets the destination directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
+        /// </summary>
+        [NotMapped]
+        public string DestinationPath => Path.Combine(DestinationFolder.DirectoryPath, MediaPath);
+
+        /// <summary>
+        /// Gets the sub-path based on the <see cref="PlexMediaType"/>, e.g: [TvShow]/[Season]/ or [Movie]/.
+        /// </summary>
+        [NotMapped]
+        public string MediaPath
         {
             get
             {
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:
-                        return Path.Combine(DownloadPath, $"{Path.GetFileNameWithoutExtension(FileName)}");
+                        return Path.Combine(Title);
                     case PlexMediaType.Episode:
-                        return Path.Combine(DownloadPath, TitleTvShow.Replace(":", "-"), TitleTvShowSeason);
+                        return Path.Combine(TitleTvShow.Replace(":", "-"), TitleTvShowSeason);
                     default:
-                        return Path.Combine(DownloadPath, $"{Path.GetFileNameWithoutExtension(FileName)}");
+                        return Path.Combine($"{Path.GetFileNameWithoutExtension(FileName)}");
                 }
             }
         }

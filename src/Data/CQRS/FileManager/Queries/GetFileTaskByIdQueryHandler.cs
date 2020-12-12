@@ -18,11 +18,11 @@ namespace PlexRipper.Data.CQRS.FileManager
         }
     }
 
-    public class GetFileTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetFileTaskByIdQuery, Result<FileTask>>
+    public class GetFileTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetFileTaskByIdQuery, Result<DownloadFileTask>>
     {
         public GetFileTaskByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<FileTask>> Handle(GetFileTaskByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<DownloadFileTask>> Handle(GetFileTaskByIdQuery request, CancellationToken cancellationToken)
         {
             var fileTask = await _dbContext.FileTasks
                 .Include(x => x.DownloadTask)
@@ -35,7 +35,7 @@ namespace PlexRipper.Data.CQRS.FileManager
 
             if (fileTask == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(FileTask), request.Id);
+                return ResultExtensions.GetEntityNotFound(nameof(DownloadFileTask), request.Id);
             }
 
             return Result.Ok(fileTask);

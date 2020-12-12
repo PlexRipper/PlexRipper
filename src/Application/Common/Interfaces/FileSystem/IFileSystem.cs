@@ -19,5 +19,14 @@ namespace PlexRipper.Application.Common
         Result<FileStream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize);
 
         Result Setup();
+
+        Result CreateDirectoryFromFilePath(string filePath);
+
+        /// <summary>
+        /// Deletes the last folder in the file path
+        /// </summary>
+        /// <param name="filePath">The filepath to delete the last folder in the path from.</param>
+        /// <returns></returns>
+        Result DeleteDirectoryFromFilePath(string filePath);
     }
 }

@@ -16,13 +16,15 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.FileSystem
 {
-    public class FileManager : IFileManager
+    public class FileMerger : IFileMerger
     {
         private readonly IMediator _mediator;
 
+        private readonly IFileSystem _fileSystem;
+
         #region Fields
 
-        private readonly Channel<FileTask> _channel = Channel.CreateUnbounded<FileTask>();
+        private readonly Channel<DownloadFileTask> _channel = Channel.CreateUnbounded<DownloadFileTask>();
 
         private readonly Subject<FileMergeProgress> _fileMergeProgressSubject = new Subject<FileMergeProgress>();
 
@@ -34,9 +36,10 @@ namespace PlexRipper.FileSystem
 
         #region Constructors
 
-        public FileManager(IMediator mediator)
+        public FileMerger(IMediator mediator, IFileSystem fileSystem)
         {
             _mediator = mediator;
+            _fileSystem = fileSystem;
         }
 
         #endregion
@@ -92,11 +95,19 @@ namespace PlexRipper.FileSystem
 
                 try
                 {
+                    // Ensure destination directory exists and is otherwise created.
+                    var result = _fileSystem.CreateDirectoryFromFilePath(fileTask.DestinationFilePath);
+                    if (result.IsFailed)
+                    {
+                        continue;
+                    }
+
                     // Merge files
-                    await using (var outputStream = File.Create(fileTask.OutputFilePath, 4096, FileOptions.SequentialScan))
+                    await using (var outputStream = File.Create(fileTask.DestinationFilePath, 4096, FileOptions.SequentialScan))
                     {
                         Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
                         await StreamExtensions.CopyMultipleToAsync(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
+                        _fileSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
                     }
                 }
                 catch (Exception e)
@@ -131,7 +142,7 @@ namespace PlexRipper.FileSystem
         /// <summary>
         /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
         /// </summary>
-        /// <param name="downloadTask">The <see cref="DownloadTask"/> to be added as a <see cref="FileTask"/>.</param>
+        /// <param name="downloadTask">The <see cref="DownloadTask"/> to be added as a <see cref="DownloadFileTask"/>.</param>
         public async Task<Result> AddFileTask(DownloadTask downloadTask)
         {
             Log.Debug($"Adding DownloadTask {downloadTask.Title} to a FileTask to be merged");

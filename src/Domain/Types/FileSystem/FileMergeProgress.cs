@@ -5,13 +5,13 @@ namespace PlexRipper.Domain
     public class FileMergeProgress
     {
         /// <summary>
-        /// This is equal to the <see cref="FileTask"/> Id.
+        /// This is equal to the <see cref="DownloadFileTask"/> Id.
         /// </summary>
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
         /// <summary>
-        /// This is equal to the <see cref="DownloadTask"/> Id the <see cref="FileTask"/> is currently handling.
+        /// This is equal to the <see cref="DownloadTask"/> Id the <see cref="DownloadFileTask"/> is currently handling.
         /// </summary>
         [JsonProperty("downloadTaskId", Required = Required.Always)]
         public int DownloadTaskId { get; set; }
@@ -35,7 +35,7 @@ namespace PlexRipper.Domain
         public string TransferSpeedFormatted => DataFormat.FormatSpeedString(TransferSpeed);
 
         /// <summary>
-        /// The time remaining in seconds the <see cref="FileTask"/> to finish.
+        /// The time remaining in seconds the <see cref="DownloadFileTask"/> to finish.
         /// </summary>
         [JsonProperty("timeRemaining", Required = Required.Always)]
         public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, TransferSpeed);

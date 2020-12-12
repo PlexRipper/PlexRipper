@@ -1,4 +1,4 @@
-#region
+﻿#region
 
 using System.Collections.Generic;
 using System.Linq;
@@ -164,7 +164,7 @@ namespace PlexRipper.Application.PlexDownloads
                 return downloadFolder.ToResult();
 
             // Get the destination folder
-            var destinationFolder = await _folderPathService.GetTvShowDestinationFolderAsync();
+            var destinationFolder = await _folderPathService.GetDestinationFolderByMediaType(downloadTasks.First().MediaType);
             if (destinationFolder.IsFailed)
                 return destinationFolder.ToResult();
 

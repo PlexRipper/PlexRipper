@@ -29,7 +29,7 @@ namespace PlexRipper.DownloadManager
         /// </summary>
         private readonly List<PlexDownloadClient> _downloadsList = new List<PlexDownloadClient>();
 
-        private readonly IFileManager _fileManager;
+        private readonly IFileMerger _fileMerger;
 
         private readonly IFileSystem _fileSystem;
 
@@ -54,14 +54,14 @@ namespace PlexRipper.DownloadManager
         /// <param name="signalRService"></param>
         /// <param name="plexAuthenticationService">.</param>
         /// <param name="fileSystem">.</param>
-        /// <param name="fileManager">.</param>
+        /// <param name="fileMerger">.</param>
         /// <param name="downloadQueue">Used to retrieve the next <see cref="DownloadTask"/> from the <see cref="DownloadQueue"/>.</param>
         public DownloadManager(
             IMediator mediator,
             ISignalRService signalRService,
             IPlexAuthenticationService plexAuthenticationService,
             IFileSystem fileSystem,
-            IFileManager fileManager,
+            IFileMerger fileMerger,
             IUserSettings userSettings,
             DownloadQueue downloadQueue)
         {
@@ -69,12 +69,12 @@ namespace PlexRipper.DownloadManager
             _signalRService = signalRService;
             _plexAuthenticationService = plexAuthenticationService;
             _fileSystem = fileSystem;
-            _fileManager = fileManager;
+            _fileMerger = fileMerger;
             _userSettings = userSettings;
             _downloadQueue = downloadQueue;
             ServicePointManager.DefaultConnectionLimit = 1000;
 
-            _fileManager.FileMergeProgressObservable.Subscribe(OnFileMergeProgress);
+            _fileMerger.FileMergeProgressObservable.Subscribe(OnFileMergeProgress);
         }
 
         #endregion
@@ -296,7 +296,7 @@ namespace PlexRipper.DownloadManager
                     downloadComplete.DataReceived,
                     downloadComplete.DataTotal));
 
-                await _fileManager.AddFileTask(downloadComplete.DownloadTask);
+                await _fileMerger.AddFileTask(downloadComplete.DownloadTask);
                 CleanUpDownloadClient(downloadComplete.Id);
                 await SetDownloadStatusAsync(new DownloadStatusChanged(downloadComplete.Id, DownloadStatus.Merging));
                 Log.Information($"The download of {downloadComplete.DownloadTask.Title} has completed!");

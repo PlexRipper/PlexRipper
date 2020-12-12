@@ -30,12 +30,11 @@ namespace PlexRipper.Data.CQRS.FileManager
 
         public async Task<Result<int>> Handle(AddFileTaskFromDownloadTaskCommand command, CancellationToken cancellationToken)
         {
-            var fileTask = new FileTask(command.DownloadTask)
+            var fileTask = new DownloadFileTask()
             {
+                DownloadTaskId = command.DownloadTask.Id,
                 CreatedAt = DateTime.UtcNow,
             };
-            fileTask.DownloadTask = null;
-            fileTask.DestinationFolder = null;
 
             await _dbContext.FileTasks.AddAsync(fileTask);
             await _dbContext.SaveChangesAsync(cancellationToken);

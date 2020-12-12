@@ -5,14 +5,14 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
-    public interface IFileManager : ISetup
+    public interface IFileMerger : ISetup
     {
         IObservable<FileMergeProgress> FileMergeProgressObservable { get; }
 
         /// <summary>
         /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
         /// </summary>
-        /// <param name="downloadTask">The <see cref="DownloadTask"/> to be added as a <see cref="FileTask"/>.</param>
+        /// <param name="downloadTask">The <see cref="DownloadTask"/> to be added as a <see cref="DownloadFileTask"/>.</param>
         Task<Result> AddFileTask(DownloadTask downloadTask);
     }
 }

@@ -24,7 +24,7 @@ namespace PlexRipper.Data
 
         public DbSet<FolderPath> FolderPaths { get; set; }
 
-        public DbSet<FileTask> FileTasks { get; set; }
+        public DbSet<DownloadFileTask> FileTasks { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
 

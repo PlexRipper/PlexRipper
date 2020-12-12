@@ -46,6 +46,21 @@ namespace PlexRipper.Application.FolderPaths
             return await _mediator.Send(new GetFolderPathByIdQuery(3));
         }
 
+        public async Task<Result<FolderPath>> GetDestinationFolderByMediaType(PlexMediaType mediaType)
+        {
+            switch (mediaType)
+            {
+                case PlexMediaType.Movie:
+                    return await GetMovieDestinationFolderAsync();
+                case PlexMediaType.TvShow:
+                case PlexMediaType.Season:
+                case PlexMediaType.Episode:
+                    return await GetTvShowDestinationFolderAsync();
+                default:
+                    return await GetDownloadFolderAsync();
+            }
+        }
+
         public async Task<Result> CheckIfFolderPathsAreValid()
         {
             var folderPaths = await GetAllFolderPathsAsync();

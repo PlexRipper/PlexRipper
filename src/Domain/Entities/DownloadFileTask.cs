@@ -6,26 +6,12 @@ using System.Linq;
 
 namespace PlexRipper.Domain
 {
-    public class FileTask : BaseEntity
+    /// <summary>
+    /// Used for the merging and transferring of the completed downloaded media file.
+    /// </summary>
+    public class DownloadFileTask : BaseEntity
     {
-        #region Constructors
-
-        public FileTask() { }
-
-        public FileTask(DownloadTask downloadTask)
-        {
-            DownloadTaskId = downloadTask.Id;
-            DownloadTask = downloadTask;
-            DestinationFolder = downloadTask.DestinationFolder;
-            DestinationFolderId = downloadTask.DestinationFolderId;
-            TempDirectory = downloadTask.TempDirectory;
-        }
-
-        #endregion
-
         #region Properties
-
-        public string TempDirectory { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
@@ -35,10 +21,6 @@ namespace PlexRipper.Domain
 
         public int DownloadTaskId { get; set; }
 
-        public FolderPath DestinationFolder { get; set; }
-
-        public int DestinationFolderId { get; set; }
-
         #endregion
 
         #region Helpers
@@ -47,7 +29,7 @@ namespace PlexRipper.Domain
         public string FileName => DownloadTask?.FileName;
 
         [NotMapped]
-        public string OutputFilePath => Path.Combine(TempDirectory, FileName);
+        public string DestinationFilePath => Path.Combine(DownloadTask.DestinationPath, FileName);
 
         [NotMapped]
         public long FileSize => DownloadTask?.DataTotal ?? -1L;

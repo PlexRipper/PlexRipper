@@ -30,5 +30,7 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <returns>Destination <see cref="FolderPath"/> for TvShows.</returns>
         Task<Result<FolderPath>> GetTvShowDestinationFolderAsync();
+
+        Task<Result<FolderPath>> GetDestinationFolderByMediaType(PlexMediaType mediaType);
     }
 }

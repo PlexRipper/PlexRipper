@@ -289,7 +289,7 @@ namespace PlexRipper.DownloadManager.Download
             Log.Debug(builder.ToString());
             var downloadComplete = new DownloadComplete(DownloadTask)
             {
-                DestinationPath = DownloadTask.DownloadPath,
+                DestinationPath = DownloadTask.DestinationPath,
                 DownloadWorkerCompletes = orderedList,
                 DataReceived = completeList.Sum(x => x.BytesReceived),
                 DataTotal = TotalBytesToReceive,

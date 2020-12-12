@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.FileManager.Queries
 {
-    public class GetFileTaskByIdQuery : IRequest<Result<FileTask>>
+    public class GetFileTaskByIdQuery : IRequest<Result<DownloadFileTask>>
     {
         public GetFileTaskByIdQuery(int id)
         {

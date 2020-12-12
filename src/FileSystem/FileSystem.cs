@@ -82,6 +82,49 @@ namespace PlexRipper.FileSystem
             }
         }
 
+        public Result CreateDirectoryFromFilePath(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
+            {
+                return Result.Fail("parameter filepath was empty");
+            }
+
+            string directoryPath = Path.GetDirectoryName(filePath) ?? string.Empty;
+            if (string.IsNullOrEmpty(directoryPath))
+            {
+                return Result.Fail($"Could not determine the directory name of path: {filePath}");
+            }
+
+            Directory.CreateDirectory(directoryPath);
+            return Result.Ok();
+        }
+
+        /// <inheritdoc/>
+        public Result DeleteDirectoryFromFilePath(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
+            {
+                return Result.Fail("parameter filepath was empty");
+            }
+
+            string directoryPath = Path.GetDirectoryName(filePath) ?? string.Empty;
+            if (string.IsNullOrEmpty(directoryPath))
+            {
+                return Result.Fail($"Could not determine the directory name of path: {filePath}");
+            }
+
+            try
+            {
+                Directory.Delete(directoryPath);
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e));
+            }
+
+            return Result.Ok();
+        }
+
         private List<FileSystemModel> GetDrives()
         {
             return _diskProvider.GetMounts()

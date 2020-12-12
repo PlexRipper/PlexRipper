@@ -57,7 +57,7 @@ namespace PlexRipper.Settings
             Log.Information("Setting up UserSettings");
             if (!File.Exists(FileLocation))
             {
-                Log.Information($"{FileName} doesn't exist, will create new one now.");
+                Log.Information($"{FileName} doesn't exist, will create new one now in {FileLocation}");
                 Save();
             }
 

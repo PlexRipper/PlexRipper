@@ -1,24 +1,17 @@
 import { Observable, of, iif } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
-import { ObservableStore } from '@codewithdan/observable-store';
 import StoreState from '@state/storeState';
 import AccountService from '@service/accountService';
-import { getPlexLibrary } from '@api/plexLibraryApi';
+import { BaseService } from '@state/baseService';
 
-export class ServerService extends ObservableStore<StoreState> {
-	public get servers(): PlexServerDTO[] {
-		return this.getState().servers;
-	}
-
+export class ServerService extends BaseService {
 	public constructor() {
-		super({
-			stateSliceSelector: (state: StoreState) => {
-				return {
-					servers: state.servers,
-				};
-			},
+		super((state: StoreState) => {
+			return {
+				servers: state.servers,
+			};
 		});
 
 		AccountService.getActiveAccount()
@@ -30,29 +23,16 @@ export class ServerService extends ObservableStore<StoreState> {
 			});
 	}
 
+	public get servers(): PlexServerDTO[] {
+		return this.getState().servers;
+	}
+
 	public getServers(): Observable<PlexServerDTO[]> {
 		return this.stateChanged.pipe(switchMap((state: StoreState) => of(state?.servers ?? [])));
 	}
 
 	public getServer(serverId: number): Observable<PlexServerDTO | null> {
 		return this.getServers().pipe(switchMap((servers: PlexServerDTO[]) => of(servers.find((x) => x.id === serverId) ?? null)));
-	}
-
-	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | undefined> {
-		return this.getServers().pipe(switchMap((x) => of(x.find((y) => y.plexLibraries.find((z) => z.id === libraryId)))));
-	}
-
-	public getLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
-		// Search for the library in the servers state
-		const library: PlexLibraryDTO | null = this.findLibrary(this.servers, libraryId);
-
-		// If the library has already been stored with media then return it.
-		if (library && library.count > 0) {
-			return of(library);
-		}
-
-		this.refreshLibrary(libraryId);
-		return this.stateChanged.pipe(switchMap((x) => of(this.findLibrary(x?.servers ?? [], libraryId))));
 	}
 
 	public findLibrary(servers: PlexServerDTO[], libraryId: number): PlexLibraryDTO | null {
@@ -71,31 +51,11 @@ export class ServerService extends ObservableStore<StoreState> {
 		return null;
 	}
 
-	public refreshLibrary(libraryId: number): void {
-		getPlexLibrary(libraryId ?? 0, 0)
-			.pipe(take(1))
-			.subscribe((libraryData) => {
-				if (libraryData) {
-					const servers = this.servers;
-					const serverIndex = this.servers.findIndex((x) => x.id === libraryData.plexServerId);
-					if (serverIndex === -1) {
-						return;
-					}
-					const libraryIndex = servers[serverIndex].plexLibraries.findIndex((x) => x.id === libraryData.id);
-					if (libraryIndex === -1) {
-						return;
-					}
-					servers[serverIndex].plexLibraries.splice(libraryIndex, 1, libraryData);
-					this.setState({ servers }, 'plexLibrary refresh');
-				}
-			});
-	}
-
 	public checkServer(plexServerId: number): void {
 		if (plexServerId > 0) {
 			checkPlexServer(plexServerId).subscribe((serverStatus: PlexServerStatusDTO | null) => {
 				if (serverStatus) {
-					const servers = this.servers;
+					const servers = this.getState().servers;
 					const index = servers.findIndex((x) => x.id === serverStatus.plexServerId);
 					if (index === -1) {
 						return;

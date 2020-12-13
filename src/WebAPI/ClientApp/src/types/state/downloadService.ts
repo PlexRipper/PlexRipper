@@ -3,19 +3,17 @@ import { Observable, of } from 'rxjs';
 import { getAllDownloads } from '@api/plexDownloadApi';
 import { switchMap } from 'rxjs/operators';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
-import { ObservableStore } from '@codewithdan/observable-store';
 import StoreState from '@state/storeState';
 import ServerService from '@state/serverService';
 import AccountService from '@service/accountService';
+import { BaseService } from '@state/baseService';
 
-export class DownloadService extends ObservableStore<StoreState> {
+export class DownloadService extends BaseService {
 	public constructor() {
-		super({
-			stateSliceSelector: (state: StoreState) => {
-				return {
-					downloads: state.downloads,
-				} as StoreState;
-			},
+		super((state: StoreState) => {
+			return {
+				downloads: state.downloads,
+			} as StoreState;
 		});
 
 		AccountService.getActiveAccount()
@@ -23,7 +21,6 @@ export class DownloadService extends ObservableStore<StoreState> {
 			.subscribe((downloads: DownloadTaskDTO[]) => {
 				if (downloads) {
 					this.setState({ downloads }, 'Initial DownloadTask Data');
-					Log.warn('history', this.stateHistory);
 				}
 			});
 	}

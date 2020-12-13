@@ -122,6 +122,7 @@ export interface PlexMovieDTO {
   guid: any;
   studio: string;
   title: string;
+  size: number;
   contentRating: string;
   summary: string;
   index: number;

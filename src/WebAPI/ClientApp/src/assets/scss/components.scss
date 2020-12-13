@@ -135,20 +135,34 @@ MediaTable.vue
 */
 .media-table {
 	.media-table-header {
-		height: 50px;
+		height: 40px;
 		margin: 0;
 		position: sticky;
 		position: -webkit-sticky;
 		top: 0; /* required */
-
-		.media-table-header-columns {
-		}
+		@extend .flex-nowrap;
+	}
+	.title-column {
+		min-width: 100px;
+		max-width: 400px;
+		display: inline-block;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
 	}
 	.media-table-content {
 		// TODO Maybe calculate this in vue
 		// This takes the 100% browser window height, and then subtracts all bars that are above
 		// media-table-content to calculate the height of the actual viewport of the media that is viewed.
-		height: calc(100vh - 50px - 85px - 48px - 24px);
+		height: calc(100vh - 40px - 85px - 48px - 24px);
+		.media-table-content-row {
+			@extend .ml-2;
+			@extend .flex-nowrap;
+			.v-sheet {
+				max-height: 24px;
+			}
+
+		}
 	}
 }
 

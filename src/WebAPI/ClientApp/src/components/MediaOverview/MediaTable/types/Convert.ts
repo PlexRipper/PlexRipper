@@ -64,12 +64,13 @@ export default abstract class Convert {
 
 		movies.forEach((movie: PlexMovieDTO) => {
 			if (movie) {
-				// Add tvShow
+				// Add movie
 				items.push({
 					id: movie.id,
 					key: `${movie.id}`,
 					title: movie.title ?? '',
 					year: movie.year,
+					size: movie.size,
 					type: PlexMediaType.Movie,
 					item: movie,
 					mediaData: movie.plexMovieDatas as IMediaData[],

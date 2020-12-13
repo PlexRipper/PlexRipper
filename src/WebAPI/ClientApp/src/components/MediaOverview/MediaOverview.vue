@@ -1,7 +1,7 @@
 <template>
 	<page>
 		<template v-if="isLoading">
-			<v-row justify="center">
+			<v-row justify="center" class="mx-0">
 				<v-col cols="auto">
 					<v-layout row justify-center align-center>
 						<v-progress-circular :size="70" :width="7" color="red" indeterminate></v-progress-circular>
@@ -20,7 +20,7 @@
 		<!-- Header -->
 		<template v-else-if="server && library">
 			<!--	Overview bar	-->
-			<v-row>
+			<v-row class="mx-0">
 				<media-overview-bar
 					:server="server"
 					:library="library"
@@ -83,7 +83,7 @@ import { catchError, finalize, takeWhile, tap } from 'rxjs/operators';
 import Log from 'consola';
 import { downloadMedia } from '@api/plexDownloadApi';
 import DownloadService from '@state/downloadService';
-import ServerService from '@state/serverService';
+import LibraryService from '@state/libraryService';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
@@ -254,7 +254,7 @@ export default class MediaOverview extends Vue {
 		this.isRefreshing = true;
 		this.isLoading = true;
 		this.resetProgress(true);
-		ServerService.refreshLibrary(this.libraryId);
+		LibraryService.refreshLibrary(this.libraryId);
 	}
 
 	created(): void {
@@ -270,18 +270,16 @@ export default class MediaOverview extends Vue {
 			}
 		});
 
-		ServerService.getServerByLibraryID(this.libraryId).subscribe((server) => {
+		LibraryService.getServerByLibraryID(this.libraryId).subscribe((server) => {
 			this.server = server ?? null;
 			Log.warn('Server:', this.server);
 		});
 
-		ServerService.getLibrary(this.libraryId).subscribe((library) => {
+		LibraryService.getLibrary(this.libraryId).subscribe((library) => {
 			if (library) {
 				this.library = library;
 				Log.warn('Library:', this.library);
-				if (this.library.count > -1) {
-					this.isLoading = false;
-				}
+				this.isLoading = false;
 			}
 		});
 	}

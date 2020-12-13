@@ -65,6 +65,7 @@ export default class MovieTable extends Vue {
 				text: 'Size',
 				value: 'size',
 				width: 100,
+				type: 'data',
 			},
 		];
 	}

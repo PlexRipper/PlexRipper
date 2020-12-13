@@ -3,16 +3,20 @@
 		<v-col cols="12">
 			<!-- Table Headers -->
 			<v-row class="media-table-header">
+				<!-- Checkbox -->
 				<v-col class="ml-6 select-all-check" style="max-width: 50px">
 					<v-checkbox :indeterminate="isIndeterminate" color="red" @change="selectAll($event)"></v-checkbox>
 				</v-col>
-				<v-col
-					v-for="(header, index) in headers"
-					:key="index"
-					:class="[index > 0 ? 'col-auto' : '', 'col', 'media-table-header-columns']"
-				>
+				<!-- Title -->
+				<v-col cols="4" class="title-column">
+					{{ headers[0].text }}
+				</v-col>
+				<v-spacer />
+				<!-- Other columns -->
+				<v-col v-for="(header, i) in headers.slice(1, headers.length)" :key="i" cols="auto">
 					<v-sheet :width="header.width" :max-width="header.width" class="no-background">{{ header.text }}</v-sheet>
 				</v-col>
+				<!-- Actions -->
 				<v-col cols="auto" class="text-center">
 					<v-sheet width="70" class="no-background">Actions</v-sheet>
 				</v-col>
@@ -34,11 +38,17 @@
 							item-text="title"
 						>
 							<template #label="{ item }">
-								<v-row class="ml-2">
-									<!--	Data columns	-->
-									<v-col v-for="(header, index) in headers" :key="index" :class="[index > 0 ? 'col-auto' : '', 'col']">
+								<v-row class="media-table-content-row">
+									<!-- Title -->
+									<v-col cols="4" class="title-column">
+										{{ item[headers[0].value] }}
+									</v-col>
+									<v-spacer />
+									<!-- Other columns -->
+									<v-col v-for="(header, index) in headers.slice(1, headers.length)" :key="index" cols="auto">
 										<v-sheet :width="header.width" :max-width="header.width" class="no-background">
-											<date-time v-if="header.type === 'date'" :text="item[header.value]" :time="false" />
+											<date-time v-if="header.type === 'date'" :text="item[header.value]" :time="false" short-date />
+											<span v-else-if="header.type === 'data'">{{ item[header.value] | prettyBytes }}</span>
 											<span v-else>{{ item[header.value] }}</span>
 										</v-sheet>
 									</v-col>

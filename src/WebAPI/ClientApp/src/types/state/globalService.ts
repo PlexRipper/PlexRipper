@@ -1,19 +1,9 @@
 import Log from 'consola';
 import { ReplaySubject, Observable } from 'rxjs';
-import { ObservableStore } from '@codewithdan/observable-store';
-import StoreState from '@state/storeState';
+import { BaseService } from '@state/baseService';
 
-export class GlobalService extends ObservableStore<StoreState> {
+export class GlobalService extends BaseService {
 	private _axiosReady: ReplaySubject<any> = new ReplaySubject();
-
-	public constructor() {
-		super({ trackStateHistory: true });
-
-		ObservableStore.initializeState({
-			servers: [],
-			downloads: [],
-		} as StoreState);
-	}
 
 	public setAxiosReady(): void {
 		Log.debug('Axios is ready');

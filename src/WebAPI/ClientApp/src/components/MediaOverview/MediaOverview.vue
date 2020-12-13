@@ -254,10 +254,11 @@ export default class MediaOverview extends Vue {
 		this.isRefreshing = true;
 		this.isLoading = true;
 		this.resetProgress(true);
-		LibraryService.refreshLibrary(this.libraryId);
+		LibraryService.retrieveLibrary(this.libraryId);
 	}
 
 	created(): void {
+		Log.warn('created');
 		this.resetProgress(false);
 		this.isRefreshing = false;
 		this.isLoading = true;
@@ -271,15 +272,22 @@ export default class MediaOverview extends Vue {
 		});
 
 		LibraryService.getServerByLibraryID(this.libraryId).subscribe((server) => {
-			this.server = server ?? null;
-			Log.warn('Server:', this.server);
+			Log.warn('Server', server);
+			if (server) {
+				this.server = server;
+				if (this.library) {
+					this.isLoading = false;
+				}
+			}
 		});
 
 		LibraryService.getLibrary(this.libraryId).subscribe((library) => {
-			if (library) {
+			Log.warn('Library', library);
+			if (library && library.id === this.libraryId) {
 				this.library = library;
-				Log.warn('Library:', this.library);
-				this.isLoading = false;
+				if (this.server) {
+					this.isLoading = false;
+				}
 			}
 		});
 	}

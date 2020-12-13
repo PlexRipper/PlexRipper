@@ -13,13 +13,6 @@ export class LibraryService extends BaseService {
 				libraries: state.libraries,
 			};
 		});
-
-		// serverService
-		// 	.getServers()
-		// 	.pipe(switchMap((servers) => servers.flatMap((x) => x.plexLibraries)))
-		// 	.subscribe((libraries) => {
-		// 		Log.debug('LibraryService', libraries);
-		// 	});
 	}
 
 	public getLibraries(): Observable<PlexLibraryDTO[]> {
@@ -29,11 +22,11 @@ export class LibraryService extends BaseService {
 	public getLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
 		return this.getLibraries().pipe(
 			map((libraries): PlexLibraryDTO | null => libraries.find((y) => y.id === libraryId) ?? null),
-			switchMap((library) => iif(() => library !== null, of(library), this.refreshLibrary(libraryId))),
+			switchMap((library) => iif(() => library !== null, of(library), this.retrieveLibrary(libraryId))),
 		);
 	}
 
-	public refreshLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
+	public retrieveLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
 		return getPlexLibrary(libraryId, 0).pipe(
 			tap((library) => {
 				if (!library) {
@@ -47,7 +40,6 @@ export class LibraryService extends BaseService {
 					libraries.splice(libraryIndex, 1, library);
 				}
 				this.setState({ libraries }, 'plexLibrary with id: ' + libraryId + ' updated');
-				this.logHistory();
 			}),
 		);
 	}

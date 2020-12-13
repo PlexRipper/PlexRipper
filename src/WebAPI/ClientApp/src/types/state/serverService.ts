@@ -35,22 +35,6 @@ export class ServerService extends BaseService {
 		return this.getServers().pipe(switchMap((servers: PlexServerDTO[]) => of(servers.find((x) => x.id === serverId) ?? null)));
 	}
 
-	public findLibrary(servers: PlexServerDTO[], libraryId: number): PlexLibraryDTO | null {
-		if (!servers) {
-			return null;
-		}
-		for (let i = 0; i < servers.length; i++) {
-			if (servers[i] || servers[i].plexLibraries || servers[i].plexLibraries.length > 0) {
-				for (let j = 0; i < servers[i].plexLibraries.length; j++) {
-					if (servers[i].plexLibraries[j].id === libraryId) {
-						return servers[i].plexLibraries[j];
-					}
-				}
-			}
-		}
-		return null;
-	}
-
 	public checkServer(plexServerId: number): void {
 		if (plexServerId > 0) {
 			checkPlexServer(plexServerId).subscribe((serverStatus: PlexServerStatusDTO | null) => {
@@ -63,7 +47,8 @@ export class ServerService extends BaseService {
 					const server = servers[index];
 					server.status = serverStatus;
 					servers.splice(index, 1, server);
-					this.setState({ servers });
+					this.setState({ servers }, 'Update server status for ' + plexServerId);
+					this.logHistory();
 				}
 			});
 		}

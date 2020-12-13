@@ -117,8 +117,6 @@ namespace PlexRipper.WebAPI
 
             app.UseCors(CORSConfiguration);
 
-            // TODO This might be removed if the CORS is working without it
-            // app.UseCorsMiddleware();
             app.UseAuthorization();
 
             app.UseOpenApi(); // serve OpenAPI/Swagger documents

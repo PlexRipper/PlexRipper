@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
@@ -153,15 +154,34 @@ namespace PlexRipper.Application.PlexAccounts
             await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, 0, plexServerList.Value.Count);
 
             // Retrieve and store the corresponding PlexLibraries
-            if (plexServerList.Value.Any())
+            if (!plexServerList.Value.Any())
             {
-                for (int i = 0; i < plexServerList.Value.Count; i++)
-                {
-                    var plexServer = plexServerList.Value[i];
-                    await _plexLibraryService.RefreshLibrariesAsync(plexAccount, plexServer);
-                    await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, i + 1, plexServerList.Value.Count);
-                }
+                Log.Debug("Account was setup successfully, but did not have access to any servers!");
+                return Result.Ok(false);
             }
+
+            int finishedCount = 0;
+
+            async Task SendProgress()
+            {
+                Interlocked.Increment(ref finishedCount);
+
+                // Send progress update to clients
+                await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, finishedCount, plexServerList.Value.Count);
+            }
+
+            var tasks = plexServerList.Value.Select(async plexServer =>
+            {
+                var serverStatusResult = await _plexServerService.CheckPlexServerStatusAsync(plexServer.Id, plexAccount.Id);
+                if (serverStatusResult.IsSuccess && serverStatusResult.Value.IsSuccessful)
+                {
+                    await _plexLibraryService.RefreshLibrariesAsync(plexAccount, plexServer);
+                }
+
+                await SendProgress();
+            });
+
+            await Task.WhenAll(tasks);
 
             Log.Debug("Account was setup successfully!");
             return Result.Ok(true);
@@ -206,7 +226,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
 
         /// <summary>
-        /// Checks if an <see cref="PlexAccount"/> with the same username already exists. 
+        /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
         /// </summary>
         /// <param name="username">The username to check for.</param>
         /// <returns>true if username is available.</returns>

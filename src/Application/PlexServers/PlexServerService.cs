@@ -39,11 +39,10 @@ namespace PlexRipper.Application.PlexServers
         {
             if (plexAccount == null)
             {
-                Log.Warning("plexAccount was null");
-                return Result.Fail("plexAccount was null");
+                return Result.Fail("plexAccount was null").LogWarning();
             }
 
-            Log.Debug($"Refreshing PlexLibraries for PlexAccount: {plexAccount.Id}");
+            Log.Debug($"Refreshing Plex servers for PlexAccount: {plexAccount.Id}");
 
             var token = await _plexAuthenticationService.GetPlexTokenAsync(plexAccount);
 

@@ -20,7 +20,7 @@ namespace PlexRipper.Application.PlexAuthentication
             _plexApiService = plexApiService;
         }
 
-        public async Task<string> GetPlexTokenAsync(PlexAccount plexAccount)
+        public async Task<string> GetPlexApiTokenAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
             {

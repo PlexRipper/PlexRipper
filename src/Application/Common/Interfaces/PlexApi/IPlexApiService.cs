@@ -21,7 +21,12 @@ namespace PlexRipper.Application.Common
 
         Task<PlexAccount> GetAccountAsync(string authToken);
 
-        Task<List<PlexServer>> GetServersAsync(string authToken);
+        /// <summary>
+        /// Retrieves the accessible <see cref="PlexServer"/> by this plexAccountToken by sending an API request to the PlexAPI.
+        /// </summary>
+        /// <param name="plexAccountToken">The <see cref="PlexAccount"/> token to retrieve the accessible <see cref="PlexServer"/>s with.</param>
+        /// <returns>The accessible <see cref="PlexServer"/>s.</returns>
+        Task<List<PlexServer>> GetServersAsync(string plexAccountToken);
 
         Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl);
 

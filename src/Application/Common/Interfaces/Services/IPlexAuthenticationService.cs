@@ -6,7 +6,7 @@ namespace PlexRipper.Application.Common
 {
     public interface IPlexAuthenticationService
     {
-        Task<string> GetPlexTokenAsync(PlexAccount plexAccount);
+        Task<string> GetPlexApiTokenAsync(PlexAccount plexAccount);
 
         /// <summary>
         /// Returns the authentication token needed to authenticate communication with the <see cref="PlexServer"/>.

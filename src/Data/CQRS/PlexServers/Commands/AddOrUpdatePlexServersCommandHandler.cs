@@ -23,11 +23,11 @@ namespace PlexRipper.Data.CQRS.PlexServers
         }
     }
 
-    public class AddOrUpdatePlexServersHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexServersCommand, Result<bool>>
+    public class AddOrUpdatePlexServersHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexServersCommand, Result>
     {
         public AddOrUpdatePlexServersHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<bool>> Handle(AddOrUpdatePlexServersCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(AddOrUpdatePlexServersCommand command, CancellationToken cancellationToken)
         {
             var plexAccount = command.PlexAccount;
             var plexServers = command.PlexServers;
@@ -117,7 +117,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
                 }
             }
 
-            return Result.Ok(true);
+            return Result.Ok();
         }
     }
 }

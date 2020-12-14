@@ -37,6 +37,12 @@ namespace PlexRipper.Domain
 
         public long OwnerId { get; set; }
 
+        /// <summary>
+        /// Certain servers have protection or are misconfigured which is why we can apply certain fixes to facilitate server communication.
+        /// This will attempt to connect on port 80 of the server.
+        /// </summary>
+        public bool ServerFixApplyDNSFix { get; set; }
+
         #region Relationships
 
         public List<PlexAccountServer> PlexAccountServers { get; set; } = new List<PlexAccountServer>();
@@ -50,18 +56,33 @@ namespace PlexRipper.Domain
         #region Helpers
 
         /// <summary>
-        /// The server url, e.g: http://112.202.10.213:32400.
+        /// Gets the server url, e.g: http://112.202.10.213:32400.
         /// </summary>
         [NotMapped]
-        public string ServerUrl => $"{Scheme}://{Address}:{Port}";
+        public string ServerUrl
+        {
+            get
+            {
+                switch (Scheme)
+                {
+                    case "http":
+                        return $"{Scheme}://{Address}:{(ServerFixApplyDNSFix ? 80 : Port)}";
+                    case "https":
+                        return $"{Scheme}://{Address}:{(ServerFixApplyDNSFix ? 443 : Port)}";
+                    default:
+                        return $"{Scheme}://{Address}:{Port}";
+                }
+            }
+        }
 
         /// <summary>
-        /// The library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections.
+        /// Gets the library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections.
         /// </summary>
         [NotMapped]
         public string LibraryUrl => $"{ServerUrl}/library/sections";
 
         /// <summary>
+        /// Gets or sets the temporary auth token.
         /// Do not use this property to retrieve the needed authToken, this is only meant to transfer the incoming authToken from the plexApi to the Database.
         /// See AddOrUpdatePlexServersHandler.
         /// </summary>
@@ -69,13 +90,13 @@ namespace PlexRipper.Domain
         public string AccessToken { get; set; }
 
         /// <summary>
-        /// Check if any nested <see cref="PlexLibrary"/> has a <see cref="DownloadTask"/>.
+        /// Gets a value indicating whether this <see cref="PlexServer"/> has any DownloadTasks in any nested <see cref="PlexLibrary"/>.
         /// </summary>
         [NotMapped]
         public bool HasDownloadTasks => PlexLibraries?.Any(x => x.DownloadTasks?.Any() ?? false) ?? false;
 
         /// <summary>
-        /// Returns the last known server status.
+        /// Gets the last known server status.
         /// </summary>
         [NotMapped]
         public PlexServerStatus Status

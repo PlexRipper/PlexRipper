@@ -23,6 +23,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.PlexLibraries, opt => opt.Ignore())
                 .ForMember(dest => dest.ServerStatus, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
+                .ForMember(dest => dest.ServerFixApplyDNSFix, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt,
                     opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
                 .ForMember(dest => dest.UpdatedAt,

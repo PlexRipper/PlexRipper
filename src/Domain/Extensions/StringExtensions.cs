@@ -1,9 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 
 namespace PlexRipper.Domain
 {
     public static class StringExtensions
     {
+        private static Random random = new Random();
+
         public static string GetActualCasing(this string path)
         {
             if (OsInfo.IsNotWindows || path.StartsWith("\\"))
@@ -46,6 +50,23 @@ namespace PlexRipper.Domain
             }
 
             return Path.Combine(GetProperCapitalization(parentDirInfo), folderName);
+        }
+
+        public static string RandomString(int length, bool allowNumbers = false, bool allowCapitalLetters = false)
+        {
+            string chars = "abcdefghijklmnopqrstuvwxyz";
+
+            if (allowCapitalLetters)
+            {
+                chars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            }
+
+            if (allowNumbers)
+            {
+                chars += "0123456789";
+            }
+
+            return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

@@ -13,7 +13,7 @@ namespace PlexRipper.Application.Common
 
         Task<Result<PlexServer>> GetServerAsync(int plexServerId);
 
-        Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(int plexServerId, int plexAccountId = 0);
+        Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(int plexServerId, int plexAccountId = 0, bool trimEntries = true);
 
         /// <summary>
         /// Retrieves all <see cref="PlexServer"/>s from the Database with the included <see cref="PlexLibrary"/>.

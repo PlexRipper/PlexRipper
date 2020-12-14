@@ -290,7 +290,7 @@ namespace PlexRipper.Application.PlexDownloads
 
         public Task<string> GetPlexTokenAsync(PlexAccount plexAccount)
         {
-            return _plexAuthenticationService.GetPlexTokenAsync(plexAccount);
+            return _plexAuthenticationService.GetPlexApiTokenAsync(plexAccount);
         }
 
         #region Commands

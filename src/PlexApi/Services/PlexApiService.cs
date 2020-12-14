@@ -35,31 +35,6 @@ namespace PlexRipper.PlexApi.Services
 
         #region Methods
 
-        #region Private
-
-        /// <summary>
-        /// Some PlexServers are misconfigured so we have to fix that.
-        /// </summary>
-        /// <param name="plexServers"></param>
-        /// <returns></returns>
-        private List<PlexServer> CleanupPlexServers(List<PlexServer> plexServers)
-        {
-            if (plexServers.Count > 0)
-            {
-                foreach (var plexServer in plexServers)
-                {
-                    if (plexServer.Port == 443 && plexServer.Scheme == "http")
-                    {
-                        plexServer.Scheme = "https";
-                    }
-                }
-            }
-
-            return plexServers;
-        }
-
-        #endregion
-
         #region Public
 
         public async Task<PlexAccount> GetAccountAsync(string authToken)
@@ -166,13 +141,13 @@ namespace PlexRipper.PlexApi.Services
             return result != null ? _mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata) : new List<PlexTvShowSeason>();
         }
 
-        public async Task<List<PlexServer>> GetServersAsync(string authToken)
+        /// <inheritdoc/>
+        public async Task<List<PlexServer>> GetServersAsync(string plexAccountToken)
         {
-            var result = await _plexApi.GetServerAsync(authToken);
+            var result = await _plexApi.GetServerAsync(plexAccountToken);
             if (result != null)
             {
-                var convertedList = _mapper.Map<List<PlexServer>>(result);
-                return CleanupPlexServers(convertedList);
+                return _mapper.Map<List<PlexServer>>(result);
             }
 
             Log.Warning("Failed to retrieve PlexServers");

@@ -151,7 +151,6 @@ namespace PlexRipper.Application.PlexAccounts
                 return plexServerList.ToResult();
             }
 
-            await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, 0, plexServerList.Value.Count);
 
             // Retrieve and store the corresponding PlexLibraries
             if (!plexServerList.Value.Any())
@@ -160,28 +159,7 @@ namespace PlexRipper.Application.PlexAccounts
                 return Result.Ok(false);
             }
 
-            int finishedCount = 0;
 
-            async Task SendProgress()
-            {
-                Interlocked.Increment(ref finishedCount);
-
-                // Send progress update to clients
-                await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, finishedCount, plexServerList.Value.Count);
-            }
-
-            var tasks = plexServerList.Value.Select(async plexServer =>
-            {
-                var serverStatusResult = await _plexServerService.CheckPlexServerStatusAsync(plexServer.Id, plexAccount.Id);
-                if (serverStatusResult.IsSuccess && serverStatusResult.Value.IsSuccessful)
-                {
-                    await _plexLibraryService.RefreshLibrariesAsync(plexAccount, plexServer);
-                }
-
-                await SendProgress();
-            });
-
-            await Task.WhenAll(tasks);
 
             Log.Debug("Account was setup successfully!");
             return Result.Ok(true);

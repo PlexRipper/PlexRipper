@@ -1,11 +1,13 @@
 <template>
-	<v-dialog :value="dialog" persistent max-width="800">
+	<v-dialog :value="dialog" persistent max-width="900">
 		<!-- The setup account progress -->
 		<v-card v-if="accountSetupProgress">
-			<progress-component
-				:percentage="accountSetupProgress.percentage"
-				:text="`Retrieving accessible servers ${accountSetupProgress.received} of ${accountSetupProgress.total}`"
-			/>
+			<v-card-text>
+				<progress-component
+					:percentage="accountSetupProgress.percentage"
+					:text="`Retrieving accessible servers ${accountSetupProgress.received} of ${accountSetupProgress.total}`"
+				/>
+			</v-card-text>
 		</v-card>
 		<!-- The account pop-up -->
 		<v-card v-else>

@@ -1,5 +1,5 @@
 <template>
-	<v-toolbar class="media-overview-bar" :height="barHeight">
+	<v-toolbar class="media-overview-bar" outlined :height="barHeight">
 		<v-toolbar-title>
 			<v-list subheader two-line class="no-background pa-0">
 				<v-list-item>

@@ -1,10 +1,10 @@
 @import './components.scss';
 @import './overwriting.scss';
 @import './pages.scss';
+
 /*
 default
 */
-
 html {
 	overflow-y: hidden;
 }
@@ -48,6 +48,25 @@ ul li {
 
 .no-background {
 	background-color: transparent !important;
+}
+
+/*
+general
+*/
+.glass-background {
+	&.theme--dark {
+		background: rgba(255, 255, 255, 0.08);
+	}
+	&.theme--light {
+		background: $light-background-color;
+	}
+}
+
+.default-border {
+	border: 2px solid red;
+}
+.default-shadow {
+	box-shadow: $box-shadow;
 }
 
 /*

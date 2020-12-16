@@ -1,6 +1,6 @@
 <template>
-	<v-row justify="center" no-gutters>
-		<v-col cols="12">
+	<v-row justify="center">
+		<v-col cols="11">
 			<!-- Circular progress -->
 			<v-row v-if="showCircular" justify="center" no-gutters class="my-3">
 				<v-col cols="auto">

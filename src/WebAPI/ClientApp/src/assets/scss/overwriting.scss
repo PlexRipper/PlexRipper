@@ -1,4 +1,4 @@
-@import "variables";
+@import 'variables';
 
 /*
 v-app
@@ -10,6 +10,43 @@ v-app
 		}
 		&.theme--light {
 			background: $light-background-color;
+		}
+	}
+}
+/*
+v-sheet
+*/
+
+.v-sheet--outlined {
+	&.theme--dark {
+		@extend .default-border;
+	}
+	&.theme--light {
+		@extend .default-border;
+	}
+
+	&.v-card--hover:hover {
+		box-shadow: $box-shadow-hover;
+	}
+}
+
+/*
+v-dialog
+*/
+
+.v-dialog {
+	border-radius: 15px;
+	@extend .default-border;
+	@extend .default-shadow;
+
+	.v-card {
+		backdrop-filter: blur(30px);
+		border-radius: 15px;
+		&.theme--dark {
+			background: $dark-dialog-background-color;
+		}
+		&.theme--light {
+			background: $light-dialog-background-color;
 		}
 	}
 }

@@ -1,7 +1,6 @@
-import Log from 'consola';
 import { Observable, of } from 'rxjs';
-import { getAllDownloads } from '@api/plexDownloadApi';
-import { switchMap } from 'rxjs/operators';
+import { getAllDownloads, deleteDownloadTask } from '@api/plexDownloadApi';
+import { finalize, switchMap } from 'rxjs/operators';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import StoreState from '@state/storeState';
 import ServerService from '@state/serverService';
@@ -65,6 +64,10 @@ export class DownloadService extends BaseService {
 	public fetchDownloadList(): Observable<DownloadTaskDTO[]> {
 		getAllDownloads().subscribe((downloads) => this.setState({ downloads }));
 		return this.getDownloadList();
+	}
+
+	public deleteDownloadTask(downloadTaskId: number): Observable<any> {
+		return deleteDownloadTask(downloadTaskId).pipe(finalize(() => this.fetchDownloadList()));
 	}
 }
 

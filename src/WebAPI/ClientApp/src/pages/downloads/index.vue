@@ -39,7 +39,6 @@
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import {
-	deleteDownloadTask,
 	restartDownloadTask,
 	stopDownloadTask,
 	clearDownloadTasks,
@@ -49,7 +48,7 @@ import {
 } from '@api/plexDownloadApi';
 import DownloadService from '@state/downloadService';
 import SignalrService from '@service/signalrService';
-import { finalize, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import {
 	DownloadProgress,
 	DownloadStatus,
@@ -136,11 +135,9 @@ export default class Downloads extends Vue {
 		if (i > -1) {
 			this.downloads.splice(i, 1);
 		}
-		deleteDownloadTask(downloadTaskId)
-			.pipe(finalize(() => DownloadService.fetchDownloadList()))
-			.subscribe(() => {
-				this.cleanupProgress(downloadTaskId);
-			});
+		DownloadService.deleteDownloadTask(downloadTaskId).subscribe(() => {
+			this.cleanupProgress(downloadTaskId);
+		});
 	}
 
 	stopDownloadTask(downloadTaskId: number): void {

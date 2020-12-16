@@ -1,6 +1,6 @@
 import { Observable, of, iif } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { PlexLibraryDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import StoreState from '@state/storeState';
 import AccountService from '@service/accountService';

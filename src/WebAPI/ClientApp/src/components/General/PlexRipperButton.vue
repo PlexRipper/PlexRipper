@@ -19,7 +19,7 @@
 				v-on="on"
 				@click="click"
 			>
-				<v-icon v-if="getIcon" class="mx-2" :color="getColor">{{ getIcon }}</v-icon>
+				<v-icon v-if="getIcon" class="mx-2" :size="iconSize" :color="getColor">{{ getIcon }}</v-icon>
 				<span v-if="getText !== ''">{{ $t(getText) }}</span>
 			</v-btn>
 		</template>
@@ -71,6 +71,9 @@ export default class PBtn extends Vue {
 
 	@Prop({ required: false, type: String })
 	readonly to!: string;
+
+	@Prop({ required: false, type: String })
+	readonly iconSize!: string;
 
 	get isDark(): boolean {
 		return this.$vuetify.theme.dark;

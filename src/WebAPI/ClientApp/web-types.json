@@ -679,6 +679,14 @@
                 "kind": "expression",
                 "type": "string"
               }
+            },
+            {
+              "name": "iconSize",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              }
             }
           ],
           "events": [

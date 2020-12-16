@@ -13,6 +13,7 @@ v-app
 		}
 	}
 }
+
 /*
 v-sheet
 */
@@ -23,6 +24,15 @@ v-sheet
 	}
 	&.theme--light {
 		@extend .default-border;
+	}
+
+	&.v-toolbar {
+		&.theme--dark {
+			background: $dark-dialog-background-color;
+		}
+		&.theme--light {
+			background: $light-dialog-background-color;
+		}
 	}
 
 	&.v-card--hover:hover {
@@ -36,12 +46,27 @@ v-dialog
 
 .v-dialog {
 	border-radius: 15px;
+	transition: 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
 	@extend .default-border;
 	@extend .default-shadow;
 
 	.v-card {
 		backdrop-filter: blur(30px);
 		border-radius: 15px;
+		&.theme--dark {
+			background: $dark-dialog-background-color;
+		}
+		&.theme--light {
+			background: $light-dialog-background-color;
+		}
+	}
+}
+/*
+v-menu
+*/
+.v-menu__content {
+	backdrop-filter: blur(30px);
+	.v-list {
 		&.theme--dark {
 			background: $dark-dialog-background-color;
 		}

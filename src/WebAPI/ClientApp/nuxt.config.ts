@@ -27,7 +27,7 @@ const config: NuxtConfig = {
 	/*
 	 ** Customize the progress-bar color
 	 */
-	loading: { color: '#fff' },
+	loading: false,
 	/*
 	 ** Plugins to load before mounting the App
 	 */

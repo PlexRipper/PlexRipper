@@ -13,7 +13,7 @@ namespace PlexRipper.Domain
                 .MinimumLevel.Verbose()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-                .WriteTo.Debug(outputTemplate: Template)
+                .WriteTo.Debug(outputTemplate: Template, restrictedToMinimumLevel: LogEventLevel.Debug)
                 .WriteTo.ColoredConsole(outputTemplate: Template);
 
         public static Logger GetLogger()

@@ -38,8 +38,8 @@ namespace PlexRipper.PlexApi
             var response = await ExecuteAsync<T>(request);
             if (response.IsSuccessful)
             {
-                Log.Information($"Request to {request.Resource} was successful!");
-                Log.Debug($"Response was: {response.Content}");
+                Log.Debug($"Request to {request.Resource} was successful!");
+                Log.Verbose($"Response was: {response.Content}");
             }
             else
             {

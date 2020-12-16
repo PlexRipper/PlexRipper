@@ -53,7 +53,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                 command.PlexLibrary.TvShows.ForEach(plexTvShow =>
                 {
                     plexTvShow.PlexLibraryId = plexLibrary.Id;
-                    plexTvShow.Seasons.ForEach(x =>
+                    plexTvShow.Seasons?.ForEach(x =>
                     {
                         x.PlexLibraryId = plexLibrary.Id;
                         if (x.Episodes != null && !x.Episodes.Any())

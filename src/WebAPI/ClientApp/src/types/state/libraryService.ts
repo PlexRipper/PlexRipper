@@ -1,10 +1,11 @@
 import { iif, Observable, of } from 'rxjs';
 import { BaseService } from '@state/baseService';
 import StoreState from '@state/storeState';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
-import { getPlexLibrary } from '@api/plexLibraryApi';
+import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 import serverService from '@state/serverService';
+import { settingsStore } from '~/store';
 
 export class LibraryService extends BaseService {
 	public constructor() {
@@ -13,6 +14,20 @@ export class LibraryService extends BaseService {
 				libraries: state.libraries,
 			};
 		});
+	}
+
+	private updateLibraryInStore(library: PlexLibraryDTO | null) {
+		if (!library) {
+			return;
+		}
+		const libraries = this.getState().libraries;
+		const libraryIndex = libraries.findIndex((x) => x.id === library.id);
+		if (libraryIndex === -1) {
+			libraries.push(library);
+		} else {
+			libraries.splice(libraryIndex, 1, library);
+		}
+		this.setState({ libraries }, 'plexLibrary with id: ' + library.id + ' updated');
 	}
 
 	public getLibraries(): Observable<PlexLibraryDTO[]> {
@@ -27,21 +42,13 @@ export class LibraryService extends BaseService {
 	}
 
 	public retrieveLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
-		return getPlexLibrary(libraryId, 0).pipe(
-			tap((library) => {
-				if (!library) {
-					return;
-				}
-				const libraries = this.getState().libraries;
-				const libraryIndex = libraries.findIndex((x) => x.id === libraryId);
-				if (libraryIndex === -1) {
-					libraries.push(library);
-				} else {
-					libraries.splice(libraryIndex, 1, library);
-				}
-				this.setState({ libraries }, 'plexLibrary with id: ' + libraryId + ' updated');
-			}),
-		);
+		return getPlexLibrary(libraryId, 0).pipe(tap((library) => this.updateLibraryInStore(library)));
+	}
+
+	public refreshLibrary(libraryId: number): void {
+		refreshPlexLibrary(libraryId, settingsStore.activeAccountId)
+			.pipe(take(1))
+			.subscribe((library) => this.updateLibraryInStore(library));
 	}
 
 	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | undefined> {

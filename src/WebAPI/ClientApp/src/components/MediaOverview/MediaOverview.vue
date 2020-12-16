@@ -253,12 +253,12 @@ export default class MediaOverview extends Vue {
 	refreshLibrary(): void {
 		this.isRefreshing = true;
 		this.isLoading = true;
+		this.library = null;
 		this.resetProgress(true);
-		LibraryService.retrieveLibrary(this.libraryId);
+		LibraryService.refreshLibrary(this.libraryId);
 	}
 
 	created(): void {
-		Log.warn('created');
 		this.resetProgress(false);
 		this.isRefreshing = false;
 		this.isLoading = true;

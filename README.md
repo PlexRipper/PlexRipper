@@ -2,20 +2,21 @@
 
 **UNDER ACTIVE DEVELOPMENT - ALPHA STAGE**
 
-Tired of searching for media on different torrent websites or paying for Usenet server access? Well look no further! You can now use PlexRipper to download "everything" from the Plex servers you have access to and expand your collection that way! Let others collect media for you and then just download everything 
+Tired of searching for media on different torrent websites or paying for Usenet server access? Well look no further! You can now use PlexRipper to download "everything" from the Plex servers you have access to and expand your collection that way! Let others collect media for you and then just download everything!
 
 ## Current Features
 
-- Runs in a Docker container and can be deployed on any type of platform that can host a Docker container.
-- Add multiple Plex accounts to download from the accessible Plex servers
+- Runs in a Docker container and can be deployed on any type of platform that can host a Docker container!
+- Add multiple Plex accounts to easily download from the accessible Plex servers!
 - A beautiful GUI which has a Light and Dark-mode theme!
 - Multi-threaded downloading!
-- Will still work even if Plex.tv is down by connecting directly to the media servers
+- Will still work even if Plex.tv is down by connecting directly to the media servers!
+- Has a highly complex neural network which will automatically fix misconfigured servers to allow connecting!
   
 ## Upcoming features
 
-- Download music and photo's, currently only movies and tv shows
-- Search through media and download entire tvshows or seasons with ease
+- Download music and photo's, currently only movies and tv shows!
+- Search through and filter media available for downloading!
 
 ## Back-end
 

@@ -124,7 +124,7 @@ namespace PlexRipper.Domain
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:
-                        return Path.Combine(Title);
+                        return Title;
                     case PlexMediaType.Episode:
                         return Path.Combine(TitleTvShow.Replace(":", "-"), TitleTvShowSeason);
                     default:

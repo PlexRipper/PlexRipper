@@ -16,16 +16,19 @@ export interface DownloadTaskDTO {
   title: string;
   status: DownloadStatus;
   fileLocationUrl: string;
-  FileName: string;
+  fileName: string;
   titleTvShow: string;
   titleTvShowSeason: string;
-  type: PlexMediaType;
+  mediaType: PlexMediaType;
   ratingKey: number;
   dataReceived: number;
   dataTotal: number;
   priority: number;
   plexServerId: number;
   plexLibraryId: number;
+  destinationPath: string;
+  downloadPath: string;
+  downloadUrl: string;
 }
 
 export enum DownloadStatus {

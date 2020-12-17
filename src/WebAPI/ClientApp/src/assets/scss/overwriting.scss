@@ -1,6 +1,16 @@
 @import 'variables';
 
 /*
+grid
+*/
+.container {
+	.row {
+		margin-left: 0;
+		margin-right: 0;
+	}
+}
+
+/*
 v-app
 */
 .v-application {
@@ -61,6 +71,7 @@ v-dialog
 		}
 	}
 }
+
 /*
 v-menu
 */
@@ -72,6 +83,30 @@ v-menu
 		}
 		&.theme--light {
 			background: $light-dialog-background-color;
+		}
+	}
+}
+
+/*
+v-expansion-panels
+*/
+.v-expansion-panels {
+	&.theme--dark {
+		.v-expansion-panel {
+			background: $dark-dialog-background-color;
+			.v-data-table,
+			.v-data-table--fixed-header thead th {
+				@extend .no-background;
+			}
+		}
+	}
+	&.theme--light {
+		.v-expansion-panel {
+			background: $light-dialog-background-color;
+			.v-data-table,
+			.v-data-table--fixed-header thead th {
+				@extend .no-background;
+			}
 		}
 	}
 }

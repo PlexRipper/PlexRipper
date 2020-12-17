@@ -297,7 +297,6 @@ namespace PlexRipper.DownloadManager
                     downloadComplete.DataTotal));
 
                 await _fileMerger.AddFileTask(downloadComplete.DownloadTask);
-                CleanUpDownloadClient(downloadComplete.Id);
                 await SetDownloadStatusAsync(new DownloadStatusChanged(downloadComplete.Id, DownloadStatus.Merging));
                 Log.Information($"The download of {downloadComplete.DownloadTask.Title} has completed!");
                 CheckDownloadQueue();

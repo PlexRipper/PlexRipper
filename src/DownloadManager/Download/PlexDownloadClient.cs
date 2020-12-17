@@ -123,10 +123,13 @@ namespace PlexRipper.DownloadManager.Download
             base.Dispose(disposing);
         }
 
-        private void SetDownloadStatus(DownloadStatus downloadStatus)
+        private void SetDownloadStatus(DownloadStatus downloadStatus, Result errorResult = null)
         {
             DownloadStatus = downloadStatus;
             DownloadTask.DownloadStatus = downloadStatus;
+
+            // TODO Find a way to handle Download Worker errors
+
             _statusChanged.OnNext(new DownloadStatusChanged(DownloadTaskId, downloadStatus));
         }
 
@@ -152,12 +155,12 @@ namespace PlexRipper.DownloadManager.Download
                 .Sample(TimeSpan.FromMilliseconds(1000), _timeThreadContext)
                 .Subscribe(OnDownloadProgressChanged);
 
-            // On download status change
+            // On download worker error
             _downloadWorkers
-                .Select(x => x.DownloadStatusChanged)
-                .CombineLatest()
+                .Select(x => x.DownloadWorkerError)
+                .Merge()
                 .TakeUntil(downloadCompleteStream)
-                .Subscribe(OnDownloadStatusChanged);
+                .Subscribe(OnDownloadWorkerError);
 
             // On download status change
             _downloadWorkers
@@ -219,24 +222,9 @@ namespace PlexRipper.DownloadManager.Download
             _downloadProgressChanged.OnNext(downloadProgress);
         }
 
-        private void OnDownloadStatusChanged(IList<DownloadStatusChanged> statuses)
+        private void OnDownloadWorkerError(Result errorResult)
         {
-            foreach (var downloadStatusChanged in statuses)
-            {
-                if (downloadStatusChanged.Status == DownloadStatus.Error)
-                {
-                    // TODO Add error handling and functionality to communicate to the front-end
-                    SetDownloadStatus(DownloadStatus.Error);
-                    break;
-                }
-
-                // Check recursively if all _downloadWorkers have the same download status
-                if (_downloadWorkers.All(x => x.Status == downloadStatusChanged.Status))
-                {
-                    SetDownloadStatus(downloadStatusChanged.Status);
-                    break;
-                }
-            }
+            SetDownloadStatus(DownloadStatus.Error, errorResult);
         }
 
         private void OnDownloadWorkerTaskChange(IList<DownloadWorkerTask> taskList)
@@ -314,6 +302,8 @@ namespace PlexRipper.DownloadManager.Download
                         return startResult.LogError();
                     }
                 }
+
+                SetDownloadStatus(DownloadStatus.Downloading);
             }
             catch (Exception e)
             {
@@ -431,24 +421,17 @@ namespace PlexRipper.DownloadManager.Download
                 var stopResult = await downloadWorker.Stop();
                 if (stopResult.IsFailed)
                 {
-                    stopResult.WithError(new Error($"Failed to stop downloadWorkerTask with id: {downloadWorker.Id} in PlexDownloadClient with id: {DownloadTask.Id}"))
+                    stopResult.WithError(new Error(
+                            $"Failed to stop downloadWorkerTask with id: {downloadWorker.Id} in PlexDownloadClient with id: {DownloadTask.Id}"))
                         .LogError();
                 }
             });
 
-            // foreach (var downloadWorker in _downloadWorkers)
-            // {
-            //     var stopResult = await downloadWorker.Stop();
-            //     if (stopResult.IsFailed)
-            //     {
-            //         return stopResult.WithError(new Error($"Failed to stop downloadWorkerTask with id: {downloadWorker.Id}"))
-            //             .LogError();
-            //     }
-            // }
+            ClearDownloadWorkers();
 
+            _fileSystem.DeleteAllFilesFromDirectory(DownloadTask.DownloadPath);
             _fileSystem.DeleteDirectoryFromFilePath(DownloadTask.DownloadPath);
 
-            ClearDownloadWorkers();
             SetDownloadStatus(DownloadStatus.Stopped);
             return Result.Ok(true);
         }
@@ -457,12 +440,15 @@ namespace PlexRipper.DownloadManager.Download
         {
             if (DownloadStatus == DownloadStatus.Downloading)
             {
+                SetDownloadStatus(DownloadStatus.Pausing);
+
                 _downloadWorkers.AsParallel().ForAll(async downloadWorker =>
                 {
                     var pauseResult = await downloadWorker.Pause();
                     if (pauseResult.IsFailed)
                     {
-                        pauseResult.WithError(new Error($"Failed to pause downloadWorkerTask with id: {downloadWorker.Id} in PlexDownloadClient with id: {DownloadTask.Id}"))
+                        pauseResult.WithError(new Error(
+                                $"Failed to pause downloadWorkerTask with id: {downloadWorker.Id} in PlexDownloadClient with id: {DownloadTask.Id}"))
                             .LogError();
                     }
                 });

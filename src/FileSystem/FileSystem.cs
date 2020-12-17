@@ -104,22 +104,30 @@ namespace PlexRipper.FileSystem
         {
             if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
             {
-                return Result.Fail("parameter filepath was empty");
-            }
-
-            string directoryPath = Path.GetDirectoryName(filePath) ?? string.Empty;
-            if (string.IsNullOrEmpty(directoryPath))
-            {
-                return Result.Fail($"Could not determine the directory name of path: {filePath}");
+                return Result.Fail("Parameter filepath was empty").LogError();
             }
 
             try
             {
-                Directory.Delete(directoryPath);
+                if (File.Exists(filePath))
+                {
+                    string directoryPath = Path.GetDirectoryName(filePath) ?? string.Empty;
+                    if (string.IsNullOrEmpty(directoryPath))
+                    {
+                        return Result.Fail($"Could not determine the directory name of path: {filePath}").LogError();
+                    }
+
+                    Directory.Delete(directoryPath);
+                }
+                // If the filePath is just an empty directory then delete that.
+                else if (Directory.Exists(filePath) || !Directory.GetFiles(filePath).Any())
+                {
+                    Directory.Delete(filePath);
+                }
             }
             catch (Exception e)
             {
-                return Result.Fail(new ExceptionalError(e));
+                return Result.Fail(new ExceptionalError(e)).LogError();
             }
 
             return Result.Ok();
@@ -263,7 +271,7 @@ namespace PlexRipper.FileSystem
                 FileStream fileStream;
                 if (File.Exists(filePath))
                 {
-                    fileStream = File.Open(filePath, FileMode.Open, FileAccess.Write, FileShare.Delete);
+                    fileStream = File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete);
                 }
                 else
                 {
@@ -280,6 +288,29 @@ namespace PlexRipper.FileSystem
                 Log.Error(e);
                 throw;
             }
+        }
+
+        /// <inheritdoc/>
+        public Result DeleteAllFilesFromDirectory(string directory)
+        {
+            if (Directory.Exists(directory))
+            {
+                DirectoryInfo di = new DirectoryInfo(directory);
+
+                foreach (FileInfo file in di.GetFiles())
+                {
+                    file.Delete();
+                }
+
+                foreach (DirectoryInfo dir in di.GetDirectories())
+                {
+                    dir.Delete(true);
+                }
+
+                return Result.Ok();
+            }
+
+            return Result.Fail($"Directory: {directory} does not exist").LogError();
         }
 
         public string ToAbsolutePath(string relativePath)

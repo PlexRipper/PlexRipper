@@ -248,7 +248,7 @@ namespace PlexRipper.DownloadManager
             var index = _downloadsList.FindIndex(x => x.DownloadTaskId == downloadTaskId);
             if (index == -1)
             {
-                Log.Warning($"Could not find downloadTask with id {downloadTaskId} to clean-up.");
+                Log.Debug($"Could not find downloadTask with id {downloadTaskId} to clean-up.");
                 return;
             }
 
@@ -420,23 +420,21 @@ namespace PlexRipper.DownloadManager
         /// <inheritdoc/>
         public async Task<Result<bool>> RestartDownloadAsync(int downloadTaskId)
         {
-            CleanUpDownloadClient(downloadTaskId);
-
             return await StartDownload(downloadTaskId);
         }
 
         /// <inheritdoc/>
-        public async Task<Result<bool>> StopDownloadAsync(int downloadTaskId)
+        public Result<bool> StopDownload(int downloadTaskId)
         {
             // Retrieve download client
             var downloadClient = GetDownloadClient(downloadTaskId);
             if (downloadClient.IsSuccess)
             {
                 downloadClient.Value.Stop();
+                return Result.Ok(true);
             }
 
-            await SetDownloadStatusAsync(new DownloadStatusChanged(downloadTaskId, DownloadStatus.Stopped));
-            return Result.Ok(true);
+            return Result.Ok(false);
         }
 
         /// <inheritdoc/>

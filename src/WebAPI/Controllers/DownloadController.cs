@@ -107,14 +107,14 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpGet("stop/{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Stop(int id)
+        public IActionResult Stop(int id)
         {
             if (id <= 0)
             {
                 return BadRequest(id, "Download Task Id");
             }
 
-            var result = await _plexDownloadService.StopDownloadTask(id);
+            var result = _plexDownloadService.StopDownloadTask(id);
             return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 

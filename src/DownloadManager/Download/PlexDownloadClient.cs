@@ -171,24 +171,6 @@ namespace PlexRipper.DownloadManager.Download
                 .Subscribe(OnDownloadComplete);
         }
 
-        private Result<bool> StartDownloadWorkers()
-        {
-            DownloadStartAt = DateTime.UtcNow;
-            try
-            {
-                Task.WhenAll(_downloadWorkers.Select(x => x.Start().ValueOrDefault).ToList());
-            }
-            catch (Exception e)
-            {
-                ClearDownloadWorkers();
-                return Result.Fail(new ExceptionalError(e)
-                        .WithMessage($"Could not download {DownloadTask.FileName} from {DownloadTask.DownloadUrl}"))
-                    .LogError();
-            }
-
-            return Result.Ok(true);
-        }
-
         /// <summary>
         /// Calls Dispose on all DownloadWorkers and clears the downloadWorkersList.
         /// </summary>
@@ -232,7 +214,7 @@ namespace PlexRipper.DownloadManager.Download
                 DataTotal = TotalBytesToReceive,
             };
             builder.Append($" = ({downloadProgress.DownloadSpeedFormatted} - {downloadProgress.TimeRemaining})");
-            Log.Debug(builder.ToString());
+            Log.Verbose(builder.ToString());
 
             _downloadProgressChanged.OnNext(downloadProgress);
         }
@@ -309,19 +291,39 @@ namespace PlexRipper.DownloadManager.Download
         #region Commands
 
         /// <summary>
-        /// Start the download of the DownloadTask passed during the construction.
+        /// Starts the download workers for the <see cref="DownloadTask"/> given during setup.
         /// </summary>
         /// <returns>Is successful.</returns>
-        public Result<bool> Start()
+        public Result Start()
         {
             if (!_isSetup)
             {
                 return Result.Fail(new Error("This plex download client has not been setup, run SetupAsync() first"));
             }
 
-            Log.Debug($"Start downloading from {DownloadTask.DownloadUrl}");
-            StartDownloadWorkers();
-            return Result.Ok(true);
+            Log.Debug($"Start downloading {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
+            DownloadStartAt = DateTime.UtcNow;
+            try
+            {
+                foreach (var downloadWorker in _downloadWorkers)
+                {
+                    var startResult = downloadWorker.Start();
+                    if (startResult.IsFailed)
+                    {
+                        ClearDownloadWorkers();
+                        return startResult.LogError();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ClearDownloadWorkers();
+                return Result.Fail(new ExceptionalError(e)
+                        .WithMessage($"Could not download {DownloadTask.FileName} from {DownloadTask.DownloadUrl}"))
+                    .LogError();
+            }
+
+            return Result.Ok();
         }
 
         /// <summary>
@@ -416,22 +418,35 @@ namespace PlexRipper.DownloadManager.Download
         }
 
         /// <summary>
-        /// Immediately stops all <see cref="DownloadWorker"/>s and destroys them.
+        /// Immediately stops all and destroys the <see cref="DownloadWorker"/>s, will also removes any temporary files them.
         /// This will also remove any downloaded data.
         /// </summary>
         /// <returns>Is successful.</returns>
         public Result<bool> Stop()
         {
             SetDownloadStatus(DownloadStatus.Stopping);
-            foreach (var downloadWorker in _downloadWorkers)
+
+            _downloadWorkers.AsParallel().ForAll(async downloadWorker =>
             {
-                var stopResult = downloadWorker.Stop();
+                var stopResult = await downloadWorker.Stop();
                 if (stopResult.IsFailed)
                 {
-                    return stopResult.WithError(new Error($"Failed to stop downloadWorkerTask with id: {downloadWorker.Id}"))
+                    stopResult.WithError(new Error($"Failed to stop downloadWorkerTask with id: {downloadWorker.Id} in PlexDownloadClient with id: {DownloadTask.Id}"))
                         .LogError();
                 }
-            }
+            });
+
+            // foreach (var downloadWorker in _downloadWorkers)
+            // {
+            //     var stopResult = await downloadWorker.Stop();
+            //     if (stopResult.IsFailed)
+            //     {
+            //         return stopResult.WithError(new Error($"Failed to stop downloadWorkerTask with id: {downloadWorker.Id}"))
+            //             .LogError();
+            //     }
+            // }
+
+            _fileSystem.DeleteDirectoryFromFilePath(DownloadTask.DownloadPath);
 
             ClearDownloadWorkers();
             SetDownloadStatus(DownloadStatus.Stopped);
@@ -442,7 +457,16 @@ namespace PlexRipper.DownloadManager.Download
         {
             if (DownloadStatus == DownloadStatus.Downloading)
             {
-                _downloadWorkers.ForEach(downloadWorker => downloadWorker.Pause());
+                _downloadWorkers.AsParallel().ForAll(async downloadWorker =>
+                {
+                    var pauseResult = await downloadWorker.Pause();
+                    if (pauseResult.IsFailed)
+                    {
+                        pauseResult.WithError(new Error($"Failed to pause downloadWorkerTask with id: {downloadWorker.Id} in PlexDownloadClient with id: {DownloadTask.Id}"))
+                            .LogError();
+                    }
+                });
+
                 ClearDownloadWorkers();
                 SetDownloadStatus(DownloadStatus.Paused);
                 return Result.Ok(true);

@@ -1,3 +1,4 @@
+@import 'variables';
 @import '~vuetify/src/styles/styles.sass';
 
 /*
@@ -19,4 +20,13 @@ pages/setup/index.vue
 		@extend .mb-12;
 		@extend .px-3;
 	}
+}
+
+/*
+pages/downloads/index.vue
+*/
+
+.download-page-tables {
+	// -8px is the margin/padding
+	height: calc(100vh - #{$app-bar-height} - #{$download-page-bar-height} - 4px);
 }

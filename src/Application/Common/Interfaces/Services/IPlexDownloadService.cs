@@ -13,7 +13,7 @@ namespace PlexRipper.Application.Common
 
         Task<Result<bool>> DeleteDownloadTaskAsync(int downloadTaskId);
 
-        Task<Result<bool>> StopDownloadTask(int downloadTaskId);
+        Result<bool> StopDownloadTask(int downloadTaskId);
 
         Task<Result<bool>> RestartDownloadTask(int downloadTaskId);
 

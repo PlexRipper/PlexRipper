@@ -108,7 +108,7 @@ namespace PlexRipper.Domain
         public string DownloadPath => Path.Combine(DownloadFolder.DirectoryPath, MediaPath);
 
         /// <summary>
-        /// Gets the destination directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
+        /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
         /// </summary>
         [NotMapped]
         public string DestinationPath => Path.Combine(DestinationFolder.DirectoryPath, MediaPath);
@@ -124,7 +124,7 @@ namespace PlexRipper.Domain
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:
-                        return Path.Combine(Title);
+                        return Title;
                     case PlexMediaType.Episode:
                         return Path.Combine(TitleTvShow.Replace(":", "-"), TitleTvShowSeason);
                     default:

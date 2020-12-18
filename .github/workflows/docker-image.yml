@@ -1,8 +1,8 @@
-name: Publish Docker image
+name: Publish Docker image on release
 'on':
-  release:
-    types:
-      - published
+  push:
+    branches: 
+      - master
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
@@ -16,4 +16,5 @@ jobs:
           username: '${{ secrets.DOCKER_USERNAME }}'
           password: '${{ secrets.DOCKER_PASSWORD }}'
           repository: plexripper/plexripper
-          tag_with_ref: true
+          tags: plexripper/plexripper:latest
+

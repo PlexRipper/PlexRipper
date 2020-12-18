@@ -23,7 +23,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("fileLocationUrl", Required = Required.Always)]
         public string FileLocationUrl { get; set; }
 
-        [JsonProperty("FileName", Required = Required.Always)]
+        [JsonProperty("fileName", Required = Required.Always)]
         public string FileName { get; set; }
 
         /// <summary>
@@ -38,7 +38,10 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("titleTvShowSeason", Required = Required.Always)]
         public string TitleTvShowSeason { get; set; }
 
-        [JsonProperty("type", Required = Required.Always)]
+        /// <summary>
+        /// Note: Naming third just 'type' will cause errors in the Typescript type generating.
+        /// </summary>
+        [JsonProperty("mediaType", Required = Required.Always)]
         public PlexMediaType MediaType { get; set; }
 
         /// <summary>
@@ -64,5 +67,14 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }
+
+        [JsonProperty("destinationPath", Required = Required.Always)]
+        public string DestinationPath { get; set; }
+
+        [JsonProperty("downloadPath", Required = Required.Always)]
+        public string DownloadPath { get; set; }
+
+        [JsonProperty("downloadUrl", Required = Required.Always)]
+        public string DownloadUrl { get; set; }
     }
 }

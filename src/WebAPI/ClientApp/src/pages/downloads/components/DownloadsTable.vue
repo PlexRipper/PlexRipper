@@ -32,7 +32,7 @@
 		</template>
 		<!-- Percentage -->
 		<template #item.percentage="{ item }">
-			<v-progress-linear :value="item.percentage" stream striped color="blue-grey" height="25">
+			<v-progress-linear :value="item.percentage" stream striped color="red" height="25">
 				<template #default="{ value }">
 					<strong>{{ value }}%</strong>
 				</template>
@@ -191,7 +191,6 @@ export default class DownloadsTable extends Vue {
 				actions.push('stop');
 				break;
 			case DownloadStatus.Completed:
-				actions.push('restart');
 				actions.push('delete');
 				break;
 			case DownloadStatus.Stopping:

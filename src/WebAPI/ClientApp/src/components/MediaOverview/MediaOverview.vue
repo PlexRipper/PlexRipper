@@ -272,7 +272,6 @@ export default class MediaOverview extends Vue {
 		});
 
 		LibraryService.getServerByLibraryID(this.libraryId).subscribe((server) => {
-			Log.warn('Server', server);
 			if (server) {
 				this.server = server;
 				if (this.library) {
@@ -282,7 +281,6 @@ export default class MediaOverview extends Vue {
 		});
 
 		LibraryService.getLibrary(this.libraryId).subscribe((library) => {
-			Log.warn('Library', library);
 			if (library && library.id === this.libraryId) {
 				this.library = library;
 				if (this.server) {

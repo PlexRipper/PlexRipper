@@ -3,8 +3,8 @@
 		<!-- Download Toolbar -->
 		<download-bar @clear="clearDownloadTasks" @delete="deleteDownloadTask" />
 		<!--	The Download Table	-->
-		<perfect-scrollbar>
-			<v-row v-if="plexServers.length > 0" class="px-2" style="height: 1000px">
+		<perfect-scrollbar class="download-page-tables">
+			<v-row v-if="plexServers.length > 0">
 				<v-col>
 					<v-expansion-panels v-model="openExpansions" multiple>
 						<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
@@ -20,6 +20,7 @@
 									@stop="stopDownloadTask"
 									@restart="restartDownloadTask"
 									@start="startDownloadTask"
+									@details="detailsDownloadTask"
 								/>
 							</v-expansion-panel-content>
 						</v-expansion-panel>
@@ -32,6 +33,7 @@
 				</v-col>
 			</v-row>
 		</perfect-scrollbar>
+		<download-details-dialog :download-task="downloadTaskDetail" :dialog="dialog" @close="closeDetailsDialog" />
 	</page>
 </template>
 
@@ -61,12 +63,14 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import DownloadsTable from './components/DownloadsTable.vue';
 import IDownloadRow from './types/IDownloadRow';
 import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
+import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsDialog.vue';
 
 @Component({
 	components: {
 		LoadingSpinner,
 		DownloadsTable,
 		DownloadBar,
+		DownloadDetailsDialog,
 	},
 })
 export default class Downloads extends Vue {
@@ -77,6 +81,9 @@ export default class Downloads extends Vue {
 	downloadStatusList: DownloadStatusChanged[] = [];
 	openExpansions: number[] = [];
 	selected: IDownloadRow[] = [];
+	downloadTaskDetail: DownloadTaskDTO | null = null;
+	private dialog: boolean = false;
+
 	/**
 	 * Merge the SignalR feeds into 1 update IDownloadRow
 	 */
@@ -107,6 +114,7 @@ export default class Downloads extends Vue {
 				downloadRow.percentage = 100;
 				downloadRow.timeRemaining = 0;
 				downloadRow.downloadSpeed = 0;
+				downloadRow.dataReceived = downloadRow.dataTotal;
 				this.cleanupProgress(download.id);
 			}
 			downloadRows.push(downloadRow);
@@ -170,6 +178,16 @@ export default class Downloads extends Vue {
 			.subscribe();
 	}
 
+	detailsDownloadTask(downloadTaskId: number): void {
+		this.downloadTaskDetail = this.downloads.find((x) => x.id === downloadTaskId) ?? null;
+		this.dialog = true;
+	}
+
+	closeDetailsDialog(): void {
+		this.downloadTaskDetail = null;
+		this.dialog = false;
+	}
+
 	cleanupProgress(downloadTaskId: number): void {
 		// Clean-up progress objects
 		const downloadProgressIndex = this.downloadProgressList.findIndex((x) => x.id === downloadTaskId);
@@ -190,7 +208,6 @@ export default class Downloads extends Vue {
 
 	created(): void {
 		DownloadService.getDownloadListInServers().subscribe((data) => {
-			Log.warn('getDownloadListInServers', data);
 			this.plexServers = data;
 			this.openExpansions = [...Array(this.plexServers?.length).keys()] ?? [];
 		});

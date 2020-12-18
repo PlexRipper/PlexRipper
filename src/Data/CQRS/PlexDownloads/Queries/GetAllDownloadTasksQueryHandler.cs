@@ -35,6 +35,8 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 .Include(x => x.DownloadWorkerTasks)
                 .Include(x => x.DestinationFolder)
                 .Include(x => x.DownloadFolder)
+                .Include(x => x.PlexServer)
+                .Include(x => x.PlexLibrary)
                 .ToListAsync(cancellationToken);
             return Result.Ok(downloadList);
         }

@@ -31,6 +31,7 @@ Page.vue
 AppBar.vue
 */
 .app-bar {
+	height: $app-bar-height;
 	&.theme--dark {
 		background: rgba(255, 0, 0, 0.2) !important;
 	}
@@ -152,7 +153,6 @@ MediaTable.vue
 		overflow: hidden;
 	}
 	.media-table-content {
-		// TODO Maybe calculate this in vue
 		// This takes the 100% browser window height, and then subtracts all bars that are above
 		// media-table-content to calculate the height of the actual viewport of the media that is viewed.
 		height: calc(100vh - 40px - 85px - 48px - 24px);

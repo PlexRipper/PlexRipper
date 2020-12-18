@@ -2,7 +2,7 @@
 	<!-- Download Toolbar -->
 	<v-row no-gutters>
 		<v-col>
-			<v-toolbar outlined>
+			<v-toolbar outlined :height="64">
 				<!--Prioritize buttons-->
 				<!--		Re-enable once ordering had been implemented		-->
 				<template v-if="false">

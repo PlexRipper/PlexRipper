@@ -1,3 +1,6 @@
+using System.Linq;
+using System.Reflection;
+using System.Text.Json.Serialization;
 using Autofac;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -13,9 +16,6 @@ using PlexRipper.Domain;
 using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
-using System.Linq;
-using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace PlexRipper.WebAPI
 {
@@ -51,19 +51,23 @@ namespace PlexRipper.WebAPI
                     CORSConfiguration,
                     builder =>
                     {
-                        builder
-                            .AllowAnyHeader()
+                        // TODO CORS disabled, otherwise its not working when deployed in a docker container
+                        // Solution?
+                        builder.AllowAnyHeader()
                             .AllowAnyMethod()
-                            .AllowCredentials()
-                            .WithOrigins(CurrentEnvironment.IsDevelopment() ? "http://localhost:3000" : "http://localhost:5000");
+                            .AllowAnyOrigin();
                     });
             });
 
             // Controllers and Json options
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
-            if (!CurrentEnvironment.IsDevelopment())
+            if (CurrentEnvironment.IsProduction())
             {
                 services.AddSpaStaticFiles(configuration => { configuration.RootPath = "wwwroot"; });
+            }
+            if (CurrentEnvironment.IsDevelopment())
+            {
+                services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp"; });
             }
 
             services.AddHttpContextAccessor();
@@ -116,6 +120,8 @@ namespace PlexRipper.WebAPI
             app.UseRouting();
 
             app.UseCors(CORSConfiguration);
+            // TODO This might be removed if the CORS is working without it
+            app.UseCorsMiddleware();
 
             app.UseAuthorization();
 
@@ -134,10 +140,7 @@ namespace PlexRipper.WebAPI
             if (CurrentEnvironment.IsProduction())
             {
                 app.UseSpaStaticFiles();
-                app.UseSpa(spa =>
-                {
-                    spa.Options.SourcePath = "ClientApp";
-                });
+                app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
             }
 
             if (CurrentEnvironment.IsDevelopment())

@@ -44,16 +44,18 @@ RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish
 FROM base AS final
 ENV ASPNETCORE_ENVIRONMENT Production
 ENV DOTNET_ENVIRONMENT Production
+ENV ASPNETCORE_URLS=http://+:7000
+ENV DOTNET_URLS=http://+:7000
 WORKDIR /app
-#ENV ASPNETCORE_URLS="http://+:${port}"
-#ENV DOTNET_URLS="http://+:${port}"
 
 COPY --from=publish /app/publish .
 COPY --from=client-build /tmp/build/ClientApp/dist /app/wwwroot
+
 LABEL company="PlexRipper"
 LABEL maintainer="plexripper@protonmail.com"
 LABEL version="0.1.1"
-EXPOSE $port
+
+EXPOSE 7000
 VOLUME /config /downloads /movies /series
 
 ENTRYPOINT ["dotnet", "PlexRipper.WebAPI.dll"]

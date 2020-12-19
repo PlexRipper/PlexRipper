@@ -7,6 +7,12 @@ const config: NuxtConfig = {
 	ssr: false,
 	target: 'static',
 	srcDir: 'src/',
+	// @ts-ignore
+	/*	privateRuntimeConfig: {
+		axios: {
+			baseURL: process.env.BASE_URL,
+		},
+	}, */
 	publicRuntimeConfig: {
 		nodeEnv: process.env.NODE_ENV || 'development',
 		// The API Port

@@ -10,10 +10,14 @@ export default (ctx: Context): void => {
 		Log.debug(`Making request to ${config.url}`, config);
 	});
 
-	GlobalService.getConfigReady().subscribe((config) => {
-		ctx.$axios.setBaseURL(config.baseApiUrl);
-		Axios.defaults.baseURL = config.baseApiUrl;
-		Log.debug('Finished setting up Axios');
+	GlobalService.getConfigReady().subscribe(() => {
+		if (process.client || process.static) {
+			const host = window.location.hostname;
+			const baseURL = 'http://' + host + ':7000';
+			ctx.$axios.setBaseURL(baseURL);
+			Axios.defaults.baseURL = baseURL;
+			Log.debug('Finished setting up Axios');
+		}
 		GlobalService.setAxiosReady();
 	});
 

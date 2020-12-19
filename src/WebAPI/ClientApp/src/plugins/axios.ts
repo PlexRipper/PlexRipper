@@ -11,9 +11,11 @@ export default (ctx: Context): void => {
 	});
 
 	GlobalService.getConfigReady().subscribe((config) => {
+		Log.info('Axios BaseURL: ' + config.baseApiUrl);
 		ctx.$axios.setBaseURL(config.baseApiUrl);
 		Axios.defaults.baseURL = config.baseApiUrl;
 		Log.debug('Finished setting up Axios');
+
 		GlobalService.setAxiosReady();
 	});
 

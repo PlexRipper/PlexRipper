@@ -14,15 +14,18 @@ export class GlobalService extends BaseService {
 	}
 
 	public setConfigReady(config: RuntimeConfig): void {
-		const appConfig: IAppConfig = {
-			nodeEnv: config.nodeEnv,
-			port: +config.port,
-			baseURL: 'http://localhost:' + config.port,
-			baseApiUrl: 'http://localhost:' + config.port + '/api',
-		};
+		if (process.client || process.static) {
+			const appConfig: IAppConfig = {
+				nodeEnv: config.nodeEnv,
+				baseURL: window.location.origin,
+				baseApiUrl: window.location.origin + '/api',
+			};
 
-		Log.info('Runtime Config is ready');
-		this._configReady.next(appConfig);
+			Log.info('Runtime Config is ready');
+			this._configReady.next(appConfig);
+		} else {
+			Log.error('setConfigReady => Process was neither client or static, was:', process);
+		}
 	}
 
 	public getAxiosReady(): Observable<void> {

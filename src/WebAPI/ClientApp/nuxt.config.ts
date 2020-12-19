@@ -9,8 +9,6 @@ const config: NuxtConfig = {
 	srcDir: 'src/',
 	publicRuntimeConfig: {
 		nodeEnv: process.env.NODE_ENV || 'development',
-		// The API Port
-		port: process.env.PORT || 5000,
 	},
 	/*
 	 ** Headers of the page

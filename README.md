@@ -9,7 +9,7 @@ Tired of searching for media on different torrent websites or paying for Usenet 
 - Runs in a Docker container and can be deployed on any type of platform that can host a Docker container!
 - Add multiple Plex accounts to easily download from the accessible Plex servers!
 - A beautiful GUI which has a Light and Dark-mode theme!
-- Multi-threaded downloading!
+- Multi-threaded downloading and moves your finished downloads straight to your own Plex media collection!
 - Will still work even if Plex.tv is down by connecting directly to the media servers!
 - Has a highly complex neural network which will automatically fix misconfigured servers to allow connecting!
   

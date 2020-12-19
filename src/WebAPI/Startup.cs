@@ -1,3 +1,6 @@
+using System.Linq;
+using System.Reflection;
+using System.Text.Json.Serialization;
 using Autofac;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -13,9 +16,6 @@ using PlexRipper.Domain;
 using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
-using System.Linq;
-using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace PlexRipper.WebAPI
 {
@@ -51,11 +51,12 @@ namespace PlexRipper.WebAPI
                     CORSConfiguration,
                     builder =>
                     {
-                        builder
-                            .AllowAnyHeader()
+                        // TODO CORS disabled, otherwise its not working when deployed in a docker container
+                        // Solution?
+                        builder.AllowAnyHeader()
                             .AllowAnyMethod()
-                            .AllowCredentials()
-                            .WithOrigins(CurrentEnvironment.IsDevelopment() ? "http://localhost:3000" : "http://localhost:7000");
+                            .SetIsOriginAllowed(_ => true)
+                            .AllowCredentials();
                     });
             });
 
@@ -134,10 +135,7 @@ namespace PlexRipper.WebAPI
             if (CurrentEnvironment.IsProduction())
             {
                 app.UseSpaStaticFiles();
-                app.UseSpa(spa =>
-                {
-                    spa.Options.SourcePath = "ClientApp";
-                });
+                app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
             }
 
             if (CurrentEnvironment.IsDevelopment())

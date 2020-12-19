@@ -1,19 +1,21 @@
 import Log from 'consola';
 import { AxiosResponse } from 'axios';
-import { NuxtAppOptions } from '@nuxt/types';
-import { baseApiUrl } from '@api/baseApi';
+import { Context } from '@nuxt/types';
 import Axios from 'axios-observable';
 import GlobalService from '@state/globalService';
 import Result from 'fluent-type-results';
 
-export default ({ $axios }: NuxtAppOptions): void => {
-	$axios.onRequest((config) => {
-		Log.debug(`Making request to ${config.url}`);
+export default (ctx: Context): void => {
+	ctx.$axios.onRequest((config) => {
+		Log.debug(`Making request to ${config.url}`, config);
 	});
 
-	$axios.setBaseURL(baseApiUrl);
-
-	Axios.defaults.baseURL = baseApiUrl;
+	GlobalService.getConfigReady().subscribe((config) => {
+		ctx.$axios.setBaseURL(config.baseApiUrl);
+		Axios.defaults.baseURL = config.baseApiUrl;
+		Log.debug('Finished setting up Axios');
+		GlobalService.setAxiosReady();
+	});
 
 	Axios.defaults.headers.get['Content-Type'] = 'application/json';
 	Axios.defaults.headers.get['Access-Control-Allow-Origin'] = '*';
@@ -40,7 +42,4 @@ export default ({ $axios }: NuxtAppOptions): void => {
 			return error.response;
 		},
 	);
-
-	Log.debug('Finished setting up Axios');
-	GlobalService.setAxiosReady();
 };

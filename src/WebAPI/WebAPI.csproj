@@ -6,11 +6,12 @@
         <AssemblyName>PlexRipper.WebAPI</AssemblyName>
         <UserSecretsId>0732cfe0-5874-40d5-99f7-8794dfabd959</UserSecretsId>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-        <DockerfileContext>..\..</DockerfileContext>
         <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
         <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
         <IsPackable>false</IsPackable>
         <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
+        <DockerfileFile>..\..\Dockerfile</DockerfileFile>
+        <DockerfileContext>.</DockerfileContext>
         <SpaRoot>ClientApp\</SpaRoot>
         <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
     </PropertyGroup>
@@ -48,5 +49,9 @@
 
     <ItemGroup>
         <None Remove="WebAPI.csproj.DotSettings" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Properties\" />
     </ItemGroup>
 </Project>

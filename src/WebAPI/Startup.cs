@@ -55,7 +55,7 @@ namespace PlexRipper.WebAPI
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials()
-                            .WithOrigins(CurrentEnvironment.IsDevelopment() ? "http://localhost:3000" : "http://localhost:5000");
+                            .WithOrigins(CurrentEnvironment.IsDevelopment() ? "http://localhost:3000" : "http://localhost:7000");
                     });
             });
 

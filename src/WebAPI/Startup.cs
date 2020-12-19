@@ -1,6 +1,3 @@
-using System.Linq;
-using System.Reflection;
-using System.Text.Json.Serialization;
 using Autofac;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -16,6 +13,9 @@ using PlexRipper.Domain;
 using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
+using System.Linq;
+using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.WebAPI
 {
@@ -131,18 +131,23 @@ namespace PlexRipper.WebAPI
                 endpoints.MapHub<NotificationHub>("/notifications");
             });
 
-            if (!CurrentEnvironment.IsDevelopment())
+            if (CurrentEnvironment.IsProduction())
             {
                 app.UseSpaStaticFiles();
                 app.UseSpa(spa =>
                 {
                     spa.Options.SourcePath = "ClientApp";
+                });
+            }
 
-                    if (CurrentEnvironment.IsDevelopment())
-                    {
-                        spa.Options.DevServerPort = 3000;
-                        spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
-                    }
+            if (CurrentEnvironment.IsDevelopment())
+            {
+                app.UseSpaStaticFiles();
+                app.UseSpa(spa =>
+                {
+                    spa.Options.SourcePath = "ClientApp";
+                    spa.Options.DevServerPort = 3000;
+                    spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
                 });
             }
         }

@@ -1,5 +1,3 @@
-﻿using System;
-using System.IO;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +5,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Domain;
 using Serilog;
+using System;
+using System.IO;
 using Log = Serilog.Log;
 
 namespace PlexRipper.WebAPI

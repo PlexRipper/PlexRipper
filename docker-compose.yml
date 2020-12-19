@@ -12,4 +12,5 @@ services:
         # restart: always
         ports:
             # Web UI & Web API
-            - '5000:5000'
+            - '7000:7000'
+        restart: unless-stopped

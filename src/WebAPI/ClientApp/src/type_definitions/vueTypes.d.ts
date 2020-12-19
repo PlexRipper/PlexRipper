@@ -10,3 +10,12 @@ declare module 'vue/types/vue' {
 		$moment(path: string): string;
 	}
 }
+
+export interface RuntimeConfig {
+	nodeEnv: string;
+	port: string | number;
+}
+
+declare module '@nuxt/types/config/runtime' {
+	interface NuxtRuntimeConfig extends RuntimeConfig {}
+}

@@ -3,15 +3,27 @@
   "profiles": {
     "WebAPI": {
       "commandName": "Project",
-      "launchUrl": "weatherforecast",
+      "launchUrl": "localhost",
+      "dotnetRunMessages": "true",
+      "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
+        "DOTNET_URLS": "http://+:5000",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://+:5000",
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+      }
     },
     "Docker": {
       "commandName": "Docker",
-      "launchUrl": "{Scheme}://{ServiceHost}:{3000}/",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:7000/",
+      "environmentVariables": {
+        "DOTNET_URLS": "http://+:7000",
+        "DOTNET_ENVIRONMENT": "Production",
+        "ASPNETCORE_URLS": "http://+:7000",
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "httpPort": 7000,
       "publishAllPorts": true,
       "useSSL": false
     }

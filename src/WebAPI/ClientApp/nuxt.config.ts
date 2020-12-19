@@ -7,6 +7,11 @@ const config: NuxtConfig = {
 	ssr: false,
 	target: 'static',
 	srcDir: 'src/',
+	publicRuntimeConfig: {
+		nodeEnv: process.env.NODE_ENV || 'development',
+		// The API Port
+		port: process.env.PORT || 5000,
+	},
 	/*
 	 ** Headers of the page
 	 */
@@ -32,7 +37,7 @@ const config: NuxtConfig = {
 	 ** Plugins to load before mounting the App
 	 */
 	plugins: [
-		{ src: '@plugins/consola.ts', mode: 'client' },
+		{ src: '@plugins/setup.ts', mode: 'client' },
 		{ src: '@plugins/vuetify.ts', mode: 'client' },
 		{ src: '@plugins/filters.ts', mode: 'client' },
 		{ src: '@plugins/axios.ts', mode: 'client' },

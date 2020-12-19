@@ -55,16 +55,19 @@ namespace PlexRipper.WebAPI
                         // Solution?
                         builder.AllowAnyHeader()
                             .AllowAnyMethod()
-                            .SetIsOriginAllowed(_ => true)
-                            .AllowCredentials();
+                            .AllowAnyOrigin();
                     });
             });
 
             // Controllers and Json options
             services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
-            if (!CurrentEnvironment.IsDevelopment())
+            if (CurrentEnvironment.IsProduction())
             {
                 services.AddSpaStaticFiles(configuration => { configuration.RootPath = "wwwroot"; });
+            }
+            if (CurrentEnvironment.IsDevelopment())
+            {
+                services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp"; });
             }
 
             services.AddHttpContextAccessor();

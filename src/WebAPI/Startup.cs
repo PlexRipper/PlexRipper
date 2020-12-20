@@ -120,8 +120,6 @@ namespace PlexRipper.WebAPI
             app.UseRouting();
 
             app.UseCors(CORSConfiguration);
-            // TODO This might be removed if the CORS is working without it
-            app.UseCorsMiddleware();
 
             app.UseAuthorization();
 

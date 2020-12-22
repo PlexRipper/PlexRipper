@@ -84,6 +84,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexMovieDatas, opt => opt.MapFrom(x => x.Media))
                 .ForMember(dest => dest.GetParts, opt => opt.Ignore())
+                .ForMember(dest => dest.MediaSize, opt => opt.MapFrom(x => x.Media.Sum(y => y.Part.Sum(z => z.Size))))
                 .ForMember(dest => dest.OriginallyAvailableAt, opt => opt.ConvertUsing(new StringToDateTimeUTC()));
 
             // Medium -> PlexMovieData
@@ -123,6 +124,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.TvShowSeasonId, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
+                .ForMember(dest => dest.MediaSize, opt => opt.MapFrom(x => x.Media.Sum(y => y.Part.Sum(z => z.Size))))
                 .ForMember(dest => dest.EpisodeData, opt => opt.MapFrom(x => x.Media));
 
             // PlexMediaData -> PlexTvShowEpisodeData

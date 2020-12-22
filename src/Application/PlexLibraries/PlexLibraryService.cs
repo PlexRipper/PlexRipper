@@ -102,11 +102,13 @@ namespace PlexRipper.Application.PlexLibraries
 
                         // Set the correct plexLibraryId
                         episodes.Value.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
+                        season.MediaSize = episodes.Value.Sum(x => x.MediaSize);
 
                         season.Episodes = episodes.Value;
                     }).ToArray();
 
                     await Task.WhenAll(tasks);
+                    plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
                 }
 
                 SendProgress();

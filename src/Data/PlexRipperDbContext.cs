@@ -139,7 +139,6 @@ namespace PlexRipper.Data
                 Log.Error("Database could not be created.");
                 return Result.Fail($"Could not create database {DatabaseName} in {_fileSystem.ConfigDirectory}").LogError();
             }
-
             Log.Information($"Database {DatabaseName} exists and is successfully connected!");
             return Result.Ok();
         }

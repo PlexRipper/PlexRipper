@@ -1,7 +1,7 @@
 <template>
-	<v-container style="max-width: 900px">
+	<v-container class="pa-0" style="max-width: 900px">
 		<!-- Logo	-->
-		<v-row justify="center">
+		<v-row justify="center" no-gutters>
 			<v-col cols="auto">
 				<logo :size="128" />
 			</v-col>

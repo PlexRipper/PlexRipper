@@ -1,5 +1,5 @@
 <template>
-	<v-img :height="size" :width="size" :src="require('@img/logo/full-logo-256.png')"></v-img>
+	<v-img :height="size" :width="size" :src="require('@img/logo/full-logo-256.png')" />
 </template>
 
 <script lang="ts">

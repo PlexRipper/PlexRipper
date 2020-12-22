@@ -1,13 +1,25 @@
 <template>
-	<v-app :class="[hasBackgroundOverlay ? 'background' : 'no-background']">
+	<!--	Instead of multiple layouts we merge into one default layout to prevent full
+				page change (flashing white background) during transitions.	-->
+	<v-app :class="[isSetupPage ? 'no-background' : 'background']">
 		<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
-		<navigation-drawer v-if="showNavigationDrawer" />
-		<app-bar v-if="showAppbar" />
-
-		<v-main class="no-background">
-			<nuxt />
-		</v-main>
-		<footer />
+		<!--	Use for setup-layout	-->
+		<template v-if="isSetupPage">
+			<perfect-scrollbar style="height: 100vh">
+				<v-main class="no-background">
+					<nuxt />
+				</v-main>
+			</perfect-scrollbar>
+		</template>
+		<!--	Use for everything else	-->
+		<template v-else>
+			<navigation-drawer />
+			<app-bar />
+			<v-main class="no-background">
+				<nuxt />
+			</v-main>
+			<footer />
+		</template>
 		<background />
 	</v-app>
 </template>
@@ -34,19 +46,7 @@ export default class Default extends Vue {
 	helpId: string = '';
 
 	get isSetupPage(): boolean {
-		return this.$route.fullPath !== '/setup';
-	}
-
-	get hasBackgroundOverlay(): boolean {
-		return this.isSetupPage;
-	}
-
-	get showNavigationDrawer(): boolean {
-		return this.isSetupPage;
-	}
-
-	get showAppbar(): boolean {
-		return this.isSetupPage;
+		return this.$route.fullPath === '/setup';
 	}
 
 	created(): void {

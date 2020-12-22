@@ -2,9 +2,15 @@ import { RuntimeConfig } from '~/type_definitions/vueTypes';
 
 export default class AppConfig {
 	private readonly _nodeEnv: string;
+	private readonly _version: string;
 
 	constructor(config: RuntimeConfig) {
 		this._nodeEnv = config.nodeEnv;
+		this._version = config.version;
+	}
+
+	get version(): string {
+		return this._version;
 	}
 
 	get isDevelopment(): boolean {

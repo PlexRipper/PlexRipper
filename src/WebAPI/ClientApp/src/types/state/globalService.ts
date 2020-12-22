@@ -15,7 +15,7 @@ export class GlobalService extends BaseService {
 
 	public setConfigReady(config: RuntimeConfig): void {
 		if (process.client || process.static) {
-			Log.info('Runtime Config is ready');
+			Log.info('Runtime Config is ready - ' + config.version);
 			this._configReady.next(new AppConfig(config));
 		} else {
 			Log.error('setConfigReady => Process was neither client or static, was:', process);

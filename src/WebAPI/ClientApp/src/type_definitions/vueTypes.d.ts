@@ -13,6 +13,7 @@ declare module 'vue/types/vue' {
 
 export interface RuntimeConfig {
 	nodeEnv: string;
+	version: string;
 }
 
 declare module '@nuxt/types/config/runtime' {

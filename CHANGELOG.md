@@ -1,6 +1,7 @@
 ## [0.2.0] - 2020-12-22
 ### Added
  - Added CHANGELOG.md file
+ - Added PlexRipper version to the front-end in the home button.
  - Added the FileSize.vue component and moved the PrettyBytes filter there.
  - The total media size of a Plex library is now shown in the media bar on the library page.
 

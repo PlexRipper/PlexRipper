@@ -56,6 +56,11 @@ namespace PlexRipper.Domain
 
         public int ChildCount { get; set; }
 
+        /// <summary>
+        /// The total filesize of the nested media.
+        /// </summary>
+        public long MediaSize { get; set; }
+
         public DateTime AddedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }

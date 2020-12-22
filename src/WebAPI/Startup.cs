@@ -5,6 +5,7 @@ using Autofac;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,18 +54,27 @@ namespace PlexRipper.WebAPI
                     {
                         // TODO CORS disabled, otherwise its not working when deployed in a docker container
                         // Solution?
-                        builder.AllowAnyHeader()
+                        builder
+                            .AllowAnyHeader()
                             .AllowAnyMethod()
-                            .AllowAnyOrigin();
+                            // The combo all origin is allowed with allow credentials is needed to make SignalR work from the client.
+                            .SetIsOriginAllowed(x => true)
+                            .AllowCredentials();
                     });
             });
 
             // Controllers and Json options
-            services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+            services
+                .AddControllers()
+                .AddJsonOptions(
+                    options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+
+
             if (CurrentEnvironment.IsProduction())
             {
                 services.AddSpaStaticFiles(configuration => { configuration.RootPath = "wwwroot"; });
             }
+
             if (CurrentEnvironment.IsDevelopment())
             {
                 services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp"; });
@@ -120,8 +130,6 @@ namespace PlexRipper.WebAPI
             app.UseRouting();
 
             app.UseCors(CORSConfiguration);
-            // TODO This might be removed if the CORS is working without it
-            app.UseCorsMiddleware();
 
             app.UseAuthorization();
 
@@ -143,16 +151,16 @@ namespace PlexRipper.WebAPI
                 app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
             }
 
-            if (CurrentEnvironment.IsDevelopment())
-            {
-                app.UseSpaStaticFiles();
-                app.UseSpa(spa =>
-                {
-                    spa.Options.SourcePath = "ClientApp";
-                    spa.Options.DevServerPort = 3000;
-                    spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
-                });
-            }
+            // if (CurrentEnvironment.IsDevelopment())
+            // {
+            //     app.UseSpaStaticFiles();
+            //     app.UseSpa(spa =>
+            //     {
+            //         spa.Options.SourcePath = "ClientApp";
+            //         spa.Options.DevServerPort = 3000;
+            //         spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
+            //     });
+            // }
         }
 
         public void ConfigureContainer(ContainerBuilder builder)

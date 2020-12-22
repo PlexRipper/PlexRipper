@@ -34,6 +34,9 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("uuid", Required = Required.Always)]
         public Guid Uuid { get; set; }
 
+        [JsonProperty("mediaSize", Required = Required.Always)]
+        public long MediaSize { get; set; }
+
         [JsonProperty("libraryLocationId", Required = Required.Always)]
         public int LibraryLocationId { get; set; }
 

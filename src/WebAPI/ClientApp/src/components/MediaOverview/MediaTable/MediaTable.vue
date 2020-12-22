@@ -48,7 +48,7 @@
 									<v-col v-for="(header, index) in headers.slice(1, headers.length)" :key="index" cols="auto">
 										<v-sheet :width="header.width" :max-width="header.width" class="no-background">
 											<date-time v-if="header.type === 'date'" :text="item[header.value]" :time="false" short-date />
-											<span v-else-if="header.type === 'data'">{{ item[header.value] | prettyBytes }}</span>
+											<file-size v-else-if="header.type === 'data'" :size="item[header.value]" />
 											<span v-else>{{ item[header.value] }}</span>
 										</v-sheet>
 									</v-col>

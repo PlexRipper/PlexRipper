@@ -107,6 +107,7 @@ export interface PlexLibraryDTO {
   scannedAt: string;
   contentChangedAt: string;
   uuid: string;
+  mediaSize: number;
   libraryLocationId: number;
   libraryLocationPath: string;
   plexServerId: number;

@@ -12,18 +12,20 @@
 		<!-- Data received -->
 		<template #item.dataReceived="{ item }">
 			<strong>
-				{{ item.dataReceived | prettyBytes }}
+				<file-size :size="item.dataReceived" />
 			</strong>
 		</template>
 		<!-- Data total -->
 		<template #item.dataTotal="{ item }">
 			<strong>
-				{{ item.dataTotal | prettyBytes }}
+				<file-size :size="item.dataTotal" />
 			</strong>
 		</template>
 		<!-- Download speed -->
 		<template #item.downloadSpeed="{ item }">
-			<strong v-if="item.downloadSpeed > 0"> {{ item.downloadSpeed | prettyBytes }}/s </strong>
+			<strong v-if="item.downloadSpeed > 0">
+				<file-size :size="item.downloadSpeed" speed />
+			</strong>
 			<strong v-else> - </strong>
 		</template>
 		<!-- Download Time Remaining -->

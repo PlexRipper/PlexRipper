@@ -31,14 +31,8 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
             try
             {
                 var plexLibraryDb = await _dbContext.PlexLibraries.AsTracking().FirstOrDefaultAsync(x => x.Id == command.PlexLibrary.Id);
-                plexLibraryDb.Key = command.PlexLibrary.Key;
-                plexLibraryDb.Title = command.PlexLibrary.Title;
-                plexLibraryDb.UpdatedAt = command.PlexLibrary.UpdatedAt;
-                plexLibraryDb.CreatedAt = command.PlexLibrary.CreatedAt;
-                plexLibraryDb.ScannedAt = command.PlexLibrary.ScannedAt;
-                plexLibraryDb.ContentChangedAt = command.PlexLibrary.ContentChangedAt;
-                plexLibraryDb.LibraryLocationId = command.PlexLibrary.LibraryLocationId;
-                plexLibraryDb.LibraryLocationPath = command.PlexLibrary.LibraryLocationPath;
+
+                _dbContext.Entry(plexLibraryDb).CurrentValues.SetValues(command.PlexLibrary);
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 return Result.Ok(true);

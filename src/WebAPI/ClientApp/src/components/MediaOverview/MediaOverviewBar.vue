@@ -8,8 +8,7 @@
 					</v-list-item-avatar>
 					<v-list-item-content>
 						<v-list-item-title>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</v-list-item-title>
-
-						<v-list-item-subtitle>{{ mediaCountFormatted }}</v-list-item-subtitle>
+						<v-list-item-subtitle>{{ mediaCountFormatted }} - <file-size :size="library.mediaSize" /></v-list-item-subtitle>
 					</v-list-item-content>
 				</v-list-item>
 			</v-list>

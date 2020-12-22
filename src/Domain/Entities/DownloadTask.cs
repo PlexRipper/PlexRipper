@@ -6,6 +6,9 @@ using FluentResults;
 
 namespace PlexRipper.Domain
 {
+    /// <summary>
+    /// Creates a media DownloadTask to be executed, needed values should be copied over since the mediaIds can change randomly.
+    /// </summary>
     public class DownloadTask : BaseEntity
     {
         /// <summary>
@@ -29,6 +32,11 @@ namespace PlexRipper.Domain
         /// If the type is an episode of a tv show then this will be the title of that tv show season.
         /// </summary>
         public string TitleTvShowSeason { get; set; }
+
+        /// <summary>
+        /// The release year of the media.
+        /// </summary>
+        public int ReleaseYear { get; set; }
 
         [Column("Type")]
         public string _Type { get; set; }
@@ -114,7 +122,7 @@ namespace PlexRipper.Domain
         public string DestinationPath => Path.Combine(DestinationFolder.DirectoryPath, MediaPath);
 
         /// <summary>
-        /// Gets the sub-path based on the <see cref="PlexMediaType"/>, e.g: [TvShow]/[Season]/ or [Movie]/.
+        /// Gets the sub-path based on the <see cref="PlexMediaType"/>, e.g: [TvShow]/[Season]/ or [Movie] [ReleaseYear]/.
         /// </summary>
         [NotMapped]
         public string MediaPath
@@ -124,7 +132,7 @@ namespace PlexRipper.Domain
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:
-                        return Title;
+                        return $"{Title} " + (ReleaseYear > 0 ? $"({ReleaseYear})" : string.Empty);
                     case PlexMediaType.Episode:
                         return Path.Combine(TitleTvShow.Replace(":", "-"), TitleTvShowSeason);
                     default:

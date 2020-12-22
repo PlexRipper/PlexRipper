@@ -53,9 +53,8 @@ COPY --from=client-build /tmp/build/ClientApp/dist /app/wwwroot
 
 LABEL company="PlexRipper"
 LABEL maintainer="plexripper@protonmail.com"
-LABEL version="0.1.1"
 
 EXPOSE 7000
-VOLUME /config /downloads /movies /series
+VOLUME /config /downloads /movies /tvshows
 
 ENTRYPOINT ["dotnet", "PlexRipper.WebAPI.dll"]

@@ -1,7 +1,7 @@
 <template>
 	<v-app-bar class="app-bar" dense app clipped-left>
 		<v-toolbar-title>
-			<v-btn to="/" outlined nuxt><logo :size="24" class="mr-3" /> PlexRipper </v-btn>
+			<v-btn to="/" outlined nuxt><logo :size="24" class="mr-3" /> PlexRipper - v{{ version }}</v-btn>
 		</v-toolbar-title>
 
 		<v-spacer></v-spacer>
@@ -59,6 +59,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
+import GlobalService from '@state/globalService';
 import AccountService from '@service/accountService';
 import NotificationButton from '@components/AppBar/NotificationButton.vue';
 import DarkModeToggle from '@components/General/DarkModeToggle.vue';
@@ -79,6 +80,7 @@ import { settingsStore } from '~/store';
 export default class AppBar extends Vue {
 	private accounts: PlexAccountDTO[] = [];
 	private loading: boolean[] = [false];
+	private version: string = '?';
 
 	private accountRefreshProgress: PlexAccountRefreshProgress[] = [];
 	get activeAccountId(): number {
@@ -112,6 +114,10 @@ export default class AppBar extends Vue {
 	}
 
 	created(): void {
+		GlobalService.getConfigReady().subscribe((config) => {
+			this.version = config.version;
+		});
+
 		AccountService.getAccounts().subscribe((data) => {
 			this.accounts = [
 				{

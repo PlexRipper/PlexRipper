@@ -38,20 +38,11 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
 
             // Directory -> PlexLibrary
-            CreateMap<Directory, PlexLibrary>(MemberList.Destination)
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
-                .ForMember(dest => dest.Movies, opt => opt.Ignore())
-                .ForMember(dest => dest.TvShows, opt => opt.Ignore())
-                .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
-                .ForMember(dest => dest.CheckedAt, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexAccountLibraries, opt => opt.Ignore())
+            CreateMap<Directory, PlexLibrary>(MemberList.None)
                 .ForMember(dest => dest.Type,
                     opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter(), x => x.Type))
                 .ForMember(dest => dest.LibraryLocationId,
                     opt => opt.MapFrom(src => src.Location.First().Id))
-
                 // Location[0].Path -> LibraryLocationPath
                 .ForMember(dest => dest.LibraryLocationPath,
                     opt => opt.MapFrom(src => src.Location.First().Path));
@@ -84,6 +75,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexMovieDatas, opt => opt.MapFrom(x => x.Media))
                 .ForMember(dest => dest.GetParts, opt => opt.Ignore())
+                .ForMember(dest => dest.MediaSize, opt => opt.MapFrom(x => x.Media.Sum(y => y.Part.Sum(z => z.Size))))
                 .ForMember(dest => dest.OriginallyAvailableAt, opt => opt.ConvertUsing(new StringToDateTimeUTC()));
 
             // Medium -> PlexMovieData
@@ -123,6 +115,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.TvShowSeasonId, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
+                .ForMember(dest => dest.MediaSize, opt => opt.MapFrom(x => x.Media.Sum(y => y.Part.Sum(z => z.Size))))
                 .ForMember(dest => dest.EpisodeData, opt => opt.MapFrom(x => x.Media));
 
             // PlexMediaData -> PlexTvShowEpisodeData

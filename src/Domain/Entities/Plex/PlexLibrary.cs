@@ -46,6 +46,12 @@ namespace PlexRipper.Domain
         public Guid Uuid { get; set; }
 
         /// <summary>
+        /// The total filesize of the nested media.
+        /// </summary>
+        [Column(Order = 10)]
+        public long MediaSize { get; set; }
+
+        /// <summary>
         /// This is the relative path Id of the Library location.
         /// </summary>
         [Column(Order = 10)]

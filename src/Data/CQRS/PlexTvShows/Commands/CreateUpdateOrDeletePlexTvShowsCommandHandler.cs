@@ -137,7 +137,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
                 // Update the TvShowId of every plexTvShow
                 plexTvShows.ForEach(x => x.Seasons?.ForEach(y => y.TvShowId = x.Id));
-                var plexTvShowSeasons = plexTvShows.SelectMany(x => x.Seasons.Select(y => y)).ToList();
+                var plexTvShowSeasons = plexTvShows.SelectMany(x => x.Seasons?.Select(y => y)).ToList();
                 if (plexTvShowSeasons.Count == 0)
                 {
                     return;
@@ -147,7 +147,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
                 // Update the TvShowSeasonId of every plexTvShowSeason
                 plexTvShowSeasons.ForEach(x => x.Episodes?.ForEach(y => y.TvShowSeasonId = x.Id));
-                var plexTvShowEpisodes = plexTvShowSeasons?.SelectMany(x => x.Episodes.Select(y => y))?.ToList();
+                var plexTvShowEpisodes = plexTvShowSeasons?.SelectMany(x => x.Episodes?.Select(y => y))?.ToList();
                 if (plexTvShowEpisodes.Count == 0)
                 {
                     return;

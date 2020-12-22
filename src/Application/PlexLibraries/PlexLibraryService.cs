@@ -79,48 +79,51 @@ namespace PlexRipper.Application.PlexLibraries
             int finishedCount = 0;
             int errorCount = 0;
 
-            plexLibrary.TvShows.AsParallel().WithDegreeOfParallelism(10).ForAll(async plexTvShow =>
-            {
-                plexTvShow.Seasons = await _plexServiceApi.GetSeasonsAsync(authToken, serverUrl, plexTvShow);
-
-                // Retrieve the episodes for every season
-                if (plexTvShow.Seasons.Any())
+            // We wrap it in a task to ensure we can await the result before continuing.
+            await Task.WhenAll(
+                plexLibrary.TvShows.AsParallel().WithDegreeOfParallelism(10).Select(async plexTvShow =>
                 {
-                    // We use Task.WhenAll here because we need to await the season retrieval before continuing.
-                    var tasks = plexTvShow.Seasons.Select(async season =>
+                    plexTvShow.Seasons = await _plexServiceApi.GetSeasonsAsync(authToken, serverUrl, plexTvShow);
+
+                    // Retrieve the episodes for every season
+                    if (plexTvShow.Seasons.Any())
                     {
-                        season.PlexLibraryId = plexLibrary.Id;
-                        season.PlexLibrary = plexLibrary;
-                        season.TvShow = plexTvShow;
-
-                        var episodes = await _plexServiceApi.GetEpisodesAsync(authToken, serverUrl, season);
-                        if (episodes.IsFailed)
+                        // We use Task.WhenAll here because we need to await the season retrieval before continuing.
+                        var tasks = plexTvShow.Seasons.Select(async season =>
                         {
-                            Interlocked.Increment(ref errorCount);
-                            return;
-                        }
+                            season.PlexLibraryId = plexLibrary.Id;
+                            season.PlexLibrary = plexLibrary;
+                            season.TvShow = plexTvShow;
 
-                        // Set the correct plexLibraryId
-                        episodes.Value.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
+                            var episodes = await _plexServiceApi.GetEpisodesAsync(authToken, serverUrl, season);
+                            if (episodes.IsFailed)
+                            {
+                                Interlocked.Increment(ref errorCount);
+                                return;
+                            }
 
-                        season.Episodes = episodes.Value;
-                    }).ToArray();
+                            // Set the correct plexLibraryId
+                            episodes.Value.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
+                            season.MediaSize = episodes.Value.Sum(x => x.MediaSize);
 
-                    await Task.WhenAll(tasks);
-                }
+                            season.Episodes = episodes.Value;
+                        }).ToArray();
 
-                SendProgress();
-            });
+                        await Task.WhenAll(tasks);
+                        plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
+                    }
 
-            void SendProgress()
-            {
-                Interlocked.Increment(ref finishedCount);
-                Log.Debug($"{Interlocked.CompareExchange(ref finishedCount, 0, 0)}");
-                Task.Run(() => _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, Interlocked.CompareExchange(ref finishedCount, 0, 0),
-                    plexLibrary.TvShows.Count));
-            }
+                    // Send progress to front-end
+                    Interlocked.Increment(ref finishedCount);
+                    await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, Interlocked.CompareExchange(ref finishedCount, 0, 0),
+                        plexLibrary.TvShows.Count);
+                }).ToList()
+            );
 
             Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds} with {errorCount} errors.");
+
+            // Calculate total media size of the library
+            plexLibrary.MediaSize = plexLibrary.TvShows.Sum(x => x.MediaSize);
 
             var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
             if (updateResult.IsFailed)
@@ -158,6 +161,9 @@ namespace PlexRipper.Application.PlexLibraries
             {
                 return ResultExtensions.IsNull(nameof(plexLibrary));
             }
+
+            // Calculate total media size of the library
+            plexLibrary.MediaSize = plexLibrary.Movies.Sum(x => x.MediaSize);
 
             var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
             if (updateResult.IsFailed)

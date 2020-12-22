@@ -1,6 +1,6 @@
 {
 	"name": "plex-ripper-web-ui",
-	"version": "0.1.1",
+	"version": "0.2.1",
 	"description": "PlexRipper",
 	"author": "JasonLandbridge",
 	"private": true,
@@ -22,7 +22,7 @@
 	},
 	"husky": {
 		"hooks": {
-			"pre-commit": "lint-staged"
+			"pre-commit": "npm run lint"
 		}
 	},
 	"web-types": "./web-types.json",

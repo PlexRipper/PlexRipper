@@ -11,20 +11,13 @@ export default (ctx: Context): void => {
 	});
 
 	GlobalService.getConfigReady().subscribe((config) => {
-		Log.info('Axios BaseURL: ' + config.baseApiUrl);
+		Log.info('Axios BaseApiUrl: ' + config.baseApiUrl);
 		ctx.$axios.setBaseURL(config.baseApiUrl);
 		Axios.defaults.baseURL = config.baseApiUrl;
 		Log.debug('Finished setting up Axios');
 
 		GlobalService.setAxiosReady();
 	});
-
-	Axios.defaults.headers.get['Content-Type'] = 'application/json';
-	Axios.defaults.headers.get['Access-Control-Allow-Origin'] = '*';
-
-	Axios.defaults.headers.post['Content-Type'] = 'application/json';
-	Axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
-	// Axios.defaults.withCredentials = false;
 
 	Axios.interceptors.response.use(
 		(response): AxiosResponse<Result<any>> => {

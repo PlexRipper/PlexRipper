@@ -1,12 +1,12 @@
 import Log from 'consola';
-import IAppConfig from '@interfaces/IAppConfig';
+import AppConfig from '@interfaces/AppConfig';
 import { ReplaySubject, Observable } from 'rxjs';
 import { BaseService } from '@state/baseService';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
 
 export class GlobalService extends BaseService {
 	private _axiosReady: ReplaySubject<any> = new ReplaySubject();
-	private _configReady: ReplaySubject<IAppConfig> = new ReplaySubject();
+	private _configReady: ReplaySubject<AppConfig> = new ReplaySubject();
 
 	public setAxiosReady(): void {
 		Log.info('Axios is ready');
@@ -15,14 +15,8 @@ export class GlobalService extends BaseService {
 
 	public setConfigReady(config: RuntimeConfig): void {
 		if (process.client || process.static) {
-			const appConfig: IAppConfig = {
-				nodeEnv: config.nodeEnv,
-				baseURL: window.location.origin,
-				baseApiUrl: window.location.origin + '/api',
-			};
-
 			Log.info('Runtime Config is ready');
-			this._configReady.next(appConfig);
+			this._configReady.next(new AppConfig(config));
 		} else {
 			Log.error('setConfigReady => Process was neither client or static, was:', process);
 		}
@@ -32,7 +26,7 @@ export class GlobalService extends BaseService {
 		return this._axiosReady.asObservable();
 	}
 
-	public getConfigReady(): Observable<IAppConfig> {
+	public getConfigReady(): Observable<AppConfig> {
 		return this._configReady.asObservable();
 	}
 }

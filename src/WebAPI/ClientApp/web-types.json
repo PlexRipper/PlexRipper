@@ -299,6 +299,34 @@
           }
         },
         {
+          "name": "FileSize",
+          "description": "",
+          "attributes": [
+            {
+              "name": "size",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "0"
+            },
+            {
+              "name": "speed",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            }
+          ],
+          "source": {
+            "module": "./src/components/General/FileSize.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "Footer",
           "description": "",
           "source": {

@@ -38,20 +38,11 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
 
             // Directory -> PlexLibrary
-            CreateMap<Directory, PlexLibrary>(MemberList.Destination)
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
-                .ForMember(dest => dest.Movies, opt => opt.Ignore())
-                .ForMember(dest => dest.TvShows, opt => opt.Ignore())
-                .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
-                .ForMember(dest => dest.CheckedAt, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexAccountLibraries, opt => opt.Ignore())
+            CreateMap<Directory, PlexLibrary>(MemberList.None)
                 .ForMember(dest => dest.Type,
                     opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter(), x => x.Type))
                 .ForMember(dest => dest.LibraryLocationId,
                     opt => opt.MapFrom(src => src.Location.First().Id))
-
                 // Location[0].Path -> LibraryLocationPath
                 .ForMember(dest => dest.LibraryLocationPath,
                     opt => opt.MapFrom(src => src.Location.First().Path));

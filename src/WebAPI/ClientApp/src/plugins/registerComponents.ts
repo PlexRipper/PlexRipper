@@ -8,9 +8,10 @@ import PCheckbox from '@components/General/PlexRipperCheckBox.vue';
 import PSection from '@components/General/Section.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import Status from '@components/General/Status.vue';
+import FileSize from '@components/General/FileSize.vue';
 
 export default (): void => {
-	const components = { Page, Background, Logo, PBtn, PCheckbox, DateTime, PSection, HelpIcon, Status };
+	const components = { Page, Background, Logo, PBtn, PCheckbox, DateTime, PSection, HelpIcon, Status, FileSize };
 
 	Object.entries(components).forEach(([name, component]) => {
 		Vue.component(name, component);

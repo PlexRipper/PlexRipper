@@ -9,6 +9,8 @@
 					append-icon="mdi-folder-open"
 					:value="folderPath.directory"
 					:height="50"
+					dense
+					outlined
 					solo
 					readonly
 					@click:append="openDirectoryBrowser(folderPath)"

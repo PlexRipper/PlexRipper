@@ -16,15 +16,4 @@ namespace PlexRipper.Domain
 
         public DateTime? LastModified { get; set; }
     }
-
-    public enum FileSystemEntityType
-    {
-        Parent,
-
-        Drive,
-
-        Folder,
-
-        File,
-    }
 }

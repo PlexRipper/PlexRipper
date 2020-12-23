@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
+using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.FileSystem
 {

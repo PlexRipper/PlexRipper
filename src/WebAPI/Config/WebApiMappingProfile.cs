@@ -2,6 +2,7 @@
 using AutoMapper;
 using FluentResults;
 using PlexRipper.Domain;
+using PlexRipper.FileSystem.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;

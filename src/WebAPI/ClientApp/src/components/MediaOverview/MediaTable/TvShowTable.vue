@@ -55,6 +55,12 @@ export default class TVShowsTable extends Vue {
 				width: 50,
 			},
 			{
+				text: 'Size',
+				value: 'size',
+				width: 100,
+				type: 'data',
+			},
+			{
 				text: 'Added At',
 				value: 'addedAt',
 				width: 150,

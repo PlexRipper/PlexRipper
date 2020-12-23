@@ -1,3 +1,17 @@
+## [0.3.0] - 2020-12-22
+### Added
+- Added media icons to the download confirmation dialog.
+- Tv shows now show their media size in the MediaTableView.
+
+### Changed
+- Cleaned-up the default-layout code in the front-end.
+- Moved the files related to path retrieval of the host system to the FileSystem project.
+
+### Fixed
+- Fixed the setup page not being scroll-able when viewing with limited viewport height.
+- Fixed when going to a music library that nothing would happen, now a page will show that it is currently not supported.
+- Fixed the UI for the path settings and DirectoryBrowser
+
 ## [0.2.0] - 2020-12-22
 ### Added
  - Added CHANGELOG.md file
@@ -20,7 +34,6 @@
 
 
 ## [0.1.1] - 2020-12-18
-
 ### Changed
  - Updated packages front-end packages.
  - Setup build pipeline in Github Actions and in DockerHub.

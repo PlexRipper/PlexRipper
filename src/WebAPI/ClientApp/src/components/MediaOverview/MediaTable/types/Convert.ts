@@ -22,6 +22,7 @@ export default abstract class Convert {
 								children: [],
 								mediaData: [] as IMediaData[],
 								item: episode,
+								size: episode.size,
 								addedAt: episode.addedAt ?? '',
 								updatedAt: episode.updatedAt ?? '',
 							});
@@ -35,6 +36,7 @@ export default abstract class Convert {
 							children: episodes,
 							mediaData: [] as IMediaData[],
 							item: season,
+							size: season.size,
 							addedAt: season.addedAt ?? '',
 							updatedAt: season.updatedAt ?? '',
 						});
@@ -48,6 +50,7 @@ export default abstract class Convert {
 					year: tvShow.year,
 					type: PlexMediaType.TvShow,
 					item: tvShow,
+					size: tvShow.size,
 					mediaData: [] as IMediaData[],
 					children: seasons,
 					addedAt: tvShow.addedAt ?? '',

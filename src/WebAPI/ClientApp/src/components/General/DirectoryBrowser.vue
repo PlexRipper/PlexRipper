@@ -1,16 +1,18 @@
 <template>
 	<v-row justify="start">
 		<v-col>
-			<v-dialog :value="open" persistent scrollable max-width="900px">
-				<v-card style="position: absolute; top: 200px; bottom: 200px; max-width: 900px; max-height: 900px">
+			<v-dialog :value="open" persistent max-width="900px">
+				<v-card>
 					<v-card-title>
 						<v-row>
 							<v-col cols="12">
-								<label>Select {{ path.type }}</label>
+								<label>Select {{ path.displayName }}</label>
 							</v-col>
-							<v-col cols="12">
+							<v-col cols="12" style="max-height: 75px">
 								<v-text-field
 									v-model="newDirectory"
+									outlined
+									color="red"
 									placeholder="Start typing or select a path below"
 									@input="newDirectory = $event"
 								/>
@@ -18,26 +20,39 @@
 						</v-row>
 					</v-card-title>
 					<v-divider />
-					<v-card-text style="height: 300px">
-						<v-data-table
-							:headers="headers"
-							:items="items"
-							hide-default-footer
-							fixed-header
-							disable-sort
-							disable-pagination
-							disable-filtering
-							item-class="class"
-							@click:row="directoryNavigate"
-						>
-							<template #item.type="{ item }">
-								<v-icon>{{ getIcon(item.type) }}</v-icon>
+					<v-card-text style="height: 100%; overflow-y: hidden">
+						<!--	Directory browser table header -->
+						<v-simple-table>
+							<template #default>
+								<thead>
+									<tr>
+										<th class="text-left" :width="100">Type:</th>
+										<th class="text-left">Path:</th>
+									</tr>
+								</thead>
 							</template>
-						</v-data-table>
+						</v-simple-table>
+						<!--	Directory browser table content -->
+						<perfect-scrollbar>
+							<div style="height: 50vh; width: 100%">
+								<v-simple-table>
+									<template #default>
+										<tbody>
+											<tr v-for="(item, i) in items" :key="i" style="cursor: pointer" @click="directoryNavigate(item)">
+												<td :width="100">
+													<v-icon>{{ getIcon(item.type) }}</v-icon>
+												</td>
+												<td>{{ item.name }}</td>
+											</tr>
+										</tbody>
+									</template>
+								</v-simple-table>
+							</div>
+						</perfect-scrollbar>
 					</v-card-text>
-					<v-card-actions class="justify-end">
-						<v-btn color="blue darken-1" text @click="cancel()">Cancel</v-btn>
-						<v-btn color="blue darken-1" text @click="confirm()">Ok</v-btn>
+					<v-card-actions class="justify-end" style="height: 60px">
+						<p-btn :button-type="cancelButtonType" @click="cancel()" />
+						<p-btn :button-type="confirmButtonType" @click="confirm()" />
 					</v-card-actions>
 				</v-card>
 			</v-dialog>
@@ -46,10 +61,13 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
+import Log from 'consola';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify';
 import { getDirectoryPath } from '@api/pathApi';
-import type { FolderPathDTO, FileSystemModelDTO } from '@dto/mainApi';
+import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
+import { FileSystemEntityType } from '@dto/mainApi';
+import ButtonType from '@enums/buttonType';
 
 @Component
 export default class DirectoryBrowser extends Vue {
@@ -78,19 +96,19 @@ export default class DirectoryBrowser extends Vue {
 		},
 	];
 
-	getIcon(type: string): string {
+	getIcon(type: FileSystemEntityType): string {
+		Log.info(type);
 		switch (type) {
-			case 'drive':
+			case FileSystemEntityType.Parent:
+				return 'mdi-arrow-left';
+			case FileSystemEntityType.Drive:
+				return 'mdi-harddisk';
+			case FileSystemEntityType.Folder:
 				return 'mdi-folder';
-			case 'folder':
-				return 'mdi-folder';
-			case 'file':
+			case FileSystemEntityType.File:
 				return 'mdi-file';
-			case 'return':
-				return 'mdi-arrow-up-bold-outline';
-
 			default:
-				return 'crosshairs-question';
+				return 'mdi-crosshairs-question';
 		}
 	}
 
@@ -100,6 +118,14 @@ export default class DirectoryBrowser extends Vue {
 			this.newDirectory = this.path?.directory ?? '';
 			this.requestDirectories(this.newDirectory);
 		}
+	}
+
+	get cancelButtonType(): ButtonType {
+		return ButtonType.Cancel;
+	}
+
+	get confirmButtonType(): ButtonType {
+		return ButtonType.Confirm;
 	}
 
 	confirm(): void {
@@ -112,6 +138,7 @@ export default class DirectoryBrowser extends Vue {
 	}
 
 	directoryNavigate(dataRow: FileSystemModelDTO): void {
+		Log.info(dataRow);
 		if (dataRow.path === '..') {
 			this.requestDirectories(this.parentPath);
 		} else {
@@ -128,7 +155,7 @@ export default class DirectoryBrowser extends Vue {
 				this.items.unshift({
 					name: '...',
 					path: '..',
-					type: 0,
+					type: FileSystemEntityType.Parent,
 					extension: '',
 					size: 0,
 					lastModified: '',

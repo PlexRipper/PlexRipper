@@ -1,6 +1,8 @@
 ﻿using System.IO;
+using PlexRipper.Application.Common;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Domain
+namespace PlexRipper.FileSystem.Common
 {
     public class DriveInfoMount : IMount
     {

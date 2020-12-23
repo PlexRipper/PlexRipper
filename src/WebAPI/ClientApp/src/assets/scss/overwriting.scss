@@ -51,6 +51,25 @@ v-sheet
 }
 
 /*
+v-data-table
+*/
+.v-data-table {
+	.v-data-table--fixed-header {
+		thead {
+			th {
+				background: transparent;
+			}
+		}
+	}
+	&.theme--dark {
+		@extend .no-background;
+	}
+	&.theme--light {
+		@extend .no-background;
+	}
+}
+
+/*
 v-dialog
 */
 
@@ -110,3 +129,22 @@ v-expansion-panels
 		}
 	}
 }
+
+.v-text-field--solo {
+	&.theme--dark {
+		.v-input__control > .v-input__slot {
+			background: $dark-theme-glass-background;
+		}
+	}
+}
+
+//.v-text-field--outlined {
+//	.v-input__control {
+//		.v-input__slot {
+//			border: 1px solid rgba(255, 255, 255, 0.24);
+//			border-collapse: collapse;
+//		}
+//	}
+//	fieldset {
+//	}
+//}

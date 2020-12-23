@@ -27,6 +27,9 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("index", Required = Required.Always)]
         public int Index { get; set; }
 
+        [JsonProperty("size", Required = Required.Always)]
+        public long Size { get; set; }
+
         [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType Type { get; set; }
 

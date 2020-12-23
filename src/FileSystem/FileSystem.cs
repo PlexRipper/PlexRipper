@@ -6,6 +6,7 @@ using System.Reflection;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
+using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.FileSystem
 {

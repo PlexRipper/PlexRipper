@@ -183,6 +183,7 @@ export interface PlexTvShowDTO {
   guid: any;
   studio: any;
   title: any;
+  size: number;
   contentRating: any;
   summary: any;
   index: number;
@@ -213,6 +214,7 @@ export interface PlexTvShowSeasonDTO {
   title: string;
   summary: string;
   index: number;
+  size: number;
   type: PlexMediaType;
   leafCount: number;
   viewedLeafCount: number;
@@ -233,6 +235,7 @@ export interface PlexTvShowEpisodeDTO {
   title: string;
   summary: string;
   index: number;
+  size: number;
   type: PlexMediaType;
   leafCount: number;
   viewedLeafCount: number;
@@ -288,13 +291,12 @@ export interface FileSystemModelDTO {
   lastModified: string | null;
 }
 
-/**
- * 0 = Parent
-1 = Drive
-2 = Folder
-3 = File
- */
-export type FileSystemEntityType = 0 | 1 | 2 | 3;
+export enum FileSystemEntityType {
+  Parent = "Parent",
+  Drive = "Drive",
+  Folder = "Folder",
+  File = "File",
+}
 
 export type ResultDTOOfListOfNotificationDTO = ResultDTO & { value: NotificationDTO[] };
 

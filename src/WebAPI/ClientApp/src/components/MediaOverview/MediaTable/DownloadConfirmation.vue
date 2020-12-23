@@ -9,20 +9,20 @@
 				</v-card-subtitle>
 				<!-- Show Download Task Preview -->
 				<v-card-text>
-					<v-treeview
-						:items="downloadPreview"
-						item-text="title"
-						item-key="key"
-						:open.sync="openDownloadPreviews"
-						open-all
-					></v-treeview>
+					<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open.sync="openDownloadPreviews" open-all>
+						<template #prepend="{ item }">
+							<v-icon>
+								{{ item.type | mediaTypeIcon }}
+							</v-icon>
+						</template>
+					</v-treeview>
 				</v-card-text>
 				<v-divider></v-divider>
 
 				<v-card-actions>
-					<v-btn large @click="showDialog = false"> Cancel </v-btn>
+					<p-btn :button-type="cancelButtonType" @click="showDialog = false" />
 					<v-spacer></v-spacer>
-					<v-btn color="success" large @click="confirmDownload()"> Yes! </v-btn>
+					<p-btn :button-type="confirmButtonType" @click="confirmDownload()" />
 				</v-card-actions>
 			</v-card>
 
@@ -47,6 +47,7 @@ import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { clone } from 'lodash';
 import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 import { settingsStore as SettingsStore } from '@/store';
+import ButtonType from '@enums/buttonType';
 
 @Component({
 	components: {
@@ -78,6 +79,14 @@ export default class DownloadConfirmation extends Vue {
 			default:
 				return true;
 		}
+	}
+
+	get cancelButtonType(): ButtonType {
+		return ButtonType.Cancel;
+	}
+
+	get confirmButtonType(): ButtonType {
+		return ButtonType.Confirm;
 	}
 
 	private createPreview(mediaId: IMediaId): void {

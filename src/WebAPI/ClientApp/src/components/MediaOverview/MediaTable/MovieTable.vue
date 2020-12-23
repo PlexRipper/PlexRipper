@@ -50,6 +50,12 @@ export default class MovieTable extends Vue {
 				width: 50,
 			},
 			{
+				text: 'Size',
+				value: 'size',
+				width: 100,
+				type: 'data',
+			},
+			{
 				text: 'Added At',
 				value: 'addedAt',
 				width: 150,
@@ -60,12 +66,6 @@ export default class MovieTable extends Vue {
 				value: 'updatedAt',
 				width: 150,
 				type: 'date',
-			},
-			{
-				text: 'Size',
-				value: 'size',
-				width: 100,
-				type: 'data',
 			},
 		];
 	}

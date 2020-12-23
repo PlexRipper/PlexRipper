@@ -183,6 +183,7 @@ export interface PlexTvShowDTO {
   guid: any;
   studio: any;
   title: any;
+  size: number;
   contentRating: any;
   summary: any;
   index: number;
@@ -213,6 +214,7 @@ export interface PlexTvShowSeasonDTO {
   title: string;
   summary: string;
   index: number;
+  size: number;
   type: PlexMediaType;
   leafCount: number;
   viewedLeafCount: number;
@@ -233,6 +235,7 @@ export interface PlexTvShowEpisodeDTO {
   title: string;
   summary: string;
   index: number;
+  size: number;
   type: PlexMediaType;
   leafCount: number;
   viewedLeafCount: number;

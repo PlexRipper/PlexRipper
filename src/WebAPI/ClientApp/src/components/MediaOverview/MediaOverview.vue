@@ -25,23 +25,22 @@
 					:server="server"
 					:library="library"
 					:view-mode="viewMode"
+					:has-selected="getSelectedMediaIds.length > 0"
 					@view-change="changeView"
 					@refresh-library="refreshLibrary"
+					@download="processDownloadCommand(null)"
 				></media-overview-bar>
 			</v-row>
 			<!--	Data table display	-->
 			<template v-if="isTableView">
-				<!-- The movie table -->
-				<movie-table v-if="isMovieLibrary" :movies="movies" :items="getItems" @download="openDownloadDialog" />
-				<!-- The tv-show table -->
-				<tv-show-table v-if="isTvShowLibrary" :tv-shows="tvShows" :items="getItems" @download="openDownloadDialog" />
+				<media-table :items="getItems" :media-type="mediaType" @download="processDownloadCommand" @selected="selected = $event" />
 			</template>
 
 			<!-- Poster display-->
 			<perfect-scrollbar>
 				<v-row v-if="isPosterView" class="poster-overview" justify="center">
 					<template v-for="item in getItems">
-						<media-poster :key="item.id" :media-item="item" :media-type="mediaType" @download="openDownloadDialog" />
+						<media-poster :key="item.id" :media-item="item" :media-type="mediaType" @download="processDownloadCommand" />
 					</template>
 				</v-row>
 			</perfect-scrollbar>
@@ -52,7 +51,7 @@
 					ref="downloadConfirmationRef"
 					:items="getItems"
 					:progress="downloadTaskCreationProgress"
-					@download="downloadMedia"
+					@download="sendDownloadCommand"
 				/>
 			</v-row>
 		</template>
@@ -64,39 +63,26 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import type { PlexServerDTO } from '@dto/mainApi';
-import {
-	DownloadTaskCreationProgress,
-	LibraryProgress,
-	PlexLibraryDTO,
-	PlexMediaType,
-	PlexMovieDTO,
-	PlexTvShowDTO,
-	ViewMode,
-} from '@dto/mainApi';
-import MovieTable from '@mediaOverview/MediaTable/MovieTable.vue';
+import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
+import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import MediaPoster from '@mediaOverview/MediaPoster.vue';
-import TvShowTable from '@mediaOverview/MediaTable/TvShowTable.vue';
-import { merge, of } from 'rxjs';
 import SignalrService from '@service/signalrService';
-import { catchError, finalize, takeWhile, tap } from 'rxjs/operators';
+import { filter, finalize, tap } from 'rxjs/operators';
 import Log from 'consola';
-import { downloadMedia } from '@api/plexDownloadApi';
 import DownloadService from '@state/downloadService';
 import LibraryService from '@state/libraryService';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
-import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
+import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
 import { settingsStore } from '~/store';
 
 @Component({
 	components: {
 		MediaPoster,
-		MovieTable,
-		TvShowTable,
+		MediaTable,
 		ProgressComponent,
 		DownloadConfirmation,
 		MediaOverviewBar,
@@ -109,6 +95,7 @@ export default class MediaOverview extends Vue {
 	@Ref('downloadConfirmationRef')
 	readonly downloadConfirmationRef!: DownloadConfirmation;
 
+	selected: string[] = [];
 	isLoading: boolean = true;
 	isRefreshing: boolean = false;
 	server: PlexServerDTO | null = null;
@@ -123,26 +110,6 @@ export default class MediaOverview extends Vue {
 
 	get activeAccountId(): number {
 		return settingsStore.activeAccountId;
-	}
-
-	get mediaIds(): number[] {
-		return this.getItems.map((x) => x.id);
-	}
-
-	get isMovieLibrary(): boolean {
-		return this.mediaType === PlexMediaType.Movie;
-	}
-
-	get isTvShowLibrary(): boolean {
-		return this.mediaType === PlexMediaType.TvShow;
-	}
-
-	get movies(): PlexMovieDTO[] {
-		return this.library?.movies ?? [];
-	}
-
-	get tvShows(): PlexTvShowDTO[] {
-		return this.library?.tvShows ?? [];
 	}
 
 	get getPercentage(): number {
@@ -167,7 +134,7 @@ export default class MediaOverview extends Vue {
 			case PlexMediaType.TvShow:
 				return settingsStore.setTvShowViewMode(viewMode);
 		}
-		Log.error('Could not set viewmode for type' + this.mediaType);
+		Log.error('Could not set view mode for type' + this.mediaType);
 	}
 
 	resetProgress(isRefreshing: boolean): void {
@@ -185,10 +152,10 @@ export default class MediaOverview extends Vue {
 		let items: ITreeViewItem[] = [];
 		switch (this.mediaType) {
 			case PlexMediaType.Movie:
-				items = Convert.moviesToTreeViewItems(this.movies);
+				items = Convert.moviesToTreeViewItems(this.library?.movies ?? []);
 				break;
 			case PlexMediaType.TvShow:
-				items = Convert.tvShowsToTreeViewItems(this.tvShows);
+				items = Convert.tvShowsToTreeViewItems(this.library?.tvShows ?? []);
 				break;
 		}
 
@@ -203,51 +170,65 @@ export default class MediaOverview extends Vue {
 		return this.viewMode === ViewMode.Table;
 	}
 
-	openDownloadDialog(mediaId: IMediaId): void {
-		this.downloadConfirmationRef.openDialog(mediaId);
+	openDownloadDialog(downloadMediaCommand: DownloadMediaDTO): void {
+		this.downloadConfirmationRef.openDialog(downloadMediaCommand);
 	}
 
-	downloadMedia(mediaId: IMediaId): void {
-		merge(
-			// Setup progress bar
-			SignalrService.getDownloadTaskCreationProgress().pipe(
-				tap((data) => {
-					this.downloadTaskCreationProgress = data;
-					Log.debug(data);
-				}),
-				finalize(() => {
-					setTimeout(() => {
-						this.downloadConfirmationRef.closeDialog();
-						this.downloadTaskCreationProgress = null;
-					}, 2000);
-				}),
-				takeWhile((data) => !data.isComplete),
-				catchError(() => {
-					return of(null);
-				}),
-			),
-			// Download Media
-			downloadMedia(mediaId.id, this.activeAccountId, mediaId.type).pipe(
-				finalize(() => {
-					setTimeout(() => {
-						this.downloadConfirmationRef.closeDialog();
-						this.downloadTaskCreationProgress = null;
-					}, 2000);
-					DownloadService.fetchDownloadList();
-				}),
-				catchError(() => {
-					return of(false);
-				}),
-			),
-		)
-			.pipe(
-				catchError(() => {
-					this.downloadConfirmationRef.closeDialog();
-					this.downloadTaskCreationProgress = null;
-					return of(false);
-				}),
-			)
-			.subscribe();
+	get getSelectedMediaIds(): number[] {
+		const ids: number[] = [];
+		switch (this.mediaType) {
+			case PlexMediaType.Movie:
+				this.selected.forEach((x) => ids.push(+x.split('-')[0]));
+				break;
+			case PlexMediaType.TvShow:
+			case PlexMediaType.Season:
+			case PlexMediaType.Episode:
+				this.selected.forEach((x) => ids.push(+x.split('-')[2]));
+				break;
+			default:
+				Log.warn('Could not determine the type of the media to correctly download multiple selected media');
+				break;
+		}
+		return ids;
+	}
+
+	get downloadMediaCommand(): DownloadMediaDTO {
+		let type: PlexMediaType = PlexMediaType.None;
+
+		// Determine the type of media downloaded, the getSelectedMediaIds are always of the same type.
+		switch (this.mediaType) {
+			case PlexMediaType.Movie:
+				type = PlexMediaType.Movie;
+				break;
+			case PlexMediaType.TvShow:
+			case PlexMediaType.Season:
+			case PlexMediaType.Episode:
+				type = PlexMediaType.Episode;
+				break;
+			default:
+				return {} as DownloadMediaDTO;
+		}
+		return {
+			mediaIds: this.getSelectedMediaIds,
+			type,
+			plexAccountId: this.activeAccountId,
+			libraryId: this.libraryId,
+		};
+	}
+
+	processDownloadCommand(downloadMediaCommand: DownloadMediaDTO | null): void {
+		if (downloadMediaCommand) {
+			downloadMediaCommand.libraryId = this.libraryId;
+			downloadMediaCommand.plexAccountId = this.activeAccountId;
+
+			this.openDownloadDialog(downloadMediaCommand);
+		} else {
+			this.openDownloadDialog(this.downloadMediaCommand);
+		}
+	}
+
+	sendDownloadCommand(downloadMediaCommand: DownloadMediaDTO): void {
+		DownloadService.downloadMedia(downloadMediaCommand);
 	}
 
 	refreshLibrary(): void {
@@ -270,6 +251,22 @@ export default class MediaOverview extends Vue {
 				this.isRefreshing = data.isRefreshing ?? false;
 			}
 		});
+
+		SignalrService.getDownloadTaskCreationProgress()
+			.pipe(
+				filter((x) => x.plexLibraryId === this.libraryId),
+				tap((data) => {
+					this.downloadTaskCreationProgress = data;
+					Log.debug(data);
+				}),
+				finalize(() => {
+					setTimeout(() => {
+						this.downloadConfirmationRef.closeDialog();
+						this.downloadTaskCreationProgress = null;
+					}, 2000);
+				}),
+			)
+			.subscribe();
 
 		LibraryService.getServerByLibraryID(this.libraryId).subscribe((server) => {
 			if (server) {

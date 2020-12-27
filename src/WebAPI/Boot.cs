@@ -20,15 +20,18 @@ namespace PlexRipper.WebAPI
 
         private readonly IFileMerger _fileMerger;
 
+        private readonly IDownloadManager _downloadManager;
+
         private readonly PlexRipperDbContext _dbContext;
 
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
+        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger, IDownloadManager downloadManager,
             PlexRipperDbContext dbContext)
         {
             _appLifetime = appLifetime;
             _userSettings = userSettings;
             _fileSystem = fileSystem;
             _fileMerger = fileMerger;
+            _downloadManager = downloadManager;
             _dbContext = dbContext;
         }
 
@@ -43,6 +46,7 @@ namespace PlexRipper.WebAPI
 
             _dbContext.Setup();
             _userSettings.Setup();
+            _downloadManager.Setup();
             _fileMerger.Setup();
             return Task.CompletedTask;
         }

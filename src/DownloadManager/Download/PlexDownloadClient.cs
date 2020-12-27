@@ -170,23 +170,22 @@ namespace PlexRipper.DownloadManager.Download
                 .Subscribe(OnDownloadWorkerTaskChange);
 
             // On download complete
+            // Async function in subscription: https://stackoverflow.com/a/30030553/8205497
             downloadCompleteStream
-                .Subscribe(OnDownloadComplete);
+                .Select(l => Observable.FromAsync(() => OnDownloadComplete(l)))
+                .Concat()
+                .Subscribe();
         }
 
         /// <summary>
         /// Calls Dispose on all DownloadWorkers and clears the downloadWorkersList.
         /// </summary>
         /// <returns>Is successful.</returns>
-        private Result<bool> ClearDownloadWorkers()
+        private async Task ClearDownloadWorkers()
         {
-            foreach (var downloadWorker in _downloadWorkers)
-            {
-                downloadWorker.Dispose();
-            }
-
+            await Task.WhenAll(_downloadWorkers.Select(x => x.DisposeAsync()).ToList());
             _downloadWorkers.Clear();
-            return Result.Ok(true);
+            Log.Debug($"DownloadWorkers have been disposed for {DownloadTask.DownloadPath}");
         }
 
         #region Subscriptions
@@ -232,7 +231,7 @@ namespace PlexRipper.DownloadManager.Download
             _downloadWorkerTaskChanged.OnNext(taskList);
         }
 
-        private void OnDownloadComplete(IList<DownloadWorkerComplete> completeList)
+        private async Task OnDownloadComplete(IList<DownloadWorkerComplete> completeList)
         {
             _timeThreadContext.Dispose();
 
@@ -265,7 +264,8 @@ namespace PlexRipper.DownloadManager.Download
                 DataTotal = TotalBytesToReceive,
             };
             Log.Debug($"Download of {DownloadTask.FileName} finished!");
-            ClearDownloadWorkers();
+
+            await ClearDownloadWorkers();
             SetDownloadStatus(DownloadStatus.Completed);
             _downloadFileCompleted.OnNext(downloadComplete);
         }

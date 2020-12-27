@@ -1,4 +1,4 @@
-## [0.3.0] - 2020-12-22
+## [0.3.0] - 2020-12-23
 ### Added
 - Added media icons to the download confirmation dialog.
 - Tv shows now show their media size in the MediaTableView.

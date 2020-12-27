@@ -259,9 +259,10 @@ export interface PlexServerStatusDTO {
 export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
 
 export interface DownloadMediaDTO {
-  plexAccountId: number;
-  plexMediaId: number;
+  mediaIds: number[];
   type: PlexMediaType;
+  libraryId: number;
+  plexAccountId: number;
 }
 
 export type ResultDTOOfListOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[] };

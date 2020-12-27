@@ -11,13 +11,11 @@ namespace PlexRipper.Application.Common
 
         Task<Result<List<PlexServer>>> GetDownloadTasksInServerAsync();
 
-        Task<Result<bool>> DeleteDownloadTaskAsync(int downloadTaskId);
-
-        Result<bool> StopDownloadTask(int downloadTaskId);
+        Result<bool> StopDownloadTask(List<int> downloadTaskIds = null);
 
         Task<Result<bool>> RestartDownloadTask(int downloadTaskId);
 
-        Task<Result<bool>> ClearCompleted();
+        Task<Result<bool>> ClearCompleted(List<int> downloadTaskIds = null);
 
         Task<Result<bool>> StartDownloadTask(int downloadTaskId);
 
@@ -28,5 +26,7 @@ namespace PlexRipper.Application.Common
         Task<Result<bool>> DeleteDownloadTasksAsync(IEnumerable<int> downloadTaskIds);
 
         Task<Result<List<DownloadTask>>> GetDownloadTasksAsync();
+
+        Task<Result> DownloadMediaAsync(List<int> mediaIds, PlexMediaType type, int libraryId, int accountId = 0);
     }
 }

@@ -9,11 +9,11 @@
 				</v-col>
 				<!-- Title -->
 				<v-col cols="4" class="title-column">
-					{{ headers[0].text }}
+					{{ getHeaders[0].text }}
 				</v-col>
 				<v-spacer />
 				<!-- Other columns -->
-				<v-col v-for="(header, i) in headers.slice(1, headers.length)" :key="i" cols="auto">
+				<v-col v-for="(header, i) in getHeaders.slice(1, getHeaders.length)" :key="i" cols="auto">
 					<v-sheet :width="header.width" :max-width="header.width" class="no-background">{{ header.text }}</v-sheet>
 				</v-col>
 				<!-- Actions -->
@@ -26,7 +26,6 @@
 				<perfect-scrollbar>
 					<v-col class="col-12 px-0">
 						<v-treeview
-							v-model="selected"
 							selectable
 							selected-color="red"
 							selection-type="leaf"
@@ -36,16 +35,17 @@
 							transition
 							item-key="key"
 							item-text="title"
+							@input="updateSelected"
 						>
 							<template #label="{ item }">
 								<v-row class="media-table-content-row">
 									<!-- Title -->
 									<v-col cols="4" class="title-column">
-										{{ item[headers[0].value] }}
+										{{ item[getHeaders[0].value] }}
 									</v-col>
 									<v-spacer />
 									<!-- Other columns -->
-									<v-col v-for="(header, index) in headers.slice(1, headers.length)" :key="index" cols="auto">
+									<v-col v-for="(header, index) in getHeaders.slice(1, getHeaders.length)" :key="index" cols="auto">
 										<v-sheet :width="header.width" :max-width="header.width" class="no-background">
 											<date-time v-if="header.type === 'date'" :text="item[header.value]" :time="false" short-date />
 											<file-size v-else-if="header.type === 'data'" :size="item[header.value]" />
@@ -55,7 +55,7 @@
 									<!-- Actions -->
 									<v-col cols="auto">
 										<v-sheet width="70" class="no-background text-center">
-											<v-icon small @click="downloadMedia(item.id, item.type)"> mdi-download </v-icon>
+											<v-icon small @click="downloadMedia(item)"> mdi-download </v-icon>
 										</v-sheet>
 									</v-col>
 								</v-row>
@@ -70,11 +70,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DownloadTaskCreationProgress, PlexMediaType, PlexTvShowDTO } from '@dto/mainApi';
+import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
 import IMediaTableHeader from '@interfaces/IMediaTableHeader';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
-import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 import ITreeViewItem from './types/ITreeViewItem';
 
 @Component({
@@ -84,19 +83,16 @@ import ITreeViewItem from './types/ITreeViewItem';
 	},
 })
 export default class MediaTable extends Vue {
-	@Prop({ required: true, type: Array as () => IMediaTableHeader<PlexTvShowDTO>[] })
-	readonly headers!: IMediaTableHeader[];
-
 	@Prop({ required: true, type: Array as () => ITreeViewItem[] })
 	readonly items!: ITreeViewItem[];
 
 	@Prop({ required: true, type: String })
 	readonly mediaType!: PlexMediaType;
 
-	expanded: string[] = [];
 	selected: string[] = [];
 
-	showDialog: boolean = false;
+	expanded: string[] = [];
+
 	openDownloadPreviews: number[] = [];
 
 	progress: DownloadTaskCreationProgress | null = null;
@@ -112,16 +108,76 @@ export default class MediaTable extends Vue {
 		return this.getLeafs.length !== this.selected.length && this.selected.length > 0;
 	}
 
-	selectAll(state: boolean): void {
-		if (state) {
-			this.selected = this.getLeafs;
-		} else {
-			this.selected = [];
-		}
+	updateSelected(selected: string[]) {
+		this.$emit('selected', selected);
 	}
 
-	downloadMedia(mediaId: number, type: PlexMediaType): void {
-		this.$emit('download', { id: mediaId, type } as IMediaId);
+	selectAll(state: boolean): void {
+		this.updateSelected(state ? this.getLeafs : []);
+	}
+
+	get getHeaders(): IMediaTableHeader[] {
+		return [
+			// {
+			// 	text: 'Id',
+			// 	value: 'id',
+			// },
+			{
+				text: 'Title',
+				value: 'title',
+				width: 400,
+			},
+			{
+				text: 'Year',
+				value: 'year',
+				width: 50,
+			},
+			{
+				text: 'Size',
+				value: 'size',
+				width: 100,
+				type: 'data',
+			},
+			{
+				text: 'Added At',
+				value: 'addedAt',
+				width: 150,
+				type: 'date',
+			},
+			{
+				text: 'Updated At',
+				value: 'updatedAt',
+				width: 150,
+				type: 'date',
+			},
+		];
+	}
+
+	downloadMedia(item: ITreeViewItem): void {
+		const downloadCommand: DownloadMediaDTO = {
+			type: item.type,
+			mediaIds: [],
+			libraryId: 0,
+			plexAccountId: 0,
+		};
+		switch (item.type) {
+			case PlexMediaType.Movie:
+				downloadCommand.mediaIds.push(item.id);
+				break;
+			case PlexMediaType.TvShow:
+				downloadCommand.mediaIds = item.children.flatMap((x) => x.children.flatMap((y) => y.id));
+				break;
+			case PlexMediaType.Season:
+				downloadCommand.mediaIds = item.children.flatMap((x) => x.id);
+				break;
+			case PlexMediaType.Episode:
+				downloadCommand.mediaIds.push(item.id);
+				break;
+			default:
+				return;
+		}
+
+		this.$emit('download', downloadCommand);
 	}
 }
 </script>

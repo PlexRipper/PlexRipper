@@ -62,8 +62,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { getThumbnail } from '@api/plexLibraryApi';
-import { PlexMediaType } from '@dto/mainApi';
-import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
+import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
 import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 
 @Component
@@ -134,7 +133,14 @@ export default class MediaPoster extends Vue {
 	}
 
 	downloadMedia(): void {
-		this.$emit('download', { id: this.mediaItem.id, type: this.mediaType } as IMediaId);
+		const downloadCommand: DownloadMediaDTO = {
+			type: this.mediaType,
+			mediaIds: [this.mediaItem.id],
+			libraryId: 0,
+			plexAccountId: 0,
+		};
+
+		this.$emit('download', downloadCommand);
 	}
 }
 </script>

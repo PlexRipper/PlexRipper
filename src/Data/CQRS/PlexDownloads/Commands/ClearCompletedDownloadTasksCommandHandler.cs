@@ -21,11 +21,19 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
         public async Task<Result<bool>> Handle(ClearCompletedDownloadTasksCommand command,
             CancellationToken cancellationToken)
         {
-            var downloadTasks = await _dbContext.DownloadTasks.AsTracking()
-                .Where(x => x._DownloadStatus == DownloadStatus.Completed.ToString())
-                .ToListAsync(cancellationToken);
+            if (command.DownloadTaskIds != null && command.DownloadTaskIds.Any())
+            {
+                var downloadTasks = await _dbContext.DownloadTasks.Where(x => command.DownloadTaskIds.Contains(x.Id) && x._DownloadStatus == DownloadStatus.Completed.ToString()).ToListAsync();
+                _dbContext.DownloadTasks.RemoveRange(downloadTasks);
+            }
+            else
+            {
+                var downloadTasks = await _dbContext.DownloadTasks.AsTracking()
+                    .Where(x => x._DownloadStatus == DownloadStatus.Completed.ToString())
+                    .ToListAsync(cancellationToken);
+                _dbContext.DownloadTasks.RemoveRange(downloadTasks);
+            }
 
-            _dbContext.DownloadTasks.RemoveRange(downloadTasks);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return Result.Ok(true);

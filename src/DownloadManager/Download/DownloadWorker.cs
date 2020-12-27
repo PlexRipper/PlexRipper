@@ -19,7 +19,7 @@ namespace PlexRipper.DownloadManager.Download
     /// The <see cref="DownloadWorker"/> is part of the multi-threaded <see cref="PlexDownloadClient"/>
     /// and will download a part of the <see cref="DownloadTask"/>.
     /// </summary>
-    public class DownloadWorker : IDisposable
+    public class DownloadWorker
     {
         #region Fields
 
@@ -44,6 +44,8 @@ namespace PlexRipper.DownloadManager.Download
         private Timer _timer = new Timer(100);
 
         private Task _downloadProcess;
+
+        private FileStream _fileStream;
 
         #endregion
 
@@ -174,12 +176,12 @@ namespace PlexRipper.DownloadManager.Download
             Log.Debug($"Download worker {Id} start for {FileName}");
 
             // Create and check Filestream to which to download.
-            var fileStreamResult =
+            var _fileStreamResult =
                 _fileSystem.DownloadWorkerTempFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.BytesRangeSize);
-            if (fileStreamResult.IsFailed)
+            if (_fileStreamResult.IsFailed)
             {
-                SendDownloadWorkerError(fileStreamResult);
-                return fileStreamResult.ToResult();
+                SendDownloadWorkerError(_fileStreamResult);
+                return _fileStreamResult.ToResult();
             }
 
             DownloadStartAt = DateTime.UtcNow;
@@ -187,10 +189,10 @@ namespace PlexRipper.DownloadManager.Download
             {
                 try
                 {
-                    await using var fileStream = fileStreamResult.Value;
+                    _fileStream = _fileStreamResult.Value;
 
                     // Is 0 when starting new and > 0 when resuming.
-                    fileStream.Position = DownloadWorkerTask.BytesReceived;
+                    _fileStream.Position = DownloadWorkerTask.BytesReceived;
 
                     using var httpClient = new HttpClient();
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, DownloadWorkerTask.Uri);
@@ -220,15 +222,12 @@ namespace PlexRipper.DownloadManager.Download
                         }
 
                         // TODO Add snapshot every n mb downloaded e.g.: _downloadWorkerTaskChanged.OnNext(DownloadWorkerTask);
-                        await fileStream.WriteAsync(buffer, 0, bytesRead, _cancellationTokenSource.Token);
-                        await fileStream.FlushAsync(_cancellationTokenSource.Token);
+                        await _fileStream.WriteAsync(buffer, 0, bytesRead, _cancellationTokenSource.Token);
+                        await _fileStream.FlushAsync(_cancellationTokenSource.Token);
 
                         BytesReceived += bytesRead;
                         UpdateProgress();
                     }
-
-                    // Clean-up filestream
-                    fileStream.Close();
                 }
                 catch (TaskCanceledException e)
                 {
@@ -290,11 +289,17 @@ namespace PlexRipper.DownloadManager.Download
         #endregion
 
         /// <inheritdoc/>
-        public void Dispose()
+        public async Task DisposeAsync()
         {
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _downloadProcess?.Dispose();
+            if (_fileStream != null)
+            {
+                _fileStream.Close();
+                await _fileStream.DisposeAsync();
+                _fileStream = null;
+            }
 
             // Dispose subscriptions
             _downloadWorkerComplete?.Dispose();

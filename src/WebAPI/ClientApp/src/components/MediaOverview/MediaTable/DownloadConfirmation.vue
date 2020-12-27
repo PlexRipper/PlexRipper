@@ -9,13 +9,15 @@
 				</v-card-subtitle>
 				<!-- Show Download Task Preview -->
 				<v-card-text>
-					<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open.sync="openDownloadPreviews" open-all>
-						<template #prepend="{ item }">
-							<v-icon>
-								{{ item.type | mediaTypeIcon }}
-							</v-icon>
-						</template>
-					</v-treeview>
+					<perfect-scrollbar>
+						<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open="getLeafs" open-all>
+							<template #prepend="{ item }">
+								<v-icon>
+									{{ item.type | mediaTypeIcon }}
+								</v-icon>
+							</template>
+						</v-treeview>
+					</perfect-scrollbar>
 				</v-card-text>
 				<v-divider></v-divider>
 
@@ -40,12 +42,11 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ProgressComponent from '@components/ProgressComponent.vue';
-import { DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
+import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import { clone } from 'lodash';
-import IMediaId from '@mediaOverview/MediaTable/types/IMediaId';
 import { settingsStore as SettingsStore } from '@/store';
 import ButtonType from '@enums/buttonType';
 
@@ -61,13 +62,12 @@ export default class DownloadConfirmation extends Vue {
 	@Prop({ required: true })
 	readonly progress!: DownloadTaskCreationProgress | null;
 
-	openDownloadPreviews: string[] = [];
-	downloadPreview: ITreeViewItem[] = [];
 	showDialog: boolean = false;
-	mediaId: IMediaId = { id: 0, type: PlexMediaType.None };
+	downloadPreview: ITreeViewItem[] = [];
+	downloadMediaCommand: DownloadMediaDTO | null = null;
 
 	get isConfirmationEnabled(): boolean {
-		switch (this.mediaId.type) {
+		switch (this.downloadMediaCommand?.type) {
 			case PlexMediaType.Movie:
 				return SettingsStore.askDownloadMovieConfirmation;
 			case PlexMediaType.TvShow:
@@ -89,86 +89,61 @@ export default class DownloadConfirmation extends Vue {
 		return ButtonType.Confirm;
 	}
 
-	private createPreview(mediaId: IMediaId): void {
-		const result: ITreeViewItem[] = [];
-		this.openDownloadPreviews = [];
+	private createPreview(downloadMediaCommand: DownloadMediaDTO): void {
+		let filterResult: ITreeViewItem[] = [];
+		const mediaIds = downloadMediaCommand.mediaIds;
 
 		// If statements instead of switch to avoid having to overcomplicate the variable names.
 
 		// Movie: Show only the movie
-		if (mediaId.type === PlexMediaType.Movie) {
-			const movie: ITreeViewItem | undefined = this.items.find((x) => x.id === mediaId.id);
-			if (movie) {
-				// Ensure all nodes are open
-				this.openDownloadPreviews.push(movie.key);
-				result.push(clone(movie));
-			}
-		}
-
-		// Tv show: Show tvShow -> with all seasons -> with all episodes
-		if (mediaId.type === PlexMediaType.TvShow) {
-			const tvShow: ITreeViewItem | undefined = this.items.find((x) => x.id === mediaId.id);
-			if (tvShow) {
-				// Ensure all nodes are open
-				this.getLeafs([tvShow]).forEach((x) => this.openDownloadPreviews.push(x));
-				result.push(clone(tvShow));
-			}
-		}
-
-		// Season: Show tvShow -> season -> with all episodes
-		if (mediaId.type === PlexMediaType.Season) {
-			let tvShow: ITreeViewItem = {} as ITreeViewItem;
-			for (let i = 0; i < this.items.length; i++) {
-				const season = this.items[i].children.find((c) => c.id === mediaId.id);
-				if (season) {
-					tvShow = clone(this.items[i]);
-					tvShow.children = clone([season]);
-					// Ensure all nodes are open
-					this.openDownloadPreviews.push(tvShow.key);
-					this.openDownloadPreviews.push(season.key);
-					break;
-				}
-			}
-			result.push(tvShow);
+		if (downloadMediaCommand.type === PlexMediaType.Movie) {
+			filterResult = this.items.filter((x) => mediaIds.some((y) => y === x.id)) ?? [];
 		}
 
 		// Episode: Show tvShow -> season -> episode without anything else
-		if (mediaId.type === PlexMediaType.Episode) {
-			let tvShow: ITreeViewItem = {} as ITreeViewItem;
-			for (let i = 0; i < this.items.length; i++) {
-				for (let j = 0; j < this.items[i].children.length; j++) {
-					const season: ITreeViewItem = clone(this.items[i].children[j]);
-					const episode: ITreeViewItem | undefined = season?.children?.find((c) => c.id === mediaId.id);
-					if (episode) {
-						tvShow = clone(this.items[i]);
-						season.children = clone([episode]);
-						tvShow.children = clone([season]);
-						// Ensure all nodes are open
-						this.openDownloadPreviews.push(tvShow.key);
-						this.openDownloadPreviews.push(season.key);
-						break;
-					}
-				}
-			}
-			result.push(tvShow);
+		// First filter and then map to exclude unneeded tvshows/seasons/episodes
+		if (
+			downloadMediaCommand.type === PlexMediaType.TvShow ||
+			downloadMediaCommand.type === PlexMediaType.Season ||
+			downloadMediaCommand.type === PlexMediaType.Episode
+		) {
+			filterResult = this.items
+				.filter((tvShow) => tvShow.children.some((season) => season.children.some((z) => mediaIds.some((y) => y === z.id))))
+				.map((tvShow) => {
+					return {
+						...tvShow,
+						children: tvShow.children
+							.filter((season) => season.children.some((episode) => mediaIds.some((y) => y === episode.id)))
+							.map((season) => {
+								return {
+									...season,
+									children: season.children.filter((episode) => mediaIds.some((y) => y === episode.id)),
+								};
+							}),
+					};
+				});
 		}
-		this.downloadPreview = result;
+
+		this.downloadPreview = filterResult;
+		Log.info('preview', this.downloadPreview);
 	}
 
 	/* Recursively retrieve all unique keys used in the items: ITreeViewItem[] */
-	getLeafs(items: ITreeViewItem[]): string[] {
+	get getLeafs(): string[] {
 		let keys: string[] = [];
-		keys = keys.concat(items.map((x) => x.key));
-		keys = keys.concat(items.map((x) => x.children?.map((y) => y.key)).flat(1));
-		keys = keys.concat(items.map((x) => x.children?.map((y) => y.children?.map((z) => z.key))).flat(2));
-		keys = keys.concat(items.map((x) => x.children?.map((y) => y.children?.map((z) => z.children?.map((w) => w.key)))).flat(3));
+		keys = keys.concat(this.downloadPreview.map((x) => x.key));
+		keys = keys.concat(this.downloadPreview.map((x) => x.children?.map((y) => y.key)).flat(1));
+		keys = keys.concat(this.downloadPreview.map((x) => x.children?.map((y) => y.children?.map((z) => z.key))).flat(2));
+		keys = keys.concat(
+			this.downloadPreview.map((x) => x.children?.map((y) => y.children?.map((z) => z.children?.map((w) => w.key)))).flat(3),
+		);
 		return keys;
 	}
 
-	openDialog(mediaId: IMediaId): void {
-		this.mediaId = mediaId;
+	openDialog(downloadMediaCommand: DownloadMediaDTO): void {
+		this.downloadMediaCommand = downloadMediaCommand;
 		if (this.isConfirmationEnabled) {
-			this.createPreview(mediaId);
+			this.createPreview(downloadMediaCommand);
 		} else {
 			this.confirmDownload();
 		}
@@ -180,7 +155,7 @@ export default class DownloadConfirmation extends Vue {
 	}
 
 	confirmDownload(): void {
-		this.$emit('download', this.mediaId);
+		this.$emit('download', this.downloadMediaCommand);
 	}
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-	<span>{{ formattedString }} {{ speed ? '/s' : '' }}</span>
+	<span>{{ formattedString }}{{ speed ? '/s' : '' }}</span>
 </template>
 
 <script lang="ts">

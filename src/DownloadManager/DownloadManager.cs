@@ -18,11 +18,9 @@ namespace PlexRipper.DownloadManager
     /// <summary>
     /// Handles all <see cref="DownloadTask"/> management, all download related commands should be handled here.
     /// </summary>
-    public class DownloadManager : IDownloadManager
+    public class DownloadManager : DownloadManagerBase, IDownloadManager
     {
         #region Fields
-
-        private readonly DownloadQueue _downloadQueue;
 
         /// <summary>
         /// Currently loaded and active <see cref="PlexDownloadClient"/>s.
@@ -33,13 +31,13 @@ namespace PlexRipper.DownloadManager
 
         private readonly IFileSystem _fileSystem;
 
-        private readonly IMediator _mediator;
-
         private readonly IPlexAuthenticationService _plexAuthenticationService;
 
-        private readonly ISignalRService _signalRService;
-
         private readonly IUserSettings _userSettings;
+
+        private readonly INotificationsService _notificationsService;
+
+        private readonly IDownloadQueue _downloadQueue;
 
         private Task<Task> _checkDownloadTask;
 
@@ -55,7 +53,9 @@ namespace PlexRipper.DownloadManager
         /// <param name="plexAuthenticationService">.</param>
         /// <param name="fileSystem">.</param>
         /// <param name="fileMerger">.</param>
+        /// <param name="userSettings"></param>
         /// <param name="downloadQueue">Used to retrieve the next <see cref="DownloadTask"/> from the <see cref="DownloadQueue"/>.</param>
+        /// <param name="notificationsService"></param>
         public DownloadManager(
             IMediator mediator,
             ISignalRService signalRService,
@@ -63,16 +63,17 @@ namespace PlexRipper.DownloadManager
             IFileSystem fileSystem,
             IFileMerger fileMerger,
             IUserSettings userSettings,
-            DownloadQueue downloadQueue)
+            IDownloadQueue downloadQueue,
+            INotificationsService notificationsService) : base(mediator, signalRService)
         {
-            _mediator = mediator;
-            _signalRService = signalRService;
+            ServicePointManager.DefaultConnectionLimit = 1000;
+
             _plexAuthenticationService = plexAuthenticationService;
             _fileSystem = fileSystem;
             _fileMerger = fileMerger;
             _userSettings = userSettings;
+            _notificationsService = notificationsService;
             _downloadQueue = downloadQueue;
-            ServicePointManager.DefaultConnectionLimit = 1000;
 
             _fileMerger.FileMergeProgressObservable.Subscribe(OnFileMergeProgress);
         }
@@ -91,6 +92,7 @@ namespace PlexRipper.DownloadManager
                 return tokenResult.ToResult();
             }
 
+            downloadTask.ServerToken = tokenResult.Value;
             downloadTask.ServerToken = tokenResult.Value;
 
             return Result.Ok(downloadTask);
@@ -227,21 +229,6 @@ namespace PlexRipper.DownloadManager
             return Result.Ok(downloadClient);
         }
 
-        private async Task<Result> SetDownloadStatusAsync(DownloadStatusChanged downloadStatusChanged)
-        {
-            Log.Debug($"DownloadClient changed downloadStatus for downloadTask {downloadStatusChanged.Id} " +
-                      $"to {downloadStatusChanged.Status.ToString()}");
-
-            var result = await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadStatusChanged.Id, downloadStatusChanged.Status));
-            if (result.IsFailed)
-            {
-                return result;
-            }
-
-            await _signalRService.SendDownloadStatusUpdate(downloadStatusChanged.Id, downloadStatusChanged.Status);
-            return Result.Ok();
-        }
-
         private void CleanUpDownloadClient(int downloadTaskId)
         {
             Log.Debug($"Cleaning-up downloadClient with id {downloadTaskId}");
@@ -297,7 +284,7 @@ namespace PlexRipper.DownloadManager
                     downloadComplete.DataTotal));
 
                 await _fileMerger.AddFileTask(downloadComplete.DownloadTask);
-                await SetDownloadStatusAsync(new DownloadStatusChanged(downloadComplete.Id, DownloadStatus.Merging));
+                await SetDownloadStatusAsync(downloadComplete.Id, DownloadStatus.Merging);
                 Log.Information($"The download of {downloadComplete.DownloadTask.Title} has completed!");
                 CheckDownloadQueue();
             });
@@ -305,7 +292,7 @@ namespace PlexRipper.DownloadManager
 
         private void OnDownloadStatusChanged(DownloadStatusChanged downloadStatusChanged)
         {
-            Task.Run(async () => { await SetDownloadStatusAsync(downloadStatusChanged); });
+            SetDownloadStatus(downloadStatusChanged.Id, downloadStatusChanged.Status);
         }
 
         private void OnDownloadProgressChanged(DownloadProgress downloadProgress)
@@ -320,7 +307,7 @@ namespace PlexRipper.DownloadManager
             _signalRService.SendFileMergeProgressUpdate(progress);
             if (progress.Percentage >= 100)
             {
-                Task.Run(async () => { await SetDownloadStatusAsync(new DownloadStatusChanged(progress.DownloadTaskId, DownloadStatus.Completed)); });
+                SetDownloadStatus(progress.DownloadTaskId, DownloadStatus.Completed);
             }
         }
 
@@ -331,6 +318,13 @@ namespace PlexRipper.DownloadManager
         #region Public
 
         #region Commands
+
+        public Result<bool> Setup()
+        {
+            Log.Information("Running DownloadManager setup.");
+            _downloadQueue.Setup();
+            return Result.Ok(true);
+        }
 
         /// <inheritdoc/>
         public async Task<Result> DeleteDownloadClient(int downloadTaskId)
@@ -358,6 +352,29 @@ namespace PlexRipper.DownloadManager
         public async Task<Result<bool>> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks)
         {
             Log.Debug($"Attempt to add {downloadTasks.Count} DownloadTasks");
+            var downloadTasksResult = ValidateDownloadTasks(downloadTasks);
+            if (downloadTasksResult.IsFailed)
+            {
+                return downloadTasksResult.ToResult();
+            }
+
+            // Add to Database
+            var createResult = await _mediator.Send(new CreateDownloadTasksCommand(downloadTasks));
+            if (createResult.IsFailed)
+            {
+                return createResult.ToResult().LogError();
+            }
+
+            if (createResult.Value.Count != downloadTasks.Count)
+            {
+                return Result.Fail("The added download tasks are not stored correctly, missing download tasks.").LogError();
+            }
+
+            // Set the Id's of the just added downloadTasks
+            for (int i = 0; i < downloadTasks.Count; i++)
+            {
+                downloadTasks[i].Id = createResult.Value[i];
+            }
 
             Log.Debug($"Successfully added all {downloadTasks.Count} DownloadTasks");
             CheckDownloadQueue();
@@ -365,55 +382,75 @@ namespace PlexRipper.DownloadManager
         }
 
         /// <summary>
+        /// Validates the <see cref="DownloadTask"/>s and returns only the valid one while notifying of any failed ones.
+        /// Returns only a failed result when all downloadTasks failed validation.
+        /// </summary>
+        /// <param name="downloadTasks">The <see cref="DownloadTask"/>s to validate.</param>
+        /// <returns>Only the valid <see cref="DownloadTask"/>s.</returns>
+        private Result<List<DownloadTask>> ValidateDownloadTasks(List<DownloadTask> downloadTasks)
+        {
+            var failedList = new List<DownloadTask>();
+            var result = Result.Fail("Failed to add the following DownloadTasks");
+            foreach (var downloadTask in downloadTasks)
+            {
+                // Check validity
+                var validationResult = downloadTask.IsValid();
+                if (validationResult.IsFailed)
+                {
+                    failedList.Add(downloadTask);
+                    result = Result.Merge(
+                        result,
+                        validationResult
+                            .WithError(new Error(downloadTask.Title)
+                                .WithMetadata("downloadTask", downloadTask)));
+                    result.LogError();
+                }
+
+                // TODO Need a different way to check for duplicate, media consisting of multiple parts have the same rating key
+                // Check if this DownloadTask is a duplicate
+                // var downloadTaskExists = await DownloadTaskExistsAsync(downloadTask);
+                // if (downloadTaskExists.IsFailed)
+                // {
+                //     // If it fails then there are bigger problems..
+                //     return downloadTaskExists;
+                // }
+                //
+                // if (downloadTaskExists.Value)
+                // {
+                //     failedList.Add(downloadTask);
+                // }
+            }
+
+            // All download tasks failed validation
+            if (failedList.Count == downloadTasks.Count)
+            {
+                return result;
+            }
+
+            // Some failed, alert front-end of some failing
+            if (failedList.Count > 0)
+            {
+                _notificationsService.SendResult(result);
+                return Result.Ok(downloadTasks.Except(failedList).ToList());
+            }
+
+            // All passed
+            return Result.Ok(downloadTasks);
+        }
+
+        /// <summary>
         /// Check the DownloadQueue for downloadTasks which can be started.
         /// </summary>
         public void CheckDownloadQueue()
         {
-            Log.Debug("Executing download queue check!");
-            if (_checkDownloadTask?.Status.Equals(TaskStatus.Running) ?? false)
-            {
-                Log.Warning("Check download Queue already in progress");
-            }
-
-            _checkDownloadTask = Task.Factory.StartNew(
-                async () =>
-                {
-                    Log.Debug("Checking for download tasks which can be processed.");
-                    var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
-                    var serverList = serverListResult.Value.Where(x => x.HasDownloadTasks).ToList();
-
-                    Log.Information($"Starting the check of {serverList.Count} PlexServers.");
-                    if (serverList.Any())
-                    {
-                        foreach (var server in serverList)
-                        {
-                            var downloadTask = await _downloadQueue.NextDownloadAsync(server);
-
-                            if (downloadTask.IsFailed)
-                            {
-                                continue;
-                            }
-
-                            // Check if there is already a client working this downloadTask
-                            var downloadClient = GetDownloadClient(downloadTask.Value.Id);
-                            if (downloadClient.IsFailed)
-                            {
-                                downloadClient = await CreateDownloadClientAsync(downloadTask.Value);
-                                downloadClient.Value.Start();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Log.Information("There are no PlexServers with DownloadTasks");
-                    }
-                }, TaskCreationOptions.LongRunning);
+            _downloadQueue.CheckDownloadQueue(this);
         }
 
+        /// <param name="downloadTaskIds"></param>
         /// <inheritdoc/>
-        public async Task<Result<bool>> ClearCompletedAsync()
+        public async Task<Result<bool>> ClearCompletedAsync(List<int> downloadTaskIds = null)
         {
-            return await _mediator.Send(new ClearCompletedDownloadTasksCommand());
+            return await _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
         }
 
         /// <inheritdoc/>
@@ -423,17 +460,24 @@ namespace PlexRipper.DownloadManager
         }
 
         /// <inheritdoc/>
-        public Result<bool> StopDownload(int downloadTaskId)
+        public Result StopDownload(List<int> downloadTaskIds = null)
         {
-            // Retrieve download client
-            var downloadClient = GetDownloadClient(downloadTaskId);
-            if (downloadClient.IsSuccess)
+            if (downloadTaskIds == null)
             {
-                downloadClient.Value.Stop();
-                return Result.Ok(true);
+                return ResultExtensions.IsNull(nameof(downloadTaskIds));
             }
 
-            return Result.Ok(false);
+            // Retrieve download client
+            foreach (int downloadTaskId in downloadTaskIds)
+            {
+                var downloadClient = GetDownloadClient(downloadTaskId);
+                if (downloadClient.IsSuccess)
+                {
+                    downloadClient.Value.Stop();
+                }
+            }
+
+            return Result.Ok();
         }
 
         /// <inheritdoc/>

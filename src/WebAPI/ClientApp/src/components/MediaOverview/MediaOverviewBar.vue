@@ -15,13 +15,28 @@
 		</v-toolbar-title>
 
 		<v-spacer></v-spacer>
+		<!--	Download button	-->
+		<vertical-button
+			icon="mdi-download"
+			label="Download"
+			:height="barHeight"
+			:width="verticalButtonWidth"
+			:disabled="!hasSelected"
+			@click="download"
+		/>
 		<!--	Refresh library button	-->
-		<vertical-button icon="mdi-refresh" label="Refresh" :height="barHeight" @click="refreshLibrary" />
+		<vertical-button
+			icon="mdi-refresh"
+			label="Refresh"
+			:height="barHeight"
+			:width="verticalButtonWidth"
+			@click="refreshLibrary"
+		/>
 
 		<!--	View mode	-->
 		<v-menu left bottom offset-y>
 			<template #activator="{ on, attrs }">
-				<vertical-button v-bind="attrs" icon="mdi-eye" label="View" :height="barHeight" v-on="on" />
+				<vertical-button v-bind="attrs" icon="mdi-eye" label="View" :height="barHeight" :width="verticalButtonWidth" v-on="on" />
 			</template>
 			<!-- View mode options -->
 			<v-list>
@@ -65,10 +80,18 @@ export default class MediaOverviewBar extends Vue {
 	@Prop({ required: true, type: String })
 	readonly viewMode!: ViewMode;
 
+	@Prop({ required: true, type: Boolean })
+	readonly hasSelected!: boolean;
+
 	readonly barHeight: number = 85;
+	readonly verticalButtonWidth: number = 120;
 
 	refreshLibrary(): void {
 		this.$emit('refresh-library', this.library?.id);
+	}
+
+	download(): void {
+		this.$emit('download');
 	}
 
 	changeView(viewMode: ViewMode): void {

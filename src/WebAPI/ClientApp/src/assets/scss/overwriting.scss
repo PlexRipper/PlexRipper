@@ -61,10 +61,10 @@ v-data-table
 			}
 		}
 	}
-	&.theme--dark {
+	&.theme--dark, tbody tr.v-data-table__selected {
 		@extend .no-background;
 	}
-	&.theme--light {
+	&.theme--light, tbody tr.v-data-table__selected {
 		@extend .no-background;
 	}
 }
@@ -138,13 +138,15 @@ v-expansion-panels
 	}
 }
 
-//.v-text-field--outlined {
-//	.v-input__control {
-//		.v-input__slot {
-//			border: 1px solid rgba(255, 255, 255, 0.24);
-//			border-collapse: collapse;
-//		}
-//	}
-//	fieldset {
-//	}
-//}
+/*
+v-btn
+*/
+// Remove background color on button disabled
+.theme--dark.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+	background-color: transparent !important;
+}
+
+// Remove background color on button disabled
+.theme--light.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+	background-color: transparent !important;
+}

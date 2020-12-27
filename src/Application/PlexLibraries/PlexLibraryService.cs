@@ -81,7 +81,7 @@ namespace PlexRipper.Application.PlexLibraries
 
             // We wrap it in a task to ensure we can await the result before continuing.
             await Task.WhenAll(
-                plexLibrary.TvShows.AsParallel().WithDegreeOfParallelism(10).Select(async plexTvShow =>
+                plexLibrary.TvShows.AsParallel().WithDegreeOfParallelism(5).Select(async plexTvShow =>
                 {
                     plexTvShow.Seasons = await _plexServiceApi.GetSeasonsAsync(authToken, serverUrl, plexTvShow);
 

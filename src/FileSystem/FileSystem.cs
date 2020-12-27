@@ -6,7 +6,6 @@ using System.Reflection;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
-using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.FileSystem
 {
@@ -110,20 +109,16 @@ namespace PlexRipper.FileSystem
 
             try
             {
-                if (File.Exists(filePath))
-                {
-                    string directoryPath = Path.GetDirectoryName(filePath) ?? string.Empty;
-                    if (string.IsNullOrEmpty(directoryPath))
-                    {
-                        return Result.Fail($"Could not determine the directory name of path: {filePath}").LogError();
-                    }
+                var directory = Path.GetDirectoryName(filePath) ?? string.Empty;
 
-                    Directory.Delete(directoryPath);
-                }
                 // If the filePath is just an empty directory then delete that.
-                else if (Directory.Exists(filePath) || !Directory.GetFiles(filePath).Any())
+                if (!string.IsNullOrEmpty(directory) && Directory.Exists(directory) && !Directory.GetFiles(directory).Any())
                 {
-                    Directory.Delete(filePath);
+                    Directory.Delete(directory);
+                }
+                else
+                {
+                    return Result.Fail($"Could not determine the directory name of path: {filePath} or the path contains files").LogError();
                 }
             }
             catch (Exception e)

@@ -139,14 +139,14 @@ namespace PlexRipper.Data
             }
 
             Log.Error("Database could not be created and or migrated.");
-            return Result.Fail($"Could not create database {DatabaseName} in {_fileSystem.ConfigDirectory}").LogError();
+            return Result.Fail($"Could not create database {DatabaseName} in {FileSystemPaths.ConfigDirectory}").LogError();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                string dbPath = Path.Combine(_fileSystem.ConfigDirectory, DatabaseName);
+                string dbPath = Path.Combine(FileSystemPaths.ConfigDirectory, DatabaseName);
 
                 // optionsBuilder.UseLazyLoadingProxies();
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);

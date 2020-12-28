@@ -5,15 +5,15 @@ namespace PlexRipper.Domain
 {
     public static class OsInfo
     {
-        public static Os Os { get; }
+        public static OperatingSystemPlatform CurrentOS { get; }
 
         public static bool IsNotWindows => !IsWindows;
 
-        public static bool IsLinux => Os == Os.Linux;
+        public static bool IsLinux => CurrentOS == OperatingSystemPlatform.Linux;
 
-        public static bool IsOsx => Os == Os.Osx;
+        public static bool IsOsx => CurrentOS == OperatingSystemPlatform.Osx;
 
-        public static bool IsWindows => Os == Os.Windows;
+        public static bool IsWindows => CurrentOS == OperatingSystemPlatform.Windows;
 
         static OsInfo()
         {
@@ -23,37 +23,28 @@ namespace PlexRipper.Domain
             {
                 case PlatformID.Win32NT:
                 {
-                    Os = Os.Windows;
+                    CurrentOS = OperatingSystemPlatform.Windows;
                     break;
                 }
+
                 case PlatformID.MacOSX:
                 case PlatformID.Unix:
                 {
                     // Sometimes Mac OS reports itself as Unix
                     if (Directory.Exists("/System/Library/CoreServices/") &&
                         (File.Exists("/System/Library/CoreServices/SystemVersion.plist") ||
-                         File.Exists("/System/Library/CoreServices/ServerVersion.plist"))
-                    )
+                         File.Exists("/System/Library/CoreServices/ServerVersion.plist")))
                     {
-                        Os = Os.Osx;
+                        CurrentOS = OperatingSystemPlatform.Osx;
                     }
                     else
                     {
-                        Os = Os.Linux;
+                        CurrentOS = OperatingSystemPlatform.Linux;
                     }
 
                     break;
                 }
             }
         }
-    }
-
-    public enum Os
-    {
-        Windows,
-
-        Linux,
-
-        Osx,
     }
 }

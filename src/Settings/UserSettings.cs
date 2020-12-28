@@ -15,8 +15,6 @@ namespace PlexRipper.Settings
     {
         #region Fields
 
-        private readonly IFileSystem _fileSystem;
-
         private readonly JsonSerializerOptions _jsonSerializerSettings = new JsonSerializerOptions
         {
             WriteIndented = true,
@@ -28,22 +26,13 @@ namespace PlexRipper.Settings
 
         #endregion
 
-        #region Constructors
-
-        public UserSettings(IFileSystem fileSystem)
-        {
-            _fileSystem = fileSystem;
-        }
-
-        #endregion
-
         #region Properties
 
         [JsonIgnore]
         private static string FileName { get; } = "PlexRipperSettings.json";
 
         [JsonIgnore]
-        private string FileLocation => Path.Join(_fileSystem.ConfigDirectory, FileName);
+        private string FileLocation => Path.Join(FileSystemPaths.ConfigDirectory, FileName);
 
         #endregion
 
@@ -53,7 +42,7 @@ namespace PlexRipper.Settings
 
         public Result<bool> Setup()
         {
-            // TODO Add result based error handeling here
+            // TODO Add result based error handling here
             Log.Information("Setting up UserSettings");
             if (!File.Exists(FileLocation))
             {

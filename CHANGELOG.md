@@ -1,3 +1,20 @@
+## [0.4.1] - 2020-12-28
+
+### Added
+
+-   Added Polly package to start integrating resilience
+
+### Changed
+
+-   Changed download commands in the DownloadManager to async due to the async dependency of ClearWorkers.
+-   Refactored the dependency chain between DownloadManager, DownloadClient and DownloadWorker to be instantiated by Autofac
+-   HttpClients are now instantiated through IHttpClientFactory
+
+### Fixed
+
+-   Fixed the LibrarySize not being shown in the front-end …
+-   Fixed the DownloadTask creating invalid path if the media title contained invalid characters.
+
 ## [0.4.0] - 2020-12-28
 
 ### Added

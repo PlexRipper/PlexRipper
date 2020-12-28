@@ -198,7 +198,7 @@ namespace PlexRipper.DownloadManager.Download
                     _fileStream.Position = DownloadWorkerTask.BytesReceived;
 
                     // Create download client
-                    var client = _httpClientFactory.CreateClient();
+                    var client = _httpClientFactory.CreateClient("Default");
                     using var response = await client.SendAsync(new HttpRequestMessage
                     {
                         RequestUri = DownloadWorkerTask.Uri,

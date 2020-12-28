@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -5,7 +6,6 @@ using Autofac;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +17,7 @@ using PlexRipper.Domain;
 using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
+using Polly;
 
 namespace PlexRipper.WebAPI
 {
@@ -57,6 +58,7 @@ namespace PlexRipper.WebAPI
                         builder
                             .AllowAnyHeader()
                             .AllowAnyMethod()
+
                             // The combo all origin is allowed with allow credentials is needed to make SignalR work from the client.
                             .SetIsOriginAllowed(x => true)
                             .AllowCredentials();
@@ -68,7 +70,6 @@ namespace PlexRipper.WebAPI
                 .AddControllers()
                 .AddJsonOptions(
                     options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
-
 
             if (CurrentEnvironment.IsProduction())
             {
@@ -118,7 +119,9 @@ namespace PlexRipper.WebAPI
             });
 
             // Autofac
-            services.AddHttpClient();
+            services.AddHttpClient("Default").AddTransientHttpErrorPolicy(builder =>
+                builder.WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+            );
             services.AddOptions();
         }
 

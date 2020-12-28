@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -5,6 +6,8 @@ using FluentResults;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Config.Converters;
+using Polly;
+using Polly.Retry;
 using RestSharp;
 using RestSharp.Serialization.Xml;
 using RestSharp.Serializers.SystemTextJson;
@@ -13,6 +16,7 @@ namespace PlexRipper.PlexApi
 {
     public class PlexApiClient : RestClient
     {
+
         public static JsonSerializerOptions SerializerOptions =>
             new JsonSerializerOptions
             {

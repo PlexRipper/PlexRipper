@@ -15,7 +15,7 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="downloadTaskIds">The ids of the <see cref="DownloadTask"/> to stop.</param>
         /// <returns>Is successful.</returns>
-        Result StopDownload(List<int> downloadTaskIds = null);
+        Task<Result> StopDownload(List<int> downloadTaskIds = null);
 
         /// <summary>
         /// Adds a list of <see cref="DownloadTask"/>s to the download queue.
@@ -50,7 +50,7 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to pause.</param>
         /// <returns>Is successful.</returns>
-        Result<bool> PauseDownload(int downloadTaskId);
+        Task<Result> PauseDownload(int downloadTaskId);
 
         /// <summary>
         /// Deletes the PlexDownloadClient, if active, from the _downloadList, executes its disposal and deletes from database.

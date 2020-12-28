@@ -281,9 +281,9 @@ namespace PlexRipper.Application.PlexDownloads
             return await _downloadManager.RestartDownloadAsync(downloadTaskId);
         }
 
-        public Result<bool> StopDownloadTask(List<int> downloadTaskIds = null)
+        public async Task<Result> StopDownloadTask(List<int> downloadTaskIds = null)
         {
-            return _downloadManager.StopDownload(downloadTaskIds);
+            return await _downloadManager.StopDownload(downloadTaskIds);
         }
 
         public async Task<Result<bool>> StartDownloadTask(int downloadTaskId)
@@ -293,11 +293,11 @@ namespace PlexRipper.Application.PlexDownloads
             return await _downloadManager.StartDownload(downloadTaskId);
         }
 
-        public Result<bool> PauseDownloadTask(int downloadTaskId)
+        public async Task<Result> PauseDownloadTask(int downloadTaskId)
         {
             if (downloadTaskId <= 0) return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
-            return _downloadManager.PauseDownload(downloadTaskId);
+            return await _downloadManager.PauseDownload(downloadTaskId);
         }
 
         public Task<Result<bool>> ClearCompleted(List<int> downloadTaskIds)

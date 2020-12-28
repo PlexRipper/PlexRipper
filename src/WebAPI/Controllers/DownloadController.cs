@@ -112,9 +112,9 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpPost("stop")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public IActionResult Stop([FromBody] List<int> downloadTaskIds)
+        public async Task<IActionResult> Stop([FromBody] List<int> downloadTaskIds)
         {
-            var result = _plexDownloadService.StopDownloadTask(downloadTaskIds);
+            var result = await _plexDownloadService.StopDownloadTask(downloadTaskIds);
             return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 
@@ -152,14 +152,14 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpGet("pause/{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public IActionResult Pause(int id)
+        public async Task<IActionResult> Pause(int id)
         {
             if (id <= 0)
             {
                 return BadRequest(id, "Download Task Id");
             }
 
-            var result = _plexDownloadService.PauseDownloadTask(id);
+            var result = await _plexDownloadService.PauseDownloadTask(id);
             return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 

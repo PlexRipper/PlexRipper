@@ -29,13 +29,13 @@ namespace PlexRipper.DownloadManager
 
         private readonly IFileMerger _fileMerger;
 
-        private readonly IFileSystem _fileSystem;
-
         private readonly IPlexAuthenticationService _plexAuthenticationService;
 
         private readonly IUserSettings _userSettings;
 
         private readonly INotificationsService _notificationsService;
+
+        private readonly Func<DownloadTask, PlexDownloadClient> _plexDownloadClientFactory;
 
         private readonly IDownloadQueue _downloadQueue;
 
@@ -56,23 +56,24 @@ namespace PlexRipper.DownloadManager
         /// <param name="userSettings"></param>
         /// <param name="downloadQueue">Used to retrieve the next <see cref="DownloadTask"/> from the <see cref="DownloadQueue"/>.</param>
         /// <param name="notificationsService"></param>
+        /// <param name="plexDownloadClientFactory"></param>
+        /// <param name="httpClientFactory"></param>
         public DownloadManager(
             IMediator mediator,
             ISignalRService signalRService,
             IPlexAuthenticationService plexAuthenticationService,
-            IFileSystem fileSystem,
             IFileMerger fileMerger,
             IUserSettings userSettings,
             IDownloadQueue downloadQueue,
-            INotificationsService notificationsService) : base(mediator, signalRService)
+            INotificationsService notificationsService,
+            Func<DownloadTask, PlexDownloadClient> plexDownloadClientFactory) : base(mediator, signalRService)
         {
-            ServicePointManager.DefaultConnectionLimit = 1000;
 
             _plexAuthenticationService = plexAuthenticationService;
-            _fileSystem = fileSystem;
             _fileMerger = fileMerger;
             _userSettings = userSettings;
             _notificationsService = notificationsService;
+            _plexDownloadClientFactory = plexDownloadClientFactory;
             _downloadQueue = downloadQueue;
 
             _fileMerger.FileMergeProgressObservable.Subscribe(OnFileMergeProgress);
@@ -111,13 +112,10 @@ namespace PlexRipper.DownloadManager
                 return authenticateDownloadTaskResult.ToResult().LogError();
             }
 
-            HttpResponseMessage response = await ValidateDownloadSize(downloadTask);
-
             // Create download client
-            var newClient = new PlexDownloadClient(downloadTask, _mediator, _fileSystem)
-            {
-                Parts = _userSettings.AdvancedSettings.DownloadManager.DownloadSegments,
-            };
+            var newClient = _plexDownloadClientFactory(downloadTask);
+            newClient.Parts = _userSettings.AdvancedSettings.DownloadManager.DownloadSegments;
+
 
             // Setup the client
             var setupResult = await newClient.SetupAsync(downloadTask.DownloadWorkerTasks);
@@ -131,28 +129,7 @@ namespace PlexRipper.DownloadManager
             return Result.Ok(newClient);
         }
 
-        private async Task<HttpResponseMessage> ValidateDownloadSize(DownloadTask downloadTask)
-        {
-            // Determine media size
-            // Source: https://stackoverflow.com/a/48190014/8205497
-            using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync(downloadTask.DownloadUri, HttpCompletionOption.ResponseHeadersRead);
-            if (!response.IsSuccessStatusCode)
-            {
-                return response;
-            }
 
-            var newDataTotal = response.Content.Headers.ContentLength ?? -1L;
-            if (downloadTask.DataTotal > 0 && downloadTask.DataTotal != newDataTotal)
-            {
-                // The media size changes, re-create download workers and delete any old ones.
-                downloadTask.DownloadWorkerTasks = null;
-                await _mediator.Send(new DeleteDownloadWorkerTasksByDownloadTaskIdCommand(downloadTask.Id));
-            }
-
-            downloadTask.DataTotal = newDataTotal;
-            return response;
-        }
 
         /// <summary>
         /// Checks if a <see cref="DownloadTask"/> with this Id or ratingKey has already been added.
@@ -229,7 +206,7 @@ namespace PlexRipper.DownloadManager
             return Result.Ok(downloadClient);
         }
 
-        private void CleanUpDownloadClient(int downloadTaskId)
+        private async Task CleanUpDownloadClient(int downloadTaskId)
         {
             Log.Debug($"Cleaning-up downloadClient with id {downloadTaskId}");
             var index = _downloadsList.FindIndex(x => x.DownloadTaskId == downloadTaskId);
@@ -239,7 +216,7 @@ namespace PlexRipper.DownloadManager
                 return;
             }
 
-            _downloadsList[index].Stop();
+            await _downloadsList[index].Stop();
             _downloadsList[index].Dispose();
             _downloadsList.RemoveAt(index);
 
@@ -460,7 +437,7 @@ namespace PlexRipper.DownloadManager
         }
 
         /// <inheritdoc/>
-        public Result StopDownload(List<int> downloadTaskIds = null)
+        public async Task<Result> StopDownload(List<int> downloadTaskIds = null)
         {
             if (downloadTaskIds == null)
             {
@@ -473,7 +450,7 @@ namespace PlexRipper.DownloadManager
                 var downloadClient = GetDownloadClient(downloadTaskId);
                 if (downloadClient.IsSuccess)
                 {
-                    downloadClient.Value.Stop();
+                    await downloadClient.Value.Stop();
                 }
             }
 
@@ -500,17 +477,17 @@ namespace PlexRipper.DownloadManager
                 return downloadClient.ToResult();
             }
 
-            return downloadClient.Value.Start();
+            return await downloadClient.Value.Start();
         }
 
         /// <inheritdoc/>
-        public Result<bool> PauseDownload(int downloadTaskId)
+        public async Task<Result> PauseDownload(int downloadTaskId)
         {
             // Retrieve download client
             var downloadClient = GetDownloadClient(downloadTaskId);
             if (downloadClient.IsSuccess && downloadClient.Value != null)
             {
-                return downloadClient.Value.Pause();
+                return await downloadClient.Value.Pause();
             }
 
             return downloadClient

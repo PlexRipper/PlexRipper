@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -35,6 +35,8 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly IFileSystem _fileSystem;
 
+        private readonly IHttpClientFactory _httpClientFactory;
+
         private int _count;
 
         private Task _downloadTask;
@@ -56,10 +58,11 @@ namespace PlexRipper.DownloadManager.Download
         /// </summary>
         /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
         /// <param name="fileSystem">The filesystem used to store the downloaded data.</param>
-        public DownloadWorker(DownloadWorkerTask downloadWorkerTask, IFileSystem fileSystem)
+        public DownloadWorker(DownloadWorkerTask downloadWorkerTask, IFileSystem fileSystem, IHttpClientFactory httpClientFactory)
         {
             DownloadWorkerTask = downloadWorkerTask;
             _fileSystem = fileSystem;
+            _httpClientFactory = httpClientFactory;
 
             _timer.AutoReset = true;
             _timer.Elapsed += (sender, args) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
@@ -194,13 +197,20 @@ namespace PlexRipper.DownloadManager.Download
                     // Is 0 when starting new and > 0 when resuming.
                     _fileStream.Position = DownloadWorkerTask.BytesReceived;
 
-                    using var httpClient = new HttpClient();
-                    using var requestMessage = new HttpRequestMessage(HttpMethod.Get, DownloadWorkerTask.Uri);
-                    var request = (HttpWebRequest)WebRequest.Create(DownloadWorkerTask.Uri);
-                    request.AddRange(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte);
-                    var response = (HttpWebResponse)request.GetResponse();
+                    // Create download client
+                    var client = _httpClientFactory.CreateClient();
+                    using var response = await client.SendAsync(new HttpRequestMessage
+                    {
+                        RequestUri = DownloadWorkerTask.Uri,
+                        Method = HttpMethod.Get,
+                        Headers =
+                        {
+                            Range = new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte),
+                        },
+                    }, HttpCompletionOption.ResponseHeadersRead);
 
-                    await using Stream responseStream = response.GetResponseStream();
+
+                    await using Stream responseStream = await response.Content.ReadAsStreamAsync();
 
                     byte[] buffer = new byte[4096];
 

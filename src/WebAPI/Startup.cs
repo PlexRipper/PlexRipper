@@ -118,6 +118,7 @@ namespace PlexRipper.WebAPI
             });
 
             // Autofac
+            services.AddHttpClient();
             services.AddOptions();
         }
 

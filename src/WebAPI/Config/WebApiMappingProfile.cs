@@ -44,6 +44,7 @@ namespace PlexRipper.WebAPI.Config
             // PlexLibrary -> PlexLibraryDTO
             CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.MediaCount))
+                .ForMember(dto => dto.MediaSize, entity => entity.MapFrom(x => x.MediaSize))
                 .ForMember(dto => dto.SeasonCount, entity => entity.MapFrom(x => x.SeasonCount))
                 .ForMember(dto => dto.EpisodeCount, entity => entity.MapFrom(x => x.EpisodeCount));
 

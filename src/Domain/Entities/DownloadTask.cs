@@ -89,6 +89,8 @@ namespace PlexRipper.Domain
 
         #region Helpers
 
+        private string MovieTitle => $"{Title}" + (ReleaseYear > 0 ? $" ({ReleaseYear})" : string.Empty);
+
         [NotMapped]
         public DownloadStatus DownloadStatus
         {
@@ -122,11 +124,11 @@ namespace PlexRipper.Domain
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "Movies", $"{Title}-{FileNameWithoutExtention}");
+                        return Path.Combine(DownloadFolder.DirectoryPath, "Movies", $"{FileNameWithoutExtention}".SanitizePath());
                     case PlexMediaType.Episode:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "TvShows", $"{TitleTvShow}-{FileNameWithoutExtention}");
+                        return Path.Combine(DownloadFolder.DirectoryPath, "TvShows", $"{FileNameWithoutExtention}".SanitizePath());
                     default:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "Other", $"{Title}-{FileNameWithoutExtention}");
+                        return Path.Combine(DownloadFolder.DirectoryPath, "Other", $"{FileNameWithoutExtention}".SanitizePath());
                 }
             }
         }
@@ -145,28 +147,20 @@ namespace PlexRipper.Domain
         {
             get
             {
-                string path;
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:
-                        path = Path.Combine($"{Title} " + (ReleaseYear > 0 ? $"({ReleaseYear})" : string.Empty));
-                        break;
+                        return Path.Combine(MovieTitle.SanitizePath());
                     case PlexMediaType.Episode:
                         // If the same, than it will most likely be an anime type of tvShow which can have no seasons.
                         if (TitleTvShow == TitleTvShowSeason)
                         {
-                            path = Path.Combine(TitleTvShow);
-                            break;
+                            return Path.Combine(TitleTvShow.SanitizePath());
                         }
-
-                        path = Path.Combine(TitleTvShow, TitleTvShowSeason);
-                        break;
+                        return Path.Combine(TitleTvShow.SanitizePath(), TitleTvShowSeason.SanitizePath());
                     default:
-                        path = Path.Combine($"{FileNameWithoutExtention}");
-                        break;
+                        return Path.Combine($"{FileNameWithoutExtention.SanitizePath()}");
                 }
-
-                return path.SanitizePath();
             }
         }
 

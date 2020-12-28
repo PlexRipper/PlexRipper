@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application.Common;
@@ -38,6 +39,8 @@ namespace PlexRipper.WebAPI
         public Task WaitForStartAsync(CancellationToken cancellationToken)
         {
             Log.Information("Initiating boot process");
+            ServicePointManager.DefaultConnectionLimit = 1000;
+
             var fileSystemSetup = _fileSystem.Setup();
             if (fileSystemSetup.IsFailed)
             {

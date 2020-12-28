@@ -1,13 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace PlexRipper.Domain
 {
     public static class StringExtensions
     {
         private static Random random = new Random();
+
+        private static readonly char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
 
         public static string GetActualCasing(this string path)
         {
@@ -72,10 +73,7 @@ namespace PlexRipper.Domain
 
         public static string SanitizePath(this string path)
         {
-            string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()));
-            string invalidRegStr = string.Format(@"([{0}]*\.+$)|([{0}]+)", invalidChars);
-
-            return Regex.Replace(path, invalidRegStr, "_");
+            return new string(path.Where(ch => !invalidFileNameChars.Contains(ch)).ToArray());
         }
     }
 }

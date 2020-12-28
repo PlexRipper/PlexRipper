@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System.IO;
+using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -14,7 +15,14 @@ namespace PlexRipper.Domain
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
                 .WriteTo.Debug(outputTemplate: Template, restrictedToMinimumLevel: LogEventLevel.Debug)
-                .WriteTo.ColoredConsole(outputTemplate: Template);
+                .WriteTo.ColoredConsole(outputTemplate: Template)
+                .WriteTo.File(
+                    Path.Combine(FileSystemPaths.LogsDirectory, "log.txt"),
+                    LogEventLevel.Debug,
+                    Template,
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    retainedFileCountLimit: 7);
 
         public static Logger GetLogger()
         {

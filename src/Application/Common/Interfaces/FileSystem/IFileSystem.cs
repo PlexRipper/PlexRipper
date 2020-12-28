@@ -6,9 +6,6 @@ namespace PlexRipper.Application.Common
 {
     public interface IFileSystem
     {
-        string RootDirectory { get; }
-
-        string ConfigDirectory { get; }
 
         Result<FileStream> SaveFile(string directory, string fileName, long fileSize);
 

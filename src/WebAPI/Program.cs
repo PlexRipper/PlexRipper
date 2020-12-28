@@ -21,7 +21,7 @@ namespace PlexRipper.WebAPI
             try
             {
                 Domain.Log.Information("Starting up");
-                Domain.Log.Information($"Currently running on {OsInfo.Os}");
+                Domain.Log.Information($"Currently running on {OsInfo.CurrentOS}");
 
                 var host = Host.CreateDefaultBuilder(args)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())

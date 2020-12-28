@@ -1,3 +1,10 @@
+## [0.4.2] - 2020-12-28
+
+### Changed
+-   Enabled migrations for the database.
+-   Logging will now be written to file in `/config/logs`.
+-   Created a static class `FileSystemPaths` for OS paths.
+
 ## [0.4.1] - 2020-12-28
 
 ### Added

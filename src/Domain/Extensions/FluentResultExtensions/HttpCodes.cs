@@ -1,7 +1,7 @@
 ﻿namespace PlexRipper.Domain
 {
     // Status Codes listed at http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-    // These status codes are copied here from Microsoft.AspNetCore.Http package to avoid a large dependancy
+    // These status codes are copied here from Microsoft.AspNetCore.Http package to avoid a large dependency
     public static class HttpCodes
     {
         public const int Status100Continue = 100;

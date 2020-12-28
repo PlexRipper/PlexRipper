@@ -58,6 +58,8 @@ namespace PlexRipper.DownloadManager.Download
         /// <param name="downloadTask">The <see cref="DownloadTask"/> to start executing.</param>
         /// <param name="mediator"></param>
         /// <param name="fileSystem">Used to get fileStreams in which to store the download data.</param>
+        /// <param name="httpClientFactory"></param>
+        /// <param name="downloadWorkerFactory"></param>
         public PlexDownloadClient(DownloadTask downloadTask, IMediator mediator, IFileSystem fileSystem, IHttpClientFactory httpClientFactory,
             Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory)
         {

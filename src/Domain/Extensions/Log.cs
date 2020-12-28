@@ -4,12 +4,11 @@ using System.Runtime.CompilerServices;
 
 namespace PlexRipper.Domain
 {
-    // TODO Add summaries describing how the log levels should be used
     public static class Log
     {
         private static string FormatForException(this string message, Exception ex)
         {
-            return $"{message}: {(ex != null ? ex.ToString() : "")}";
+            return $"{message}: {ex?.ToString() ?? string.Empty}";
         }
 
         private static string FormatForContext(
@@ -30,8 +29,7 @@ namespace PlexRipper.Domain
         {
             Serilog.Log.Verbose(
                 message
-                    .FormatForContext(memberName, sourceFilePath)
-            );
+                    .FormatForContext(memberName, sourceFilePath));
         }
 
         public static void Verbose(
@@ -81,7 +79,7 @@ namespace PlexRipper.Domain
             [CallerFilePath] string sourceFilePath = "")
         {
             Serilog.Log.Debug(
-                (ex != null ? ex.ToString() : "")
+                (ex != null ? ex.ToString() : string.Empty)
                 .FormatForContext(memberName, sourceFilePath)
             );
         }
@@ -116,7 +114,7 @@ namespace PlexRipper.Domain
             [CallerFilePath] string sourceFilePath = "")
         {
             Serilog.Log.Information(
-                (ex != null ? ex.ToString() : "")
+                (ex != null ? ex.ToString() : string.Empty)
                 .FormatForContext(memberName, sourceFilePath)
             );
         }
@@ -150,7 +148,7 @@ namespace PlexRipper.Domain
             [CallerFilePath] string sourceFilePath = "")
         {
             Serilog.Log.Warning(
-                (ex != null ? ex.ToString() : "")
+                (ex != null ? ex.ToString() : string.Empty)
                 .FormatForContext(memberName, sourceFilePath)
             );
         }
@@ -185,7 +183,7 @@ namespace PlexRipper.Domain
             [CallerFilePath] string sourceFilePath = "")
         {
             Serilog.Log.Error(
-                (ex != null ? ex.ToString() : "")
+                (ex != null ? ex.ToString() : string.Empty)
                 .FormatForContext(memberName, sourceFilePath)
             );
         }
@@ -226,7 +224,7 @@ namespace PlexRipper.Domain
             FatalAction();
 
             Serilog.Log.Error(
-                (ex != null ? ex.ToString() : "")
+                (ex != null ? ex.ToString() : string.Empty)
                 .FormatForContext(memberName, sourceFilePath)
             );
         }

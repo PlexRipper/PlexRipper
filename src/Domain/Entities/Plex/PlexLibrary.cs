@@ -37,28 +37,31 @@ namespace PlexRipper.Domain
         public DateTime ContentChangedAt { get; set; }
 
         /// <summary>
-        /// The DateTime this library was last refreshed from the PlexApi.
+        /// Gets or sets the DateTime this library was last refreshed from the PlexApi.
         /// </summary>
         [Column(Order = 8)]
         public DateTime CheckedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the unique id of the <see cref="PlexLibrary"/>.
+        /// </summary>
         [Column(Order = 9)]
         public Guid Uuid { get; set; }
 
         /// <summary>
-        /// The total filesize of the nested media.
+        /// Gets or sets the total filesize of the nested media.
         /// </summary>
         [Column(Order = 10)]
         public long MediaSize { get; set; }
 
         /// <summary>
-        /// This is the relative path Id of the Library location.
+        /// Gets or sets this is the relative path Id of the Library location.
         /// </summary>
         [Column(Order = 10)]
         public int LibraryLocationId { get; set; }
 
         /// <summary>
-        /// This is a relative path of the Library location, e.g: /AnimeSeries.
+        /// Gets or sets the relative path of the Library location, e.g: /AnimeSeries.
         /// </summary>
         [Column(Order = 11)]
         public string LibraryLocationPath { get; set; }
@@ -68,12 +71,12 @@ namespace PlexRipper.Domain
         #region Relationships
 
         /// <summary>
-        /// The PlexServer this PlexLibrary belongs to.
+        /// Gets or sets the PlexServer this PlexLibrary belongs to.
         /// </summary>
         public PlexServer PlexServer { get; set; }
 
         /// <summary>
-        /// The PlexServerId of the PlexServer this PlexLibrary belongs to.
+        /// Gets or sets the PlexServerId of the PlexServer this PlexLibrary belongs to.
         /// </summary>
         public int PlexServerId { get; set; }
 
@@ -89,6 +92,9 @@ namespace PlexRipper.Domain
 
         #region Helpers
 
+        /// <summary>
+        /// Gets whether this <see cref="PlexLibrary"/> has any media available.
+        /// </summary>
         [NotMapped]
         public bool HasMedia
         {

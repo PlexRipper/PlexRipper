@@ -1,6 +1,13 @@
+## [0.4.3] - 2020-12-28
+
+### Fixed
+
+-   Possible build fix for IHttpClientFactory not being referenced.
+
 ## [0.4.2] - 2020-12-28
 
 ### Changed
+
 -   Enabled migrations for the database.
 -   Logging will now be written to file in `/config/logs`.
 -   Created a static class `FileSystemPaths` for OS paths.

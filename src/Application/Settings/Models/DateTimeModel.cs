@@ -16,6 +16,9 @@ namespace PlexRipper.Application.Settings.Models
         [JsonProperty("timeFormat", Required = Required.Always)]
         public string TimeFormat { get; set; } = "HH:MM:ss";
 
+        [JsonProperty("timeZone", Required = Required.Always)]
+        public string TimeZone { get; set; } = "UTC";
+
         [JsonProperty("showRelativeDates", Required = Required.Always)]
         public bool ShowRelativeDates { get; set; } = true;
 

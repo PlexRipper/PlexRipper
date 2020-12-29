@@ -421,6 +421,7 @@ export type DateTimeModel = BaseModel & {
   shortDateFormat: string;
   longDateFormat: string;
   timeFormat: string;
+  timeZone: string;
   showRelativeDates: boolean;
 };
 

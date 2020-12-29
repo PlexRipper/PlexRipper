@@ -7,6 +7,7 @@
 			<v-col>
 				<v-simple-table class="section-table">
 					<tbody>
+						<!--	Short Date Format Setting	-->
 						<tr>
 							<td style="width: 30%">
 								<help-icon help-id="help.settings.ui.date-and-time.short-date-format" />
@@ -25,6 +26,7 @@
 								/>
 							</td>
 						</tr>
+						<!--	Long Date Format Setting	-->
 						<tr>
 							<td>
 								<help-icon help-id="help.settings.ui.date-and-time.long-date-format" />
@@ -43,6 +45,27 @@
 								/>
 							</td>
 						</tr>
+						<!--	Time Zone Setting	-->
+						<!--	Dealing with Timezones is 1 big clusterfuck, will go back to try again later-->
+						<!--						<tr>-->
+						<!--							<td>-->
+						<!--								<help-icon help-id="help.settings.ui.date-and-time.time-zone" />-->
+						<!--							</td>-->
+						<!--							<td>-->
+						<!--								<v-select-->
+						<!--									v-model="timeZone"-->
+						<!--									color="red"-->
+						<!--									filled-->
+						<!--									outlined-->
+						<!--									dense-->
+						<!--									class="my-3"-->
+						<!--									hide-details="auto"-->
+						<!--									:menu-props="getMenuProps"-->
+						<!--									:items="timeZoneOptions"-->
+						<!--								/>-->
+						<!--							</td>-->
+						<!--						</tr>-->
+						<!--	Time Format Setting	-->
 						<tr>
 							<td>
 								<help-icon help-id="help.settings.ui.date-and-time.time-format" />
@@ -61,6 +84,7 @@
 								/>
 							</td>
 						</tr>
+						<!--	Show Relative Dates Setting	-->
 						<tr>
 							<td>
 								<help-icon help-id="help.settings.ui.date-and-time.show-relative-dates" />
@@ -91,6 +115,8 @@ interface ISelectItem {
 
 @Component
 export default class DateAndTimeSection extends Vue {
+	// region Settings
+
 	get shortDateFormat(): string {
 		return settingsStore.shortDateFormat;
 	}
@@ -115,6 +141,14 @@ export default class DateAndTimeSection extends Vue {
 		settingsStore.setTimeFormat(value);
 	}
 
+	get timeZone(): string {
+		return settingsStore.timeZone;
+	}
+
+	set timeZone(value: string) {
+		settingsStore.setTimeZone(value);
+	}
+
 	get showRelativeDates(): boolean {
 		return settingsStore.showRelativeDates;
 	}
@@ -122,6 +156,7 @@ export default class DateAndTimeSection extends Vue {
 	set showRelativeDates(value: boolean) {
 		settingsStore.setShowRelativeDates(value);
 	}
+	// endregion
 
 	get getMenuProps(): any {
 		return {
@@ -170,6 +205,12 @@ export default class DateAndTimeSection extends Vue {
 		});
 
 		return options;
+	}
+
+	get timeZoneOptions(): ISelectItem[] {
+		const currentTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+		const offSet = new Date().getTimezoneOffset() / 60;
+		return [{ text: `${offSet} ${currentTZ}`, value: currentTZ }];
 	}
 }
 </script>

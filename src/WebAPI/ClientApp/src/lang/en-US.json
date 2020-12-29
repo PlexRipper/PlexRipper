@@ -80,6 +80,7 @@
 				"date-and-time": {
 					"short-date-format": "Short Date Format",
 					"long-date-format": "Long Date Format",
+					"time-zone": "Time Zone",
 					"time-format": "Time Format",
 					"show-relative-dates": "Show Relative Dates"
 				},

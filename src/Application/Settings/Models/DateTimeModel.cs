@@ -14,7 +14,7 @@ namespace PlexRipper.Application.Settings.Models
         public string LongDateFormat { get; set; } = "EEEE, dd MMMM yyyy";
 
         [JsonProperty("timeFormat", Required = Required.Always)]
-        public string TimeFormat { get; set; } = "HH:MM";
+        public string TimeFormat { get; set; } = "HH:MM:ss";
 
         [JsonProperty("showRelativeDates", Required = Required.Always)]
         public bool ShowRelativeDates { get; set; } = true;

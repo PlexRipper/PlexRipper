@@ -61,10 +61,12 @@ v-data-table
 			}
 		}
 	}
-	&.theme--dark, tbody tr.v-data-table__selected {
+	&.theme--dark,
+	tbody tr.v-data-table__selected {
 		@extend .no-background;
 	}
-	&.theme--light, tbody tr.v-data-table__selected {
+	&.theme--light,
+	tbody tr.v-data-table__selected {
 		@extend .no-background;
 	}
 }
@@ -80,7 +82,7 @@ v-dialog
 	@extend .default-shadow;
 
 	.v-card {
-		backdrop-filter: blur(30px);
+		@extend .blur;
 		border-radius: 15px;
 		&.theme--dark {
 			background: $dark-dialog-background-color;
@@ -95,7 +97,7 @@ v-dialog
 v-menu
 */
 .v-menu__content {
-	backdrop-filter: blur(30px);
+	@extend .blur;
 	.v-list {
 		&.theme--dark {
 			background: $dark-dialog-background-color;

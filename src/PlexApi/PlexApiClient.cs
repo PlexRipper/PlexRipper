@@ -27,19 +27,17 @@ namespace PlexRipper.PlexApi
 
         public PlexApiClient()
         {
-            this.UseSystemTextJson();
+            this.UseSystemTextJson(SerializerOptions);
             this.UseDotNetXmlSerializer();
-            this.ThrowOnAnyError = true;
+            ThrowOnAnyError = true;
             Timeout = 10000;
-
-            // TODO Ignore all bad SSL certificates based on user option set
         }
 
-        public async Task<T> SendRequestAsync<T>(RestRequest request)
+        public async Task<Result<T>> SendRequestAsync<T>(RestRequest request)
         {
             request = AddHeaders(request);
 
-            return await Policy
+            var response = await Policy
                 .Handle<WebException>()
                 .WaitAndRetryAsync(3, retryAttempt =>
                     {
@@ -47,34 +45,35 @@ namespace PlexRipper.PlexApi
                         Log.Warning($"Waiting {timeToWait.TotalSeconds} seconds before retrying ({request.Resource}) again.");
                         return timeToWait;
                     },
-                    (exception, pollyRetryCount, context) =>
-                    {
-                        Log.Warning($"An exception occured at {exception.Source} with message {exception.Message}");
-                    })
+                    (exception, _, _) => { Log.Warning($"An exception occured at {exception.Source} with message {exception.Message}"); })
                 .ExecuteAsync(async () =>
                 {
-                    var response = await ExecuteAsync<T>(request);
-                    if (response.IsSuccessful)
+                    try
                     {
-                        Log.Debug($"Request to {request.Resource} was successful!");
-                        Log.Verbose($"Response was: {response.Content}");
+                        return await ExecuteAsync<T>(request);
                     }
-                    else
+                    catch (Exception e)
                     {
-                        Log.Error(response.ErrorException,
-                            $"PlexApi Error: Error on request to {request.Resource} ({response.StatusCode}) - {response.Content}");
+                        Log.Error(e);
+                        throw;
                     }
-
-                    return response.Data;
                 });
-        }
 
-        public async Task<Result<IRestResponse>> SendRequestAsync(RestRequest request)
-        {
-            request = AddHeaders(request);
+            var metaData = GetMetadata(response);
+            if (response.IsSuccessful)
+            {
+                var result = Result.Ok(response.Data)
+                    .WithReason(new Success($"Request to {response.ResponseUri} was successful!")
+                        .WithMetadata(metaData))
+                    .LogDebug();
+                Log.Verbose($"Response was: {response.Content}");
+                return result;
+            }
 
-            var response = await ExecuteAsync(request);
-            return ResultFromResponse(response);
+            return Result.Fail(new ExceptionalError(response.ErrorException).WithMessage(
+                        $"PlexApi Error: Error on request to {request.Resource} ({response.StatusCode}) - {response.Content}")
+                    .WithMetadata(metaData))
+                .LogError();
         }
 
         public async Task<byte[]> SendImageRequestAsync(RestRequest request)
@@ -101,26 +100,20 @@ namespace PlexRipper.PlexApi
             return request;
         }
 
-        private Result<IRestResponse> ResultFromResponse(IRestResponse response)
+        private Dictionary<string, object> GetMetadata(IRestResponse response)
         {
-            if (response.IsSuccessful)
+            var metaData = new Dictionary<string, object>
             {
-                Log.Information($"Request to {response.Request.Resource} was successful!");
-                Log.Debug($"Response was: {response.Content}");
-                return Result.Ok(response);
-            }
-
-            var msg = $"PlexApi Error: Error on request to {response.Request.Resource} ({response.StatusCode}) - {response.Content}";
-            Log.Error(response.ErrorException, msg);
-
-            var metadata = new Dictionary<string, object>
-            {
-                { "StatusCode", response.StatusCode },
-                { "Message", response.ErrorMessage },
+                { "StatusCode", response.StatusCode.ToString() },
                 { "Resource", response.Request.Resource },
             };
-            var error = new Error("Plex Api Request Error").WithMetadata(metadata);
-            return Result.Fail(error);
+
+            if (response.ErrorMessage != string.Empty)
+            {
+                metaData.Add("ErrorMessage", response.ErrorMessage);
+            }
+
+            return metaData;
         }
     }
 }

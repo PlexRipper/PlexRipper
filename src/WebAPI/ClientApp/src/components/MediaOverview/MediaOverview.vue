@@ -274,6 +274,9 @@ export default class MediaOverview extends Vue {
 				if (this.library) {
 					this.isLoading = false;
 				}
+			} else {
+				Log.error('Could not retrieve server');
+				this.isLoading = false;
 			}
 		});
 
@@ -283,6 +286,9 @@ export default class MediaOverview extends Vue {
 				if (this.server) {
 					this.isLoading = false;
 				}
+			} else {
+				Log.error('Could not retrieve library with id: ' + this.libraryId);
+				this.isLoading = false;
 			}
 		});
 	}

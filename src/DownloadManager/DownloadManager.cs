@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentResults;
@@ -39,8 +37,6 @@ namespace PlexRipper.DownloadManager
 
         private readonly IDownloadQueue _downloadQueue;
 
-        private Task<Task> _checkDownloadTask;
-
         #endregion
 
         #region Constructors
@@ -51,13 +47,11 @@ namespace PlexRipper.DownloadManager
         /// <param name="mediator">Defines a mediator to encapsulate request/response and publishing interaction patterns.</param>
         /// <param name="signalRService"></param>
         /// <param name="plexAuthenticationService">.</param>
-        /// <param name="fileSystem">.</param>
         /// <param name="fileMerger">.</param>
         /// <param name="userSettings"></param>
         /// <param name="downloadQueue">Used to retrieve the next <see cref="DownloadTask"/> from the <see cref="DownloadQueue"/>.</param>
         /// <param name="notificationsService"></param>
         /// <param name="plexDownloadClientFactory"></param>
-        /// <param name="httpClientFactory"></param>
         public DownloadManager(
             IMediator mediator,
             ISignalRService signalRService,
@@ -143,7 +137,7 @@ namespace PlexRipper.DownloadManager
                 return ResultExtensions.IsNull(nameof(downloadTask)).LogError();
             }
 
-            Result<DownloadTask> downloadTaskDB = null;
+            Result<DownloadTask> downloadTaskDB;
 
             // Download tasks added here might not contain an Id, which is why we also search on ratingKey.
             if (downloadTask.Id > 0)
@@ -306,7 +300,7 @@ namespace PlexRipper.DownloadManager
         /// <inheritdoc/>
         public async Task<Result> DeleteDownloadClient(int downloadTaskId)
         {
-            CleanUpDownloadClient(downloadTaskId);
+            await CleanUpDownloadClient(downloadTaskId);
             return await _mediator.Send(new DeleteDownloadTaskByIdCommand(downloadTaskId));
         }
 
@@ -460,7 +454,7 @@ namespace PlexRipper.DownloadManager
         /// <inheritdoc/>
         public async Task<Result<bool>> StartDownload(int downloadTaskId)
         {
-            CleanUpDownloadClient(downloadTaskId);
+            await CleanUpDownloadClient(downloadTaskId);
 
             // Client does not exist yet, create one
             var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true));

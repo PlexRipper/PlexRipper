@@ -1,12 +1,11 @@
 import { Observable, of } from 'rxjs';
 import { getAllDownloads, deleteDownloadTasks, clearDownloadTasks, stopDownloadTasks, downloadMedia } from '@api/plexDownloadApi';
 import { finalize, switchMap } from 'rxjs/operators';
-import { DownloadMediaDTO, DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import { DownloadMediaDTO, DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import StoreState from '@state/storeState';
 import ServerService from '@state/serverService';
 import AccountService from '@service/accountService';
 import { BaseService } from '@state/baseService';
-import Log from 'consola';
 
 export class DownloadService extends BaseService {
 	public constructor() {

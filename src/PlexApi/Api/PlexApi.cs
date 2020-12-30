@@ -194,7 +194,7 @@ namespace PlexRipper.PlexApi.Api
             return result.ValueOrDefault;
         }
 
-        public Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
+        public async Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
         {
             if (width > 0 && height > 0)
             {
@@ -207,7 +207,9 @@ namespace PlexRipper.PlexApi.Api
 
             request = AddToken(request, authToken);
             request = AddLimitHeaders(request, 0, 50);
-            return Client.SendImageRequestAsync(request);
+            var result = await Client.SendImageRequestAsync(request);
+            return result;
+
         }
 
         /// <summary>

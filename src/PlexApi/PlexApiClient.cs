@@ -8,6 +8,7 @@ using PlexRipper.Domain;
 using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Config.Converters;
 using Polly;
+using Polly.Retry;
 using RestSharp;
 using RestSharp.Serialization.Xml;
 using RestSharp.Serializers.SystemTextJson;
@@ -25,27 +26,31 @@ namespace PlexRipper.PlexApi
                 Converters = { new LongToDateTime() },
             };
 
+        private readonly AsyncRetryPolicy _policy;
+
         public PlexApiClient()
         {
             this.UseSystemTextJson(SerializerOptions);
             this.UseDotNetXmlSerializer();
             ThrowOnAnyError = true;
             Timeout = 10000;
+
+            _policy = Policy
+                .Handle<WebException>()
+                .WaitAndRetryAsync(3, retryAttempt =>
+                    {
+                        var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
+                        Log.Warning($"Waiting {timeToWait.TotalSeconds} seconds before retrying again.");
+                        return timeToWait;
+                    },
+                    (exception, _, _) => { Log.Warning($"An exception occured at {exception.Source} with message {exception.Message}"); });
         }
 
         public async Task<Result<T>> SendRequestAsync<T>(RestRequest request)
         {
             request = AddHeaders(request);
 
-            var response = await Policy
-                .Handle<WebException>()
-                .WaitAndRetryAsync(3, retryAttempt =>
-                    {
-                        var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                        Log.Warning($"Waiting {timeToWait.TotalSeconds} seconds before retrying ({request.Resource}) again.");
-                        return timeToWait;
-                    },
-                    (exception, _, _) => { Log.Warning($"An exception occured at {exception.Source} with message {exception.Message}"); })
+            var response = await _policy
                 .ExecuteAsync(async () =>
                 {
                     try
@@ -79,10 +84,20 @@ namespace PlexRipper.PlexApi
         public async Task<byte[]> SendImageRequestAsync(RestRequest request)
         {
             request = AddHeaders(request);
-
-            var response = await ExecuteAsync(request);
-
-            return response.RawBytes;
+            return await _policy
+                .ExecuteAsync(async () =>
+                {
+                    try
+                    {
+                        var response = await Task.Run(() => DownloadData(request));
+                        return response;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e);
+                        throw;
+                    }
+                });
         }
 
         /// <summary>

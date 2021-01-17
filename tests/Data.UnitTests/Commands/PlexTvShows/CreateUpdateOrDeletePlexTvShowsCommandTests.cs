@@ -71,7 +71,7 @@ namespace Data.UnitTests.Commands
             {
                 plexTvShow.Should().NotBeNull();
                 plexTvShow.Title.Should().NotBeEmpty();
-                plexTvShow.RatingKey.Should().BeGreaterThan(0);
+                plexTvShow.Key.Should().BeGreaterThan(0);
                 plexTvShow.Id.Should().BeGreaterThan(0);
             }
         }
@@ -143,7 +143,7 @@ namespace Data.UnitTests.Commands
             {
                 plexTvShow.Should().NotBeNull();
                 plexTvShow.Title.Should().NotBeEmpty();
-                plexTvShow.RatingKey.Should().BeGreaterThan(0);
+                plexTvShow.Key.Should().BeGreaterThan(0);
                 plexTvShow.Id.Should().BeGreaterThan(0);
                 if (plexTvShow.Id % 2 == 0)
                 {

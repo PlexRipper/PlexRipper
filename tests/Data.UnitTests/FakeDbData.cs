@@ -85,7 +85,7 @@ namespace Data.UnitTests
             return new Faker<PlexMovie>()
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
-                .RuleFor(x => x.RatingKey, f => f.Random.Int(1, 100000))
+                .RuleFor(x => x.Key, f => f.Random.Int(1, 100000))
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
                 .RuleFor(x => x.PlexMovieDatas, f => plexMovieData.Generate(2).ToList());
@@ -107,7 +107,7 @@ namespace Data.UnitTests
                 .RuleFor(x => x.Parts, f => episodeDataPart.Generate(f.Random.Int(1, 3)).ToList());
 
             var episodes = new Faker<PlexTvShowEpisode>()
-                .RuleFor(x => x.RatingKey, f => f.Random.Int(1, 10000))
+                .RuleFor(x => x.Key, f => f.Random.Int(1, 10000))
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
                 .RuleFor(x => x.EpisodeData, f => episodeData.Generate(f.Random.Int(1, 3)).ToList())
@@ -117,7 +117,7 @@ namespace Data.UnitTests
             var seasonIndex = 1;
             var seasons = new Faker<PlexTvShowSeason>()
                 .RuleFor(x => x.Title, f => $"Season {seasonIndex++}")
-                .RuleFor(x => x.RatingKey, f => f.Random.Int(1, 1000))
+                .RuleFor(x => x.Key, f => f.Random.Int(1, 1000))
                 .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
                 .RuleFor(x => x.Episodes, f => episodes.Generate(f.Random.Int(5, 25)).ToList())
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
@@ -126,7 +126,7 @@ namespace Data.UnitTests
             return new Faker<PlexTvShow>()
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
-                .RuleFor(x => x.RatingKey, f => f.Random.Int(1, 100000))
+                .RuleFor(x => x.Key, f => f.Random.Int(1, 100000))
                 .RuleFor(x => x.Seasons, f => seasons.Generate(f.Random.Int(1, 10)).ToList())
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));

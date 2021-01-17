@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210117135354_AddParentKeyToTvShowSeasonAndEpisode")]
+    partial class AddParentKeyToTvShowSeasonAndEpisode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -410,8 +412,8 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("Index")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("LeafCount")
                         .HasColumnType("INTEGER");
@@ -427,6 +429,9 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<double>("Rating")
                         .HasColumnType("REAL");
+
+                    b.Property<int>("RatingKey")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Studio")
                         .HasColumnType("TEXT");
@@ -742,8 +747,8 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("Index")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("LeafCount")
                         .HasColumnType("INTEGER");
@@ -759,6 +764,9 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<double>("Rating")
                         .HasColumnType("REAL");
+
+                    b.Property<int>("RatingKey")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Studio")
                         .HasColumnType("TEXT");
@@ -824,8 +832,8 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("Index")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("LeafCount")
                         .HasColumnType("INTEGER");
@@ -836,14 +844,17 @@ namespace PlexRipper.Data.Migrations
                     b.Property<DateTime>("OriginallyAvailableAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ParentKey")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ParentKey")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<double>("Rating")
                         .HasColumnType("REAL");
+
+                    b.Property<int>("RatingKey")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Studio")
                         .HasColumnType("TEXT");
@@ -1048,8 +1059,8 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("Index")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("LeafCount")
                         .HasColumnType("INTEGER");
@@ -1060,10 +1071,13 @@ namespace PlexRipper.Data.Migrations
                     b.Property<DateTime>("OriginallyAvailableAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ParentKey")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ParentKey")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RatingKey")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Summary")

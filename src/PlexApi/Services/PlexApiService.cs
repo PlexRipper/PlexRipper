@@ -43,16 +43,27 @@ namespace PlexRipper.PlexApi.Services
             return _mapper.Map<PlexAccount>(result);
         }
 
-        public async Task<Result<List<PlexTvShowEpisode>>> GetEpisodesAsync(string serverAuthToken, string plexFullHost,
-            PlexTvShowSeason plexTvShowSeason)
+        public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(string serverAuthToken, string plexFullHost, string plexLibraryKey)
         {
-            var result = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexTvShowSeason.RatingKey);
+            var result = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexLibraryKey);
             if (result != null)
             {
                 return Result.Ok(_mapper.Map<List<PlexTvShowEpisode>>(result.MediaContainer.Metadata));
             }
 
-            return Result.Fail($"Failed to retrieve episodes for {plexTvShowSeason.TvShow.Title}");
+            return Result.Fail($"Failed to retrieve episodes for library with key {plexLibraryKey}");
+        }
+
+        public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(string serverAuthToken, string plexFullHost,
+            string plexLibraryKey)
+        {
+            var result = await _plexApi.GetAllSeasonsAsync(serverAuthToken, plexFullHost, plexLibraryKey);
+            if (result != null)
+            {
+                return Result.Ok(_mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata));
+            }
+
+            return Result.Fail($"Failed to retrieve seasons for library with key {plexLibraryKey}");
         }
 
         /// <summary>
@@ -138,7 +149,7 @@ namespace PlexRipper.PlexApi.Services
 
         public async Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow)
         {
-            var result = await _plexApi.GetSeasonsAsync(serverAuthToken, plexFullHost, plexTvShow.RatingKey);
+            var result = await _plexApi.GetSeasonsAsync(serverAuthToken, plexFullHost, plexTvShow.Key);
             return result != null ? _mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata) : new List<PlexTvShowSeason>();
         }
 

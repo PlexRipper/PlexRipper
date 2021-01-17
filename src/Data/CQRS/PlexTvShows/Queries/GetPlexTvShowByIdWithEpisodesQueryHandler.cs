@@ -32,7 +32,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                 .ThenInclude(x => x.Episodes)
                 .ThenInclude(x => x.EpisodeData)
                 .ThenInclude(x => x.Parts)
-                .OrderBy(x => x.RatingKey)
+                .OrderBy(x => x.Key)
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (plexTvShow == null)

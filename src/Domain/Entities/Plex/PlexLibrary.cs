@@ -179,7 +179,7 @@ namespace PlexRipper.Domain
             // Sort TvShows
             if (TvShows?.Count > 0)
             {
-                TvShows = TvShows.OrderBy(x => x.Title).ThenBy(y => y.RatingKey).ToList();
+                TvShows = TvShows.OrderBy(x => x.Title).ThenBy(y => y.Key).ToList();
                 for (int i = 0; i < TvShows.Count; i++)
                 {
                     TvShows[i].Seasons = TvShows[i].Seasons.OrderByNatural(x => x.Title).ToList();
@@ -187,7 +187,7 @@ namespace PlexRipper.Domain
                     for (int j = 0; j < TvShows[i].Seasons.Count; j++)
                     {
                         TvShows[i].Seasons[j].Episodes =
-                            TvShows[i].Seasons[j].Episodes.OrderBy(x => x.RatingKey).ToList();
+                            TvShows[i].Seasons[j].Episodes.OrderBy(x => x.Key).ToList();
                     }
                 }
             }

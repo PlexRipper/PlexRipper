@@ -68,6 +68,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
         {
             // Metadata -> PlexMovie
             CreateMap<Metadata, PlexMovie>(MemberList.Destination)
+                .ForMember(dest => dest.Key, opt => opt.MapFrom(x => x.RatingKey))
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexMovieGenres, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexMovieRoles, opt => opt.Ignore())
@@ -91,30 +92,18 @@ namespace PlexRipper.PlexApi.Config.Mappings
         {
             // Metadata -> PlexTvShow
             CreateMap<Metadata, PlexTvShow>(MemberList.None)
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexTvShowGenres, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexTvShowRoles, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
-                .ForMember(dest => dest.Seasons, opt => opt.Ignore())
+                .ForMember(dest => dest.Key, opt => opt.MapFrom(x => x.RatingKey))
                 .ForMember(dest => dest.OriginallyAvailableAt, opt => opt.ConvertUsing(new StringToDateTimeUTC()));
 
             // Metadata -> PlexTvShowSeason
             CreateMap<Metadata, PlexTvShowSeason>(MemberList.None)
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.TvShow, opt => opt.Ignore())
-                .ForMember(dest => dest.TvShowId, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
-                .ForMember(dest => dest.Episodes, opt => opt.Ignore());
+                .ForMember(dest => dest.Key, opt => opt.MapFrom(x => x.RatingKey))
+                .ForMember(dest => dest.ParentKey, opt => opt.MapFrom(x => x.ParentRatingKey));
 
             // Metadata -> PlexTvShowEpisode
             CreateMap<Metadata, PlexTvShowEpisode>(MemberList.None)
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.TvShowSeason, opt => opt.Ignore())
-                .ForMember(dest => dest.TvShowSeasonId, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
+                .ForMember(dest => dest.Key, opt => opt.MapFrom(x => x.RatingKey))
+                .ForMember(dest => dest.ParentKey, opt => opt.MapFrom(x => x.ParentRatingKey))
                 .ForMember(dest => dest.MediaSize, opt => opt.MapFrom(x => x.Media.Sum(y => y.Part.Sum(z => z.Size))))
                 .ForMember(dest => dest.EpisodeData, opt => opt.MapFrom(x => x.Media));
 

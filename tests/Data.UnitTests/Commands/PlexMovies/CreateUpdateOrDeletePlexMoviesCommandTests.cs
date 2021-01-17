@@ -61,7 +61,7 @@ namespace Data.UnitTests.Commands
             {
                 plexMovie.Should().NotBeNull();
                 plexMovie.Title.Should().NotBeEmpty();
-                plexMovie.RatingKey.Should().BeGreaterThan(0);
+                plexMovie.Key.Should().BeGreaterThan(0);
                 plexMovie.Id.Should().BeGreaterThan(0);
             }
         }
@@ -122,7 +122,7 @@ namespace Data.UnitTests.Commands
             {
                 plexMovie.Should().NotBeNull();
                 plexMovie.Title.Should().NotBeEmpty();
-                plexMovie.RatingKey.Should().BeGreaterThan(0);
+                plexMovie.Key.Should().BeGreaterThan(0);
                 plexMovie.Id.Should().BeGreaterThan(0);
                 if (plexMovie.Id % 2 == 0)
                 {
@@ -166,7 +166,7 @@ namespace Data.UnitTests.Commands
             {
                 plexMovie.Should().NotBeNull();
                 plexMovie.Title.Should().NotBeEmpty();
-                plexMovie.RatingKey.Should().BeGreaterThan(0);
+                plexMovie.Key.Should().BeGreaterThan(0);
                 plexMovie.Id.Should().BeGreaterThan(0);
             }
         }

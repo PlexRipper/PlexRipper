@@ -20,8 +20,9 @@ export class LibraryService extends BaseService {
 		if (!library) {
 			return;
 		}
+		library = Object.freeze(library);
 		const libraries = this.getState().libraries;
-		const libraryIndex = libraries.findIndex((x) => x.id === library.id);
+		const libraryIndex = libraries.findIndex((x) => x.id === library?.id);
 		if (libraryIndex === -1) {
 			libraries.push(library);
 		} else {

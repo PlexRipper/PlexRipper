@@ -282,7 +282,7 @@ export default class MediaOverview extends Vue {
 
 		LibraryService.getLibrary(this.libraryId).subscribe((library) => {
 			if (library && library.id === this.libraryId) {
-				this.library = library;
+				this.library = Object.freeze(library);
 				if (this.server) {
 					this.isLoading = false;
 				}

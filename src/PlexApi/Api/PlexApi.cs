@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PlexRipper.Domain;
+using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
 using PlexRipper.PlexApi.Models.Server;
 using RestSharp;
@@ -70,7 +71,7 @@ namespace PlexRipper.PlexApi.Api
             // TODO Use healthCheck from here:
             // https://github.com/Arcanemagus/plex-api/wiki/Plex-Web-API-Overview
             var request = new RestRequest(new Uri($"{serverBaseUrl}/identity"), Method.GET);
-            request = AddToken(request, authToken);
+            request.AddToken(authToken);
             var response = await _client.SendRequestAsync<RestResponse>(request);
             if (response.IsFailed)
             {
@@ -103,7 +104,7 @@ namespace PlexRipper.PlexApi.Api
         public async Task<PlexAccountDTO> GetAccountAsync(string authToken)
         {
             var request = new RestRequest(new Uri(GetAccountUri), Method.GET);
-            request = AddToken(request, authToken);
+            request.AddToken(authToken);
             var result = await _client.SendRequestAsync<PlexAccountDTO>(request);
             return result.ValueOrDefault;
         }
@@ -111,7 +112,7 @@ namespace PlexRipper.PlexApi.Api
         public async Task<List<Server>> GetServerAsync(string authToken)
         {
             var request = new RestRequest(new Uri(ServerUri), Method.GET, DataFormat.Xml);
-            request = AddToken(request, authToken);
+            request.AddToken(authToken);
 
             var result = await _client.SendRequestAsync<ServerContainer>(request);
             return result.ValueOrDefault?.Servers;
@@ -126,7 +127,7 @@ namespace PlexRipper.PlexApi.Api
         public async Task<PlexMediaContainer> GetLibrarySectionsAsync(string plexAuthToken, string plexFullHost)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/sections"), Method.GET);
-            request = AddToken(request, plexAuthToken);
+            request.AddToken(plexAuthToken);
             Log.Debug($"GetLibrarySectionsAsync => {request.Resource}");
             var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
             return result.ValueOrDefault;
@@ -135,7 +136,7 @@ namespace PlexRipper.PlexApi.Api
         public async Task<PlexMediaContainer> GetMetadataForLibraryAsync(string authToken, string plexServerBaseUrl, string libraryKey)
         {
             var request = new RestRequest(new Uri($"{plexServerBaseUrl}/library/sections/{libraryKey}/all"), Method.GET);
-            request = AddToken(request, authToken);
+            request.AddToken(authToken);
             request.AddQueryParameter("includeMeta", "1");
             var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
             return result.ValueOrDefault;
@@ -144,7 +145,7 @@ namespace PlexRipper.PlexApi.Api
         public async Task<PlexMediaContainer> GetMetadataAsync(string authToken, string plexFullHost, int metadataId)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{metadataId}"), Method.GET);
-            request = AddToken(request, authToken);
+            request.AddToken(authToken);
             var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
             return result.ValueOrDefault;
         }
@@ -152,7 +153,7 @@ namespace PlexRipper.PlexApi.Api
         public async Task<PlexMediaContainer> GetMetadataAsync(string authToken, string metaDataUrl)
         {
             var request = new RestRequest(new Uri(metaDataUrl), Method.GET);
-            request = AddToken(request, authToken);
+            request.AddToken(authToken);
             var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
             return result.ValueOrDefault;
         }
@@ -160,7 +161,7 @@ namespace PlexRipper.PlexApi.Api
         public async Task<PlexMediaContainer> GetSeasonsAsync(string authToken, string plexFullHost, int ratingKey)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{ratingKey}/children"), Method.GET);
-            request = AddToken(request, authToken);
+            request.AddToken(authToken);
             var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
             return result.ValueOrDefault;
         }
@@ -175,7 +176,7 @@ namespace PlexRipper.PlexApi.Api
         public async Task<PlexMediaContainer> GetAllSeasonsAsync(string authToken, string plexFullHost, string plexLibraryKey)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/sections/{plexLibraryKey}/all"), Method.GET);
-            request = AddToken(request, authToken);
+            request.AddToken(authToken);
             request.AddQueryParameter("type", "3");
             var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
             return result.ValueOrDefault;
@@ -188,11 +189,12 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="plexFullHost"></param>
         /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary"/>.</param>
         /// <returns></returns>
-        public async Task<PlexMediaContainer> GetAllEpisodesAsync(string authToken, string plexFullHost, string plexLibraryKey)
+        public async Task<PlexMediaContainer> GetAllEpisodesAsync(string authToken, string plexFullHost, string plexLibraryKey, int from, int to)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/sections/{plexLibraryKey}/all"), Method.GET);
-            request = AddToken(request, authToken);
+            request.AddToken(authToken).AddLimitHeaders(from, to);
             request.AddQueryParameter("type", "4");
+
             var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
             return result.ValueOrDefault;
         }
@@ -200,8 +202,8 @@ namespace PlexRipper.PlexApi.Api
         public async Task<PlexMediaContainer> GetRecentlyAddedAsync(string authToken, string hostUrl, string sectionId)
         {
             var request = new RestRequest(new Uri($"{hostUrl}/library/sections/{sectionId}/recentlyAdded"), Method.GET);
-            request = AddToken(request, authToken);
-            request = AddLimitHeaders(request, 0, 50);
+            request.AddToken(authToken).AddLimitHeaders(0, 50);
+
             var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
             return result.ValueOrDefault;
         }
@@ -217,28 +219,14 @@ namespace PlexRipper.PlexApi.Api
 
             var request = new RestRequest(new Uri(thumbUrl), Method.GET);
 
-            request = AddToken(request, authToken);
-            request = AddLimitHeaders(request, 0, 50);
+            request.AddToken(authToken).AddLimitHeaders(0, 50);
+
             var result = await _client.SendImageRequestAsync(request);
             return result;
         }
 
-        /// <summary>
-        /// Adds the required headers and also the authorization header.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="authToken"></param>
-        private RestRequest AddToken(RestRequest request, string authToken)
-        {
-            request.AddQueryParameter("X-Plex-Token", authToken);
-            return request;
-        }
 
-        private RestRequest AddLimitHeaders(RestRequest request, int from, int to)
-        {
-            request.AddQueryParameter("X-Plex-Container-Start", from.ToString());
-            request.AddQueryParameter("X-Plex-Container-Size", to.ToString());
-            return request;
-        }
+
+
     }
 }

@@ -6,6 +6,7 @@ using AutoMapper;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
+using PlexRipper.PlexApi.Models;
 
 namespace PlexRipper.PlexApi.Services
 {
@@ -45,10 +46,29 @@ namespace PlexRipper.PlexApi.Services
 
         public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(string serverAuthToken, string plexFullHost, string plexLibraryKey)
         {
-            var result = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexLibraryKey);
+            int stepSize = 5000;
+            var result = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexLibraryKey, 0, stepSize);
             if (result != null)
             {
-                return Result.Ok(_mapper.Map<List<PlexTvShowEpisode>>(result.MediaContainer.Metadata));
+                List<Metadata> metaData = result.MediaContainer.Metadata;
+                int totalSize = result.MediaContainer.TotalSize;
+                if (totalSize > stepSize)
+                {
+                    int loops = (int)Math.Ceiling(totalSize / (double)stepSize);
+
+                    for (int i = 1; i < loops; i++)
+                    {
+                        var rangeResult = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexLibraryKey, i * stepSize, stepSize);
+                        if (rangeResult?.MediaContainer?.Metadata?.Count > 0)
+                        {
+                            metaData.AddRange(rangeResult.MediaContainer.Metadata);
+                        }
+                    }
+
+                    bool success = metaData.Count == totalSize;
+                }
+
+                return Result.Ok(_mapper.Map<List<PlexTvShowEpisode>>(metaData));
             }
 
             return Result.Fail($"Failed to retrieve episodes for library with key {plexLibraryKey}");

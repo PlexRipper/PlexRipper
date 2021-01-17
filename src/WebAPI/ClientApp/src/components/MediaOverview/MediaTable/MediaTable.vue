@@ -25,42 +25,52 @@
 			<v-row no-gutters class="media-table-content">
 				<perfect-scrollbar>
 					<v-col class="col-12 px-0">
-						<v-treeview
-							selectable
-							selected-color="red"
-							selection-type="leaf"
-							hoverable
-							expand-icon="mdi-chevron-down"
-							:items="items"
-							transition
-							item-key="key"
-							item-text="title"
-							@input="updateSelected"
-						>
-							<template #label="{ item }">
-								<v-row class="media-table-content-row">
-									<!-- Title -->
-									<v-col cols="4" class="title-column">
-										{{ item[getHeaders[0].value] }}
-									</v-col>
-									<v-spacer />
-									<!-- Other columns -->
-									<v-col v-for="(header, index) in getHeaders.slice(1, getHeaders.length)" :key="index" cols="auto">
-										<v-sheet :width="header.width" :max-width="header.width" class="no-background">
-											<date-time v-if="header.type === 'date'" :text="item[header.value]" :time="false" short-date />
-											<file-size v-else-if="header.type === 'data'" :size="item[header.value]" />
-											<span v-else>{{ item[header.value] }}</span>
-										</v-sheet>
-									</v-col>
-									<!-- Actions -->
-									<v-col cols="auto">
-										<v-sheet width="70" class="no-background text-center">
-											<v-icon small @click="downloadMedia(item)"> mdi-download </v-icon>
-										</v-sheet>
-									</v-col>
-								</v-row>
-							</template>
-						</v-treeview>
+						<template v-for="(x, y) in items.length">
+							<v-lazy
+								:key="y"
+								:options="{
+									threshold: 0.5,
+								}"
+								:min-height="50"
+							>
+								<v-treeview
+									selectable
+									selected-color="red"
+									selection-type="leaf"
+									hoverable
+									expand-icon="mdi-chevron-down"
+									:items="items.slice(y, y + 1)"
+									transition
+									item-key="key"
+									item-text="title"
+									@input="updateSelected"
+								>
+									<template #label="{ item }">
+										<v-row class="media-table-content-row">
+											<!-- Title -->
+											<v-col cols="4" class="title-column">
+												{{ item[getHeaders[0].value] }}
+											</v-col>
+											<v-spacer />
+											<!-- Other columns -->
+											<v-col v-for="(header, index) in getHeaders.slice(1, getHeaders.length)" :key="index" cols="auto">
+												<v-sheet :width="header.width" :max-width="header.width" class="no-background">
+													<date-time v-if="header.type === 'date'" :text="item[header.value]" :time="false" short-date />
+													<file-size v-else-if="header.type === 'data'" :size="item[header.value]" />
+													<span v-else>{{ item[header.value] }}</span>
+												</v-sheet>
+											</v-col>
+											<!-- Actions -->
+											<v-col cols="auto">
+												<v-sheet width="70" class="no-background text-center">
+													<v-icon small @click="downloadMedia(item)"> mdi-download </v-icon>
+												</v-sheet>
+											</v-col>
+										</v-row>
+									</template>
+								</v-treeview>
+							</v-lazy>
+						</template>
 					</v-col>
 				</perfect-scrollbar>
 			</v-row>
@@ -69,7 +79,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
 import IMediaTableHeader from '@interfaces/IMediaTableHeader';
 import ProgressComponent from '@components/ProgressComponent.vue';
@@ -96,6 +106,13 @@ export default class MediaTable extends Vue {
 	openDownloadPreviews: number[] = [];
 
 	progress: DownloadTaskCreationProgress | null = null;
+
+	visible: boolean[] = [];
+
+	@Watch('items')
+	updateVisible(): void {
+		this.items.forEach(() => this.visible.push(false));
+	}
 
 	get getLeafs(): string[] {
 		if (this.mediaType === PlexMediaType.Movie) {

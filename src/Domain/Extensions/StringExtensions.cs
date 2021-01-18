@@ -8,6 +8,8 @@ namespace PlexRipper.Domain
     {
         private static Random random = new Random();
 
+        private static readonly char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
+
         public static string GetActualCasing(this string path)
         {
             if (OsInfo.IsNotWindows || path.StartsWith("\\"))
@@ -67,6 +69,11 @@ namespace PlexRipper.Domain
             }
 
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        public static string SanitizePath(this string path)
+        {
+            return new string(path.Where(ch => !invalidFileNameChars.Contains(ch)).ToArray());
         }
     }
 }

@@ -1,7 +1,7 @@
 {
   "framework": "vue",
   "name": "plex-ripper-web-ui",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "contributions": {
     "html": {
       "description-markup": "markdown",
@@ -472,6 +472,9 @@
               "name": "refresh-library"
             },
             {
+              "name": "download"
+            },
+            {
               "name": "view-change"
             }
           ],
@@ -516,14 +519,6 @@
           "description": "",
           "attributes": [
             {
-              "name": "headers",
-              "required": true,
-              "value": {
-                "kind": "expression",
-                "type": "Array"
-              }
-            },
-            {
               "name": "items",
               "required": true,
               "value": {
@@ -541,6 +536,9 @@
             }
           ],
           "events": [
+            {
+              "name": "selected"
+            },
             {
               "name": "download"
             }
@@ -566,6 +564,9 @@
           "events": [
             {
               "name": "download"
+            },
+            {
+              "name": "selected"
             }
           ],
           "source": {
@@ -909,6 +910,9 @@
           "events": [
             {
               "name": "download"
+            },
+            {
+              "name": "selected"
             }
           ],
           "source": {

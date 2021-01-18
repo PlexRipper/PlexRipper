@@ -24,7 +24,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
             RuleFor(x => x.PlexLibrary.Movies).NotEmpty();
             RuleForEach(x => x.PlexLibrary.Movies).ChildRules(plexMovie =>
             {
-                plexMovie.RuleFor(x => x.RatingKey).GreaterThan(0);
+                plexMovie.RuleFor(x => x.Key).GreaterThan(0);
                 plexMovie.RuleFor(x => x.PlexMovieDatas).NotEmpty();
                 plexMovie.RuleForEach(x => x.PlexMovieDatas).ChildRules(plexMovieData =>
                 {
@@ -58,7 +58,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
                 command.PlexLibrary.Movies.ForEach(x =>
                 {
                     x.PlexLibraryId = plexLibrary.Id;
-                    plexMoviesDict.Add(x.RatingKey, x);
+                    plexMoviesDict.Add(x.Key, x);
                 });
 
                 // Retrieve current movies
@@ -76,7 +76,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
                 }
 
                 Dictionary<int, PlexMovie> plexMoviesDbDict = new Dictionary<int, PlexMovie>();
-                plexMoviesInDb.ForEach(x => plexMoviesDbDict.Add(x.RatingKey, x));
+                plexMoviesInDb.ForEach(x => plexMoviesDbDict.Add(x.Key, x));
 
                 // Create dictionaries on how to update the database.
                 var addDict = plexMoviesDict.Where(x => !plexMoviesDbDict.ContainsKey(x.Key)).ToDictionary(k => k.Key, v => v.Value);

@@ -1,8 +1,8 @@
 <template>
-	<v-btn text tile :height="height" @click="buttonClick">
-		<div class="hello-text">
+	<v-btn class="vertical-button" text tile :height="height" :disabled="disabled" :width="width" @click="$emit('click', $event)">
+		<div class="vertical-button-content">
 			<v-icon x-large>{{ icon }}</v-icon>
-			<v-subheader class="vertical-button-label">{{ label }}</v-subheader>
+			<span class="vertical-button-label">{{ label }}</span>
 		</div>
 	</v-btn>
 </template>
@@ -21,19 +21,10 @@ export default class VerticalButton extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly height!: number;
 
-	buttonClick(e: MouseEvent): void {
-		this.$emit('click', e);
-	}
+	@Prop({ required: false, type: Number })
+	readonly width!: number;
+
+	@Prop({ required: false, type: Boolean, default: false })
+	readonly disabled!: boolean;
 }
 </script>
-
-<style lang="scss">
-.hello-text {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-.vertical-button-label {
-	height: 24px;
-}
-</style>

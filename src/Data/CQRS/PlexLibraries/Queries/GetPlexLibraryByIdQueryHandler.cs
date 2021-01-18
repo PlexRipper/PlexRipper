@@ -32,7 +32,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
                 return ResultExtensions.GetEntityNotFound(nameof(PlexLibrary), request.Id);
             }
 
-            var plexLibrary = await GetPlexLibraryQueryableByType(result.Type, request.IncludePlexServer)
+            var plexLibrary = await GetPlexLibraryQueryableByType(result.Type, request.IncludePlexServer, request.IncludeMedia, request.TopLevelMediaOnly)
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (plexLibrary == null)

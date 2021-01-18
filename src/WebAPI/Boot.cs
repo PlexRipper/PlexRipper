@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application.Common;
@@ -20,21 +21,26 @@ namespace PlexRipper.WebAPI
 
         private readonly IFileMerger _fileMerger;
 
+        private readonly IDownloadManager _downloadManager;
+
         private readonly PlexRipperDbContext _dbContext;
 
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
+        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger, IDownloadManager downloadManager,
             PlexRipperDbContext dbContext)
         {
             _appLifetime = appLifetime;
             _userSettings = userSettings;
             _fileSystem = fileSystem;
             _fileMerger = fileMerger;
+            _downloadManager = downloadManager;
             _dbContext = dbContext;
         }
 
         public Task WaitForStartAsync(CancellationToken cancellationToken)
         {
             Log.Information("Initiating boot process");
+            ServicePointManager.DefaultConnectionLimit = 1000;
+
             var fileSystemSetup = _fileSystem.Setup();
             if (fileSystemSetup.IsFailed)
             {
@@ -43,6 +49,7 @@ namespace PlexRipper.WebAPI
 
             _dbContext.Setup();
             _userSettings.Setup();
+            _downloadManager.Setup();
             _fileMerger.Setup();
             return Task.CompletedTask;
         }

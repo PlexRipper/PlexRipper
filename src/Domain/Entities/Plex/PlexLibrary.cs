@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using FluentResults;
+using Innofactor.EfCoreJsonValueConverter;
 
 namespace PlexRipper.Domain
 {
@@ -10,16 +12,19 @@ namespace PlexRipper.Domain
         #region Properties
 
         /// <summary>
-        /// The Library Section Identifier used by Plex.
+        /// Gets or sets the Library Section Identifier used by Plex.
         /// </summary>
         [Column(Order = 1)]
         public string Key { get; set; }
 
+        /// <summary>
+        /// Gets or sets the display title of this <see cref="PlexLibrary"/>.
+        /// </summary>
         [Column(Order = 2)]
         public string Title { get; set; }
 
         /// <summary>
-        /// Plex Library type, see: https://github.com/Arcanemagus/plex-api/wiki/MediaTypes.
+        /// Gets or sets plex Library type, see: https://github.com/Arcanemagus/plex-api/wiki/MediaTypes.
         /// </summary>
         [Column(Order = 3)]
         public PlexMediaType Type { get; set; }
@@ -37,43 +42,48 @@ namespace PlexRipper.Domain
         public DateTime ContentChangedAt { get; set; }
 
         /// <summary>
-        /// The DateTime this library was last refreshed from the PlexApi.
+        /// Gets or sets the DateTime this library was last refreshed from the PlexApi.
         /// </summary>
         [Column(Order = 8)]
         public DateTime CheckedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the unique id of the <see cref="PlexLibrary"/>.
+        /// </summary>
         [Column(Order = 9)]
         public Guid Uuid { get; set; }
 
         /// <summary>
-        /// The total filesize of the nested media.
-        /// </summary>
-        [Column(Order = 10)]
-        public long MediaSize { get; set; }
-
-        /// <summary>
-        /// This is the relative path Id of the Library location.
+        /// Gets or sets this is the relative path Id of the Library location.
         /// </summary>
         [Column(Order = 10)]
         public int LibraryLocationId { get; set; }
 
         /// <summary>
-        /// This is a relative path of the Library location, e.g: /AnimeSeries.
+        /// Gets or sets the relative path of the Library location, e.g: /AnimeSeries.
         /// </summary>
         [Column(Order = 11)]
         public string LibraryLocationPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="PlexLibraryMetaData"/>, this is a JSON field that contains a collection
+        /// of various values that dont warrant their own database column.
+        /// </summary>
+        [JsonField]
+        [Column(Order = 12)]
+        public PlexLibraryMetaData MetaData { get; set; }
 
         #endregion
 
         #region Relationships
 
         /// <summary>
-        /// The PlexServer this PlexLibrary belongs to.
+        /// Gets or sets the PlexServer this PlexLibrary belongs to.
         /// </summary>
         public PlexServer PlexServer { get; set; }
 
         /// <summary>
-        /// The PlexServerId of the PlexServer this PlexLibrary belongs to.
+        /// Gets or sets the PlexServerId of the PlexServer this PlexLibrary belongs to.
         /// </summary>
         public int PlexServerId { get; set; }
 
@@ -89,19 +99,11 @@ namespace PlexRipper.Domain
 
         #region Helpers
 
+        /// <summary>
+        /// Gets whether this <see cref="PlexLibrary"/> has any media assigned.
+        /// </summary>
         [NotMapped]
-        public bool HasMedia
-        {
-            get
-            {
-                return Type switch
-                {
-                    PlexMediaType.Movie => Movies != null && Movies.Count > 0,
-                    PlexMediaType.TvShow => TvShows != null && TvShows.Count > 0,
-                    _ => false,
-                };
-            }
-        }
+        public bool HasMedia => MediaCount > 0;
 
         [NotMapped]
         public int MediaCount
@@ -110,40 +112,55 @@ namespace PlexRipper.Domain
             {
                 return Type switch
                 {
-                    PlexMediaType.Movie => Movies?.Count ?? -1,
-                    PlexMediaType.TvShow => TvShows?.Count ?? -1,
+                    PlexMediaType.Movie => MovieCount,
+                    PlexMediaType.TvShow => TvShowCount,
                     _ => -1,
                 };
             }
         }
 
+        /// <summary>
+        /// Gets the total filesize of the nested media.
+        /// Will return -1 when MetaData is invalid.
+        /// </summary>
         [NotMapped]
-        public int SeasonCount
-        {
-            get
-            {
-                return Type switch
-                {
-                    PlexMediaType.Movie => 0,
-                    PlexMediaType.TvShow => TvShows?.Sum(x => x.Seasons.Count) ?? 0,
-                    _ => -1,
-                };
-            }
-        }
+        public long MediaSize => MetaData?.MediaSize ?? -1;
 
+        /// <summary>
+        /// Gets the current <see cref="PlexMovie"/> count.
+        /// Will return -1 if the <see cref="PlexMediaType"/> of this library does not match the count requested,
+        /// or if MetaData is invalid.
+        /// E.g. There will be a -1 when this library is of type TvShow.
+        /// </summary>
         [NotMapped]
-        public int EpisodeCount
-        {
-            get
-            {
-                return Type switch
-                {
-                    PlexMediaType.Movie => 0,
-                    PlexMediaType.TvShow => TvShows?.Sum(x => x.Seasons.Sum(y => y.Episodes.Count)) ?? 0,
-                    _ => -1,
-                };
-            }
-        }
+        public int MovieCount => Type == PlexMediaType.Movie ? MetaData?.MovieCount ?? -1 : -1;
+
+        /// <summary>
+        /// Gets the current <see cref="PlexTvShow"/> count.
+        /// Will return -1 if the <see cref="PlexMediaType"/> of this library does not match the count requested,
+        /// or if MetaData is invalid.
+        /// E.g. There will be a -1 when this library is of type Movie.
+        /// </summary>
+        [NotMapped]
+        public int TvShowCount => Type == PlexMediaType.TvShow ? MetaData?.TvShowCount ?? -1 : -1;
+
+        /// <summary>
+        /// Gets the current <see cref="PlexTvShowSeason"/> count.
+        /// Will return -1 if the <see cref="PlexMediaType"/> of this library does not match the count requested.
+        /// or if MetaData is invalid.
+        /// E.g. There will be a -1 when this library is of type Movie.
+        /// </summary>
+        [NotMapped]
+        public int SeasonCount => Type == PlexMediaType.TvShow ? MetaData?.TvShowSeasonCount ?? -1 : -1;
+
+        /// <summary>
+        /// Gets the current <see cref="PlexTvShowEpisode"/> count.
+        /// Will return -1 if the <see cref="PlexMediaType"/> of this library does not match the count requested.
+        /// or if MetaData is invalid.
+        /// E.g. There will be a -1 when this library is of type Movie.
+        /// </summary>
+        [NotMapped]
+        public int EpisodeCount => Type == PlexMediaType.TvShow ? MetaData?.TvShowEpisodeCount ?? -1 : -1;
 
         [NotMapped]
         public string ServerUrl => PlexServer?.ServerUrl ?? string.Empty;
@@ -173,21 +190,62 @@ namespace PlexRipper.Domain
             // Sort TvShows
             if (TvShows?.Count > 0)
             {
-                TvShows = TvShows.OrderBy(x => x.Title).ThenBy(y => y.RatingKey).ToList();
+                TvShows = TvShows.OrderBy(x => x.Title).ThenBy(y => y.Key).ToList();
                 for (int i = 0; i < TvShows.Count; i++)
                 {
-                    TvShows[i].Seasons = TvShows[i].Seasons.OrderByNatural(x => x.Title).ToList();
-
-                    for (int j = 0; j < TvShows[i].Seasons.Count; j++)
+                    if (TvShows[i].Seasons?.Count > 0)
                     {
-                        TvShows[i].Seasons[j].Episodes =
-                            TvShows[i].Seasons[j].Episodes.OrderBy(x => x.RatingKey).ToList();
+                        TvShows[i].Seasons = TvShows[i].Seasons.OrderByNatural(x => x.Title).ToList();
+
+                        for (int j = 0; j < TvShows[i].Seasons.Count; j++)
+                        {
+                            if (TvShows[i].Seasons[j].Episodes?.Count > 0)
+                            {
+                                TvShows[i].Seasons[j].Episodes =
+                                    TvShows[i].Seasons[j].Episodes.OrderBy(x => x.Key).ToList();
+                            }
+                        }
                     }
                 }
             }
 
             // TODO Add here for other media types once supported
             return this;
+        }
+
+        public Result UpdateMetaData()
+        {
+            MetaData ??= new PlexLibraryMetaData();
+
+            if (Type == PlexMediaType.Movie && Movies?.Count > 0)
+            {
+                if (Movies?.Count > 0)
+                {
+                    MetaData.MediaSize = Movies.Sum(x => x.MediaSize);
+                    MetaData.MovieCount = Movies.Count;
+                }
+                else
+                {
+                    return Result.Fail("The PlexLibrary is of type Movie but has no Movies included to update the MetaData.");
+                }
+            }
+
+            if (Type == PlexMediaType.TvShow)
+            {
+                if (TvShows?.Count > 0)
+                {
+                    MetaData.MediaSize = TvShows.Sum(x => x.MediaSize);
+                    MetaData.TvShowCount = TvShows.Count;
+                    MetaData.TvShowSeasonCount = TvShows.Sum(x => x.Seasons.Count);
+                    MetaData.TvShowEpisodeCount = TvShows.Sum(x => x.Seasons.Sum(y => y.Episodes.Count));
+                }
+                else
+                {
+                    return Result.Fail("The PlexLibrary is of type TvShow but has no TvShows included to update the MetaData.");
+                }
+            }
+
+            return Result.Ok();
         }
 
         #endregion

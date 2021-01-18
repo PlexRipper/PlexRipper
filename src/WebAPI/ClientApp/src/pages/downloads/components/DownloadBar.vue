@@ -28,28 +28,17 @@
 				</template>
 
 				<!--Command buttons-->
-				<v-btn depressed tile class="no-background" @click="clearDownloadTasks">
-					<v-icon large left>mdi-notification-clear-all</v-icon>
-					<span class="hidden-sm-and-down">Clear Completed</span>
-				</v-btn>
-				<v-btn depressed tile class="no-background">
-					<v-icon large left>mdi-pause</v-icon>
-					<span class="hidden-sm-and-down">Pause</span>
-				</v-btn>
-
-				<v-btn depressed tile class="no-background">
-					<v-icon large left>mdi-play</v-icon>
-					<span class="hidden-sm-and-down">Start</span>
-				</v-btn>
-
-				<v-btn depressed tile class="no-background">
-					<v-icon large left>mdi-restart</v-icon>
-					<span class="hidden-sm-and-down">Restart</span>
-				</v-btn>
-
-				<v-btn depressed tile class="no-background" @click="deleteDownloadTasks">
-					<v-icon large left>mdi-delete</v-icon>
-					<span class="hidden-sm-and-down">Delete</span>
+				<v-btn
+					v-for="(button, i) in buttons"
+					:key="i"
+					depressed
+					tile
+					:disabled="button.disableOnNoSelected && !hasSelected"
+					class="no-background"
+					@click="$emit(button.value)"
+				>
+					<v-icon large left>{{ button.icon }}</v-icon>
+					<span class="hidden-sm-and-down">{{ button.name }}</span>
 				</v-btn>
 			</v-toolbar>
 		</v-col>
@@ -57,16 +46,59 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Prop } from 'vue-property-decorator';
+
+interface buttons {
+	name: string;
+	value: string;
+	icon: string;
+	disableOnNoSelected: boolean;
+}
 
 @Component
 export default class DownloadBar extends Vue {
-	clearDownloadTasks(): void {
-		this.$emit('clear');
-	}
+	@Prop({ required: true, type: Boolean })
+	readonly hasSelected!: boolean;
 
-	deleteDownloadTasks(): void {
-		this.$emit('delete');
+	get buttons(): buttons[] {
+		return [
+			{
+				name: 'Clear Completed',
+				value: 'clear',
+				icon: 'mdi-notification-clear-all',
+				disableOnNoSelected: false,
+			},
+			{
+				name: 'Start',
+				value: 'start',
+				icon: 'mdi-play',
+				disableOnNoSelected: true,
+			},
+			{
+				name: 'Pause',
+				value: 'pause',
+				icon: 'mdi-pause',
+				disableOnNoSelected: true,
+			},
+			{
+				name: 'Stop',
+				value: 'stop',
+				icon: 'mdi-stop',
+				disableOnNoSelected: true,
+			},
+			{
+				name: 'Restart',
+				value: 'restart',
+				icon: 'mdi-restart',
+				disableOnNoSelected: true,
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				icon: 'mdi-delete',
+				disableOnNoSelected: true,
+			},
+		];
 	}
 }
 </script>

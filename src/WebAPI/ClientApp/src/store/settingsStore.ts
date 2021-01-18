@@ -85,6 +85,10 @@ export default class SettingsStore extends VuexModule {
 		return this.settings?.userInterfaceSettings?.dateTimeSettings?.timeFormat ?? '';
 	}
 
+	get timeZone(): string {
+		return this.settings?.userInterfaceSettings?.dateTimeSettings?.timeZone ?? '';
+	}
+
 	get showRelativeDates(): boolean {
 		return this.settings?.userInterfaceSettings?.dateTimeSettings?.showRelativeDates ?? false;
 	}
@@ -109,6 +113,14 @@ export default class SettingsStore extends VuexModule {
 	setTimeFormat(value: string) {
 		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
 			this.settings.userInterfaceSettings.dateTimeSettings.timeFormat = value;
+			SettingsService.updateSettings(this.settings);
+		}
+	}
+
+	@Mutation
+	setTimeZone(value: string) {
+		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
+			this.settings.userInterfaceSettings.dateTimeSettings.timeZone = value;
 			SettingsService.updateSettings(this.settings);
 		}
 	}

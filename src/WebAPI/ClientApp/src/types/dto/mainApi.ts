@@ -121,8 +121,7 @@ export interface PlexLibraryDTO {
 
 export interface PlexMovieDTO {
   id: number;
-  ratingKey: number;
-  key: any;
+  key: number;
   guid: any;
   studio: string;
   title: string;
@@ -178,11 +177,11 @@ export interface PlexMovieDataPartDTO {
 
 export interface PlexTvShowDTO {
   id: number;
-  ratingKey: number;
-  key: any;
+  key: number;
   guid: any;
   studio: any;
   title: any;
+  size: number;
   contentRating: any;
   summary: any;
   index: number;
@@ -207,12 +206,12 @@ export interface PlexTvShowDTO {
 
 export interface PlexTvShowSeasonDTO {
   id: number;
-  ratingKey: number;
-  key: string;
+  key: number;
   guid: string;
   title: string;
   summary: string;
   index: number;
+  size: number;
   type: PlexMediaType;
   leafCount: number;
   viewedLeafCount: number;
@@ -227,12 +226,12 @@ export interface PlexTvShowSeasonDTO {
 
 export interface PlexTvShowEpisodeDTO {
   id: number;
-  ratingKey: number;
-  key: string;
+  key: number;
   guid: string;
   title: string;
   summary: string;
   index: number;
+  size: number;
   type: PlexMediaType;
   leafCount: number;
   viewedLeafCount: number;
@@ -256,9 +255,10 @@ export interface PlexServerStatusDTO {
 export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
 
 export interface DownloadMediaDTO {
-  plexAccountId: number;
-  plexMediaId: number;
+  mediaIds: number[];
   type: PlexMediaType;
+  libraryId: number;
+  plexAccountId: number;
 }
 
 export type ResultDTOOfListOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[] };
@@ -288,13 +288,12 @@ export interface FileSystemModelDTO {
   lastModified: string | null;
 }
 
-/**
- * 0 = Parent
-1 = Drive
-2 = Folder
-3 = File
- */
-export type FileSystemEntityType = 0 | 1 | 2 | 3;
+export enum FileSystemEntityType {
+  Parent = "Parent",
+  Drive = "Drive",
+  Folder = "Folder",
+  File = "File",
+}
 
 export type ResultDTOOfListOfNotificationDTO = ResultDTO & { value: NotificationDTO[] };
 
@@ -374,6 +373,8 @@ export interface ThumbnailRequestDTO {
   plexMediaType: PlexMediaType;
 }
 
+export type ResultDTOOfPlexTvShowDTO = ResultDTO & { value: PlexTvShowDTO };
+
 export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStatusDTO };
 
 export type ResultDTOOfSettingsModel = ResultDTO & { value: SettingsModel };
@@ -418,6 +419,7 @@ export type DateTimeModel = BaseModel & {
   shortDateFormat: string;
   longDateFormat: string;
   timeFormat: string;
+  timeZone: string;
   showRelativeDates: boolean;
 };
 

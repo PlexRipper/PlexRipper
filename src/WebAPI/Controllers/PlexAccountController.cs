@@ -106,7 +106,7 @@ namespace PlexRipper.WebAPI.Controllers
                     return BadRequest(result);
                 }
 
-                var mapResult = _mapper.Map<PlexAccountDTO>(result);
+                var mapResult = _mapper.Map<PlexAccountDTO>(result.Value);
                 return Ok(Result.Ok(mapResult));
             }
             catch (Exception e)

@@ -2,6 +2,7 @@
 	<v-data-table
 		fixed-header
 		show-select
+		hide-default-footer
 		:headers="getHeaders"
 		:items-per-page="30"
 		:items="downloads"
@@ -155,6 +156,11 @@ export default class DownloadsTable extends Vue {
 				icon: 'mdi-delete',
 			},
 			{
+				name: 'Clear',
+				value: 'clear',
+				icon: 'mdi-notification-clear-all',
+			},
+			{
 				name: 'Details',
 				value: 'details',
 				icon: 'mdi-chart-box-outline',
@@ -193,7 +199,7 @@ export default class DownloadsTable extends Vue {
 				actions.push('stop');
 				break;
 			case DownloadStatus.Completed:
-				actions.push('delete');
+				actions.push('clear');
 				break;
 			case DownloadStatus.Stopping:
 				actions.push('delete');

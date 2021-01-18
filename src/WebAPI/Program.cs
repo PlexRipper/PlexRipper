@@ -7,6 +7,7 @@ using PlexRipper.Domain;
 using Serilog;
 using System;
 using System.IO;
+using PlexRipper.FileSystem.Common;
 using Log = Serilog.Log;
 
 namespace PlexRipper.WebAPI
@@ -20,7 +21,7 @@ namespace PlexRipper.WebAPI
             try
             {
                 Domain.Log.Information("Starting up");
-                Domain.Log.Information($"Currently running on {OsInfo.Os}");
+                Domain.Log.Information($"Currently running on {OsInfo.CurrentOS}");
 
                 var host = Host.CreateDefaultBuilder(args)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())

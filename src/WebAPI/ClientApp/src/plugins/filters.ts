@@ -18,9 +18,11 @@ export default (): void => {
 	Vue.filter('mediaTypeIcon', (type: PlexMediaType): string => {
 		switch (type) {
 			case PlexMediaType.TvShow:
-			case PlexMediaType.Season:
-			case PlexMediaType.Episode:
 				return 'mdi-television-classic';
+			case PlexMediaType.Season:
+				return 'mdi-play-box-multiple';
+			case PlexMediaType.Episode:
+				return 'mdi-movie-open';
 			case PlexMediaType.Movie:
 				return 'mdi-filmstrip';
 			case PlexMediaType.Music:

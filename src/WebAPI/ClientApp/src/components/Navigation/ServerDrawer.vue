@@ -108,8 +108,11 @@ export default class ServerDrawer extends Vue {
 			case PlexMediaType.TvShow:
 				this.$router.push(`/tvshows/${library.id}`);
 				break;
+			case PlexMediaType.Music:
+				this.$router.push(`/music/${library.id}`);
+				break;
 			default:
-				Log.error(library.type + ' was neither a movie or tvshows');
+				Log.error(library.type + ' was neither a movie, tvshow or music library');
 		}
 	}
 

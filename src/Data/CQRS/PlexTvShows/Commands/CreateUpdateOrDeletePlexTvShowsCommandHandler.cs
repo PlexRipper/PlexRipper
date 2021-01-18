@@ -63,7 +63,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                     });
 
                     // Add to dictionary to later compare against DB data
-                    plexTvShowsDict.Add(plexTvShow.RatingKey, plexTvShow);
+                    plexTvShowsDict.Add(plexTvShow.Key, plexTvShow);
                 });
 
                 // Retrieve current tv shows
@@ -83,7 +83,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
                 // Create compare dictionary based on the rating key of the current data in the database.
                 Dictionary<int, PlexTvShow> PlexTvShowDbDict = new Dictionary<int, PlexTvShow>();
-                tvShowsInDb.ForEach(x => PlexTvShowDbDict.Add(x.RatingKey, x));
+                tvShowsInDb.ForEach(x => PlexTvShowDbDict.Add(x.Key, x));
 
                 // Create dictionaries on how to update the database.
                 var addDict = plexTvShowsDict.Where(x => !PlexTvShowDbDict.ContainsKey(x.Key)).ToDictionary(k => k.Key, v => v.Value);
@@ -147,7 +147,9 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
                 // Update the TvShowSeasonId of every plexTvShowSeason
                 plexTvShowSeasons.ForEach(x => x.Episodes?.ForEach(y => y.TvShowSeasonId = x.Id));
-                var plexTvShowEpisodes = plexTvShowSeasons?.SelectMany(x => x.Episodes?.Select(y => y))?.ToList();
+                var plexTvShowEpisodes = plexTvShowSeasons?
+                    .SelectMany(x => x.Episodes?
+                        .Select(y => y))?.ToList();
                 if (plexTvShowEpisodes.Count == 0)
                 {
                     return;

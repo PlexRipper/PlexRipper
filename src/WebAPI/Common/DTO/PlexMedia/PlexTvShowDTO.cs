@@ -10,11 +10,8 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
-        [JsonProperty("ratingKey", Required = Required.Always)]
-        public int RatingKey { get; set; }
-
         [JsonProperty("key", Required = Required.Always)]
-        public object Key { get; set; }
+        public int Key { get; set; }
 
         [JsonProperty("guid", Required = Required.Always)]
         public object Guid { get; set; }
@@ -24,6 +21,9 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("title", Required = Required.Always)]
         public object Title { get; set; }
+
+        [JsonProperty("size", Required = Required.Always)]
+        public long Size { get; set; }
 
         [JsonProperty("contentRating", Required = Required.Always)]
         public object ContentRating { get; set; }

@@ -162,7 +162,6 @@ MediaTable.vue
 			.v-sheet {
 				max-height: 24px;
 			}
-
 		}
 	}
 }
@@ -190,4 +189,20 @@ ServerDrawer.vue
 .ps {
 	height: 100%;
 	width: 100%;
+}
+
+/*
+VerticalButton.vue
+*/
+
+.vertical-button {
+	.vertical-button-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		.vertical-button-label {
+			transition-duration: 0.28s;
+			height: 24px;
+		}
+	}
 }

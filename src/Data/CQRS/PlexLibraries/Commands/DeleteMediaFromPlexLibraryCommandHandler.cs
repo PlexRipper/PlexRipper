@@ -36,7 +36,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
 
                 // Then construct the database query,
                 // this improves performance such as not to check the tables which will return no result anyway.
-                var plexLibraryQuery = GetPlexLibraryQueryableByType(entity.Type);
+                var plexLibraryQuery = GetPlexLibraryQueryableByType(entity.Type, false, true);
 
                 // We only want to delete the media and preserve the PlexLibrary entry in the Db.
                 var plexLibrary = await plexLibraryQuery.AsTracking().FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);

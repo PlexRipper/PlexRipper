@@ -1,6 +1,7 @@
 <template>
 	<page>
-		<p>Movies Overview</p>
+		<h1>Movies Overview</h1>
+		<p>Select a library from the left-hand side</p>
 	</page>
 </template>
 

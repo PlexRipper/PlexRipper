@@ -120,34 +120,33 @@ namespace PlexRipper.Data
                 Database.EnsureDeleted();
             }
 
-            // TODO Re-enable Migrate when stable
-            // DB.Database.Migrate();
+            if (!IsTestMode)
+            {
+                Database.Migrate();
+            }
+            else
+            {
+                Log.Information("Database will be setup in TestMode");
+                Database.EnsureCreated();
+            }
+
             // Check if database exists and can be connected to.
             var exist = Database.CanConnect();
-            if (!exist)
+            if (exist)
             {
-                Log.Information("Database does not exist, creating one now.");
-                Database.EnsureCreated();
-                exist = Database.CanConnect();
-
-                if (exist)
-                {
-                    Log.Information("Database was successfully created and connected!");
-                    return Result.Ok();
-                }
-
-                Log.Error("Database could not be created.");
-                return Result.Fail($"Could not create database {DatabaseName} in {_fileSystem.ConfigDirectory}").LogError();
+                Log.Information("Database was successfully created and connected!");
+                return Result.Ok();
             }
-            Log.Information($"Database {DatabaseName} exists and is successfully connected!");
-            return Result.Ok();
+
+            Log.Error("Database could not be created and or migrated.");
+            return Result.Fail($"Could not create database {DatabaseName} in {FileSystemPaths.ConfigDirectory}").LogError();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                string dbPath = Path.Combine(_fileSystem.ConfigDirectory, DatabaseName);
+                string dbPath = Path.Combine(FileSystemPaths.ConfigDirectory, DatabaseName);
 
                 // optionsBuilder.UseLazyLoadingProxies();
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);

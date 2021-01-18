@@ -1,7 +1,15 @@
 <template>
 	<page>
 		<!-- Download Toolbar -->
-		<download-bar @clear="clearDownloadTasks" @delete="deleteDownloadTask" />
+		<download-bar
+			:has-selected="hasSelected"
+			@pause="pauseDownloadTasks"
+			@stop="stopDownloadTasks"
+			@restart="restartDownloadTasks"
+			@start="startDownloadTasks"
+			@clear="clearDownloadTasks"
+			@delete="deleteDownloadTasks"
+		/>
 		<!--	The Download Table	-->
 		<perfect-scrollbar class="download-page-tables">
 			<v-row v-if="plexServers.length > 0">
@@ -16,6 +24,7 @@
 									v-model="selected"
 									:downloads="getDownloadRows(plexServer.id)"
 									@pause="pauseDownloadTask"
+									@clear="clearDownloadTask"
 									@delete="deleteDownloadTask"
 									@stop="stopDownloadTask"
 									@restart="restartDownloadTask"
@@ -40,17 +49,9 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import {
-	restartDownloadTask,
-	stopDownloadTask,
-	clearDownloadTasks,
-	startDownloadTask,
-	pauseDownloadTask,
-	deleteDownloadTasks,
-} from '@api/plexDownloadApi';
+import { pauseDownloadTask, restartDownloadTask, startDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@state/downloadService';
 import SignalrService from '@service/signalrService';
-import { switchMap } from 'rxjs/operators';
 import {
 	DownloadProgress,
 	DownloadStatus,
@@ -60,6 +61,7 @@ import {
 	PlexServerDTO,
 } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import _ from 'lodash';
 import DownloadsTable from './components/DownloadsTable.vue';
 import IDownloadRow from './types/IDownloadRow';
 import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
@@ -126,6 +128,10 @@ export default class Downloads extends Vue {
 		return this.selected.map((x) => x.id);
 	}
 
+	get hasSelected(): boolean {
+		return this.selectedIds.length > 0;
+	}
+
 	updateDownloadProgress(downloadProgress: DownloadProgress): void {
 		// Check if there is already a progress object for this Id
 		const i = this.downloadProgressList.findIndex((x) => x.id === downloadProgress.id);
@@ -138,50 +144,73 @@ export default class Downloads extends Vue {
 		}
 	}
 
-	deleteDownloadTask(downloadTaskId: number): void {
-		const i = this.downloads.findIndex((x) => x.id === downloadTaskId);
-		if (i > -1) {
-			this.downloads.splice(i, 1);
-		}
-		DownloadService.deleteDownloadTask(downloadTaskId).subscribe(() => {
-			this.cleanupProgress(downloadTaskId);
-		});
-	}
+	// region single commands
 
-	stopDownloadTask(downloadTaskId: number): void {
-		stopDownloadTask(downloadTaskId)
-			.pipe(switchMap(() => DownloadService.fetchDownloadList))
-			.subscribe();
-	}
-
-	pauseDownloadTask(downloadTaskId: number): void {
-		pauseDownloadTask(downloadTaskId).subscribe();
+	clearDownloadTask(downloadTaskId: number): void {
+		DownloadService.clearDownloadTasks([downloadTaskId]);
+		this.selected = _.filter(this.selected, (x) => x.id !== downloadTaskId);
 	}
 
 	startDownloadTask(downloadTaskId: number): void {
 		startDownloadTask(downloadTaskId).subscribe();
 	}
 
+	pauseDownloadTask(downloadTaskId: number): void {
+		pauseDownloadTask(downloadTaskId).subscribe();
+	}
+
+	stopDownloadTask(downloadTaskId: number): void {
+		DownloadService.stopDownloadTasks([downloadTaskId]);
+	}
+
 	restartDownloadTask(downloadTaskId: number): void {
 		restartDownloadTask(downloadTaskId).subscribe();
 	}
 
-	clearDownloadTasks(): void {
-		clearDownloadTasks()
-			.pipe(switchMap(() => DownloadService.fetchDownloadList()))
-			.subscribe();
-	}
-
-	deleteDownloadTasks(): void {
-		deleteDownloadTasks(this.selected.map((x) => x.id))
-			.pipe(switchMap(() => DownloadService.fetchDownloadList()))
-			.subscribe();
+	deleteDownloadTask(downloadTaskId: number): void {
+		DownloadService.deleteDownloadTasks([downloadTaskId]);
+		this.selected = _.filter(this.selected, (x) => x.id !== downloadTaskId);
 	}
 
 	detailsDownloadTask(downloadTaskId: number): void {
 		this.downloadTaskDetail = this.downloads.find((x) => x.id === downloadTaskId) ?? null;
 		this.dialog = true;
 	}
+
+	// endregion
+
+	// region batch commands
+	clearDownloadTasks(): void {
+		if (!this.hasSelected) {
+			DownloadService.clearDownloadTasks([]);
+		} else {
+			DownloadService.clearDownloadTasks(this.selectedIds);
+			this.selected = [];
+		}
+	}
+
+	startDownloadTasks(): void {
+		Log.info('startDownloadTasks not implemented');
+	}
+
+	pauseDownloadTasks(): void {
+		Log.info('pauseDownloadTasks not implemented');
+	}
+
+	stopDownloadTasks(): void {
+		Log.info('stopDownloadTasks not implemented');
+	}
+
+	restartDownloadTasks(): void {
+		Log.info('restartDownloadTasks not implemented');
+	}
+
+	deleteDownloadTasks(): void {
+		DownloadService.deleteDownloadTasks(this.selectedIds);
+		this.selected = [];
+	}
+
+	// endregion
 
 	closeDetailsDialog(): void {
 		this.downloadTaskDetail = null;
@@ -194,11 +223,6 @@ export default class Downloads extends Vue {
 		if (downloadProgressIndex > -1) {
 			this.downloadProgressList.splice(downloadProgressIndex, 1);
 		}
-
-		// const downloadStatusUpdateIndex = this.downloadStatusList.findIndex((x) => x.id === downloadTaskId);
-		// if (downloadStatusUpdateIndex > -1) {
-		// 	this.downloadStatusList.splice(downloadStatusUpdateIndex, 1);
-		// }
 
 		const fileMergeProgressIndex = this.fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
 		if (fileMergeProgressIndex > -1) {
@@ -214,6 +238,7 @@ export default class Downloads extends Vue {
 
 		// Retrieve download list
 		DownloadService.getDownloadList().subscribe((data) => {
+			Log.info('getDownloadList', data);
 			this.downloads = data ?? [];
 		});
 

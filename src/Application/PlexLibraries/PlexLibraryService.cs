@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
@@ -52,7 +51,7 @@ namespace PlexRipper.Application.PlexLibraries
         /// <param name="authToken"></param>
         /// <param name="plexLibrary"></param>
         /// <returns></returns>
-        private async Task<Result<PlexLibrary>> RefreshPlexTvShowLibrary(string authToken, PlexLibrary plexLibrary)
+        private async Task<Result> RefreshPlexTvShowLibrary(string authToken, PlexLibrary plexLibrary)
         {
             if (plexLibrary == null)
                 return ResultExtensions.IsNull("plexLibrary").LogError();
@@ -72,58 +71,57 @@ namespace PlexRipper.Application.PlexLibraries
             // Request seasons and episodes for every tv show
             var plexLibraryDb = result.Value;
             var serverUrl = plexLibraryDb.PlexServer.ServerUrl;
-            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 0, plexLibrary.TvShows.Count);
+            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 0, 3);
             var timer = new Stopwatch();
             timer.Start();
 
-            int finishedCount = 0;
-            int errorCount = 0;
+            var rawSeasonDataResult = await _plexServiceApi.GetAllSeasonsAsync(authToken, serverUrl, plexLibrary.Key);
+            if (rawSeasonDataResult.IsFailed)
+            {
+                return rawSeasonDataResult.ToResult();
+            }
 
-            // We wrap it in a task to ensure we can await the result before continuing.
-            await Task.WhenAll(
-                plexLibrary.TvShows.AsParallel().WithDegreeOfParallelism(10).Select(async plexTvShow =>
+            // Phase 1 of 4: Season data was retrieved successfully.
+            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 1, 4);
+
+            var rawEpisodesDataResult = await _plexServiceApi.GetAllEpisodesAsync(authToken, serverUrl, plexLibrary.Key);
+            if (rawEpisodesDataResult.IsFailed)
+            {
+                return rawEpisodesDataResult.ToResult();
+            }
+
+            // Phase 2 of 4: Episode data was retrieved successfully.
+            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 2, 4);
+
+            foreach (var plexTvShow in plexLibrary.TvShows)
+            {
+                plexTvShow.Seasons = rawSeasonDataResult.Value.FindAll(x => x.ParentKey == plexTvShow.Key);
+                foreach (var plexTvShowSeason in plexTvShow.Seasons)
                 {
-                    plexTvShow.Seasons = await _plexServiceApi.GetSeasonsAsync(authToken, serverUrl, plexTvShow);
+                    plexTvShowSeason.PlexLibraryId = plexLibrary.Id;
+                    plexTvShowSeason.PlexLibrary = plexLibrary;
+                    plexTvShowSeason.TvShow = plexTvShow;
+                    plexTvShowSeason.Episodes = rawEpisodesDataResult.Value.FindAll(x => x.ParentKey == plexTvShowSeason.Key);
 
-                    // Retrieve the episodes for every season
-                    if (plexTvShow.Seasons.Any())
-                    {
-                        // We use Task.WhenAll here because we need to await the season retrieval before continuing.
-                        var tasks = plexTvShow.Seasons.Select(async season =>
-                        {
-                            season.PlexLibraryId = plexLibrary.Id;
-                            season.PlexLibrary = plexLibrary;
-                            season.TvShow = plexTvShow;
+                    // Set libraryId in each episode
+                    plexTvShowSeason.Episodes.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
+                    plexTvShowSeason.MediaSize = plexTvShowSeason.Episodes.Sum(x => x.MediaSize);
+                }
 
-                            var episodes = await _plexServiceApi.GetEpisodesAsync(authToken, serverUrl, season);
-                            if (episodes.IsFailed)
-                            {
-                                Interlocked.Increment(ref errorCount);
-                                return;
-                            }
+                plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
+            }
 
-                            // Set the correct plexLibraryId
-                            episodes.Value.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
-                            season.MediaSize = episodes.Value.Sum(x => x.MediaSize);
+            // Phase 3 of 4: PlexLibrary media data was parsed successfully.
+            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 3, 4);
+            Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds}");
+            timer.Restart();
 
-                            season.Episodes = episodes.Value;
-                        }).ToArray();
-
-                        await Task.WhenAll(tasks);
-                        plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
-                    }
-
-                    // Send progress to front-end
-                    Interlocked.Increment(ref finishedCount);
-                    await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, Interlocked.CompareExchange(ref finishedCount, 0, 0),
-                        plexLibrary.TvShows.Count);
-                }).ToList()
-            );
-
-            Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds} with {errorCount} errors.");
-
-            // Calculate total media size of the library
-            plexLibrary.MediaSize = plexLibrary.TvShows.Sum(x => x.MediaSize);
+            // Update the MetaData of this library
+            var updateMetaDataResult = plexLibrary.UpdateMetaData();
+            if (updateMetaDataResult.IsFailed)
+            {
+                return updateMetaDataResult;
+            }
 
             var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
             if (updateResult.IsFailed)
@@ -143,27 +141,31 @@ namespace PlexRipper.Application.PlexLibraries
                 return createResult.ToResult();
             }
 
-            var freshPlexLibrary = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id, false, true));
+            Log.Debug($"Finished updating all media in the database for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds}");
 
-            // Complete progress update
-            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.TvShows.Count, plexLibrary.TvShows.Count);
-            return freshPlexLibrary;
+            // Phase 4 of 4: Database has been successfully updated with new library data.
+            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 4, 4);
+            return Result.Ok();
         }
 
         /// <summary>
         /// Refresh the <see cref="PlexLibrary"/>, by first deleting all (related) media and the re-adding the media again.
         /// </summary>
         /// <param name="plexLibrary">The <see cref="PlexLibrary"/> to refresh.</param>
-        /// <returns>The refreshed <see cref="PlexLibrary"/> with all its media and <see cref="PlexServer"/> reference.</returns>
-        private async Task<Result<PlexLibrary>> RefreshPlexMovieLibrary(PlexLibrary plexLibrary)
+        /// <returns></returns>
+        private async Task<Result> RefreshPlexMovieLibrary(PlexLibrary plexLibrary)
         {
             if (plexLibrary == null)
             {
                 return ResultExtensions.IsNull(nameof(plexLibrary));
             }
 
-            // Calculate total media size of the library
-            plexLibrary.MediaSize = plexLibrary.Movies.Sum(x => x.MediaSize);
+            // Update the MetaData of this library
+            var updateMetaDataResult = plexLibrary.UpdateMetaData();
+            if (updateMetaDataResult.IsFailed)
+            {
+                return updateMetaDataResult;
+            }
 
             var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
             if (updateResult.IsFailed)
@@ -184,7 +186,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.MediaCount, plexLibrary.MediaCount);
-            return await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id));
+            return Result.Ok();
         }
 
         #endregion
@@ -192,11 +194,11 @@ namespace PlexRipper.Application.PlexLibraries
         #region Public
 
         /// <inheritdoc/>
-        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0)
+        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false)
         {
             await _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
 
-            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true));
+            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
 
             if (libraryDB.IsFailed)
             {
@@ -211,21 +213,18 @@ namespace PlexRipper.Application.PlexLibraries
                 var refreshResult = await RefreshLibraryMediaAsync(libraryId, plexAccountId);
                 if (refreshResult.IsFailed)
                 {
-                    return refreshResult;
+                    return refreshResult.ToResult();
                 }
-
-                // Re-retrieve from database with all includes
-                return await _mediator.Send(new GetPlexLibraryByIdQuery(refreshResult.Value.Id, true, true));
             }
 
             await _signalRService.SendLibraryProgressUpdate(libraryId, 1, 1, false);
-            return libraryDB;
+            return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true, topLevelMediaOnly));
         }
 
         /// <inheritdoc/>
-        public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0)
+        public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false)
         {
-            var plexLibrary = await GetPlexLibraryAsync(libraryId, plexAccountId);
+            var plexLibrary = await GetPlexLibraryAsync(libraryId, plexAccountId, topLevelMediaOnly);
             if (plexLibrary.IsFailed)
             {
                 return plexLibrary.ToResult();

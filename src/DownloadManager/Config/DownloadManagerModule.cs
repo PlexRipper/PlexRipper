@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using PlexRipper.Application.Common;
+using PlexRipper.DownloadManager.Download;
 
 namespace PlexRipper.DownloadManager.Config
 {
@@ -8,7 +9,9 @@ namespace PlexRipper.DownloadManager.Config
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<DownloadManager>().As<IDownloadManager>().SingleInstance();
-            builder.RegisterType<DownloadQueue>().SingleInstance();
+            builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
+            builder.RegisterType<PlexDownloadClient>().InstancePerDependency();
+            builder.RegisterType<DownloadWorker>().InstancePerDependency();
         }
     }
 }

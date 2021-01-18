@@ -11,14 +11,7 @@ namespace PlexRipper.Domain
         /// Unique key identifying this item by the Plex Api. This is used by the PlexServers to differentiate between media items.
         /// e.g: 28550, 1723, 21898.
         /// </summary>
-        public int RatingKey { get; set; }
-
-        /// <summary>
-        /// Unique key identifying this item by the Plex Api. with the url path included
-        /// e.g: "/library/metadata/9725", "/library/metadata/9724".
-        /// TODO: This can possibly be removed from the database as it seems that every "Key" is always "/library/metadata/" + RatingKey.
-        /// </summary>
-        public string Key { get; set; }
+        public int Key { get; set; }
 
         public string Guid { get; set; }
 
@@ -33,6 +26,11 @@ namespace PlexRipper.Domain
         public int ViewedLeafCount { get; set; }
 
         public int ChildCount { get; set; }
+
+        /// <summary>
+        /// The PlexKey of the tvShow this belongs too.
+        /// </summary>
+        public int ParentKey { get; set; }
 
         /// <summary>
         /// The total filesize of the nested media.

@@ -6,14 +6,12 @@ namespace PlexRipper.Application.PlexTvShows
 {
     public class GetPlexTvShowEpisodeByIdQuery : IRequest<Result<PlexTvShowEpisode>>
     {
-        public GetPlexTvShowEpisodeByIdQuery(int id, bool includePlexTvShow = false)
+        public GetPlexTvShowEpisodeByIdQuery(int id)
         {
             Id = id;
-            IncludePlexTvShow = includePlexTvShow;
         }
 
         public int Id { get; }
 
-        public bool IncludePlexTvShow { get; }
     }
 }

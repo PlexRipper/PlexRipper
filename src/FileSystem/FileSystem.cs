@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
@@ -26,29 +25,6 @@ namespace PlexRipper.FileSystem
 
         #endregion Constructors
 
-        #region Properties
-
-        public string RootDirectory
-        {
-            get
-            {
-                switch (OsInfo.Os)
-                {
-                    case Os.Linux:
-                    case Os.Osx:
-                        return "/";
-                    case Os.Windows:
-                        return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
-                    default:
-                        return "/";
-                }
-            }
-        }
-
-        public string ConfigDirectory => Path.Combine(RootDirectory, "config");
-
-        #endregion Properties
-
         #region Methods
 
         public Result Setup()
@@ -60,13 +36,13 @@ namespace PlexRipper.FileSystem
         {
             try
             {
-                if (!Directory.Exists(ConfigDirectory))
+                if (!Directory.Exists(FileSystemPaths.ConfigDirectory))
                 {
                     Log.Debug("Config directory doesn't exist, will create now.");
 
-                    Directory.CreateDirectory(ConfigDirectory);
+                    Directory.CreateDirectory(FileSystemPaths.ConfigDirectory);
 
-                    Log.Debug($"Directory: \"{ConfigDirectory}\" created!");
+                    Log.Debug($"Directory: \"{FileSystemPaths.ConfigDirectory}\" created!");
                 }
                 else
                 {
@@ -109,20 +85,16 @@ namespace PlexRipper.FileSystem
 
             try
             {
-                if (File.Exists(filePath))
-                {
-                    string directoryPath = Path.GetDirectoryName(filePath) ?? string.Empty;
-                    if (string.IsNullOrEmpty(directoryPath))
-                    {
-                        return Result.Fail($"Could not determine the directory name of path: {filePath}").LogError();
-                    }
+                var directory = Path.GetDirectoryName(filePath) ?? string.Empty;
 
-                    Directory.Delete(directoryPath);
-                }
                 // If the filePath is just an empty directory then delete that.
-                else if (Directory.Exists(filePath) || !Directory.GetFiles(filePath).Any())
+                if (!string.IsNullOrEmpty(directory) && Directory.Exists(directory) && !Directory.GetFiles(directory).Any())
                 {
-                    Directory.Delete(filePath);
+                    Directory.Delete(directory);
+                }
+                else
+                {
+                    return Result.Fail($"Could not determine the directory name of path: {filePath} or the path contains files").LogError();
                 }
             }
             catch (Exception e)
@@ -315,8 +287,7 @@ namespace PlexRipper.FileSystem
 
         public string ToAbsolutePath(string relativePath)
         {
-            var x = Path.GetFullPath(Path.Combine(RootDirectory, relativePath));
-            return x;
+            return Path.GetFullPath(Path.Combine(FileSystemPaths.RootDirectory, relativePath));
         }
 
         #endregion Methods

@@ -89,6 +89,8 @@ namespace PlexRipper.Domain
 
         #region Helpers
 
+        private string MovieTitle => $"{Title}" + (ReleaseYear > 0 ? $" ({ReleaseYear})" : string.Empty);
+
         [NotMapped]
         public DownloadStatus DownloadStatus
         {
@@ -109,11 +111,27 @@ namespace PlexRipper.Domain
         [NotMapped]
         public Uri DownloadUri => new Uri(DownloadUrl, UriKind.Absolute);
 
+        public string FileNameWithoutExtention => Path.GetFileNameWithoutExtension(FileName);
+
         /// <summary>
         /// Gets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
         /// </summary>
         [NotMapped]
-        public string DownloadPath => Path.Combine(DownloadFolder.DirectoryPath, MediaPath);
+        public string DownloadPath
+        {
+            get
+            {
+                switch (MediaType)
+                {
+                    case PlexMediaType.Movie:
+                        return Path.Combine(DownloadFolder.DirectoryPath, "Movies", $"{FileNameWithoutExtention}".SanitizePath());
+                    case PlexMediaType.Episode:
+                        return Path.Combine(DownloadFolder.DirectoryPath, "TvShows", $"{FileNameWithoutExtention}".SanitizePath());
+                    default:
+                        return Path.Combine(DownloadFolder.DirectoryPath, "Other", $"{FileNameWithoutExtention}".SanitizePath());
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
@@ -122,7 +140,7 @@ namespace PlexRipper.Domain
         public string DestinationPath => Path.Combine(DestinationFolder.DirectoryPath, MediaPath);
 
         /// <summary>
-        /// Gets the sub-path based on the <see cref="PlexMediaType"/>, e.g: [TvShow]/[Season]/ or [Movie] [ReleaseYear]/.
+        /// Gets the sanitized sub-path based on the <see cref="PlexMediaType"/>, e.g: [TvShow]/[Season]/ or [Movie] [ReleaseYear]/.
         /// </summary>
         [NotMapped]
         public string MediaPath
@@ -132,11 +150,16 @@ namespace PlexRipper.Domain
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:
-                        return $"{Title} " + (ReleaseYear > 0 ? $"({ReleaseYear})" : string.Empty);
+                        return Path.Combine(MovieTitle.SanitizePath());
                     case PlexMediaType.Episode:
-                        return Path.Combine(TitleTvShow.Replace(":", "-"), TitleTvShowSeason);
+                        // If the same, than it will most likely be an anime type of tvShow which can have no seasons.
+                        if (TitleTvShow == TitleTvShowSeason)
+                        {
+                            return Path.Combine(TitleTvShow.SanitizePath());
+                        }
+                        return Path.Combine(TitleTvShow.SanitizePath(), TitleTvShowSeason.SanitizePath());
                     default:
-                        return Path.Combine($"{Path.GetFileNameWithoutExtension(FileName)}");
+                        return Path.Combine($"{FileNameWithoutExtention.SanitizePath()}");
                 }
             }
         }

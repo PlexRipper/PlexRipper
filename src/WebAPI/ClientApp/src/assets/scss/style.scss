@@ -55,7 +55,7 @@ general
 */
 .glass-background {
 	&.theme--dark {
-		background: rgba(255, 255, 255, 0.08);
+		background: $dark-theme-glass-background;
 	}
 	&.theme--light {
 		background: $light-background-color;
@@ -67,6 +67,10 @@ general
 }
 .default-shadow {
 	box-shadow: $box-shadow;
+}
+
+.blur {
+	backdrop-filter: blur(30px);
 }
 
 /*
@@ -87,4 +91,3 @@ SectionTable
 		@extend .no-background;
 	}
 }
-

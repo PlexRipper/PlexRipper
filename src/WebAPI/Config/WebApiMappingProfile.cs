@@ -44,17 +44,24 @@ namespace PlexRipper.WebAPI.Config
             // PlexLibrary -> PlexLibraryDTO
             CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.MediaCount))
+                .ForMember(dto => dto.MediaSize, entity => entity.MapFrom(x => x.MediaSize))
                 .ForMember(dto => dto.SeasonCount, entity => entity.MapFrom(x => x.SeasonCount))
                 .ForMember(dto => dto.EpisodeCount, entity => entity.MapFrom(x => x.EpisodeCount));
 
             // PlexTvShow <-> PlexTvShowDTO
-            CreateMap<PlexTvShow, PlexTvShowDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<PlexTvShow, PlexTvShowDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Size, entity => entity.MapFrom(x => x.MediaSize))
+                .ReverseMap();
 
             // PlexTvShowSeason <-> PlexTvShowSeasonDTO
-            CreateMap<PlexTvShowSeason, PlexTvShowSeasonDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<PlexTvShowSeason, PlexTvShowSeasonDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Size, entity => entity.MapFrom(x => x.MediaSize))
+                .ReverseMap();
 
-            // PlexTvShowSeason <-> PlexTvShowSeasonDTO
-            CreateMap<PlexTvShowEpisode, PlexTvShowEpisodeDTO>(MemberList.Destination).ReverseMap();
+            // PlexTvShowEpisode <-> PlexTvShowEpisodeDTO
+            CreateMap<PlexTvShowEpisode, PlexTvShowEpisodeDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Size, entity => entity.MapFrom(x => x.MediaSize))
+                .ReverseMap();
 
             // PlexMovie -> PlexMovieDTO
             CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination)

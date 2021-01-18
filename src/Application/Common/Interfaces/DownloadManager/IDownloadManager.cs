@@ -8,14 +8,14 @@ namespace PlexRipper.Application.Common
     /// <summary>
     /// Interface for the DownloadManager.
     /// </summary>
-    public interface IDownloadManager
+    public interface IDownloadManager : ISetup
     {
         /// <summary>
         /// Cancels the PlexDownloadClient executing the <see cref="DownloadTask"/> if it is downloading.
         /// </summary>
-        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to stop.</param>
+        /// <param name="downloadTaskIds">The ids of the <see cref="DownloadTask"/> to stop.</param>
         /// <returns>Is successful.</returns>
-        Result<bool> StopDownload(int downloadTaskId);
+        Task<Result> StopDownload(List<int> downloadTaskIds = null);
 
         /// <summary>
         /// Adds a list of <see cref="DownloadTask"/>s to the download queue.
@@ -34,8 +34,9 @@ namespace PlexRipper.Application.Common
         /// <summary>
         /// Will clear any completed <see cref="DownloadTask"/> from the database.
         /// </summary>
+        /// <param name="downloadTaskIds"></param>
         /// <returns>Is successful.</returns>
-        Task<Result<bool>> ClearCompletedAsync();
+        Task<Result<bool>> ClearCompletedAsync(List<int> downloadTaskIds = null);
 
         /// <summary>
         /// Starts a queued task immediately.
@@ -49,7 +50,7 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to pause.</param>
         /// <returns>Is successful.</returns>
-        Result<bool> PauseDownload(int downloadTaskId);
+        Task<Result> PauseDownload(int downloadTaskId);
 
         /// <summary>
         /// Deletes the PlexDownloadClient, if active, from the _downloadList, executes its disposal and deletes from database.
@@ -65,5 +66,6 @@ namespace PlexRipper.Application.Common
         /// <param name="downloadTaskIds">The list of <see cref="DownloadTask"/> to delete.</param>
         /// <returns><see cref="Result"/> fails on error.</returns>
         Task<Result> DeleteDownloadClients(IEnumerable<int> downloadTaskIds);
+
     }
 }

@@ -11,6 +11,5 @@ export default interface ITreeViewItem {
 	updatedAt: string;
 	type: PlexMediaType;
 	mediaData: IMediaData[];
-	children: ITreeViewItem[];
-	item: any;
+	children?: ITreeViewItem[];
 }

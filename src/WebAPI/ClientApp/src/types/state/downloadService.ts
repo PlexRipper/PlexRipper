@@ -1,7 +1,7 @@
 import { Observable, of } from 'rxjs';
-import { getAllDownloads, deleteDownloadTask } from '@api/plexDownloadApi';
+import { getAllDownloads, deleteDownloadTasks, clearDownloadTasks, stopDownloadTasks, downloadMedia } from '@api/plexDownloadApi';
 import { finalize, switchMap } from 'rxjs/operators';
-import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
+import { DownloadMediaDTO, DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import StoreState from '@state/storeState';
 import ServerService from '@state/serverService';
 import AccountService from '@service/accountService';
@@ -66,8 +66,39 @@ export class DownloadService extends BaseService {
 		return this.getDownloadList();
 	}
 
-	public deleteDownloadTask(downloadTaskId: number): Observable<any> {
-		return deleteDownloadTask(downloadTaskId).pipe(finalize(() => this.fetchDownloadList()));
+	public downloadMedia(downloadMediaCommand: DownloadMediaDTO): void {
+		downloadMedia(downloadMediaCommand)
+			.pipe(finalize(() => this.fetchDownloadList()))
+			.subscribe();
+	}
+
+	// region Commands
+
+	public deleteDownloadTasks(downloadTaskIds: number[]): void {
+		this.removeDownloadTasks(downloadTaskIds);
+		deleteDownloadTasks(downloadTaskIds)
+			.pipe(finalize(() => this.fetchDownloadList()))
+			.subscribe();
+	}
+
+	public clearDownloadTasks(downloadTaskIds: number[]): void {
+		this.removeDownloadTasks(downloadTaskIds);
+		clearDownloadTasks(downloadTaskIds)
+			.pipe(finalize(() => this.fetchDownloadList()))
+			.subscribe();
+	}
+
+	public stopDownloadTasks(downloadTaskIds: number[]): void {
+		stopDownloadTasks(downloadTaskIds)
+			.pipe(finalize(() => this.fetchDownloadList()))
+			.subscribe();
+	}
+
+	// endregion
+
+	private removeDownloadTasks(downloadTaskIds: number[]): void {
+		const downloads = this.getState().downloads.filter((x) => downloadTaskIds.some((y) => y !== x.id));
+		this.setState({ downloads });
 	}
 }
 

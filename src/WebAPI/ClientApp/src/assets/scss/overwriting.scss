@@ -51,6 +51,27 @@ v-sheet
 }
 
 /*
+v-data-table
+*/
+.v-data-table {
+	.v-data-table--fixed-header {
+		thead {
+			th {
+				background: transparent;
+			}
+		}
+	}
+	&.theme--dark,
+	tbody tr.v-data-table__selected {
+		@extend .no-background;
+	}
+	&.theme--light,
+	tbody tr.v-data-table__selected {
+		@extend .no-background;
+	}
+}
+
+/*
 v-dialog
 */
 
@@ -61,7 +82,7 @@ v-dialog
 	@extend .default-shadow;
 
 	.v-card {
-		backdrop-filter: blur(30px);
+		@extend .blur;
 		border-radius: 15px;
 		&.theme--dark {
 			background: $dark-dialog-background-color;
@@ -76,7 +97,7 @@ v-dialog
 v-menu
 */
 .v-menu__content {
-	backdrop-filter: blur(30px);
+	@extend .blur;
 	.v-list {
 		&.theme--dark {
 			background: $dark-dialog-background-color;
@@ -109,4 +130,25 @@ v-expansion-panels
 			}
 		}
 	}
+}
+
+.v-text-field--solo {
+	&.theme--dark {
+		.v-input__control > .v-input__slot {
+			background: $dark-theme-glass-background;
+		}
+	}
+}
+
+/*
+v-btn
+*/
+// Remove background color on button disabled
+.theme--dark.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+	background-color: transparent !important;
+}
+
+// Remove background color on button disabled
+.theme--light.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+	background-color: transparent !important;
 }

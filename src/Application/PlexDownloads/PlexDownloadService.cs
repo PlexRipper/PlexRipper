@@ -99,7 +99,7 @@ namespace PlexRipper.Application.PlexDownloads
         {
             Log.Debug($"Creating download tasks for TvShow with id: {plexTvShowId}");
 
-            var plexTvShow = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(plexTvShowId, true));
+            var plexTvShow = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(plexTvShowId, true, true));
             if (plexTvShow.IsFailed) return plexTvShow.ToResult();
 
             // Parse all contained episodes to DownloadTasks
@@ -231,7 +231,11 @@ namespace PlexRipper.Application.PlexDownloads
             await _signalRService.SendDownloadTaskCreationProgressUpdate(libraryId, 0, mediaIds.Count);
             for (int i = 0; i < mediaIds.Count; i++)
             {
-                await DownloadMediaAsync(mediaIds[i], type, accountId);
+                var result = await DownloadMediaAsync(mediaIds[i], type, accountId);
+                if (result.IsFailed)
+                {
+                    await _notificationsService.SendResult(result);
+                }
                 await _signalRService.SendDownloadTaskCreationProgressUpdate(libraryId, i, mediaIds.Count);
             }
 
@@ -240,7 +244,7 @@ namespace PlexRipper.Application.PlexDownloads
             return Result.Ok();
         }
 
-        public async Task<Result<bool>> DownloadMediaAsync(int mediaId, PlexMediaType type, int plexAccountId = 0)
+        public async Task<Result> DownloadMediaAsync(int mediaId, PlexMediaType type, int plexAccountId = 0)
         {
             var result = await _folderPathService.CheckIfFolderPathsAreValid();
             if (result.IsFailed)

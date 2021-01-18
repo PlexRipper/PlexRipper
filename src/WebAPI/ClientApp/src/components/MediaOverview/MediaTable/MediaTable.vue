@@ -44,7 +44,7 @@
 									transition
 									item-key="key"
 									item-text="title"
-									@input="updateSelected"
+									@input="updateSelected(y, $event)"
 								>
 									<template #label="{ item }">
 										<v-row class="media-table-content-row" align="center">
@@ -64,7 +64,12 @@
 											<!-- Actions -->
 											<v-col cols="auto" class="py-0">
 												<v-sheet width="70" class="no-background text-center">
-													<p-btn button-type="download" icon-mode @click="downloadMedia(item)"></p-btn>
+													<p-btn
+														button-type="download"
+														:loading="isLoading(item.key)"
+														icon-mode
+														@click="downloadMedia(item)"
+													></p-btn>
 												</v-sheet>
 											</v-col>
 										</v-row>
@@ -80,7 +85,6 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
 import IMediaTableHeader from '@interfaces/IMediaTableHeader';
@@ -88,6 +92,7 @@ import ProgressComponent from '@components/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import { getTvShow } from '@api/mediaApi';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
+import { Dictionary } from 'typescript-collections';
 import ITreeViewItem from './types/ITreeViewItem';
 
 @Component({
@@ -114,6 +119,9 @@ export default class MediaTable extends Vue {
 	visible: boolean[] = [];
 	active: boolean[] = [];
 	tempItems: ITreeViewItem[] = [];
+	loadingButtons: string[] = [];
+
+	selectedDict: Dictionary<number, string[]> = new Dictionary<number, string[]>();
 
 	@Watch('tempItems')
 	updateVisible(): void {
@@ -131,12 +139,21 @@ export default class MediaTable extends Vue {
 		return this.getLeafs.length !== this.selected.length && this.selected.length > 0;
 	}
 
-	updateSelected(selected: string[]) {
-		this.$emit('selected', selected);
+	isLoading(key: string): boolean {
+		return this.loadingButtons.some((x) => x === key);
+	}
+
+	updateSelected(i: number, selected: string[]) {
+		if (i === 0) {
+			this.$emit('selected', selected);
+		} else {
+			this.selectedDict.setValue(i, selected);
+			this.$emit('selected', this.selectedDict.values().flat(1));
+		}
 	}
 
 	selectAll(state: boolean): void {
-		this.updateSelected(state ? this.getLeafs : []);
+		this.updateSelected(0, state ? this.getLeafs : []);
 	}
 
 	get getHeaders(): IMediaTableHeader[] {
@@ -189,6 +206,8 @@ export default class MediaTable extends Vue {
 	}
 
 	async downloadMedia(item: ITreeViewItem): Promise<void> {
+		// Set as currently loading.
+		this.loadingButtons.push(item.key);
 		const downloadCommand: DownloadMediaDTO = {
 			type: item.type,
 			mediaIds: [],
@@ -203,10 +222,10 @@ export default class MediaTable extends Vue {
 				if (item.children?.length === 0) {
 					await this.getMedia(item);
 				}
-				downloadCommand.mediaIds = item?.children?.flatMap((x) => x.children?.flatMap((y) => y.id) ?? []) ?? [];
+				downloadCommand.mediaIds.push(item.id);
 				break;
 			case PlexMediaType.Season:
-				downloadCommand.mediaIds = item?.children?.flatMap((x) => x?.id) ?? [];
+				downloadCommand.mediaIds.push(item.id);
 				break;
 			case PlexMediaType.Episode:
 				downloadCommand.mediaIds.push(item.id);
@@ -214,7 +233,13 @@ export default class MediaTable extends Vue {
 			default:
 				return;
 		}
-		Log.debug('DownloadTask', downloadCommand);
+		// Set finished loading
+		const i = this.loadingButtons.findIndex((x) => x === item.key);
+		if (i > -1) {
+			this.loadingButtons.splice(i, 1);
+		} else {
+			this.loadingButtons = [];
+		}
 		this.$emit('download', downloadCommand);
 	}
 

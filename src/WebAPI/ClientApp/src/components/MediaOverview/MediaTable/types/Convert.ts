@@ -72,7 +72,6 @@ export default abstract class Convert {
 					size: movie.size,
 					type: PlexMediaType.Movie,
 					mediaData: movie.plexMovieDatas as IMediaData[],
-					children: [],
 					addedAt: movie.addedAt ?? '',
 					updatedAt: movie.updatedAt ?? '',
 				});

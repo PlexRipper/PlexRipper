@@ -65,7 +65,7 @@ namespace PlexRipper.WebAPI.Config
 
             // PlexMovie -> PlexMovieDTO
             CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Size, entity => entity.MapFrom(x => x.GetParts.SelectMany(y => y.PlexMovieData.Parts).Sum(z => z.Size)));
+                .ForMember(dto => dto.Size, entity => entity.MapFrom(x => x.MediaSize));
 
             // PlexMovieData -> PlexMovieDataDTO
             CreateMap<PlexMovieData, PlexMovieDataDTO>(MemberList.Destination);

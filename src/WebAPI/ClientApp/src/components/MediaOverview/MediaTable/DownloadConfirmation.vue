@@ -6,17 +6,21 @@
 				<v-card-title> Are you sure? </v-card-title>
 				<v-card-subtitle>
 					<p>Plex Ripper will start downloading the following:</p>
+					<p>Total size: <file-size :size="totalSize" /></p>
 				</v-card-subtitle>
 				<!-- Show Download Task Preview -->
 				<v-card-text>
-					<perfect-scrollbar>
-						<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open="getLeafs" open-all>
-							<template #prepend="{ item }">
-								<v-icon>
-									{{ item.type | mediaTypeIcon }}
-								</v-icon>
-							</template>
-						</v-treeview>
+					<perfect-scrollbar ref="previewscrollbar" :options="{ suppressScrollX: true }">
+						<v-col cols="12">
+							<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open="getLeafs" open-all>
+								<template #prepend="{ item }">
+									<v-icon>
+										{{ item.type | mediaTypeIcon }}
+									</v-icon>
+								</template>
+								<template #append="{ item }"> (<file-size :size="item.size" />) </template>
+							</v-treeview>
+						</v-col>
 					</perfect-scrollbar>
 				</v-card-text>
 				<v-divider></v-divider>
@@ -48,6 +52,7 @@ import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { settingsStore as SettingsStore } from '@/store';
 import ButtonType from '@enums/buttonType';
+import Log from 'consola';
 
 @Component({
 	components: {
@@ -88,6 +93,14 @@ export default class DownloadConfirmation extends Vue {
 		return ButtonType.Confirm;
 	}
 
+	get totalSize(): number {
+		let size = 0;
+		if (this.downloadPreview.length > 0) {
+			this.downloadPreview.forEach((x) => (size += x.size ?? 0));
+		}
+		return size;
+	}
+
 	private createPreview(downloadMediaCommand: DownloadMediaDTO): void {
 		let filterResult: ITreeViewItem[] = [];
 		const mediaIds = downloadMediaCommand.mediaIds;
@@ -96,35 +109,44 @@ export default class DownloadConfirmation extends Vue {
 
 		// Movie: Show only the movie
 		if (downloadMediaCommand.type === PlexMediaType.Movie) {
-			filterResult = this.items.filter((x) => mediaIds.some((y) => y === x.id)) ?? [];
+			filterResult = this.items.filter((movie) => mediaIds.includes(movie.id));
 		}
 
-		// Episode: Show tvShow -> season -> episode without anything else
-		// First filter and then map to exclude unneeded tvshows/seasons/episodes
-		if (
-			downloadMediaCommand.type === PlexMediaType.TvShow ||
-			downloadMediaCommand.type === PlexMediaType.Season ||
-			downloadMediaCommand.type === PlexMediaType.Episode
-		) {
+		// TvShow: Show tvShow -> with all season -> with all episodes
+		if (downloadMediaCommand.type === PlexMediaType.TvShow) {
+			filterResult = this.items.filter((tvShow) => mediaIds.some((x) => x === tvShow.id));
+		}
+
+		// Season: Show tvShow -> season -> with all episodes
+		if (downloadMediaCommand.type === PlexMediaType.Season) {
 			filterResult = this.items
-				.filter((tvShow) => tvShow.children?.some((season) => season.children?.some((z) => mediaIds.some((y) => y === z.id))))
+				.filter((tvShow) => tvShow.children?.some((season) => mediaIds.includes(season.id)))
 				.map((tvShow) => {
 					return {
 						...tvShow,
-						children:
-							tvShow?.children ??
-							[]
-								.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.some((y) => y === episode.id)))
-								.map((season: ITreeViewItem) => {
-									return {
-										...season,
-										children: season?.children?.filter((episode) => mediaIds.some((y) => y === episode.id)),
-									};
-								}),
+						children: tvShow.children?.filter((season) => mediaIds.includes(season.id)),
 					};
 				});
 		}
 
+		// Episode: Show tvShow -> season -> episode without anything else
+		if (downloadMediaCommand.type === PlexMediaType.Episode) {
+			filterResult = this.items
+				.filter((tvShow) => tvShow.children?.some((season) => season.children?.some((episode) => mediaIds.includes(episode.id))))
+				.map((tvShow) => {
+					return {
+						...tvShow,
+						children: tvShow.children
+							?.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.includes(episode.id)))
+							.map((season: ITreeViewItem) => {
+								return {
+									...season,
+									children: season?.children?.filter((episode) => mediaIds.includes(episode.id)),
+								};
+							}),
+					};
+				});
+		}
 		this.downloadPreview = filterResult;
 	}
 
@@ -146,6 +168,7 @@ export default class DownloadConfirmation extends Vue {
 
 	openDialog(downloadMediaCommand: DownloadMediaDTO): void {
 		this.downloadMediaCommand = downloadMediaCommand;
+		Log.info('opendialog', this.downloadMediaCommand);
 		if (this.isConfirmationEnabled) {
 			this.createPreview(downloadMediaCommand);
 		} else {
@@ -156,6 +179,7 @@ export default class DownloadConfirmation extends Vue {
 
 	closeDialog(): void {
 		this.showDialog = false;
+		this.downloadPreview = [];
 	}
 
 	confirmDownload(): void {

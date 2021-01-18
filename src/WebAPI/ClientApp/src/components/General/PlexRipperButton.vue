@@ -17,7 +17,7 @@
 				:target="href ? '_blank' : '_self'"
 				v-bind="attrs"
 				v-on="on"
-				@click="click"
+				@click="click($event)"
 			>
 				<v-icon v-if="getIcon" class="mx-2" :size="iconSize" :color="getColor">{{ getIcon }}</v-icon>
 				<span v-if="getText !== ''">{{ $t(getText) }}</span>
@@ -184,8 +184,8 @@ export default class PBtn extends Vue {
 		return false;
 	}
 
-	click(): void {
-		this.$emit('click');
+	click(event: any): void {
+		this.$emit('click', event);
 	}
 }
 </script>

@@ -25,10 +25,20 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
         public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdWithEpisodesQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<PlexTvShow> query = _dbContext.PlexTvShows.Include(x => x.Seasons)
-                .ThenInclude(x => x.Episodes)
-                .ThenInclude(x => x.EpisodeData)
-                .ThenInclude(x => x.Parts);
+            IQueryable<PlexTvShow> query = _dbContext.PlexTvShows.AsQueryable();
+
+            if (!request.IncludeData)
+            {
+                query = query.Include(x => x.Seasons)
+                    .ThenInclude(x => x.Episodes);
+            }
+            else
+            {
+                query = query.Include(x => x.Seasons)
+                    .ThenInclude(x => x.Episodes)
+                    .ThenInclude(x => x.EpisodeData)
+                    .ThenInclude(x => x.Parts);
+            }
 
             if (request.IncludeLibrary)
             {

@@ -45,7 +45,7 @@ namespace PlexRipper.WebAPI.Controllers
                 Log.Debug($"API Request: GetPlexLibrary(plexLibraryId = {id}, plexAccountId = {plexAccountId})");
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                var data = await _plexLibraryService.GetPlexLibraryAsync(id, plexAccountId);
+                var data = await _plexLibraryService.GetPlexLibraryAsync(id, plexAccountId, true);
 
                 if (data.IsFailed)
                 {
@@ -87,7 +87,7 @@ namespace PlexRipper.WebAPI.Controllers
 
             try
             {
-                var data = await _plexLibraryService.GetPlexLibraryInServerAsync(id, plexAccountId);
+                var data = await _plexLibraryService.GetPlexLibraryInServerAsync(id, plexAccountId, true);
 
                 if (data.IsFailed)
                 {
@@ -112,27 +112,20 @@ namespace PlexRipper.WebAPI.Controllers
 
         // POST api/<PlexLibrary>/refresh
         [HttpPost("refresh")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibraryDTO refreshPlexLibraryDto)
         {
             var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId, refreshPlexLibraryDto.PlexAccountId);
 
-            if (data.IsFailed)
+            if (data.IsSuccess)
             {
-                return InternalServerError(data);
-            }
-
-            if (data.Value != null)
-            {
-                var mapResult = _mapper.Map<PlexLibraryDTO>(data.Value);
-                Log.Debug($"Found {data.Value.MediaCount} in library {data.Value.Title} of type {data.Value.Type} after refreshing");
-                return Ok(Result.Ok(mapResult));
+                return Ok(Result.Ok());
             }
 
             string msg = $"Could not refresh {nameof(PlexLibrary)} with Id: {refreshPlexLibraryDto.PlexLibraryId}";
             Log.Warning(msg);
-            return InternalServerError(Result.Fail(msg));
+            return InternalServerError(data);
         }
 
         // GET api/<PlexLibrary>/5

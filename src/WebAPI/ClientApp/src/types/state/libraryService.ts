@@ -1,7 +1,7 @@
 import { iif, Observable, of } from 'rxjs';
 import { BaseService } from '@state/baseService';
 import StoreState from '@state/storeState';
-import { map, switchMap, take, tap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 import serverService from '@state/serverService';
@@ -20,6 +20,7 @@ export class LibraryService extends BaseService {
 		if (!library) {
 			return;
 		}
+		// library = Object.freeze(library);
 		const libraries = this.getState().libraries;
 		const libraryIndex = libraries.findIndex((x) => x.id === library.id);
 		if (libraryIndex === -1) {
@@ -47,7 +48,7 @@ export class LibraryService extends BaseService {
 
 	public refreshLibrary(libraryId: number): void {
 		refreshPlexLibrary(libraryId, settingsStore.activeAccountId)
-			.pipe(take(1))
+			.pipe(switchMap(() => this.retrieveLibrary(libraryId)))
 			.subscribe((library) => this.updateLibraryInStore(library));
 	}
 

@@ -48,6 +48,7 @@ namespace PlexRipper.Application.PlexDownloads
         /// <param name="plexApiService"></param>
         /// <param name="signalRService"></param>
         /// <param name="folderPathService"></param>
+        /// <param name="notificationsService"></param>
         public PlexDownloadService(
             IMediator mediator,
             IDownloadManager downloadManager,
@@ -98,7 +99,7 @@ namespace PlexRipper.Application.PlexDownloads
         {
             Log.Debug($"Creating download tasks for TvShow with id: {plexTvShowId}");
 
-            var plexTvShow = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(plexTvShowId));
+            var plexTvShow = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(plexTvShowId, true));
             if (plexTvShow.IsFailed) return plexTvShow.ToResult();
 
             // Parse all contained episodes to DownloadTasks
@@ -144,7 +145,7 @@ namespace PlexRipper.Application.PlexDownloads
         {
             Log.Debug($"Creating download request for TvShow episode with id: {plexTvShowEpisodeId}");
 
-            var plexTvShowEpisode = await _mediator.Send(new GetPlexTvShowEpisodeByIdQuery(plexTvShowEpisodeId, true));
+            var plexTvShowEpisode = await _mediator.Send(new GetPlexTvShowEpisodeByIdQuery(plexTvShowEpisodeId));
             if (plexTvShowEpisode.IsFailed)
                 return plexTvShowEpisode.ToResult();
 

@@ -62,13 +62,13 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import MediaPoster from '@mediaOverview/MediaPoster.vue';
 import SignalrService from '@service/signalrService';
 import { filter, finalize, tap } from 'rxjs/operators';
-import Log from 'consola';
 import DownloadService from '@state/downloadService';
 import LibraryService from '@state/libraryService';
 import ProgressComponent from '@components/ProgressComponent.vue';
@@ -77,6 +77,7 @@ import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
+import { combineLatest } from 'rxjs';
 import { settingsStore } from '~/store';
 
 @Component({
@@ -268,23 +269,20 @@ export default class MediaOverview extends Vue {
 			)
 			.subscribe();
 
-		LibraryService.getServerByLibraryID(this.libraryId).subscribe((server) => {
-			if (server) {
-				this.server = server;
-				if (this.library) {
+		// Retrieve server and library data
+		combineLatest([LibraryService.getServerByLibraryID(this.libraryId), LibraryService.getLibrary(this.libraryId)]).subscribe(
+			(data) => {
+				if (data[0]) {
+					this.server = Object.freeze(data[0]);
+				}
+				if (data[1] && data[1].id === this.libraryId) {
+					this.library = Object.freeze(data[1]);
+				}
+				if (this.server && this.library) {
 					this.isLoading = false;
 				}
-			}
-		});
-
-		LibraryService.getLibrary(this.libraryId).subscribe((library) => {
-			if (library && library.id === this.libraryId) {
-				this.library = library;
-				if (this.server) {
-					this.isLoading = false;
-				}
-			}
-		});
+			},
+		);
 	}
 }
 </script>

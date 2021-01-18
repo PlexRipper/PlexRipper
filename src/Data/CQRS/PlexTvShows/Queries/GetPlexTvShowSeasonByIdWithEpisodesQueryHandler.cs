@@ -33,7 +33,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                 .Include(x => x.Episodes)
                 .ThenInclude(x => x.EpisodeData)
                 .ThenInclude(x => x.Parts)
-                .OrderBy(x => x.RatingKey)
+                .OrderBy(x => x.Key)
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (plexTvShowSeason == null)
@@ -41,7 +41,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                 return ResultExtensions.GetEntityNotFound(nameof(PlexTvShowSeason), request.Id);
             }
 
-            plexTvShowSeason.Episodes = plexTvShowSeason.Episodes.OrderBy(x => x.RatingKey).ToList();
+            plexTvShowSeason.Episodes = plexTvShowSeason.Episodes.OrderBy(x => x.Key).ToList();
 
             return Result.Ok(plexTvShowSeason);
         }

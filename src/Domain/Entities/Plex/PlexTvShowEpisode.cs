@@ -6,6 +6,11 @@ namespace PlexRipper.Domain
 {
     public class PlexTvShowEpisode : PlexMedia, IToDownloadTask
     {
+        /// <summary>
+        /// The PlexKey of the <see cref="PlexTvShowSeason"/> this belongs too.
+        /// </summary>
+        public int ParentKey { get; set; }
+
         #region Helpers
 
         public override PlexMediaType Type => PlexMediaType.Episode;

@@ -26,6 +26,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
         {
             var plexTvShowEpisode = await _dbContext.PlexTvShowEpisodes
                 .Include(x => x.TvShowSeason)
+                .ThenInclude(x => x.TvShow)
                 .Include(x => x.PlexLibrary)
                 .ThenInclude(x => x.PlexServer)
                 .Include(x => x.EpisodeData)

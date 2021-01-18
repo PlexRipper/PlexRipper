@@ -25,42 +25,54 @@
 			<v-row no-gutters class="media-table-content">
 				<perfect-scrollbar>
 					<v-col class="col-12 px-0">
-						<v-treeview
-							selectable
-							selected-color="red"
-							selection-type="leaf"
-							hoverable
-							expand-icon="mdi-chevron-down"
-							:items="items"
-							transition
-							item-key="key"
-							item-text="title"
-							@input="updateSelected"
-						>
-							<template #label="{ item }">
-								<v-row class="media-table-content-row">
-									<!-- Title -->
-									<v-col cols="4" class="title-column">
-										{{ item[getHeaders[0].value] }}
-									</v-col>
-									<v-spacer />
-									<!-- Other columns -->
-									<v-col v-for="(header, index) in getHeaders.slice(1, getHeaders.length)" :key="index" cols="auto">
-										<v-sheet :width="header.width" :max-width="header.width" class="no-background">
-											<date-time v-if="header.type === 'date'" :text="item[header.value]" :time="false" short-date />
-											<file-size v-else-if="header.type === 'data'" :size="item[header.value]" />
-											<span v-else>{{ item[header.value] }}</span>
-										</v-sheet>
-									</v-col>
-									<!-- Actions -->
-									<v-col cols="auto">
-										<v-sheet width="70" class="no-background text-center">
-											<v-icon small @click="downloadMedia(item)"> mdi-download </v-icon>
-										</v-sheet>
-									</v-col>
-								</v-row>
-							</template>
-						</v-treeview>
+						<template v-for="(x, y) in tempItems.length">
+							<v-lazy
+								:key="y"
+								:options="{
+									threshold: 0.5,
+								}"
+								:min-height="50"
+							>
+								<v-treeview
+									selectable
+									selected-color="red"
+									selection-type="leaf"
+									hoverable
+									expand-icon="mdi-chevron-down"
+									:items="tempItems.slice(y, y + 1)"
+									:load-children="getMedia"
+									transition
+									open-on-click
+									item-key="key"
+									item-text="title"
+									@input="updateSelected"
+								>
+									<template #label="{ item }">
+										<v-row class="media-table-content-row">
+											<!-- Title -->
+											<v-col cols="4" class="title-column">
+												{{ item[getHeaders[0].value] }}
+											</v-col>
+											<v-spacer />
+											<!-- Other columns -->
+											<v-col v-for="(header, index) in getHeaders.slice(1, getHeaders.length)" :key="index" cols="auto">
+												<v-sheet :width="header.width" :max-width="header.width" class="no-background">
+													<date-time v-if="header.type === 'date'" :text="item[header.value]" :time="false" short-date />
+													<file-size v-else-if="header.type === 'data'" :size="item[header.value]" />
+													<span v-else>{{ item[header.value] }}</span>
+												</v-sheet>
+											</v-col>
+											<!-- Actions -->
+											<v-col cols="auto">
+												<v-sheet width="70" class="no-background text-center">
+													<v-icon small @click="downloadMedia(item)"> mdi-download </v-icon>
+												</v-sheet>
+											</v-col>
+										</v-row>
+									</template>
+								</v-treeview>
+							</v-lazy>
+						</template>
 					</v-col>
 				</perfect-scrollbar>
 			</v-row>
@@ -69,11 +81,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
 import IMediaTableHeader from '@interfaces/IMediaTableHeader';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
+import { getTvShow } from '@api/mediaApi';
+import Convert from '@mediaOverview/MediaTable/types/Convert';
 import ITreeViewItem from './types/ITreeViewItem';
 
 @Component({
@@ -97,11 +111,20 @@ export default class MediaTable extends Vue {
 
 	progress: DownloadTaskCreationProgress | null = null;
 
+	visible: boolean[] = [];
+	active: boolean[] = [];
+	tempItems: ITreeViewItem[] = [];
+
+	@Watch('tempItems')
+	updateVisible(): void {
+		this.tempItems.forEach(() => this.visible.push(false));
+	}
+
 	get getLeafs(): string[] {
 		if (this.mediaType === PlexMediaType.Movie) {
-			return this.items.map((x) => x.key);
+			return this.tempItems.map((x) => x.key);
 		}
-		return this.items.map((x) => x.children?.map((y) => y.children?.map((z) => z.key))).flat(2);
+		return this.tempItems.map((x) => x.children?.map((y) => y.children?.map((z) => z.key) ?? []) ?? [])?.flat(2) ?? [];
 	}
 
 	get isIndeterminate(): boolean {
@@ -153,6 +176,18 @@ export default class MediaTable extends Vue {
 		];
 	}
 
+	getMedia(item: ITreeViewItem): Promise<ITreeViewItem> {
+		return getTvShow(item.id)
+			.toPromise()
+			.then((response) => {
+				const convert = Convert.tvShowsToTreeViewItems([response])[0];
+				item.children?.push(...(convert?.children ?? []));
+				const i = this.tempItems.findIndex((x) => x.key === item.key);
+				this.tempItems.splice(i, 1, item);
+				return item;
+			});
+	}
+
 	downloadMedia(item: ITreeViewItem): void {
 		const downloadCommand: DownloadMediaDTO = {
 			type: item.type,
@@ -165,10 +200,10 @@ export default class MediaTable extends Vue {
 				downloadCommand.mediaIds.push(item.id);
 				break;
 			case PlexMediaType.TvShow:
-				downloadCommand.mediaIds = item.children.flatMap((x) => x.children.flatMap((y) => y.id));
+				downloadCommand.mediaIds = item?.children?.flatMap((x) => x.children?.flatMap((y) => y.id) ?? []) ?? [];
 				break;
 			case PlexMediaType.Season:
-				downloadCommand.mediaIds = item.children.flatMap((x) => x.id);
+				downloadCommand.mediaIds = item?.children?.flatMap((x) => x?.id) ?? [];
 				break;
 			case PlexMediaType.Episode:
 				downloadCommand.mediaIds.push(item.id);
@@ -178,6 +213,12 @@ export default class MediaTable extends Vue {
 		}
 
 		this.$emit('download', downloadCommand);
+	}
+
+	created(): void {
+		// This is needed to refresh the TreeView when a node is expanded.
+		// We edit the copy instead of the prop
+		this.tempItems = this.items;
 	}
 }
 </script>

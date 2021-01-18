@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210117151146_ChangedParentKeyTypeToInt")]
+    partial class ChangedParentKeyTypeToInt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -351,8 +353,8 @@ namespace PlexRipper.Data.Migrations
                     b.Property<string>("LibraryLocationPath")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MetaData")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("MediaSize")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");

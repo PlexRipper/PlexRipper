@@ -69,6 +69,10 @@ general
 	box-shadow: $box-shadow;
 }
 
+.blur {
+	backdrop-filter: blur(30px);
+}
+
 /*
 Nuxt-i18n
 */
@@ -87,4 +91,3 @@ SectionTable
 		@extend .no-background;
 	}
 }
-

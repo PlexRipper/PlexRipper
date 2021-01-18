@@ -10,11 +10,17 @@ namespace PlexRipper.Domain.AutoMapper
     {
         public DomainMappingProfile()
         {
-            // String -> Guid
+            // string <-> Guid
             CreateMap<string, Guid>().ConvertUsing(s => Guid.Parse(s));
             CreateMap<Guid, string>().ConvertUsing(g => g.ToString("N"));
+
+            // long <-> DateTime
             CreateMap<long, DateTime>().ConvertUsing(g => DateTimeOffset.FromUnixTimeSeconds(g).DateTime.ToUniversalTime());
             CreateMap<DateTime, long>().ConvertUsing(g => new DateTimeOffset(g).ToUnixTimeSeconds());
+
+            // string <-> int
+            CreateMap<string, int>().ConvertUsing(g => ToInt(g));
+            CreateMap<int, string>().ConvertUsing(g => g.ToString());
 
             // Entities
             // PlexAccountServer => PlexServer
@@ -26,6 +32,11 @@ namespace PlexRipper.Domain.AutoMapper
 
             // PlexMediaDataPart -> PlexMovieDataPart
             CreateMap<PlexMediaDataPart, PlexMovieDataPart>(MemberList.Source).ReverseMap();
+        }
+
+        private static int ToInt(string stringInt)
+        {
+            return int.TryParse(stringInt, out int x) ? x : 0;
         }
     }
 }

@@ -1,3 +1,29 @@
+## [0.5.0] - 2021-01-18
+### Added
+-   Added a MediaController to request individual mediaData.
+-   Added more documentation in PlexLibrary.
+
+### Changed
+-   Refactored the PlexApiClient and integrated Polly to have a more robust ApiClient.
+-   Refactored the ResultExtensions.Logging and added LogDebug and LogInformation to results.
+-   Added universal string <-> int conversion in AutoMapper.
+-   Refactored the RatingKey, Key etc in media, now it's just an int Key and removed the other non-sense.
+-   PlexTvShowSeason and PlexTvShowEpisoide now have a ParentKey, this is used to connect everything together when refreshing the library.
+-   Refactored the refreshing of a TvShow library, this is now way faster and does away with the individual season/episode requests. Now it only requires 3 API requests total and doesnt look like a DDOS  when refreshing a library.
+-   Major performance improvements for showing the library contents in the front-end.
+-   Requesting of all episodes now happens in batches as not to overload the server.
+-   Moved certain PlexLibrary database fields into a json MetaData field and added ways to only calculate the metadata fields once in order to increase performance.
+-   Refreshing a library now doesn't return an updated plexLibrary anymore, in certain cases this would be done multiple times and wasting performance.
+-   Added a system to return only top-level media when navigating a Plex library in the front end, when a tvShow is expanded, only then will the full data be requested from the back-end. This was done to handle huge libraries which would slow down performance considerably.
+
+### Fixed
+-   Fixed the refreshProgressbar in the mediaoverview hanging when failing to refresh a library.
+-   Fixed the episodes not downloading due to a missing TvShowTitle when creating downloadTasks.
+-   Fixed the default value for UI => Date And Time => TimeFormat not being correct.
+-   Fixed the updating of a PlexAccount which was always returning an error.
+-   Fixed the false "Could not be displayed" error when the library is still loading.
+
+
 ## [0.4.3] - 2020-12-28
 
 ### Fixed

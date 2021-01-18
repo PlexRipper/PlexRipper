@@ -9,11 +9,8 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
-        [JsonProperty("ratingKey", Required = Required.Always)]
-        public int RatingKey { get; set; }
-
         [JsonProperty("key", Required = Required.Always)]
-        public string Key { get; set; }
+        public int Key { get; set; }
 
         [JsonProperty("guid", Required = Required.Always)]
         public string Guid { get; set; }

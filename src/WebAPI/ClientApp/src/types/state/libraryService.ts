@@ -1,7 +1,7 @@
 import { iif, Observable, of } from 'rxjs';
 import { BaseService } from '@state/baseService';
 import StoreState from '@state/storeState';
-import { map, switchMap, take, tap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 import serverService from '@state/serverService';

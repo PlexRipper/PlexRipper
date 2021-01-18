@@ -272,6 +272,7 @@ export default class MediaOverview extends Vue {
 			if (server) {
 				this.server = server;
 				if (this.library) {
+					Log.info('Server was found');
 					this.isLoading = false;
 				}
 			} else {

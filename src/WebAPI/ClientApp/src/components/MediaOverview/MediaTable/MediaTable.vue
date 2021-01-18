@@ -124,7 +124,7 @@ export default class MediaTable extends Vue {
 		if (this.mediaType === PlexMediaType.Movie) {
 			return this.tempItems.map((x) => x.key);
 		}
-		return this.tempItems.map((x) => x.children?.map((y) => y.children?.map((z) => z.key))).flat(2);
+		return this.tempItems.map((x) => x.children?.map((y) => y.children?.map((z) => z.key) ?? []) ?? [])?.flat(2) ?? [];
 	}
 
 	get isIndeterminate(): boolean {
@@ -181,7 +181,7 @@ export default class MediaTable extends Vue {
 			.toPromise()
 			.then((response) => {
 				const convert = Convert.tvShowsToTreeViewItems([response])[0];
-				item.children.push(...convert.children);
+				item.children?.push(...(convert?.children ?? []));
 				const i = this.tempItems.findIndex((x) => x.key === item.key);
 				this.tempItems.splice(i, 1, item);
 				return item;
@@ -200,10 +200,10 @@ export default class MediaTable extends Vue {
 				downloadCommand.mediaIds.push(item.id);
 				break;
 			case PlexMediaType.TvShow:
-				downloadCommand.mediaIds = item.children.flatMap((x) => x.children.flatMap((y) => y.id));
+				downloadCommand.mediaIds = item?.children?.flatMap((x) => x.children?.flatMap((y) => y.id) ?? []) ?? [];
 				break;
 			case PlexMediaType.Season:
-				downloadCommand.mediaIds = item.children.flatMap((x) => x.id);
+				downloadCommand.mediaIds = item?.children?.flatMap((x) => x?.id) ?? [];
 				break;
 			case PlexMediaType.Episode:
 				downloadCommand.mediaIds.push(item.id);

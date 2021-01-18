@@ -42,7 +42,6 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
@@ -108,34 +107,39 @@ export default class DownloadConfirmation extends Vue {
 			downloadMediaCommand.type === PlexMediaType.Episode
 		) {
 			filterResult = this.items
-				.filter((tvShow) => tvShow.children.some((season) => season.children.some((z) => mediaIds.some((y) => y === z.id))))
+				.filter((tvShow) => tvShow.children?.some((season) => season.children?.some((z) => mediaIds.some((y) => y === z.id))))
 				.map((tvShow) => {
 					return {
 						...tvShow,
-						children: tvShow.children
-							.filter((season) => season.children.some((episode) => mediaIds.some((y) => y === episode.id)))
-							.map((season) => {
-								return {
-									...season,
-									children: season.children.filter((episode) => mediaIds.some((y) => y === episode.id)),
-								};
-							}),
+						children:
+							tvShow?.children ??
+							[]
+								.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.some((y) => y === episode.id)))
+								.map((season: ITreeViewItem) => {
+									return {
+										...season,
+										children: season?.children?.filter((episode) => mediaIds.some((y) => y === episode.id)),
+									};
+								}),
 					};
 				});
 		}
 
 		this.downloadPreview = filterResult;
-		Log.info('preview', this.downloadPreview);
 	}
 
 	/* Recursively retrieve all unique keys used in the items: ITreeViewItem[] */
 	get getLeafs(): string[] {
 		let keys: string[] = [];
 		keys = keys.concat(this.downloadPreview.map((x) => x.key));
-		keys = keys.concat(this.downloadPreview.map((x) => x.children?.map((y) => y.key)).flat(1));
-		keys = keys.concat(this.downloadPreview.map((x) => x.children?.map((y) => y.children?.map((z) => z.key))).flat(2));
+		keys = keys.concat(this.downloadPreview.map((x) => x.children?.map((y) => y.key) ?? [])?.flat(1) ?? []);
 		keys = keys.concat(
-			this.downloadPreview.map((x) => x.children?.map((y) => y.children?.map((z) => z.children?.map((w) => w.key)))).flat(3),
+			this.downloadPreview.map((x) => x.children?.map((y) => y.children?.map((z) => z.key) ?? []) ?? [])?.flat(2) ?? [],
+		);
+		keys = keys.concat(
+			this.downloadPreview
+				.map((x) => x.children?.map((y) => y.children?.map((z) => z.children?.map((w) => w.key) ?? []) ?? []) ?? [])
+				?.flat(3),
 		);
 		return keys;
 	}

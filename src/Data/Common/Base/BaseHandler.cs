@@ -48,8 +48,11 @@ namespace PlexRipper.Data.Common
         /// </summary>
         /// <param name="type">The <see cref="PlexMediaType"/> to use to include the related data.</param>
         /// <param name="includeServer">Optionally include the <see cref="PlexServer"/> this <see cref="PlexLibrary"/> belongs to.</param>
+        /// <param name="includeMedia"></param>
+        /// <param name="topLevelMediaOnly"></param>
         /// <returns>The <see cref="IQueryable"/> of <see cref="PlexLibrary"/>.</returns>
-        protected IQueryable<PlexLibrary> GetPlexLibraryQueryableByType(PlexMediaType type, bool includeServer = false)
+        protected IQueryable<PlexLibrary> GetPlexLibraryQueryableByType(PlexMediaType type, bool includeServer = false, bool includeMedia = false,
+            bool topLevelMediaOnly = false)
         {
             var plexLibraryQuery = PlexLibraryQueryable;
 
@@ -58,16 +61,21 @@ namespace PlexRipper.Data.Common
                 plexLibraryQuery = plexLibraryQuery.IncludeServer();
             }
 
-            switch (type)
+            if (includeMedia)
             {
-                case PlexMediaType.Movie:
-                    return plexLibraryQuery.IncludeMovies();
-                case PlexMediaType.TvShow:
-                    return plexLibraryQuery.IncludeTvShows();
-                default:
-                    Log.Error($"PlexLibrary with MediaType {type} is currently not supported");
-                    return plexLibraryQuery;
+                switch (type)
+                {
+                    case PlexMediaType.Movie:
+                        return plexLibraryQuery.IncludeMovies(topLevelMediaOnly);
+                    case PlexMediaType.TvShow:
+                        return plexLibraryQuery.IncludeTvShows(topLevelMediaOnly);
+                    default:
+                        Log.Error($"PlexLibrary with MediaType {type} is currently not supported");
+                        return plexLibraryQuery;
+                }
             }
+
+            return plexLibraryQuery;
         }
 
         protected Result<T> ReturnResult<T>(T value, int id = 0)

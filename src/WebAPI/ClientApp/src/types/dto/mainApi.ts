@@ -121,8 +121,7 @@ export interface PlexLibraryDTO {
 
 export interface PlexMovieDTO {
   id: number;
-  ratingKey: number;
-  key: any;
+  key: number;
   guid: any;
   studio: string;
   title: string;
@@ -178,8 +177,7 @@ export interface PlexMovieDataPartDTO {
 
 export interface PlexTvShowDTO {
   id: number;
-  ratingKey: number;
-  key: any;
+  key: number;
   guid: any;
   studio: any;
   title: any;
@@ -208,8 +206,7 @@ export interface PlexTvShowDTO {
 
 export interface PlexTvShowSeasonDTO {
   id: number;
-  ratingKey: number;
-  key: string;
+  key: number;
   guid: string;
   title: string;
   summary: string;
@@ -229,8 +226,7 @@ export interface PlexTvShowSeasonDTO {
 
 export interface PlexTvShowEpisodeDTO {
   id: number;
-  ratingKey: number;
-  key: string;
+  key: number;
   guid: string;
   title: string;
   summary: string;
@@ -376,6 +372,8 @@ export interface ThumbnailRequestDTO {
   height: number;
   plexMediaType: PlexMediaType;
 }
+
+export type ResultDTOOfPlexTvShowDTO = ResultDTO & { value: PlexTvShowDTO };
 
 export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStatusDTO };
 

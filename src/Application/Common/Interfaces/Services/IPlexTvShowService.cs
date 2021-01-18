@@ -1,4 +1,11 @@
-﻿namespace PlexRipper.Application.Common
+﻿using System.Threading.Tasks;
+using FluentResults;
+using PlexRipper.Domain;
+
+namespace PlexRipper.Application.Common
 {
-    public interface IPlexTvShowService { }
+    public interface IPlexTvShowService
+    {
+        Task<Result<PlexTvShow>> GetTvShow(int id);
+    }
 }

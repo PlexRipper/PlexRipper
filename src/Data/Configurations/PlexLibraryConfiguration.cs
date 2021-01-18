@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Innofactor.EfCoreJsonValueConverter;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Domain;
@@ -25,6 +26,10 @@ namespace PlexRipper.Data.Configurations
             builder
                 .Property(e => e.Type)
                 .HasConversion(converter);
+
+            builder
+                .Property(x => x.MetaData)
+                .HasJsonValueConversion();
         }
     }
 }

@@ -6,16 +6,28 @@ namespace PlexRipper.Data.Common
 {
     public static class PlexRipperDbContextExtensions
     {
-        public static IQueryable<PlexLibrary> IncludeTvShows(this IQueryable<PlexLibrary> plexLibrary)
+        public static IQueryable<PlexLibrary> IncludeTvShows(this IQueryable<PlexLibrary> plexLibrary, bool topLevelOnly = false)
         {
+            if (topLevelOnly)
+            {
+                return plexLibrary
+                    .Include(x => x.TvShows);
+            }
+
             return plexLibrary
                 .Include(x => x.TvShows)
                 .ThenInclude(x => x.Seasons)
                 .ThenInclude(x => x.Episodes);
         }
 
-        public static IQueryable<PlexLibrary> IncludeMovies(this IQueryable<PlexLibrary> plexLibrary)
+        public static IQueryable<PlexLibrary> IncludeMovies(this IQueryable<PlexLibrary> plexLibrary, bool topLevelOnly = false)
         {
+            if (topLevelOnly)
+            {
+                return plexLibrary
+                    .Include(x => x.Movies);
+            }
+
             return plexLibrary
                 .Include(x => x.Movies)
                 .ThenInclude(x => x.PlexMovieDatas)

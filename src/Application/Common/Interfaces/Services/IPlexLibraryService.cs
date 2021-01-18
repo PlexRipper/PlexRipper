@@ -27,11 +27,12 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="libraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
         /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to use for authentication.</param>
+        /// <param name="topLevelMediaOnly"></param>
         /// <returns>Valid result if found.</returns>
-        Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0);
+        Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false);
 
         Task<Result<byte[]>> GetThumbnailImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0);
 
-        Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0);
+        Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false);
     }
 }

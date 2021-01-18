@@ -99,7 +99,7 @@ namespace PlexRipper.Application.PlexDownloads
         {
             Log.Debug($"Creating download tasks for TvShow with id: {plexTvShowId}");
 
-            var plexTvShow = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(plexTvShowId));
+            var plexTvShow = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(plexTvShowId, true));
             if (plexTvShow.IsFailed) return plexTvShow.ToResult();
 
             // Parse all contained episodes to DownloadTasks

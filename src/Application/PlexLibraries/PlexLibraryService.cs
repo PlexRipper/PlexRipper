@@ -51,7 +51,7 @@ namespace PlexRipper.Application.PlexLibraries
         /// <param name="authToken"></param>
         /// <param name="plexLibrary"></param>
         /// <returns></returns>
-        private async Task<Result<PlexLibrary>> RefreshPlexTvShowLibrary(string authToken, PlexLibrary plexLibrary)
+        private async Task<Result> RefreshPlexTvShowLibrary(string authToken, PlexLibrary plexLibrary)
         {
             if (plexLibrary == null)
                 return ResultExtensions.IsNull("plexLibrary").LogError();
@@ -116,8 +116,12 @@ namespace PlexRipper.Application.PlexLibraries
             Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds}");
             timer.Restart();
 
-            // Calculate total media size of the library
-            plexLibrary.MediaSize = plexLibrary.TvShows.Sum(x => x.MediaSize);
+            // Update the MetaData of this library
+            var updateMetaDataResult = plexLibrary.UpdateMetaData();
+            if (updateMetaDataResult.IsFailed)
+            {
+                return updateMetaDataResult;
+            }
 
             var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
             if (updateResult.IsFailed)
@@ -137,28 +141,31 @@ namespace PlexRipper.Application.PlexLibraries
                 return createResult.ToResult();
             }
 
-            var freshPlexLibrary = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id, false, true));
-
             Log.Debug($"Finished updating all media in the database for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds}");
+
             // Phase 4 of 4: Database has been successfully updated with new library data.
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 4, 4);
-            return freshPlexLibrary;
+            return Result.Ok();
         }
 
         /// <summary>
         /// Refresh the <see cref="PlexLibrary"/>, by first deleting all (related) media and the re-adding the media again.
         /// </summary>
         /// <param name="plexLibrary">The <see cref="PlexLibrary"/> to refresh.</param>
-        /// <returns>The refreshed <see cref="PlexLibrary"/> with all its media and <see cref="PlexServer"/> reference.</returns>
-        private async Task<Result<PlexLibrary>> RefreshPlexMovieLibrary(PlexLibrary plexLibrary)
+        /// <returns></returns>
+        private async Task<Result> RefreshPlexMovieLibrary(PlexLibrary plexLibrary)
         {
             if (plexLibrary == null)
             {
                 return ResultExtensions.IsNull(nameof(plexLibrary));
             }
 
-            // Calculate total media size of the library
-            plexLibrary.MediaSize = plexLibrary.Movies.Sum(x => x.MediaSize);
+            // Update the MetaData of this library
+            var updateMetaDataResult = plexLibrary.UpdateMetaData();
+            if (updateMetaDataResult.IsFailed)
+            {
+                return updateMetaDataResult;
+            }
 
             var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
             if (updateResult.IsFailed)
@@ -179,7 +186,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.MediaCount, plexLibrary.MediaCount);
-            return await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibrary.Id));
+            return Result.Ok();
         }
 
         #endregion
@@ -187,11 +194,11 @@ namespace PlexRipper.Application.PlexLibraries
         #region Public
 
         /// <inheritdoc/>
-        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0)
+        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false)
         {
             await _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
 
-            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true));
+            var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
 
             if (libraryDB.IsFailed)
             {
@@ -206,21 +213,18 @@ namespace PlexRipper.Application.PlexLibraries
                 var refreshResult = await RefreshLibraryMediaAsync(libraryId, plexAccountId);
                 if (refreshResult.IsFailed)
                 {
-                    return refreshResult;
+                    return refreshResult.ToResult();
                 }
-
-                // Re-retrieve from database with all includes
-                return await _mediator.Send(new GetPlexLibraryByIdQuery(refreshResult.Value.Id, true, true));
             }
 
             await _signalRService.SendLibraryProgressUpdate(libraryId, 1, 1, false);
-            return libraryDB;
+            return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true, topLevelMediaOnly));
         }
 
         /// <inheritdoc/>
-        public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0)
+        public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false)
         {
-            var plexLibrary = await GetPlexLibraryAsync(libraryId, plexAccountId);
+            var plexLibrary = await GetPlexLibraryAsync(libraryId, plexAccountId, topLevelMediaOnly);
             if (plexLibrary.IsFailed)
             {
                 return plexLibrary.ToResult();

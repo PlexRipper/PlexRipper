@@ -123,6 +123,8 @@ export default class PBtn extends Vue {
 				return 'mdi-check';
 			case ButtonType.Save:
 				return 'mdi-content-save';
+			case ButtonType.Download:
+				return 'mdi-download';
 			case ButtonType.Delete:
 				return 'mdi-delete';
 			case ButtonType.Error:
@@ -161,6 +163,8 @@ export default class PBtn extends Vue {
 	get getIsOutlined(): boolean {
 		switch (this.buttonType) {
 			case ButtonType.ExternalLink:
+				return false;
+			case ButtonType.Download:
 				return false;
 			default:
 				return true;

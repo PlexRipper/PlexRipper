@@ -4,6 +4,7 @@ enum ButtonType {
 	Warning = 'warning',
 	Navigation = 'navigation',
 	ExternalLink = 'external-link',
+	Download = 'download',
 	Error = 'error',
 	Cancel = 'cancel',
 	Confirm = 'confirm',

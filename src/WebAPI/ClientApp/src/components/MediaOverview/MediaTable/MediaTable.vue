@@ -42,13 +42,12 @@
 									:items="tempItems.slice(y, y + 1)"
 									:load-children="getMedia"
 									transition
-									open-on-click
 									item-key="key"
 									item-text="title"
 									@input="updateSelected"
 								>
 									<template #label="{ item }">
-										<v-row class="media-table-content-row">
+										<v-row class="media-table-content-row" align="center">
 											<!-- Title -->
 											<v-col cols="4" class="title-column">
 												{{ item[getHeaders[0].value] }}
@@ -63,9 +62,9 @@
 												</v-sheet>
 											</v-col>
 											<!-- Actions -->
-											<v-col cols="auto">
+											<v-col cols="auto" class="py-0">
 												<v-sheet width="70" class="no-background text-center">
-													<v-icon small @click="downloadMedia(item)"> mdi-download </v-icon>
+													<p-btn button-type="download" icon-mode @click="downloadMedia(item)"></p-btn>
 												</v-sheet>
 											</v-col>
 										</v-row>
@@ -81,6 +80,7 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
 import IMediaTableHeader from '@interfaces/IMediaTableHeader';
@@ -188,7 +188,7 @@ export default class MediaTable extends Vue {
 			});
 	}
 
-	downloadMedia(item: ITreeViewItem): void {
+	async downloadMedia(item: ITreeViewItem): Promise<void> {
 		const downloadCommand: DownloadMediaDTO = {
 			type: item.type,
 			mediaIds: [],
@@ -200,6 +200,9 @@ export default class MediaTable extends Vue {
 				downloadCommand.mediaIds.push(item.id);
 				break;
 			case PlexMediaType.TvShow:
+				if (item.children?.length === 0) {
+					await this.getMedia(item);
+				}
 				downloadCommand.mediaIds = item?.children?.flatMap((x) => x.children?.flatMap((y) => y.id) ?? []) ?? [];
 				break;
 			case PlexMediaType.Season:
@@ -211,7 +214,7 @@ export default class MediaTable extends Vue {
 			default:
 				return;
 		}
-
+		Log.debug('DownloadTask', downloadCommand);
 		this.$emit('download', downloadCommand);
 	}
 

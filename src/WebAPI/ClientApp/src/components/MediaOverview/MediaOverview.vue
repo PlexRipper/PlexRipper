@@ -37,13 +37,9 @@
 			</template>
 
 			<!-- Poster display-->
-			<perfect-scrollbar>
-				<v-row v-if="isPosterView" class="poster-overview" justify="center">
-					<template v-for="item in getItems">
-						<media-poster :key="item.id" :media-item="item" :media-type="mediaType" @download="processDownloadCommand" />
-					</template>
-				</v-row>
-			</perfect-scrollbar>
+			<template v-if="isPosterView">
+				<poster-table :items="getItems" :media-type="mediaType" @download="processDownloadCommand" />
+			</template>
 
 			<!--	Download confirmation dialog	-->
 			<v-row>
@@ -64,11 +60,11 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import { filter, finalize, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import MediaPoster from '@mediaOverview/MediaPoster.vue';
 import SignalrService from '@service/signalrService';
-import { filter, finalize, tap } from 'rxjs/operators';
 import DownloadService from '@state/downloadService';
 import LibraryService from '@state/libraryService';
 import ProgressComponent from '@components/ProgressComponent.vue';
@@ -77,7 +73,9 @@ import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
+import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 import { combineLatest } from 'rxjs';
+import PosterTable from '@mediaOverview/PosterTable/PosterTable.vue';
 import { settingsStore } from '~/store';
 
 @Component({
@@ -87,6 +85,8 @@ import { settingsStore } from '~/store';
 		ProgressComponent,
 		DownloadConfirmation,
 		MediaOverviewBar,
+		AlphabetNavigation,
+		PosterTable,
 	},
 })
 export default class MediaOverview extends Vue {

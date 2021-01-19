@@ -10,6 +10,7 @@ enum ButtonType {
 	Confirm = 'confirm',
 	Delete = 'delete',
 	Save = 'save',
+	Alphabet = 'alphabet',
 }
 
 export default ButtonType;

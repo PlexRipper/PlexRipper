@@ -1,14 +1,16 @@
 <template>
-	<v-col cols="auto">
-		<v-lazy
-			v-model="isVisible"
-			:options="{
-				threshold: 0.1,
-			}"
-			:width="thumbWidth"
-			:height="getLazyLoadingHeight"
-			transition="fade-transition"
-		>
+	<v-lazy
+		v-model="isVisible"
+		:options="{
+			threshold: 0.1,
+		}"
+		:width="thumbWidth"
+		:height="getLazyLoadingHeight"
+		:data-title="mediaItem.title"
+		transition="fade-transition"
+		class="mx-3"
+	>
+		<v-col cols="auto">
 			<v-hover v-slot="{ hover }">
 				<v-card :max-width="thumbWidth" :width="thumbWidth" :elevation="hover ? 12 : 2">
 					<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight" :alt="mediaItem.title">
@@ -55,8 +57,8 @@
 					</v-row>
 				</v-card>
 			</v-hover>
-		</v-lazy>
-	</v-col>
+		</v-col>
+	</v-lazy>
 </template>
 
 <script lang="ts">
@@ -80,7 +82,7 @@ export default class MediaPoster extends Vue {
 	imageUrl: string = '';
 
 	get getLazyLoadingHeight(): number {
-		return this.thumbHeight + 80;
+		return this.thumbHeight + 40;
 	}
 
 	get hover(): boolean {

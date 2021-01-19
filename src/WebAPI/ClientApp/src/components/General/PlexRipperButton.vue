@@ -4,15 +4,17 @@
 			<v-btn
 				raised
 				nuxt
-				:class="[getIsFilled ? 'filled' : '', getIsOutlined ? 'outlined' : '', 'p-btn', 'mx-2', 'i18n-formatting']"
+				:class="getClass"
 				:color="getColor"
 				:outlined="getIsOutlined"
 				:disabled="isDisabled"
 				:loading="loading"
 				:width="getWidth"
 				:block="block"
+				:depressed="depressed"
 				:icon="iconMode"
 				:href="href"
+				:tile="tile"
 				:to="to"
 				:target="href ? '_blank' : '_self'"
 				v-bind="attrs"
@@ -20,7 +22,8 @@
 				@click="click($event)"
 			>
 				<v-icon v-if="getIcon" class="mx-2" :size="iconSize" :color="getColor">{{ getIcon }}</v-icon>
-				<span v-if="getText !== ''">{{ $t(getText) }}</span>
+				<span v-if="getText !== ''">{{ $t(getText) }} </span>
+				<slot></slot>
 			</v-btn>
 		</template>
 		<span>{{ $t(getText) }}</span>
@@ -50,6 +53,12 @@ export default class PBtn extends Vue {
 
 	@Prop({ required: false, type: Boolean, default: false })
 	readonly filled!: boolean;
+
+	@Prop({ required: false, type: Boolean, default: false })
+	readonly tile!: boolean;
+
+	@Prop({ required: false, type: Boolean, default: false })
+	readonly depressed!: boolean;
 
 	@Prop({ required: false, type: Boolean, default: false })
 	readonly iconMode!: boolean;
@@ -92,6 +101,17 @@ export default class PBtn extends Vue {
 			return this.width;
 		}
 		return 'auto';
+	}
+
+	get getClass(): string[] {
+		return [
+			this.getIsFilled ? 'filled' : '',
+			this.getIsOutlined ? 'outlined' : '',
+			'p-btn',
+			'mx-2',
+			'i18n-formatting',
+			this.buttonType === ButtonType.Alphabet ? 'navigation-btn' : '',
+		];
 	}
 
 	get getText(): string {
@@ -157,14 +177,14 @@ export default class PBtn extends Vue {
 			case ButtonType.Error:
 				return 'red';
 		}
-		return this.isDark ? 'white' : 'black';
+		return '';
 	}
 
 	get getIsOutlined(): boolean {
 		switch (this.buttonType) {
 			case ButtonType.ExternalLink:
-				return false;
 			case ButtonType.Download:
+			case ButtonType.Alphabet:
 				return false;
 			default:
 				return true;
@@ -179,6 +199,7 @@ export default class PBtn extends Vue {
 			case ButtonType.Cancel:
 			case ButtonType.Confirm:
 			case ButtonType.Delete:
+			case ButtonType.Alphabet:
 				return false;
 		}
 		return false;

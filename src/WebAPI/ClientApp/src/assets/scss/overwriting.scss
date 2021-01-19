@@ -143,6 +143,19 @@ v-expansion-panels
 /*
 v-btn
 */
+
+.v-btn:not(.v-btn--round).v-size--default {
+	min-width: 0;
+}
+
+.theme--dark.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+	background-color: transparent;
+}
+
+.theme--light.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+	background-color: transparent;
+}
+
 // Remove background color on button disabled
 .theme--dark.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
 	background-color: transparent !important;

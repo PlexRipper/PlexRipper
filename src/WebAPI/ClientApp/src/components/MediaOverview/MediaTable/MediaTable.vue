@@ -1,6 +1,6 @@
 <template>
-	<v-row justify="center" class="media-table">
-		<v-col cols="12">
+	<v-row justify="center" class="media-table flex-nowrap" no-gutters>
+		<v-col>
 			<!-- Table Headers -->
 			<v-row class="media-table-header">
 				<!-- Checkbox -->
@@ -23,15 +23,17 @@
 			</v-row>
 			<!-- TreeView Table -->
 			<v-row no-gutters class="media-table-content">
-				<perfect-scrollbar>
-					<v-col class="col-12 px-0">
-						<template v-for="(x, y) in tempItems.length">
+				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
+					<v-col id="media-table-body" class="col px-0">
+						<template v-for="(tempItem, i) in tempItems">
 							<v-lazy
-								:key="y"
+								:key="i"
 								:options="{
-									threshold: 0.5,
+									threshold: 0.25,
 								}"
 								:min-height="50"
+								:data-title="tempItem.title"
+								transition="scroll-x-reverse-transition"
 							>
 								<v-treeview
 									selectable
@@ -39,12 +41,13 @@
 									selection-type="leaf"
 									hoverable
 									expand-icon="mdi-chevron-down"
-									:items="tempItems.slice(y, y + 1)"
+									:items="tempItems.slice(i, i + 1)"
 									:load-children="getMedia"
 									transition
 									item-key="key"
 									item-text="title"
-									@input="updateSelected(y, $event)"
+									class="media-table-row"
+									@input="updateSelected(i, $event)"
 								>
 									<template #label="{ item }">
 										<v-row class="media-table-content-row" align="center">
@@ -81,6 +84,7 @@
 				</perfect-scrollbar>
 			</v-row>
 		</v-col>
+		<alphabet-navigation :items="tempItems" container-ref="scrollbarmediatable" />
 	</v-row>
 </template>
 
@@ -93,12 +97,14 @@ import LoadingSpinner from '@components/LoadingSpinner.vue';
 import { getTvShow } from '@api/mediaApi';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import { Dictionary } from 'typescript-collections';
+import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 import ITreeViewItem from './types/ITreeViewItem';
 
 @Component({
 	components: {
 		LoadingSpinner,
 		ProgressComponent,
+		AlphabetNavigation,
 	},
 })
 export default class MediaTable extends Vue {
@@ -117,7 +123,6 @@ export default class MediaTable extends Vue {
 	progress: DownloadTaskCreationProgress | null = null;
 
 	visible: boolean[] = [];
-	active: boolean[] = [];
 	tempItems: ITreeViewItem[] = [];
 	loadingButtons: string[] = [];
 
@@ -137,6 +142,10 @@ export default class MediaTable extends Vue {
 
 	get isIndeterminate(): boolean {
 		return this.getLeafs.length !== this.selected.length && this.selected.length > 0;
+	}
+
+	get containerRef(): any {
+		return this.$refs.scrollbar;
 	}
 
 	isLoading(key: string): boolean {
@@ -250,22 +259,3 @@ export default class MediaTable extends Vue {
 	}
 }
 </script>
-
-<style lang="scss">
-.v-treeview.theme--dark {
-	.v-treeview-node {
-		border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
-	}
-}
-
-.table-header-dark {
-	border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
-}
-
-.select-all-check {
-	.v-input--selection-controls {
-		padding: 0 0 0 2px !important;
-		margin: 0 !important;
-	}
-}
-</style>

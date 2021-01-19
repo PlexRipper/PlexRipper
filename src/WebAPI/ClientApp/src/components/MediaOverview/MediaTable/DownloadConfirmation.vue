@@ -4,14 +4,15 @@
 		<v-dialog v-model="showDialog" :max-width="500" scrollable>
 			<v-card v-if="isConfirmationEnabled && progress === null">
 				<v-card-title> Are you sure? </v-card-title>
-				<v-card-subtitle>
-					<p>Plex Ripper will start downloading the following:</p>
-					<p>Total size: <file-size :size="totalSize" /></p>
+				<v-card-subtitle class="py-2">
+					<span>Plex Ripper will start downloading the following:</span> <br />
+					<span>Total size: <file-size :size="totalSize" /></span>
 				</v-card-subtitle>
+				<v-divider />
 				<!-- Show Download Task Preview -->
-				<v-card-text>
+				<v-card-text class="pa-0" style="min-height: 60vh; max-height: 60vh">
 					<perfect-scrollbar ref="previewscrollbar" :options="{ suppressScrollX: true }">
-						<v-col cols="12">
+						<v-col cols="12" class="px-2 py-0">
 							<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open="getLeafs" open-all>
 								<template #prepend="{ item }">
 									<v-icon>

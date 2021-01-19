@@ -165,3 +165,13 @@ v-btn
 .theme--light.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
 	background-color: transparent !important;
 }
+
+/*
+v-card
+*/
+.theme--dark.v-card {
+	background-color: $dark-theme-glass-background;
+}
+.theme--light.v-card {
+	background-color: $light-theme-glass-background;
+}

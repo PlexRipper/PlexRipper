@@ -345,7 +345,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             byte[] image = await _plexServiceApi.GetThumbnailAsync(thumbUrl.Value, token.Value, width, height);
-            if (image == null || image.Length == 0)
+            if (image == null || image.Length == 109)
             {
                 return Result.Fail("Failed to retrieve image.");
             }

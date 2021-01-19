@@ -129,22 +129,24 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         // GET api/<PlexLibrary>/5
-        [HttpPost("thumb")]
+        [HttpGet("thumb")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileContentResult))]
-        public async Task<IActionResult> GetThumb([FromBody] ThumbnailRequestDTO thumbnailRequestDto)
+        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(FileContentResult))]
+        public async Task<IActionResult> GetThumb(int plexMediaId, PlexMediaType plexMediaType, int width, int height)
         {
-            var result = await _plexLibraryService.GetThumbnailImage(
-                thumbnailRequestDto.PlexMediaId,
-                thumbnailRequestDto.PlexMediaType,
-                thumbnailRequestDto.Width,
-                thumbnailRequestDto.Height);
+            if (plexMediaId == 0)
+            {
+                return BadRequestInvalidId();
+            }
+
+            var result = await _plexLibraryService.GetThumbnailImage(plexMediaId, plexMediaType, width, height);
 
             if (result.IsSuccess)
             {
                 return File(result.Value, "image/jpeg");
             }
 
-            return BadRequest();
+            return NoContent();
         }
     }
 }

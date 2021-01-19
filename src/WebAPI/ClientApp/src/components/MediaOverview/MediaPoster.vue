@@ -16,14 +16,28 @@
 					<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight" :alt="mediaItem.title">
 						<!--	Placeholder	-->
 						<template #placeholder>
-							<v-row class="fill-height ma-0" align="center" justify="center">
-								<v-col cols="12">
-									<h4 class="text-center">{{ mediaItem.title }}</h4>
-								</v-col>
-								<v-col cols="auto">
-									<v-progress-circular indeterminate color="grey lighten-5" />
-								</v-col>
-							</v-row>
+							<!--	Show fallback image	-->
+							<template v-if="defaultImage">
+								<v-row align="center" justify="center" class="fill-height">
+									<v-col cols="auto">
+										<v-icon class="mx-3" style="font-size: 100px">{{ mediaType | mediaTypeIcon }}</v-icon>
+									</v-col>
+									<v-col cols="12">
+										<h4 class="text-center">{{ mediaItem.title }}</h4>
+									</v-col>
+								</v-row>
+							</template>
+							<!--	Show  image	-->
+							<template v-else>
+								<v-row class="fill-height ma-0" align="center" justify="center">
+									<v-col cols="12">
+										<h4 class="text-center">{{ mediaItem.title }}</h4>
+									</v-col>
+									<v-col cols="auto">
+										<v-progress-circular indeterminate color="grey lighten-5" />
+									</v-col>
+								</v-row>
+							</template>
 						</template>
 						<!--	Overlay	-->
 						<v-container fluid :class="['poster-overlay', hover ? 'on-hover' : '', 'white--text']">
@@ -80,7 +94,7 @@ export default class MediaPoster extends Vue {
 
 	isVisible: boolean = false;
 	imageUrl: string = '';
-
+	defaultImage: boolean = false;
 	get getLazyLoadingHeight(): number {
 		return this.thumbHeight + 40;
 	}
@@ -129,6 +143,11 @@ export default class MediaPoster extends Vue {
 	getThumbnail(): void {
 		if (this.isVisible && !this.imageUrl) {
 			getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((response) => {
+				if (response.status === 204) {
+					// this.imageUrl = require('@img/logo/full-logo-256.png');
+					this.defaultImage = true;
+					return;
+				}
 				this.imageUrl = URL.createObjectURL(response.data);
 			});
 		}

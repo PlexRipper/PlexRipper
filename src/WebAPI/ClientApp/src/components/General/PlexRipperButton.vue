@@ -18,6 +18,8 @@
 				:to="to"
 				:target="href ? '_blank' : '_self'"
 				v-bind="attrs"
+				:x-large="xLarge"
+				:x-small="xSmall"
 				v-on="on"
 				@click="click($event)"
 			>
@@ -83,6 +85,12 @@ export default class PBtn extends Vue {
 
 	@Prop({ required: false, type: String })
 	readonly iconSize!: string;
+
+	@Prop({ required: false, type: Boolean })
+	readonly xLarge!: boolean;
+
+	@Prop({ required: false, type: Boolean })
+	readonly xSmall!: boolean;
 
 	get isDark(): boolean {
 		return this.$vuetify.theme.dark;

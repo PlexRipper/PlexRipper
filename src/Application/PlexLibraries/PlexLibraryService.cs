@@ -5,7 +5,6 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexMovies;
-using PlexRipper.Application.PlexServers;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
@@ -96,12 +95,15 @@ namespace PlexRipper.Application.PlexLibraries
             foreach (var plexTvShow in plexLibrary.TvShows)
             {
                 plexTvShow.Seasons = rawSeasonDataResult.Value.FindAll(x => x.ParentKey == plexTvShow.Key);
+                plexTvShow.ChildCount = plexTvShow.Seasons.Count;
+
                 foreach (var plexTvShowSeason in plexTvShow.Seasons)
                 {
                     plexTvShowSeason.PlexLibraryId = plexLibrary.Id;
                     plexTvShowSeason.PlexLibrary = plexLibrary;
                     plexTvShowSeason.TvShow = plexTvShow;
                     plexTvShowSeason.Episodes = rawEpisodesDataResult.Value.FindAll(x => x.ParentKey == plexTvShowSeason.Key);
+                    plexTvShowSeason.ChildCount = plexTvShowSeason.Episodes.Count;
 
                     // Set libraryId in each episode
                     plexTvShowSeason.Episodes.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
@@ -323,8 +325,6 @@ namespace PlexRipper.Application.PlexLibraries
         }
 
         #endregion
-
-
 
         #endregion
 

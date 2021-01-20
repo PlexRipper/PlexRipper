@@ -54,6 +54,8 @@
 				ref="detailsOverview"
 				:media-type="mediaType"
 				:media-item="detailItem"
+				:library="library"
+				:server="server"
 				@close="closeDetailsOverview"
 			/>
 		</template>

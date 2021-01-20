@@ -29,6 +29,7 @@ export default abstract class Convert {
 								mediaSize: episode.mediaSize,
 								addedAt: episode.addedAt ?? '',
 								updatedAt: episode.updatedAt ?? '',
+								childCount: 0,
 							});
 						});
 						// Add seasons
@@ -49,6 +50,7 @@ export default abstract class Convert {
 							mediaSize: season.mediaSize,
 							addedAt: season.addedAt,
 							updatedAt: season.updatedAt,
+							childCount: season.childCount,
 						});
 					}
 				});
@@ -70,6 +72,7 @@ export default abstract class Convert {
 					children: seasons,
 					addedAt: tvShow.addedAt ?? '',
 					updatedAt: tvShow.updatedAt ?? '',
+					childCount: tvShow.childCount,
 				});
 			}
 		});
@@ -99,6 +102,7 @@ export default abstract class Convert {
 					hasThumb: movie.hasThumb,
 					plexLibraryId: movie.plexLibraryId,
 					plexServerId: movie.plexServerId,
+					childCount: 0,
 				});
 			}
 		});

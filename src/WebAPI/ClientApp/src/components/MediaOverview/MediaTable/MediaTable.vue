@@ -22,7 +22,7 @@
 				</v-col>
 			</v-row>
 			<!-- TreeView Table -->
-			<v-row no-gutters class="media-table-content">
+			<v-row no-gutters :class="['media-table-content', detailMode ? 'detail-mode' : '']">
 				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
 					<v-col id="media-table-body" class="col px-0">
 						<template v-for="(tempItem, i) in items">
@@ -43,6 +43,7 @@
 									expand-icon="mdi-chevron-down"
 									:items="items.slice(i, i + 1)"
 									:load-children="getMedia"
+									:open-all="detailMode"
 									transition
 									item-key="key"
 									item-text="title"
@@ -84,7 +85,7 @@
 				</perfect-scrollbar>
 			</v-row>
 		</v-col>
-		<alphabet-navigation :items="items" container-ref="scrollbarmediatable" />
+		<alphabet-navigation v-if="!hideNavigation" :items="items" container-ref="scrollbarmediatable" />
 	</v-row>
 </template>
 
@@ -111,6 +112,12 @@ export default class MediaTable extends Vue {
 
 	@Prop({ required: true, type: String })
 	readonly mediaType!: PlexMediaType;
+
+	@Prop({ required: false, type: Boolean })
+	readonly hideNavigation!: boolean;
+
+	@Prop({ type: Boolean })
+	readonly detailMode!: boolean;
 
 	selected: string[] = [];
 
@@ -180,7 +187,7 @@ export default class MediaTable extends Vue {
 			},
 			{
 				text: 'Size',
-				value: 'size',
+				value: 'mediaSize',
 				width: 100,
 				type: 'data',
 			},

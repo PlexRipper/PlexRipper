@@ -77,10 +77,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { getThumbnail } from '@api/mediaApi';
 import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
 import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-
+import mediaService from '@state/mediaService';
 @Component
 export default class MediaPoster extends Vue {
 	@Prop({ required: true, type: Object as () => ITreeViewItem })
@@ -143,13 +142,12 @@ export default class MediaPoster extends Vue {
 		}
 
 		if (this.isVisible && !this.imageUrl) {
-			getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((response) => {
-				if (response.status === 204) {
-					// this.imageUrl = require('@img/logo/full-logo-256.png');
+			mediaService.getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((imageUrl) => {
+				if (!imageUrl) {
 					this.defaultImage = true;
 					return;
 				}
-				this.imageUrl = URL.createObjectURL(response.data);
+				this.imageUrl = imageUrl;
 			});
 		}
 	}

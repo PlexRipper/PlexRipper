@@ -13,6 +13,7 @@ export default interface ITreeViewItem {
 	hasTheme: boolean;
 	addedAt: string;
 	updatedAt: string;
+	childCount: number;
 	plexLibraryId: number;
 	plexServerId: number;
 	type: PlexMediaType;

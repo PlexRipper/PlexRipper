@@ -33,23 +33,32 @@
 			</v-row>
 			<!--	Data table display	-->
 			<template v-if="isTableView">
-				<media-table :items="getItems" :media-type="mediaType" @download="processDownloadCommand" @selected="selected = $event" />
+				<media-table
+					:items="items"
+					:media-type="mediaType"
+					@download="processDownloadCommand"
+					@selected="selected = $event"
+					@request-media="requestMedia"
+				/>
 			</template>
 
 			<!-- Poster display-->
 			<template v-if="isPosterView">
-				<poster-table :items="getItems" :media-type="mediaType" @download="processDownloadCommand" />
+				<poster-table :items="items" :media-type="mediaType" @download="processDownloadCommand" @open-details="openDetails" />
 			</template>
 
 			<!--	Download confirmation dialog	-->
 			<v-row>
 				<download-confirmation
 					ref="downloadConfirmationRef"
-					:items="getItems"
+					:items="items"
 					:progress="downloadTaskCreationProgress"
 					@download="sendDownloadCommand"
 				/>
 			</v-row>
+
+			<!--	Overlay with details of the media	-->
+			<details-overview ref="detailsOverview" :media-type="mediaType" :media-item="detailItem" @close="closeDetails" />
 		</template>
 		<template v-else>
 			<h1>Could not display this library.</h1>
@@ -63,7 +72,7 @@ import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import { filter, finalize, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
-import MediaPoster from '@mediaOverview/MediaPoster.vue';
+import MediaPoster from '@mediaOverview/PosterTable/MediaPoster.vue';
 import SignalrService from '@service/signalrService';
 import DownloadService from '@state/downloadService';
 import LibraryService from '@state/libraryService';
@@ -76,6 +85,8 @@ import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 import { combineLatest } from 'rxjs';
 import PosterTable from '@mediaOverview/PosterTable/PosterTable.vue';
+import DetailsOverview from '@mediaOverview/DetailsOverview.vue';
+import { getTvShow } from '@api/mediaApi';
 import { settingsStore } from '~/store';
 
 @Component({
@@ -87,6 +98,7 @@ import { settingsStore } from '~/store';
 		MediaOverviewBar,
 		AlphabetNavigation,
 		PosterTable,
+		DetailsOverview,
 	},
 })
 export default class MediaOverview extends Vue {
@@ -96,6 +108,9 @@ export default class MediaOverview extends Vue {
 	@Ref('downloadConfirmationRef')
 	readonly downloadConfirmationRef!: DownloadConfirmation;
 
+	@Ref('detailsOverview')
+	readonly detailsOverview!: DetailsOverview;
+
 	selected: string[] = [];
 	isLoading: boolean = true;
 	isRefreshing: boolean = false;
@@ -104,6 +119,8 @@ export default class MediaOverview extends Vue {
 	libraryProgress: LibraryProgress | null = null;
 	downloadTaskCreationProgress: DownloadTaskCreationProgress | null = null;
 	downloadPreviewType: PlexMediaType = PlexMediaType.None;
+	items: ITreeViewItem[] = [];
+	detailItem: ITreeViewItem | null = null;
 
 	get mediaType(): PlexMediaType {
 		return this.library?.type ?? PlexMediaType.Unknown;
@@ -149,18 +166,15 @@ export default class MediaOverview extends Vue {
 		};
 	}
 
-	get getItems(): ITreeViewItem[] {
-		let items: ITreeViewItem[] = [];
+	convertMediaItems(): void {
 		switch (this.mediaType) {
 			case PlexMediaType.Movie:
-				items = Convert.moviesToTreeViewItems(this.library?.movies ?? []);
+				this.items = Convert.moviesToTreeViewItems(this.library?.movies ?? []);
 				break;
 			case PlexMediaType.TvShow:
-				items = Convert.tvShowsToTreeViewItems(this.library?.tvShows ?? []);
+				this.items = Convert.tvShowsToTreeViewItems(this.library?.tvShows ?? []);
 				break;
 		}
-
-		return items;
 	}
 
 	get isPosterView(): boolean {
@@ -232,12 +246,49 @@ export default class MediaOverview extends Vue {
 		DownloadService.downloadMedia(downloadMediaCommand);
 	}
 
+	openDetails(mediaId: number): void {
+		this.detailsOverview.openDetails();
+		const item = this.items.find((x) => x.id === mediaId);
+		if (item?.children?.length === 0) {
+			this.requestMedia({
+				mediaId,
+				resolve: () => {
+					this.detailItem = this.items.find((x) => x.id === mediaId) ?? null;
+				},
+			});
+		} else {
+			this.detailItem = item ?? null;
+		}
+	}
+
+	closeDetails(): void {
+		this.detailItem = null;
+	}
+
 	refreshLibrary(): void {
 		this.isRefreshing = true;
 		this.isLoading = true;
 		this.library = null;
 		this.resetProgress(true);
 		LibraryService.refreshLibrary(this.libraryId);
+	}
+
+	requestMedia(numberPromise: { mediaId: number; resolve?: Function }): void {
+		if (this.mediaType === PlexMediaType.TvShow) {
+			getTvShow(numberPromise.mediaId).subscribe((response) => {
+				if (response) {
+					const convert = Convert.tvShowsToTreeViewItems([response])[0];
+					const itemsIndex = this.items.findIndex((x) => x.id === numberPromise.mediaId);
+					this.items[itemsIndex].children?.push(...(convert?.children ?? []));
+				}
+				if (numberPromise.resolve) {
+					// Alert listener that the data is available
+					numberPromise.resolve();
+				}
+			});
+		} else {
+			Log.error('Request media could not be executed for ' + this.mediaType);
+		}
 	}
 
 	created(): void {
@@ -277,6 +328,7 @@ export default class MediaOverview extends Vue {
 				}
 				if (data[1] && data[1].id === this.libraryId) {
 					this.library = Object.freeze(data[1]);
+					this.convertMediaItems();
 				}
 				if (this.server && this.library) {
 					this.isLoading = false;

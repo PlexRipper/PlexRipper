@@ -25,7 +25,7 @@
 			<v-row no-gutters class="media-table-content">
 				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
 					<v-col id="media-table-body" class="col px-0">
-						<template v-for="(tempItem, i) in tempItems">
+						<template v-for="(tempItem, i) in items">
 							<v-lazy
 								:key="i"
 								:options="{
@@ -41,7 +41,7 @@
 									selection-type="leaf"
 									hoverable
 									expand-icon="mdi-chevron-down"
-									:items="tempItems.slice(i, i + 1)"
+									:items="items.slice(i, i + 1)"
 									:load-children="getMedia"
 									transition
 									item-key="key"
@@ -84,7 +84,7 @@
 				</perfect-scrollbar>
 			</v-row>
 		</v-col>
-		<alphabet-navigation :items="tempItems" container-ref="scrollbarmediatable" />
+		<alphabet-navigation :items="items" container-ref="scrollbarmediatable" />
 	</v-row>
 </template>
 
@@ -94,8 +94,6 @@ import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@
 import IMediaTableHeader from '@interfaces/IMediaTableHeader';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
-import { getTvShow } from '@api/mediaApi';
-import Convert from '@mediaOverview/MediaTable/types/Convert';
 import { Dictionary } from 'typescript-collections';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 import ITreeViewItem from './types/ITreeViewItem';
@@ -123,21 +121,20 @@ export default class MediaTable extends Vue {
 	progress: DownloadTaskCreationProgress | null = null;
 
 	visible: boolean[] = [];
-	tempItems: ITreeViewItem[] = [];
 	loadingButtons: string[] = [];
 
 	selectedDict: Dictionary<number, string[]> = new Dictionary<number, string[]>();
 
-	@Watch('tempItems')
+	@Watch('items')
 	updateVisible(): void {
-		this.tempItems.forEach(() => this.visible.push(false));
+		this.items.forEach(() => this.visible.push(false));
 	}
 
 	get getLeafs(): string[] {
 		if (this.mediaType === PlexMediaType.Movie) {
-			return this.tempItems.map((x) => x.key);
+			return this.items.map((x) => x.key);
 		}
-		return this.tempItems.map((x) => x.children?.map((y) => y.children?.map((z) => z.key) ?? []) ?? [])?.flat(2) ?? [];
+		return this.items.map((x) => x.children?.map((y) => y.children?.map((z) => z.key) ?? []) ?? [])?.flat(2) ?? [];
 	}
 
 	get isIndeterminate(): boolean {
@@ -202,16 +199,11 @@ export default class MediaTable extends Vue {
 		];
 	}
 
+	/*
+	A promise is send to the parent, which will resolve once the data is available. After which the node expands.
+	 */
 	getMedia(item: ITreeViewItem): Promise<ITreeViewItem> {
-		return getTvShow(item.id)
-			.toPromise()
-			.then((response) => {
-				const convert = Convert.tvShowsToTreeViewItems([response])[0];
-				item.children?.push(...(convert?.children ?? []));
-				const i = this.tempItems.findIndex((x) => x.key === item.key);
-				this.tempItems.splice(i, 1, item);
-				return item;
-			});
+		return new Promise((resolve) => this.$emit('request-media', { mediaId: item.id, resolve }));
 	}
 
 	async downloadMedia(item: ITreeViewItem): Promise<void> {
@@ -250,12 +242,6 @@ export default class MediaTable extends Vue {
 			this.loadingButtons = [];
 		}
 		this.$emit('download', downloadCommand);
-	}
-
-	created(): void {
-		// This is needed to refresh the TreeView when a node is expanded.
-		// We edit the copy instead of the prop
-		this.tempItems = this.items;
 	}
 }
 </script>

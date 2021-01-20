@@ -13,9 +13,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("key", Required = Required.Always)]
         public int Key { get; set; }
 
-        [JsonProperty("guid", Required = Required.Always)]
-        public string Guid { get; set; }
-
         [JsonProperty("title", Required = Required.Always)]
         public string Title { get; set; }
 
@@ -31,12 +28,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType Type { get; set; }
 
-        [JsonProperty("leafCount", Required = Required.Always)]
-        public int LeafCount { get; set; }
-
-        [JsonProperty("viewedLeafCount", Required = Required.Always)]
-        public int ViewedLeafCount { get; set; }
-
         [JsonProperty("childCount", Required = Required.Always)]
         public int ChildCount { get; set; }
 
@@ -47,7 +38,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         public DateTime UpdatedAt { get; set; }
 
         [JsonProperty("originallyAvailableAt", Required = Required.Always)]
-        public DateTime OriginallyAvailableAt { get; set; }
+        public DateTime? OriginallyAvailableAt { get; set; }
 
         [JsonProperty("tvShowId", Required = Required.Always)]
         public int TvShowId { get; set; }

@@ -2,11 +2,11 @@
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexMovies
+namespace PlexRipper.Application.PlexTvShows
 {
-    public class GetPlexMovieByIdQuery : IRequest<Result<PlexMovie>>
+    public class GetPlexTvShowByIdQuery : IRequest<Result<PlexTvShow>>
     {
-        public GetPlexMovieByIdQuery(int id, bool includeLibrary = false, bool includeServer = false)
+        public GetPlexTvShowByIdQuery(int id, bool includeLibrary = false, bool includeServer = false)
         {
             Id = id;
             IncludeLibrary = includeLibrary;

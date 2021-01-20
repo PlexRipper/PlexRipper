@@ -58,6 +58,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies.Commands
                 command.PlexLibrary.Movies.ForEach(x =>
                 {
                     x.PlexLibraryId = plexLibrary.Id;
+                    x.PlexServerId = plexLibrary.PlexServerId;
                     plexMoviesDict.Add(x.Key, x);
                 });
 

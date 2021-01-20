@@ -324,34 +324,7 @@ namespace PlexRipper.Application.PlexLibraries
 
         #endregion
 
-        public async Task<Result<byte[]>> GetThumbnailImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0)
-        {
-            var thumbUrl = await _mediator.Send(new GetThumbUrlByPlexMediaIdQuery(mediaId, mediaType));
-            if (thumbUrl.IsFailed)
-            {
-                return thumbUrl.ToResult();
-            }
 
-            var plexServer = await _mediator.Send(new GetPlexServerByPlexMediaIdQuery(mediaId, mediaType));
-            if (plexServer.IsFailed)
-            {
-                return plexServer.ToResult();
-            }
-
-            var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Value.Id);
-            if (token.IsFailed)
-            {
-                return token.ToResult();
-            }
-
-            byte[] image = await _plexServiceApi.GetThumbnailAsync(thumbUrl.Value, token.Value, width, height);
-            if (image == null || image.Length == 109)
-            {
-                return Result.Fail("Failed to retrieve image.");
-            }
-
-            return Result.Ok(image);
-        }
 
         #endregion
 

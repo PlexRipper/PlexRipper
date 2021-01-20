@@ -17,9 +17,9 @@ namespace PlexRipper.WebAPI.Controllers
     [EnableCors("CORS_Configuration")]
     public abstract class BaseController : ControllerBase
     {
-        private readonly IMapper _mapper;
+        protected readonly IMapper _mapper;
 
-        private readonly INotificationsService _notificationsService;
+        protected readonly INotificationsService _notificationsService;
 
         protected BaseController(IMapper mapper, INotificationsService notificationsService)
         {

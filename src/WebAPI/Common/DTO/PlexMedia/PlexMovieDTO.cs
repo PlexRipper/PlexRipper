@@ -13,9 +13,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("key", Required = Required.Always)]
         public int Key { get; set; }
 
-        [JsonProperty("guid", Required = Required.Always)]
-        public object Guid { get; set; }
-
         [JsonProperty("studio", Required = Required.Always)]
         public string Studio { get; set; }
 
@@ -40,26 +37,11 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("year", Required = Required.Always)]
         public int Year { get; set; }
 
-        [JsonProperty("thumb", Required = Required.Always)]
-        public object Thumb { get; set; }
-
-        [JsonProperty("art", Required = Required.Always)]
-        public object Art { get; set; }
-
-        [JsonProperty("banner", Required = Required.Always)]
-        public object Banner { get; set; }
-
         [JsonProperty("duration", Required = Required.Always)]
         public int Duration { get; set; }
 
         [JsonProperty("originallyAvailableAt", Required = Required.Always)]
-        public DateTime OriginallyAvailableAt { get; set; }
-
-        [JsonProperty("leafCount", Required = Required.Always)]
-        public int LeafCount { get; set; }
-
-        [JsonProperty("viewedLeafCount", Required = Required.Always)]
-        public int ViewedLeafCount { get; set; }
+        public DateTime? OriginallyAvailableAt { get; set; }
 
         [JsonProperty("childCount", Required = Required.Always)]
         public int ChildCount { get; set; }
@@ -69,12 +51,6 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("updatedAt", Required = Required.Always)]
         public DateTime UpdatedAt { get; set; }
-
-        [JsonProperty("viewCount", Required = Required.Always)]
-        public object ViewCount { get; set; }
-
-        [JsonProperty("theme", Required = Required.Always)]
-        public object Theme { get; set; }
 
         [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }

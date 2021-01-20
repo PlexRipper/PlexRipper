@@ -26,12 +26,6 @@ namespace PlexRipper.Domain.AutoMapper
             // PlexAccountServer => PlexServer
             CreateMap<PlexAccountServer, PlexServer>(MemberList.Destination)
                 .ConvertUsing(source => source.PlexServer ?? null);
-
-            // PlexMediaData -> PlexMovieData
-            CreateMap<PlexMediaData, PlexMovieData>(MemberList.Source).ReverseMap();
-
-            // PlexMediaDataPart -> PlexMovieDataPart
-            CreateMap<PlexMediaDataPart, PlexMovieDataPart>(MemberList.Source).ReverseMap();
         }
 
         private static int ToInt(string stringInt)

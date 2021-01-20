@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace PlexRipper.Domain
 {
+    [Table("PlexTvShow")]
     public class PlexTvShow : PlexMedia, IToDownloadTask
     {
         public PlexMediaType Type => PlexMediaType.TvShow;

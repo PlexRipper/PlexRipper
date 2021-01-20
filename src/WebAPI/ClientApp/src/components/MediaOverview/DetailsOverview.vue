@@ -36,7 +36,7 @@ export default class DetailsOverview extends Vue {
 	@Prop({ required: true, type: String })
 	readonly mediaType!: PlexMediaType;
 
-	@Prop({ required: true, type: (Object as () => ITreeViewItem) | null })
+	@Prop({ type: Object as () => ITreeViewItem })
 	readonly mediaItem!: ITreeViewItem | null;
 
 	isOpen: boolean = false;
@@ -48,7 +48,6 @@ export default class DetailsOverview extends Vue {
 	}
 
 	openDetails(): void {
-		// this.mediaItem = mediaItem;
 		this.isOpen = true;
 	}
 }

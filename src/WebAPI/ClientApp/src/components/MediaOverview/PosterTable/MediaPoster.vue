@@ -99,10 +99,6 @@ export default class MediaPoster extends Vue {
 		return this.thumbHeight + 40;
 	}
 
-	get hover(): boolean {
-		return true;
-	}
-
 	getQualityColor(quality: string): string {
 		switch (quality) {
 			case 'sd':
@@ -141,6 +137,11 @@ export default class MediaPoster extends Vue {
 
 	@Watch('isVisible')
 	getThumbnail(): void {
+		if (!this.mediaItem.hasThumb) {
+			this.defaultImage = true;
+			return;
+		}
+
 		if (this.isVisible && !this.imageUrl) {
 			getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((response) => {
 				if (response.status === 204) {

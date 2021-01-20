@@ -20,7 +20,7 @@
 		<!-- Header -->
 		<template v-else-if="server && library">
 			<!--	Overview bar	-->
-			<v-row class="mx-0">
+			<v-row v-show="showMediaOverview" class="mx-0">
 				<media-overview-bar
 					:server="server"
 					:library="library"
@@ -34,6 +34,7 @@
 			<!--	Data table display	-->
 			<template v-if="isTableView">
 				<media-table
+					v-show="showMediaOverview"
 					:items="items"
 					:media-type="mediaType"
 					@download="processDownloadCommand"
@@ -44,31 +45,34 @@
 
 			<!-- Poster display-->
 			<template v-if="isPosterView">
-				<poster-table :items="items" :media-type="mediaType" @download="processDownloadCommand" @open-details="openDetails" />
+				<poster-table
+					v-show="showMediaOverview"
+					:items="items"
+					:media-type="mediaType"
+					@download="processDownloadCommand"
+					@open-details="openDetails"
+				/>
 			</template>
 
-			<!--	Download confirmation dialog	-->
-			<v-row>
-				<download-confirmation
-					ref="downloadConfirmationRef"
-					:items="items"
-					:progress="downloadTaskCreationProgress"
-					@download="sendDownloadCommand"
-				/>
-			</v-row>
-
 			<!--	Overlay with details of the media	-->
-			<details-overview ref="detailsOverview" :media-type="mediaType" :media-item="detailItem" @close="closeDetails" />
+			<details-overview ref="detailsOverview" :media-type="mediaType" :media-item="detailItem" @close="closeDetailsOverview" />
 		</template>
 		<template v-else>
 			<h1>Could not display this library.</h1>
 		</template>
+		<!--	Download confirmation dialog	-->
+		<download-confirmation
+			ref="downloadConfirmationRef"
+			:items="items"
+			:progress="downloadTaskCreationProgress"
+			@download="sendDownloadCommand"
+		/>
 	</page>
 </template>
 
 <script lang="ts">
 import Log from 'consola';
-import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { filter, finalize, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
@@ -143,6 +147,10 @@ export default class MediaOverview extends Vue {
 			default:
 				return ViewMode.Poster;
 		}
+	}
+
+	get showMediaOverview(): boolean {
+		return !(this.detailItem ?? false);
 	}
 
 	changeView(viewMode: ViewMode): void {
@@ -246,8 +254,24 @@ export default class MediaOverview extends Vue {
 		DownloadService.downloadMedia(downloadMediaCommand);
 	}
 
+	@Watch('$route.hash')
+	testFunction(newHash: string, oldHash: string): void {
+		Log.info('newHash', newHash);
+		Log.info('oldHash', oldHash);
+		if (oldHash === '#detailsOverview') {
+			this.resetDetailsOverview();
+		}
+	}
+
 	openDetails(mediaId: number): void {
 		this.detailsOverview.openDetails();
+		this.$router.push({
+			path: '#detailsOverview',
+			query: {
+				mediaId: '' + mediaId,
+			},
+		});
+
 		const item = this.items.find((x) => x.id === mediaId);
 		if (item?.children?.length === 0) {
 			this.requestMedia({
@@ -261,7 +285,11 @@ export default class MediaOverview extends Vue {
 		}
 	}
 
-	closeDetails(): void {
+	closeDetailsOverview(): void {
+		this.$router.back();
+	}
+
+	resetDetailsOverview(): void {
 		this.detailItem = null;
 	}
 

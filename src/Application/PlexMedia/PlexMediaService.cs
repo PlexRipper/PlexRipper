@@ -76,7 +76,7 @@ namespace PlexRipper.Application.PlexMedia
             }
 
             byte[] image = await _plexServiceApi.GetThumbnailAsync(plexServer.ServerUrl + thumbPath, token.Value, width, height);
-            if (image == null || image.Length == 109)
+            if (image == null || image.Length < 200)
             {
                 return Result.Ok(System.Array.Empty<byte>());
             }
@@ -136,7 +136,7 @@ namespace PlexRipper.Application.PlexMedia
             }
 
             byte[] image = await _plexServiceApi.GetBannerAsync(plexServer.ServerUrl + bannerPath, token.Value, width, height);
-            if (image == null || image.Length == 109)
+            if (image == null || image.Length < 200)
             {
                 return Result.Ok(System.Array.Empty<byte>());
             }

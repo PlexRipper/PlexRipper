@@ -19,7 +19,7 @@
 										{{ item.type | mediaTypeIcon }}
 									</v-icon>
 								</template>
-								<template #append="{ item }"> (<file-size :size="item.size" />) </template>
+								<template #append="{ item }"> (<file-size :size="item.mediaSize" />) </template>
 							</v-treeview>
 						</v-col>
 					</perfect-scrollbar>
@@ -97,7 +97,7 @@ export default class DownloadConfirmation extends Vue {
 	get totalSize(): number {
 		let size = 0;
 		if (this.downloadPreview.length > 0) {
-			this.downloadPreview.forEach((x) => (size += x.size ?? 0));
+			this.downloadPreview.forEach((x) => (size += x.mediaSize ?? 0));
 		}
 		return size;
 	}

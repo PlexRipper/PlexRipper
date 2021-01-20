@@ -3,12 +3,14 @@
 		<v-toolbar-title>
 			<v-list subheader two-line class="no-background pa-0">
 				<v-list-item>
-					<v-list-item-avatar>
+					<v-list-item-avatar v-if="library">
 						<v-icon large class="mx-3">{{ library.type | mediaTypeIcon }}</v-icon>
 					</v-list-item-avatar>
 					<v-list-item-content>
 						<v-list-item-title>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</v-list-item-title>
-						<v-list-item-subtitle>{{ mediaCountFormatted }} - <file-size :size="library.mediaSize" /></v-list-item-subtitle>
+						<v-list-item-subtitle v-if="library">
+							{{ mediaCountFormatted }} - <file-size :size="library.mediaSize" />
+						</v-list-item-subtitle>
 					</v-list-item-content>
 				</v-list-item>
 			</v-list>
@@ -26,6 +28,7 @@
 		/>
 		<!--	Refresh library button	-->
 		<vertical-button
+			v-if="!detailMode"
 			icon="mdi-refresh"
 			label="Refresh"
 			:height="barHeight"
@@ -77,11 +80,14 @@ export default class MediaOverviewBar extends Vue {
 	@Prop({ required: false, type: Object as () => PlexLibraryDTO | null })
 	readonly library!: PlexLibraryDTO | null;
 
-	@Prop({ required: true, type: String })
+	@Prop({ required: false, type: String })
 	readonly viewMode!: ViewMode;
 
 	@Prop({ required: true, type: Boolean })
 	readonly hasSelected!: boolean;
+
+	@Prop({ type: Boolean })
+	readonly detailMode!: boolean;
 
 	readonly barHeight: number = 85;
 	readonly verticalButtonWidth: number = 120;

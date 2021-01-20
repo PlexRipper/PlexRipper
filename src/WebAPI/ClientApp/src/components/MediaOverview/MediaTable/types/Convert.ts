@@ -1,6 +1,5 @@
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { PlexMediaType, PlexMovieDTO, PlexTvShowDTO } from '@dto/mainApi';
-import IMediaData from '@mediaOverview/MediaTable/types/IMediaData';
 
 export default abstract class Convert {
 	public static tvShowsToTreeViewItems(tvShows: PlexTvShowDTO[]): ITreeViewItem[] {
@@ -16,38 +15,58 @@ export default abstract class Convert {
 							// Add Episode
 							episodes.push({
 								id: episode.id,
+								duration: episode.duration,
+								hasArt: episode.hasArt,
+								hasBanner: episode.hasBanner,
+								hasTheme: episode.hasTheme,
+								hasThumb: episode.hasThumb,
+								plexLibraryId: episode.plexLibraryId,
+								plexServerId: episode.plexServerId,
+								year: episode.year,
 								key: `${tvShow.id}-${season.id}-${episode.id}`,
 								title: episode.title ?? '',
 								type: PlexMediaType.Episode,
-								mediaData: [] as IMediaData[],
-								size: episode.size,
+								mediaSize: episode.mediaSize,
 								addedAt: episode.addedAt ?? '',
 								updatedAt: episode.updatedAt ?? '',
 							});
 						});
 						// Add seasons
 						seasons.push({
+							duration: season.duration,
+							hasArt: season.hasArt,
+							hasBanner: season.hasBanner,
+							hasTheme: season.hasTheme,
+							hasThumb: season.hasThumb,
+							plexLibraryId: season.plexLibraryId,
+							plexServerId: season.plexServerId,
+							year: season.year,
 							id: season.id,
 							key: `${tvShow.id}-${season.id}`,
-							title: season.title ?? '',
+							title: season.title,
 							type: PlexMediaType.Season,
 							children: episodes,
-							mediaData: [] as IMediaData[],
-							size: season.size,
-							addedAt: season.addedAt ?? '',
-							updatedAt: season.updatedAt ?? '',
+							mediaSize: season.mediaSize,
+							addedAt: season.addedAt,
+							updatedAt: season.updatedAt,
 						});
 					}
 				});
 				// Add tvShow
 				items.push({
+					duration: tvShow.duration,
+					hasArt: tvShow.hasArt,
+					hasBanner: tvShow.hasBanner,
+					hasTheme: tvShow.hasTheme,
+					hasThumb: tvShow.hasThumb,
+					plexLibraryId: tvShow.plexLibraryId,
+					plexServerId: tvShow.plexServerId,
 					id: tvShow.id,
 					key: `${tvShow.id}`,
 					title: tvShow.title ?? '',
 					year: tvShow.year,
 					type: PlexMediaType.TvShow,
-					size: tvShow.size,
-					mediaData: [] as IMediaData[],
+					mediaSize: tvShow.mediaSize,
 					children: seasons,
 					addedAt: tvShow.addedAt ?? '',
 					updatedAt: tvShow.updatedAt ?? '',
@@ -69,11 +88,17 @@ export default abstract class Convert {
 					key: `${movie.id}`,
 					title: movie.title ?? '',
 					year: movie.year,
-					size: movie.size,
+					mediaSize: movie.mediaSize,
 					type: PlexMediaType.Movie,
-					mediaData: movie.plexMovieDatas as IMediaData[],
 					addedAt: movie.addedAt ?? '',
 					updatedAt: movie.updatedAt ?? '',
+					duration: movie.duration,
+					hasArt: movie.hasArt,
+					hasBanner: movie.hasBanner,
+					hasTheme: movie.hasTheme,
+					hasThumb: movie.hasThumb,
+					plexLibraryId: movie.plexLibraryId,
+					plexServerId: movie.plexServerId,
 				});
 			}
 		});

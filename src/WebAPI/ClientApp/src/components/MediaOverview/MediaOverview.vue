@@ -19,43 +19,43 @@
 		</template>
 		<!-- Header -->
 		<template v-else-if="server && library">
-			<!--	Overview bar	-->
-			<v-row v-show="showMediaOverview" class="mx-0">
-				<media-overview-bar
-					:server="server"
-					:library="library"
-					:view-mode="viewMode"
-					:has-selected="getSelectedMediaIds.length > 0"
-					@view-change="changeView"
-					@refresh-library="refreshLibrary"
-					@download="processDownloadCommand(null)"
-				></media-overview-bar>
-			</v-row>
-			<!--	Data table display	-->
-			<template v-if="isTableView">
-				<media-table
-					v-show="showMediaOverview"
-					:items="items"
-					:media-type="mediaType"
-					@download="processDownloadCommand"
-					@selected="selected = $event"
-					@request-media="requestMedia"
-				/>
-			</template>
+			<div v-show="showMediaOverview">
+				<!--	Overview bar	-->
+				<v-row class="mx-0">
+					<media-overview-bar
+						:server="server"
+						:library="library"
+						:view-mode="viewMode"
+						:has-selected="getSelectedMediaIds.length > 0"
+						@view-change="changeView"
+						@refresh-library="refreshLibrary"
+						@download="processDownloadCommand(null)"
+					></media-overview-bar>
+				</v-row>
+				<!--	Data table display	-->
+				<template v-if="isTableView">
+					<media-table
+						:items="items"
+						:media-type="mediaType"
+						@download="processDownloadCommand"
+						@selected="selected = $event"
+						@request-media="requestMedia"
+					/>
+				</template>
 
-			<!-- Poster display-->
-			<template v-if="isPosterView">
-				<poster-table
-					v-show="showMediaOverview"
-					:items="items"
-					:media-type="mediaType"
-					@download="processDownloadCommand"
-					@open-details="openDetails"
-				/>
-			</template>
-
+				<!-- Poster display-->
+				<template v-if="isPosterView">
+					<poster-table :items="items" :media-type="mediaType" @download="processDownloadCommand" @open-details="openDetails" />
+				</template>
+			</div>
 			<!--	Overlay with details of the media	-->
-			<details-overview ref="detailsOverview" :media-type="mediaType" :media-item="detailItem" @close="closeDetailsOverview" />
+			<details-overview
+				v-show="!showMediaOverview"
+				ref="detailsOverview"
+				:media-type="mediaType"
+				:media-item="detailItem"
+				@close="closeDetailsOverview"
+			/>
 		</template>
 		<template v-else>
 			<h1>Could not display this library.</h1>
@@ -254,23 +254,23 @@ export default class MediaOverview extends Vue {
 		DownloadService.downloadMedia(downloadMediaCommand);
 	}
 
-	@Watch('$route.hash')
-	testFunction(newHash: string, oldHash: string): void {
-		Log.info('newHash', newHash);
-		Log.info('oldHash', oldHash);
-		if (oldHash === '#detailsOverview') {
+	@Watch('$route.path')
+	testFunction(newPath: string, oldPath: string): void {
+		Log.info('newPath', newPath);
+		Log.info('oldPath', oldPath);
+
+		if (oldPath.includes('details') && !newPath.includes('details')) {
 			this.resetDetailsOverview();
 		}
 	}
 
 	openDetails(mediaId: number): void {
+		if (!this.$route.path.includes('details')) {
+			this.$router.push({
+				path: this.libraryId + '/details/' + mediaId,
+			});
+		}
 		this.detailsOverview.openDetails();
-		this.$router.push({
-			path: '#detailsOverview',
-			query: {
-				mediaId: '' + mediaId,
-			},
-		});
 
 		const item = this.items.find((x) => x.id === mediaId);
 		if (item?.children?.length === 0) {
@@ -286,7 +286,11 @@ export default class MediaOverview extends Vue {
 	}
 
 	closeDetailsOverview(): void {
-		this.$router.back();
+		Log.debug('Close Details Overview');
+		this.$router.push({
+			path: '/tvshows/' + this.libraryId,
+		});
+		this.resetDetailsOverview();
 	}
 
 	resetDetailsOverview(): void {
@@ -319,10 +323,18 @@ export default class MediaOverview extends Vue {
 		}
 	}
 
+	mounted(): void {}
+
 	created(): void {
 		this.resetProgress(false);
 		this.isRefreshing = false;
 		this.isLoading = true;
+
+		// this.$router.beforeResolve((to, from, next) => {
+		// 	if (from.path.includes('details')){
+		//
+		// 	}
+		// })
 
 		// Setup progress bar
 		SignalrService.getLibraryProgress().subscribe((data) => {
@@ -360,6 +372,18 @@ export default class MediaOverview extends Vue {
 				}
 				if (this.server && this.library) {
 					this.isLoading = false;
+					if (this.detailsOverview) {
+						if (+this.$route.params.mediaid) {
+							this.openDetails(+this.$route.params.mediaid);
+						}
+					} else {
+						this.$nextTick(() => {
+							Log.debug('mediaId', +this.$route.params.mediaid);
+							if (+this.$route.params.mediaid) {
+								this.openDetails(+this.$route.params.mediaid);
+							}
+						});
+					}
 				}
 			},
 		);

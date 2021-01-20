@@ -46,6 +46,19 @@ const config: NuxtConfig = {
 	],
 	router: {
 		middleware: ['pageRedirect'],
+		extendRoutes(routes, resolve) {
+			routes.push({
+				name: 'details-overview',
+				path: '/tvshows/:id',
+				component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
+				children: [
+					{
+						path: 'details/:mediaid',
+						component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
+					},
+				],
+			});
+		},
 	},
 	/*
 	 ** Nuxt.js dev-modules

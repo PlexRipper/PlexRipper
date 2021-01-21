@@ -116,14 +116,16 @@ namespace PlexRipper.PlexApi.Services
                 return null;
             }
 
+            var mediaList = result.MediaContainer.Metadata;
+
             // Determine how to map based on the Library type.
             switch (result.MediaContainer.ViewGroup)
             {
                 case "movie":
-                    updatedPlexLibrary.Movies = _mapper.Map<List<PlexMovie>>(result.MediaContainer.Metadata);
+                    updatedPlexLibrary.Movies = _mapper.Map<List<PlexMovie>>(mediaList);
                     break;
                 case "show":
-                    updatedPlexLibrary.TvShows = _mapper.Map<List<PlexTvShow>>(result.MediaContainer.Metadata);
+                    updatedPlexLibrary.TvShows = _mapper.Map<List<PlexTvShow>>(mediaList);
                     break;
             }
 
@@ -213,6 +215,11 @@ namespace PlexRipper.PlexApi.Services
         public async Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
         {
             return await _plexApi.GetThumbnailAsync(thumbUrl, authToken, width, height);
+        }
+
+        public async Task<byte[]> GetBannerAsync(string bannerUrl, string authToken, int width = 0, int height = 0)
+        {
+            return await _plexApi.GetBannerAsync(bannerUrl, authToken, width, height);
         }
 
         #endregion

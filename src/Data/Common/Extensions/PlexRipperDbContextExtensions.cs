@@ -43,21 +43,27 @@ namespace PlexRipper.Data.Common
 
         public static IQueryable<PlexMovie> IncludePlexLibrary(this IQueryable<PlexMovie> plexMovies)
         {
-            return plexMovies
-                .Include(x => x.PlexLibrary);
+            return plexMovies.Include(x => x.PlexLibrary);
         }
 
         public static IQueryable<PlexMovie> IncludeServer(this IQueryable<PlexMovie> plexMovies)
         {
-            return plexMovies
-                .Include(x => x.PlexLibrary)
-                .ThenInclude(x => x.PlexServer);
+            return plexMovies.Include(x => x.PlexServer);
+        }
+
+        public static IQueryable<PlexTvShow> IncludePlexLibrary(this IQueryable<PlexTvShow> plexTvShows)
+        {
+            return plexTvShows.Include(x => x.PlexLibrary);
+        }
+
+        public static IQueryable<PlexTvShow> IncludeServer(this IQueryable<PlexTvShow> plexTvShows)
+        {
+            return plexTvShows.Include(x => x.PlexServer);
         }
 
         public static IQueryable<PlexLibrary> IncludeServer(this IQueryable<PlexLibrary> plexLibrary)
         {
-            return plexLibrary
-                .Include(x => x.PlexServer);
+            return plexLibrary.Include(x => x.PlexServer);
         }
     }
 }

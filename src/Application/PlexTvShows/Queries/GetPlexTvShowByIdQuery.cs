@@ -4,19 +4,19 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexTvShows
 {
-    public class GetPlexTvShowByIdWithEpisodesQuery : IRequest<Result<PlexTvShow>>
+    public class GetPlexTvShowByIdQuery : IRequest<Result<PlexTvShow>>
     {
-        public GetPlexTvShowByIdWithEpisodesQuery(int id, bool includeLibrary = false, bool includeData = false)
+        public GetPlexTvShowByIdQuery(int id, bool includeLibrary = false, bool includeServer = false)
         {
             Id = id;
             IncludeLibrary = includeLibrary;
-            IncludeData = includeData;
+            IncludeServer = includeServer;
         }
 
         public int Id { get; }
 
         public bool IncludeLibrary { get; }
 
-        public bool IncludeData { get; }
+        public bool IncludeServer { get; }
     }
 }

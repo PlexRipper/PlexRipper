@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
-    public interface IPlexTvShowService
+    public interface IPlexTvShowService : IPlexMediaService
     {
         Task<Result<PlexTvShow>> GetTvShow(int id);
     }

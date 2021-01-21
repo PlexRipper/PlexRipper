@@ -19,3 +19,10 @@ export interface RuntimeConfig {
 declare module '@nuxt/types/config/runtime' {
 	interface NuxtRuntimeConfig extends RuntimeConfig {}
 }
+
+// Extensions
+declare global {
+	interface Array<T> {
+		addOrReplace(index: number, object: any): Array<T>;
+	}
+}

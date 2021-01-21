@@ -21,7 +21,7 @@ namespace PlexRipper.Application.Common
 
         Task<Result> PauseDownloadTask(int downloadTaskId);
 
-        Task<Result<bool>> DownloadMediaAsync(int mediaId, PlexMediaType type, int plexAccountId);
+        Task<Result> DownloadMediaAsync(int mediaId, PlexMediaType type, int plexAccountId);
 
         Task<Result<bool>> DeleteDownloadTasksAsync(IEnumerable<int> downloadTaskIds);
 

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using PlexRipper.Domain;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
@@ -43,6 +44,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                     opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter(), x => x.Type))
                 .ForMember(dest => dest.LibraryLocationId,
                     opt => opt.MapFrom(src => src.Location.First().Id))
+
                 // Location[0].Path -> LibraryLocationPath
                 .ForMember(dest => dest.LibraryLocationPath,
                     opt => opt.MapFrom(src => src.Location.First().Path));
@@ -51,10 +53,20 @@ namespace PlexRipper.PlexApi.Config.Mappings
             CreateMap<PlexMediaContainer, PlexMediaMetaData>(MemberList.Destination)
                 .ConvertUsing<PlexMediaMetaDataDTOPlexMediaMetaData>();
 
+            // Metadata -> PlexMedia
+            CreateMap<Metadata, PlexMedia>(MemberList.None)
+                .ForMember(dest => dest.Key, opt => opt.MapFrom(x => x.RatingKey))
+                .ForMember(dest => dest.MediaSize, opt => opt.MapFrom(x => x.Media.Sum(y => y.Part.Sum(z => z.Size))))
+                .ForMember(dest => dest.HasThumb, opt => opt.MapFrom(x => !string.IsNullOrEmpty(x.Thumb)))
+                .ForMember(dest => dest.HasBanner, opt => opt.MapFrom(x => !string.IsNullOrEmpty(x.Banner)))
+                .ForMember(dest => dest.HasArt, opt => opt.MapFrom(x => !string.IsNullOrEmpty(x.Art)))
+                .ForMember(dest => dest.HasTheme, opt => opt.MapFrom(x => !string.IsNullOrEmpty(x.Theme)))
+                .ForMember(dest => dest.MetaDataKey, opt => opt.MapFrom(x => RetrieveMetaDataKey(x)))
+                .ForMember(dest => dest.OriginallyAvailableAt, opt => opt.ConvertUsing(new StringToDateTimeUTC()));
+
             // Medium -> PlexMediaData
             CreateMap<Medium, PlexMediaData>(MemberList.Destination)
-                .ForMember(dest => dest.MediaFormat, opt => opt.MapFrom(src => src.Container))
-                .ForMember(dest => dest.Parts, opt => opt.MapFrom(src => src.Part.ToList()));
+                .ForMember(dest => dest.MediaFormat, opt => opt.MapFrom(src => src.Container));
 
             // Part -> PlexMediaDataPart
             CreateMap<Part, PlexMediaDataPart>(MemberList.Destination)
@@ -67,59 +79,81 @@ namespace PlexRipper.PlexApi.Config.Mappings
         private void PlexMovieMappings()
         {
             // Metadata -> PlexMovie
-            CreateMap<Metadata, PlexMovie>(MemberList.Destination)
-                .ForMember(dest => dest.Key, opt => opt.MapFrom(x => x.RatingKey))
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexMovieGenres, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexMovieRoles, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexLibrary, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexLibraryId, opt => opt.Ignore())
-                .ForMember(dest => dest.PlexMovieDatas, opt => opt.MapFrom(x => x.Media))
-                .ForMember(dest => dest.GetParts, opt => opt.Ignore())
-                .ForMember(dest => dest.MediaSize, opt => opt.MapFrom(x => x.Media.Sum(y => y.Part.Sum(z => z.Size))))
-                .ForMember(dest => dest.OriginallyAvailableAt, opt => opt.ConvertUsing(new StringToDateTimeUTC()));
+            CreateMap<Metadata, PlexMovie>(MemberList.None)
+                .IncludeBase<Metadata, PlexMedia>()
+                .ForMember(dest => dest.PlexMovieDatas, opt => opt.MapFrom(x => x.Media));
 
-            // Medium -> PlexMovieData
-            CreateMap<Medium, PlexMovieData>(MemberList.Destination)
-                .ConvertUsing<MediumToPlexMovieData>();
+            // PlexMediaData -> PlexMovieData
+            CreateMap<Medium, PlexMovieData>(MemberList.None)
+                .IncludeBase<Medium, PlexMediaData>()
+                .ForMember(dest => dest.Parts, opt => opt.MapFrom(src => src.Part.ToList()));
 
-            // Part -> PlexMovieDataPart
-            CreateMap<Part, PlexMovieDataPart>(MemberList.Destination)
-                .ConvertUsing<PartToPlexMovieDataPart>();
+            // PlexMediaDataPart -> PlexMovieDataPart
+            CreateMap<Part, PlexMovieDataPart>(MemberList.None)
+                .IncludeBase<Part, PlexMediaDataPart>();
         }
 
         private void PlexTvShowMappings()
         {
             // Metadata -> PlexTvShow
             CreateMap<Metadata, PlexTvShow>(MemberList.None)
-                .ForMember(dest => dest.Key, opt => opt.MapFrom(x => x.RatingKey))
-                .ForMember(dest => dest.OriginallyAvailableAt, opt => opt.ConvertUsing(new StringToDateTimeUTC()));
+                .IncludeBase<Metadata, PlexMedia>();
 
             // Metadata -> PlexTvShowSeason
             CreateMap<Metadata, PlexTvShowSeason>(MemberList.None)
-                .ForMember(dest => dest.Key, opt => opt.MapFrom(x => x.RatingKey))
+                .IncludeBase<Metadata, PlexMedia>()
                 .ForMember(dest => dest.ParentKey, opt => opt.MapFrom(x => x.ParentRatingKey));
 
             // Metadata -> PlexTvShowEpisode
             CreateMap<Metadata, PlexTvShowEpisode>(MemberList.None)
-                .ForMember(dest => dest.Key, opt => opt.MapFrom(x => x.RatingKey))
+                .IncludeBase<Metadata, PlexMedia>()
                 .ForMember(dest => dest.ParentKey, opt => opt.MapFrom(x => x.ParentRatingKey))
-                .ForMember(dest => dest.MediaSize, opt => opt.MapFrom(x => x.Media.Sum(y => y.Part.Sum(z => z.Size))))
                 .ForMember(dest => dest.EpisodeData, opt => opt.MapFrom(x => x.Media));
 
-            // PlexMediaData -> PlexTvShowEpisodeData
-            CreateMap<PlexMediaData, PlexTvShowEpisodeData>(MemberList.Source);
-
-            // PlexMediaDataPart -> PlexTvShowEpisodeDataPart
-            CreateMap<PlexMediaDataPart, PlexTvShowEpisodeDataPart>(MemberList.Source);
-
             // Medium -> PlexTvShowEpisodeData
-            CreateMap<Medium, PlexTvShowEpisodeData>(MemberList.Destination)
-                .ConvertUsing<MediumToPlexTvShowEpisodeData>();
+            CreateMap<Medium, PlexTvShowEpisodeData>(MemberList.None)
+                .IncludeBase<Medium, PlexMediaData>()
+                .ForMember(dest => dest.Parts, opt => opt.MapFrom(src => src.Part.ToList()));
 
             // Part -> PartToPlexTvShowEpisodeDataPart
-            CreateMap<Part, PlexTvShowEpisodeDataPart>(MemberList.Destination)
-                .ConvertUsing<PartToPlexTvShowEpisodeDataPart>();
+            CreateMap<Part, PlexTvShowEpisodeDataPart>(MemberList.None)
+                .IncludeBase<Part, PlexMediaDataPart>();
+        }
+
+        /// <summary>
+        /// Retrieves the MetaDataKey from either the ThumbUrl,BannerUrl, ArtUrl or ThemeUrl.
+        /// It is assumed that all MetaDataKeys are the same, returns 0 if nothing is found.
+        /// </summary>
+        /// <param name="metadata"></param>
+        /// <returns></returns>
+        private int RetrieveMetaDataKey(Metadata metadata)
+        {
+            List<string> list = new()
+            {
+                metadata.Thumb,
+                metadata.Banner,
+                metadata.Art,
+                metadata.Theme,
+            };
+
+            foreach (var entry in list)
+            {
+                if (!string.IsNullOrEmpty(entry))
+                {
+                    // We want the last number
+                    // Example: /library/metadata/457047/thumb/1587006741
+                    var splitStrings = entry.Split('/').ToList();
+                    if (splitStrings.Count > 2)
+                    {
+                        if (int.TryParse(splitStrings.Last(), out int result))
+                        {
+                            return result;
+                        }
+                    }
+                }
+            }
+
+            return 0;
         }
     }
 }

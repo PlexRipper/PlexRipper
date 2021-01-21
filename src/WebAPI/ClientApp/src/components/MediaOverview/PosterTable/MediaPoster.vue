@@ -1,27 +1,43 @@
 <template>
-	<v-col cols="auto">
-		<v-lazy
-			v-model="isVisible"
-			:options="{
-				threshold: 0.1,
-			}"
-			:width="thumbWidth"
-			:height="getLazyLoadingHeight"
-			transition="fade-transition"
-		>
+	<v-lazy
+		v-model="isVisible"
+		:options="{
+			threshold: 0.1,
+		}"
+		:width="thumbWidth"
+		:height="getLazyLoadingHeight"
+		:data-title="mediaItem.title"
+		transition="fade-transition"
+		class="mx-3"
+	>
+		<v-col cols="auto">
 			<v-hover v-slot="{ hover }">
 				<v-card :max-width="thumbWidth" :width="thumbWidth" :elevation="hover ? 12 : 2">
 					<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight" :alt="mediaItem.title">
 						<!--	Placeholder	-->
 						<template #placeholder>
-							<v-row class="fill-height ma-0" align="center" justify="center">
-								<v-col cols="12">
-									<h4 class="text-center">{{ mediaItem.title }}</h4>
-								</v-col>
-								<v-col cols="auto">
-									<v-progress-circular indeterminate color="grey lighten-5" />
-								</v-col>
-							</v-row>
+							<!--	Show fallback image	-->
+							<template v-if="defaultImage">
+								<v-row align="center" justify="center" class="fill-height">
+									<v-col cols="auto">
+										<v-icon class="mx-3" style="font-size: 100px">{{ mediaType | mediaTypeIcon }}</v-icon>
+									</v-col>
+									<v-col cols="12">
+										<h4 class="text-center">{{ mediaItem.title }}</h4>
+									</v-col>
+								</v-row>
+							</template>
+							<!--	Show  image	-->
+							<template v-else>
+								<v-row class="fill-height ma-0" align="center" justify="center">
+									<v-col cols="12">
+										<h4 class="text-center">{{ mediaItem.title }}</h4>
+									</v-col>
+									<v-col cols="auto">
+										<v-progress-circular indeterminate color="grey lighten-5" />
+									</v-col>
+								</v-row>
+							</template>
 						</template>
 						<!--	Overlay	-->
 						<v-container fluid :class="['poster-overlay', hover ? 'on-hover' : '', 'white--text']">
@@ -55,16 +71,15 @@
 					</v-row>
 				</v-card>
 			</v-hover>
-		</v-lazy>
-	</v-col>
+		</v-col>
+	</v-lazy>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { getThumbnail } from '@api/plexLibraryApi';
 import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
 import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-
+import mediaService from '@state/mediaService';
 @Component
 export default class MediaPoster extends Vue {
 	@Prop({ required: true, type: Object as () => ITreeViewItem })
@@ -78,13 +93,9 @@ export default class MediaPoster extends Vue {
 
 	isVisible: boolean = false;
 	imageUrl: string = '';
-
+	defaultImage: boolean = false;
 	get getLazyLoadingHeight(): number {
-		return this.thumbHeight + 80;
-	}
-
-	get hover(): boolean {
-		return true;
+		return this.thumbHeight + 40;
 	}
 
 	getQualityColor(quality: string): string {
@@ -125,14 +136,28 @@ export default class MediaPoster extends Vue {
 
 	@Watch('isVisible')
 	getThumbnail(): void {
+		if (!this.mediaItem.hasThumb) {
+			this.defaultImage = true;
+			return;
+		}
+
 		if (this.isVisible && !this.imageUrl) {
-			getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((response) => {
-				this.imageUrl = URL.createObjectURL(response.data);
+			mediaService.getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((imageUrl) => {
+				if (!imageUrl) {
+					this.defaultImage = true;
+					return;
+				}
+				this.imageUrl = imageUrl;
 			});
 		}
 	}
 
 	downloadMedia(): void {
+		if (this.mediaType === PlexMediaType.TvShow) {
+			this.openDetails();
+			return;
+		}
+
 		const downloadCommand: DownloadMediaDTO = {
 			type: this.mediaType,
 			mediaIds: [this.mediaItem.id],
@@ -141,6 +166,10 @@ export default class MediaPoster extends Vue {
 		};
 
 		this.$emit('download', downloadCommand);
+	}
+
+	openDetails(): void {
+		this.$emit('open-details', this.mediaItem.id);
 	}
 }
 </script>

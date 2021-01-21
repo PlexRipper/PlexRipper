@@ -26,12 +26,12 @@ namespace PlexRipper.Data.CQRS.PlexMovies
         {
             var query = PlexMoviesQueryable;
 
-            if (request.IncludePlexLibrary && !request.IncludePlexServer)
+            if (request.IncludeLibrary)
             {
                 query = query.IncludePlexLibrary();
             }
 
-            if (request.IncludePlexLibrary && request.IncludePlexServer)
+            if ( request.IncludeServer)
             {
                 query = query.IncludeServer();
             }

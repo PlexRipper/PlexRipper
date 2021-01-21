@@ -25,14 +25,14 @@
 			<v-row no-gutters :class="['media-table-content', detailMode ? 'detail-mode' : '']">
 				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
 					<v-col id="media-table-body" class="col px-0">
-						<template v-for="(tempItem, i) in items">
+						<template v-for="(parentItem, i) in items">
 							<v-lazy
 								:key="i"
 								:options="{
 									threshold: 0.25,
 								}"
 								:min-height="50"
-								:data-title="tempItem.title"
+								:data-title="parentItem.title"
 								transition="scroll-x-reverse-transition"
 							>
 								<v-treeview
@@ -41,7 +41,7 @@
 									selection-type="leaf"
 									hoverable
 									expand-icon="mdi-chevron-down"
-									:items="items.slice(i, i + 1)"
+									:items="[parentItem]"
 									:load-children="getMedia"
 									:open-all="detailMode"
 									transition

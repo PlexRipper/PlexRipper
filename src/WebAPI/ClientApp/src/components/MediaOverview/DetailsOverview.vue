@@ -52,13 +52,15 @@
 				<v-col>
 					<v-card>
 						<v-card-title>
-							<h1>{{ mediaItem.title }} - {{ mediaItem.id }}</h1>
+							<h1>{{ mediaItem.title }}</h1>
 						</v-card-title>
 						<v-card-text>
-							<v-row>
-								<v-col>
-									<span>Duration: {{ mediaItem.duration }}</span>
-									{{ selected }}
+							<v-row no-gutters>
+								<v-col cols="12">
+									<span>Duration: <duration :value="mediaItem.duration" /> </span>
+								</v-col>
+								<v-col cols="12">
+									<span>Database ID: {{ mediaItem.id }}</span>
 								</v-col>
 							</v-row>
 						</v-card-text>

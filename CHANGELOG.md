@@ -1,3 +1,35 @@
+## [0.6.0] - 2021-01-21
+### Added
+-   Added an Alphabet navigation to the tableView and posterView in the library navigation.
+
+### Changed
+-   The download size is now shown in the downloadConfirmation dialog.
+-   The downloadButton will show to be loading in the tableview when a tvShow has not been retrieved yet.
+-   Polished the user interface of the downloadConfirmation window.
+-   PlexMedia derived entities now have a reference to the owning plexServer, this saves the trouble of retrieving the PlexLibrary first to get the server.
+
+### Fixed
+-   Fixed the downloadButton being too small in tableMode when navigating a library.
+-   Fixed the movie fileSize not being shown correctly in tableViewMode.
+-   Fixed the selecting of tableRows in the tableview when viewing a library, this was giving incorrect results back.
+-   Fixed the movie media rows in the tableView wrongly retrieving season/episode data.
+-   Fixed the missing posters showing as if they were still loading, now the will show a default empty image.
+-   Fixed the unneeded health-ping to the back-end, this is now disabled.
+-   Fixed back-button and close-button of the media details overview.
+
+### Optimized
+-   Removed unneeded data from PlexMedia entity that was stored in the database but never used.
+-   Optimized the image paths of PlexMedia entity, now they are generated instead of stored. Reduces database storage of image paths by 99%.
+-   Optimized the mapping of PlexMedia data coming from the external PlexServers.
+-   Optimized the retrieval of thumbnail and banner functionality.
+-   Refactored the generating of the downloadPreview shown in the downloadConfirmation dialog.
+-   Changed the requesting of thumbnails to a GET request.
+-   Removed unneeded values from the PlexMedia DTO's send to the front-end.
+-   Improved the mediaDetailScreen.
+-   ThumbnailUrl results are now shared and stored in the Store.
+-   The mediaTable now returns downloadCommands based on the type, and combines an entire season worth of episodes, into just the seasonId to be send.
+
+
 ## [0.5.0] - 2021-01-18
 ### Added
 -   Added a MediaController to request individual mediaData.
@@ -52,7 +84,7 @@
 
 ### Fixed
 
--   Fixed the LibrarySize not being shown in the front-end …
+-   Fixed the LibrarySize not being shown in the front-end
 -   Fixed the DownloadTask creating invalid path if the media title contained invalid characters.
 
 ## [0.4.0] - 2020-12-28
@@ -139,4 +171,4 @@
 
 ## [0.1.0] - 2020-12-18
 
--   Initial release of PlexRipper
+-   Initial pre-release of PlexRipper

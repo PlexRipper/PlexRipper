@@ -53,13 +53,18 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                 command.PlexLibrary.TvShows.ForEach(plexTvShow =>
                 {
                     plexTvShow.PlexLibraryId = plexLibrary.Id;
-                    plexTvShow.Seasons?.ForEach(x =>
+                    plexTvShow.PlexServerId = plexLibrary.PlexServerId;
+
+                    plexTvShow.Seasons?.ForEach(season =>
                     {
-                        x.PlexLibraryId = plexLibrary.Id;
-                        if (x.Episodes != null && !x.Episodes.Any())
+                        season.PlexLibraryId = plexLibrary.Id;
+                        season.PlexServerId = plexLibrary.PlexServerId;
+
+                        season.Episodes?.ForEach(episode =>
                         {
-                            x.Episodes.ForEach(y => y.PlexLibraryId = plexLibrary.Id);
-                        }
+                            episode.PlexLibraryId = plexLibrary.Id;
+                            episode.PlexServerId = plexLibrary.PlexServerId;
+                        });
                     });
 
                     // Add to dictionary to later compare against DB data

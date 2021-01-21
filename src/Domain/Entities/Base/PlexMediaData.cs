@@ -52,13 +52,6 @@ namespace PlexRipper.Domain
 
         public bool Selected { get; set; }
 
-        #region Relationships
-
-        [NotMapped]
-        public List<PlexMediaDataPart> Parts { get; set; }
-
-        #endregion
-
         #endregion
     }
 }

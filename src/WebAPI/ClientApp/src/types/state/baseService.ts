@@ -1,6 +1,6 @@
+import Log from 'consola';
 import { ObservableStore } from '@codewithdan/observable-store';
 import StoreState from '@state/storeState';
-import Log from 'consola';
 
 export class BaseService extends ObservableStore<StoreState> {
 	public constructor(stateSliceSelector: (state: any) => any = () => {}) {
@@ -11,6 +11,7 @@ export class BaseService extends ObservableStore<StoreState> {
 				servers: [],
 				downloads: [],
 				libraries: [],
+				mediaUrls: [],
 			} as StoreState);
 		}
 	}

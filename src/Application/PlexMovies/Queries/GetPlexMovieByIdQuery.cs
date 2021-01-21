@@ -6,17 +6,17 @@ namespace PlexRipper.Application.PlexMovies
 {
     public class GetPlexMovieByIdQuery : IRequest<Result<PlexMovie>>
     {
-        public GetPlexMovieByIdQuery(int id, bool includePlexLibrary = false, bool includePlexServer = false)
+        public GetPlexMovieByIdQuery(int id, bool includeLibrary = false, bool includeServer = false)
         {
             Id = id;
-            IncludePlexLibrary = includePlexLibrary;
-            IncludePlexServer = includePlexServer;
+            IncludeLibrary = includeLibrary;
+            IncludeServer = includeServer;
         }
 
         public int Id { get; }
 
-        public bool IncludePlexLibrary { get; }
+        public bool IncludeLibrary { get; }
 
-        public bool IncludePlexServer { get; }
+        public bool IncludeServer { get; }
     }
 }

@@ -15,52 +15,97 @@ namespace PlexRipper.Domain
         /// Unique key identifying this item by the Plex Api. This is used by the PlexServers to differentiate between media items.
         /// e.g: 28550, 1723, 21898.
         /// </summary>
+        [Column(Order = 1)]
         public int Key { get; set; }
 
-        public string Guid { get; set; }
-
-        public string Studio { get; set; }
-
+        [Column(Order = 2)]
         public string Title { get; set; }
 
-        public string ContentRating { get; set; }
-
-        public string Summary { get; set; }
-
-        public int Index { get; set; }
-
-        public double Rating { get; set; }
-
+        [Column(Order = 3)]
         public int Year { get; set; }
 
-        public string Thumb { get; set; }
-
-        public string Art { get; set; }
-
-        public string Banner { get; set; }
-
+        /// <summary>
+        /// Gets or sets the duration in seconds of the (nested) media.
+        /// </summary>
+        [Column(Order = 4)]
         public int Duration { get; set; }
 
-        public DateTime OriginallyAvailableAt { get; set; }
+        /// <summary>
+        /// Gets or sets the total filesize of the nested media.
+        /// </summary>
+        [Column(Order = 5)]
+        public long MediaSize { get; set; }
 
-        public int LeafCount { get; set; }
+        /// <summary>
+        /// Gets or sets the key used to retrieve thumbnails, art or banners.
+        /// E.g. /library/metadata/[Key]/art/[MetadataKey] =>  /library/metadata/529367/art/1593898227.
+        /// </summary>
+        [Column(Order = 6)]
+        public int MetaDataKey { get; set; }
 
-        public int ViewedLeafCount { get; set; }
+        /// <summary>
+        /// Gets or sets whether this <see cref="PlexMedia"/> has a thumbnail.
+        /// </summary>
+        [Column(Order = 7)]
+        public bool HasThumb { get; set; }
 
+        /// <summary>
+        /// Gets or sets whether this <see cref="PlexMedia"/> has art.
+        /// </summary>
+        [Column(Order = 8)]
+        public bool HasArt { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether this <see cref="PlexMedia"/> has a banner.
+        /// </summary>
+        [Column(Order = 9)]
+        public bool HasBanner { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether this <see cref="PlexMedia"/> has a theme.
+        /// </summary>
+        [Column(Order = 10)]
+        public bool HasTheme { get; set; }
+
+        [Column(Order = 11)]
+        public int Index { get; set; }
+
+        [Column(Order = 12)]
+        public string Studio { get; set; }
+
+        [Column(Order = 13)]
+        public string Summary { get; set; }
+
+        [Column(Order = 14)]
+        public string ContentRating { get; set; }
+
+        [Column(Order = 15)]
+        public double Rating { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of direct children
+        /// E.G. if the type is tvShow, then this number would be the season count, if season then this would be the episode count.
+        /// </summary>
+        [Column(Order = 16)]
         public int ChildCount { get; set; }
 
         /// <summary>
-        /// The total filesize of the nested media.
+        /// Gets or sets when this media was added to the Plex library.
         /// </summary>
-        public long MediaSize { get; set; }
-
+        [Column(Order = 17)]
         public DateTime AddedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets when this media was last updated in the Plex library.
+        /// </summary>
+        [Column(Order = 18)]
         public DateTime UpdatedAt { get; set; }
 
-        public int? ViewCount { get; set; }
-
-        public string Theme { get; set; }
+        /// <summary>
+        /// Gets or sets when this media was released/aired to the public.
+        /// </summary>
+        [Column(Order = 19)]
+        public DateTime? OriginallyAvailableAt { get; set; }
 
         #endregion
 
@@ -70,23 +115,31 @@ namespace PlexRipper.Domain
 
         public int PlexLibraryId { get; set; }
 
+        public PlexServer PlexServer { get; set; }
+
+        public int PlexServerId { get; set; }
+
         #endregion
 
         #region Helpers
 
         [NotMapped]
-        public string MetaDataUrl => $"{PlexLibrary.PlexServer.ServerUrl}{Key}";
-
-        /// <summary>
-        ///     Gets the absolute url of the thumb image, which requires a <see cref="PlexLibrary" /> and <see cref="PlexServer" />
-        ///     navigation property.
-        ///     Result is empty if invalid.
-        /// </summary>
-        [NotMapped]
-        public string ThumbUrl => PlexLibrary?.PlexServer?.ServerUrl + Thumb ?? string.Empty;
-
-        [NotMapped]
         public virtual PlexMediaType Type => PlexMediaType.None;
+
+        [NotMapped]
+        public string MetaDataUrl => $"/library/metadata/{Key}";
+
+        [NotMapped]
+        public string ThumbUrl => HasThumb ? $"{MetaDataUrl}/thumb/{MetaDataKey}" : string.Empty;
+
+        [NotMapped]
+        public string BannerUrl => HasBanner ? $"{MetaDataUrl}/banner/{MetaDataKey}" : string.Empty;
+
+        [NotMapped]
+        public string ArtUrl => HasArt ? $"{MetaDataUrl}/art/{MetaDataKey}" : string.Empty;
+
+        [NotMapped]
+        public string ThemeUrl => HasTheme ? $"{MetaDataUrl}/theme/{MetaDataKey}" : string.Empty;
 
         /// <summary>
         /// The base <see cref="DownloadTask"/> used as a template to create DownloadTasks in child classes.

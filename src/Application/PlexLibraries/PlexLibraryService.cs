@@ -5,7 +5,6 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexMovies;
-using PlexRipper.Application.PlexServers;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
@@ -96,12 +95,15 @@ namespace PlexRipper.Application.PlexLibraries
             foreach (var plexTvShow in plexLibrary.TvShows)
             {
                 plexTvShow.Seasons = rawSeasonDataResult.Value.FindAll(x => x.ParentKey == plexTvShow.Key);
+                plexTvShow.ChildCount = plexTvShow.Seasons.Count;
+
                 foreach (var plexTvShowSeason in plexTvShow.Seasons)
                 {
                     plexTvShowSeason.PlexLibraryId = plexLibrary.Id;
                     plexTvShowSeason.PlexLibrary = plexLibrary;
                     plexTvShowSeason.TvShow = plexTvShow;
                     plexTvShowSeason.Episodes = rawEpisodesDataResult.Value.FindAll(x => x.ParentKey == plexTvShowSeason.Key);
+                    plexTvShowSeason.ChildCount = plexTvShowSeason.Episodes.Count;
 
                     // Set libraryId in each episode
                     plexTvShowSeason.Episodes.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
@@ -323,35 +325,6 @@ namespace PlexRipper.Application.PlexLibraries
         }
 
         #endregion
-
-        public async Task<Result<byte[]>> GetThumbnailImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0)
-        {
-            var thumbUrl = await _mediator.Send(new GetThumbUrlByPlexMediaIdQuery(mediaId, mediaType));
-            if (thumbUrl.IsFailed)
-            {
-                return thumbUrl.ToResult();
-            }
-
-            var plexServer = await _mediator.Send(new GetPlexServerByPlexMediaIdQuery(mediaId, mediaType));
-            if (plexServer.IsFailed)
-            {
-                return plexServer.ToResult();
-            }
-
-            var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Value.Id);
-            if (token.IsFailed)
-            {
-                return token.ToResult();
-            }
-
-            byte[] image = await _plexServiceApi.GetThumbnailAsync(thumbUrl.Value, token.Value, width, height);
-            if (image == null || image.Length == 0)
-            {
-                return Result.Fail("Failed to retrieve image.");
-            }
-
-            return Result.Ok(image);
-        }
 
         #endregion
 

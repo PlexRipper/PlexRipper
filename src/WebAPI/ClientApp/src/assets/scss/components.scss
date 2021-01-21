@@ -143,6 +143,13 @@ MediaTable.vue
 		position: -webkit-sticky;
 		top: 0; /* required */
 		@extend .flex-nowrap;
+
+		.select-all-check {
+			.v-input--selection-controls {
+				padding: 0 0 0 2px !important;
+				margin: 0 !important;
+			}
+		}
 	}
 	.title-column {
 		min-width: 100px;
@@ -155,12 +162,22 @@ MediaTable.vue
 	.media-table-content {
 		// This takes the 100% browser window height, and then subtracts all bars that are above
 		// media-table-content to calculate the height of the actual viewport of the media that is viewed.
-		height: calc(100vh - 40px - 85px - 48px - 24px);
+		height: calc(100vh - 48px - 85px - 48px - 24px);
+		&.detail-mode {
+			// In order -> viewport -> topBar -> MediaOverviewBar -> DetailsOverviewHeader -> .media-table-header -> extra
+			height: calc(100vh - 48px - 85px - 250px - 40px - 8px);
+		}
+		.media-table-row {
+			.v-treeview-node {
+				border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
+			}
+		}
+
 		.media-table-content-row {
 			@extend .ml-2;
 			@extend .flex-nowrap;
 			.v-sheet {
-				max-height: 24px;
+				// max-height: 24px;
 			}
 		}
 	}
@@ -205,4 +222,15 @@ VerticalButton.vue
 			height: 24px;
 		}
 	}
+}
+
+/*
+AlphabetNavigation.vue
+*/
+.navigation-btn {
+	height: 32px;
+	background: transparent !important;
+	flex: 1 1 20px;
+	text-align: center;
+	font-weight: bold;
 }

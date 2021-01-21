@@ -43,9 +43,23 @@ const config: NuxtConfig = {
 		{ src: '@plugins/i18nPlugin.ts', mode: 'client' },
 		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
 		{ src: '@plugins/registerComponents.ts', mode: 'client' },
+		{ src: '@plugins/typeExtensions.ts', mode: 'client' },
 	],
 	router: {
 		middleware: ['pageRedirect'],
+		extendRoutes(routes, resolve) {
+			routes.push({
+				name: 'details-overview',
+				path: '/tvshows/:id',
+				component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
+				children: [
+					{
+						path: 'details/:mediaid',
+						component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
+					},
+				],
+			});
+		},
 	},
 	/*
 	 ** Nuxt.js dev-modules

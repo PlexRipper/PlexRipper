@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Folder Include="CQRS\PlexAuthentication\Commands" />
+    <Folder Include="CQRS\PlexMedia\Queries" />
     <Folder Include="Migrations" />
   </ItemGroup>
 

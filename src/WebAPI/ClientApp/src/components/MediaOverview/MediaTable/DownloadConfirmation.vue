@@ -4,19 +4,24 @@
 		<v-dialog v-model="showDialog" :max-width="500" scrollable>
 			<v-card v-if="isConfirmationEnabled && progress === null">
 				<v-card-title> Are you sure? </v-card-title>
-				<v-card-subtitle>
-					<p>Plex Ripper will start downloading the following:</p>
+				<v-card-subtitle class="py-2">
+					<span>Plex Ripper will start downloading the following:</span> <br />
+					<span>Total size: <file-size :size="totalSize" /></span>
 				</v-card-subtitle>
+				<v-divider />
 				<!-- Show Download Task Preview -->
-				<v-card-text>
-					<perfect-scrollbar>
-						<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open="getLeafs" open-all>
-							<template #prepend="{ item }">
-								<v-icon>
-									{{ item.type | mediaTypeIcon }}
-								</v-icon>
-							</template>
-						</v-treeview>
+				<v-card-text class="pa-0" style="min-height: 60vh; max-height: 60vh">
+					<perfect-scrollbar ref="previewscrollbar" :options="{ suppressScrollX: true }">
+						<v-col cols="12" class="px-2 py-0">
+							<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open="getLeafs" open-all>
+								<template #prepend="{ item }">
+									<v-icon>
+										{{ item.type | mediaTypeIcon }}
+									</v-icon>
+								</template>
+								<template #append="{ item }"> (<file-size :size="item.mediaSize" />) </template>
+							</v-treeview>
+						</v-col>
 					</perfect-scrollbar>
 				</v-card-text>
 				<v-divider></v-divider>
@@ -46,7 +51,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import { settingsStore as SettingsStore } from '@/store';
+import { settingsStore } from '@/store';
 import ButtonType from '@enums/buttonType';
 
 @Component({
@@ -63,21 +68,24 @@ export default class DownloadConfirmation extends Vue {
 
 	showDialog: boolean = false;
 	downloadPreview: ITreeViewItem[] = [];
-	downloadMediaCommand: DownloadMediaDTO | null = null;
+	downloadMediaCommand: DownloadMediaDTO[] = [];
 
 	get isConfirmationEnabled(): boolean {
-		switch (this.downloadMediaCommand?.type) {
-			case PlexMediaType.Movie:
-				return SettingsStore.askDownloadMovieConfirmation;
-			case PlexMediaType.TvShow:
-				return SettingsStore.askDownloadTvShowConfirmation;
-			case PlexMediaType.Season:
-				return SettingsStore.askDownloadSeasonConfirmation;
-			case PlexMediaType.Episode:
-				return SettingsStore.askDownloadEpisodeConfirmation;
-			default:
-				return true;
+		if (this.downloadMediaCommand.length === 1) {
+			switch (this.downloadMediaCommand[0].type) {
+				case PlexMediaType.Movie:
+					return settingsStore.askDownloadMovieConfirmation;
+				case PlexMediaType.TvShow:
+					return settingsStore.askDownloadTvShowConfirmation;
+				case PlexMediaType.Season:
+					return settingsStore.askDownloadSeasonConfirmation;
+				case PlexMediaType.Episode:
+					return settingsStore.askDownloadEpisodeConfirmation;
+				default:
+					return true;
+			}
 		}
+		return true;
 	}
 
 	get cancelButtonType(): ButtonType {
@@ -88,42 +96,68 @@ export default class DownloadConfirmation extends Vue {
 		return ButtonType.Confirm;
 	}
 
-	private createPreview(downloadMediaCommand: DownloadMediaDTO): void {
+	get totalSize(): number {
+		let size = 0;
+		if (this.downloadPreview.length > 0) {
+			this.downloadPreview.forEach((x) => (size += x.mediaSize ?? 0));
+		}
+		return size;
+	}
+
+	private createPreview(downloadMediaCommands: DownloadMediaDTO[]): void {
 		let filterResult: ITreeViewItem[] = [];
-		const mediaIds = downloadMediaCommand.mediaIds;
 
 		// If statements instead of switch to avoid having to overcomplicate the variable names.
+		downloadMediaCommands.forEach((downloadMediaCommand) => {
+			const mediaIds = downloadMediaCommand.mediaIds;
 
-		// Movie: Show only the movie
-		if (downloadMediaCommand.type === PlexMediaType.Movie) {
-			filterResult = this.items.filter((x) => mediaIds.some((y) => y === x.id)) ?? [];
-		}
+			// Movie: Show only the movie
+			if (downloadMediaCommand.type === PlexMediaType.Movie) {
+				filterResult = filterResult.concat(this.items.filter((movie) => mediaIds.includes(movie.id)));
+			}
 
-		// Episode: Show tvShow -> season -> episode without anything else
-		// First filter and then map to exclude unneeded tvshows/seasons/episodes
-		if (
-			downloadMediaCommand.type === PlexMediaType.TvShow ||
-			downloadMediaCommand.type === PlexMediaType.Season ||
-			downloadMediaCommand.type === PlexMediaType.Episode
-		) {
-			filterResult = this.items
-				.filter((tvShow) => tvShow.children?.some((season) => season.children?.some((z) => mediaIds.some((y) => y === z.id))))
-				.map((tvShow) => {
-					return {
-						...tvShow,
-						children:
-							tvShow?.children ??
-							[]
-								.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.some((y) => y === episode.id)))
-								.map((season: ITreeViewItem) => {
-									return {
-										...season,
-										children: season?.children?.filter((episode) => mediaIds.some((y) => y === episode.id)),
-									};
-								}),
-					};
-				});
-		}
+			// TvShow: Show tvShow -> with all season -> with all episodes
+			if (downloadMediaCommand.type === PlexMediaType.TvShow) {
+				filterResult = filterResult.concat(this.items.filter((tvShow) => mediaIds.some((x) => x === tvShow.id)));
+			}
+
+			// Season: Show tvShow -> season -> with all episodes
+			if (downloadMediaCommand.type === PlexMediaType.Season) {
+				filterResult = filterResult.concat(
+					this.items
+						.filter((tvShow) => tvShow.children?.some((season) => mediaIds.includes(season.id)))
+						.map((tvShow) => {
+							return {
+								...tvShow,
+								children: tvShow.children?.filter((season) => mediaIds.includes(season.id)),
+							};
+						}),
+				);
+			}
+
+			// Episode: Show tvShow -> season -> episode without anything else
+			if (downloadMediaCommand.type === PlexMediaType.Episode) {
+				filterResult = filterResult.concat(
+					this.items
+						.filter((tvShow) =>
+							tvShow.children?.some((season) => season.children?.some((episode) => mediaIds.includes(episode.id))),
+						)
+						.map((tvShow) => {
+							return {
+								...tvShow,
+								children: tvShow.children
+									?.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.includes(episode.id)))
+									.map((season: ITreeViewItem) => {
+										return {
+											...season,
+											children: season?.children?.filter((episode) => mediaIds.includes(episode.id)),
+										};
+									}),
+							};
+						}),
+				);
+			}
+		});
 
 		this.downloadPreview = filterResult;
 	}
@@ -144,7 +178,7 @@ export default class DownloadConfirmation extends Vue {
 		return keys;
 	}
 
-	openDialog(downloadMediaCommand: DownloadMediaDTO): void {
+	openDialog(downloadMediaCommand: DownloadMediaDTO[]): void {
 		this.downloadMediaCommand = downloadMediaCommand;
 		if (this.isConfirmationEnabled) {
 			this.createPreview(downloadMediaCommand);
@@ -156,6 +190,7 @@ export default class DownloadConfirmation extends Vue {
 
 	closeDialog(): void {
 		this.showDialog = false;
+		this.downloadPreview = [];
 	}
 
 	confirmDownload(): void {

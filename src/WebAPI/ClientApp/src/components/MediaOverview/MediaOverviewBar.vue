@@ -138,7 +138,7 @@ export default class MediaOverviewBar extends Vue {
 				case PlexMediaType.TvShow:
 					return `${this.library.count} TvShows - ${this.library.seasonCount} Seasons - ${this.library.episodeCount} Episodes`;
 				default:
-					return `Library type ${this.library.type} is not supported in the media count`;
+					return `Library type ${this.library?.type} is not supported in the media count`;
 			}
 		}
 		return 'unknown media count';
@@ -154,7 +154,7 @@ export default class MediaOverviewBar extends Vue {
 						this.mediaItem.children?.map((x) => x.childCount),
 					)} Episodes`;
 				default:
-					return `Library type ${this.library.type} is not supported in the media count`;
+					return `Library type ${this.library?.type} is not supported in the media count`;
 			}
 		}
 		return 'unknown media count';

@@ -29,13 +29,15 @@
 						:has-selected="getSelectedMediaIds.length > 0"
 						@view-change="changeView"
 						@refresh-library="refreshLibrary"
-						@download="processDownloadCommand(null)"
+						@download="processDownloadCommand([])"
 					></media-overview-bar>
 				</v-row>
 				<!--	Data table display	-->
 				<template v-if="isTableView">
 					<media-table
+						ref="overview-media-table"
 						:items="items"
+						:library-id="libraryId"
 						:media-type="mediaType"
 						@download="processDownloadCommand"
 						@selected="selected = $event"
@@ -57,6 +59,7 @@
 				:library="library"
 				:server="server"
 				@close="closeDetailsOverview"
+				@download="processDownloadCommand"
 			/>
 		</template>
 		<template v-else>
@@ -116,6 +119,9 @@ export default class MediaOverview extends Vue {
 
 	@Ref('detailsOverview')
 	readonly detailsOverview!: DetailsOverview;
+
+	@Ref('overview-media-table')
+	readonly overviewMediaTableRef!: MediaTable;
 
 	selected: string[] = [];
 	isLoading: boolean = true;
@@ -195,10 +201,6 @@ export default class MediaOverview extends Vue {
 		return this.viewMode === ViewMode.Table;
 	}
 
-	openDownloadDialog(downloadMediaCommand: DownloadMediaDTO): void {
-		this.downloadConfirmationRef.openDialog(downloadMediaCommand);
-	}
-
 	get getSelectedMediaIds(): number[] {
 		const ids: number[] = [];
 		switch (this.mediaType) {
@@ -241,14 +243,11 @@ export default class MediaOverview extends Vue {
 		};
 	}
 
-	processDownloadCommand(downloadMediaCommand: DownloadMediaDTO | null): void {
-		if (downloadMediaCommand) {
-			downloadMediaCommand.libraryId = this.libraryId;
-			downloadMediaCommand.plexAccountId = this.activeAccountId;
-
-			this.openDownloadDialog(downloadMediaCommand);
+	processDownloadCommand(downloadMediaCommand: DownloadMediaDTO[]): void {
+		if (downloadMediaCommand.length > 0) {
+			this.downloadConfirmationRef.openDialog(downloadMediaCommand);
 		} else {
-			this.openDownloadDialog(this.downloadMediaCommand);
+			this.downloadConfirmationRef.openDialog(this.overviewMediaTableRef.createDownloadCommands());
 		}
 	}
 

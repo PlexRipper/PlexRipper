@@ -43,6 +43,7 @@ const config: NuxtConfig = {
 		{ src: '@plugins/i18nPlugin.ts', mode: 'client' },
 		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
 		{ src: '@plugins/registerComponents.ts', mode: 'client' },
+		{ src: '@plugins/typeExtensions.ts', mode: 'client' },
 	],
 	router: {
 		middleware: ['pageRedirect'],

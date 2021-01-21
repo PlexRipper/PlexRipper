@@ -5,11 +5,11 @@
 			<v-row class="mx-0">
 				<media-overview-bar
 					detail-mode
-					:has-selected="true"
 					:library="library"
 					:server="server"
 					:media-item="mediaItem"
-					@download="sendDownloadCommand"
+					:has-selected="selected.length > 0"
+					@download="downloadSelectedMedia"
 					@back="close"
 				/>
 			</v-row>
@@ -58,6 +58,7 @@
 							<v-row>
 								<v-col>
 									<span>Duration: {{ mediaItem.duration }}</span>
+									{{ selected }}
 								</v-col>
 							</v-row>
 						</v-card-text>
@@ -68,7 +69,16 @@
 			<!--	Media Table	-->
 			<v-row no-gutters>
 				<v-col>
-					<media-table :items="[mediaItem]" :media-type="mediaType" hide-navigation detail-mode />
+					<media-table
+						ref="detail-media-table"
+						:items="[mediaItem]"
+						:media-type="mediaType"
+						:library-id="library.id"
+						hide-navigation
+						detail-mode
+						@download="downloadMedia"
+						@selected="selected = $event"
+					/>
 				</v-col>
 			</v-row>
 		</template>
@@ -84,13 +94,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { DownloadMediaDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
 import mediaService from '@state/mediaService';
+import { settingsStore } from '~/store';
 
 @Component<DetailsOverview>({
 	components: {
@@ -112,13 +123,17 @@ export default class DetailsOverview extends Vue {
 	@Prop({ required: false, type: Object as () => PlexServerDTO | null })
 	readonly server!: PlexServerDTO | null;
 
+	@Ref('detail-media-table')
+	readonly detailMediaTable!: MediaTable;
+
 	private thumbWidth: number = 150;
 	private thumbHeight: number = 200;
 	isOpen: boolean = false;
 	mediaId: number = 0;
 	defaultImage: boolean = false;
 	imageUrl: string = '';
-
+	selected: string[] = [];
+	downloadMediaCommand: DownloadMediaDTO[] = [];
 	close(): void {
 		this.isOpen = false;
 		this.$emit('close');
@@ -141,7 +156,21 @@ export default class DetailsOverview extends Vue {
 		this.isOpen = true;
 	}
 
-	sendDownloadCommand(downloadMediaCommand: DownloadMediaDTO): void {
+	downloadSelectedMedia(): void {
+		if (this.mediaType === PlexMediaType.TvShow) {
+			this.$emit('download', this.detailMediaTable.createDownloadCommands());
+		}
+		if (this.mediaType === PlexMediaType.Movie) {
+			this.$emit('download', {
+				mediaIds: [this.mediaItem?.id],
+				plexAccountId: settingsStore.activeAccountId,
+				type: PlexMediaType.Movie,
+				libraryId: this.library?.id,
+			} as DownloadMediaDTO);
+		}
+	}
+
+	downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
 		this.$emit('download', downloadMediaCommand);
 	}
 }

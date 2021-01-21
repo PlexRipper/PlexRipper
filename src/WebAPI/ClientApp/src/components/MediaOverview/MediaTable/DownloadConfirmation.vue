@@ -51,9 +51,8 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import { settingsStore as SettingsStore } from '@/store';
+import { settingsStore } from '@/store';
 import ButtonType from '@enums/buttonType';
-import Log from 'consola';
 
 @Component({
 	components: {
@@ -69,21 +68,24 @@ export default class DownloadConfirmation extends Vue {
 
 	showDialog: boolean = false;
 	downloadPreview: ITreeViewItem[] = [];
-	downloadMediaCommand: DownloadMediaDTO | null = null;
+	downloadMediaCommand: DownloadMediaDTO[] = [];
 
 	get isConfirmationEnabled(): boolean {
-		switch (this.downloadMediaCommand?.type) {
-			case PlexMediaType.Movie:
-				return SettingsStore.askDownloadMovieConfirmation;
-			case PlexMediaType.TvShow:
-				return SettingsStore.askDownloadTvShowConfirmation;
-			case PlexMediaType.Season:
-				return SettingsStore.askDownloadSeasonConfirmation;
-			case PlexMediaType.Episode:
-				return SettingsStore.askDownloadEpisodeConfirmation;
-			default:
-				return true;
+		if (this.downloadMediaCommand.length === 1) {
+			switch (this.downloadMediaCommand[0].type) {
+				case PlexMediaType.Movie:
+					return settingsStore.askDownloadMovieConfirmation;
+				case PlexMediaType.TvShow:
+					return settingsStore.askDownloadTvShowConfirmation;
+				case PlexMediaType.Season:
+					return settingsStore.askDownloadSeasonConfirmation;
+				case PlexMediaType.Episode:
+					return settingsStore.askDownloadEpisodeConfirmation;
+				default:
+					return true;
+			}
 		}
+		return true;
 	}
 
 	get cancelButtonType(): ButtonType {
@@ -102,52 +104,61 @@ export default class DownloadConfirmation extends Vue {
 		return size;
 	}
 
-	private createPreview(downloadMediaCommand: DownloadMediaDTO): void {
+	private createPreview(downloadMediaCommands: DownloadMediaDTO[]): void {
 		let filterResult: ITreeViewItem[] = [];
-		const mediaIds = downloadMediaCommand.mediaIds;
 
 		// If statements instead of switch to avoid having to overcomplicate the variable names.
+		downloadMediaCommands.forEach((downloadMediaCommand) => {
+			const mediaIds = downloadMediaCommand.mediaIds;
 
-		// Movie: Show only the movie
-		if (downloadMediaCommand.type === PlexMediaType.Movie) {
-			filterResult = this.items.filter((movie) => mediaIds.includes(movie.id));
-		}
+			// Movie: Show only the movie
+			if (downloadMediaCommand.type === PlexMediaType.Movie) {
+				filterResult = filterResult.concat(this.items.filter((movie) => mediaIds.includes(movie.id)));
+			}
 
-		// TvShow: Show tvShow -> with all season -> with all episodes
-		if (downloadMediaCommand.type === PlexMediaType.TvShow) {
-			filterResult = this.items.filter((tvShow) => mediaIds.some((x) => x === tvShow.id));
-		}
+			// TvShow: Show tvShow -> with all season -> with all episodes
+			if (downloadMediaCommand.type === PlexMediaType.TvShow) {
+				filterResult = filterResult.concat(this.items.filter((tvShow) => mediaIds.some((x) => x === tvShow.id)));
+			}
 
-		// Season: Show tvShow -> season -> with all episodes
-		if (downloadMediaCommand.type === PlexMediaType.Season) {
-			filterResult = this.items
-				.filter((tvShow) => tvShow.children?.some((season) => mediaIds.includes(season.id)))
-				.map((tvShow) => {
-					return {
-						...tvShow,
-						children: tvShow.children?.filter((season) => mediaIds.includes(season.id)),
-					};
-				});
-		}
+			// Season: Show tvShow -> season -> with all episodes
+			if (downloadMediaCommand.type === PlexMediaType.Season) {
+				filterResult = filterResult.concat(
+					this.items
+						.filter((tvShow) => tvShow.children?.some((season) => mediaIds.includes(season.id)))
+						.map((tvShow) => {
+							return {
+								...tvShow,
+								children: tvShow.children?.filter((season) => mediaIds.includes(season.id)),
+							};
+						}),
+				);
+			}
 
-		// Episode: Show tvShow -> season -> episode without anything else
-		if (downloadMediaCommand.type === PlexMediaType.Episode) {
-			filterResult = this.items
-				.filter((tvShow) => tvShow.children?.some((season) => season.children?.some((episode) => mediaIds.includes(episode.id))))
-				.map((tvShow) => {
-					return {
-						...tvShow,
-						children: tvShow.children
-							?.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.includes(episode.id)))
-							.map((season: ITreeViewItem) => {
-								return {
-									...season,
-									children: season?.children?.filter((episode) => mediaIds.includes(episode.id)),
-								};
-							}),
-					};
-				});
-		}
+			// Episode: Show tvShow -> season -> episode without anything else
+			if (downloadMediaCommand.type === PlexMediaType.Episode) {
+				filterResult = filterResult.concat(
+					this.items
+						.filter((tvShow) =>
+							tvShow.children?.some((season) => season.children?.some((episode) => mediaIds.includes(episode.id))),
+						)
+						.map((tvShow) => {
+							return {
+								...tvShow,
+								children: tvShow.children
+									?.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.includes(episode.id)))
+									.map((season: ITreeViewItem) => {
+										return {
+											...season,
+											children: season?.children?.filter((episode) => mediaIds.includes(episode.id)),
+										};
+									}),
+							};
+						}),
+				);
+			}
+		});
+
 		this.downloadPreview = filterResult;
 	}
 
@@ -167,9 +178,8 @@ export default class DownloadConfirmation extends Vue {
 		return keys;
 	}
 
-	openDialog(downloadMediaCommand: DownloadMediaDTO): void {
+	openDialog(downloadMediaCommand: DownloadMediaDTO[]): void {
 		this.downloadMediaCommand = downloadMediaCommand;
-		Log.info('opendialog', this.downloadMediaCommand);
 		if (this.isConfirmationEnabled) {
 			this.createPreview(downloadMediaCommand);
 		} else {

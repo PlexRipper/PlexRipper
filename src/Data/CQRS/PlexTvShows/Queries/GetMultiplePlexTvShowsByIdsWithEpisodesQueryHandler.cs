@@ -20,26 +20,14 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
         }
     }
 
-    public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler : BaseHandler, IRequestHandler<GetMultiplePlexTvShowsByIdsWithEpisodesQuery, Result<List<PlexTvShow>>>>
+    public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler : BaseHandler,
+        IRequestHandler<GetMultiplePlexTvShowsByIdsWithEpisodesQuery, Result<List<PlexTvShow>>>
     {
         public GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<List<PlexTvShow>>> Handle(GetMultiplePlexTvShowsByIdsWithEpisodesQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<PlexTvShow> query = _dbContext.PlexTvShows.AsQueryable();
-
-            if (!request.IncludeData)
-            {
-                query = query.Include(x => x.Seasons)
-                    .ThenInclude(x => x.Episodes);
-            }
-            else
-            {
-                query = query.Include(x => x.Seasons)
-                    .ThenInclude(x => x.Episodes)
-                    .ThenInclude(x => x.EpisodeData)
-                    .ThenInclude(x => x.Parts);
-            }
+            IQueryable<PlexTvShow> query = PlexTvShowsQueryable;
 
             if (request.IncludeLibrary)
             {
@@ -49,6 +37,12 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
             if (request.IncludeServer)
             {
                 query = query.IncludeServer();
+            }
+
+            if (request.IncludeData)
+            {
+                query = query.Include(x => x.Seasons)
+                    .ThenInclude(x => x.Episodes);
             }
 
             var plexTvShow = await query

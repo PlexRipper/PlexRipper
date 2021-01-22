@@ -1,13 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Configurations
 {
-    public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
+    public class PlexTvShowSeasonConfiguration : IEntityTypeConfiguration<PlexTvShowSeason>
     {
-        public void Configure(EntityTypeBuilder<PlexTvShow> builder)
+        public void Configure(EntityTypeBuilder<PlexTvShowSeason> builder)
         {
             // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
             // Based on: https://stackoverflow.com/a/63992731/8205497

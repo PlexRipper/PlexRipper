@@ -20,26 +20,22 @@ namespace PlexRipper.Data.Common
                 .ThenInclude(x => x.Episodes);
         }
 
-        public static IQueryable<PlexLibrary> IncludeMovies(this IQueryable<PlexLibrary> plexLibrary, bool topLevelOnly = false)
+        public static IQueryable<PlexLibrary> IncludeMovies(this IQueryable<PlexLibrary> plexLibrary)
         {
-            if (topLevelOnly)
-            {
-                return plexLibrary
-                    .Include(x => x.Movies);
-            }
-
             return plexLibrary
-                .Include(x => x.Movies)
-                .ThenInclude(x => x.PlexMovieDatas)
-                .ThenInclude(x => x.Parts);
+                .Include(x => x.Movies);
         }
 
-        public static IQueryable<PlexMovie> IncludeMovieData(this IQueryable<PlexMovie> plexMovies)
+        #region PlexLibrary
+
+        public static IQueryable<PlexLibrary> IncludeServer(this IQueryable<PlexLibrary> plexLibrary)
         {
-            return plexMovies
-                .Include(x => x.PlexMovieDatas)
-                .ThenInclude(x => x.Parts);
+            return plexLibrary.Include(x => x.PlexServer);
         }
+
+        #endregion
+
+        #region PlexMovie
 
         public static IQueryable<PlexMovie> IncludePlexLibrary(this IQueryable<PlexMovie> plexMovies)
         {
@@ -51,6 +47,10 @@ namespace PlexRipper.Data.Common
             return plexMovies.Include(x => x.PlexServer);
         }
 
+        #endregion
+
+        #region PlexTvShow
+
         public static IQueryable<PlexTvShow> IncludePlexLibrary(this IQueryable<PlexTvShow> plexTvShows)
         {
             return plexTvShows.Include(x => x.PlexLibrary);
@@ -61,9 +61,34 @@ namespace PlexRipper.Data.Common
             return plexTvShows.Include(x => x.PlexServer);
         }
 
-        public static IQueryable<PlexLibrary> IncludeServer(this IQueryable<PlexLibrary> plexLibrary)
+        #endregion
+
+        #region PlexTvShow
+
+        public static IQueryable<PlexTvShowSeason> IncludePlexLibrary(this IQueryable<PlexTvShowSeason> plexTvShowSeason)
         {
-            return plexLibrary.Include(x => x.PlexServer);
+            return plexTvShowSeason.Include(x => x.PlexLibrary);
         }
+
+        public static IQueryable<PlexTvShowSeason> IncludeServer(this IQueryable<PlexTvShowSeason> plexTvShowSeason)
+        {
+            return plexTvShowSeason.Include(x => x.PlexServer);
+        }
+
+        #endregion
+
+        #region PlexTvShow
+
+        public static IQueryable<PlexTvShowEpisode> IncludePlexLibrary(this IQueryable<PlexTvShowEpisode> plexTvShowEpisode)
+        {
+            return plexTvShowEpisode.Include(x => x.PlexLibrary);
+        }
+
+        public static IQueryable<PlexTvShowEpisode> IncludeServer(this IQueryable<PlexTvShowEpisode> plexTvShowEpisode)
+        {
+            return plexTvShowEpisode.Include(x => x.PlexServer);
+        }
+
+        #endregion
     }
 }

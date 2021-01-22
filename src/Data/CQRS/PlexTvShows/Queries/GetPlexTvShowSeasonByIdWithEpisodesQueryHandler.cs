@@ -26,22 +26,27 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
         public async Task<Result<PlexTvShowSeason>> Handle(GetPlexTvShowSeasonByIdWithEpisodesQuery request, CancellationToken cancellationToken)
         {
-            var plexTvShowSeason = await _dbContext.PlexTvShowSeason
+            var query = PlexTvShowSeasonsQueryable;
+
+            if (request.IncludeLibrary)
+            {
+                query = query.IncludePlexLibrary();
+            }
+
+            if (request.IncludeServer)
+            {
+                query = query.IncludeServer();
+            }
+
+            var plexTvShowSeason = await query
                 .Include(x => x.TvShow)
-                .Include(x => x.PlexLibrary)
-                .ThenInclude(x => x.PlexServer)
                 .Include(x => x.Episodes)
-                .ThenInclude(x => x.EpisodeData)
-                .ThenInclude(x => x.Parts)
-                .OrderBy(x => x.Key)
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (plexTvShowSeason == null)
             {
                 return ResultExtensions.GetEntityNotFound(nameof(PlexTvShowSeason), request.Id);
             }
-
-            plexTvShowSeason.Episodes = plexTvShowSeason.Episodes.OrderBy(x => x.Key).ToList();
 
             return Result.Ok(plexTvShowSeason);
         }

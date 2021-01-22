@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using PlexRipper.Domain;
+using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
@@ -71,5 +73,8 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType Type { get; set; }
+
+        [JsonProperty("mediaData", Required = Required.Always)]
+        public List<PlexMediaDataDTO> MediaData { get; set; }
     }
 }

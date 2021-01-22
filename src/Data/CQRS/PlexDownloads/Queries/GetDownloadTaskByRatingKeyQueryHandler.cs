@@ -35,7 +35,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 .Include(x => x.DownloadWorkerTasks)
                 .Include(x => x.DestinationFolder)
                 .Include(x => x.DownloadFolder)
-                .FirstOrDefaultAsync(x => x.RatingKey == request.RatingKey, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Key == request.RatingKey, cancellationToken);
 
             if (downloadTask == null)
             {

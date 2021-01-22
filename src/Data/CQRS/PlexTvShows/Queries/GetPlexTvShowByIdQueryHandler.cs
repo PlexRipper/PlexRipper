@@ -25,7 +25,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
         public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<PlexTvShow> query = _dbContext.PlexTvShows.AsQueryable();
+            IQueryable<PlexTvShow> query = PlexTvShowsQueryable;
 
             if (request.IncludeLibrary)
             {

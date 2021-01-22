@@ -20,7 +20,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 downloadTask.RuleFor(x => x.Id).Equal(0);
                 downloadTask.RuleFor(x => x.PlexServerId).GreaterThan(0);
                 downloadTask.RuleFor(x => x.DataTotal).GreaterThan(0);
-                downloadTask.RuleFor(x => x.RatingKey).GreaterThan(0);
+                downloadTask.RuleFor(x => x.Key).GreaterThan(0);
                 downloadTask.RuleFor(x => x.MediaType).NotEqual(PlexMediaType.None);
                 downloadTask.RuleFor(x => x.MediaType).NotEqual(PlexMediaType.Unknown);
                 downloadTask.RuleFor(x => x.DownloadFolderId).GreaterThan(0);

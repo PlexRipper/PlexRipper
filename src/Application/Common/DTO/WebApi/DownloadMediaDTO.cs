@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using PlexRipper.Domain;
 
-namespace PlexRipper.WebAPI.Common.DTO
+namespace PlexRipper.Application.Common.DTO.WebApi
 {
     public class DownloadMediaDTO
     {

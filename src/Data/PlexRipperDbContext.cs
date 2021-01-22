@@ -4,6 +4,7 @@ using System.Reflection;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data
@@ -36,10 +37,6 @@ namespace PlexRipper.Data
 
         public DbSet<PlexMovie> PlexMovies { get; set; }
 
-        public DbSet<PlexMovieData> PlexMovieData { get; set; }
-
-        public DbSet<PlexMovieDataPart> PlexMovieDataParts { get; set; }
-
         #endregion
 
         #region PlexTvShow
@@ -49,10 +46,6 @@ namespace PlexRipper.Data
         public DbSet<PlexTvShowSeason> PlexTvShowSeason { get; set; }
 
         public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
-
-        public DbSet<PlexTvShowEpisodeData> PlexTvShowEpisodeData { get; set; }
-
-        public DbSet<PlexTvShowEpisodeDataPart> PlexTvShowEpisodeDataParts { get; set; }
 
         #endregion
 
@@ -160,6 +153,22 @@ namespace PlexRipper.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            builder.Entity<PlexMovie>()
+                .Property(x => x.MediaData)
+                .HasJsonValueConversion();
+
+            builder.Entity<PlexTvShow>()
+                .Property(x => x.MediaData)
+                .HasJsonValueConversion();
+
+            builder.Entity<PlexTvShowSeason>()
+                .Property(x => x.MediaData)
+                .HasJsonValueConversion();
+
+            builder.Entity<PlexTvShowEpisode>()
+                .Property(x => x.MediaData)
+                .HasJsonValueConversion();
 
             builder = PlexRipperDBContextSeed.SeedDatabase(builder);
 

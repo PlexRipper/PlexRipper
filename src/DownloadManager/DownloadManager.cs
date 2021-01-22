@@ -152,17 +152,17 @@ namespace PlexRipper.DownloadManager
                 // Check Database
                 downloadTaskDB = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTask.Id));
             }
-            else if (downloadTask.RatingKey > 0)
+            else if (downloadTask.Key > 0)
             {
                 // First check if there is an downloadClient with that downloadTask, as that is faster
-                var downloadClient = _downloadsList.Find(x => x.DownloadTask.RatingKey == downloadTask.RatingKey);
+                var downloadClient = _downloadsList.Find(x => x.DownloadTask.Key == downloadTask.Key);
                 if (downloadClient != null)
                 {
                     return Result.Ok(true);
                 }
 
                 // Check DataBase
-                downloadTaskDB = await _mediator.Send(new GetDownloadTaskByRatingKeyQuery(downloadTask.RatingKey));
+                downloadTaskDB = await _mediator.Send(new GetDownloadTaskByRatingKeyQuery(downloadTask.Key));
             }
             else
             {

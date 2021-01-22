@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Newtonsoft.Json;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Configurations
@@ -13,6 +16,11 @@ namespace PlexRipper.Data.Configurations
                 .WithOne(x => x.DownloadTask)
                 .HasForeignKey(x => x.DownloadTaskId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder
+                .Property(x => x.MetaData)
+                .HasJsonValueConversion();
+
         }
     }
 }

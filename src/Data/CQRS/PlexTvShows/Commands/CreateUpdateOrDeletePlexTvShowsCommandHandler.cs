@@ -75,8 +75,6 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                 var tvShowsInDb = await _dbContext.PlexTvShows
                     .Include(x => x.Seasons)
                     .ThenInclude(x => x.Episodes)
-                    .ThenInclude(x => x.EpisodeData)
-                    .ThenInclude(x => x.Parts)
                     .Where(x => x.PlexLibraryId == plexLibrary.Id)
                     .ToListAsync(cancellationToken);
 
@@ -162,25 +160,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
                 _dbContext.BulkInsert(plexTvShowEpisodes, _config);
 
-                // Update the PlexTvShowEpisodeId of every plexTvShowEpisode
-                plexTvShowEpisodes.ForEach(x => x.EpisodeData?.ForEach(y => y.PlexTvShowEpisodeId = x.Id));
-                var plexTvShowEpisodeDataList = plexTvShowEpisodes?.SelectMany(x => x.EpisodeData?.Select(y => y))?.ToList();
-                if (plexTvShowEpisodeDataList.Count == 0)
-                {
-                    return;
-                }
 
-                _dbContext.BulkInsert(plexTvShowEpisodeDataList, _config);
-
-                // Update the PlexTvShowEpisodeDataId of every plexTvShowEpisodeData
-                plexTvShowEpisodeDataList?.ForEach(x => x.Parts?.ForEach(y => y.PlexTvShowEpisodeDataId = x.Id));
-                var plexTvShowEpisodeDataPartList = plexTvShowEpisodeDataList?.SelectMany(x => x.Parts?.Select(y => y))?.ToList();
-                if (plexTvShowEpisodeDataPartList.Count == 0)
-                {
-                    return;
-                }
-
-                _dbContext.BulkInsert(plexTvShowEpisodeDataPartList);
             }
             catch (Exception e)
             {

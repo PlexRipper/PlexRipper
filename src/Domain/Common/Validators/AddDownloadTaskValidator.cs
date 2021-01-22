@@ -10,7 +10,7 @@ namespace PlexRipper.Domain
             RuleFor(x => x.Id).Equal(0);
             RuleFor(x => x.DataReceived).Equal(0);
             RuleFor(x => x.DataTotal).GreaterThan(0);
-            RuleFor(x => x.RatingKey).GreaterThan(0);
+            RuleFor(x => x.Key).GreaterThan(0);
             RuleFor(x => x.MediaType).NotEqual(PlexMediaType.None);
             RuleFor(x => x.MediaType).NotEqual(PlexMediaType.Unknown);
 

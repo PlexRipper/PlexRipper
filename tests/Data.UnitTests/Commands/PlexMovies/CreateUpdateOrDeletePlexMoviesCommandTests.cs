@@ -85,21 +85,6 @@ namespace Data.UnitTests.Commands
                 {
                     x.Title += " Updated!";
                     x.UpdatedAt = x.UpdatedAt.AddDays(4);
-                    x.PlexMovieDatas.Add(new PlexMovieData
-                    {
-                        MediaFormat = "Updated!",
-                        Height = x.Id * 100,
-                        Width = x.Id * 100,
-                        Parts = new List<PlexMovieDataPart>
-                        {
-                            new PlexMovieDataPart
-                            {
-                                Container = "mkv",
-                                File = "Updated!",
-                                ObfuscatedFilePath = x.Id.ToString(),
-                            },
-                        },
-                    });
                 }
 
                 return x;

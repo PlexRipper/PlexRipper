@@ -6,9 +6,9 @@ using PlexRipper.PlexApi.Models;
 
 namespace PlexRipper.PlexApi.Config.Mappings
 {
-    public class PlexMediaMetaDataDTOPlexMediaMetaData : ITypeConverter<PlexMediaContainer, PlexMediaMetaData>
+    public class PlexMediaMetaDataDTOPlexMediaMetaData : ITypeConverter<PlexMediaContainerDTO, PlexMediaMetaData>
     {
-        public PlexMediaMetaData Convert(PlexMediaContainer source, PlexMediaMetaData destination, ResolutionContext context)
+        public PlexMediaMetaData Convert(PlexMediaContainerDTO source, PlexMediaMetaData destination, ResolutionContext context)
         {
             try
             {

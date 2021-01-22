@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
+using PlexRipper.Application.Common.DTO.WebApi;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
@@ -21,12 +22,12 @@ namespace PlexRipper.Application.Common
 
         Task<Result> PauseDownloadTask(int downloadTaskId);
 
-        Task<Result> DownloadMediaAsync(int mediaId, PlexMediaType type, int plexAccountId);
+        Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadMedias);
 
         Task<Result<bool>> DeleteDownloadTasksAsync(IEnumerable<int> downloadTaskIds);
 
         Task<Result<List<DownloadTask>>> GetDownloadTasksAsync();
 
-        Task<Result> DownloadMediaAsync(List<int> mediaIds, PlexMediaType type, int libraryId, int accountId = 0);
+        Task<Result> DownloadMediaAsync(List<int> mediaIds, PlexMediaType type, int libraryId, int plexAccountId = 0);
     }
 }

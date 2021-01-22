@@ -38,18 +38,16 @@ namespace PlexRipper.Domain
         /// </summary>
         public int ReleaseYear { get; set; }
 
-        [Column("Type")]
-        public string _Type { get; set; }
+        public PlexMediaType MediaType { get; set; }
 
-        [Column("DownloadStatus")]
-        public string _DownloadStatus { get; set; }
+        public DownloadStatus DownloadStatus { get; set; }
 
         public DateTime Created { get; set; }
 
         /// <summary>
         /// The identifier used by Plex to keep track of media.
         /// </summary>
-        public int RatingKey { get; set; }
+        public int Key { get; set; }
 
         /// <summary>
         /// The download priority, the higher the more important.
@@ -89,21 +87,13 @@ namespace PlexRipper.Domain
 
         #region Helpers
 
+        /// <summary>
+        /// Gets or sets the <see cref="DownloadTaskMetaData"/>, this is a JSON field that contains a collection
+        /// of various values that dont warrant their own database column.
+        /// </summary>
+        public DownloadTaskMetaData MetaData { get; set; } = new DownloadTaskMetaData();
+
         private string MovieTitle => $"{Title}" + (ReleaseYear > 0 ? $" ({ReleaseYear})" : string.Empty);
-
-        [NotMapped]
-        public DownloadStatus DownloadStatus
-        {
-            get => Enum.TryParse(_DownloadStatus, out DownloadStatus status) ? status : DownloadStatus.Unknown;
-            set => _DownloadStatus = value.ToString();
-        }
-
-        [NotMapped]
-        public PlexMediaType MediaType
-        {
-            get => Enum.TryParse(_Type, out PlexMediaType type) ? type : PlexMediaType.Unknown;
-            set => _Type = value.ToString();
-        }
 
         [NotMapped]
         public string DownloadUrl => PlexServer != null ? $"{PlexServer?.ServerUrl}{FileLocationUrl}?X-Plex-Token={ServerToken}" : string.Empty;
@@ -157,6 +147,7 @@ namespace PlexRipper.Domain
                         {
                             return Path.Combine(TitleTvShow.SanitizePath());
                         }
+
                         return Path.Combine(TitleTvShow.SanitizePath(), TitleTvShowSeason.SanitizePath());
                     default:
                         return Path.Combine($"{FileNameWithoutExtention.SanitizePath()}");

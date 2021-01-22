@@ -9,9 +9,10 @@ import PSection from '@components/General/Section.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import Status from '@components/General/Status.vue';
 import FileSize from '@components/General/FileSize.vue';
+import Duration from '@components/General/Duration.vue';
 
 export default (): void => {
-	const components = { Page, Background, Logo, PBtn, PCheckbox, DateTime, PSection, HelpIcon, Status, FileSize };
+	const components = { Page, Background, Logo, PBtn, PCheckbox, DateTime, PSection, HelpIcon, Status, FileSize, Duration };
 
 	Object.entries(components).forEach(([name, component]) => {
 		Vue.component(name, component);

@@ -29,6 +29,7 @@ import LoadingSpinner from '@components/LoadingSpinner.vue';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import MediaPoster from '@mediaOverview/PosterTable/MediaPoster.vue';
+import { settingsStore } from '~/store';
 
 @Component({
 	components: {
@@ -45,8 +46,15 @@ export default class PosterTable extends Vue {
 	@Prop({ required: true, type: String })
 	readonly mediaType!: PlexMediaType;
 
-	downloadMedia(downloadMediaCommand: DownloadMediaDTO): void {
-		this.$emit('download', downloadMediaCommand);
+	@Prop({ required: false, type: Number })
+	readonly libraryId!: number;
+
+	downloadMedia(downloadMediaCommands: DownloadMediaDTO[]): void {
+		downloadMediaCommands.forEach((x) => {
+			x.libraryId = this.libraryId;
+			x.plexAccountId = settingsStore.activeAccountId;
+		});
+		this.$emit('download', downloadMediaCommands);
 	}
 
 	openDetails(mediaId: number): void {

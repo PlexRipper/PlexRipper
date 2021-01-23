@@ -1,3 +1,7 @@
+## [0.6.2] - 2021-01-24
+### Fixed
+ - Fixed the movie poster view not being able to download.
+
 ## [0.6.1] - 2021-01-23
 ### Changed
 -   Moved several properties in the Downloadtask entity into it's metadata field.

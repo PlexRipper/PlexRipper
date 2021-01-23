@@ -32,6 +32,7 @@
 		<v-spacer></v-spacer>
 		<!--	Download button	-->
 		<vertical-button
+			v-if="!hideDownloadButton"
 			icon="mdi-download"
 			label="Download"
 			:height="barHeight"
@@ -39,6 +40,7 @@
 			:disabled="!hasSelected"
 			@click="download"
 		/>
+
 		<!--	Refresh library button	-->
 		<vertical-button
 			v-if="!detailMode"
@@ -106,6 +108,9 @@ export default class MediaOverviewBar extends Vue {
 
 	@Prop({ type: Boolean })
 	readonly detailMode!: boolean;
+
+	@Prop({ type: Boolean, default: false })
+	readonly hideDownloadButton!: boolean;
 
 	readonly barHeight: number = 85;
 	readonly verticalButtonWidth: number = 120;

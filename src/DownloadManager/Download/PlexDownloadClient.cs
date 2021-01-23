@@ -206,12 +206,12 @@ namespace PlexRipper.DownloadManager.Download
             var newDataTotal = response.Content.Headers.ContentLength ?? -1L;
             if (downloadTask.DataTotal > 0 && downloadTask.DataTotal != newDataTotal)
             {
+                //TODO Implement recreation of downloadtask when downloadSize is a mismatch, this indicates the media has been updated.
                 // The media size changes, re-create download workers and delete any old ones.
                 downloadTask.DownloadWorkerTasks = null;
                 await _mediator.Send(new DeleteDownloadWorkerTasksByDownloadTaskIdCommand(downloadTask.Id));
             }
 
-            downloadTask.DataTotal = newDataTotal;
             return response;
         }
 

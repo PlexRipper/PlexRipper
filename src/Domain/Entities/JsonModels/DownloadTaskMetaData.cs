@@ -4,6 +4,8 @@ namespace PlexRipper.Domain
 {
     public class DownloadTaskMetaData
     {
+        public int ReleaseYear { get; set; }
+
         public string MovieTitle { get; set; }
 
         public string TvShowTitle { get; set; }

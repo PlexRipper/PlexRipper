@@ -1,4 +1,6 @@
-﻿using FluentResults;
+﻿using System.Collections.Generic;
+using System.Linq;
+using FluentResults;
 using FluentValidation.Results;
 
 namespace PlexRipper.Domain
@@ -123,6 +125,22 @@ namespace PlexRipper.Domain
         public static Result<T> IsEmpty<T>(string parameterName)
         {
             return IsEmpty(parameterName);
+        }
+
+        /// <summary>
+        /// Add the list of errors to the first error found as a nested error list.
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="errors"></param>
+        /// <returns></returns>
+        public static Result AddNestedErrors(this Result result, List<Error> errors)
+        {
+            if (result.Errors.Any())
+            {
+                result.Errors.First().Reasons.AddRange(errors);
+            }
+
+            return result;
         }
 
         #endregion

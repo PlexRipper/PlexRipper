@@ -32,7 +32,7 @@ namespace PlexRipper.Domain
 
             foreach (var downloadTask in downloadTasks)
             {
-                downloadTask.TitleTvShowSeason = Title;
+                downloadTask.MetaData.TvShowSeasonTitle = Title;
             }
 
             return downloadTasks;

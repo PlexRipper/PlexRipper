@@ -151,13 +151,17 @@ namespace PlexRipper.Domain
         {
             return new DownloadTask
             {
+                MetaData = new DownloadTaskMetaData
+                {
+                    MediaData = MediaData.MediaData,
+                    ReleaseYear = Year,
+                },
                 PlexLibrary = PlexLibrary,
                 PlexLibraryId = PlexLibraryId,
                 PlexServer = PlexServer,
                 PlexServerId = PlexServerId,
                 Created = DateTime.Now,
                 DownloadStatus = DownloadStatus.Initialized,
-                ReleaseYear = Year,
                 Key = Key,
             };
         }

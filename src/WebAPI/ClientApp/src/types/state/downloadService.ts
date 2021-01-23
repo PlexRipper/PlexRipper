@@ -66,7 +66,7 @@ export class DownloadService extends BaseService {
 		return this.getDownloadList();
 	}
 
-	public downloadMedia(downloadMediaCommand: DownloadMediaDTO): void {
+	public downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
 		downloadMedia(downloadMediaCommand)
 			.pipe(finalize(() => this.fetchDownloadList()))
 			.subscribe();

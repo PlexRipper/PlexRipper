@@ -1,3 +1,11 @@
+## [0.6.1] - 2021-01-23
+### Changed
+-   Moved several properties in the Downloadtask entity into it's metadata field.
+### Fixed
+-   Fixed the downloadProcess not working due to major refactoring
+-   Fixed some warnings int he Controllers about fields in the baseController being overwritten
+
+
 ## [0.6.0] - 2021-01-21
 ### Added
 -   Added an Alphabet navigation to the tableView and posterView in the library navigation.

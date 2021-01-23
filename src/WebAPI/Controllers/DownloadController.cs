@@ -5,6 +5,7 @@ using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Common.DTO.WebApi;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
@@ -17,16 +18,10 @@ namespace PlexRipper.WebAPI.Controllers
     {
         private readonly IPlexDownloadService _plexDownloadService;
 
-        private readonly IMapper _mapper;
-
-        private readonly INotificationsService _notificationsService;
-
         public DownloadController(IPlexDownloadService plexDownloadService, IMapper mapper, INotificationsService notificationsService) : base(mapper,
             notificationsService)
         {
             _plexDownloadService = plexDownloadService;
-            _mapper = mapper;
-            _notificationsService = notificationsService;
         }
 
         // GET: api/<DownloadController>
@@ -77,18 +72,14 @@ namespace PlexRipper.WebAPI.Controllers
         /// <summary>
         /// POST: api/(DownloadController)/download/
         /// </summary>
-        /// <param name="downloadMedia"></param>
+        /// <param name="downloadMedias"></param>
         /// <returns></returns>
         [HttpPost("download")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> DownloadMedia([FromBody] DownloadMediaDTO downloadMedia)
+        public async Task<IActionResult> DownloadMedia([FromBody] List<DownloadMediaDTO> downloadMedias)
         {
-            var result = await _plexDownloadService.DownloadMediaAsync(
-                downloadMedia.MediaIds,
-                downloadMedia.Type,
-                downloadMedia.LibraryId,
-                downloadMedia.PlexAccountId);
+            var result = await _plexDownloadService.DownloadMediaAsync(downloadMedias);
 
             if (result.IsFailed)
             {

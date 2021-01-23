@@ -71,46 +71,22 @@ namespace Data.UnitTests
         {
             var mediaContainer = new[] { "mkv", "mp4" };
 
-            var plexMovieDataPart = new Faker<PlexMovieDataPart>()
-                .RuleFor(x => x.Container, f => f.PickRandom(mediaContainer))
-                .RuleFor(x => x.File, f => f.System.FileName())
-                .RuleFor(x => x.ObfuscatedFilePath, f => f.Random.Int(1, 500).ToString());
-
-            var plexMovieData = new Faker<PlexMovieData>()
-                .RuleFor(x => x.MediaFormat, f => f.PickRandom(mediaContainer))
-                .RuleFor(x => x.Width, f => f.Random.Int(0, 10) * 100)
-                .RuleFor(x => x.Height, f => f.Random.Int(0, 10) * 100)
-                .RuleFor(x => x.Parts, f => plexMovieDataPart.Generate(f.Random.Int(1, 3)).ToList());
-
             return new Faker<PlexMovie>()
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
                 .RuleFor(x => x.Key, f => f.Random.Int(1, 100000))
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
-                .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
-                .RuleFor(x => x.PlexMovieDatas, f => plexMovieData.Generate(2).ToList());
+                .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
         }
 
         public static Faker<PlexTvShow> GetPlexTvShows(int plexLibraryId)
         {
             var mediaContainer = new[] { "mkv", "mp4" };
 
-            var episodeDataPart = new Faker<PlexTvShowEpisodeDataPart>()
-                .RuleFor(x => x.Container, f => f.PickRandom(mediaContainer))
-                .RuleFor(x => x.File, f => f.System.FileName())
-                .RuleFor(x => x.ObfuscatedFilePath, f => f.Random.Int(1, 500).ToString());
-
-            var episodeData = new Faker<PlexTvShowEpisodeData>()
-                .RuleFor(x => x.MediaFormat, f => f.PickRandom(mediaContainer))
-                .RuleFor(x => x.Width, f => f.Random.Int(0, 10) * 100)
-                .RuleFor(x => x.Height, f => f.Random.Int(0, 10) * 100)
-                .RuleFor(x => x.Parts, f => episodeDataPart.Generate(f.Random.Int(1, 3)).ToList());
-
             var episodes = new Faker<PlexTvShowEpisode>()
                 .RuleFor(x => x.Key, f => f.Random.Int(1, 10000))
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
-                .RuleFor(x => x.EpisodeData, f => episodeData.Generate(f.Random.Int(1, 3)).ToList())
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
 

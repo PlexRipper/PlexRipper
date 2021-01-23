@@ -16,15 +16,7 @@ namespace PlexRipper.WebAPI.Controllers
     [ApiController]
     public class NotificationController : BaseController
     {
-        private readonly INotificationsService _notificationsService;
-
-        private readonly IMapper _mapper;
-
-        public NotificationController(INotificationsService notificationsService, IMapper mapper) : base(mapper, notificationsService)
-        {
-            _notificationsService = notificationsService;
-            _mapper = mapper;
-        }
+        public NotificationController(INotificationsService notificationsService, IMapper mapper) : base(mapper, notificationsService) { }
 
         // GET api/<NotificationController>/
         [HttpGet]

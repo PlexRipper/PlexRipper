@@ -2,7 +2,7 @@
 
 namespace PlexRipper.PlexApi.Models
 {
-    public class PlexMediaContainer
+    public class PlexMediaContainerDTO
     {
         [JsonPropertyName("MediaContainer")]
         public MediaContainer MediaContainer { get; set; }

@@ -17,15 +17,12 @@ namespace PlexRipper.WebAPI.Controllers
     {
         private readonly IPlexAccountService _plexAccountService;
 
-        private readonly IMapper _mapper;
-
         public PlexAccountController(
             IPlexAccountService plexAccountService,
             IMapper mapper,
             INotificationsService notificationsService) : base(mapper, notificationsService)
         {
             _plexAccountService = plexAccountService;
-            _mapper = mapper;
         }
 
         // GET: api/<PlexAccountController>

@@ -1,6 +1,6 @@
 ﻿namespace PlexRipper.Domain
 {
-    public class PlexMediaDataPart : BaseEntity
+    public class PlexMediaDataPart
     {
         #region Properties
 

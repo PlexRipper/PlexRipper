@@ -24,8 +24,6 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
             var plexTvShows = await _dbContext.PlexTvShows
                 .Include(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)
-                .ThenInclude(x => x.EpisodeData)
-                .ThenInclude(x => x.Parts)
                 .Where(x => x.PlexLibraryId == request.PlexLibraryId)
                 .ToListAsync(cancellationToken);
 

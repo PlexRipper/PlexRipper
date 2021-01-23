@@ -19,7 +19,7 @@ export function getAllDownloads(): Observable<DownloadTaskDTO[]> {
 	return checkResponse<DownloadTaskDTO[]>(result, logText, 'getAllDownloads');
 }
 
-export function downloadMedia(downloadMediaCommand: DownloadMediaDTO): Observable<boolean> {
+export function downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): Observable<boolean> {
 	preApiRequest(logText, 'downloadMedia');
 	const result: Observable<AxiosResponse> = Axios.post(`${apiPath}/download`, downloadMediaCommand);
 	return checkResponse<boolean>(result, logText, 'downloadMedia');

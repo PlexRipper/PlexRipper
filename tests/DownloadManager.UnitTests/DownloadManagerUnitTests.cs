@@ -23,7 +23,6 @@ namespace DownloadManager.UnitTests
             var downloadManager = Container.GetDownloadManager;
             var downloadTask = new DownloadTask
             {
-                FileLocationUrl = "/library/parts/41722/1519652720/file.mkv",
                 PlexServer = new PlexServer
                 {
                     Scheme = "http",

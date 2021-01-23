@@ -5,17 +5,14 @@ namespace PlexRipper.Application.PlexDownloads
 {
     public class UpdateDownloadCompleteOfDownloadTaskCommand : IRequest<Result<bool>>
     {
-        public UpdateDownloadCompleteOfDownloadTaskCommand(int downloadTaskId, long dataReceived, long dataTotal)
+        public UpdateDownloadCompleteOfDownloadTaskCommand(int downloadTaskId, long dataReceived)
         {
             DownloadTaskId = downloadTaskId;
             DataReceived = dataReceived;
-            DataTotal = dataTotal;
         }
 
         public int DownloadTaskId { get; }
 
         public long DataReceived { get; }
-
-        public long DataTotal { get; }
     }
 }

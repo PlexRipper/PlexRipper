@@ -2,12 +2,9 @@
 
 namespace PlexRipper.WebAPI.Common.DTO.PlexMediaData
 {
-    public class PlexMovieDataPartDTO
+    public class PlexMediaDataPartDTO
     {
         #region Properties
-
-        [JsonProperty("id", Required = Required.Always)]
-        public int Id { get; set; }
 
         [JsonProperty("obfuscatedFilePath", Required = Required.Always)]
         public string ObfuscatedFilePath { get; set; }

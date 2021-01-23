@@ -23,13 +23,13 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
         {
             if (command.DownloadTaskIds != null && command.DownloadTaskIds.Any())
             {
-                var downloadTasks = await _dbContext.DownloadTasks.Where(x => command.DownloadTaskIds.Contains(x.Id) && x._DownloadStatus == DownloadStatus.Completed.ToString()).ToListAsync();
+                var downloadTasks = await _dbContext.DownloadTasks.Where(x => command.DownloadTaskIds.Contains(x.Id) && x.DownloadStatus == DownloadStatus.Completed).ToListAsync();
                 _dbContext.DownloadTasks.RemoveRange(downloadTasks);
             }
             else
             {
                 var downloadTasks = await _dbContext.DownloadTasks.AsTracking()
-                    .Where(x => x._DownloadStatus == DownloadStatus.Completed.ToString())
+                    .Where(x => x.DownloadStatus == DownloadStatus.Completed)
                     .ToListAsync(cancellationToken);
                 _dbContext.DownloadTasks.RemoveRange(downloadTasks);
             }

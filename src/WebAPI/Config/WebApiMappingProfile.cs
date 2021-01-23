@@ -47,27 +47,6 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.SeasonCount, entity => entity.MapFrom(x => x.SeasonCount))
                 .ForMember(dto => dto.EpisodeCount, entity => entity.MapFrom(x => x.EpisodeCount));
 
-            // PlexTvShow <-> PlexTvShowDTO
-            CreateMap<PlexTvShow, PlexTvShowDTO>(MemberList.Destination)
-                .ReverseMap();
-
-            // PlexTvShowSeason <-> PlexTvShowSeasonDTO
-            CreateMap<PlexTvShowSeason, PlexTvShowSeasonDTO>(MemberList.Destination)
-                .ReverseMap();
-
-            // PlexTvShowEpisode <-> PlexTvShowEpisodeDTO
-            CreateMap<PlexTvShowEpisode, PlexTvShowEpisodeDTO>(MemberList.Destination)
-                .ReverseMap();
-
-            // PlexMovie -> PlexMovieDTO
-            CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination);
-
-            // PlexMovieData -> PlexMovieDataDTO
-            CreateMap<PlexMovieData, PlexMovieDataDTO>(MemberList.Destination);
-
-            // PlexMovieDataPart -> PlexMovieDataPartDTO
-            CreateMap<PlexMovieDataPart, PlexMovieDataPartDTO>(MemberList.Destination);
-
             // DownloadTask -> DownloadTaskDTO
             CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.DownloadStatus));
@@ -82,6 +61,40 @@ namespace PlexRipper.WebAPI.Config
 
             // FileSystemModel -> FileSystemModelDTO
             CreateMap<FileSystemModel, FileSystemModelDTO>(MemberList.Destination).ReverseMap();
+
+            PlexMediaMappings();
+            PlexMovieMappings();
+            PlexTvShowMappings();
+        }
+
+        private void PlexMediaMappings()
+        {
+            // PlexMediaData -> PlexMediaDataDTO
+            CreateMap<PlexMediaData, PlexMediaDataDTO>(MemberList.Destination);
+
+            CreateMap<PlexMediaDataPart, PlexMediaDataPartDTO>(MemberList.Destination);
+        }
+
+        private void PlexMovieMappings()
+        {
+            // PlexMovie -> PlexMovieDTO
+            CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination)
+                .ForMember(dto => dto.MediaData, entity => entity.MapFrom(x => x.MovieData));
+        }
+
+        private void PlexTvShowMappings()
+        {
+            // PlexTvShow -> PlexTvShowDTO
+            CreateMap<PlexTvShow, PlexTvShowDTO>(MemberList.Destination)
+                .ForMember(dto => dto.MediaData, opt => opt.Ignore());
+
+            // PlexTvShowSeason -> PlexTvShowSeasonDTO
+            CreateMap<PlexTvShowSeason, PlexTvShowSeasonDTO>(MemberList.Destination)
+                .ForMember(dto => dto.MediaData, opt => opt.Ignore());
+
+            // PlexTvShowEpisode -> PlexTvShowEpisodeDTO
+            CreateMap<PlexTvShowEpisode, PlexTvShowEpisodeDTO>(MemberList.Destination)
+                .ForMember(dto => dto.MediaData, entity => entity.MapFrom(x => x.EpisodeData));
         }
     }
 }

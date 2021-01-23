@@ -18,13 +18,10 @@ namespace PlexRipper.WebAPI.Controllers
     {
         private readonly IPlexLibraryService _plexLibraryService;
 
-        private readonly IMapper _mapper;
-
         public PlexLibraryController(IPlexLibraryService plexLibraryService, IMapper mapper, INotificationsService notificationsService) : base(
             mapper, notificationsService)
         {
             _plexLibraryService = plexLibraryService;
-            _mapper = mapper;
         }
 
         // GET api/<PlexLibrary>/5

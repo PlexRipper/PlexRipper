@@ -152,17 +152,17 @@ namespace PlexRipper.DownloadManager
                 // Check Database
                 downloadTaskDB = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTask.Id));
             }
-            else if (downloadTask.RatingKey > 0)
+            else if (downloadTask.Key > 0)
             {
                 // First check if there is an downloadClient with that downloadTask, as that is faster
-                var downloadClient = _downloadsList.Find(x => x.DownloadTask.RatingKey == downloadTask.RatingKey);
+                var downloadClient = _downloadsList.Find(x => x.DownloadTask.Key == downloadTask.Key);
                 if (downloadClient != null)
                 {
                     return Result.Ok(true);
                 }
 
                 // Check DataBase
-                downloadTaskDB = await _mediator.Send(new GetDownloadTaskByRatingKeyQuery(downloadTask.RatingKey));
+                downloadTaskDB = await _mediator.Send(new GetDownloadTaskByRatingKeyQuery(downloadTask.Key));
             }
             else
             {
@@ -251,8 +251,7 @@ namespace PlexRipper.DownloadManager
             {
                 await _mediator.Send(new UpdateDownloadCompleteOfDownloadTaskCommand(
                     downloadComplete.Id,
-                    downloadComplete.DataReceived,
-                    downloadComplete.DataTotal));
+                    downloadComplete.DataReceived));
 
                 await _fileMerger.AddFileTask(downloadComplete.DownloadTask);
                 await SetDownloadStatusAsync(downloadComplete.Id, DownloadStatus.Merging);
@@ -369,13 +368,10 @@ namespace PlexRipper.DownloadManager
                 if (validationResult.IsFailed)
                 {
                     failedList.Add(downloadTask);
-                    result = Result.Merge(
-                        result,
-                        validationResult
-                            .WithError(new Error(downloadTask.Title)
-                                .WithMetadata("downloadTask", downloadTask)));
-                    result.LogError();
+                    validationResult.Errors.ForEach(x => x.WithMetadata("downloadTask Title", downloadTask.TitlePath));
+                    result.AddNestedErrors(validationResult.Errors);
                 }
+
 
                 // TODO Need a different way to check for duplicate, media consisting of multiple parts have the same rating key
                 // Check if this DownloadTask is a duplicate
@@ -395,13 +391,13 @@ namespace PlexRipper.DownloadManager
             // All download tasks failed validation
             if (failedList.Count == downloadTasks.Count)
             {
-                return result;
+                return result.LogError();
             }
 
             // Some failed, alert front-end of some failing
             if (failedList.Count > 0)
             {
-                _notificationsService.SendResult(result);
+                _notificationsService.SendResult(result.LogError());
                 return Result.Ok(downloadTasks.Except(failedList).ToList());
             }
 

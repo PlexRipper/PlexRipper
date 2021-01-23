@@ -3,16 +3,11 @@ using Newtonsoft.Json;
 
 namespace PlexRipper.WebAPI.Common.DTO.PlexMediaData
 {
-    public class PlexMovieDataDTO
+    public class PlexMediaDataDTO
     {
         #region Properties
 
-        [JsonProperty("id", Required = Required.Always)]
-
-        public int Id { get; set; }
-
         [JsonProperty("mediaFormat", Required = Required.Always)]
-
         public string MediaFormat { get; set; }
 
         [JsonProperty("duration", Required = Required.Always)]
@@ -52,7 +47,7 @@ namespace PlexRipper.WebAPI.Common.DTO.PlexMediaData
         public int AudioChannels { get; set; }
 
         [JsonProperty("parts", Required = Required.Always)]
-        public List<PlexMovieDataPartDTO> Parts { get; set; }
+        public List<PlexMediaDataPartDTO> Parts { get; set; }
 
         #endregion
     }

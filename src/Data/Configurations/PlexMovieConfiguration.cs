@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Configurations
@@ -8,9 +9,12 @@ namespace PlexRipper.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<PlexMovie> builder)
         {
-            builder.HasMany(x => x.PlexMovieDatas)
-                .WithOne(x => x.PlexMovie)
-                .HasForeignKey(x => x.PlexMovieId);
+            // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
+            // Based on: https://stackoverflow.com/a/63992731/8205497
+            // builder
+            //     .Property(x => x.MediaData)
+            //     .HasJsonValueConversion();
         }
+
     }
 }

@@ -21,14 +21,11 @@ namespace PlexRipper.WebAPI.Controllers
 
         private readonly IFileSystem _fileSystem;
 
-        private readonly IMapper _mapper;
-
         public FolderPathController(IFolderPathService folderPathService, IFileSystem fileSystem, IMapper mapper,
             INotificationsService notificationsService) : base(mapper, notificationsService)
         {
             _folderPathService = folderPathService;
             _fileSystem = fileSystem;
-            _mapper = mapper;
         }
 
         // GET: api/<FolderPathController>

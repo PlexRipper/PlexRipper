@@ -107,6 +107,8 @@ namespace PlexRipper.Domain
         [Column(Order = 19)]
         public DateTime? OriginallyAvailableAt { get; set; }
 
+        public PlexMediaContainer MediaData { get; set; } = new PlexMediaContainer();
+
         #endregion
 
         #region Relationships
@@ -149,12 +151,18 @@ namespace PlexRipper.Domain
         {
             return new DownloadTask
             {
-                PlexServer = PlexLibrary?.PlexServer,
-                PlexServerId = PlexLibrary?.PlexServer?.Id ?? 0,
+                MetaData = new DownloadTaskMetaData
+                {
+                    MediaData = MediaData.MediaData,
+                    ReleaseYear = Year,
+                },
+                PlexLibrary = PlexLibrary,
                 PlexLibraryId = PlexLibraryId,
+                PlexServer = PlexServer,
+                PlexServerId = PlexServerId,
                 Created = DateTime.Now,
                 DownloadStatus = DownloadStatus.Initialized,
-                RatingKey = Key,
+                Key = Key,
             };
         }
 

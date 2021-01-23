@@ -124,45 +124,45 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="plexAuthToken"></param>
         /// <param name="plexFullHost"></param>
         /// <returns></returns>
-        public async Task<PlexMediaContainer> GetLibrarySectionsAsync(string plexAuthToken, string plexFullHost)
+        public async Task<PlexMediaContainerDTO> GetLibrarySectionsAsync(string plexAuthToken, string plexFullHost)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/sections"), Method.GET);
             request.AddToken(plexAuthToken);
             Log.Debug($"GetLibrarySectionsAsync => {request.Resource}");
-            var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
+            var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
             return result.ValueOrDefault;
         }
 
-        public async Task<PlexMediaContainer> GetMetadataForLibraryAsync(string authToken, string plexServerBaseUrl, string libraryKey)
+        public async Task<PlexMediaContainerDTO> GetMetadataForLibraryAsync(string authToken, string plexServerBaseUrl, string libraryKey)
         {
             var request = new RestRequest(new Uri($"{plexServerBaseUrl}/library/sections/{libraryKey}/all"), Method.GET);
             request.AddToken(authToken);
             request.AddQueryParameter("includeMeta", "1");
-            var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
+            var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
             return result.ValueOrDefault;
         }
 
-        public async Task<PlexMediaContainer> GetMetadataAsync(string authToken, string plexFullHost, int metadataId)
+        public async Task<PlexMediaContainerDTO> GetMetadataAsync(string authToken, string plexFullHost, int metadataId)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{metadataId}"), Method.GET);
             request.AddToken(authToken);
-            var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
+            var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
             return result.ValueOrDefault;
         }
 
-        public async Task<PlexMediaContainer> GetMetadataAsync(string authToken, string metaDataUrl)
+        public async Task<PlexMediaContainerDTO> GetMetadataAsync(string authToken, string metaDataUrl)
         {
             var request = new RestRequest(new Uri(metaDataUrl), Method.GET);
             request.AddToken(authToken);
-            var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
+            var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
             return result.ValueOrDefault;
         }
 
-        public async Task<PlexMediaContainer> GetSeasonsAsync(string authToken, string plexFullHost, int ratingKey)
+        public async Task<PlexMediaContainerDTO> GetSeasonsAsync(string authToken, string plexFullHost, int ratingKey)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{ratingKey}/children"), Method.GET);
             request.AddToken(authToken);
-            var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
+            var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
             return result.ValueOrDefault;
         }
 
@@ -173,12 +173,12 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="plexFullHost"></param>
         /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary"/>.</param>
         /// <returns></returns>
-        public async Task<PlexMediaContainer> GetAllSeasonsAsync(string authToken, string plexFullHost, string plexLibraryKey)
+        public async Task<PlexMediaContainerDTO> GetAllSeasonsAsync(string authToken, string plexFullHost, string plexLibraryKey)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/sections/{plexLibraryKey}/all"), Method.GET);
             request.AddToken(authToken);
             request.AddQueryParameter("type", "3");
-            var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
+            var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
             return result.ValueOrDefault;
         }
 
@@ -189,22 +189,22 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="plexFullHost"></param>
         /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary"/>.</param>
         /// <returns></returns>
-        public async Task<PlexMediaContainer> GetAllEpisodesAsync(string authToken, string plexFullHost, string plexLibraryKey, int from, int to)
+        public async Task<PlexMediaContainerDTO> GetAllEpisodesAsync(string authToken, string plexFullHost, string plexLibraryKey, int from, int to)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/sections/{plexLibraryKey}/all"), Method.GET);
             request.AddToken(authToken).AddLimitHeaders(from, to);
             request.AddQueryParameter("type", "4");
 
-            var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
+            var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
             return result.ValueOrDefault;
         }
 
-        public async Task<PlexMediaContainer> GetRecentlyAddedAsync(string authToken, string hostUrl, string sectionId)
+        public async Task<PlexMediaContainerDTO> GetRecentlyAddedAsync(string authToken, string hostUrl, string sectionId)
         {
             var request = new RestRequest(new Uri($"{hostUrl}/library/sections/{sectionId}/recentlyAdded"), Method.GET);
             request.AddToken(authToken).AddLimitHeaders(0, 50);
 
-            var result = await _client.SendRequestAsync<PlexMediaContainer>(request);
+            var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
             return result.ValueOrDefault;
         }
 

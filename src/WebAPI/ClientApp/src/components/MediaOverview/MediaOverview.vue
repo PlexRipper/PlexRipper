@@ -251,7 +251,7 @@ export default class MediaOverview extends Vue {
 		}
 	}
 
-	sendDownloadCommand(downloadMediaCommand: DownloadMediaDTO): void {
+	sendDownloadCommand(downloadMediaCommand: DownloadMediaDTO[]): void {
 		DownloadService.downloadMedia(downloadMediaCommand);
 	}
 

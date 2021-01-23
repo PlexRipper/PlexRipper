@@ -14,7 +14,7 @@ namespace PlexRipper.Data.Config
             var assembly = Assembly.GetExecutingAssembly();
 
             // MediatR
-            builder.AddMediatR(assembly);
+            builder.RegisterMediatR(assembly);
 
             // Register the Command's Validators (Validators based on FluentValidation library)
             builder.RegisterAssemblyTypes(assembly)
@@ -25,8 +25,9 @@ namespace PlexRipper.Data.Config
             builder.RegisterAssemblyTypes(assembly)
                 .AsClosedTypesOf(typeof(IRequestHandler<,>));
 
+            // We get concurrency issues s if we have .InstancePerLifetimeScope();
             builder.RegisterType<PlexRipperDbContext>()
-                .InstancePerDependency(); // TODO this might need to be InstancePerLifetime
+                .InstancePerDependency();
         }
     }
 }

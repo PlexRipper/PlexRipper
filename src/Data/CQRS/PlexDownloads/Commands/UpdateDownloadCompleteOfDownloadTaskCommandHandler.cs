@@ -16,7 +16,6 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
         {
             RuleFor(x => x.DownloadTaskId).GreaterThan(0);
             RuleFor(x => x.DataReceived).GreaterThan(0);
-            RuleFor(x => x.DataTotal).GreaterThan(0);
         }
     }
 
@@ -33,7 +32,6 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
             if (downloadTask != null)
             {
                 downloadTask.DataReceived = command.DataReceived;
-                downloadTask.DataTotal = command.DataTotal;
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 return Result.Ok(true);
             }

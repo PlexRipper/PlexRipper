@@ -47,8 +47,8 @@ namespace PlexRipper.WebAPI.Common.DTO
         /// <summary>
         /// The identifier used by Plex to keep track of media.
         /// </summary>
-        [JsonProperty("ratingKey", Required = Required.Always)]
-        public int RatingKey { get; set; }
+        [JsonProperty("key", Required = Required.Always)]
+        public int Key { get; set; }
 
         [JsonProperty("dataReceived", Required = Required.Always)]
         public long DataReceived { get; set; }

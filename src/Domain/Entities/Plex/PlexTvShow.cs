@@ -25,7 +25,7 @@ namespace PlexRipper.Domain
         {
             var downloadTasks = Seasons.SelectMany(x => x.CreateDownloadTasks()).ToList();
 
-            downloadTasks.ForEach(downloadTask => downloadTask.TitleTvShow = Title);
+            downloadTasks.ForEach(downloadTask => downloadTask.MetaData.TvShowTitle = Title);
 
             return downloadTasks;
         }

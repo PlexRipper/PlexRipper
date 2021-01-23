@@ -27,6 +27,7 @@
 						:library="library"
 						:view-mode="viewMode"
 						:has-selected="getSelectedMediaIds.length > 0"
+						:hide-download-button="!isTableView"
 						@view-change="changeView"
 						@refresh-library="refreshLibrary"
 						@download="processDownloadCommand([])"
@@ -35,7 +36,7 @@
 				<!--	Data table display	-->
 				<template v-if="isTableView">
 					<media-table
-						ref="overview-media-table"
+						ref="overviewMediaTable"
 						:items="items"
 						:library-id="libraryId"
 						:media-type="mediaType"
@@ -120,7 +121,7 @@ export default class MediaOverview extends Vue {
 	@Ref('detailsOverview')
 	readonly detailsOverview!: DetailsOverview;
 
-	@Ref('overview-media-table')
+	@Ref('overviewMediaTable')
 	readonly overviewMediaTableRef!: MediaTable;
 
 	selected: string[] = [];
@@ -246,8 +247,12 @@ export default class MediaOverview extends Vue {
 	processDownloadCommand(downloadMediaCommand: DownloadMediaDTO[]): void {
 		if (downloadMediaCommand.length > 0) {
 			this.downloadConfirmationRef.openDialog(downloadMediaCommand);
-		} else {
+			return;
+		}
+		if (this.overviewMediaTableRef) {
 			this.downloadConfirmationRef.openDialog(this.overviewMediaTableRef.createDownloadCommands());
+		} else {
+			Log.error('overviewMediaTableRef was invalid', this.overviewMediaTableRef);
 		}
 	}
 

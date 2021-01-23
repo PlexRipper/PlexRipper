@@ -53,6 +53,7 @@ import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { settingsStore } from '@/store';
 import ButtonType from '@enums/buttonType';
+import Log from 'consola';
 
 @Component({
 	components: {
@@ -180,6 +181,7 @@ export default class DownloadConfirmation extends Vue {
 
 	openDialog(downloadMediaCommand: DownloadMediaDTO[]): void {
 		this.downloadMediaCommand = downloadMediaCommand;
+		Log.info('downloadMedia', downloadMediaCommand);
 		if (this.isConfirmationEnabled) {
 			this.createPreview(downloadMediaCommand);
 		} else {

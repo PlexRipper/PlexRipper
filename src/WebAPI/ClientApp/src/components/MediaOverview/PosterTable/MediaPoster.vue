@@ -48,8 +48,11 @@
 									</h2>
 								</v-col>
 								<v-col cols="auto">
-									<v-btn icon large @click="downloadMedia()">
+									<v-btn v-if="isMovieType" icon large @click="downloadMedia()">
 										<v-icon large> mdi-download </v-icon>
+									</v-btn>
+									<v-btn v-if="isTvShowType" icon large @click="openDetails()">
+										<v-icon large> mdi-magnify </v-icon>
 									</v-btn>
 								</v-col>
 							</v-row>
@@ -80,6 +83,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
 import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import mediaService from '@state/mediaService';
+
 @Component
 export default class MediaPoster extends Vue {
 	@Prop({ required: true, type: Object as () => ITreeViewItem })
@@ -96,6 +100,14 @@ export default class MediaPoster extends Vue {
 	defaultImage: boolean = false;
 	get getLazyLoadingHeight(): number {
 		return this.thumbHeight + 40;
+	}
+
+	get isMovieType(): boolean {
+		return this.mediaType === PlexMediaType.Movie;
+	}
+
+	get isTvShowType(): boolean {
+		return this.mediaType === PlexMediaType.TvShow;
 	}
 
 	getQualityColor(quality: string): string {
@@ -153,11 +165,6 @@ export default class MediaPoster extends Vue {
 	}
 
 	downloadMedia(): void {
-		if (this.mediaType === PlexMediaType.TvShow) {
-			this.openDetails();
-			return;
-		}
-
 		const downloadCommand: DownloadMediaDTO = {
 			type: this.mediaType,
 			mediaIds: [this.mediaItem.id],
@@ -165,7 +172,7 @@ export default class MediaPoster extends Vue {
 			plexAccountId: 0,
 		};
 
-		this.$emit('download', downloadCommand);
+		this.$emit('download', [downloadCommand]);
 	}
 
 	openDetails(): void {

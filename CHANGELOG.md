@@ -1,3 +1,8 @@
+## [0.6.3] - 2021-01-24
+### Fixed
+-   Fixed the downloadPreview of the media not shown correctly based on the selection.
+-   Fixed the downloadTaskCreation progressbar freezing on 0% due to no updates.
+
 ## [0.6.2] - 2021-01-24
 ### Fixed
  - Fixed the movie poster view not being able to download.

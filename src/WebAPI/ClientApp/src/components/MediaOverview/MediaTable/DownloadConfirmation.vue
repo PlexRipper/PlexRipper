@@ -106,61 +106,87 @@ export default class DownloadConfirmation extends Vue {
 	}
 
 	private createPreview(downloadMediaCommands: DownloadMediaDTO[]): void {
-		let filterResult: ITreeViewItem[] = [];
+		let downloadPreview: ITreeViewItem[] = [];
 
+		const movieDownloadCommand = downloadMediaCommands.find((x) => x.type === PlexMediaType.Movie);
 		// If statements instead of switch to avoid having to overcomplicate the variable names.
-		downloadMediaCommands.forEach((downloadMediaCommand) => {
-			const mediaIds = downloadMediaCommand.mediaIds;
+		// Movie: Show only the movie
+		if (movieDownloadCommand) {
+			downloadPreview = downloadPreview.concat(this.items.filter((movie) => movieDownloadCommand.mediaIds.includes(movie.id)));
+		}
 
-			// Movie: Show only the movie
-			if (downloadMediaCommand.type === PlexMediaType.Movie) {
-				filterResult = filterResult.concat(this.items.filter((movie) => mediaIds.includes(movie.id)));
-			}
+		// TvShow: Show tvShow -> with all season -> with all episodes
+		const tvShowDownloadCommand = downloadMediaCommands.find((x) => x.type === PlexMediaType.TvShow);
+		if (tvShowDownloadCommand) {
+			downloadPreview = downloadPreview.concat(this.items.filter((tvShow) => tvShowDownloadCommand.mediaIds.includes(tvShow.id)));
+		}
 
-			// TvShow: Show tvShow -> with all season -> with all episodes
-			if (downloadMediaCommand.type === PlexMediaType.TvShow) {
-				filterResult = filterResult.concat(this.items.filter((tvShow) => mediaIds.some((x) => x === tvShow.id)));
-			}
+		// Season: Show tvShow -> season -> with all episodes
+		const tvShowSeasonDownloadCommand = downloadMediaCommands.find((x) => x.type === PlexMediaType.Season);
+		if (tvShowSeasonDownloadCommand) {
+			const mediaIds = tvShowSeasonDownloadCommand.mediaIds;
 
-			// Season: Show tvShow -> season -> with all episodes
-			if (downloadMediaCommand.type === PlexMediaType.Season) {
-				filterResult = filterResult.concat(
-					this.items
-						.filter((tvShow) => tvShow.children?.some((season) => mediaIds.includes(season.id)))
-						.map((tvShow) => {
-							return {
-								...tvShow,
-								children: tvShow.children?.filter((season) => mediaIds.includes(season.id)),
-							};
-						}),
-				);
-			}
+			downloadPreview = downloadPreview.concat(
+				this.items
+					.filter((tvShow) => tvShow.children?.some((season) => mediaIds.includes(season.id)))
+					.map((tvShow) => {
+						return {
+							...tvShow,
+							children: tvShow.children?.filter((season) => mediaIds.includes(season.id)),
+						};
+					}),
+			);
+		}
 
-			// Episode: Show tvShow -> season -> episode without anything else
-			if (downloadMediaCommand.type === PlexMediaType.Episode) {
-				filterResult = filterResult.concat(
-					this.items
-						.filter((tvShow) =>
-							tvShow.children?.some((season) => season.children?.some((episode) => mediaIds.includes(episode.id))),
-						)
-						.map((tvShow) => {
-							return {
-								...tvShow,
-								children: tvShow.children
-									?.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.includes(episode.id)))
-									.map((season: ITreeViewItem) => {
-										return {
-											...season,
-											children: season?.children?.filter((episode) => mediaIds.includes(episode.id)),
-										};
-									}),
-							};
-						}),
-				);
-			}
+		// Episode: Show tvShow -> season -> episode without anything else
+		const tvShowEpisodeDownloadCommand = downloadMediaCommands.find((x) => x.type === PlexMediaType.Episode);
+		if (tvShowEpisodeDownloadCommand) {
+			const mediaIds = tvShowEpisodeDownloadCommand.mediaIds;
+			const filterResult = this.items
+				.filter((tvShow) => tvShow.children?.some((season) => season.children?.some((episode) => mediaIds.includes(episode.id))))
+				.map((tvShow) => {
+					// Create the tvShow
+					return {
+						...tvShow,
+						children: tvShow.children
+							?.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.includes(episode.id)))
+							.map((season: ITreeViewItem) => {
+								// Create the tvShowSeason
+								return {
+									...season,
+									children: season?.children?.filter((episode) => mediaIds.includes(episode.id)),
+								};
+							}),
+					};
+				});
+
+			// Merge the tvShows
+			filterResult.forEach((filterResultTvShow) => {
+				const downloadPreviewTvShow = downloadPreview.find((x) => x.id === filterResultTvShow.id);
+				if (downloadPreviewTvShow) {
+					// There already is a tvShow in the filterResult with the same id
+					filterResultTvShow.children?.forEach((season) => {
+						const filterResultTvShowSeason = downloadPreviewTvShow?.children?.find((x) => x.id === season.id);
+						if (!filterResultTvShowSeason) {
+							downloadPreviewTvShow?.children?.push(season);
+						}
+					});
+				} else {
+					downloadPreview.push(filterResultTvShow);
+				}
+			});
+		}
+
+		// Calculate mediaSize for each parent and child (TvShow and Season);
+		downloadPreview.forEach((parent) => {
+			parent.children?.forEach((child) => {
+				child.mediaSize = child?.children?.map((x) => x.mediaSize).sum() ?? 0;
+			});
+			parent.mediaSize = parent.children?.map((x) => x.mediaSize).sum() ?? 0;
 		});
 
-		this.downloadPreview = filterResult;
+		Log.info('downloadPreview', downloadPreview);
+		this.downloadPreview = downloadPreview;
 	}
 
 	/* Recursively retrieve all unique keys used in the items: ITreeViewItem[] */

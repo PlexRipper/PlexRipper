@@ -4,9 +4,6 @@ namespace PlexRipper.SignalR.Common
 {
     public class DownloadTaskCreationProgress
     {
-        [JsonProperty("plexLibraryId", Required = Required.Always)]
-        public int PlexLibraryId { get; set; }
-
         [JsonProperty("percentage", Required = Required.Always)]
         public decimal Percentage { get; set; }
 

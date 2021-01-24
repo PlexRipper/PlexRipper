@@ -268,45 +268,55 @@ export default class MediaTable extends Vue {
 			// Instead of 10 episodeIds, we get 1 seasonId if all episodes in that season have been selected.
 			// Same thing for a tvShowId, instead of multiple seasonIds, we get a single tvShowId if all seasons have been selected.
 			const tvShowIds: number[] = [];
+			let seasonIds: number[] = [];
+			const episodesIds: number[] = [];
 			treeTvShows.forEach((treeTvShow) => {
+				// Find tvShow
 				const tvShow = this.items.find((tvShow) => tvShow.id === treeTvShow.id);
 				if (tvShow) {
-					const seasonIds: number[] = [];
-					const episodesIds: number[] = [];
+					const tmpSeasonIds: number[] = [];
 					treeTvShow.children?.forEach((treeSeason) => {
+						// Find season
 						const season = tvShow?.children?.find((x) => x.id === treeSeason.id);
 						if (treeSeason?.children?.length === season?.children?.length) {
-							seasonIds.push(treeSeason.id);
+							tmpSeasonIds.push(treeSeason.id);
 						} else {
 							treeSeason.children?.forEach((x) => episodesIds.push(x.id));
 						}
 					});
 
-					if (tvShow?.children?.length === seasonIds.length) {
+					// Check if all seasons are checked, if so then add the TvShowId
+					if (tvShow?.children?.length === tmpSeasonIds.length) {
 						tvShowIds.push(treeTvShow.id);
-					} else if (seasonIds.length > 0) {
-						downloads.push({
-							mediaIds: seasonIds,
-							type: PlexMediaType.Season,
-							plexAccountId: this.activeAccountId,
-							libraryId: this.libraryId,
-						});
-					}
-
-					if (episodesIds.length > 0) {
-						downloads.push({
-							mediaIds: episodesIds,
-							type: PlexMediaType.Episode,
-							plexAccountId: this.activeAccountId,
-							libraryId: this.libraryId,
-						});
+						// If not then add the remaining to the seasonIds
+					} else if (tmpSeasonIds.length > 0) {
+						seasonIds = seasonIds.concat(tmpSeasonIds);
 					}
 				}
 			});
+
 			if (tvShowIds.length > 0) {
 				downloads.push({
 					mediaIds: tvShowIds,
 					type: PlexMediaType.TvShow,
+					plexAccountId: this.activeAccountId,
+					libraryId: this.libraryId,
+				});
+			}
+
+			if (seasonIds.length > 0) {
+				downloads.push({
+					mediaIds: seasonIds,
+					type: PlexMediaType.Season,
+					plexAccountId: this.activeAccountId,
+					libraryId: this.libraryId,
+				});
+			}
+
+			if (episodesIds.length > 0) {
+				downloads.push({
+					mediaIds: episodesIds,
+					type: PlexMediaType.Episode,
 					plexAccountId: this.activeAccountId,
 					libraryId: this.libraryId,
 				});
@@ -328,7 +338,6 @@ export default class MediaTable extends Vue {
 	/*
 	A promise is send to the parent, which will resolve once the data is available. After which the node expands.
 	 */
-
 	getMedia(item: ITreeViewItem): Promise<ITreeViewItem> {
 		return new Promise((resolve) => this.$emit('request-media', { mediaId: item.id, resolve }));
 	}

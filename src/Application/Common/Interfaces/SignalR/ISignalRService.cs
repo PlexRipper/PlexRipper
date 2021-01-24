@@ -7,7 +7,7 @@ namespace PlexRipper.Application.Common
     {
         Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true);
 
-        Task SendDownloadTaskCreationProgressUpdate(int plexLibraryId, int current, int total);
+        Task SendDownloadTaskCreationProgressUpdate(int current, int total);
 
         Task SendDownloadProgressUpdate(IDownloadProgress downloadProgress);
 

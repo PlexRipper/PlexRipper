@@ -87,6 +87,9 @@ namespace PlexRipper.Application.PlexDownloads
 
         public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadMedias)
         {
+            int mediaCount = downloadMedias.Select(x => x.MediaIds.Sum()).Sum();
+            await _signalRService.SendDownloadTaskCreationProgressUpdate(1, mediaCount);
+            int count = 0;
             for (int i = 0; i < downloadMedias.Count; i++)
             {
                 var downloadMedia = downloadMedias[i];
@@ -96,8 +99,11 @@ namespace PlexRipper.Application.PlexDownloads
                     await _notificationsService.SendResult(result);
                 }
 
-                await _signalRService.SendDownloadTaskCreationProgressUpdate(downloadMedia.LibraryId, i, downloadMedia.MediaIds.Count);
+                count += downloadMedia.MediaIds.Count;
+                await _signalRService.SendDownloadTaskCreationProgressUpdate(count, mediaCount);
             }
+
+            await _signalRService.SendDownloadTaskCreationProgressUpdate(mediaCount, mediaCount);
 
             return Result.Ok();
         }
@@ -213,6 +219,7 @@ namespace PlexRipper.Application.PlexDownloads
                     downloadTask.PlexLibrary = plexTvShow.PlexLibrary;
                     downloadTask.PlexServer = plexTvShow.PlexServer;
                 }
+
                 downloadTasks.AddRange(tvShowDownloadTasks);
                 Log.Debug($"Created download task(s) for tvShow: {plexTvShow.Title}");
             }
@@ -238,11 +245,10 @@ namespace PlexRipper.Application.PlexDownloads
                     downloadTask.PlexLibrary = plexTvShowSeason.PlexLibrary;
                     downloadTask.PlexServer = plexTvShowSeason.PlexServer;
                 }
+
                 downloadTasks.AddRange(seasonDownloadTasks);
                 Log.Debug($"Created download task(s) for tvShowSeasons: {plexTvShowSeason.Title}");
             }
-
-
 
             return await FinalizeDownloadTasks(downloadTasks, plexAccountId);
         }

@@ -76,7 +76,7 @@ namespace PlexRipper.SignalR
             await _progressHub.Clients.All.SendAsync(nameof(LibraryProgress), progress);
         }
 
-        public async Task SendDownloadTaskCreationProgressUpdate(int plexLibraryId, int current, int total)
+        public async Task SendDownloadTaskCreationProgressUpdate(int current, int total)
         {
             if (_progressHub?.Clients?.All == null)
             {
@@ -86,7 +86,6 @@ namespace PlexRipper.SignalR
 
             var progress = new DownloadTaskCreationProgress
             {
-                PlexLibraryId = plexLibraryId,
                 Percentage = DataFormat.GetPercentage(current, total),
                 Current = current,
                 Total = total,

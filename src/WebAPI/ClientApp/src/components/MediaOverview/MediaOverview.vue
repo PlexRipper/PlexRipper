@@ -79,7 +79,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
-import { filter, finalize, tap } from 'rxjs/operators';
+import { finalize, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import MediaPoster from '@mediaOverview/PosterTable/MediaPoster.vue';
@@ -352,10 +352,8 @@ export default class MediaOverview extends Vue {
 
 		SignalrService.getDownloadTaskCreationProgress()
 			.pipe(
-				filter((x) => x.plexLibraryId === this.libraryId),
 				tap((data) => {
 					this.downloadTaskCreationProgress = data;
-					Log.debug(data);
 				}),
 				finalize(() => {
 					setTimeout(() => {

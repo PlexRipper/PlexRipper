@@ -8,4 +8,12 @@ export default (): void => {
 
 		return this;
 	};
+
+	Array.prototype.sum = function (): number {
+		let sum = 0;
+		if (this && this.length > 0) {
+			this.forEach((x) => (sum += x));
+		}
+		return sum;
+	};
 };

@@ -207,8 +207,13 @@ namespace PlexRipper.Application.PlexDownloads
             var downloadTasks = new List<DownloadTask>();
             foreach (var plexTvShow in plexTvShows.Value)
             {
-                downloadTasks.AddRange(plexTvShow.CreateDownloadTasks());
-
+                var tvShowDownloadTasks = plexTvShow.CreateDownloadTasks();
+                foreach (DownloadTask downloadTask in tvShowDownloadTasks)
+                {
+                    downloadTask.PlexLibrary = plexTvShow.PlexLibrary;
+                    downloadTask.PlexServer = plexTvShow.PlexServer;
+                }
+                downloadTasks.AddRange(tvShowDownloadTasks);
                 Log.Debug($"Created download task(s) for tvShow: {plexTvShow.Title}");
             }
 
@@ -227,10 +232,17 @@ namespace PlexRipper.Application.PlexDownloads
             var downloadTasks = new List<DownloadTask>();
             foreach (var plexTvShowSeason in plexTvShowSeasonResult.Value)
             {
-                downloadTasks.AddRange(plexTvShowSeason.CreateDownloadTasks());
-
+                var seasonDownloadTasks = plexTvShowSeason.CreateDownloadTasks();
+                foreach (DownloadTask downloadTask in seasonDownloadTasks)
+                {
+                    downloadTask.PlexLibrary = plexTvShowSeason.PlexLibrary;
+                    downloadTask.PlexServer = plexTvShowSeason.PlexServer;
+                }
+                downloadTasks.AddRange(seasonDownloadTasks);
                 Log.Debug($"Created download task(s) for tvShowSeasons: {plexTvShowSeason.Title}");
             }
+
+
 
             return await FinalizeDownloadTasks(downloadTasks, plexAccountId);
         }

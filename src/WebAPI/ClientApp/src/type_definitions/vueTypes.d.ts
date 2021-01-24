@@ -24,5 +24,6 @@ declare module '@nuxt/types/config/runtime' {
 declare global {
 	interface Array<T> {
 		addOrReplace(index: number, object: any): Array<T>;
+		sum(): number;
 	}
 }

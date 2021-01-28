@@ -26,6 +26,8 @@ namespace PlexRipper.BaseTests
             // builder.Populate(services);
 
             AutofacContainer = builder.Build();
+            PlexRipperDbContext.Setup();
+
         }
 
         public IPlexAccountService GetPlexAccountService => AutofacContainer.Resolve<IPlexAccountService>();

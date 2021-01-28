@@ -61,6 +61,16 @@ namespace PlexRipper.Data.Common
             return plexTvShows.Include(x => x.PlexServer);
         }
 
+        public static IQueryable<PlexTvShow> IncludeSeasons(this IQueryable<PlexTvShow> plexTvShows)
+        {
+            return plexTvShows.Include(x => x.Seasons);
+        }
+
+        public static IQueryable<PlexTvShow> IncludeEpisodes(this IQueryable<PlexTvShow> plexTvShows)
+        {
+            return plexTvShows.Include(x => x.Seasons).ThenInclude(x => x.Episodes);
+        }
+
         #endregion
 
         #region PlexTvShow

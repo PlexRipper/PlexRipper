@@ -131,12 +131,6 @@ namespace PlexRipper.Application.PlexLibraries
                 return updateResult.ToResult();
             }
 
-            var deleteResult = await _mediator.Send(new DeleteMediaFromPlexLibraryCommand(plexLibrary.Id));
-            if (deleteResult.IsFailed)
-            {
-                return deleteResult.ToResult();
-            }
-
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
             if (createResult.IsFailed)
             {
@@ -173,12 +167,6 @@ namespace PlexRipper.Application.PlexLibraries
             if (updateResult.IsFailed)
             {
                 return updateResult.ToResult();
-            }
-
-            var deleteResult = await _mediator.Send(new DeleteMediaFromPlexLibraryCommand(plexLibrary.Id));
-            if (deleteResult.IsFailed)
-            {
-                return deleteResult.ToResult();
             }
 
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));

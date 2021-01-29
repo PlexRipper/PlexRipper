@@ -1,5 +1,6 @@
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import { PlexMediaType, PlexMovieDTO, PlexTvShowDTO } from '@dto/mainApi';
+import { DownloadStatus, DownloadTaskTvShowDTO, PlexMediaType, PlexMovieDTO, PlexTvShowDTO } from '@dto/mainApi';
+import IDownloadRow from '~/pages/downloads/types/IDownloadRow';
 
 export default abstract class Convert {
 	public static tvShowsToTreeViewItems(tvShows: PlexTvShowDTO[]): ITreeViewItem[] {
@@ -106,6 +107,60 @@ export default abstract class Convert {
 				});
 			}
 		});
+		return items;
+	}
+
+	public static DownloadTaskTvShowToTreeViewTableRows(tvShows: DownloadTaskTvShowDTO[]): IDownloadRow[] {
+		const items: IDownloadRow[] = [];
+
+		tvShows.forEach((tvShow: DownloadTaskTvShowDTO) => {
+			const seasons: IDownloadRow[] = [];
+			if (tvShow.seasons) {
+				tvShow.seasons.forEach((season) => {
+					const episodes: IDownloadRow[] = [];
+					if (season.episodes) {
+						season.episodes.forEach((episode) => {
+							// Add Episode
+							episodes.push({
+								mediaType: PlexMediaType.Episode,
+								plexLibraryId: episode.plexLibraryId,
+								plexServerId: episode.plexServerId,
+								title: episode.title,
+								status: episode.status,
+								dataReceived: episode.dataReceived,
+								dataTotal: episode.dataTotal,
+								downloadSpeed: 0,
+							} as IDownloadRow);
+						});
+						// Add seasons
+						seasons.push({
+							mediaType: PlexMediaType.Season,
+							children: episodes,
+							status: episodes.length > 0 ? episodes[0].status : DownloadStatus.Unknown,
+							plexLibraryId: tvShow.plexLibraryId,
+							plexServerId: tvShow.plexServerId,
+							dataReceived: episodes.map((x) => x.dataReceived).sum(),
+							dataTotal: episodes.map((x) => x.dataTotal).sum(),
+							title: season.title,
+							downloadSpeed: episodes.map((x) => x.downloadSpeed).sum(),
+						} as IDownloadRow);
+					}
+				});
+				// Add tvShow
+				items.push({
+					title: tvShow.title,
+					mediaType: PlexMediaType.TvShow,
+					status: seasons.length > 0 ? seasons[0].status : DownloadStatus.Unknown,
+					children: seasons,
+					plexLibraryId: tvShow.plexLibraryId,
+					plexServerId: tvShow.plexServerId,
+					dataReceived: seasons.map((x) => x.dataReceived).sum(),
+					dataTotal: seasons.map((x) => x.dataTotal).sum(),
+					downloadSpeed: seasons.map((x) => x.downloadSpeed).sum(),
+				} as IDownloadRow);
+			}
+		});
+
 		return items;
 	}
 }

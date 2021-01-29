@@ -123,6 +123,7 @@ const config: NuxtConfig = {
 				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
 				config.resolve.alias['@overviews'] = path.resolve(__dirname, 'src/components/overviews');
 				config.resolve.alias['@mediaOverview'] = path.resolve(__dirname, 'src/components/MediaOverview/');
+				config.resolve.alias['@vTreeViewTable'] = path.resolve(__dirname, 'src/components/General/VTreeViewTable');
 			}
 		},
 	},

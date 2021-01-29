@@ -1,9 +1,9 @@
-import { DownloadTaskDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { DownloadTaskContainerDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
 
 export default interface StoreState {
 	servers: PlexServerDTO[];
-	downloads: DownloadTaskDTO[];
+	downloads: DownloadTaskContainerDTO;
 	libraries: PlexLibraryDTO[];
 	mediaUrls: IObjectUrl[];
 }

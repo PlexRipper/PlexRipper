@@ -108,7 +108,7 @@ namespace PlexRipper.SignalR
         }
 
         /// <inheritdoc/>
-        public async Task SendDownloadStatusUpdate(int id, DownloadStatus downloadStatus)
+        public async Task SendDownloadStatusUpdate(int id, DownloadStatus downloadStatus, int plexServerId, int plexLibraryId)
         {
             if (_progressHub?.Clients?.All == null)
             {
@@ -116,7 +116,13 @@ namespace PlexRipper.SignalR
                 return;
             }
 
-            var downloadStatusChanged = new DownloadStatusChanged(id, downloadStatus);
+            var downloadStatusChanged = new DownloadStatusChanged
+            {
+                Id = id,
+                Status = downloadStatus,
+                PlexLibraryId = plexLibraryId,
+                PlexServerId = plexServerId,
+            };
 
             await _progressHub.Clients.All.SendAsync(nameof(DownloadStatusChanged), downloadStatusChanged);
         }

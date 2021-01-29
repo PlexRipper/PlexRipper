@@ -90,7 +90,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
-import IMediaTableHeader from '@interfaces/IMediaTableHeader';
+import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
@@ -195,7 +195,7 @@ export default class MediaTable extends Vue {
 		this.$emit('selected', this.getSelected);
 	}
 
-	get getHeaders(): IMediaTableHeader[] {
+	get getHeaders(): ITreeViewTableHeader[] {
 		return [
 			// {
 			// 	text: 'Id',

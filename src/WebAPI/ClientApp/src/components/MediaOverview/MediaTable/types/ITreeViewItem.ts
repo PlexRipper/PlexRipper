@@ -1,9 +1,7 @@
 import { PlexMediaType } from '@dto/mainApi';
+import ITreeViewTableRow from '@components/General/VTreeViewTable/ITreeViewTableRow';
 
-export default interface ITreeViewItem {
-	id: number;
-	key: string;
-	title: string;
+export default interface ITreeViewItem extends ITreeViewTableRow {
 	year: number;
 	mediaSize: number;
 	duration: number;
@@ -13,9 +11,7 @@ export default interface ITreeViewItem {
 	hasTheme: boolean;
 	addedAt: string;
 	updatedAt: string;
-	childCount: number;
 	plexLibraryId: number;
 	plexServerId: number;
 	type: PlexMediaType;
-	children?: ITreeViewItem[];
 }

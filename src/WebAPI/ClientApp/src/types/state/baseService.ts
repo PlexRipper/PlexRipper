@@ -1,6 +1,7 @@
 import Log from 'consola';
 import { ObservableStore } from '@codewithdan/observable-store';
 import StoreState from '@state/storeState';
+import { DownloadTaskContainerDTO } from '@dto/mainApi';
 
 export class BaseService extends ObservableStore<StoreState> {
 	public constructor(stateSliceSelector: (state: any) => any = () => {}) {
@@ -9,7 +10,7 @@ export class BaseService extends ObservableStore<StoreState> {
 		if (!this.getState()) {
 			ObservableStore.initializeState({
 				servers: [],
-				downloads: [],
+				downloads: {} as DownloadTaskContainerDTO,
 				libraries: [],
 				mediaUrls: [],
 			} as StoreState);

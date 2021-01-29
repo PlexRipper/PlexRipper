@@ -23,7 +23,7 @@ declare module '@nuxt/types/config/runtime' {
 // Extensions
 declare global {
 	interface Array<T> {
-		addOrReplace(index: number, object: any): Array<T>;
+		addOrReplace(searchFunction: Function, object: any): Array<T>;
 		sum(): number;
 	}
 }

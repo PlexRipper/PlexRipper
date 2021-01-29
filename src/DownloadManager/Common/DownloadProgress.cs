@@ -38,6 +38,12 @@ namespace PlexRipper.DownloadManager.Common
         [JsonProperty("workerProgresses", Required = Required.Always)]
         public List<IDownloadWorkerProgress> WorkerProgresses { get; }
 
+        [JsonProperty("plexServerId", Required = Required.Always)]
+        public int PlexServerId { get; set; }
+
+        [JsonProperty("plexLibraryId", Required = Required.Always)]
+        public int PlexLibraryId { get; set; }
+
         public DownloadProgress(List<IDownloadWorkerProgress> progresses)
         {
             WorkerProgresses = progresses;

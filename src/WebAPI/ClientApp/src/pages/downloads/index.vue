@@ -22,7 +22,8 @@
 							<v-expansion-panel-content>
 								<downloads-table
 									v-model="selected"
-									:downloads="getDownloadRows(plexServer.id)"
+									:downloads="getDownloadContainer(plexServer.id)"
+									:server-id="plexServer.id"
 									@pause="pauseDownloadTask"
 									@clear="clearDownloadTask"
 									@delete="deleteDownloadTask"
@@ -51,15 +52,7 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { pauseDownloadTask, restartDownloadTask, startDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@state/downloadService';
-import SignalrService from '@service/signalrService';
-import {
-	DownloadProgress,
-	DownloadStatus,
-	DownloadStatusChanged,
-	DownloadTaskDTO,
-	FileMergeProgress,
-	PlexServerDTO,
-} from '@dto/mainApi';
+import { DownloadTaskContainerDTO, DownloadTaskDTO, DownloadTaskTvShowDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import _ from 'lodash';
 import DownloadsTable from './components/DownloadsTable.vue';
@@ -77,51 +70,16 @@ import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsD
 })
 export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
-	downloads: DownloadTaskDTO[] = [];
-	downloadProgressList: DownloadProgress[] = [];
-	fileMergeProgressList: FileMergeProgress[] = [];
-	downloadStatusList: DownloadStatusChanged[] = [];
+	downloads: DownloadTaskContainerDTO | null = null;
 	openExpansions: number[] = [];
 	selected: IDownloadRow[] = [];
 	downloadTaskDetail: DownloadTaskDTO | null = null;
 	private dialog: boolean = false;
 
-	/**
-	 * Merge the SignalR feeds into 1 update IDownloadRow
-	 */
-	getDownloadRows(serverId: number): IDownloadRow[] {
-		const downloadRows: IDownloadRow[] = [];
-		const downloads: DownloadTaskDTO[] = this.downloads.filter((x) => x.plexServerId === serverId);
-		for (let i = 0; i < downloads.length; i++) {
-			const download = downloads[i];
-			const downloadProgress = this.downloadProgressList.find((x) => x.id === download.id);
-			const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === download.id);
-			// Merge the various feeds
-			const downloadRow: IDownloadRow = {
-				...download,
-				...downloadProgress,
-				// Status priority: downloadStatusUpdate > getDownloadList
-				status: downloadStatusUpdate?.status ?? download.status,
-			} as IDownloadRow;
+	getDownloadContainer(serverId: number): DownloadTaskContainerDTO {
+		const tvShows: DownloadTaskTvShowDTO[] = this.downloads?.tvShows?.filter((x) => x.plexServerId === serverId) ?? [];
 
-			if (downloadRow.status === DownloadStatus.Merging) {
-				const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === download.id);
-				downloadRow.percentage = fileMergeProgress?.percentage ?? 0;
-				downloadRow.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
-				downloadRow.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
-				downloadRow.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
-			}
-
-			if (downloadRow.status === DownloadStatus.Completed) {
-				downloadRow.percentage = 100;
-				downloadRow.timeRemaining = 0;
-				downloadRow.downloadSpeed = 0;
-				downloadRow.dataReceived = downloadRow.dataTotal;
-				this.cleanupProgress(download.id);
-			}
-			downloadRows.push(downloadRow);
-		}
-		return downloadRows;
+		return { tvShows } as DownloadTaskContainerDTO;
 	}
 
 	get selectedIds(): number[] {
@@ -130,18 +88,6 @@ export default class Downloads extends Vue {
 
 	get hasSelected(): boolean {
 		return this.selectedIds.length > 0;
-	}
-
-	updateDownloadProgress(downloadProgress: DownloadProgress): void {
-		// Check if there is already a progress object for this Id
-		const i = this.downloadProgressList.findIndex((x) => x.id === downloadProgress.id);
-		if (i > -1) {
-			// Update
-			this.downloadProgressList.splice(i, 1, downloadProgress);
-		} else {
-			// Add
-			this.downloadProgressList.push(downloadProgress);
-		}
 	}
 
 	// region single commands
@@ -217,19 +163,6 @@ export default class Downloads extends Vue {
 		this.dialog = false;
 	}
 
-	cleanupProgress(downloadTaskId: number): void {
-		// Clean-up progress objects
-		const downloadProgressIndex = this.downloadProgressList.findIndex((x) => x.id === downloadTaskId);
-		if (downloadProgressIndex > -1) {
-			this.downloadProgressList.splice(downloadProgressIndex, 1);
-		}
-
-		const fileMergeProgressIndex = this.fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
-		if (fileMergeProgressIndex > -1) {
-			this.fileMergeProgressList.splice(fileMergeProgressIndex, 1);
-		}
-	}
-
 	created(): void {
 		DownloadService.getDownloadListInServers().subscribe((data) => {
 			this.plexServers = data;
@@ -237,51 +170,9 @@ export default class Downloads extends Vue {
 		});
 
 		// Retrieve download list
-		DownloadService.getDownloadList().subscribe((data) => {
+		DownloadService.getDownloadList().subscribe((data: DownloadTaskContainerDTO) => {
 			Log.info('getDownloadList', data);
-			this.downloads = data ?? [];
-		});
-
-		// Retrieve download status from SignalR
-		SignalrService.getDownloadStatus().subscribe((data) => {
-			if (data) {
-				const index = this.downloadStatusList.findIndex((x) => x.id === data.id);
-				if (index > -1) {
-					this.downloadStatusList.splice(index, 1);
-					// Clean-up progress result if the download has finished
-					if (data.status === DownloadStatus.Completed) {
-						const progressIndex = this.downloadProgressList.findIndex((x) => x.id === data.id);
-						if (progressIndex > -1) {
-							this.downloadProgressList.splice(progressIndex, 1);
-						}
-					}
-				}
-				this.downloadStatusList.push(data);
-			}
-		});
-
-		SignalrService.getDownloadProgress().subscribe((data) => {
-			if (data) {
-				this.updateDownloadProgress(data);
-			} else {
-				Log.error(`DownloadProgress was undefined`);
-			}
-		});
-
-		SignalrService.getFileMergeProgress().subscribe((fileMergeProgress) => {
-			if (fileMergeProgress) {
-				// Check if there is already a progress object for this Id
-				const i = this.fileMergeProgressList.findIndex((x) => x.id === fileMergeProgress.id);
-				if (i > -1) {
-					// Update
-					this.fileMergeProgressList.splice(i, 1, fileMergeProgress);
-				} else {
-					// Add
-					this.fileMergeProgressList.push(fileMergeProgress);
-				}
-			} else {
-				Log.error(`FileMergeProgress was undefined`);
-			}
+			this.downloads = data ?? null;
 		});
 	}
 }

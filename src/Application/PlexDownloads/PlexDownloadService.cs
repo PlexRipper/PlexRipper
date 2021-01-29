@@ -73,9 +73,68 @@ namespace PlexRipper.Application.PlexDownloads
             return _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
         }
 
-        public Task<Result<List<DownloadTask>>> GetDownloadTasksAsync()
+        public async Task<Result<DownloadTaskContainerDTO>> GetDownloadTasksAsync()
         {
-            return _mediator.Send(new GetAllDownloadTasksQuery());
+            var result = await _mediator.Send(new GetAllDownloadTasksQuery());
+            if (result.IsFailed)
+            {
+                return result.ToResult();
+            }
+
+            var downloadTasks = result.Value;
+
+            var tvShowDownloadTasks = new List<DownloadTaskTvShowDTO>();
+            foreach (var downloadTask in downloadTasks)
+            {
+                if (downloadTask.MediaType == PlexMediaType.Episode)
+                {
+                    var tvShowDownloadTask =
+                        tvShowDownloadTasks.Find(x => x.Title == downloadTask.TitleTvShow && x.PlexLibraryId == downloadTask.PlexLibraryId);
+                    if (tvShowDownloadTask is null)
+                    {
+                        tvShowDownloadTask = new DownloadTaskTvShowDTO
+                        {
+                            Title = downloadTask.TitleTvShow,
+                            PlexServerId = downloadTask.PlexServerId,
+                            PlexLibraryId = downloadTask.PlexLibraryId,
+                            Seasons = new List<DownloadTaskTvShowSeasonDTO>(),
+                        };
+                        tvShowDownloadTasks.Add(tvShowDownloadTask);
+                    }
+
+                    var tvShowSeasonDownloadTask = tvShowDownloadTasks.SelectMany(x => x.Seasons).ToList()
+                        .Find(x => x.Title == downloadTask.TitleTvShowSeason && x.PlexLibraryId == downloadTask.PlexLibraryId);
+                    if (tvShowSeasonDownloadTask is null)
+                    {
+                        tvShowSeasonDownloadTask = new DownloadTaskTvShowSeasonDTO
+                        {
+                            Title = downloadTask.TitleTvShowSeason,
+                            PlexServerId = downloadTask.PlexServerId,
+                            PlexLibraryId = downloadTask.PlexLibraryId,
+                        };
+                        tvShowDownloadTask.Seasons.Add(tvShowSeasonDownloadTask);
+                    }
+
+                    tvShowSeasonDownloadTask.Episodes.Add(new DownloadTaskTvShowEpisodeDTO
+                    {
+                        Id = downloadTask.Id,
+                        Title = downloadTask.TitleTvShowEpisode,
+                        DataReceived = downloadTask.DataReceived,
+                        DataTotal = downloadTask.DataTotal,
+                        PlexServerId = downloadTask.PlexServerId,
+                        PlexLibraryId = downloadTask.PlexLibraryId,
+                        Status = downloadTask.DownloadStatus,
+                        DestinationPath = downloadTask.DestinationPath,
+                        DownloadPath = downloadTask.DownloadPath,
+                        DownloadUrl = downloadTask.DownloadUrl,
+                    });
+                }
+            }
+
+            return Result.Ok(new DownloadTaskContainerDTO
+            {
+                TvShows = tvShowDownloadTasks,
+            });
         }
 
         public Task<string> GetPlexTokenAsync(PlexAccount plexAccount)

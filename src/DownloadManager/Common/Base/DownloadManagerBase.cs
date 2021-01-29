@@ -18,18 +18,19 @@ namespace PlexRipper.DownloadManager.Common
             _signalRService = signalRService;
         }
 
-        protected void SetDownloadStatus(int downloadTaskId, DownloadStatus status)
+        protected void SetDownloadStatus(DownloadStatusChanged downloadStatusChanged)
         {
-            Task.Run(() => SetDownloadStatusAsync(downloadTaskId, status));
+            Task.Run(() => SetDownloadStatusAsync(downloadStatusChanged));
         }
 
-        protected async Task SetDownloadStatusAsync(int downloadTaskId, DownloadStatus status)
+        protected async Task SetDownloadStatusAsync(DownloadStatusChanged downloadStatusChanged)
         {
-            Log.Debug($"DownloadClient changed downloadStatus for downloadTask {downloadTaskId} " +
-                      $"to {status.ToString()}");
+            Log.Debug($"DownloadClient changed downloadStatus for downloadTask {downloadStatusChanged.Id} " +
+                      $"to {downloadStatusChanged.Status.ToString()}");
 
-            await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadTaskId, status));
-            await _signalRService.SendDownloadStatusUpdate(downloadTaskId, status);
+            await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadStatusChanged.Id, downloadStatusChanged.Status));
+            await _signalRService.SendDownloadStatusUpdate(downloadStatusChanged.Id, downloadStatusChanged.Status, downloadStatusChanged.PlexServerId,
+                downloadStatusChanged.PlexLibraryId);
         }
     }
 }

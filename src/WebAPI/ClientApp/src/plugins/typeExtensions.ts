@@ -1,5 +1,6 @@
 export default (): void => {
-	Array.prototype.addOrReplace = function (index: number, object: any) {
+	Array.prototype.addOrReplace = function (searchFunction: Function, object: any) {
+		const index = this.findIndex(() => searchFunction);
 		if (this.length > index) {
 			this.push(object);
 		} else {

@@ -30,7 +30,8 @@
 			"@service/*": ["./types/service/*"],
 			"@components/*": ["./components/*"],
 			"@overviews/*": ["./components/overviews/*"],
-			"@mediaOverview/*": ["./components/MediaOverview/*"]
+			"@mediaOverview/*": ["./components/MediaOverview/*"],
+			"@vTreeViewTable/*": ["./components/General/VTreeViewTable/*"]
 		},
 		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify", "nuxt-i18n"]
 	},

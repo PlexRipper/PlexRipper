@@ -1,83 +1,32 @@
 <template>
-	<v-data-table
-		fixed-header
-		show-select
-		hide-default-footer
-		:headers="getHeaders"
-		:items-per-page="30"
-		:items="downloads"
-		:loading="loading"
-		:value="value"
-		@input="$emit('input', $event)"
-	>
-		<!-- Data received -->
-		<template #item.dataReceived="{ item }">
-			<strong>
-				<file-size :size="item.dataReceived" />
-			</strong>
-		</template>
-		<!-- Data total -->
-		<template #item.dataTotal="{ item }">
-			<strong>
-				<file-size :size="item.dataTotal" />
-			</strong>
-		</template>
-		<!-- Download speed -->
-		<template #item.downloadSpeed="{ item }">
-			<strong v-if="item.downloadSpeed > 0">
-				<file-size :size="item.downloadSpeed" speed />
-			</strong>
-			<strong v-else> - </strong>
-		</template>
-		<!-- Download Time Remaining -->
-		<template #item.timeRemaining="{ item }">
-			<strong> {{ formatCountdown(item.timeRemaining) }} </strong>
-		</template>
-		<!-- Percentage -->
-		<template #item.percentage="{ item }">
-			<v-progress-linear :value="item.percentage" stream striped color="red" height="25">
-				<template #default="{ value }">
-					<strong>{{ value }}%</strong>
-				</template>
-			</v-progress-linear>
-		</template>
-		<!-- Actions -->
-		<template #item.actions="{ item }">
-			<v-btn-toggle borderless dense group tile>
-				<template v-for="(action, i) in availableActions(item)">
-					<!-- Render buttons -->
-					<template v-for="(button, y) in getButtons">
-						<v-btn v-if="action === button.value" :key="`${i}-${y}`" icon @click="command(action, item.id)">
-							<v-tooltip top>
-								<template #activator="{ on, attrs }">
-									<!-- Button icon-->
-									<v-icon v-bind="attrs" v-on="on"> {{ button.icon }} </v-icon>
-								</template>
-								<!-- Tooltip text -->
-								<span>{{ button.name }}</span>
-							</v-tooltip>
-						</v-btn>
-					</template>
-				</template>
-			</v-btn-toggle>
-		</template>
-	</v-data-table>
+	<v-tree-view-table :items="getDownloads" :headers="getHeaders" />
 </template>
-
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
-import { DownloadStatus } from '@dto/mainApi';
-import { DataTableHeader } from 'vuetify/types';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import {
+	DownloadProgress,
+	DownloadStatus,
+	DownloadStatusChanged,
+	DownloadTaskContainerDTO,
+	FileMergeProgress,
+} from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
+import Convert from '@mediaOverview/MediaTable/types/Convert';
+import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
+import SignalrService from '@service/signalrService';
+import Log from 'consola';
+import { filter } from 'rxjs/operators';
 import IDownloadRow from '../types/IDownloadRow';
+
 @Component({
 	components: {
 		LoadingSpinner,
 	},
 })
 export default class DownloadsTable extends Vue {
-	@Prop({ required: true, type: Array as () => IDownloadRow[] })
-	readonly downloads!: IDownloadRow[];
+	@Prop({ required: true, type: Object as () => DownloadTaskContainerDTO })
+	readonly downloads!: DownloadTaskContainerDTO;
 
 	@Prop({ type: Boolean })
 	readonly loading: Boolean = false;
@@ -85,7 +34,51 @@ export default class DownloadsTable extends Vue {
 	@Prop({ required: true, type: Array as () => IDownloadRow[] })
 	readonly value!: IDownloadRow[];
 
-	get getHeaders(): DataTableHeader<IDownloadRow>[] {
+	@Prop({ required: true, type: Number })
+	readonly serverId!: number;
+
+	downloadProgressList: DownloadProgress[] = [];
+	fileMergeProgressList: FileMergeProgress[] = [];
+	downloadStatusList: DownloadStatusChanged[] = [];
+
+	get getDownloads(): IDownloadRow[] {
+		const downloadContainer = Convert.DownloadTaskTvShowToTreeViewTableRows(this.downloads?.tvShows ?? []);
+
+		downloadContainer.tvShows?.forEach((tvShow) => {
+			tvShow.seasons?.forEach((season) => {
+				season.episodes?.forEach((episode) => {
+					const downloadProgress = this.downloadProgressList.find((x) => x.id === episode.id);
+					const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === episode.id);
+					// Merge the various feeds
+					episode = {
+						...episode,
+						...downloadProgress,
+						// Status priority: downloadStatusUpdate > getDownloadList
+						status: downloadStatusUpdate?.status ?? DownloadStatus.Unknown,
+					} as IDownloadRow;
+
+					if (episode.status === DownloadStatus.Merging) {
+						const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === episode.id);
+						episode.percentage = fileMergeProgress?.percentage ?? 0;
+						episode.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
+						episode.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
+						episode.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
+					}
+
+					if (episode.status === DownloadStatus.Completed) {
+						episode.percentage = 100;
+						episode.timeRemaining = 0;
+						episode.downloadSpeed = 0;
+						episode.dataReceived = episode.dataTotal;
+						this.cleanupProgress(episode.id);
+					}
+				});
+			});
+		});
+		return downloadContainer;
+	}
+
+	get getHeaders(): ITreeViewTableHeader[] {
 		return [
 			// {
 			// 	text: 'Id',
@@ -94,35 +87,67 @@ export default class DownloadsTable extends Vue {
 			{
 				text: 'Title',
 				value: 'title',
+				maxWidth: 250,
 			},
 			{
 				text: 'Status',
 				value: 'status',
+				width: 120,
 			},
 			{
-				text: 'Data Received',
+				text: 'Received',
 				value: 'dataReceived',
+				type: TreeViewTableHeaderEnum.FileSize,
+				width: 120,
 			},
 			{
 				text: 'Size',
 				value: 'dataTotal',
+				type: TreeViewTableHeaderEnum.FileSize,
+				width: 120,
 			},
 			{
 				text: 'Speed',
 				value: 'downloadSpeed',
+				type: TreeViewTableHeaderEnum.FileSpeed,
+				width: 120,
 			},
 			{
 				text: 'ETA',
 				value: 'timeRemaining',
+				width: 120,
 			},
 			{
 				text: 'Percentage',
 				value: 'percentage',
+				type: TreeViewTableHeaderEnum.Percentage,
+				width: 120,
 			},
 			{
 				text: 'Actions',
 				value: 'actions',
-				width: '100px',
+				type: TreeViewTableHeaderEnum.Actions,
+				actions: [
+					{
+						command: 'details',
+					},
+					{
+						command: 'stop',
+					},
+					{
+						command: 'delete',
+					},
+					{
+						command: 'pause',
+					},
+					{
+						command: 'stop',
+					},
+					{
+						command: 'start',
+					},
+				],
+				width: 120,
 				sortable: false,
 			},
 		];
@@ -220,6 +245,62 @@ export default class DownloadsTable extends Vue {
 
 	command(action: string, itemId: number): void {
 		this.$emit(action, itemId);
+	}
+
+	updateDownloadProgress(downloadProgress: DownloadProgress): void {
+		// Check if there is already a progress object for this Id
+		const i = this.downloadProgressList.findIndex((x) => x.id === downloadProgress.id);
+		if (i > -1) {
+			// Update
+			this.downloadProgressList.splice(i, 1, downloadProgress);
+		} else {
+			// Add
+			this.downloadProgressList.push(downloadProgress);
+		}
+	}
+
+	cleanupProgress(downloadTaskId: number): void {
+		// Clean-up progress objects
+		const downloadProgressIndex = this.downloadProgressList.findIndex((x) => x.id === downloadTaskId);
+		if (downloadProgressIndex > -1) {
+			this.downloadProgressList.splice(downloadProgressIndex, 1);
+		}
+
+		const fileMergeProgressIndex = this.fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
+		if (fileMergeProgressIndex > -1) {
+			this.fileMergeProgressList.splice(fileMergeProgressIndex, 1);
+		}
+	}
+
+	created(): void {
+		SignalrService.getDownloadProgress()
+			.pipe(filter((x) => x.plexServerId === this.serverId))
+			.subscribe((data) => {
+				if (data) {
+					this.updateDownloadProgress(data);
+				} else {
+					Log.error(`DownloadProgress was undefined.`);
+				}
+			});
+
+		// Retrieve download status from SignalR
+		SignalrService.getDownloadStatus()
+			.pipe(filter((x) => x.plexServerId === this.serverId))
+			.subscribe((data) => {
+				if (data) {
+					this.downloadStatusList.addOrReplace((x) => x.id === data.id);
+				} else {
+					Log.error(`DownloadStatusChanged was undefined.`);
+				}
+			});
+
+		SignalrService.getFileMergeProgress().subscribe((fileMergeProgress) => {
+			if (fileMergeProgress) {
+				this.fileMergeProgressList.addOrReplace((x) => x.id === fileMergeProgress.id, fileMergeProgress);
+			} else {
+				Log.error(`FileMergeProgress was undefined`);
+			}
+		});
 	}
 }
 </script>

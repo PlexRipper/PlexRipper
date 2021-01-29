@@ -148,7 +148,7 @@ namespace Data.UnitTests.Commands
 
         public void Dispose()
         {
-            // _dbContext.Database.EnsureDeleted();
+            _dbContext.Database.EnsureDeleted();
             _dbContext?.Dispose();
         }
     }

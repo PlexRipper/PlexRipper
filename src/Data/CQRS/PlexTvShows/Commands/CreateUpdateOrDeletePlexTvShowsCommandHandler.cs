@@ -52,7 +52,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            // Ensure all tvShows, seasons and episodes have the correct plexLibraryId assigned
+            // Ensure all tvShows, seasons and episodes have the correct plexLibraryId assigned and other values
             var plexTvShowsDict = new Dictionary<int, PlexTvShow>();
             command.PlexLibrary.TvShows.ForEach(plexTvShow =>
             {
@@ -64,12 +64,14 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                     season.PlexLibraryId = plexLibrary.Id;
                     season.PlexServerId = plexLibrary.PlexServerId;
                     season.ParentKey = plexTvShow.Key;
+                    season.TvShow = plexTvShow;
 
                     season.Episodes?.ForEach(episode =>
                     {
                         episode.PlexLibraryId = plexLibrary.Id;
                         episode.PlexServerId = plexLibrary.PlexServerId;
                         episode.ParentKey = season.Key;
+                        episode.TvShowSeason = season;
                     });
                 });
 
@@ -136,12 +138,13 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                         addSeasonDict.Add(newPlexTvSeason.Key, newPlexTvSeason);
 
                         // Add all episodes because the season is new.
-                        searchSeasonResult.Episodes.ForEach(newEpisode => addEpisodeDict.Add(newEpisode.Key, newEpisode));
+                        newPlexTvSeason.Episodes.ForEach(newEpisode => addEpisodeDict.Add(newEpisode.Key, newEpisode));
                     }
                     else
                     {
                         //Update seasons
                         newPlexTvSeason.Id = searchSeasonResult.Id;
+                        newPlexTvSeason.TvShowId = searchSeasonResult.TvShowId;
                         updateSeasonDict.Add(newPlexTvSeason.Key, newPlexTvSeason);
 
                         // Filter the episodes by Add, update or delete.
@@ -149,7 +152,6 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                         {
                             // Set seasonId in every episode
                             newPlexTvShowEpisode.TvShowSeasonId = newPlexTvSeason.Id;
-
                             var searchEpisodeResult = episodeList.Find(x => x.Key == newPlexTvShowEpisode.Key);
                             if (searchEpisodeResult is null)
                             {
@@ -202,13 +204,15 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
             await _dbContext.BulkInsertAsync(tvShowAddList, _config, cancellationToken: token);
 
             // Add tvShowId to every season and then insert episodes in DB.
-            tvShowAddList.ForEach(tvShow => tvShow.Seasons.ForEach(season => season.TvShowId = tvShow.Id));
             var tvShowSeasonAddList = seasonDict.Select(x => x.Value).ToList();
+            tvShowAddList.ForEach(tvShow => tvShow.Seasons.ForEach(season => season.TvShowId = tvShow.Id));
+            tvShowSeasonAddList.ForEach(season => season.TvShowId = season.TvShow.Id);
             await _dbContext.BulkInsertAsync(tvShowSeasonAddList, _config, cancellationToken: token);
 
             // Add season id to every episode and then insert episodes in DB.
-            tvShowSeasonAddList.ForEach(season => season.Episodes.ForEach(episode => episode.TvShowSeasonId = season.Id));
             var tvShowEpisodeAddList = episodeDict.Select(x => x.Value).ToList();
+            tvShowSeasonAddList.ForEach(season => season.Episodes.ForEach(episode => episode.TvShowSeasonId = season.Id));
+            tvShowEpisodeAddList.ForEach(episode => episode.TvShowSeasonId = episode.TvShowSeason.Id);
             await _dbContext.BulkInsertAsync(tvShowEpisodeAddList, _config, cancellationToken: token);
         }
     }

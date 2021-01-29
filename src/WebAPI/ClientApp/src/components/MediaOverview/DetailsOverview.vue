@@ -86,9 +86,9 @@
 		</template>
 		<!--	Loading	-->
 		<template v-else>
-			<v-row>
-				<v-col>
-					<loading-spinner />
+			<v-row justify="center">
+				<v-col cols="auto">
+					<loading-spinner :size="60" />
 				</v-col>
 			</v-row>
 		</template>

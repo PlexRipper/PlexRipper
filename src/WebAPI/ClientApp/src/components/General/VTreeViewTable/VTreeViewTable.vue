@@ -28,7 +28,6 @@
 			</v-row>
 			<!-- TreeView Table -->
 			<v-row no-gutters>
-				{{ testSelection }}
 				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
 					<v-col id="media-table-body" class="col px-0">
 						<template v-for="(parentItem, i) in items">
@@ -42,7 +41,6 @@
 								transition="scroll-x-reverse-transition"
 							>
 								<v-treeview
-									v-model="testSelection"
 									selectable
 									selected-color="red"
 									selection-type="leaf"
@@ -61,7 +59,9 @@
 											<!-- Title -->
 											<v-col class="title-column">
 												<media-type-icon :media-type="item.mediaType" />
-												{{ item[headers[0].value] }}
+												<span class="mt-2">
+													{{ item[headers[0].value] }}
+												</span>
 											</v-col>
 										</v-row>
 									</template>
@@ -77,6 +77,10 @@
 												<!-- Date format -->
 												<template v-if="header.type === 'date'">
 													<date-time :text="item[header.value]" :time="false" short-date />
+												</template>
+												<!-- Date format -->
+												<template v-if="header.type === 'duration'">
+													<duration :value="item[header.value]" />
 												</template>
 												<!-- Filesize -->
 												<template v-else-if="header.type === 'file-size'">
@@ -130,7 +134,7 @@ import ProgressComponent from '@components/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import ButtonType from '@enums/buttonType';
-import IDownloadRow from '~/pages/downloads/types/IDownloadRow';
+import DownloadTaskDTO from '~/pages/downloads/types/DownloadTaskDTO';
 
 declare interface ISelection {
 	index: number;
@@ -144,16 +148,14 @@ declare interface ISelection {
 	},
 })
 export default class VTreeViewTable extends Vue {
-	@Prop({ required: true, type: Array as () => IDownloadRow[] })
-	readonly items!: IDownloadRow[];
+	@Prop({ required: true, type: Array as () => DownloadTaskDTO[] })
+	readonly items!: DownloadTaskDTO[];
 
 	@Prop({ required: true, type: Array as () => ITreeViewTableHeader[] })
 	readonly headers!: ITreeViewTableHeader[];
 
 	@Prop({ required: false, type: Boolean })
 	readonly openAll!: boolean;
-
-	testSelection: string[] = [];
 
 	selected: ISelection[] = [];
 
@@ -198,14 +200,14 @@ export default class VTreeViewTable extends Vue {
 		} else {
 			this.selected.splice(index, 1, { index: i, keys: selected });
 		}
-		// this.emitSelected();
+		this.emitSelected();
 	}
 
 	selectAll(state: boolean): void {
 		if (state) {
-			this.items.forEach((x, i) => {
-				this.selected.addOrReplace(i, { index: i, keys: this.retrieveAllLeafs([x]) } as ISelection);
-			});
+			// this.items.forEach((x, i) => {
+			// 	// this.selected.slice(i, 1, { index: i, keys: this.retrieveAllLeafs([x]) } as ISelection);
+			// });
 		} else {
 			this.selected = [];
 		}

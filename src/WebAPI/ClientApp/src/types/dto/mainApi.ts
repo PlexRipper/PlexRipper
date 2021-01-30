@@ -9,30 +9,32 @@
  * ---------------------------------------------------------------
  */
 
-export type ResultDTOOfListOfDownloadTaskContainerDTO = ResultDTO & { value: DownloadTaskContainerDTO[] };
+export type ResultDTOOfListOfDownloadTaskDTO = ResultDTO & { value: DownloadTaskDTO[] };
 
-export interface DownloadTaskContainerDTO {
-  tvShows: DownloadTaskTvShowDTO[];
-}
-
-export type DownloadTaskTvShowDTO = DownloadTaskMediaDTO & {
-  seasons: DownloadTaskTvShowSeasonDTO[];
-  mediaType: PlexMediaType;
-};
-
-export type DownloadTaskTvShowSeasonDTO = DownloadTaskMediaDTO & {
-  episodes: DownloadTaskTvShowEpisodeDTO[];
-  mediaType: PlexMediaType;
-};
-
-export type DownloadTaskTvShowEpisodeDTO = DownloadTaskMediaDTO & {
+export interface DownloadTaskDTO {
   id: number;
+  title: string;
+  fullTitle: string;
   status: DownloadStatus;
+  fileLocationUrl: string;
+  fileName: string;
   mediaType: PlexMediaType;
+  key: number;
+  downloadSpeed: number;
+  dataReceived: number;
+  dataTotal: number;
+  percentage: number;
+  priority: number;
+  plexServerId: number;
+  plexLibraryId: number;
+  timeRemaining: number;
+  downloadWorkersProgress: IDownloadWorkerProgress[];
   destinationPath: string;
   downloadPath: string;
   downloadUrl: string;
-};
+  children: DownloadTaskDTO[];
+  actions: string[];
+}
 
 export enum DownloadStatus {
   Unknown = "Unknown",
@@ -63,15 +65,17 @@ export enum PlexMediaType {
   Unknown = "Unknown",
 }
 
-export interface DownloadTaskMediaDTO {
-  key: number;
-  title: string;
-  mediaType: PlexMediaType;
-  dataReceived: number;
-  dataTotal: number;
-  priority: number;
-  plexServerId: number;
-  plexLibraryId: number;
+export interface IDownloadWorkerProgress {
+  id?: number;
+  dataReceived?: number;
+  dataTotal?: number;
+  downloadSpeed?: number;
+  downloadSpeedFormatted?: string | null;
+  timeRemaining?: number;
+  bytesRemaining?: number;
+  isCompleted?: boolean;
+  percentage?: number;
+  downloadSpeedAverage?: number;
 }
 
 export interface ResultDTO {
@@ -192,26 +196,6 @@ export type PlexTvShowDTO = PlexMediaDTO & { seasons: PlexTvShowSeasonDTO[] };
 export type PlexTvShowSeasonDTO = PlexMediaDTO & { tvShowId: number; episodes: PlexTvShowEpisodeDTO[] };
 
 export type PlexTvShowEpisodeDTO = PlexMediaDTO & { tvShowSeasonId: number };
-
-export interface DownloadTaskDTO {
-  id: number;
-  title: string;
-  status: DownloadStatus;
-  fileLocationUrl: string;
-  fileName: string;
-  titleTvShow: string;
-  titleTvShowSeason: string;
-  mediaType: PlexMediaType;
-  key: number;
-  dataReceived: number;
-  dataTotal: number;
-  priority: number;
-  plexServerId: number;
-  plexLibraryId: number;
-  destinationPath: string;
-  downloadPath: string;
-  downloadUrl: string;
-}
 
 export interface PlexServerStatusDTO {
   id: number;
@@ -398,19 +382,6 @@ export interface DownloadProgress {
   workerProgresses: IDownloadWorkerProgress[];
   plexServerId: number;
   plexLibraryId: number;
-}
-
-export interface IDownloadWorkerProgress {
-  id?: number;
-  dataReceived?: number;
-  dataTotal?: number;
-  downloadSpeed?: number;
-  downloadSpeedFormatted?: string | null;
-  timeRemaining?: number;
-  bytesRemaining?: number;
-  isCompleted?: boolean;
-  percentage?: number;
-  downloadSpeedAverage?: number;
 }
 
 export interface DownloadTaskCreationProgress {

@@ -68,6 +68,9 @@ namespace PlexRipper.Domain
         [NotMapped]
         public long DataTotal => MetaData?.MediaData?.First()?.Parts?.First()?.Size ?? 0;
 
+        [NotMapped]
+        public decimal Percentage => decimal.Round(DataReceived / DataTotal, 2);
+
         /// <summary>
         /// The release year of the media.
         /// </summary>

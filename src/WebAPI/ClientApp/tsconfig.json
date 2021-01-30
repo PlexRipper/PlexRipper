@@ -33,7 +33,7 @@
 			"@mediaOverview/*": ["./components/MediaOverview/*"],
 			"@vTreeViewTable/*": ["./components/General/VTreeViewTable/*"]
 		},
-		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify", "nuxt-i18n"]
+		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify", "nuxt-i18n", "@types/jest"]
 	},
 	"exclude": ["node_modules", ".nuxt", "node_modules/dist", ".vscode"]
 }

@@ -16,7 +16,18 @@ export default Vue.extend({
 		},
 	},
 	render(h: CreateElement, context: RenderContext): VNode {
-		return h('v-icon', { props: { size: context.props.size } }, Convert.mediaTypeToIcon(context.props.mediaType));
+		return h(
+			'v-icon',
+			{
+				class: {
+					...(context.data.staticClass && {
+						[context.data.staticClass]: true,
+					}),
+				},
+				props: { size: context.props.size },
+			},
+			Convert.mediaTypeToIcon(context.props.mediaType),
+		);
 	},
 });
 </script>

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using AutoMapper;
 using FluentResults;
+using PlexRipper.Application.Common.DTO.WebApi;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
@@ -46,10 +47,6 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.MediaCount))
                 .ForMember(dto => dto.SeasonCount, entity => entity.MapFrom(x => x.SeasonCount))
                 .ForMember(dto => dto.EpisodeCount, entity => entity.MapFrom(x => x.EpisodeCount));
-
-            // DownloadTask -> DownloadTaskDTO
-            CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.DownloadStatus));
 
             // FolderPath -> FolderPathDTO
             CreateMap<FolderPath, FolderPathDTO>(MemberList.Destination)

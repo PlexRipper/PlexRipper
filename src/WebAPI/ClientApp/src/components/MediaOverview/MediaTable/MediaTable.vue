@@ -92,6 +92,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
 import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
 import ProgressComponent from '@components/ProgressComponent.vue';
+import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 import ITreeDownloadItem from '@mediaOverview/MediaTable/types/ITreeDownloadItem';
@@ -215,19 +216,19 @@ export default class MediaTable extends Vue {
 				text: 'Size',
 				value: 'mediaSize',
 				width: 100,
-				type: 'data',
+				type: TreeViewTableHeaderEnum.FileSize,
 			},
 			{
 				text: 'Added At',
 				value: 'addedAt',
 				width: 150,
-				type: 'date',
+				type: TreeViewTableHeaderEnum.Date,
 			},
 			{
 				text: 'Updated At',
 				value: 'updatedAt',
 				width: 150,
-				type: 'date',
+				type: TreeViewTableHeaderEnum.Date,
 			},
 		];
 	}

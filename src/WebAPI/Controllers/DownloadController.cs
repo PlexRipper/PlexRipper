@@ -26,7 +26,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET: api/<DownloadController>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<DownloadTaskContainerDTO>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<DownloadTaskDTO>>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> GetDownloadTasks()
         {

@@ -51,11 +51,10 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { pauseDownloadTask, restartDownloadTask, startDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@state/downloadService';
-import { DownloadTaskContainerDTO, DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import { DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import _ from 'lodash';
 import DownloadsTable from './components/DownloadsTable.vue';
-import IDownloadRow from './types/IDownloadRow';
 import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
 import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsDialog.vue';
 
@@ -69,9 +68,9 @@ import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsD
 })
 export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
-	downloads: DownloadTaskContainerDTO | null = null;
+	downloads: DownloadTaskDTO[] = [];
 	openExpansions: number[] = [];
-	selected: IDownloadRow[] = [];
+	selected: DownloadTaskDTO[] = [];
 	downloadTaskDetail: DownloadTaskDTO | null = null;
 	private dialog: boolean = false;
 
@@ -85,36 +84,36 @@ export default class Downloads extends Vue {
 
 	// region single commands
 
-	clearDownloadTask(downloadTaskId: number): void {
-		DownloadService.clearDownloadTasks([downloadTaskId]);
-		this.selected = _.filter(this.selected, (x) => x.id !== downloadTaskId);
+	clearDownloadTask(downloadTask: DownloadTaskDTO): void {
+		DownloadService.clearDownloadTasks([downloadTask.id]);
+		this.selected = _.filter(this.selected, (x) => x.id !== downloadTask.id);
 	}
 
-	startDownloadTask(downloadTaskId: number): void {
-		startDownloadTask(downloadTaskId).subscribe();
+	startDownloadTask(downloadTask: DownloadTaskDTO): void {
+		startDownloadTask(downloadTask.id).subscribe();
 	}
 
-	pauseDownloadTask(downloadTaskId: number): void {
-		pauseDownloadTask(downloadTaskId).subscribe();
+	pauseDownloadTask(downloadTask: DownloadTaskDTO): void {
+		pauseDownloadTask(downloadTask.id).subscribe();
 	}
 
-	stopDownloadTask(downloadTaskId: number): void {
-		DownloadService.stopDownloadTasks([downloadTaskId]);
+	stopDownloadTask(downloadTask: DownloadTaskDTO): void {
+		DownloadService.stopDownloadTasks([downloadTask.id]);
 	}
 
-	restartDownloadTask(downloadTaskId: number): void {
-		restartDownloadTask(downloadTaskId).subscribe();
+	restartDownloadTask(downloadTask: DownloadTaskDTO): void {
+		restartDownloadTask(downloadTask.id).subscribe();
 	}
 
-	deleteDownloadTask(downloadTask: IDownloadRow): void {
+	deleteDownloadTask(downloadTask: DownloadTaskDTO): void {
 		if (downloadTask.mediaType === PlexMediaType.Episode) {
 			DownloadService.deleteDownloadTasks([downloadTask.id]);
 			this.selected = _.filter(this.selected, (x) => x.id !== downloadTask.id);
 		}
 	}
 
-	detailsDownloadTask(downloadTaskId: number): void {
-		this.downloadTaskDetail = this.downloads.find((x) => x.id === downloadTaskId) ?? null;
+	detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
+		this.downloadTaskDetail = downloadTask;
 		this.dialog = true;
 	}
 
@@ -166,8 +165,3 @@ export default class Downloads extends Vue {
 	}
 }
 </script>
-<style scoped lang="scss">
-tr.v-data-table__selected {
-	background: transparent !important;
-}
-</style>

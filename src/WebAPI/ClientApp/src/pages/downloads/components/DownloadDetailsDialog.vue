@@ -2,8 +2,10 @@
 	<v-dialog :value="dialog" max-width="800" @click:outside="close">
 		<v-card v-if="downloadTask">
 			<v-card-title class="headline">
-				<media-type-icon class="mx-3" :size="36" media-type="downloadTask.mediaType" />
-				{{ downloadTask.title }}
+				<media-type-icon class="mx-3" :size="36" :media-type="downloadTask.mediaType" />
+				<span class="mt-2">
+					{{ downloadTask.fullTitle }}
+				</span>
 			</v-card-title>
 
 			<v-card-text>
@@ -31,11 +33,11 @@
 									<tr>
 										<td>Download URL:</td>
 										<td>
-											<v-row no-gutters>
+											<v-row no-gutters class="no-wrap">
 												<v-col>
 													{{ downloadTask.downloadUrl }}
 												</v-col>
-												<v-col cols="auto">
+												<v-col v-if="downloadTask.downloadUrl" cols="auto">
 													<external-link :href="downloadTask.downloadUrl" />
 												</v-col>
 											</v-row>
@@ -53,8 +55,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DownloadTaskDTO } from '@dto/mainApi';
 import ExternalLink from '@components/General/ExternalLink.vue';
+import { DownloadTaskDTO } from '@dto/mainApi';
 
 @Component<DownloadDetailsDialog>({
 	components: {

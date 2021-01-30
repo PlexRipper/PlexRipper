@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 using PlexRipper.Domain;
 
-namespace PlexRipper.WebAPI.Common.DTO
+namespace PlexRipper.Application.Common.DTO.WebApi
 {
-    public class DownloadTaskDTO
+    public class DownloadTaskDTO : IDownloadProgress
     {
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
@@ -13,6 +14,12 @@ namespace PlexRipper.WebAPI.Common.DTO
         /// </summary>
         [JsonProperty("title", Required = Required.Always)]
         public string Title { get; set; }
+
+        /// <summary>
+        /// The full media title including the [TvShow]/[Season]/[Episode] as shown in Plex.
+        /// </summary>
+        [JsonProperty("fullTitle", Required = Required.Always)]
+        public string FullTitle { get; set; }
 
         [JsonProperty("status", Required = Required.Always)]
         public DownloadStatus Status { get; set; }
@@ -27,18 +34,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         public string FileName { get; set; }
 
         /// <summary>
-        /// If this type is an episode of a tv show then this will be the title of that tv show.
-        /// </summary>
-        [JsonProperty("titleTvShow", Required = Required.Always)]
-        public string TitleTvShow { get; set; }
-
-        /// <summary>
-        /// If this type is an episode of a tv show then this will be the title of that tv show season.
-        /// </summary>
-        [JsonProperty("titleTvShowSeason", Required = Required.Always)]
-        public string TitleTvShowSeason { get; set; }
-
-        /// <summary>
         /// Note: Naming third just 'type' will cause errors in the Typescript type generating.
         /// </summary>
         [JsonProperty("mediaType", Required = Required.Always)]
@@ -50,11 +45,17 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("key", Required = Required.Always)]
         public int Key { get; set; }
 
+        [JsonProperty("downloadSpeed", Required = Required.Always)]
+        public int DownloadSpeed { get; }
+
         [JsonProperty("dataReceived", Required = Required.Always)]
         public long DataReceived { get; set; }
 
         [JsonProperty("dataTotal", Required = Required.Always)]
         public long DataTotal { get; set; }
+
+        [JsonProperty("percentage", Required = Required.Always)]
+        public decimal Percentage { get; set; }
 
         /// <summary>
         /// The download priority, the higher the more important.
@@ -68,6 +69,12 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }
 
+        [JsonProperty("timeRemaining", Required = Required.Always)]
+        public long TimeRemaining { get; set; }
+
+        [JsonProperty("downloadWorkersProgress", Required = Required.Always)]
+        public List<IDownloadWorkerProgress> WorkerProgresses { get; set; } = new List<IDownloadWorkerProgress>();
+
         [JsonProperty("destinationPath", Required = Required.Always)]
         public string DestinationPath { get; set; }
 
@@ -76,5 +83,11 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("downloadUrl", Required = Required.Always)]
         public string DownloadUrl { get; set; }
+
+        [JsonProperty("children", Required = Required.Always)]
+        public List<DownloadTaskDTO> Children { get; set; } = new List<DownloadTaskDTO>();
+
+        [JsonProperty("actions", Required = Required.Always)]
+        public string[] Actions { get; set; }
     }
 }

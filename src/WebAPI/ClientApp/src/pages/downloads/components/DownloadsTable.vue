@@ -2,25 +2,17 @@
 	<v-tree-view-table :items="getDownloads" :headers="getHeaders" @action="tableAction" />
 </template>
 <script lang="ts">
+import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import {
-	DownloadProgress,
-	DownloadStatus,
-	DownloadStatusChanged,
-	DownloadTaskContainerDTO,
-	FileMergeProgress,
-} from '@dto/mainApi';
+import { DownloadProgress, DownloadStatus, DownloadStatusChanged, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
-import Convert from '@mediaOverview/MediaTable/types/Convert';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import SignalrService from '@service/signalrService';
-import Log from 'consola';
 import { filter, switchMap } from 'rxjs/operators';
 import ButtonType from '@enums/buttonType';
 import DownloadService from '@state/downloadService';
 import { of } from 'rxjs';
-import IDownloadRow from '../types/IDownloadRow';
 
 @Component({
 	components: {
@@ -31,8 +23,8 @@ export default class DownloadsTable extends Vue {
 	@Prop({ type: Boolean })
 	readonly loading: Boolean = false;
 
-	@Prop({ required: true, type: Array as () => IDownloadRow[] })
-	readonly value!: IDownloadRow[];
+	@Prop({ required: true, type: Array as () => DownloadTaskDTO[] })
+	readonly value!: DownloadTaskDTO[];
 
 	@Prop({ required: true, type: Number })
 	readonly serverId!: number;
@@ -40,49 +32,50 @@ export default class DownloadsTable extends Vue {
 	downloadProgressList: DownloadProgress[] = [];
 	fileMergeProgressList: FileMergeProgress[] = [];
 	downloadStatusList: DownloadStatusChanged[] = [];
-	tvShowsDownloadRows: IDownloadRow[] = [];
+	tvShowsDownloadRows: DownloadTaskDTO[] = [];
 
-	get getDownloads(): IDownloadRow[] {
+	get getDownloads(): DownloadTaskDTO[] {
 		this.tvShowsDownloadRows.forEach((tvShow) => {
-			tvShow.actions = this.availableActions(tvShow.status);
 			tvShow?.children?.forEach((season) => {
-				season.actions = this.availableActions(season.status);
 				if (season.children.length > 0) {
-					const updatedEpisodes: IDownloadRow[] = [];
 					season.children.forEach((episode) => {
+						// Merge the various feeds
 						const downloadProgress = this.downloadProgressList.find((x) => x.id === episode.id);
 						const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === episode.id);
-						// Merge the various feeds
-						// Status priority: downloadStatusUpdate > getDownloadList
-						const status = downloadStatusUpdate?.status ?? episode?.status ?? DownloadStatus.Unknown;
 						// Note: Need to create a new one, then add to array and then use that array to overwrite the season.children,
 						// otherwise result will not be updated.
-						const downloadRow: IDownloadRow = {
-							...episode,
-							...downloadProgress,
-							status,
-							actions: this.availableActions(status),
-						};
 
-						if (downloadRow.status === DownloadStatus.Merging) {
-							const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === downloadRow.id);
-							downloadRow.percentage = fileMergeProgress?.percentage ?? 0;
-							downloadRow.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
-							downloadRow.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
-							downloadRow.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
+						// Status priority: downloadStatusUpdate > getDownloadList
+						const newStatus = downloadStatusUpdate?.status ?? episode?.status ?? DownloadStatus.Unknown;
+						if (newStatus !== episode.status) {
+							episode.status = newStatus;
+						}
+						episode.actions = this.availableActions(newStatus);
+
+						if (downloadProgress) {
+							episode.percentage = downloadProgress.percentage;
+							episode.downloadSpeed = downloadProgress.downloadSpeed;
+							episode.dataReceived = downloadProgress.dataReceived;
+							episode.dataTotal = downloadProgress.dataTotal;
+							episode.timeRemaining = downloadProgress.timeRemaining;
 						}
 
-						if (downloadRow.status === DownloadStatus.Completed) {
-							downloadRow.percentage = 100;
-							downloadRow.timeRemaining = 0;
-							downloadRow.downloadSpeed = 0;
-							downloadRow.dataReceived = episode.dataTotal;
+						if (episode.status === DownloadStatus.Merging) {
+							const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === episode.id);
+							episode.percentage = fileMergeProgress?.percentage ?? 0;
+							episode.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
+							episode.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
+							episode.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
+						}
+
+						if (episode.status === DownloadStatus.Completed) {
+							episode.percentage = 100;
+							episode.timeRemaining = 0;
+							episode.downloadSpeed = 0;
+							episode.dataReceived = episode.dataTotal;
 							this.cleanupProgress(episode.id);
 						}
-
-						updatedEpisodes.push(downloadRow);
 					});
-					season.children = updatedEpisodes;
 				} else {
 					Log.warn(`Season: ${season.title} had no episodes`);
 				}
@@ -129,6 +122,7 @@ export default class DownloadsTable extends Vue {
 			{
 				text: 'ETA',
 				value: 'timeRemaining',
+				type: TreeViewTableHeaderEnum.Duration,
 				width: 120,
 			},
 			{
@@ -145,13 +139,6 @@ export default class DownloadsTable extends Vue {
 				sortable: false,
 			},
 		];
-	}
-
-	formatCountdown(seconds: number): string {
-		if (!seconds || seconds <= 0) {
-			return '0:00';
-		}
-		return new Date(seconds * 1000)?.toISOString()?.substr(11, 8)?.toString() ?? '?';
 	}
 
 	availableActions(status: DownloadStatus): ButtonType[] {
@@ -202,18 +189,6 @@ export default class DownloadsTable extends Vue {
 		this.$emit(action, payload);
 	}
 
-	updateDownloadProgress(downloadProgress: DownloadProgress): void {
-		// Check if there is already a progress object for this Id
-		const i = this.downloadProgressList.findIndex((x) => x.id === downloadProgress.id);
-		if (i > -1) {
-			// Update
-			this.downloadProgressList.splice(i, 1, downloadProgress);
-		} else {
-			// Add
-			this.downloadProgressList.push(downloadProgress);
-		}
-	}
-
 	cleanupProgress(downloadTaskId: number): void {
 		// Clean-up progress objects
 		const downloadProgressIndex = this.downloadProgressList.findIndex((x) => x.id === downloadTaskId);
@@ -232,7 +207,14 @@ export default class DownloadsTable extends Vue {
 			.pipe(filter((x) => x.plexServerId === this.serverId))
 			.subscribe((data) => {
 				if (data) {
-					this.updateDownloadProgress(data);
+					const i = this.downloadProgressList.findIndex((x) => x.id === data.id);
+					if (i > -1) {
+						// Update
+						this.downloadProgressList.splice(i, 1, data);
+					} else {
+						// Add
+						this.downloadProgressList.push(data);
+					}
 				} else {
 					Log.error(`DownloadProgress was undefined.`);
 				}
@@ -243,33 +225,43 @@ export default class DownloadsTable extends Vue {
 			.pipe(filter((x) => x.plexServerId === this.serverId))
 			.subscribe((data) => {
 				if (data) {
-					this.downloadStatusList.addOrReplace((x) => x.id === data.id, data);
+					const i = this.downloadStatusList.findIndex((x) => x.id === data.id);
+					if (i > -1) {
+						// Update
+						this.downloadStatusList.splice(i, 1, data);
+					} else {
+						// Add
+						this.downloadStatusList.push(data);
+					}
 				} else {
 					Log.error(`DownloadStatusChanged was undefined.`);
 				}
 			});
 
-		SignalrService.getFileMergeProgress().subscribe((fileMergeProgress) => {
-			if (fileMergeProgress) {
-				this.fileMergeProgressList.addOrReplace((x) => x.id === fileMergeProgress.id, fileMergeProgress);
-			} else {
-				Log.error(`FileMergeProgress was undefined`);
-			}
-		});
+		SignalrService.getFileMergeProgress()
+			.pipe(filter((x) => x.plexServerId === this.serverId))
+			.subscribe((fileMergeProgress) => {
+				if (fileMergeProgress) {
+					const i = this.fileMergeProgressList.findIndex((x) => x.id === fileMergeProgress.id);
+					if (i > -1) {
+						// Update
+						this.fileMergeProgressList.splice(i, 1, fileMergeProgress);
+					} else {
+						// Add
+						this.fileMergeProgressList.push(fileMergeProgress);
+					}
+				} else {
+					Log.error(`FileMergeProgress was undefined`);
+				}
+			});
 
 		// Retrieve download list
 		DownloadService.getDownloadList()
-			.pipe(
-				switchMap((x) => {
-					return of({
-						tvShows: x?.tvShows.filter((x) => x.plexServerId === this.serverId) ?? [],
-					} as DownloadTaskContainerDTO);
-				}),
-			)
-			.subscribe((data: DownloadTaskContainerDTO) => {
+			.pipe(switchMap((x) => of(x?.filter((x) => x.plexServerId === this.serverId) ?? [])))
+			.subscribe((data: DownloadTaskDTO[]) => {
 				Log.info('getDownloadList', data);
 				if (data) {
-					this.tvShowsDownloadRows = Convert.DownloadTaskTvShowToTreeViewTableRows(data.tvShows);
+					this.tvShowsDownloadRows = data as DownloadTaskDTO[];
 				}
 			});
 	}

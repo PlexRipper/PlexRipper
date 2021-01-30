@@ -14,7 +14,7 @@
 					<v-list subheader two-line class="no-background pa-0">
 						<v-list-item>
 							<v-list-item-avatar v-if="library">
-								<v-icon large class="mx-3">{{ library.type | mediaTypeIcon }}</v-icon>
+								<media-type-icon class="mx-3" :size="36" :media-type="library.type" />
 							</v-list-item-avatar>
 							<v-list-item-content>
 								<v-list-item-title>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</v-list-item-title>

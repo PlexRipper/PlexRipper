@@ -36,6 +36,7 @@ namespace PlexRipper.Domain
             downloadTask.MediaType = Type;
             downloadTask.MetaData.MovieTitle = Title;
             downloadTask.MetaData.MediaData = MovieData;
+            downloadTask.MetaData.MovieKey = Key;
 
             return new List<DownloadTask>
             {

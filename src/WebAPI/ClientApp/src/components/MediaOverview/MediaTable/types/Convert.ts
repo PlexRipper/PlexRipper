@@ -1,5 +1,6 @@
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { DownloadStatus, DownloadTaskTvShowDTO, PlexMediaType, PlexMovieDTO, PlexTvShowDTO } from '@dto/mainApi';
+import ButtonType from '@enums/buttonType';
 import IDownloadRow from '~/pages/downloads/types/IDownloadRow';
 
 export default abstract class Convert {
@@ -122,6 +123,7 @@ export default abstract class Convert {
 						season.episodes.forEach((episode) => {
 							// Add Episode
 							episodes.push({
+								id: episode.id,
 								mediaType: PlexMediaType.Episode,
 								plexLibraryId: episode.plexLibraryId,
 								plexServerId: episode.plexServerId,
@@ -130,6 +132,7 @@ export default abstract class Convert {
 								dataReceived: episode.dataReceived,
 								dataTotal: episode.dataTotal,
 								downloadSpeed: 0,
+								actions: [] as ButtonType[],
 							} as IDownloadRow);
 						});
 						// Add seasons
@@ -143,6 +146,7 @@ export default abstract class Convert {
 							dataTotal: episodes.map((x) => x.dataTotal).sum(),
 							title: season.title,
 							downloadSpeed: episodes.map((x) => x.downloadSpeed).sum(),
+							actions: [] as ButtonType[],
 						} as IDownloadRow);
 					}
 				});
@@ -157,10 +161,62 @@ export default abstract class Convert {
 					dataReceived: seasons.map((x) => x.dataReceived).sum(),
 					dataTotal: seasons.map((x) => x.dataTotal).sum(),
 					downloadSpeed: seasons.map((x) => x.downloadSpeed).sum(),
+					actions: [] as ButtonType[],
 				} as IDownloadRow);
 			}
 		});
 
 		return items;
+	}
+
+	public static buttonTypeToIcon(type: ButtonType): string {
+		switch (type) {
+			case ButtonType.Cancel:
+				return 'mdi-cancel';
+			case ButtonType.Confirm:
+				return 'mdi-check';
+			case ButtonType.Save:
+				return 'mdi-content-save';
+			case ButtonType.Download:
+				return 'mdi-download';
+			case ButtonType.Delete:
+				return 'mdi-delete';
+			case ButtonType.Error:
+				return 'mdi-alert-circle';
+			case ButtonType.ExternalLink:
+				return 'mdi-open-in-new';
+			case ButtonType.Start:
+			case ButtonType.Resume:
+				return 'mdi-play';
+			case ButtonType.Restart:
+				return 'mdi-refresh';
+			case ButtonType.Pause:
+				return 'mdi-pause';
+			case ButtonType.Stop:
+				return 'mdi-stop';
+			case ButtonType.Clear:
+				return 'mdi-notification-clear-all';
+			case ButtonType.Details:
+				return 'mdi-chart-box-outline';
+			default:
+				return 'mdi-help-circle-outline';
+		}
+	}
+
+	public static mediaTypeToIcon(mediaType: PlexMediaType): string {
+		switch (mediaType) {
+			case PlexMediaType.TvShow:
+				return 'mdi-television-classic';
+			case PlexMediaType.Season:
+				return 'mdi-play-box-multiple';
+			case PlexMediaType.Episode:
+				return 'mdi-movie-open';
+			case PlexMediaType.Movie:
+				return 'mdi-filmstrip';
+			case PlexMediaType.Music:
+				return 'mdi-music';
+			default:
+				return 'mdi-help-circle-outline';
+		}
 	}
 }

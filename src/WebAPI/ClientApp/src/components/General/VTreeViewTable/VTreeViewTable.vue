@@ -28,6 +28,7 @@
 			</v-row>
 			<!-- TreeView Table -->
 			<v-row no-gutters>
+				{{ testSelection }}
 				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
 					<v-col id="media-table-body" class="col px-0">
 						<template v-for="(parentItem, i) in items">
@@ -41,6 +42,7 @@
 								transition="scroll-x-reverse-transition"
 							>
 								<v-treeview
+									v-model="testSelection"
 									selectable
 									selected-color="red"
 									selection-type="leaf"
@@ -57,48 +59,56 @@
 									<template #label="{ item }">
 										<v-row align="center">
 											<!-- Title -->
-											<v-col class="title-column">{{ item[headers[0].value] }}</v-col>
+											<v-col class="title-column">
+												<media-type-icon :media-type="item.mediaType" />
+												{{ item[headers[0].value] }}
+											</v-col>
 										</v-row>
 									</template>
 									<template #append="{ item }">
 										<v-row class="no-wrap" no-gutters align="center">
 											<!-- Other columns -->
-											<v-col v-for="(header, index) in headers.slice(1, headers.length)" :key="index" cols="auto">
-												<v-sheet :width="header.width" class="no-background">
-													<!-- Date format -->
-													<template v-if="header.type === 'date'">
-														<date-time :text="item[header.value]" :time="false" short-date />
-													</template>
-													<!-- Filesize -->
-													<template v-else-if="header.type === 'file-size'">
-														<file-size :size="item[header.value]" />
-													</template>
-													<!-- File speed -->
-													<template v-else-if="header.type === 'file-speed'">
-														<file-size :size="item[header.value]" speed />
-													</template>
-													<!-- Percentage -->
-													<template v-else-if="header.type === 'percentage'">
-														<v-progress-linear :value="item.percentage" stream striped color="red" height="25">
-															<template #default="{ value }">
-																<strong>{{ value }}%</strong>
-															</template>
-														</v-progress-linear>
-													</template>
-													<!-- Actions -->
-													<template v-else-if="header.type === 'actions'">
-														<p-btn
-															button-type="download"
-															:loading="isLoading(item.key)"
-															icon-mode
-															@click="downloadMedia(item)"
-														></p-btn>
-													</template>
-													<!-- default -->
-													<template v-else>
-														<span>{{ item[header.value] }}</span>
-													</template>
-												</v-sheet>
+											<v-col
+												v-for="(header, index) in headers.slice(1, headers.length)"
+												:key="index"
+												:style="{ width: header.width + 'px' }"
+												cols="auto"
+											>
+												<!-- Date format -->
+												<template v-if="header.type === 'date'">
+													<date-time :text="item[header.value]" :time="false" short-date />
+												</template>
+												<!-- Filesize -->
+												<template v-else-if="header.type === 'file-size'">
+													<file-size :size="item[header.value]" />
+												</template>
+												<!-- File speed -->
+												<template v-else-if="header.type === 'file-speed'">
+													<file-size :size="item[header.value]" speed />
+												</template>
+												<!-- Percentage -->
+												<template v-else-if="header.type === 'percentage'">
+													<v-progress-linear :value="item.percentage" stream striped color="red" height="25">
+														<template #default="{ value }">
+															<strong>{{ value }}%</strong>
+														</template>
+													</v-progress-linear>
+												</template>
+												<!-- Actions -->
+												<template v-else-if="header.type === 'actions'">
+													<v-btn
+														v-for="(action, y) in item[header.value]"
+														:key="`${index}-${y}`"
+														icon
+														@click="buttonAction(action, item)"
+													>
+														<v-icon>{{ buttonIcon(action) }} </v-icon>
+													</v-btn>
+												</template>
+												<!-- default -->
+												<template v-else>
+													<span>{{ item[header.value] }}</span>
+												</template>
 											</v-col>
 										</v-row>
 									</template>
@@ -118,6 +128,9 @@ import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTa
 import ITreeViewTableRow from '@vTreeViewTable/ITreeViewTableRow';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
+import Convert from '@mediaOverview/MediaTable/types/Convert';
+import ButtonType from '@enums/buttonType';
+import IDownloadRow from '~/pages/downloads/types/IDownloadRow';
 
 declare interface ISelection {
 	index: number;
@@ -131,14 +144,16 @@ declare interface ISelection {
 	},
 })
 export default class VTreeViewTable extends Vue {
-	@Prop({ required: true, type: Array as () => ITreeViewTableRow[] })
-	readonly items!: ITreeViewTableRow[];
+	@Prop({ required: true, type: Array as () => IDownloadRow[] })
+	readonly items!: IDownloadRow[];
 
 	@Prop({ required: true, type: Array as () => ITreeViewTableHeader[] })
 	readonly headers!: ITreeViewTableHeader[];
 
 	@Prop({ required: false, type: Boolean })
 	readonly openAll!: boolean;
+
+	testSelection: string[] = [];
 
 	selected: ISelection[] = [];
 
@@ -183,7 +198,7 @@ export default class VTreeViewTable extends Vue {
 		} else {
 			this.selected.splice(index, 1, { index: i, keys: selected });
 		}
-		this.emitSelected();
+		// this.emitSelected();
 	}
 
 	selectAll(state: boolean): void {
@@ -201,8 +216,12 @@ export default class VTreeViewTable extends Vue {
 		this.$emit('selected', this.getSelected);
 	}
 
-	action(command: string, payload: any) {
-		this.$emit('action', { command, payload });
+	buttonAction(action: string, payload: any) {
+		this.$emit('action', { action, payload });
+	}
+
+	buttonIcon(buttonType: ButtonType) {
+		return Convert.buttonTypeToIcon(buttonType);
 	}
 
 	/*

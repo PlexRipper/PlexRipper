@@ -24,7 +24,7 @@
 				@click="click($event)"
 			>
 				<v-icon v-if="getIcon" class="mx-2" :size="iconSize" :color="getColor">{{ getIcon }}</v-icon>
-				<span v-if="getText !== ''">{{ $t(getText) }} </span>
+				<span v-if="getText !== '' && !iconMode">{{ $t(getText) }} </span>
 				<slot></slot>
 			</v-btn>
 		</template>
@@ -35,6 +35,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ButtonType from '@enums/buttonType';
+import Convert from '@mediaOverview/MediaTable/types/Convert';
 
 @Component
 export default class PBtn extends Vue {
@@ -66,6 +67,9 @@ export default class PBtn extends Vue {
 	readonly iconMode!: boolean;
 
 	@Prop({ required: false, type: Boolean, default: false })
+	readonly outlined!: boolean;
+
+	@Prop({ required: false, type: Boolean, default: false })
 	readonly disabled!: boolean;
 
 	@Prop({ required: false, type: Boolean, default: false })
@@ -85,6 +89,9 @@ export default class PBtn extends Vue {
 
 	@Prop({ required: false, type: String })
 	readonly iconSize!: string;
+
+	@Prop({ required: false, type: Boolean, default: true })
+	readonly margin!: boolean;
 
 	@Prop({ required: false, type: Boolean })
 	readonly xLarge!: boolean;
@@ -116,7 +123,7 @@ export default class PBtn extends Vue {
 			this.getIsFilled ? 'filled' : '',
 			this.getIsOutlined ? 'outlined' : '',
 			'p-btn',
-			'mx-2',
+			this.margin ? 'mx-2' : '',
 			'i18n-formatting',
 			this.buttonType === ButtonType.Alphabet ? 'navigation-btn' : '',
 		];
@@ -144,23 +151,7 @@ export default class PBtn extends Vue {
 		if (this.icon) {
 			return this.icon;
 		}
-		switch (this.buttonType) {
-			case ButtonType.Cancel:
-				return 'mdi-cancel';
-			case ButtonType.Confirm:
-				return 'mdi-check';
-			case ButtonType.Save:
-				return 'mdi-content-save';
-			case ButtonType.Download:
-				return 'mdi-download';
-			case ButtonType.Delete:
-				return 'mdi-delete';
-			case ButtonType.Error:
-				return 'mdi-alert-circle';
-			case ButtonType.ExternalLink:
-				return 'mdi-open-in-new';
-		}
-		return '';
+		return Convert.buttonTypeToIcon(this.buttonType);
 	}
 
 	get getColor(): string {
@@ -189,13 +180,23 @@ export default class PBtn extends Vue {
 	}
 
 	get getIsOutlined(): boolean {
+		if (this.outlined) {
+			return true;
+		}
 		switch (this.buttonType) {
 			case ButtonType.ExternalLink:
 			case ButtonType.Download:
 			case ButtonType.Alphabet:
+			case ButtonType.Start:
+			case ButtonType.Resume:
+			case ButtonType.Restart:
+			case ButtonType.Pause:
+			case ButtonType.Stop:
+			case ButtonType.Clear:
+			case ButtonType.Details:
 				return false;
 			default:
-				return true;
+				return false;
 		}
 	}
 

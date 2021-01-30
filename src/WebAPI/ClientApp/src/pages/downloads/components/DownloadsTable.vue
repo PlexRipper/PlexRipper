@@ -1,5 +1,5 @@
 <template>
-	<v-tree-view-table :items="getDownloads" :headers="getHeaders" />
+	<v-tree-view-table :items="getDownloads" :headers="getHeaders" @action="tableAction" />
 </template>
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
@@ -16,7 +16,10 @@ import Convert from '@mediaOverview/MediaTable/types/Convert';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import SignalrService from '@service/signalrService';
 import Log from 'consola';
-import { filter } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
+import ButtonType from '@enums/buttonType';
+import DownloadService from '@state/downloadService';
+import { of } from 'rxjs';
 import IDownloadRow from '../types/IDownloadRow';
 
 @Component({
@@ -25,9 +28,6 @@ import IDownloadRow from '../types/IDownloadRow';
 	},
 })
 export default class DownloadsTable extends Vue {
-	@Prop({ required: true, type: Object as () => DownloadTaskContainerDTO })
-	readonly downloads!: DownloadTaskContainerDTO;
-
 	@Prop({ type: Boolean })
 	readonly loading: Boolean = false;
 
@@ -40,42 +40,56 @@ export default class DownloadsTable extends Vue {
 	downloadProgressList: DownloadProgress[] = [];
 	fileMergeProgressList: FileMergeProgress[] = [];
 	downloadStatusList: DownloadStatusChanged[] = [];
+	tvShowsDownloadRows: IDownloadRow[] = [];
 
 	get getDownloads(): IDownloadRow[] {
-		const downloadContainer = Convert.DownloadTaskTvShowToTreeViewTableRows(this.downloads?.tvShows ?? []);
-
-		downloadContainer.tvShows?.forEach((tvShow) => {
-			tvShow.seasons?.forEach((season) => {
-				season.episodes?.forEach((episode) => {
-					const downloadProgress = this.downloadProgressList.find((x) => x.id === episode.id);
-					const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === episode.id);
-					// Merge the various feeds
-					episode = {
-						...episode,
-						...downloadProgress,
+		this.tvShowsDownloadRows.forEach((tvShow) => {
+			tvShow.actions = this.availableActions(tvShow.status);
+			tvShow?.children?.forEach((season) => {
+				season.actions = this.availableActions(season.status);
+				if (season.children.length > 0) {
+					const updatedEpisodes: IDownloadRow[] = [];
+					season.children.forEach((episode) => {
+						const downloadProgress = this.downloadProgressList.find((x) => x.id === episode.id);
+						const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === episode.id);
+						// Merge the various feeds
 						// Status priority: downloadStatusUpdate > getDownloadList
-						status: downloadStatusUpdate?.status ?? DownloadStatus.Unknown,
-					} as IDownloadRow;
+						const status = downloadStatusUpdate?.status ?? episode?.status ?? DownloadStatus.Unknown;
+						// Note: Need to create a new one, then add to array and then use that array to overwrite the season.children,
+						// otherwise result will not be updated.
+						const downloadRow: IDownloadRow = {
+							...episode,
+							...downloadProgress,
+							status,
+							actions: this.availableActions(status),
+						};
 
-					if (episode.status === DownloadStatus.Merging) {
-						const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === episode.id);
-						episode.percentage = fileMergeProgress?.percentage ?? 0;
-						episode.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
-						episode.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
-						episode.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
-					}
+						if (downloadRow.status === DownloadStatus.Merging) {
+							const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === downloadRow.id);
+							downloadRow.percentage = fileMergeProgress?.percentage ?? 0;
+							downloadRow.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
+							downloadRow.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
+							downloadRow.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
+						}
 
-					if (episode.status === DownloadStatus.Completed) {
-						episode.percentage = 100;
-						episode.timeRemaining = 0;
-						episode.downloadSpeed = 0;
-						episode.dataReceived = episode.dataTotal;
-						this.cleanupProgress(episode.id);
-					}
-				});
+						if (downloadRow.status === DownloadStatus.Completed) {
+							downloadRow.percentage = 100;
+							downloadRow.timeRemaining = 0;
+							downloadRow.downloadSpeed = 0;
+							downloadRow.dataReceived = episode.dataTotal;
+							this.cleanupProgress(episode.id);
+						}
+
+						updatedEpisodes.push(downloadRow);
+					});
+					season.children = updatedEpisodes;
+				} else {
+					Log.warn(`Season: ${season.title} had no episodes`);
+				}
 			});
 		});
-		return downloadContainer;
+		Log.info('tvShows', this.tvShowsDownloadRows);
+		return this.tvShowsDownloadRows;
 	}
 
 	get getHeaders(): ITreeViewTableHeader[] {
@@ -127,68 +141,8 @@ export default class DownloadsTable extends Vue {
 				text: 'Actions',
 				value: 'actions',
 				type: TreeViewTableHeaderEnum.Actions,
-				actions: [
-					{
-						command: 'details',
-					},
-					{
-						command: 'stop',
-					},
-					{
-						command: 'delete',
-					},
-					{
-						command: 'pause',
-					},
-					{
-						command: 'stop',
-					},
-					{
-						command: 'start',
-					},
-				],
-				width: 120,
+				width: 160,
 				sortable: false,
-			},
-		];
-	}
-
-	get getButtons(): any {
-		return [
-			{
-				name: 'Restart',
-				value: 'restart',
-				icon: 'mdi-refresh',
-			},
-			{
-				name: 'Start / Resume',
-				value: 'start',
-				icon: 'mdi-play',
-			},
-			{
-				name: 'Pause',
-				value: 'pause',
-				icon: 'mdi-pause',
-			},
-			{
-				name: 'Stop',
-				value: 'stop',
-				icon: 'mdi-stop',
-			},
-			{
-				name: 'Delete',
-				value: 'delete',
-				icon: 'mdi-delete',
-			},
-			{
-				name: 'Clear',
-				value: 'clear',
-				icon: 'mdi-notification-clear-all',
-			},
-			{
-				name: 'Details',
-				value: 'details',
-				icon: 'mdi-chart-box-outline',
 			},
 		];
 	}
@@ -200,51 +154,52 @@ export default class DownloadsTable extends Vue {
 		return new Date(seconds * 1000)?.toISOString()?.substr(11, 8)?.toString() ?? '?';
 	}
 
-	availableActions(item: IDownloadRow): string[] {
-		const actions: string[] = ['details'];
-		switch (item.status) {
+	availableActions(status: DownloadStatus): ButtonType[] {
+		const availableActions: ButtonType[] = [ButtonType.Details];
+		switch (status) {
 			case DownloadStatus.Initialized:
-				actions.push('delete');
+				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Starting:
-				actions.push('stop');
-				actions.push('delete');
+				availableActions.push(ButtonType.Stop);
+				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Queued:
-				actions.push('start');
-				actions.push('delete');
+				availableActions.push(ButtonType.Start);
+				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Downloading:
-				actions.push('pause');
-				actions.push('stop');
+				availableActions.push(ButtonType.Pause);
+				availableActions.push(ButtonType.Stop);
 				break;
 			case DownloadStatus.Paused:
-				actions.push('start');
-				actions.push('restart');
-				actions.push('stop');
+				availableActions.push(ButtonType.Start);
+				availableActions.push(ButtonType.Stop);
+				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Completed:
-				actions.push('clear');
+				availableActions.push(ButtonType.Clear);
 				break;
 			case DownloadStatus.Stopping:
-				actions.push('delete');
+				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Stopped:
-				actions.push('restart');
-				actions.push('delete');
+				availableActions.push(ButtonType.Restart);
+				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Merging:
 				break;
 			case DownloadStatus.Error:
-				actions.push('restart');
-				actions.push('delete');
+				availableActions.push(ButtonType.Restart);
+				availableActions.push(ButtonType.Delete);
 				break;
 		}
-		return actions;
+		return availableActions;
 	}
 
-	command(action: string, itemId: number): void {
-		this.$emit(action, itemId);
+	tableAction({ action, payload }: { action: string; payload: any }) {
+		Log.info('command', { action, payload });
+		this.$emit(action, payload);
 	}
 
 	updateDownloadProgress(downloadProgress: DownloadProgress): void {
@@ -288,7 +243,7 @@ export default class DownloadsTable extends Vue {
 			.pipe(filter((x) => x.plexServerId === this.serverId))
 			.subscribe((data) => {
 				if (data) {
-					this.downloadStatusList.addOrReplace((x) => x.id === data.id);
+					this.downloadStatusList.addOrReplace((x) => x.id === data.id, data);
 				} else {
 					Log.error(`DownloadStatusChanged was undefined.`);
 				}
@@ -301,6 +256,22 @@ export default class DownloadsTable extends Vue {
 				Log.error(`FileMergeProgress was undefined`);
 			}
 		});
+
+		// Retrieve download list
+		DownloadService.getDownloadList()
+			.pipe(
+				switchMap((x) => {
+					return of({
+						tvShows: x?.tvShows.filter((x) => x.plexServerId === this.serverId) ?? [],
+					} as DownloadTaskContainerDTO);
+				}),
+			)
+			.subscribe((data: DownloadTaskContainerDTO) => {
+				Log.info('getDownloadList', data);
+				if (data) {
+					this.tvShowsDownloadRows = Convert.DownloadTaskTvShowToTreeViewTableRows(data.tvShows);
+				}
+			});
 	}
 }
 </script>

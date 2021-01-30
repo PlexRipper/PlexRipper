@@ -14,7 +14,14 @@ namespace PlexRipper.Domain
 
         public string TvShowEpisodeTitle { get; set; }
 
-        public List<PlexMediaData> MediaData { get; set; }
+        public int MovieKey { get; set; }
 
+        public int TvShowKey { get; set; }
+
+        public int TvShowSeasonKey { get; set; }
+
+        public int TvShowEpisodeKey { get; set; }
+
+        public List<PlexMediaData> MediaData { get; set; }
     }
 }

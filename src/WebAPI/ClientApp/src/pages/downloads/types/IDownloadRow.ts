@@ -1,5 +1,7 @@
-import { DownloadTaskDTO, DownloadProgress, DownloadStatusChanged } from '@dto/mainApi';
+import { DownloadTaskDTO, DownloadProgress, DownloadStatusChanged, PlexMediaType } from '@dto/mainApi';
 
 export default interface IDownloadRow extends DownloadTaskDTO, DownloadProgress, DownloadStatusChanged {
-	children?: IDownloadRow[];
+	type: PlexMediaType;
+	children: IDownloadRow[];
+	actions: string[];
 }

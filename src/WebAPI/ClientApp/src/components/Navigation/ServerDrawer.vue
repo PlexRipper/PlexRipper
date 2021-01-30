@@ -24,7 +24,7 @@
 								<template v-if="server.plexLibraries.length > 0">
 									<v-list-item v-for="(library, y) in server.plexLibraries" :key="y" @click="openMediaPage(library)">
 										<v-list-item-icon>
-											<v-icon>{{ library.type | mediaTypeIcon }}</v-icon>
+											<media-type-icon :media-type="library.type" />
 										</v-list-item-icon>
 										<v-list-item-content>
 											<v-list-item-title v-text="library.title"></v-list-item-title>
@@ -35,7 +35,7 @@
 								<template v-else>
 									<v-list-item>
 										<v-list-item-icon>
-											<v-icon>{{ '' | mediaTypeIcon }}</v-icon>
+											<media-type-icon media-type="" />
 										</v-list-item-icon>
 										<v-list-item-content>
 											<v-list-item-title>No libraries available</v-list-item-title>

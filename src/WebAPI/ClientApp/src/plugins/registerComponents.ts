@@ -11,6 +11,7 @@ import Status from '@components/General/Status.vue';
 import FileSize from '@components/General/FileSize.vue';
 import Duration from '@components/General/Duration.vue';
 import VTreeViewTable from '@vTreeViewTable/VTreeViewTable.vue';
+import MediaTypeIcon from '@components/General/MediaTypeIcon.vue';
 
 export default (): void => {
 	const components = {
@@ -26,6 +27,7 @@ export default (): void => {
 		FileSize,
 		Duration,
 		VTreeViewTable,
+		MediaTypeIcon,
 	};
 
 	Object.entries(components).forEach(([name, component]) => {

@@ -24,7 +24,7 @@ namespace PlexRipper.Domain
         #region Helpers
 
         [NotMapped]
-        public PlexMediaType Type => PlexMediaType.Season;
+        public override PlexMediaType Type => PlexMediaType.Season;
 
         public List<DownloadTask> CreateDownloadTasks()
         {
@@ -33,6 +33,8 @@ namespace PlexRipper.Domain
             foreach (var downloadTask in downloadTasks)
             {
                 downloadTask.MetaData.TvShowSeasonTitle = Title;
+                downloadTask.MetaData.TvShowSeasonKey = Key;
+                downloadTask.MetaData.TvShowKey = ParentKey;
             }
 
             return downloadTasks;

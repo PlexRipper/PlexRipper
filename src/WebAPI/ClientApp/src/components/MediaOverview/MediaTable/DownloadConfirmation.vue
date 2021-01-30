@@ -15,16 +15,14 @@
 						<v-col cols="12" class="px-2 py-0">
 							<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open="getLeafs" open-all>
 								<template #prepend="{ item }">
-									<v-icon>
-										{{ item.type | mediaTypeIcon }}
-									</v-icon>
+									<media-type-icon :media-type="item.type" />
 								</template>
 								<template #append="{ item }"> (<file-size :size="item.mediaSize" />) </template>
 							</v-treeview>
 						</v-col>
 					</perfect-scrollbar>
 				</v-card-text>
-				<v-divider></v-divider>
+				<v-divider />
 
 				<v-card-actions>
 					<p-btn :button-type="cancelButtonType" @click="showDialog = false" />

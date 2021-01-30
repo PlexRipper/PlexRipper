@@ -10,7 +10,13 @@ enum ButtonType {
 	Confirm = 'confirm',
 	Delete = 'delete',
 	Save = 'save',
+	Restart = 'restart',
+	Start = 'start',
+	Stop = 'stop',
+	Resume = 'resume',
+	Pause = 'pause',
+	Clear = 'clear',
+	Details = 'details',
 	Alphabet = 'alphabet',
 }
-
 export default ButtonType;

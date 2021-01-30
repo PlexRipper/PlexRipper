@@ -20,7 +20,7 @@
 							<template v-if="defaultImage">
 								<v-row align="center" justify="center" class="fill-height">
 									<v-col cols="auto">
-										<v-icon class="mx-3" style="font-size: 100px">{{ mediaType | mediaTypeIcon }}</v-icon>
+										<media-type-icon class="mx-3" :size="100" :media-type="mediaType" />
 									</v-col>
 									<v-col cols="12">
 										<h4 class="text-center">{{ mediaItem.title }}</h4>

@@ -37,6 +37,10 @@ namespace PlexRipper.Domain
             downloadTask.MetaData.TvShowEpisodeTitle = Title;
             downloadTask.MetaData.MediaData = EpisodeData;
 
+            downloadTask.MetaData.TvShowKey = TvShowSeason?.TvShow?.Key ?? 0;
+            downloadTask.MetaData.TvShowSeasonKey = ParentKey;
+            downloadTask.MetaData.TvShowEpisodeKey = Key;
+
             return new List<DownloadTask>
             {
                 downloadTask,

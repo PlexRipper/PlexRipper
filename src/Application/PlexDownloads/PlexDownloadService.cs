@@ -118,6 +118,7 @@ namespace PlexRipper.Application.PlexDownloads
                     tvShowSeasonDownloadTask.Episodes.Add(new DownloadTaskTvShowEpisodeDTO
                     {
                         Id = downloadTask.Id,
+                        Key = downloadTask.Key,
                         Title = downloadTask.TitleTvShowEpisode,
                         DataReceived = downloadTask.DataReceived,
                         DataTotal = downloadTask.DataTotal,

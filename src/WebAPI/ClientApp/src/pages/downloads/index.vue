@@ -22,7 +22,6 @@
 							<v-expansion-panel-content>
 								<downloads-table
 									v-model="selected"
-									:downloads="getDownloadContainer(plexServer.id)"
 									:server-id="plexServer.id"
 									@pause="pauseDownloadTask"
 									@clear="clearDownloadTask"
@@ -52,7 +51,7 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { pauseDownloadTask, restartDownloadTask, startDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@state/downloadService';
-import { DownloadTaskContainerDTO, DownloadTaskDTO, DownloadTaskTvShowDTO, PlexServerDTO } from '@dto/mainApi';
+import { DownloadTaskContainerDTO, DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import _ from 'lodash';
 import DownloadsTable from './components/DownloadsTable.vue';
@@ -75,12 +74,6 @@ export default class Downloads extends Vue {
 	selected: IDownloadRow[] = [];
 	downloadTaskDetail: DownloadTaskDTO | null = null;
 	private dialog: boolean = false;
-
-	getDownloadContainer(serverId: number): DownloadTaskContainerDTO {
-		const tvShows: DownloadTaskTvShowDTO[] = this.downloads?.tvShows?.filter((x) => x.plexServerId === serverId) ?? [];
-
-		return { tvShows } as DownloadTaskContainerDTO;
-	}
 
 	get selectedIds(): number[] {
 		return this.selected.map((x) => x.id);
@@ -113,9 +106,11 @@ export default class Downloads extends Vue {
 		restartDownloadTask(downloadTaskId).subscribe();
 	}
 
-	deleteDownloadTask(downloadTaskId: number): void {
-		DownloadService.deleteDownloadTasks([downloadTaskId]);
-		this.selected = _.filter(this.selected, (x) => x.id !== downloadTaskId);
+	deleteDownloadTask(downloadTask: IDownloadRow): void {
+		if (downloadTask.mediaType === PlexMediaType.Episode) {
+			DownloadService.deleteDownloadTasks([downloadTask.id]);
+			this.selected = _.filter(this.selected, (x) => x.id !== downloadTask.id);
+		}
 	}
 
 	detailsDownloadTask(downloadTaskId: number): void {
@@ -167,12 +162,6 @@ export default class Downloads extends Vue {
 		DownloadService.getDownloadListInServers().subscribe((data) => {
 			this.plexServers = data;
 			this.openExpansions = [...Array(this.plexServers?.length).keys()] ?? [];
-		});
-
-		// Retrieve download list
-		DownloadService.getDownloadList().subscribe((data: DownloadTaskContainerDTO) => {
-			Log.info('getDownloadList', data);
-			this.downloads = data ?? null;
 		});
 	}
 }

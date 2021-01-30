@@ -2,7 +2,7 @@
 	<v-dialog :value="dialog" max-width="800" @click:outside="close">
 		<v-card v-if="downloadTask">
 			<v-card-title class="headline">
-				<v-icon large class="mx-3">{{ downloadTask.mediaType | mediaTypeIcon }}</v-icon>
+				<media-type-icon class="mx-3" :size="36" media-type="downloadTask.mediaType" />
 				{{ downloadTask.title }}
 			</v-card-title>
 

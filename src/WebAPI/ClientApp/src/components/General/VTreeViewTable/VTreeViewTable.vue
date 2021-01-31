@@ -1,17 +1,19 @@
 <template>
-	<v-row justify="center" class="media-table flex-nowrap" no-gutters>
+	<v-row justify="center" class="v-tree-view-table" no-gutters>
 		<v-col>
 			<!-- Table Headers -->
-			<v-row class="media-table-header no-wrap" justify="space-between" no-gutters align="center">
+			<v-row class="v-tree-view-table-header" justify="space-between" no-gutters align="center">
 				<v-col>
 					<v-row no-gutters class="no-wrap" align="center">
 						<!-- Checkbox -->
-						<v-col class="select-all-check" style="max-width: 50px">
+						<v-col class="select-all-check" style="max-width: 50px" cols="auto">
 							<v-checkbox :indeterminate="isIndeterminate" color="red" @change="selectAll($event)"></v-checkbox>
 						</v-col>
 						<!-- Title -->
 						<v-col class="title-column">
-							{{ headers[0].text }}
+							<span>
+								{{ headers[0].text }}
+							</span>
 						</v-col>
 					</v-row>
 				</v-col>
@@ -27,9 +29,9 @@
 				</v-col>
 			</v-row>
 			<!-- TreeView Table -->
-			<v-row no-gutters>
-				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
-					<v-col id="media-table-body" class="col px-0">
+			<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
+				<v-row no-gutters class="v-tree-view-table-body">
+					<v-col class="col px-0">
 						<template v-for="(parentItem, i) in items">
 							<v-lazy
 								:key="i"
@@ -48,17 +50,18 @@
 									expand-icon="mdi-chevron-down"
 									:items="[parentItem]"
 									:open-all="openAll"
+									:load-children="getChildren"
 									transition
 									item-key="key"
 									item-text="title"
-									class="media-table-row"
+									class="v-tree-view-table-row"
 									@input="updateSelected(i, $event)"
 								>
 									<template #label="{ item }">
 										<v-row align="center">
 											<!-- Title -->
 											<v-col class="title-column">
-												<media-type-icon :media-type="item.mediaType" />
+												<media-type-icon v-if="mediaIcons" :media-type="item.mediaType" />
 												<span class="mt-2">
 													{{ item[headers[0].value] }}
 												</span>
@@ -79,7 +82,7 @@
 													<date-time :text="item[header.value]" :time="false" short-date />
 												</template>
 												<!-- Date format -->
-												<template v-if="header.type === 'duration'">
+												<template v-else-if="header.type === 'duration'">
 													<duration :value="item[header.value]" />
 												</template>
 												<!-- Filesize -->
@@ -100,6 +103,19 @@
 												</template>
 												<!-- Actions -->
 												<template v-else-if="header.type === 'actions'">
+													<!-- Default Actions -->
+													<template v-if="header.defaultActions && header.defaultActions.length > 0">
+														<v-btn
+															v-for="(action, y) in header.defaultActions"
+															:key="`${index}-${y}`"
+															icon
+															@click="buttonAction(action, item)"
+														>
+															<v-icon>{{ buttonIcon(action) }} </v-icon>
+														</v-btn>
+													</template>
+
+													<!-- Item Actions -->
 													<v-btn
 														v-for="(action, y) in item[header.value]"
 														:key="`${index}-${y}`"
@@ -120,9 +136,10 @@
 							</v-lazy>
 						</template>
 					</v-col>
-				</perfect-scrollbar>
-			</v-row>
+				</v-row>
+			</perfect-scrollbar>
 		</v-col>
+		<alphabet-navigation v-if="navigation" :items="items" container-ref="scrollbarmediatable" />
 	</v-row>
 </template>
 
@@ -134,7 +151,7 @@ import ProgressComponent from '@components/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import ButtonType from '@enums/buttonType';
-import DownloadTaskDTO from '~/pages/downloads/types/DownloadTaskDTO';
+import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 
 declare interface ISelection {
 	index: number;
@@ -145,11 +162,12 @@ declare interface ISelection {
 	components: {
 		LoadingSpinner,
 		ProgressComponent,
+		AlphabetNavigation,
 	},
 })
 export default class VTreeViewTable extends Vue {
-	@Prop({ required: true, type: Array as () => DownloadTaskDTO[] })
-	readonly items!: DownloadTaskDTO[];
+	@Prop({ required: true, type: Array as () => any[] })
+	readonly items!: any[];
 
 	@Prop({ required: true, type: Array as () => ITreeViewTableHeader[] })
 	readonly headers!: ITreeViewTableHeader[];
@@ -157,10 +175,17 @@ export default class VTreeViewTable extends Vue {
 	@Prop({ required: false, type: Boolean })
 	readonly openAll!: boolean;
 
+	@Prop({ required: false, type: Boolean })
+	readonly navigation!: boolean;
+
+	@Prop({ required: false, type: Boolean })
+	readonly mediaIcons!: boolean;
+
+	@Prop({ required: false, type: Boolean })
+	readonly loadChildren!: boolean;
+
 	selected: ISelection[] = [];
-
 	expanded: string[] = [];
-
 	visible: boolean[] = [];
 	loadingButtons: string[] = [];
 
@@ -218,19 +243,20 @@ export default class VTreeViewTable extends Vue {
 		this.$emit('selected', this.getSelected);
 	}
 
-	buttonAction(action: string, payload: any) {
-		this.$emit('action', { action, payload });
+	buttonAction(action: string, item: any) {
+		this.$emit('action', { action, item });
+		this.$emit(action, item);
 	}
 
 	buttonIcon(buttonType: ButtonType) {
 		return Convert.buttonTypeToIcon(buttonType);
 	}
 
-	/*
-	A promise is send to the parent, which will resolve once the data is available. After which the node expands.
-	 */
-	getMedia(item: ITreeViewTableRow): Promise<ITreeViewTableRow> {
-		return new Promise((resolve) => this.$emit('request-media', { mediaId: item.id, resolve }));
+	getChildren(item: any): Promise<any> {
+		if (this.loadChildren) {
+			return new Promise((resolve) => this.$emit('load-children', { item, resolve }));
+		}
+		return Promise.resolve();
 	}
 }
 </script>

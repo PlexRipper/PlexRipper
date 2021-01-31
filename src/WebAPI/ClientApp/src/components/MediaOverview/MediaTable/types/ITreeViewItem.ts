@@ -13,5 +13,6 @@ export default interface ITreeViewItem extends ITreeViewTableRow {
 	updatedAt: string;
 	plexLibraryId: number;
 	plexServerId: number;
-	type: PlexMediaType;
+	mediaType: PlexMediaType;
+	actions: string[];
 }

@@ -93,7 +93,8 @@ HelpIcon.vue
 P-btn.vue
 */
 
-.p-btn {
+.p-btn,
+.navigation-btn {
 	&.filled {
 		background-color: currentColor;
 	}
@@ -133,19 +134,17 @@ MediaOverviewBar.vue
 	// height: 92%;
 }
 /*
-MediaTable.vue
+VTreeViewTable.vue
 */
-.media-table {
-	.media-table-header {
-		height: 40px;
-		margin: 0;
-		position: sticky;
-		position: -webkit-sticky;
-		top: 0; /* required */
-		@extend .flex-nowrap;
+.v-tree-view-table {
+	.v-tree-view-table-header {
+		height: 48px;
+		@extend .no-wrap;
 
 		.select-all-check {
-			margin: 22px 0 0 36px;
+			padding-top: 22px;
+			margin-left: 36px;
+			margin-right: 10px;
 			.v-input--selection-controls {
 				padding: 0 0 0 2px !important;
 				margin: 0 !important;
@@ -160,7 +159,7 @@ MediaTable.vue
 		white-space: nowrap;
 		overflow: hidden;
 	}
-	.media-table-content {
+	.v-tree-view-table-body {
 		// This takes the 100% browser window height, and then subtracts all bars that are above
 		// media-table-content to calculate the height of the actual viewport of the media that is viewed.
 		height: calc(100vh - 48px - 85px - 48px - 24px);
@@ -168,13 +167,13 @@ MediaTable.vue
 			// In order -> viewport -> topBar -> MediaOverviewBar -> DetailsOverviewHeader -> .media-table-header -> extra
 			height: calc(100vh - 48px - 85px - 250px - 40px - 8px);
 		}
-		.media-table-row {
+		.v-tree-view-table-row {
 			.v-treeview-node {
 				border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
 			}
 		}
 
-		.media-table-content-row {
+		.v-tree-view-table-content-row {
 			@extend .ml-2;
 			@extend .flex-nowrap;
 			.v-sheet {

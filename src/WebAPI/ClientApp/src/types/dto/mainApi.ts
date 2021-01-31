@@ -81,9 +81,9 @@ export interface IDownloadWorkerProgress {
 export interface ResultDTO {
   isFailed?: boolean;
   isSuccess?: boolean;
-  reasons?: Reason[] | null | null;
-  errors?: Error[] | null | null;
-  successes?: Success[] | null | null;
+  reasons?: Reason[] | null;
+  errors?: Error[] | null;
+  successes?: Success[] | null;
 }
 
 export interface Reason {
@@ -91,7 +91,7 @@ export interface Reason {
   metadata?: Record<string, any>;
 }
 
-export type Error = Reason & { reasons?: Error[] | null | null };
+export type Error = Reason & { reasons?: Error[] | null };
 
 export type Success = Reason & object;
 
@@ -132,12 +132,10 @@ export interface PlexLibraryDTO {
   count: number;
   seasonCount: number;
   episodeCount: number;
-  movies: PlexMovieDTO[];
-  tvShows: PlexTvShowDTO[];
+  movies: PlexMediaDTO[];
+  tvShows: PlexMediaDTO[];
   downloadTasks: DownloadTaskDTO[];
 }
-
-export type PlexMovieDTO = PlexMediaDTO & object;
 
 export interface PlexMediaDTO {
   id: number;
@@ -159,10 +157,13 @@ export interface PlexMediaDTO {
   addedAt: string;
   updatedAt: string;
   originallyAvailableAt: string;
+  tvShowId: number;
+  tvShowSeasonId: number;
   plexLibraryId: number;
   plexServerId: number;
   type: PlexMediaType;
-  mediaData: PlexMediaDataDTO[];
+  mediaData: PlexMediaDataDTO[] | null;
+  children: PlexMediaDTO[];
 }
 
 export interface PlexMediaDataDTO {
@@ -190,12 +191,6 @@ export interface PlexMediaDataPartDTO {
   Container: string;
   VideoProfile: string;
 }
-
-export type PlexTvShowDTO = PlexMediaDTO & { seasons: PlexTvShowSeasonDTO[] };
-
-export type PlexTvShowSeasonDTO = PlexMediaDTO & { tvShowId: number; episodes: PlexTvShowEpisodeDTO[] };
-
-export type PlexTvShowEpisodeDTO = PlexMediaDTO & { tvShowSeasonId: number };
 
 export interface PlexServerStatusDTO {
   id: number;
@@ -320,7 +315,7 @@ export interface RefreshPlexLibraryDTO {
   plexLibraryId?: number;
 }
 
-export type ResultDTOOfPlexTvShowDTO = ResultDTO & { value: PlexTvShowDTO };
+export type ResultDTOOfPlexMediaDTO = ResultDTO & { value: PlexMediaDTO };
 
 export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStatusDTO };
 

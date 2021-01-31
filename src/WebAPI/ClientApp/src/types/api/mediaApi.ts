@@ -1,16 +1,16 @@
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
-import { PlexMediaType, PlexTvShowDTO } from '@dto/mainApi';
+import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { checkResponse, preApiRequest } from '@api/baseApi';
 
 const logText = 'From plexMediaApi => ';
 const apiPath = '/PlexMedia';
 
-export function getTvShow(id: number): Observable<PlexTvShowDTO> {
+export function getTvShow(id: number): Observable<PlexMediaDTO> {
 	preApiRequest(logText, 'getTvShow');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/tvshow/${id}`);
-	return checkResponse<PlexTvShowDTO>(result, logText, 'getTvShow');
+	return checkResponse<PlexMediaDTO>(result, logText, 'getTvShow');
 }
 
 export function getThumbnail(

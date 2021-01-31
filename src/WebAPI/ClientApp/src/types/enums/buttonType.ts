@@ -17,6 +17,5 @@ enum ButtonType {
 	Pause = 'pause',
 	Clear = 'clear',
 	Details = 'details',
-	Alphabet = 'alphabet',
 }
 export default ButtonType;

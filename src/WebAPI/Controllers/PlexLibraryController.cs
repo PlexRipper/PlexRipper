@@ -30,7 +30,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> GetPlexLibrary(int id, int plexAccountId = 0)
+        public async Task<IActionResult> GetPlexLibrary(int id, [FromQuery] int plexAccountId = 0, bool allMedia = false)
         {
             if (id <= 0)
             {
@@ -39,10 +39,10 @@ namespace PlexRipper.WebAPI.Controllers
 
             try
             {
-                Log.Debug($"API Request: GetPlexLibrary(plexLibraryId = {id}, plexAccountId = {plexAccountId})");
+                Log.Debug($"API Request: GetPlexLibrary(plexLibraryId = {id}, plexAccountId = {plexAccountId}, allMedia = {allMedia})");
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                var data = await _plexLibraryService.GetPlexLibraryAsync(id, plexAccountId, true);
+                var data = await _plexLibraryService.GetPlexLibraryAsync(id, plexAccountId, !allMedia);
 
                 if (data.IsFailed)
                 {

@@ -26,10 +26,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
             RuleForEach(x => x.PlexLibrary.TvShows).ChildRules(plexMovie =>
             {
                 plexMovie.RuleFor(x => x.Key).GreaterThan(0);
-                plexMovie.RuleForEach(x => x.Seasons).ChildRules(plexMovieData =>
-                {
-                    plexMovieData.RuleFor(x => x.Episodes).NotEmpty();
-                });
+                plexMovie.RuleForEach(x => x.Seasons).ChildRules(plexMovieData => { plexMovieData.RuleFor(x => x.Episodes).NotEmpty(); });
             });
         }
     }
@@ -150,7 +147,8 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                         // Filter the episodes by Add, update or delete.
                         newPlexTvSeason.Episodes.ForEach(newPlexTvShowEpisode =>
                         {
-                            // Set seasonId in every episode
+                            // Set tvShowId and tvShowSeasonId in every episode
+                            newPlexTvShowEpisode.TvShowId = newPlexTvShow.Id;
                             newPlexTvShowEpisode.TvShowSeasonId = newPlexTvSeason.Id;
                             var searchEpisodeResult = episodeList.Find(x => x.Key == newPlexTvShowEpisode.Key);
                             if (searchEpisodeResult is null)
@@ -203,16 +201,28 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
             var tvShowAddList = tvShowDict.Select(x => x.Value).ToList();
             await _dbContext.BulkInsertAsync(tvShowAddList, _config, cancellationToken: token);
 
-            // Add tvShowId to every season and then insert episodes in DB.
+            // Add tvShowId to every season and episode and then insert seasons in DB.
             var tvShowSeasonAddList = seasonDict.Select(x => x.Value).ToList();
-            tvShowAddList.ForEach(tvShow => tvShow.Seasons.ForEach(season => season.TvShowId = tvShow.Id));
-            tvShowSeasonAddList.ForEach(season => season.TvShowId = season.TvShow.Id);
+            tvShowAddList.ForEach(tvShow => tvShow.Seasons.ForEach(season =>
+            {
+                season.TvShowId = tvShow.Id;
+                season.Episodes.ForEach(episode => episode.TvShowId = tvShow.Id);
+            }));
+            tvShowSeasonAddList.ForEach(season =>
+            {
+                season.TvShowId = season.TvShow.Id;
+                season.Episodes.ForEach(episode => episode.TvShowId = season.TvShow.Id);
+            });
             await _dbContext.BulkInsertAsync(tvShowSeasonAddList, _config, cancellationToken: token);
 
             // Add season id to every episode and then insert episodes in DB.
             var tvShowEpisodeAddList = episodeDict.Select(x => x.Value).ToList();
             tvShowSeasonAddList.ForEach(season => season.Episodes.ForEach(episode => episode.TvShowSeasonId = season.Id));
-            tvShowEpisodeAddList.ForEach(episode => episode.TvShowSeasonId = episode.TvShowSeason.Id);
+            tvShowEpisodeAddList.ForEach(episode =>
+            {
+                episode.TvShowSeasonId = episode.TvShowSeason.Id;
+                episode.TvShowId = episode.TvShowSeason.TvShowId;
+            });
             await _dbContext.BulkInsertAsync(tvShowEpisodeAddList, _config, cancellationToken: token);
         }
     }

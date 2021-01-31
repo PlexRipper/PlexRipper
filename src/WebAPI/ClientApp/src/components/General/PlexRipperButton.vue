@@ -125,7 +125,6 @@ export default class PBtn extends Vue {
 			'p-btn',
 			this.margin ? 'mx-2' : '',
 			'i18n-formatting',
-			this.buttonType === ButtonType.Alphabet ? 'navigation-btn' : '',
 		];
 	}
 
@@ -186,7 +185,6 @@ export default class PBtn extends Vue {
 		switch (this.buttonType) {
 			case ButtonType.ExternalLink:
 			case ButtonType.Download:
-			case ButtonType.Alphabet:
 			case ButtonType.Start:
 			case ButtonType.Resume:
 			case ButtonType.Restart:
@@ -208,7 +206,6 @@ export default class PBtn extends Vue {
 			case ButtonType.Cancel:
 			case ButtonType.Confirm:
 			case ButtonType.Delete:
-			case ButtonType.Alphabet:
 				return false;
 		}
 		return false;

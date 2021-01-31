@@ -84,9 +84,9 @@ export class DownloadService extends BaseService {
 
 		downloads.forEach((downloadTask) => {
 			if (downloadTask.mediaType === PlexMediaType.TvShow) {
-				downloadTask.children.forEach((season) => {
+				downloadTask.children?.forEach((season) => {
 					if (downloadTask.mediaType === PlexMediaType.Season) {
-						season.children = season.children.filter((x) => downloadTaskIds.some((y) => y !== x.id));
+						season.children = season.children?.filter((x) => downloadTaskIds.some((y) => y !== x.id)) ?? [];
 					}
 				});
 			}

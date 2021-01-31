@@ -33,7 +33,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET api/<PlexMedia>/tvshow/5
         [HttpGet("tvshow/{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexTvShowDTO>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexMediaDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
@@ -55,7 +55,7 @@ namespace PlexRipper.WebAPI.Controllers
 
                 if (data.Value != null)
                 {
-                    return Ok(Result.Ok(_mapper.Map<PlexTvShowDTO>(data.Value)));
+                    return Ok(Result.Ok(_mapper.Map<PlexMediaDTO>(data.Value)));
                 }
 
                 string message = $"Could not find a {nameof(PlexTvShow)} with Id: {id}";

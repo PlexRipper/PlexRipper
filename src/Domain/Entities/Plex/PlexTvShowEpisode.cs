@@ -12,6 +12,10 @@ namespace PlexRipper.Domain
 
         #region Relationships
 
+        public PlexTvShow TvShow { get; set; }
+
+        public int TvShowId { get; set; }
+
         public PlexTvShowSeason TvShowSeason { get; set; }
 
         public int TvShowSeasonId { get; set; }

@@ -1,5 +1,5 @@
 <template>
-	<v-tree-view-table :items="getDownloads" :headers="getHeaders" @action="tableAction" />
+	<v-tree-view-table :items="getDownloads" :headers="getHeaders" media-icons @action="tableAction" />
 </template>
 <script lang="ts">
 import Log from 'consola';
@@ -37,8 +37,8 @@ export default class DownloadsTable extends Vue {
 	get getDownloads(): DownloadTaskDTO[] {
 		this.tvShowsDownloadRows.forEach((tvShow) => {
 			tvShow?.children?.forEach((season) => {
-				if (season.children.length > 0) {
-					season.children.forEach((episode) => {
+				if (season.children && season.children.length > 0) {
+					season.children?.forEach((episode) => {
 						// Merge the various feeds
 						const downloadProgress = this.downloadProgressList.find((x) => x.id === episode.id);
 						const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === episode.id);
@@ -87,10 +87,6 @@ export default class DownloadsTable extends Vue {
 
 	get getHeaders(): ITreeViewTableHeader[] {
 		return [
-			// {
-			// 	text: 'Id',
-			// 	value: 'id',
-			// },
 			{
 				text: 'Title',
 				value: 'title',
@@ -184,9 +180,9 @@ export default class DownloadsTable extends Vue {
 		return availableActions;
 	}
 
-	tableAction({ action, payload }: { action: string; payload: any }) {
-		Log.info('command', { action, payload });
-		this.$emit(action, payload);
+	tableAction({ action, item }: { action: string; item: any }) {
+		Log.info('command', { action, item });
+		this.$emit(action, item);
 	}
 
 	cleanupProgress(downloadTaskId: number): void {

@@ -19,38 +19,40 @@
 		</template>
 		<!-- Header -->
 		<template v-else-if="server && library">
-			<div v-show="showMediaOverview">
-				<!--	Overview bar	-->
-				<v-row class="mx-0">
-					<media-overview-bar
-						:server="server"
-						:library="library"
-						:view-mode="viewMode"
-						:has-selected="getSelectedMediaIds.length > 0"
-						:hide-download-button="!isTableView"
-						@view-change="changeView"
-						@refresh-library="refreshLibrary"
-						@download="processDownloadCommand([])"
-					></media-overview-bar>
-				</v-row>
-				<!--	Data table display	-->
-				<template v-if="isTableView">
-					<media-table
-						ref="overviewMediaTable"
-						:items="items"
-						:library-id="libraryId"
-						:media-type="mediaType"
-						@download="processDownloadCommand"
-						@selected="selected = $event"
-						@request-media="requestMedia"
-					/>
-				</template>
+			<v-row v-show="showMediaOverview" no-gutters>
+				<v-col>
+					<!--	Overview bar	-->
+					<v-row>
+						<media-overview-bar
+							:server="server"
+							:library="library"
+							:view-mode="viewMode"
+							:has-selected="getSelectedMediaIds.length > 0"
+							:hide-download-button="!isTableView"
+							@view-change="changeView"
+							@refresh-library="refreshLibrary"
+							@download="processDownloadCommand([])"
+						></media-overview-bar>
+					</v-row>
+					<!--	Data table display	-->
+					<template v-if="isTableView">
+						<media-table
+							ref="overviewMediaTable"
+							:items="items"
+							:library-id="libraryId"
+							:media-type="mediaType"
+							@download="processDownloadCommand"
+							@selected="selected = $event"
+							@request-media="requestMedia"
+						/>
+					</template>
 
-				<!-- Poster display-->
-				<template v-if="isPosterView">
-					<poster-table :items="items" :media-type="mediaType" @download="processDownloadCommand" @open-details="openDetails" />
-				</template>
-			</div>
+					<!-- Poster display-->
+					<template v-if="isPosterView">
+						<poster-table :items="items" :media-type="mediaType" @download="processDownloadCommand" @open-details="openDetails" />
+					</template>
+				</v-col>
+			</v-row>
 			<!--	Overlay with details of the media	-->
 			<details-overview
 				v-show="!showMediaOverview"
@@ -80,16 +82,14 @@
 import Log from 'consola';
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { finalize, tap } from 'rxjs/operators';
-import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
+import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import MediaPoster from '@mediaOverview/PosterTable/MediaPoster.vue';
 import SignalrService from '@service/signalrService';
 import DownloadService from '@state/downloadService';
 import LibraryService from '@state/libraryService';
 import ProgressComponent from '@components/ProgressComponent.vue';
-import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
-import Convert from '@mediaOverview/MediaTable/types/Convert';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
@@ -132,8 +132,8 @@ export default class MediaOverview extends Vue {
 	libraryProgress: LibraryProgress | null = null;
 	downloadTaskCreationProgress: DownloadTaskCreationProgress | null = null;
 	downloadPreviewType: PlexMediaType = PlexMediaType.None;
-	items: ITreeViewItem[] = [];
-	detailItem: ITreeViewItem | null = null;
+	items: PlexMediaDTO[] = [];
+	detailItem: PlexMediaDTO | null = null;
 
 	get mediaType(): PlexMediaType {
 		return this.library?.type ?? PlexMediaType.Unknown;
@@ -181,17 +181,6 @@ export default class MediaOverview extends Vue {
 			isRefreshing,
 			isComplete: false,
 		};
-	}
-
-	convertMediaItems(): void {
-		switch (this.mediaType) {
-			case PlexMediaType.Movie:
-				this.items = Convert.moviesToTreeViewItems(this.library?.movies ?? []);
-				break;
-			case PlexMediaType.TvShow:
-				this.items = Convert.tvShowsToTreeViewItems(this.library?.tvShows ?? []);
-				break;
-		}
 	}
 
 	get isPosterView(): boolean {
@@ -281,7 +270,7 @@ export default class MediaOverview extends Vue {
 		const item = this.items.find((x) => x.id === mediaId);
 		if (item?.children?.length === 0) {
 			this.requestMedia({
-				mediaId,
+				item,
 				resolve: () => {
 					this.detailItem = this.items.find((x) => x.id === mediaId) ?? null;
 				},
@@ -311,13 +300,19 @@ export default class MediaOverview extends Vue {
 		LibraryService.refreshLibrary(this.libraryId);
 	}
 
-	requestMedia(numberPromise: { mediaId: number; resolve?: Function }): void {
+	requestMedia(numberPromise: { item: PlexMediaDTO; resolve?: Function }): void {
 		if (this.mediaType === PlexMediaType.TvShow) {
-			getTvShow(numberPromise.mediaId).subscribe((response) => {
+			getTvShow(numberPromise.item.id).subscribe((response) => {
 				if (response) {
-					const convert = Convert.tvShowsToTreeViewItems([response])[0];
-					const itemsIndex = this.items.findIndex((x) => x.id === numberPromise.mediaId);
-					this.items[itemsIndex].children?.push(...(convert?.children ?? []));
+					const itemsIndex = this.items.findIndex((x) => x.id === numberPromise.item.id);
+					// This is a fix to prevent episodes from acting like it has additional children and that it can be requested
+					response.children?.forEach((season) => {
+						season.children?.forEach((episode) => {
+							// @ts-ignore:
+							episode.children = undefined;
+						});
+					});
+					this.items[itemsIndex].children?.push(...(response.children ?? []));
 				}
 				if (numberPromise.resolve) {
 					// Alert listener that the data is available
@@ -335,12 +330,6 @@ export default class MediaOverview extends Vue {
 		this.resetProgress(false);
 		this.isRefreshing = false;
 		this.isLoading = true;
-
-		// this.$router.beforeResolve((to, from, next) => {
-		// 	if (from.path.includes('details')){
-		//
-		// 	}
-		// })
 
 		// Setup progress bar
 		SignalrService.getLibraryProgress().subscribe((data) => {
@@ -372,7 +361,14 @@ export default class MediaOverview extends Vue {
 				}
 				if (data[1] && data[1].id === this.libraryId) {
 					this.library = Object.freeze(data[1]);
-					this.convertMediaItems();
+					switch (this.mediaType) {
+						case PlexMediaType.Movie:
+							this.items = this.library?.movies ?? [];
+							break;
+						case PlexMediaType.TvShow:
+							this.items = this.library?.tvShows ?? [];
+							break;
+					}
 				}
 				if (this.server && this.library) {
 					this.isLoading = false;

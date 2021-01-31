@@ -65,6 +65,12 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("originallyAvailableAt", Required = Required.Always)]
         public DateTime? OriginallyAvailableAt { get; set; }
 
+        [JsonProperty("tvShowId", Required = Required.Always)]
+        public int TvShowId { get; set; }
+
+        [JsonProperty("tvShowSeasonId", Required = Required.Always)]
+        public int TvShowSeasonId { get; set; }
+
         [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }
 
@@ -74,7 +80,10 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType Type { get; set; }
 
-        [JsonProperty("mediaData", Required = Required.Always)]
+        [JsonProperty("mediaData", Required = Required.AllowNull)]
         public List<PlexMediaDataDTO> MediaData { get; set; }
+
+        [JsonProperty("children", Required = Required.Always)]
+        public List<PlexMediaDTO> Children { get; set; } = new List<PlexMediaDTO>();
     }
 }

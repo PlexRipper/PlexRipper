@@ -47,8 +47,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ProgressComponent from '@components/ProgressComponent.vue';
-import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
-import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
+import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { settingsStore } from '@/store';
 import ButtonType from '@enums/buttonType';
 import Log from 'consola';
@@ -59,14 +58,14 @@ import Log from 'consola';
 	},
 })
 export default class DownloadConfirmation extends Vue {
-	@Prop({ required: true, type: Array as () => ITreeViewItem[] })
-	readonly items!: ITreeViewItem[];
+	@Prop({ required: true, type: Array as () => PlexMediaDTO[] })
+	readonly items!: PlexMediaDTO[];
 
 	@Prop({ required: true })
 	readonly progress!: DownloadTaskCreationProgress | null;
 
 	showDialog: boolean = false;
-	downloadPreview: ITreeViewItem[] = [];
+	downloadPreview: PlexMediaDTO[] = [];
 	downloadMediaCommand: DownloadMediaDTO[] = [];
 
 	get isConfirmationEnabled(): boolean {
@@ -104,7 +103,7 @@ export default class DownloadConfirmation extends Vue {
 	}
 
 	private createPreview(downloadMediaCommands: DownloadMediaDTO[]): void {
-		let downloadPreview: ITreeViewItem[] = [];
+		let downloadPreview: PlexMediaDTO[] = [];
 
 		const movieDownloadCommand = downloadMediaCommands.find((x) => x.type === PlexMediaType.Movie);
 		// If statements instead of switch to avoid having to overcomplicate the variable names.
@@ -147,8 +146,8 @@ export default class DownloadConfirmation extends Vue {
 					return {
 						...tvShow,
 						children: tvShow.children
-							?.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.includes(episode.id)))
-							.map((season: ITreeViewItem) => {
+							?.filter((season: PlexMediaDTO) => season?.children?.some((episode) => mediaIds.includes(episode.id)))
+							.map((season: PlexMediaDTO) => {
 								// Create the tvShowSeason
 								return {
 									...season,
@@ -190,14 +189,15 @@ export default class DownloadConfirmation extends Vue {
 	/* Recursively retrieve all unique keys used in the items: ITreeViewItem[] */
 	get getLeafs(): string[] {
 		let keys: string[] = [];
-		keys = keys.concat(this.downloadPreview.map((x) => x.key));
-		keys = keys.concat(this.downloadPreview.map((x) => x.children?.map((y) => y.key) ?? [])?.flat(1) ?? []);
+		keys = keys.concat(this.downloadPreview.map((x) => x.key.toString()));
+		keys = keys.concat(this.downloadPreview.map((x) => x.children?.map((y) => y.key.toString()) ?? [])?.flat(1) ?? []);
 		keys = keys.concat(
-			this.downloadPreview.map((x) => x.children?.map((y) => y.children?.map((z) => z.key) ?? []) ?? [])?.flat(2) ?? [],
+			this.downloadPreview.map((x) => x.children?.map((y) => y.children?.map((z) => z.key.toString()) ?? []) ?? [])?.flat(2) ??
+				[],
 		);
 		keys = keys.concat(
 			this.downloadPreview
-				.map((x) => x.children?.map((y) => y.children?.map((z) => z.children?.map((w) => w.key) ?? []) ?? []) ?? [])
+				.map((x) => x.children?.map((y) => y.children?.map((z) => z.children?.map((w) => w.key.toString()) ?? []) ?? []) ?? [])
 				?.flat(3),
 		);
 		return keys;

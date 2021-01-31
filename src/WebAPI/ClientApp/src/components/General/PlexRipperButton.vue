@@ -24,7 +24,7 @@
 				@click="click($event)"
 			>
 				<v-icon v-if="getIcon" class="mx-2" :size="iconSize" :color="getColor">{{ getIcon }}</v-icon>
-				<span v-if="getText !== '' && !iconMode">{{ $t(getText) }} </span>
+				<span v-if="getText !== ''">{{ $t(getText) }} </span>
 				<slot></slot>
 			</v-btn>
 		</template>
@@ -67,9 +67,6 @@ export default class PBtn extends Vue {
 	readonly iconMode!: boolean;
 
 	@Prop({ required: false, type: Boolean, default: false })
-	readonly outlined!: boolean;
-
-	@Prop({ required: false, type: Boolean, default: false })
 	readonly disabled!: boolean;
 
 	@Prop({ required: false, type: Boolean, default: false })
@@ -89,9 +86,6 @@ export default class PBtn extends Vue {
 
 	@Prop({ required: false, type: String })
 	readonly iconSize!: string;
-
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly margin!: boolean;
 
 	@Prop({ required: false, type: Boolean })
 	readonly xLarge!: boolean;
@@ -119,13 +113,7 @@ export default class PBtn extends Vue {
 	}
 
 	get getClass(): string[] {
-		return [
-			this.getIsFilled ? 'filled' : '',
-			this.getIsOutlined ? 'outlined' : '',
-			'p-btn',
-			this.margin ? 'mx-2' : '',
-			'i18n-formatting',
-		];
+		return [this.getIsFilled ? 'filled' : '', this.getIsOutlined ? 'outlined' : '', 'p-btn', 'mx-2', 'i18n-formatting'];
 	}
 
 	get getText(): string {
@@ -179,19 +167,9 @@ export default class PBtn extends Vue {
 	}
 
 	get getIsOutlined(): boolean {
-		if (this.outlined) {
-			return true;
-		}
 		switch (this.buttonType) {
 			case ButtonType.ExternalLink:
 			case ButtonType.Download:
-			case ButtonType.Start:
-			case ButtonType.Resume:
-			case ButtonType.Restart:
-			case ButtonType.Pause:
-			case ButtonType.Stop:
-			case ButtonType.Clear:
-			case ButtonType.Details:
 				return false;
 			default:
 				return true;
@@ -208,7 +186,7 @@ export default class PBtn extends Vue {
 			case ButtonType.Delete:
 				return false;
 		}
-		return true;
+		return false;
 	}
 
 	click(event: any): void {

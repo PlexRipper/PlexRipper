@@ -18,11 +18,11 @@ namespace PlexRipper.Data.CQRS
         }
     }
 
-    public class DeletePlexAccountHandler : BaseHandler, IRequestHandler<DeletePlexAccountCommand, Result<bool>>
+    public class DeletePlexAccountHandler : BaseHandler, IRequestHandler<DeletePlexAccountCommand, Result>
     {
         public DeletePlexAccountHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<bool>> Handle(DeletePlexAccountCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(DeletePlexAccountCommand command, CancellationToken cancellationToken)
         {
             var plexAccount = await _dbContext.PlexAccounts.AsTracking().FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
 
@@ -35,7 +35,7 @@ namespace PlexRipper.Data.CQRS
             await _dbContext.SaveChangesAsync(cancellationToken);
             Log.Debug($"Deleted PlexAccount with Id: {command.Id} from the database");
 
-            return Result.Ok(true);
+            return Result.Ok();
         }
     }
 }

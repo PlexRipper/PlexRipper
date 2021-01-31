@@ -196,6 +196,11 @@ namespace PlexRipper.Application.PlexServers
             return await _mediator.Send(new GetPlexServerStatusByIdQuery(result.Value));
         }
 
+        public Task<Result> RemoveInaccessibleServers()
+        {
+            return _mediator.Send(new RemoveInaccessibleServersCommand());
+        }
+
         #region CRUD
 
         public Task<Result<PlexServer>> GetServerAsync(int plexServerId)

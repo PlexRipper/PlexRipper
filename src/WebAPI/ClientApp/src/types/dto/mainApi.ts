@@ -135,11 +135,13 @@ export interface PlexLibraryDTO {
   movies: PlexMediaDTO[];
   tvShows: PlexMediaDTO[];
   downloadTasks: DownloadTaskDTO[];
+  media?: PlexMediaDTO[] | null;
 }
 
 export interface PlexMediaDTO {
   id: number;
   key: number;
+  treeKeyId: string;
   title: string;
   year: number;
   duration: number;

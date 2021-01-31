@@ -14,6 +14,12 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("key", Required = Required.Always)]
         public int Key { get; set; }
 
+        /// <summary>
+        /// Used specifically for the treeView display in the client
+        /// </summary>
+        [JsonProperty("treeKeyId", Required = Required.Always)]
+        public string TreeKeyId { get; set; }
+
         [JsonProperty("title", Required = Required.Always)]
         public string Title { get; set; }
 

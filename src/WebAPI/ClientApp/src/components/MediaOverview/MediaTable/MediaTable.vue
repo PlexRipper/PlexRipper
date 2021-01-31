@@ -4,8 +4,9 @@
 		:headers="getHeaders"
 		:navigation="!hideNavigation"
 		:open-all="detailMode"
+		item-key="treeKeyId"
 		load-children
-		@selected="selected = $event"
+		@selected="updateSelected"
 		@download="downloadMedia"
 		@load-children="getMedia"
 	/>
@@ -213,6 +214,11 @@ export default class MediaTable extends Vue {
 		}
 
 		return downloads;
+	}
+
+	updateSelected(selected: string[]): void {
+		this.selected = selected;
+		this.$emit('selected', selected);
 	}
 
 	async downloadMedia(item: PlexMediaDTO): Promise<void> {

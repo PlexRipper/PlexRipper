@@ -29,9 +29,9 @@
 				</v-col>
 			</v-row>
 			<!-- TreeView Table -->
-			<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
-				<v-row no-gutters class="v-tree-view-table-body">
-					<v-col class="col px-0">
+			<v-row no-gutters class="v-tree-view-table-body">
+				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
+					<v-col class="col pa-0">
 						<template v-for="(parentItem, i) in items">
 							<v-lazy
 								:key="i"
@@ -52,10 +52,11 @@
 									:open-all="openAll"
 									:load-children="getChildren"
 									transition
-									item-key="key"
+									:item-key="itemKey"
 									item-text="title"
 									class="v-tree-view-table-row"
-									@input="updateSelected(i, $event)"
+									:value="findSelected(parentItem.key)"
+									@input="updateSelected(parentItem.key, $event)"
 								>
 									<template #label="{ item }">
 										<v-row align="center">
@@ -136,8 +137,8 @@
 							</v-lazy>
 						</template>
 					</v-col>
-				</v-row>
-			</perfect-scrollbar>
+				</perfect-scrollbar>
+			</v-row>
 		</v-col>
 		<alphabet-navigation v-if="navigation" :items="items" container-ref="scrollbarmediatable" />
 	</v-row>
@@ -154,7 +155,7 @@ import ButtonType from '@enums/buttonType';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 
 declare interface ISelection {
-	index: number;
+	indexKey: number;
 	keys: string[];
 }
 
@@ -184,6 +185,9 @@ export default class VTreeViewTable extends Vue {
 	@Prop({ required: false, type: Boolean })
 	readonly loadChildren!: boolean;
 
+	@Prop({ required: false, type: String, default: 'key' })
+	readonly itemKey!: string;
+
 	selected: ISelection[] = [];
 	expanded: string[] = [];
 	visible: boolean[] = [];
@@ -198,8 +202,12 @@ export default class VTreeViewTable extends Vue {
 		return this.selected.map((x) => x.keys).flat(1);
 	}
 
+	findSelected(i: number): string[] {
+		return this.selected.find((x) => x.indexKey === i)?.keys ?? [];
+	}
+
 	get isIndeterminate(): boolean {
-		return this.getSelected.length !== this.selected.length && this.selected.length > 0;
+		return this.selected.length < this.items.length && this.selected.length > 0;
 	}
 
 	get containerRef(): any {
@@ -207,36 +215,56 @@ export default class VTreeViewTable extends Vue {
 	}
 
 	retrieveAllLeafs(items: ITreeViewTableRow[]): string[] {
-		return (
-			items
-				.map((root) => root.children?.map((child1) => child1.children?.map((child2) => child2.key) ?? child1.key) ?? root.key)
-				?.flat(2) ?? []
-		);
+		const keys: string[] = [];
+		items.forEach((root) => {
+			if (root.children && root.children?.length > 0) {
+				root.children.forEach((child1) => {
+					if (child1.children && child1.children.length > 0) {
+						child1.children.forEach((child2) => {
+							if (child2.children && child2.children.length > 0) {
+								child2.children.forEach((child3) => {
+									keys.push(child3[this.itemKey]);
+								});
+							} else {
+								keys.push(child2[this.itemKey]);
+							}
+						});
+					} else {
+						keys.push(child1[this.itemKey]);
+					}
+				});
+			} else {
+				keys.push(root[this.itemKey]);
+			}
+		});
+
+		return keys;
 	}
 
 	isLoading(key: string): boolean {
 		return this.loadingButtons.some((x) => x === key);
 	}
 
-	updateSelected(i: number, selected: string[]) {
-		const index = this.selected.findIndex((x) => x.index === i);
+	updateSelected(itemKey: number, selected: string[]) {
+		const index = this.selected.findIndex((x) => x.indexKey === itemKey);
 		if (index === -1) {
-			this.selected.push({ index: i, keys: selected });
+			this.selected.push({ indexKey: itemKey, keys: selected });
 		} else {
-			this.selected.splice(index, 1, { index: i, keys: selected });
+			this.selected.splice(index, 1, { indexKey: itemKey, keys: selected });
 		}
 		this.emitSelected();
 	}
 
 	selectAll(state: boolean): void {
 		if (state) {
-			// this.items.forEach((x, i) => {
-			// 	// this.selected.slice(i, 1, { index: i, keys: this.retrieveAllLeafs([x]) } as ISelection);
-			// });
+			this.items.forEach((item) => {
+				const leafs = this.retrieveAllLeafs([item]);
+				this.updateSelected(item.key, leafs);
+			});
 		} else {
 			this.selected = [];
+			this.emitSelected();
 		}
-		this.emitSelected();
 	}
 
 	emitSelected(): void {
@@ -254,7 +282,16 @@ export default class VTreeViewTable extends Vue {
 
 	getChildren(item: any): Promise<any> {
 		if (this.loadChildren) {
-			return new Promise((resolve) => this.$emit('load-children', { item, resolve }));
+			const promise = new Promise((resolve) => this.$emit('load-children', { item, resolve }));
+			// Ensure that all children are selected if the root node is selected on load-children
+			promise.then(() => {
+				const selection = this.selected.find((x) => x.indexKey === item.key);
+				if (selection) {
+					const leafs = this.retrieveAllLeafs([item]);
+					this.updateSelected(item.key, leafs);
+				}
+			});
+			return promise;
 		}
 		return Promise.resolve();
 	}

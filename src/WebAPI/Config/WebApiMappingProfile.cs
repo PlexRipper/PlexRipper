@@ -67,6 +67,7 @@ namespace PlexRipper.WebAPI.Config
         {
             // PlexMediaData -> PlexMediaDataDTO
             CreateMap<PlexMedia, PlexMediaDTO>(MemberList.Destination)
+                .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => entity.Id.ToString()))
                 .ForMember(dto => dto.TvShowId, opt => opt.Ignore())
                 .ForMember(dto => dto.TvShowSeasonId, opt => opt.Ignore())
                 .ForMember(dto => dto.MediaData, opt => opt.Ignore())
@@ -92,6 +93,7 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<PlexTvShow, PlexMediaDTO>(MemberList.Destination)
                 .IncludeBase<PlexMedia, PlexMediaDTO>()
                 .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.Id))
+                .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => entity.Id.ToString()))
                 .ForMember(dto => dto.TvShowSeasonId, opt => opt.Ignore())
                 .ForMember(dto => dto.Children, opt => opt.MapFrom(entity => entity.Seasons))
                 .ForMember(dto => dto.MediaData, opt => opt.Ignore());
@@ -100,6 +102,7 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<PlexTvShowSeason, PlexMediaDTO>(MemberList.Destination)
                 .IncludeBase<PlexMedia, PlexMediaDTO>()
                 .ForMember(dto => dto.TvShowSeasonId, opt => opt.MapFrom(entity => entity.Id))
+                .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => $"{entity.TvShowId.ToString()}-{entity.Id.ToString()}"))
                 .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.TvShowId))
                 .ForMember(dto => dto.Children, opt => opt.MapFrom(entity => entity.Episodes))
                 .ForMember(dto => dto.MediaData, opt => opt.Ignore());
@@ -108,6 +111,7 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<PlexTvShowEpisode, PlexMediaDTO>(MemberList.Destination)
                 .IncludeBase<PlexMedia, PlexMediaDTO>()
                 .ForMember(dto => dto.Children, opt => opt.Ignore())
+                .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => $"{entity.TvShowId.ToString()}-{entity.TvShowSeasonId.ToString()}-{entity.Id.ToString()}"))
                 .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.TvShowId))
                 .ForMember(dto => dto.TvShowSeasonId, opt => opt.MapFrom(entity => entity.TvShowSeasonId))
                 .ForMember(dto => dto.MediaData, entity => entity.MapFrom(x => x.EpisodeData));

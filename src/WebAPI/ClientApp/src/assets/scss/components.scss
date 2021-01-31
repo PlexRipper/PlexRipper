@@ -137,6 +137,7 @@ MediaOverviewBar.vue
 VTreeViewTable.vue
 */
 .v-tree-view-table {
+	@extend .no-wrap;
 	.v-tree-view-table-header {
 		height: 48px;
 		@extend .no-wrap;
@@ -162,7 +163,7 @@ VTreeViewTable.vue
 	.v-tree-view-table-body {
 		// This takes the 100% browser window height, and then subtracts all bars that are above
 		// media-table-content to calculate the height of the actual viewport of the media that is viewed.
-		height: calc(100vh - 48px - 85px - 48px - 24px);
+		height: calc(100vh - 48px - 85px - 48px - 30px);
 		&.detail-mode {
 			// In order -> viewport -> topBar -> MediaOverviewBar -> DetailsOverviewHeader -> .media-table-header -> extra
 			height: calc(100vh - 48px - 85px - 250px - 40px - 8px);

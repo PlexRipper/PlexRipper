@@ -27,7 +27,7 @@
 							:server="server"
 							:library="library"
 							:view-mode="viewMode"
-							:has-selected="getSelectedMediaIds.length > 0"
+							:has-selected="selected.length > 0"
 							:hide-download-button="!isTableView"
 							@view-change="changeView"
 							@refresh-library="refreshLibrary"
@@ -191,48 +191,6 @@ export default class MediaOverview extends Vue {
 		return this.viewMode === ViewMode.Table;
 	}
 
-	get getSelectedMediaIds(): number[] {
-		const ids: number[] = [];
-		switch (this.mediaType) {
-			case PlexMediaType.Movie:
-				this.selected.forEach((x) => ids.push(+x.split('-')[0]));
-				break;
-			case PlexMediaType.TvShow:
-			case PlexMediaType.Season:
-			case PlexMediaType.Episode:
-				this.selected.forEach((x) => ids.push(+x.split('-')[2]));
-				break;
-			default:
-				Log.warn('Could not determine the type of the media to correctly download multiple selected media');
-				break;
-		}
-		return ids;
-	}
-
-	get downloadMediaCommand(): DownloadMediaDTO {
-		let type: PlexMediaType = PlexMediaType.None;
-
-		// Determine the type of media downloaded, the getSelectedMediaIds are always of the same type.
-		switch (this.mediaType) {
-			case PlexMediaType.Movie:
-				type = PlexMediaType.Movie;
-				break;
-			case PlexMediaType.TvShow:
-			case PlexMediaType.Season:
-			case PlexMediaType.Episode:
-				type = PlexMediaType.Episode;
-				break;
-			default:
-				return {} as DownloadMediaDTO;
-		}
-		return {
-			mediaIds: this.getSelectedMediaIds,
-			type,
-			plexAccountId: this.activeAccountId,
-			libraryId: this.libraryId,
-		};
-	}
-
 	processDownloadCommand(downloadMediaCommand: DownloadMediaDTO[]): void {
 		if (downloadMediaCommand.length > 0) {
 			this.downloadConfirmationRef.openDialog(downloadMediaCommand);
@@ -316,7 +274,7 @@ export default class MediaOverview extends Vue {
 				}
 				if (numberPromise.resolve) {
 					// Alert listener that the data is available
-					numberPromise.resolve();
+					numberPromise.resolve(response);
 				}
 			});
 		} else {

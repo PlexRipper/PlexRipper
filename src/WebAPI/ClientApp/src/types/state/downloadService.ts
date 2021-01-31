@@ -15,10 +15,12 @@ import { BaseService } from '@state/baseService';
 
 export class DownloadService extends BaseService {
 	public constructor() {
-		super((state: StoreState) => {
-			return {
-				downloads: state.downloads,
-			} as StoreState;
+		super({
+			stateSliceSelector: (state: StoreState) => {
+				return {
+					downloads: state.downloads,
+				};
+			},
 		});
 
 		AccountService.getActiveAccount()

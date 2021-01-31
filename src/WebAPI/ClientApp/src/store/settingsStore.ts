@@ -1,7 +1,7 @@
 import Log from 'consola';
 import { Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import type { SettingsModel } from '@dto/mainApi';
-import SettingsService from '@service/settingsService';
+import SettingsService from '@state/settingsService';
 import { ViewMode } from '@dto/mainApi';
 
 // Doc: https://typescript.nuxtjs.org/cookbook/store.html#class-based
@@ -32,7 +32,7 @@ export default class SettingsStore extends VuexModule {
 	setFirstTimeSetup(value: boolean) {
 		if (this.settings?.firstTimeSetup) {
 			this.settings.firstTimeSetup = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -40,7 +40,7 @@ export default class SettingsStore extends VuexModule {
 	setActiveAccountId(value: number) {
 		if (this.settings?.accountSettings) {
 			this.settings.accountSettings.activeAccountId = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -59,7 +59,7 @@ export default class SettingsStore extends VuexModule {
 	setMovieViewMode(value: ViewMode) {
 		if (this.settings?.userInterfaceSettings?.displaySettings) {
 			this.settings.userInterfaceSettings.displaySettings.movieViewMode = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -67,7 +67,7 @@ export default class SettingsStore extends VuexModule {
 	setTvShowViewMode(value: ViewMode) {
 		if (this.settings?.userInterfaceSettings?.displaySettings) {
 			this.settings.userInterfaceSettings.displaySettings.tvShowViewMode = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 	// endregion
@@ -97,7 +97,7 @@ export default class SettingsStore extends VuexModule {
 	setShortDateFormat(value: string) {
 		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
 			this.settings.userInterfaceSettings.dateTimeSettings.shortDateFormat = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -105,7 +105,7 @@ export default class SettingsStore extends VuexModule {
 	setLongDateFormat(value: string) {
 		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
 			this.settings.userInterfaceSettings.dateTimeSettings.longDateFormat = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -113,7 +113,7 @@ export default class SettingsStore extends VuexModule {
 	setTimeFormat(value: string) {
 		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
 			this.settings.userInterfaceSettings.dateTimeSettings.timeFormat = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -121,7 +121,7 @@ export default class SettingsStore extends VuexModule {
 	setTimeZone(value: string) {
 		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
 			this.settings.userInterfaceSettings.dateTimeSettings.timeZone = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -129,7 +129,7 @@ export default class SettingsStore extends VuexModule {
 	setShowRelativeDates(value: boolean) {
 		if (this.settings?.userInterfaceSettings?.dateTimeSettings) {
 			this.settings.userInterfaceSettings.dateTimeSettings.showRelativeDates = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -149,6 +149,7 @@ export default class SettingsStore extends VuexModule {
 	}
 
 	get askDownloadEpisodeConfirmation(): boolean {
+		Log.debug('settings', this.settings);
 		return this.settings?.userInterfaceSettings?.confirmationSettings?.askDownloadEpisodeConfirmation ?? false;
 	}
 
@@ -156,7 +157,7 @@ export default class SettingsStore extends VuexModule {
 	setAskDownloadMovieConfirmation(value: boolean) {
 		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
 			this.settings.userInterfaceSettings.confirmationSettings.askDownloadMovieConfirmation = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -164,7 +165,7 @@ export default class SettingsStore extends VuexModule {
 	setAskDownloadTvShowConfirmation(value: boolean) {
 		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
 			this.settings.userInterfaceSettings.confirmationSettings.askDownloadTvShowConfirmation = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -172,7 +173,7 @@ export default class SettingsStore extends VuexModule {
 	setAskDownloadSeasonConfirmation(value: boolean) {
 		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
 			this.settings.userInterfaceSettings.confirmationSettings.askDownloadSeasonConfirmation = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 
@@ -180,7 +181,7 @@ export default class SettingsStore extends VuexModule {
 	setAskDownloadEpisodeConfirmation(value: boolean) {
 		if (this.settings?.userInterfaceSettings?.confirmationSettings) {
 			this.settings.userInterfaceSettings.confirmationSettings.askDownloadEpisodeConfirmation = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 	// endregion
@@ -195,7 +196,7 @@ export default class SettingsStore extends VuexModule {
 	setDownloadSegments(value: number) {
 		if (this.settings?.advancedSettings?.downloadManager?.downloadSegments) {
 			this.settings.advancedSettings.downloadManager.downloadSegments = value;
-			SettingsService.updateSettings(this.settings);
+			SettingsService.updateSettings();
 		}
 	}
 	// endregion

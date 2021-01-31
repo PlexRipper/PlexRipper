@@ -2,11 +2,16 @@ import Log from 'consola';
 import AppConfig from '@interfaces/AppConfig';
 import { ReplaySubject, Observable } from 'rxjs';
 import { BaseService } from '@state/baseService';
+import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
 
 export class GlobalService extends BaseService {
 	private _axiosReady: ReplaySubject<any> = new ReplaySubject();
 	private _configReady: ReplaySubject<AppConfig> = new ReplaySubject();
+
+	constructor() {
+		super({} as ObservableStoreSettings);
+	}
 
 	public setAxiosReady(): void {
 		Log.info('Axios is ready');

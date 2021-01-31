@@ -135,7 +135,6 @@ export interface PlexLibraryDTO {
   movies: PlexMediaDTO[];
   tvShows: PlexMediaDTO[];
   downloadTasks: DownloadTaskDTO[];
-  media?: PlexMediaDTO[] | null;
 }
 
 export interface PlexMediaDTO {
@@ -336,7 +335,7 @@ export type BaseModel = object;
 
 export type AdvancedSettingsModel = BaseModel & { downloadManager: DownloadManagerModel };
 
-export type DownloadManagerModel = BaseModel & { downloadSegments?: number };
+export type DownloadManagerModel = BaseModel & { downloadSegments: number };
 
 export type UserInterfaceSettingsModel = BaseModel & {
   confirmationSettings: ConfirmationSettingsModel;

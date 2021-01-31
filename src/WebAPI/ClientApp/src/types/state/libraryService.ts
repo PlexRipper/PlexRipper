@@ -9,10 +9,12 @@ import { settingsStore } from '~/store';
 
 export class LibraryService extends BaseService {
 	public constructor() {
-		super((state: StoreState) => {
-			return {
-				libraries: state.libraries,
-			};
+		super({
+			stateSliceSelector: (state: StoreState) => {
+				return {
+					libraries: state.libraries,
+				};
+			},
 		});
 	}
 

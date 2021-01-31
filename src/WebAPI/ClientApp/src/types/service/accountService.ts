@@ -1,40 +1,46 @@
 import Log from 'consola';
-import { ReplaySubject, Observable, of, combineLatest } from 'rxjs';
+import { Observable, of, combineLatest } from 'rxjs';
 import { getAllAccounts } from '@api/accountApi';
-import { PlexAccountDTO, SettingsModel } from '@dto/mainApi';
-import SettingsService from '@service/./settingsService';
+import { PlexAccountDTO } from '@dto/mainApi';
 import { switchMap, tap } from 'rxjs/operators';
+import SettingsService from '@state/settingsService';
+import { BaseService } from '@state/baseService';
+import StoreState from '@state/storeState';
+import GlobalService from '@state/globalService';
 
-export class AccountService {
-	private _accounts: ReplaySubject<PlexAccountDTO[]> = new ReplaySubject();
-
+export class AccountService extends BaseService {
 	public constructor() {
-		SettingsService.getSettings()
+		super({
+			stateSliceSelector: (state: StoreState) => {
+				return {
+					accounts: state.accounts,
+				};
+			},
+		});
+
+		GlobalService.getAxiosReady()
 			.pipe(
 				tap(() => Log.debug('Retrieving all accounts')),
-				switchMap(() => getAllAccounts()),
+				switchMap(() => of(this.fetchAccounts())),
 			)
-			.subscribe((value) => {
-				Log.debug(`AccountService => Fetch Accounts`, value);
-				this._accounts.next(value ?? []);
-			});
+			.subscribe();
 	}
 
 	public fetchAccounts(): void {
-		getAllAccounts().subscribe((value) => {
-			Log.debug(`AccountService => Fetch Accounts`, value);
-			this._accounts.next(value ?? []);
+		getAllAccounts().subscribe((accounts) => {
+			Log.debug(`AccountService => Fetch Accounts`, accounts);
+			this.setState({ accounts });
 		});
 	}
 
 	public getAccounts(): Observable<PlexAccountDTO[]> {
-		return this._accounts.asObservable();
+		return this.stateChanged.pipe(switchMap((x) => of(x?.accounts ?? [])));
 	}
 
 	public getActiveAccount(): Observable<PlexAccountDTO | null> {
-		return combineLatest(SettingsService.getSettings(), this.getAccounts()).pipe(
-			switchMap((result: [SettingsModel, PlexAccountDTO[]]) => {
-				const activeAccountId = result[0]?.accountSettings.activeAccountId ?? 0;
+		return combineLatest([SettingsService.getActiveAccountId(), this.getAccounts()]).pipe(
+			switchMap((result: [number, PlexAccountDTO[]]) => {
+				const activeAccountId = result[0];
 				// Check if there is an valid account
 				if (activeAccountId > 0) {
 					return of(result[1].find((account) => account.id === activeAccountId) ?? null);

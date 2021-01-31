@@ -8,10 +8,12 @@ import { BaseService } from '@state/baseService';
 
 export class ServerService extends BaseService {
 	public constructor() {
-		super((state: StoreState) => {
-			return {
-				servers: state.servers,
-			};
+		super({
+			stateSliceSelector: (state: StoreState) => {
+				return {
+					servers: state.servers,
+				};
+			},
 		});
 
 		AccountService.getActiveAccount()

@@ -7,10 +7,12 @@ import { switchMap } from 'rxjs/operators';
 
 export class MediaService extends BaseService {
 	public constructor() {
-		super((state: StoreState) => {
-			return {
-				mediaUrls: state.mediaUrls,
-			};
+		super({
+			stateSliceSelector: (state: StoreState) => {
+				return {
+					mediaUrls: state.mediaUrls,
+				};
+			},
 		});
 	}
 

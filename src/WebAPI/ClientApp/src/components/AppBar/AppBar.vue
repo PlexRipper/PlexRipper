@@ -21,9 +21,9 @@
 				</v-btn>
 			</template>
 			<v-list>
-				<v-list-item-group v-if="accounts.length > 0" v-model="activeAccountId">
+				<v-list-item-group v-if="accounts.length > 0" :value="activeAccountId">
 					<!--	Button per account	-->
-					<v-list-item v-for="(account, index) in accounts" :key="index" @click="setActiveAccount(account.id)">
+					<v-list-item v-for="(account, index) in accounts" :key="index" @click="updateActiveAccountId(account.id)">
 						<v-list-item-content>
 							<v-list-item-title> {{ account.displayName }}</v-list-item-title>
 							<progress-component
@@ -69,7 +69,8 @@ import { of } from 'rxjs';
 import SignalrService from '@service/signalrService';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import { PlexAccountRefreshProgress } from '@dto/mainApi';
-import { settingsStore } from '~/store';
+import SettingsService from '@state/settingsService';
+
 @Component({
 	components: {
 		NotificationButton,
@@ -83,20 +84,14 @@ export default class AppBar extends Vue {
 	private version: string = '?';
 
 	private accountRefreshProgress: PlexAccountRefreshProgress[] = [];
-	get activeAccountId(): number {
-		return settingsStore.activeAccountId;
-	}
-
-	set activeAccountId(value: number) {
-		settingsStore.setActiveAccountId(value);
-	}
+	activeAccountId: number = 0;
 
 	get isLoading(): boolean {
 		return this.loading.some((x) => x);
 	}
 
-	setActiveAccount(accountId: number): void {
-		this.activeAccountId = accountId;
+	updateActiveAccountId(accountId: number): void {
+		SettingsService.updateActiveAccountSettings(accountId);
 	}
 
 	getRefreshProgress(plexAccountId: number): PlexAccountRefreshProgress | null {
@@ -127,6 +122,12 @@ export default class AppBar extends Vue {
 			];
 			data?.filter((x) => x.isEnabled).forEach((account) => this.accounts.push(account));
 			this.accounts.forEach(() => this.loading.push(false));
+		});
+
+		SettingsService.getActiveAccountId().subscribe((activeAccountId) => {
+			if (activeAccountId || activeAccountId >= 0) {
+				this.activeAccountId = activeAccountId;
+			}
 		});
 
 		SignalrService.getPlexAccountRefreshProgress().subscribe((data) => {

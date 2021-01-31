@@ -230,7 +230,7 @@ export default class MediaTable extends Vue {
 				break;
 			case PlexMediaType.TvShow:
 				if (item.children?.length === 0) {
-					await this.getMedia({ item, resolve: () => {} });
+					await new Promise((resolve) => this.getMedia({ item, resolve }));
 				}
 				downloadCommand.mediaIds.push(item.id);
 				break;

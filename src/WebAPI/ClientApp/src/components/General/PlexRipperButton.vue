@@ -194,7 +194,7 @@ export default class PBtn extends Vue {
 			case ButtonType.Details:
 				return false;
 			default:
-				return false;
+				return true;
 		}
 	}
 
@@ -208,7 +208,7 @@ export default class PBtn extends Vue {
 			case ButtonType.Delete:
 				return false;
 		}
-		return false;
+		return true;
 	}
 
 	click(event: any): void {

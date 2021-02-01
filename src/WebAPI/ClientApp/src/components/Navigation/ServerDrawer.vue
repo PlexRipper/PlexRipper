@@ -100,7 +100,6 @@ export default class ServerDrawer extends Vue {
 	}
 
 	openMediaPage(library: PlexLibraryDTO): void {
-		Log.debug(library);
 		switch (library.type) {
 			case PlexMediaType.Movie:
 				this.$router.push(`/movies/${library.id}`);
@@ -120,8 +119,8 @@ export default class ServerDrawer extends Vue {
 		this.selectedServerId = 0;
 	}
 
-	created(): void {
-		ServerService.getServers().subscribe((data: PlexServerDTO[]) => {
+	mounted(): void {
+		this.$subscribeTo(ServerService.getServers(), (data: PlexServerDTO[]) => {
 			this.plexServers = data;
 		});
 	}

@@ -53,7 +53,7 @@ import { pauseDownloadTask, restartDownloadTask, startDownloadTask } from '@api/
 import DownloadService from '@state/downloadService';
 import { DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import _ from 'lodash';
+import { filter } from 'lodash';
 import DownloadsTable from './components/DownloadsTable.vue';
 import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
 import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsDialog.vue';
@@ -86,15 +86,15 @@ export default class Downloads extends Vue {
 
 	clearDownloadTask(downloadTask: DownloadTaskDTO): void {
 		DownloadService.clearDownloadTasks([downloadTask.id]);
-		this.selected = _.filter(this.selected, (x) => x.id !== downloadTask.id);
+		this.selected = filter(this.selected, (x) => x.id !== downloadTask.id);
 	}
 
 	startDownloadTask(downloadTask: DownloadTaskDTO): void {
-		startDownloadTask(downloadTask.id).subscribe();
+		this.$subscribeTo(startDownloadTask(downloadTask.id), () => {});
 	}
 
 	pauseDownloadTask(downloadTask: DownloadTaskDTO): void {
-		pauseDownloadTask(downloadTask.id).subscribe();
+		this.$subscribeTo(pauseDownloadTask(downloadTask.id), () => {});
 	}
 
 	stopDownloadTask(downloadTask: DownloadTaskDTO): void {
@@ -102,13 +102,13 @@ export default class Downloads extends Vue {
 	}
 
 	restartDownloadTask(downloadTask: DownloadTaskDTO): void {
-		restartDownloadTask(downloadTask.id).subscribe();
+		this.$subscribeTo(restartDownloadTask(downloadTask.id), () => {});
 	}
 
 	deleteDownloadTask(downloadTask: DownloadTaskDTO): void {
 		if (downloadTask.mediaType === PlexMediaType.Episode) {
 			DownloadService.deleteDownloadTasks([downloadTask.id]);
-			this.selected = _.filter(this.selected, (x) => x.id !== downloadTask.id);
+			this.selected = filter(this.selected, (x) => x.id !== downloadTask.id);
 		}
 	}
 
@@ -158,7 +158,7 @@ export default class Downloads extends Vue {
 	}
 
 	created(): void {
-		DownloadService.getDownloadListInServers().subscribe((data) => {
+		this.$subscribeTo(DownloadService.getDownloadListInServers(), (data) => {
 			this.plexServers = data;
 			this.openExpansions = [...Array(this.plexServers?.length).keys()] ?? [];
 		});

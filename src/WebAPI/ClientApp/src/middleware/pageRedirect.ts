@@ -6,6 +6,7 @@ export default function ({ route, redirect }) {
 	// Redirect to setup if it is the first time setup
 	if (!subscriptionCreated) {
 		subscriptionCreated = true;
+
 		SettingsService.getFirstTimeSetup().subscribe((state) => {
 			if (state === null) {
 				return;

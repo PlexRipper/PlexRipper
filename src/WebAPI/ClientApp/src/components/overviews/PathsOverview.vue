@@ -40,7 +40,7 @@ import Log from 'consola';
 import { getFolderPaths, updateFolderPath } from '@api/pathApi';
 import ValidIcon from '@components/General/ValidIcon.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
-import _ from 'lodash';
+import { kebabCase } from 'lodash';
 import DirectoryBrowser from '../General/DirectoryBrowser.vue';
 
 @Component({
@@ -64,10 +64,9 @@ export default class PathsOverview extends Vue {
 
 	confirmDirectoryBrowser(path: FolderPathDTO): void {
 		this.selectedFolderPath = path;
-		Log.debug(path);
 		this.isDirectoryBrowserOpen = false;
 
-		updateFolderPath(path).subscribe((data) => {
+		this.$subscribeTo(updateFolderPath(path), (data) => {
 			Log.debug(`Successfully updated folder path ${path.displayName}`, data);
 			const i = this.folderPaths.findIndex((x) => x.id === data.id);
 			if (i > -1) {
@@ -81,13 +80,12 @@ export default class PathsOverview extends Vue {
 	}
 
 	toTranslation(type: string): string {
-		return `help.settings.paths.${_.kebabCase(type)}`;
+		return `help.settings.paths.${kebabCase(type)}`;
 	}
 
 	created(): void {
-		getFolderPaths().subscribe((data) => {
+		this.$subscribeTo(getFolderPaths(), (data) => {
 			this.folderPaths = data;
-			Log.debug(this.folderPaths);
 		});
 	}
 }

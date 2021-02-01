@@ -21,7 +21,7 @@ export default class Footer extends Vue {
 	}
 
 	created(): void {
-		HealthService.getServerStatus().subscribe((status) => {
+		this.$subscribeTo(HealthService.getServerStatus(), (status) => {
 			this.status = status;
 		});
 	}

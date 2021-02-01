@@ -109,11 +109,11 @@ export default class AppBar extends Vue {
 	}
 
 	created(): void {
-		GlobalService.getConfigReady().subscribe((config) => {
+		this.$subscribeTo(GlobalService.getConfigReady(), (config) => {
 			this.version = config.version;
 		});
 
-		AccountService.getAccounts().subscribe((data) => {
+		this.$subscribeTo(AccountService.getAccounts(), (data) => {
 			this.accounts = [
 				{
 					id: 0,
@@ -124,13 +124,13 @@ export default class AppBar extends Vue {
 			this.accounts.forEach(() => this.loading.push(false));
 		});
 
-		SettingsService.getActiveAccountId().subscribe((activeAccountId) => {
+		this.$subscribeTo(SettingsService.getActiveAccountId(), (activeAccountId) => {
 			if (activeAccountId || activeAccountId >= 0) {
 				this.activeAccountId = activeAccountId;
 			}
 		});
 
-		SignalrService.getPlexAccountRefreshProgress().subscribe((data) => {
+		this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
 			const index = this.accountRefreshProgress.findIndex((x) => x.plexAccountId === data.plexAccountId);
 			if (index > -1) {
 				if (!data.isComplete) {

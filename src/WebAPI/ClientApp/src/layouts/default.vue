@@ -50,7 +50,7 @@ export default class Default extends Vue {
 	}
 
 	created(): void {
-		HelpService.getHelpDialog().subscribe((helpId) => {
+		this.$subscribeTo(HelpService.getHelpDialog(), (helpId) => {
 			this.helpId = helpId;
 			this.helpDialogState = true;
 		});

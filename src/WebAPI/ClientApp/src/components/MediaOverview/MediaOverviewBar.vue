@@ -80,7 +80,7 @@ import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
 import VerticalButton from '@components/General/VerticalButton.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import _ from 'lodash';
+import { sum } from 'lodash';
 
 interface IViewOptions {
 	label: string;
@@ -155,7 +155,7 @@ export default class MediaOverviewBar extends Vue {
 				case PlexMediaType.Movie:
 					return `1 Movie`;
 				case PlexMediaType.TvShow:
-					return `1 TvShow - ${this.mediaItem.children?.length} Seasons - ${_.sum(
+					return `1 TvShow - ${this.mediaItem.children?.length} Seasons - ${sum(
 						this.mediaItem.children?.map((x) => x.childCount),
 					)} Episodes`;
 				default:

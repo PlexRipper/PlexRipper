@@ -198,45 +198,41 @@ export default class DownloadsTable extends Vue {
 		}
 	}
 
-	created(): void {
-		SignalrService.getDownloadProgress()
-			.pipe(filter((x) => x.plexServerId === this.serverId))
-			.subscribe((data) => {
-				if (data) {
-					const i = this.downloadProgressList.findIndex((x) => x.id === data.id);
-					if (i > -1) {
-						// Update
-						this.downloadProgressList.splice(i, 1, data);
-					} else {
-						// Add
-						this.downloadProgressList.push(data);
-					}
+	mounted(): void {
+		this.$subscribeTo(SignalrService.getDownloadProgress().pipe(filter((x) => x.plexServerId === this.serverId)), (data) => {
+			if (data) {
+				const i = this.downloadProgressList.findIndex((x) => x.id === data.id);
+				if (i > -1) {
+					// Update
+					this.downloadProgressList.splice(i, 1, data);
 				} else {
-					Log.error(`DownloadProgress was undefined.`);
+					// Add
+					this.downloadProgressList.push(data);
 				}
-			});
+			} else {
+				Log.error(`DownloadProgress was undefined.`);
+			}
+		});
 
 		// Retrieve download status from SignalR
-		SignalrService.getDownloadStatus()
-			.pipe(filter((x) => x.plexServerId === this.serverId))
-			.subscribe((data) => {
-				if (data) {
-					const i = this.downloadStatusList.findIndex((x) => x.id === data.id);
-					if (i > -1) {
-						// Update
-						this.downloadStatusList.splice(i, 1, data);
-					} else {
-						// Add
-						this.downloadStatusList.push(data);
-					}
+		this.$subscribeTo(SignalrService.getDownloadStatus().pipe(filter((x) => x.plexServerId === this.serverId)), (data) => {
+			if (data) {
+				const i = this.downloadStatusList.findIndex((x) => x.id === data.id);
+				if (i > -1) {
+					// Update
+					this.downloadStatusList.splice(i, 1, data);
 				} else {
-					Log.error(`DownloadStatusChanged was undefined.`);
+					// Add
+					this.downloadStatusList.push(data);
 				}
-			});
+			} else {
+				Log.error(`DownloadStatusChanged was undefined.`);
+			}
+		});
 
-		SignalrService.getFileMergeProgress()
-			.pipe(filter((x) => x.plexServerId === this.serverId))
-			.subscribe((fileMergeProgress) => {
+		this.$subscribeTo(
+			SignalrService.getFileMergeProgress().pipe(filter((x) => x.plexServerId === this.serverId)),
+			(fileMergeProgress) => {
 				if (fileMergeProgress) {
 					const i = this.fileMergeProgressList.findIndex((x) => x.id === fileMergeProgress.id);
 					if (i > -1) {
@@ -249,17 +245,18 @@ export default class DownloadsTable extends Vue {
 				} else {
 					Log.error(`FileMergeProgress was undefined`);
 				}
-			});
+			},
+		);
 
 		// Retrieve download list
-		DownloadService.getDownloadList()
-			.pipe(switchMap((x) => of(x?.filter((x) => x.plexServerId === this.serverId) ?? [])))
-			.subscribe((data: DownloadTaskDTO[]) => {
-				Log.info('getDownloadList', data);
+		this.$subscribeTo(
+			DownloadService.getDownloadList().pipe(switchMap((x) => of(x?.filter((x) => x.plexServerId === this.serverId) ?? []))),
+			(data: DownloadTaskDTO[]) => {
 				if (data) {
 					this.tvShowsDownloadRows = data as DownloadTaskDTO[];
 				}
-			});
+			},
+		);
 	}
 }
 </script>

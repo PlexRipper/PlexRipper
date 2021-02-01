@@ -49,7 +49,6 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import SettingsService from '@state/settingsService';
 
@@ -70,14 +69,12 @@ export default class ConfirmationSection extends Vue {
 	}
 
 	mounted(): void {
-		SettingsService.getConfirmationSettings().subscribe((uiSettings) => {
+		this.$subscribeTo(SettingsService.getConfirmationSettings(), (uiSettings) => {
 			if (uiSettings) {
 				this.askDownloadMovieConfirmation = uiSettings.askDownloadMovieConfirmation;
 				this.askDownloadTvShowConfirmation = uiSettings.askDownloadTvShowConfirmation;
 				this.askDownloadSeasonConfirmation = uiSettings.askDownloadSeasonConfirmation;
 				this.askDownloadEpisodeConfirmation = uiSettings.askDownloadEpisodeConfirmation;
-			} else {
-				Log.error('uiSettings was undefined, could not update the Settings => ConfirmationSection');
 			}
 		});
 	}

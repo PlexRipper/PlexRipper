@@ -1,4 +1,4 @@
-import StoreState from '@state/storeState';
+import IStoreState from '@interfaces/IStoreState';
 import { BaseService } from '@state/baseService';
 import { PlexMediaType } from '@dto/mainApi';
 import { Observable, of } from 'rxjs';
@@ -8,7 +8,7 @@ import { switchMap } from 'rxjs/operators';
 export class MediaService extends BaseService {
 	public constructor() {
 		super({
-			stateSliceSelector: (state: StoreState) => {
+			stateSliceSelector: (state: IStoreState) => {
 				return {
 					mediaUrls: state.mediaUrls,
 				};

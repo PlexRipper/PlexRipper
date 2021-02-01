@@ -1,7 +1,7 @@
 import { DownloadTaskDTO, PlexAccountDTO, PlexLibraryDTO, PlexServerDTO, SettingsModel } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
 
-export default interface StoreState {
+export default interface IStoreState {
 	accounts: PlexAccountDTO[];
 	servers: PlexServerDTO[];
 	downloads: DownloadTaskDTO[];

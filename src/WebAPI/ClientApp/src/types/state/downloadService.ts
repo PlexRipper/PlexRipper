@@ -9,14 +9,14 @@ import {
 } from '@api/plexDownloadApi';
 import { finalize, switchMap } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
-import StoreState from '@state/storeState';
+import IStoreState from '@interfaces/IStoreState';
 import AccountService from '@service/accountService';
 import { BaseService } from '@state/baseService';
 
 export class DownloadService extends BaseService {
 	public constructor() {
 		super({
-			stateSliceSelector: (state: StoreState) => {
+			stateSliceSelector: (state: IStoreState) => {
 				return {
 					downloads: state.downloads,
 				};
@@ -33,7 +33,7 @@ export class DownloadService extends BaseService {
 	}
 
 	public getDownloadList(): Observable<DownloadTaskDTO[]> {
-		return this.stateChanged.pipe(switchMap((state: StoreState) => of(state?.downloads)));
+		return this.stateChanged.pipe(switchMap((state: IStoreState) => of(state?.downloads)));
 	}
 
 	/**

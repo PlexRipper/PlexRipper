@@ -13,6 +13,7 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
@@ -20,8 +21,6 @@ import ProgressComponent from '@components/ProgressComponent.vue';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import ITreeDownloadItem from '@mediaOverview/MediaTable/types/ITreeDownloadItem';
-import Log from 'consola';
-import { settingsStore } from '~/store';
 
 @Component({
 	components: {
@@ -45,6 +44,9 @@ export default class MediaTable extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly libraryId!: number;
 
+	@Prop({ required: true, type: Number })
+	readonly activeAccountId!: number;
+
 	expanded: string[] = [];
 
 	openDownloadPreviews: number[] = [];
@@ -63,10 +65,6 @@ export default class MediaTable extends Vue {
 
 	get containerRef(): any {
 		return this.$refs.scrollbar;
-	}
-
-	get activeAccountId(): number {
-		return settingsStore.activeAccountId;
 	}
 
 	isLoading(key: string): boolean {

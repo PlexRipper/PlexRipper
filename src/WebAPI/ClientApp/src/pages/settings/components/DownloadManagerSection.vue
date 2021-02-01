@@ -32,7 +32,7 @@ export default class DownloadManagerSection extends Vue {
 	}
 
 	mounted(): void {
-		SettingsService.getDownloadManagerSettings().subscribe((downloadManagerSettings) => {
+		this.$subscribeTo(SettingsService.getDownloadManagerSettings(), (downloadManagerSettings) => {
 			if (downloadManagerSettings) {
 				this.downloadSegments = downloadManagerSettings.downloadSegments;
 			}

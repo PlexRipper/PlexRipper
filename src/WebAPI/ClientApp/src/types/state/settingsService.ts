@@ -1,5 +1,5 @@
 import Log from 'consola';
-import StoreState from '@state/storeState';
+import IStoreState from '@interfaces/IStoreState';
 import { BaseService } from '@state/baseService';
 import { Observable, of } from 'rxjs';
 import {
@@ -7,11 +7,13 @@ import {
 	AdvancedSettingsModel,
 	ConfirmationSettingsModel,
 	DateTimeModel,
+	DisplaySettingsModel,
 	DownloadManagerModel,
 	SettingsModel,
 	UserInterfaceSettingsModel,
+	ViewMode,
 } from '@dto/mainApi';
-import { distinctUntilChanged, finalize, switchMap, take, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, switchMap, take, tap } from 'rxjs/operators';
 import GlobalService from '@state/globalService';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import { isEqual } from 'lodash';
@@ -19,73 +21,93 @@ import { isEqual } from 'lodash';
 export class SettingsService extends BaseService {
 	public constructor() {
 		super({
-			stateSliceSelector: (state: StoreState) => {
+			stateSliceSelector: (state: IStoreState) => {
 				return {
 					settings: state.settings,
 				};
 			},
 		});
 
+		// On app load, request the settings once
 		GlobalService.getAxiosReady()
-			.pipe(switchMap(() => of(this.fetchSettings())))
-			.subscribe();
-		this.stateWithPropertyChanges.subscribe((x) => Log.info('stateWith', x));
-	}
-
-	// region Settings
-	public getSettings(): Observable<SettingsModel | null> {
-		return this.stateChanged.pipe(
-			switchMap((x) => of(x?.settings ?? null)),
-			distinctUntilChanged(isEqual),
-		);
-	}
-
-	public fetchSettings(): void {
-		getSettings()
-			.pipe(tap(() => Log.debug('Retrieving settings')))
+			.pipe(
+				tap(() => Log.debug('Retrieving settings')),
+				switchMap(() => getSettings()),
+				take(1),
+			)
 			.subscribe((settings) => {
 				this.setState({ settings });
 			});
+
+		// On settings state update => send update to back-end
+		this.getSettings()
+			.pipe(switchMap((settings) => updateSettings(settings)))
+			.subscribe();
+	}
+
+	// region Settings
+	public getSettings(): Observable<SettingsModel> {
+		return this.stateChanged.pipe(
+			filter((x) => x !== null),
+			switchMap((x) => of(x.settings)),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
 	public updateSettings(): void {
 		const settings = this.getState().settings;
 		if (settings) {
-			updateSettings(settings)
-				.pipe(finalize(() => this.fetchSettings()))
-				.subscribe();
+			updateSettings(settings).subscribe((settings) => this.setState({ settings }));
 		} else {
 			Log.warn('SettingsService => updateSettings: settings was invalid, will not send as an update.');
 		}
 	}
 	// endregion
 
-	public getFirstTimeSetup(): Observable<boolean | null> {
+	public getFirstTimeSetup(): Observable<boolean> {
 		return this.getSettings().pipe(
-			switchMap((x) => of(x?.firstTimeSetup ?? null)),
+			switchMap((x) => of(x.firstTimeSetup)),
 			distinctUntilChanged(isEqual),
 		);
+	}
+
+	public updateFirstTimeSetup(state: boolean): void {
+		const settings = this.getState().settings;
+		this.setState({
+			...this.getState(),
+			settings: {
+				...settings,
+				firstTimeSetup: state,
+			},
+		});
 	}
 
 	// region UserInterfaceSettings
 
-	public getUserInterfaceSettings(): Observable<UserInterfaceSettingsModel | null> {
+	public getUserInterfaceSettings(): Observable<UserInterfaceSettingsModel> {
 		return this.getSettings().pipe(
-			switchMap((x) => of(x?.userInterfaceSettings ?? null)),
+			switchMap((x) => of(x.userInterfaceSettings)),
 			distinctUntilChanged(isEqual),
 		);
 	}
 
-	public getConfirmationSettings(): Observable<ConfirmationSettingsModel | null> {
+	public getConfirmationSettings(): Observable<ConfirmationSettingsModel> {
 		return this.getUserInterfaceSettings().pipe(
-			switchMap((x) => of(x?.confirmationSettings ?? null)),
+			switchMap((x) => of(x.confirmationSettings)),
 			distinctUntilChanged(isEqual),
 		);
 	}
 
-	public getDateTimeSettings(): Observable<DateTimeModel | null> {
+	public getDisplaySettings(): Observable<DisplaySettingsModel> {
 		return this.getUserInterfaceSettings().pipe(
-			switchMap((x) => of(x?.dateTimeSettings ?? null)),
+			switchMap((x) => of(x.displaySettings)),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getDateTimeSettings(): Observable<DateTimeModel> {
+		return this.getUserInterfaceSettings().pipe(
+			switchMap((x) => of(x.dateTimeSettings)),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -98,6 +120,21 @@ export class SettingsService extends BaseService {
 	public updateDateTimeSettings(dateTimeSettings: DateTimeModel): void {
 		const userInterfaceSettings = this.getState().settings.userInterfaceSettings;
 		this.updateUserInterfaceSettings({ ...userInterfaceSettings, dateTimeSettings });
+	}
+
+	public updateDisplaySettings(displaySettings: DisplaySettingsModel): void {
+		const userInterfaceSettings = this.getState().settings.userInterfaceSettings;
+		this.updateUserInterfaceSettings({ ...userInterfaceSettings, displaySettings });
+	}
+
+	public updateMovieViewMode(viewMode: ViewMode): void {
+		const displaySettings = this.getState().settings.userInterfaceSettings.displaySettings;
+		this.updateDisplaySettings({ ...displaySettings, movieViewMode: viewMode });
+	}
+
+	public updateTvShowViewMode(viewMode: ViewMode): void {
+		const displaySettings = this.getState().settings.userInterfaceSettings.displaySettings;
+		this.updateDisplaySettings({ ...displaySettings, tvShowViewMode: viewMode });
 	}
 
 	public updateUserInterfaceSettings(userInterfaceSettings: UserInterfaceSettingsModel): void {
@@ -114,16 +151,16 @@ export class SettingsService extends BaseService {
 
 	// region accountSettings
 
-	public getAccountSettings(): Observable<AccountSettingsModel | null> {
+	public getAccountSettings(): Observable<AccountSettingsModel> {
 		return this.getSettings().pipe(
-			switchMap((x) => of(x?.accountSettings ?? null)),
+			switchMap((x) => of(x.accountSettings)),
 			distinctUntilChanged(isEqual),
 		);
 	}
 
 	public getActiveAccountId(): Observable<number> {
 		return this.getAccountSettings().pipe(
-			switchMap((x) => of(x?.activeAccountId ?? 0)),
+			switchMap((x) => of(x.activeAccountId ?? 0)),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -148,16 +185,16 @@ export class SettingsService extends BaseService {
 
 	// region advancedSettings
 
-	public getAdvancedSettings(): Observable<AdvancedSettingsModel | null> {
+	public getAdvancedSettings(): Observable<AdvancedSettingsModel> {
 		return this.getSettings().pipe(
-			switchMap((x) => of(x?.advancedSettings ?? null)),
+			switchMap((x) => of(x.advancedSettings)),
 			distinctUntilChanged(isEqual),
 		);
 	}
 
-	public getDownloadManagerSettings(): Observable<DownloadManagerModel | null> {
+	public getDownloadManagerSettings(): Observable<DownloadManagerModel> {
 		return this.getAdvancedSettings().pipe(
-			switchMap((x) => of(x?.downloadManager ?? null)),
+			switchMap((x) => of(x.downloadManager)),
 			distinctUntilChanged(isEqual),
 		);
 	}

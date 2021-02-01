@@ -20,7 +20,6 @@
 		"paths": {
 			"~/*": ["./*"],
 			"@/*": ["./*"],
-			"@store/*": ["./types/store/*"],
 			"@state/*": ["./types/state/*"],
 			"@dto/*": ["./types/dto/*"],
 			"@api/*": ["./types/api/*"],

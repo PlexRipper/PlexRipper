@@ -194,7 +194,7 @@ export default class DateAndTimeSection extends Vue {
 	}
 
 	mounted(): void {
-		SettingsService.getDateTimeSettings().subscribe((dateTimeSettings) => {
+		this.$subscribeTo(SettingsService.getDateTimeSettings(), (dateTimeSettings) => {
 			if (dateTimeSettings) {
 				this.shortDateFormat = dateTimeSettings.shortDateFormat;
 				this.longDateFormat = dateTimeSettings.longDateFormat;

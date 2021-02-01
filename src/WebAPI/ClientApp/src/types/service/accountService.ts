@@ -5,13 +5,13 @@ import { PlexAccountDTO } from '@dto/mainApi';
 import { switchMap, tap } from 'rxjs/operators';
 import SettingsService from '@state/settingsService';
 import { BaseService } from '@state/baseService';
-import StoreState from '@state/storeState';
+import IStoreState from '@interfaces/IStoreState';
 import GlobalService from '@state/globalService';
 
 export class AccountService extends BaseService {
 	public constructor() {
 		super({
-			stateSliceSelector: (state: StoreState) => {
+			stateSliceSelector: (state: IStoreState) => {
 				return {
 					accounts: state.accounts,
 				};

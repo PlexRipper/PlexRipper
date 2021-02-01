@@ -48,9 +48,9 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
-import { settingsStore } from '@/store';
 import ButtonType from '@enums/buttonType';
 import Log from 'consola';
+import SettingsService from '@state/settingsService';
 
 @Component({
 	components: {
@@ -64,6 +64,11 @@ export default class DownloadConfirmation extends Vue {
 	@Prop({ required: true })
 	readonly progress!: DownloadTaskCreationProgress | null;
 
+	askDownloadMovieConfirmation: boolean = false;
+	askDownloadTvShowConfirmation: boolean = false;
+	askDownloadSeasonConfirmation: boolean = false;
+	askDownloadEpisodeConfirmation: boolean = false;
+
 	showDialog: boolean = false;
 	downloadPreview: PlexMediaDTO[] = [];
 	downloadMediaCommand: DownloadMediaDTO[] = [];
@@ -72,13 +77,13 @@ export default class DownloadConfirmation extends Vue {
 		if (this.downloadMediaCommand.length === 1) {
 			switch (this.downloadMediaCommand[0].type) {
 				case PlexMediaType.Movie:
-					return settingsStore.askDownloadMovieConfirmation;
+					return this.askDownloadMovieConfirmation;
 				case PlexMediaType.TvShow:
-					return settingsStore.askDownloadTvShowConfirmation;
+					return this.askDownloadTvShowConfirmation;
 				case PlexMediaType.Season:
-					return settingsStore.askDownloadSeasonConfirmation;
+					return this.askDownloadSeasonConfirmation;
 				case PlexMediaType.Episode:
-					return settingsStore.askDownloadEpisodeConfirmation;
+					return this.askDownloadEpisodeConfirmation;
 				default:
 					return true;
 			}
@@ -221,6 +226,17 @@ export default class DownloadConfirmation extends Vue {
 
 	confirmDownload(): void {
 		this.$emit('download', this.downloadMediaCommand);
+	}
+
+	mounted(): void {
+		this.$subscribeTo(SettingsService.getConfirmationSettings(), (uiSettings) => {
+			if (uiSettings) {
+				this.askDownloadMovieConfirmation = uiSettings.askDownloadMovieConfirmation;
+				this.askDownloadTvShowConfirmation = uiSettings.askDownloadTvShowConfirmation;
+				this.askDownloadSeasonConfirmation = uiSettings.askDownloadSeasonConfirmation;
+				this.askDownloadEpisodeConfirmation = uiSettings.askDownloadEpisodeConfirmation;
+			}
+		});
 	}
 }
 </script>

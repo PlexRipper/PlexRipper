@@ -49,7 +49,7 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var library = GetLibraryFromPlexAccount(result.Value);
             library.Should().NotBeNull();
 
-            var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(library.Id, result.Value.Id);
+            var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(library.Id);
 
             // Assert
             result.IsSuccess.Should().BeTrue();
@@ -77,8 +77,8 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var plexLibraryPick = GetLibraryFromPlexAccount(account.Value);
 
             // Refresh library
-            var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(plexLibraryPick.Id, account.Value.Id);
-            plexLibrary = await plexLibraryService.RefreshLibraryMediaAsync(plexLibraryPick.Id, account.Value.Id);
+            var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(plexLibraryPick.Id);
+            plexLibrary = await plexLibraryService.RefreshLibraryMediaAsync(plexLibraryPick.Id);
 
             account.Value.Should().NotBeNull();
             plexLibrary.Value.HasMedia.Should().BeTrue();

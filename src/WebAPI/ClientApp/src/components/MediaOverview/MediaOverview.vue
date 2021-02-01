@@ -39,6 +39,7 @@
 						<media-table
 							ref="overviewMediaTable"
 							:items="items"
+							:active-account-id="activeAccountId"
 							:library-id="libraryId"
 							:media-type="mediaType"
 							@download="processDownloadCommand"
@@ -49,7 +50,13 @@
 
 					<!-- Poster display-->
 					<template v-if="isPosterView">
-						<poster-table :items="items" :media-type="mediaType" @download="processDownloadCommand" @open-details="openDetails" />
+						<poster-table
+							:items="items"
+							:active-account-id="activeAccountId"
+							:media-type="mediaType"
+							@download="processDownloadCommand"
+							@open-details="openDetails"
+						/>
 					</template>
 				</v-col>
 			</v-row>
@@ -61,6 +68,7 @@
 				:media-item="detailItem"
 				:library="library"
 				:server="server"
+				:active-account-id="activeAccountId"
 				@close="closeDetailsOverview"
 				@download="processDownloadCommand"
 			/>
@@ -81,7 +89,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
-import { finalize, tap } from 'rxjs/operators';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import MediaPoster from '@mediaOverview/PosterTable/MediaPoster.vue';
@@ -93,11 +101,11 @@ import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
-import { combineLatest } from 'rxjs';
+import { combineLatest, of } from 'rxjs';
 import PosterTable from '@mediaOverview/PosterTable/PosterTable.vue';
 import DetailsOverview from '@mediaOverview/DetailsOverview.vue';
 import { getTvShow } from '@api/mediaApi';
-import { settingsStore } from '~/store';
+import SettingsService from '@state/settingsService';
 
 @Component({
 	components: {
@@ -124,6 +132,9 @@ export default class MediaOverview extends Vue {
 	@Ref('overviewMediaTable')
 	readonly overviewMediaTableRef!: MediaTable;
 
+	activeAccountId: number = 0;
+	movieViewMode: ViewMode = ViewMode.Poster;
+	tvShowViewMode: ViewMode = ViewMode.Poster;
 	selected: string[] = [];
 	isLoading: boolean = true;
 	isRefreshing: boolean = false;
@@ -139,10 +150,6 @@ export default class MediaOverview extends Vue {
 		return this.library?.type ?? PlexMediaType.Unknown;
 	}
 
-	get activeAccountId(): number {
-		return settingsStore.activeAccountId;
-	}
-
 	get getPercentage(): number {
 		return this.libraryProgress?.percentage ?? -1;
 	}
@@ -150,9 +157,9 @@ export default class MediaOverview extends Vue {
 	get viewMode(): ViewMode {
 		switch (this.mediaType) {
 			case PlexMediaType.Movie:
-				return settingsStore.movieViewMode;
+				return this.movieViewMode;
 			case PlexMediaType.TvShow:
-				return settingsStore.tvShowViewMode;
+				return this.tvShowViewMode;
 			default:
 				return ViewMode.Poster;
 		}
@@ -165,9 +172,9 @@ export default class MediaOverview extends Vue {
 	changeView(viewMode: ViewMode): void {
 		switch (this.mediaType) {
 			case PlexMediaType.Movie:
-				return settingsStore.setMovieViewMode(viewMode);
+				return SettingsService.updateMovieViewMode(viewMode);
 			case PlexMediaType.TvShow:
-				return settingsStore.setTvShowViewMode(viewMode);
+				return SettingsService.updateTvShowViewMode(viewMode);
 		}
 		Log.error('Could not set view mode for type' + this.mediaType);
 	}
@@ -282,7 +289,17 @@ export default class MediaOverview extends Vue {
 		}
 	}
 
-	mounted(): void {}
+	mounted(): void {
+		this.$subscribeTo(SettingsService.getActiveAccountId(), (id) => (this.activeAccountId = id));
+		this.$subscribeTo(
+			SettingsService.getDisplaySettings().pipe(switchMap((x) => of(x.movieViewMode))),
+			(x) => (this.movieViewMode = x),
+		);
+		this.$subscribeTo(
+			SettingsService.getDisplaySettings().pipe(switchMap((x) => of(x.tvShowViewMode))),
+			(x) => (this.tvShowViewMode = x),
+		);
+	}
 
 	created(): void {
 		this.resetProgress(false);
@@ -290,15 +307,15 @@ export default class MediaOverview extends Vue {
 		this.isLoading = true;
 
 		// Setup progress bar
-		SignalrService.getLibraryProgress().subscribe((data) => {
+		this.$subscribeTo(SignalrService.getLibraryProgress(), (data) => {
 			if (data.id === this.libraryId) {
 				this.libraryProgress = data;
 				this.isRefreshing = data.isRefreshing ?? false;
 			}
 		});
 
-		SignalrService.getDownloadTaskCreationProgress()
-			.pipe(
+		this.$subscribeTo(
+			SignalrService.getDownloadTaskCreationProgress().pipe(
 				tap((data) => {
 					this.downloadTaskCreationProgress = data;
 				}),
@@ -308,11 +325,13 @@ export default class MediaOverview extends Vue {
 						this.downloadTaskCreationProgress = null;
 					}, 2000);
 				}),
-			)
-			.subscribe();
+			),
+			() => {},
+		);
 
 		// Retrieve server and library data
-		combineLatest([LibraryService.getServerByLibraryID(this.libraryId), LibraryService.getLibrary(this.libraryId)]).subscribe(
+		this.$subscribeTo(
+			combineLatest([LibraryService.getServerByLibraryID(this.libraryId), LibraryService.getLibrary(this.libraryId)]),
 			(data) => {
 				if (data[0]) {
 					this.server = Object.freeze(data[0]);

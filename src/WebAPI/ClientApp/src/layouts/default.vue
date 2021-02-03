@@ -57,9 +57,3 @@ export default class Default extends Vue {
 	}
 }
 </script>
-
-<style lang="scss">
-// This only needs to be included in the default layout, not in other layouts.
-// Otherwise the styles get imported multiple times.
-@import './src/assets/scss/style.scss';
-</style>

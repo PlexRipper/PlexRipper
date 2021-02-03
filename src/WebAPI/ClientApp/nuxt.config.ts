@@ -2,6 +2,7 @@ import * as path from 'path';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
+import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 const config: NuxtConfig = {
 	ssr: false,
@@ -28,6 +29,10 @@ const config: NuxtConfig = {
 		],
 		link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.png' }],
 	},
+
+	// Global CSS: https://go.nuxtjs.dev/config-css
+	css: ['@/assets/scss/style.scss'],
+
 	/*
 	 ** Customize the progress-bar color
 	 */
@@ -108,6 +113,12 @@ const config: NuxtConfig = {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
 			}
 
+			const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+			if (config && config.resolve && config.resolve.plugins) {
+				// config.resolve.plugins.push(new TsconfigPathsPlugin());
+				config.resolve.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
+			}
+
 			// Make sure to also update the tsconfig.json when adding aliases for import resolving.
 			// These are necessary to tell webpack which aliases are used.
 			if (config && config.resolve && config.resolve.alias) {
@@ -118,7 +129,6 @@ const config: NuxtConfig = {
 				config.resolve.alias['@enums'] = path.resolve(__dirname, 'src/types/enums/');
 				config.resolve.alias['@interfaces'] = path.resolve(__dirname, 'src/types/interfaces/');
 				config.resolve.alias['@service'] = path.resolve(__dirname, 'src/types/service/');
-				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
 				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
 				config.resolve.alias['@overviews'] = path.resolve(__dirname, 'src/components/overviews');
 				config.resolve.alias['@mediaOverview'] = path.resolve(__dirname, 'src/components/MediaOverview/');

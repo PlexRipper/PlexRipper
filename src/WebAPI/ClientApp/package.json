@@ -22,7 +22,7 @@
 	},
 	"husky": {
 		"hooks": {
-			"pre-commit": "npm run lint"
+			"pre-commit": "lint-staged"
 		}
 	},
 	"web-types": "./web-types.json",
@@ -78,7 +78,8 @@
 		"prettier": "^2.2.1",
 		"stylelint": "^13.9.0",
 		"ts-jest": "^26.5.0",
+		"tsconfig-paths-webpack-plugin": "^3.3.0",
 		"vue-jest": "^4.0.0-rc.0",
-		"vuex-module-decorators": "^1.0.1"
+		"webpack-bundle-analyzer": "^4.4.0"
 	}
 }

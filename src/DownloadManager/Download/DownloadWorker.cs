@@ -11,6 +11,7 @@ using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Common;
+using Serilog.Events;
 using Timer = System.Timers.Timer;
 
 namespace PlexRipper.DownloadManager.Download
@@ -25,7 +26,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        private readonly Subject<Result> _downloadWorkerError = new Subject<Result>();
+        private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new Subject<DownloadWorkerLog>();
 
         private readonly Subject<DownloadWorkerComplete> _downloadWorkerComplete = new Subject<DownloadWorkerComplete>();
 
@@ -103,7 +104,7 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Observables
 
-        public IObservable<Result> DownloadWorkerError => _downloadWorkerError.AsObservable();
+        public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
         public IObservable<DownloadWorkerComplete> DownloadWorkerComplete => _downloadWorkerComplete.AsObservable();
 
@@ -119,8 +120,33 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Private
 
+        #region SendData
+
+        private void SendDownloadWorkerLog(LogEventLevel logLevel, string message)
+        {
+            _downloadWorkerLog.OnNext(new DownloadWorkerLog
+            {
+                Message = message,
+                LogLevel = logLevel,
+                CreatedAt = DateTime.Now,
+                DownloadWorkerTaskId = DownloadWorkerTask.Id,
+            });
+        }
+
+        private void SetDownloadWorkerTaskChanged(DownloadStatus status)
+        {
+            var log = $"Download worker {Id} with {FileName} changed status to {status}";
+            Log.Debug(log);
+            DownloadWorkerTask.DownloadStatus = status;
+            SendDownloadWorkerLog(LogEventLevel.Information, log);
+            _downloadWorkerTaskChanged.OnNext(DownloadWorkerTask);
+        }
+
+        #endregion
+
         private void Complete()
         {
+            SetDownloadWorkerTaskChanged(DownloadStatus.Completed);
             var complete = new DownloadWorkerComplete(Id)
             {
                 FilePath = FilePath,
@@ -139,10 +165,9 @@ namespace PlexRipper.DownloadManager.Download
                 errorResult.Errors.First().Metadata.Add(nameof(DownloadWorker) + "Id", Id);
             }
 
-            _downloadWorkerError.OnNext(errorResult);
+            SetDownloadWorkerTaskChanged(DownloadStatus.Error);
+            SendDownloadWorkerLog(LogEventLevel.Error, errorResult.ToString());
         }
-
-        private void StartDownloadClient() { }
 
         private void UpdateAverage(int newValue)
         {
@@ -188,6 +213,7 @@ namespace PlexRipper.DownloadManager.Download
             }
 
             DownloadStartAt = DateTime.UtcNow;
+            SetDownloadWorkerTaskChanged(DownloadStatus.Downloading);
             _downloadProcess = Task.Factory.StartNew(async () =>
             {
                 try
@@ -208,7 +234,6 @@ namespace PlexRipper.DownloadManager.Download
                             Range = new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte),
                         },
                     }, HttpCompletionOption.ResponseHeadersRead);
-
 
                     await using Stream responseStream = await response.Content.ReadAsStreamAsync();
 
@@ -269,14 +294,15 @@ namespace PlexRipper.DownloadManager.Download
         /// </summary>
         public async Task<Result> Pause()
         {
+            SetDownloadWorkerTaskChanged(DownloadStatus.Pausing);
+
             var cancelResult = await CancelDownloadProcess();
             if (cancelResult.IsFailed)
             {
                 return cancelResult.LogError();
             }
 
-            Log.Debug($"Download worker {Id} paused for {FileName}");
-            _downloadWorkerTaskChanged.OnNext(DownloadWorkerTask);
+            SetDownloadWorkerTaskChanged(DownloadStatus.Paused);
             return Result.Ok();
         }
 
@@ -286,13 +312,15 @@ namespace PlexRipper.DownloadManager.Download
         /// <returns>Is successful.</returns>
         public async Task<Result> Stop()
         {
+            SetDownloadWorkerTaskChanged(DownloadStatus.Stopping);
+
             var cancelResult = await CancelDownloadProcess();
             if (cancelResult.IsFailed)
             {
                 return cancelResult.LogError();
             }
 
-            Log.Debug($"Download worker {Id} stopped for {FileName}");
+            SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
             return Result.Ok(true);
         }
 
@@ -314,7 +342,7 @@ namespace PlexRipper.DownloadManager.Download
             // Dispose subscriptions
             _downloadWorkerComplete?.Dispose();
             _downloadWorkerProgress?.Dispose();
-            _downloadWorkerError?.Dispose();
+            _downloadWorkerLog?.Dispose();
             _downloadWorkerTaskChanged?.Dispose();
 
             // Dispose timer

@@ -226,9 +226,14 @@ namespace PlexRipper.DownloadManager
             newClient.DownloadStatusChanged
                 .Subscribe(OnDownloadStatusChanged);
 
-            // Download Status Changed subscription
+            // Download Worker Task Changed subscription
             newClient.DownloadWorkerTaskChanged
                 .Subscribe(OnDownloadWorkerTaskChanged);
+
+            // Download Worker Log subscription
+            newClient.DownloadWorkerLog
+                .Buffer(TimeSpan.FromSeconds(1))
+                .Subscribe(OnDownloadWorkerLog);
 
             // Download File Completed subscription
             newClient.DownloadFileCompleted
@@ -236,9 +241,19 @@ namespace PlexRipper.DownloadManager
                 .Subscribe(OnDownloadFileCompleted);
         }
 
+        private void OnDownloadWorkerLog(IList<DownloadWorkerLog> logs)
+        {
+            if (!logs.Any())
+            {
+                return;
+            }
+
+            Task.Run(async () => { await _mediator.Send(new AddDownloadWorkerLogsCommand(logs)); });
+        }
+
         private void OnDownloadWorkerTaskChanged(IList<DownloadWorkerTask> taskList)
         {
-            Task.Run(() => _mediator.Send(new UpdateDownloadWorkerTasksCommand(taskList)));
+            Task.Run(async () => await _mediator.Send(new UpdateDownloadWorkerTasksCommand(taskList)));
         }
 
         private void OnDownloadFileCompleted(DownloadComplete downloadComplete)

@@ -32,6 +32,8 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly Subject<IList<DownloadWorkerTask>> _downloadWorkerTaskChanged = new Subject<IList<DownloadWorkerTask>>();
 
+        private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new Subject<DownloadWorkerLog>();
+
         private readonly List<DownloadWorker> _downloadWorkers = new List<DownloadWorker>();
 
         private readonly IMediator _mediator;
@@ -75,8 +77,6 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Properties
 
-        public string DownloadPath => _fileSystem.ToAbsolutePath(DownloadTask.DestinationFolder?.DirectoryPath);
-
         public DateTime DownloadStartAt { get; internal set; }
 
         public DownloadStatus DownloadStatus { get; internal set; }
@@ -87,8 +87,6 @@ namespace PlexRipper.DownloadManager.Download
         /// The ClientId/DownloadTaskId is always the same id that is assigned to the <see cref="DownloadTask"/>.
         /// </summary>
         public int DownloadTaskId => DownloadTask.Id;
-
-        public TimeSpan ElapsedTime => DateTime.UtcNow.Subtract(DownloadStartAt);
 
         /// <summary>
         /// In how many parts/segments should the media be downloaded.
@@ -106,6 +104,8 @@ namespace PlexRipper.DownloadManager.Download
         public IObservable<DownloadStatusChanged> DownloadStatusChanged => _statusChanged.AsObservable();
 
         public IObservable<IList<DownloadWorkerTask>> DownloadWorkerTaskChanged => _downloadWorkerTaskChanged.AsObservable();
+
+        public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
         #endregion
 
@@ -167,10 +167,10 @@ namespace PlexRipper.DownloadManager.Download
 
             // On download worker error
             _downloadWorkers
-                .Select(x => x.DownloadWorkerError)
+                .Select(x => x.DownloadWorkerLog)
                 .Merge()
                 .TakeUntil(downloadCompleteStream)
-                .Subscribe(OnDownloadWorkerError);
+                .Subscribe(OnDownloadWorkerLog);
 
             // On download status change
             _downloadWorkers
@@ -256,9 +256,9 @@ namespace PlexRipper.DownloadManager.Download
             _downloadProgressChanged.OnNext(downloadProgress);
         }
 
-        private void OnDownloadWorkerError(Result errorResult)
+        private void OnDownloadWorkerLog(DownloadWorkerLog downloadWorkerLog)
         {
-            SetDownloadStatus(DownloadStatus.Error, errorResult);
+            _downloadWorkerLog.OnNext(downloadWorkerLog);
         }
 
         private void OnDownloadWorkerTaskChange(IList<DownloadWorkerTask> taskList)

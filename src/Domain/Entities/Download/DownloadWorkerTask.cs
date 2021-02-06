@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 
@@ -40,25 +41,28 @@ namespace PlexRipper.Domain
         [Column(Order = 4)]
         public long EndByte { get; set; }
 
+        [Column(Order = 5)]
+        public DownloadStatus DownloadStatus { get; set; }
+
         /// <summary>
         /// Gets the total bytes received so far.
         /// </summary>
-        [Column(Order = 5)]
+        [Column(Order = 6)]
         public long BytesReceived { get; set; }
 
-        [Column(Order = 6)]
+        [Column(Order = 7)]
         public string Url { get; set; }
 
         /// <summary>
         /// The download directory where the part is downloaded into.
         /// </summary>
-        [Column(Order = 7)]
+        [Column(Order = 8)]
         public string TempDirectory { get; internal set; }
 
         /// <summary>
         /// The elapsed time in milliseconds with an accuracy of 100 milliseconds.
         /// </summary>
-        [Column(Order = 8)]
+        [Column(Order = 9)]
         public long ElapsedTime { get; set; }
 
         #endregion
@@ -68,6 +72,8 @@ namespace PlexRipper.Domain
         public DownloadTask DownloadTask { get; set; }
 
         public int DownloadTaskId { get; set; }
+
+        public ICollection<DownloadWorkerLog> DownloadWorkerTaskLogs { get; set; }
 
         #endregion
 

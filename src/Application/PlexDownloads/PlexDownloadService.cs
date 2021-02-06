@@ -168,7 +168,7 @@ namespace PlexRipper.Application.PlexDownloads
 
         public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadMedias)
         {
-            int mediaCount = downloadMedias.Select(x => x.MediaIds.Sum()).Sum();
+            int mediaCount = downloadMedias.Select(x => x.MediaIds.Count).Sum();
             await _signalRService.SendDownloadTaskCreationProgressUpdate(1, mediaCount);
             int count = 0;
             for (int i = 0; i < downloadMedias.Count; i++)
@@ -269,6 +269,7 @@ namespace PlexRipper.Application.PlexDownloads
         /// <returns>The created <see cref="DownloadTask"/>.</returns>
         private async Task<Result<bool>> DownloadMovieAsync(List<int> plexMovieIds, int plexAccountId = 0)
         {
+            Log.Debug($"Creating {plexMovieIds.Count} movie download tasks.");
             var plexMoviesResult = await _mediator.Send(new GetMultiplePlexMoviesByIdsQuery(plexMovieIds, true, true));
             if (plexMoviesResult.IsFailed) return plexMoviesResult.ToResult<bool>();
 

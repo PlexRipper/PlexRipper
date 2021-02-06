@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexDownloads
 {
-    public class UpdateDownloadTaskByIdCommand : IRequest<Result<bool>>
+    public class UpdateDownloadTaskByIdCommand : IRequest<Result>
     {
         public UpdateDownloadTaskByIdCommand(DownloadTask downloadTask)
         {

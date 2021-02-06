@@ -40,7 +40,6 @@ namespace PlexRipper.DownloadManager
 
         private readonly IDownloadQueue _downloadQueue;
 
-
         #endregion
 
         #region Constructors
@@ -254,27 +253,24 @@ namespace PlexRipper.DownloadManager
         private void SetupSubscriptions(PlexDownloadClient newClient)
         {
             // Download Progress Changed subscription
-            newClient.DownloadProgressChanged
-                .TakeUntil(newClient.DownloadFileCompleted)
+            newClient
+                .DownloadProgressChanged
                 .Subscribe(OnDownloadProgressChanged);
 
-            // Download Status Changed subscription
-            newClient.DownloadStatusChanged
-                .Subscribe(OnDownloadStatusChanged);
-
             // Download Worker Task Changed subscription
-            newClient.DownloadWorkerTaskChanged
+            newClient
+                .DownloadTaskChanged
                 .Subscribe(OnDownloadWorkerTaskChanged);
+
+            // Download Worker Task completed subscription
+            newClient.DownloadTaskChanged
+                .Where(x => x.DownloadStatus == DownloadStatus.Completed)
+                .Subscribe(OnDownloadFileCompleted);
 
             // Download Worker Log subscription
             newClient.DownloadWorkerLog
                 .Buffer(TimeSpan.FromSeconds(1))
                 .Subscribe(OnDownloadWorkerLog);
-
-            // Download File Completed subscription
-            newClient.DownloadFileCompleted
-                .Take(1)
-                .Subscribe(OnDownloadFileCompleted);
         }
 
         private void OnDownloadWorkerLog(IList<DownloadWorkerLog> logs)
@@ -287,33 +283,24 @@ namespace PlexRipper.DownloadManager
             Task.Run(async () => { await _mediator.Send(new AddDownloadWorkerLogsCommand(logs)); });
         }
 
-        private void OnDownloadWorkerTaskChanged(IList<DownloadWorkerTask> taskList)
+        private void OnDownloadWorkerTaskChanged(DownloadTask downloadTask)
         {
-            Task.Run(async () => await _mediator.Send(new UpdateDownloadWorkerTasksCommand(taskList)));
+            Task.Run(async () => await UpdateDownloadTaskStatusAsync(downloadTask));
         }
 
-        private void OnDownloadFileCompleted(DownloadComplete downloadComplete)
+        private void OnDownloadFileCompleted(DownloadTask downloadTask)
         {
             Task.Run(async () =>
             {
-                await _mediator.Send(new UpdateDownloadCompleteOfDownloadTaskCommand(
-                    downloadComplete.Id,
-                    downloadComplete.DataReceived));
+                await _fileMerger.AddFileTask(downloadTask);
 
-                await _fileMerger.AddFileTask(downloadComplete.DownloadTask);
+                downloadTask.DownloadStatus = DownloadStatus.Merging;
+                downloadTask.DownloadWorkerTasks.ForEach(x => x.DownloadStatus = DownloadStatus.Merging);
+                await UpdateDownloadTaskStatusAsync(downloadTask);
 
-                var downloadStatusChanged = downloadComplete.ToStatus();
-                downloadStatusChanged.Status = DownloadStatus.Merging;
-                await SetDownloadStatusAsync(downloadStatusChanged);
-
-                Log.Information($"The download of {downloadComplete.DownloadTask.Title} has completed!");
+                Log.Information($"The download of {downloadTask.Title} has completed!");
                 CheckDownloadQueue();
             });
-        }
-
-        private void OnDownloadStatusChanged(DownloadStatusChanged downloadStatusChanged)
-        {
-            SetDownloadStatus(downloadStatusChanged);
         }
 
         private void OnDownloadProgressChanged(DownloadProgress downloadProgress)
@@ -328,12 +315,17 @@ namespace PlexRipper.DownloadManager
             _signalRService.SendFileMergeProgressUpdate(progress);
             if (progress.Percentage >= 100)
             {
-                SetDownloadStatus(new DownloadStatusChanged
+                Task.Run(async () =>
                 {
-                    Id = progress.DownloadTaskId,
-                    Status = DownloadStatus.Completed,
-                    PlexLibraryId = progress.PlexLibraryId,
-                    PlexServerId = progress.PlexServerId,
+                    var downloadTaskResultDownloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(progress.DownloadTaskId));
+                    if (downloadTaskResultDownloadTaskResult.IsFailed)
+                    {
+                        downloadTaskResultDownloadTaskResult.LogError();
+                        return;
+                    }
+
+                    downloadTaskResultDownloadTaskResult.Value.DownloadStatus = DownloadStatus.Completed;
+                    await UpdateDownloadTaskStatusAsync(downloadTaskResultDownloadTaskResult.Value);
                 });
             }
         }

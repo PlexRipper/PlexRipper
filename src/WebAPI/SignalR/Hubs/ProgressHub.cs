@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace PlexRipper.SignalR.Hubs
+namespace PlexRipper.WebAPI.SignalR.Hubs
 {
     public class ProgressHub : Hub { }
 }

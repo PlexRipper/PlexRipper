@@ -11,7 +11,7 @@ namespace PlexRipper.Application.Common
 
         Task SendDownloadProgressUpdate(IDownloadProgress downloadProgress);
 
-        Task SendDownloadStatusUpdate(int id, DownloadStatus downloadStatus, int plexServerId, int plexLibraryId);
+        Task SendDownloadTaskUpdate(DownloadTask downloadTask);
 
         /// <summary>
         /// Sends a <see cref="FileMergeProgress"/> object to the SignalR client in the front-end.

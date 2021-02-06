@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace PlexRipper.SignalR.Common
+namespace PlexRipper.WebAPI.SignalR.Common
 {
     public class DownloadTaskCreationProgress
     {

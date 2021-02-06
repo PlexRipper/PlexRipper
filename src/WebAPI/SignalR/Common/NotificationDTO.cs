@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using PlexRipper.Domain;
 
-namespace PlexRipper.SignalR.Common
+namespace PlexRipper.WebAPI.SignalR.Common
 {
     public class NotificationDTO
     {

@@ -5,7 +5,7 @@ using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Common;
-using PlexRipper.SignalR.Common;
+using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Config
 {
@@ -27,7 +27,6 @@ namespace PlexRipper.WebAPI.Config
                 typeof(DownloadTaskCreationProgress),
                 typeof(LibraryProgress),
                 typeof(PlexAccountRefreshProgress),
-                typeof(DownloadStatusChanged),
                 typeof(FileMergeProgress),
                 typeof(NotificationDTO),
             };

@@ -6,10 +6,10 @@ import {
 	DownloadProgress,
 	LibraryProgress,
 	DownloadTaskCreationProgress,
-	DownloadStatusChanged,
 	FileMergeProgress,
 	NotificationDTO,
 	PlexAccountRefreshProgress,
+	DownloadTaskDTO,
 } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
 import globalService from '@state/globalService';
@@ -26,7 +26,7 @@ export class SignalrService {
 	private _notificationHubSubscription: Subscription | null = null;
 
 	private _downloadProgressSubject: ReplaySubject<DownloadProgress> = new ReplaySubject<DownloadProgress>();
-	private _downloadStatusChangedSubject: ReplaySubject<DownloadStatusChanged> = new ReplaySubject<DownloadStatusChanged>();
+	private _downloadTaskUpdateSubject: ReplaySubject<DownloadTaskDTO> = new ReplaySubject<DownloadTaskDTO>();
 	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> = new ReplaySubject<DownloadTaskCreationProgress>();
 
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
@@ -79,8 +79,8 @@ export class SignalrService {
 			this._downloadProgressSubject.next(data);
 		});
 
-		this._progressHubConnection?.on<DownloadStatusChanged>('DownloadStatusChanged').subscribe((data) => {
-			this._downloadStatusChangedSubject.next(data);
+		this._progressHubConnection?.on<DownloadTaskDTO>('DownloadTaskUpdate').subscribe((data) => {
+			this._downloadTaskUpdateSubject.next(data);
 		});
 
 		this._progressHubConnection?.on<DownloadTaskCreationProgress>('DownloadTaskCreationProgress').subscribe((data) => {
@@ -166,8 +166,8 @@ export class SignalrService {
 		return this._fileMergeProgressSubject.asObservable();
 	}
 
-	public getDownloadStatus(): Observable<DownloadStatusChanged> {
-		return this._downloadStatusChangedSubject.asObservable();
+	public getDownloadTaskUpdate(): Observable<DownloadTaskDTO> {
+		return this._downloadTaskUpdateSubject.asObservable();
 	}
 
 	public getLibraryProgress(): Observable<LibraryProgress> {
@@ -190,7 +190,7 @@ export interface ProgressHub {
 	DownloadProgress: DownloadProgress;
 	FileMergeProgress: FileMergeProgress;
 	DownloadTaskCreation: DownloadTaskCreationProgress;
-	DownloadStatusChanged: DownloadStatusChanged;
+	DownloadTaskUpdate: DownloadTaskDTO;
 	DownloadTaskCreationProgress: DownloadTaskCreationProgress;
 	LibraryProgress: LibraryProgress;
 	PlexAccountRefreshProgress: PlexAccountRefreshProgress;

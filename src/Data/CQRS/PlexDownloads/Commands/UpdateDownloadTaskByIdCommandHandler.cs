@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -23,13 +24,14 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
     }
 
     public class UpdateDownloadTaskByIdCommandHandler : BaseHandler,
-        IRequestHandler<UpdateDownloadTaskByIdCommand, Result<bool>>
+        IRequestHandler<UpdateDownloadTaskByIdCommand, Result>
     {
         public UpdateDownloadTaskByIdCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<bool>> Handle(UpdateDownloadTaskByIdCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(UpdateDownloadTaskByIdCommand command, CancellationToken cancellationToken)
         {
-            var downloadTask = await _dbContext.DownloadTasks.AsTracking()
+            var downloadTask = await _dbContext.DownloadTasks
+                .Include(x => x.DownloadWorkerTasks)
                 .FirstOrDefaultAsync(x => x.Id == command.DownloadTask.Id, cancellationToken);
 
             if (downloadTask == null)
@@ -38,8 +40,15 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
             }
 
             _dbContext.Entry(downloadTask).CurrentValues.SetValues(command.DownloadTask);
+            _dbContext.Entry(downloadTask).Reference(x => x.DestinationFolder).IsModified = false;
+            _dbContext.Entry(downloadTask).Reference(x => x.DestinationFolder).IsModified = false;
+            _dbContext.Entry(downloadTask).Reference(x => x.DownloadFolder).IsModified = false;
+            _dbContext.Entry(downloadTask).Reference(x => x.PlexServer).IsModified = false;
+            _dbContext.Entry(downloadTask).Reference(x => x.PlexLibrary).IsModified = false;
+
             await _dbContext.SaveChangesAsync(cancellationToken);
-            return Result.Ok(true);
+            await _dbContext.BulkInsertOrUpdateAsync(command.DownloadTask.DownloadWorkerTasks);
+            return Result.Ok();
         }
     }
 }

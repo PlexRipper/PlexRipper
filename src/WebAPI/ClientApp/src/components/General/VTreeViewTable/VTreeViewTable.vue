@@ -153,11 +153,7 @@ import LoadingSpinner from '@components/LoadingSpinner.vue';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import ButtonType from '@enums/buttonType';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
-
-declare interface ISelection {
-	indexKey: number;
-	keys: string[];
-}
+import ISelection from '@interfaces/ISelection';
 
 @Component({
 	components: {
@@ -227,10 +223,6 @@ export default class VTreeViewTable extends Vue {
 			return height + 'px';
 		}
 		return 'auto';
-	}
-
-	hasLoadableChildren(item: ITreeViewTableRow): boolean {
-		return item?.children?.length === 0 ?? false;
 	}
 
 	retrieveAllLeafs(items: ITreeViewTableRow[]): string[] {

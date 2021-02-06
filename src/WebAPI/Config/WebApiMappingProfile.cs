@@ -7,6 +7,7 @@ using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 using PlexRipper.WebAPI.Common.FluentResult;
+using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Config
 {
@@ -58,6 +59,11 @@ namespace PlexRipper.WebAPI.Config
 
             // FileSystemModel -> FileSystemModelDTO
             CreateMap<FileSystemModel, FileSystemModelDTO>(MemberList.Destination).ReverseMap();
+
+            // Notification <-> NotificationUpdate
+            CreateMap<Notification, NotificationDTO>(MemberList.Destination)
+                .ForSourceMember(x => x.Level, opt => opt.DoNotValidate())
+                .ForMember(x => x.Level, opt => opt.MapFrom(x => x.NotificationLevel)).ReverseMap();
 
             DownloadTaskMappings();
             PlexMediaMappings();

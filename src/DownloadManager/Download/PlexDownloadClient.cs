@@ -23,13 +23,9 @@ namespace PlexRipper.DownloadManager.Download
     {
         #region Fields
 
-        private readonly Subject<DownloadComplete> _downloadFileCompleted = new Subject<DownloadComplete>();
-
         private readonly Subject<DownloadProgress> _downloadProgressChanged = new Subject<DownloadProgress>();
 
-        private readonly Subject<DownloadStatusChanged> _statusChanged = new Subject<DownloadStatusChanged>();
-
-        private readonly Subject<IList<DownloadWorkerTask>> _downloadWorkerTaskChanged = new Subject<IList<DownloadWorkerTask>>();
+        private readonly Subject<DownloadTask> _downloadTaskChanged = new Subject<DownloadTask>();
 
         private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new Subject<DownloadWorkerLog>();
 
@@ -99,11 +95,7 @@ namespace PlexRipper.DownloadManager.Download
 
         public IObservable<DownloadProgress> DownloadProgressChanged => _downloadProgressChanged.AsObservable();
 
-        public IObservable<DownloadComplete> DownloadFileCompleted => _downloadFileCompleted.AsObservable();
-
-        public IObservable<DownloadStatusChanged> DownloadStatusChanged => _statusChanged.AsObservable();
-
-        public IObservable<IList<DownloadWorkerTask>> DownloadWorkerTaskChanged => _downloadWorkerTaskChanged.AsObservable();
+        public IObservable<DownloadTask> DownloadTaskChanged => _downloadTaskChanged.AsObservable();
 
         public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
@@ -122,46 +114,8 @@ namespace PlexRipper.DownloadManager.Download
         public void Dispose()
         {
             _downloadProgressChanged?.Dispose();
-            _downloadFileCompleted?.Dispose();
-            _downloadWorkerTaskChanged?.Dispose();
-            _statusChanged?.Dispose();
-        }
-
-        private void SetDownloadStatus(IList<DownloadWorkerTask> downloadWorkerTasks)
-        {
-            var clientStatus = downloadWorkerTasks.Select(x => x.DownloadStatus).ToList();
-
-            // If there is any error then set client to error state
-            if (clientStatus.Any(x => x == DownloadStatus.Error))
-            {
-                DownloadStatus = DownloadStatus.Error;
-            }
-
-            if (clientStatus.All(x => x == DownloadStatus.Downloading))
-            {
-                DownloadStatus = DownloadStatus.Downloading;
-            }
-
-            // TODO Find a way to handle Download Worker errors
-            _statusChanged.OnNext(new DownloadStatusChanged
-            {
-                Id = DownloadTaskId,
-                Status = DownloadStatus,
-                PlexLibraryId = DownloadTask.PlexLibraryId,
-                PlexServerId = DownloadTask.PlexServerId,
-                WorkerStatuses = downloadWorkerTasks.Select(src => new DownloadStatusChanged
-                {
-                    Id = src.Id,
-                    Status = src.DownloadStatus,
-                    PlexLibraryId = DownloadTask.PlexLibraryId,
-                    PlexServerId = DownloadTask.PlexServerId,
-                }).ToList(),
-            });
-
-            if (DownloadStatus == DownloadStatus.Completed)
-            {
-                _statusChanged.OnCompleted();
-            }
+            _downloadTaskChanged?.Dispose();
+            _downloadWorkerLog?.Dispose();
         }
 
         private void SetupSubscriptions()
@@ -172,17 +126,10 @@ namespace PlexRipper.DownloadManager.Download
                 return;
             }
 
-            var downloadCompleteStream = _downloadWorkers
-                .Select(x => x.DownloadWorkerComplete)
-                .Merge()
-                .Buffer(_downloadWorkers.Count)
-                .Take(1);
-
             // On download progress
-            _workerProgressSubscription = _downloadWorkers
+            _downloadWorkers
                 .Select(x => x.DownloadWorkerProgress)
                 .CombineLatest()
-                .TakeUntil(downloadCompleteStream)
                 .Sample(TimeSpan.FromMilliseconds(1000), _timeThreadContext)
                 .Subscribe(OnDownloadProgressChanged);
 
@@ -190,7 +137,6 @@ namespace PlexRipper.DownloadManager.Download
             _downloadWorkers
                 .Select(x => x.DownloadWorkerLog)
                 .Merge()
-                .TakeUntil(downloadCompleteStream)
                 .Subscribe(OnDownloadWorkerLog);
 
             // On download task change
@@ -198,13 +144,6 @@ namespace PlexRipper.DownloadManager.Download
                 .Select(x => x.DownloadWorkerTaskChanged)
                 .CombineLatest()
                 .Subscribe(OnDownloadWorkerTaskChange);
-
-            // On download complete
-            // Async function in subscription: https://stackoverflow.com/a/30030553/8205497
-            downloadCompleteStream
-                .Select(l => Observable.FromAsync(() => OnDownloadComplete(l)))
-                .Concat()
-                .Subscribe();
         }
 
         /// <summary>
@@ -257,49 +196,61 @@ namespace PlexRipper.DownloadManager.Download
             _downloadWorkerLog.OnNext(downloadWorkerLog);
         }
 
-        private void OnDownloadWorkerTaskChange(IList<DownloadWorkerTask> taskList)
+        private void OnDownloadWorkerTaskChange(IList<DownloadWorkerTask> downloadWorkerTasks)
         {
-            SetDownloadStatus(taskList);
-            _downloadWorkerTaskChanged.OnNext(taskList);
-        }
+            var clientStatus = downloadWorkerTasks.Select(x => x.DownloadStatus).ToList();
 
-        private async Task OnDownloadComplete(IList<DownloadWorkerComplete> completeList)
-        {
-            _timeThreadContext.Dispose();
-
-            var orderedList = completeList.ToList().OrderBy(x => x.Id).ToList();
-            StringBuilder builder = new StringBuilder();
-            foreach (var progress in orderedList)
+            // If there is any error then set client to error state
+            if (clientStatus.Any(x => x == DownloadStatus.Error))
             {
-                builder.Append($"({progress.Id} - {progress.FileName} download completed!) + ");
-                if (!progress.ReceivedAllBytes)
-                {
-                    var msg = $"Did not receive the correct number of bytes for download worker {progress.Id}.";
-                    msg +=
-                        $" Received {progress.BytesReceived} and not {progress.BytesReceivedGoal} with a difference of {progress.BytesReceivedGoal - progress.BytesReceived}";
-                    Log.Error(msg);
-                }
+                DownloadStatus = DownloadStatus.Error;
             }
 
-            // Remove the last " + "
-            if (builder.Length > 3)
+            if (clientStatus.All(x => x == DownloadStatus.Downloading))
             {
-                builder.Length -= 3;
+                DownloadStatus = DownloadStatus.Downloading;
             }
 
-            Log.Debug(builder.ToString());
-            var downloadComplete = new DownloadComplete(DownloadTask)
-            {
-                DestinationPath = DownloadTask.DestinationPath,
-                DownloadWorkerCompletes = orderedList,
-                DataReceived = completeList.Sum(x => x.BytesReceived),
-                DataTotal = TotalBytesToReceive,
-            };
-            Log.Debug($"Download of {DownloadTask.FileName} finished!");
+            DownloadTask.DownloadWorkerTasks = downloadWorkerTasks.ToList();
+            _downloadTaskChanged.OnNext(DownloadTask);
 
-            await ClearDownloadWorkers();
-            _downloadFileCompleted.OnNext(downloadComplete);
+            if (DownloadStatus == DownloadStatus.Completed)
+            {
+                _downloadTaskChanged.OnCompleted();
+                _downloadProgressChanged.OnCompleted();
+                _downloadWorkerLog.OnCompleted();
+            }
         }
+
+        // private async Task OnDownloadComplete(IList<DownloadWorkerComplete> completeList)
+        // {
+        //     _timeThreadContext.Dispose();
+        //
+        //     var orderedList = completeList.ToList().OrderBy(x => x.Id).ToList();
+        //     StringBuilder builder = new StringBuilder();
+        //     foreach (var progress in orderedList)
+        //     {
+        //         builder.Append($"({progress.Id} - {progress.FileName} download completed!) + ");
+        //         if (!progress.ReceivedAllBytes)
+        //         {
+        //             var msg = $"Did not receive the correct number of bytes for download worker {progress.Id}.";
+        //             msg +=
+        //                 $" Received {progress.BytesReceived} and not {progress.BytesReceivedGoal} with a difference of {progress.BytesReceivedGoal - progress.BytesReceived}";
+        //             Log.Error(msg);
+        //         }
+        //     }
+        //
+        //     // Remove the last " + "
+        //     if (builder.Length > 3)
+        //     {
+        //         builder.Length -= 3;
+        //     }
+        //
+        //     Log.Debug(builder.ToString());
+        //     Log.Debug($"Download of {DownloadTask.FileName} finished!");
+        //
+        //     await ClearDownloadWorkers();
+        // }
 
         #endregion
 

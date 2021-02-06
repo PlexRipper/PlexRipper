@@ -405,13 +405,6 @@ export interface PlexAccountRefreshProgress {
   isComplete: boolean;
 }
 
-export interface DownloadStatusChanged {
-  id: number;
-  status: DownloadStatus;
-  plexServerId: number;
-  plexLibraryId: number;
-}
-
 export interface FileMergeProgress {
   id: number;
   downloadTaskId: number;

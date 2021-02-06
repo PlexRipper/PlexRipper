@@ -69,13 +69,7 @@ namespace PlexRipper.DownloadManager
                                 if (downloadTask.DownloadStatus == DownloadStatus.Initialized)
                                 {
                                     downloadTask.DownloadStatus = DownloadStatus.Queued;
-                                    await SetDownloadStatusAsync(new DownloadStatusChanged
-                                    {
-                                        Id = downloadTask.Id,
-                                        Status = downloadTask.DownloadStatus,
-                                        PlexLibraryId = downloadTask.PlexLibraryId,
-                                        PlexServerId = downloadTask.PlexServerId,
-                                    });
+                                    await UpdateDownloadTaskStatusAsync(downloadTask);
                                 }
                             }
 

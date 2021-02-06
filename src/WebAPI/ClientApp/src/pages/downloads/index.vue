@@ -1,5 +1,6 @@
 <template>
 	<page>
+		{{ getSelected }}
 		<!-- Download Toolbar -->
 		<download-bar
 			:has-selected="hasSelected"
@@ -23,6 +24,7 @@
 								<downloads-table
 									v-model="selected"
 									:server-id="plexServer.id"
+									@selected="updateSelected(plexServer.id, $event)"
 									@pause="pauseDownloadTask"
 									@clear="clearDownloadTask"
 									@delete="deleteDownloadTask"
@@ -54,6 +56,7 @@ import DownloadService from '@state/downloadService';
 import { DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { filter } from 'lodash';
+import ISelection from '@interfaces/ISelection';
 import DownloadsTable from './components/DownloadsTable.vue';
 import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
 import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsDialog.vue';
@@ -70,12 +73,17 @@ export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
 	downloads: DownloadTaskDTO[] = [];
 	openExpansions: number[] = [];
-	selected: DownloadTaskDTO[] = [];
 	downloadTaskDetail: DownloadTaskDTO | null = null;
+	selected: ISelection[] = [];
+
 	private dialog: boolean = false;
 
 	get selectedIds(): number[] {
 		return this.selected.map((x) => x.id);
+	}
+
+	get getSelected(): string[] {
+		return this.selected.map((x) => x.keys).flat(1);
 	}
 
 	get hasSelected(): boolean {
@@ -115,6 +123,15 @@ export default class Downloads extends Vue {
 	detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
 		this.downloadTaskDetail = downloadTask;
 		this.dialog = true;
+	}
+
+	updateSelected(plexServerId: number, selected: string[]) {
+		const index = this.selected.findIndex((x) => x.indexKey === plexServerId);
+		if (index === -1) {
+			this.selected.push({ indexKey: plexServerId, keys: selected });
+		} else {
+			this.selected.splice(index, 1, { indexKey: plexServerId, keys: selected });
+		}
 	}
 
 	// endregion

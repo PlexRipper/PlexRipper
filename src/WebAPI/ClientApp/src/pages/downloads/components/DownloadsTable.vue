@@ -1,22 +1,21 @@
 <template>
 	<div>
-		{{ downloadStatusList }}
 		{{ downloadProgressList }}
 		{{ fileMergeProgressList }}
-		<v-tree-view-table :items="getDownloads" :headers="getHeaders" height-auto media-icons @action="tableAction" />
+		<v-tree-view-table
+			:items="getDownloads"
+			:headers="getHeaders"
+			height-auto
+			media-icons
+			@action="tableAction"
+			@selected="$emit('selected', $event)"
+		/>
 	</div>
 </template>
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import {
-	DownloadProgress,
-	DownloadStatus,
-	DownloadStatusChanged,
-	DownloadTaskDTO,
-	FileMergeProgress,
-	PlexMediaType,
-} from '@dto/mainApi';
+import { DownloadProgress, DownloadStatus, DownloadTaskDTO, FileMergeProgress, PlexMediaType } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
@@ -43,22 +42,15 @@ export default class DownloadsTable extends Vue {
 
 	downloadProgressList: DownloadProgress[] = [];
 	fileMergeProgressList: FileMergeProgress[] = [];
-	downloadStatusList: DownloadStatusChanged[] = [];
 	downloadRows: DownloadTaskDTO[] = [];
 
 	mergeDownloadRow(downloadTask: DownloadTaskDTO): DownloadTaskDTO {
 		// Merge the various feeds
 		const downloadProgress = this.downloadProgressList.find((x) => x.id === downloadTask.id);
-		const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === downloadTask.id);
 		// Note: Need to create a new one, then add to array and then use that array to overwrite the season.children,
 		// otherwise result will not be updated.
 
-		// Status priority: downloadStatusUpdate > getDownloadList
-		const newStatus = downloadStatusUpdate?.status ?? downloadTask?.status ?? DownloadStatus.Unknown;
-		if (newStatus !== downloadTask.status) {
-			downloadTask.status = newStatus;
-		}
-		downloadTask.actions = this.availableActions(newStatus);
+		downloadTask.actions = this.availableActions(downloadTask.status);
 
 		if (downloadProgress) {
 			downloadTask.percentage = downloadProgress.percentage;
@@ -244,18 +236,14 @@ export default class DownloadsTable extends Vue {
 		});
 
 		// Retrieve download status from SignalR
-		this.$subscribeTo(SignalrService.getDownloadStatus().pipe(filter((x) => x.plexServerId === this.serverId)), (data) => {
-			if (data) {
-				const i = this.downloadStatusList.findIndex((x) => x.id === data.id);
-				if (i > -1) {
-					// Update
-					this.downloadStatusList.splice(i, 1, data);
-				} else {
-					// Add
-					this.downloadStatusList.push(data);
-				}
+		this.$subscribeTo(SignalrService.getDownloadTaskUpdate().pipe(filter((x) => x.plexServerId === this.serverId)), (data) => {
+			const i = this.downloadRows.findIndex((x) => x.id === data.id);
+			if (i > -1) {
+				// Update
+				this.downloadRows.splice(i, 1, data);
 			} else {
-				Log.error(`DownloadStatusChanged was undefined.`);
+				// Add
+				this.downloadRows.push(data);
 			}
 		});
 

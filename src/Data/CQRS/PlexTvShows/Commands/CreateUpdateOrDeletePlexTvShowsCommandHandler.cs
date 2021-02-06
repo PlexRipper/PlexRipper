@@ -23,10 +23,13 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
             RuleFor(x => x.PlexLibrary.Title).NotEmpty();
             RuleFor(x => x.PlexLibrary.TvShows).NotEmpty();
 
-            RuleForEach(x => x.PlexLibrary.TvShows).ChildRules(plexMovie =>
+            RuleForEach(x => x.PlexLibrary.TvShows).ChildRules(plexTvShow =>
             {
-                plexMovie.RuleFor(x => x.Key).GreaterThan(0);
-                plexMovie.RuleForEach(x => x.Seasons).ChildRules(plexMovieData => { plexMovieData.RuleFor(x => x.Episodes).NotEmpty(); });
+                plexTvShow.RuleFor(x => x.Key).GreaterThan(0);
+                plexTvShow.RuleForEach(x => x.Seasons).ChildRules(plexTvShowSeason =>
+                {
+                    plexTvShowSeason.RuleFor(x => x.Key).GreaterThan(0);
+                });
             });
         }
     }

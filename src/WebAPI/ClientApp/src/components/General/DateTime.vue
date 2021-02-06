@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import SettingsService from '@state/settingsService';
 @Component
 export default class DateTime extends Vue {
-	@Prop({ required: true, type: String })
+	@Prop({ required: true, type: String, default: '' })
 	readonly text!: string;
 
 	@Prop({ required: false, type: Boolean, default: false })
@@ -29,6 +29,9 @@ export default class DateTime extends Vue {
 	}
 
 	get dateTimeString(): string {
+		if (!this.text) {
+			return '';
+		}
 		let string = '';
 		if (this.time) {
 			string += format(this.date, this.timeFormat);
@@ -37,11 +40,11 @@ export default class DateTime extends Vue {
 			string += ' - ';
 		}
 
-		if (this.shortDate) {
+		if (this.shortDate && this.shortDateFormat) {
 			string += format(this.date, this.shortDateFormat);
 		}
 
-		if (this.longDate) {
+		if (this.longDate && this.longDateFormat) {
 			string += format(this.date, this.longDateFormat);
 		}
 
@@ -51,9 +54,9 @@ export default class DateTime extends Vue {
 	mounted(): void {
 		this.$subscribeTo(SettingsService.getDateTimeSettings(), (dateTimeSettings) => {
 			if (dateTimeSettings) {
-				this.shortDateFormat = dateTimeSettings.shortDateFormat;
-				this.longDateFormat = dateTimeSettings.longDateFormat;
-				this.timeFormat = dateTimeSettings.timeFormat;
+				this.shortDateFormat = dateTimeSettings.shortDateFormat ?? '';
+				this.longDateFormat = dateTimeSettings.longDateFormat ?? '';
+				this.timeFormat = dateTimeSettings.timeFormat ?? '';
 			}
 		});
 	}

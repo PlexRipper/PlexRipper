@@ -14,7 +14,8 @@
 		"lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier-stylelint --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{css,scss}\" --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\"",
 		"test": "jest",
 		"update-web-types": "vue-docgen-web-types",
-		"npm-upgrade-packages": "npm-upgrade"
+		"npm-upgrade-packages": "npm-upgrade",
+		"analyze": "nuxt build --analyze"
 	},
 	"lint-staged": {
 		"*.{js,vue}": "npm run lint --fix",
@@ -79,6 +80,7 @@
 		"stylelint": "^13.9.0",
 		"ts-jest": "^26.5.0",
 		"tsconfig-paths-webpack-plugin": "^3.3.0",
+		"vue-cli-plugin-webpack-bundle-analyzer": "~4.0.0",
 		"vue-jest": "^4.0.0-rc.0",
 		"webpack-bundle-analyzer": "^4.4.0"
 	}

@@ -106,6 +106,7 @@ const config: NuxtConfig = {
 				overlay: false,
 			},
 		},
+		extractCSS: true,
 		// Will allow for debugging in Typescript + Nuxt
 		// Doc: https://nordschool.com/enable-vs-code-debugger-for-nuxt-and-typescript/
 		extend(config: WebpackConfiguration, { isDev, isClient }: NuxtWebpackEnv): void {

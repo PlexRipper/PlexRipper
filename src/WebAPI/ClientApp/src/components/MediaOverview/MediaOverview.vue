@@ -321,7 +321,7 @@ export default class MediaOverview extends Vue {
 				}),
 				finalize(() => {
 					setTimeout(() => {
-						this.downloadConfirmationRef.closeDialog();
+						this.downloadConfirmationRef?.closeDialog();
 						this.downloadTaskCreationProgress = null;
 					}, 2000);
 				}),

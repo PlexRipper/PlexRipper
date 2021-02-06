@@ -204,7 +204,7 @@ export default class MediaTable extends Vue {
 
 		if (this.mediaType === PlexMediaType.Movie) {
 			downloads.push({
-				mediaIds: this.selected.map((x) => +x),
+				mediaIds: this.selected?.map((x) => +x),
 				type: PlexMediaType.Movie,
 				plexAccountId: this.activeAccountId,
 				libraryId: this.libraryId,

@@ -1,10 +1,22 @@
 <template>
-	<v-tree-view-table :items="getDownloads" :headers="getHeaders" media-icons @action="tableAction" />
+	<div>
+		{{ downloadStatusList }}
+		{{ downloadProgressList }}
+		{{ fileMergeProgressList }}
+		<v-tree-view-table :items="getDownloads" :headers="getHeaders" height-auto media-icons @action="tableAction" />
+	</div>
 </template>
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DownloadProgress, DownloadStatus, DownloadStatusChanged, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
+import {
+	DownloadProgress,
+	DownloadStatus,
+	DownloadStatusChanged,
+	DownloadTaskDTO,
+	FileMergeProgress,
+	PlexMediaType,
+} from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
@@ -32,57 +44,73 @@ export default class DownloadsTable extends Vue {
 	downloadProgressList: DownloadProgress[] = [];
 	fileMergeProgressList: FileMergeProgress[] = [];
 	downloadStatusList: DownloadStatusChanged[] = [];
-	tvShowsDownloadRows: DownloadTaskDTO[] = [];
+	downloadRows: DownloadTaskDTO[] = [];
+
+	mergeDownloadRow(downloadTask: DownloadTaskDTO): DownloadTaskDTO {
+		// Merge the various feeds
+		const downloadProgress = this.downloadProgressList.find((x) => x.id === downloadTask.id);
+		const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === downloadTask.id);
+		// Note: Need to create a new one, then add to array and then use that array to overwrite the season.children,
+		// otherwise result will not be updated.
+
+		// Status priority: downloadStatusUpdate > getDownloadList
+		const newStatus = downloadStatusUpdate?.status ?? downloadTask?.status ?? DownloadStatus.Unknown;
+		if (newStatus !== downloadTask.status) {
+			downloadTask.status = newStatus;
+		}
+		downloadTask.actions = this.availableActions(newStatus);
+
+		if (downloadProgress) {
+			downloadTask.percentage = downloadProgress.percentage;
+			downloadTask.downloadSpeed = downloadProgress.downloadSpeed;
+			downloadTask.dataReceived = downloadProgress.dataReceived;
+			downloadTask.dataTotal = downloadProgress.dataTotal;
+			downloadTask.timeRemaining = downloadProgress.timeRemaining;
+		}
+
+		if (downloadTask.status === DownloadStatus.Merging) {
+			const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === downloadTask.id);
+			downloadTask.percentage = fileMergeProgress?.percentage ?? 0;
+			downloadTask.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
+			downloadTask.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
+			downloadTask.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
+		}
+
+		if (downloadTask.status === DownloadStatus.Completed) {
+			downloadTask.percentage = 100;
+			downloadTask.timeRemaining = 0;
+			downloadTask.downloadSpeed = 0;
+			downloadTask.dataReceived = downloadTask.dataTotal;
+			this.cleanupProgress(downloadTask.id);
+		}
+	}
 
 	get getDownloads(): DownloadTaskDTO[] {
-		this.tvShowsDownloadRows.forEach((tvShow) => {
-			tvShow?.children?.forEach((season) => {
-				if (season.children && season.children.length > 0) {
-					season.children?.forEach((episode) => {
-						// Merge the various feeds
-						const downloadProgress = this.downloadProgressList.find((x) => x.id === episode.id);
-						const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === episode.id);
-						// Note: Need to create a new one, then add to array and then use that array to overwrite the season.children,
-						// otherwise result will not be updated.
+		this.downloadRows.forEach((rootDownloadTask) => {
+			// For movies download tasks
+			if (rootDownloadTask.mediaType === PlexMediaType.Movie) {
+				this.mergeDownloadRow(rootDownloadTask);
+				rootDownloadTask.actions = this.availableActions(rootDownloadTask.status);
+				rootDownloadTask.children = undefined;
+			}
 
-						// Status priority: downloadStatusUpdate > getDownloadList
-						const newStatus = downloadStatusUpdate?.status ?? episode?.status ?? DownloadStatus.Unknown;
-						if (newStatus !== episode.status) {
-							episode.status = newStatus;
-						}
-						episode.actions = this.availableActions(newStatus);
-
-						if (downloadProgress) {
-							episode.percentage = downloadProgress.percentage;
-							episode.downloadSpeed = downloadProgress.downloadSpeed;
-							episode.dataReceived = downloadProgress.dataReceived;
-							episode.dataTotal = downloadProgress.dataTotal;
-							episode.timeRemaining = downloadProgress.timeRemaining;
-						}
-
-						if (episode.status === DownloadStatus.Merging) {
-							const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === episode.id);
-							episode.percentage = fileMergeProgress?.percentage ?? 0;
-							episode.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
-							episode.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
-							episode.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
-						}
-
-						if (episode.status === DownloadStatus.Completed) {
-							episode.percentage = 100;
-							episode.timeRemaining = 0;
-							episode.downloadSpeed = 0;
-							episode.dataReceived = episode.dataTotal;
-							this.cleanupProgress(episode.id);
+			// For tvShows download tasks
+			if (rootDownloadTask.mediaType === PlexMediaType.TvShow) {
+				if (rootDownloadTask.children && rootDownloadTask.children.length > 0) {
+					rootDownloadTask?.children?.forEach((season) => {
+						if (season.children && season.children.length > 0) {
+							season.children?.forEach((episode) => {
+								this.mergeDownloadRow(episode);
+							});
+						} else {
+							Log.warn(`Season: ${season.title} had no episodes`);
 						}
 					});
-				} else {
-					Log.warn(`Season: ${season.title} had no episodes`);
 				}
-			});
+			}
 		});
-		Log.info('tvShows', this.tvShowsDownloadRows);
-		return this.tvShowsDownloadRows;
+		Log.info('downloadRows', this.downloadRows);
+		return this.downloadRows;
 	}
 
 	get getHeaders(): ITreeViewTableHeader[] {
@@ -162,6 +190,7 @@ export default class DownloadsTable extends Vue {
 				break;
 			case DownloadStatus.Completed:
 				availableActions.push(ButtonType.Clear);
+				availableActions.push(ButtonType.Restart);
 				break;
 			case DownloadStatus.Stopping:
 				availableActions.push(ButtonType.Delete);
@@ -253,7 +282,7 @@ export default class DownloadsTable extends Vue {
 			DownloadService.getDownloadList().pipe(switchMap((x) => of(x?.filter((x) => x.plexServerId === this.serverId) ?? []))),
 			(data: DownloadTaskDTO[]) => {
 				if (data) {
-					this.tvShowsDownloadRows = data as DownloadTaskDTO[];
+					this.downloadRows = data as DownloadTaskDTO[];
 				}
 			},
 		);

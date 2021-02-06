@@ -4,7 +4,6 @@
     {
         public int Id { get; }
 
-        public string FilePath { get; set; }
 
         public string FileName { get; set; }
 

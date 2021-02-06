@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.DTO.WebApi
+namespace PlexRipper.WebAPI.Common.DTO
 {
     public class DownloadTaskDTO : IDownloadProgress
     {
@@ -84,8 +85,8 @@ namespace PlexRipper.Application.Common.DTO.WebApi
         [JsonProperty("downloadUrl", Required = Required.Always)]
         public string DownloadUrl { get; set; }
 
-        [JsonProperty("children", Required = Required.Always)]
-        public List<DownloadTaskDTO> Children { get; set; } = new List<DownloadTaskDTO>();
+        [JsonProperty("children", Required = Required.AllowNull)]
+        public List<DownloadTaskDTO> Children { get; set; }
 
         [JsonProperty("actions", Required = Required.Always)]
         public string[] Actions { get; set; }

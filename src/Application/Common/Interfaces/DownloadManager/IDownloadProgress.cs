@@ -12,7 +12,7 @@ namespace PlexRipper.Application.Common
 
         long DataReceived { get; }
 
-        long DataTotal { get; set; }
+        long DataTotal { get; }
 
         int PlexServerId { get; set; }
 

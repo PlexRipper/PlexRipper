@@ -118,11 +118,8 @@ namespace PlexRipper.WebAPI
                 configure.DocumentProcessors.Add(new NSwagAddExtraTypes());
             });
 
-            // Autofac
-            services.AddHttpClient("Default").AddTransientHttpErrorPolicy(builder =>
-                builder.WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
-            );
             services.AddOptions();
+            // Autofac
         }
 
         /// <summary>

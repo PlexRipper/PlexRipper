@@ -1,7 +1,7 @@
 {
   "framework": "vue",
   "name": "plex-ripper-web-ui",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "contributions": {
     "html": {
       "description-markup": "markdown",
@@ -207,7 +207,8 @@
               "value": {
                 "kind": "expression",
                 "type": "string"
-              }
+              },
+              "default": "''"
             },
             {
               "name": "shortDate",
@@ -275,6 +276,14 @@
               "value": {
                 "kind": "expression",
                 "type": "union"
+              }
+            },
+            {
+              "name": "activeAccountId",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "number"
               }
             }
           ],
@@ -697,6 +706,14 @@
                 "kind": "expression",
                 "type": "number"
               }
+            },
+            {
+              "name": "activeAccountId",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              }
             }
           ],
           "events": [
@@ -704,10 +721,10 @@
               "name": "selected"
             },
             {
-              "name": "request-media"
+              "name": "download"
             },
             {
-              "name": "download"
+              "name": "request-media"
             }
           ],
           "source": {
@@ -843,15 +860,6 @@
               "default": "false"
             },
             {
-              "name": "outlined",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "false"
-            },
-            {
               "name": "disabled",
               "required": false,
               "value": {
@@ -910,15 +918,6 @@
                 "kind": "expression",
                 "type": "string"
               }
-            },
-            {
-              "name": "margin",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "true"
             },
             {
               "name": "xLarge",
@@ -1046,6 +1045,14 @@
             {
               "name": "libraryId",
               "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              }
+            },
+            {
+              "name": "activeAccountId",
+              "required": true,
               "value": {
                 "kind": "expression",
                 "type": "number"
@@ -1187,6 +1194,48 @@
                 "kind": "expression",
                 "type": "boolean"
               }
+            },
+            {
+              "name": "navigation",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "mediaIcons",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "loadChildren",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "itemKey",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "'key'"
+            },
+            {
+              "name": "heightAuto",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
             }
           ],
           "events": [
@@ -1197,7 +1246,7 @@
               "name": "action"
             },
             {
-              "name": "request-media"
+              "name": "load-children"
             }
           ],
           "source": {

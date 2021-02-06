@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.DTO.WebApi;
 using PlexRipper.Domain;
+using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -36,8 +37,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return InternalServerError(result);
             }
 
-            // var mapResult = _mapper.Map<List<DownloadTaskDTO>>(result.Value);
-            return Ok(Result.Ok(result.Value));
+            return Ok(Result.Ok(ControllerHelpers.ConvertToDownloadTaskDTOHierarchy(result.Value, _mapper)));
         }
 
         // GET: api/<DownloadController>/inserver

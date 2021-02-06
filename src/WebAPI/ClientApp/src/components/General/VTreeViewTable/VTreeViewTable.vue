@@ -29,7 +29,7 @@
 				</v-col>
 			</v-row>
 			<!-- TreeView Table -->
-			<v-row no-gutters class="v-tree-view-table-body">
+			<v-row ref="v-tree-view-container" no-gutters class="v-tree-view-table-body" :style="{ height: getHeight }">
 				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
 					<v-col class="col pa-0">
 						<template v-for="(parentItem, i) in items">
@@ -39,7 +39,7 @@
 									threshold: 0.25,
 								}"
 								:min-height="50"
-								:data-title="parentItem.title"
+								:data-title="parentItem.title[0]"
 								transition="scroll-x-reverse-transition"
 							>
 								<v-treeview
@@ -50,7 +50,6 @@
 									expand-icon="mdi-chevron-down"
 									:items="[parentItem]"
 									:open-all="openAll"
-									:load-children="getChildren"
 									transition
 									:item-key="itemKey"
 									item-text="title"
@@ -145,6 +144,7 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
 import ITreeViewTableRow from '@vTreeViewTable/ITreeViewTableRow';
@@ -188,11 +188,14 @@ export default class VTreeViewTable extends Vue {
 	@Prop({ required: false, type: String, default: 'key' })
 	readonly itemKey!: string;
 
+	@Prop({ required: false, type: Boolean, default: false })
+	readonly heightAuto!: boolean;
+
 	selected: ISelection[] = [];
 	expanded: string[] = [];
 	visible: boolean[] = [];
 	loadingButtons: string[] = [];
-
+	isMounted: boolean = false;
 	@Watch('items')
 	updateVisible(): void {
 		this.items.forEach(() => this.visible.push(false));
@@ -212,6 +215,22 @@ export default class VTreeViewTable extends Vue {
 
 	get containerRef(): any {
 		return this.$refs.scrollbar;
+	}
+
+	get getHeight(): string {
+		if (this.heightAuto) {
+			return 'auto';
+		}
+		if (this.isMounted) {
+			const height = this.$vuetify.breakpoint.height - this.$refs['v-tree-view-container']?.getBoundingClientRect().top ?? 0;
+			Log.debug('v-tree-view-container height: ', height);
+			return height + 'px';
+		}
+		return 'auto';
+	}
+
+	hasLoadableChildren(item: ITreeViewTableRow): boolean {
+		return item?.children?.length === 0 ?? false;
 	}
 
 	retrieveAllLeafs(items: ITreeViewTableRow[]): string[] {
@@ -294,6 +313,12 @@ export default class VTreeViewTable extends Vue {
 			return promise;
 		}
 		return Promise.resolve();
+	}
+
+	mounted(): void {
+		this.$nextTick(function () {
+			this.isMounted = true;
+		});
 	}
 }
 </script>

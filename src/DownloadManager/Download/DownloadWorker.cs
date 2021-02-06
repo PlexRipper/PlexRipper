@@ -28,15 +28,13 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new Subject<DownloadWorkerLog>();
 
-        private readonly Subject<DownloadWorkerComplete> _downloadWorkerComplete = new Subject<DownloadWorkerComplete>();
-
         private readonly Subject<IDownloadWorkerProgress> _downloadWorkerProgress = new Subject<IDownloadWorkerProgress>();
 
         private readonly Subject<DownloadWorkerTask> _downloadWorkerTaskChanged = new Subject<DownloadWorkerTask>();
 
         private readonly IFileSystem _fileSystem;
 
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IPlexRipperHttpClient _httpClient;
 
         private int _count;
 
@@ -59,11 +57,11 @@ namespace PlexRipper.DownloadManager.Download
         /// </summary>
         /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
         /// <param name="fileSystem">The filesystem used to store the downloaded data.</param>
-        public DownloadWorker(DownloadWorkerTask downloadWorkerTask, IFileSystem fileSystem, IHttpClientFactory httpClientFactory)
+        public DownloadWorker(DownloadWorkerTask downloadWorkerTask, IFileSystem fileSystem, IPlexRipperHttpClient httpClient)
         {
             DownloadWorkerTask = downloadWorkerTask;
             _fileSystem = fileSystem;
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
 
             _timer.AutoReset = true;
             _timer.Elapsed += (sender, args) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
@@ -106,8 +104,6 @@ namespace PlexRipper.DownloadManager.Download
 
         public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
-        public IObservable<DownloadWorkerComplete> DownloadWorkerComplete => _downloadWorkerComplete.AsObservable();
-
         public IObservable<IDownloadWorkerProgress> DownloadWorkerProgress => _downloadWorkerProgress.AsObservable();
 
         public IObservable<DownloadWorkerTask> DownloadWorkerTaskChanged => _downloadWorkerTaskChanged.AsObservable();
@@ -143,20 +139,6 @@ namespace PlexRipper.DownloadManager.Download
         }
 
         #endregion
-
-        private void Complete()
-        {
-            SetDownloadWorkerTaskChanged(DownloadStatus.Completed);
-            var complete = new DownloadWorkerComplete(Id)
-            {
-                FilePath = FilePath,
-                FileName = FileName,
-                DownloadSpeedAverage = DownloadSpeedAverage,
-                BytesReceived = BytesReceived,
-                BytesReceivedGoal = DownloadWorkerTask.BytesRangeSize,
-            };
-            _downloadWorkerComplete.OnNext(complete);
-        }
 
         private void SendDownloadWorkerError(Result errorResult)
         {
@@ -224,8 +206,7 @@ namespace PlexRipper.DownloadManager.Download
                     _fileStream.Position = DownloadWorkerTask.BytesReceived;
 
                     // Create download client
-                    var client = _httpClientFactory.CreateClient("Default");
-                    using var response = await client.SendAsync(new HttpRequestMessage
+                    using var response = await _httpClient.SendAsync(new HttpRequestMessage
                     {
                         RequestUri = DownloadWorkerTask.Uri,
                         Method = HttpMethod.Get,
@@ -252,7 +233,7 @@ namespace PlexRipper.DownloadManager.Download
                         if (bytesRead <= 0)
                         {
                             UpdateProgress();
-                            Complete();
+                            SetDownloadWorkerTaskChanged(DownloadStatus.Completed);
                             break;
                         }
 
@@ -340,7 +321,6 @@ namespace PlexRipper.DownloadManager.Download
             }
 
             // Dispose subscriptions
-            _downloadWorkerComplete?.Dispose();
             _downloadWorkerProgress?.Dispose();
             _downloadWorkerLog?.Dispose();
             _downloadWorkerTaskChanged?.Dispose();

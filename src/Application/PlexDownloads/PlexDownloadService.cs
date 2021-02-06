@@ -73,90 +73,9 @@ namespace PlexRipper.Application.PlexDownloads
             return _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
         }
 
-        public async Task<Result<List<DownloadTaskDTO>>> GetDownloadTasksAsync()
+        public async Task<Result<List<DownloadTask>>> GetDownloadTasksAsync()
         {
-            var result = await _mediator.Send(new GetAllDownloadTasksQuery());
-            if (result.IsFailed)
-            {
-                return result.ToResult();
-            }
-
-            var downloadTasks = result.Value;
-
-            var tvShowDownloadTasks = new List<DownloadTaskDTO>();
-            foreach (var downloadTask in downloadTasks.OrderBy(x => x.Id))
-            {
-                if (downloadTask.MediaType == PlexMediaType.Episode)
-                {
-                    var tvShowDownloadTask =
-                        tvShowDownloadTasks.Find(x => x.Key == downloadTask.MetaData.TvShowKey && x.PlexLibraryId == downloadTask.PlexLibraryId);
-                    if (tvShowDownloadTask is null)
-                    {
-                        tvShowDownloadTask = new DownloadTaskDTO
-                        {
-                            Key = downloadTask.MetaData.TvShowKey,
-                            Title = downloadTask.TitleTvShow,
-                            FullTitle = downloadTask.TitleTvShow,
-                            MediaType = PlexMediaType.TvShow,
-                            PlexServerId = downloadTask.PlexServerId,
-                            PlexLibraryId = downloadTask.PlexLibraryId,
-                        };
-                        tvShowDownloadTasks.Add(tvShowDownloadTask);
-                    }
-
-                    var tvShowSeasonDownloadTask = tvShowDownloadTasks.SelectMany(x => x.Children).ToList()
-                        .Find(x => x.Key == downloadTask.MetaData.TvShowSeasonKey && x.PlexLibraryId == downloadTask.PlexLibraryId);
-                    if (tvShowSeasonDownloadTask is null)
-                    {
-                        tvShowSeasonDownloadTask = new DownloadTaskDTO
-                        {
-                            Key = downloadTask.MetaData.TvShowSeasonKey,
-                            Title = downloadTask.TitleTvShowSeason,
-                            FullTitle = $"{tvShowDownloadTask.Title}/{downloadTask.TitleTvShowSeason}",
-                            MediaType = PlexMediaType.Season,
-                            PlexServerId = downloadTask.PlexServerId,
-                            PlexLibraryId = downloadTask.PlexLibraryId,
-                        };
-                        tvShowDownloadTask.Children.Add(tvShowSeasonDownloadTask);
-                    }
-
-                    tvShowSeasonDownloadTask.Children.Add(new DownloadTaskDTO
-                    {
-                        Id = downloadTask.Id,
-                        Key = downloadTask.MetaData.TvShowEpisodeKey,
-                        Title = downloadTask.TitleTvShowEpisode,
-                        FullTitle = $"{tvShowDownloadTask.Title}/{tvShowSeasonDownloadTask.Title}/{downloadTask.TitleTvShowEpisode}",
-                        MediaType = PlexMediaType.Episode,
-                        DataReceived = downloadTask.DataReceived,
-                        DataTotal = downloadTask.DataTotal,
-                        PlexServerId = downloadTask.PlexServerId,
-                        PlexLibraryId = downloadTask.PlexLibraryId,
-                        Status = downloadTask.DownloadStatus,
-                        DestinationPath = downloadTask.DestinationPath,
-                        DownloadPath = downloadTask.DownloadPath,
-                        DownloadUrl = downloadTask.DownloadUrl,
-                        Percentage = downloadTask.Percentage,
-                        FileName = downloadTask.FileName,
-                    });
-                }
-            }
-
-            tvShowDownloadTasks.ForEach(tvShow =>
-            {
-                tvShow.Children.ForEach(season =>
-                {
-                    season.DataTotal = season.Children.Sum(x => x.DataTotal);
-                    season.DataReceived = season.Children.Sum(x => x.DataReceived);
-                    season.DataReceived = season.Children.Sum(x => x.DataReceived);
-                    season.Percentage = decimal.Round(season.Children.Average(x => x.Percentage), 2);
-                });
-
-                tvShow.DataTotal = tvShow.Children.Sum(x => x.DataTotal);
-                tvShow.DataReceived = tvShow.Children.Sum(x => x.DataReceived);
-                tvShow.DataReceived = tvShow.Children.Sum(x => x.DataReceived);
-                tvShow.Percentage = decimal.Round(tvShow.Children.Average(x => x.Percentage), 2);
-            });
-            return Result.Ok(tvShowDownloadTasks);
+            return await _mediator.Send(new GetAllDownloadTasksQuery());
         }
 
         public Task<string> GetPlexTokenAsync(PlexAccount plexAccount)

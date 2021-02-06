@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager.Common
@@ -8,6 +9,7 @@ namespace PlexRipper.DownloadManager.Common
     /// </summary>
     public class DownloadStatusChanged
     {
+
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
@@ -19,5 +21,8 @@ namespace PlexRipper.DownloadManager.Common
 
         [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }
+
+        [JsonProperty("workerStatuses", Required = Required.Always)]
+        public List<DownloadStatusChanged> WorkerStatuses  { get; set; }
     }
 }

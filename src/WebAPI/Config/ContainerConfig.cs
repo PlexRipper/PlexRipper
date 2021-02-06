@@ -6,6 +6,7 @@ using PlexRipper.Data.Config;
 using PlexRipper.Domain.AutoMapper;
 using PlexRipper.DownloadManager.Config;
 using PlexRipper.FileSystem.Config;
+using PlexRipper.HttpClient.Config;
 using PlexRipper.PlexApi.Config;
 using PlexRipper.PlexApi.Config.Mappings;
 using PlexRipper.Settings.Config;
@@ -31,6 +32,7 @@ namespace PlexRipper.WebAPI.Config
             builder.RegisterModule<PlexApiModule>();
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<SignalRModule>();
+            builder.RegisterModule<HttpClientModule>();
 
             // Presentation
             builder.RegisterModule<WebApiModule>();

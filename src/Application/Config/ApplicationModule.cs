@@ -34,6 +34,8 @@ namespace PlexRipper.Application.Config
                 .Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces()
                 .InstancePerDependency();
+
+
         }
     }
 }

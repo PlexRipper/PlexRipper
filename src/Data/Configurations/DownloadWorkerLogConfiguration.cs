@@ -6,9 +6,9 @@ using Serilog.Events;
 
 namespace PlexRipper.Data.Configurations
 {
-    public class DownloadTaskWorkerLogConfiguration : IEntityTypeConfiguration<DownloadWorkerTaskLog>
+    public class DownloadWorkerLogConfiguration : IEntityTypeConfiguration<DownloadWorkerLog>
     {
-        public void Configure(EntityTypeBuilder<DownloadWorkerTaskLog> builder)
+        public void Configure(EntityTypeBuilder<DownloadWorkerLog> builder)
         {
             builder
                 .Property(e => e.LogLevel)

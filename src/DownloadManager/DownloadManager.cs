@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentResults;
@@ -33,9 +34,12 @@ namespace PlexRipper.DownloadManager
 
         private readonly INotificationsService _notificationsService;
 
+        private readonly IPlexRipperHttpClient _httpClient;
+
         private readonly Func<DownloadTask, PlexDownloadClient> _plexDownloadClientFactory;
 
         private readonly IDownloadQueue _downloadQueue;
+
 
         #endregion
 
@@ -60,12 +64,14 @@ namespace PlexRipper.DownloadManager
             IUserSettings userSettings,
             IDownloadQueue downloadQueue,
             INotificationsService notificationsService,
+            IPlexRipperHttpClient httpClient,
             Func<DownloadTask, PlexDownloadClient> plexDownloadClientFactory) : base(mediator, signalRService)
         {
             _plexAuthenticationService = plexAuthenticationService;
             _fileMerger = fileMerger;
             _userSettings = userSettings;
             _notificationsService = notificationsService;
+            _httpClient = httpClient;
             _plexDownloadClientFactory = plexDownloadClientFactory;
             _downloadQueue = downloadQueue;
 
@@ -109,6 +115,12 @@ namespace PlexRipper.DownloadManager
             var newClient = _plexDownloadClientFactory(downloadTask);
             newClient.Parts = _userSettings.AdvancedSettings.DownloadManager.DownloadSegments;
 
+            var validateDownloadSizeResult = await ValidateDownloadSize(downloadTask);
+            if (validateDownloadSizeResult.IsFailed)
+            {
+                return validateDownloadSizeResult.LogError();
+            }
+
             // Setup the client
             var setupResult = await newClient.SetupAsync(downloadTask.DownloadWorkerTasks);
             if (setupResult.IsFailed)
@@ -119,6 +131,30 @@ namespace PlexRipper.DownloadManager
             SetupSubscriptions(newClient);
             _downloadsList.Add(newClient);
             return Result.Ok(newClient);
+        }
+
+        private async Task<Result> ValidateDownloadSize(DownloadTask downloadTask)
+        {
+            // Determine media size
+            // Source: https://stackoverflow.com/a/48190014/8205497
+            var response = await _httpClient.GetAsync(downloadTask.DownloadUri, HttpCompletionOption.ResponseHeadersRead);
+            if (!response.IsSuccessStatusCode)
+            {
+                return Result.Fail($"The {nameof(ValidateDownloadSize)} returned a invalid status code of {response.StatusCode}");
+            }
+
+            var newDataTotal = response.Content.Headers.ContentLength ?? -1L;
+            if (downloadTask.DataTotal > 0 && downloadTask.DataTotal != newDataTotal)
+            {
+                //TODO Implement recreation of downloadTask when downloadSize is a mismatch, this indicates the media has been updated.
+                // The media size changes, re-create download workers and delete any old ones.
+                downloadTask.DownloadWorkerTasks = null;
+                await _mediator.Send(new DeleteDownloadWorkerTasksByDownloadTaskIdCommand(downloadTask.Id));
+                return Result.Fail(
+                    $"The downloadTask has an incorrect total download size, has {downloadTask.DataTotal} and should be {newDataTotal}");
+            }
+
+            return Result.Ok();
         }
 
         /// <summary>

@@ -90,7 +90,7 @@ namespace PlexRipper.Domain
             {
                 return MediaType switch
                 {
-                    PlexMediaType.Movie => MovieTitle,
+                    PlexMediaType.Movie => TitleMovie,
                     PlexMediaType.TvShow => TitleTvShow,
                     PlexMediaType.Season => TitleTvShowSeason,
                     PlexMediaType.Episode => TitleTvShowEpisode,
@@ -109,7 +109,7 @@ namespace PlexRipper.Domain
             {
                 return MediaType switch
                 {
-                    PlexMediaType.Movie => MovieTitle,
+                    PlexMediaType.Movie => TitleMovie,
                     PlexMediaType.TvShow => TitleTvShow,
                     PlexMediaType.Season => $"{TitleTvShow}/{TitleTvShowSeason}",
                     PlexMediaType.Episode => $"{TitleTvShow}/{TitleTvShowSeason}/{TitleTvShowEpisode}",
@@ -119,7 +119,7 @@ namespace PlexRipper.Domain
         }
 
         [NotMapped]
-        private string MovieTitle => MetaData?.MovieTitle ?? string.Empty;
+        public string TitleMovie => MetaData?.MovieTitle ?? string.Empty;
 
         /// <summary>
         /// If the type is an TvShow, Season or Episode, then this will be the title of that TvShow.

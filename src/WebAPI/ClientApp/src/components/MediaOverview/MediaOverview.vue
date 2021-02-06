@@ -20,45 +20,43 @@
 		<!-- Header -->
 		<template v-else-if="server && library">
 			<v-row v-show="showMediaOverview" no-gutters>
-				<v-col>
-					<!--	Overview bar	-->
-					<v-row>
-						<media-overview-bar
-							:server="server"
-							:library="library"
-							:view-mode="viewMode"
-							:has-selected="selected.length > 0"
-							:hide-download-button="!isTableView"
-							@view-change="changeView"
-							@refresh-library="refreshLibrary"
-							@download="processDownloadCommand([])"
-						></media-overview-bar>
-					</v-row>
-					<!--	Data table display	-->
-					<template v-if="isTableView">
-						<media-table
-							ref="overviewMediaTable"
-							:items="items"
-							:active-account-id="activeAccountId"
-							:library-id="libraryId"
-							:media-type="mediaType"
-							@download="processDownloadCommand"
-							@selected="selected = $event"
-							@request-media="requestMedia"
-						/>
-					</template>
+				<!--	Overview bar	-->
+				<v-row>
+					<media-overview-bar
+						:server="server"
+						:library="library"
+						:view-mode="viewMode"
+						:has-selected="selected.length > 0"
+						:hide-download-button="!isTableView"
+						@view-change="changeView"
+						@refresh-library="refreshLibrary"
+						@download="processDownloadCommand([])"
+					></media-overview-bar>
+				</v-row>
+				<!--	Data table display	-->
+				<template v-if="isTableView">
+					<media-table
+						ref="overviewMediaTable"
+						:items="items"
+						:active-account-id="activeAccountId"
+						:library-id="libraryId"
+						:media-type="mediaType"
+						@download="processDownloadCommand"
+						@selected="selected = $event"
+						@request-media="requestMedia"
+					/>
+				</template>
 
-					<!-- Poster display-->
-					<template v-if="isPosterView">
-						<poster-table
-							:items="items"
-							:active-account-id="activeAccountId"
-							:media-type="mediaType"
-							@download="processDownloadCommand"
-							@open-details="openDetails"
-						/>
-					</template>
-				</v-col>
+				<!-- Poster display-->
+				<template v-if="isPosterView">
+					<poster-table
+						:items="items"
+						:active-account-id="activeAccountId"
+						:media-type="mediaType"
+						@download="processDownloadCommand"
+						@open-details="openDetails"
+					/>
+				</template>
 			</v-row>
 			<!--	Overlay with details of the media	-->
 			<details-overview

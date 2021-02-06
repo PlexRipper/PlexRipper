@@ -33,36 +33,39 @@ namespace PlexRipper.Domain
         public string FileName { get; internal set; }
 
         [Column(Order = 2)]
-        public int PartIndex { get; set; }
+        public string FilePath { get; set; }
 
         [Column(Order = 3)]
-        public long StartByte { get; set; }
+        public int PartIndex { get; set; }
 
         [Column(Order = 4)]
-        public long EndByte { get; set; }
+        public long StartByte { get; set; }
 
         [Column(Order = 5)]
+        public long EndByte { get; set; }
+
+        [Column(Order = 6)]
         public DownloadStatus DownloadStatus { get; set; }
 
         /// <summary>
         /// Gets the total bytes received so far.
         /// </summary>
-        [Column(Order = 6)]
+        [Column(Order = 7)]
         public long BytesReceived { get; set; }
 
-        [Column(Order = 7)]
+        [Column(Order = 8)]
         public string Url { get; set; }
 
         /// <summary>
         /// The download directory where the part is downloaded into.
         /// </summary>
-        [Column(Order = 8)]
+        [Column(Order = 9)]
         public string TempDirectory { get; internal set; }
 
         /// <summary>
         /// The elapsed time in milliseconds with an accuracy of 100 milliseconds.
         /// </summary>
-        [Column(Order = 9)]
+        [Column(Order = 10)]
         public long ElapsedTime { get; set; }
 
         #endregion

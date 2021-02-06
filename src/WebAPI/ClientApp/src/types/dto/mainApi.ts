@@ -32,7 +32,7 @@ export interface DownloadTaskDTO {
   destinationPath: string;
   downloadPath: string;
   downloadUrl: string;
-  children: DownloadTaskDTO[];
+  children: DownloadTaskDTO[] | null;
   actions: string[];
 }
 

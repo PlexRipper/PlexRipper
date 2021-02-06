@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using AutoMapper;
 using FluentResults;
+using PlexRipper.Application.Common.DTO.WebApi;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
@@ -58,9 +59,29 @@ namespace PlexRipper.WebAPI.Config
             // FileSystemModel -> FileSystemModelDTO
             CreateMap<FileSystemModel, FileSystemModelDTO>(MemberList.Destination).ReverseMap();
 
+            DownloadTaskMappings();
             PlexMediaMappings();
             PlexMovieMappings();
             PlexTvShowMappings();
+        }
+
+        private void DownloadTaskMappings()
+        {
+            CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.None)
+                .ForMember(dto => dto.Id, opt => opt.MapFrom(entity => entity.Id))
+                .ForMember(dto => dto.FullTitle, opt => opt.MapFrom(entity => entity.TitlePath))
+                .ForMember(dto => dto.MediaType, opt => opt.MapFrom(entity => entity.MediaType))
+                .ForMember(dto => dto.DataReceived, opt => opt.MapFrom(entity => entity.DataReceived))
+                .ForMember(dto => dto.DataTotal, opt => opt.MapFrom(entity => entity.DataTotal))
+                .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
+                .ForMember(dto => dto.DestinationPath, opt => opt.MapFrom(entity => entity.DestinationPath))
+                .ForMember(dto => dto.DownloadPath, opt => opt.MapFrom(entity => entity.DownloadPath))
+                .ForMember(dto => dto.DownloadUrl, opt => opt.MapFrom(entity => entity.DownloadUrl))
+                .ForMember(dto => dto.Percentage, opt => opt.MapFrom(entity => entity.Percentage))
+                .ForMember(dto => dto.FileName, opt => opt.MapFrom(entity => entity.FileName))
+                .ForMember(dto => dto.PlexLibraryId, opt => opt.MapFrom(entity => entity.PlexLibraryId))
+                .ForMember(dto => dto.PlexServerId, opt => opt.MapFrom(entity => entity.PlexServerId));
+
         }
 
         private void PlexMediaMappings()
@@ -111,7 +132,8 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<PlexTvShowEpisode, PlexMediaDTO>(MemberList.Destination)
                 .IncludeBase<PlexMedia, PlexMediaDTO>()
                 .ForMember(dto => dto.Children, opt => opt.Ignore())
-                .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => $"{entity.TvShowId.ToString()}-{entity.TvShowSeasonId.ToString()}-{entity.Id.ToString()}"))
+                .ForMember(dto => dto.TreeKeyId,
+                    opt => opt.MapFrom(entity => $"{entity.TvShowId.ToString()}-{entity.TvShowSeasonId.ToString()}-{entity.Id.ToString()}"))
                 .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.TvShowId))
                 .ForMember(dto => dto.TvShowSeasonId, opt => opt.MapFrom(entity => entity.TvShowSeasonId))
                 .ForMember(dto => dto.MediaData, entity => entity.MapFrom(x => x.EpisodeData));

@@ -21,7 +21,7 @@ namespace PlexRipper.DownloadManager.Common
         public long DataReceived => WorkerProgresses.AsQueryable().Sum(x => x.DataReceived);
 
         [JsonProperty("dataTotal", Required = Required.Always)]
-        public long DataTotal { get; set; }
+        public long DataTotal => WorkerProgresses.AsQueryable().Sum(x => x.DataTotal);
 
         [JsonProperty("downloadSpeedFormatted", Required = Required.Always)]
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);

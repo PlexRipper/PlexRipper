@@ -1,3 +1,34 @@
+## [0.7.0] - 2021-02-06
+### Added
+-   Created generic v-treeview-table.
+-   Added keys (plexIds) to the downloadTask metadata
+
+### Changed
+-   PlexMedia entities are now updated instead of "remove everything and re-add", this will preserve the Ids of media and allow for more reliance on that.
+-   DownloadTasks are now nested displayed on the download page
+-   Removed the MediaTypeIcon filter and replaced it with a component
+-   Added the TvShowId to the TvShowEpisode entity
+-   Updated NPM packages in the client
+-   The update settings now returns the current settings object
+
+### Fixed
+-   Fixed the UnitTests of the createUpdateOrDelete functions for tvShows and movies.
+-   Fixed the outlines of plexButtons
+-   Fixed the download button not awaiting
+-   Fixed the selection of the MediaTable not working, will now also work when select all is pressed
+-   Fixed the plexServers and related data not being deleted when an account is removed that was the last one which had access.
+
+### Optimized
+-   The data for the mediaTable that was converted in the client is now generated on the server, improving performance of the client.
+-   Merged the PlexMovieDTO, PlexTvShowDTO into 1 PlexMediaDTO
+-   The new VTreeViewTable is now used in the MediaTable
+-   Moved away from the vuex settings store and settings are now working with the observable store.
+-   Removed several dependancies on activeAccountId
+-   Completed refactor of the settings in the observable store
+-   Went through all subscriptions and ensured they are disposed properly
+-   Properly imported all lodash functions, no more "_"
+
+
 ## [0.6.3] - 2021-01-24
 ### Fixed
 -   Fixed the downloadPreview of the media not shown correctly based on the selection.
@@ -5,7 +36,7 @@
 
 ## [0.6.2] - 2021-01-24
 ### Fixed
- - Fixed the movie poster view not being able to download.
+-   Fixed the movie poster view not being able to download.
 
 ## [0.6.1] - 2021-01-23
 ### Changed

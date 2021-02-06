@@ -5,7 +5,7 @@
 		"moduleResolution": "node",
 		"lib": ["esnext", "esnext.asynciterable", "dom"],
 		"esModuleInterop": true,
-		"allowJs": true,
+		"allowJs": false,
 		"sourceMap": true,
 		"strict": true,
 		"allowSyntheticDefaultImports": true,
@@ -15,24 +15,25 @@
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"resolveJsonModule": true,
-		"baseUrl": "./src/",
+		"baseUrl": "src",
 		"outDir": "./build/",
 		"paths": {
 			"~/*": ["./*"],
 			"@/*": ["./*"],
-			"@store/*": ["./types/store/*"],
-			"@state/*": ["./types/state/*"],
 			"@dto/*": ["./types/dto/*"],
 			"@api/*": ["./types/api/*"],
-			"@enums/*": ["./types/enums/*"],
+			"@state/*": ["./types/state/*"],
 			"@img/*": ["./assets/img/*"],
+			"@enums/*": ["./types/enums/*"],
 			"@interfaces/*": ["./types/interfaces/*"],
 			"@service/*": ["./types/service/*"],
 			"@components/*": ["./components/*"],
 			"@overviews/*": ["./components/overviews/*"],
-			"@mediaOverview/*": ["./components/MediaOverview/*"]
+			"@mediaOverview/*": ["./components/MediaOverview/*"],
+			"@vTreeViewTable/*": ["./components/General/VTreeViewTable/*"]
 		},
-		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify", "nuxt-i18n"]
+		//"typeRoots": ["./type_definitions"],
+		"types": ["@types/node", "@nuxt/types", "@nuxtjs/axios", "@nuxtjs/vuetify", "nuxt-i18n", "@types/jest"]
 	},
 	"exclude": ["node_modules", ".nuxt", "node_modules/dist", ".vscode"]
 }

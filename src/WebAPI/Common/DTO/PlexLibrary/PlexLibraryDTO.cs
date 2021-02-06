@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using PlexRipper.Application.Common.DTO.WebApi;
 using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI.Common.DTO
@@ -56,10 +57,10 @@ namespace PlexRipper.WebAPI.Common.DTO
         public int EpisodeCount { get; set; }
 
         [JsonProperty("movies", Required = Required.Always)]
-        public List<PlexMovieDTO> Movies { get; set; }
+        public List<PlexMediaDTO> Movies { get; set; }
 
         [JsonProperty("tvShows", Required = Required.Always)]
-        public List<PlexTvShowDTO> TvShows { get; set; }
+        public List<PlexMediaDTO> TvShows { get; set; }
 
         [JsonProperty("downloadTasks", Required = Required.Always)]
         public List<DownloadTaskDTO> DownloadTasks { get; set; }

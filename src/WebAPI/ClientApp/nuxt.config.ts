@@ -2,6 +2,7 @@ import * as path from 'path';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
+import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 const config: NuxtConfig = {
 	ssr: false,
@@ -28,6 +29,10 @@ const config: NuxtConfig = {
 		],
 		link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.png' }],
 	},
+
+	// Global CSS: https://go.nuxtjs.dev/config-css
+	css: ['@/assets/scss/style.scss'],
+
 	/*
 	 ** Customize the progress-bar color
 	 */
@@ -101,6 +106,7 @@ const config: NuxtConfig = {
 				overlay: false,
 			},
 		},
+		extractCSS: true,
 		// Will allow for debugging in Typescript + Nuxt
 		// Doc: https://nordschool.com/enable-vs-code-debugger-for-nuxt-and-typescript/
 		extend(config: WebpackConfiguration, { isDev, isClient }: NuxtWebpackEnv): void {
@@ -108,10 +114,15 @@ const config: NuxtConfig = {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
 			}
 
+			const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+			if (config && config.resolve && config.resolve.plugins) {
+				// config.resolve.plugins.push(new TsconfigPathsPlugin());
+				config.resolve.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
+			}
+
 			// Make sure to also update the tsconfig.json when adding aliases for import resolving.
 			// These are necessary to tell webpack which aliases are used.
 			if (config && config.resolve && config.resolve.alias) {
-				config.resolve.alias['@store'] = path.resolve(__dirname, 'src/store/');
 				config.resolve.alias['@dto'] = path.resolve(__dirname, 'src/types/dto/');
 				config.resolve.alias['@api'] = path.resolve(__dirname, 'src/types/api/');
 				config.resolve.alias['@state'] = path.resolve(__dirname, 'src/types/state/');
@@ -120,9 +131,9 @@ const config: NuxtConfig = {
 				config.resolve.alias['@interfaces'] = path.resolve(__dirname, 'src/types/interfaces/');
 				config.resolve.alias['@service'] = path.resolve(__dirname, 'src/types/service/');
 				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
-				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
 				config.resolve.alias['@overviews'] = path.resolve(__dirname, 'src/components/overviews');
 				config.resolve.alias['@mediaOverview'] = path.resolve(__dirname, 'src/components/MediaOverview/');
+				config.resolve.alias['@vTreeViewTable'] = path.resolve(__dirname, 'src/components/General/VTreeViewTable');
 			}
 		},
 	},

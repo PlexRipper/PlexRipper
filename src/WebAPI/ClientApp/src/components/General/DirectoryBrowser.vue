@@ -147,7 +147,7 @@ export default class DirectoryBrowser extends Vue {
 	}
 
 	requestDirectories(path: string): void {
-		getDirectoryPath(path).subscribe((data) => {
+		this.$subscribeTo(getDirectoryPath(path), (data) => {
 			this.items = data.directories;
 
 			// Don't add return row if in the root folder

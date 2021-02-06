@@ -68,7 +68,6 @@ namespace PlexRipper.WebAPI.Controllers
         [NonAction]
         protected IActionResult BadRequest(Result result)
         {
-            // Filter our the value type
             _notificationsService.SendResult(result);
             var resultDTO = _mapper.Map<ResultDTO>(result);
             return new BadRequestObjectResult(resultDTO);
@@ -77,7 +76,6 @@ namespace PlexRipper.WebAPI.Controllers
         [NonAction]
         protected IActionResult Ok<T>(Result<T> result)
         {
-            // Filter our the value type
             var resultDTO = _mapper.Map<ResultDTO<T>>(result);
             return new OkObjectResult(resultDTO);
         }

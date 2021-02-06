@@ -134,7 +134,13 @@ namespace PlexRipper.DownloadManager.Download
 
             // TODO Find a way to handle Download Worker errors
 
-            _statusChanged.OnNext(new DownloadStatusChanged(DownloadTaskId, downloadStatus));
+            _statusChanged.OnNext(new DownloadStatusChanged
+            {
+                Id = DownloadTaskId,
+                Status = downloadStatus,
+                PlexLibraryId = DownloadTask.PlexLibraryId,
+                PlexServerId = DownloadTask.PlexServerId,
+            });
         }
 
         private void SetupSubscriptions()
@@ -241,6 +247,8 @@ namespace PlexRipper.DownloadManager.Download
             {
                 Id = DownloadTaskId,
                 DataTotal = TotalBytesToReceive,
+                PlexLibraryId = DownloadTask.PlexLibraryId,
+                PlexServerId = DownloadTask.PlexServerId,
             };
             builder.Append($" = ({downloadProgress.DownloadSpeedFormatted} - {downloadProgress.TimeRemaining})");
             Log.Verbose(builder.ToString());

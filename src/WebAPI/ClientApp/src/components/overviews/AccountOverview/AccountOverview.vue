@@ -51,12 +51,12 @@ export default class AccountOverview extends Vue {
 	}
 
 	created(): void {
-		AccountService.getAccounts().subscribe((data) => {
+		this.$subscribeTo(AccountService.getAccounts(), (data) => {
 			this.accounts = data ?? [];
 			Log.debug(this.accounts);
 		});
 
-		SignalrService.getPlexAccountRefreshProgress().subscribe((data) => {
+		this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
 			Log.debug(data);
 		});
 	}

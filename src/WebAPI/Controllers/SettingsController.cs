@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
 using AutoMapper;
-using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
@@ -33,12 +31,7 @@ namespace PlexRipper.WebAPI.Controllers
             try
             {
                 var result = _settingsService.GetSettings();
-                if (result.IsFailed)
-                {
-                    return InternalServerError(result);
-                }
-
-                return Ok(Result.Ok(result.Value));
+                return result.IsFailed ? InternalServerError(result) : Ok(result);
             }
             catch (Exception e)
             {
@@ -48,20 +41,15 @@ namespace PlexRipper.WebAPI.Controllers
 
         // PUT api/<SettingsController>/
         [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModel>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> UpdateSettings([FromBody] SettingsModel settingsModel)
+        public IActionResult UpdateSettings([FromBody] SettingsModel settingsModel)
         {
             try
             {
-                var result = await _settingsService.UpdateSettings(settingsModel);
-                if (result.IsFailed)
-                {
-                    return BadRequest(result);
-                }
-
-                return Ok(Result.Ok(true));
+                var result = _settingsService.UpdateSettings(settingsModel);
+                return result.IsFailed ? BadRequest(result) : Ok(result);
             }
             catch (Exception e)
             {

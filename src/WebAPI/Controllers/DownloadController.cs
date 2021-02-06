@@ -36,8 +36,8 @@ namespace PlexRipper.WebAPI.Controllers
                 return InternalServerError(result);
             }
 
-            var mapResult = _mapper.Map<List<DownloadTaskDTO>>(result.Value);
-            return Ok(Result.Ok(mapResult));
+            // var mapResult = _mapper.Map<List<DownloadTaskDTO>>(result.Value);
+            return Ok(Result.Ok(result.Value));
         }
 
         // GET: api/<DownloadController>/inserver

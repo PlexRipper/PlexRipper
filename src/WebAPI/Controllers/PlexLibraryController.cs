@@ -30,7 +30,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> GetPlexLibrary(int id, int plexAccountId = 0)
+        public async Task<IActionResult> GetPlexLibrary(int id, [FromQuery] bool allMedia = false)
         {
             if (id <= 0)
             {
@@ -39,10 +39,10 @@ namespace PlexRipper.WebAPI.Controllers
 
             try
             {
-                Log.Debug($"API Request: GetPlexLibrary(plexLibraryId = {id}, plexAccountId = {plexAccountId})");
+                Log.Debug($"API Request: GetPlexLibrary(plexLibraryId = {id} allMedia = {allMedia})");
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                var data = await _plexLibraryService.GetPlexLibraryAsync(id, plexAccountId, true);
+                var data = await _plexLibraryService.GetPlexLibraryAsync(id, !allMedia);
 
                 if (data.IsFailed)
                 {
@@ -84,7 +84,7 @@ namespace PlexRipper.WebAPI.Controllers
 
             try
             {
-                var data = await _plexLibraryService.GetPlexLibraryInServerAsync(id, plexAccountId, true);
+                var data = await _plexLibraryService.GetPlexLibraryInServerAsync(id, true);
 
                 if (data.IsFailed)
                 {
@@ -113,7 +113,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibraryDTO refreshPlexLibraryDto)
         {
-            var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId, refreshPlexLibraryDto.PlexAccountId);
+            var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId);
 
             if (data.IsSuccess)
             {

@@ -32,10 +32,25 @@ namespace PlexRipper.DownloadManager.Common
 
         public List<DownloadWorkerComplete> DownloadWorkerCompletes { get; set; }
 
+        public int PlexServerId => DownloadTask.PlexServerId;
+
+        public int PlexLibraryId => DownloadTask.PlexLibraryId;
+
         public string FileName => DownloadTask.FileName;
 
         public List<string> FilePaths => DownloadWorkerCompletes.Select(x => x.FilePath).ToList();
 
         #endregion
+
+        public DownloadStatusChanged ToStatus()
+        {
+            return new DownloadStatusChanged
+            {
+                Id = Id,
+                Status = DownloadStatus.Completed,
+                PlexLibraryId = PlexLibraryId,
+                PlexServerId = PlexServerId,
+            };
+        }
     }
 }

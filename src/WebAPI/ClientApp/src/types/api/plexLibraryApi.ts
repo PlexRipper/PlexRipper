@@ -19,10 +19,9 @@ export function getPlexLibraryInServer(libraryId: number, plexAccountId: number)
 	return checkResponse<PlexServerDTO>(result, logText, 'getPlexLibraryInServer');
 }
 
-export function refreshPlexLibrary(libraryId: number, plexAccountId: number): Observable<PlexLibraryDTO | null> {
+export function refreshPlexLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
 	preApiRequest(logText, 'refreshPlexLibrary');
 	const result: Observable<AxiosResponse> = Axios.post(`${apiPath}/refresh/`, {
-		plexAccountId,
 		plexLibraryId: libraryId,
 	});
 	return checkResponse<PlexLibraryDTO | null>(result, logText, 'refreshPlexLibrary');

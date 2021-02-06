@@ -16,6 +16,6 @@ export function getSettings(): Observable<SettingsModel> {
 
 export function updateSettings(settings: SettingsModel): Observable<SettingsModel> {
 	preApiRequest(logText, 'updateSettings');
-	const result: Observable<AxiosResponse> = Axios.put<Result<boolean>>(`${apiPath}`, settings);
+	const result: Observable<AxiosResponse> = Axios.put<Result<SettingsModel>>(`${apiPath}`, settings);
 	return checkResponse<SettingsModel>(result, logText, 'updateSettings');
 }

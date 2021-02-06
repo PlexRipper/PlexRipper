@@ -50,16 +50,10 @@ export default class Default extends Vue {
 	}
 
 	created(): void {
-		HelpService.getHelpDialog().subscribe((helpId) => {
+		this.$subscribeTo(HelpService.getHelpDialog(), (helpId) => {
 			this.helpId = helpId;
 			this.helpDialogState = true;
 		});
 	}
 }
 </script>
-
-<style lang="scss">
-// This only needs to be included in the default layout, not in other layouts.
-// Otherwise the styles get imported multiple times.
-@import './src/assets/scss/style.scss';
-</style>

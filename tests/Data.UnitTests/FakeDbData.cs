@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Bogus;
 using PlexRipper.Domain;
@@ -7,6 +8,8 @@ namespace Data.UnitTests
 {
     public static class FakeDbData
     {
+        private static Random _random = new Random();
+
         public static Faker<PlexServer> GetPlexServer(bool includeLibraries = false)
         {
             var rnd = new Random();
@@ -70,11 +73,13 @@ namespace Data.UnitTests
         public static Faker<PlexMovie> GetPlexMovies(int plexLibraryId)
         {
             var mediaContainer = new[] { "mkv", "mp4" };
+            var movieIds = new List<int>();
 
             return new Faker<PlexMovie>()
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
-                .RuleFor(x => x.Key, f => f.Random.Int(1, 100000))
+                .RuleFor(x => x.Key, f => GetUniqueId(1, 10000, movieIds))
+                .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
         }
@@ -83,29 +88,49 @@ namespace Data.UnitTests
         {
             var mediaContainer = new[] { "mkv", "mp4" };
 
+            var tvShowIds = new List<int>();
+            var seasonIds = new List<int>();
+            var episodeIds = new List<int>();
+
             var episodes = new Faker<PlexTvShowEpisode>()
-                .RuleFor(x => x.Key, f => f.Random.Int(1, 10000))
+                .RuleFor(x => x.Key, f => GetUniqueId(1, 10000, episodeIds))
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
+                .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
 
             var seasonIndex = 1;
             var seasons = new Faker<PlexTvShowSeason>()
                 .RuleFor(x => x.Title, f => $"Season {seasonIndex++}")
-                .RuleFor(x => x.Key, f => f.Random.Int(1, 1000))
+                .RuleFor(x => x.Key, f => GetUniqueId(1, 10000, seasonIds))
                 .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
-                .RuleFor(x => x.Episodes, f => episodes.Generate(f.Random.Int(5, 25)).ToList())
+                .RuleFor(x => x.Episodes, f => episodes.Generate(f.Random.Int(6, 10)).ToList())
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
+                .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
 
             return new Faker<PlexTvShow>()
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexLibraryId, f => plexLibraryId)
-                .RuleFor(x => x.Key, f => f.Random.Int(1, 100000))
-                .RuleFor(x => x.Seasons, f => seasons.Generate(f.Random.Int(1, 10)).ToList())
+                .RuleFor(x => x.Key, f => GetUniqueId(1, 10000, tvShowIds))
+                .RuleFor(x => x.Seasons, f => seasons.Generate(f.Random.Int(6, 10)).ToList())
+                .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
+        }
+
+        private static int GetUniqueId(int min, int max, List<int> alreadyGenerated)
+        {
+            while (true)
+            {
+                int value = _random.Next(min, max);
+                if (!alreadyGenerated.Contains(value))
+                {
+                    alreadyGenerated.Add(value);
+                    return value;
+                }
+            }
         }
     }
 }

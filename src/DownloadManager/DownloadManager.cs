@@ -62,7 +62,6 @@ namespace PlexRipper.DownloadManager
             INotificationsService notificationsService,
             Func<DownloadTask, PlexDownloadClient> plexDownloadClientFactory) : base(mediator, signalRService)
         {
-
             _plexAuthenticationService = plexAuthenticationService;
             _fileMerger = fileMerger;
             _userSettings = userSettings;
@@ -110,7 +109,6 @@ namespace PlexRipper.DownloadManager
             var newClient = _plexDownloadClientFactory(downloadTask);
             newClient.Parts = _userSettings.AdvancedSettings.DownloadManager.DownloadSegments;
 
-
             // Setup the client
             var setupResult = await newClient.SetupAsync(downloadTask.DownloadWorkerTasks);
             if (setupResult.IsFailed)
@@ -122,8 +120,6 @@ namespace PlexRipper.DownloadManager
             _downloadsList.Add(newClient);
             return Result.Ok(newClient);
         }
-
-
 
         /// <summary>
         /// Checks if a <see cref="DownloadTask"/> with this Id or ratingKey has already been added.
@@ -254,7 +250,11 @@ namespace PlexRipper.DownloadManager
                     downloadComplete.DataReceived));
 
                 await _fileMerger.AddFileTask(downloadComplete.DownloadTask);
-                await SetDownloadStatusAsync(downloadComplete.Id, DownloadStatus.Merging);
+
+                var downloadStatusChanged = downloadComplete.ToStatus();
+                downloadStatusChanged.Status = DownloadStatus.Merging;
+                await SetDownloadStatusAsync(downloadStatusChanged);
+
                 Log.Information($"The download of {downloadComplete.DownloadTask.Title} has completed!");
                 CheckDownloadQueue();
             });
@@ -262,7 +262,7 @@ namespace PlexRipper.DownloadManager
 
         private void OnDownloadStatusChanged(DownloadStatusChanged downloadStatusChanged)
         {
-            SetDownloadStatus(downloadStatusChanged.Id, downloadStatusChanged.Status);
+            SetDownloadStatus(downloadStatusChanged);
         }
 
         private void OnDownloadProgressChanged(DownloadProgress downloadProgress)
@@ -277,7 +277,13 @@ namespace PlexRipper.DownloadManager
             _signalRService.SendFileMergeProgressUpdate(progress);
             if (progress.Percentage >= 100)
             {
-                SetDownloadStatus(progress.DownloadTaskId, DownloadStatus.Completed);
+                SetDownloadStatus(new DownloadStatusChanged
+                {
+                    Id = progress.DownloadTaskId,
+                    Status = DownloadStatus.Completed,
+                    PlexLibraryId = progress.PlexLibraryId,
+                    PlexServerId = progress.PlexServerId,
+                });
             }
         }
 
@@ -371,7 +377,6 @@ namespace PlexRipper.DownloadManager
                     validationResult.Errors.ForEach(x => x.WithMetadata("downloadTask Title", downloadTask.TitlePath));
                     result.AddNestedErrors(validationResult.Errors);
                 }
-
 
                 // TODO Need a different way to check for duplicate, media consisting of multiple parts have the same rating key
                 // Check if this DownloadTask is a duplicate

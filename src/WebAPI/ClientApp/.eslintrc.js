@@ -17,6 +17,6 @@ module.exports = {
 		'vue/valid-v-slot': 0,
 		'vue/no-v-html': 'off',
 		'no-use-before-define': 'off',
-		'no-extend-native': ['error', { exceptions: ['Object'] }],
+		'no-extend-native': 'off',
 	},
 };

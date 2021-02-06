@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
@@ -151,15 +150,12 @@ namespace PlexRipper.Application.PlexAccounts
                 return plexServerList.ToResult();
             }
 
-
             // Retrieve and store the corresponding PlexLibraries
             if (!plexServerList.Value.Any())
             {
                 Log.Debug("Account was setup successfully, but did not have access to any servers!");
                 return Result.Ok(false);
             }
-
-
 
             Log.Debug("Account was setup successfully!");
             return Result.Ok(true);
@@ -383,7 +379,13 @@ namespace PlexRipper.Application.PlexAccounts
         /// <returns></returns>
         public async Task<Result<bool>> DeletePlexAccountAsync(int plexAccountId)
         {
-            return await _mediator.Send(new DeletePlexAccountCommand(plexAccountId));
+            var deleteAccountResult = await _mediator.Send(new DeletePlexAccountCommand(plexAccountId));
+            if (deleteAccountResult.IsFailed)
+            {
+                return deleteAccountResult;
+            }
+
+            return await _plexServerService.RemoveInaccessibleServers();
         }
 
         #endregion

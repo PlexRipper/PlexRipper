@@ -32,6 +32,8 @@ namespace PlexRipper.Data.Common
 
         #region Properties
 
+        protected IQueryable<PlexServer> PlexServerQueryable => _dbContext.PlexServers.AsQueryable();
+
         protected IQueryable<PlexLibrary> PlexLibraryQueryable => _dbContext.PlexLibraries.AsQueryable();
 
         /// <summary>

@@ -1,18 +1,26 @@
 import { Observable, of } from 'rxjs';
-import { getAllDownloads, deleteDownloadTasks, clearDownloadTasks, stopDownloadTasks, downloadMedia } from '@api/plexDownloadApi';
+import {
+	clearDownloadTasks,
+	deleteDownloadTasks,
+	downloadMedia,
+	getAllDownloads,
+	getDownloadTasksInServer,
+	stopDownloadTasks,
+} from '@api/plexDownloadApi';
 import { finalize, switchMap } from 'rxjs/operators';
-import { DownloadMediaDTO, DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
-import StoreState from '@state/storeState';
-import ServerService from '@state/serverService';
+import { DownloadMediaDTO, DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import IStoreState from '@interfaces/IStoreState';
 import AccountService from '@service/accountService';
 import { BaseService } from '@state/baseService';
 
 export class DownloadService extends BaseService {
 	public constructor() {
-		super((state: StoreState) => {
-			return {
-				downloads: state.downloads,
-			} as StoreState;
+		super({
+			stateSliceSelector: (state: IStoreState) => {
+				return {
+					downloads: state.downloads,
+				};
+			},
 		});
 
 		AccountService.getActiveAccount()
@@ -25,37 +33,14 @@ export class DownloadService extends BaseService {
 	}
 
 	public getDownloadList(): Observable<DownloadTaskDTO[]> {
-		return this.stateChanged.pipe(switchMap((state: StoreState) => of(state?.downloads ?? [])));
+		return this.stateChanged.pipe(switchMap((state: IStoreState) => of(state?.downloads)));
 	}
 
 	/**
 	 * returns the downloadTasks nested in PlexServerDTO -> PlexLibraryDTO -> DownloadTaskDTO[]
 	 */
 	public getDownloadListInServers(): Observable<PlexServerDTO[]> {
-		return ServerService.getServers().pipe(
-			switchMap(() => this.getDownloadList()),
-			switchMap((downloads) => {
-				const servers: PlexServerDTO[] = [];
-				downloads.forEach((download) => {
-					// Check if Server has already been added
-					let server = servers.find((x) => x.id === download.plexServerId);
-					if (!server) {
-						server = ServerService.servers.find((x) => x.id === download.plexServerId);
-						if (server) {
-							servers.push(server);
-						}
-					}
-
-					if (server) {
-						const libraryIndex = server.plexLibraries.findIndex((x) => x.id === download.plexLibraryId);
-						if (libraryIndex > -1) {
-							server.plexLibraries[libraryIndex].downloadTasks.push(download);
-						}
-					}
-				});
-				return of(servers);
-			}),
-		);
+		return getDownloadTasksInServer();
 	}
 
 	/**
@@ -97,7 +82,17 @@ export class DownloadService extends BaseService {
 	// endregion
 
 	private removeDownloadTasks(downloadTaskIds: number[]): void {
-		const downloads = this.getState().downloads.filter((x) => downloadTaskIds.some((y) => y !== x.id));
+		const downloads = this.getState().downloads;
+
+		downloads.forEach((downloadTask) => {
+			if (downloadTask.mediaType === PlexMediaType.TvShow) {
+				downloadTask.children?.forEach((season) => {
+					if (downloadTask.mediaType === PlexMediaType.Season) {
+						season.children = season.children?.filter((x) => downloadTaskIds.some((y) => y !== x.id)) ?? [];
+					}
+				});
+			}
+		});
 		this.setState({ downloads });
 	}
 }

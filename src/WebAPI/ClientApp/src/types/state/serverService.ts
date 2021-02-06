@@ -2,16 +2,18 @@ import { Observable, of, iif } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
-import StoreState from '@state/storeState';
+import IStoreState from '@interfaces/IStoreState';
 import AccountService from '@service/accountService';
 import { BaseService } from '@state/baseService';
 
 export class ServerService extends BaseService {
 	public constructor() {
-		super((state: StoreState) => {
-			return {
-				servers: state.servers,
-			};
+		super({
+			stateSliceSelector: (state: IStoreState) => {
+				return {
+					servers: state.servers,
+				};
+			},
 		});
 
 		AccountService.getActiveAccount()
@@ -28,7 +30,7 @@ export class ServerService extends BaseService {
 	}
 
 	public getServers(): Observable<PlexServerDTO[]> {
-		return this.stateChanged.pipe(switchMap((state: StoreState) => of(state?.servers ?? [])));
+		return this.stateChanged.pipe(switchMap((state: IStoreState) => of(state?.servers ?? [])));
 	}
 
 	public getServer(serverId: number): Observable<PlexServerDTO | null> {

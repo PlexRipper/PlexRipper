@@ -8,6 +8,6 @@ namespace PlexRipper.Application.Common
     {
         Result<SettingsModel> GetSettings();
 
-        Task<Result<bool>> UpdateSettings(SettingsModel settingsModel);
+        Result<SettingsModel> UpdateSettings(SettingsModel settingsModel);
     }
 }

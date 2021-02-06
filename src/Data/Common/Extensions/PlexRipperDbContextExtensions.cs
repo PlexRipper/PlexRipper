@@ -6,6 +6,32 @@ namespace PlexRipper.Data.Common
 {
     public static class PlexRipperDbContextExtensions
     {
+        #region PlexServer
+
+        public static IQueryable<PlexServer> IncludeLibrariesWithMedia(this IQueryable<PlexServer> plexServer)
+        {
+            return plexServer
+                .Include(x => x.PlexLibraries)
+                .ThenInclude(x => x.Movies)
+                .Include(x => x.PlexLibraries)
+                .ThenInclude(x => x.TvShows)
+                .ThenInclude(x => x.Seasons)
+                .ThenInclude(x => x.Episodes);
+        }
+
+        public static IQueryable<PlexServer> IncludeLibrariesWithDownloadTasks(this IQueryable<PlexServer> plexServer)
+        {
+            return plexServer
+                .Include(x => x.PlexLibraries)
+                .ThenInclude(x => x.DownloadTasks)
+                .ThenInclude(x => x.DownloadWorkerTasks);
+
+        }
+
+        #endregion
+
+        #region PlexLibrary
+
         public static IQueryable<PlexLibrary> IncludeTvShows(this IQueryable<PlexLibrary> plexLibrary, bool topLevelOnly = false)
         {
             if (topLevelOnly)
@@ -25,8 +51,6 @@ namespace PlexRipper.Data.Common
             return plexLibrary
                 .Include(x => x.Movies);
         }
-
-        #region PlexLibrary
 
         public static IQueryable<PlexLibrary> IncludeServer(this IQueryable<PlexLibrary> plexLibrary)
         {
@@ -61,9 +85,19 @@ namespace PlexRipper.Data.Common
             return plexTvShows.Include(x => x.PlexServer);
         }
 
+        public static IQueryable<PlexTvShow> IncludeSeasons(this IQueryable<PlexTvShow> plexTvShows)
+        {
+            return plexTvShows.Include(x => x.Seasons);
+        }
+
+        public static IQueryable<PlexTvShow> IncludeEpisodes(this IQueryable<PlexTvShow> plexTvShows)
+        {
+            return plexTvShows.Include(x => x.Seasons).ThenInclude(x => x.Episodes);
+        }
+
         #endregion
 
-        #region PlexTvShow
+        #region PlexTvShowSeason
 
         public static IQueryable<PlexTvShowSeason> IncludePlexLibrary(this IQueryable<PlexTvShowSeason> plexTvShowSeason)
         {
@@ -77,7 +111,7 @@ namespace PlexRipper.Data.Common
 
         #endregion
 
-        #region PlexTvShow
+        #region PlexTvShowEpisode
 
         public static IQueryable<PlexTvShowEpisode> IncludePlexLibrary(this IQueryable<PlexTvShowEpisode> plexTvShowEpisode)
         {

@@ -733,6 +733,9 @@ namespace PlexRipper.Data.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TvShowId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("TvShowSeasonId")
                         .HasColumnType("INTEGER");
 
@@ -747,6 +750,8 @@ namespace PlexRipper.Data.Migrations
                     b.HasIndex("PlexLibraryId");
 
                     b.HasIndex("PlexServerId");
+
+                    b.HasIndex("TvShowId");
 
                     b.HasIndex("TvShowSeasonId");
 
@@ -1093,6 +1098,12 @@ namespace PlexRipper.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PlexRipper.Domain.PlexTvShow", "TvShow")
+                        .WithMany()
+                        .HasForeignKey("TvShowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("PlexRipper.Domain.PlexTvShowSeason", "TvShowSeason")
                         .WithMany("Episodes")
                         .HasForeignKey("TvShowSeasonId")
@@ -1102,6 +1113,8 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
+
+                    b.Navigation("TvShow");
 
                     b.Navigation("TvShowSeason");
                 });

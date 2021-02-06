@@ -12,6 +12,10 @@ namespace PlexRipper.Domain
 
         #region Relationships
 
+        public PlexTvShow TvShow { get; set; }
+
+        public int TvShowId { get; set; }
+
         public PlexTvShowSeason TvShowSeason { get; set; }
 
         public int TvShowSeasonId { get; set; }
@@ -36,6 +40,10 @@ namespace PlexRipper.Domain
             downloadTask.MetaData.TvShowSeasonTitle = TvShowSeason?.Title ?? string.Empty;
             downloadTask.MetaData.TvShowEpisodeTitle = Title;
             downloadTask.MetaData.MediaData = EpisodeData;
+
+            downloadTask.MetaData.TvShowKey = TvShowSeason?.TvShow?.Key ?? 0;
+            downloadTask.MetaData.TvShowSeasonKey = ParentKey;
+            downloadTask.MetaData.TvShowEpisodeKey = Key;
 
             return new List<DownloadTask>
             {

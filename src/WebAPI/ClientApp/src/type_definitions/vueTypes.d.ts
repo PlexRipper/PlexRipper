@@ -7,7 +7,6 @@ declare module 'vue/types/vue' {
 		$messages(): VueI18n.LocaleMessageObject;
 		$getMessage(path: string): object;
 		$ts(path: string): string;
-		$moment(path: string): string;
 	}
 }
 
@@ -23,7 +22,7 @@ declare module '@nuxt/types/config/runtime' {
 // Extensions
 declare global {
 	interface Array<T> {
-		addOrReplace(index: number, object: any): Array<T>;
+		addOrReplace(searchFunction: Function, object: any): Array<T>;
 		sum(): number;
 	}
 }

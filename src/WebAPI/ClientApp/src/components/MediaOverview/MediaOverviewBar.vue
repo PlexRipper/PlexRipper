@@ -14,7 +14,7 @@
 					<v-list subheader two-line class="no-background pa-0">
 						<v-list-item>
 							<v-list-item-avatar v-if="library">
-								<v-icon large class="mx-3">{{ library.type | mediaTypeIcon }}</v-icon>
+								<media-type-icon class="mx-3" :size="36" :media-type="library.type" />
 							</v-list-item-avatar>
 							<v-list-item-content>
 								<v-list-item-title>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</v-list-item-title>
@@ -80,7 +80,7 @@ import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
 import VerticalButton from '@components/General/VerticalButton.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import _ from 'lodash';
+import { sum } from 'lodash';
 
 interface IViewOptions {
 	label: string;
@@ -155,7 +155,7 @@ export default class MediaOverviewBar extends Vue {
 				case PlexMediaType.Movie:
 					return `1 Movie`;
 				case PlexMediaType.TvShow:
-					return `1 TvShow - ${this.mediaItem.children?.length} Seasons - ${_.sum(
+					return `1 TvShow - ${this.mediaItem.children?.length} Seasons - ${sum(
 						this.mediaItem.children?.map((x) => x.childCount),
 					)} Episodes`;
 				default:

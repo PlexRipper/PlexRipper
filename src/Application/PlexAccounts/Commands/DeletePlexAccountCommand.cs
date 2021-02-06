@@ -3,7 +3,7 @@ using MediatR;
 
 namespace PlexRipper.Application.PlexAccounts
 {
-    public class DeletePlexAccountCommand : IRequest<Result<bool>>
+    public class DeletePlexAccountCommand : IRequest<Result>
     {
         public int Id { get; }
 

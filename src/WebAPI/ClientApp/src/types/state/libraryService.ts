@@ -1,18 +1,19 @@
 import { iif, Observable, of } from 'rxjs';
 import { BaseService } from '@state/baseService';
-import StoreState from '@state/storeState';
+import IStoreState from '@interfaces/IStoreState';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 import serverService from '@state/serverService';
-import { settingsStore } from '~/store';
 
 export class LibraryService extends BaseService {
 	public constructor() {
-		super((state: StoreState) => {
-			return {
-				libraries: state.libraries,
-			};
+		super({
+			stateSliceSelector: (state: IStoreState) => {
+				return {
+					libraries: state.libraries,
+				};
+			},
 		});
 	}
 
@@ -32,7 +33,7 @@ export class LibraryService extends BaseService {
 	}
 
 	public getLibraries(): Observable<PlexLibraryDTO[]> {
-		return this.stateChanged.pipe(switchMap((state: StoreState) => of(state?.libraries ?? [])));
+		return this.stateChanged.pipe(switchMap((state: IStoreState) => of(state?.libraries ?? [])));
 	}
 
 	public getLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
@@ -47,7 +48,7 @@ export class LibraryService extends BaseService {
 	}
 
 	public refreshLibrary(libraryId: number): void {
-		refreshPlexLibrary(libraryId, settingsStore.activeAccountId)
+		refreshPlexLibrary(libraryId)
 			.pipe(switchMap(() => this.retrieveLibrary(libraryId)))
 			.subscribe((library) => this.updateLibraryInStore(library));
 	}

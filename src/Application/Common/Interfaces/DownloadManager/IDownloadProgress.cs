@@ -14,6 +14,10 @@ namespace PlexRipper.Application.Common
 
         long DataTotal { get; set; }
 
+        int PlexServerId { get; set; }
+
+        int PlexLibraryId { get; set; }
+
         /// <summary>
         /// The download time remaining in seconds.
         /// </summary>

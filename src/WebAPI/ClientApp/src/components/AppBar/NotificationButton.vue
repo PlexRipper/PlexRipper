@@ -40,8 +40,8 @@ export default class NotificationButton extends Vue {
 		NotificationService.hideNotification(id);
 	}
 
-	created(): void {
-		NotificationService.getNotifications().subscribe((value) => {
+	mounted(): void {
+		this.$subscribeTo(NotificationService.getNotifications(), (value) => {
 			this.notifications = value;
 		});
 	}

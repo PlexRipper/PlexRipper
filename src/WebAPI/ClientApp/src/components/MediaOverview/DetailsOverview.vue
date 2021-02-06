@@ -26,7 +26,7 @@
 								<template v-if="defaultImage">
 									<v-row align="center" justify="center" class="fill-height">
 										<v-col cols="auto">
-											<v-icon class="mx-3" style="font-size: 100px">{{ mediaType | mediaTypeIcon }}</v-icon>
+											<media-type-icon :size="100" class="mx-3" media-type="mediaType" />
 										</v-col>
 										<v-col cols="12">
 											<h4 class="text-center">{{ mediaItem.title }}</h4>
@@ -86,9 +86,9 @@
 		</template>
 		<!--	Loading	-->
 		<template v-else>
-			<v-row>
-				<v-col>
-					<loading-spinner />
+			<v-row justify="center">
+				<v-col cols="auto">
+					<loading-spinner :size="60" />
 				</v-col>
 			</v-row>
 		</template>
@@ -103,7 +103,6 @@ import { DownloadMediaDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
 import mediaService from '@state/mediaService';
-import { settingsStore } from '~/store';
 
 @Component<DetailsOverview>({
 	components: {
@@ -124,6 +123,9 @@ export default class DetailsOverview extends Vue {
 
 	@Prop({ required: false, type: Object as () => PlexServerDTO | null })
 	readonly server!: PlexServerDTO | null;
+
+	@Prop({ required: true, type: Number })
+	readonly activeAccountId!: number;
 
 	@Ref('detail-media-table')
 	readonly detailMediaTable!: MediaTable;
@@ -165,7 +167,7 @@ export default class DetailsOverview extends Vue {
 		if (this.mediaType === PlexMediaType.Movie) {
 			this.$emit('download', {
 				mediaIds: [this.mediaItem?.id],
-				plexAccountId: settingsStore.activeAccountId,
+				plexAccountId: this.activeAccountId,
 				type: PlexMediaType.Movie,
 				libraryId: this.library?.id,
 			} as DownloadMediaDTO);

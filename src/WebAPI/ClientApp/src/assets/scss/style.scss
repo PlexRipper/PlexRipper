@@ -73,6 +73,10 @@ general
 	backdrop-filter: blur(30px);
 }
 
+.no-wrap{
+	@extend .flex-nowrap;
+}
+
 /*
 Nuxt-i18n
 */

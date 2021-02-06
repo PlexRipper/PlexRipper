@@ -131,12 +131,6 @@ namespace PlexRipper.Application.PlexLibraries
                 return updateResult.ToResult();
             }
 
-            var deleteResult = await _mediator.Send(new DeleteMediaFromPlexLibraryCommand(plexLibrary.Id));
-            if (deleteResult.IsFailed)
-            {
-                return deleteResult.ToResult();
-            }
-
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
             if (createResult.IsFailed)
             {
@@ -175,12 +169,6 @@ namespace PlexRipper.Application.PlexLibraries
                 return updateResult.ToResult();
             }
 
-            var deleteResult = await _mediator.Send(new DeleteMediaFromPlexLibraryCommand(plexLibrary.Id));
-            if (deleteResult.IsFailed)
-            {
-                return deleteResult.ToResult();
-            }
-
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             if (createResult.IsFailed)
             {
@@ -196,7 +184,7 @@ namespace PlexRipper.Application.PlexLibraries
         #region Public
 
         /// <inheritdoc/>
-        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false)
+        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, bool topLevelMediaOnly = false)
         {
             await _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
 
@@ -212,7 +200,7 @@ namespace PlexRipper.Application.PlexLibraries
             {
                 Log.Information($"PlexLibrary with id {libraryId} has no media, forcing refresh from the PlexApi");
 
-                var refreshResult = await RefreshLibraryMediaAsync(libraryId, plexAccountId);
+                var refreshResult = await RefreshLibraryMediaAsync(libraryId);
                 if (refreshResult.IsFailed)
                 {
                     return refreshResult.ToResult();
@@ -224,9 +212,9 @@ namespace PlexRipper.Application.PlexLibraries
         }
 
         /// <inheritdoc/>
-        public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false)
+        public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, bool topLevelMediaOnly = false)
         {
-            var plexLibrary = await GetPlexLibraryAsync(libraryId, plexAccountId, topLevelMediaOnly);
+            var plexLibrary = await GetPlexLibraryAsync(libraryId, topLevelMediaOnly);
             if (plexLibrary.IsFailed)
             {
                 return plexLibrary.ToResult();
@@ -272,7 +260,7 @@ namespace PlexRipper.Application.PlexLibraries
         }
 
         /// <inheritdoc/>
-        public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId, int plexAccountId = 0)
+        public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId)
         {
             var plexLibraryResult = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibraryId, true));
             if (plexLibraryResult.IsFailed)
@@ -293,7 +281,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             // Get plexServer authToken
-            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexLibrary.PlexServer.Id, plexAccountId);
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexLibrary.PlexServer.Id);
             if (authToken.IsFailed)
             {
                 return authToken.ToResult();

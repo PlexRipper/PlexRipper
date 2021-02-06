@@ -15,16 +15,14 @@
 						<v-col cols="12" class="px-2 py-0">
 							<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open="getLeafs" open-all>
 								<template #prepend="{ item }">
-									<v-icon>
-										{{ item.type | mediaTypeIcon }}
-									</v-icon>
+									<media-type-icon :media-type="item.type" />
 								</template>
 								<template #append="{ item }"> (<file-size :size="item.mediaSize" />) </template>
 							</v-treeview>
 						</v-col>
 					</perfect-scrollbar>
 				</v-card-text>
-				<v-divider></v-divider>
+				<v-divider />
 
 				<v-card-actions>
 					<p-btn :button-type="cancelButtonType" @click="showDialog = false" />
@@ -49,11 +47,10 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ProgressComponent from '@components/ProgressComponent.vue';
-import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
-import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import { settingsStore } from '@/store';
+import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import Log from 'consola';
+import SettingsService from '@state/settingsService';
 
 @Component({
 	components: {
@@ -61,27 +58,32 @@ import Log from 'consola';
 	},
 })
 export default class DownloadConfirmation extends Vue {
-	@Prop({ required: true, type: Array as () => ITreeViewItem[] })
-	readonly items!: ITreeViewItem[];
+	@Prop({ required: true, type: Array as () => PlexMediaDTO[] })
+	readonly items!: PlexMediaDTO[];
 
 	@Prop({ required: true })
 	readonly progress!: DownloadTaskCreationProgress | null;
 
+	askDownloadMovieConfirmation: boolean = false;
+	askDownloadTvShowConfirmation: boolean = false;
+	askDownloadSeasonConfirmation: boolean = false;
+	askDownloadEpisodeConfirmation: boolean = false;
+
 	showDialog: boolean = false;
-	downloadPreview: ITreeViewItem[] = [];
+	downloadPreview: PlexMediaDTO[] = [];
 	downloadMediaCommand: DownloadMediaDTO[] = [];
 
 	get isConfirmationEnabled(): boolean {
 		if (this.downloadMediaCommand.length === 1) {
 			switch (this.downloadMediaCommand[0].type) {
 				case PlexMediaType.Movie:
-					return settingsStore.askDownloadMovieConfirmation;
+					return this.askDownloadMovieConfirmation;
 				case PlexMediaType.TvShow:
-					return settingsStore.askDownloadTvShowConfirmation;
+					return this.askDownloadTvShowConfirmation;
 				case PlexMediaType.Season:
-					return settingsStore.askDownloadSeasonConfirmation;
+					return this.askDownloadSeasonConfirmation;
 				case PlexMediaType.Episode:
-					return settingsStore.askDownloadEpisodeConfirmation;
+					return this.askDownloadEpisodeConfirmation;
 				default:
 					return true;
 			}
@@ -106,7 +108,7 @@ export default class DownloadConfirmation extends Vue {
 	}
 
 	private createPreview(downloadMediaCommands: DownloadMediaDTO[]): void {
-		let downloadPreview: ITreeViewItem[] = [];
+		let downloadPreview: PlexMediaDTO[] = [];
 
 		const movieDownloadCommand = downloadMediaCommands.find((x) => x.type === PlexMediaType.Movie);
 		// If statements instead of switch to avoid having to overcomplicate the variable names.
@@ -149,8 +151,8 @@ export default class DownloadConfirmation extends Vue {
 					return {
 						...tvShow,
 						children: tvShow.children
-							?.filter((season: ITreeViewItem) => season?.children?.some((episode) => mediaIds.includes(episode.id)))
-							.map((season: ITreeViewItem) => {
+							?.filter((season: PlexMediaDTO) => season?.children?.some((episode) => mediaIds.includes(episode.id)))
+							.map((season: PlexMediaDTO) => {
 								// Create the tvShowSeason
 								return {
 									...season,
@@ -192,14 +194,15 @@ export default class DownloadConfirmation extends Vue {
 	/* Recursively retrieve all unique keys used in the items: ITreeViewItem[] */
 	get getLeafs(): string[] {
 		let keys: string[] = [];
-		keys = keys.concat(this.downloadPreview.map((x) => x.key));
-		keys = keys.concat(this.downloadPreview.map((x) => x.children?.map((y) => y.key) ?? [])?.flat(1) ?? []);
+		keys = keys.concat(this.downloadPreview.map((x) => x.key.toString()));
+		keys = keys.concat(this.downloadPreview.map((x) => x.children?.map((y) => y.key.toString()) ?? [])?.flat(1) ?? []);
 		keys = keys.concat(
-			this.downloadPreview.map((x) => x.children?.map((y) => y.children?.map((z) => z.key) ?? []) ?? [])?.flat(2) ?? [],
+			this.downloadPreview.map((x) => x.children?.map((y) => y.children?.map((z) => z.key.toString()) ?? []) ?? [])?.flat(2) ??
+				[],
 		);
 		keys = keys.concat(
 			this.downloadPreview
-				.map((x) => x.children?.map((y) => y.children?.map((z) => z.children?.map((w) => w.key) ?? []) ?? []) ?? [])
+				.map((x) => x.children?.map((y) => y.children?.map((z) => z.children?.map((w) => w.key.toString()) ?? []) ?? []) ?? [])
 				?.flat(3),
 		);
 		return keys;
@@ -223,6 +226,17 @@ export default class DownloadConfirmation extends Vue {
 
 	confirmDownload(): void {
 		this.$emit('download', this.downloadMediaCommand);
+	}
+
+	mounted(): void {
+		this.$subscribeTo(SettingsService.getConfirmationSettings(), (uiSettings) => {
+			if (uiSettings) {
+				this.askDownloadMovieConfirmation = uiSettings.askDownloadMovieConfirmation;
+				this.askDownloadTvShowConfirmation = uiSettings.askDownloadTvShowConfirmation;
+				this.askDownloadSeasonConfirmation = uiSettings.askDownloadSeasonConfirmation;
+				this.askDownloadEpisodeConfirmation = uiSettings.askDownloadEpisodeConfirmation;
+			}
+		});
 	}
 }
 </script>

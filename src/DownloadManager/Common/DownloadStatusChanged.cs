@@ -9,15 +9,15 @@ namespace PlexRipper.DownloadManager.Common
     public class DownloadStatusChanged
     {
         [JsonProperty("id", Required = Required.Always)]
-        public int Id { get; }
+        public int Id { get; set; }
 
         [JsonProperty("status", Required = Required.Always)]
-        public DownloadStatus Status { get; }
+        public DownloadStatus Status { get; set; }
 
-        public DownloadStatusChanged(int id, DownloadStatus downloadStatus)
-        {
-            Id = id;
-            Status = downloadStatus;
-        }
+        [JsonProperty("plexServerId", Required = Required.Always)]
+        public int PlexServerId { get; set; }
+
+        [JsonProperty("plexLibraryId", Required = Required.Always)]
+        public int PlexLibraryId { get; set; }
     }
 }

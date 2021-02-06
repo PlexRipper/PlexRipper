@@ -10,9 +10,25 @@ import HelpIcon from '@components/Help/HelpIcon.vue';
 import Status from '@components/General/Status.vue';
 import FileSize from '@components/General/FileSize.vue';
 import Duration from '@components/General/Duration.vue';
+import VTreeViewTable from '@vTreeViewTable/VTreeViewTable.vue';
+import MediaTypeIcon from '@components/General/MediaTypeIcon.vue';
 
 export default (): void => {
-	const components = { Page, Background, Logo, PBtn, PCheckbox, DateTime, PSection, HelpIcon, Status, FileSize, Duration };
+	const components = {
+		Page,
+		Background,
+		Logo,
+		PBtn,
+		PCheckbox,
+		DateTime,
+		PSection,
+		HelpIcon,
+		Status,
+		FileSize,
+		Duration,
+		VTreeViewTable,
+		MediaTypeIcon,
+	};
 
 	Object.entries(components).forEach(([name, component]) => {
 		Vue.component(name, component);

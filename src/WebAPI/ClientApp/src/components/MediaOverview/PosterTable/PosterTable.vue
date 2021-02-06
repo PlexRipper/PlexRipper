@@ -29,7 +29,6 @@ import LoadingSpinner from '@components/LoadingSpinner.vue';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import MediaPoster from '@mediaOverview/PosterTable/MediaPoster.vue';
-import { settingsStore } from '~/store';
 
 @Component({
 	components: {
@@ -49,10 +48,13 @@ export default class PosterTable extends Vue {
 	@Prop({ required: false, type: Number })
 	readonly libraryId!: number;
 
+	@Prop({ required: true, type: Number })
+	readonly activeAccountId!: number;
+
 	downloadMedia(downloadMediaCommands: DownloadMediaDTO[]): void {
 		downloadMediaCommands.forEach((x) => {
 			x.libraryId = this.libraryId;
-			x.plexAccountId = settingsStore.activeAccountId;
+			x.plexAccountId = this.activeAccountId;
 		});
 		this.$emit('download', downloadMediaCommands);
 	}

@@ -35,6 +35,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ButtonType from '@enums/buttonType';
+import Convert from '@mediaOverview/MediaTable/types/Convert';
 
 @Component
 export default class PBtn extends Vue {
@@ -112,14 +113,7 @@ export default class PBtn extends Vue {
 	}
 
 	get getClass(): string[] {
-		return [
-			this.getIsFilled ? 'filled' : '',
-			this.getIsOutlined ? 'outlined' : '',
-			'p-btn',
-			'mx-2',
-			'i18n-formatting',
-			this.buttonType === ButtonType.Alphabet ? 'navigation-btn' : '',
-		];
+		return [this.getIsFilled ? 'filled' : '', this.getIsOutlined ? 'outlined' : '', 'p-btn', 'mx-2', 'i18n-formatting'];
 	}
 
 	get getText(): string {
@@ -144,23 +138,7 @@ export default class PBtn extends Vue {
 		if (this.icon) {
 			return this.icon;
 		}
-		switch (this.buttonType) {
-			case ButtonType.Cancel:
-				return 'mdi-cancel';
-			case ButtonType.Confirm:
-				return 'mdi-check';
-			case ButtonType.Save:
-				return 'mdi-content-save';
-			case ButtonType.Download:
-				return 'mdi-download';
-			case ButtonType.Delete:
-				return 'mdi-delete';
-			case ButtonType.Error:
-				return 'mdi-alert-circle';
-			case ButtonType.ExternalLink:
-				return 'mdi-open-in-new';
-		}
-		return '';
+		return Convert.buttonTypeToIcon(this.buttonType);
 	}
 
 	get getColor(): string {
@@ -192,7 +170,6 @@ export default class PBtn extends Vue {
 		switch (this.buttonType) {
 			case ButtonType.ExternalLink:
 			case ButtonType.Download:
-			case ButtonType.Alphabet:
 				return false;
 			default:
 				return true;
@@ -207,7 +184,6 @@ export default class PBtn extends Vue {
 			case ButtonType.Cancel:
 			case ButtonType.Confirm:
 			case ButtonType.Delete:
-			case ButtonType.Alphabet:
 				return false;
 		}
 		return false;

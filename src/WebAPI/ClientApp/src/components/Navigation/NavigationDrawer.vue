@@ -103,8 +103,8 @@ export default class NavigationDrawer extends Vue {
 	}
 
 	created(): void {
-		DownloadService.getDownloadList().subscribe((downloadTasks) => {
-			this.downloadTaskCount = downloadTasks.length;
+		this.$subscribeTo(DownloadService.getDownloadList(), (downloadTasks) => {
+			this.downloadTaskCount = downloadTasks?.length ?? -1;
 		});
 	}
 }

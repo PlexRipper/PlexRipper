@@ -169,8 +169,8 @@ import AccountOverview from '@overviews/AccountOverview/AccountOverview.vue';
 import ExternalLink from '@components/General/ExternalLink.vue';
 import PBtn from '@components/General/PlexRipperButton.vue';
 import ConfirmationButton from '@components/General/ConfirmationButton.vue';
+import SettingsService from '@state/settingsService';
 import NavigationBar from './components/NavigationBar.vue';
-import { settingsStore } from '~/store';
 
 @Component({
 	components: { NavigationBar, PathsOverview, AccountOverview, ExternalLink, PBtn, ConfirmationButton },
@@ -201,7 +201,7 @@ export default class Setup extends Vue {
 	}
 
 	finishSetup(): void {
-		settingsStore.setFirstTimeSetup(false);
+		SettingsService.updateFirstTimeSetup(false);
 		this.$router.push('/');
 	}
 

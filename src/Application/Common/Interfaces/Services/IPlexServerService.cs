@@ -21,5 +21,7 @@ namespace PlexRipper.Application.Common
         /// <param name="plexAccountId">Retrieve only the <see cref="PlexServer"/> which are accessible by this <see cref="PlexAccount"/>.</param>
         /// <returns>The list of <see cref="PlexServer"/>s.</returns>
         Task<Result<List<PlexServer>>> GetServersAsync(int plexAccountId = 0);
+
+        Task<Result> RemoveInaccessibleServers();
     }
 }

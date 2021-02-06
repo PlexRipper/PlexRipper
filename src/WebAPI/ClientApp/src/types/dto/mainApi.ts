@@ -14,21 +14,26 @@ export type ResultDTOOfListOfDownloadTaskDTO = ResultDTO & { value: DownloadTask
 export interface DownloadTaskDTO {
   id: number;
   title: string;
+  fullTitle: string;
   status: DownloadStatus;
   fileLocationUrl: string;
   fileName: string;
-  titleTvShow: string;
-  titleTvShowSeason: string;
   mediaType: PlexMediaType;
   key: number;
+  downloadSpeed: number;
   dataReceived: number;
   dataTotal: number;
+  percentage: number;
   priority: number;
   plexServerId: number;
   plexLibraryId: number;
+  timeRemaining: number;
+  downloadWorkersProgress: IDownloadWorkerProgress[];
   destinationPath: string;
   downloadPath: string;
   downloadUrl: string;
+  children: DownloadTaskDTO[];
+  actions: string[];
 }
 
 export enum DownloadStatus {
@@ -60,12 +65,25 @@ export enum PlexMediaType {
   Unknown = "Unknown",
 }
 
+export interface IDownloadWorkerProgress {
+  id?: number;
+  dataReceived?: number;
+  dataTotal?: number;
+  downloadSpeed?: number;
+  downloadSpeedFormatted?: string | null;
+  timeRemaining?: number;
+  bytesRemaining?: number;
+  isCompleted?: boolean;
+  percentage?: number;
+  downloadSpeedAverage?: number;
+}
+
 export interface ResultDTO {
   isFailed?: boolean;
   isSuccess?: boolean;
-  reasons?: Reason[] | null | null;
-  errors?: Error[] | null | null;
-  successes?: Success[] | null | null;
+  reasons?: Reason[] | null;
+  errors?: Error[] | null;
+  successes?: Success[] | null;
 }
 
 export interface Reason {
@@ -73,7 +91,7 @@ export interface Reason {
   metadata?: Record<string, any>;
 }
 
-export type Error = Reason & { reasons?: Error[] | null | null };
+export type Error = Reason & { reasons?: Error[] | null };
 
 export type Success = Reason & object;
 
@@ -114,16 +132,15 @@ export interface PlexLibraryDTO {
   count: number;
   seasonCount: number;
   episodeCount: number;
-  movies: PlexMovieDTO[];
-  tvShows: PlexTvShowDTO[];
+  movies: PlexMediaDTO[];
+  tvShows: PlexMediaDTO[];
   downloadTasks: DownloadTaskDTO[];
 }
-
-export type PlexMovieDTO = PlexMediaDTO & object;
 
 export interface PlexMediaDTO {
   id: number;
   key: number;
+  treeKeyId: string;
   title: string;
   year: number;
   duration: number;
@@ -141,10 +158,13 @@ export interface PlexMediaDTO {
   addedAt: string;
   updatedAt: string;
   originallyAvailableAt: string;
+  tvShowId: number;
+  tvShowSeasonId: number;
   plexLibraryId: number;
   plexServerId: number;
   type: PlexMediaType;
-  mediaData: PlexMediaDataDTO[];
+  mediaData: PlexMediaDataDTO[] | null;
+  children: PlexMediaDTO[];
 }
 
 export interface PlexMediaDataDTO {
@@ -172,12 +192,6 @@ export interface PlexMediaDataPartDTO {
   Container: string;
   VideoProfile: string;
 }
-
-export type PlexTvShowDTO = PlexMediaDTO & { seasons: PlexTvShowSeasonDTO[] };
-
-export type PlexTvShowSeasonDTO = PlexMediaDTO & { tvShowId: number; episodes: PlexTvShowEpisodeDTO[] };
-
-export type PlexTvShowEpisodeDTO = PlexMediaDTO & { tvShowSeasonId: number };
 
 export interface PlexServerStatusDTO {
   id: number;
@@ -302,7 +316,7 @@ export interface RefreshPlexLibraryDTO {
   plexLibraryId?: number;
 }
 
-export type ResultDTOOfPlexTvShowDTO = ResultDTO & { value: PlexTvShowDTO };
+export type ResultDTOOfPlexMediaDTO = ResultDTO & { value: PlexMediaDTO };
 
 export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStatusDTO };
 
@@ -321,7 +335,7 @@ export type BaseModel = object;
 
 export type AdvancedSettingsModel = BaseModel & { downloadManager: DownloadManagerModel };
 
-export type DownloadManagerModel = BaseModel & { downloadSegments?: number };
+export type DownloadManagerModel = BaseModel & { downloadSegments: number };
 
 export type UserInterfaceSettingsModel = BaseModel & {
   confirmationSettings: ConfirmationSettingsModel;
@@ -362,19 +376,8 @@ export interface DownloadProgress {
   timeRemaining: number;
   bytesRemaining: number;
   workerProgresses: IDownloadWorkerProgress[];
-}
-
-export interface IDownloadWorkerProgress {
-  id?: number;
-  dataReceived?: number;
-  dataTotal?: number;
-  downloadSpeed?: number;
-  downloadSpeedFormatted?: string | null;
-  timeRemaining?: number;
-  bytesRemaining?: number;
-  isCompleted?: boolean;
-  percentage?: number;
-  downloadSpeedAverage?: number;
+  plexServerId: number;
+  plexLibraryId: number;
 }
 
 export interface DownloadTaskCreationProgress {
@@ -405,6 +408,8 @@ export interface PlexAccountRefreshProgress {
 export interface DownloadStatusChanged {
   id: number;
   status: DownloadStatus;
+  plexServerId: number;
+  plexLibraryId: number;
 }
 
 export interface FileMergeProgress {
@@ -417,4 +422,6 @@ export interface FileMergeProgress {
   transferSpeedFormatted: string;
   timeRemaining: number;
   bytesRemaining: number;
+  plexServerId: number;
+  plexLibraryId: number;
 }

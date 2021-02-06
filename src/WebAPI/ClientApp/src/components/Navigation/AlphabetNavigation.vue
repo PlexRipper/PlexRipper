@@ -1,8 +1,16 @@
 <template>
 	<v-col cols="auto" class="d-flex flex-column pt-2">
-		<p-btn v-for="letter in alphabet" :key="letter" :width="20" tile depressed button-type="alphabet" @click="scrollTo(letter)">
+		<v-btn
+			v-for="letter in alphabet"
+			:key="letter"
+			:width="20"
+			class="navigation-btn filled"
+			tile
+			depressed
+			@click="scrollTo(letter)"
+		>
 			<span>{{ letter }}</span>
-		</p-btn>
+		</v-btn>
 	</v-col>
 </template>
 

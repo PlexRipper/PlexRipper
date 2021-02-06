@@ -88,6 +88,8 @@ namespace PlexRipper.FileSystem
                             DataTransferred = dataTransferred,
                             DataTotal = fileTask.FileSize,
                             DownloadTaskId = fileTask.DownloadTaskId,
+                            PlexLibraryId = fileTask.DownloadTask.PlexLibraryId,
+                            PlexServerId = fileTask.DownloadTask.PlexServerId,
                             TransferSpeed = DataFormat.GetDownloadSpeed(dataTransferred, ElapsedTime.TotalSeconds),
                         };
                     })

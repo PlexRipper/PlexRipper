@@ -18,7 +18,7 @@ namespace PlexRipper.WebAPI.Common
                 // Convert movie typed downloadTasks
                 if (downloadTask.MediaType == PlexMediaType.Movie)
                 {
-                    mappedDownloadTask.Key = downloadTask.Key;
+                    mappedDownloadTask.Key = downloadTask.Id;
                     mappedDownloadTask.Title = downloadTask.TitleMovie;
                     convertedDownloadTasks.Add(mappedDownloadTask);
                     continue;

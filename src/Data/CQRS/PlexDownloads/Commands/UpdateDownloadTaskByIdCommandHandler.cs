@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using FluentResults;
@@ -30,23 +31,24 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
 
         public async Task<Result> Handle(UpdateDownloadTaskByIdCommand command, CancellationToken cancellationToken)
         {
-            var downloadTask = await _dbContext.DownloadTasks
-                .Include(x => x.DownloadWorkerTasks)
-                .FirstOrDefaultAsync(x => x.Id == command.DownloadTask.Id, cancellationToken);
-
-            if (downloadTask == null)
-            {
-                return ResultExtensions.GetEntityNotFound(nameof(downloadTask), command.DownloadTask.Id);
-            }
-
-            _dbContext.Entry(downloadTask).CurrentValues.SetValues(command.DownloadTask);
-            _dbContext.Entry(downloadTask).Reference(x => x.DestinationFolder).IsModified = false;
-            _dbContext.Entry(downloadTask).Reference(x => x.DestinationFolder).IsModified = false;
-            _dbContext.Entry(downloadTask).Reference(x => x.DownloadFolder).IsModified = false;
-            _dbContext.Entry(downloadTask).Reference(x => x.PlexServer).IsModified = false;
-            _dbContext.Entry(downloadTask).Reference(x => x.PlexLibrary).IsModified = false;
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            // var downloadTask = await _dbContext.DownloadTasks
+            //     .Include(x => x.DownloadWorkerTasks)
+            //     .FirstOrDefaultAsync(x => x.Id == command.DownloadTask.Id, cancellationToken);
+            //
+            // if (downloadTask == null)
+            // {
+            //     return ResultExtensions.GetEntityNotFound(nameof(downloadTask), command.DownloadTask.Id);
+            // }
+            //
+            // _dbContext.Entry(downloadTask).CurrentValues.SetValues(command.DownloadTask);
+            // _dbContext.Entry(downloadTask).Reference(x => x.DestinationFolder).IsModified = false;
+            // _dbContext.Entry(downloadTask).Reference(x => x.DestinationFolder).IsModified = false;
+            // _dbContext.Entry(downloadTask).Reference(x => x.DownloadFolder).IsModified = false;
+            // _dbContext.Entry(downloadTask).Reference(x => x.PlexServer).IsModified = false;
+            // _dbContext.Entry(downloadTask).Reference(x => x.PlexLibrary).IsModified = false;
+            //
+            // await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.BulkUpdateAsync(new List<DownloadTask> { command.DownloadTask });
             await _dbContext.BulkInsertOrUpdateAsync(command.DownloadTask.DownloadWorkerTasks);
             return Result.Ok();
         }

@@ -116,8 +116,8 @@ namespace PlexRipper.WebAPI.SignalR
                 return;
             }
 
-
-            await _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", _mapper.Map<DownloadTaskDTO>(downloadTask));
+            var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
+            await _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", downloadTaskDTO);
         }
 
         /// <inheritdoc/>

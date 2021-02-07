@@ -53,7 +53,7 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { pauseDownloadTask, restartDownloadTask, startDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@state/downloadService';
-import { DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { filter } from 'lodash';
 import ISelection from '@interfaces/ISelection';
@@ -78,16 +78,12 @@ export default class Downloads extends Vue {
 
 	private dialog: boolean = false;
 
-	get selectedIds(): number[] {
-		return this.selected.map((x) => x.id);
-	}
-
-	get getSelected(): string[] {
+	get getSelected(): number[] {
 		return this.selected.map((x) => x.keys).flat(1);
 	}
 
 	get hasSelected(): boolean {
-		return this.selectedIds.length > 0;
+		return this.getSelected.length > 0;
 	}
 
 	// region single commands
@@ -114,10 +110,8 @@ export default class Downloads extends Vue {
 	}
 
 	deleteDownloadTask(downloadTask: DownloadTaskDTO): void {
-		if (downloadTask.mediaType === PlexMediaType.Episode) {
-			DownloadService.deleteDownloadTasks([downloadTask.id]);
-			this.selected = filter(this.selected, (x) => x.id !== downloadTask.id);
-		}
+		DownloadService.deleteDownloadTasks([downloadTask.id]);
+		this.selected = filter(this.selected, (x) => x.id !== downloadTask.id);
 	}
 
 	detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
@@ -141,7 +135,7 @@ export default class Downloads extends Vue {
 		if (!this.hasSelected) {
 			DownloadService.clearDownloadTasks([]);
 		} else {
-			DownloadService.clearDownloadTasks(this.selectedIds);
+			DownloadService.clearDownloadTasks(this.getSelected);
 			this.selected = [];
 		}
 	}
@@ -163,7 +157,7 @@ export default class Downloads extends Vue {
 	}
 
 	deleteDownloadTasks(): void {
-		DownloadService.deleteDownloadTasks(this.selectedIds);
+		DownloadService.deleteDownloadTasks(this.getSelected);
 		this.selected = [];
 	}
 

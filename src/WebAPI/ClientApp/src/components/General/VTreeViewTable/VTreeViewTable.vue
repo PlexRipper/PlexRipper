@@ -54,8 +54,8 @@
 									:item-key="itemKey"
 									item-text="title"
 									class="v-tree-view-table-row"
-									:value="findSelected(parentItem.key)"
-									@input="updateSelected(parentItem.key, $event)"
+									:value="findSelected(parentItem[itemKey])"
+									@input="updateSelected(parentItem[itemKey], $event)"
 								>
 									<template #label="{ item }">
 										<v-row align="center">
@@ -206,7 +206,7 @@ export default class VTreeViewTable extends Vue {
 	}
 
 	get isIndeterminate(): boolean {
-		return this.selected.length < this.items.length && this.selected.length > 0;
+		return this.getSelected.length < this.items.length && this.getSelected.length > 0;
 	}
 
 	get containerRef(): any {

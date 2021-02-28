@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
-    public interface IFileSystem
+    public interface IFileSystem : ISetup
     {
 
         Result<FileStream> SaveFile(string directory, string fileName, long fileSize);
@@ -14,8 +14,6 @@ namespace PlexRipper.Application.Common
         FileSystemResult LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
 
         Result<FileStream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize);
-
-        Result Setup();
 
         Result CreateDirectoryFromFilePath(string filePath);
 

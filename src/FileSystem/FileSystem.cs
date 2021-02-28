@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
@@ -27,7 +28,7 @@ namespace PlexRipper.FileSystem
 
         #region Methods
 
-        public Result Setup()
+        public async Task<Result> SetupAsync()
         {
             return CreateConfigDirectory();
         }

@@ -206,9 +206,14 @@ namespace PlexRipper.DownloadManager.Download
                 DownloadStatus = DownloadStatus.Error;
             }
 
-            if (clientStatus.All(x => x == DownloadStatus.Downloading))
+            if (clientStatus.Any(x => x == DownloadStatus.Downloading))
             {
                 DownloadStatus = DownloadStatus.Downloading;
+            }
+
+            if (clientStatus.All(x => x == DownloadStatus.Completed))
+            {
+                DownloadStatus = DownloadStatus.Completed;
             }
 
             DownloadTask.DownloadWorkerTasks = downloadWorkerTasks.ToList();

@@ -26,9 +26,9 @@ namespace PlexRipper.DownloadManager
         /// <param name="signalRService"></param>
         public DownloadQueue(IMediator mediator, ISignalRService signalRService) : base(mediator, signalRService) { }
 
-        public Result<bool> Setup()
+        public async Task<Result> SetupAsync()
         {
-            ExecuteDownloadQueue();
+            await ExecuteDownloadQueue();
             return Result.Ok(true);
         }
 
@@ -37,11 +37,11 @@ namespace PlexRipper.DownloadManager
             Task.Run(() => _checkDownloadQueue.Writer.WriteAsync(downloadManager));
         }
 
-        public void ExecuteDownloadQueue()
+        public async Task ExecuteDownloadQueue()
         {
             Log.Information("Running DownloadQueue executor");
 
-            Task.Factory.StartNew(async () =>
+            await Task.Factory.StartNew(async () =>
             {
                 while (await _checkDownloadQueue.Reader.WaitToReadAsync())
                 {
@@ -101,6 +101,5 @@ namespace PlexRipper.DownloadManager
             }, TaskCreationOptions.LongRunning);
         }
 
-        public void TerminateDownloadQueue() { }
     }
 }

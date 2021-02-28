@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common;
@@ -9,7 +10,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
-    public class PlexRipperDbContext : DbContext
+    public class PlexRipperDbContext : DbContext, ISetup
     {
         private readonly IFileSystem _fileSystem;
 
@@ -106,27 +107,27 @@ namespace PlexRipper.Data
 
         #region Methods
 
-        public Result Setup()
+        public async Task<Result> SetupAsync()
         {
             // Should the Database be deleted and re-created
             if (ResetDatabase)
             {
                 Log.Warning("ResetDB command is true, database will be deleted and re-created.");
-                Database.EnsureDeleted();
+                await Database.EnsureDeletedAsync();
             }
 
             if (!IsTestMode)
             {
-                Database.Migrate();
+                await Database.MigrateAsync();
             }
             else
             {
                 Log.Information("Database will be setup in TestMode");
-                Database.EnsureCreated();
+                await Database.EnsureCreatedAsync();
             }
 
             // Check if database exists and can be connected to.
-            var exist = Database.CanConnect();
+            var exist = await Database.CanConnectAsync();
             if (exist)
             {
                 Log.Information("Database was successfully created and connected!");
@@ -178,5 +179,6 @@ namespace PlexRipper.Data
         }
 
         #endregion Methods
+
     }
 }

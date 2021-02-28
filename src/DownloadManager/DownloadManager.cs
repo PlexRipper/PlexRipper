@@ -338,10 +338,10 @@ namespace PlexRipper.DownloadManager
 
         #region Commands
 
-        public Result<bool> Setup()
+        public async Task<Result> SetupAsync()
         {
             Log.Information("Running DownloadManager setup.");
-            _downloadQueue.Setup();
+            await _downloadQueue.SetupAsync();
             return Result.Ok(true);
         }
 
@@ -486,10 +486,26 @@ namespace PlexRipper.DownloadManager
             foreach (int downloadTaskId in downloadTaskIds)
             {
                 var downloadClient = GetDownloadClient(downloadTaskId);
+                DownloadTask downloadTask = null;
                 if (downloadClient.IsSuccess)
                 {
                     await downloadClient.Value.Stop();
+                    downloadTask = downloadClient.Value.DownloadTask;
                 }
+
+                if (downloadTask is null)
+                {
+                    var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true));
+                    if (downloadTaskResult.IsFailed)
+                    {
+                        continue;
+                    }
+
+                    downloadTask = downloadTaskResult.Value;
+                }
+
+                downloadTask.DownloadStatus = DownloadStatus.Stopped;
+                await UpdateDownloadTaskStatusAsync(downloadTask);
             }
 
             return Result.Ok();

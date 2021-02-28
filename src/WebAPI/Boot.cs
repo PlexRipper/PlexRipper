@@ -36,22 +36,16 @@ namespace PlexRipper.WebAPI
             _dbContext = dbContext;
         }
 
-        public Task WaitForStartAsync(CancellationToken cancellationToken)
+        public async Task WaitForStartAsync(CancellationToken cancellationToken)
         {
             Log.Information("Initiating boot process");
             ServicePointManager.DefaultConnectionLimit = 1000;
 
-            var fileSystemSetup = _fileSystem.Setup();
-            if (fileSystemSetup.IsFailed)
-            {
-                return Task.CompletedTask;
-            }
-
-            _dbContext.Setup();
-            _userSettings.Setup();
-            _downloadManager.Setup();
-            _fileMerger.Setup();
-            return Task.CompletedTask;
+            await _fileSystem.SetupAsync();
+            await _dbContext.SetupAsync();
+            await _userSettings.SetupAsync();
+            await  _downloadManager.SetupAsync();
+            await  _fileMerger.SetupAsync();
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

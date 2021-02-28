@@ -26,7 +26,7 @@ namespace PlexRipper.BaseTests
             // builder.Populate(services);
 
             AutofacContainer = builder.Build();
-            PlexRipperDbContext.Setup();
+            PlexRipperDbContext.SetupAsync();
 
         }
 

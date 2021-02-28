@@ -52,7 +52,7 @@ namespace PlexRipper.FileSystem
 
         private async Task ExecuteFileTasks()
         {
-            Log.Debug("Running FileTask executor");
+            Log.Information("Running FileTask executor");
             await foreach (var fileTask in _channel.Reader.ReadAllAsync(_token))
             {
                 if (!fileTask.FilePaths.Any())
@@ -101,6 +101,7 @@ namespace PlexRipper.FileSystem
                     var result = _fileSystem.CreateDirectoryFromFilePath(fileTask.DestinationFilePath);
                     if (result.IsFailed)
                     {
+                        // TODO do something here with the error
                         continue;
                     }
 
@@ -121,6 +122,7 @@ namespace PlexRipper.FileSystem
                 // Clean-up
                 _bytesReceivedProgress.OnCompleted();
                 _bytesReceivedProgress.Dispose();
+                await _mediator.Send(new DeleteFileTaskByIdCommand(fileTask.Id));
                 Log.Information($"Finished combining {fileTask.FilePaths.Count} files into {fileTask.FileName}");
             }
         }
@@ -129,7 +131,7 @@ namespace PlexRipper.FileSystem
 
         #region Public
 
-        public Result<bool> Setup()
+        public async Task<Result> SetupAsync()
         {
             _copytask = Task.Factory.StartNew(ExecuteFileTasks, TaskCreationOptions.LongRunning);
 
@@ -138,7 +140,19 @@ namespace PlexRipper.FileSystem
                 return Result.Fail("ExecuteFileTasks failed due to an error");
             }
 
+            await ResumeFileTasks();
+
             return Result.Ok(true);
+        }
+
+        private async Task ResumeFileTasks()
+        {
+            var fileTasksResult = await _mediator.Send(new GetAllFileTasksQuery());
+
+            foreach (var downloadFileTask in fileTasksResult.Value)
+            {
+                await _channel.Writer.WriteAsync(downloadFileTask);
+            }
         }
 
         /// <summary>
@@ -161,7 +175,7 @@ namespace PlexRipper.FileSystem
                 return fileTask.LogError();
             }
 
-            _channel.Writer.TryWrite(fileTask.Value);
+            await _channel.Writer.WriteAsync(fileTask.Value);
             return Result.Ok(true);
         }
 

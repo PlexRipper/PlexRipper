@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using PlexRipper.Application.Common.DTO.DownloadManager;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
@@ -9,9 +10,7 @@ namespace PlexRipper.Application.Common
 
         Task SendDownloadTaskCreationProgressUpdate(int current, int total);
 
-        Task SendDownloadProgressUpdate(IDownloadProgress downloadProgress);
-
-        Task SendDownloadTaskUpdate(DownloadTask downloadTask);
+        Task SendDownloadTaskUpdate(DownloadClientUpdate downloadClientUpdate);
 
         /// <summary>
         /// Sends a <see cref="FileMergeProgress"/> object to the SignalR client in the front-end.

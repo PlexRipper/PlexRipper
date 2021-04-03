@@ -159,4 +159,7 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B4C02A51-7A0F-40AF-B559-20772614ED60}
 	EndGlobalSection
+	GlobalSection(RiderSharedRunConfigurations) = postSolution
+		File = src\WebAPI\ClientApp\.run\Nuxt Debug JavaScript.run.xml
+	EndGlobalSection
 EndGlobal

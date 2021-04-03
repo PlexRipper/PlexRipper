@@ -3,7 +3,6 @@ import { LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
 import {
-	DownloadProgress,
 	LibraryProgress,
 	DownloadTaskCreationProgress,
 	FileMergeProgress,
@@ -25,7 +24,6 @@ export class SignalrService {
 	private _notificationHubConnection: HubConnection<NotificationHub> | null = null;
 	private _notificationHubSubscription: Subscription | null = null;
 
-	private _downloadProgressSubject: ReplaySubject<DownloadProgress> = new ReplaySubject<DownloadProgress>();
 	private _downloadTaskUpdateSubject: ReplaySubject<DownloadTaskDTO> = new ReplaySubject<DownloadTaskDTO>();
 	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> = new ReplaySubject<DownloadTaskCreationProgress>();
 
@@ -73,10 +71,6 @@ export class SignalrService {
 
 		this._notificationHubConnection?.connectionState$.subscribe((connectionState) => {
 			this._notificationHubConnectionState = connectionState.status;
-		});
-
-		this._progressHubConnection?.on<DownloadProgress>('DownloadProgress').subscribe((data) => {
-			this._downloadProgressSubject.next(data);
 		});
 
 		this._progressHubConnection?.on<DownloadTaskDTO>('DownloadTaskUpdate').subscribe((data) => {
@@ -158,10 +152,6 @@ export class SignalrService {
 		return this._downloadTaskCreationProgressSubject.asObservable().pipe(takeWhile((data) => !data.isComplete));
 	}
 
-	public getDownloadProgress(): Observable<DownloadProgress> {
-		return this._downloadProgressSubject.asObservable();
-	}
-
 	public getFileMergeProgress(): Observable<FileMergeProgress> {
 		return this._fileMergeProgressSubject.asObservable();
 	}
@@ -187,7 +177,6 @@ const signalrService = new SignalrService();
 export default signalrService;
 
 export interface ProgressHub {
-	DownloadProgress: DownloadProgress;
 	FileMergeProgress: FileMergeProgress;
 	DownloadTaskCreation: DownloadTaskCreationProgress;
 	DownloadTaskUpdate: DownloadTaskDTO;

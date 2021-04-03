@@ -53,10 +53,14 @@ namespace PlexRipper.FileSystem
         private async Task ExecuteFileTasks()
         {
             Log.Information("Running FileTask executor");
-            await foreach (var fileTask in _channel.Reader.ReadAllAsync(_token))
+
+            while (!_token.IsCancellationRequested)
             {
+                var fileTask = await _channel.Reader.ReadAsync(_token);
+
                 if (!fileTask.FilePaths.Any())
                 {
+                    Log.Error($"File task: {fileTask.FileName} with id {fileTask.Id} did not have any file paths to merge");
                     return;
                 }
 

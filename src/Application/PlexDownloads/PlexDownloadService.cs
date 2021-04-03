@@ -113,7 +113,7 @@ namespace PlexRipper.Application.PlexDownloads
             var result = await _folderPathService.CheckIfFolderPathsAreValid();
             if (result.IsFailed)
             {
-                return result;
+                return result.LogError();
             }
 
             switch (type)

@@ -5,7 +5,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
-    public class DownloadTaskDTO : IDownloadProgress
+    public class DownloadTaskDTO
     {
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
@@ -72,9 +72,6 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("timeRemaining", Required = Required.Always)]
         public long TimeRemaining { get; set; }
-
-        [JsonProperty("downloadWorkersProgress", Required = Required.Always)]
-        public List<IDownloadWorkerProgress> WorkerProgresses { get; set; } = new List<IDownloadWorkerProgress>();
 
         [JsonProperty("destinationPath", Required = Required.Always)]
         public string DestinationPath { get; set; }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Common.DTO.DownloadManager;
 using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Common;
@@ -29,7 +30,7 @@ namespace PlexRipper.DownloadManager
         public async Task<Result> SetupAsync()
         {
             await ExecuteDownloadQueue();
-            return Result.Ok(true);
+            return Result.Ok();
         }
 
         public void CheckDownloadQueue(IDownloadManager downloadManager)
@@ -69,7 +70,7 @@ namespace PlexRipper.DownloadManager
                                 if (downloadTask.DownloadStatus == DownloadStatus.Initialized)
                                 {
                                     downloadTask.DownloadStatus = DownloadStatus.Queued;
-                                    await UpdateDownloadTaskStatusAsync(downloadTask);
+                                    await UpdateDownloadTaskStatusAsync(new DownloadClientUpdate(downloadTask));
                                 }
                             }
 
@@ -100,6 +101,5 @@ namespace PlexRipper.DownloadManager
                 }
             }, TaskCreationOptions.LongRunning);
         }
-
     }
 }

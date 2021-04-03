@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using AutoMapper;
 using FluentResults;
-using PlexRipper.Application.Common.DTO.WebApi;
+using PlexRipper.Application.Common.DTO.DownloadManager;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
@@ -88,6 +88,7 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.PlexLibraryId, opt => opt.MapFrom(entity => entity.PlexLibraryId))
                 .ForMember(dto => dto.PlexServerId, opt => opt.MapFrom(entity => entity.PlexServerId));
 
+            CreateMap<DownloadClientUpdate, DownloadTaskDTO>(MemberList.None);
         }
 
         private void PlexMediaMappings()

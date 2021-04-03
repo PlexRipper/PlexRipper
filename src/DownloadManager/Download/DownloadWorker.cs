@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Common.DTO.DownloadManager;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Common;
 using Serilog.Events;
@@ -24,21 +25,17 @@ namespace PlexRipper.DownloadManager.Download
     {
         #region Fields
 
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new Subject<DownloadWorkerLog>();
+        private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new();
 
-        private readonly Subject<IDownloadWorkerProgress> _downloadWorkerProgress = new Subject<IDownloadWorkerProgress>();
-
-        private readonly Subject<DownloadWorkerTask> _downloadWorkerTaskChanged = new Subject<DownloadWorkerTask>();
+        private readonly Subject<DownloadWorkerUpdate> _downloadWorkerUpdate = new();
 
         private readonly IFileSystem _fileSystem;
 
         private readonly IPlexRipperHttpClient _httpClient;
 
         private int _count;
-
-        private Task _downloadTask;
 
         private bool _isDownloading = true;
 
@@ -104,9 +101,7 @@ namespace PlexRipper.DownloadManager.Download
 
         public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
-        public IObservable<IDownloadWorkerProgress> DownloadWorkerProgress => _downloadWorkerProgress.AsObservable();
-
-        public IObservable<DownloadWorkerTask> DownloadWorkerTaskChanged => _downloadWorkerTaskChanged.AsObservable();
+        public IObservable<DownloadWorkerUpdate> DownloadWorkerUpdate => _downloadWorkerUpdate.AsObservable();
 
         #endregion
 
@@ -135,7 +130,7 @@ namespace PlexRipper.DownloadManager.Download
             Log.Debug(log);
             DownloadWorkerTask.DownloadStatus = status;
             SendDownloadWorkerLog(LogEventLevel.Information, log);
-            _downloadWorkerTaskChanged.OnNext(DownloadWorkerTask);
+            SendDownloadWorkerUpdate();
         }
 
         #endregion
@@ -163,16 +158,19 @@ namespace PlexRipper.DownloadManager.Download
             DownloadSpeedAverage = DownloadSpeedAverage * (_count - 1) / _count + newValue / _count;
         }
 
-        private void UpdateProgress()
+        private void SendDownloadWorkerUpdate()
         {
             UpdateAverage(DownloadSpeed);
-            _downloadWorkerProgress.OnNext(
-                new DownloadWorkerProgress(
-                    Id,
-                    BytesReceived,
-                    DownloadWorkerTask.BytesRangeSize,
-                    DownloadSpeed,
-                    DownloadSpeedAverage));
+            _downloadWorkerUpdate.OnNext(
+                new DownloadWorkerUpdate
+                {
+                    Id = Id,
+                    DataReceived = BytesReceived,
+                    DataTotal = DownloadWorkerTask.BytesRangeSize,
+                    DownloadStatus = DownloadWorkerTask.DownloadStatus,
+                    DownloadSpeed = DownloadSpeed,
+                    DownloadSpeedAverage = DownloadSpeedAverage,
+                });
         }
 
         #endregion
@@ -232,7 +230,7 @@ namespace PlexRipper.DownloadManager.Download
 
                         if (bytesRead <= 0)
                         {
-                            UpdateProgress();
+                            SendDownloadWorkerUpdate();
                             SetDownloadWorkerTaskChanged(DownloadStatus.Completed);
                             break;
                         }
@@ -242,7 +240,7 @@ namespace PlexRipper.DownloadManager.Download
                         await _fileStream.FlushAsync(_cancellationTokenSource.Token);
 
                         BytesReceived += bytesRead;
-                        UpdateProgress();
+                        SendDownloadWorkerUpdate();
                     }
                 }
                 catch (TaskCanceledException e)
@@ -321,9 +319,8 @@ namespace PlexRipper.DownloadManager.Download
             }
 
             // Dispose subscriptions
-            _downloadWorkerProgress?.Dispose();
+            _downloadWorkerUpdate?.Dispose();
             _downloadWorkerLog?.Dispose();
-            _downloadWorkerTaskChanged?.Dispose();
 
             // Dispose timer
             _timer?.Dispose();

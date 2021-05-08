@@ -3,6 +3,7 @@
 		<v-container>
 			<v-row justify="center">
 				<v-col cols="auto">
+					<h1>ERROR!</h1>
 					<h1 class="text-left">
 						<pre><code class="no-background">{{ errorFormatted }}</code></pre>
 					</h1>

@@ -319,6 +319,11 @@ export default class DownloadsTable extends Vue {
 			DownloadService.getDownloadList().pipe(switchMap((x) => of(x?.filter((x) => x.plexServerId === this.serverId) ?? []))),
 			(data: DownloadTaskDTO[]) => {
 				if (data) {
+					data.forEach((x) => {
+						if (x.children === null) {
+							x.children = [];
+						}
+					});
 					this.downloadRows = data as DownloadTaskDTO[];
 				}
 			},

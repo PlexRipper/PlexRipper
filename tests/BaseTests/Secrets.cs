@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace PlexRipper.BaseTests
 {
-    public class Secrets
+    public static class Secrets
     {
         public static TestCredentialsDTO GetCredentials()
         {

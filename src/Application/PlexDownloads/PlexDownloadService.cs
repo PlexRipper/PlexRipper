@@ -116,26 +116,18 @@ namespace PlexRipper.Application.PlexDownloads
                 return result.LogError();
             }
 
-            switch (type)
+            return type switch
             {
-                case PlexMediaType.Movie:
-                    return await DownloadMovieAsync(mediaIds, plexAccountId);
-                case PlexMediaType.TvShow:
-                    return await DownloadTvShowAsync(mediaIds, plexAccountId);
-                case PlexMediaType.Season:
-                    return await DownloadTvShowSeasonAsync(mediaIds, plexAccountId);
-                case PlexMediaType.Episode:
-                    return await DownloadTvShowEpisodeAsync(mediaIds, plexAccountId);
-                case PlexMediaType.Music:
-                case PlexMediaType.Album:
-                    return Result.Fail("PlexMediaType was Music or Album, this is not yet supported").LogWarning();
-                case PlexMediaType.None:
-                    return Result.Fail("PlexMediaType was none in DownloadMediaAsync").LogWarning();
-                case PlexMediaType.Unknown:
-                    return Result.Fail("PlexMediaType was Unknown in DownloadMediaAsync").LogWarning();
-                default:
-                    return Result.Fail($"PlexMediaType defaulted with value {type.ToString()} in DownloadMediaAsync").LogWarning();
-            }
+                PlexMediaType.Movie => await DownloadMovieAsync(mediaIds, plexAccountId),
+                PlexMediaType.TvShow => await DownloadTvShowAsync(mediaIds, plexAccountId),
+                PlexMediaType.Season => await DownloadTvShowSeasonAsync(mediaIds, plexAccountId),
+                PlexMediaType.Episode => await DownloadTvShowEpisodeAsync(mediaIds, plexAccountId),
+                PlexMediaType.Music => Result.Fail("PlexMediaType was Music or Album, this is not yet supported").LogWarning(),
+                PlexMediaType.Album => Result.Fail("PlexMediaType was Music or Album, this is not yet supported").LogWarning(),
+                PlexMediaType.None => Result.Fail("PlexMediaType was none in DownloadMediaAsync").LogWarning(),
+                PlexMediaType.Unknown => Result.Fail("PlexMediaType was Unknown in DownloadMediaAsync").LogWarning(),
+                _ => Result.Fail($"PlexMediaType defaulted with value {type.ToString()} in DownloadMediaAsync").LogWarning()
+            };
         }
 
         public async Task<Result<bool>> DeleteDownloadTasksAsync(IEnumerable<int> downloadTaskIds)

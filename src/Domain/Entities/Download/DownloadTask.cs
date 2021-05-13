@@ -165,6 +165,11 @@ namespace PlexRipper.Domain
         {
             get
             {
+                if (DownloadFolder is null)
+                {
+                    return string.Empty;
+                }
+
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:

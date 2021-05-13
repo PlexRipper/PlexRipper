@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
@@ -12,8 +11,6 @@ namespace PlexRipper.Data
 {
     public class PlexRipperDbContext : DbContext, ISetup
     {
-        private readonly IFileSystem _fileSystem;
-
         #region Properties
 
         #region Tables
@@ -96,10 +93,7 @@ namespace PlexRipper.Data
 
         #region Constructors
 
-        public PlexRipperDbContext(IFileSystem fileSystem)
-        {
-            _fileSystem = fileSystem;
-        }
+        public PlexRipperDbContext() { }
 
         public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
 
@@ -179,6 +173,5 @@ namespace PlexRipper.Data
         }
 
         #endregion Methods
-
     }
 }

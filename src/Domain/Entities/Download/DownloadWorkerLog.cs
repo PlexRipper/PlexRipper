@@ -29,6 +29,34 @@ namespace PlexRipper.Domain
 
         #region Helpers
 
+        public void Log()
+        {
+            switch (LogLevel)
+            {
+                case LogEventLevel.Verbose:
+                    Domain.Log.Verbose(Message);
+                    break;
+                case LogEventLevel.Debug:
+                    Domain.Log.Debug(Message);
+                    break;
+                case LogEventLevel.Information:
+                    Domain.Log.Information(Message);
+                    break;
+                case LogEventLevel.Warning:
+                    Domain.Log.Warning(Message);
+                    break;
+                case LogEventLevel.Error:
+                    Domain.Log.Error(Message);
+                    break;
+                case LogEventLevel.Fatal:
+                    Domain.Log.Fatal(Message);
+                    break;
+                default:
+                    Domain.Log.Debug(Message);
+                    break;
+            }
+        }
+
         #endregion
     }
 }

@@ -9,7 +9,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.FileSystem
 {
-    public class FileSystem : IFileSystem
+    public class FileSystemCustom : IFileSystemCustom
     {
         #region Fields
 
@@ -19,7 +19,7 @@ namespace PlexRipper.FileSystem
 
         #region Constructors
 
-        public FileSystem(IDiskProvider diskProvider)
+        public FileSystemCustom(IDiskProvider diskProvider)
         {
             _diskProvider = diskProvider;
         }
@@ -227,7 +227,7 @@ namespace PlexRipper.FileSystem
             }
         }
 
-        public Result<FileStream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize)
+        public Result<Stream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize)
         {
             try
             {
@@ -254,7 +254,7 @@ namespace PlexRipper.FileSystem
                 // var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous);
                 // Pre-allocate the required file size
                 fileStream.SetLength(fileSize);
-                return Result.Ok(fileStream);
+                return Result.Ok<Stream>(fileStream);
             }
             catch (Exception e)
             {

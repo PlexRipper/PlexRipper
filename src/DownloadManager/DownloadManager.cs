@@ -122,7 +122,7 @@ namespace PlexRipper.DownloadManager
             }
 
             // Setup the client
-            var setupResult = await newClient.SetupAsync(downloadTask.DownloadWorkerTasks);
+            var setupResult = await newClient.SetupAsync();
             if (setupResult.IsFailed)
             {
                 return setupResult.ToResult();
@@ -366,7 +366,7 @@ namespace PlexRipper.DownloadManager
             var downloadTasksResult = ValidateDownloadTasks(downloadTasks);
             if (downloadTasksResult.IsFailed)
             {
-                return downloadTasksResult.ToResult();
+                return downloadTasksResult.ToResult().LogError();
             }
 
             // Add to Database

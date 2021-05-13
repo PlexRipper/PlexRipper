@@ -6,6 +6,8 @@ namespace PlexRipper.Domain
 {
     public class FolderPath : BaseEntity
     {
+        #region Properties
+
         /// <summary>
         /// The folder type, do now edit or access this property directly. Use the FolderType property!
         /// </summary>
@@ -17,6 +19,17 @@ namespace PlexRipper.Domain
 
         [Column(Order = 3)]
         public string DirectoryPath { get; set; }
+
+        #endregion
+
+        public FolderPath() { }
+
+        public FolderPath(FolderType folderType, string displayName, string directoryPath)
+        {
+            FolderType = folderType;
+            DisplayName = displayName;
+            DirectoryPath = directoryPath;
+        }
 
         #region Helpers
 

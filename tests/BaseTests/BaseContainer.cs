@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using MediatR;
@@ -38,15 +39,25 @@ namespace PlexRipper.BaseTests
 
             // SignalR requires the default ILogger
             builder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
+
             builder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
+
+            //builder.RegisterInstance(BaseDependanciesTest.GetLogger<object>()).As<ILogger>().SingleInstance();
 
             AutofacContainer = builder.Build();
             PlexRipperDbContext.SetupAsync();
         }
 
-        public void SetupTestAccount()
+        public async Task<PlexAccount> SetupTestAccount()
         {
-            GetPlexAccountService.CreatePlexAccountAsync(new PlexAccount(Secrets.Account1.Username, Secrets.Account1.Password));
+            var plexAccount = new PlexAccount(Secrets.Account2.Username, Secrets.Account2.Password)
+            {
+                DisplayName = "Test Account",
+            };
+
+            var result = await GetPlexAccountService.CreatePlexAccountAsync(plexAccount);
+
+            return result.Value;
         }
 
         public static IWebHostEnvironment GetWebHostEnvironment()
@@ -66,6 +77,8 @@ namespace PlexRipper.BaseTests
         public IPlexApiService GetPlexApiService => AutofacContainer.Resolve<IPlexApiService>();
 
         public IDownloadManager GetDownloadManager => AutofacContainer.Resolve<IDownloadManager>();
+
+        public IFolderPathService GetFolderPathService => AutofacContainer.Resolve<IFolderPathService>();
 
         public Func<DownloadTask, PlexDownloadClient> GetPlexDownloadClientFactory =>
             AutofacContainer.Resolve<Func<DownloadTask, PlexDownloadClient>>();

@@ -20,7 +20,7 @@ namespace PlexRipper.FileSystem
     {
         private readonly IMediator _mediator;
 
-        private readonly IFileSystem _fileSystem;
+        private readonly IFileSystemCustom _fileSystemCustom;
 
         #region Fields
 
@@ -36,10 +36,10 @@ namespace PlexRipper.FileSystem
 
         #region Constructors
 
-        public FileMerger(IMediator mediator, IFileSystem fileSystem)
+        public FileMerger(IMediator mediator, IFileSystemCustom fileSystemCustom)
         {
             _mediator = mediator;
-            _fileSystem = fileSystem;
+            _fileSystemCustom = fileSystemCustom;
         }
 
         #endregion
@@ -102,7 +102,7 @@ namespace PlexRipper.FileSystem
                 try
                 {
                     // Ensure destination directory exists and is otherwise created.
-                    var result = _fileSystem.CreateDirectoryFromFilePath(fileTask.DestinationFilePath);
+                    var result = _fileSystemCustom.CreateDirectoryFromFilePath(fileTask.DestinationFilePath);
                     if (result.IsFailed)
                     {
                         // TODO do something here with the error
@@ -114,7 +114,7 @@ namespace PlexRipper.FileSystem
                     {
                         Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
                         await StreamExtensions.CopyMultipleToAsync(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
-                        _fileSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
+                        _fileSystemCustom.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
                     }
                 }
                 catch (Exception e)

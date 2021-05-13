@@ -4,6 +4,8 @@ namespace PlexRipper.Domain
 {
     public class DownloadTaskMetaData
     {
+        #region Properties
+
         public int ReleaseYear { get; set; }
 
         public string MovieTitle { get; set; }
@@ -23,5 +25,7 @@ namespace PlexRipper.Domain
         public int TvShowEpisodeKey { get; set; }
 
         public List<PlexMediaData> MediaData { get; set; }
+
+        #endregion
     }
 }

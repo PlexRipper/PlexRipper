@@ -14,12 +14,23 @@ namespace PlexRipper.Domain
 
         private DownloadWorkerTask() { }
 
-        public DownloadWorkerTask(DownloadTask downloadTask)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DownloadWorkerTask"/> class.
+        /// </summary>
+        /// <param name="downloadTask"></param>
+        /// <param name="partIndex"></param>
+        /// <param name="startPosition"></param>
+        /// <param name="endPosition"></param>
+        public DownloadWorkerTask(DownloadTask downloadTask, int partIndex, long startPosition, long endPosition)
         {
             FileName = downloadTask.FileName;
             TempDirectory = downloadTask.DownloadPath;
             DownloadTask = downloadTask;
             DownloadTaskId = downloadTask.Id;
+
+            PartIndex = partIndex;
+            StartByte = startPosition;
+            EndByte = endPosition;
         }
 
         #endregion
@@ -53,19 +64,16 @@ namespace PlexRipper.Domain
         [Column(Order = 7)]
         public long BytesReceived { get; set; }
 
-        [Column(Order = 8)]
-        public string Url { get; set; }
-
         /// <summary>
         /// The download directory where the part is downloaded into.
         /// </summary>
-        [Column(Order = 9)]
+        [Column(Order = 8)]
         public string TempDirectory { get; internal set; }
 
         /// <summary>
         /// The elapsed time in milliseconds with an accuracy of 100 milliseconds.
         /// </summary>
-        [Column(Order = 10)]
+        [Column(Order = 9)]
         public long ElapsedTime { get; set; }
 
         #endregion
@@ -87,6 +95,9 @@ namespace PlexRipper.Domain
 
         [NotMapped]
         public string TempFilePath => Path.Combine(TempDirectory, TempFileName);
+
+        [NotMapped]
+        public string Url => DownloadTask.DownloadUrl;
 
         [NotMapped]
         public Uri Uri => new Uri(Url);

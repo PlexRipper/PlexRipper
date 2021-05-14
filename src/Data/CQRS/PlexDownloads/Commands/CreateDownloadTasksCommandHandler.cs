@@ -28,6 +28,9 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 downloadTask.RuleFor(x => x.PlexLibraryId).GreaterThan(0);
                 downloadTask.RuleFor(x => x.FileName).NotEmpty();
                 downloadTask.RuleFor(x => x.FileLocationUrl).NotEmpty();
+
+                downloadTask.RuleFor(x => x.DownloadWorkerTasks.Any()).Equal(true);
+
             });
         }
     }
@@ -45,7 +48,6 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 x.DownloadFolder = null;
                 x.PlexServer = null;
                 x.PlexLibrary = null;
-                x.DownloadWorkerTasks = new List<DownloadWorkerTask>();
             });
 
             await _dbContext.AddRangeAsync(command.DownloadTasks, cancellationToken);

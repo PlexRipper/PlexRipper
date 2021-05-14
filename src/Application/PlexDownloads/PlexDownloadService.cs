@@ -75,11 +75,10 @@ namespace PlexRipper.Application.PlexDownloads
 
             List<DownloadTask> downloadTasks = new();
 
-            for (int i = 0; i < downloadMedias.Count; i++)
+            foreach (var downloadMedia in downloadMedias)
             {
-                var downloadMedia = downloadMedias[i];
-                var result = await _plexDownloadTaskFactory.GenerateAsync(downloadMedia.MediaIds, downloadMedia.Type,
-                    downloadMedia.LibraryId);
+                var result = await _plexDownloadTaskFactory.GenerateAsync(downloadMedia.MediaIds, downloadMedia.Type);
+
                 if (result.IsFailed)
                 {
                     await _notificationsService.SendResult(result);

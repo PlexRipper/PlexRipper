@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Data;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Download;
@@ -79,6 +80,10 @@ namespace PlexRipper.BaseTests
         public IDownloadManager GetDownloadManager => AutofacContainer.Resolve<IDownloadManager>();
 
         public IFolderPathService GetFolderPathService => AutofacContainer.Resolve<IFolderPathService>();
+
+        public IPlexDownloadTaskFactory GetPlexDownloadTaskFactory => AutofacContainer.Resolve<IPlexDownloadTaskFactory>();
+
+        public IPlexRipperHttpClient GetPlexRipperHttpClient => AutofacContainer.Resolve<IPlexRipperHttpClient>();
 
         public Func<DownloadTask, PlexDownloadClient> GetPlexDownloadClientFactory =>
             AutofacContainer.Resolve<Func<DownloadTask, PlexDownloadClient>>();

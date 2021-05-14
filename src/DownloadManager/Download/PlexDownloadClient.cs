@@ -4,12 +4,11 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
-using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.DTO.DownloadManager;
-using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager.Download
@@ -28,15 +27,13 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly List<DownloadWorker> _downloadWorkers = new();
 
-        private readonly IMediator _mediator;
-
         private readonly IFileSystemCustom _fileSystemCustom;
 
         private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
 
         private readonly EventLoopScheduler _timeThreadContext = new();
 
-        private bool _isSetup;
+        private readonly CancellationTokenSource _downloadWorkersToken = new CancellationTokenSource();
 
         #endregion
 
@@ -46,18 +43,22 @@ namespace PlexRipper.DownloadManager.Download
         /// Initializes a new instance of the <see cref="PlexDownloadClient"/> class.
         /// </summary>
         /// <param name="downloadTask">The <see cref="DownloadTask"/> to start executing.</param>
-        /// <param name="mediator"></param>
         /// <param name="fileSystemCustom">Used to get fileStreams in which to store the download data.</param>
-        /// <param name="httpClientFactory"></param>
         /// <param name="downloadWorkerFactory"></param>
-        public PlexDownloadClient(DownloadTask downloadTask, IMediator mediator, IFileSystemCustom fileSystemCustom,
+        public PlexDownloadClient(DownloadTask downloadTask, IFileSystemCustom fileSystemCustom,
             Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory)
         {
-            _mediator = mediator;
             _fileSystemCustom = fileSystemCustom;
             _downloadWorkerFactory = downloadWorkerFactory;
             DownloadTask = downloadTask;
-            DownloadStatus = downloadTask.DownloadStatus;
+
+            // Create workers
+            foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
+            {
+                _downloadWorkers.Add(_downloadWorkerFactory(downloadWorkerTask));
+            }
+
+            SetupSubscriptions();
         }
 
         #endregion
@@ -83,8 +84,6 @@ namespace PlexRipper.DownloadManager.Download
         /// In how many parts/segments should the media be downloaded.
         /// </summary>
         public long Parts { get; set; } = 1;
-
-        public long TotalBytesToReceive => DownloadTask.DataTotal;
 
         #region Observables
 
@@ -201,24 +200,21 @@ namespace PlexRipper.DownloadManager.Download
         /// <returns>Is successful.</returns>
         public async Task<Result<bool>> Start()
         {
-            if (!_isSetup)
-            {
-                return Result.Fail(new Error("This plex download client has not been setup, run SetupAsync() first")).LogError();
-            }
-
             Log.Debug($"Start downloading {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
             DownloadStartAt = DateTime.UtcNow;
             try
             {
-                foreach (var downloadWorker in _downloadWorkers)
-                {
-                    var startResult = downloadWorker.Start();
-                    if (startResult.IsFailed)
-                    {
-                        await ClearDownloadWorkers();
-                        return startResult.LogError();
-                    }
-                }
+                await Task.WhenAll(_downloadWorkers.Select(x => x.StartAsync(_downloadWorkersToken.Token)).ToList());
+
+                // foreach (var downloadWorker in _downloadWorkers)
+                // {
+                //     var startResult = downloadWorker.StartAsync();
+                //     if (startResult.IsFailed)
+                //     {
+                //         await ClearDownloadWorkers();
+                //         return startResult.LogError();
+                //     }
+                // }
             }
             catch (Exception e)
             {
@@ -229,87 +225,6 @@ namespace PlexRipper.DownloadManager.Download
             }
 
             return Result.Ok();
-        }
-
-        /// <summary>
-        /// Setup this PlexDownloadClient to get ready for downloading.
-        /// </summary>
-        /// <param name="downloadWorkerTasks">Optional: If the <see cref="DownloadWorkerTask"/>s are already made then use those,
-        /// otherwise they will be created.</param>
-        /// <returns>Is successful.</returns>
-        public async Task<Result<bool>> SetupAsync()
-        {
-            var downloadWorkerTasks = DownloadTask.DownloadWorkerTasks;
-
-            if (downloadWorkerTasks is null || !downloadWorkerTasks.Any())
-            {
-                // Create download worker tasks/segments/ranges
-                var partSize = TotalBytesToReceive / Parts;
-                var remainder = TotalBytesToReceive - partSize * Parts;
-                downloadWorkerTasks = new List<DownloadWorkerTask>();
-                for (int i = 0; i < Parts; i++)
-                {
-                    long start = partSize * i;
-                    long end = start + partSize;
-                    if (i == Parts - 1 && remainder > 0)
-                    {
-                        // Add the remainder to the last download range
-                        end += remainder;
-                    }
-
-                    downloadWorkerTasks.Add(new DownloadWorkerTask(DownloadTask, i + 1, start, end));
-                }
-
-                // Verify bytes have been correctly divided
-                var totalBytesInWorkers = downloadWorkerTasks.Sum(x => x.BytesRangeSize);
-                if (totalBytesInWorkers != TotalBytesToReceive)
-                {
-                    Log.Error($"The bytes were incorrectly divided, expected {TotalBytesToReceive} but the sum was " +
-                              $"{totalBytesInWorkers} with a difference of {TotalBytesToReceive - totalBytesInWorkers}");
-                }
-
-                // Send downloadWorkerTasks to the database and retrieve entries
-                var result = await _mediator.Send(new AddDownloadWorkerTasksCommand(downloadWorkerTasks));
-                if (result.IsFailed)
-                {
-                    return result.ToResult().LogError();
-                }
-            }
-
-            var createResult = await CreateDownloadWorkers(DownloadTask.Id);
-            if (createResult.IsFailed)
-            {
-                return createResult;
-            }
-
-            SetupSubscriptions();
-            _isSetup = true;
-            return Result.Ok(true);
-        }
-
-        private async Task<Result<bool>> CreateDownloadWorkers(int downloadTaskId)
-        {
-            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true));
-            if (downloadTask.IsFailed)
-            {
-                return downloadTask.ToResult();
-            }
-
-            if (!downloadTask.Value.DownloadWorkerTasks.Any())
-            {
-                return Result.Fail($"Could not find any download worker tasks attached to download task {downloadTaskId}").LogError();
-            }
-
-            // Update the Download Task set in this client
-            DownloadTask = downloadTask.Value;
-
-            // Create workers
-            foreach (var downloadWorkerTask in downloadTask.Value.DownloadWorkerTasks)
-            {
-                _downloadWorkers.Add(_downloadWorkerFactory(downloadWorkerTask));
-            }
-
-            return Result.Ok(true);
         }
 
         /// <summary>
@@ -344,7 +259,7 @@ namespace PlexRipper.DownloadManager.Download
             {
                 _downloadWorkers.AsParallel().ForAll(async downloadWorker =>
                 {
-                    var pauseResult = await downloadWorker.Pause();
+                    var pauseResult = await downloadWorker.Stop();
                     if (pauseResult.IsFailed)
                     {
                         pauseResult.WithError(new Error(
@@ -354,7 +269,6 @@ namespace PlexRipper.DownloadManager.Download
                 });
 
                 await ClearDownloadWorkers();
-                return Result.Ok();
             }
 
             return Result.Ok();

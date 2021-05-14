@@ -1,0 +1,92 @@
+﻿{
+  "Version": "1.1",
+  "Content": {
+    "Headers": [
+      {
+        "Key": "Last-Modified",
+        "Value": [
+          "Tue, 11 May 2021 18:36:52 GMT"
+        ]
+      },
+      {
+        "Key": "Content-Range",
+        "Value": [
+          "bytes 367148032-734296064/1468592128"
+        ]
+      },
+      {
+        "Key": "Content-Length",
+        "Value": [
+          "367148033"
+        ]
+      },
+      {
+        "Key": "Content-Type",
+        "Value": [
+          "video/x-msvideo"
+        ]
+      }
+    ]
+  },
+  "StatusCode": 206,
+  "ReasonPhrase": "Partial Content",
+  "Headers": [
+    {
+      "Key": "X-Plex-Protocol",
+      "Value": [
+        "1.0"
+      ]
+    },
+    {
+      "Key": "ETag",
+      "Value": [
+        "\"176f52c121f103b628dc878342a50311e8797f91\""
+      ]
+    },
+    {
+      "Key": "Accept-Ranges",
+      "Value": [
+        "bytes"
+      ]
+    },
+    {
+      "Key": "Connection",
+      "Value": [
+        "Keep-Alive"
+      ]
+    },
+    {
+      "Key": "Keep-Alive",
+      "Value": [
+        "timeout=20"
+      ]
+    },
+    {
+      "Key": "Date",
+      "Value": [
+        "Fri, 14 May 2021 07:23:13 GMT"
+      ]
+    }
+  ],
+  "TrailingHeaders": [],
+  "RequestMessage": {
+    "Version": "1.1",
+    "VersionPolicy": 0,
+    "Content": null,
+    "Method": {
+      "Method": "GET"
+    },
+    "RequestUri": "http://localhost:8080/library/parts/68831/1586877036/file.avi?X-Plex-Token=asdasdasdasdasd",
+    "Headers": [
+      {
+        "Key": "Range",
+        "Value": [
+          "bytes=367148032-734296064"
+        ]
+      }
+    ],
+    "Properties": {},
+    "Options": {}
+  },
+  "IsSuccessStatusCode": true
+}

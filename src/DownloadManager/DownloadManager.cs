@@ -121,13 +121,6 @@ namespace PlexRipper.DownloadManager
                 return validateDownloadSizeResult.LogError();
             }
 
-            // Setup the client
-            var setupResult = await newClient.SetupAsync();
-            if (setupResult.IsFailed)
-            {
-                return setupResult.ToResult();
-            }
-
             SetupSubscriptions(newClient);
             _downloadsList.Add(newClient);
             return Result.Ok(newClient);
@@ -360,7 +353,7 @@ namespace PlexRipper.DownloadManager
         }
 
         /// <inheritdoc/>
-        public async Task<Result<bool>> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks)
+        public async Task<Result> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks)
         {
             Log.Debug($"Attempt to add {downloadTasks.Count} DownloadTasks");
             var downloadTasksResult = ValidateDownloadTasks(downloadTasks);
@@ -389,7 +382,7 @@ namespace PlexRipper.DownloadManager
 
             Log.Debug($"Successfully added all {downloadTasks.Count} DownloadTasks");
             CheckDownloadQueue();
-            return Result.Ok(true);
+            return Result.Ok();
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ namespace PlexRipper.Application.PlexDownloads
 {
     /// <summary>
     ///     Request all downloadTasks sorted in their respective <see cref="PlexServer" /> and <see cref="PlexLibrary" />.
+    ///     Includes the <see cref="DownloadWorkerTask"/>.
     /// </summary>
     public class GetAllDownloadTasksInPlexServersQuery : IRequest<Result<List<PlexServer>>>
     {

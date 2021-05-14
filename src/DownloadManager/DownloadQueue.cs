@@ -18,7 +18,7 @@ namespace PlexRipper.DownloadManager
     {
         private bool _isChecking;
 
-        private Channel<IDownloadManager> _checkDownloadQueue = Channel.CreateBounded<IDownloadManager>(1);
+        private readonly Channel<IDownloadManager> _checkDownloadQueue = Channel.CreateBounded<IDownloadManager>(1);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DownloadQueue"/> class.

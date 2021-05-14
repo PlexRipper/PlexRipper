@@ -54,6 +54,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.UnitTests", "tests\Dat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpClient", "HttpClient\HttpClient.csproj", "{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MockPlexApiServer", "tests\MockPlexApiServer\MockPlexApiServer.csproj", "{BBE5B55B-77AB-4EDC-B6CC-305D06A107FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -132,6 +134,10 @@ Global
 		{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBE5B55B-77AB-4EDC-B6CC-305D06A107FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBE5B55B-77AB-4EDC-B6CC-305D06A107FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBE5B55B-77AB-4EDC-B6CC-305D06A107FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBE5B55B-77AB-4EDC-B6CC-305D06A107FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -155,6 +161,7 @@ Global
 		{E0E9AA81-AF60-4019-9AB8-811AFC39DE24} = {664D406C-2F83-48F0-BFC3-408D5CB53C65}
 		{18A93138-6F01-4934-8402-88A99778BFA8} = {664D406C-2F83-48F0-BFC3-408D5CB53C65}
 		{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C} = {B5FA026C-E81F-40B9-84FA-E74F5BD2FBD7}
+		{BBE5B55B-77AB-4EDC-B6CC-305D06A107FB} = {033AA8B6-0752-4E0F-80A2-FC46A0D88354}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B4C02A51-7A0F-40AF-B559-20772614ED60}

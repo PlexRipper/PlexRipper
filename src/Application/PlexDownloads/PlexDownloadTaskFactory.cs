@@ -18,18 +18,21 @@ namespace PlexRipper.Application.PlexDownloads
 
         private readonly IFolderPathService _folderPathService;
 
+        private readonly IUserSettings _userSettings;
+
         public PlexDownloadTaskFactory(
             IMediator mediator,
             IPlexAuthenticationService plexAuthenticationService,
-            IFolderPathService folderPathService)
+            IFolderPathService folderPathService,
+            IUserSettings userSettings)
         {
             _mediator = mediator;
             _plexAuthenticationService = plexAuthenticationService;
             _folderPathService = folderPathService;
+            _userSettings = userSettings;
         }
 
-        public async Task<Result<List<DownloadTask>>> GenerateAsync(List<int> mediaIds, PlexMediaType type, int libraryId,
-            int plexAccountId = 0)
+        public async Task<Result<List<DownloadTask>>> GenerateAsync(List<int> mediaIds, PlexMediaType type)
         {
             var result = await _folderPathService.CheckIfFolderPathsAreValid();
             if (result.IsFailed)
@@ -37,22 +40,16 @@ namespace PlexRipper.Application.PlexDownloads
                 return result.LogError();
             }
 
-            Result<List<DownloadTask>> downloadTaskResult;
-
             switch (type)
             {
                 case PlexMediaType.Movie:
-                    downloadTaskResult = await GenerateMovieDownloadTasksAsync(mediaIds);
-                    break;
+                    return await GenerateMovieDownloadTasksAsync(mediaIds);
                 case PlexMediaType.TvShow:
-                    downloadTaskResult = await GenerateDownloadTvShowTasksAsync(mediaIds);
-                    break;
+                    return await GenerateDownloadTvShowTasksAsync(mediaIds);
                 case PlexMediaType.Season:
-                    downloadTaskResult = await GenerateDownloadTvShowSeasonTasksAsync(mediaIds);
-                    break;
+                    return await GenerateDownloadTvShowSeasonTasksAsync(mediaIds);
                 case PlexMediaType.Episode:
-                    downloadTaskResult = await GenerateDownloadTvShowEpisodeTasksAsync(mediaIds);
-                    break;
+                    return await GenerateDownloadTvShowEpisodeTasksAsync(mediaIds);
                 case PlexMediaType.Music:
                 case PlexMediaType.Album:
                     return Result.Fail("PlexMediaType was Music or Album, this is not yet supported").LogWarning();
@@ -64,13 +61,6 @@ namespace PlexRipper.Application.PlexDownloads
                     return Result.Fail($"PlexMediaType defaulted with value {type.ToString()} in DownloadMediaAsync").LogWarning();
             }
 
-            if (downloadTaskResult.IsFailed)
-            {
-                return downloadTaskResult.ToResult();
-            }
-
-            // Add folder paths
-            return await FinalizeDownloadTasks(downloadTaskResult.Value, plexAccountId);
         }
 
         #region Private Methods
@@ -96,7 +86,13 @@ namespace PlexRipper.Application.PlexDownloads
                 Log.Debug($"Created download task(s) for movie: {plexMovie.Title}");
             }
 
-            return Result.Ok(downloadTasks);
+            var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks);
+            if (finalizeDownloadTasksResult.IsFailed)
+            {
+                return finalizeDownloadTasksResult.ToResult().LogError();
+            }
+
+            return Result.Ok(finalizeDownloadTasksResult.Value);
         }
 
         public async Task<Result<List<DownloadTask>>> GenerateDownloadTvShowTasksAsync(List<int> plexTvShowIds)
@@ -121,7 +117,13 @@ namespace PlexRipper.Application.PlexDownloads
                 Log.Debug($"Created download task(s) for tvShow: {plexTvShow.Title}");
             }
 
-            return Result.Ok(downloadTasks);
+            var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks);
+            if (finalizeDownloadTasksResult.IsFailed)
+            {
+                return finalizeDownloadTasksResult.ToResult().LogError();
+            }
+
+            return Result.Ok(finalizeDownloadTasksResult.Value);
         }
 
         public async Task<Result<List<DownloadTask>>> GenerateDownloadTvShowSeasonTasksAsync(List<int> plexTvShowSeasonIds)
@@ -147,7 +149,13 @@ namespace PlexRipper.Application.PlexDownloads
                 Log.Debug($"Created download task(s) for tvShowSeasons: {plexTvShowSeason.Title}");
             }
 
-            return Result.Ok(downloadTasks);
+            var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks);
+            if (finalizeDownloadTasksResult.IsFailed)
+            {
+                return finalizeDownloadTasksResult.ToResult().LogError();
+            }
+
+            return Result.Ok(finalizeDownloadTasksResult.Value);
         }
 
         public async Task<Result<List<DownloadTask>>> GenerateDownloadTvShowEpisodeTasksAsync(List<int> plexTvShowEpisodeId)
@@ -166,7 +174,13 @@ namespace PlexRipper.Application.PlexDownloads
                 Log.Debug($"Created download task(s) for tvShowEpisodes: {plexTvShowSeason.Title}");
             }
 
-            return Result.Ok(downloadTasks);
+            var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks);
+            if (finalizeDownloadTasksResult.IsFailed)
+            {
+                return finalizeDownloadTasksResult.ToResult().LogError();
+            }
+
+            return Result.Ok(finalizeDownloadTasksResult.Value);
         }
 
         public async Task<Result<List<DownloadTask>>> FinalizeDownloadTasks(List<DownloadTask> downloadTasks, int plexAccountId = 0)
@@ -189,6 +203,8 @@ namespace PlexRipper.Application.PlexDownloads
             if (serverToken.IsFailed)
                 return serverToken.ToResult();
 
+            var parts = _userSettings.AdvancedSettings.DownloadManager.DownloadSegments;
+
             foreach (var downloadTask in downloadTasks)
             {
                 downloadTask.DownloadFolderId = downloadFolder.Value.Id;
@@ -196,9 +212,36 @@ namespace PlexRipper.Application.PlexDownloads
                 downloadTask.DestinationFolderId = destinationFolder.Value.Id;
                 downloadTask.DestinationFolder = destinationFolder.Value;
                 downloadTask.ServerToken = serverToken.Value;
+
+                downloadTask.DownloadWorkerTasks = GenerateDownloadWorkerTasks(downloadTask, parts);
             }
 
             return Result.Ok(downloadTasks);
+        }
+
+        public List<DownloadWorkerTask> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts)
+        {
+            // Create download worker tasks/segments/ranges
+            var totalBytesToReceive = downloadTask.DataTotal;
+            var partSize = totalBytesToReceive / parts;
+            var remainder = totalBytesToReceive - partSize * parts;
+
+            var downloadWorkerTasks = new List<DownloadWorkerTask>();
+
+            for (int i = 0; i < parts; i++)
+            {
+                long start = partSize * i;
+                long end = start + partSize;
+                if (i == parts - 1 && remainder > 0)
+                {
+                    // Add the remainder to the last download range
+                    end += remainder;
+                }
+
+                downloadWorkerTasks.Add(new DownloadWorkerTask(downloadTask, i + 1, start, end));
+            }
+
+            return downloadWorkerTasks;
         }
 
         #endregion

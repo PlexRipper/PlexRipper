@@ -37,15 +37,14 @@ namespace DownloadManager.UnitTests
                 await Container.GetPlexLibraryService.GetPlexLibraryAsync(server.Value.PlexLibraries
                     .FirstOrDefault(x => x.Name == "Test Media Movies").Id);
 
-            var downloadTasksResult = await Container.GetPlexDownloadService.GenerateDownloadTasksAsync(
-                new List<int> { plexLibrary.Value.Movies.First().Id }, PlexMediaType.Movie,
-                plexLibrary.Value.Id, testAccount.Id);
+            var downloadTasksResult = await Container.GetPlexDownloadTaskFactory.GenerateAsync(
+                new List<int> { plexLibrary.Value.Movies.First().Id }, PlexMediaType.Movie);
+
             downloadTasksResult.Value.First().Id = 1;
 
             //  // Act
             var downloadClient = Container.GetPlexDownloadClientFactory(downloadTasksResult.Value.First());
 
-            await downloadClient.SetupAsync();
             await downloadClient.Start();
 
             await Task.Delay(30000);

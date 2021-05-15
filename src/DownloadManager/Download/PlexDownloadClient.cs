@@ -29,8 +29,6 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly IFileSystemCustom _fileSystemCustom;
 
-        private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
-
         private readonly EventLoopScheduler _timeThreadContext = new();
 
         private readonly CancellationTokenSource _downloadWorkersToken = new CancellationTokenSource();
@@ -43,22 +41,46 @@ namespace PlexRipper.DownloadManager.Download
         /// Initializes a new instance of the <see cref="PlexDownloadClient"/> class.
         /// </summary>
         /// <param name="downloadTask">The <see cref="DownloadTask"/> to start executing.</param>
-        /// <param name="fileSystemCustom">Used to get fileStreams in which to store the download data.</param>
-        /// <param name="downloadWorkerFactory"></param>
-        public PlexDownloadClient(DownloadTask downloadTask, IFileSystemCustom fileSystemCustom,
-            Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory)
+        /// <param name="fileSystemCustom">Used to get the (file)Streams in which to store the download data.</param>
+        /// <param name="plexRipperHttpClient"></param>
+        private PlexDownloadClient(
+            DownloadTask downloadTask,
+            IFileSystemCustom fileSystemCustom,
+            IPlexRipperHttpClient plexRipperHttpClient)
         {
             _fileSystemCustom = fileSystemCustom;
-            _downloadWorkerFactory = downloadWorkerFactory;
             DownloadTask = downloadTask;
 
-            // Create workers
             foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
             {
-                _downloadWorkers.Add(_downloadWorkerFactory(downloadWorkerTask));
+                _downloadWorkers.Add(new DownloadWorker(downloadWorkerTask, fileSystemCustom, plexRipperHttpClient));
             }
 
             SetupSubscriptions();
+        }
+
+        public static Result<PlexDownloadClient> Create(DownloadTask downloadTask, IFileSystemCustom fileSystemCustom,
+            IPlexRipperHttpClient plexRipperHttpClient)
+        {
+            // Create workers
+            if (downloadTask is null)
+            {
+                return Result.Fail(new Error("DownloadTask parameter in PlexDownloadClient was null")).LogError();
+            }
+
+            if (downloadTask.DownloadWorkerTasks is null || !downloadTask.DownloadWorkerTasks.Any())
+            {
+                return Result.Fail(new Error("DownloadTask.DownloadWorkerTasks in PlexDownloadClient was null or empty")).LogError();
+            }
+
+            var downloadTaskValidResult = downloadTask.IsValid();
+            if (downloadTaskValidResult.IsFailed)
+            {
+                Log.Error($"DownloadTask with id {downloadTask.Id} and name {downloadTask.FileName} failed validation");
+                return downloadTaskValidResult.LogError();
+            }
+
+            return Result.Ok(new PlexDownloadClient(downloadTask, fileSystemCustom, plexRipperHttpClient));
         }
 
         #endregion
@@ -83,7 +105,12 @@ namespace PlexRipper.DownloadManager.Download
         /// <summary>
         /// In how many parts/segments should the media be downloaded.
         /// </summary>
-        public long Parts { get; set; } = 1;
+        public long Parts => _downloadWorkers.Count;
+
+        /// <summary>
+        /// Gets the Task that completes when all download workers have finished.
+        /// </summary>
+        public Task DownloadProcessTask => Task.WhenAll(_downloadWorkers.Select(x => x.DownloadProcessTask));
 
         #region Observables
 
@@ -102,7 +129,6 @@ namespace PlexRipper.DownloadManager.Download
         /// <summary>
         /// Releases the unmanaged resources used by the HttpClient and optionally disposes of the managed resources.
         /// </summary>
-        /// <param name="disposing">Is currently disposing.</param>
         public void Dispose()
         {
             _downloadWorkerLog?.Dispose();
@@ -198,23 +224,21 @@ namespace PlexRipper.DownloadManager.Download
         /// Starts the download workers for the <see cref="DownloadTask"/> given during setup.
         /// </summary>
         /// <returns>Is successful.</returns>
-        public async Task<Result<bool>> Start()
+        public async Task<Result> Start()
         {
             Log.Debug($"Start downloading {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
             DownloadStartAt = DateTime.UtcNow;
             try
             {
-                await Task.WhenAll(_downloadWorkers.Select(x => x.StartAsync(_downloadWorkersToken.Token)).ToList());
-
-                // foreach (var downloadWorker in _downloadWorkers)
-                // {
-                //     var startResult = downloadWorker.StartAsync();
-                //     if (startResult.IsFailed)
-                //     {
-                //         await ClearDownloadWorkers();
-                //         return startResult.LogError();
-                //     }
-                // }
+                foreach (var downloadWorker in _downloadWorkers)
+                {
+                    var startResult = downloadWorker.Start();
+                    if (startResult.IsFailed)
+                    {
+                        await ClearDownloadWorkers();
+                        return startResult.LogError();
+                    }
+                }
             }
             catch (Exception e)
             {

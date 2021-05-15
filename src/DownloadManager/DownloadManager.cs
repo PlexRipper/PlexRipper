@@ -31,8 +31,6 @@ namespace PlexRipper.DownloadManager
 
         private readonly IPlexAuthenticationService _plexAuthenticationService;
 
-        private readonly IUserSettings _userSettings;
-
         private readonly INotificationsService _notificationsService;
 
         private readonly IPlexRipperHttpClient _httpClient;
@@ -61,7 +59,6 @@ namespace PlexRipper.DownloadManager
             ISignalRService signalRService,
             IPlexAuthenticationService plexAuthenticationService,
             IFileMerger fileMerger,
-            IUserSettings userSettings,
             IDownloadQueue downloadQueue,
             INotificationsService notificationsService,
             IPlexRipperHttpClient httpClient,
@@ -69,7 +66,6 @@ namespace PlexRipper.DownloadManager
         {
             _plexAuthenticationService = plexAuthenticationService;
             _fileMerger = fileMerger;
-            _userSettings = userSettings;
             _notificationsService = notificationsService;
             _httpClient = httpClient;
             _plexDownloadClientFactory = plexDownloadClientFactory;
@@ -113,7 +109,6 @@ namespace PlexRipper.DownloadManager
 
             // Create download client
             var newClient = _plexDownloadClientFactory(downloadTask);
-            newClient.Parts = _userSettings.AdvancedSettings.DownloadManager.DownloadSegments;
 
             var validateDownloadSizeResult = await ValidateDownloadSize(downloadTask);
             if (validateDownloadSizeResult.IsFailed)

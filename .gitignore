@@ -237,3 +237,4 @@ tests/Applicaton.IntegrationTests/secretCredentials.json
 .idea/
 
 tests/BaseTests/secretCredentials.json
+tests/MockPlexApiServer/media/

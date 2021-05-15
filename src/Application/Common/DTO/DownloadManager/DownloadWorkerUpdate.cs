@@ -23,6 +23,11 @@ namespace PlexRipper.Application.Common.DTO.DownloadManager
         /// </summary>
         public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, DownloadSpeed);
 
+        /// <summary>
+        /// The time elapsed of this DownloadWorker.
+        /// </summary>
+        public long TimeElapsed { get; set; }
+
         public long BytesRemaining => DataTotal - DataReceived;
 
         public bool IsCompleted => DataReceived == DataTotal;

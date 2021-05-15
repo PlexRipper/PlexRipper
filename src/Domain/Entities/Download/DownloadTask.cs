@@ -216,7 +216,7 @@ namespace PlexRipper.Domain
 
         public Result IsValid()
         {
-            return new AddDownloadTaskValidator().Validate(this).ToFluentResult();
+            return new DownloadTaskValidator().Validate(this).ToFluentResult();
         }
 
         #endregion

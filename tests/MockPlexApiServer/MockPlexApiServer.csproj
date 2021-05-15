@@ -8,4 +8,16 @@
       <PackageReference Include="WireMock.Net" Version="1.4.14" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="media\test-video.mp4" />
+      <None Remove="media\movies\4 for Texas (1963)\4 for Texas (1963).avi" />
+      <Content Include="media\movies\4 for Texas (1963)\4 for Texas (1963).avi">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
+    </ItemGroup>
+
 </Project>

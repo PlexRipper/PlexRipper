@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -62,7 +61,7 @@ namespace PlexRipper.DownloadManager.Download
             _fileSystemCustom = fileSystemCustom;
             _httpClient = httpClient;
 
-            _timer.Elapsed += (sender, args) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
+            _timer.Elapsed += (_, _) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
         }
 
         #endregion
@@ -79,11 +78,6 @@ namespace PlexRipper.DownloadManager.Download
 
         public int DownloadSpeedAverage { get; set; }
 
-        /// <summary>
-        /// Gets the <see cref="DateTime"/> from when this <see cref="DownloadWorkerTask"/> was started.
-        /// </summary>
-        public DateTime DownloadStartAt { get; internal set; }
-
         public DownloadWorkerUpdate LastDownloadWorkerUpdate { get; internal set; }
 
         /// <summary>
@@ -92,8 +86,6 @@ namespace PlexRipper.DownloadManager.Download
         public DownloadWorkerTask DownloadWorkerTask { get; }
 
         public string FileName => DownloadWorkerTask.TempFileName;
-
-        public string FilePath => DownloadWorkerTask.TempFilePath;
 
         /// <summary>
         /// The download worker id, which is the same as the <see cref="DownloadWorkerTask"/> Id.
@@ -104,7 +96,10 @@ namespace PlexRipper.DownloadManager.Download
 
         public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
-        public IObservable<DownloadWorkerUpdate> DownloadWorkerUpdate => _downloadWorkerUpdate.AsObservable();
+        public IObservable<DownloadWorkerUpdate> DownloadWorkerUpdate =>
+            _downloadWorkerUpdate
+                 .Sample(TimeSpan.FromMilliseconds(100))
+                .AsObservable();
 
         #endregion
 
@@ -169,6 +164,7 @@ namespace PlexRipper.DownloadManager.Download
                 Id = Id,
                 DataReceived = BytesReceived,
                 DataTotal = DownloadWorkerTask.BytesRangeSize,
+                TimeElapsed = DownloadWorkerTask.ElapsedTime,
                 DownloadStatus = DownloadWorkerTask.DownloadStatus,
                 DownloadSpeed = DownloadSpeed,
                 DownloadSpeedAverage = DownloadSpeedAverage,
@@ -182,7 +178,7 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Commands
 
-        public async Task<Result> StartAsync(CancellationToken token = new())
+        public Result Start()
         {
             Log.Debug($"Download worker {Id} start for {FileName}");
 
@@ -195,11 +191,9 @@ namespace PlexRipper.DownloadManager.Download
                 return _fileStreamResult.ToResult();
             }
 
-            DownloadStartAt = DateTime.UtcNow;
             SetDownloadWorkerTaskChanged(DownloadStatus.Downloading);
 
-            DownloadProcessTask = DownloadProcessAsync(_fileStreamResult.Value, token);
-            await DownloadProcessTask;
+            DownloadProcessTask = DownloadProcessAsync(_fileStreamResult.Value);
             return Result.Ok();
         }
 

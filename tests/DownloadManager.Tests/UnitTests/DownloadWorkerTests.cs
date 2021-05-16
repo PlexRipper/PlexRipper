@@ -166,11 +166,60 @@ namespace DownloadManager.Tests.UnitTests
             downloadWorkerUpdates.Count.Should().BeGreaterThan(0);
         }
 
+        [Fact]
+        public async Task Start_ShouldHaveAValidDownloadWorkerTask_WhenDownloadWorkerStopped()
+        {
+            //Arrange
+            var memoryStream = new MemoryStream();
+            var downloadWorker = GetDownloadWorker(memoryStream, 1000);
+
+            //Act
+            downloadWorker.Start();
+            await Task.Delay(2000);
+            var lastUpdate = await downloadWorker.Stop();
+
+            //Assert
+            lastUpdate.Value.ShouldNotBeNull();
+            lastUpdate.Value.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
+
+        }
+
+        [Fact]
+        public async Task Start_ShouldHaveAValidDownloadFile_WhenDownloadWorkerStoppedAndRestarted()
+        {
+            //Arrange
+            var mediaFile = MockServer.GetDefaultMovieMockMediaData();
+            var memoryStream = new MemoryStream();
+
+            var _filesystem = new Mock<IFileSystemCustom>();
+            _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
+                .Returns(Result.Ok<Stream>(memoryStream));
+
+            var downloadWorkerTask = new DownloadWorkerTask(GetTestDownloadTask(), 0, 0, mediaFile.ByteSize)
+            {
+                Id = 1,
+            };
+            var downloadWorker = new DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
+
+            //Act
+            downloadWorker.Start();
+            await Task.Delay(2000);
+            var lastUpdate = await downloadWorker.Stop();
+            lastUpdate.IsSuccess.ShouldBeTrue();
+
+            //// Recreate another download worker with a cloned stream as the original got closed
+            var downloadWorker2 = new DownloadWorker(lastUpdate.Value, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
+            downloadWorker2.Start();
+            await downloadWorker2.DownloadProcessTask;
+
+            //Assert
+            mediaFile.Md5.Should().Be(DataFormat.CalculateMD5(memoryStream));
+        }
+
         [Theory]
         [InlineData(500)]
         [InlineData(1000)]
         [InlineData(2000)]
-        [InlineData(100)]
         public async Task Start_ShouldBeDownloadSpeedLimited_WhenDownloadSpeedLimitIsGiven(int downloadSpeedLimit)
         {
             //Arrange

@@ -31,8 +31,6 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly EventLoopScheduler _timeThreadContext = new();
 
-        private readonly CancellationTokenSource _downloadWorkersToken = new CancellationTokenSource();
-
         #endregion
 
         #region Constructors
@@ -164,7 +162,7 @@ namespace PlexRipper.DownloadManager.Download
         /// <returns>Is successful.</returns>
         private async Task ClearDownloadWorkers()
         {
-            await Task.WhenAll(_downloadWorkers.Select(x => x.DisposeAsync()).ToList());
+            _downloadWorkers.ForEach(x => x.Dispose());
             _downloadWorkers.Clear();
             Log.Debug($"DownloadWorkers have been disposed for {DownloadTask.DownloadPath}");
         }

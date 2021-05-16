@@ -115,12 +115,6 @@ namespace PlexRipper.Domain
         public long CurrentByte => StartByte + BytesReceived;
 
         /// <summary>
-        /// Has then <see cref="DownloadWorkerTask"/> been partially completed.
-        /// </summary>
-        [NotMapped]
-        public bool IsResumed => BytesReceived > 0;
-
-        /// <summary>
         /// The elapsed time this <see cref="DownloadWorkerTask"/> has been downloading for.
         /// </summary>
         [NotMapped]

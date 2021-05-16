@@ -2,17 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
 using MockPlexApiServer;
 using Moq;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Common.DTO.DownloadManager;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Download;
-using WireMock.RequestBuilders;
-using WireMock.ResponseBuilders;
+using Shouldly;
 using WireMock.Server;
 using Xunit;
 using Xunit.Abstractions;
@@ -24,10 +25,6 @@ namespace DownloadManager.Tests.UnitTests
         private BaseContainer Container { get; }
 
         private readonly WireMockServer _server;
-
-        private static readonly string _filePath = @$"{FileSystemPaths.RootDirectory}/resources/test-video.mp4";
-
-        private static readonly string _fileMd5 = DataFormat.CalculateMD5(_filePath);
 
         public PlexDownloadClientTests(ITestOutputHelper output)
         {
@@ -42,7 +39,7 @@ namespace DownloadManager.Tests.UnitTests
         private DownloadTask GetTestDownloadTask()
         {
             var uri = new Uri(_server.Urls[0]);
-            var mediaFile = MockServer.GetMockMediaData().First();
+            var mediaFile = MockServer.GetDefaultMovieMockMediaData();
 
             return new DownloadTask
             {
@@ -96,7 +93,7 @@ namespace DownloadManager.Tests.UnitTests
             };
         }
 
-        private Result<PlexDownloadClient> CreatePlexDownloadClient(MemoryStream memoryStream)
+        private Result<PlexDownloadClient> CreatePlexDownloadClient(MemoryStream memoryStream, int downloadSpeedLimitInKb = 0)
         {
             var _filesystem = new Mock<IFileSystemCustom>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
@@ -105,7 +102,7 @@ namespace DownloadManager.Tests.UnitTests
             var downloadTask = GetTestDownloadTask();
             downloadTask.DownloadWorkerTasks = Container.GetPlexDownloadTaskFactory.GenerateDownloadWorkerTasks(downloadTask, 4);
 
-            return PlexDownloadClient.Create(downloadTask, _filesystem.Object, Container.GetPlexRipperHttpClient);
+            return PlexDownloadClient.Create(downloadTask, _filesystem.Object, Container.GetPlexRipperHttpClient, downloadSpeedLimitInKb);
         }
 
         [Fact]
@@ -126,6 +123,25 @@ namespace DownloadManager.Tests.UnitTests
         }
 
         [Fact]
+        public async Task StartAsync_ShouldDownloadValidFile_WhenPausedAndResumed()
+        {
+            //Arrange
+            var memoryStream = new MemoryStream();
+            var downloadClient = CreatePlexDownloadClient(memoryStream, 500);
+            downloadClient.IsFailed.Should().BeFalse();
+            var mediaFile = MockServer.GetMockMediaData().First();
+
+            // Act
+            await downloadClient.Value.Start();
+            await Task.Delay(5000);
+            await downloadClient.Value.Pause();
+            await downloadClient.Value.DownloadProcessTask;
+
+            // Assert
+            mediaFile.Md5.Should().Be(DataFormat.CalculateMD5(memoryStream));
+        }
+
+        [Fact]
         public void Create_ShouldReturnFailedResult_WhenNullDownloadTaskIsGiven()
         {
             //Arrange
@@ -133,7 +149,6 @@ namespace DownloadManager.Tests.UnitTests
             var _filesystem = new Mock<IFileSystemCustom>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
                 .Returns(Result.Ok<Stream>(memoryStream));
-
 
             // Act
             var downloadClient = PlexDownloadClient.Create(null, _filesystem.Object, Container.GetPlexRipperHttpClient);
@@ -151,7 +166,6 @@ namespace DownloadManager.Tests.UnitTests
             var _filesystem = new Mock<IFileSystemCustom>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
                 .Returns(Result.Ok<Stream>(memoryStream));
-
 
             // Act
             var downloadClient = PlexDownloadClient.Create(new DownloadTask(), _filesystem.Object, Container.GetPlexRipperHttpClient);
@@ -173,6 +187,23 @@ namespace DownloadManager.Tests.UnitTests
             // Assert
             downloadClient.IsFailed.Should().BeFalse();
             downloadClient.Value.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task Create_ShouldBeDownloadSpeedLimited_WhenDownloadSpeedLimitIsGiven()
+        {
+            //Arrange
+            var memoryStream = new MemoryStream();
+            var downloadClient = CreatePlexDownloadClient(memoryStream, 500);
+            var updates = new List<DownloadClientUpdate>();
+            downloadClient.Value.DownloadClientUpdate.Subscribe(update => updates.Add(update));
+
+            // Act
+            await downloadClient.Value.Start();
+            await downloadClient.Value.DownloadProcessTask;
+
+            // Assert
+            updates.ShouldAllBe(x => x.DownloadSpeed / 1024F > 500 - 10 && x.DownloadSpeed / 1024F < 500 + 10);
         }
     }
 }

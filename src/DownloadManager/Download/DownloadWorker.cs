@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -45,6 +46,10 @@ namespace PlexRipper.DownloadManager.Download
 
         private Stream _fileStream;
 
+        private int _downloadSpeedLimit;
+
+        private List<int> _downloadSpeeds = new List<int>();
+
         #endregion
 
         #region Constructors
@@ -55,13 +60,19 @@ namespace PlexRipper.DownloadManager.Download
         /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
         /// <param name="fileSystemCustom">The filesystem used to store the downloaded data.</param>
         /// <param name="httpClient"></param>
-        public DownloadWorker(DownloadWorkerTask downloadWorkerTask, IFileSystemCustom fileSystemCustom, IPlexRipperHttpClient httpClient)
+        /// <param name="downloadSpeedLimit"></param>
+        public DownloadWorker(
+            DownloadWorkerTask downloadWorkerTask,
+            IFileSystemCustom fileSystemCustom,
+            IPlexRipperHttpClient httpClient,
+            int downloadSpeedLimit = 0)
         {
             DownloadWorkerTask = downloadWorkerTask;
             _fileSystemCustom = fileSystemCustom;
             _httpClient = httpClient;
 
             _timer.Elapsed += (_, _) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
+            _downloadSpeedLimit = downloadSpeedLimit;
         }
 
         #endregion
@@ -98,7 +109,7 @@ namespace PlexRipper.DownloadManager.Download
 
         public IObservable<DownloadWorkerUpdate> DownloadWorkerUpdate =>
             _downloadWorkerUpdate
-                 .Sample(TimeSpan.FromMilliseconds(100))
+                .Sample(TimeSpan.FromMilliseconds(100))
                 .AsObservable();
 
         #endregion
@@ -153,6 +164,7 @@ namespace PlexRipper.DownloadManager.Download
                 return;
             }
 
+            // Source: https://stackoverflow.com/a/23493727/8205497
             DownloadSpeedAverage = DownloadSpeedAverage * (_count - 1) / _count + newValue / _count;
         }
 
@@ -222,13 +234,17 @@ namespace PlexRipper.DownloadManager.Download
 
                 await using Stream responseStream = await response.Content.ReadAsStreamAsync();
 
+                // Throttle the stream to enable download speed limiting
+                var throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
+
                 byte[] buffer = new byte[4096];
 
                 _timer.Start();
 
                 while (_isDownloading)
                 {
-                    int bytesRead = await responseStream.ReadAsync(buffer, 0, buffer.Length, token);
+                    throttledStream.SetThrottleSpeed(_downloadSpeedLimit);
+                    int bytesRead = await throttledStream.ReadAsync(buffer, 0, buffer.Length, token);
                     if (bytesRead > 0)
                     {
                         bytesRead = (int)Math.Min(DownloadWorkerTask.BytesRangeSize - BytesReceived, bytesRead);
@@ -288,6 +304,11 @@ namespace PlexRipper.DownloadManager.Download
 
             SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
             return Result.Ok(true);
+        }
+
+        public void SetDownloadSpeedLimit(int speedInKb)
+        {
+            _downloadSpeedLimit = speedInKb;
         }
 
         #endregion

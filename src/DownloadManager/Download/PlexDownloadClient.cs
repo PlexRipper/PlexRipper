@@ -43,24 +43,26 @@ namespace PlexRipper.DownloadManager.Download
         /// <param name="downloadTask">The <see cref="DownloadTask"/> to start executing.</param>
         /// <param name="fileSystemCustom">Used to get the (file)Streams in which to store the download data.</param>
         /// <param name="plexRipperHttpClient"></param>
+        /// <param name="downloadSpeedLimit">The download speed limit, 0 is unlimited</param>
         private PlexDownloadClient(
             DownloadTask downloadTask,
             IFileSystemCustom fileSystemCustom,
-            IPlexRipperHttpClient plexRipperHttpClient)
+            IPlexRipperHttpClient plexRipperHttpClient,
+            int downloadSpeedLimit = 0)
         {
             _fileSystemCustom = fileSystemCustom;
             DownloadTask = downloadTask;
 
             foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
             {
-                _downloadWorkers.Add(new DownloadWorker(downloadWorkerTask, fileSystemCustom, plexRipperHttpClient));
+                _downloadWorkers.Add(new DownloadWorker(downloadWorkerTask, fileSystemCustom, plexRipperHttpClient, downloadSpeedLimit));
             }
 
             SetupSubscriptions();
         }
 
         public static Result<PlexDownloadClient> Create(DownloadTask downloadTask, IFileSystemCustom fileSystemCustom,
-            IPlexRipperHttpClient plexRipperHttpClient)
+            IPlexRipperHttpClient plexRipperHttpClient, int downloadSpeedLimit = 0)
         {
             // Create workers
             if (downloadTask is null)
@@ -80,7 +82,7 @@ namespace PlexRipper.DownloadManager.Download
                 return downloadTaskValidResult.LogError();
             }
 
-            return Result.Ok(new PlexDownloadClient(downloadTask, fileSystemCustom, plexRipperHttpClient));
+            return Result.Ok(new PlexDownloadClient(downloadTask, fileSystemCustom, plexRipperHttpClient, downloadSpeedLimit));
         }
 
         #endregion
@@ -95,7 +97,7 @@ namespace PlexRipper.DownloadManager.Download
             internal set => DownloadTask.DownloadStatus = value;
         }
 
-        public DownloadTask DownloadTask { get; internal set; }
+        public DownloadTask DownloadTask { get; }
 
         /// <summary>
         /// The ClientId/DownloadTaskId is always the same id that is assigned to the <see cref="DownloadTask"/>.
@@ -277,8 +279,12 @@ namespace PlexRipper.DownloadManager.Download
             return Result.Ok(true);
         }
 
-        public async Task<Result> Pause()
+        public async Task<Result<List<DownloadWorkerTask>>> Pause()
         {
+            var downloadWorkerTasks = _downloadWorkers.Select(x => x.DownloadWorkerTask).ToList();
+
+            await ClearDownloadWorkers();
+
             if (DownloadStatus == DownloadStatus.Downloading)
             {
                 _downloadWorkers.AsParallel().ForAll(async downloadWorker =>
@@ -291,11 +297,14 @@ namespace PlexRipper.DownloadManager.Download
                             .LogError();
                     }
                 });
-
-                await ClearDownloadWorkers();
             }
 
             return Result.Ok();
+        }
+
+        public void SetDownloadSpeedLimit(int downloadSpeedLimitInKb = 0)
+        {
+            _downloadWorkers.ForEach(x => x.SetDownloadSpeedLimit(downloadSpeedLimitInKb /  _downloadWorkers.Count));
         }
 
         #endregion

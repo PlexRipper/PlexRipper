@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
+using MockPlexApiServer;
 using Moq;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.DTO.DownloadManager;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Download;
-using WireMock.RequestBuilders;
-using WireMock.ResponseBuilders;
+using Shouldly;
 using WireMock.Server;
 using Xunit;
 
@@ -21,47 +22,45 @@ namespace DownloadManager.Tests.UnitTests
     {
         private readonly WireMockServer _server;
 
-        private static readonly string _filePath = @$"{FileSystemPaths.RootDirectory}/resources/test-video.mp4";
-
-        private static readonly string _fileMd5 = DataFormat.CalculateMD5(_filePath);
-
         private BaseContainer Container { get; }
 
         public DownloadWorkerTests()
         {
             Container = new BaseContainer();
 
-            _server = WireMockServer.Start();
+            _server = MockServer.GetPlexMockServer();
 
             Log.Debug($"Server running at: {_server.Urls[0]}");
-
-            _server
-                .Given(Request.Create().WithPath("/foo/file.mkv").UsingGet())
-                .RespondWith(
-                    Response.Create()
-                        .WithStatusCode(206)
-                        .WithBodyFromFile(_filePath)
-                );
         }
 
         private DownloadTask GetTestDownloadTask()
         {
             var uri = new Uri(_server.Urls[0]);
+            var mediaFile = MockServer.GetDefaultMovieMockMediaData();
 
             return new DownloadTask
             {
                 MediaType = PlexMediaType.Movie,
+                Key = 9999,
+                Created = DateTime.Now,
                 PlexServer = new()
                 {
+                    Id = 1,
                     Scheme = uri.Scheme,
                     Address = uri.Host,
                     Host = uri.Host,
                     Port = uri.Port,
                 },
+                PlexLibrary = new PlexLibrary
+                {
+                    Id = 1,
+                },
+                PlexServerId = 1,
+                PlexLibraryId = 1,
                 ServerToken = "AAABBBCCCDDDEEEFFFGGG",
                 MetaData = new()
                 {
-                    MovieTitle = "TestMovie",
+                    MovieTitle = mediaFile.ParentFolderName,
                     MediaData = new List<PlexMediaData>
                     {
                         new()
@@ -70,16 +69,28 @@ namespace DownloadManager.Tests.UnitTests
                             {
                                 new()
                                 {
-                                    ObfuscatedFilePath = "/foo/file.mkv",
+                                    Size = mediaFile.ByteSize,
+                                    ObfuscatedFilePath = mediaFile.RelativeUrl,
+                                    File = mediaFile.FileName,
                                 },
                             },
                         },
                     },
                 },
+                DownloadFolder = new FolderPath
+                {
+                    DirectoryPath = FileSystemPaths.RootDirectory,
+                },
+                DownloadFolderId = 1,
+                DestinationFolder = new FolderPath
+                {
+                    DirectoryPath = FileSystemPaths.RootDirectory,
+                },
+                DestinationFolderId = 1,
             };
         }
 
-        private DownloadWorker GetDownloadWorker(MemoryStream memoryStream)
+        private DownloadWorker GetDownloadWorker(MemoryStream memoryStream, int downloadSpeedLimitInKb = 0)
         {
             var _filesystem = new Mock<IFileSystemCustom>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
@@ -88,7 +99,7 @@ namespace DownloadManager.Tests.UnitTests
             {
                 Id = 1,
             };
-            return new DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient);
+            return new DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient, downloadSpeedLimitInKb);
         }
 
         [Fact]
@@ -97,16 +108,14 @@ namespace DownloadManager.Tests.UnitTests
             //Arrange
             var memoryStream = new MemoryStream();
             var downloadWorker = GetDownloadWorker(memoryStream);
+            var mediaFile = MockServer.GetDefaultMovieMockMediaData();
 
             //Act
             downloadWorker.Start();
             await downloadWorker.DownloadProcessTask;
 
             //Assert
-            memoryStream.Length.Should().Be(6482740);
-
-            // Check MD5 hash
-            _fileMd5.Should().Be(DataFormat.CalculateMD5(memoryStream));
+            mediaFile.Md5.Should().Be(DataFormat.CalculateMD5(memoryStream));
         }
 
         [Fact]
@@ -155,6 +164,30 @@ namespace DownloadManager.Tests.UnitTests
 
             //Assert
             downloadWorkerUpdates.Count.Should().BeGreaterThan(0);
+        }
+
+        [Theory]
+        [InlineData(500)]
+        [InlineData(1000)]
+        [InlineData(2000)]
+        [InlineData(100)]
+        public async Task Start_ShouldBeDownloadSpeedLimited_WhenDownloadSpeedLimitIsGiven(int downloadSpeedLimit)
+        {
+            //Arrange
+            var marginOfErrorInKb = 100;
+            var memoryStream = new MemoryStream();
+            var downloadWorker = GetDownloadWorker(memoryStream, downloadSpeedLimit);
+
+            List<DownloadWorkerUpdate> downloadWorkerUpdates = new();
+            downloadWorker.DownloadWorkerUpdate.Subscribe(downloadWorkerUpdate => downloadWorkerUpdates.Add(downloadWorkerUpdate));
+
+            //Act
+            downloadWorker.Start();
+            await downloadWorker.DownloadProcessTask;
+
+            //Assert
+            (downloadWorkerUpdates.Last().DownloadSpeedAverage / 1024f)
+                .ShouldBeInRange(downloadSpeedLimit - marginOfErrorInKb, downloadSpeedLimit + marginOfErrorInKb);
         }
     }
 }

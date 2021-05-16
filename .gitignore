@@ -237,4 +237,5 @@ tests/Applicaton.IntegrationTests/secretCredentials.json
 .idea/
 
 tests/BaseTests/secretCredentials.json
-tests/MockPlexApiServer/media/
+tests/MockPlexApiServer/media/movies/*
+!tests/MockPlexApiServer/media/movies/default

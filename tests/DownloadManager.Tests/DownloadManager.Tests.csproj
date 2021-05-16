@@ -33,4 +33,10 @@
       <None Remove="resources\test-video.mp4" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Shouldly, Version=4.0.3.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941">
+        <HintPath>C:\Users\JasonL\.nuget\packages\shouldly\4.0.3\lib\netstandard2.0\Shouldly.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

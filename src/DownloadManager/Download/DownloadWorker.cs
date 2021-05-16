@@ -290,7 +290,7 @@ namespace PlexRipper.DownloadManager.Download
         /// Stops the downloading.
         /// </summary>
         /// <returns>Is successful.</returns>
-        public async Task<Result<DownloadWorkerTask>> Stop()
+        public async Task<Result<DownloadWorkerTask>> StopAsync()
         {
             _isDownloading = false;
 

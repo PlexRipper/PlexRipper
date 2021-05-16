@@ -230,7 +230,7 @@ namespace PlexRipper.DownloadManager
                 return;
             }
 
-            await _downloadsList[index].Stop();
+            await _downloadsList[index].StopAsync();
             _downloadsList[index].Dispose();
             _downloadsList.RemoveAt(index);
 
@@ -469,7 +469,7 @@ namespace PlexRipper.DownloadManager
                 DownloadTask downloadTask = null;
                 if (downloadClient.IsSuccess)
                 {
-                    await downloadClient.Value.Stop();
+                    await downloadClient.Value.StopAsync();
                     downloadTask = downloadClient.Value.DownloadTask;
                 }
 
@@ -511,7 +511,7 @@ namespace PlexRipper.DownloadManager
                 return downloadClient.ToResult();
             }
 
-            return await downloadClient.Value.Start();
+            return downloadClient.Value.Start();
         }
 
         /// <inheritdoc/>
@@ -521,7 +521,7 @@ namespace PlexRipper.DownloadManager
             var downloadClient = GetDownloadClient(downloadTaskId);
             if (downloadClient.IsSuccess && downloadClient.Value != null)
             {
-                return await downloadClient.Value.Pause();
+                return await downloadClient.Value.StopAsync();
             }
 
             return downloadClient

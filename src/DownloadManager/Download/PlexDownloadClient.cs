@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
@@ -27,8 +26,6 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly List<DownloadWorker> _downloadWorkers = new();
 
-        private readonly IFileSystemCustom _fileSystemCustom;
-
         private readonly EventLoopScheduler _timeThreadContext = new();
 
         #endregion
@@ -48,13 +45,14 @@ namespace PlexRipper.DownloadManager.Download
             IPlexRipperHttpClient plexRipperHttpClient,
             int downloadSpeedLimit = 0)
         {
-            _fileSystemCustom = fileSystemCustom;
             DownloadTask = downloadTask;
 
             foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
             {
-                _downloadWorkers.Add(new DownloadWorker(downloadWorkerTask, fileSystemCustom, plexRipperHttpClient, downloadSpeedLimit));
+                _downloadWorkers.Add(new DownloadWorker(downloadWorkerTask, fileSystemCustom, plexRipperHttpClient));
             }
+
+            SetDownloadSpeedLimit(downloadSpeedLimit);
 
             SetupSubscriptions();
         }
@@ -132,6 +130,7 @@ namespace PlexRipper.DownloadManager.Download
         public void Dispose()
         {
             _downloadWorkerLog?.Dispose();
+            ClearDownloadWorkers();
         }
 
         private void SetupSubscriptions()
@@ -160,7 +159,7 @@ namespace PlexRipper.DownloadManager.Download
         /// Calls Dispose on all DownloadWorkers and clears the downloadWorkersList.
         /// </summary>
         /// <returns>Is successful.</returns>
-        private async Task ClearDownloadWorkers()
+        private void ClearDownloadWorkers()
         {
             _downloadWorkers.ForEach(x => x.Dispose());
             _downloadWorkers.Clear();
@@ -224,7 +223,7 @@ namespace PlexRipper.DownloadManager.Download
         /// Starts the download workers for the <see cref="DownloadTask"/> given during setup.
         /// </summary>
         /// <returns>Is successful.</returns>
-        public async Task<Result> Start()
+        public Result Start()
         {
             Log.Debug($"Start downloading {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
             DownloadStartAt = DateTime.UtcNow;
@@ -235,14 +234,12 @@ namespace PlexRipper.DownloadManager.Download
                     var startResult = downloadWorker.Start();
                     if (startResult.IsFailed)
                     {
-                        await ClearDownloadWorkers();
                         return startResult.LogError();
                     }
                 }
             }
             catch (Exception e)
             {
-                await ClearDownloadWorkers();
                 return Result.Fail(new ExceptionalError(e)
                         .WithMessage($"Could not download {DownloadTask.FileName} from {DownloadTask.DownloadUrl}"))
                     .LogError();
@@ -251,58 +248,20 @@ namespace PlexRipper.DownloadManager.Download
             return Result.Ok();
         }
 
-        /// <summary>
-        /// Immediately stops all and destroys the <see cref="DownloadWorker"/>s, will also removes any temporary files them.
-        /// This will also remove any downloaded data.
-        /// </summary>
-        /// <returns>Is successful.</returns>
-        public async Task<Result> Stop()
+
+        public async Task<Result<DownloadTask>> StopAsync()
         {
-            _downloadWorkers.AsParallel().ForAll(async downloadWorker =>
-            {
-                var stopResult = await downloadWorker.Stop();
-                if (stopResult.IsFailed)
-                {
-                    stopResult.WithError(new Error(
-                            $"Failed to stop downloadWorkerTask with id: {downloadWorker.Id} in PlexDownloadClient with id: {DownloadTask.Id}"))
-                        .LogError();
-                }
-            });
+            Log.Debug($"Stop downloading {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
 
-            await ClearDownloadWorkers();
+            await Task.WhenAll(_downloadWorkers.Select(x => x.StopAsync()));
 
-            _fileSystemCustom.DeleteAllFilesFromDirectory(DownloadTask.DownloadPath);
-            _fileSystemCustom.DeleteDirectoryFromFilePath(DownloadTask.DownloadPath);
-
-            return Result.Ok(true);
-        }
-
-        public async Task<Result<List<DownloadWorkerTask>>> Pause()
-        {
-            var downloadWorkerTasks = _downloadWorkers.Select(x => x.DownloadWorkerTask).ToList();
-
-            await ClearDownloadWorkers();
-
-            if (DownloadStatus == DownloadStatus.Downloading)
-            {
-                _downloadWorkers.AsParallel().ForAll(async downloadWorker =>
-                {
-                    var pauseResult = await downloadWorker.Stop();
-                    if (pauseResult.IsFailed)
-                    {
-                        pauseResult.WithError(new Error(
-                                $"Failed to pause downloadWorkerTask with id: {downloadWorker.Id} in PlexDownloadClient with id: {DownloadTask.Id}"))
-                            .LogError();
-                    }
-                });
-            }
-
-            return Result.Ok();
+            DownloadTask.DownloadWorkerTasks = _downloadWorkers.Select(x => x.DownloadWorkerTask).ToList();
+            return Result.Ok(DownloadTask);
         }
 
         public void SetDownloadSpeedLimit(int downloadSpeedLimitInKb = 0)
         {
-            _downloadWorkers.ForEach(x => x.SetDownloadSpeedLimit(downloadSpeedLimitInKb /  _downloadWorkers.Count));
+            _downloadWorkers.ForEach(x => x.SetDownloadSpeedLimit(downloadSpeedLimitInKb / _downloadWorkers.Count));
         }
 
         #endregion

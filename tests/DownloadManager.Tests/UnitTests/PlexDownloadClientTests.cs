@@ -115,7 +115,7 @@ namespace DownloadManager.Tests.UnitTests
             var mediaFile = MockServer.GetMockMediaData().First();
 
             // Act
-            await downloadClient.Value.Start();
+            downloadClient.Value.Start();
             await downloadClient.Value.DownloadProcessTask;
 
             // Assert
@@ -127,15 +127,24 @@ namespace DownloadManager.Tests.UnitTests
         {
             //Arrange
             var memoryStream = new MemoryStream();
-            var downloadClient = CreatePlexDownloadClient(memoryStream, 500);
+            var downloadClient = CreatePlexDownloadClient(memoryStream, 1000);
             downloadClient.IsFailed.Should().BeFalse();
             var mediaFile = MockServer.GetMockMediaData().First();
 
+            var _filesystem = new Mock<IFileSystemCustom>();
+            _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
+                .Returns(Result.Ok<Stream>(memoryStream));
+
             // Act
-            await downloadClient.Value.Start();
-            await Task.Delay(5000);
-            await downloadClient.Value.Pause();
-            await downloadClient.Value.DownloadProcessTask;
+            downloadClient.Value.Start();
+            await Task.Delay(3000);
+            //// Stop task
+            var downloadTask = await downloadClient.Value.StopAsync();
+            downloadTask.IsSuccess.ShouldBeTrue();
+            //// Create new client and restart
+            var downloadClient2 = PlexDownloadClient.Create(downloadTask.Value, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
+            downloadClient2.Value.Start();
+            await downloadClient2.Value.DownloadProcessTask;
 
             // Assert
             mediaFile.Md5.Should().Be(DataFormat.CalculateMD5(memoryStream));
@@ -199,11 +208,11 @@ namespace DownloadManager.Tests.UnitTests
             downloadClient.Value.DownloadClientUpdate.Subscribe(update => updates.Add(update));
 
             // Act
-            await downloadClient.Value.Start();
+            downloadClient.Value.Start();
             await downloadClient.Value.DownloadProcessTask;
 
             // Assert
-            updates.ShouldAllBe(x => x.DownloadSpeed / 1024F > 500 - 10 && x.DownloadSpeed / 1024F < 500 + 10);
+            updates.ShouldAllBe(x => x.DownloadSpeed / 1024F > 500 - 100 && x.DownloadSpeed / 1024F < 500 + 100);
         }
     }
 }

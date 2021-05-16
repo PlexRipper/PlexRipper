@@ -133,7 +133,7 @@ namespace DownloadManager.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Start_ShouldHaveStatusStopped_WhenStopped()
+        public async Task Stop_ShouldHaveStatusStopped_WhenStopped()
         {
             //Arrange
             var memoryStream = new MemoryStream();
@@ -142,7 +142,7 @@ namespace DownloadManager.Tests.UnitTests
             //Act
             downloadWorker.Start();
             await Task.Delay(500);
-            await downloadWorker.Stop();
+            await downloadWorker.StopAsync();
 
             //Assert
             downloadWorker.LastDownloadWorkerUpdate.DownloadStatus.Should().Be(DownloadStatus.Stopped);
@@ -176,7 +176,7 @@ namespace DownloadManager.Tests.UnitTests
             //Act
             downloadWorker.Start();
             await Task.Delay(2000);
-            var lastUpdate = await downloadWorker.Stop();
+            var lastUpdate = await downloadWorker.StopAsync();
 
             //Assert
             lastUpdate.Value.ShouldNotBeNull();
@@ -204,7 +204,7 @@ namespace DownloadManager.Tests.UnitTests
             //Act
             downloadWorker.Start();
             await Task.Delay(2000);
-            var lastUpdate = await downloadWorker.Stop();
+            var lastUpdate = await downloadWorker.StopAsync();
             lastUpdate.IsSuccess.ShouldBeTrue();
 
             //// Recreate another download worker with a cloned stream as the original got closed

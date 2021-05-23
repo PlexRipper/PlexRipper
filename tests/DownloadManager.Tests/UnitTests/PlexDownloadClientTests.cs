@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
-using FluentAssertions;
 using FluentResults;
 using Moq;
 using PlexRipper.Application.Common;
@@ -110,7 +108,7 @@ namespace DownloadManager.Tests.UnitTests
             //Arrange
             var memoryStream = new MemoryStream();
             var downloadClient = CreatePlexDownloadClient(memoryStream);
-            downloadClient.IsFailed.Should().BeFalse();
+            downloadClient.IsFailed.ShouldBeFalse();
             var mediaFile = MockServer.GetMockMediaData().First();
 
             // Act
@@ -118,7 +116,7 @@ namespace DownloadManager.Tests.UnitTests
             await downloadClient.Value.DownloadProcessTask;
 
             // Assert
-            mediaFile.Md5.Should().Be(DataFormat.CalculateMD5(memoryStream));
+            mediaFile.Md5.ShouldBe(DataFormat.CalculateMD5(memoryStream));
         }
 
         [Fact]
@@ -127,7 +125,7 @@ namespace DownloadManager.Tests.UnitTests
             //Arrange
             var memoryStream = new MemoryStream();
             var downloadClient = CreatePlexDownloadClient(memoryStream, 1000);
-            downloadClient.IsFailed.Should().BeFalse();
+            downloadClient.IsFailed.ShouldBeFalse();
             var mediaFile = MockServer.GetMockMediaData().First();
 
             var _filesystem = new Mock<IFileSystemCustom>();
@@ -146,7 +144,7 @@ namespace DownloadManager.Tests.UnitTests
             await downloadClient2.Value.DownloadProcessTask;
 
             // Assert
-            mediaFile.Md5.Should().Be(DataFormat.CalculateMD5(memoryStream));
+            mediaFile.Md5.ShouldBe(DataFormat.CalculateMD5(memoryStream));
         }
 
         [Fact]
@@ -162,8 +160,8 @@ namespace DownloadManager.Tests.UnitTests
             var downloadClient = PlexDownloadClient.Create(null, _filesystem.Object, Container.GetPlexRipperHttpClient);
 
             // Assert
-            downloadClient.IsFailed.Should().BeTrue();
-            downloadClient.Errors.Count.Should().BeGreaterThan(0);
+            downloadClient.IsFailed.ShouldBeTrue();
+            downloadClient.Errors.Count.ShouldBeGreaterThan(0);
         }
 
         [Fact]
@@ -179,8 +177,8 @@ namespace DownloadManager.Tests.UnitTests
             var downloadClient = PlexDownloadClient.Create(new DownloadTask(), _filesystem.Object, Container.GetPlexRipperHttpClient);
 
             // Assert
-            downloadClient.IsFailed.Should().BeTrue();
-            downloadClient.Errors.Count.Should().BeGreaterThan(0);
+            downloadClient.IsFailed.ShouldBeTrue();
+            downloadClient.Errors.Count.ShouldBeGreaterThan(0);
         }
 
         [Fact]
@@ -193,8 +191,8 @@ namespace DownloadManager.Tests.UnitTests
             var downloadClient = CreatePlexDownloadClient(memoryStream);
 
             // Assert
-            downloadClient.IsFailed.Should().BeFalse();
-            downloadClient.Value.Should().NotBeNull();
+            downloadClient.IsFailed.ShouldBeFalse();
+            downloadClient.Value.ShouldNotBeNull();
         }
 
         [Fact]

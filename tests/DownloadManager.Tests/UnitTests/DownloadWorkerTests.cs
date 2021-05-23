@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
 using FluentResults;
 using Moq;
 using PlexRipper.Application.Common;
@@ -114,7 +113,7 @@ namespace DownloadManager.Tests.UnitTests
             await downloadWorker.DownloadProcessTask;
 
             //Assert
-            mediaFile.Md5.Should().Be(DataFormat.CalculateMD5(memoryStream));
+            mediaFile.Md5.ShouldBe(DataFormat.CalculateMD5(memoryStream));
         }
 
         [Fact]
@@ -128,7 +127,7 @@ namespace DownloadManager.Tests.UnitTests
             downloadWorker.Start();
 
             //Assert
-            downloadWorker.LastDownloadWorkerUpdate.DownloadStatus.Should().Be(DownloadStatus.Downloading);
+            downloadWorker.LastDownloadWorkerUpdate.DownloadStatus.ShouldBe(DownloadStatus.Downloading);
         }
 
         [Fact]
@@ -144,7 +143,7 @@ namespace DownloadManager.Tests.UnitTests
             await downloadWorker.StopAsync();
 
             //Assert
-            downloadWorker.LastDownloadWorkerUpdate.DownloadStatus.Should().Be(DownloadStatus.Stopped);
+            downloadWorker.LastDownloadWorkerUpdate.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
         }
 
         [Fact]
@@ -162,7 +161,7 @@ namespace DownloadManager.Tests.UnitTests
             await downloadWorker.DownloadProcessTask;
 
             //Assert
-            downloadWorkerUpdates.Count.Should().BeGreaterThan(0);
+            downloadWorkerUpdates.Count.ShouldBeGreaterThan(0);
         }
 
         [Fact]
@@ -212,7 +211,7 @@ namespace DownloadManager.Tests.UnitTests
             await downloadWorker2.DownloadProcessTask;
 
             //Assert
-            mediaFile.Md5.Should().Be(DataFormat.CalculateMD5(memoryStream));
+            mediaFile.Md5.ShouldBe(DataFormat.CalculateMD5(memoryStream));
         }
 
         [Theory]

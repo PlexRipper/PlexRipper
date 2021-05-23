@@ -1,12 +1,12 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using FluentAssertions;
 using MediatR;
 using PlexRipper.Application.PlexLibraries;
 using PlexRipper.BaseTests;
 using PlexRipper.Data;
 using PlexRipper.Domain;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -54,11 +54,11 @@ namespace Data.UnitTests
             var result = await _mediator.Send(new GetPlexLibraryByIdQuery(1, true, true));
 
             // Assert
-            result.IsFailed.Should().BeFalse();
-            result.Value.Should().NotBeNull();
-            result.Value.PlexServer.Should().NotBeNull();
-            result.Value.TvShows.Should().NotBeEmpty();
-            result.Value.TvShows.Count.Should().Be(_numberOfTvShow);
+            result.IsFailed.ShouldBeFalse();
+            result.Value.ShouldNotBeNull();
+            result.Value.PlexServer.ShouldNotBeNull();
+            result.Value.TvShows.ShouldNotBeEmpty();
+            result.Value.TvShows.Count.ShouldBe(_numberOfTvShow);
         }
 
         public void Dispose()

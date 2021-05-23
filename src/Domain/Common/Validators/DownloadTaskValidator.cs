@@ -18,8 +18,11 @@ namespace PlexRipper.Domain
             RuleFor(x => x.ServerToken).NotEmpty();
             RuleFor(x => x.DownloadUrl).NotEmpty();
             RuleFor(x => x.DownloadPath).NotEmpty();
-            RuleFor(x => x.DownloadUri.IsAbsoluteUri).NotNull();
-            RuleFor(x => Uri.IsWellFormedUriString(x.DownloadUri.AbsoluteUri, UriKind.Absolute)).NotNull();
+            RuleFor(x => x.DownloadUri).NotNull();
+            RuleFor(x => x.DownloadUri.IsAbsoluteUri).NotNull()
+                .When(x => x.DownloadUri != null);
+
+            RuleFor(x => Uri.IsWellFormedUriString(x.DownloadUri.AbsoluteUri, UriKind.Absolute)).NotEqual(false).When(x => x.DownloadUri != null);
             RuleFor(x => x.FileLocationUrl).NotEmpty();
             RuleFor(x => x.Created).NotEqual(DateTime.MinValue);
 
@@ -28,14 +31,19 @@ namespace PlexRipper.Domain
 
             RuleFor(x => x.PlexServerId).GreaterThan(0);
             RuleFor(x => x.PlexServer).NotNull();
+
             RuleFor(x => x.PlexLibraryId).GreaterThan(0);
             RuleFor(x => x.PlexLibrary).NotNull();
+
             RuleFor(x => x.DownloadFolderId).GreaterThan(0);
             RuleFor(x => x.DownloadFolder).NotNull();
-            RuleFor(x => x.DownloadFolder.IsValid()).NotNull();
+            RuleFor(x => x.DownloadFolder.IsValid()).NotNull()
+                .When(x => x.DownloadFolder != null);
+
             RuleFor(x => x.DestinationFolderId).GreaterThan(0);
             RuleFor(x => x.DestinationFolder).NotNull();
-            RuleFor(x => x.DestinationFolder.IsValid()).NotNull();
+            RuleFor(x => x.DestinationFolder.IsValid()).NotNull()
+                .When(x => x.DestinationFolder != null);
         }
     }
 }

@@ -152,7 +152,7 @@ namespace PlexRipper.Domain
         public string DownloadUrl => PlexServer != null ? $"{PlexServer?.ServerUrl}{FileLocationUrl}?X-Plex-Token={ServerToken}" : string.Empty;
 
         [NotMapped]
-        public Uri DownloadUri => new Uri(DownloadUrl, UriKind.Absolute);
+        public Uri DownloadUri => !string.IsNullOrWhiteSpace(DownloadUrl) ? new Uri(DownloadUrl, UriKind.Absolute) : null;
 
         [NotMapped]
         public string FileNameWithoutExtention => Path.GetFileNameWithoutExtension(FileName);

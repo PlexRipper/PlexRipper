@@ -6,7 +6,6 @@ using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentResults;
-using MockPlexApiServer;
 using Moq;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.DTO.DownloadManager;

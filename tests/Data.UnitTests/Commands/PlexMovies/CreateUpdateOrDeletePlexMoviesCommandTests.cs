@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using MediatR;
@@ -36,8 +34,8 @@ namespace Data.UnitTests.Commands
 
         private void SetupDatabase()
         {
-            _dbContext.PlexServers.Add(FakeDbData.GetPlexServer());
-            _dbContext.PlexLibraries.Add(FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow).Generate());
+            _dbContext.PlexServers.Add(FakeData.GetPlexServer());
+            _dbContext.PlexLibraries.Add(FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow).Generate());
             _dbContext.SaveChanges();
         }
 
@@ -46,7 +44,7 @@ namespace Data.UnitTests.Commands
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
 
             // Act
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
@@ -71,7 +69,7 @@ namespace Data.UnitTests.Commands
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             createResult.IsSuccess.Should().BeTrue(createResult.Errors.ToString());
 
@@ -117,8 +115,8 @@ namespace Data.UnitTests.Commands
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
-            var plexMovies = FakeDbData.GetPlexMovies(_numberOfMovies);
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
+            var plexMovies = FakeData.GetPlexMovies(_numberOfMovies);
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             createResult.IsSuccess.Should().BeTrue(createResult.Errors.ToString());
 

@@ -31,11 +31,11 @@ namespace PlexRipper.DownloadManager
 
         private readonly IPlexAuthenticationService _plexAuthenticationService;
 
+        private readonly IFileSystemCustom _fileSystem;
+
         private readonly INotificationsService _notificationsService;
 
         private readonly IPlexRipperHttpClient _httpClient;
-
-        private readonly Func<DownloadTask, PlexDownloadClient> _plexDownloadClientFactory;
 
         private readonly IDownloadQueue _downloadQueue;
 
@@ -49,26 +49,27 @@ namespace PlexRipper.DownloadManager
         /// <param name="mediator">Defines a mediator to encapsulate request/response and publishing interaction patterns.</param>
         /// <param name="signalRService"></param>
         /// <param name="plexAuthenticationService">.</param>
+        /// <param name="fileSystem"></param>
         /// <param name="fileMerger">.</param>
         /// <param name="userSettings"></param>
         /// <param name="downloadQueue">Used to retrieve the next <see cref="DownloadTask"/> from the <see cref="DownloadQueue"/>.</param>
         /// <param name="notificationsService"></param>
-        /// <param name="plexDownloadClientFactory"></param>
         public DownloadManager(
             IMediator mediator,
             ISignalRService signalRService,
             IPlexAuthenticationService plexAuthenticationService,
+            IFileSystemCustom fileSystem,
             IFileMerger fileMerger,
             IDownloadQueue downloadQueue,
             INotificationsService notificationsService,
-            IPlexRipperHttpClient httpClient,
-            Func<DownloadTask, PlexDownloadClient> plexDownloadClientFactory) : base(mediator, signalRService)
+            IPlexRipperHttpClient httpClient
+        ) : base(mediator, signalRService)
         {
             _plexAuthenticationService = plexAuthenticationService;
+            _fileSystem = fileSystem;
             _fileMerger = fileMerger;
             _notificationsService = notificationsService;
             _httpClient = httpClient;
-            _plexDownloadClientFactory = plexDownloadClientFactory;
             _downloadQueue = downloadQueue;
 
             _fileMerger.FileMergeProgressObservable.Subscribe(OnFileMergeProgress);
@@ -108,7 +109,11 @@ namespace PlexRipper.DownloadManager
             }
 
             // Create download client
-            var newClient = _plexDownloadClientFactory(downloadTask);
+            var newClient = PlexDownloadClient.Create(downloadTask, _fileSystem, _httpClient);
+            if (newClient.IsFailed)
+            {
+                return newClient.ToResult().LogError();
+            }
 
             var validateDownloadSizeResult = await ValidateDownloadSize(downloadTask);
             if (validateDownloadSizeResult.IsFailed)
@@ -116,9 +121,9 @@ namespace PlexRipper.DownloadManager
                 return validateDownloadSizeResult.LogError();
             }
 
-            SetupSubscriptions(newClient);
-            _downloadsList.Add(newClient);
-            return Result.Ok(newClient);
+            SetupSubscriptions(newClient.Value);
+            _downloadsList.Add(newClient.Value);
+            return Result.Ok(newClient.Value);
         }
 
         private async Task<Result> ValidateDownloadSize(DownloadTask downloadTask)
@@ -350,6 +355,11 @@ namespace PlexRipper.DownloadManager
         /// <inheritdoc/>
         public async Task<Result> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks)
         {
+            if (downloadTasks is null || !downloadTasks.Any())
+            {
+                return Result.Fail(new Error("Parameter downloadTasks was empty or null")).LogError();
+            }
+
             Log.Debug($"Attempt to add {downloadTasks.Count} DownloadTasks");
             var downloadTasksResult = ValidateDownloadTasks(downloadTasks);
             if (downloadTasksResult.IsFailed)

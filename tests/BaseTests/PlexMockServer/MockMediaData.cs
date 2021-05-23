@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using PlexRipper.Domain;
 
-namespace MockPlexApiServer
+namespace PlexRipper.BaseTests
 {
     public class MockMediaData
     {

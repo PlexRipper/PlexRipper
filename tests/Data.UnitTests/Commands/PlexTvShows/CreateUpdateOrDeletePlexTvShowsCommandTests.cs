@@ -37,8 +37,8 @@ namespace Data.UnitTests.Commands
 
         private void SetupDatabase()
         {
-            PlexServer plexServer = FakeDbData.GetPlexServer().Generate();
-            PlexLibrary plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow).Generate();
+            PlexServer plexServer = FakeData.GetPlexServer().Generate();
+            PlexLibrary plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow).Generate();
             try
             {
                 _dbContext.PlexServers.Add(plexServer);
@@ -57,7 +57,7 @@ namespace Data.UnitTests.Commands
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
 
             // Act
             var createCommand = new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary);
@@ -92,7 +92,7 @@ namespace Data.UnitTests.Commands
              */
             SetupDatabase();
 
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
 
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
 
@@ -175,7 +175,7 @@ namespace Data.UnitTests.Commands
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
 
             var createCommandHandler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(_dbContext);
             var createResult = await createCommandHandler.Handle(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary), new CancellationToken());

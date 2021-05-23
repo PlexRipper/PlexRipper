@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.Logging.Configuration;
 using PlexRipper.Domain;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 
-namespace MockPlexApiServer
+namespace PlexRipper.BaseTests
 {
     public static class MockServer
     {

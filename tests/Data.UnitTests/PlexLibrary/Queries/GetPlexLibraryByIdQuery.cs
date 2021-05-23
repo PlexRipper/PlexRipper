@@ -35,8 +35,8 @@ namespace Data.UnitTests
         {
             var sw = Stopwatch.StartNew();
 
-            _dbContext.PlexServers.Add(FakeDbData.GetPlexServer());
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
+            _dbContext.PlexServers.Add(FakeData.GetPlexServer());
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
             _dbContext.PlexLibraries.Add(plexLibrary);
             _dbContext.SaveChanges();
 

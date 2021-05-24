@@ -357,35 +357,29 @@ namespace PlexRipper.DownloadManager
         {
             if (downloadTasks is null || !downloadTasks.Any())
             {
-                return Result.Fail(new Error("Parameter downloadTasks was empty or null")).LogError();
+                return Result.Fail("Parameter downloadTasks was empty or null").LogError();
             }
 
             Log.Debug($"Attempt to add {downloadTasks.Count} DownloadTasks");
             var downloadTasksResult = ValidateDownloadTasks(downloadTasks);
             if (downloadTasksResult.IsFailed)
             {
-                return downloadTasksResult.ToResult().LogError();
+                return downloadTasksResult.ToResult();
             }
 
             // Add to Database
-            var createResult = await _mediator.Send(new CreateDownloadTasksCommand(downloadTasks));
+            var createResult = await _mediator.Send(new CreateDownloadTasksCommand(downloadTasksResult.Value));
             if (createResult.IsFailed)
             {
                 return createResult.ToResult().LogError();
             }
 
-            if (createResult.Value.Count != downloadTasks.Count)
+            if (createResult.Value.Count != downloadTasksResult.Value.Count)
             {
                 return Result.Fail("The added download tasks are not stored correctly, missing download tasks.").LogError();
             }
 
-            // Set the Id's of the just added downloadTasks
-            for (int i = 0; i < downloadTasks.Count; i++)
-            {
-                downloadTasks[i].Id = createResult.Value[i];
-            }
-
-            Log.Debug($"Successfully added all {downloadTasks.Count} DownloadTasks");
+            Log.Debug($"Successfully added all {downloadTasksResult.Value.Count} DownloadTasks");
             CheckDownloadQueue();
             return Result.Ok();
         }
@@ -400,15 +394,23 @@ namespace PlexRipper.DownloadManager
         {
             var failedList = new List<DownloadTask>();
             var result = Result.Fail("Failed to add the following DownloadTasks");
-            foreach (var downloadTask in downloadTasks)
+            for (int i = 0; i < downloadTasks.Count; i++)
             {
+                var downloadTask = downloadTasks[i];
+
                 // Check validity
+                Log.Debug($"Checking DownloadTask {i + 1} of {downloadTasks.Count} with title {downloadTask.TitlePath}");
                 var validationResult = downloadTask.IsValid();
                 if (validationResult.IsFailed)
                 {
+                    validationResult.LogError();
                     failedList.Add(downloadTask);
                     validationResult.Errors.ForEach(x => x.WithMetadata("downloadTask Title", downloadTask.TitlePath));
                     result.AddNestedErrors(validationResult.Errors);
+                }
+                else
+                {
+                    Log.Information($"DownloadTask {i + 1} of {downloadTasks.Count} with title {downloadTask.TitlePath} was valid");
                 }
 
                 // TODO Need a different way to check for duplicate, media consisting of multiple parts have the same rating key
@@ -429,13 +431,13 @@ namespace PlexRipper.DownloadManager
             // All download tasks failed validation
             if (failedList.Count == downloadTasks.Count)
             {
-                return result.LogError();
+                return result;
             }
 
             // Some failed, alert front-end of some failing
             if (failedList.Count > 0)
             {
-                _notificationsService.SendResult(result.LogError());
+                _notificationsService.SendResult(result);
                 return Result.Ok(downloadTasks.Except(failedList).ToList());
             }
 

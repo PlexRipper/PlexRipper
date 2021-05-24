@@ -69,16 +69,16 @@ namespace PlexRipper.Domain
         public long DataTotal => MetaData?.MediaData?.First()?.Parts?.First()?.Size ?? 0;
 
         [NotMapped]
-        public decimal Percentage => decimal.Round(DataReceived / DataTotal, 2);
+        public decimal Percentage => DataTotal > 0 ? decimal.Round(DataReceived / DataTotal, 2) : 0;
 
         /// <summary>
         /// The release year of the media.
         /// </summary>
         [NotMapped]
-        public int ReleaseYear => MetaData.ReleaseYear;
+        public int ReleaseYear => MetaData?.ReleaseYear ?? -1;
 
         [NotMapped]
-        public int MediaParts => MetaData.MediaData.Count;
+        public int MediaParts => MetaData?.MediaData?.Count ?? 0;
 
         /// <summary>
         /// The formatted media title as shown in Plex, based on the <see cref="PlexMediaType"/>.
@@ -100,7 +100,8 @@ namespace PlexRipper.Domain
         }
 
         /// <summary>
-        /// The formatted media title as shown in Plex, based on the <see cref="PlexMediaType"/>.
+        /// The full formatted media title, based on the <see cref="PlexMediaType"/>.
+        /// E.g. "TvShow/Season/Episode".
         /// </summary>
         [NotMapped]
         public string TitlePath
@@ -155,7 +156,7 @@ namespace PlexRipper.Domain
         public Uri DownloadUri => !string.IsNullOrWhiteSpace(DownloadUrl) ? new Uri(DownloadUrl, UriKind.Absolute) : null;
 
         [NotMapped]
-        public string FileNameWithoutExtention => Path.GetFileNameWithoutExtension(FileName);
+        public string FileNameWithoutExtention => !string.IsNullOrWhiteSpace(FileName) ? Path.GetFileNameWithoutExtension(FileName) : string.Empty;
 
         /// <summary>
         /// Gets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
@@ -186,7 +187,7 @@ namespace PlexRipper.Domain
         /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
         /// </summary>
         [NotMapped]
-        public string DestinationPath => Path.Combine(DestinationFolder.DirectoryPath, MediaPath);
+        public string DestinationPath => DestinationFolder != null ? Path.Combine(DestinationFolder.DirectoryPath, MediaPath) : string.Empty;
 
         /// <summary>
         /// Gets the sanitized sub-path based on the <see cref="PlexMediaType"/>, e.g: [TvShow]/[Season]/ or [Movie] [ReleaseYear]/.

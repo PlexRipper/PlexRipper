@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using FluentValidation;
 
 namespace PlexRipper.Domain
@@ -10,8 +11,9 @@ namespace PlexRipper.Domain
             RuleFor(x => x.DataReceived).Equal(0);
             RuleFor(x => x.DataTotal).GreaterThan(0);
             RuleFor(x => x.Key).GreaterThan(0);
-            RuleFor(x => x.MediaType).NotEqual(PlexMediaType.None);
-            RuleFor(x => x.MediaType).NotEqual(PlexMediaType.Unknown);
+            RuleFor(x => x.MediaType)
+                .NotEqual(PlexMediaType.None)
+                .NotEqual(PlexMediaType.Unknown);
 
             RuleFor(x => x.FileName).NotEmpty();
             RuleFor(x => x.Title).NotEmpty();
@@ -44,6 +46,10 @@ namespace PlexRipper.Domain
             RuleFor(x => x.DestinationFolder).NotNull();
             RuleFor(x => x.DestinationFolder.IsValid()).NotNull()
                 .When(x => x.DestinationFolder != null);
+
+            RuleFor(x => x.DownloadWorkerTasks).NotNull();
+            RuleFor(x => x.DownloadWorkerTasks.Any()).Equal(true)
+                .When(x => x.DownloadWorkerTasks != null);
         }
     }
 }

@@ -70,7 +70,7 @@ namespace PlexRipper.BaseTests
             return plexLibrary;
         }
 
-        public static Faker<DownloadTask> CreateMovieDownloadTask()
+        public static Faker<DownloadTask> MovieDownloadTasks()
         {
             var plexServer = GetPlexServer().Generate(1).First();
             var plexLibrary = GetPlexLibrary(plexServer.Id, 1, PlexMediaType.Movie).Generate(1).First();
@@ -78,7 +78,13 @@ namespace PlexRipper.BaseTests
 
             return new Faker<DownloadTask>()
                 .StrictMode(true)
-                .RuleFor(x => x.MediaType, f => PlexMediaType.Movie)
+                .RuleFor(x => x.Id, _ => 0)
+                .RuleFor(x => x.DownloadStatus, f => DownloadStatus.Initialized)
+                .RuleFor(x => x.Priority, f => 0)
+                .RuleFor(x => x.DataReceived, f => 0)
+                .RuleFor(x => x.DataTotal, f => f.Random.Long(1, 10000000))
+                .RuleFor(x => x.DownloadWorkerTasks, f => new())
+                .RuleFor(x => x.MediaType, PlexMediaType.Movie)
                 .RuleFor(x => x.Key, f => _random.Next(0, 10000))
                 .RuleFor(x => x.ServerToken, f => f.Random.Guid().ToString())
                 .RuleFor(x => x.Created, f => f.Date.Recent(30))
@@ -86,9 +92,9 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PlexServerId, f => plexServer.Id)
                 .RuleFor(x => x.PlexLibrary, f => plexLibrary)
                 .RuleFor(x => x.PlexLibraryId, f => plexLibrary.Id)
-                .RuleFor(x => x.MetaData, () => new()
+                .RuleFor(x => x.MetaData, f => new DownloadTaskMetaData
                 {
-                    MovieTitle = mediaFile.ParentFolderName,
+                    MovieTitle = f.Random.Words(2),
                     MediaData = new List<PlexMediaData>
                     {
                         new()
@@ -114,7 +120,14 @@ namespace PlexRipper.BaseTests
                 {
                     DirectoryPath = FileSystemPaths.RootDirectory,
                 })
-                .RuleFor(x => x.DestinationFolderId, _ => 2);
+                .RuleFor(x => x.DestinationFolderId, _ => 2)
+                .FinishWith((f, u) =>
+                {
+                    u.DownloadWorkerTasks = new List<DownloadWorkerTask>
+                    {
+                        new (u, 1, 0, u.DataTotal),
+                    };
+                });
         }
 
         public static Faker<PlexMovie> GetPlexMovies(int plexLibraryId)

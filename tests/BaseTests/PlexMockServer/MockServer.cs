@@ -12,7 +12,14 @@ namespace PlexRipper.BaseTests
     {
         private static readonly List<MockMediaData> _mockMediaData = new();
 
-        public static string MockMovieMediaPath => Path.Combine(FileSystemPaths.RootDirectory, "media", "movies");
+        public static string MockMovieMediaPath
+        {
+            get
+            {
+                var basePath = Directory.GetParent(FileSystemPaths.RootDirectory).Parent.Parent.Parent;
+                return Path.Join(basePath.FullName, "BaseTests", "PlexMockServer", "media", "movies");
+            }
+        }
 
         public static List<MockMediaData> GetMockMediaData()
         {
@@ -40,8 +47,6 @@ namespace PlexRipper.BaseTests
         {
             var _server = WireMockServer.Start();
 
-            var moviePath = $@"{FileSystemPaths.RootDirectory}/media/movies";
-
             foreach (var mockMediaData in GetMockMediaData())
             {
                 _server
@@ -49,7 +54,7 @@ namespace PlexRipper.BaseTests
                     .RespondWith(
                         Response.Create()
                             .WithStatusCode(206)
-                            .WithBodyFromFile(Path.Combine(moviePath, mockMediaData.ParentFolderName, mockMediaData.FileName))
+                            .WithBodyFromFile(Path.Combine(MockMovieMediaPath, mockMediaData.ParentFolderName, mockMediaData.FileName))
                     );
             }
 
@@ -59,7 +64,7 @@ namespace PlexRipper.BaseTests
                 .RespondWith(
                     Response.Create()
                         .WithStatusCode(206)
-                        .WithBodyFromFile(Path.Combine(FileSystemPaths.RootDirectory, "media", "movies", "default", "test-video.mp4"))
+                        .WithBodyFromFile(Path.Combine(MockMovieMediaPath, "test-video.mp4"))
                 );
 
             return _server;

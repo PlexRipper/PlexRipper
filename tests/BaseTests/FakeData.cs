@@ -70,7 +70,7 @@ namespace PlexRipper.BaseTests
             return plexLibrary;
         }
 
-        public static Faker<DownloadTask> MovieDownloadTasks()
+        public static Faker<DownloadTask> GetMovieDownloadTask()
         {
             var plexServer = GetPlexServer().Generate(1).First();
             var plexLibrary = GetPlexLibrary(plexServer.Id, 1, PlexMediaType.Movie).Generate(1).First();
@@ -78,7 +78,7 @@ namespace PlexRipper.BaseTests
 
             return new Faker<DownloadTask>()
                 .StrictMode(true)
-                .RuleFor(x => x.Id, _ => 0)
+                .RuleFor(x => x.Id, f => f.Random.Int(1, 1000))
                 .RuleFor(x => x.DownloadStatus, f => DownloadStatus.Initialized)
                 .RuleFor(x => x.Priority, f => 0)
                 .RuleFor(x => x.DataReceived, f => 0)

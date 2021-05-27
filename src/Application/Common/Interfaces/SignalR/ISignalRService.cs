@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using PlexRipper.Application.Common.DTO.DownloadManager;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common

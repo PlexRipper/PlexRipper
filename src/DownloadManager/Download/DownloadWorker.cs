@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.DTO.DownloadManager;
 using PlexRipper.Domain;
 using Serilog.Events;
 using Timer = System.Timers.Timer;

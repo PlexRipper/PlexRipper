@@ -1,6 +1,6 @@
 ﻿using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.DTO.DownloadManager
+namespace PlexRipper.Application.Common
 {
     public class DownloadWorkerUpdate : IDownloadWorkerUpdate
     {

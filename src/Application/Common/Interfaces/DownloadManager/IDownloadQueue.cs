@@ -1,9 +1,15 @@
-﻿using PlexRipper.Domain;
+﻿using System.Collections.Generic;
+using System.Reactive.Subjects;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
-    public interface IDownloadQueue : ISetup
+    public interface IDownloadQueue
     {
-        void CheckDownloadQueue(IDownloadManager downloadManager);
+        Subject<DownloadClientUpdate> UpdateDownloadClient { get; }
+
+        Subject<int> StartDownloadTask { get; }
+
+        void ExecuteDownloadQueue(List<PlexServer> plexServers);
     }
 }

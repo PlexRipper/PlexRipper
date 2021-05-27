@@ -8,7 +8,7 @@ namespace PlexRipper.Application.Common
     /// <summary>
     /// Interface for the DownloadManager.
     /// </summary>
-    public interface IDownloadManager : ISetup
+    public interface IDownloadManager
     {
         /// <summary>
         /// Cancels the PlexDownloadClient executing the <see cref="DownloadTask"/> if it is downloading.
@@ -25,25 +25,18 @@ namespace PlexRipper.Application.Common
         Task<Result> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks);
 
         /// <summary>
-        /// Restart the <see cref="DownloadTask"/> by deleting the PlexDownloadClient and starting a new one.
-        /// </summary>
-        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to restart.</param>
-        /// <returns>Is successful.</returns>
-        Task<Result<bool>> RestartDownloadAsync(int downloadTaskId);
-
-        /// <summary>
         /// Will clear any completed <see cref="DownloadTask"/> from the database.
         /// </summary>
         /// <param name="downloadTaskIds"></param>
         /// <returns>Is successful.</returns>
-        Task<Result<bool>> ClearCompletedAsync(List<int> downloadTaskIds = null);
+        Task<Result> ClearCompletedAsync(List<int> downloadTaskIds = null);
 
         /// <summary>
         /// Starts a queued task immediately.
         /// </summary>
         /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to start.</param>
         /// <returns>Is successful.</returns>
-        Task<Result<bool>> StartDownload(int downloadTaskId);
+        Task<Result> StartDownload(int downloadTaskId);
 
         /// <summary>
         /// Pause a currently downloading <see cref="DownloadTask"/>.
@@ -67,5 +60,11 @@ namespace PlexRipper.Application.Common
         /// <returns><see cref="Result"/> fails on error.</returns>
         Task<Result> DeleteDownloadClients(IEnumerable<int> downloadTaskIds);
 
+        /// <summary>
+        /// Restart the <see cref="DownloadTask"/> by deleting the PlexDownloadClient and starting a new one.
+        /// </summary>
+        /// <param name="downloadTaskIds">The ids of the <see cref="DownloadTask"/> to restart.</param>
+        /// <returns>Is successful.</returns>
+        Task<Result> RestartDownloadAsync(List<int> downloadTaskIds);
     }
 }

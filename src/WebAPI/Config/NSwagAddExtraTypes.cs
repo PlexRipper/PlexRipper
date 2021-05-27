@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
-using PlexRipper.Application.Common.DTO.DownloadManager;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Common;
 using PlexRipper.WebAPI.SignalR.Common;

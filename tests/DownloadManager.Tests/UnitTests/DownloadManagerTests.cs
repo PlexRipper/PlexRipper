@@ -1,13 +1,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using PlexRipper.Application.PlexServers;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;
 using WireMock.Server;
 using Xunit;
 using Xunit.Abstractions;
-using DownloadManager = PlexRipper.DownloadManager.DownloadManager;
 
 namespace DownloadManager.Tests.UnitTests
 {
@@ -56,6 +54,6 @@ namespace DownloadManager.Tests.UnitTests
             // Assert
             result.IsFailed.ShouldBeTrue();
         }
-        
+
     }
 }

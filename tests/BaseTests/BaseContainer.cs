@@ -79,6 +79,8 @@ namespace PlexRipper.BaseTests
 
         public IDownloadManager GetDownloadManager => AutofacContainer.Resolve<IDownloadManager>();
 
+        public IDownloadQueue GetDownloadQueue => AutofacContainer.Resolve<IDownloadQueue>();
+
         public IFolderPathService GetFolderPathService => AutofacContainer.Resolve<IFolderPathService>();
 
         public IPlexDownloadTaskFactory GetPlexDownloadTaskFactory => AutofacContainer.Resolve<IPlexDownloadTaskFactory>();

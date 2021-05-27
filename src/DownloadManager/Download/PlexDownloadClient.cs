@@ -7,7 +7,6 @@ using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.DTO.DownloadManager;
 using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager.Download
@@ -19,10 +18,6 @@ namespace PlexRipper.DownloadManager.Download
     public class PlexDownloadClient : IDisposable
     {
         #region Fields
-
-        private readonly Subject<DownloadClientUpdate> _downloadClientUpdate = new();
-
-        private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new();
 
         private readonly List<DownloadWorker> _downloadWorkers = new();
 
@@ -112,9 +107,9 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Observables
 
-        public IObservable<DownloadClientUpdate> DownloadClientUpdate => _downloadClientUpdate.AsObservable();
+        public Subject<DownloadClientUpdate> DownloadClientUpdate { get; } = new();
 
-        public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
+        public Subject<DownloadWorkerLog> DownloadWorkerLog { get; } = new();
 
         #endregion
 
@@ -129,7 +124,7 @@ namespace PlexRipper.DownloadManager.Download
         /// </summary>
         public void Dispose()
         {
-            _downloadWorkerLog?.Dispose();
+            DownloadWorkerLog?.Dispose();
             ClearDownloadWorkers();
         }
 
@@ -152,7 +147,7 @@ namespace PlexRipper.DownloadManager.Download
             _downloadWorkers
                 .Select(x => x.DownloadWorkerLog)
                 .Merge()
-                .Subscribe(OnDownloadWorkerLog);
+                .Subscribe(downloadWorkerLog => DownloadWorkerLog.OnNext(downloadWorkerLog));
         }
 
         /// <summary>
@@ -170,7 +165,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private void OnDownloadWorkerUpdate(IList<DownloadWorkerUpdate> downloadWorkerUpdates)
         {
-            if (_downloadClientUpdate.IsDisposed)
+            if (DownloadClientUpdate.IsDisposed)
             {
                 return;
             }
@@ -197,18 +192,13 @@ namespace PlexRipper.DownloadManager.Download
 
             Log.Debug(downloadClientUpdate.ToString());
 
-            _downloadClientUpdate.OnNext(downloadClientUpdate);
+            DownloadClientUpdate.OnNext(downloadClientUpdate);
 
             if (DownloadStatus == DownloadStatus.Completed)
             {
-                _downloadClientUpdate.OnCompleted();
-                _downloadWorkerLog.OnCompleted();
+                DownloadClientUpdate.OnCompleted();
+                DownloadWorkerLog.OnCompleted();
             }
-        }
-
-        private void OnDownloadWorkerLog(DownloadWorkerLog downloadWorkerLog)
-        {
-            _downloadWorkerLog.OnNext(downloadWorkerLog);
         }
 
         #endregion
@@ -247,7 +237,6 @@ namespace PlexRipper.DownloadManager.Download
 
             return Result.Ok();
         }
-
 
         public async Task<Result<DownloadTask>> StopAsync()
         {

@@ -44,7 +44,6 @@ namespace PlexRipper.WebAPI
             await _fileSystemCustom.SetupAsync();
             await _dbContext.SetupAsync();
             await _userSettings.SetupAsync();
-            await  _downloadManager.SetupAsync();
             await  _fileMerger.SetupAsync();
         }
 

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using Moq;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.DTO.DownloadManager;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Download;

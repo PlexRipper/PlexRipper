@@ -4,7 +4,7 @@ using System.Text;
 using Newtonsoft.Json;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.DTO.DownloadManager
+namespace PlexRipper.Application.Common
 {
     public class DownloadClientUpdate
     {
@@ -36,10 +36,10 @@ namespace PlexRipper.Application.Common.DTO.DownloadManager
         public DownloadStatus DownloadStatus => DownloadTask.DownloadStatus;
 
         [JsonProperty("percentage", Required = Required.Always)]
-        public decimal Percentage => decimal.Round(WorkerProgresses.AsQueryable().Average(x => x.Percentage), 2);
+        public decimal Percentage => WorkerProgresses.Any() ? decimal.Round(WorkerProgresses.AsQueryable().Average(x => x.Percentage), 2) : 0;
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
-        public int DownloadSpeed => WorkerProgresses.AsQueryable().Sum(x => x.DownloadSpeed);
+        public int DownloadSpeed => WorkerProgresses.Any() ? WorkerProgresses.AsQueryable().Sum(x => x.DownloadSpeed) : 0;
 
         [JsonProperty("dataReceived", Required = Required.Always)]
         public long DataReceived => WorkerProgresses.AsQueryable().Sum(x => x.DataReceived);

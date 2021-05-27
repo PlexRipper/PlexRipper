@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentResults;
@@ -95,20 +96,6 @@ namespace PlexRipper.WebAPI.Controllers
             return Ok(result);
         }
 
-        /// <summary>
-        /// POST: api/(DownloadController)/stop/
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpPost("stop")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Stop([FromBody] List<int> downloadTaskIds)
-        {
-            var result = await _plexDownloadService.StopDownloadTask(downloadTaskIds);
-            return result.IsFailed ? BadRequest(result) : Ok(result);
-        }
-
         // GET api/<DownloadController>/start/{id:int}
         [HttpGet("start/{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
@@ -135,7 +122,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(id, "Download Task Id");
             }
 
-            var result = await _plexDownloadService.RestartDownloadTask(id);
+            var result = await _plexDownloadService.RestartDownloadTask(new List<int> { id });
             return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 
@@ -154,6 +141,8 @@ namespace PlexRipper.WebAPI.Controllers
             return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 
+        #region BatchCommands
+
         /// <summary>
         /// DELETE api/(DownloadController)/delete
         /// </summary>
@@ -164,7 +153,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Delete([FromBody] List<int> downloadTaskIds)
         {
-            if (downloadTaskIds.Count <= 0)
+            if (!downloadTaskIds.Any())
             {
                 return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
             }
@@ -179,5 +168,37 @@ namespace PlexRipper.WebAPI.Controllers
 
             return result.IsFailed ? InternalServerError(result) : Ok(result);
         }
+
+        // POST api/<DownloadController>/restart/{id:int}
+        [HttpPost("restart")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> Restart([FromBody] List<int> downloadTaskIds)
+        {
+            if (!downloadTaskIds.Any())
+            {
+                return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
+            }
+
+            var result = await _plexDownloadService.RestartDownloadTask(downloadTaskIds);
+            return result.IsFailed ? BadRequest(result) : Ok(result);
+        }
+
+        // POST: api/(DownloadController)/stop/
+        [HttpPost("stop")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> Stop([FromBody] List<int> downloadTaskIds)
+        {
+            if (!downloadTaskIds.Any())
+            {
+                return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
+            }
+
+            var result = await _plexDownloadService.StopDownloadTask(downloadTaskIds);
+            return result.IsFailed ? BadRequest(result) : Ok(result);
+        }
+
+        #endregion
     }
 }

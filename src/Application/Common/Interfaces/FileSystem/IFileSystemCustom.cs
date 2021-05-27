@@ -6,7 +6,6 @@ namespace PlexRipper.Application.Common
 {
     public interface IFileSystemCustom : ISetup
     {
-
         Result<FileStream> SaveFile(string directory, string fileName, long fileSize);
 
         string ToAbsolutePath(string relativePath);

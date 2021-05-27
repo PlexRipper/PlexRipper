@@ -29,7 +29,6 @@ namespace PlexRipper.Application.Common
         /// <returns>Valid result if found.</returns>
         Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, bool topLevelMediaOnly = false);
 
-
         Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, bool topLevelMediaOnly = false);
     }
 }

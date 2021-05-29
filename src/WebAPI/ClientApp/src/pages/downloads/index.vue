@@ -79,7 +79,7 @@ export default class Downloads extends Vue {
 	private dialog: boolean = false;
 
 	get getSelected(): number[] {
-		return this.selected.map((x) => x.keys).flat(1);
+		return this.selected.map((x) => +x.keys).flat(1);
 	}
 
 	get hasSelected(): boolean {
@@ -90,7 +90,7 @@ export default class Downloads extends Vue {
 
 	clearDownloadTask(downloadTask: DownloadTaskDTO): void {
 		DownloadService.clearDownloadTasks([downloadTask.id]);
-		this.selected = filter(this.selected, (x) => x.id !== downloadTask.id);
+		this.selected = filter(this.selected, (x) => x.indexKey !== downloadTask.id);
 	}
 
 	startDownloadTask(downloadTask: DownloadTaskDTO): void {
@@ -111,7 +111,7 @@ export default class Downloads extends Vue {
 
 	deleteDownloadTask(downloadTask: DownloadTaskDTO): void {
 		DownloadService.deleteDownloadTasks([downloadTask.id]);
-		this.selected = filter(this.selected, (x) => x.id !== downloadTask.id);
+		this.selected = filter(this.selected, (x) => x.indexKey !== downloadTask.id);
 	}
 
 	detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
@@ -153,7 +153,7 @@ export default class Downloads extends Vue {
 	}
 
 	restartDownloadTasks(): void {
-		Log.info('restartDownloadTasks not implemented');
+		DownloadService.restartDownloadTasks(this.getSelected);
 	}
 
 	deleteDownloadTasks(): void {

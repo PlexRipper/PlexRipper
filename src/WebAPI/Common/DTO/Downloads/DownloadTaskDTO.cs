@@ -82,9 +82,17 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("downloadUrl", Required = Required.Always)]
         public string DownloadUrl { get; set; }
 
-        [JsonProperty("children", Required = Required.AllowNull)]
+        /// <summary>
+        /// The nested <see cref="DownloadTask"/> used for seasons and episodes.
+        /// "Required = Required.Default" is used for ensuring it's optional in the Typescript generating.
+        /// </summary>
+        [JsonProperty("children", Required = Required.Default)]
         public List<DownloadTaskDTO> Children { get; set; }
 
+        /// <summary>
+        /// The actions that can be taken on this <see cref="DownloadTask"/>.
+        /// This is filled by the front-end and depends on the DownloadStatus
+        /// </summary>
         [JsonProperty("actions", Required = Required.Always)]
         public string[] Actions { get; set; }
     }

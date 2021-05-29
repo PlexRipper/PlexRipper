@@ -50,10 +50,11 @@ namespace PlexRipper.DownloadManager
                 if (queuedDownloadTask != null)
                 {
                     Log.Debug(
-                        $"Returning the next Queued downloadTask with id {queuedDownloadTask.Id} - {queuedDownloadTask.Title} for server {plexServer.Name}");
+                        $"Starting the next Queued downloadTask with id {queuedDownloadTask.Id} - {queuedDownloadTask.Title} for server {plexServer.Name}");
                     queuedDownloadTask.DownloadStatus = DownloadStatus.Downloading;
                     UpdateDownloadClient.OnNext(new DownloadClientUpdate(queuedDownloadTask));
                     StartDownloadTask.OnNext(queuedDownloadTask.Id);
+                    return;
                 }
 
                 Log.Information($"There are no available downloadTasks remaining for PlexServer: {plexServer.Name}");

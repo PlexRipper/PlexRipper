@@ -33,7 +33,7 @@ export class SignalrService {
 
 	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
-	public constructor() {
+	public setup(): void {
 		globalService.getConfigReady().subscribe((config) => {
 			Log.info('Setting up SignalR Service');
 			const options: ConnectionOptions = {

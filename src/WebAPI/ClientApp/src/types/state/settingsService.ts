@@ -17,6 +17,7 @@ import { distinctUntilChanged, filter, switchMap, take, tap } from 'rxjs/operato
 import GlobalService from '@state/globalService';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import { isEqual } from 'lodash';
+import { Context } from '@nuxt/types';
 
 export class SettingsService extends BaseService {
 	public constructor() {
@@ -27,6 +28,10 @@ export class SettingsService extends BaseService {
 				};
 			},
 		});
+	}
+
+	public setup(nuxtContext: Context): void {
+		super.setup(nuxtContext);
 
 		// On app load, request the settings once
 		GlobalService.getAxiosReady()

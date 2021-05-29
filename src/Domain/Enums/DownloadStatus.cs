@@ -83,15 +83,21 @@ namespace PlexRipper.Domain
         Merging = 11,
 
         /// <summary>
+        /// Download file is being moved.
+        /// </summary>
+        [EnumMember(Value = "Moving")]
+        Moving = 12,
+
+        /// <summary>
         /// Download is completed.
         /// </summary>
         [EnumMember(Value = "Completed")]
-        Completed = 12,
+        Completed = 13,
 
         /// <summary>
         /// There was an error during download.
         /// </summary>
         [EnumMember(Value = "Error")]
-        Error = 13,
+        Error = 14,
     }
 }

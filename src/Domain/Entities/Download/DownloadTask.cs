@@ -78,12 +78,9 @@ namespace PlexRipper.Domain
         public int ReleaseYear => MetaData?.ReleaseYear ?? -1;
 
         [NotMapped]
-        public int MediaParts => MetaData?.MediaData?.Count ?? 0;
+        public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
 
-        /// <summary>
-        /// The formatted media title as shown in Plex, based on the <see cref="PlexMediaType"/>.
-        /// </summary>
-        [NotMapped]
+        /// <summary>sd
         public string Title
         {
             get

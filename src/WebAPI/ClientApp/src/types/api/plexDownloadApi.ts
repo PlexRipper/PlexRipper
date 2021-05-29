@@ -26,6 +26,12 @@ export function downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): Observa
 }
 
 // region Commands
+export function restartDownloadTasks(downloadTaskIds: number[]): Observable<boolean> {
+	preApiRequest(logText, 'restartDownloadTasks');
+	const result: Observable<AxiosResponse> = Axios.post(`${apiPath}/restart`, downloadTaskIds);
+	return checkResponse<boolean>(result, logText, 'restartDownloadTasks');
+}
+
 export function deleteDownloadTasks(downloadTaskIds: number[]): Observable<boolean> {
 	preApiRequest(logText, 'deleteDownloadTasks');
 	const result: Observable<AxiosResponse> = Axios.post(`${apiPath}/delete`, downloadTaskIds);

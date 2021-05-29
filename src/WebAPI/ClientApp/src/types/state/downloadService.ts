@@ -1,17 +1,21 @@
-import { Observable, of } from 'rxjs';
+import Log from 'consola';
+import { combineLatest, merge, Observable, of } from 'rxjs';
 import {
 	clearDownloadTasks,
 	deleteDownloadTasks,
 	downloadMedia,
 	getAllDownloads,
 	getDownloadTasksInServer,
+	restartDownloadTasks,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { finalize, switchMap } from 'rxjs/operators';
+import { finalize, startWith, switchMap } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import AccountService from '@service/accountService';
 import { BaseService } from '@state/baseService';
+import ProgressService from '@state/progressService';
+import { Context } from '@nuxt/types';
 
 export class DownloadService extends BaseService {
 	public constructor() {
@@ -22,6 +26,10 @@ export class DownloadService extends BaseService {
 				};
 			},
 		});
+	}
+
+	public setup(nuxtContext: Context): void {
+		super.setup(nuxtContext);
 
 		AccountService.getActiveAccount()
 			.pipe(switchMap(() => getAllDownloads()))
@@ -32,8 +40,35 @@ export class DownloadService extends BaseService {
 			});
 	}
 
-	public getDownloadList(): Observable<DownloadTaskDTO[]> {
-		return this.stateChanged.pipe(switchMap((state: IStoreState) => of(state?.downloads)));
+	public getDownloadList(serverId: number = 0): Observable<DownloadTaskDTO[]> {
+		return combineLatest([
+			this.stateChanged.pipe(switchMap((state: IStoreState) => of(state?.downloads ?? []))),
+			ProgressService.getDownloadTaskUpdateProgress(serverId).pipe(startWith([])),
+		]).pipe(
+			// Merge the baseDownload with the download progress and return the updated result
+			switchMap(([baseDownloadRows, downloadProgressRows]) => {
+				Log.warn('TESTESTERSFG', [baseDownloadRows, downloadProgressRows]);
+				if (!downloadProgressRows || downloadProgressRows === []) {
+					return of(baseDownloadRows);
+				}
+				// Replace by progress if found
+				for (let i = 0; i < baseDownloadRows.length; i++) {
+					const index = downloadProgressRows.findIndex((x) => x.id === baseDownloadRows[i].id);
+					if (index > -1) {
+						baseDownloadRows[i] = downloadProgressRows[index];
+					}
+				}
+
+				// Fix for Vuetify, the "v-treeview" component freaks out if children are null/undefined
+				baseDownloadRows.forEach((x) => {
+					if (x.children === null) {
+						x.children = [];
+					}
+				});
+
+				return of(baseDownloadRows);
+			}),
+		);
 	}
 
 	/**
@@ -46,9 +81,8 @@ export class DownloadService extends BaseService {
 	/**
 	 * Fetch the download list and signal to the observers that it is done.
 	 */
-	public fetchDownloadList(): Observable<DownloadTaskDTO[]> {
+	public fetchDownloadList(): void {
 		getAllDownloads().subscribe((downloads) => this.setState({ downloads }));
-		return this.getDownloadList();
 	}
 
 	public downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
@@ -58,6 +92,12 @@ export class DownloadService extends BaseService {
 	}
 
 	// region Commands
+
+	public restartDownloadTasks(downloadTaskIds: number[]): void {
+		restartDownloadTasks(downloadTaskIds)
+			.pipe(finalize(() => this.fetchDownloadList()))
+			.subscribe();
+	}
 
 	public deleteDownloadTasks(downloadTaskIds: number[]): void {
 		this.removeDownloadTasks(downloadTaskIds);

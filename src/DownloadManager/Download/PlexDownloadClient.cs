@@ -80,8 +80,6 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Properties
 
-        public DateTime DownloadStartAt { get; internal set; }
-
         public DownloadStatus DownloadStatus
         {
             get => DownloadTask.DownloadStatus;
@@ -94,11 +92,6 @@ namespace PlexRipper.DownloadManager.Download
         /// The ClientId/DownloadTaskId is always the same id that is assigned to the <see cref="DownloadTask"/>.
         /// </summary>
         public int DownloadTaskId => DownloadTask.Id;
-
-        /// <summary>
-        /// In how many parts/segments should the media be downloaded.
-        /// </summary>
-        public long Parts => _downloadWorkers.Count;
 
         /// <summary>
         /// Gets the Task that completes when all download workers have finished.
@@ -216,7 +209,6 @@ namespace PlexRipper.DownloadManager.Download
         public Result Start()
         {
             Log.Debug($"Start downloading {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
-            DownloadStartAt = DateTime.UtcNow;
             try
             {
                 foreach (var downloadWorker in _downloadWorkers)

@@ -1,6 +1,7 @@
 <template>
 	<div>
 		{{ downloadRows }}
+		<br />
 		{{ fileMergeProgressList }}
 		<v-tree-view-table
 			:items="downloadRows"
@@ -12,18 +13,17 @@
 		/>
 	</div>
 </template>
+
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DownloadClientUpdate, DownloadStatus, DownloadTaskDTO, FileMergeProgress, PlexMediaType } from '@dto/mainApi';
+import { DownloadStatus, DownloadTaskDTO, FileMergeProgress, PlexMediaType } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
-import SignalrService from '@service/signalrService';
-import { filter, switchMap } from 'rxjs/operators';
 import ButtonType from '@enums/buttonType';
 import DownloadService from '@state/downloadService';
-import { of } from 'rxjs';
+import ProgressService from '@state/progressService';
 
 @Component({
 	components: {
@@ -72,37 +72,10 @@ export default class DownloadsTable extends Vue {
 			downloadTask.timeRemaining = 0;
 			downloadTask.downloadSpeed = 0;
 			downloadTask.dataReceived = downloadTask.dataTotal;
-			this.cleanupProgress(downloadTask.id);
+			ProgressService.cleanUpProgressByDownloadTaskId(downloadTask.id);
 		}
 
 		return downloadTask;
-	}
-
-	get getDownloads(): DownloadTaskDTO[] | DownloadClientUpdate[] {
-		this.downloadRows.forEach((rootDownloadTask) => {
-			// For movies download tasks
-			if (rootDownloadTask.mediaType === PlexMediaType.Movie) {
-				this.mergeDownloadRow(rootDownloadTask);
-				rootDownloadTask.actions = this.availableActions(rootDownloadTask.status);
-				rootDownloadTask.children = undefined;
-			}
-
-			// For tvShows download tasks
-			if (rootDownloadTask.mediaType === PlexMediaType.TvShow) {
-				if (rootDownloadTask.children && rootDownloadTask.children.length > 0) {
-					rootDownloadTask?.children?.forEach((season) => {
-						if (season.children && season.children.length > 0) {
-							season.children?.forEach((episode) => {
-								this.mergeDownloadRow(episode);
-							});
-						} else {
-							Log.warn(`Season: ${season.title} had no episodes`);
-						}
-					});
-				}
-			}
-		});
-		return this.downloadRows;
 	}
 
 	get getHeaders(): ITreeViewTableHeader[] {
@@ -206,44 +179,11 @@ export default class DownloadsTable extends Vue {
 		this.$emit(action, item);
 	}
 
-	cleanupProgress(downloadTaskId: number): void {
-		// Clean-up progress objects
-		// const downloadProgressIndex = this.downloadProgressList.findIndex((x) => x.id === downloadTaskId);
-		// if (downloadProgressIndex > -1) {
-		// 	this.downloadProgressList.splice(downloadProgressIndex, 1);
-		// }
-
-		const fileMergeProgressIndex = this.fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
-		if (fileMergeProgressIndex > -1) {
-			this.fileMergeProgressList.splice(fileMergeProgressIndex, 1);
-		}
-	}
-
 	mounted(): void {
-		SignalrService.getDownloadTaskUpdate()
-			.pipe(filter((x) => x.plexServerId === this.serverId))
-			.subscribe((downloadTaskUpdate) => {
-				Log.info('downloadTaskUpdate', downloadTaskUpdate);
-
-				const i = this.downloadRows.findIndex((x) => x.id === downloadTaskUpdate.id);
-				if (i > -1) {
-					// Update
-					this.downloadRows.splice(i, 1, downloadTaskUpdate);
-				} else {
-					// Add
-					this.downloadRows.push(downloadTaskUpdate);
-				}
-				//
-				// const j = this.downloadProgressList.findIndex((x) => x.id === downloadProgress.id);
-				// if (j > -1) {
-				// 	// Update
-				// 	this.downloadProgressList.splice(i, 1, downloadProgress);
-				// } else {
-				// 	// Add
-				// 	this.downloadProgressList.push(downloadProgress);
-				// }
-				//
-				this.downloadRows.forEach((rootDownloadTask) => {
+		// Retrieve initial download list
+		this.$subscribeTo(DownloadService.getDownloadList(this.serverId), (data: DownloadTaskDTO[]) => {
+			if (data && data.length > 0) {
+				data.forEach((rootDownloadTask) => {
 					// For movies download tasks
 					if (rootDownloadTask.mediaType === PlexMediaType.Movie) {
 						this.mergeDownloadRow(rootDownloadTask);
@@ -266,68 +206,12 @@ export default class DownloadsTable extends Vue {
 						}
 					}
 				});
-				Log.info('downloadRows', this.downloadRows);
-			});
+			}
+			this.downloadRows = data as DownloadTaskDTO[];
+			Log.info('downloadRows', this.downloadRows);
+		});
 
-		// this.$subscribeTo(SignalrService.getDownloadProgress().pipe(filter((x) => x.plexServerId === this.serverId)), (data) => {
-		// 	if (data) {
-		// 		const i = this.downloadProgressList.findIndex((x) => x.id === data.id);
-		// 		if (i > -1) {
-		// 			// Update
-		// 			this.downloadProgressList.splice(i, 1, data);
-		// 		} else {
-		// 			// Add
-		// 			this.downloadProgressList.push(data);
-		// 		}
-		// 	} else {
-		// 		Log.error(`DownloadProgress was undefined.`);
-		// 	}
-		// });
-		//
-		// // Retrieve download status from SignalR
-		// this.$subscribeTo(SignalrService.getDownloadTaskUpdate().pipe(filter((x) => x.plexServerId === this.serverId)), (data) => {
-		// 	const i = this.downloadRows.findIndex((x) => x.id === data.id);
-		// 	if (i > -1) {
-		// 		// Update
-		// 		this.downloadRows.splice(i, 1, data);
-		// 	} else {
-		// 		// Add
-		// 		this.downloadRows.push(data);
-		// 	}
-		// });
-
-		this.$subscribeTo(
-			SignalrService.getFileMergeProgress().pipe(filter((x) => x.plexServerId === this.serverId)),
-			(fileMergeProgress) => {
-				if (fileMergeProgress) {
-					const i = this.fileMergeProgressList.findIndex((x) => x.id === fileMergeProgress.id);
-					if (i > -1) {
-						// Update
-						this.fileMergeProgressList.splice(i, 1, fileMergeProgress);
-					} else {
-						// Add
-						this.fileMergeProgressList.push(fileMergeProgress);
-					}
-				} else {
-					Log.error(`FileMergeProgress was undefined`);
-				}
-			},
-		);
-
-		// Retrieve download list
-		this.$subscribeTo(
-			DownloadService.getDownloadList().pipe(switchMap((x) => of(x?.filter((x) => x.plexServerId === this.serverId) ?? []))),
-			(data: DownloadTaskDTO[]) => {
-				if (data) {
-					data.forEach((x) => {
-						if (x.children === null) {
-							x.children = [];
-						}
-					});
-					this.downloadRows = data as DownloadTaskDTO[];
-				}
-			},
-		);
+		this.$subscribeTo(ProgressService.getFileMergeProgress(this.serverId), (x) => (this.fileMergeProgressList = x));
 	}
 }
 </script>

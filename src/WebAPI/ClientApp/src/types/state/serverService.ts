@@ -5,6 +5,7 @@ import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/IStoreState';
 import AccountService from '@service/accountService';
 import { BaseService } from '@state/baseService';
+import { Context } from '@nuxt/types';
 
 export class ServerService extends BaseService {
 	public constructor() {
@@ -15,6 +16,10 @@ export class ServerService extends BaseService {
 				};
 			},
 		});
+	}
+
+	public setup(nuxtContext: Context): void {
+		super.setup(nuxtContext);
 
 		AccountService.getActiveAccount()
 			.pipe(switchMap((account) => iif(() => account == null, getPlexServers(), of(account?.plexServers ?? []))))

@@ -25,7 +25,8 @@ namespace PlexRipper.WebAPI
 
         private readonly PlexRipperDbContext _dbContext;
 
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystemCustom fileSystemCustom, IFileMerger fileMerger, IDownloadManager downloadManager,
+        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystemCustom fileSystemCustom, IFileMerger fileMerger,
+            IDownloadManager downloadManager,
             PlexRipperDbContext dbContext)
         {
             _appLifetime = appLifetime;
@@ -41,10 +42,14 @@ namespace PlexRipper.WebAPI
             Log.Information("Initiating boot process");
             ServicePointManager.DefaultConnectionLimit = 1000;
 
+            // First await the finishing off all these
             await _fileSystemCustom.SetupAsync();
             await _dbContext.SetupAsync();
             await _userSettings.SetupAsync();
-            await  _fileMerger.SetupAsync();
+
+            // Keep running the following
+            var fileMergerSetup = Task.Factory.StartNew(() => _fileMerger.SetupAsync(), TaskCreationOptions.LongRunning);
+            await Task.WhenAll(fileMergerSetup);
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

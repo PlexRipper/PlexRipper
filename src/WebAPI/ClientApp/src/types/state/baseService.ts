@@ -1,23 +1,19 @@
 import Log from 'consola';
+import { Context } from '@nuxt/types';
 import { ObservableStore } from '@codewithdan/observable-store';
 import IStoreState from '@interfaces/IStoreState';
-import { SettingsModel } from '@dto/mainApi';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 
 export class BaseService extends ObservableStore<IStoreState> {
-	public constructor(settings: ObservableStoreSettings) {
-		super(settings);
+	protected _nuxtContext!: Context;
 
-		if (!this.getState()) {
-			ObservableStore.initializeState({
-				accounts: [],
-				servers: [],
-				downloads: [],
-				libraries: [],
-				mediaUrls: [],
-				settings: {} as SettingsModel,
-			} as IStoreState);
-		}
+	public constructor(settings: ObservableStoreSettings) {
+		settings.trackStateHistory = true;
+		super(settings);
+	}
+
+	public setup(nuxtContext: Context): void {
+		this._nuxtContext = nuxtContext;
 	}
 
 	public logHistory(): void {

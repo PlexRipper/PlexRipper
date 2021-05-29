@@ -50,7 +50,7 @@ namespace PlexRipper.FileSystem
 
         #region Private
 
-        private async Task ExecuteFileTasks()
+        public async Task ExecuteFileTasks()
         {
             Log.Information("Running FileTask executor");
 

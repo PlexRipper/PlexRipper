@@ -34,11 +34,11 @@ namespace DownloadManager.Tests.UnitTests
         {
             //Arrange
             var downloadQueue = Container.GetDownloadQueue;
-            List<DownloadClientUpdate> updates = new();
+            List<DownloadTask> updates = new();
             List<int> startCommands = new();
 
             // Act
-            downloadQueue.UpdateDownloadClient.Subscribe(update => updates.Add(update));
+            downloadQueue.UpdateDownloadTask.Subscribe(update => updates.Add(update));
             downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
 
             downloadQueue.ExecuteDownloadQueue(new List<PlexServer>());
@@ -57,14 +57,14 @@ namespace DownloadManager.Tests.UnitTests
             serverList[0].PlexLibraries = FakeData.GetPlexLibrary(serverList[0].Id, 1, PlexMediaType.Movie).Generate(1);
             serverList[0].PlexLibraries[0].DownloadTasks = FakeData.GetMovieDownloadTask().Generate(5);
 
-            List<DownloadClientUpdate> updates = new();
+            List<DownloadTask> downloadTaskUpdates = new();
 
             // Act
-            downloadQueue.UpdateDownloadClient.Subscribe(update => updates.Add(update));
+            downloadQueue.UpdateDownloadTask.Subscribe(update => downloadTaskUpdates.Add(update));
             downloadQueue.ExecuteDownloadQueue(serverList);
 
             // Assert
-            updates.Count.ShouldBeEquivalentTo(6);
+            downloadTaskUpdates.Count.ShouldBeEquivalentTo(6);
         }
 
         [Fact]
@@ -96,16 +96,16 @@ namespace DownloadManager.Tests.UnitTests
             serverList[0].PlexLibraries[0].DownloadTasks = FakeData.GetMovieDownloadTask().Generate(5);
 
             List<int> startCommands = new();
-            List<DownloadClientUpdate> updates = new();
+            List<DownloadTask> downloadTasksUpdates = new();
 
             // Act
             downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-            downloadQueue.UpdateDownloadClient.Subscribe(update => updates.Add(update));
+            downloadQueue.UpdateDownloadTask.Subscribe(downloadTasksUpdate => downloadTasksUpdates.Add(downloadTasksUpdate));
             downloadQueue.ExecuteDownloadQueue(serverList);
 
             // Assert
             startCommands.Count.ShouldBeEquivalentTo(1);
-            updates.Last().DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+            downloadTasksUpdates.Last().DownloadStatus.ShouldBe(DownloadStatus.Downloading);
         }
 
         [Fact]
@@ -119,13 +119,13 @@ namespace DownloadManager.Tests.UnitTests
             serverList[0].PlexLibraries[0].DownloadTasks[0].DownloadStatus = DownloadStatus.Completed;
 
             List<int> startCommands = new();
-            List<DownloadClientUpdate> updates = new();
+            List<DownloadTask> downloadTaskUpdates = new();
             downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-            downloadQueue.UpdateDownloadClient.Subscribe(update =>
+            downloadQueue.UpdateDownloadTask.Subscribe(downloadTasksUpdate =>
             {
-                updates.Add(update);
-                var i = serverList[0].PlexLibraries[0].DownloadTasks.FindIndex(x => x.Id == update.Id);
-                serverList[0].PlexLibraries[0].DownloadTasks[i] = update.DownloadTask;
+                downloadTaskUpdates.Add(downloadTasksUpdate);
+                var i = serverList[0].PlexLibraries[0].DownloadTasks.FindIndex(x => x.Id == downloadTasksUpdate.Id);
+                serverList[0].PlexLibraries[0].DownloadTasks[i] = downloadTasksUpdate;
             });
 
             // Act
@@ -147,13 +147,13 @@ namespace DownloadManager.Tests.UnitTests
             serverList[0].PlexLibraries[0].DownloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
 
             List<int> startCommands = new();
-            List<DownloadClientUpdate> updates = new();
+            List<DownloadTask> updates = new();
             downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-            downloadQueue.UpdateDownloadClient.Subscribe(update =>
+            downloadQueue.UpdateDownloadTask.Subscribe(update =>
             {
                 updates.Add(update);
                 var i = serverList[0].PlexLibraries[0].DownloadTasks.FindIndex(x => x.Id == update.Id);
-                serverList[0].PlexLibraries[0].DownloadTasks[i] = update.DownloadTask;
+                serverList[0].PlexLibraries[0].DownloadTasks[i] = update;
             });
 
             // Act

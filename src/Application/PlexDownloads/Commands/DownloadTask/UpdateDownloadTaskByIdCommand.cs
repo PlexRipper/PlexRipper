@@ -1,11 +1,12 @@
 ﻿using FluentResults;
 using MediatR;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexDownloads
 {
     public class UpdateDownloadTaskByIdCommand : IRequest<Result>
     {
-        public UpdateDownloadTaskByIdCommand(Domain.DownloadTask downloadTask)
+        public UpdateDownloadTaskByIdCommand(DownloadTask downloadTask)
         {
             DownloadTask = downloadTask;
         }

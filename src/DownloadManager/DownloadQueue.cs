@@ -11,7 +11,7 @@ namespace PlexRipper.DownloadManager
     /// </summary>
     public class DownloadQueue : IDownloadQueue
     {
-        public Subject<DownloadClientUpdate> UpdateDownloadClient { get; } = new();
+        public Subject<DownloadTask> UpdateDownloadTask { get; } = new();
 
         public Subject<int> StartDownloadTask { get; } = new();
 
@@ -34,7 +34,7 @@ namespace PlexRipper.DownloadManager
                     if (downloadTask.DownloadStatus == DownloadStatus.Initialized)
                     {
                         downloadTask.DownloadStatus = DownloadStatus.Queued;
-                        UpdateDownloadClient.OnNext(new DownloadClientUpdate(downloadTask));
+                        UpdateDownloadTask.OnNext(downloadTask);
                     }
                 }
 
@@ -52,7 +52,7 @@ namespace PlexRipper.DownloadManager
                     Log.Debug(
                         $"Starting the next Queued downloadTask with id {queuedDownloadTask.Id} - {queuedDownloadTask.Title} for server {plexServer.Name}");
                     queuedDownloadTask.DownloadStatus = DownloadStatus.Downloading;
-                    UpdateDownloadClient.OnNext(new DownloadClientUpdate(queuedDownloadTask));
+                    UpdateDownloadTask.OnNext(queuedDownloadTask);
                     StartDownloadTask.OnNext(queuedDownloadTask.Id);
                     return;
                 }

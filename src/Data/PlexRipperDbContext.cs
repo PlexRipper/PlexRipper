@@ -112,6 +112,7 @@ namespace PlexRipper.Data
 
             if (!IsTestMode)
             {
+                Log.Information("Attempting to migrate database");
                 await Database.MigrateAsync();
             }
             else
@@ -124,7 +125,7 @@ namespace PlexRipper.Data
             var exist = await Database.CanConnectAsync();
             if (exist)
             {
-                Log.Information("Database was successfully created and connected!");
+                Log.Information("Database was successfully connected!");
                 return Result.Ok();
             }
 

@@ -200,8 +200,8 @@ namespace DownloadManager.Tests.UnitTests
             //Arrange
             var memoryStream = new MemoryStream();
             var downloadClient = CreatePlexDownloadClient(memoryStream, 500);
-            var updates = new List<DownloadClientUpdate>();
-            downloadClient.Value.DownloadClientUpdate.Subscribe(update => updates.Add(update));
+            var updates = new List<DownloadTask>();
+            downloadClient.Value.DownloadTaskUpdate.Subscribe(update => updates.Add(update));
 
             // Act
             downloadClient.Value.Start();

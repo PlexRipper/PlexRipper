@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
+using System.Text;
 using FluentResults;
 
 namespace PlexRipper.Domain
 {
     /// <summary>
-    /// Creates a media DownloadTask to be executed, needed values should be copied over since the mediaIds can change randomly.
+    /// Creates a media DownloadTask to be executed and is also used for providing updates on progress.
+    /// Needed values from <see cref="PlexMedia"/> should be copied over since the mediaIds can change randomly.
     /// </summary>
     public class DownloadTask : BaseEntity
     {
@@ -19,7 +21,8 @@ namespace PlexRipper.Domain
         public DateTime Created { get; set; }
 
         /// <summary>
-        /// The identifier used by Plex to keep track of media.
+        /// The unique identifier used by the Plex Api to keep track of media.
+        /// This is only unique on that specific server.
         /// </summary>
         public int Key { get; set; }
 
@@ -27,8 +30,6 @@ namespace PlexRipper.Domain
         /// The download priority, the higher the more important.
         /// </summary>
         public long Priority { get; set; }
-
-        public long DataReceived { get; set; }
 
         /// <summary>
         /// Used to authenticate download request with the server.
@@ -69,7 +70,10 @@ namespace PlexRipper.Domain
         public long DataTotal => MetaData?.MediaData?.First()?.Parts?.First()?.Size ?? 0;
 
         [NotMapped]
-        public decimal Percentage => DataTotal > 0 ? decimal.Round(DataReceived / DataTotal, 2) : 0;
+        public long DataReceived => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.Sum(x => x.BytesReceived) : 0;
+
+        [NotMapped]
+        public decimal Percentage => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.Average(x => x.Percentage) : 0;
 
         /// <summary>
         /// The release year of the media.
@@ -80,7 +84,6 @@ namespace PlexRipper.Domain
         [NotMapped]
         public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
 
-        /// <summary>sd
         public string Title
         {
             get
@@ -186,6 +189,18 @@ namespace PlexRipper.Domain
         [NotMapped]
         public string DestinationPath => DestinationFolder != null ? Path.Combine(DestinationFolder.DirectoryPath, MediaPath) : string.Empty;
 
+        [NotMapped]
+        public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
+
+        [NotMapped]
+        public int DownloadSpeed => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.AsQueryable().Sum(x => x.DownloadSpeed) : 0;
+
+        [NotMapped]
+        public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, DownloadSpeed);
+
+        [NotMapped]
+        public long BytesRemaining => DataTotal - DataReceived;
+
         /// <summary>
         /// Gets the sanitized sub-path based on the <see cref="PlexMediaType"/>, e.g: [TvShow]/[Season]/ or [Movie] [ReleaseYear]/.
         /// </summary>
@@ -215,6 +230,26 @@ namespace PlexRipper.Domain
         public Result IsValid()
         {
             return new DownloadTaskValidator().Validate(this).ToFluentResult();
+        }
+
+        public override string ToString()
+        {
+            var orderedList = DownloadWorkerTasks.ToList().OrderBy(x => x.Id).ToList();
+            StringBuilder builder = new StringBuilder();
+            foreach (var progress in orderedList)
+            {
+                builder.Append($"({progress.Id} - {progress.Percentage} {progress.DownloadSpeedFormatted}) + ");
+            }
+
+            // Remove the last " + "
+            if (builder.Length > 3)
+            {
+                builder.Length -= 3;
+            }
+
+            builder.Append($" = ({DownloadSpeedFormatted} - {TimeRemaining})");
+
+            return builder.ToString();
         }
 
         #endregion

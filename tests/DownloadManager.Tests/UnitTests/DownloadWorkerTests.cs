@@ -126,7 +126,7 @@ namespace DownloadManager.Tests.UnitTests
             downloadWorker.Start();
 
             //Assert
-            downloadWorker.LastDownloadWorkerUpdate.DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+            downloadWorker.DownloadWorkerTask.DownloadStatus.ShouldBe(DownloadStatus.Downloading);
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace DownloadManager.Tests.UnitTests
             await downloadWorker.StopAsync();
 
             //Assert
-            downloadWorker.LastDownloadWorkerUpdate.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
+            downloadWorker.DownloadWorkerTask.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
         }
 
         [Fact]
@@ -152,8 +152,8 @@ namespace DownloadManager.Tests.UnitTests
             var memoryStream = new MemoryStream();
             var downloadWorker = GetDownloadWorker(memoryStream);
 
-            List<DownloadWorkerUpdate> downloadWorkerUpdates = new();
-            downloadWorker.DownloadWorkerUpdate.Subscribe(downloadWorkerUpdate => downloadWorkerUpdates.Add(downloadWorkerUpdate));
+            List<DownloadWorkerTask> downloadWorkerUpdates = new();
+            downloadWorker.DownloadWorkerTaskUpdate.Subscribe(downloadWorkerUpdate => downloadWorkerUpdates.Add(downloadWorkerUpdate));
 
             //Act
             downloadWorker.Start();
@@ -224,16 +224,16 @@ namespace DownloadManager.Tests.UnitTests
             var memoryStream = new MemoryStream();
             var downloadWorker = GetDownloadWorker(memoryStream, downloadSpeedLimit);
 
-            List<DownloadWorkerUpdate> downloadWorkerUpdates = new();
-            downloadWorker.DownloadWorkerUpdate.Subscribe(downloadWorkerUpdate => downloadWorkerUpdates.Add(downloadWorkerUpdate));
+            List<DownloadWorkerTask> downloadWorkerUpdates = new();
+            downloadWorker.DownloadWorkerTaskUpdate.Subscribe(downloadWorkerUpdate => downloadWorkerUpdates.Add(downloadWorkerUpdate));
 
             //Act
             downloadWorker.Start();
             await downloadWorker.DownloadProcessTask;
 
             //Assert
-            (downloadWorkerUpdates.Last().DownloadSpeedAverage / 1024f)
-                .ShouldBeInRange(downloadSpeedLimit - marginOfErrorInKb, downloadSpeedLimit + marginOfErrorInKb);
+            var average = downloadWorkerUpdates.Select(x => x.DownloadSpeed).Average() / 1024f;
+            average.ShouldBeInRange(downloadSpeedLimit - marginOfErrorInKb, downloadSpeedLimit + marginOfErrorInKb);
         }
     }
 }

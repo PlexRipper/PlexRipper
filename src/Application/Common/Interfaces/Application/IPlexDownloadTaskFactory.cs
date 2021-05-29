@@ -26,5 +26,7 @@ namespace PlexRipper.Application.PlexDownloads
         Task<Result<List<DownloadTask>>> FinalizeDownloadTasks(List<DownloadTask> downloadTasks, int plexAccountId = 0);
 
         List<DownloadWorkerTask> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts);
+
+        Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<DownloadTask> downloadTasks);
     }
 }

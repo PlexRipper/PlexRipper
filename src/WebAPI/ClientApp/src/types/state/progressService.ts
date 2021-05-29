@@ -1,11 +1,11 @@
+import Log from 'consola';
+import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import { BaseService } from '@state/baseService';
 import SignalrService from '@service/signalrService';
-import Log from 'consola';
-import { Context } from '@nuxt/types';
 
 export class ProgressService extends BaseService {
 	public constructor() {

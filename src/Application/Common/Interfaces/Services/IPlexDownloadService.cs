@@ -10,19 +10,19 @@ namespace PlexRipper.Application.Common
     {
         Task<Result<List<PlexServer>>> GetDownloadTasksInServerAsync();
 
-        Task<Result> StopDownloadTask(List<int> downloadTaskIds = null);
+        Task<Result<List<DownloadTask>>> StopDownloadTask(List<int> downloadTaskIds);
 
         Task<Result> RestartDownloadTask(List<int> downloadTaskIds);
 
         Task<Result> ClearCompleted(List<int> downloadTaskIds = null);
 
-        Task<Result> StartDownloadTask(int downloadTaskId);
+        Task<Result> StartDownloadTask(List<int> downloadTaskIds);
 
-        Task<Result> PauseDownloadTask(int downloadTaskId);
+        Task<Result> PauseDownloadTask(List<int> downloadTaskIds);
 
         Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadMedias);
 
-        Task<Result> DeleteDownloadTasksAsync(IEnumerable<int> downloadTaskIds);
+        Task<Result> DeleteDownloadTasksAsync(List<int> downloadTaskIds);
 
         Task<Result<List<DownloadTask>>> GetDownloadTasksAsync();
     }

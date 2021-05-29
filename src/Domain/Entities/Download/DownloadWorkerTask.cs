@@ -103,10 +103,10 @@ namespace PlexRipper.Domain
         public Uri Uri => new Uri(Url);
 
         [NotMapped]
-        public long BytesRangeSize => EndByte - StartByte;
+        public long DataTotal => EndByte - StartByte;
 
         [NotMapped]
-        public long BytesRemaining => BytesRangeSize - BytesReceived;
+        public long DataRemaining => DataTotal - BytesReceived;
 
         /// <summary>
         /// The current byte in its range this task is currently downloading at.
@@ -119,6 +119,29 @@ namespace PlexRipper.Domain
         /// </summary>
         [NotMapped]
         public TimeSpan ElapsedTimeSpan => TimeSpan.FromMilliseconds(ElapsedTime);
+
+        [NotMapped]
+        public int DownloadSpeed => DataFormat.GetDownloadSpeed(BytesReceived, ElapsedTimeSpan.TotalSeconds);
+
+        [NotMapped]
+        public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
+
+        /// <summary>
+        /// The time remaining in seconds for this DownloadWorker to finish.
+        /// </summary>
+
+        [NotMapped]
+        public long TimeRemaining => DataFormat.GetTimeRemaining(DataRemaining, DownloadSpeed);
+
+        /// <summary>
+        /// The time elapsed of this DownloadWorker.
+        /// </summary>
+
+        [NotMapped]
+        public bool IsCompleted => BytesReceived == DataTotal;
+
+        [NotMapped]
+        public decimal Percentage => DataFormat.GetPercentage(BytesReceived, DataTotal);
 
         #endregion
     }

@@ -98,36 +98,29 @@ namespace PlexRipper.Application.PlexDownloads
             return await _downloadManager.AddToDownloadQueueAsync(downloadTasks);
         }
 
-        public async Task<Result> DeleteDownloadTasksAsync(IEnumerable<int> downloadTaskIds)
+        public async Task<Result> DeleteDownloadTasksAsync(List<int> downloadTaskIds)
         {
-            return await _downloadManager.DeleteDownloadClients(downloadTaskIds);
+            return await _downloadManager.DeleteDownloadTaskClientsAsync(downloadTaskIds);
         }
 
-        public async Task<Result> RestartDownloadTask(List<int> downloadTaskIds)
+        public Task<Result> RestartDownloadTask(List<int> downloadTaskIds)
         {
-            if (!downloadTaskIds.Any())
-                return ResultExtensions.IsEmpty(nameof(downloadTaskIds)).LogWarning();
-
-            return await _downloadManager.RestartDownloadAsync(downloadTaskIds);
+            return _downloadManager.RestartDownloadTasksAsync(downloadTaskIds);
         }
 
-        public async Task<Result> StopDownloadTask(List<int> downloadTaskIds = null)
+        public Task<Result<List<DownloadTask>>> StopDownloadTask(List<int> downloadTaskIds)
         {
-            return await _downloadManager.StopDownload(downloadTaskIds);
+            return _downloadManager.StopDownloadTasksAsync(downloadTaskIds);
         }
 
-        public async Task<Result> StartDownloadTask(int downloadTaskId)
+        public Task<Result> StartDownloadTask(List<int> downloadTaskIds)
         {
-            if (downloadTaskId <= 0) return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
-
-            return await _downloadManager.StartDownload(downloadTaskId);
+            return _downloadManager.ResumeDownloadTasksAsync(downloadTaskIds);
         }
 
-        public async Task<Result> PauseDownloadTask(int downloadTaskId)
+        public Task<Result> PauseDownloadTask(List<int> downloadTaskIds)
         {
-            if (downloadTaskId <= 0) return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
-
-            return await _downloadManager.PauseDownload(downloadTaskId);
+            return _downloadManager.PauseDownload(downloadTaskIds);
         }
 
         public Task<Result> ClearCompleted(List<int> downloadTaskIds)

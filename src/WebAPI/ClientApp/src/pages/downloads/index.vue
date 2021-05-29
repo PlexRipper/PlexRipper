@@ -4,12 +4,12 @@
 		<!-- Download Toolbar -->
 		<download-bar
 			:has-selected="hasSelected"
-			@pause="pauseDownloadTasks"
-			@stop="stopDownloadTasks"
-			@restart="restartDownloadTasks"
-			@start="startDownloadTasks"
-			@clear="clearDownloadTasks"
-			@delete="deleteDownloadTasks"
+			@pause="pauseDownloadTasks(getSelected)"
+			@stop="stopDownloadTasks(getSelected)"
+			@restart="restartDownloadTasks(getSelected)"
+			@start="startDownloadTasks(getSelected)"
+			@clear="clearDownloadTasks(getSelected)"
+			@delete="deleteDownloadTasks(getSelected)"
 		/>
 		<!--	The Download Table	-->
 		<perfect-scrollbar class="download-page-tables">
@@ -25,13 +25,13 @@
 									v-model="selected"
 									:server-id="plexServer.id"
 									@selected="updateSelected(plexServer.id, $event)"
-									@pause="pauseDownloadTask"
-									@clear="clearDownloadTask"
-									@delete="deleteDownloadTask"
-									@stop="stopDownloadTask"
-									@restart="restartDownloadTask"
-									@start="startDownloadTask"
-									@details="detailsDownloadTask"
+									@pause="pauseDownloadTasks([$event])"
+									@clear="clearDownloadTasks([$event])"
+									@delete="deleteDownloadTasks([$event])"
+									@stop="stopDownloadTasks([$event])"
+									@restart="restartDownloadTasks([$event])"
+									@start="startDownloadTasks([$event])"
+									@details="detailsDownloadTask($event)"
 								/>
 							</v-expansion-panel-content>
 						</v-expansion-panel>
@@ -49,13 +49,10 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import { pauseDownloadTask, restartDownloadTask, startDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@state/downloadService';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import { filter } from 'lodash';
 import ISelection from '@interfaces/ISelection';
 import DownloadsTable from './components/DownloadsTable.vue';
 import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
@@ -88,32 +85,6 @@ export default class Downloads extends Vue {
 
 	// region single commands
 
-	clearDownloadTask(downloadTask: DownloadTaskDTO): void {
-		DownloadService.clearDownloadTasks([downloadTask.id]);
-		this.selected = filter(this.selected, (x) => x.indexKey !== downloadTask.id);
-	}
-
-	startDownloadTask(downloadTask: DownloadTaskDTO): void {
-		this.$subscribeTo(startDownloadTask(downloadTask.id), () => {});
-	}
-
-	pauseDownloadTask(downloadTask: DownloadTaskDTO): void {
-		this.$subscribeTo(pauseDownloadTask(downloadTask.id), () => {});
-	}
-
-	stopDownloadTask(downloadTask: DownloadTaskDTO): void {
-		DownloadService.stopDownloadTasks([downloadTask.id]);
-	}
-
-	restartDownloadTask(downloadTask: DownloadTaskDTO): void {
-		this.$subscribeTo(restartDownloadTask(downloadTask.id), () => {});
-	}
-
-	deleteDownloadTask(downloadTask: DownloadTaskDTO): void {
-		DownloadService.deleteDownloadTasks([downloadTask.id]);
-		this.selected = filter(this.selected, (x) => x.indexKey !== downloadTask.id);
-	}
-
 	detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
 		this.downloadTaskDetail = downloadTask;
 		this.dialog = true;
@@ -131,34 +102,33 @@ export default class Downloads extends Vue {
 	// endregion
 
 	// region batch commands
-	clearDownloadTasks(): void {
-		if (!this.hasSelected) {
-			DownloadService.clearDownloadTasks([]);
-		} else {
+	clearDownloadTasks(downloadTaskIds: number[]): void {
+		if (this.hasSelected) {
 			DownloadService.clearDownloadTasks(this.getSelected);
 			this.selected = [];
+		} else {
+			DownloadService.clearDownloadTasks(downloadTaskIds);
 		}
 	}
 
-	startDownloadTasks(): void {
-		Log.info('startDownloadTasks not implemented');
+	startDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.startDownloadTasks(downloadTaskIds);
 	}
 
-	pauseDownloadTasks(): void {
-		Log.info('pauseDownloadTasks not implemented');
+	pauseDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.pauseDownloadTasks(downloadTaskIds);
 	}
 
-	stopDownloadTasks(): void {
-		Log.info('stopDownloadTasks not implemented');
+	stopDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.stopDownloadTasks(downloadTaskIds);
 	}
 
-	restartDownloadTasks(): void {
-		DownloadService.restartDownloadTasks(this.getSelected);
+	restartDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.restartDownloadTasks(downloadTaskIds);
 	}
 
-	deleteDownloadTasks(): void {
-		DownloadService.deleteDownloadTasks(this.getSelected);
-		this.selected = [];
+	deleteDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.deleteDownloadTasks(downloadTaskIds);
 	}
 
 	// endregion

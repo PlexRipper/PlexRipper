@@ -49,8 +49,6 @@ export default class DownloadsTable extends Vue {
 		// Note: Need to create a new one, then add to array and then use that array to overwrite the season.children,
 		// otherwise result will not be updated.
 
-		downloadTask.actions = this.availableActions(downloadTask.status);
-
 		// if (downloadProgress) {
 		// 	downloadTask.percentage = downloadProgress.percentage;
 		// 	downloadTask.downloadSpeed = downloadProgress.downloadSpeed;
@@ -72,7 +70,6 @@ export default class DownloadsTable extends Vue {
 			downloadTask.timeRemaining = 0;
 			downloadTask.downloadSpeed = 0;
 			downloadTask.dataReceived = downloadTask.dataTotal;
-			ProgressService.cleanUpProgressByDownloadTaskId(downloadTask.id);
 		}
 
 		return downloadTask;
@@ -174,7 +171,7 @@ export default class DownloadsTable extends Vue {
 		return availableActions;
 	}
 
-	tableAction({ action, item }: { action: string; item: any }) {
+	tableAction({ action, item }: { action: string; item: DownloadTaskDTO }) {
 		Log.info('command', { action, item });
 		this.$emit(action, item);
 	}
@@ -186,7 +183,7 @@ export default class DownloadsTable extends Vue {
 				data.forEach((rootDownloadTask) => {
 					// For movies download tasks
 					if (rootDownloadTask.mediaType === PlexMediaType.Movie) {
-						this.mergeDownloadRow(rootDownloadTask);
+						// this.mergeDownloadRow(rootDownloadTask);
 						rootDownloadTask.actions = this.availableActions(rootDownloadTask.status);
 						rootDownloadTask.children = undefined;
 					}

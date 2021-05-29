@@ -5,7 +5,6 @@ using EFCore.BulkExtensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
@@ -17,10 +16,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
         public UpdateDownloadTaskByIdCommandValidator()
         {
             RuleFor(x => x.DownloadTask).NotNull();
-            RuleFor(x => x.DownloadTask.Id).GreaterThan(0);
-            RuleFor(x => x.DownloadTask.DataTotal).GreaterThan(0);
-            RuleFor(x => x.DownloadTask.PlexServerId).GreaterThan(0);
-            RuleFor(x => x.DownloadTask.PlexLibraryId).GreaterThan(0);
+            RuleFor(x => x.DownloadTask.IsValid().IsSuccess).Equal(true);
         }
     }
 

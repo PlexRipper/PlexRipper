@@ -100,7 +100,7 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Observables
 
-        public Subject<DownloadClientUpdate> DownloadClientUpdate { get; } = new();
+        public Subject<DownloadTask> DownloadTaskUpdate { get; } = new();
 
         public Subject<DownloadWorkerLog> DownloadWorkerLog { get; } = new();
 
@@ -131,10 +131,10 @@ namespace PlexRipper.DownloadManager.Download
 
             // On download worker update
             _downloadWorkers
-                .Select(x => x.DownloadWorkerUpdate)
+                .Select(x => x.DownloadWorkerTaskUpdate)
                 .CombineLatest()
                 .Sample(TimeSpan.FromMilliseconds(1000), _timeThreadContext)
-                .Subscribe(OnDownloadWorkerUpdate);
+                .Subscribe(OnDownloadWorkerTaskUpdate);
 
             // On download worker log
             _downloadWorkers
@@ -156,11 +156,21 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Subscriptions
 
-        private void OnDownloadWorkerUpdate(IList<DownloadWorkerUpdate> downloadWorkerUpdates)
+        private void OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates)
         {
-            if (DownloadClientUpdate.IsDisposed)
+            if (DownloadTaskUpdate.IsDisposed)
             {
                 return;
+            }
+
+            // Replace every DownloadWorkerTask with the updated version
+            foreach (var downloadWorkerTask in downloadWorkerUpdates)
+            {
+                var i = DownloadTask.DownloadWorkerTasks.FindIndex(x => x.Id == downloadWorkerTask.Id);
+                if (i > -1)
+                {
+                    DownloadTask.DownloadWorkerTasks[i] = downloadWorkerTask;
+                }
             }
 
             var clientStatus = downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList();
@@ -181,15 +191,11 @@ namespace PlexRipper.DownloadManager.Download
                 DownloadStatus = DownloadStatus.Completed;
             }
 
-            var downloadClientUpdate = new DownloadClientUpdate(DownloadTask, downloadWorkerUpdates);
-
-            Log.Debug(downloadClientUpdate.ToString());
-
-            DownloadClientUpdate.OnNext(downloadClientUpdate);
+            DownloadTaskUpdate.OnNext(DownloadTask);
 
             if (DownloadStatus == DownloadStatus.Completed)
             {
-                DownloadClientUpdate.OnCompleted();
+                DownloadTaskUpdate.OnCompleted();
                 DownloadWorkerLog.OnCompleted();
             }
         }
@@ -228,6 +234,16 @@ namespace PlexRipper.DownloadManager.Download
             }
 
             return Result.Ok();
+        }
+
+        public async Task<Result<DownloadTask>> PauseAsync()
+        {
+            Log.Debug($"Pause downloading of {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
+
+            await Task.WhenAll(_downloadWorkers.Select(x => x.PauseAsync()));
+
+            DownloadTask.DownloadWorkerTasks = _downloadWorkers.Select(x => x.DownloadWorkerTask).ToList();
+            return Result.Ok(DownloadTask);
         }
 
         public async Task<Result<DownloadTask>> StopAsync()

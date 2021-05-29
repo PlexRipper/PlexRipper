@@ -24,7 +24,6 @@ namespace PlexRipper.WebAPI.Config
         {
             List<Type> types = new List<Type>
             {
-                typeof(DownloadClientUpdate),
                 typeof(DownloadTaskCreationProgress),
                 typeof(LibraryProgress),
                 typeof(PlexAccountRefreshProgress),

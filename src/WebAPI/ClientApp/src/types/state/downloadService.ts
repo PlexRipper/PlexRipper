@@ -5,11 +5,12 @@ import {
 	deleteDownloadTasks,
 	downloadMedia,
 	getAllDownloads,
-	getDownloadTasksInServer,
+	getDownloadTasksInServer, pauseDownloadTask,
 	restartDownloadTasks,
+	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { finalize, startWith, switchMap } from 'rxjs/operators';
+import { startWith, switchMap, take, tap } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import AccountService from '@service/accountService';
@@ -32,7 +33,10 @@ export class DownloadService extends BaseService {
 		super.setup(nuxtContext);
 
 		AccountService.getActiveAccount()
-			.pipe(switchMap(() => getAllDownloads()))
+			.pipe(
+				switchMap(() => getAllDownloads()),
+				take(1),
+			)
 			.subscribe((downloads: DownloadTaskDTO[]) => {
 				if (downloads) {
 					this.setState({ downloads }, 'Initial DownloadTask Data');
@@ -51,11 +55,16 @@ export class DownloadService extends BaseService {
 				if (!downloadProgressRows || downloadProgressRows === []) {
 					return of(baseDownloadRows);
 				}
+
+				// Remove updates of finished download task updates
+				const x = downloadProgressRows.filter((x) => baseDownloadRows.findIndex((y) => y.id === x.id) >= 0);
+				this.setState({ downloadTaskUpdateList: x }, 'CLEAN UP DOWNLOAD TASK UPDATE LIST', false);
+
 				// Replace by progress if found
 				for (let i = 0; i < baseDownloadRows.length; i++) {
 					const index = downloadProgressRows.findIndex((x) => x.id === baseDownloadRows[i].id);
 					if (index > -1) {
-						baseDownloadRows[i] = downloadProgressRows[index];
+						baseDownloadRows[i] = { ...baseDownloadRows[i], ...downloadProgressRows[index] };
 					}
 				}
 
@@ -81,44 +90,78 @@ export class DownloadService extends BaseService {
 	/**
 	 * Fetch the download list and signal to the observers that it is done.
 	 */
-	public fetchDownloadList(): void {
-		getAllDownloads().subscribe((downloads) => this.setState({ downloads }));
+	public fetchDownloadList(): Observable<DownloadTaskDTO[]> {
+		return getAllDownloads().pipe(
+			tap((downloads) => {
+				Log.debug('Fetching download list');
+				this.setState({ downloads });
+			}),
+		);
 	}
 
 	public downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
 		downloadMedia(downloadMediaCommand)
-			.pipe(finalize(() => this.fetchDownloadList()))
+			.pipe(switchMap(() => this.fetchDownloadList()))
 			.subscribe();
 	}
 
 	// region Commands
 
+	public startDownloadTasks(downloadTaskIds: number[]): void {
+		startDownloadTask(downloadTaskIds)
+			.pipe(
+				switchMap(() => this.fetchDownloadList()),
+				take(1),
+			)
+			.subscribe();
+	}
+
 	public restartDownloadTasks(downloadTaskIds: number[]): void {
 		restartDownloadTasks(downloadTaskIds)
-			.pipe(finalize(() => this.fetchDownloadList()))
+			.pipe(
+				switchMap(() => this.fetchDownloadList()),
+				take(1),
+			)
 			.subscribe();
 	}
 
 	public deleteDownloadTasks(downloadTaskIds: number[]): void {
 		this.removeDownloadTasks(downloadTaskIds);
 		deleteDownloadTasks(downloadTaskIds)
-			.pipe(finalize(() => this.fetchDownloadList()))
+			.pipe(
+				switchMap(() => this.fetchDownloadList()),
+				take(1),
+			)
+			.subscribe();
+	}
+
+	public pauseDownloadTasks(downloadTaskIds: number[]): void {
+		pauseDownloadTask(downloadTaskIds)
+			.pipe(
+				switchMap(() => this.fetchDownloadList()),
+				take(1),
+			)
+			.subscribe();
+	}
+
+	public stopDownloadTasks(downloadTaskIds: number[]): void {
+		stopDownloadTasks(downloadTaskIds)
+			.pipe(
+				switchMap(() => this.fetchDownloadList()),
+				take(1),
+			)
 			.subscribe();
 	}
 
 	public clearDownloadTasks(downloadTaskIds: number[]): void {
 		this.removeDownloadTasks(downloadTaskIds);
 		clearDownloadTasks(downloadTaskIds)
-			.pipe(finalize(() => this.fetchDownloadList()))
+			.pipe(
+				switchMap(() => this.fetchDownloadList()),
+				take(1),
+			)
 			.subscribe();
 	}
-
-	public stopDownloadTasks(downloadTaskIds: number[]): void {
-		stopDownloadTasks(downloadTaskIds)
-			.pipe(finalize(() => this.fetchDownloadList()))
-			.subscribe();
-	}
-
 	// endregion
 
 	private removeDownloadTasks(downloadTaskIds: number[]): void {

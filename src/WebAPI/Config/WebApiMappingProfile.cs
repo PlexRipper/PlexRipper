@@ -88,7 +88,6 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.PlexLibraryId, opt => opt.MapFrom(entity => entity.PlexLibraryId))
                 .ForMember(dto => dto.PlexServerId, opt => opt.MapFrom(entity => entity.PlexServerId));
 
-            CreateMap<DownloadClientUpdate, DownloadTaskDTO>(MemberList.None);
         }
 
         private void PlexMediaMappings()

@@ -96,7 +96,7 @@ namespace PlexRipper.WebAPI.SignalR
         }
 
         /// <inheritdoc/>
-        public async Task SendDownloadTaskUpdate(DownloadClientUpdate downloadClientUpdate)
+        public async Task SendDownloadTaskUpdate(DownloadTask downloadTask)
         {
             if (_progressHub?.Clients?.All == null)
             {
@@ -104,7 +104,7 @@ namespace PlexRipper.WebAPI.SignalR
                 return;
             }
 
-            var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadClientUpdate);
+            var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
             await _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", downloadTaskDTO);
         }
 

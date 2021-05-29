@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.PlexMedia;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
@@ -16,6 +17,8 @@ namespace PlexRipper.Application.PlexDownloads
 
         private readonly IPlexAuthenticationService _plexAuthenticationService;
 
+        private readonly INotificationsService _notificationsService;
+
         private readonly IFolderPathService _folderPathService;
 
         private readonly IUserSettings _userSettings;
@@ -23,11 +26,14 @@ namespace PlexRipper.Application.PlexDownloads
         public PlexDownloadTaskFactory(
             IMediator mediator,
             IPlexAuthenticationService plexAuthenticationService,
+            INotificationsService notificationsService,
             IFolderPathService folderPathService,
             IUserSettings userSettings)
         {
             _mediator = mediator;
             _plexAuthenticationService = plexAuthenticationService;
+            _notificationsService = notificationsService;
+
             _folderPathService = folderPathService;
             _userSettings = userSettings;
         }
@@ -60,7 +66,6 @@ namespace PlexRipper.Application.PlexDownloads
                 default:
                     return Result.Fail($"PlexMediaType defaulted with value {type.ToString()} in DownloadMediaAsync").LogWarning();
             }
-
         }
 
         #region Private Methods
@@ -242,6 +247,40 @@ namespace PlexRipper.Application.PlexDownloads
             }
 
             return downloadWorkerTasks;
+        }
+
+        public async Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<DownloadTask> downloadTasks)
+        {
+            var freshDownloadTasks = new List<DownloadTask>();
+
+            foreach (var downloadTask in downloadTasks)
+            {
+                var mediaIdResult =
+                    await _mediator.Send(new GetPlexMediaIdByKeyQuery(downloadTask.Key, downloadTask.MediaType, downloadTask.PlexServerId));
+                if (mediaIdResult.IsFailed)
+                {
+                    var result = Result.Fail($"Could not recreate the download task for {downloadTask.TitlePath}");
+                    result.WithReasons(mediaIdResult.Reasons);
+                    await _notificationsService.SendResult(result);
+                    continue;
+                }
+
+                var downloadTasksResult = await GenerateAsync(new List<int> { mediaIdResult.Value }, downloadTask.MediaType);
+                if (downloadTasksResult.IsFailed)
+                {
+                    var result = Result.Fail($"Could not recreate the download task for {downloadTask.TitlePath}");
+                    result.WithReasons(mediaIdResult.Reasons);
+                    await _notificationsService.SendResult(result);
+                    continue;
+                }
+
+
+                //TODO Certain properties should be copied over such as priority to maintain the same order in the front-end
+
+                freshDownloadTasks.AddRange(downloadTasksResult.Value);
+            }
+
+            return Result.Ok(freshDownloadTasks);
         }
 
         #endregion

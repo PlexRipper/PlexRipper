@@ -1,5 +1,6 @@
 <template>
-	<span>{{ formattedString }}{{ speed ? '/s' : '' }}</span>
+	<span v-if="size > 0">{{ formattedString }}{{ speed ? '/s' : '' }}</span>
+	<span v-else> - </span>
 </template>
 
 <script lang="ts">

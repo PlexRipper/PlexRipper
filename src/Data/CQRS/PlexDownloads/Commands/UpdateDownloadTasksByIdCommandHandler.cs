@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using PlexRipper.Domain;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
@@ -15,7 +16,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
         {
             RuleForEach(x => x.DownloadTasks).NotNull();
             RuleForEach(x => x.DownloadTasks)
-                .ChildRules(x => x.RuleFor(y => y.IsValid().IsSuccess).Equal(true));
+                .ChildRules(x => x.RuleFor(y => y).SetValidator(new DownloadTaskValidator()));
         }
     }
 

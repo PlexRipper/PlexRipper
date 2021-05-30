@@ -41,6 +41,7 @@ export default class DownloadsTable extends Vue {
 	readonly serverId!: number;
 
 	fileMergeProgressList: FileMergeProgress[] = [];
+
 	downloadRows: DownloadTaskDTO[] = [];
 
 	get getHeaders(): ITreeViewTableHeader[] {
@@ -101,10 +102,6 @@ export default class DownloadsTable extends Vue {
 			case DownloadStatus.Initialized:
 				availableActions.push(ButtonType.Delete);
 				break;
-			case DownloadStatus.Starting:
-				availableActions.push(ButtonType.Stop);
-				availableActions.push(ButtonType.Delete);
-				break;
 			case DownloadStatus.Queued:
 				availableActions.push(ButtonType.Start);
 				availableActions.push(ButtonType.Delete);
@@ -121,9 +118,6 @@ export default class DownloadsTable extends Vue {
 			case DownloadStatus.Completed:
 				availableActions.push(ButtonType.Clear);
 				availableActions.push(ButtonType.Restart);
-				break;
-			case DownloadStatus.Stopping:
-				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Stopped:
 				availableActions.push(ButtonType.Restart);
@@ -172,6 +166,8 @@ export default class DownloadsTable extends Vue {
 				}
 
 				this.downloadRows = [...data] as DownloadTaskDTO[];
+			} else {
+				this.downloadRows = [];
 			}
 		});
 

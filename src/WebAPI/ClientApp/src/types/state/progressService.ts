@@ -81,21 +81,21 @@ export class ProgressService extends BaseService {
 		);
 	}
 
-	public cleanUpProgressByDownloadTaskId(downloadTaskId: number): void {
-		const { fileMergeProgressList } = this.getState();
-		const fileMergeProgressIndex = fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
-		if (fileMergeProgressIndex > -1) {
-			fileMergeProgressList.splice(fileMergeProgressIndex, 1);
-			this.setState({ fileMergeProgressList });
-		}
-
-		const { downloadTaskUpdateList } = this.getState();
-		const downloadTaskUpdateListIndex = downloadTaskUpdateList.findIndex((x) => x.id === downloadTaskId);
-		if (downloadTaskUpdateListIndex > -1) {
-			downloadTaskUpdateList.splice(downloadTaskUpdateListIndex, 1);
-			this.setState({ downloadTaskUpdateList });
-		}
-	}
+	// public cleanUpProgressByDownloadTaskId(downloadTaskId: number): void {
+	// 	const { fileMergeProgressList } = this.getState();
+	// 	const fileMergeProgressIndex = fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
+	// 	if (fileMergeProgressIndex > -1) {
+	// 		fileMergeProgressList.splice(fileMergeProgressIndex, 1);
+	// 		this.setState({ fileMergeProgressList });
+	// 	}
+	//
+	// 	const { downloadTaskUpdateList } = this.getState();
+	// 	const downloadTaskUpdateListIndex = downloadTaskUpdateList.findIndex((x) => x.id === downloadTaskId);
+	// 	if (downloadTaskUpdateListIndex > -1) {
+	// 		downloadTaskUpdateList.splice(downloadTaskUpdateListIndex, 1);
+	// 		this.setState({ downloadTaskUpdateList });
+	// 	}
+	// }
 }
 
 const progressService = new ProgressService();

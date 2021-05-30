@@ -23,6 +23,8 @@ namespace PlexRipper.FileSystem
 
         private readonly IFileSystem _fileSystem;
 
+        private readonly INotificationsService _notificationsService;
+
         #region Fields
 
         private readonly Channel<DownloadFileTask> _channel = Channel.CreateUnbounded<DownloadFileTask>();
@@ -37,10 +39,11 @@ namespace PlexRipper.FileSystem
 
         #region Constructors
 
-        public FileMerger(IMediator mediator, IFileSystem fileSystem)
+        public FileMerger(IMediator mediator, IFileSystem fileSystem, INotificationsService notificationsService)
         {
             _mediator = mediator;
             _fileSystem = fileSystem;
+            _notificationsService = notificationsService;
         }
 
         #endregion
@@ -103,15 +106,16 @@ namespace PlexRipper.FileSystem
                 try
                 {
                     // Ensure destination directory exists and is otherwise created.
-                    var result = _fileSystem.CreateDirectoryFromFilePath(fileTask.DestinationFilePath);
+                    var result = _fileSystem.CreateDirectoryFromFilePath(fileTask.DownloadTask.DestinationFilePath);
                     if (result.IsFailed)
                     {
                         // TODO do something here with the error
+                        result.LogError();
                         continue;
                     }
 
                     // Merge files
-                    await using (var outputStream = File.Create(fileTask.DestinationFilePath, 4096, FileOptions.SequentialScan))
+                    await using (var outputStream = File.Create(fileTask.DownloadTask.DestinationFilePath, 4096, FileOptions.SequentialScan))
                     {
                         Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
                         await StreamExtensions.CopyMultipleToAsync(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
@@ -120,8 +124,7 @@ namespace PlexRipper.FileSystem
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e);
-                    throw;
+                    await _notificationsService.SendResult(Result.Fail(new ExceptionalError(e)).LogError());
                 }
 
                 // Clean-up

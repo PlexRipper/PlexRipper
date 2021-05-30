@@ -47,7 +47,12 @@ export class DownloadService extends BaseService {
 
 	public getDownloadList(serverId: number = 0): Observable<DownloadTaskDTO[]> {
 		return combineLatest([
-			this.stateChanged.pipe(switchMap((state: IStoreState) => of(state?.downloads ?? []))),
+			this.stateChanged.pipe(
+				switchMap((state: IStoreState) =>
+					// Only return the filtered array by serverId, 0 is all
+					of(state?.downloads.filter((x) => (serverId > 0 ? x.plexServerId === serverId : true)) ?? []),
+				),
+			),
 			ProgressService.getDownloadTaskUpdateProgress(serverId).pipe(startWith([])),
 			ProgressService.getFileMergeProgress(serverId).pipe(startWith([])),
 		]).pipe(
@@ -58,8 +63,9 @@ export class DownloadService extends BaseService {
 				}
 
 				// Remove updates of finished download task updates
-				const x = downloadProgressRows.filter((x) => baseDownloadRows.findIndex((y) => y.id === x.id) >= 0);
-				this.setState({ downloadTaskUpdateList: x }, 'CLEAN UP DOWNLOAD TASK UPDATE LIST', false);
+				const x1 = downloadProgressRows.filter((x) => baseDownloadRows.find((y) => y.id === x.id));
+				const y1 = fileMergeRows.filter((x) => baseDownloadRows.find((y) => y.id === x.downloadTaskId));
+				this.setState({ downloadTaskUpdateList: x1, fileMergeProgressList: y1 }, 'CLEAN UP DOWNLOAD TASK UPDATE LIST', false);
 
 				const mergedDownloadRows: DownloadTaskDTO[] = [];
 				for (const baseDownloadRow of baseDownloadRows) {
@@ -85,11 +91,13 @@ export class DownloadService extends BaseService {
 						}
 					}
 					mergedDownloadRows.push(mergedDownloadRow);
-					Log.warn('MERGED RESULT', mergedDownloadRow);
 				}
 
 				// Fix for Vuetify, the "v-treeview" component freaks out if children are null/undefined
 				mergedDownloadRows.forEach((x) => {
+					if (x.status === DownloadStatus.Completed) {
+						x.downloadSpeed = 0;
+					}
 					if (x.children === null) {
 						x.children = [];
 					}
@@ -173,8 +181,7 @@ export class DownloadService extends BaseService {
 			.subscribe();
 	}
 
-	public clearDownloadTasks(downloadTaskIds: number[]): void {
-		this.removeDownloadTasks(downloadTaskIds);
+	public clearDownloadTasks(downloadTaskIds: number[] = []): void {
 		clearDownloadTasks(downloadTaskIds)
 			.pipe(
 				switchMap(() => this.fetchDownloadList()),

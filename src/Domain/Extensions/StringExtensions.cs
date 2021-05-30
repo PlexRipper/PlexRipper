@@ -69,13 +69,10 @@ namespace PlexRipper.Domain
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public static string SanitizePath(this string path)
-        {
-            return new string(path.Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
-        }
-
         public static string SanitizeFolderName(this string folderName)
         {
+            folderName = folderName.Replace(@"·", "-").Replace(":", " ");
+
             return new string(folderName.Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
         }
     }

@@ -73,8 +73,8 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("timeRemaining", Required = Required.Always)]
         public long TimeRemaining { get; set; }
 
-        [JsonProperty("destinationPath", Required = Required.Always)]
-        public string DestinationPath { get; set; }
+        [JsonProperty("destinationFilePath", Required = Required.Always)]
+        public string DestinationFilePath { get; set; }
 
         [JsonProperty("downloadPath", Required = Required.Always)]
         public string DownloadPath { get; set; }

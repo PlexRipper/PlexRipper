@@ -174,11 +174,11 @@ namespace PlexRipper.Domain
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "Movies", $"{FileNameWithoutExtention}".SanitizePath());
+                        return Path.Combine(DownloadFolder.DirectoryPath, "Movies", $"{FileNameWithoutExtention}".SanitizeFolderName());
                     case PlexMediaType.Episode:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "TvShows", $"{FileNameWithoutExtention}".SanitizePath());
+                        return Path.Combine(DownloadFolder.DirectoryPath, "TvShows", $"{FileNameWithoutExtention}".SanitizeFolderName());
                     default:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "Other", $"{FileNameWithoutExtention}".SanitizePath());
+                        return Path.Combine(DownloadFolder.DirectoryPath, "Other", $"{FileNameWithoutExtention}".SanitizeFolderName());
                 }
             }
         }
@@ -187,7 +187,7 @@ namespace PlexRipper.Domain
         /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
         /// </summary>
         [NotMapped]
-        public string DestinationPath => DestinationFolder != null ? Path.Combine(DestinationFolder.DirectoryPath, MediaPath) : string.Empty;
+        public string DestinationFilePath => DestinationFolder != null ? Path.Combine(DestinationFolder.DirectoryPath, MediaPath, FileName) : string.Empty;
 
         [NotMapped]
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
@@ -237,7 +237,7 @@ namespace PlexRipper.Domain
         {
             var orderedList = DownloadWorkerTasks?.OrderBy(x => x.Id).ToList();
             StringBuilder builder = new StringBuilder();
-            builder.Append($"Status: {DownloadStatus}: ");
+            builder.Append($"[Status: {DownloadStatus}] - ");
             foreach (var progress in orderedList)
             {
                 builder.Append($"({progress.Id} - {progress.Percentage} {progress.DownloadSpeedFormatted}) + ");

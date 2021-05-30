@@ -103,11 +103,16 @@ export default class Downloads extends Vue {
 
 	// region batch commands
 	clearDownloadTasks(downloadTaskIds: number[]): void {
+		if (downloadTaskIds && downloadTaskIds.length > 0) {
+			DownloadService.clearDownloadTasks(downloadTaskIds);
+			return;
+		}
+
 		if (this.hasSelected) {
 			DownloadService.clearDownloadTasks(this.getSelected);
 			this.selected = [];
 		} else {
-			DownloadService.clearDownloadTasks(downloadTaskIds);
+			DownloadService.clearDownloadTasks();
 		}
 	}
 

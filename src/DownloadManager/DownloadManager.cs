@@ -352,22 +352,27 @@ namespace PlexRipper.DownloadManager
             _signalRService.SendFileMergeProgressUpdate(progress);
             if (progress.Percentage >= 100)
             {
-                var downloadTaskResultDownloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(progress.DownloadTaskId));
-                if (downloadTaskResultDownloadTaskResult.IsFailed)
+                var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(progress.DownloadTaskId, true, true));
+                if (downloadTaskResult.IsFailed)
                 {
-                    downloadTaskResultDownloadTaskResult.LogError();
+                    downloadTaskResult.LogError();
                     return;
                 }
 
-                downloadTaskResultDownloadTaskResult.Value.DownloadStatus = DownloadStatus.Completed;
-                await UpdateDownloadTaskAsync(downloadTaskResultDownloadTaskResult.Value);
+                downloadTaskResult.Value.DownloadStatus = DownloadStatus.Completed;
+                await UpdateDownloadTaskAsync(downloadTaskResult.Value);
             }
         }
 
         private async Task UpdateDownloadTaskAsync(DownloadTask downloadTask)
         {
             Log.Debug(downloadTask.ToString());
-            await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { downloadTask }));
+            var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { downloadTask }));
+            if (updateResult.IsFailed)
+            {
+                updateResult.LogError();
+            }
+
             _signalRService.SendDownloadTaskUpdate(downloadTask);
         }
 

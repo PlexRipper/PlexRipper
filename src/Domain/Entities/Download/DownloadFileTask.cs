@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.IO;
 using System.Linq;
 
 namespace PlexRipper.Domain
@@ -27,9 +26,6 @@ namespace PlexRipper.Domain
 
         [NotMapped]
         public string FileName => DownloadTask?.FileName;
-
-        [NotMapped]
-        public string DestinationFilePath => DownloadTask.DestinationPath;
 
         [NotMapped]
         public long FileSize => DownloadTask?.DataTotal ?? -1L;

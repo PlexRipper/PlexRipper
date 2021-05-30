@@ -180,11 +180,14 @@ export default class DownloadConfirmation extends Vue {
 		}
 
 		// Calculate mediaSize for each parent and child (TvShow and Season);
+
 		downloadPreview.forEach((parent) => {
-			parent.children?.forEach((child) => {
-				child.mediaSize = child?.children?.map((x) => x.mediaSize).sum() ?? 0;
-			});
-			parent.mediaSize = parent.children?.map((x) => x.mediaSize).sum() ?? 0;
+			if (parent.type === PlexMediaType.TvShow || parent.type === PlexMediaType.Season) {
+				parent.children?.forEach((child) => {
+					child.mediaSize = child?.children?.map((x) => x.mediaSize).sum() ?? 0;
+				});
+				parent.mediaSize = parent.children?.map((x) => x.mediaSize).sum() ?? 0;
+			}
 		});
 
 		Log.info('downloadPreview', downloadPreview);

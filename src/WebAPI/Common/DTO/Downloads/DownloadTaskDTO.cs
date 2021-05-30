@@ -47,7 +47,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         public int Key { get; set; }
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
-        public int DownloadSpeed { get; }
+        public int DownloadSpeed { get; set;}
 
         [JsonProperty("dataReceived", Required = Required.Always)]
         public long DataReceived { get; set; }

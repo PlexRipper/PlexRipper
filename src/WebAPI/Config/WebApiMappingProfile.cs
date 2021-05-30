@@ -76,17 +76,7 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Id, opt => opt.MapFrom(entity => entity.Id))
                 .ForMember(dto => dto.FullTitle, opt => opt.MapFrom(entity => entity.TitlePath))
-                .ForMember(dto => dto.MediaType, opt => opt.MapFrom(entity => entity.MediaType))
-                .ForMember(dto => dto.DataReceived, opt => opt.MapFrom(entity => entity.DataReceived))
-                .ForMember(dto => dto.DataTotal, opt => opt.MapFrom(entity => entity.DataTotal))
                 .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
-                .ForMember(dto => dto.DestinationPath, opt => opt.MapFrom(entity => entity.DestinationPath))
-                .ForMember(dto => dto.DownloadPath, opt => opt.MapFrom(entity => entity.DownloadPath))
-                .ForMember(dto => dto.DownloadUrl, opt => opt.MapFrom(entity => entity.DownloadUrl))
-                .ForMember(dto => dto.Percentage, opt => opt.MapFrom(entity => entity.Percentage))
-                .ForMember(dto => dto.FileName, opt => opt.MapFrom(entity => entity.FileName))
-                .ForMember(dto => dto.PlexLibraryId, opt => opt.MapFrom(entity => entity.PlexLibraryId))
-                .ForMember(dto => dto.PlexServerId, opt => opt.MapFrom(entity => entity.PlexServerId))
                 .ForMember(dto => dto.Children, opt => opt.Ignore())
                 .ForMember(dto => dto.Actions, opt => opt.Ignore());
 

@@ -80,15 +80,15 @@ namespace PlexRipper.DownloadManager
             Log.Information("Running DownloadManager setup.");
 
             // Setup DownloadQueue subscriptions
-            _downloadQueue.StartDownloadTask
-                .Select(id => Observable.FromAsync(() => StartDownloadTasksAsync(new List<int> { id })))
-                .Concat()
-                .Subscribe(result =>
+            _downloadQueue
+                .StartDownloadTask
+                .SubscribeAsync(async id =>
                 {
+                    var result = await StartDownloadTasksAsync(new List<int> { id });
                     if (result.IsFailed)
                     {
                         result.LogError();
-                        _notificationsService.SendResult(result);
+                        await _notificationsService.SendResult(result);
                     }
                 });
 
@@ -98,7 +98,7 @@ namespace PlexRipper.DownloadManager
 
             _fileMerger
                 .FileMergeProgressObservable
-                .Subscribe(OnFileMergeProgress);
+                .SubscribeAsync(OnFileMergeProgress);
         }
 
         #endregion
@@ -314,8 +314,7 @@ namespace PlexRipper.DownloadManager
             // Download Worker Task completed subscription
             newClient.DownloadTaskUpdate
                 .Where(x => x.DownloadStatus == DownloadStatus.Completed)
-                .Select(update => Observable.FromAsync(() => OnDownloadFileCompleted(update)))
-                .Concat().Subscribe();
+                .SubscribeAsync(OnDownloadFileCompleted);
 
             // Download Worker Log subscription
             newClient.DownloadWorkerLog
@@ -346,25 +345,22 @@ namespace PlexRipper.DownloadManager
             await CheckDownloadQueue();
         }
 
-        private void OnFileMergeProgress(FileMergeProgress progress)
+        private async Task OnFileMergeProgress(FileMergeProgress progress)
         {
             Log.Debug(
                 $"Merge Progress: {progress.DataTransferred} / {progress.DataTotal} - {progress.Percentage} - {progress.TransferSpeedFormatted}");
             _signalRService.SendFileMergeProgressUpdate(progress);
             if (progress.Percentage >= 100)
             {
-                Task.Run(async () =>
+                var downloadTaskResultDownloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(progress.DownloadTaskId));
+                if (downloadTaskResultDownloadTaskResult.IsFailed)
                 {
-                    var downloadTaskResultDownloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(progress.DownloadTaskId));
-                    if (downloadTaskResultDownloadTaskResult.IsFailed)
-                    {
-                        downloadTaskResultDownloadTaskResult.LogError();
-                        return;
-                    }
+                    downloadTaskResultDownloadTaskResult.LogError();
+                    return;
+                }
 
-                    downloadTaskResultDownloadTaskResult.Value.DownloadStatus = DownloadStatus.Completed;
-                    await UpdateDownloadTaskAsync(downloadTaskResultDownloadTaskResult.Value);
-                });
+                downloadTaskResultDownloadTaskResult.Value.DownloadStatus = DownloadStatus.Completed;
+                await UpdateDownloadTaskAsync(downloadTaskResultDownloadTaskResult.Value);
             }
         }
 

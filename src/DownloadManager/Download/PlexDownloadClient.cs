@@ -214,6 +214,11 @@ namespace PlexRipper.DownloadManager.Download
         /// <returns>Is successful.</returns>
         public Result Start()
         {
+            if (DownloadStatus == DownloadStatus.Downloading)
+            {
+                return Result.Fail($"The PlexDownloadClient is already downloading and can not be started.");
+            }
+
             Log.Debug($"Start downloading {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
             try
             {
@@ -238,7 +243,7 @@ namespace PlexRipper.DownloadManager.Download
 
         public async Task<Result<DownloadTask>> PauseAsync()
         {
-            Log.Debug($"Pause downloading of {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
+            Log.Information($"Pause downloading of {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
 
             await Task.WhenAll(_downloadWorkers.Select(x => x.PauseAsync()));
 
@@ -248,7 +253,7 @@ namespace PlexRipper.DownloadManager.Download
 
         public async Task<Result<DownloadTask>> StopAsync()
         {
-            Log.Debug($"Stop downloading {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
+            Log.Information($"Stop downloading {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
 
             await Task.WhenAll(_downloadWorkers.Select(x => x.StopAsync()));
 

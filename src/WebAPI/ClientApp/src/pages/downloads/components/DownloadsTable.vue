@@ -173,14 +173,14 @@ export default class DownloadsTable extends Vue {
 
 	tableAction({ action, item }: { action: string; item: DownloadTaskDTO }) {
 		Log.info('command', { action, item });
-		this.$emit(action, item);
+		this.$emit(action, item.id);
 	}
 
 	mounted(): void {
 		// Retrieve initial download list
 		this.$subscribeTo(DownloadService.getDownloadList(this.serverId), (data: DownloadTaskDTO[]) => {
 			if (data && data.length > 0) {
-				data.forEach((rootDownloadTask) => {
+				for (const rootDownloadTask of data) {
 					// For movies download tasks
 					if (rootDownloadTask.mediaType === PlexMediaType.Movie) {
 						// this.mergeDownloadRow(rootDownloadTask);
@@ -202,10 +202,12 @@ export default class DownloadsTable extends Vue {
 							});
 						}
 					}
-				});
+					Log.info('rootDownloadTask', rootDownloadTask);
+				}
+
+				this.downloadRows = [...data] as DownloadTaskDTO[];
+				Log.info('downloadRows', this.downloadRows);
 			}
-			this.downloadRows = data as DownloadTaskDTO[];
-			Log.info('downloadRows', this.downloadRows);
 		});
 
 		this.$subscribeTo(ProgressService.getFileMergeProgress(this.serverId), (x) => (this.fileMergeProgressList = x));

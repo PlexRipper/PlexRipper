@@ -8,7 +8,7 @@ namespace PlexRipper.Domain
     {
         public DownloadTaskValidator()
         {
-            RuleFor(x => x.DataReceived).Equal(0);
+            RuleFor(x => x.DataReceived).GreaterThanOrEqualTo(0).LessThanOrEqualTo(x => x.DataTotal);
             RuleFor(x => x.DataTotal).GreaterThan(0);
             RuleFor(x => x.Key).GreaterThan(0);
             RuleFor(x => x.MediaType)

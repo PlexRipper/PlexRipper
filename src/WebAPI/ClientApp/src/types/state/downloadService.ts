@@ -1,11 +1,12 @@
 import Log from 'consola';
-import { combineLatest, merge, Observable, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import {
 	clearDownloadTasks,
 	deleteDownloadTasks,
 	downloadMedia,
 	getAllDownloads,
-	getDownloadTasksInServer, pauseDownloadTask,
+	getDownloadTasksInServer,
+	pauseDownloadTask,
 	restartDownloadTasks,
 	startDownloadTask,
 	stopDownloadTasks,
@@ -65,6 +66,7 @@ export class DownloadService extends BaseService {
 					const index = downloadProgressRows.findIndex((x) => x.id === baseDownloadRows[i].id);
 					if (index > -1) {
 						baseDownloadRows[i] = { ...baseDownloadRows[i], ...downloadProgressRows[index] };
+						Log.warn('MERGED RESULT', baseDownloadRows[i]);
 					}
 				}
 
@@ -94,7 +96,7 @@ export class DownloadService extends BaseService {
 		return getAllDownloads().pipe(
 			tap((downloads) => {
 				Log.debug('Fetching download list');
-				this.setState({ downloads });
+				this.setState({ downloads, downloadTaskUpdateList: [] });
 			}),
 		);
 	}

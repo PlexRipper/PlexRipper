@@ -60,7 +60,7 @@ namespace PlexRipper.Domain
 
         public int DownloadFolderId { get; set; }
 
-        public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
+        public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new List<DownloadWorkerTask>();
 
         #endregion
 

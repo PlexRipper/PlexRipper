@@ -76,18 +76,17 @@ namespace PlexRipper.DownloadManager
             _httpClient = httpClient;
             _downloadQueue = downloadQueue;
 
-            _fileMerger.FileMergeProgressObservable.Subscribe(OnFileMergeProgress);
-
             Log.Information("Running DownloadManager setup.");
 
             // Setup DownloadQueue subscriptions
             _downloadQueue.StartDownloadTask
-                .Select(id => Observable.FromAsync(() => PauseDownload(new List<int> { id })))
+                .Select(id => Observable.FromAsync(() => StartDownloadTasksAsync(new List<int> { id })))
                 .Concat()
                 .Subscribe(result =>
                 {
                     if (result.IsFailed)
                     {
+                        result.LogError();
                         _notificationsService.SendResult(result);
                     }
                 });
@@ -96,6 +95,10 @@ namespace PlexRipper.DownloadManager
                 .Select(update => Observable.FromAsync(() => UpdateDownloadTaskStatusAsync(update)))
                 .Concat()
                 .Subscribe();
+
+            _fileMerger
+                .FileMergeProgressObservable
+                .Subscribe(OnFileMergeProgress);
         }
 
         #endregion
@@ -104,7 +107,7 @@ namespace PlexRipper.DownloadManager
 
         #region Private
 
-        private Result<PlexDownloadClient> CreateDownloadClientAsync(DownloadTask downloadTask)
+        private Result<PlexDownloadClient> CreateDownloadClient(DownloadTask downloadTask)
         {
             if (downloadTask == null)
             {
@@ -374,8 +377,8 @@ namespace PlexRipper.DownloadManager
             Log.Debug($"DownloadClient changed downloadStatus for downloadTask {downloadTask.Id} " +
                       $"to {downloadTask.DownloadStatus.ToString()}");
 
-            await _mediator.Send(new UpdateDownloadTaskByIdCommand(downloadTask));
-            await _signalRService.SendDownloadTaskUpdate(downloadTask);
+            await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { downloadTask }));
+            _signalRService.SendDownloadTaskUpdate(downloadTask);
         }
 
         #endregion
@@ -418,19 +421,14 @@ namespace PlexRipper.DownloadManager
             return Result.Ok();
         }
 
-        /// <param name="downloadTaskIds"></param>
-        /// <inheritdoc/>
-        public async Task<Result> ClearCompletedAsync(List<int> downloadTaskIds)
-        {
-            return await _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
-        }
+
 
         public async Task<Result> ResumeDownloadTasksAsync(List<int> downloadTaskIds)
         {
             // TODO Implement Pause first and then add start/resume
-            if (downloadTaskIds == null)
+            if (downloadTaskIds is null || !downloadTaskIds.Any())
             {
-                return ResultExtensions.IsNull(nameof(downloadTaskIds));
+                return Result.Fail("Parameter downloadTasks was empty or null").LogError();
             }
 
             var downloadTasks = await _mediator.Send(new GetAllDownloadTasksQuery(downloadTaskIds));
@@ -451,13 +449,49 @@ namespace PlexRipper.DownloadManager
             return Result.Ok();
         }
 
+
+        public async Task<Result> StartDownloadTasksAsync(List<int> downloadTaskIds)
+        {
+            if (downloadTaskIds is null || !downloadTaskIds.Any())
+            {
+                return Result.Fail("Parameter downloadTasks was empty or null").LogError();
+            }
+
+            var downloadTasks = await _mediator.Send(new GetAllDownloadTasksQuery(downloadTaskIds));
+            if (downloadTasks.IsFailed)
+            {
+                return downloadTasks;
+            }
+
+            foreach (var downloadTask in downloadTasks.Value)
+            {
+                var downloadClient = GetDownloadClient(downloadTask.Id);
+                if (downloadClient.IsFailed)
+                {
+                    downloadClient = CreateDownloadClient(downloadTask);
+                    if (downloadClient.IsFailed)
+                    {
+                        downloadClient.LogError();
+                        continue;
+                    }
+                }
+
+                downloadClient.Value.Start();
+
+            }
+
+            return Result.Ok();
+        }
+
         /// <inheritdoc/>
         public async Task<Result> RestartDownloadTasksAsync(List<int> downloadTaskIds)
         {
-            if (downloadTaskIds == null)
+            if (downloadTaskIds is null || !downloadTaskIds.Any())
             {
-                return ResultExtensions.IsNull(nameof(downloadTaskIds));
+                return Result.Fail("Parameter downloadTasks was empty or null").LogError();
             }
+
+            Log.Information($"Restarting {downloadTaskIds.Count} downloadTasks");
 
             var downloadTasksResult = await StopDownloadTasksAsync(downloadTaskIds);
             if (downloadTasksResult.IsFailed)
@@ -471,11 +505,13 @@ namespace PlexRipper.DownloadManager
                 return regeneratedDownloadTasks.LogError();
             }
 
-            // Delete old DownloadTasks
-            await _mediator.Send(new DeleteDownloadTasksByIdCommand(downloadTasksResult.Value.Select(x => x.Id).ToList()));
+            downloadTasksResult = ValidateDownloadTasks(regeneratedDownloadTasks.Value);
+            if (downloadTasksResult.IsFailed)
+            {
+                return downloadTasksResult.ToResult().LogError();
+            }
 
-            // Add the new ones
-            await AddToDownloadQueueAsync(regeneratedDownloadTasks.Value);
+            await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasksResult.Value));
 
             await CheckDownloadQueue();
 
@@ -485,12 +521,14 @@ namespace PlexRipper.DownloadManager
         /// <inheritdoc/>
         public async Task<Result<List<DownloadTask>>> StopDownloadTasksAsync(List<int> downloadTaskIds)
         {
-            if (downloadTaskIds == null)
+            if (downloadTaskIds is null || !downloadTaskIds.Any())
             {
-                return ResultExtensions.IsNull(nameof(downloadTaskIds));
+                return Result.Fail("Parameter downloadTasks was empty or null").LogError();
             }
 
             var downloadTasks = new List<DownloadTask>();
+
+            Log.Information($"Stopping {downloadTaskIds.Count} from downloading");
 
             // Retrieve download client
             foreach (int downloadTaskId in downloadTaskIds)
@@ -571,6 +609,13 @@ namespace PlexRipper.DownloadManager
             }
 
             return await _mediator.Send(new DeleteDownloadTasksByIdCommand(downloadTaskIds));
+        }
+
+        /// <param name="downloadTaskIds"></param>
+        /// <inheritdoc/>
+        public async Task<Result> ClearCompletedAsync(List<int> downloadTaskIds)
+        {
+            return await _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
         }
 
         #endregion

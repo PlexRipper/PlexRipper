@@ -119,10 +119,14 @@ namespace PlexRipper.DownloadManager.Download
 
         private void SetDownloadWorkerTaskChanged(DownloadStatus status)
         {
+            if (DownloadWorkerTask.DownloadStatus == status)
+            {
+                return;
+            }
+
             var log = $"Download worker {Id} with {FileName} changed status to {status}";
             Log.Debug(log);
             DownloadWorkerTask.DownloadStatus = status;
-
             SendDownloadWorkerLog(LogEventLevel.Information, log);
             SendDownloadWorkerUpdate();
         }

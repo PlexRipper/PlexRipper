@@ -51,8 +51,7 @@ namespace PlexRipper.DownloadManager
                 {
                     Log.Debug(
                         $"Starting the next Queued downloadTask with id {queuedDownloadTask.Id} - {queuedDownloadTask.Title} for server {plexServer.Name}");
-                    queuedDownloadTask.DownloadStatus = DownloadStatus.Downloading;
-                    UpdateDownloadTask.OnNext(queuedDownloadTask);
+                   // UpdateDownloadTask.OnNext(queuedDownloadTask);
                     StartDownloadTask.OnNext(queuedDownloadTask.Id);
                     return;
                 }

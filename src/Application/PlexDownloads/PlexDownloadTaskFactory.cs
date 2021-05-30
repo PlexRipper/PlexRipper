@@ -249,8 +249,16 @@ namespace PlexRipper.Application.PlexDownloads
             return downloadWorkerTasks;
         }
 
+        /// <inheritdoc/>
         public async Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<DownloadTask> downloadTasks)
         {
+            if (downloadTasks is null || !downloadTasks.Any())
+            {
+                return Result.Fail("Parameter downloadTasks was empty or null").LogError();
+            }
+
+            Log.Debug($"Regenerating {downloadTasks.Count} download tasks.");
+
             var freshDownloadTasks = new List<DownloadTask>();
 
             foreach (var downloadTask in downloadTasks)
@@ -274,12 +282,22 @@ namespace PlexRipper.Application.PlexDownloads
                     continue;
                 }
 
+                await _mediator.Send(new DeleteDownloadWorkerTasksByDownloadTaskIdCommand(downloadTask.Id));
 
                 //TODO Certain properties should be copied over such as priority to maintain the same order in the front-end
+                downloadTasksResult.Value[0].Id = downloadTask.Id;
+                downloadTasksResult.Value[0].Priority = downloadTask.Priority;
+                downloadTasksResult.Value[0].DownloadWorkerTasks.ForEach(x => x.DownloadTaskId = downloadTask.Id);
+
 
                 freshDownloadTasks.AddRange(downloadTasksResult.Value);
             }
 
+            Log.Debug($"Successfully regenerated {freshDownloadTasks.Count} out of {downloadTasks.Count} download tasks.");
+            if (downloadTasks.Count - freshDownloadTasks.Count > 0)
+            {
+                Log.Error("Failed to generate");
+            }
             return Result.Ok(freshDownloadTasks);
         }
 

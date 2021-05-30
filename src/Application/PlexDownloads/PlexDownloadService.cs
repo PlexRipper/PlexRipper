@@ -108,9 +108,10 @@ namespace PlexRipper.Application.PlexDownloads
             return _downloadManager.RestartDownloadTasksAsync(downloadTaskIds);
         }
 
-        public Task<Result<List<DownloadTask>>> StopDownloadTask(List<int> downloadTaskIds)
+        public async Task<Result> StopDownloadTask(List<int> downloadTaskIds)
         {
-            return _downloadManager.StopDownloadTasksAsync(downloadTaskIds);
+            var result = await _downloadManager.StopDownloadTasksAsync(downloadTaskIds);
+            return result.IsSuccess ? Result.Ok() : result.ToResult();
         }
 
         public Task<Result> StartDownloadTask(List<int> downloadTaskIds)

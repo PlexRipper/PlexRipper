@@ -139,6 +139,7 @@ namespace DownloadManager.Tests.UnitTests
             downloadTask.IsSuccess.ShouldBeTrue();
             //// Create new client and restart
             var downloadClient2 = PlexDownloadClient.Create(downloadTask.Value, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
+            downloadClient2.IsSuccess.ShouldBeTrue();
             downloadClient2.Value.Start();
             await downloadClient2.Value.DownloadProcessTask;
 

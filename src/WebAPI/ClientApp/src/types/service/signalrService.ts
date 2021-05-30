@@ -1,4 +1,5 @@
 import Log from 'consola';
+import globalService from '@state/globalService';
 import { LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
@@ -11,7 +12,6 @@ import {
 	DownloadTaskDTO,
 } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
-import globalService from '@state/globalService';
 
 export class SignalrService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();

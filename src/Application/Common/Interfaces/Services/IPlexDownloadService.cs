@@ -10,7 +10,7 @@ namespace PlexRipper.Application.Common
     {
         Task<Result<List<PlexServer>>> GetDownloadTasksInServerAsync();
 
-        Task<Result<List<DownloadTask>>> StopDownloadTask(List<int> downloadTaskIds);
+        Task<Result> StopDownloadTask(List<int> downloadTaskIds);
 
         Task<Result> RestartDownloadTask(List<int> downloadTaskIds);
 

@@ -73,7 +73,7 @@ namespace PlexRipper.WebAPI.Config
 
         private void DownloadTaskMappings()
         {
-            CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.None)
+            CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Id, opt => opt.MapFrom(entity => entity.Id))
                 .ForMember(dto => dto.FullTitle, opt => opt.MapFrom(entity => entity.TitlePath))
                 .ForMember(dto => dto.MediaType, opt => opt.MapFrom(entity => entity.MediaType))
@@ -86,7 +86,9 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.Percentage, opt => opt.MapFrom(entity => entity.Percentage))
                 .ForMember(dto => dto.FileName, opt => opt.MapFrom(entity => entity.FileName))
                 .ForMember(dto => dto.PlexLibraryId, opt => opt.MapFrom(entity => entity.PlexLibraryId))
-                .ForMember(dto => dto.PlexServerId, opt => opt.MapFrom(entity => entity.PlexServerId));
+                .ForMember(dto => dto.PlexServerId, opt => opt.MapFrom(entity => entity.PlexServerId))
+                .ForMember(dto => dto.Children, opt => opt.Ignore())
+                .ForMember(dto => dto.Actions, opt => opt.Ignore());
 
         }
 

@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
-    public interface IFileSystemCustom : ISetup
+    public interface IFileSystem : ISetup
     {
         Result<FileStream> SaveFile(string directory, string fileName, long fileSize);
 

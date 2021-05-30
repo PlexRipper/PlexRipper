@@ -12,6 +12,7 @@ using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.FileManager.Command;
 using PlexRipper.Application.FileManager.Queries;
+using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Domain;
 
 namespace PlexRipper.FileSystem
@@ -20,7 +21,7 @@ namespace PlexRipper.FileSystem
     {
         private readonly IMediator _mediator;
 
-        private readonly IFileSystemCustom _fileSystemCustom;
+        private readonly IFileSystem _fileSystem;
 
         #region Fields
 
@@ -36,10 +37,10 @@ namespace PlexRipper.FileSystem
 
         #region Constructors
 
-        public FileMerger(IMediator mediator, IFileSystemCustom fileSystemCustom)
+        public FileMerger(IMediator mediator, IFileSystem fileSystem)
         {
             _mediator = mediator;
-            _fileSystemCustom = fileSystemCustom;
+            _fileSystem = fileSystem;
         }
 
         #endregion
@@ -94,7 +95,7 @@ namespace PlexRipper.FileSystem
                             DownloadTaskId = fileTask.DownloadTaskId,
                             PlexLibraryId = fileTask.DownloadTask.PlexLibraryId,
                             PlexServerId = fileTask.DownloadTask.PlexServerId,
-                            TransferSpeed = DataFormat.GetDownloadSpeed(dataTransferred, ElapsedTime.TotalSeconds),
+                            TransferSpeed = DataFormat.GetTransferSpeed(dataTransferred, ElapsedTime.TotalSeconds),
                         };
                     })
                     .Subscribe(data => _fileMergeProgressSubject.OnNext(data), () => { _timeContext.Dispose(); });
@@ -102,7 +103,7 @@ namespace PlexRipper.FileSystem
                 try
                 {
                     // Ensure destination directory exists and is otherwise created.
-                    var result = _fileSystemCustom.CreateDirectoryFromFilePath(fileTask.DestinationFilePath);
+                    var result = _fileSystem.CreateDirectoryFromFilePath(fileTask.DestinationFilePath);
                     if (result.IsFailed)
                     {
                         // TODO do something here with the error
@@ -114,7 +115,7 @@ namespace PlexRipper.FileSystem
                     {
                         Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
                         await StreamExtensions.CopyMultipleToAsync(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
-                        _fileSystemCustom.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
+                        _fileSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
                     }
                 }
                 catch (Exception e)
@@ -162,11 +163,23 @@ namespace PlexRipper.FileSystem
         /// <summary>
         /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
         /// </summary>
-        /// <param name="downloadTask">The <see cref="DownloadTask"/> to be added as a <see cref="DownloadFileTask"/>.</param>
-        public async Task<Result> AddFileTask(DownloadTask downloadTask)
+        /// <param name="downloadTaskId"></param>
+        public async Task<Result> AddFileTaskFromDownloadTask(int downloadTaskId)
         {
-            Log.Debug($"Adding DownloadTask {downloadTask.Title} to a FileTask to be merged");
-            var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask));
+            if (downloadTaskId == 0)
+            {
+                return ResultExtensions.IsInvalidId(nameof(downloadTaskId)).LogError();
+            }
+
+            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true));
+            if (downloadTask.IsFailed)
+            {
+                return downloadTask.LogError();
+            }
+
+
+            Log.Debug($"Adding DownloadTask {downloadTask.Value.Title} to a FileTask to be merged");
+            var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask.Value));
             if (result.IsFailed)
             {
                 // TODO Add notification here for front-end

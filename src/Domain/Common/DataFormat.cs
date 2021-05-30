@@ -110,7 +110,7 @@ namespace PlexRipper.Domain
         /// <param name="bytesReceived"></param>
         /// <param name="elapsedTimeInSeconds"></param>
         /// <returns></returns>
-        public static int GetDownloadSpeed(long bytesReceived, double elapsedTimeInSeconds)
+        public static int GetTransferSpeed(long bytesReceived, double elapsedTimeInSeconds)
         {
             return elapsedTimeInSeconds <= 0 ? 0 : (int)Math.Round(bytesReceived / elapsedTimeInSeconds, 2);
         }

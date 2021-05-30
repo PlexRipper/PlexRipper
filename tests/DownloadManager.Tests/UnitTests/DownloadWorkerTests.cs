@@ -89,7 +89,7 @@ namespace DownloadManager.Tests.UnitTests
 
         private DownloadWorker GetDownloadWorker(MemoryStream memoryStream, int downloadSpeedLimitInKb = 0)
         {
-            var _filesystem = new Mock<IFileSystemCustom>();
+            var _filesystem = new Mock<IFileSystem>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
                 .Returns(Result.Ok<Stream>(memoryStream));
             var downloadWorkerTask = new DownloadWorkerTask(GetTestDownloadTask(), 0, 0, 6482740)
@@ -188,7 +188,7 @@ namespace DownloadManager.Tests.UnitTests
             var mediaFile = MockServer.GetDefaultMovieMockMediaData();
             var memoryStream = new MemoryStream();
 
-            var _filesystem = new Mock<IFileSystemCustom>();
+            var _filesystem = new Mock<IFileSystem>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
                 .Returns(Result.Ok<Stream>(memoryStream));
 

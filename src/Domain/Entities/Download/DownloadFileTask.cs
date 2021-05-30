@@ -29,7 +29,7 @@ namespace PlexRipper.Domain
         public string FileName => DownloadTask?.FileName;
 
         [NotMapped]
-        public string DestinationFilePath => Path.Combine(DownloadTask.DestinationPath, FileName);
+        public string DestinationFilePath => DownloadTask.DestinationPath;
 
         [NotMapped]
         public long FileSize => DownloadTask?.DataTotal ?? -1L;

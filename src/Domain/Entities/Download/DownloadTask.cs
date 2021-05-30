@@ -212,17 +212,17 @@ namespace PlexRipper.Domain
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:
-                        return Path.Combine($"{Title}" + (ReleaseYear > 0 ? $" ({ReleaseYear})" : string.Empty).SanitizePath());
+                        return Path.Combine($"{Title}" + (ReleaseYear > 0 ? $" ({ReleaseYear})" : string.Empty).SanitizeFolderName());
                     case PlexMediaType.Episode:
                         // If the same, than it will most likely be an anime type of tvShow which can have no seasons.
                         if (TitleTvShow == TitleTvShowSeason)
                         {
-                            return Path.Combine(TitleTvShow.SanitizePath());
+                            return Path.Combine(TitleTvShow.SanitizeFolderName());
                         }
 
-                        return Path.Combine(TitleTvShow.SanitizePath(), TitleTvShowSeason.SanitizePath());
+                        return Path.Combine(TitleTvShow.SanitizeFolderName(), TitleTvShowSeason.SanitizeFolderName());
                     default:
-                        return Path.Combine($"{FileNameWithoutExtention.SanitizePath()}");
+                        return Path.Combine($"{FileNameWithoutExtention.SanitizeFolderName()}");
                 }
             }
         }
@@ -232,10 +232,12 @@ namespace PlexRipper.Domain
             return new DownloadTaskValidator().Validate(this).ToFluentResult();
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
-            var orderedList = DownloadWorkerTasks.ToList().OrderBy(x => x.Id).ToList();
+            var orderedList = DownloadWorkerTasks?.OrderBy(x => x.Id).ToList();
             StringBuilder builder = new StringBuilder();
+            builder.Append($"Status: {DownloadStatus}: ");
             foreach (var progress in orderedList)
             {
                 builder.Append($"({progress.Id} - {progress.Percentage} {progress.DownloadSpeedFormatted}) + ");

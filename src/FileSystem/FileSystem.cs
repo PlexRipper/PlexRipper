@@ -9,7 +9,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.FileSystem
 {
-    public class FileSystemCustom : IFileSystemCustom
+    public class FileSystem : IFileSystem
     {
         #region Fields
 
@@ -19,7 +19,7 @@ namespace PlexRipper.FileSystem
 
         #region Constructors
 
-        public FileSystemCustom(IDiskProvider diskProvider)
+        public FileSystem(IDiskProvider diskProvider)
         {
             _diskProvider = diskProvider;
         }

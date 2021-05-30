@@ -17,7 +17,7 @@ namespace PlexRipper.WebAPI
 
         private readonly IUserSettings _userSettings;
 
-        private readonly IFileSystemCustom _fileSystemCustom;
+        private readonly IFileSystem _fileSystem;
 
         private readonly IFileMerger _fileMerger;
 
@@ -25,13 +25,13 @@ namespace PlexRipper.WebAPI
 
         private readonly PlexRipperDbContext _dbContext;
 
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystemCustom fileSystemCustom, IFileMerger fileMerger,
+        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
             IDownloadManager downloadManager,
             PlexRipperDbContext dbContext)
         {
             _appLifetime = appLifetime;
             _userSettings = userSettings;
-            _fileSystemCustom = fileSystemCustom;
+            _fileSystem = fileSystem;
             _fileMerger = fileMerger;
             _downloadManager = downloadManager;
             _dbContext = dbContext;
@@ -43,7 +43,7 @@ namespace PlexRipper.WebAPI
             ServicePointManager.DefaultConnectionLimit = 1000;
 
             // First await the finishing off all these
-            await _fileSystemCustom.SetupAsync();
+            await _fileSystem.SetupAsync();
             await _dbContext.SetupAsync();
             await _userSettings.SetupAsync();
 

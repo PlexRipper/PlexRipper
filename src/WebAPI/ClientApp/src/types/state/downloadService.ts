@@ -12,7 +12,7 @@ import {
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
 import { startWith, switchMap, take, tap } from 'rxjs/operators';
-import { DownloadMediaDTO, DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import AccountService from '@service/accountService';
 import { BaseService } from '@state/baseService';
@@ -49,10 +49,10 @@ export class DownloadService extends BaseService {
 		return combineLatest([
 			this.stateChanged.pipe(switchMap((state: IStoreState) => of(state?.downloads ?? []))),
 			ProgressService.getDownloadTaskUpdateProgress(serverId).pipe(startWith([])),
+			ProgressService.getFileMergeProgress(serverId).pipe(startWith([])),
 		]).pipe(
 			// Merge the baseDownload with the download progress and return the updated result
-			switchMap(([baseDownloadRows, downloadProgressRows]) => {
-				Log.warn('TESTESTERSFG', [baseDownloadRows, downloadProgressRows]);
+			switchMap(([baseDownloadRows, downloadProgressRows, fileMergeRows]) => {
 				if (!downloadProgressRows || downloadProgressRows === []) {
 					return of(baseDownloadRows);
 				}
@@ -61,23 +61,41 @@ export class DownloadService extends BaseService {
 				const x = downloadProgressRows.filter((x) => baseDownloadRows.findIndex((y) => y.id === x.id) >= 0);
 				this.setState({ downloadTaskUpdateList: x }, 'CLEAN UP DOWNLOAD TASK UPDATE LIST', false);
 
-				// Replace by progress if found
-				for (let i = 0; i < baseDownloadRows.length; i++) {
-					const index = downloadProgressRows.findIndex((x) => x.id === baseDownloadRows[i].id);
-					if (index > -1) {
-						baseDownloadRows[i] = { ...baseDownloadRows[i], ...downloadProgressRows[index] };
-						Log.warn('MERGED RESULT', baseDownloadRows[i]);
+				const mergedDownloadRows: DownloadTaskDTO[] = [];
+				for (const baseDownloadRow of baseDownloadRows) {
+					let mergedDownloadRow: DownloadTaskDTO = { ...baseDownloadRow };
+					// Merge downloadProgress
+					const downloadProgress = downloadProgressRows.find((x) => x.id === baseDownloadRow.id);
+					if (downloadProgress) {
+						mergedDownloadRow = { ...mergedDownloadRow, ...downloadProgress };
 					}
+
+					// Merge filemergeProgress
+					if (mergedDownloadRow.status === DownloadStatus.Merging || mergedDownloadRow.status === DownloadStatus.Moving) {
+						const fileMergeProgress = fileMergeRows.find((x) => x.downloadTaskId === baseDownloadRow.id);
+						if (fileMergeProgress) {
+							mergedDownloadRow = {
+								...mergedDownloadRow,
+								dataReceived: fileMergeProgress.dataTransferred,
+								dataTotal: fileMergeProgress.dataTotal,
+								percentage: fileMergeProgress.percentage,
+								timeRemaining: fileMergeProgress.timeRemaining,
+								downloadSpeed: fileMergeProgress.transferSpeed,
+							};
+						}
+					}
+					mergedDownloadRows.push(mergedDownloadRow);
+					Log.warn('MERGED RESULT', mergedDownloadRow);
 				}
 
 				// Fix for Vuetify, the "v-treeview" component freaks out if children are null/undefined
-				baseDownloadRows.forEach((x) => {
+				mergedDownloadRows.forEach((x) => {
 					if (x.children === null) {
 						x.children = [];
 					}
 				});
 
-				return of(baseDownloadRows);
+				return of(mergedDownloadRows);
 			}),
 		);
 	}

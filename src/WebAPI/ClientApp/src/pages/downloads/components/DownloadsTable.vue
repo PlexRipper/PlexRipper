@@ -43,38 +43,6 @@ export default class DownloadsTable extends Vue {
 	fileMergeProgressList: FileMergeProgress[] = [];
 	downloadRows: DownloadTaskDTO[] = [];
 
-	mergeDownloadRow(downloadTask: DownloadTaskDTO): DownloadTaskDTO {
-		// Merge the various feeds
-		// const downloadProgress = this.downloadProgressList.find((x) => x.id === downloadTask.id);
-		// Note: Need to create a new one, then add to array and then use that array to overwrite the season.children,
-		// otherwise result will not be updated.
-
-		// if (downloadProgress) {
-		// 	downloadTask.percentage = downloadProgress.percentage;
-		// 	downloadTask.downloadSpeed = downloadProgress.downloadSpeed;
-		// 	downloadTask.dataReceived = downloadProgress.dataReceived;
-		// 	downloadTask.dataTotal = downloadProgress.dataTotal;
-		// 	downloadTask.timeRemaining = downloadProgress.timeRemaining;
-		// }
-
-		if (downloadTask.status === DownloadStatus.Merging) {
-			const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === downloadTask.id);
-			downloadTask.percentage = fileMergeProgress?.percentage ?? 0;
-			downloadTask.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
-			downloadTask.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
-			downloadTask.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
-		}
-
-		if (downloadTask.status === DownloadStatus.Completed) {
-			downloadTask.percentage = 100;
-			downloadTask.timeRemaining = 0;
-			downloadTask.downloadSpeed = 0;
-			downloadTask.dataReceived = downloadTask.dataTotal;
-		}
-
-		return downloadTask;
-	}
-
 	get getHeaders(): ITreeViewTableHeader[] {
 		return [
 			{
@@ -183,7 +151,6 @@ export default class DownloadsTable extends Vue {
 				for (const rootDownloadTask of data) {
 					// For movies download tasks
 					if (rootDownloadTask.mediaType === PlexMediaType.Movie) {
-						// this.mergeDownloadRow(rootDownloadTask);
 						rootDownloadTask.actions = this.availableActions(rootDownloadTask.status);
 						rootDownloadTask.children = undefined;
 					}
@@ -193,8 +160,8 @@ export default class DownloadsTable extends Vue {
 						if (rootDownloadTask.children && rootDownloadTask.children.length > 0) {
 							rootDownloadTask?.children?.forEach((season) => {
 								if (season.children && season.children.length > 0) {
-									season.children?.forEach((episode) => {
-										this.mergeDownloadRow(episode);
+									season.children?.forEach(() => {
+										// this.mergeDownloadRow(episode);
 									});
 								} else {
 									Log.warn(`Season: ${season.title} had no episodes`);
@@ -202,11 +169,9 @@ export default class DownloadsTable extends Vue {
 							});
 						}
 					}
-					Log.info('rootDownloadTask', rootDownloadTask);
 				}
 
 				this.downloadRows = [...data] as DownloadTaskDTO[];
-				Log.info('downloadRows', this.downloadRows);
 			}
 		});
 

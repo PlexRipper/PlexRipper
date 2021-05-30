@@ -27,7 +27,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
 
-        private readonly IFileSystemCustom _fileSystemCustom;
+        private readonly IFileSystem _fileSystem;
 
         private readonly IPlexRipperHttpClient _httpClient;
 
@@ -54,17 +54,17 @@ namespace PlexRipper.DownloadManager.Download
         /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
         /// </summary>
         /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
-        /// <param name="fileSystemCustom">The filesystem used to store the downloaded data.</param>
+        /// <param name="fileSystem">The filesystem used to store the downloaded data.</param>
         /// <param name="httpClient"></param>
         /// <param name="downloadSpeedLimit"></param>
         public DownloadWorker(
             DownloadWorkerTask downloadWorkerTask,
-            IFileSystemCustom fileSystemCustom,
+            IFileSystem fileSystem,
             IPlexRipperHttpClient httpClient,
             int downloadSpeedLimit = 0)
         {
             DownloadWorkerTask = downloadWorkerTask;
-            _fileSystemCustom = fileSystemCustom;
+            _fileSystem = fileSystem;
             _httpClient = httpClient;
 
             _timer.Elapsed += (_, _) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
@@ -164,7 +164,7 @@ namespace PlexRipper.DownloadManager.Download
 
             // Create and check Filestream to which to download.
             var _fileStreamResult =
-                _fileSystemCustom.DownloadWorkerTempFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
+                _fileSystem.DownloadWorkerTempFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
             if (_fileStreamResult.IsFailed)
             {
                 SendDownloadWorkerError(_fileStreamResult);

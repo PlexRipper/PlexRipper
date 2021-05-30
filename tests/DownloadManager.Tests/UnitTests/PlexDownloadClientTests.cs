@@ -91,7 +91,7 @@ namespace DownloadManager.Tests.UnitTests
 
         private Result<PlexDownloadClient> CreatePlexDownloadClient(MemoryStream memoryStream, int downloadSpeedLimitInKb = 0)
         {
-            var _filesystem = new Mock<IFileSystemCustom>();
+            var _filesystem = new Mock<IFileSystem>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
                 .Returns(Result.Ok<Stream>(memoryStream));
 
@@ -127,7 +127,7 @@ namespace DownloadManager.Tests.UnitTests
             downloadClient.IsFailed.ShouldBeFalse();
             var mediaFile = MockServer.GetMockMediaData().First();
 
-            var _filesystem = new Mock<IFileSystemCustom>();
+            var _filesystem = new Mock<IFileSystem>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
                 .Returns(Result.Ok<Stream>(memoryStream));
 
@@ -152,7 +152,7 @@ namespace DownloadManager.Tests.UnitTests
         {
             //Arrange
             var memoryStream = new MemoryStream();
-            var _filesystem = new Mock<IFileSystemCustom>();
+            var _filesystem = new Mock<IFileSystem>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
                 .Returns(Result.Ok<Stream>(memoryStream));
 
@@ -169,7 +169,7 @@ namespace DownloadManager.Tests.UnitTests
         {
             //Arrange
             var memoryStream = new MemoryStream();
-            var _filesystem = new Mock<IFileSystemCustom>();
+            var _filesystem = new Mock<IFileSystem>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
                 .Returns(Result.Ok<Stream>(memoryStream));
 

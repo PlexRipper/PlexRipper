@@ -121,7 +121,7 @@ namespace PlexRipper.Domain
         public TimeSpan ElapsedTimeSpan => TimeSpan.FromMilliseconds(ElapsedTime);
 
         [NotMapped]
-        public int DownloadSpeed => DataFormat.GetDownloadSpeed(BytesReceived, ElapsedTimeSpan.TotalSeconds);
+        public int DownloadSpeed => DataFormat.GetTransferSpeed(BytesReceived, ElapsedTimeSpan.TotalSeconds);
 
         [NotMapped]
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);

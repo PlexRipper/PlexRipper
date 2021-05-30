@@ -19,7 +19,10 @@ namespace PlexRipper.Domain
             RuleFor(x => x.Title).NotEmpty();
             RuleFor(x => x.ServerToken).NotEmpty();
             RuleFor(x => x.DownloadUrl).NotEmpty();
+
             RuleFor(x => x.DownloadPath).NotEmpty();
+            RuleFor(x => x.DestinationPath).NotEmpty();
+
             RuleFor(x => x.DownloadUri).NotNull();
             RuleFor(x => x.DownloadUri.IsAbsoluteUri).NotNull()
                 .When(x => x.DownloadUri != null);
@@ -50,6 +53,8 @@ namespace PlexRipper.Domain
             RuleFor(x => x.DownloadWorkerTasks).NotNull();
             RuleFor(x => x.DownloadWorkerTasks.Any()).Equal(true)
                 .When(x => x.DownloadWorkerTasks != null);
+
+
         }
     }
 }

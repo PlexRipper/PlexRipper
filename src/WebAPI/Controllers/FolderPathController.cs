@@ -19,13 +19,13 @@ namespace PlexRipper.WebAPI.Controllers
     {
         private readonly IFolderPathService _folderPathService;
 
-        private readonly IFileSystemCustom _fileSystemCustom;
+        private readonly IFileSystem _fileSystem;
 
-        public FolderPathController(IFolderPathService folderPathService, IFileSystemCustom fileSystemCustom, IMapper mapper,
+        public FolderPathController(IFolderPathService folderPathService, IFileSystem fileSystem, IMapper mapper,
             INotificationsService notificationsService) : base(mapper, notificationsService)
         {
             _folderPathService = folderPathService;
-            _fileSystemCustom = fileSystemCustom;
+            _fileSystem = fileSystem;
         }
 
         // GET: api/<FolderPathController>
@@ -45,7 +45,7 @@ namespace PlexRipper.WebAPI.Controllers
         {
             path = path == "null" ? string.Empty : path;
 
-            var mapResult = _mapper.Map<FileSystemDTO>(_fileSystemCustom.LookupContents(path, false, true));
+            var mapResult = _mapper.Map<FileSystemDTO>(_fileSystem.LookupContents(path, false, true));
             return Ok(Result.Ok(mapResult));
         }
 

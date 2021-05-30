@@ -23,10 +23,10 @@ namespace PlexRipper.Domain
         Initialized = 1,
 
         /// <summary>
-        /// Download Task is created and is preparing to start downloading.
+        /// Download is added to the queue.
         /// </summary>
-        [EnumMember(Value = "Starting")]
-        Starting = 2,
+        [EnumMember(Value = "Queued")]
+        Queued = 2,
 
         /// <summary>
         /// Download Task is downloading data from the server.
@@ -35,40 +35,16 @@ namespace PlexRipper.Domain
         Downloading = 3,
 
         /// <summary>
-        /// Download Task releases used resources, so the download can be paused.
-        /// </summary>
-        [EnumMember(Value = "Pausing")]
-        Pausing = 4,
-
-        /// <summary>
         /// Download is paused.
         /// </summary>
         [EnumMember(Value = "Paused")]
         Paused = 5,
 
         /// <summary>
-        /// Download Task releases used resources, so the download can be paused.
-        /// </summary>
-        [EnumMember(Value = "Stopping")]
-        Stopping = 6,
-
-        /// <summary>
         /// Download is paused.
         /// </summary>
         [EnumMember(Value = "Stopped")]
         Stopped = 7,
-
-        /// <summary>
-        /// Download is added to the queue.
-        /// </summary>
-        [EnumMember(Value = "Queued")]
-        Queued = 8,
-
-        /// <summary>
-        /// Download Task releases used resources, so the download can be deleted.
-        /// </summary>
-        [EnumMember(Value = "Deleting")]
-        Deleting = 9,
 
         /// <summary>
         /// Download is deleted.

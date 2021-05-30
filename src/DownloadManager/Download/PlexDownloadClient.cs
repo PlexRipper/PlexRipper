@@ -23,6 +23,10 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly EventLoopScheduler _timeThreadContext = new();
 
+        private readonly Subject<DownloadTask> _downloadTaskUpdate = new();
+
+        private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new();
+
         #endregion
 
         #region Constructors
@@ -31,12 +35,12 @@ namespace PlexRipper.DownloadManager.Download
         /// Initializes a new instance of the <see cref="PlexDownloadClient"/> class.
         /// </summary>
         /// <param name="downloadTask">The <see cref="DownloadTask"/> to start executing.</param>
-        /// <param name="fileSystemCustom">Used to get the (file)Streams in which to store the download data.</param>
+        /// <param name="fileSystem">Used to get the (file)Streams in which to store the download data.</param>
         /// <param name="plexRipperHttpClient"></param>
         /// <param name="downloadSpeedLimit">The download speed limit, 0 is unlimited</param>
         private PlexDownloadClient(
             DownloadTask downloadTask,
-            IFileSystemCustom fileSystemCustom,
+            IFileSystem fileSystem,
             IPlexRipperHttpClient plexRipperHttpClient,
             int downloadSpeedLimit = 0)
         {
@@ -44,7 +48,7 @@ namespace PlexRipper.DownloadManager.Download
 
             foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
             {
-                _downloadWorkers.Add(new DownloadWorker(downloadWorkerTask, fileSystemCustom, plexRipperHttpClient));
+                _downloadWorkers.Add(new DownloadWorker(downloadWorkerTask, fileSystem, plexRipperHttpClient));
             }
 
             SetDownloadSpeedLimit(downloadSpeedLimit);
@@ -52,7 +56,7 @@ namespace PlexRipper.DownloadManager.Download
             SetupSubscriptions();
         }
 
-        public static Result<PlexDownloadClient> Create(DownloadTask downloadTask, IFileSystemCustom fileSystemCustom,
+        public static Result<PlexDownloadClient> Create(DownloadTask downloadTask, IFileSystem fileSystem,
             IPlexRipperHttpClient plexRipperHttpClient, int downloadSpeedLimit = 0)
         {
             // Create workers
@@ -73,7 +77,7 @@ namespace PlexRipper.DownloadManager.Download
                 return downloadTaskValidResult.LogError();
             }
 
-            return Result.Ok(new PlexDownloadClient(downloadTask, fileSystemCustom, plexRipperHttpClient, downloadSpeedLimit));
+            return Result.Ok(new PlexDownloadClient(downloadTask, fileSystem, plexRipperHttpClient, downloadSpeedLimit));
         }
 
         #endregion
@@ -100,9 +104,9 @@ namespace PlexRipper.DownloadManager.Download
 
         #region Observables
 
-        public Subject<DownloadTask> DownloadTaskUpdate { get; } = new();
+        public IObservable<DownloadTask> DownloadTaskUpdate => _downloadTaskUpdate.AsObservable();
 
-        public Subject<DownloadWorkerLog> DownloadWorkerLog { get; } = new();
+        public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
         #endregion
 
@@ -117,7 +121,6 @@ namespace PlexRipper.DownloadManager.Download
         /// </summary>
         public void Dispose()
         {
-            DownloadWorkerLog?.Dispose();
             ClearDownloadWorkers();
         }
 
@@ -140,7 +143,7 @@ namespace PlexRipper.DownloadManager.Download
             _downloadWorkers
                 .Select(x => x.DownloadWorkerLog)
                 .Merge()
-                .Subscribe(downloadWorkerLog => DownloadWorkerLog.OnNext(downloadWorkerLog));
+                .Subscribe(downloadWorkerLog => _downloadWorkerLog.OnNext(downloadWorkerLog));
         }
 
         /// <summary>
@@ -158,7 +161,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private void OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates)
         {
-            if (DownloadTaskUpdate.IsDisposed)
+            if (_downloadTaskUpdate.IsDisposed)
             {
                 return;
             }
@@ -191,12 +194,12 @@ namespace PlexRipper.DownloadManager.Download
                 DownloadStatus = DownloadStatus.Completed;
             }
 
-            DownloadTaskUpdate.OnNext(DownloadTask);
+            _downloadTaskUpdate.OnNext(DownloadTask);
 
             if (DownloadStatus == DownloadStatus.Completed)
             {
-                DownloadTaskUpdate.OnCompleted();
-                DownloadWorkerLog.OnCompleted();
+                _downloadTaskUpdate.OnCompleted();
+                _downloadTaskUpdate.OnCompleted();
             }
         }
 

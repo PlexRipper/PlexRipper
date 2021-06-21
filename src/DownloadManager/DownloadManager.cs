@@ -37,8 +37,6 @@ namespace PlexRipper.DownloadManager
 
         private readonly IPlexDownloadTaskFactory _plexDownloadTaskFactory;
 
-        private readonly IPlexDownloadTaskFactory _plexRipperHttpClient;
-
         private readonly IPlexRipperHttpClient _httpClient;
 
         private readonly IDownloadQueue _downloadQueue;
@@ -553,7 +551,7 @@ namespace PlexRipper.DownloadManager
                 RemoveDownloadTempFiles(downloadTask);
 
                 downloadTask.DownloadStatus = DownloadStatus.Stopped;
-                UpdateDownloadTaskAsync(downloadTask);
+                await UpdateDownloadTaskAsync(downloadTask);
                 downloadTasks.Add(downloadTask);
             }
 
@@ -572,14 +570,13 @@ namespace PlexRipper.DownloadManager
             foreach (var downloadTaskId in downloadTaskIds)
             {
                 var client = GetDownloadClient(downloadTaskId);
-                if (client.IsFailed)
+                if (client.IsSuccess)
                 {
-                    continue;
+                    // The paused downloading state will be send through an subscription to the database.
+                    var downloadTask = await client.Value.PauseAsync();
+                    await UpdateDownloadTaskAsync(downloadTask.Value);
+                    CleanUpDownloadClient(downloadTaskId);
                 }
-
-                // The paused downloading state will be send through an subscription to the database.
-                await client.Value.PauseAsync();
-                CleanUpDownloadClient(downloadTaskId);
             }
 
             return Result.Ok();

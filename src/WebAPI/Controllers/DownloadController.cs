@@ -38,7 +38,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return InternalServerError(result);
             }
 
-            return Ok(Result.Ok(ControllerHelpers.ConvertToDownloadTaskDTOHierarchy(result.Value, _mapper)));
+            return Ok(ControllerHelpers.ConvertToDownloadTaskDTOHierarchy(result.Value, _mapper));
         }
 
         // GET: api/<DownloadController>/inserver

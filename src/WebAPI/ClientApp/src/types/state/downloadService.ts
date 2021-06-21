@@ -45,14 +45,24 @@ export class DownloadService extends BaseService {
 			});
 	}
 
+	private getDownloadState(serverId: number = 0): Observable<DownloadTaskDTO[]> {
+		return this.stateChanged.pipe(
+			tap((state) => {
+				Log.warn('Downloads', state?.downloads);
+			}),
+			switchMap((state: IStoreState) => {
+				// Only return the filtered array by serverId, 0 is all
+				if (state?.downloads) {
+					return of(state.downloads.filter((x) => (serverId > 0 ? x.plexServerId === serverId : true)) ?? []);
+				}
+				return of([]);
+			}),
+		);
+	}
+
 	public getDownloadList(serverId: number = 0): Observable<DownloadTaskDTO[]> {
 		return combineLatest([
-			this.stateChanged.pipe(
-				switchMap((state: IStoreState) =>
-					// Only return the filtered array by serverId, 0 is all
-					of(state?.downloads.filter((x) => (serverId > 0 ? x.plexServerId === serverId : true)) ?? []),
-				),
-			),
+			this.getDownloadState(serverId),
 			ProgressService.getDownloadTaskUpdateProgress(serverId).pipe(startWith([])),
 			ProgressService.getFileMergeProgress(serverId).pipe(startWith([])),
 		]).pipe(
@@ -63,9 +73,9 @@ export class DownloadService extends BaseService {
 				}
 
 				// Remove updates of finished download task updates
-				const x1 = downloadProgressRows.filter((x) => baseDownloadRows.find((y) => y.id === x.id));
-				const y1 = fileMergeRows.filter((x) => baseDownloadRows.find((y) => y.id === x.downloadTaskId));
-				this.setState({ downloadTaskUpdateList: x1, fileMergeProgressList: y1 }, 'CLEAN UP DOWNLOAD TASK UPDATE LIST', false);
+				// const x1 = downloadProgressRows.filter((x) => baseDownloadRows.find((y) => y.id === x.id));
+				// const y1 = fileMergeRows.filter((x) => baseDownloadRows.find((y) => y.id === x.downloadTaskId));
+				// this.setState({ downloadTaskUpdateList: x1, fileMergeProgressList: y1 }, 'CLEAN UP DOWNLOAD TASK UPDATE LIST', false);
 
 				const mergedDownloadRows: DownloadTaskDTO[] = [];
 				for (const baseDownloadRow of baseDownloadRows) {

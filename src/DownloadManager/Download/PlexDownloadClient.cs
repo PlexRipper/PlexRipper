@@ -246,6 +246,10 @@ namespace PlexRipper.DownloadManager.Download
 
         public async Task<Result<DownloadTask>> PauseAsync()
         {
+            if (DownloadStatus != DownloadStatus.Downloading)
+            {
+                Log.Warning($"DownloadClient with {DownloadTask.FileName} is currently not downloading and cannot be paused.");
+            }
             Log.Information($"Pause downloading of {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
 
             await Task.WhenAll(_downloadWorkers.Select(x => x.PauseAsync()));

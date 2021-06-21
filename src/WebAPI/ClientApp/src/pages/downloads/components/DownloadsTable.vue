@@ -1,8 +1,5 @@
 <template>
 	<div>
-		{{ downloadRows }}
-		<br />
-		{{ fileMergeProgressList }}
 		<v-tree-view-table
 			:items="downloadRows"
 			:headers="getHeaders"

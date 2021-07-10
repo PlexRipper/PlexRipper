@@ -302,8 +302,8 @@ namespace PlexRipper.Application.PlexAccounts
             if (createResult.IsFailed)
             {
                 string msg = "Failed to validate the PlexAccount that will be created";
-                Log.Warning(msg);
                 createResult.Errors.Add(new Error(msg));
+                createResult.LogError();
                 return createResult.ToResult();
             }
 

@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Common;
-using PlexRipper.SignalR.Common;
+using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Config
 {
@@ -23,11 +24,9 @@ namespace PlexRipper.WebAPI.Config
         {
             List<Type> types = new List<Type>
             {
-                typeof(DownloadProgress),
                 typeof(DownloadTaskCreationProgress),
                 typeof(LibraryProgress),
                 typeof(PlexAccountRefreshProgress),
-                typeof(DownloadStatusChanged),
                 typeof(FileMergeProgress),
                 typeof(NotificationDTO),
             };

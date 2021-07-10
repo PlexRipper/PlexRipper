@@ -14,9 +14,9 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application.Config;
 using PlexRipper.Domain;
-using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
+using PlexRipper.WebAPI.SignalR.Hubs;
 using Polly;
 
 namespace PlexRipper.WebAPI
@@ -118,11 +118,8 @@ namespace PlexRipper.WebAPI
                 configure.DocumentProcessors.Add(new NSwagAddExtraTypes());
             });
 
-            // Autofac
-            services.AddHttpClient("Default").AddTransientHttpErrorPolicy(builder =>
-                builder.WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
-            );
             services.AddOptions();
+            // Autofac
         }
 
         /// <summary>

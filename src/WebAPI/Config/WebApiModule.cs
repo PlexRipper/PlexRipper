@@ -1,6 +1,8 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Hosting;
-using PlexRipper.SignalR.Hubs;
+using PlexRipper.Application.Common;
+using PlexRipper.WebAPI.SignalR;
+using PlexRipper.WebAPI.SignalR.Hubs;
 
 namespace PlexRipper.WebAPI.Config
 {
@@ -8,6 +10,7 @@ namespace PlexRipper.WebAPI.Config
     {
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterType<SignalRService>().As<ISignalRService>();
             builder.RegisterType<ProgressHub>().ExternallyOwned();
             builder.RegisterType<Boot>()
                 .As<IHostedService>()

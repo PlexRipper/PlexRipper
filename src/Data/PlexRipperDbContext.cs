@@ -1,18 +1,16 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
-    public class PlexRipperDbContext : DbContext
+    public class PlexRipperDbContext : DbContext, ISetup
     {
-        private readonly IFileSystem _fileSystem;
-
         #region Properties
 
         #region Tables
@@ -22,6 +20,8 @@ namespace PlexRipper.Data
         public DbSet<DownloadTask> DownloadTasks { get; set; }
 
         public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
+
+        public DbSet<DownloadWorkerLog> DownloadWorkerTasksLogs { get; set; }
 
         public DbSet<FolderPath> FolderPaths { get; set; }
 
@@ -93,10 +93,7 @@ namespace PlexRipper.Data
 
         #region Constructors
 
-        public PlexRipperDbContext(IFileSystem fileSystem)
-        {
-            _fileSystem = fileSystem;
-        }
+        public PlexRipperDbContext() { }
 
         public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
 
@@ -104,30 +101,31 @@ namespace PlexRipper.Data
 
         #region Methods
 
-        public Result Setup()
+        public async Task<Result> SetupAsync()
         {
             // Should the Database be deleted and re-created
             if (ResetDatabase)
             {
                 Log.Warning("ResetDB command is true, database will be deleted and re-created.");
-                Database.EnsureDeleted();
+                await Database.EnsureDeletedAsync();
             }
 
             if (!IsTestMode)
             {
-                Database.Migrate();
+                Log.Information("Attempting to migrate database");
+                await Database.MigrateAsync();
             }
             else
             {
                 Log.Information("Database will be setup in TestMode");
-                Database.EnsureCreated();
+                await Database.EnsureCreatedAsync();
             }
 
             // Check if database exists and can be connected to.
-            var exist = Database.CanConnect();
+            var exist = await Database.CanConnectAsync();
             if (exist)
             {
-                Log.Information("Database was successfully created and connected!");
+                Log.Information("Database was successfully connected!");
                 return Result.Ok();
             }
 

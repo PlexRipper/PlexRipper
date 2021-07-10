@@ -147,6 +147,11 @@ namespace PlexRipper.Domain
 
         public static Result ToFluentResult(this ValidationResult validationResult)
         {
+            if (validationResult is null)
+            {
+                return Result.Fail("Validation result was null");
+            }
+
             if (validationResult.IsValid)
             {
                 return Result.Ok();

@@ -29,7 +29,7 @@
 				</v-col>
 			</v-row>
 			<!-- TreeView Table -->
-			<v-row no-gutters class="v-tree-view-table-body">
+			<v-row ref="v-tree-view-container" no-gutters class="v-tree-view-table-body" :style="{ height: getHeight }">
 				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
 					<v-col class="col pa-0">
 						<template v-for="(parentItem, i) in items">
@@ -39,7 +39,7 @@
 									threshold: 0.25,
 								}"
 								:min-height="50"
-								:data-title="parentItem.title"
+								:data-title="parentItem.title[0]"
 								transition="scroll-x-reverse-transition"
 							>
 								<v-treeview
@@ -50,13 +50,12 @@
 									expand-icon="mdi-chevron-down"
 									:items="[parentItem]"
 									:open-all="openAll"
-									:load-children="getChildren"
 									transition
 									:item-key="itemKey"
 									item-text="title"
 									class="v-tree-view-table-row"
-									:value="findSelected(parentItem.key)"
-									@input="updateSelected(parentItem.key, $event)"
+									:value="findSelected(parentItem[itemKey])"
+									@input="updateSelected(parentItem[itemKey], $event)"
 								>
 									<template #label="{ item }">
 										<v-row align="center">
@@ -145,7 +144,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import Log from 'consola';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
 import ITreeViewTableRow from '@vTreeViewTable/ITreeViewTableRow';
 import ProgressComponent from '@components/ProgressComponent.vue';
@@ -153,11 +153,7 @@ import LoadingSpinner from '@components/LoadingSpinner.vue';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import ButtonType from '@enums/buttonType';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
-
-declare interface ISelection {
-	indexKey: number;
-	keys: string[];
-}
+import ISelection from '@interfaces/ISelection';
 
 @Component({
 	components: {
@@ -188,10 +184,17 @@ export default class VTreeViewTable extends Vue {
 	@Prop({ required: false, type: String, default: 'key' })
 	readonly itemKey!: string;
 
+	@Prop({ required: false, type: Boolean, default: false })
+	readonly heightAuto!: boolean;
+
+	@Ref('v-tree-view-container')
+	readonly treeViewContainer!: HTMLButtonElement;
+
 	selected: ISelection[] = [];
 	expanded: string[] = [];
 	visible: boolean[] = [];
 	loadingButtons: string[] = [];
+	isMounted: boolean = false;
 
 	@Watch('items')
 	updateVisible(): void {
@@ -207,11 +210,23 @@ export default class VTreeViewTable extends Vue {
 	}
 
 	get isIndeterminate(): boolean {
-		return this.selected.length < this.items.length && this.selected.length > 0;
+		return this.getSelected.length < this.items.length && this.getSelected.length > 0;
 	}
 
 	get containerRef(): any {
 		return this.$refs.scrollbar;
+	}
+
+	get getHeight(): string {
+		if (this.heightAuto) {
+			return 'auto';
+		}
+		if (this.isMounted) {
+			const height = this.$vuetify.breakpoint.height - this.treeViewContainer?.getBoundingClientRect().top ?? 0;
+			Log.debug('v-tree-view-container height: ', height);
+			return height + 'px';
+		}
+		return 'auto';
 	}
 
 	retrieveAllLeafs(items: ITreeViewTableRow[]): string[] {
@@ -294,6 +309,12 @@ export default class VTreeViewTable extends Vue {
 			return promise;
 		}
 		return Promise.resolve();
+	}
+
+	mounted(): void {
+		this.$nextTick(function () {
+			this.isMounted = true;
+		});
 	}
 }
 </script>

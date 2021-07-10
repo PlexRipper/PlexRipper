@@ -1,18 +1,17 @@
 import Log from 'consola';
+import globalService from '@state/globalService';
 import { LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
 import {
-	DownloadProgress,
 	LibraryProgress,
 	DownloadTaskCreationProgress,
-	DownloadStatusChanged,
 	FileMergeProgress,
 	NotificationDTO,
 	PlexAccountRefreshProgress,
+	DownloadTaskDTO,
 } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
-import globalService from '@state/globalService';
 
 export class SignalrService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();
@@ -25,8 +24,7 @@ export class SignalrService {
 	private _notificationHubConnection: HubConnection<NotificationHub> | null = null;
 	private _notificationHubSubscription: Subscription | null = null;
 
-	private _downloadProgressSubject: ReplaySubject<DownloadProgress> = new ReplaySubject<DownloadProgress>();
-	private _downloadStatusChangedSubject: ReplaySubject<DownloadStatusChanged> = new ReplaySubject<DownloadStatusChanged>();
+	private _downloadTaskUpdateSubject: ReplaySubject<DownloadTaskDTO> = new ReplaySubject<DownloadTaskDTO>();
 	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> = new ReplaySubject<DownloadTaskCreationProgress>();
 
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
@@ -35,7 +33,7 @@ export class SignalrService {
 
 	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
-	public constructor() {
+	public setup(): void {
 		globalService.getConfigReady().subscribe((config) => {
 			Log.info('Setting up SignalR Service');
 			const options: ConnectionOptions = {
@@ -75,12 +73,8 @@ export class SignalrService {
 			this._notificationHubConnectionState = connectionState.status;
 		});
 
-		this._progressHubConnection?.on<DownloadProgress>('DownloadProgress').subscribe((data) => {
-			this._downloadProgressSubject.next(data);
-		});
-
-		this._progressHubConnection?.on<DownloadStatusChanged>('DownloadStatusChanged').subscribe((data) => {
-			this._downloadStatusChangedSubject.next(data);
+		this._progressHubConnection?.on<DownloadTaskDTO>('DownloadTaskUpdate').subscribe((data) => {
+			this._downloadTaskUpdateSubject.next(data);
 		});
 
 		this._progressHubConnection?.on<DownloadTaskCreationProgress>('DownloadTaskCreationProgress').subscribe((data) => {
@@ -158,16 +152,12 @@ export class SignalrService {
 		return this._downloadTaskCreationProgressSubject.asObservable().pipe(takeWhile((data) => !data.isComplete));
 	}
 
-	public getDownloadProgress(): Observable<DownloadProgress> {
-		return this._downloadProgressSubject.asObservable();
-	}
-
 	public getFileMergeProgress(): Observable<FileMergeProgress> {
 		return this._fileMergeProgressSubject.asObservable();
 	}
 
-	public getDownloadStatus(): Observable<DownloadStatusChanged> {
-		return this._downloadStatusChangedSubject.asObservable();
+	public getDownloadTaskUpdate(): Observable<DownloadTaskDTO> {
+		return this._downloadTaskUpdateSubject.asObservable();
 	}
 
 	public getLibraryProgress(): Observable<LibraryProgress> {
@@ -187,10 +177,9 @@ const signalrService = new SignalrService();
 export default signalrService;
 
 export interface ProgressHub {
-	DownloadProgress: DownloadProgress;
 	FileMergeProgress: FileMergeProgress;
 	DownloadTaskCreation: DownloadTaskCreationProgress;
-	DownloadStatusChanged: DownloadStatusChanged;
+	DownloadTaskUpdate: DownloadTaskDTO;
 	DownloadTaskCreationProgress: DownloadTaskCreationProgress;
 	LibraryProgress: LibraryProgress;
 	PlexAccountRefreshProgress: PlexAccountRefreshProgress;

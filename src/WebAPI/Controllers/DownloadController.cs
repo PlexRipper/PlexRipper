@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentResults;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.DTO.WebApi;
 using PlexRipper.Domain;
+using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -36,24 +38,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return InternalServerError(result);
             }
 
-            // var mapResult = _mapper.Map<List<DownloadTaskDTO>>(result.Value);
-            return Ok(Result.Ok(result.Value));
-        }
-
-        // GET: api/<DownloadController>/inserver
-        [HttpGet("inserver")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerDTO>>))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> GetDownloadTasksInServer()
-        {
-            var result = await _plexDownloadService.GetDownloadTasksInServerAsync();
-            if (result.IsFailed)
-            {
-                return InternalServerError(result);
-            }
-
-            var mapResult = _mapper.Map<List<PlexServerDTO>>(result.Value);
-            return Ok(Result.Ok(mapResult));
+            return Ok(ControllerHelpers.ConvertToDownloadTaskDTOHierarchy(result.Value, _mapper));
         }
 
         /// <summary>
@@ -95,67 +80,41 @@ namespace PlexRipper.WebAPI.Controllers
             return Ok(result);
         }
 
-        /// <summary>
-        /// POST: api/(DownloadController)/stop/
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpPost("stop")]
+
+
+        #region BatchCommands
+        // POST api/<DownloadController>/start/{id:int}
+        [HttpPost("start")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Stop([FromBody] List<int> downloadTaskIds)
+        public async Task<IActionResult> Start([FromBody] List<int> downloadTaskIds)
         {
-            var result = await _plexDownloadService.StopDownloadTask(downloadTaskIds);
+            if (!downloadTaskIds.Any())
+            {
+                return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
+            }
+
+            var result = await _plexDownloadService.StartDownloadTask(downloadTaskIds);
             return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 
-        // GET api/<DownloadController>/start/{id:int}
-        [HttpGet("start/{id:int}")]
+        // POST api/<DownloadController>/restart/{id:int}
+        [HttpPost("pause")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Start(int id)
+        public async Task<IActionResult> Pause([FromBody] List<int> downloadTaskIds)
         {
-            if (id <= 0)
+            if (!downloadTaskIds.Any())
             {
-                return BadRequest(id, "Download Task Id");
+                return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
             }
 
-            var result = await _plexDownloadService.StartDownloadTask(id);
-            return result.IsFailed ? BadRequest(result) : Ok(result);
-        }
-
-        // GET api/<DownloadController>/restart/{id:int}
-        [HttpGet("restart/{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Restart(int id)
-        {
-            if (id <= 0)
-            {
-                return BadRequest(id, "Download Task Id");
-            }
-
-            var result = await _plexDownloadService.RestartDownloadTask(id);
-            return result.IsFailed ? BadRequest(result) : Ok(result);
-        }
-
-        // GET api/<DownloadController>/restart/{id:int}
-        [HttpGet("pause/{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Pause(int id)
-        {
-            if (id <= 0)
-            {
-                return BadRequest(id, "Download Task Id");
-            }
-
-            var result = await _plexDownloadService.PauseDownloadTask(id);
+            var result = await _plexDownloadService.PauseDownloadTask(downloadTaskIds);
             return result.IsFailed ? BadRequest(result) : Ok(result);
         }
 
         /// <summary>
-        /// DELETE api/(DownloadController)/delete
+        /// HttpPost api/(DownloadController)/delete
         /// </summary>
         /// <param name="downloadTaskIds">The list of downloadTasks to delete by id.</param>
         /// <returns>HTTP Response.</returns>
@@ -164,7 +123,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Delete([FromBody] List<int> downloadTaskIds)
         {
-            if (downloadTaskIds.Count <= 0)
+            if (!downloadTaskIds.Any())
             {
                 return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
             }
@@ -179,5 +138,37 @@ namespace PlexRipper.WebAPI.Controllers
 
             return result.IsFailed ? InternalServerError(result) : Ok(result);
         }
+
+        // POST api/<DownloadController>/restart/{id:int}
+        [HttpPost("restart")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> Restart([FromBody] List<int> downloadTaskIds)
+        {
+            if (!downloadTaskIds.Any())
+            {
+                return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
+            }
+
+            var result = await _plexDownloadService.RestartDownloadTask(downloadTaskIds);
+            return result.IsFailed ? BadRequest(result) : Ok(result);
+        }
+
+        // POST: api/(DownloadController)/stop/
+        [HttpPost("stop")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> Stop([FromBody] List<int> downloadTaskIds)
+        {
+            if (!downloadTaskIds.Any())
+            {
+                return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
+            }
+
+            var result = await _plexDownloadService.StopDownloadTask(downloadTaskIds);
+            return result.IsFailed ? BadRequest(result) : Ok(result);
+        }
+
+        #endregion
     }
 }

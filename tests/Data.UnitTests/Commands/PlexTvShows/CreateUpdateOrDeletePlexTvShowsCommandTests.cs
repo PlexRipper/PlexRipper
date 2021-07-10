@@ -2,13 +2,13 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
 using MediatR;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.BaseTests;
 using PlexRipper.Data;
 using PlexRipper.Data.CQRS.PlexTvShows;
 using PlexRipper.Domain;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -37,8 +37,8 @@ namespace Data.UnitTests.Commands
 
         private void SetupDatabase()
         {
-            PlexServer plexServer = FakeDbData.GetPlexServer().Generate();
-            PlexLibrary plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow).Generate();
+            PlexServer plexServer = FakeData.GetPlexServer().Generate();
+            PlexLibrary plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow).Generate();
             try
             {
                 _dbContext.PlexServers.Add(plexServer);
@@ -57,7 +57,7 @@ namespace Data.UnitTests.Commands
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
 
             // Act
             var createCommand = new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary);
@@ -69,16 +69,16 @@ namespace Data.UnitTests.Commands
             var dbResult = await handler.Handle(command, new CancellationToken());
 
             // Assert
-            createResult.IsFailed.Should().BeFalse();
-            createResult.Value.Should().BeTrue();
+            createResult.IsFailed.ShouldBeFalse();
+            createResult.Value.ShouldBeTrue();
 
-            dbResult.Value.Count.Should().Be(_numberOfTvShow);
+            dbResult.Value.Count.ShouldBe(_numberOfTvShow);
             foreach (var plexTvShow in dbResult.Value)
             {
-                plexTvShow.Should().NotBeNull();
-                plexTvShow.Title.Should().NotBeEmpty();
-                plexTvShow.Key.Should().BeGreaterThan(0);
-                plexTvShow.Id.Should().BeGreaterThan(0);
+                plexTvShow.ShouldNotBeNull();
+                plexTvShow.Title.ShouldNotBeEmpty();
+                plexTvShow.Key.ShouldBeGreaterThan(0);
+                plexTvShow.Id.ShouldBeGreaterThan(0);
             }
 
             Log.Information("CreateUpdateOrDeletePlexTvShowsCommand_CreateTvShows finished successfully!");
@@ -92,7 +92,7 @@ namespace Data.UnitTests.Commands
              */
             SetupDatabase();
 
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
 
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
 
@@ -134,35 +134,35 @@ namespace Data.UnitTests.Commands
             /*
              * Assert
              */
-            createResult.IsFailed.Should().BeFalse();
-            createResult.Value.Should().BeTrue();
-            updatedResult.IsFailed.Should().BeFalse();
-            updatedResult.Value.Should().BeTrue();
+            createResult.IsFailed.ShouldBeFalse();
+            createResult.Value.ShouldBeTrue();
+            updatedResult.IsFailed.ShouldBeFalse();
+            updatedResult.Value.ShouldBeTrue();
 
-            dbResult.Value.Count.Should().Be(_numberOfTvShow);
+            dbResult.Value.Count.ShouldBe(_numberOfTvShow);
 
-            dbUpdateResult.Value.Count.Should().Be(_numberOfTvShow);
+            dbUpdateResult.Value.Count.ShouldBe(_numberOfTvShow);
             for (int i = 0; i < 10; i++)
             {
                 var plexTvShow = dbUpdateResult.Value[i];
-                plexTvShow.Should().NotBeNull();
-                plexTvShow.Title.Should().NotBeEmpty();
-                plexTvShow.Key.Should().BeGreaterThan(0);
-                plexTvShow.Id.Should().BeGreaterThan(0);
-                plexTvShow.Title.Contains("Updated!").Should().BeTrue($"TvShow: {plexTvShow.Id}");
-                plexTvShow.Seasons.Count.Should().BeGreaterThan(5);
+                plexTvShow.ShouldNotBeNull();
+                plexTvShow.Title.ShouldNotBeEmpty();
+                plexTvShow.Key.ShouldBeGreaterThan(0);
+                plexTvShow.Id.ShouldBeGreaterThan(0);
+                plexTvShow.Title.Contains("Updated!").ShouldBeTrue($"TvShow: {plexTvShow.Id}");
+                plexTvShow.Seasons.Count.ShouldBeGreaterThan(5);
 
                 for (int j = 0; j < 5; j++)
                 {
                     var tvShowSeason = plexTvShow.Seasons[j];
 
-                    tvShowSeason.Episodes.Count.Should().BeGreaterThan(5);
-                    tvShowSeason.Title.Contains("Updated!").Should().BeTrue($"TvShowSeason: {tvShowSeason.Id}");
+                    tvShowSeason.Episodes.Count.ShouldBeGreaterThan(5);
+                    tvShowSeason.Title.Contains("Updated!").ShouldBeTrue($"TvShowSeason: {tvShowSeason.Id}");
 
                     for (int k = 0; k < 5; k++)
                     {
                         var episode = tvShowSeason.Episodes[k];
-                        episode.Title.Contains("Updated!").Should().BeTrue($"TvShowEpisode: {episode.Id}");
+                        episode.Title.Contains("Updated!").ShouldBeTrue($"TvShowEpisode: {episode.Id}");
                     }
                 }
             }
@@ -175,7 +175,7 @@ namespace Data.UnitTests.Commands
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow, _numberOfTvShow).Generate();
 
             var createCommandHandler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(_dbContext);
             var createResult = await createCommandHandler.Handle(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary), new CancellationToken());
@@ -193,21 +193,21 @@ namespace Data.UnitTests.Commands
             var dbUpdateResult = await handler.Handle(new GetPlexTvShowsByPlexLibraryIdQuery(plexLibrary.Id), new CancellationToken());
 
             // Assert
-            createResult.IsFailed.Should().BeFalse();
-            updatedResult.IsFailed.Should().BeFalse();
-            createResult.Value.Should().BeTrue();
-            updatedResult.Value.Should().BeTrue();
+            createResult.IsFailed.ShouldBeFalse();
+            updatedResult.IsFailed.ShouldBeFalse();
+            createResult.Value.ShouldBeTrue();
+            updatedResult.Value.ShouldBeTrue();
 
-            dbUpdateResult.Value.Count.Should().Be(_numberOfTvShow - 10);
-            dbUpdateResult.Value.SelectMany(x => x.Seasons).Count().Should().Be(seasonCount);
-            dbUpdateResult.Value.SelectMany(x => x.Seasons.Select(episode => episode.Episodes)).Count().Should().Be(episodeCount);
+            dbUpdateResult.Value.Count.ShouldBe(_numberOfTvShow - 10);
+            dbUpdateResult.Value.SelectMany(x => x.Seasons).Count().ShouldBe(seasonCount);
+            dbUpdateResult.Value.SelectMany(x => x.Seasons.Select(episode => episode.Episodes)).Count().ShouldBe(episodeCount);
 
             foreach (var plexTvShow in dbResult.Value)
             {
-                plexTvShow.Should().NotBeNull();
-                plexTvShow.Title.Should().NotBeEmpty();
-                plexTvShow.Key.Should().BeGreaterThan(0);
-                plexTvShow.Id.Should().BeGreaterThan(0);
+                plexTvShow.ShouldNotBeNull();
+                plexTvShow.Title.ShouldNotBeEmpty();
+                plexTvShow.Key.ShouldBeGreaterThan(0);
+                plexTvShow.Id.ShouldBeGreaterThan(0);
             }
 
             Log.Information("CreateUpdateOrDeletePlexTvShowsCommand_DeleteTvShows finished successfully!");

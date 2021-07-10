@@ -1,9 +1,10 @@
-﻿using FluentResults;
+﻿using System.Threading.Tasks;
+using FluentResults;
 
 namespace PlexRipper.Domain
 {
     public interface ISetup
     {
-        public Result<bool> Setup();
+        public Task<Result> SetupAsync();
     }
 }

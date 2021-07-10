@@ -4,8 +4,8 @@ import { map, tap } from 'rxjs/operators';
 import { AxiosResponse } from 'axios';
 import Result from 'fluent-type-results';
 
-export function preApiRequest(logText: string, fnName: string, msg: string = ''): void {
-	Log.debug(`${logText} ${fnName} => sending request ${msg}`);
+export function preApiRequest(logText: string, fnName: string, data: any | string = 'none'): void {
+	Log.debug(`${logText} ${fnName} => sending request:`, data);
 }
 
 export function checkResponse<T>(response: Observable<AxiosResponse<Result<T>>>, logText: string, fnName: string): Observable<T> {

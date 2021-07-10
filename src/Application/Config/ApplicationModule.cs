@@ -2,6 +2,7 @@
 using Autofac;
 using FluentValidation;
 using MediatR;
+using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Domain.Behavior.Pipelines;
 using Module = Autofac.Module;
 
@@ -28,6 +29,8 @@ namespace PlexRipper.Application.Config
 
             // Register Behavior Pipeline
             builder.RegisterGeneric(typeof(ValidationPipeline<,>)).As(typeof(IPipelineBehavior<,>));
+
+            builder.RegisterType<PlexDownloadTaskFactory>().As<IPlexDownloadTaskFactory>().InstancePerLifetimeScope();
 
             // register all I*Services
             builder.RegisterAssemblyTypes(assembly)

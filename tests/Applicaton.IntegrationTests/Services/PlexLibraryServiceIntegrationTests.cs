@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
-using FluentAssertions;
 using PlexRipper.BaseTests;
-using PlexRipper.BaseTests.Fixtures;
 using PlexRipper.Domain;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Priority;
@@ -40,29 +39,29 @@ namespace PlexRipper.Application.IntegrationTests.Services
 
             // Act
             var result = await accountService.CreatePlexAccountAsync(newAccount);
-            result.IsFailed.Should().BeFalse();
+            result.IsFailed.ShouldBeFalse();
 
             // Retrieve account with included PlexServers and PlexLibraries
             result = await accountService.GetPlexAccountAsync(result.Value.Id);
 
             // This is very specific to the plex account used
             var library = GetLibraryFromPlexAccount(result.Value);
-            library.Should().NotBeNull();
+            library.ShouldNotBeNull();
 
             var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(library.Id);
 
             // Assert
-            result.IsSuccess.Should().BeTrue();
-            result.Value.Should().NotBeNull();
-            result.Value.DisplayName.Should().Be(newAccount.DisplayName);
-            result.Value.Username.Should().Be(newAccount.Username);
-            result.Value.Password.Should().Be(newAccount.Password);
-            result.Value.PlexAccountServers.Should().NotBeEmpty();
-            result.Value.AuthenticationToken.Should().NotBeEmpty();
+            result.IsSuccess.ShouldBeTrue();
+            result.Value.ShouldNotBeNull();
+            result.Value.DisplayName.ShouldBe(newAccount.DisplayName);
+            result.Value.Username.ShouldBe(newAccount.Username);
+            result.Value.Password.ShouldBe(newAccount.Password);
+            result.Value.PlexAccountServers.ShouldNotBeEmpty();
+            result.Value.AuthenticationToken.ShouldNotBeEmpty();
 
-            plexLibrary.Value.Movies.Should().NotBeEmpty();
-            plexLibrary.Value.PlexServer.Should().NotBeNull();
-            plexLibrary.Value.HasMedia.Should().BeTrue();
+            plexLibrary.Value.Movies.ShouldNotBeEmpty();
+            plexLibrary.Value.PlexServer.ShouldNotBeNull();
+            plexLibrary.Value.HasMedia.ShouldBeTrue();
         }
 
         [Fact]
@@ -80,8 +79,8 @@ namespace PlexRipper.Application.IntegrationTests.Services
             var plexLibrary = await plexLibraryService.GetPlexLibraryAsync(plexLibraryPick.Id);
             plexLibrary = await plexLibraryService.RefreshLibraryMediaAsync(plexLibraryPick.Id);
 
-            account.Value.Should().NotBeNull();
-            plexLibrary.Value.HasMedia.Should().BeTrue();
+            account.Value.ShouldNotBeNull();
+            plexLibrary.Value.HasMedia.ShouldBeTrue();
         }
 
         private PlexLibrary GetLibraryFromPlexAccount(PlexAccount plexAccount)

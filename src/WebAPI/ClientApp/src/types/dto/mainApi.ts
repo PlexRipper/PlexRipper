@@ -1,5 +1,5 @@
-/* tslint:disable */
 /* eslint-disable */
+/* tslint:disable */
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -12,6 +12,7 @@
 export type ResultDTOOfListOfDownloadTaskDTO = ResultDTO & { value: DownloadTaskDTO[] };
 
 export interface DownloadTaskDTO {
+  /** @format int32 */
   id: number;
   title: string;
   fullTitle: string;
@@ -19,36 +20,50 @@ export interface DownloadTaskDTO {
   fileLocationUrl: string;
   fileName: string;
   mediaType: PlexMediaType;
+
+  /** @format int32 */
   key: number;
+
+  /** @format int32 */
   downloadSpeed: number;
+
+  /** @format int64 */
   dataReceived: number;
+
+  /** @format int64 */
   dataTotal: number;
+
+  /** @format decimal */
   percentage: number;
+
+  /** @format int32 */
   priority: number;
+
+  /** @format int32 */
   plexServerId: number;
+
+  /** @format int32 */
   plexLibraryId: number;
+
+  /** @format int64 */
   timeRemaining: number;
-  downloadWorkersProgress: IDownloadWorkerProgress[];
-  destinationPath: string;
+  destinationFilePath: string;
   downloadPath: string;
   downloadUrl: string;
-  children: DownloadTaskDTO[];
+  children?: DownloadTaskDTO[] | null;
   actions: string[];
 }
 
 export enum DownloadStatus {
   Unknown = "Unknown",
   Initialized = "Initialized",
-  Starting = "Starting",
-  Downloading = "Downloading",
-  Pausing = "Pausing",
-  Paused = "Paused",
-  Stopping = "Stopping",
-  Stopped = "Stopped",
   Queued = "Queued",
-  Deleting = "Deleting",
+  Downloading = "Downloading",
+  Paused = "Paused",
+  Stopped = "Stopped",
   Deleted = "Deleted",
   Merging = "Merging",
+  Moving = "Moving",
   Completed = "Completed",
   Error = "Error",
 }
@@ -63,19 +78,6 @@ export enum PlexMediaType {
   Album = "Album",
   Song = "Song",
   Unknown = "Unknown",
-}
-
-export interface IDownloadWorkerProgress {
-  id?: number;
-  dataReceived?: number;
-  dataTotal?: number;
-  downloadSpeed?: number;
-  downloadSpeedFormatted?: string | null;
-  timeRemaining?: number;
-  bytesRemaining?: number;
-  isCompleted?: boolean;
-  percentage?: number;
-  downloadSpeedAverage?: number;
 }
 
 export interface ResultDTO {
@@ -98,9 +100,12 @@ export type Success = Reason & object;
 export type ResultDTOOfListOfPlexServerDTO = ResultDTO & { value: PlexServerDTO[] };
 
 export interface PlexServerDTO {
+  /** @format int32 */
   id: number;
   name: string;
   address: string;
+
+  /** @format int32 */
   port: number;
   version: string;
   scheme: string;
@@ -108,29 +113,58 @@ export interface PlexServerDTO {
   localAddresses: string;
   serverUrl: string;
   machineIdentifier: string;
+
+  /** @format date-time */
   createdAt: string;
+
+  /** @format date-time */
   updatedAt: string;
+
+  /** @format int32 */
   ownerId: number;
   plexLibraries: PlexLibraryDTO[];
   status: PlexServerStatusDTO;
 }
 
 export interface PlexLibraryDTO {
+  /** @format int32 */
   id: number;
   key: string;
   title: string;
   type: PlexMediaType;
+
+  /** @format date-time */
   updatedAt: string;
+
+  /** @format date-time */
   createdAt: string;
+
+  /** @format date-time */
   scannedAt: string;
+
+  /** @format date-time */
   contentChangedAt: string;
+
+  /** @format guid */
   uuid: string;
+
+  /** @format int64 */
   mediaSize: number;
+
+  /** @format int32 */
   libraryLocationId: number;
   libraryLocationPath: string;
+
+  /** @format int32 */
   plexServerId: number;
+
+  /** @format int32 */
   count: number;
+
+  /** @format int32 */
   seasonCount: number;
+
+  /** @format int32 */
   episodeCount: number;
   movies: PlexMediaDTO[];
   tvShows: PlexMediaDTO[];
@@ -138,29 +172,58 @@ export interface PlexLibraryDTO {
 }
 
 export interface PlexMediaDTO {
+  /** @format int32 */
   id: number;
+
+  /** @format int32 */
   key: number;
   treeKeyId: string;
   title: string;
+
+  /** @format int32 */
   year: number;
+
+  /** @format int32 */
   duration: number;
+
+  /** @format int64 */
   mediaSize: number;
   hasThumb: boolean;
   hasArt: boolean;
   hasBanner: boolean;
   hasTheme: boolean;
+
+  /** @format int32 */
   index: number;
   studio: string;
   summary: string;
   contentRating: string;
+
+  /** @format double */
   rating: number;
+
+  /** @format int32 */
   childCount: number;
+
+  /** @format date-time */
   addedAt: string;
+
+  /** @format date-time */
   updatedAt: string;
+
+  /** @format date-time */
   originallyAvailableAt: string;
+
+  /** @format int32 */
   tvShowId: number;
+
+  /** @format int32 */
   tvShowSeasonId: number;
+
+  /** @format int32 */
   plexLibraryId: number;
+
+  /** @format int32 */
   plexServerId: number;
   type: PlexMediaType;
   mediaData: PlexMediaDataDTO[] | null;
@@ -169,36 +232,59 @@ export interface PlexMediaDTO {
 
 export interface PlexMediaDataDTO {
   mediaFormat: string;
+
+  /** @format int64 */
   duration: number;
   videoResolution: string;
+
+  /** @format int32 */
   width: number;
+
+  /** @format int32 */
   height: number;
+
+  /** @format int32 */
   bitrate: number;
   videoCodec: string;
   videoFrameRate: string;
+
+  /** @format double */
   aspectRatio: number;
   videoProfile: string;
   audioProfile: string;
   audioCodec: string;
+
+  /** @format int32 */
   audioChannels: number;
   parts: PlexMediaDataPartDTO[];
 }
 
 export interface PlexMediaDataPartDTO {
   obfuscatedFilePath: string;
+
+  /** @format int32 */
   Duration: number;
   File: string;
+
+  /** @format int64 */
   Size: number;
   Container: string;
   VideoProfile: string;
 }
 
 export interface PlexServerStatusDTO {
+  /** @format int32 */
   id: number;
+
+  /** @format int32 */
   statusCode: number;
   isSuccessful: boolean;
   statusMessage: string;
+
+  /** @format date-time */
   lastChecked: string;
+
+  /** @format int32 */
   plexServerId: number;
 }
 
@@ -207,13 +293,18 @@ export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
 export interface DownloadMediaDTO {
   mediaIds: number[];
   type: PlexMediaType;
+
+  /** @format int32 */
   libraryId: number;
+
+  /** @format int32 */
   plexAccountId: number;
 }
 
 export type ResultDTOOfListOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[] };
 
 export interface FolderPathDTO {
+  /** @format int32 */
   id: number;
   type: string;
   displayName: string;
@@ -234,7 +325,11 @@ export interface FileSystemModelDTO {
   name: string;
   path: string;
   extension: string;
+
+  /** @format int64 */
   size: number;
+
+  /** @format date-time */
   lastModified: string | null;
 }
 
@@ -248,8 +343,11 @@ export enum FileSystemEntityType {
 export type ResultDTOOfListOfNotificationDTO = ResultDTO & { value: NotificationDTO[] };
 
 export interface NotificationDTO {
+  /** @format int32 */
   id: number;
   level: NotificationLevel;
+
+  /** @format date-time */
   createdAt: string;
   message: string;
   hidden: boolean;
@@ -266,6 +364,7 @@ export enum NotificationLevel {
 export type ResultDTOOfListOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO[] };
 
 export interface PlexAccountDTO {
+  /** @format int32 */
   id: number;
   displayName: string;
   username: string;
@@ -273,9 +372,13 @@ export interface PlexAccountDTO {
   isEnabled: boolean;
   isMain: boolean;
   isValidated: boolean;
+
+  /** @format date-time */
   validatedAt: string;
   uuid: string;
   email: string | null;
+
+  /** @format date-time */
   joined_at: string;
   title: string;
   hasPassword: boolean;
@@ -286,6 +389,7 @@ export interface PlexAccountDTO {
 export type ResultDTOOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO };
 
 export interface UpdatePlexAccountDTO {
+  /** @format int32 */
   id: number;
   displayName: string;
   username: string;
@@ -312,7 +416,10 @@ export type ResultDTOOfPlexLibraryDTO = ResultDTO & { value: PlexLibraryDTO };
 export type ResultDTOOfPlexServerDTO = ResultDTO & { value: PlexServerDTO };
 
 export interface RefreshPlexLibraryDTO {
+  /** @format int32 */
   plexAccountId?: number;
+
+  /** @format int32 */
   plexLibraryId?: number;
 }
 
@@ -366,62 +473,79 @@ export type DateTimeModel = BaseModel & {
   showRelativeDates: boolean;
 };
 
-export interface DownloadProgress {
-  id: number;
-  percentage: number;
-  downloadSpeed: number;
-  dataReceived: number;
-  dataTotal: number;
-  downloadSpeedFormatted: string;
-  timeRemaining: number;
-  bytesRemaining: number;
-  workerProgresses: IDownloadWorkerProgress[];
-  plexServerId: number;
-  plexLibraryId: number;
-}
-
 export interface DownloadTaskCreationProgress {
+  /** @format decimal */
   percentage: number;
+
+  /** @format int32 */
   current: number;
+
+  /** @format int32 */
   total: number;
   isComplete: boolean;
 }
 
 export interface LibraryProgress {
+  /** @format int32 */
   id: number;
+
+  /** @format decimal */
   percentage: number;
+
+  /** @format int32 */
   received: number;
+
+  /** @format int32 */
   total: number;
   isRefreshing: boolean;
   isComplete: boolean;
 }
 
 export interface PlexAccountRefreshProgress {
+  /** @format int32 */
   plexAccountId: number;
+
+  /** @format decimal */
   percentage: number;
+
+  /** @format int32 */
   received: number;
+
+  /** @format int32 */
   total: number;
   isRefreshing: boolean;
   isComplete: boolean;
 }
 
-export interface DownloadStatusChanged {
-  id: number;
-  status: DownloadStatus;
-  plexServerId: number;
-  plexLibraryId: number;
-}
-
 export interface FileMergeProgress {
+  /** @format int32 */
   id: number;
+
+  /** @format int32 */
   downloadTaskId: number;
+
+  /** @format int64 */
   dataTransferred: number;
+
+  /** @format int64 */
   dataTotal: number;
+
+  /** @format decimal */
   percentage: number;
+
+  /** @format int32 */
   transferSpeed: number;
   transferSpeedFormatted: string;
+
+  /** @format int64 */
   timeRemaining: number;
+
+  /** @format int64 */
   bytesRemaining: number;
+
+  /** @format int32 */
   plexServerId: number;
+
+  /** @format int32 */
   plexLibraryId: number;
 }

@@ -2,11 +2,12 @@ import Log from 'consola';
 import { Observable, of, combineLatest } from 'rxjs';
 import { getAllAccounts } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
-import { switchMap, tap } from 'rxjs/operators';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 import SettingsService from '@state/settingsService';
 import { BaseService } from '@state/baseService';
 import IStoreState from '@interfaces/IStoreState';
 import GlobalService from '@state/globalService';
+import { Context } from '@nuxt/types';
 
 export class AccountService extends BaseService {
 	public constructor() {
@@ -17,11 +18,15 @@ export class AccountService extends BaseService {
 				};
 			},
 		});
+	}
+
+	public setup(nuxtContext: Context): void {
+		super.setup(nuxtContext);
 
 		GlobalService.getAxiosReady()
 			.pipe(
 				tap(() => Log.debug('Retrieving all accounts')),
-				switchMap(() => of(this.fetchAccounts())),
+				finalize(() => this.fetchAccounts()),
 			)
 			.subscribe();
 	}

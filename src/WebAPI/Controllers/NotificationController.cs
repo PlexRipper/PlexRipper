@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
-using PlexRipper.SignalR.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
+using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Controllers
 {

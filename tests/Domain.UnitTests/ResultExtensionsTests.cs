@@ -1,6 +1,6 @@
-﻿using FluentAssertions;
-using FluentResults;
+﻿using FluentResults;
 using PlexRipper.BaseTests;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -27,15 +27,15 @@ namespace PlexRipper.Domain.UnitTests
             var result2 = Result.Fail("").Add400BadRequestError(testMessage);
 
             // Assert
-            result.Has400BadRequestError().Should().BeTrue();
-            result.Has404NotFoundError().Should().BeFalse();
-            result.Errors.Count.Should().Be(1);
-            result.Errors[0].Message.Should().Be(testMessage);
+            result.Has400BadRequestError().ShouldBeTrue();
+            result.Has404NotFoundError().ShouldBeFalse();
+            result.Errors.Count.ShouldBe(1);
+            result.Errors[0].Message.ShouldBe(testMessage);
 
-            result2.Has400BadRequestError().Should().BeTrue();
-            result2.Has404NotFoundError().Should().BeFalse();
-            result2.Errors.Count.Should().Be(2);
-            result2.Errors[1].Message.Should().Be(testMessage);
+            result2.Has400BadRequestError().ShouldBeTrue();
+            result2.Has404NotFoundError().ShouldBeFalse();
+            result2.Errors.Count.ShouldBe(2);
+            result2.Errors[1].Message.ShouldBe(testMessage);
         }
 
         [Fact]
@@ -49,15 +49,15 @@ namespace PlexRipper.Domain.UnitTests
             var result2 = Result.Fail("").Add404NotFoundError(testMessage);
 
             // Assert
-            result.Has404NotFoundError().Should().BeTrue();
-            result.Has400BadRequestError().Should().BeFalse();
-            result.Errors.Count.Should().Be(1);
-            result.Errors[0].Message.Should().Be(testMessage);
+            result.Has404NotFoundError().ShouldBeTrue();
+            result.Has400BadRequestError().ShouldBeFalse();
+            result.Errors.Count.ShouldBe(1);
+            result.Errors[0].Message.ShouldBe(testMessage);
 
-            result2.Has404NotFoundError().Should().BeTrue();
-            result2.Has400BadRequestError().Should().BeFalse();
-            result2.Errors.Count.Should().Be(2);
-            result2.Errors[1].Message.Should().Be(testMessage);
+            result2.Has404NotFoundError().ShouldBeTrue();
+            result2.Has400BadRequestError().ShouldBeFalse();
+            result2.Errors.Count.ShouldBe(2);
+            result2.Errors[1].Message.ShouldBe(testMessage);
         }
     }
 }

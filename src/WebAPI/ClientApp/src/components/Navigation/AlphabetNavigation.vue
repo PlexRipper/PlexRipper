@@ -51,7 +51,6 @@ export default class AlphabetNavigation extends Vue {
 
 	scrollTo(letter: string): void {
 		const ref = this.$parent.$refs[this.containerRef];
-		Log.info(this.$parent);
 		if (!ref) {
 			Log.error('Could not find container with reference: ' + this.containerRef);
 			return;
@@ -67,7 +66,6 @@ export default class AlphabetNavigation extends Vue {
 				Log.error('Could not find an index with letter ' + letter);
 			}
 		}
-		Log.debug('scroll to: ' + scrollHeight);
 
 		((ref as Vue).$el as Element).scrollTop = scrollHeight;
 	}

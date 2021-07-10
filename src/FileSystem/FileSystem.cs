@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
@@ -27,7 +28,7 @@ namespace PlexRipper.FileSystem
 
         #region Methods
 
-        public Result Setup()
+        public async Task<Result> SetupAsync()
         {
             return CreateConfigDirectory();
         }
@@ -226,7 +227,7 @@ namespace PlexRipper.FileSystem
             }
         }
 
-        public Result<FileStream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize)
+        public Result<Stream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize)
         {
             try
             {
@@ -253,7 +254,7 @@ namespace PlexRipper.FileSystem
                 // var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous);
                 // Pre-allocate the required file size
                 fileStream.SetLength(fileSize);
-                return Result.Ok(fileStream);
+                return Result.Ok<Stream>(fileStream);
             }
             catch (Exception e)
             {

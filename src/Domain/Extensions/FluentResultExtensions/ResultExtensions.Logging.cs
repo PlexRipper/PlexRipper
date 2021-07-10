@@ -269,6 +269,23 @@ namespace PlexRipper.Domain
                         }
                     }
                 }
+
+                if (error is ExceptionalError exceptional)
+                {
+                    var exception = exceptional.Exception;
+                    LogByType(logLevel, "Exception", null, memberName, sourceFilePath);
+                    LogByType(logLevel, $"--{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
+                    if (exception.InnerException is not null)
+                    {
+                        exception = exception.InnerException;
+                        LogByType(logLevel, $"----{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
+                        if (exception.InnerException is not null)
+                        {
+                            exception = exception.InnerException.InnerException;
+                            LogByType(logLevel, $"-------{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
+                        }
+                    }
+                }
             }
 
             if (e != null)

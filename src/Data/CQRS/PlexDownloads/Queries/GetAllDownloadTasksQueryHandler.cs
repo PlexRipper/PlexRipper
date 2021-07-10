@@ -32,6 +32,11 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 query = query.Include(x => x.PlexLibrary);
             }
 
+            if (request.DownloadTaskIds != null && request.DownloadTaskIds.Any())
+            {
+                query = query.Where(x => request.DownloadTaskIds.Contains(x.Id));
+            }
+
             var downloadList = await query
                 .Include(x => x.DownloadWorkerTasks)
                 .Include(x => x.DestinationFolder)

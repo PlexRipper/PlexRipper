@@ -3,19 +3,19 @@
 		<!-- Download Toolbar -->
 		<download-bar
 			:has-selected="hasSelected"
-			@pause="pauseDownloadTasks"
-			@stop="stopDownloadTasks"
-			@restart="restartDownloadTasks"
-			@start="startDownloadTasks"
-			@clear="clearDownloadTasks"
-			@delete="deleteDownloadTasks"
+			@pause="pauseDownloadTasks(getSelected)"
+			@stop="stopDownloadTasks(getSelected)"
+			@restart="restartDownloadTasks(getSelected)"
+			@start="startDownloadTasks(getSelected)"
+			@clear="clearDownloadTasks(getSelected)"
+			@delete="deleteDownloadTasks(getSelected)"
 		/>
 		<!--	The Download Table	-->
 		<perfect-scrollbar class="download-page-tables">
 			<v-row v-if="plexServers.length > 0">
 				<v-col>
 					<v-expansion-panels v-model="openExpansions" multiple>
-						<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
+						<v-expansion-panel v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
 							<v-expansion-panel-header>
 								<h2>{{ plexServer.name }}</h2>
 							</v-expansion-panel-header>
@@ -23,13 +23,14 @@
 								<downloads-table
 									v-model="selected"
 									:server-id="plexServer.id"
-									@pause="pauseDownloadTask"
-									@clear="clearDownloadTask"
-									@delete="deleteDownloadTask"
-									@stop="stopDownloadTask"
-									@restart="restartDownloadTask"
-									@start="startDownloadTask"
-									@details="detailsDownloadTask"
+									@selected="updateSelected(plexServer.id, $event)"
+									@pause="pauseDownloadTasks([$event])"
+									@clear="clearDownloadTasks([$event])"
+									@delete="deleteDownloadTasks([$event])"
+									@stop="stopDownloadTasks([$event])"
+									@restart="restartDownloadTasks([$event])"
+									@start="startDownloadTasks([$event])"
+									@details="detailsDownloadTask($event)"
 								/>
 							</v-expansion-panel-content>
 						</v-expansion-panel>
@@ -47,13 +48,12 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import { pauseDownloadTask, restartDownloadTask, startDownloadTask } from '@api/plexDownloadApi';
 import DownloadService from '@state/downloadService';
-import { DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import ServerService from '@state/serverService';
+import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import { filter } from 'lodash';
+import ISelection from '@interfaces/ISelection';
 import DownloadsTable from './components/DownloadsTable.vue';
 import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
 import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsDialog.vue';
@@ -70,84 +70,74 @@ export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
 	downloads: DownloadTaskDTO[] = [];
 	openExpansions: number[] = [];
-	selected: DownloadTaskDTO[] = [];
 	downloadTaskDetail: DownloadTaskDTO | null = null;
+	selected: ISelection[] = [];
+
 	private dialog: boolean = false;
 
-	get selectedIds(): number[] {
-		return this.selected.map((x) => x.id);
+	get getSelected(): number[] {
+		return this.selected.map((x) => +x.keys).flat(1);
+	}
+
+	get getServersWithDownloads(): PlexServerDTO[] {
+		return this.plexServers.filter((x) => this.downloads.some((y) => y.plexServerId === x.id));
 	}
 
 	get hasSelected(): boolean {
-		return this.selectedIds.length > 0;
+		return this.getSelected.length > 0;
 	}
 
 	// region single commands
-
-	clearDownloadTask(downloadTask: DownloadTaskDTO): void {
-		DownloadService.clearDownloadTasks([downloadTask.id]);
-		this.selected = filter(this.selected, (x) => x.id !== downloadTask.id);
-	}
-
-	startDownloadTask(downloadTask: DownloadTaskDTO): void {
-		this.$subscribeTo(startDownloadTask(downloadTask.id), () => {});
-	}
-
-	pauseDownloadTask(downloadTask: DownloadTaskDTO): void {
-		this.$subscribeTo(pauseDownloadTask(downloadTask.id), () => {});
-	}
-
-	stopDownloadTask(downloadTask: DownloadTaskDTO): void {
-		DownloadService.stopDownloadTasks([downloadTask.id]);
-	}
-
-	restartDownloadTask(downloadTask: DownloadTaskDTO): void {
-		this.$subscribeTo(restartDownloadTask(downloadTask.id), () => {});
-	}
-
-	deleteDownloadTask(downloadTask: DownloadTaskDTO): void {
-		if (downloadTask.mediaType === PlexMediaType.Episode) {
-			DownloadService.deleteDownloadTasks([downloadTask.id]);
-			this.selected = filter(this.selected, (x) => x.id !== downloadTask.id);
-		}
-	}
 
 	detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
 		this.downloadTaskDetail = downloadTask;
 		this.dialog = true;
 	}
 
-	// endregion
-
-	// region batch commands
-	clearDownloadTasks(): void {
-		if (!this.hasSelected) {
-			DownloadService.clearDownloadTasks([]);
+	updateSelected(plexServerId: number, selected: string[]) {
+		const index = this.selected.findIndex((x) => x.indexKey === plexServerId);
+		if (index === -1) {
+			this.selected.push({ indexKey: plexServerId, keys: selected });
 		} else {
-			DownloadService.clearDownloadTasks(this.selectedIds);
-			this.selected = [];
+			this.selected.splice(index, 1, { indexKey: plexServerId, keys: selected });
 		}
 	}
 
-	startDownloadTasks(): void {
-		Log.info('startDownloadTasks not implemented');
+	// endregion
+
+	// region batch commands
+	clearDownloadTasks(downloadTaskIds: number[]): void {
+		if (downloadTaskIds && downloadTaskIds.length > 0) {
+			DownloadService.clearDownloadTasks(downloadTaskIds);
+			return;
+		}
+
+		if (this.hasSelected) {
+			DownloadService.clearDownloadTasks(this.getSelected);
+			this.selected = [];
+		} else {
+			DownloadService.clearDownloadTasks();
+		}
 	}
 
-	pauseDownloadTasks(): void {
-		Log.info('pauseDownloadTasks not implemented');
+	startDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.startDownloadTasks(downloadTaskIds);
 	}
 
-	stopDownloadTasks(): void {
-		Log.info('stopDownloadTasks not implemented');
+	pauseDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.pauseDownloadTasks(downloadTaskIds);
 	}
 
-	restartDownloadTasks(): void {
-		Log.info('restartDownloadTasks not implemented');
+	stopDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.stopDownloadTasks(downloadTaskIds);
 	}
 
-	deleteDownloadTasks(): void {
-		DownloadService.deleteDownloadTasks(this.selectedIds);
-		this.selected = [];
+	restartDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.restartDownloadTasks(downloadTaskIds);
+	}
+
+	deleteDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.deleteDownloadTasks(downloadTaskIds);
 	}
 
 	// endregion
@@ -158,9 +148,13 @@ export default class Downloads extends Vue {
 	}
 
 	created(): void {
-		this.$subscribeTo(DownloadService.getDownloadListInServers(), (data) => {
-			this.plexServers = data;
-			this.openExpansions = [...Array(this.plexServers?.length).keys()] ?? [];
+		this.$subscribeTo(ServerService.getServers(), (servers) => {
+			this.plexServers = servers;
+			this.openExpansions = [...Array(servers?.length).keys()] ?? [];
+		});
+
+		this.$subscribeTo(DownloadService.getDownloadList(), (downloads) => {
+			this.downloads = downloads;
 		});
 	}
 }

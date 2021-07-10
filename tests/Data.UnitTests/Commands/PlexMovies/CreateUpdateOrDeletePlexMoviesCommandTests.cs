@@ -1,13 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
 using MediatR;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.BaseTests;
 using PlexRipper.Data;
 using PlexRipper.Domain;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -36,8 +34,8 @@ namespace Data.UnitTests.Commands
 
         private void SetupDatabase()
         {
-            _dbContext.PlexServers.Add(FakeDbData.GetPlexServer());
-            _dbContext.PlexLibraries.Add(FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.TvShow).Generate());
+            _dbContext.PlexServers.Add(FakeData.GetPlexServer());
+            _dbContext.PlexLibraries.Add(FakeData.GetPlexLibrary(1, 1, PlexMediaType.TvShow).Generate());
             _dbContext.SaveChanges();
         }
 
@@ -46,23 +44,23 @@ namespace Data.UnitTests.Commands
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
 
             // Act
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             var dbResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
 
             // Assert
-            createResult.IsFailed.Should().BeFalse();
-            createResult.Value.Should().BeTrue();
+            createResult.IsFailed.ShouldBeFalse();
+            createResult.Value.ShouldBeTrue();
 
-            dbResult.Value.Count.Should().Be(_numberOfMovies);
+            dbResult.Value.Count.ShouldBe(_numberOfMovies);
             foreach (var plexMovie in dbResult.Value)
             {
-                plexMovie.Should().NotBeNull();
-                plexMovie.Title.Should().NotBeEmpty();
-                plexMovie.Key.Should().BeGreaterThan(0);
-                plexMovie.Id.Should().BeGreaterThan(0);
+                plexMovie.ShouldNotBeNull();
+                plexMovie.Title.ShouldNotBeEmpty();
+                plexMovie.Key.ShouldBeGreaterThan(0);
+                plexMovie.Id.ShouldBeGreaterThan(0);
             }
         }
 
@@ -71,12 +69,12 @@ namespace Data.UnitTests.Commands
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
-            createResult.IsSuccess.Should().BeTrue(createResult.Errors.ToString());
+            createResult.IsSuccess.ShouldBeTrue(createResult.Errors.ToString());
 
             var dbResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
-            dbResult.IsSuccess.Should().BeTrue();
+            dbResult.IsSuccess.ShouldBeTrue();
 
             // change the plexMovies
 
@@ -91,24 +89,24 @@ namespace Data.UnitTests.Commands
 
             // Act
             var updatedResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
-            updatedResult.IsSuccess.Should().BeTrue();
+            updatedResult.IsSuccess.ShouldBeTrue();
 
             var dbUpdateResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
-            dbUpdateResult.IsSuccess.Should().BeTrue();
+            dbUpdateResult.IsSuccess.ShouldBeTrue();
 
             // Assert
-            createResult.Value.Should().BeTrue();
-            updatedResult.IsFailed.Should().BeFalse();
-            updatedResult.Value.Should().BeTrue();
+            createResult.Value.ShouldBeTrue();
+            updatedResult.IsFailed.ShouldBeFalse();
+            updatedResult.Value.ShouldBeTrue();
 
-            dbUpdateResult.Value.Count.Should().Be(_numberOfMovies);
+            dbUpdateResult.Value.Count.ShouldBe(_numberOfMovies);
             for (int i = 0; i < 50; i++)
             {
                 var plexMovie = dbUpdateResult.Value[i];
-                plexMovie.Should().NotBeNull();
-                plexMovie.Title.Contains("Updated!").Should().BeTrue();
-                plexMovie.Key.Should().BeGreaterThan(0);
-                plexMovie.Id.Should().BeGreaterThan(0);
+                plexMovie.ShouldNotBeNull();
+                plexMovie.Title.Contains("Updated!").ShouldBeTrue();
+                plexMovie.Key.ShouldBeGreaterThan(0);
+                plexMovie.Id.ShouldBeGreaterThan(0);
             }
         }
 
@@ -117,13 +115,13 @@ namespace Data.UnitTests.Commands
         {
             // Arrange
             SetupDatabase();
-            var plexLibrary = FakeDbData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
-            var plexMovies = FakeDbData.GetPlexMovies(_numberOfMovies);
+            var plexLibrary = FakeData.GetPlexLibrary(1, 1, PlexMediaType.Movie, _numberOfMovies).Generate();
+            var plexMovies = FakeData.GetPlexMovies(_numberOfMovies);
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
-            createResult.IsSuccess.Should().BeTrue(createResult.Errors.ToString());
+            createResult.IsSuccess.ShouldBeTrue(createResult.Errors.ToString());
 
             var dbResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
-            dbResult.IsSuccess.Should().BeTrue();
+            dbResult.IsSuccess.ShouldBeTrue();
 
             // remove the plexMovies
             dbResult.Value.RemoveRange(_numberOfMoviesHalf, _numberOfMoviesHalf);
@@ -136,12 +134,12 @@ namespace Data.UnitTests.Commands
             var dbUpdateResult = await _mediator.Send(new GetPlexMoviesByPlexLibraryId(plexLibrary.Id));
 
             // Assert
-            createResult.Value.Should().BeTrue();
-            updatedResult.Value.Should().BeTrue();
-            updatedResult.IsSuccess.Should().BeTrue();
-            dbUpdateResult.IsSuccess.Should().BeTrue();
+            createResult.Value.ShouldBeTrue();
+            updatedResult.Value.ShouldBeTrue();
+            updatedResult.IsSuccess.ShouldBeTrue();
+            dbUpdateResult.IsSuccess.ShouldBeTrue();
 
-            dbUpdateResult.Value.Count.Should().Be(_numberOfMoviesHalf);
+            dbUpdateResult.Value.Count.ShouldBe(_numberOfMoviesHalf);
 
 
         }

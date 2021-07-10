@@ -6,6 +6,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { format } from 'date-fns';
 import SettingsService from '@state/settingsService';
+
 @Component
 export default class DateTime extends Vue {
 	@Prop({ required: true, type: String, default: '' })
@@ -20,9 +21,9 @@ export default class DateTime extends Vue {
 	@Prop({ required: false, type: Boolean, default: true })
 	readonly time!: boolean;
 
-	shortDateFormat: string = '';
-	longDateFormat: string = '';
-	timeFormat: string = '';
+	shortDateFormat: string = 'dd/MM/yyyy';
+	longDateFormat: string = 'EEEE, dd MMMM yyyy';
+	timeFormat: string = 'HH:mm:ss';
 
 	get date(): Date {
 		return new Date(this.text);
@@ -54,9 +55,9 @@ export default class DateTime extends Vue {
 	mounted(): void {
 		this.$subscribeTo(SettingsService.getDateTimeSettings(), (dateTimeSettings) => {
 			if (dateTimeSettings) {
-				this.shortDateFormat = dateTimeSettings.shortDateFormat ?? '';
-				this.longDateFormat = dateTimeSettings.longDateFormat ?? '';
-				this.timeFormat = dateTimeSettings.timeFormat ?? '';
+				this.shortDateFormat = dateTimeSettings.shortDateFormat;
+				this.longDateFormat = dateTimeSettings.longDateFormat;
+				this.timeFormat = dateTimeSettings.timeFormat;
 			}
 		});
 	}

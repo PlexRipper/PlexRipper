@@ -1,6 +1,5 @@
 <template>
 	<page>
-		<print :object="downloads"></print>
 		<!-- Download Toolbar -->
 		<download-bar
 			:has-selected="hasSelected"

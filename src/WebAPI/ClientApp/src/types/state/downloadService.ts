@@ -11,7 +11,7 @@ import {
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
 import { startWith, switchMap, take, tap } from 'rxjs/operators';
-import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import AccountService from '@service/accountService';
 import { BaseService } from '@state/baseService';

@@ -1073,6 +1073,42 @@
           }
         },
         {
+          "name": "Print",
+          "description": "",
+          "attributes": [
+            {
+              "name": "title",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "'Print'"
+            },
+            {
+              "name": "object",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "any"
+              }
+            },
+            {
+              "name": "height",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "500"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Debug/Print.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "ProgressComponent",
           "description": "",
           "attributes": [

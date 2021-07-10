@@ -5,7 +5,6 @@ import {
 	deleteDownloadTasks,
 	downloadMedia,
 	getAllDownloads,
-	getDownloadTasksInServer,
 	pauseDownloadTask,
 	restartDownloadTasks,
 	startDownloadTask,
@@ -53,7 +52,10 @@ export class DownloadService extends BaseService {
 			switchMap((state: IStoreState) => {
 				// Only return the filtered array by serverId, 0 is all
 				if (state?.downloads) {
-					return of(state.downloads.filter((x) => (serverId > 0 ? x.plexServerId === serverId : true)) ?? []);
+					if (serverId > 0) {
+						return of(state.downloads.filter((x) => x.plexServerId === serverId));
+					}
+					return of(state.downloads);
 				}
 				return of([]);
 			}),
@@ -103,26 +105,9 @@ export class DownloadService extends BaseService {
 					mergedDownloadRows.push(mergedDownloadRow);
 				}
 
-				// Fix for Vuetify, the "v-treeview" component freaks out if children are null/undefined
-				mergedDownloadRows.forEach((x) => {
-					if (x.status === DownloadStatus.Completed) {
-						x.downloadSpeed = 0;
-					}
-					if (x.children === null) {
-						x.children = [];
-					}
-				});
-
 				return of(mergedDownloadRows);
 			}),
 		);
-	}
-
-	/**
-	 * returns the downloadTasks nested in PlexServerDTO -> PlexLibraryDTO -> DownloadTaskDTO[]
-	 */
-	public getDownloadListInServers(): Observable<PlexServerDTO[]> {
-		return getDownloadTasksInServer();
 	}
 
 	/**

@@ -1,6 +1,6 @@
 <template>
 	<page>
-		{{ getSelected }}
+		<print :object="downloads"></print>
 		<!-- Download Toolbar -->
 		<download-bar
 			:has-selected="hasSelected"
@@ -16,7 +16,7 @@
 			<v-row v-if="plexServers.length > 0">
 				<v-col>
 					<v-expansion-panels v-model="openExpansions" multiple>
-						<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
+						<v-expansion-panel v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
 							<v-expansion-panel-header>
 								<h2>{{ plexServer.name }}</h2>
 							</v-expansion-panel-header>
@@ -51,6 +51,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import DownloadService from '@state/downloadService';
+import ServerService from '@state/serverService';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ISelection from '@interfaces/ISelection';
@@ -77,6 +78,10 @@ export default class Downloads extends Vue {
 
 	get getSelected(): number[] {
 		return this.selected.map((x) => +x.keys).flat(1);
+	}
+
+	get getServersWithDownloads(): PlexServerDTO[] {
+		return this.plexServers.filter((x) => this.downloads.some((y) => y.plexServerId === x.id));
 	}
 
 	get hasSelected(): boolean {
@@ -144,9 +149,13 @@ export default class Downloads extends Vue {
 	}
 
 	created(): void {
-		this.$subscribeTo(DownloadService.getDownloadListInServers(), (data) => {
-			this.plexServers = data;
-			this.openExpansions = [...Array(this.plexServers?.length).keys()] ?? [];
+		this.$subscribeTo(ServerService.getServers(), (servers) => {
+			this.plexServers = servers;
+			this.openExpansions = [...Array(servers?.length).keys()] ?? [];
+		});
+
+		this.$subscribeTo(DownloadService.getDownloadList(), (downloads) => {
+			this.downloads = downloads;
 		});
 	}
 }

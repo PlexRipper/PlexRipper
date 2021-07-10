@@ -31,6 +31,10 @@ namespace PlexRipper.WebAPI.Common
                     // Convert episode typed downloadTasks
                     if (downloadTask.MediaType == PlexMediaType.Episode)
                     {
+                        mappedDownloadTask.Key = downloadTask.MetaData.TvShowEpisodeKey;
+                        mappedDownloadTask.Title = downloadTask.TitleTvShowEpisode;
+
+                        // Create TvShow downloadTask if not yet created
                         var tvShowDownloadTask = convertedDownloadTasks.Find(x =>
                             x.Key == downloadTask.MetaData.TvShowKey && x.PlexLibraryId == downloadTask.PlexLibraryId);
                         if (tvShowDownloadTask is null)
@@ -42,40 +46,31 @@ namespace PlexRipper.WebAPI.Common
                                 FullTitle = downloadTask.TitleTvShow,
                                 MediaType = PlexMediaType.TvShow,
                                 Children = new List<DownloadTaskDTO>(),
+                                PlexLibraryId = downloadTask.PlexLibraryId,
+                                PlexServerId = downloadTask.PlexServerId,
                             };
                             convertedDownloadTasks.Add(tvShowDownloadTask);
                         }
 
-                        var children = new List<DownloadTaskDTO>();
-                        convertedDownloadTasks.ForEach(x =>
+                        // Create TvShow Season downloadTask if not yet created
+                        var tvShowSeasonDownloadTask = tvShowDownloadTask.Children
+                            .Find(x => x.Key == downloadTask.MetaData.TvShowSeasonKey && x.PlexLibraryId == downloadTask.PlexLibraryId);
+                        if (tvShowSeasonDownloadTask is null)
                         {
-                            if (x.Children is not null && x.Children.Any())
+                            tvShowSeasonDownloadTask = new DownloadTaskDTO
                             {
-                                children.AddRange(x.Children);
-                            }
-                        });
-
-                        if (children.Any())
-                        {
-                            var tvShowSeasonDownloadTask = children
-                                .Find(x => x.Key == downloadTask.MetaData.TvShowSeasonKey && x.PlexLibraryId == downloadTask.PlexLibraryId);
-                            if (tvShowSeasonDownloadTask is null)
-                            {
-                                tvShowSeasonDownloadTask = new DownloadTaskDTO
-                                {
-                                    Key = downloadTask.MetaData.TvShowSeasonKey,
-                                    Title = downloadTask.TitleTvShowSeason,
-                                    FullTitle = $"{tvShowDownloadTask.Title}/{downloadTask.TitleTvShowSeason}",
-                                    MediaType = PlexMediaType.Season,
-                                    Children = new List<DownloadTaskDTO>(),
-                                };
-                                tvShowDownloadTask.Children.Add(tvShowSeasonDownloadTask);
-                            }
-
-                            mappedDownloadTask.Key = downloadTask.MetaData.TvShowEpisodeKey;
-                            mappedDownloadTask.Title = downloadTask.TitleTvShowEpisode;
-                            tvShowSeasonDownloadTask.Children.Add(mappedDownloadTask);
+                                Key = downloadTask.MetaData.TvShowSeasonKey,
+                                Title = downloadTask.TitleTvShowSeason,
+                                FullTitle = $"{tvShowDownloadTask.Title}/{downloadTask.TitleTvShowSeason}",
+                                MediaType = PlexMediaType.Season,
+                                PlexLibraryId = downloadTask.PlexLibraryId,
+                                PlexServerId = downloadTask.PlexServerId,
+                                Children = new List<DownloadTaskDTO>(),
+                            };
+                            tvShowDownloadTask.Children.Add(tvShowSeasonDownloadTask);
                         }
+
+                        tvShowSeasonDownloadTask.Children.Add(mappedDownloadTask);
                     }
                 }
 
@@ -88,8 +83,8 @@ namespace PlexRipper.WebAPI.Common
                         {
                             downloadTask.Children.ForEach(season =>
                             {
-                                var children = downloadTask.Children ?? new List<DownloadTaskDTO>();
-                                if (children.Any())
+                                var seasonChildren = downloadTask.Children ?? new List<DownloadTaskDTO>();
+                                if (seasonChildren.Any())
                                 {
                                     season.DataTotal = season.Children.Sum(x => x.DataTotal);
                                     season.DataReceived = season.Children.Sum(x => x.DataReceived);

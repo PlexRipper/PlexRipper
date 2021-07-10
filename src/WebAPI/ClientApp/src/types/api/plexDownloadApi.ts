@@ -7,12 +7,6 @@ import { checkResponse, preApiRequest } from './baseApi';
 const logText = 'From PlexDownloadApi => ';
 const apiPath = '/download';
 
-export function getDownloadTasksInServer(): Observable<PlexServerDTO[]> {
-	preApiRequest(logText, 'getDownloadTasksInServer');
-	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}/inserver`);
-	return checkResponse<PlexServerDTO[]>(result, logText, 'getDownloadTasksInServer');
-}
-
 export function getAllDownloads(): Observable<DownloadTaskDTO[]> {
 	preApiRequest(logText, 'getAllDownloads');
 	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}`);

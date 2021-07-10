@@ -4,12 +4,13 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Application.PlexMedia;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexDownloads
+namespace PlexRipper.Application
 {
     public class PlexDownloadTaskFactory : IPlexDownloadTaskFactory
     {

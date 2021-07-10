@@ -12,6 +12,7 @@ import FileSize from '@components/General/FileSize.vue';
 import Duration from '@components/General/Duration.vue';
 import VTreeViewTable from '@vTreeViewTable/VTreeViewTable.vue';
 import MediaTypeIcon from '@components/General/MediaTypeIcon.vue';
+import Print from '@components/DebugTools/Print.vue';
 
 export default (): void => {
 	const components = {
@@ -28,6 +29,7 @@ export default (): void => {
 		Duration,
 		VTreeViewTable,
 		MediaTypeIcon,
+		Print,
 	};
 
 	Object.entries(components).forEach(([name, component]) => {

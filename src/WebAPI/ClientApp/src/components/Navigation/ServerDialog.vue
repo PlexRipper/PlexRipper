@@ -60,7 +60,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
-import { ServerService } from '@state';
+import { ServerService } from '@service';
 
 @Component
 export default class ServerDialog extends Vue {

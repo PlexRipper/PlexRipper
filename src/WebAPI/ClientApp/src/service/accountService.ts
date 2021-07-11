@@ -3,7 +3,7 @@ import { Observable, of, combineLatest } from 'rxjs';
 import { getAllAccounts } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { finalize, switchMap, tap } from 'rxjs/operators';
-import { BaseService, GlobalService, SettingsService } from '@state';
+import { BaseService, GlobalService, SettingsService } from '@service';
 import { Context } from '@nuxt/types';
 import IStoreState from '@interfaces/IStoreState';
 

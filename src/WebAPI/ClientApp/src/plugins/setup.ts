@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Log from 'consola';
 import { Context } from '@nuxt/types';
-import { GlobalService } from '@state';
+import { GlobalService } from '@service';
 
 export default (ctx: Context): void => {
 	GlobalService.getConfigReady().subscribe((config) => {

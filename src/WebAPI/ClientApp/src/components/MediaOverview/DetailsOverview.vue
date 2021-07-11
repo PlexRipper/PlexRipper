@@ -102,7 +102,7 @@ import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { DownloadMediaDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
-import { MediaService } from '@state';
+import { MediaService } from '@service';
 
 @Component<DetailsOverview>({
 	components: {

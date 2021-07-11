@@ -1,5 +1,5 @@
 import Log from 'consola';
-import { BaseService, GlobalService } from '@state';
+import { BaseService, GlobalService } from '@service';
 import { LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';

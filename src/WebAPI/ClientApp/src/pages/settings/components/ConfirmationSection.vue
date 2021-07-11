@@ -50,7 +50,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { SettingsService } from '@state';
+import { SettingsService } from '@service';
 
 @Component
 export default class ConfirmationSection extends Vue {

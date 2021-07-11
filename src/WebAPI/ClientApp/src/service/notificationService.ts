@@ -2,9 +2,8 @@ import { Observable } from 'rxjs';
 import { NotificationDTO } from '@dto/mainApi';
 import Log from 'consola';
 import { map, switchMap, take, tap } from 'rxjs/operators';
-import { BaseService, GlobalService } from '@state';
+import { BaseService, GlobalService, SignalrService } from '@service';
 import { getNotifications, hideNotification } from '@api/notificationApi';
-import signalrService from '~/types/state/signalrService';
 import IStoreState from '@interfaces/IStoreState';
 import { Context } from '@nuxt/types';
 
@@ -32,7 +31,7 @@ export class NotificationService extends BaseService {
 				this.setState({ notifications: value }, 'Set Notifications');
 			});
 
-		signalrService.getNotificationUpdates().subscribe((data) => {
+		SignalrService.getNotificationUpdates().subscribe((data) => {
 			this.setState({ notifications: { ...this.getState().notifications, ...data } }, 'Add Notifications');
 		});
 	}

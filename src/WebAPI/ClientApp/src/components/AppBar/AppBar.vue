@@ -59,7 +59,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
-import { GlobalService, SettingsService, AccountService, SignalrService } from '@state';
+import { GlobalService, SettingsService, AccountService, SignalrService } from '@service';
 import NotificationButton from '@components/AppBar/NotificationButton.vue';
 import DarkModeToggle from '@components/General/DarkModeToggle.vue';
 import { refreshAccount } from '@api/accountApi';

@@ -1,5 +1,5 @@
 import Log from 'consola';
-import { SettingsService } from '@state';
+import { SettingsService } from '@service';
 
 let subscriptionCreated: boolean = false;
 export default function ({ route, redirect }) {

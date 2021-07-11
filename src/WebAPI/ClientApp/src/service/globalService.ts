@@ -4,12 +4,19 @@ import AppConfig from '@interfaces/AppConfig';
 import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
-import { BaseService, ProgressService, DownloadService, ServerService, SettingsService, NotificationService } from '@state';
-import SignalrService from '~/types/state/signalrService';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { SettingsModel } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
-import AccountService from '~/types/state/accountService';
+import {
+	BaseService,
+	ProgressService,
+	DownloadService,
+	ServerService,
+	SettingsService,
+	NotificationService,
+	AccountService,
+	SignalrService,
+} from '@service';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
 
 export class GlobalService extends BaseService {

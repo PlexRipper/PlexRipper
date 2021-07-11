@@ -22,7 +22,7 @@
 			"@/*": ["./*"],
 			"@dto/*": ["./types/dto/*"],
 			"@api/*": ["./types/api/*"],
-			"@state": ["./types/state/index.ts"],
+			"@service": ["./service/index.ts"],
 			"@img/*": ["./assets/img/*"],
 			"@enums/*": ["./types/enums/*"],
 			"@interfaces/*": ["./types/interfaces/*"],

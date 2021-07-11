@@ -139,7 +139,7 @@ import { createAccount, deleteAccount, updateAccount, validateAccount } from '@a
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import ProgressComponent from '@components/ProgressComponent.vue';
-import { SignalrService } from '@state';
+import { SignalrService } from '@service';
 import ConfirmationDialog from '@components/General/ConfirmationDialog.vue';
 import PBtn from '@components/General/PlexRipperButton.vue';
 import ButtonType from '@/types/enums/buttonType';

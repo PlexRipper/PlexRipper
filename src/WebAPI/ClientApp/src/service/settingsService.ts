@@ -13,7 +13,7 @@ import {
 	ViewMode,
 } from '@dto/mainApi';
 import { filter, switchMap, take, tap } from 'rxjs/operators';
-import { BaseService, GlobalService } from '@state';
+import { BaseService, GlobalService } from '@service';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import { Context } from '@nuxt/types';
 
@@ -42,7 +42,7 @@ export class SettingsService extends BaseService {
 				this.setState({ settings });
 			});
 
-		// On settings state update => send update to back-end
+		// On settings service update => send update to back-end
 		this.getSettings()
 			.pipe(switchMap((settings) => updateSettings(settings)))
 			.subscribe();

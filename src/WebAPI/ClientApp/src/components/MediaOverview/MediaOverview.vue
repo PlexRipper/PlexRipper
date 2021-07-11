@@ -93,7 +93,7 @@ import { finalize, switchMap, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import MediaPoster from '@mediaOverview/PosterTable/MediaPoster.vue';
-import { DownloadService, LibraryService, SettingsService, SignalrService } from '@state';
+import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';

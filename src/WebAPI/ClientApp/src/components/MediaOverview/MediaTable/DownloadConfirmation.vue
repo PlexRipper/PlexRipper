@@ -50,7 +50,7 @@ import ProgressComponent from '@components/ProgressComponent.vue';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import Log from 'consola';
-import { SettingsService } from '@state';
+import { SettingsService } from '@service';
 
 @Component({
 	components: {

@@ -1,7 +1,7 @@
 import { Observable, of } from 'rxjs';
 import IStoreState from '@interfaces/IStoreState';
 import { switchMap } from 'rxjs/operators';
-import { BaseService } from '~/types/state/index';
+import { BaseService } from '@service';
 
 export class HelpService extends BaseService {
 	public constructor() {

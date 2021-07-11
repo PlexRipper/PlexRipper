@@ -1,10 +1,10 @@
+import { Context } from '@nuxt/types';
 import { Observable, of, iif } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/IStoreState';
-import { BaseService, AccountService } from '@state';
-import { Context } from '@nuxt/types';
+import { BaseService, AccountService } from '@service';
 
 export class ServerService extends BaseService {
 	public constructor() {

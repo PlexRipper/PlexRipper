@@ -82,7 +82,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
 import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import { MediaService } from '@state';
+import { MediaService } from '@service';
 
 @Component
 export default class MediaPoster extends Vue {

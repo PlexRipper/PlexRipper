@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { SettingsService } from '@state';
+import { SettingsService } from '@service';
 import { debounce, distinctUntilChanged, map } from 'rxjs/operators';
 import { timer } from 'rxjs';
 

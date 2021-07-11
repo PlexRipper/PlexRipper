@@ -1,5 +1,5 @@
 import Log from 'consola';
-import { GlobalService } from '@state';
+import { BaseService, GlobalService } from '@state';
 import { LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
@@ -12,8 +12,9 @@ import {
 	DownloadTaskDTO,
 } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
 
-export class SignalrService {
+export class SignalrService extends BaseService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();
 
 	private _progressHubConnectionState: ConnectionStatus = ConnectionStatus.disconnected;
@@ -33,7 +34,13 @@ export class SignalrService {
 
 	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
-	public setup(): void {
+	public constructor() {
+		super({});
+	}
+
+	public setup(nuxtContext: Context): void {
+		super.setup(nuxtContext);
+
 		GlobalService.getConfigReady().subscribe((config) => {
 			Log.info('Setting up SignalR Service');
 			const options: ConnectionOptions = {

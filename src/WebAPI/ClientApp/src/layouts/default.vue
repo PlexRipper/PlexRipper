@@ -28,7 +28,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import NavigationDrawer from '@components/Navigation/NavigationDrawer.vue';
 import AppBar from '@components/AppBar/AppBar.vue';
-import HelpService from '@service/helpService';
+import { HelpService } from '@state';
 import HelpDialog from '@components/Help/HelpDialog.vue';
 import Footer from '@components/Footer/Footer.vue';
 

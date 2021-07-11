@@ -5,11 +5,11 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { BaseService, ProgressService, DownloadService, ServerService, SettingsService, NotificationService } from '@state';
-import SignalrService from '@service/signalrService';
+import SignalrService from '~/types/state/signalrService';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { SettingsModel } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
-import AccountService from '@service/accountService';
+import AccountService from '~/types/state/accountService';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
 
 export class GlobalService extends BaseService {
@@ -36,12 +36,13 @@ export class GlobalService extends BaseService {
 			mediaUrls: [],
 			notifications: [],
 			alerts: [],
+			helpIdDialog: '',
 			settings: {} as SettingsModel,
 			fileMergeProgressList: [],
 			downloadTaskUpdateList: [],
 		} as IStoreState);
 
-		SignalrService.setup();
+		SignalrService.setup(nuxtContext);
 		AccountService.setup(nuxtContext);
 		SettingsService.setup(nuxtContext);
 		ServerService.setup(nuxtContext);

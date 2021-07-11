@@ -4,7 +4,7 @@ import Log from 'consola';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, GlobalService } from '@state';
 import { getNotifications, hideNotification } from '@api/notificationApi';
-import signalrService from '@service/signalrService';
+import signalrService from '~/types/state/signalrService';
 import IStoreState from '@interfaces/IStoreState';
 import { Context } from '@nuxt/types';
 

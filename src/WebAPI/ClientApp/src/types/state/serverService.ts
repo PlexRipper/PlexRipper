@@ -3,8 +3,7 @@ import { switchMap } from 'rxjs/operators';
 import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/IStoreState';
-import AccountService from '@service/accountService';
-import { BaseService } from '@state';
+import { BaseService, AccountService } from '@state';
 import { Context } from '@nuxt/types';
 
 export class ServerService extends BaseService {

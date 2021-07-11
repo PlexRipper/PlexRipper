@@ -5,7 +5,7 @@ import { filter, switchMap } from 'rxjs/operators';
 import { DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import { BaseService } from '@state';
-import SignalrService from '@service/signalrService';
+import SignalrService from '~/types/state/signalrService';
 
 export class ProgressService extends BaseService {
 	public constructor() {

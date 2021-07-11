@@ -4,8 +4,8 @@ import { getAllAccounts } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { BaseService, GlobalService, SettingsService } from '@state';
-import IStoreState from '@interfaces/IStoreState';
 import { Context } from '@nuxt/types';
+import IStoreState from '@interfaces/IStoreState';
 
 export class AccountService extends BaseService {
 	public constructor() {

@@ -18,6 +18,7 @@ export default interface IStoreState {
 	alerts: any[];
 	mediaUrls: IObjectUrl[];
 	settings: SettingsModel;
+	helpIdDialog: string;
 	fileMergeProgressList: FileMergeProgress[];
 	downloadTaskUpdateList: DownloadTaskDTO[];
 }

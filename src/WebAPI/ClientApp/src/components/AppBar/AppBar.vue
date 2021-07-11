@@ -59,14 +59,12 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
-import { GlobalService, SettingsService } from '@state';
-import AccountService from '@service/accountService';
+import { GlobalService, SettingsService, AccountService, SignalrService } from '@state';
 import NotificationButton from '@components/AppBar/NotificationButton.vue';
 import DarkModeToggle from '@components/General/DarkModeToggle.vue';
 import { refreshAccount } from '@api/accountApi';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import SignalrService from '@service/signalrService';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import { PlexAccountRefreshProgress } from '@dto/mainApi';
 

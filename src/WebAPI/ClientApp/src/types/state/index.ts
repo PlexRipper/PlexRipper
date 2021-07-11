@@ -5,8 +5,11 @@ import DownloadService from './downloadService';
 import ServerService from './serverService';
 import LibraryService from './libraryService';
 import MediaService from './mediaService';
+import AccountService from './accountService';
 import SettingsService from './settingsService';
 import NotificationService from './notificationService';
+import SignalrService from './signalrService';
+import HelpService from './helpService';
 
 export {
 	BaseService,
@@ -18,4 +21,7 @@ export {
 	SettingsService,
 	NotificationService,
 	LibraryService,
+	AccountService,
+	SignalrService,
+	HelpService,
 };

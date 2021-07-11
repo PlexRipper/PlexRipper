@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import HelpService from '@service/helpService';
+import { HelpService } from '@state';
 
 @Component
 export default class HelpIcon extends Vue {

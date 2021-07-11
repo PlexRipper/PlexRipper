@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoMapper;
-using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
@@ -65,14 +64,14 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET api/<SettingsController>/ResetDb
         [HttpGet("ResetDb")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> ResetDatabase()
         {
             try
             {
                 var result = await _plexRipperDatabaseService.ResetDatabase();
-                return result.IsFailed ? InternalServerError(result) : Ok(Result.Ok(true));
+                return result.IsFailed ? InternalServerError(result) : Ok(result);
             }
             catch (Exception e)
             {

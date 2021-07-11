@@ -39,7 +39,9 @@ export class SettingsService extends BaseService {
 				take(1),
 			)
 			.subscribe((settings) => {
-				this.setState({ settings });
+				if (settings.isSuccess) {
+					this.setState({ settings: settings.value });
+				}
 			});
 
 		// On settings service update => send update to back-end
@@ -59,7 +61,11 @@ export class SettingsService extends BaseService {
 	public updateSettings(): void {
 		const settings = this.getState().settings;
 		if (settings) {
-			updateSettings(settings).subscribe((settings) => this.setState({ settings }));
+			updateSettings(settings).subscribe((settings) => {
+				if (settings.isSuccess) {
+					this.setState({ settings: settings.value });
+				}
+			});
 		} else {
 			Log.warn('SettingsService => updateSettings: settings was invalid, will not send as an update.');
 		}
@@ -167,7 +173,7 @@ export class SettingsService extends BaseService {
 	// region advancedSettings
 
 	public getAdvancedSettings(): Observable<AdvancedSettingsModel> {
-		return this.getSettings().pipe(switchMap((x) => of(x.advancedSettings)));
+		return this.getSettings().pipe(switchMap((x: SettingsModel) => of(x.advancedSettings)));
 	}
 
 	public getDownloadManagerSettings(): Observable<DownloadManagerModel> {

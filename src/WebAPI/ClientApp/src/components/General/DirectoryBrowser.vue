@@ -148,21 +148,23 @@ export default class DirectoryBrowser extends Vue {
 
 	requestDirectories(path: string): void {
 		this.$subscribeTo(getDirectoryPath(path), (data) => {
-			this.items = data.directories;
+			if (data.isSuccess && data.value) {
+				this.items = data.value?.directories;
 
-			// Don't add return row if in the root folder
-			if (path !== '') {
-				this.items.unshift({
-					name: '...',
-					path: '..',
-					type: FileSystemEntityType.Parent,
-					extension: '',
-					size: 0,
-					lastModified: '',
-				});
+				// Don't add return row if in the root folder
+				if (path !== '') {
+					this.items.unshift({
+						name: '...',
+						path: '..',
+						type: FileSystemEntityType.Parent,
+						extension: '',
+						size: 0,
+						lastModified: '',
+					});
+				}
+				this.parentPath = data.value?.parent;
+				this.newDirectory = path;
 			}
-			this.parentPath = data.parent;
-			this.newDirectory = path;
 		});
 	}
 }

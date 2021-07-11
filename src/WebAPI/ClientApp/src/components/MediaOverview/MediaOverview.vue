@@ -265,20 +265,20 @@ export default class MediaOverview extends Vue {
 	requestMedia(numberPromise: { item: PlexMediaDTO; resolve?: Function }): void {
 		if (this.mediaType === PlexMediaType.TvShow) {
 			getTvShow(numberPromise.item.id).subscribe((response) => {
-				if (response) {
+				if (response.isSuccess) {
 					const itemsIndex = this.items.findIndex((x) => x.id === numberPromise.item.id);
 					// This is a fix to prevent episodes from acting like it has additional children and that it can be requested
-					response.children?.forEach((season) => {
+					response.value?.children?.forEach((season) => {
 						season.children?.forEach((episode) => {
 							// @ts-ignore:
 							episode.children = undefined;
 						});
 					});
-					this.items[itemsIndex].children?.push(...(response.children ?? []));
+					this.items[itemsIndex].children?.push(...(response.value?.children ?? []));
 				}
 				if (numberPromise.resolve) {
 					// Alert listener that the data is available
-					numberPromise.resolve(response);
+					numberPromise.resolve(response?.value);
 				}
 			});
 		} else {

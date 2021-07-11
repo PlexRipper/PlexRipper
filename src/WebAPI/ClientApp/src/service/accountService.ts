@@ -31,8 +31,10 @@ export class AccountService extends BaseService {
 
 	public fetchAccounts(): void {
 		getAllAccounts().subscribe((accounts) => {
-			Log.debug(`AccountService => Fetch Accounts`, accounts);
-			this.setState({ accounts });
+			if (accounts.isSuccess) {
+				Log.debug(`AccountService => Fetch Accounts`, accounts.value);
+				this.setState({ accounts: accounts.value });
+			}
 		});
 	}
 

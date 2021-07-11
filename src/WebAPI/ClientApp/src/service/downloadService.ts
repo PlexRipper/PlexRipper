@@ -10,7 +10,7 @@ import {
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { startWith, switchMap, take, tap } from 'rxjs/operators';
+import { startWith, switchMap, take } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import { BaseService, ProgressService, AccountService } from '@service';
@@ -35,9 +35,9 @@ export class DownloadService extends BaseService {
 				switchMap(() => getAllDownloads()),
 				take(1),
 			)
-			.subscribe((downloads: DownloadTaskDTO[]) => {
-				if (downloads) {
-					this.setState({ downloads }, 'Initial DownloadTask Data');
+			.subscribe((downloads) => {
+				if (downloads.isSuccess) {
+					this.setState({ downloads: downloads.value }, 'Initial DownloadTask Data');
 				}
 			});
 	}
@@ -110,10 +110,15 @@ export class DownloadService extends BaseService {
 	 */
 	public fetchDownloadList(): Observable<DownloadTaskDTO[]> {
 		return getAllDownloads().pipe(
-			tap((downloads) => {
-				Log.debug('Fetching download list');
-				this.setState({ downloads, downloadTaskUpdateList: [] });
-			}),
+			switchMap(
+				(downloads): Observable<DownloadTaskDTO[]> => {
+					Log.debug('Fetching download list');
+					if (downloads.isSuccess) {
+						this.setState({ downloads: downloads.value, downloadTaskUpdateList: [] });
+					}
+					return of(downloads.value ?? []);
+				},
+			),
 		);
 	}
 

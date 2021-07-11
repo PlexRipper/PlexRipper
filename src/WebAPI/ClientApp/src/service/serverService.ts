@@ -1,7 +1,7 @@
 import { Context } from '@nuxt/types';
-import { Observable, of, iif } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { PlexServerDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/IStoreState';
 import { BaseService, AccountService } from '@service';
@@ -21,10 +21,10 @@ export class ServerService extends BaseService {
 		super.setup(nuxtContext);
 
 		AccountService.getActiveAccount()
-			.pipe(switchMap((account) => iif(() => account == null, getPlexServers(), of(account?.plexServers ?? []))))
-			.subscribe((data: PlexServerDTO[]) => {
-				if (data) {
-					this.setState({ servers: data }, 'Initial Server Data');
+			.pipe(switchMap(() => getPlexServers()))
+			.subscribe((data) => {
+				if (data.isSuccess) {
+					this.setState({ servers: data.value ?? [] }, 'Initial Server Data');
 				}
 			});
 	}
@@ -43,15 +43,15 @@ export class ServerService extends BaseService {
 
 	public checkServer(plexServerId: number): void {
 		if (plexServerId > 0) {
-			checkPlexServer(plexServerId).subscribe((serverStatus: PlexServerStatusDTO | null) => {
-				if (serverStatus) {
+			checkPlexServer(plexServerId).subscribe((serverStatus) => {
+				if (serverStatus.isSuccess && serverStatus.value) {
 					const servers = this.getState().servers;
-					const index = servers.findIndex((x) => x.id === serverStatus.plexServerId);
+					const index = servers.findIndex((x) => x.id === serverStatus.value?.plexServerId);
 					if (index === -1) {
 						return;
 					}
 					const server = servers[index];
-					server.status = serverStatus;
+					server.status = serverStatus.value;
 					servers.splice(index, 1, server);
 					this.setState({ servers }, 'Update server status for ' + plexServerId);
 					this.logHistory();

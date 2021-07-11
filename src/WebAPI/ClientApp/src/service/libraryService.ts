@@ -1,7 +1,7 @@
 import { iif, Observable, of } from 'rxjs';
 import { BaseService, ServerService } from '@service';
 import IStoreState from '@interfaces/IStoreState';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
 
@@ -43,7 +43,14 @@ export class LibraryService extends BaseService {
 	}
 
 	public retrieveLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
-		return getPlexLibrary(libraryId, 0).pipe(tap((library) => this.updateLibraryInStore(library)));
+		return getPlexLibrary(libraryId, 0).pipe(
+			switchMap((library) => {
+				if (library.isSuccess && library.value) {
+					this.updateLibraryInStore(library.value);
+				}
+				return of(library?.value ?? null);
+			}),
+		);
 	}
 
 	public refreshLibrary(libraryId: number): void {

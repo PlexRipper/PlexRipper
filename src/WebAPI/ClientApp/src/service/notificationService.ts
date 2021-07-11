@@ -26,8 +26,10 @@ export class NotificationService extends BaseService {
 				tap(() => Log.debug('Retrieving all notifications')),
 				switchMap(() => getNotifications()),
 			)
-			.subscribe((value) => {
-				this.setState({ notifications: value }, 'Set Notifications');
+			.subscribe((result) => {
+				if (result.isSuccess) {
+					this.setState({ notifications: result.value }, 'Set Notifications');
+				}
 			});
 
 		SignalrService.getNotificationUpdates().subscribe((data) => {

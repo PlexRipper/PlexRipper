@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
-import { SettingsModel } from '@dto/mainApi';
+import { ResultDTO, SettingsModel } from '@dto/mainApi';
 import Result from 'fluent-type-results';
 import { checkResponse, preApiRequest } from './baseApi';
 
@@ -18,4 +18,10 @@ export function updateSettings(settings: SettingsModel): Observable<SettingsMode
 	preApiRequest(logText, 'updateSettings');
 	const result: Observable<AxiosResponse> = Axios.put<Result<SettingsModel>>(`${apiPath}`, settings);
 	return checkResponse<SettingsModel>(result, logText, 'updateSettings');
+}
+
+export function resetDatabase(): Observable<ResultDTO> {
+	preApiRequest(logText, 'resetDatabase');
+	const result: Observable<AxiosResponse> = Axios.get<Result>(`${apiPath}/ResetDb`);
+	return checkResponse<ResultDTO>(result, logText, 'resetDatabase');
 }

@@ -144,7 +144,7 @@ export class SettingsService extends BaseService {
 	}
 
 	public getActiveAccountId(): Observable<number> {
-		return this.getAccountSettings().pipe(switchMap((x) => of(x.activeAccountId ?? 0)));
+		return this.getAccountSettings().pipe(switchMap((x) => of(x?.activeAccountId ?? 0)));
 	}
 
 	public updateActiveAccountSettings(activeAccountId: number): void {

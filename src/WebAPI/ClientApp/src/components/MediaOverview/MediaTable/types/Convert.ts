@@ -4,6 +4,8 @@ import ButtonType from '@enums/buttonType';
 export default abstract class Convert {
 	public static buttonTypeToIcon(type: ButtonType): string {
 		switch (type) {
+			case ButtonType.Warning:
+				return 'mdi-alert';
 			case ButtonType.Cancel:
 				return 'mdi-cancel';
 			case ButtonType.Confirm:

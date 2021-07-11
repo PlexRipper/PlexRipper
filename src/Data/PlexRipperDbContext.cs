@@ -11,6 +11,7 @@ namespace PlexRipper.Data
 {
     public class PlexRipperDbContext : DbContext, ISetup
     {
+
         #region Properties
 
         #region Tables
@@ -69,25 +70,13 @@ namespace PlexRipper.Data
 
         #endregion
 
-        private static bool IsTestMode
-        {
-            get
-            {
-                var testMode = Environment.GetEnvironmentVariable("IntegrationTestMode");
-                return testMode != null && testMode == "true";
-            }
-        }
+        public static bool IsTestMode => Environment.GetEnvironmentVariable("IntegrationTestMode") is "true";
 
-        private static bool ResetDatabase
-        {
-            get
-            {
-                var resetDb = Environment.GetEnvironmentVariable("ResetDB");
-                return resetDb != null && resetDb == "true";
-            }
-        }
+        public static  bool ResetDatabase => Environment.GetEnvironmentVariable("ResetDB") is "true";
 
-        private static string DatabaseName => IsTestMode ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
+        public static string DatabaseName => IsTestMode ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
+
+        public readonly string DatabasePath = Path.Combine(FileSystemPaths.ConfigDirectory, DatabaseName);
 
         #endregion Properties
 
@@ -100,6 +89,8 @@ namespace PlexRipper.Data
         #endregion Constructors
 
         #region Methods
+
+
 
         public async Task<Result> SetupAsync()
         {
@@ -137,13 +128,11 @@ namespace PlexRipper.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                string dbPath = Path.Combine(FileSystemPaths.ConfigDirectory, DatabaseName);
-
                 // optionsBuilder.UseLazyLoadingProxies();
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder
                     .UseSqlite(
-                        $"Data Source={dbPath}",
+                        $"Data Source={DatabasePath}",
                         b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
             }
         }

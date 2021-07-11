@@ -33,7 +33,7 @@ export default class NotificationButton extends Vue {
 	private notifications: NotificationDTO[] = [];
 
 	get getVisibleNotifications(): NotificationDTO[] {
-		return this.notifications.filter((x) => !x.hidden) ?? [];
+		return this.notifications?.filter((x) => !x.hidden) ?? [];
 	}
 
 	hideNotification(id: number): void {
@@ -42,7 +42,7 @@ export default class NotificationButton extends Vue {
 
 	mounted(): void {
 		this.$subscribeTo(NotificationService.getNotifications(), (value) => {
-			this.notifications = value;
+			this.notifications = value ?? [];
 		});
 	}
 }

@@ -8,6 +8,7 @@ import {
 	SettingsModel,
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
+import IAlert from '@interfaces/IAlert';
 
 export default interface IStoreState {
 	accounts: PlexAccountDTO[];
@@ -15,7 +16,7 @@ export default interface IStoreState {
 	downloads: DownloadTaskDTO[];
 	libraries: PlexLibraryDTO[];
 	notifications: NotificationDTO[];
-	alerts: any[];
+	alerts: IAlert[];
 	mediaUrls: IObjectUrl[];
 	settings: SettingsModel;
 	helpIdDialog: string;

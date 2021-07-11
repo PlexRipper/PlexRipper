@@ -70,6 +70,37 @@
           }
         },
         {
+          "name": "AlertDialog",
+          "description": "",
+          "attributes": [
+            {
+              "name": "show",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "id",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "close"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Dialogs/AlertDialog.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "AlphabetNavigation",
           "description": "",
           "attributes": [

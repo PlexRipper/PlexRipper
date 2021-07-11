@@ -1,6 +1,6 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
-import AppConfig from '@interfaces/AppConfig';
+import AppConfig from '@class/AppConfig';
 import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';

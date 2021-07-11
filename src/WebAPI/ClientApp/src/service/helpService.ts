@@ -15,7 +15,7 @@ export class HelpService extends BaseService {
 	}
 
 	public getHelpDialog(): Observable<string> {
-		return this.stateChanged.pipe(switchMap((x) => of(x.helpIdDialog ?? '')));
+		return this.stateChanged.pipe(switchMap((x) => of(x?.helpIdDialog ?? '')));
 	}
 
 	public openHelpDialog(helpId: string): void {

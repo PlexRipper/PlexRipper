@@ -15,7 +15,8 @@
 			"skip-setup": "Skip setup",
 			"finish-setup": "Finish setup",
 			"check-server-status": "Check server status",
-			"reset-db": "Reset Database"
+			"reset-db": "Reset Database",
+			"add-alert": "Add Alert"
 		}
 	},
 	"help": {
@@ -203,6 +204,9 @@
 			},
 			"accounts": {
 				"header": "Plex Accounts"
+			},
+			"debug": {
+				"header": "Debug"
 			}
 		}
 	}

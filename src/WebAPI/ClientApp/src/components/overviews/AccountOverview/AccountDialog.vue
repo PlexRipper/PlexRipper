@@ -132,8 +132,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import Log from 'consola';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import type { PlexAccountDTO, PlexAccountRefreshProgress } from '@dto/mainApi';
 import { createAccount, deleteAccount, updateAccount, validateAccount } from '@api/accountApi';
 import LoadingSpinner from '@components/LoadingSpinner.vue';

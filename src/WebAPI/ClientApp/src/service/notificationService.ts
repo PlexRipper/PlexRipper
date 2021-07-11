@@ -1,6 +1,6 @@
+import Log from 'consola';
 import { Observable } from 'rxjs';
 import { NotificationDTO } from '@dto/mainApi';
-import Log from 'consola';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, GlobalService, SignalrService } from '@service';
 import { getNotifications, hideNotification } from '@api/notificationApi';
@@ -13,7 +13,6 @@ export class NotificationService extends BaseService {
 			stateSliceSelector: (state: IStoreState) => {
 				return {
 					notifications: state.notifications,
-					alerts: state.alerts,
 				};
 			},
 		});
@@ -32,9 +31,11 @@ export class NotificationService extends BaseService {
 			});
 
 		SignalrService.getNotificationUpdates().subscribe((data) => {
-			this.setState({ notifications: { ...this.getState().notifications, ...data } }, 'Add Notifications');
+			this.setState({ notifications: [...this.getState().notifications, ...[data]] }, 'Add Notifications');
 		});
 	}
+
+	// region Notifications
 
 	public getNotifications(): Observable<NotificationDTO[]> {
 		return this.stateChanged.pipe(map((state: IStoreState) => state?.notifications ?? []));
@@ -49,10 +50,7 @@ export class NotificationService extends BaseService {
 		}
 		hideNotification(id).pipe(take(1)).subscribe();
 	}
-
-	public showAlert(): void {
-		Log.error('Alert Shown');
-	}
+	// endregion
 }
 
 const notificationService = new NotificationService();

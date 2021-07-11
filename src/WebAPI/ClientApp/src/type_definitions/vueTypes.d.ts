@@ -24,5 +24,6 @@ declare global {
 	interface Array<T> {
 		addOrReplace(searchFunction: Function, object: any): Array<T>;
 		sum(): number;
+		last(): T;
 	}
 }

@@ -44,9 +44,6 @@ export class DownloadService extends BaseService {
 
 	private getDownloadState(serverId: number = 0): Observable<DownloadTaskDTO[]> {
 		return this.stateChanged.pipe(
-			tap((state) => {
-				Log.warn('Downloads', state?.downloads);
-			}),
 			switchMap((state: IStoreState) => {
 				// Only return the filtered array by serverId, 0 is all
 				if (state?.downloads) {

@@ -97,6 +97,11 @@ export default class NavigationDrawer extends Vue {
 						icon: 'mdi-wrench',
 						link: '/settings/advanced',
 					},
+					{
+						title: 'Debug',
+						icon: 'mdi-bug-report',
+						link: '/settings/debug',
+					},
 				],
 			},
 		];

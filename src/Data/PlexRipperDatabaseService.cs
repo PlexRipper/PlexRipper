@@ -30,7 +30,7 @@ namespace PlexRipper.Data
             try
             {
                 var dbBackupName = $"BackUp_{PlexRipperDbContext.DatabaseName.Replace(".db", "")}_" +
-                                   $"{DateTime.Now.ToString("dd-MM-yyyy_hh:mm", CultureInfo.InvariantCulture)}.db";
+                                   $"{DateTime.Now.ToString("dd-MM-yyyy_hh-mm", CultureInfo.InvariantCulture)}.db";
                 var dbBackUpPath = Path.Combine(FileSystemPaths.DatabaseBackupDirectory, dbBackupName);
 
                 _fileSystem.CreateDirectoryFromFilePath(dbBackUpPath);

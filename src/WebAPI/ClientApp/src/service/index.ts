@@ -10,6 +10,7 @@ import SettingsService from './settingsService';
 import NotificationService from './notificationService';
 import SignalrService from './signalrService';
 import HelpService from './helpService';
+import AlertService from './alertService';
 
 export {
 	BaseService,
@@ -24,4 +25,5 @@ export {
 	AccountService,
 	SignalrService,
 	HelpService,
+	AlertService,
 };

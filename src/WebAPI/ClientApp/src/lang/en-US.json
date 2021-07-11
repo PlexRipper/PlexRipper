@@ -14,7 +14,9 @@
 			"validate": "Validate",
 			"skip-setup": "Skip setup",
 			"finish-setup": "Finish setup",
-			"check-server-status": "Check server status"
+			"check-server-status": "Check server status",
+			"reset-db": "Reset Database",
+			"add-alert": "Add Alert"
 		}
 	},
 	"help": {
@@ -51,13 +53,7 @@
 				"text": "The password of your Plex account."
 			}
 		},
-		"download-manager-section": {
-			"download-segments": {
-				"label": "Download Segments",
-				"title": "Download Segments",
-				"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
-			}
-		},
+
 		"settings": {
 			"paths": {
 				"download-folder": {
@@ -106,6 +102,20 @@
 						"text": ""
 					}
 				}
+			},
+			"advanced": {
+				"download-manager-section": {
+					"download-segments": {
+						"label": "Download Segments",
+						"title": "Download Segments",
+						"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
+					}
+				},
+				"reset-db": {
+					"label": "Reset Database",
+					"title": "Reset Database",
+					"text": "Resets the database and creates a back-up of the old one."
+				}
 			}
 		}
 	},
@@ -117,6 +127,10 @@
 		"delete-account": {
 			"title": "Are you sure?",
 			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
+		},
+		"reset-db": {
+			"title": "Are you sure?",
+			"text": "This will back-up the current database to \"config/Database Backup/\" and create a new one, after which you will be redirected to the setup page. This will not reset settings since those are stored in \"config/PlexRipperSettings.json\""
 		}
 	},
 	"pages": {
@@ -181,10 +195,18 @@
 				}
 			},
 			"advanced": {
-				"header": "Download Manager"
+				"download-manager": {
+					"header": "Download Manager"
+				},
+				"database": {
+					"header": "Database"
+				}
 			},
 			"accounts": {
 				"header": "Plex Accounts"
+			},
+			"debug": {
+				"header": "Debug"
 			}
 		}
 	}

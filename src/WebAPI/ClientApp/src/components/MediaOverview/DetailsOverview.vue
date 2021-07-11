@@ -102,7 +102,7 @@ import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { DownloadMediaDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
-import mediaService from '@state/mediaService';
+import { MediaService } from '@service';
 
 @Component<DetailsOverview>({
 	components: {
@@ -146,7 +146,7 @@ export default class DetailsOverview extends Vue {
 	@Watch('mediaItem')
 	mediaItemIsDone(newMediaItem: ITreeViewItem | null): void {
 		if (newMediaItem) {
-			mediaService.getThumbnail(newMediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((imageUrl) => {
+			MediaService.getThumbnail(newMediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((imageUrl) => {
 				if (!imageUrl) {
 					this.defaultImage = true;
 					return;

@@ -23,10 +23,12 @@ namespace PlexRipper.WebAPI
 
         private readonly IDownloadManager _downloadManager;
 
+        private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
+
         private readonly PlexRipperDbContext _dbContext;
 
         public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
-            IDownloadManager downloadManager,
+            IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService,
             PlexRipperDbContext dbContext)
         {
             _appLifetime = appLifetime;
@@ -34,6 +36,7 @@ namespace PlexRipper.WebAPI
             _fileSystem = fileSystem;
             _fileMerger = fileMerger;
             _downloadManager = downloadManager;
+            _plexRipperDatabaseService = plexRipperDatabaseService;
             _dbContext = dbContext;
         }
 
@@ -44,7 +47,7 @@ namespace PlexRipper.WebAPI
 
             // First await the finishing off all these
             await _fileSystem.SetupAsync();
-            await _dbContext.SetupAsync();
+            await _plexRipperDatabaseService.SetupAsync();
             await _userSettings.SetupAsync();
 
             // Keep running the following

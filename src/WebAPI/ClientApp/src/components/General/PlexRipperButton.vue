@@ -146,6 +146,8 @@ export default class PBtn extends Vue {
 			return this.color;
 		}
 		switch (this.buttonType) {
+			case ButtonType.Warning:
+				return 'yellow darken-1';
 			case ButtonType.None:
 				return this.isDark ? 'white' : 'black';
 			case ButtonType.Navigation:

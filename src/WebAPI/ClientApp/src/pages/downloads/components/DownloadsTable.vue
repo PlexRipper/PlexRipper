@@ -19,8 +19,7 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import ButtonType from '@enums/buttonType';
-import DownloadService from '@state/downloadService';
-import ProgressService from '@state/progressService';
+import { DownloadService, ProgressService } from '@service';
 
 @Component({
 	components: {

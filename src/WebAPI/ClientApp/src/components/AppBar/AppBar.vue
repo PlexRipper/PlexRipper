@@ -58,18 +58,15 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import type { PlexAccountDTO } from '@dto/mainApi';
-import GlobalService from '@state/globalService';
-import AccountService from '@service/accountService';
-import NotificationButton from '@components/AppBar/NotificationButton.vue';
-import DarkModeToggle from '@components/General/DarkModeToggle.vue';
+import { GlobalService, SettingsService, AccountService, SignalrService } from '@service';
 import { refreshAccount } from '@api/accountApi';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import SignalrService from '@service/signalrService';
-import ProgressComponent from '@components/ProgressComponent.vue';
+import type { PlexAccountDTO } from '@dto/mainApi';
 import { PlexAccountRefreshProgress } from '@dto/mainApi';
-import SettingsService from '@state/settingsService';
+import DarkModeToggle from '@components/General/DarkModeToggle.vue';
+import NotificationButton from '@components/AppBar/NotificationButton.vue';
+import ProgressComponent from '@components/ProgressComponent.vue';
 
 @Component({
 	components: {

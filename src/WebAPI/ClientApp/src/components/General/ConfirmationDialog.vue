@@ -38,7 +38,7 @@ import ButtonType from '@enums/buttonType';
 		PBtn,
 	},
 })
-export default class ConfirmationButton extends Vue {
+export default class ConfirmationDialog extends Vue {
 	@Prop({ required: true, type: String, default: '' })
 	readonly textId!: string;
 

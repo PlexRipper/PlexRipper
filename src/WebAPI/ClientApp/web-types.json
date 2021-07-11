@@ -70,6 +70,37 @@
           }
         },
         {
+          "name": "AlertDialog",
+          "description": "",
+          "attributes": [
+            {
+              "name": "show",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "id",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "close"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Dialogs/AlertDialog.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "AlphabetNavigation",
           "description": "",
           "attributes": [
@@ -118,7 +149,7 @@
           }
         },
         {
-          "name": "ConfirmationButton",
+          "name": "ConfirmationDialog",
           "description": "",
           "attributes": [
             {
@@ -185,7 +216,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/General/ConfirmationButton.vue",
+            "module": "./src/components/General/ConfirmationDialog.vue",
             "symbol": "default"
           }
         },
@@ -706,14 +737,6 @@
                 "kind": "expression",
                 "type": "number"
               }
-            },
-            {
-              "name": "activeAccountId",
-              "required": true,
-              "value": {
-                "kind": "expression",
-                "type": "number"
-              }
             }
           ],
           "events": [
@@ -1104,7 +1127,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/Debug/Print.vue",
+            "module": "./src/components/DebugTools/Print.vue",
             "symbol": "default"
           }
         },

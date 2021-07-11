@@ -85,7 +85,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                 .ToListAsync(cancellationToken);
 
             // Create compare dictionary based on the rating key of the current data in the database.
-            Dictionary<int, PlexTvShow> PlexTvShowDbDict = new Dictionary<int, PlexTvShow>();
+            Dictionary<int, PlexTvShow> PlexTvShowDbDict = new();
             tvShowsInDb.ForEach(x => PlexTvShowDbDict.Add(x.Key, x));
 
             // Create dictionaries on how to update the database.

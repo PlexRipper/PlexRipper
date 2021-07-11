@@ -1,19 +1,22 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
-import AppConfig from '@interfaces/AppConfig';
+import AppConfig from '@class/AppConfig';
 import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { BaseService } from '@state/baseService';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
-import ProgressService from '@state/progressService';
-import DownloadService from '@state/downloadService';
-import ServerService from '@state/serverService';
-import SettingsService from '@state/settingsService';
-import SignalrService from '@service/signalrService';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { SettingsModel } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
-import AccountService from '@service/accountService';
+import {
+	BaseService,
+	ProgressService,
+	DownloadService,
+	ServerService,
+	SettingsService,
+	NotificationService,
+	AccountService,
+	SignalrService,
+} from '@service';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
 
 export class GlobalService extends BaseService {
@@ -38,17 +41,21 @@ export class GlobalService extends BaseService {
 			downloads: [],
 			libraries: [],
 			mediaUrls: [],
+			notifications: [],
+			alerts: [],
+			helpIdDialog: '',
 			settings: {} as SettingsModel,
 			fileMergeProgressList: [],
 			downloadTaskUpdateList: [],
 		} as IStoreState);
 
-		SignalrService.setup();
+		SignalrService.setup(nuxtContext);
 		AccountService.setup(nuxtContext);
 		SettingsService.setup(nuxtContext);
 		ServerService.setup(nuxtContext);
 		DownloadService.setup(nuxtContext);
 		ProgressService.setup(nuxtContext);
+		NotificationService.setup(nuxtContext);
 	}
 
 	public setConfigReady(config: RuntimeConfig): void {

@@ -6,7 +6,7 @@ namespace PlexRipper.Data
     /// <summary>
     /// Used when migrating the DBContext
     /// </summary>
-    public class PlexRipperDBContectDesignTimeFactory : IDesignTimeDbContextFactory<PlexRipperDbContext>
+    public class PlexRipperDBContextDesignTimeFactory : IDesignTimeDbContextFactory<PlexRipperDbContext>
     {
         public PlexRipperDbContext CreateDbContext(string[] args)
         {

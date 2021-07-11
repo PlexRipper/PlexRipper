@@ -17,4 +17,12 @@ export default (): void => {
 		}
 		return sum;
 	};
+
+	Array.prototype.last = function (): any | null {
+		if (!this || this.length === 0) {
+			return null;
+		}
+
+		return this[this.length - 1];
+	};
 };

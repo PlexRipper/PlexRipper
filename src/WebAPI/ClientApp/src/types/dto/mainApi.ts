@@ -97,7 +97,103 @@ export type Error = Reason & { reasons?: Error[] | null };
 
 export type Success = Reason & object;
 
-export type ResultDTOOfListOfPlexServerDTO = ResultDTO & { value: PlexServerDTO[] };
+export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
+
+export interface DownloadMediaDTO {
+  mediaIds: number[];
+  type: PlexMediaType;
+
+  /** @format int32 */
+  libraryId: number;
+
+  /** @format int32 */
+  plexAccountId: number;
+}
+
+export type ResultDTOOfListOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[] };
+
+export interface FolderPathDTO {
+  /** @format int32 */
+  id: number;
+  type: string;
+  displayName: string;
+  directory: string;
+  isValid: boolean;
+}
+
+export type ResultDTOOfFileSystemDTO = ResultDTO & { value: FileSystemDTO };
+
+export interface FileSystemDTO {
+  parent: string;
+  directories: FileSystemModelDTO[];
+  files: FileSystemModelDTO[];
+}
+
+export interface FileSystemModelDTO {
+  type: FileSystemEntityType;
+  name: string;
+  path: string;
+  extension: string;
+
+  /** @format int64 */
+  size: number;
+
+  /** @format date-time */
+  lastModified: string | null;
+}
+
+export enum FileSystemEntityType {
+  Parent = "Parent",
+  Drive = "Drive",
+  Folder = "Folder",
+  File = "File",
+}
+
+export type ResultDTOOfListOfNotificationDTO = ResultDTO & { value: NotificationDTO[] };
+
+export interface NotificationDTO {
+  /** @format int32 */
+  id: number;
+  level: NotificationLevel;
+
+  /** @format date-time */
+  createdAt: string;
+  message: string;
+  hidden: boolean;
+}
+
+export enum NotificationLevel {
+  None = "none",
+  Info = "info",
+  Success = "success",
+  Warning = "warning",
+  Error = "error",
+}
+
+export type ResultDTOOfListOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO[] };
+
+export interface PlexAccountDTO {
+  /** @format int32 */
+  id: number;
+  displayName: string;
+  username: string;
+  password: string;
+  isEnabled: boolean;
+  isMain: boolean;
+  isValidated: boolean;
+
+  /** @format date-time */
+  validatedAt: string;
+  uuid: string;
+  email: string | null;
+
+  /** @format date-time */
+  joined_at: string;
+  title: string;
+  hasPassword: boolean;
+  authToken: string;
+  plexServers: PlexServerDTO[];
+}
 
 export interface PlexServerDTO {
   /** @format int32 */
@@ -288,104 +384,6 @@ export interface PlexServerStatusDTO {
   plexServerId: number;
 }
 
-export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
-
-export interface DownloadMediaDTO {
-  mediaIds: number[];
-  type: PlexMediaType;
-
-  /** @format int32 */
-  libraryId: number;
-
-  /** @format int32 */
-  plexAccountId: number;
-}
-
-export type ResultDTOOfListOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[] };
-
-export interface FolderPathDTO {
-  /** @format int32 */
-  id: number;
-  type: string;
-  displayName: string;
-  directory: string;
-  isValid: boolean;
-}
-
-export type ResultDTOOfFileSystemDTO = ResultDTO & { value: FileSystemDTO };
-
-export interface FileSystemDTO {
-  parent: string;
-  directories: FileSystemModelDTO[];
-  files: FileSystemModelDTO[];
-}
-
-export interface FileSystemModelDTO {
-  type: FileSystemEntityType;
-  name: string;
-  path: string;
-  extension: string;
-
-  /** @format int64 */
-  size: number;
-
-  /** @format date-time */
-  lastModified: string | null;
-}
-
-export enum FileSystemEntityType {
-  Parent = "Parent",
-  Drive = "Drive",
-  Folder = "Folder",
-  File = "File",
-}
-
-export type ResultDTOOfListOfNotificationDTO = ResultDTO & { value: NotificationDTO[] };
-
-export interface NotificationDTO {
-  /** @format int32 */
-  id: number;
-  level: NotificationLevel;
-
-  /** @format date-time */
-  createdAt: string;
-  message: string;
-  hidden: boolean;
-}
-
-export enum NotificationLevel {
-  None = "none",
-  Info = "info",
-  Success = "success",
-  Warning = "warning",
-  Error = "error",
-}
-
-export type ResultDTOOfListOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO[] };
-
-export interface PlexAccountDTO {
-  /** @format int32 */
-  id: number;
-  displayName: string;
-  username: string;
-  password: string;
-  isEnabled: boolean;
-  isMain: boolean;
-  isValidated: boolean;
-
-  /** @format date-time */
-  validatedAt: string;
-  uuid: string;
-  email: string | null;
-
-  /** @format date-time */
-  joined_at: string;
-  title: string;
-  hasPassword: boolean;
-  authToken: string;
-  plexServers: PlexServerDTO[];
-}
-
 export type ResultDTOOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO };
 
 export interface UpdatePlexAccountDTO {
@@ -424,6 +422,8 @@ export interface RefreshPlexLibraryDTO {
 }
 
 export type ResultDTOOfPlexMediaDTO = ResultDTO & { value: PlexMediaDTO };
+
+export type ResultDTOOfListOfPlexServerDTO = ResultDTO & { value: PlexServerDTO[] };
 
 export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStatusDTO };
 

@@ -1,6 +1,5 @@
 import Log from 'consola';
 import IStoreState from '@interfaces/IStoreState';
-import { BaseService } from '@state/baseService';
 import { Observable, of } from 'rxjs';
 import {
 	AccountSettingsModel,
@@ -13,10 +12,9 @@ import {
 	UserInterfaceSettingsModel,
 	ViewMode,
 } from '@dto/mainApi';
-import { distinctUntilChanged, filter, switchMap, take, tap } from 'rxjs/operators';
-import GlobalService from '@state/globalService';
+import { filter, switchMap, take, tap } from 'rxjs/operators';
+import { BaseService, GlobalService } from '@service';
 import { getSettings, updateSettings } from '@api/settingsApi';
-import { isEqual } from 'lodash';
 import { Context } from '@nuxt/types';
 
 export class SettingsService extends BaseService {
@@ -41,10 +39,12 @@ export class SettingsService extends BaseService {
 				take(1),
 			)
 			.subscribe((settings) => {
-				this.setState({ settings });
+				if (settings.isSuccess) {
+					this.setState({ settings: settings.value });
+				}
 			});
 
-		// On settings state update => send update to back-end
+		// On settings service update => send update to back-end
 		this.getSettings()
 			.pipe(switchMap((settings) => updateSettings(settings)))
 			.subscribe();
@@ -55,14 +55,17 @@ export class SettingsService extends BaseService {
 		return this.stateChanged.pipe(
 			filter((x) => x !== null),
 			switchMap((x) => of(x.settings)),
-			distinctUntilChanged(isEqual),
 		);
 	}
 
 	public updateSettings(): void {
 		const settings = this.getState().settings;
 		if (settings) {
-			updateSettings(settings).subscribe((settings) => this.setState({ settings }));
+			updateSettings(settings).subscribe((settings) => {
+				if (settings.isSuccess) {
+					this.setState({ settings: settings.value });
+				}
+			});
 		} else {
 			Log.warn('SettingsService => updateSettings: settings was invalid, will not send as an update.');
 		}
@@ -70,10 +73,7 @@ export class SettingsService extends BaseService {
 	// endregion
 
 	public getFirstTimeSetup(): Observable<boolean> {
-		return this.getSettings().pipe(
-			switchMap((x) => of(x.firstTimeSetup)),
-			distinctUntilChanged(isEqual),
-		);
+		return this.getSettings().pipe(switchMap((x) => of(x.firstTimeSetup)));
 	}
 
 	public updateFirstTimeSetup(state: boolean): void {
@@ -90,31 +90,19 @@ export class SettingsService extends BaseService {
 	// region UserInterfaceSettings
 
 	public getUserInterfaceSettings(): Observable<UserInterfaceSettingsModel> {
-		return this.getSettings().pipe(
-			switchMap((x) => of(x.userInterfaceSettings)),
-			distinctUntilChanged(isEqual),
-		);
+		return this.getSettings().pipe(switchMap((x) => of(x.userInterfaceSettings)));
 	}
 
 	public getConfirmationSettings(): Observable<ConfirmationSettingsModel> {
-		return this.getUserInterfaceSettings().pipe(
-			switchMap((x) => of(x.confirmationSettings)),
-			distinctUntilChanged(isEqual),
-		);
+		return this.getUserInterfaceSettings().pipe(switchMap((x) => of(x.confirmationSettings)));
 	}
 
 	public getDisplaySettings(): Observable<DisplaySettingsModel> {
-		return this.getUserInterfaceSettings().pipe(
-			switchMap((x) => of(x.displaySettings)),
-			distinctUntilChanged(isEqual),
-		);
+		return this.getUserInterfaceSettings().pipe(switchMap((x) => of(x.displaySettings)));
 	}
 
 	public getDateTimeSettings(): Observable<DateTimeModel> {
-		return this.getUserInterfaceSettings().pipe(
-			switchMap((x) => of(x.dateTimeSettings)),
-			distinctUntilChanged(isEqual),
-		);
+		return this.getUserInterfaceSettings().pipe(switchMap((x) => of(x.dateTimeSettings)));
 	}
 
 	public updateConfirmationSettings(confirmationSettings: ConfirmationSettingsModel): void {
@@ -157,17 +145,11 @@ export class SettingsService extends BaseService {
 	// region accountSettings
 
 	public getAccountSettings(): Observable<AccountSettingsModel> {
-		return this.getSettings().pipe(
-			switchMap((x) => of(x.accountSettings)),
-			distinctUntilChanged(isEqual),
-		);
+		return this.getSettings().pipe(switchMap((x) => of(x.accountSettings)));
 	}
 
 	public getActiveAccountId(): Observable<number> {
-		return this.getAccountSettings().pipe(
-			switchMap((x) => of(x.activeAccountId ?? 0)),
-			distinctUntilChanged(isEqual),
-		);
+		return this.getAccountSettings().pipe(switchMap((x) => of(x?.activeAccountId ?? 0)));
 	}
 
 	public updateActiveAccountSettings(activeAccountId: number): void {
@@ -191,17 +173,11 @@ export class SettingsService extends BaseService {
 	// region advancedSettings
 
 	public getAdvancedSettings(): Observable<AdvancedSettingsModel> {
-		return this.getSettings().pipe(
-			switchMap((x) => of(x.advancedSettings)),
-			distinctUntilChanged(isEqual),
-		);
+		return this.getSettings().pipe(switchMap((x: SettingsModel) => of(x.advancedSettings)));
 	}
 
 	public getDownloadManagerSettings(): Observable<DownloadManagerModel> {
-		return this.getAdvancedSettings().pipe(
-			switchMap((x) => of(x.downloadManager)),
-			distinctUntilChanged(isEqual),
-		);
+		return this.getAdvancedSettings().pipe(switchMap((x) => of(x.downloadManager)));
 	}
 
 	public updateAdvancedSettings(advancedSettings: AdvancedSettingsModel): void {

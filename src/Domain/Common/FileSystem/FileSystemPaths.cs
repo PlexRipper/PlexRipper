@@ -24,6 +24,8 @@ namespace PlexRipper.Domain
 
         public static string ConfigDirectory => Path.Combine(RootDirectory, "config");
 
+        public static string DatabaseBackupDirectory => Path.Combine(ConfigDirectory, "Database BackUp");
+
         public static string LogsDirectory => Path.Combine(RootDirectory, "config", "logs");
     }
 }

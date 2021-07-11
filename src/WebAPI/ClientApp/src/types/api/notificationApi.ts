@@ -1,20 +1,20 @@
-import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
 import { NotificationDTO } from '@dto/mainApi';
 import { checkResponse, preApiRequest } from '@api/baseApi';
+import ResultDTO from '@dto/ResultDTO';
 
 const logText = 'From notificationApi => ';
 const apiPath = '/notification';
 
-export function getNotifications(): Observable<NotificationDTO[]> {
+export function getNotifications(): Observable<ResultDTO<NotificationDTO[]>> {
 	preApiRequest(logText, 'getNotifications');
-	const result: Observable<AxiosResponse> = Axios.get(`${apiPath}`);
-	return checkResponse<NotificationDTO[]>(result, logText, 'getNotifications');
+	const result = Axios.get(`${apiPath}`);
+	return checkResponse<ResultDTO<NotificationDTO[]>>(result, logText, 'getNotifications');
 }
 
-export function hideNotification(id: number): Observable<boolean> {
+export function hideNotification(id: number): Observable<ResultDTO<boolean>> {
 	preApiRequest(logText, 'hideNotification' + id);
-	const result: Observable<AxiosResponse> = Axios.put(`${apiPath}/${id}`);
-	return checkResponse<boolean>(result, logText, 'hideNotification');
+	const result = Axios.put(`${apiPath}/${id}`);
+	return checkResponse<ResultDTO<boolean>>(result, logText, 'hideNotification');
 }

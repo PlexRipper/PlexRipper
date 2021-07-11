@@ -1,5 +1,5 @@
 import Log from 'consola';
-import globalService from '@state/globalService';
+import { BaseService, GlobalService } from '@service';
 import { LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
@@ -12,8 +12,9 @@ import {
 	DownloadTaskDTO,
 } from '@dto/mainApi';
 import { takeWhile } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
 
-export class SignalrService {
+export class SignalrService extends BaseService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();
 
 	private _progressHubConnectionState: ConnectionStatus = ConnectionStatus.disconnected;
@@ -33,8 +34,14 @@ export class SignalrService {
 
 	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
-	public setup(): void {
-		globalService.getConfigReady().subscribe((config) => {
+	public constructor() {
+		super({});
+	}
+
+	public setup(nuxtContext: Context): void {
+		super.setup(nuxtContext);
+
+		GlobalService.getConfigReady().subscribe((config) => {
 			Log.info('Setting up SignalR Service');
 			const options: ConnectionOptions = {
 				logger: LogLevel.None,
@@ -97,8 +104,7 @@ export class SignalrService {
 			this._NotificationUpdateSubject.next(data);
 		});
 
-		globalService
-			.getAxiosReady()
+		GlobalService.getAxiosReady()
 			// .pipe(finalize(() => this.startProgressHubConnection()))
 			.subscribe(() => {
 				this.startProgressHubConnection();

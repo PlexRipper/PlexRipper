@@ -1,10 +1,10 @@
 import Vue from 'vue';
 import Log from 'consola';
 import { Context } from '@nuxt/types';
-import globalService from '@state/globalService';
+import { GlobalService } from '@service';
 
 export default (ctx: Context): void => {
-	globalService.getConfigReady().subscribe((config) => {
+	GlobalService.getConfigReady().subscribe((config) => {
 		// Setup logging
 		Vue.config.devtools = !config.isProduction;
 		Vue.config.productionTip = false;
@@ -13,6 +13,6 @@ export default (ctx: Context): void => {
 
 	// Setup Config
 	Log.info(`Nuxt Environment: ${ctx.$config.nodeEnv}`);
-	globalService.setConfigReady(ctx.$config);
-	globalService.setup(ctx);
+	GlobalService.setConfigReady(ctx.$config);
+	GlobalService.setup(ctx);
 };

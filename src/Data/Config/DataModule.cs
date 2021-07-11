@@ -3,6 +3,7 @@ using Autofac;
 using FluentValidation;
 using MediatR;
 using MediatR.Extensions.Autofac.DependencyInjection;
+using PlexRipper.Application.Common;
 using Module = Autofac.Module;
 
 namespace PlexRipper.Data.Config
@@ -27,6 +28,9 @@ namespace PlexRipper.Data.Config
 
             // We get concurrency issues s if we have .InstancePerLifetimeScope();
             builder.RegisterType<PlexRipperDbContext>()
+                .InstancePerDependency();
+
+            builder.RegisterType<PlexRipperDatabaseService>().As<IPlexRipperDatabaseService>()
                 .InstancePerDependency();
         }
     }

@@ -10,12 +10,10 @@ import {
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { startWith, switchMap, take, tap } from 'rxjs/operators';
+import { startWith, switchMap, take } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
-import AccountService from '@service/accountService';
-import { BaseService } from '@state/baseService';
-import ProgressService from '@state/progressService';
+import { BaseService, ProgressService, AccountService } from '@service';
 import { Context } from '@nuxt/types';
 
 export class DownloadService extends BaseService {
@@ -37,18 +35,15 @@ export class DownloadService extends BaseService {
 				switchMap(() => getAllDownloads()),
 				take(1),
 			)
-			.subscribe((downloads: DownloadTaskDTO[]) => {
-				if (downloads) {
-					this.setState({ downloads }, 'Initial DownloadTask Data');
+			.subscribe((downloads) => {
+				if (downloads.isSuccess) {
+					this.setState({ downloads: downloads.value }, 'Initial DownloadTask Data');
 				}
 			});
 	}
 
 	private getDownloadState(serverId: number = 0): Observable<DownloadTaskDTO[]> {
 		return this.stateChanged.pipe(
-			tap((state) => {
-				Log.warn('Downloads', state?.downloads);
-			}),
 			switchMap((state: IStoreState) => {
 				// Only return the filtered array by serverId, 0 is all
 				if (state?.downloads) {
@@ -115,10 +110,15 @@ export class DownloadService extends BaseService {
 	 */
 	public fetchDownloadList(): Observable<DownloadTaskDTO[]> {
 		return getAllDownloads().pipe(
-			tap((downloads) => {
-				Log.debug('Fetching download list');
-				this.setState({ downloads, downloadTaskUpdateList: [] });
-			}),
+			switchMap(
+				(downloads): Observable<DownloadTaskDTO[]> => {
+					Log.debug('Fetching download list');
+					if (downloads.isSuccess) {
+						this.setState({ downloads: downloads.value, downloadTaskUpdateList: [] });
+					}
+					return of(downloads.value ?? []);
+				},
+			),
 		);
 	}
 

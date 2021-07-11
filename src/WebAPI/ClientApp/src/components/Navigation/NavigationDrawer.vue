@@ -49,7 +49,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import DownloadService from '@state/downloadService';
+import { DownloadService } from '@service';
 import ServerDrawer from './ServerDrawer.vue';
 
 interface INavItem {
@@ -96,6 +96,11 @@ export default class NavigationDrawer extends Vue {
 						title: 'Advanced',
 						icon: 'mdi-wrench',
 						link: '/settings/advanced',
+					},
+					{
+						title: 'Debug',
+						icon: 'mdi-bug-outline',
+						link: '/settings/debug',
 					},
 				],
 			},

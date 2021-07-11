@@ -4,7 +4,7 @@ import { ObservableStore } from '@codewithdan/observable-store';
 import IStoreState from '@interfaces/IStoreState';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 
-export class BaseService extends ObservableStore<IStoreState> {
+export default class BaseService extends ObservableStore<IStoreState> {
 	protected _nuxtContext!: Context;
 
 	public constructor(settings: ObservableStoreSettings) {

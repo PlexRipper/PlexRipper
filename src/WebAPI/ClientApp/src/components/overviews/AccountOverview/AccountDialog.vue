@@ -89,7 +89,7 @@
 			<!-- Dialog Actions	-->
 			<v-card-actions>
 				<!-- Delete account -->
-				<confirmation-button
+				<confirmation-dialog
 					v-if="!isNew"
 					class="mr-4"
 					text-id="delete-account"
@@ -132,15 +132,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import Log from 'consola';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import type { PlexAccountDTO, PlexAccountRefreshProgress } from '@dto/mainApi';
 import { createAccount, deleteAccount, updateAccount, validateAccount } from '@api/accountApi';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import ProgressComponent from '@components/ProgressComponent.vue';
-import SignalrService from '@service/signalrService';
-import ConfirmationButton from '@components/General/ConfirmationButton.vue';
+import { SignalrService } from '@service';
+import ConfirmationDialog from '@components/General/ConfirmationDialog.vue';
 import PBtn from '@components/General/PlexRipperButton.vue';
 import ButtonType from '@/types/enums/buttonType';
 
@@ -149,7 +149,7 @@ import ButtonType from '@/types/enums/buttonType';
 		LoadingSpinner,
 		HelpIcon,
 		ProgressComponent,
-		ConfirmationButton,
+		ConfirmationDialog,
 		PBtn,
 	},
 })

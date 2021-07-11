@@ -3,11 +3,9 @@ import { Observable, of, combineLatest } from 'rxjs';
 import { getAllAccounts } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { finalize, switchMap, tap } from 'rxjs/operators';
-import SettingsService from '@state/settingsService';
-import { BaseService } from '@state/baseService';
-import IStoreState from '@interfaces/IStoreState';
-import GlobalService from '@state/globalService';
+import { BaseService, GlobalService, SettingsService } from '@service';
 import { Context } from '@nuxt/types';
+import IStoreState from '@interfaces/IStoreState';
 
 export class AccountService extends BaseService {
 	public constructor() {
@@ -33,8 +31,10 @@ export class AccountService extends BaseService {
 
 	public fetchAccounts(): void {
 		getAllAccounts().subscribe((accounts) => {
-			Log.debug(`AccountService => Fetch Accounts`, accounts);
-			this.setState({ accounts });
+			if (accounts.isSuccess) {
+				Log.debug(`AccountService => Fetch Accounts`, accounts.value);
+				this.setState({ accounts: accounts.value });
+			}
 		});
 	}
 

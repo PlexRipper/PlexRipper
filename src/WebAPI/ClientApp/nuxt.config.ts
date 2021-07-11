@@ -2,7 +2,6 @@ import * as path from 'path';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
-import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 const config: NuxtConfig = {
 	ssr: false,
@@ -125,11 +124,11 @@ const config: NuxtConfig = {
 			if (config && config.resolve && config.resolve.alias) {
 				config.resolve.alias['@dto'] = path.resolve(__dirname, 'src/types/dto/');
 				config.resolve.alias['@api'] = path.resolve(__dirname, 'src/types/api/');
-				config.resolve.alias['@state'] = path.resolve(__dirname, 'src/types/state/');
+				config.resolve.alias['@class'] = path.resolve(__dirname, 'src/types/class/');
+				config.resolve.alias['@service'] = path.resolve(__dirname, 'src/service/');
 				config.resolve.alias['@img'] = path.resolve(__dirname, 'src/assets/img/');
 				config.resolve.alias['@enums'] = path.resolve(__dirname, 'src/types/enums/');
 				config.resolve.alias['@interfaces'] = path.resolve(__dirname, 'src/types/interfaces/');
-				config.resolve.alias['@service'] = path.resolve(__dirname, 'src/types/service/');
 				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
 				config.resolve.alias['@overviews'] = path.resolve(__dirname, 'src/components/overviews');
 				config.resolve.alias['@mediaOverview'] = path.resolve(__dirname, 'src/components/MediaOverview/');

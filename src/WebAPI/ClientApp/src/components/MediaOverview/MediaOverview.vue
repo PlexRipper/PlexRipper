@@ -93,9 +93,7 @@ import { finalize, switchMap, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import MediaPoster from '@mediaOverview/PosterTable/MediaPoster.vue';
-import SignalrService from '@service/signalrService';
-import DownloadService from '@state/downloadService';
-import LibraryService from '@state/libraryService';
+import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
@@ -105,7 +103,6 @@ import { combineLatest, of } from 'rxjs';
 import PosterTable from '@mediaOverview/PosterTable/PosterTable.vue';
 import DetailsOverview from '@mediaOverview/DetailsOverview.vue';
 import { getTvShow } from '@api/mediaApi';
-import SettingsService from '@state/settingsService';
 
 @Component({
 	components: {
@@ -268,20 +265,20 @@ export default class MediaOverview extends Vue {
 	requestMedia(numberPromise: { item: PlexMediaDTO; resolve?: Function }): void {
 		if (this.mediaType === PlexMediaType.TvShow) {
 			getTvShow(numberPromise.item.id).subscribe((response) => {
-				if (response) {
+				if (response.isSuccess) {
 					const itemsIndex = this.items.findIndex((x) => x.id === numberPromise.item.id);
 					// This is a fix to prevent episodes from acting like it has additional children and that it can be requested
-					response.children?.forEach((season) => {
+					response.value?.children?.forEach((season) => {
 						season.children?.forEach((episode) => {
 							// @ts-ignore:
 							episode.children = undefined;
 						});
 					});
-					this.items[itemsIndex].children?.push(...(response.children ?? []));
+					this.items[itemsIndex].children?.push(...(response.value?.children ?? []));
 				}
 				if (numberPromise.resolve) {
 					// Alert listener that the data is available
-					numberPromise.resolve(response);
+					numberPromise.resolve(response?.value);
 				}
 			});
 		} else {

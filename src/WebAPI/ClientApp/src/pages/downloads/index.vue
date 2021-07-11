@@ -49,8 +49,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import DownloadService from '@state/downloadService';
-import ServerService from '@state/serverService';
+import { DownloadService, ServerService } from '@service';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ISelection from '@interfaces/ISelection';

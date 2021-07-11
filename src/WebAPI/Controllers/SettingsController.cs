@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +13,17 @@ namespace PlexRipper.WebAPI.Controllers
     [ApiController]
     public class SettingsController : BaseController
     {
+        private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
+
         private readonly ISettingsService _settingsService;
 
         public SettingsController(
+            IPlexRipperDatabaseService plexRipperDatabaseService,
             ISettingsService settingsService,
             IMapper mapper,
             INotificationsService notificationsService) : base(mapper, notificationsService)
         {
+            _plexRipperDatabaseService = plexRipperDatabaseService;
             _settingsService = settingsService;
         }
 
@@ -50,6 +55,23 @@ namespace PlexRipper.WebAPI.Controllers
             {
                 var result = _settingsService.UpdateSettings(settingsModel);
                 return result.IsFailed ? BadRequest(result) : Ok(result);
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
+        }
+
+        // GET api/<SettingsController>/ResetDb
+        [HttpGet("ResetDb")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> ResetDatabase()
+        {
+            try
+            {
+                var result = await _plexRipperDatabaseService.ResetDatabase();
+                return result.IsFailed ? InternalServerError(result) : Ok(result);
             }
             catch (Exception e)
             {

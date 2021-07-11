@@ -44,9 +44,6 @@ export default class MediaTable extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly libraryId!: number;
 
-	@Prop({ required: true, type: Number })
-	readonly activeAccountId!: number;
-
 	expanded: string[] = [];
 
 	openDownloadPreviews: number[] = [];
@@ -178,7 +175,7 @@ export default class MediaTable extends Vue {
 				downloads.push({
 					mediaIds: tvShowIds,
 					type: PlexMediaType.TvShow,
-					plexAccountId: this.activeAccountId,
+					plexAccountId: 0,
 					libraryId: this.libraryId,
 				});
 			}
@@ -187,7 +184,7 @@ export default class MediaTable extends Vue {
 				downloads.push({
 					mediaIds: seasonIds,
 					type: PlexMediaType.Season,
-					plexAccountId: this.activeAccountId,
+					plexAccountId: 0,
 					libraryId: this.libraryId,
 				});
 			}
@@ -196,7 +193,7 @@ export default class MediaTable extends Vue {
 				downloads.push({
 					mediaIds: episodesIds,
 					type: PlexMediaType.Episode,
-					plexAccountId: this.activeAccountId,
+					plexAccountId: 0,
 					libraryId: this.libraryId,
 				});
 			}
@@ -206,7 +203,7 @@ export default class MediaTable extends Vue {
 			downloads.push({
 				mediaIds: this.selected?.map((x) => +x),
 				type: PlexMediaType.Movie,
-				plexAccountId: this.activeAccountId,
+				plexAccountId: 0,
 				libraryId: this.libraryId,
 			});
 		}
@@ -225,7 +222,7 @@ export default class MediaTable extends Vue {
 		const downloadCommand: DownloadMediaDTO = {
 			type: item.type,
 			mediaIds: [],
-			plexAccountId: this.activeAccountId,
+			plexAccountId: 0,
 			libraryId: this.libraryId,
 		};
 		switch (item.type) {

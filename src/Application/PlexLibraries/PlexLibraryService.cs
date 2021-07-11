@@ -45,7 +45,7 @@ namespace PlexRipper.Application.PlexLibraries
         #region Private
 
         /// <summary>
-        /// Retrieves all tvshow, season and episode data and stores it in the database.
+        /// Retrieves all TvShow, season and episode data and stores it in the database.
         /// </summary>
         /// <param name="authToken"></param>
         /// <param name="plexLibrary"></param>
@@ -104,6 +104,12 @@ namespace PlexRipper.Application.PlexLibraries
                     plexTvShowSeason.TvShow = plexTvShow;
                     plexTvShowSeason.Episodes = rawEpisodesDataResult.Value.FindAll(x => x.ParentKey == plexTvShowSeason.Key);
                     plexTvShowSeason.ChildCount = plexTvShowSeason.Episodes.Count;
+
+                    // Assume the season started on the year of the first episode
+                    if (plexTvShowSeason.Year == 0)
+                    {
+                        plexTvShowSeason.Year = plexTvShowSeason.Episodes.First()?.Year ?? 0;
+                    }
 
                     // Set libraryId in each episode
                     plexTvShowSeason.Episodes.ForEach(x => x.PlexLibraryId = plexLibrary.Id);

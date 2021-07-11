@@ -1,10 +1,9 @@
 import { iif, Observable, of } from 'rxjs';
-import { BaseService } from '@state/baseService';
+import { BaseService, ServerService } from '@service';
 import IStoreState from '@interfaces/IStoreState';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
-import serverService from '@state/serverService';
 
 export class LibraryService extends BaseService {
 	public constructor() {
@@ -44,7 +43,14 @@ export class LibraryService extends BaseService {
 	}
 
 	public retrieveLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
-		return getPlexLibrary(libraryId, 0).pipe(tap((library) => this.updateLibraryInStore(library)));
+		return getPlexLibrary(libraryId, 0).pipe(
+			switchMap((library) => {
+				if (library.isSuccess && library.value) {
+					this.updateLibraryInStore(library.value);
+				}
+				return of(library?.value ?? null);
+			}),
+		);
 	}
 
 	public refreshLibrary(libraryId: number): void {
@@ -54,7 +60,7 @@ export class LibraryService extends BaseService {
 	}
 
 	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | undefined> {
-		return serverService.getServers().pipe(switchMap((x) => of(x.find((y) => y.plexLibraries.find((z) => z.id === libraryId)))));
+		return ServerService.getServers().pipe(switchMap((x) => of(x.find((y) => y.plexLibraries.find((z) => z.id === libraryId)))));
 	}
 }
 

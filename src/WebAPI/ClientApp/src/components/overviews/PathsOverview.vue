@@ -67,10 +67,12 @@ export default class PathsOverview extends Vue {
 		this.isDirectoryBrowserOpen = false;
 
 		this.$subscribeTo(updateFolderPath(path), (data) => {
-			Log.debug(`Successfully updated folder path ${path.displayName}`, data);
-			const i = this.folderPaths.findIndex((x) => x.id === data.id);
-			if (i > -1) {
-				this.folderPaths.splice(i, 1, data);
+			if (data.isSuccess && data.value) {
+				Log.debug(`Successfully updated folder path ${path.displayName}`, data.value);
+				const i = this.folderPaths.findIndex((x) => x.id === data.value?.id);
+				if (i > -1) {
+					this.folderPaths.splice(i, 1, data.value);
+				}
 			}
 		});
 	}
@@ -85,7 +87,9 @@ export default class PathsOverview extends Vue {
 
 	created(): void {
 		this.$subscribeTo(getFolderPaths(), (data) => {
-			this.folderPaths = data;
+			if (data.isSuccess && data.value) {
+				this.folderPaths = data.value;
+			}
 		});
 	}
 }

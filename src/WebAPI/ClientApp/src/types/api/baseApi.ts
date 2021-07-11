@@ -2,28 +2,32 @@ import Log from 'consola';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { AxiosResponse } from 'axios';
-import Result from 'fluent-type-results';
+import { AlertService } from '@service';
+import ResultDTO from '@dto/ResultDTO';
+import { AxiosObservable } from 'axios-observable/dist/axios-observable.interface';
 
 export function preApiRequest(logText: string, fnName: string, data: any | string = 'none'): void {
 	Log.debug(`${logText} ${fnName} => sending request:`, data);
 }
 
-export function checkResponse<T>(response: Observable<AxiosResponse<Result<T>>>, logText: string, fnName: string): Observable<T> {
+export function checkResponse<T = ResultDTO>(response: AxiosObservable<T>, logText: string, fnName: string): Observable<T> {
 	// Pipe response
 	return response.pipe(
-		tap((res: AxiosResponse<Result<T>>) => {
+		tap((res) => {
 			if (res?.status && res?.status !== 200) {
+				const response = res.data;
 				switch (res.status) {
 					case 400:
-						Log.error(`${logText}${fnName} => Bad Request from response:`, res.request);
+						Log.error(`${logText}${fnName} => Bad Request (400) from response:`, res.request);
 						return;
 
 					case 404:
-						Log.error(`${logText}${fnName} => Not Found from response:`, res.request);
+						Log.error(`${logText}${fnName} => Not Found (404) from response:`, res.request);
 						return;
 
 					case 500:
-						Log.error(`${logText}${fnName} => Internal Server Error from response:`, res.request);
+						Log.error(`${logText}${fnName} => Internal Server Error (500) from response:`, response);
+						AlertService.showAlert({ id: 0, title: 'Internal Server Error (500)', text: '', result: response });
 						return;
 
 					default:
@@ -32,7 +36,7 @@ export function checkResponse<T>(response: Observable<AxiosResponse<Result<T>>>,
 				}
 			}
 		}),
-		map((res: AxiosResponse) => res?.data?.value),
+		map((res: AxiosResponse) => res?.data),
 		tap((data) => Log.debug(`${logText}${fnName} response:`, data)),
 	);
 }

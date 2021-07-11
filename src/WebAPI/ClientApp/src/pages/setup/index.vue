@@ -149,7 +149,7 @@
 		<!--	Skip button	-->
 		<v-row justify="center">
 			<v-col cols="3">
-				<confirmation-button
+				<confirmation-dialog
 					:disabled="isNextDisabled"
 					:width="100"
 					block
@@ -168,12 +168,12 @@ import PathsOverview from '@overviews/PathsOverview.vue';
 import AccountOverview from '@overviews/AccountOverview/AccountOverview.vue';
 import ExternalLink from '@components/General/ExternalLink.vue';
 import PBtn from '@components/General/PlexRipperButton.vue';
-import ConfirmationButton from '@components/General/ConfirmationButton.vue';
+import ConfirmationDialog from '@components/General/ConfirmationDialog.vue';
 import { SettingsService } from '@state';
 import NavigationBar from './components/NavigationBar.vue';
 
 @Component({
-	components: { NavigationBar, PathsOverview, AccountOverview, ExternalLink, PBtn, ConfirmationButton },
+	components: { NavigationBar, PathsOverview, AccountOverview, ExternalLink, PBtn, ConfirmationDialog },
 })
 export default class Setup extends Vue {
 	stepIndex: number = 1;

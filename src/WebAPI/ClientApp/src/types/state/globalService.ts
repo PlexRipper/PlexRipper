@@ -3,12 +3,8 @@ import { Context } from '@nuxt/types';
 import AppConfig from '@interfaces/AppConfig';
 import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { BaseService } from '@state/baseService';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { BaseService, ProgressService, DownloadService, ServerService, SettingsService, NotificationService } from '@state';
-import DownloadService from '@state/downloadService';
-import ServerService from '@state/serverService';
-import SettingsService from '@state/settingsService';
 import SignalrService from '@service/signalrService';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { SettingsModel } from '@dto/mainApi';
@@ -38,6 +34,8 @@ export class GlobalService extends BaseService {
 			downloads: [],
 			libraries: [],
 			mediaUrls: [],
+			notifications: [],
+			alerts: [],
 			settings: {} as SettingsModel,
 			fileMergeProgressList: [],
 			downloadTaskUpdateList: [],
@@ -49,6 +47,7 @@ export class GlobalService extends BaseService {
 		ServerService.setup(nuxtContext);
 		DownloadService.setup(nuxtContext);
 		ProgressService.setup(nuxtContext);
+		NotificationService.setup(nuxtContext);
 	}
 
 	public setConfigReady(config: RuntimeConfig): void {

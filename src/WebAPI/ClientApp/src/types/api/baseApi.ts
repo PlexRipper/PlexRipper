@@ -8,22 +8,26 @@ export function preApiRequest(logText: string, fnName: string, data: any | strin
 	Log.debug(`${logText} ${fnName} => sending request:`, data);
 }
 
-export function checkResponse<T>(response: Observable<AxiosResponse<Result<T>>>, logText: string, fnName: string): Observable<T> {
+export function checkResponse<T>(
+	response: Observable<AxiosResponse<Result<T> | Result>>,
+	logText: string,
+	fnName: string,
+): Observable<T> {
 	// Pipe response
 	return response.pipe(
 		tap((res: AxiosResponse<Result<T>>) => {
 			if (res?.status && res?.status !== 200) {
 				switch (res.status) {
 					case 400:
-						Log.error(`${logText}${fnName} => Bad Request from response:`, res.request);
+						Log.error(`${logText}${fnName} => Bad Request (400) from response:`, res.request);
 						return;
 
 					case 404:
-						Log.error(`${logText}${fnName} => Not Found from response:`, res.request);
+						Log.error(`${logText}${fnName} => Not Found (404) from response:`, res.request);
 						return;
 
 					case 500:
-						Log.error(`${logText}${fnName} => Internal Server Error from response:`, res.request);
+						Log.error(`${logText}${fnName} => Internal Server Error (500) from response:`, res.request.response);
 						return;
 
 					default:
@@ -32,7 +36,12 @@ export function checkResponse<T>(response: Observable<AxiosResponse<Result<T>>>,
 				}
 			}
 		}),
-		map((res: AxiosResponse) => res?.data?.value),
+		map((res: AxiosResponse) => {
+			if (res?.data?.value) {
+				return res.data.value;
+			}
+			return res?.data;
+		}),
 		tap((data) => Log.debug(`${logText}${fnName} response:`, data)),
 	);
 }

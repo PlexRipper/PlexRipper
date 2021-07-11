@@ -126,6 +126,10 @@
 		"delete-account": {
 			"title": "Are you sure?",
 			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
+		},
+		"reset-db": {
+			"title": "Are you sure?",
+			"text": "This will back-up the current database to \"config/Database Backup/\" and create a new one, after which you will be redirected to the setup page. This will not reset settings since those are stored in \"config/PlexRipperSettings.json\""
 		}
 	},
 	"pages": {
@@ -190,7 +194,12 @@
 				}
 			},
 			"advanced": {
-				"header": "Download Manager"
+				"download-manager": {
+					"header": "Download Manager"
+				},
+				"database": {
+					"header": "Database"
+				}
 			},
 			"accounts": {
 				"header": "Plex Accounts"

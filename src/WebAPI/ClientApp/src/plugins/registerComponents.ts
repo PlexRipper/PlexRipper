@@ -12,6 +12,7 @@ import FileSize from '@components/General/FileSize.vue';
 import Duration from '@components/General/Duration.vue';
 import VTreeViewTable from '@vTreeViewTable/VTreeViewTable.vue';
 import MediaTypeIcon from '@components/General/MediaTypeIcon.vue';
+import ConfirmationDialog from '@components/General/ConfirmationDialog.vue';
 import Print from '@components/DebugTools/Print.vue';
 
 export default (): void => {
@@ -30,6 +31,7 @@ export default (): void => {
 		VTreeViewTable,
 		MediaTypeIcon,
 		Print,
+		ConfirmationDialog,
 	};
 
 	Object.entries(components).forEach(([name, component]) => {

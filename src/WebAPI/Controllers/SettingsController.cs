@@ -63,7 +63,7 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         // GET api/<SettingsController>/ResetDb
-        [HttpGet("ResetDb")]
+        [HttpPost("ResetDb")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> ResetDatabase()

@@ -22,6 +22,6 @@ export function updateSettings(settings: SettingsModel): Observable<SettingsMode
 
 export function resetDatabase(): Observable<ResultDTO> {
 	preApiRequest(logText, 'resetDatabase');
-	const result: Observable<AxiosResponse> = Axios.get<Result>(`${apiPath}/ResetDb`);
+	const result: Observable<AxiosResponse> = Axios.post<ResultDTO>(`${apiPath}/ResetDb`);
 	return checkResponse<ResultDTO>(result, logText, 'resetDatabase');
 }

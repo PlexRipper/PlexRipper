@@ -118,7 +118,7 @@
           }
         },
         {
-          "name": "ConfirmationButton",
+          "name": "ConfirmationDialog",
           "description": "",
           "attributes": [
             {
@@ -185,7 +185,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/General/ConfirmationButton.vue",
+            "module": "./src/components/General/ConfirmationDialog.vue",
             "symbol": "default"
           }
         },
@@ -706,14 +706,6 @@
                 "kind": "expression",
                 "type": "number"
               }
-            },
-            {
-              "name": "activeAccountId",
-              "required": true,
-              "value": {
-                "kind": "expression",
-                "type": "number"
-              }
             }
           ],
           "events": [
@@ -1104,7 +1096,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/Debug/Print.vue",
+            "module": "./src/components/DebugTools/Print.vue",
             "symbol": "default"
           }
         },

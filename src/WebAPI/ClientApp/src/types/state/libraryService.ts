@@ -53,7 +53,7 @@ export class LibraryService extends BaseService {
 	}
 
 	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | undefined> {
-		return serverService.getServers().pipe(switchMap((x) => of(x.find((y) => y.plexLibraries.find((z) => z.id === libraryId)))));
+		return ServerService.getServers().pipe(switchMap((x) => of(x.find((y) => y.plexLibraries.find((z) => z.id === libraryId)))));
 	}
 }
 

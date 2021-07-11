@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
-import { BaseService } from '@state/baseService';
+import { BaseService } from '@state';
 import SignalrService from '@service/signalrService';
 
 export class ProgressService extends BaseService {

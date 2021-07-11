@@ -29,7 +29,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import SettingsService from '@state/settingsService';
+import { SettingsService } from '@state';
 import ButtonType from '@enums/buttonType';
 import { resetDatabase } from '@api/settingsApi';
 

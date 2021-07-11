@@ -1,5 +1,5 @@
 import Log from 'consola';
-import globalService from '@state/globalService';
+import { GlobalService } from '@state';
 import { LogLevel } from '@aspnet/signalr';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
@@ -34,7 +34,7 @@ export class SignalrService {
 	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
 	public setup(): void {
-		globalService.getConfigReady().subscribe((config) => {
+		GlobalService.getConfigReady().subscribe((config) => {
 			Log.info('Setting up SignalR Service');
 			const options: ConnectionOptions = {
 				logger: LogLevel.None,
@@ -97,8 +97,7 @@ export class SignalrService {
 			this._NotificationUpdateSubject.next(data);
 		});
 
-		globalService
-			.getAxiosReady()
+		GlobalService.getAxiosReady()
 			// .pipe(finalize(() => this.startProgressHubConnection()))
 			.subscribe(() => {
 				this.startProgressHubConnection();

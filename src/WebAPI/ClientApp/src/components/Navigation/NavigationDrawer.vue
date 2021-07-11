@@ -49,7 +49,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import DownloadService from '@state/downloadService';
+import { DownloadService } from '@state';
 import ServerDrawer from './ServerDrawer.vue';
 
 interface INavItem {

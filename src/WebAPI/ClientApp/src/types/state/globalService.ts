@@ -5,7 +5,7 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { BaseService } from '@state/baseService';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
-import ProgressService from '@state/progressService';
+import { BaseService, ProgressService, DownloadService, ServerService, SettingsService, NotificationService } from '@state';
 import DownloadService from '@state/downloadService';
 import ServerService from '@state/serverService';
 import SettingsService from '@state/settingsService';

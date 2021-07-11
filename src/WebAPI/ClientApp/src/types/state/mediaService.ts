@@ -1,5 +1,5 @@
 import IStoreState from '@interfaces/IStoreState';
-import { BaseService } from '@state/baseService';
+import { BaseService } from '@state';
 import { PlexMediaType } from '@dto/mainApi';
 import { Observable, of } from 'rxjs';
 import { getThumbnail } from '@api/mediaApi';

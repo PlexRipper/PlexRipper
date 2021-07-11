@@ -14,8 +14,7 @@ import { startWith, switchMap, take, tap } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import AccountService from '@service/accountService';
-import { BaseService } from '@state/baseService';
-import ProgressService from '@state/progressService';
+import { BaseService, ProgressService } from '@state';
 import { Context } from '@nuxt/types';
 
 export class DownloadService extends BaseService {

@@ -94,8 +94,7 @@ import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import MediaPoster from '@mediaOverview/PosterTable/MediaPoster.vue';
 import SignalrService from '@service/signalrService';
-import DownloadService from '@state/downloadService';
-import LibraryService from '@state/libraryService';
+import { DownloadService, LibraryService, SettingsService } from '@state';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
@@ -105,7 +104,6 @@ import { combineLatest, of } from 'rxjs';
 import PosterTable from '@mediaOverview/PosterTable/PosterTable.vue';
 import DetailsOverview from '@mediaOverview/DetailsOverview.vue';
 import { getTvShow } from '@api/mediaApi';
-import SettingsService from '@state/settingsService';
 
 @Component({
 	components: {

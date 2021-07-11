@@ -2,7 +2,7 @@ import Log from 'consola';
 import { AxiosResponse } from 'axios';
 import { Context } from '@nuxt/types';
 import Axios from 'axios-observable';
-import GlobalService from '@state/globalService';
+import { GlobalService } from '@state';
 import Result from 'fluent-type-results';
 
 export default (ctx: Context): void => {

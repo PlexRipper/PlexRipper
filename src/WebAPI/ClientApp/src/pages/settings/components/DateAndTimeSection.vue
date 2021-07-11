@@ -106,7 +106,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { format } from 'date-fns';
-import SettingsService from '@state/settingsService';
+import { SettingsService } from '@state';
 
 interface ISelectItem {
 	text: string | number | object;

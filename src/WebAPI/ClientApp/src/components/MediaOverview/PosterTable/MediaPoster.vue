@@ -82,7 +82,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
 import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import mediaService from '@state/mediaService';
+import { MediaService } from '@state';
 
 @Component
 export default class MediaPoster extends Vue {
@@ -155,7 +155,7 @@ export default class MediaPoster extends Vue {
 
 		if (this.isVisible && !this.imageUrl) {
 			this.$subscribeTo(
-				mediaService.getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight),
+				MediaService.getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight),
 				(imageUrl) => {
 					if (!imageUrl) {
 						this.defaultImage = true;

@@ -1,10 +1,9 @@
 import { iif, Observable, of } from 'rxjs';
-import { BaseService } from '@state/baseService';
+import { BaseService, ServerService } from '@state';
 import IStoreState from '@interfaces/IStoreState';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getPlexLibrary, refreshPlexLibrary } from '@api/plexLibraryApi';
-import serverService from '@state/serverService';
 
 export class LibraryService extends BaseService {
 	public constructor() {

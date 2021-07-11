@@ -25,7 +25,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import NotificationService from '@service/notificationService';
+import { NotificationService } from '@state';
 import { NotificationDTO } from '@dto/mainApi';
 
 @Component

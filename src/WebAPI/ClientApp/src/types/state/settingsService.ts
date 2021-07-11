@@ -1,6 +1,5 @@
 import Log from 'consola';
 import IStoreState from '@interfaces/IStoreState';
-import { BaseService } from '@state/baseService';
 import { Observable, of } from 'rxjs';
 import {
 	AccountSettingsModel,
@@ -14,7 +13,7 @@ import {
 	ViewMode,
 } from '@dto/mainApi';
 import { filter, switchMap, take, tap } from 'rxjs/operators';
-import GlobalService from '@state/globalService';
+import { BaseService, GlobalService } from '@state';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import { Context } from '@nuxt/types';
 

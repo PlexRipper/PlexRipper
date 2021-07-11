@@ -38,7 +38,6 @@
 		"axios-observable": "^1.1.6",
 		"consola": "^2.15.0",
 		"date-fns": "^2.16.1",
-		"fluent-type-results": "^1.0.11",
 		"lodash": "^4.17.20",
 		"material-design-icons-iconfont": "latest",
 		"nuxt": "^2.14.12",

@@ -99,7 +99,7 @@ export default class NavigationDrawer extends Vue {
 					},
 					{
 						title: 'Debug',
-						icon: 'mdi-bug-report',
+						icon: 'mdi-bug-outline',
 						link: '/settings/debug',
 					},
 				],

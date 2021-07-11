@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import IAlert from '@interfaces/IAlert';
+import type IAlert from '@interfaces/IAlert';
 import { Error } from '@dto/mainApi';
 
 @Component

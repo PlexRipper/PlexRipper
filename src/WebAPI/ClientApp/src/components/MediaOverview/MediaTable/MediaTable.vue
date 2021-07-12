@@ -65,7 +65,7 @@ export default class MediaTable extends Vue {
 	}
 
 	isLoading(key: string): boolean {
-		return this.loadingButtons.some((x) => x === key);
+		return this.loadingButtons.includes(key);
 	}
 
 	get getHeaders(): ITreeViewTableHeader[] {

@@ -2,6 +2,7 @@ import * as path from 'path';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
+import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 const config: NuxtConfig = {
 	ssr: false,
@@ -113,21 +114,8 @@ const config: NuxtConfig = {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
 			}
 
-			// Make sure to also update the tsconfig.json when adding aliases for import resolving.
-			// These are necessary to tell webpack which aliases are used.
-			if (config && config.resolve && config.resolve.alias) {
-				config.resolve.alias['@dto'] = path.resolve(__dirname, 'src/types/dto/');
-				config.resolve.alias['@api'] = path.resolve(__dirname, 'src/types/api/');
-				config.resolve.alias['@class'] = path.resolve(__dirname, 'src/types/class/');
-				config.resolve.alias['@service'] = path.resolve(__dirname, 'src/service/');
-				config.resolve.alias['@img'] = path.resolve(__dirname, 'src/assets/img/');
-				config.resolve.alias['@enums'] = path.resolve(__dirname, 'src/types/enums/');
-				config.resolve.alias['@interfaces'] = path.resolve(__dirname, 'src/types/interfaces/');
-				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
-				config.resolve.alias['@overviews'] = path.resolve(__dirname, 'src/components/overviews');
-				config.resolve.alias['@mediaOverview'] = path.resolve(__dirname, 'src/components/MediaOverview/');
-				config.resolve.alias['@vTreeViewTable'] = path.resolve(__dirname, 'src/components/General/VTreeViewTable');
-			}
+			// Doc: https://github.com/dividab/tsconfig-paths-webpack-plugin
+			config.resolve?.plugins?.push(new TsconfigPathsPlugin());
 		},
 	},
 };

@@ -25,7 +25,7 @@
 				@click="click($event)"
 			>
 				<v-icon v-if="getIcon" class="mx-2" :size="iconSize" :color="getColor">{{ getIcon }}</v-icon>
-				<span v-if="getText !== ''">{{ $t(getText) }} </span>
+				<span v-if="!noText && getText !== ''">{{ $t(getText) }} </span>
 				<slot></slot>
 			</v-btn>
 		</template>
@@ -81,6 +81,9 @@ export default class PBtn extends Vue {
 
 	@Prop({ required: false, type: Boolean, default: false })
 	readonly block!: boolean;
+
+	@Prop({ required: false, type: Boolean, default: false })
+	readonly noText!: boolean;
 
 	@Prop({ required: false, type: String })
 	readonly href!: string;

@@ -943,6 +943,15 @@
               "default": "false"
             },
             {
+              "name": "noText",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            },
+            {
               "name": "href",
               "required": false,
               "value": {
@@ -1003,17 +1012,22 @@
           "description": "",
           "attributes": [
             {
-              "name": "value",
-              "required": true,
+              "name": "color",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "'red'"
+            },
+            {
+              "name": "hideDetails",
+              "required": false,
               "value": {
                 "kind": "expression",
                 "type": "boolean"
-              }
-            }
-          ],
-          "events": [
-            {
-              "name": "input"
+              },
+              "default": "true"
             }
           ],
           "source": {
@@ -1034,6 +1048,52 @@
           ],
           "source": {
             "module": "./src/components/General/Section.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "PTextField",
+          "description": "",
+          "attributes": [
+            {
+              "name": "height",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "50"
+            },
+            {
+              "name": "dense",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "name": "outlined",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "name": "solo",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Generic/PlexRipperTextField.vue",
             "symbol": "default"
           }
         },
@@ -1066,45 +1126,6 @@
           "description": "",
           "source": {
             "module": "./src/components/overviews/PathsOverview.vue",
-            "symbol": "default"
-          }
-        },
-        {
-          "name": "PlexRipperTextField",
-          "description": "",
-          "attributes": [
-            {
-              "name": "appendIcon",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "string"
-              }
-            },
-            {
-              "name": "value",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "string"
-              }
-            },
-            {
-              "name": "readonly",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              }
-            }
-          ],
-          "events": [
-            {
-              "name": "click"
-            }
-          ],
-          "source": {
-            "module": "./src/components/Generic/PlexRipperTextField.vue",
             "symbol": "default"
           }
         },

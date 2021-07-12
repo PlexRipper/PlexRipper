@@ -1,36 +1,19 @@
-<template>
-	<v-text-field
-		:append-icon="appendIcon"
-		:value="value"
-		:readonly="readonly"
-		:height="height"
-		dense
-		outlined
-		solo
-		@click:append="clickAppend"
-		@input="$emit('input', $event)"
-	/>
-</template>
-
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Prop } from 'vue-property-decorator';
+import { VTextField } from 'vuetify/lib';
 
 @Component
-export default class PTextField extends Vue {
-	@Prop({ required: false, type: String })
-	readonly appendIcon!: string;
-
-	@Prop({ required: false, type: String })
-	readonly value!: string;
-
-	@Prop({ required: false, type: Boolean })
-	readonly readonly!: boolean;
-
+export default class PTextField extends VTextField {
 	@Prop({ required: false, type: Number, default: 50 })
 	readonly height!: number;
 
-	clickAppend(): void {
-		this.$emit('click');
-	}
+	@Prop({ required: false, type: Boolean, default: true })
+	readonly dense!: boolean;
+
+	@Prop({ required: false, type: Boolean, default: true })
+	readonly outlined!: boolean;
+
+	@Prop({ required: false, type: Boolean, default: true })
+	readonly solo!: boolean;
 }
 </script>

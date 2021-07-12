@@ -13,8 +13,9 @@
 					@click:append="openDirectoryBrowser(folderPath)"
 				/>
 			</v-col>
-			<v-col cols="1">
-				<valid-icon :valid="folderPath.isValid" text="Directory is not a valid path!" />
+			<!--	Is Valid Icon -->
+			<v-col cols="2">
+				<valid-icon :valid="folderPath.isValid" :text="$t('general.alerts.invalid-directory')" />
 			</v-col>
 		</v-row>
 		<!--	Custom FolderPaths	-->
@@ -22,7 +23,7 @@
 			<v-col cols="3">
 				<editable-text :value="folderPath.displayName" @save="saveDisplayName(folderPath.id, $event)" />
 			</v-col>
-			<v-col>
+			<v-col cols>
 				<p-text-field
 					append-icon="mdi-folder-open"
 					:value="folderPath.directory"
@@ -30,8 +31,10 @@
 					@click:append="openDirectoryBrowser(folderPath)"
 				/>
 			</v-col>
-			<v-col cols="1">
-				<valid-icon :valid="folderPath.isValid" text="Directory is not a valid path!" />
+			<!--	Is Valid Icon -->
+			<v-col cols="2">
+				<valid-icon :valid="folderPath.isValid" :text="$t('general.alerts.invalid-directory')" />
+				<p-btn :button-type="deleteBtn" no-text :height="50" @click="deleteFolderPath(folderPath.id)" />
 			</v-col>
 		</v-row>
 		<!--	Add Path Button	-->
@@ -83,6 +86,7 @@ export default class PathsOverview extends Vue {
 	selectedFolderPath: FolderPathDTO | null = null;
 
 	addBtn: ButtonType = ButtonType.Add;
+	deleteBtn: ButtonType = ButtonType.Delete;
 
 	openDirectoryBrowser(path: FolderPathDTO): void {
 		this.selectedFolderPath = path;
@@ -115,11 +119,18 @@ export default class PathsOverview extends Vue {
 	addFolderPath(): void {
 		this.customFolderPaths.push({
 			id: this.folderPaths.length + this.customFolderPaths.length,
-			displayName: '',
+			displayName: 'Custom Path',
 			directory: '',
 			type: 'CustomFolder',
 			isValid: false,
 		});
+	}
+
+	deleteFolderPath(id: number): void {
+		const folderPathIndex = this.customFolderPaths.findIndex((x) => x.id === id);
+		if (folderPathIndex > -1) {
+			this.customFolderPaths.splice(folderPathIndex, 1);
+		}
 	}
 
 	saveDisplayName(id: number, value: string): void {

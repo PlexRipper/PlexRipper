@@ -4,7 +4,7 @@
 			<v-subheader v-if="!editMode" class="form-label text-no-wrap">{{ newValue }}</v-subheader>
 			<p-text-field v-else v-model="newValue" />
 		</v-col>
-		<v-col cols="3">
+		<v-col cols="3" justify="right">
 			<p-btn v-if="!editMode" :button-type="editBtn" :height="50" @click="edit" />
 			<p-btn v-else :button-type="saveBtn" :height="50" @click="save" />
 		</v-col>

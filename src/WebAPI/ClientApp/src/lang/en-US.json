@@ -17,6 +17,9 @@
 			"check-server-status": "Check server status",
 			"reset-db": "Reset Database",
 			"add-alert": "Add Alert"
+		},
+		"alerts": {
+			"invalid-directory": "Directory is not a valid path!"
 		}
 	},
 	"help": {

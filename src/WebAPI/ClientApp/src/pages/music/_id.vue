@@ -2,7 +2,7 @@
 	<page>
 		<v-row>
 			<v-col>
-				<h1>Music Libraries are unfortunately not yet supported</h1>
+				<h1>Music Libraries are unfortunately not yet supported :(</h1>
 			</v-col>
 		</v-row>
 	</page>

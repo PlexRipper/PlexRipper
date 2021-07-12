@@ -59,8 +59,12 @@ export class LibraryService extends BaseService {
 			.subscribe((library) => this.updateLibraryInStore(library));
 	}
 
-	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | undefined> {
-		return ServerService.getServers().pipe(switchMap((x) => of(x.find((y) => y.plexLibraries.find((z) => z.id === libraryId)))));
+	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | null> {
+		return ServerService.getServers().pipe(
+			switchMap((x: PlexServerDTO[]) =>
+				of(x.find((y: PlexServerDTO) => y.plexLibraries.find((z: PlexLibraryDTO) => z.id === libraryId)) ?? null),
+			),
+		);
 	}
 }
 

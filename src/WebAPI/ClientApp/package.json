@@ -43,7 +43,7 @@
 		"nuxt": "^2.15.7",
 		"nuxt-i18n": "^6.27.3",
 		"object-path": "^0.11.5",
-		"rxjs": "^6.6.7",
+		"rxjs": "^7.2.0",
 		"swagger-typescript-api": "^9.1.2",
 		"three": "^0.123.0",
 		"typescript-collections": "^1.3.3",

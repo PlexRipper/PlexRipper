@@ -16,11 +16,12 @@ import {
 	NotificationService,
 	AccountService,
 	SignalrService,
+	AlertService,
 } from '@service';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
 
 export class GlobalService extends BaseService {
-	private _axiosReady: ReplaySubject<any> = new ReplaySubject();
+	private _axiosReady: ReplaySubject<void> = new ReplaySubject();
 	private _configReady: ReplaySubject<AppConfig> = new ReplaySubject();
 
 	constructor() {
@@ -56,6 +57,7 @@ export class GlobalService extends BaseService {
 		DownloadService.setup(nuxtContext);
 		ProgressService.setup(nuxtContext);
 		NotificationService.setup(nuxtContext);
+		AlertService.setup(nuxtContext);
 	}
 
 	public setConfigReady(config: RuntimeConfig): void {

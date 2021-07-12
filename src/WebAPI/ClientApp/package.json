@@ -41,7 +41,7 @@
 		"lodash": "^4.17.21",
 		"material-design-icons-iconfont": "latest",
 		"nuxt": "^2.15.7",
-		"nuxt-i18n": "^6.18.0",
+		"nuxt-i18n": "^6.27.3",
 		"object-path": "^0.11.5",
 		"rxjs": "^6.6.3",
 		"swagger-typescript-api": "^9.1.2",
@@ -75,11 +75,11 @@
 		"eslint-plugin-prettier": "^3.4.0",
 		"husky": "^4.3.8",
 		"jest": "^26.6.3",
-		"lint-staged": "^10.5.3",
+		"lint-staged": "^11.0.0",
 		"prettier": "^2.3.2",
 		"stylelint": "^13.13.1",
 		"ts-jest": "^26.5.0",
-		"tsconfig-paths-webpack-plugin": "^3.3.0",
+		"tsconfig-paths-webpack-plugin": "^3.5.1",
 		"vue-jest": "^4.0.0-rc.0"
 	}
 }

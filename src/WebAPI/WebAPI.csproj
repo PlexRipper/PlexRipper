@@ -36,7 +36,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\HttpClient\HttpClient.csproj" />
+        <ProjectReference Include="..\HttpClient\HttpClient.csproj" />
         <ProjectReference Include="..\Application\Application.csproj" />
         <ProjectReference Include="..\Data\Data.csproj" />
         <ProjectReference Include="..\DownloadManager\DownloadManager.csproj" />

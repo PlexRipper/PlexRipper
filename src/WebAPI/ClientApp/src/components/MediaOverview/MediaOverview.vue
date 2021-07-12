@@ -1,12 +1,15 @@
 <template>
 	<page>
+		<!--	Loading screen	-->
 		<template v-if="isLoading">
 			<v-row justify="center" class="mx-0">
 				<v-col cols="auto">
 					<v-layout row justify-center align-center>
 						<v-progress-circular :size="70" :width="7" color="red" indeterminate></v-progress-circular>
 					</v-layout>
-					<h1 v-if="isRefreshing">Refreshing library data from {{ server ? server.name : 'unknown' }}</h1>
+					<h1 v-if="isRefreshing">
+						Refreshing library "{{ library ? library.title : '' }}" data {{ server ? 'from ' + server.name : '' }}
+					</h1>
 					<h1 v-else>Retrieving library from PlexRipper database</h1>
 					<!-- Library progress bar -->
 					<v-progress-linear :value="getPercentage" height="20" striped color="deep-orange">
@@ -89,7 +92,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { finalize, map, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
@@ -127,7 +130,6 @@ export default class MediaOverview extends Vue {
 	movieViewMode: ViewMode = ViewMode.Poster;
 	tvShowViewMode: ViewMode = ViewMode.Poster;
 	selected: string[] = [];
-	isLoading: boolean = true;
 	isRefreshing: boolean = false;
 	server: PlexServerDTO | null = null;
 	library: PlexLibraryDTO | null = null;
@@ -143,6 +145,10 @@ export default class MediaOverview extends Vue {
 
 	get getPercentage(): number {
 		return this.libraryProgress?.percentage ?? -1;
+	}
+
+	get isLoading(): boolean {
+		return !(this.server && this.library);
 	}
 
 	get viewMode(): ViewMode {
@@ -221,7 +227,7 @@ export default class MediaOverview extends Vue {
 				path: this.libraryId + '/details/' + mediaId,
 			});
 		}
-		this.detailsOverview.openDetails();
+		this.detailsOverview?.openDetails();
 
 		const item = this.items.find((x) => x.id === mediaId);
 		if (item?.children?.length === 0) {
@@ -250,7 +256,6 @@ export default class MediaOverview extends Vue {
 
 	refreshLibrary(): void {
 		this.isRefreshing = true;
-		this.isLoading = true;
 		this.library = null;
 		this.resetProgress(true);
 		LibraryService.refreshLibrary(this.libraryId);
@@ -281,21 +286,40 @@ export default class MediaOverview extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SettingsService.getActiveAccountId(), (id) => (this.activeAccountId = id));
 		this.$subscribeTo(
-			SettingsService.getDisplaySettings().pipe(switchMap((x) => of(x.movieViewMode))),
-			(x) => (this.movieViewMode = x),
-		);
-		this.$subscribeTo(
-			SettingsService.getDisplaySettings().pipe(switchMap((x) => of(x.tvShowViewMode))),
-			(x) => (this.tvShowViewMode = x),
+			this.$watchAsObservable('isLoading').pipe(map((x: { oldValue: number; newValue: number }) => x.newValue)),
+			(isLoading) => {
+				if (!isLoading) {
+					if (this.detailsOverview) {
+						if (+this.$route.params.mediaid) {
+							this.openDetails(+this.$route.params.mediaid);
+						}
+					} else {
+						const thisRef = this;
+						this.$nextTick(() => {
+							Log.debug('mediaId', +this.$route.params.mediaid);
+							if (+this.$route.params.mediaid) {
+								thisRef?.openDetails(+this.$route.params.mediaid);
+							}
+						});
+					}
+				}
+			},
 		);
 	}
 
 	created(): void {
 		this.resetProgress(false);
 		this.isRefreshing = false;
-		this.isLoading = true;
+
+		// Get Active account Id
+		this.$subscribeTo(SettingsService.getActiveAccountId(), (id) => (this.activeAccountId = id));
+
+		// Get display settings
+		this.$subscribeTo(SettingsService.getDisplaySettings(), (x) => {
+			this.movieViewMode = x.movieViewMode;
+			this.tvShowViewMode = x.tvShowViewMode;
+		});
 
 		// Setup progress bar
 		this.$subscribeTo(SignalrService.getLibraryProgress(), (data) => {
@@ -305,6 +329,7 @@ export default class MediaOverview extends Vue {
 			}
 		});
 
+		// Show DownloadTask creation progress window
 		this.$subscribeTo(
 			SignalrService.getDownloadTaskCreationProgress().pipe(
 				tap((data) => {
@@ -320,41 +345,27 @@ export default class MediaOverview extends Vue {
 			() => {},
 		);
 
-		// Retrieve server and library data
-		this.$subscribeTo(
-			combineLatest([LibraryService.getServerByLibraryID(this.libraryId), LibraryService.getLibrary(this.libraryId)]),
-			(data) => {
-				if (data[0]) {
-					this.server = Object.freeze(data[0]);
+		// Retrieve server data
+		this.$subscribeTo(LibraryService.getServerByLibraryID(this.libraryId), (server) => {
+			if (server) {
+				this.server = server;
+			}
+		});
+
+		// Retrieve library data
+		this.$subscribeTo(LibraryService.getLibrary(this.libraryId), (data) => {
+			if (data?.id === this.libraryId) {
+				this.library = Object.freeze(data);
+				switch (this.mediaType) {
+					case PlexMediaType.Movie:
+						this.items = this.library?.movies ?? [];
+						break;
+					case PlexMediaType.TvShow:
+						this.items = this.library?.tvShows ?? [];
+						break;
 				}
-				if (data[1] && data[1].id === this.libraryId) {
-					this.library = Object.freeze(data[1]);
-					switch (this.mediaType) {
-						case PlexMediaType.Movie:
-							this.items = this.library?.movies ?? [];
-							break;
-						case PlexMediaType.TvShow:
-							this.items = this.library?.tvShows ?? [];
-							break;
-					}
-				}
-				if (this.server && this.library) {
-					this.isLoading = false;
-					if (this.detailsOverview) {
-						if (+this.$route.params.mediaid) {
-							this.openDetails(+this.$route.params.mediaid);
-						}
-					} else {
-						this.$nextTick(() => {
-							Log.debug('mediaId', +this.$route.params.mediaid);
-							if (+this.$route.params.mediaid) {
-								this.openDetails(+this.$route.params.mediaid);
-							}
-						});
-					}
-				}
-			},
-		);
+			}
+		});
 	}
 }
 </script>

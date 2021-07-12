@@ -12,6 +12,9 @@ Vue.use(Vuetify);
 export default (ctx: Context, inject: Inject): void => {
 	const vuetify = new Vuetify({
 		customVariables: ['~/assets/scss/_variables.scss'],
+		icons: {
+			iconfont: 'mdi',
+		},
 		theme: {
 			dark: true,
 			options: {

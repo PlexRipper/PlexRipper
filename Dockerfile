@@ -23,15 +23,23 @@ RUN npm run generate
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
 
-COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
-COPY ["src/PlexApi/PlexApi.csproj", "src/PlexApi/"]
-COPY ["src/Application/Application.csproj", "src/Application/"]
+## Core Projects
 COPY ["src/Domain/Domain.csproj", "src/Domain/"]
-COPY ["src/FileSystem/FileSystem.csproj", "src/FileSystem/"]
+COPY ["src/Application/Application.csproj", "src/Application/"]
+
+## Presentation projects
+COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
+
+## Infrastructure Projects
 COPY ["src/Data/Data.csproj", "src/Data/"]
-COPY ["src/Settings/Settings.csproj", "src/Settings/"]
-COPY ["src/SignalR/SignalR.csproj", "src/SignalR/"]
 COPY ["src/DownloadManager/DownloadManager.csproj", "src/DownloadManager/"]
+COPY ["src/FileSystem/FileSystem.csproj", "src/FileSystem/"]
+COPY ["src/HttpClient/HttpClient.csproj", "src/HttpClient/"]
+COPY ["src/PlexApi/PlexApi.csproj", "src/PlexApi/"]
+COPY ["src/Settings/Settings.csproj", "src/Settings/"]
+
+
+## Restore Projects
 RUN dotnet restore "src/WebAPI/WebAPI.csproj"
 COPY . .
 WORKDIR "/src/src/WebAPI"

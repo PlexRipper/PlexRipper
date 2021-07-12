@@ -20,6 +20,12 @@ export default abstract class Convert {
 				return 'mdi-alert-circle';
 			case ButtonType.ExternalLink:
 				return 'mdi-open-in-new';
+			case ButtonType.Forward:
+				return 'mdi-arrow-right';
+			case ButtonType.Back:
+				return 'mdi-arrow-left';
+			case ButtonType.Skip:
+				return 'mdi-debug-step-over';
 			case ButtonType.Start:
 			case ButtonType.Resume:
 				return 'mdi-play';
@@ -34,7 +40,7 @@ export default abstract class Convert {
 			case ButtonType.Details:
 				return 'mdi-chart-box-outline';
 			default:
-				return 'mdi-help-circle-outline';
+				return '';
 		}
 	}
 

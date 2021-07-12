@@ -165,7 +165,7 @@ export default class PBtn extends Vue {
 			case ButtonType.Error:
 				return 'red';
 		}
-		return '';
+		return this.isDark ? 'white' : 'black';
 	}
 
 	get getIsOutlined(): boolean {

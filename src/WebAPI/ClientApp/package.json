@@ -34,7 +34,7 @@
 		"@nuxt/typescript-runtime": "^2.1.0",
 		"@nuxtjs/axios": "^5.13.6",
 		"@ssv/signalr-client": "^3.0.0",
-		"@types/node": "^14.17.5",
+		"@types/node": "^16.3.1",
 		"axios-observable": "^1.1.6",
 		"consola": "^2.15.3",
 		"date-fns": "^2.22.1",

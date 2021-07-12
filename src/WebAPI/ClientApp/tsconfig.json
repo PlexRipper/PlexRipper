@@ -29,6 +29,7 @@
 			"@interfaces/*": ["./types/interfaces/*"],
 			"@components/*": ["./components/*"],
 			"@overviews/*": ["./components/overviews/*"],
+			"@mediaOverview": ["./components/MediaOverview/index.ts"],
 			"@mediaOverview/*": ["./components/MediaOverview/*"],
 			"@vTreeViewTable/*": ["./components/General/VTreeViewTable/*"]
 		},

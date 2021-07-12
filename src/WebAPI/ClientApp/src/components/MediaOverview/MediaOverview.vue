@@ -92,16 +92,10 @@ import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
-import MediaPoster from '@mediaOverview/PosterTable/MediaPoster.vue';
 import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
+import { MediaTable, MediaOverviewBar, MediaPoster, PosterTable, DetailsOverview, DownloadConfirmation } from '@mediaOverview';
 import ProgressComponent from '@components/ProgressComponent.vue';
-import DownloadConfirmation from '@mediaOverview/MediaTable/DownloadConfirmation.vue';
-import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
-import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
-import { combineLatest, of } from 'rxjs';
-import PosterTable from '@mediaOverview/PosterTable/PosterTable.vue';
-import DetailsOverview from '@mediaOverview/DetailsOverview.vue';
 import { getTvShow } from '@api/mediaApi';
 
 @Component({

@@ -1,6 +1,9 @@
 <template>
 	<page>
-		<paths-overview />
+		<p-section>
+			<template #header> {{ $t('pages.settings.paths.header') }} </template>
+			<paths-overview />
+		</p-section>
 	</page>
 </template>
 

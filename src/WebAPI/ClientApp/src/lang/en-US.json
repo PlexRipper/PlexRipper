@@ -59,17 +59,17 @@
 				"download-folder": {
 					"label": "Download Path",
 					"title": "Download Path",
-					"text": "The password of your Plex account."
+					"text": "The path all files will be downloaded to in multiple parts before being merged into one in their destination folder."
 				},
 				"movie-folder": {
 					"label": "Movie Path",
 					"title": "Movie Path",
-					"text": "The username of your Plex account"
+					"text": "The default path of Movies when no custom destination has been selected."
 				},
 				"tv-show-folder": {
 					"label": "Tv Show Path",
 					"title": "Tv Show Path",
-					"text": "The password of your Plex account."
+					"text": "The default path of Tv Shows when no custom destination has been selected."
 				}
 			},
 			"ui": {
@@ -207,6 +207,9 @@
 			},
 			"debug": {
 				"header": "Debug"
+			},
+			"paths": {
+				"header": "Paths"
 			}
 		}
 	}

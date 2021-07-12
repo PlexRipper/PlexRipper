@@ -74,19 +74,11 @@
           "description": "",
           "attributes": [
             {
-              "name": "show",
+              "name": "alert",
               "required": true,
               "value": {
                 "kind": "expression",
-                "type": "boolean"
-              }
-            },
-            {
-              "name": "id",
-              "required": true,
-              "value": {
-                "kind": "expression",
-                "type": "string"
+                "type": "IAlert"
               }
             }
           ],
@@ -411,6 +403,29 @@
           ],
           "source": {
             "module": "./src/components/General/Duration.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "EditableText",
+          "description": "",
+          "attributes": [
+            {
+              "name": "value",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "save"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Form/EditableText.vue",
             "symbol": "default"
           }
         },
@@ -910,6 +925,15 @@
               "default": "36"
             },
             {
+              "name": "height",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "36"
+            },
+            {
               "name": "block",
               "required": false,
               "value": {
@@ -1042,6 +1066,45 @@
           "description": "",
           "source": {
             "module": "./src/components/overviews/PathsOverview.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "PlexRipperTextField",
+          "description": "",
+          "attributes": [
+            {
+              "name": "appendIcon",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              }
+            },
+            {
+              "name": "value",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              }
+            },
+            {
+              "name": "readonly",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "click"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Generic/PlexRipperTextField.vue",
             "symbol": "default"
           }
         },
@@ -1210,15 +1273,6 @@
                 "kind": "expression",
                 "type": "boolean"
               }
-            },
-            {
-              "name": "pulse",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "true"
             }
           ],
           "source": {

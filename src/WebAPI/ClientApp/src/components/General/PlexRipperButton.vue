@@ -16,6 +16,7 @@
 				:href="href"
 				:tile="tile"
 				:to="to"
+				:height="height"
 				:target="href ? '_blank' : '_self'"
 				v-bind="attrs"
 				:x-large="xLarge"
@@ -74,6 +75,9 @@ export default class PBtn extends Vue {
 
 	@Prop({ required: false, type: Number, default: 36 })
 	readonly width!: number;
+
+	@Prop({ required: false, type: Number, default: 36 })
+	readonly height!: number;
 
 	@Prop({ required: false, type: Boolean, default: false })
 	readonly block!: boolean;

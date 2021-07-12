@@ -26,6 +26,10 @@ export default abstract class Convert {
 				return 'mdi-arrow-left';
 			case ButtonType.Skip:
 				return 'mdi-debug-step-over';
+			case ButtonType.Add:
+				return 'mdi-plus-box-outline';
+			case ButtonType.Edit:
+				return 'mdi-pencil';
 			case ButtonType.Start:
 			case ButtonType.Resume:
 				return 'mdi-play';

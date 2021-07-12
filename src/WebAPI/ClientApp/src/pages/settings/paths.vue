@@ -4,6 +4,9 @@
 			<template #header> {{ $t('pages.settings.paths.header') }} </template>
 			<paths-overview />
 		</p-section>
+		<p-section>
+			<template #header> {{ $t('pages.settings.paths.header') }} </template>
+		</p-section>
 	</page>
 </template>
 

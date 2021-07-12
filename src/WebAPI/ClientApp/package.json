@@ -5,7 +5,7 @@
 	"author": "JasonLandbridge",
 	"private": true,
 	"scripts": {
-		"dev": "nuxt dev --no-inline",
+		"dev": "nuxt dev",
 		"build": "nuxt build",
 		"generate": "nuxt generate",
 		"generate-ts": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json --no-client -o ./src/types/dto/ -n mainApi.ts",

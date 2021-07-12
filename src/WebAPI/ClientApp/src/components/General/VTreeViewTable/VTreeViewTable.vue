@@ -257,7 +257,7 @@ export default class VTreeViewTable extends Vue {
 	}
 
 	isLoading(key: string): boolean {
-		return this.loadingButtons.some((x) => x === key);
+		return this.loadingButtons.includes(key);
 	}
 
 	updateSelected(itemKey: number, selected: string[]) {

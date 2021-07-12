@@ -26,11 +26,13 @@ export class SignalrService extends BaseService {
 	private _notificationHubSubscription: Subscription | null = null;
 
 	private _downloadTaskUpdateSubject: ReplaySubject<DownloadTaskDTO> = new ReplaySubject<DownloadTaskDTO>();
-	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> = new ReplaySubject<DownloadTaskCreationProgress>();
+	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> =
+		new ReplaySubject<DownloadTaskCreationProgress>();
 
 	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
 	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
-	private _plexAccountRefreshProgressSubject: ReplaySubject<PlexAccountRefreshProgress> = new ReplaySubject<PlexAccountRefreshProgress>();
+	private _plexAccountRefreshProgressSubject: ReplaySubject<PlexAccountRefreshProgress> =
+		new ReplaySubject<PlexAccountRefreshProgress>();
 
 	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 

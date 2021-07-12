@@ -89,7 +89,7 @@ const config: NuxtConfig = {
 	],
 	i18n: {
 		lazy: true,
-		langDir: '/lang/',
+		langDir: 'lang/',
 		locales: [{ code: 'en', iso: 'en-US', file: 'en-US.json' }],
 		defaultLocale: 'en',
 	},
@@ -111,12 +111,6 @@ const config: NuxtConfig = {
 		extend(config: WebpackConfiguration, { isDev, isClient }: NuxtWebpackEnv): void {
 			if (isDev) {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
-			}
-
-			const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-			if (config && config.resolve && config.resolve.plugins) {
-				// config.resolve.plugins.push(new TsconfigPathsPlugin());
-				config.resolve.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
 			}
 
 			// Make sure to also update the tsconfig.json when adding aliases for import resolving.

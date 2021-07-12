@@ -110,15 +110,13 @@ export class DownloadService extends BaseService {
 	 */
 	public fetchDownloadList(): Observable<DownloadTaskDTO[]> {
 		return getAllDownloads().pipe(
-			switchMap(
-				(downloads): Observable<DownloadTaskDTO[]> => {
-					Log.debug('Fetching download list');
-					if (downloads.isSuccess) {
-						this.setState({ downloads: downloads.value, downloadTaskUpdateList: [] });
-					}
-					return of(downloads.value ?? []);
-				},
-			),
+			switchMap((downloads): Observable<DownloadTaskDTO[]> => {
+				Log.debug('Fetching download list');
+				if (downloads.isSuccess) {
+					this.setState({ downloads: downloads.value, downloadTaskUpdateList: [] });
+				}
+				return of(downloads.value ?? []);
+			}),
 		);
 	}
 

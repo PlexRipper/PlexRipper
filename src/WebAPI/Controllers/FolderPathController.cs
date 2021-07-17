@@ -56,9 +56,7 @@ namespace PlexRipper.WebAPI.Controllers
         {
             var folderPath = _mapper.Map<FolderPath>(folderPathDto);
             var result = await _folderPathService.UpdateFolderPathAsync(folderPath);
-
-            folderPathDto = _mapper.Map<FolderPathDTO>(result.Value);
-            return result.IsFailed ? BadRequest(result) : Ok(Result.Ok(folderPathDto));
+            return result.IsFailed ? BadRequest(result) : Ok(Result.Ok(_mapper.Map<FolderPathDTO>(result.Value)));
         }
 
         // POST: api/<FolderPathController>

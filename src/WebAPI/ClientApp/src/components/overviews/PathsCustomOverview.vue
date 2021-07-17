@@ -42,10 +42,8 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { FolderPathDTO, FolderType } from '@dto/mainApi';
-import { updateFolderPath } from '@api/pathApi';
 import ValidIcon from '@components/General/ValidIcon.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import EditableText from '@components/Form/EditableText.vue';
@@ -86,18 +84,13 @@ export default class PathsCustomOverview extends Vue {
 	}
 
 	confirmDirectoryBrowser(path: FolderPathDTO): void {
-		this.selectedFolderPath = path;
 		this.isDirectoryBrowserOpen = false;
-
-		this.$subscribeTo(updateFolderPath(path), (data) => {
-			if (data.isSuccess && data.value) {
-				Log.debug(`Successfully updated folder path ${path.displayName}`, data.value);
-				const i = this.folderPaths.findIndex((x) => x.id === data.value?.id);
-				if (i > -1) {
-					this.folderPaths.splice(i, 1, data.value);
-				}
-			}
-		});
+		this.selectedFolderPath = null;
+		const i = this.folderPaths.findIndex((x) => x.id === path.id);
+		if (i > -1) {
+			const folderPath = { ...this.folderPaths[i], directory: path.directory };
+			FolderPathService.updateFolderPath(folderPath);
+		}
 	}
 
 	cancelDirectoryBrowser(): void {
@@ -122,7 +115,7 @@ export default class PathsCustomOverview extends Vue {
 		const folderPathIndex = this.folderPaths.findIndex((x) => x.id === id);
 		if (folderPathIndex > -1) {
 			const folderPath = { ...this.folderPaths[folderPathIndex], displayName: value };
-			this.folderPaths.splice(folderPathIndex, 1, folderPath);
+			FolderPathService.updateFolderPath(folderPath);
 		}
 	}
 

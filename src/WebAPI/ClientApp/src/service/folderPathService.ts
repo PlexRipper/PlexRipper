@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs';
 import { FolderPathDTO } from '@dto/mainApi';
-import { map, switchMap } from 'rxjs/operators';
+import { finalize, map, take } from 'rxjs/operators';
 import { BaseService, GlobalService } from '@service';
-import { getFolderPaths, createFolderPath, deleteFolderPath } from '@api/pathApi';
+import { getFolderPaths, createFolderPath, updateFolderPath, deleteFolderPath } from '@api/pathApi';
 import IStoreState from '@interfaces/IStoreState';
 import { Context } from '@nuxt/types';
 
@@ -21,7 +21,13 @@ export class FolderPathService extends BaseService {
 		super.setup(nuxtContext);
 
 		GlobalService.getAxiosReady()
-			.pipe(switchMap(() => getFolderPaths()))
+			.pipe(finalize(() => this.fetchFolderPaths()))
+			.subscribe();
+	}
+
+	public fetchFolderPaths(): void {
+		getFolderPaths()
+			.pipe(take(1))
 			.subscribe((result) => {
 				if (result.isSuccess) {
 					this.setState({ folderPaths: result.value }, 'Set Folder Paths');
@@ -33,16 +39,6 @@ export class FolderPathService extends BaseService {
 		return this.stateChanged.pipe(map((state: IStoreState) => state?.folderPaths ?? []));
 	}
 
-	public deleteFolderPath(folderPathId: number): void {
-		deleteFolderPath(folderPathId)
-			.pipe(switchMap(() => getFolderPaths()))
-			.subscribe((result) => {
-				if (result.isSuccess) {
-					this.setState({ folderPaths: result.value }, 'Set Folder Paths');
-				}
-			});
-	}
-
 	public createFolderPath(folderPath: FolderPathDTO): void {
 		createFolderPath(folderPath).subscribe((folderPath) => {
 			if (folderPath?.isSuccess && folderPath.value) {
@@ -50,6 +46,18 @@ export class FolderPathService extends BaseService {
 				this.setState({ folderPaths }, 'Set Folder Paths');
 			}
 		});
+	}
+
+	public updateFolderPath(folderPath: FolderPathDTO): void {
+		updateFolderPath(folderPath)
+			.pipe(finalize(() => this.fetchFolderPaths()))
+			.subscribe();
+	}
+
+	public deleteFolderPath(folderPathId: number): void {
+		deleteFolderPath(folderPathId)
+			.pipe(finalize(() => this.fetchFolderPaths()))
+			.subscribe();
 	}
 }
 

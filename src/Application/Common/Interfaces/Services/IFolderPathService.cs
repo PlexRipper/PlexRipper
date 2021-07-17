@@ -34,5 +34,7 @@ namespace PlexRipper.Application.Common
         Task<Result<FolderPath>> GetDestinationFolderByMediaType(PlexMediaType mediaType);
 
         Task<Result<FolderPath>> CreateFolderPath(FolderPath folderPath);
+
+        Task<Result> DeleteFolderPathAsync(int folderPathId);
     }
 }

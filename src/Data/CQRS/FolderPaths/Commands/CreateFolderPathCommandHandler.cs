@@ -15,9 +15,8 @@ namespace PlexRipper.Data.CQRS.FolderPaths
         {
             RuleFor(x => x.FolderPath).NotNull();
             RuleFor(x => x.FolderPath.Type).NotEmpty();
-            RuleFor(x => x.FolderPath.DirectoryPath).NotEmpty();
             RuleFor(x => x.FolderPath.DisplayName).NotEmpty();
-            RuleFor(x => x.FolderPath.FolderType).NotEqual(FolderType.Unknown);
+            RuleFor(x => x.FolderPath.FolderType).NotEqual(FolderType.None);
         }
     }
 

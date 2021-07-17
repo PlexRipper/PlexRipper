@@ -164,7 +164,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import PathsOverview from '@overviews/PathsOverview.vue';
+import PathsOverview from '@overviews/PathsCustomOverview.vue';
 import AccountOverview from '@overviews/AccountOverview/AccountOverview.vue';
 import ExternalLink from '@components/General/ExternalLink.vue';
 import PBtn from '@components/General/PlexRipperButton.vue';

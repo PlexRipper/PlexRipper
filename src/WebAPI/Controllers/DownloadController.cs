@@ -42,7 +42,7 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         /// <summary>
-        /// Post: "api/(DownloadController)/clear".
+        /// POST: "api/(DownloadController)/clear".
         /// </summary>
         /// <returns>Is successful.</returns>
         [HttpPost("clear")]

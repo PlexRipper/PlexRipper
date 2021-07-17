@@ -44,7 +44,6 @@ namespace PlexRipper.WebAPI.Controllers
         public IActionResult Get(string path)
         {
             path = path == "null" ? string.Empty : path;
-
             var mapResult = _mapper.Map<FileSystemDTO>(_fileSystem.LookupContents(path, false, true));
             return Ok(Result.Ok(mapResult));
         }
@@ -55,7 +54,6 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Put([FromBody] FolderPathDTO folderPathDto)
         {
-            Log.Debug($"Updating the folderPathId {folderPathDto.Id} to {folderPathDto.Directory}");
             var folderPath = _mapper.Map<FolderPath>(folderPathDto);
             var result = await _folderPathService.UpdateFolderPathAsync(folderPath);
 
@@ -63,16 +61,30 @@ namespace PlexRipper.WebAPI.Controllers
             return result.IsFailed ? BadRequest(result) : Ok(Result.Ok(folderPathDto));
         }
 
-        // POST: api/<FolderPathController>/create
+        // POST: api/<FolderPathController>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<FolderPathDTO>))]
-        public async Task<IActionResult> Create(FolderPathDTO folderPathDto)
+        public async Task<IActionResult> Create([FromBody] FolderPathDTO folderPathDto)
         {
             var folderPath = _mapper.Map<FolderPath>(folderPathDto);
             var result = await _folderPathService.CreateFolderPath(folderPath);
-            var mapResult = _mapper.Map<List<FolderPathDTO>>(result.Value);
+            var mapResult = _mapper.Map<FolderPathDTO>(result.Value);
             return Ok(Result.Ok(mapResult));
         }
 
+        // Delete: api/<FolderPathController>
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequestInvalidId();
+            }
+
+            var result = await _folderPathService.DeleteFolderPathAsync(id);
+            return Ok(result);
+        }
     }
 }

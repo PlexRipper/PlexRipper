@@ -115,10 +115,17 @@ export type ResultDTOOfListOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[
 export interface FolderPathDTO {
   /** @format int32 */
   id: number;
-  type: string;
+  type: FolderType;
   displayName: string;
   directory: string;
   isValid: boolean;
+}
+
+export enum FolderType {
+  None = "None",
+  DownloadFolder = "DownloadFolder",
+  MovieFolder = "MovieFolder",
+  TvShowFolder = "TvShowFolder",
 }
 
 export type ResultDTOOfFileSystemDTO = ResultDTO & { value: FileSystemDTO };
@@ -148,6 +155,8 @@ export enum FileSystemEntityType {
   Folder = "Folder",
   File = "File",
 }
+
+export type ResultDTOOfFolderPathDTO = ResultDTO & { value: FolderPathDTO };
 
 export type ResultDTOOfListOfNotificationDTO = ResultDTO & { value: NotificationDTO[] };
 

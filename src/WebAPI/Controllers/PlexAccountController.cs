@@ -251,6 +251,11 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> RefreshPlexAccount(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequestInvalidId();
+            }
+
             try
             {
                 var result = await _plexAccountService.RefreshPlexAccount(id);

@@ -37,6 +37,11 @@ namespace PlexRipper.Application.FolderPaths
             return _mediator.Send(new UpdateFolderPathCommand(folderPath));
         }
 
+        public Task<Result> DeleteFolderPathAsync(int folderPathId)
+        {
+            return _mediator.Send(new DeleteFolderPathCommand(folderPathId));
+        }
+
         /// <inheritdoc/>
         public async Task<Result<FolderPath>> GetDownloadFolderAsync()
         {

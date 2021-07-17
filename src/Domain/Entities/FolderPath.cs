@@ -36,7 +36,7 @@ namespace PlexRipper.Domain
         [NotMapped]
         public FolderType FolderType
         {
-            get => Enum.TryParse(Type, out FolderType status) ? status : FolderType.Unknown;
+            get => Enum.TryParse(Type, out FolderType status) ? status : FolderType.None;
             set => Type = value.ToString();
         }
 

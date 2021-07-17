@@ -1,36 +1,7 @@
 <template>
 	<v-container fluid>
-		<!--	Show warning when no allowed to edit	-->
-		<template v-if="!allowEditing">
-			<v-row>
-				<v-col>
-					<v-alert border="bottom" colored-border type="warning" elevation="2">
-						{{ $t('general.alerts.disabled-paths') }}
-					</v-alert>
-				</v-col>
-			</v-row>
-		</template>
-		<!--	Default FolderPaths	-->
-		<v-row v-for="folderPath in folderPaths" :key="folderPath.id" no-gutters>
-			<v-col cols="3">
-				<help-icon :help-id="toTranslation(folderPath.type)" />
-			</v-col>
-			<v-col>
-				<p-text-field
-					append-icon="mdi-folder-open"
-					:value="folderPath.directory"
-					readonly
-					:disabled="!allowEditing"
-					@click:append="openDirectoryBrowser(folderPath)"
-				/>
-			</v-col>
-			<!--	Is Valid Icon -->
-			<v-col cols="2">
-				<valid-icon :valid="folderPath.isValid" :text="$t('general.alerts.invalid-directory')" />
-			</v-col>
-		</v-row>
 		<!--	Custom FolderPaths	-->
-		<v-row v-for="folderPath in customFolderPaths" :key="folderPath.id" no-gutters>
+		<v-row v-for="folderPath in getFolderPaths" :key="folderPath.id" no-gutters>
 			<v-col cols="3">
 				<editable-text :value="folderPath.displayName" :disabled="!allowEditing" @save="saveDisplayName(folderPath.id, $event)" />
 			</v-col>
@@ -43,16 +14,17 @@
 					@click:append="openDirectoryBrowser(folderPath)"
 				/>
 			</v-col>
-			<!--	Is Valid Icon -->
 			<v-col cols="2">
+				<!--	Is Valid Icon -->
 				<valid-icon :valid="folderPath.isValid" :text="$t('general.alerts.invalid-directory')" />
+				<!--	Delete Button -->
 				<p-btn :button-type="deleteBtn" no-text :disabled="!allowEditing" :height="50" @click="deleteFolderPath(folderPath.id)" />
 			</v-col>
 		</v-row>
 		<!--	Add Path Button	-->
 		<v-row justify="center">
-			<v-col cols="4">
-				<p-btn :button-type="addBtn" block :disabled="!allowEditing" :height="50" @click="addFolderPath" />
+			<v-col cols="1">
+				<p-btn :button-type="addBtn" block :disabled="!allowEditing" :height="60" icon-size="40px" @click="addFolderPath" />
 			</v-col>
 		</v-row>
 		<!--	Directory Browser	-->
@@ -71,12 +43,11 @@
 
 <script lang="ts">
 import Log from 'consola';
-import { Vue, Component } from 'vue-property-decorator';
-import { FolderPathDTO } from '@dto/mainApi';
+import { Vue, Component, Prop } from 'vue-property-decorator';
+import { FolderPathDTO, FolderType } from '@dto/mainApi';
 import { updateFolderPath } from '@api/pathApi';
 import ValidIcon from '@components/General/ValidIcon.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
-import { kebabCase } from 'lodash';
 import EditableText from '@components/Form/EditableText.vue';
 import ButtonType from '@enums/buttonType';
 import { DownloadService, FolderPathService } from '@service';
@@ -90,9 +61,11 @@ import DirectoryBrowser from '../General/DirectoryBrowser.vue';
 		HelpIcon,
 	},
 })
-export default class PathsOverview extends Vue {
+export default class PathsCustomOverview extends Vue {
+	@Prop({ required: true, type: String })
+	readonly folderType!: FolderType;
+
 	folderPaths: FolderPathDTO[] = [];
-	customFolderPaths: FolderPathDTO[] = [];
 
 	isDirectoryBrowserOpen: boolean = false;
 
@@ -102,6 +75,10 @@ export default class PathsOverview extends Vue {
 	deleteBtn: ButtonType = ButtonType.Delete;
 
 	allowEditing: boolean = true;
+
+	get getFolderPaths(): FolderPathDTO[] {
+		return this.folderPaths.filter((x) => x.type === this.folderType);
+	}
 
 	openDirectoryBrowser(path: FolderPathDTO): void {
 		this.selectedFolderPath = path;
@@ -127,54 +104,36 @@ export default class PathsOverview extends Vue {
 		this.isDirectoryBrowserOpen = false;
 	}
 
-	toTranslation(type: string): string {
-		return `help.settings.paths.${kebabCase(type)}`;
-	}
-
 	addFolderPath(): void {
-		this.customFolderPaths.push({
-			id: this.folderPaths.length + this.customFolderPaths.length,
-			displayName: 'Custom Path',
+		FolderPathService.createFolderPath({
+			id: 0,
+			displayName: `${this.folderType.replace('Folder', ' Folder')} Path`,
 			directory: '',
-			type: 'CustomFolder',
+			type: this.folderType,
 			isValid: false,
 		});
 	}
 
 	deleteFolderPath(id: number): void {
-		const folderPathIndex = this.customFolderPaths.findIndex((x) => x.id === id);
-		if (folderPathIndex > -1) {
-			this.customFolderPaths.splice(folderPathIndex, 1);
-		}
+		FolderPathService.deleteFolderPath(id);
 	}
 
 	saveDisplayName(id: number, value: string): void {
-		const folderPathIndex = this.customFolderPaths.findIndex((x) => x.id === id);
+		const folderPathIndex = this.folderPaths.findIndex((x) => x.id === id);
 		if (folderPathIndex > -1) {
-			const folderPath = { ...this.customFolderPaths[folderPathIndex], displayName: value };
-			this.customFolderPaths.splice(folderPathIndex, 1, folderPath);
+			const folderPath = { ...this.folderPaths[folderPathIndex], displayName: value };
+			this.folderPaths.splice(folderPathIndex, 1, folderPath);
 		}
 	}
 
 	created(): void {
 		this.$subscribeTo(FolderPathService.getFolderPaths(), (data) => {
-			if (data.isSuccess && data.value) {
-				this.folderPaths = data.value;
-			}
+			this.folderPaths = data ?? [];
 		});
 
 		// Ensure there are no active downloads before being allowed to change.
 		this.$subscribeTo(DownloadService.getActiveDownloadList(), (data) => {
-			Log.debug('data', data);
 			this.allowEditing = data?.length === 0 ?? false;
-		});
-
-		this.customFolderPaths.push({
-			id: this.folderPaths.length + this.customFolderPaths.length - 1,
-			displayName: 'Test',
-			directory: 'D:\\PlexDownloadFolder\\',
-			type: 'CustomFolder',
-			isValid: true,
 		});
 	}
 }

@@ -26,7 +26,13 @@ export function updateFolderPath(folderPath: FolderPathDTO): Observable<ResultDT
 }
 
 export function createFolderPath(folderPath: FolderPathDTO): Observable<ResultDTO<FolderPathDTO>> {
-	preApiRequest(logText, 'updateFolderPath');
-	const result = Axios.put(`${apiPath}`, folderPath);
-	return checkResponse<ResultDTO<FolderPathDTO>>(result, logText, 'updateFolderPath');
+	preApiRequest(logText, 'createFolderPath');
+	const result = Axios.post(`${apiPath}`, folderPath);
+	return checkResponse<ResultDTO<FolderPathDTO>>(result, logText, 'createFolderPath');
+}
+
+export function deleteFolderPath(folderPathId: number): Observable<ResultDTO<FolderPathDTO>> {
+	preApiRequest(logText, 'deleteFolderPath');
+	const result = Axios.delete(`${apiPath}/${folderPathId}`);
+	return checkResponse<ResultDTO<FolderPathDTO>>(result, logText, 'deleteFolderPath');
 }

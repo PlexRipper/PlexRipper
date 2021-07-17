@@ -15,18 +15,14 @@ namespace PlexRipper.Application.PlexAccounts
 
         private readonly IPlexServerService _plexServerService;
 
-        private readonly IPlexLibraryService _plexLibraryService;
-
         private readonly IPlexApiService _plexApiService;
 
         private readonly ISignalRService _signalRService;
 
-        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexLibraryService plexLibraryService,
-            IPlexApiService plexApiService, ISignalRService signalRService)
+        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexApiService plexApiService, ISignalRService signalRService)
         {
             _mediator = mediator;
             _plexServerService = plexServerService;
-            _plexLibraryService = plexLibraryService;
             _plexApiService = plexApiService;
             _signalRService = signalRService;
         }

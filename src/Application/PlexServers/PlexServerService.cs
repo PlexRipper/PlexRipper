@@ -149,6 +149,7 @@ namespace PlexRipper.Application.PlexServers
         /// </summary>
         /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to get the latest status for.</param>
         /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to authenticate with.</param>
+        /// <param name="trimEntries">Delete entries which are older than a certain threshold.</param>
         /// <returns>The latest <see cref="PlexServerStatus"/>.</returns>
         public async Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(int plexServerId, int plexAccountId = 0, bool trimEntries = true)
         {

@@ -11,47 +11,52 @@ namespace PlexRipper.Domain
     /// </summary>
     public class ThrottledStream : Stream
     {
-        Stream _InputStream;
+        private readonly Stream _inputStream;
 
-        int _Throttle;
+        private int _throttle;
 
-        Stopwatch _watch = Stopwatch.StartNew();
+        private readonly Stopwatch _watch = Stopwatch.StartNew();
 
-        long _TotalBytesRead;
+        private long _totalBytesRead;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ThrottledStream"/> class.
+        /// </summary>
+        /// <param name="in">The input <see cref="Stream"/>.</param>
+        /// <param name="throttleKb">The kb/s to throttle by.</param>
         public ThrottledStream(Stream @in, int throttleKb)
         {
-            _Throttle = throttleKb * 1024;
-            _InputStream = @in;
+            _throttle = throttleKb * 1024;
+            _inputStream = @in;
         }
 
-        public override bool CanRead => _InputStream.CanRead;
+        public override bool CanRead => _inputStream.CanRead;
 
-        public override bool CanSeek => _InputStream.CanSeek;
+        public override bool CanSeek => _inputStream.CanSeek;
 
         public override bool CanWrite => false;
 
         public override void Flush() { }
 
-        public override long Length => _InputStream.Length;
+        public override long Length => _inputStream.Length;
 
         public override long Position
         {
-            get => _InputStream.Position;
-            set => _InputStream.Position = value;
+            get => _inputStream.Position;
+            set => _inputStream.Position = value;
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
             var newCount = GetBytesToReturn(count);
-            int read = _InputStream.Read(buffer, offset, newCount);
-            Interlocked.Add(ref _TotalBytesRead, read);
+            int read = _inputStream.Read(buffer, offset, newCount);
+            Interlocked.Add(ref _totalBytesRead, read);
             return read;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            return _InputStream.Seek(offset, origin);
+            return _inputStream.Seek(offset, origin);
         }
 
         public override void SetLength(long value) { }
@@ -65,21 +70,21 @@ namespace PlexRipper.Domain
 
         public void SetThrottleSpeed(int throttleKb)
         {
-            _Throttle = throttleKb * 1024;
+            _throttle = throttleKb * 1024;
         }
 
         async Task<int> GetBytesToReturnAsync(int count)
         {
-            if (_Throttle <= 0)
+            if (_throttle <= 0)
                 return count;
 
-            long canSend = (long)(_watch.ElapsedMilliseconds * (_Throttle / 1000.0));
+            long canSend = (long)(_watch.ElapsedMilliseconds * (_throttle / 1000.0));
 
-            int diff = (int)(canSend - _TotalBytesRead);
+            int diff = (int)(canSend - _totalBytesRead);
 
             if (diff <= 0)
             {
-                var waitInSec = diff * -1.0 / _Throttle;
+                var waitInSec = diff * -1.0 / _throttle;
 
                 await Task.Delay((int)(waitInSec * 1000)).ConfigureAwait(false);
             }

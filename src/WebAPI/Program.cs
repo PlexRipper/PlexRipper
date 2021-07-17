@@ -7,7 +7,6 @@ using PlexRipper.Domain;
 using Serilog;
 using System;
 using System.IO;
-using PlexRipper.FileSystem.Common;
 using Log = Serilog.Log;
 
 namespace PlexRipper.WebAPI

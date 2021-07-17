@@ -4,7 +4,7 @@ namespace PlexRipper.Domain
 {
     public static partial class ResultExtensions
     {
-        private static string _statusCode = "StatusCode";
+        private static readonly string _statusCode = "StatusCode";
 
         #region Implementation
 
@@ -70,12 +70,12 @@ namespace PlexRipper.Domain
 
         #region 404
 
-        private static bool _has404Error(Result result)
+        private static bool Has404Error(Result result)
         {
             return FindStatusCode(result, HttpCodes.Status404NotFound);
         }
 
-        private static void _set404Error(Result result, string message = "")
+        private static void Set404Error(Result result, string message = "")
         {
             if (string.IsNullOrEmpty(message))
             {
@@ -85,7 +85,7 @@ namespace PlexRipper.Domain
             _AddStatusCode(result, Get404NotFoundError(message));
         }
 
-        private static Result _create404NotFoundResult(string message = "")
+        private static Result Create404NotFoundResult1(string message = "")
         {
             if (string.IsNullOrEmpty(message))
             {
@@ -170,12 +170,12 @@ namespace PlexRipper.Domain
 
         public static bool Has404NotFoundError(this Result result)
         {
-            return _has404Error(result);
+            return Has404Error(result);
         }
 
         public static Result Add404NotFoundError(this Result result, string message = "")
         {
-            _set404Error(result, message);
+            Set404Error(result, message);
             return result;
         }
 
@@ -203,12 +203,12 @@ namespace PlexRipper.Domain
 
         public static bool Has404NotFoundError<T>(this Result<T> result)
         {
-            return _has404Error(result);
+            return Has404Error(result);
         }
 
         public static void Add404NotFoundError<T>(this Result<T> result)
         {
-            _set404Error(result);
+            Set404Error(result);
         }
 
         #endregion

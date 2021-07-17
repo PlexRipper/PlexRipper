@@ -2,7 +2,7 @@
 using Autofac;
 using FluentValidation;
 using MediatR;
-using PlexRipper.Application.PlexDownloads;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain.Behavior.Pipelines;
 using Module = Autofac.Module;
 

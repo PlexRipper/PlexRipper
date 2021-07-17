@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Application.PlexMedia;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexTvShows;

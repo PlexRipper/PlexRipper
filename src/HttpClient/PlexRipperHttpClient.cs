@@ -19,8 +19,8 @@ namespace PlexRipper.HttpClient
         {
             policy ??= HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .OrResult(msg => msg.StatusCode == HttpStatusCode.Unauthorized || msg.StatusCode == HttpStatusCode.NotFound)
-                .WaitAndRetryAsync(3, attempt => TimeSpan.FromSeconds(2));
+                .OrResult(msg => msg.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.NotFound)
+                .WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(2));
 
             _policy = policy;
             _httpClient = httpClient;

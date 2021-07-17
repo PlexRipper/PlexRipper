@@ -2,7 +2,7 @@
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.FolderPaths.Queries
+namespace PlexRipper.Application.FolderPaths
 {
     public class GetFolderPathByIdQuery : IRequest<Result<FolderPath>>
     {

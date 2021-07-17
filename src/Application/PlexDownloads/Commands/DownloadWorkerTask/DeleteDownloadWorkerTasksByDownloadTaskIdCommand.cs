@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace PlexRipper.Application.PlexDownloads
+namespace PlexRipper.Application
 {
     public class DeleteDownloadWorkerTasksByDownloadTaskIdCommand : IRequest<Result<bool>>
     {

@@ -8,6 +8,9 @@ namespace PlexRipper.Domain.AutoMapper
     /// </summary>
     public class DomainMappingProfile : Profile
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DomainMappingProfile"/> class.
+        /// </summary>
         public DomainMappingProfile()
         {
             // string <-> Guid

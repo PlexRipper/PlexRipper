@@ -8,12 +8,9 @@ namespace PlexApi.UnitTests
 {
     public class JsonConverterTests
     {
-        private BaseContainer Container { get; }
-
         public JsonConverterTests(ITestOutputHelper output)
         {
             BaseDependanciesTest.SetupLogging(output);
-            Container = new BaseContainer();
         }
 
         [Fact]

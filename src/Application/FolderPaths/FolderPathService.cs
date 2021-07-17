@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.FolderPaths.Commands;
-using PlexRipper.Application.FolderPaths.Queries;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.FolderPaths

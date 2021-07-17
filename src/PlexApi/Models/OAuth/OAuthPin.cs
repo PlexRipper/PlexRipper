@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PlexRipper.PlexApi.Models.OAuth
+namespace PlexRipper.PlexApi.Models
 {
     public class OAuthPin
     {
@@ -12,7 +12,7 @@ namespace PlexRipper.PlexApi.Models.OAuth
 
         public string ClientIdentifier { get; set; }
 
-        public Location Location { get; set; }
+        public OAuthPinLocation Location { get; set; }
 
         public int ExpiresIn { get; set; }
 
@@ -25,7 +25,7 @@ namespace PlexRipper.PlexApi.Models.OAuth
         public string Url { get; set; }
     }
 
-    public class Location
+    public class OAuthPinLocation
     {
         public string Code { get; set; }
 

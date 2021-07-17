@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace PlexRipper.PlexApi.Models.Server
+namespace PlexRipper.PlexApi.Models
 {
     [XmlRoot(ElementName = "MediaContainer")]
     public class ResourceContainer

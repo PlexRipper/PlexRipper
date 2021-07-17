@@ -13,16 +13,14 @@ namespace DownloadManager.Tests.UnitTests
     {
         private BaseContainer Container { get; }
 
-        private readonly WireMockServer _server;
-
         public DownloadManagerTests(ITestOutputHelper output)
         {
             BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
 
-            _server = MockServer.GetPlexMockServer();
+            WireMockServer server = MockServer.GetPlexMockServer();
 
-            Log.Debug($"Server running at: {_server.Urls[0]}");
+            Log.Debug($"Server running at: {server.Urls[0]}");
         }
 
         [Fact]

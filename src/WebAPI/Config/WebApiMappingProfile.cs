@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using AutoMapper;
 using FluentResults;
-using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;

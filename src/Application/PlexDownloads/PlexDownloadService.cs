@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.DTO.WebApi;
+using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexDownloads
+namespace PlexRipper.Application
 {
     public class PlexDownloadService : IPlexDownloadService
     {

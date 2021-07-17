@@ -19,7 +19,8 @@
 			"add-alert": "Add Alert"
 		},
 		"alerts": {
-			"invalid-directory": "Directory is not a valid path!"
+			"invalid-directory": "Directory is not a valid path!",
+			"disabled-paths": "Editing the paths is disabled when there are active downloads. Make sure all downloads are stopped or cleared!"
 		}
 	},
 	"help": {

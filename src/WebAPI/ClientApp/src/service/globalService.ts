@@ -7,20 +7,10 @@ import { ObservableStoreSettings } from '@codewithdan/observable-store/interface
 import { ObservableStore } from '@codewithdan/observable-store';
 import { SettingsModel } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
-import {
-	BaseService,
-	ProgressService,
-	DownloadService,
-	ServerService,
-	SettingsService,
-	NotificationService,
-	AccountService,
-	SignalrService,
-	AlertService,
-} from '@service';
+import * as Service from '@service';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
 
-export class GlobalService extends BaseService {
+export class GlobalService extends Service.BaseService {
 	private _axiosReady: ReplaySubject<void> = new ReplaySubject();
 	private _configReady: ReplaySubject<AppConfig> = new ReplaySubject();
 
@@ -43,6 +33,7 @@ export class GlobalService extends BaseService {
 			libraries: [],
 			mediaUrls: [],
 			notifications: [],
+			folderPaths: [],
 			alerts: [],
 			helpIdDialog: '',
 			settings: {} as SettingsModel,
@@ -50,14 +41,15 @@ export class GlobalService extends BaseService {
 			downloadTaskUpdateList: [],
 		} as IStoreState);
 
-		SignalrService.setup(nuxtContext);
-		AccountService.setup(nuxtContext);
-		SettingsService.setup(nuxtContext);
-		ServerService.setup(nuxtContext);
-		DownloadService.setup(nuxtContext);
-		ProgressService.setup(nuxtContext);
-		NotificationService.setup(nuxtContext);
-		AlertService.setup(nuxtContext);
+		Service.SignalrService.setup(nuxtContext);
+		Service.AccountService.setup(nuxtContext);
+		Service.SettingsService.setup(nuxtContext);
+		Service.ServerService.setup(nuxtContext);
+		Service.DownloadService.setup(nuxtContext);
+		Service.ProgressService.setup(nuxtContext);
+		Service.NotificationService.setup(nuxtContext);
+		Service.FolderPathService.setup(nuxtContext);
+		Service.AlertService.setup(nuxtContext);
 	}
 
 	public setConfigReady(config: RuntimeConfig): void {

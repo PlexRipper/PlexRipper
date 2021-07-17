@@ -5,8 +5,8 @@
 			<p-text-field v-else v-model="newValue" />
 		</v-col>
 		<v-col cols="3" justify="right">
-			<p-btn v-if="!editMode" :button-type="editBtn" :height="50" @click="edit" />
-			<p-btn v-else :button-type="saveBtn" :height="50" @click="save" />
+			<p-btn v-if="!editMode" :button-type="editBtn" :disabled="disabled" :height="50" @click="edit" />
+			<p-btn v-else :button-type="saveBtn" :disabled="disabled" :height="50" @click="save" />
 		</v-col>
 	</v-row>
 </template>
@@ -21,6 +21,9 @@ import ButtonType from '@enums/buttonType';
 export default class EditableText extends Vue {
 	@Prop({ required: false, type: String })
 	readonly value!: string;
+
+	@Prop({ required: false, type: Boolean })
+	readonly disabled!: boolean;
 
 	editBtn: ButtonType = ButtonType.Edit;
 	saveBtn: ButtonType = ButtonType.Save;

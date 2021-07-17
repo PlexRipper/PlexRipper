@@ -24,3 +24,9 @@ export function updateFolderPath(folderPath: FolderPathDTO): Observable<ResultDT
 	const result = Axios.put(`${apiPath}`, folderPath);
 	return checkResponse<ResultDTO<FolderPathDTO>>(result, logText, 'updateFolderPath');
 }
+
+export function createFolderPath(folderPath: FolderPathDTO): Observable<ResultDTO<FolderPathDTO>> {
+	preApiRequest(logText, 'updateFolderPath');
+	const result = Axios.put(`${apiPath}`, folderPath);
+	return checkResponse<ResultDTO<FolderPathDTO>>(result, logText, 'updateFolderPath');
+}

@@ -21,6 +21,17 @@ namespace PlexRipper.Application.FolderPaths
             return _mediator.Send(new GetAllFolderPathsQuery());
         }
 
+        public async Task<Result<FolderPath>> CreateFolderPath(FolderPath folderPath)
+        {
+            var folderPathId = await _mediator.Send(new CreateFolderPathCommand(folderPath));
+            if (folderPathId.IsFailed)
+            {
+                return folderPathId.ToResult();
+            }
+
+            return await _mediator.Send(new GetFolderPathByIdQuery(folderPathId.Value));
+        }
+
         public Task<Result<FolderPath>> UpdateFolderPathAsync(FolderPath folderPath)
         {
             return _mediator.Send(new UpdateFolderPathCommand(folderPath));

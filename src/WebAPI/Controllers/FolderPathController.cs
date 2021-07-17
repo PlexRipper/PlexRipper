@@ -49,7 +49,7 @@ namespace PlexRipper.WebAPI.Controllers
             return Ok(Result.Ok(mapResult));
         }
 
-        // POST: api/<FolderPathController>
+        // PUT: api/<FolderPathController>
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<FolderPathDTO>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
@@ -62,5 +62,17 @@ namespace PlexRipper.WebAPI.Controllers
             folderPathDto = _mapper.Map<FolderPathDTO>(result.Value);
             return result.IsFailed ? BadRequest(result) : Ok(Result.Ok(folderPathDto));
         }
+
+        // POST: api/<FolderPathController>/create
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<FolderPathDTO>))]
+        public async Task<IActionResult> Create(FolderPathDTO folderPathDto)
+        {
+            var folderPath = _mapper.Map<FolderPath>(folderPathDto);
+            var result = await _folderPathService.CreateFolderPath(folderPath);
+            var mapResult = _mapper.Map<List<FolderPathDTO>>(result.Value);
+            return Ok(Result.Ok(mapResult));
+        }
+
     }
 }

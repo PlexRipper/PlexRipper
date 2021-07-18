@@ -19,14 +19,12 @@
 import { Component, Vue } from 'vue-property-decorator';
 import PathsDefaultOverview from '@overviews/PathsDefaultOverview.vue';
 import PathsCustomOverview from '@overviews/PathsCustomOverview.vue';
-import Page from '@components/General/Page.vue';
 import { FolderType } from '@dto/mainApi';
 
 @Component({
 	components: {
 		PathsDefaultOverview,
 		PathsCustomOverview,
-		Page,
 	},
 })
 export default class SettingsPaths extends Vue {

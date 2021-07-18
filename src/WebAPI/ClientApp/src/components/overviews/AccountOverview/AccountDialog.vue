@@ -141,7 +141,7 @@ import HelpIcon from '@components/Help/HelpIcon.vue';
 import ProgressComponent from '@components/ProgressComponent.vue';
 import { SignalrService } from '@service';
 import ConfirmationDialog from '@components/General/ConfirmationDialog.vue';
-import PBtn from '@components/General/PlexRipperButton.vue';
+import PBtn from '@components/Extensions/PlexRipperButton.vue';
 import ButtonType from '@/types/enums/buttonType';
 
 @Component({

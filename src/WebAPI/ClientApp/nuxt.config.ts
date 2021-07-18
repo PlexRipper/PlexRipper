@@ -38,6 +38,53 @@ const config: NuxtConfig = {
 	 */
 	loading: false,
 	/*
+	 ** Auto-import components
+	 *  Doc: https://github.com/nuxt/components
+	 */
+	components: [
+		// '~/components/AppBar',
+		// '~/components/DebugTools',
+		// '~/components/Dialogs',
+		// '~/components/Footer',
+		// '~/components/Form',
+		// '~/components/General/VTreeViewTable',
+		// '~/components/Help',
+		// '~/components/MediaOverview/index.ts',
+		// '~/pages/downloads/components',
+		// '~/pages/settings/components',
+		// '~/pages/setup/components',
+		{
+			path: '~/components',
+			pattern: '**/*.vue',
+			extensions: ['vue'],
+		},
+		{
+			path: '~/components/General',
+			pattern: '**/*.vue',
+			extensions: ['vue'],
+		},
+		{
+			path: '~/components/Layout',
+			pattern: '**/*.vue',
+			extensions: ['vue'],
+		},
+		{
+			path: '~/components/Form',
+			pattern: '**/*.vue',
+			extensions: ['vue'],
+		},
+		{
+			path: '~/components/Extensions',
+			pattern: '**/*.vue',
+			extensions: ['vue'],
+		},
+		{
+			path: '~/pages',
+			pattern: '**/components/*.vue',
+			extensions: ['vue'],
+		},
+	],
+	/*
 	 ** Plugins to load before mounting the App
 	 */
 	plugins: [

@@ -19,9 +19,9 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { SettingsService } from '@service';
-import { debounce, distinctUntilChanged, map } from 'rxjs/operators';
 import { timer } from 'rxjs';
+import { debounce, distinctUntilChanged, map } from 'rxjs/operators';
+import { SettingsService } from '@service';
 
 @Component
 export default class DownloadManagerSection extends Vue {

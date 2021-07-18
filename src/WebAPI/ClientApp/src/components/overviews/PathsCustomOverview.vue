@@ -64,21 +64,10 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { FolderPathDTO, FolderType } from '@dto/mainApi';
-import ValidIcon from '@components/General/ValidIcon.vue';
-import HelpIcon from '@components/Help/HelpIcon.vue';
-import EditableText from '@components/Form/EditableText.vue';
 import ButtonType from '@enums/buttonType';
 import { DownloadService, FolderPathService } from '@service';
-import DirectoryBrowser from '../General/DirectoryBrowser.vue';
 
-@Component({
-	components: {
-		DirectoryBrowser,
-		EditableText,
-		ValidIcon,
-		HelpIcon,
-	},
-})
+@Component
 export default class PathsCustomOverview extends Vue {
 	@Prop({ required: true, type: String })
 	readonly folderType!: FolderType;

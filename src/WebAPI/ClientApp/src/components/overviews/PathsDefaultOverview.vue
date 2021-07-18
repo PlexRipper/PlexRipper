@@ -49,21 +49,10 @@ import { Vue, Component } from 'vue-property-decorator';
 import { FolderPathDTO } from '@dto/mainApi';
 import { updateFolderPath } from '@api/pathApi';
 import { kebabCase } from 'lodash';
-import ValidIcon from '@components/General/ValidIcon.vue';
-import HelpIcon from '@components/Help/HelpIcon.vue';
-import EditableText from '@components/Form/EditableText.vue';
 import ButtonType from '@enums/buttonType';
 import { DownloadService, FolderPathService } from '@service';
-import DirectoryBrowser from '../General/DirectoryBrowser.vue';
 
-@Component({
-	components: {
-		DirectoryBrowser,
-		EditableText,
-		ValidIcon,
-		HelpIcon,
-	},
-})
+@Component
 export default class PathsDefaultOverview extends Vue {
 	folderPaths: FolderPathDTO[] = [];
 

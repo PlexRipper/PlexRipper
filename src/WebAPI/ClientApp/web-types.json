@@ -417,6 +417,14 @@
                 "kind": "expression",
                 "type": "string"
               }
+            },
+            {
+              "name": "disabled",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
             }
           ],
           "events": [
@@ -1003,7 +1011,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/General/PlexRipperButton.vue",
+            "module": "./src/components/Extensions/PlexRipperButton.vue",
             "symbol": "default"
           }
         },
@@ -1031,7 +1039,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/General/PlexRipperCheckBox.vue",
+            "module": "./src/components/Extensions/PlexRipperCheckBox.vue",
             "symbol": "default"
           }
         },
@@ -1047,7 +1055,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/General/Section.vue",
+            "module": "./src/components/Layout/Section.vue",
             "symbol": "default"
           }
         },
@@ -1093,7 +1101,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/Generic/PlexRipperTextField.vue",
+            "module": "./src/components/Extensions/PlexRipperTextField.vue",
             "symbol": "default"
           }
         },
@@ -1117,15 +1125,33 @@
             }
           ],
           "source": {
-            "module": "./src/components/General/Page.vue",
+            "module": "./src/components/Layout/Page.vue",
             "symbol": "default"
           }
         },
         {
-          "name": "PathsOverview",
+          "name": "PathsCustomOverview",
+          "description": "",
+          "attributes": [
+            {
+              "name": "folderType",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "FolderType"
+              }
+            }
+          ],
+          "source": {
+            "module": "./src/components/overviews/PathsCustomOverview.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "PathsDefaultOverview",
           "description": "",
           "source": {
-            "module": "./src/components/overviews/PathsOverview.vue",
+            "module": "./src/components/overviews/PathsDefaultOverview.vue",
             "symbol": "default"
           }
         },

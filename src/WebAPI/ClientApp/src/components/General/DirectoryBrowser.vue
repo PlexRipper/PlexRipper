@@ -9,13 +9,7 @@
 								<label>Select {{ path.displayName }}</label>
 							</v-col>
 							<v-col cols="12" style="max-height: 75px">
-								<v-text-field
-									v-model="newDirectory"
-									outlined
-									color="red"
-									placeholder="Start typing or select a path below"
-									@input="newDirectory = $event"
-								/>
+								<v-text-field v-model="newDirectory" outlined color="red" placeholder="Start typing or select a path below" />
 							</v-col>
 						</v-row>
 					</v-card-title>
@@ -73,13 +67,14 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify';
 import { getDirectoryPath } from '@api/pathApi';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
 import { FileSystemEntityType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
+import { debounce, distinctUntilChanged, map } from 'rxjs/operators';
+import { timer } from 'rxjs';
 
 @Component
 export default class DirectoryBrowser extends Vue {
@@ -110,7 +105,6 @@ export default class DirectoryBrowser extends Vue {
 	];
 
 	getIcon(type: FileSystemEntityType): string {
-		Log.info(type);
 		switch (type) {
 			case FileSystemEntityType.Parent:
 				return 'mdi-arrow-left';
@@ -183,6 +177,20 @@ export default class DirectoryBrowser extends Vue {
 				this.isLoading = false;
 			}
 		});
+	}
+
+	mounted(): void {
+		// On user input request the path
+		this.$subscribeTo(
+			this.$watchAsObservable('newDirectory').pipe(
+				map((x: { oldValue: string; newValue: string }) => x.newValue),
+				debounce(() => timer(1000)),
+				distinctUntilChanged(),
+			),
+			(value) => {
+				this.requestDirectories(value);
+			},
+		);
 	}
 }
 </script>

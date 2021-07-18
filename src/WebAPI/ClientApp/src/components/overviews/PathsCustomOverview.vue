@@ -1,26 +1,46 @@
 <template>
 	<v-container fluid>
 		<!--	Custom FolderPaths	-->
-		<v-row v-for="folderPath in getFolderPaths" :key="folderPath.id" no-gutters>
-			<v-col cols="3">
-				<editable-text :value="folderPath.displayName" :disabled="!allowEditing" @save="saveDisplayName(folderPath.id, $event)" />
-			</v-col>
-			<v-col cols>
-				<p-text-field
-					append-icon="mdi-folder-open"
-					:value="folderPath.directory"
-					readonly
-					:disabled="!allowEditing"
-					@click:append="openDirectoryBrowser(folderPath)"
-				/>
-			</v-col>
-			<v-col cols="2">
-				<!--	Is Valid Icon -->
-				<valid-icon :valid="folderPath.isValid" :text="$t('general.alerts.invalid-directory')" />
-				<!--	Delete Button -->
-				<p-btn :button-type="deleteBtn" no-text :disabled="!allowEditing" :height="50" @click="deleteFolderPath(folderPath.id)" />
-			</v-col>
-		</v-row>
+		<template v-if="getFolderPaths.length > 0">
+			<v-row v-for="folderPath in getFolderPaths" :key="folderPath.id" no-gutters>
+				<v-col cols="3">
+					<editable-text
+						:value="folderPath.displayName"
+						:disabled="!allowEditing"
+						@save="saveDisplayName(folderPath.id, $event)"
+					/>
+				</v-col>
+				<v-col cols>
+					<p-text-field
+						append-icon="mdi-folder-open"
+						:value="folderPath.directory"
+						readonly
+						:disabled="!allowEditing"
+						@click:append="openDirectoryBrowser(folderPath)"
+					/>
+				</v-col>
+				<v-col cols="2">
+					<!--	Is Valid Icon -->
+					<valid-icon :valid="folderPath.isValid" :text="$t('general.alerts.invalid-directory')" />
+					<!--	Delete Button -->
+					<p-btn
+						:button-type="deleteBtn"
+						no-text
+						:disabled="!allowEditing"
+						:height="50"
+						@click="deleteFolderPath(folderPath.id)"
+					/>
+				</v-col>
+			</v-row>
+		</template>
+		<!--	No custom FolderPaths	Warning-->
+		<template v-else>
+			<v-row justify="center">
+				<v-col cols="auto">
+					<h2>No paths are set.</h2>
+				</v-col>
+			</v-row>
+		</template>
 		<!--	Add Path Button	-->
 		<v-row justify="center">
 			<v-col cols="1">
@@ -75,7 +95,7 @@ export default class PathsCustomOverview extends Vue {
 	allowEditing: boolean = true;
 
 	get getFolderPaths(): FolderPathDTO[] {
-		return this.folderPaths.filter((x) => x.type === this.folderType);
+		return this.folderPaths.filter((x) => x.type === this.folderType && x.id >= 4);
 	}
 
 	openDirectoryBrowser(path: FolderPathDTO): void {

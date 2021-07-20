@@ -167,7 +167,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import PathsOverview from '@overviews/PathsCustomOverview.vue';
 import AccountOverview from '@overviews/AccountOverview/AccountOverview.vue';
 import ExternalLink from '@components/General/ExternalLink.vue';
-import PBtn from '@components/Extensions/PlexRipperButton.vue';
+import PBtn from '@components/Extensions/PButton.vue';
 import ConfirmationDialog from '@components/General/ConfirmationDialog.vue';
 import { SettingsService } from '@service';
 import NavigationBar from './components/NavigationBar.vue';

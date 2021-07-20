@@ -15,7 +15,7 @@ grid
  * (see : https://github.com/vuetifyjs/vuetify/issues/11408)
  * TODO - remove this after migration
  */
-.row:not([class*="my-"]):not([class*="ma-"]):not([class*="mt-"]):not([class*="mb-"]) {
+.row:not([class*='my-']):not([class*='ma-']):not([class*='mt-']):not([class*='mb-']) {
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
 }
@@ -184,4 +184,27 @@ v-card
 }
 .theme--light.v-card {
 	background-color: $light-theme-glass-background;
+}
+
+/*
+v-tabs
+*/
+.v-tabs--vertical {
+	.v-tab {
+		justify-content: left;
+	}
+}
+
+/*
+Transparent Background
+*/
+
+.theme--dark {
+	&.v-tabs > .v-tabs-bar {
+		@extend .no-background;
+	}
+
+	&.v-tabs-items {
+		@extend .no-background;
+	}
 }

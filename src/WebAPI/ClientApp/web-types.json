@@ -1060,6 +1060,52 @@
           }
         },
         {
+          "name": "PSelect",
+          "description": "",
+          "attributes": [
+            {
+              "name": "height",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "50"
+            },
+            {
+              "name": "dense",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "name": "outlined",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "name": "solo",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Extensions/PlexRipperSelect.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "PTextField",
           "description": "",
           "attributes": [

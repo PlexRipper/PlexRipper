@@ -53,6 +53,7 @@ const config: NuxtConfig = {
 		// '~/pages/downloads/components',
 		// '~/pages/settings/components',
 		// '~/pages/setup/components',
+		'~/components/Extensions',
 		{
 			path: '~/components',
 			pattern: '**/*.vue',
@@ -73,11 +74,7 @@ const config: NuxtConfig = {
 			pattern: '**/*.vue',
 			extensions: ['vue'],
 		},
-		{
-			path: '~/components/Extensions',
-			pattern: '**/*.vue',
-			extensions: ['vue'],
-		},
+
 		{
 			path: '~/pages',
 			pattern: '**/components/*.vue',

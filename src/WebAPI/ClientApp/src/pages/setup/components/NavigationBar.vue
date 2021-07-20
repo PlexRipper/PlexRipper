@@ -20,7 +20,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import DarkModeToggle from '@components/General/DarkModeToggle.vue';
-import PBtn from '@components/Extensions/PlexRipperButton.vue';
+import PBtn from '@components/Extensions/PButton.vue';
 import ButtonType from '@enums/buttonType';
 
 @Component({

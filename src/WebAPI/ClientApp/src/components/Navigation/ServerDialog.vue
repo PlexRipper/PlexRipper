@@ -62,7 +62,7 @@
 							<tbody>
 								<!--	Download Destinations	-->
 								<tr v-for="library in plexServer.plexLibraries" :key="library.id">
-									<td style="width: 25%">{{ library.title }}</td>
+									<td style="width: 50%"><media-type-icon :media-type="library.type" class="mx-3" />{{ library.title }}</td>
 									<td>
 										<p-select :value="{}" item-text="displayName" item-value="id" :items="getFolderPathOptions(library.type)" />
 									</td>

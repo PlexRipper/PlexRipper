@@ -40,6 +40,12 @@ namespace PlexRipper.Data.Configurations
                 .HasForeignKey(x => x.PlexLibraryId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder
+                .HasOne(x => x.DefaultDestination)
+                .WithMany(x => x.PlexLibraries)
+                .HasForeignKey(x => x.DefaultDestinationId)
+                .OnDelete(DeleteBehavior.SetNull);
+
 
 
             var converter = new EnumToStringConverter<PlexMediaType>();

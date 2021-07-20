@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 
@@ -44,6 +45,12 @@ namespace PlexRipper.Domain
         {
             return Directory.Exists(DirectoryPath);
         }
+
+        #endregion
+
+        #region Relationships
+
+        public List<PlexLibrary> PlexLibraries { get; set; }
 
         #endregion
     }

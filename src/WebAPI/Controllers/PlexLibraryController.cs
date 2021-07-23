@@ -4,6 +4,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
+using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -26,7 +27,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexLibraryDTO>>))]
         public async Task<IActionResult> GetPlexLibraries()
         {
-            return ToActionResult(await _plexLibraryService.GetAllPlexLibrariesAsync());
+            return ToActionResult<List<PlexLibrary>, List<PlexLibraryDTO>>(await _plexLibraryService.GetAllPlexLibrariesAsync());
         }
 
         // GET api/<PlexLibrary>/5
@@ -41,7 +42,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(id, nameof(id));
             }
 
-            return ToActionResult(await _plexLibraryService.GetPlexLibraryAsync(id, !allMedia));
+            return ToActionResult<PlexLibrary, PlexLibraryDTO>(await _plexLibraryService.GetPlexLibraryAsync(id, !allMedia));
         }
 
         // GET api/<PlexLibrary>/5
@@ -56,7 +57,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(id, nameof(id));
             }
 
-            return ToActionResult(await _plexLibraryService.GetPlexLibraryInServerAsync(id, true));
+            return ToActionResult<PlexServer, PlexServerDTO>(await _plexLibraryService.GetPlexLibraryInServerAsync(id, true));
         }
 
         // POST api/<PlexLibrary>/refresh
@@ -71,7 +72,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest();
             }
 
-            return ToActionResult(await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId));
+            return ToActionResult<PlexLibrary, PlexLibraryDTO>(await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId));
         }
 
         // POST api/<PlexLibrary>/settings/default/destination/{id:int}

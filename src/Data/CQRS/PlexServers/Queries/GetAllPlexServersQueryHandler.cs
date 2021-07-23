@@ -24,24 +24,32 @@ namespace PlexRipper.Data.CQRS.PlexServers
         {
             if (request.PlexAccountId == 0)
             {
-                // TODO This might return PlexServers which have no PlexAccounts available that can access them.
-                var query = await _dbContext.PlexServers
-                    .Include(x => x.ServerStatus)
-                    .Include(x => x.PlexLibraries)
-                    .ToListAsync(cancellationToken);
+                var query = PlexServerQueryable.Include(x => x.ServerStatus).AsQueryable();
 
-                return Result.Ok(query);
+                if (request.IncludeLibraries)
+                {
+                    query = query.Include(x => x.PlexLibraries);
+                }
+
+                var plexServers = await query.ToListAsync(cancellationToken);
+
+                // TODO This might return PlexServers which have no PlexAccounts available that can access them.
+                return Result.Ok(plexServers);
             }
             else
             {
-                var query = await _dbContext.PlexAccountServers
-                    .Include(x => x.PlexServer)
-                    .ThenInclude(x => x.ServerStatus)
-                    .Include(x => x.PlexServer)
-                    .ThenInclude(x => x.PlexLibraries)
-                    .Where(x => x.PlexAccountId == request.PlexAccountId)
+                var query = _dbContext.PlexAccountServers
+                    .Include(x => x.PlexServer).AsQueryable();
+
+                if (request.IncludeLibraries)
+                {
+                    query = query.Include(x => x.PlexServer).ThenInclude(x => x.PlexLibraries);
+                }
+
+                var plexServers = await query.Where(x => x.PlexAccountId == request.PlexAccountId)
                     .ToListAsync();
-                return Result.Ok(query.Select(x => x.PlexServer).ToList());
+
+                return Result.Ok(plexServers.Select(x => x.PlexServer).ToList());
             }
         }
     }

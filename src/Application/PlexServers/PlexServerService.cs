@@ -215,7 +215,7 @@ namespace PlexRipper.Application.PlexServers
         /// <param name="plexAccount">The <see cref="PlexAccount"/> to check with.</param>
         /// <param name="refresh">Should the <see cref="PlexServer"/>s data be retrieved from the PlexApi.</param>
         /// <returns>The list of <see cref="PlexServer"/>s.</returns>
-        public async Task<Result<List<PlexServer>>> GetServersAsync(PlexAccount plexAccount, bool refresh = false)
+        public async Task<Result<List<PlexServer>>> GetServersByPlexAccountAsync(PlexAccount plexAccount, bool refresh = false)
         {
             if (plexAccount == null)
             {
@@ -249,10 +249,10 @@ namespace PlexRipper.Application.PlexServers
         }
 
         /// <inheritdoc/>
-        public async Task<Result<List<PlexServer>>> GetServersAsync(int plexAccountId = 0)
+        public async Task<Result<List<PlexServer>>> GetAllServersAsync(bool includeLibraries, int plexAccountId = 0)
         {
             // Retrieve all servers
-            return await _mediator.Send(new GetAllPlexServersQuery(plexAccountId));
+            return await _mediator.Send(new GetAllPlexServersQuery(includeLibraries, plexAccountId));
         }
 
         #endregion

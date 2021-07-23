@@ -41,15 +41,14 @@ export class GlobalService extends Service.BaseService {
 			downloadTaskUpdateList: [],
 		} as IStoreState);
 
-		Service.SignalrService.setup(nuxtContext);
-		Service.AccountService.setup(nuxtContext);
-		Service.SettingsService.setup(nuxtContext);
-		Service.ServerService.setup(nuxtContext);
-		Service.DownloadService.setup(nuxtContext);
-		Service.ProgressService.setup(nuxtContext);
-		Service.NotificationService.setup(nuxtContext);
-		Service.FolderPathService.setup(nuxtContext);
-		Service.AlertService.setup(nuxtContext);
+		for (const key of Object.keys(Service)) {
+			if (key === 'BaseService' || key === 'GlobalService') {
+				continue;
+			}
+			if (Service[key] && typeof Service[key].setup === 'function') {
+				Service[key].setup(nuxtContext);
+			}
+		}
 	}
 
 	public setConfigReady(config: RuntimeConfig): void {

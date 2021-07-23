@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210722085105_MakeDefaultDestinationNullable")]
+    partial class MakeDefaultDestinationNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,55 +201,6 @@ namespace PlexRipper.Data.Migrations
                             DirectoryPath = "/tvshows",
                             DisplayName = "Tv Show Destination Path",
                             Type = "TvShowFolder"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            DirectoryPath = "/music",
-                            DisplayName = "Music Destination Path",
-                            Type = "MusicFolder"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            DirectoryPath = "/photos",
-                            DisplayName = "Photos Destination Path",
-                            Type = "PhotosFolder"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            DirectoryPath = "/other",
-                            DisplayName = "Other Videos Destination Path",
-                            Type = "OtherVideosFolder"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            DirectoryPath = "/games",
-                            DisplayName = "Games Videos Destination Path",
-                            Type = "GamesVideosFolder"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            DirectoryPath = "/",
-                            DisplayName = "Reserved #1 Destination Path",
-                            Type = "None"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            DirectoryPath = "/",
-                            DisplayName = "Reserved #2 Destination Path",
-                            Type = "None"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            DirectoryPath = "/",
-                            DisplayName = "Reserved #3 Destination Path",
-                            Type = "None"
                         });
                 });
 

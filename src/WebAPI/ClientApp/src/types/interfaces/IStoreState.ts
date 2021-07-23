@@ -14,8 +14,8 @@ import { FolderPathService } from '~/service/folderPathService';
 export default interface IStoreState {
 	accounts: PlexAccountDTO[];
 	servers: PlexServerDTO[];
-	downloads: DownloadTaskDTO[];
 	libraries: PlexLibraryDTO[];
+	downloads: DownloadTaskDTO[];
 	notifications: NotificationDTO[];
 	folderPaths: FolderPathDTO[];
 	alerts: IAlert[];

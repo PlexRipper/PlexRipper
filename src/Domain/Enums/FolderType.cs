@@ -21,5 +21,17 @@ namespace PlexRipper.Domain
 
         [EnumMember(Value = "TvShowFolder")]
         TvShowFolder = 3,
+
+        [EnumMember(Value = "MusicFolder")]
+        MusicFolder = 4,
+
+        [EnumMember(Value = "PhotosFolder")]
+        PhotosFolder = 5,
+
+        [EnumMember(Value = "OtherVideosFolder")]
+        OtherVideosFolder = 6,
+
+        [EnumMember(Value = "GamesVideosFolder")]
+        GamesVideosFolder = 7,
     }
 }

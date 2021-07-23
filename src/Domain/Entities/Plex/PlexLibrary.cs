@@ -93,7 +93,7 @@ namespace PlexRipper.Domain
         /// <summary>
         /// Gets or sets the Id of the Default Destination <see cref="FolderPath"/>.
         /// </summary>
-        public int DefaultDestinationId { get; set; }
+        public int? DefaultDestinationId { get; set; }
 
         public List<PlexMovie> Movies { get; set; }
 

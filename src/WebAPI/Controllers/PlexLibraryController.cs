@@ -1,12 +1,9 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
-using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
-using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -24,11 +21,18 @@ namespace PlexRipper.WebAPI.Controllers
             _plexLibraryService = plexLibraryService;
         }
 
+        // GET api/<PlexLibrary>/
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexLibraryDTO>>))]
+        public async Task<IActionResult> GetPlexLibraries()
+        {
+            return ToActionResult(await _plexLibraryService.GetAllPlexLibrariesAsync());
+        }
+
         // GET api/<PlexLibrary>/5
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> GetPlexLibrary(int id, [FromQuery] bool allMedia = false)
         {
@@ -37,94 +41,51 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(id, nameof(id));
             }
 
-            try
-            {
-                Log.Debug($"API Request: GetPlexLibrary(plexLibraryId = {id} allMedia = {allMedia})");
-                var stopWatch = new Stopwatch();
-                stopWatch.Start();
-                var data = await _plexLibraryService.GetPlexLibraryAsync(id, !allMedia);
-
-                if (data.IsFailed)
-                {
-                    return InternalServerError(data);
-                }
-
-                if (data.Value != null)
-                {
-                    var result = _mapper.Map<PlexLibraryDTO>(data.Value);
-                    stopWatch.Stop();
-                    Log.Debug(
-                        $"Found {data.Value.MediaCount} in library {data.Value.Title} of type {data.Value.Type} - in {stopWatch.ElapsedMilliseconds}ms");
-                    return Ok(Result.Ok(result));
-                }
-
-                stopWatch.Stop();
-                string message = $"Could not find a {nameof(PlexLibrary)} with Id: {id}";
-                Log.Warning(message);
-                return NotFound(message);
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            return ToActionResult(await _plexLibraryService.GetPlexLibraryAsync(id, !allMedia));
         }
 
         // GET api/<PlexLibrary>/5
         [HttpGet("inserver/{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> GetPlexLibraryInServer(int id, int plexAccountId = 0)
+        public async Task<IActionResult> GetPlexLibraryInServer(int id)
         {
             if (id <= 0)
             {
                 return BadRequest(id, nameof(id));
             }
 
-            try
-            {
-                var data = await _plexLibraryService.GetPlexLibraryInServerAsync(id, true);
-
-                if (data.IsFailed)
-                {
-                    return InternalServerError(data);
-                }
-
-                if (data.Value != null)
-                {
-                    var result = _mapper.Map<PlexServerDTO>(data.Value);
-                    return Ok(Result.Ok(result));
-                }
-
-                string message = $"Could not find a {nameof(PlexLibrary)} with Id: {id}";
-                Log.Warning(message);
-                return NotFound(message);
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            return ToActionResult(await _plexLibraryService.GetPlexLibraryInServerAsync(id, true));
         }
 
         // POST api/<PlexLibrary>/refresh
         [HttpPost("refresh")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibraryDTO refreshPlexLibraryDto)
         {
-            var data = await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId);
-
-            if (data.IsSuccess)
+            if (refreshPlexLibraryDto is null)
             {
-                return Ok(Result.Ok());
+                return BadRequest();
             }
 
-            string msg = $"Could not refresh {nameof(PlexLibrary)} with Id: {refreshPlexLibraryDto.PlexLibraryId}";
-            Log.Warning(msg);
-            return InternalServerError(data);
+            return ToActionResult(await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId));
         }
 
+        // POST api/<PlexLibrary>/settings/default/destination/{id:int}
+        [HttpPut("settings/default/destination")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> UpdateDefaultDestination([FromBody] UpdateDefaultDestinationDTO payload)
+        {
+            if (payload is null)
+            {
+                return BadRequest();
+            }
 
+            return ToActionResult(await _plexLibraryService.UpdateDefaultDestinationLibrary(payload.LibraryId, payload.FolderPathId));
+        }
     }
 }

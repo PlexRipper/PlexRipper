@@ -15,7 +15,7 @@ export function getPlexServer(serverId: number): Observable<ResultDTO<PlexServer
 
 export function getPlexServers(): Observable<ResultDTO<PlexServerDTO[]>> {
 	preApiRequest(logText, 'getPlexServers');
-	const result = Axios.get(`${apiPath}/`);
+	const result = Axios.get(`${apiPath}`);
 	return checkResponse<ResultDTO<PlexServerDTO[]>>(result, logText, 'getPlexServers');
 }
 export function checkPlexServer(serverId: number): Observable<ResultDTO<PlexServerStatusDTO | null>> {

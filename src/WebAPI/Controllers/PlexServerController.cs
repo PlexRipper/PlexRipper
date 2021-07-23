@@ -30,17 +30,8 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _plexServerService.GetServersAsync();
-            if (result.IsFailed)
-            {
-                if (result.Has400BadRequestError())
-                {
-                    return BadRequest(result.LogError());
-                }
-            }
 
-            var mapResult = _mapper.Map<List<PlexServerDTO>>(result.Value);
-            return Ok(Result.Ok(mapResult));
+            return ToActionResult<List<PlexServer>, List<PlexServerDTO>>(await _plexServerService.GetAllServersAsync(false));
         }
 
         // GET api/<PlexServerController>/5
@@ -91,6 +82,7 @@ namespace PlexRipper.WebAPI.Controllers
 
             var mapResult = _mapper.Map<PlexServerDTO>(result.Value);
             return Ok(Result.Ok(mapResult));
+
         }
 
         // GET api/<PlexServerController>/5/check

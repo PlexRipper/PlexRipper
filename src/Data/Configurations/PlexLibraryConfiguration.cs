@@ -47,7 +47,6 @@ namespace PlexRipper.Data.Configurations
                 .OnDelete(DeleteBehavior.SetNull);
 
 
-
             var converter = new EnumToStringConverter<PlexMediaType>();
             builder
                 .Property(e => e.Type)

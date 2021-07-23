@@ -5,6 +5,7 @@ import { BaseService, GlobalService } from '@service';
 import { getFolderPaths, createFolderPath, updateFolderPath, deleteFolderPath } from '@api/pathApi';
 import IStoreState from '@interfaces/IStoreState';
 import { Context } from '@nuxt/types';
+import Log from 'consola';
 
 export class FolderPathService extends BaseService {
 	public constructor() {
@@ -30,6 +31,8 @@ export class FolderPathService extends BaseService {
 			.pipe(take(1))
 			.subscribe((result) => {
 				if (result.isSuccess) {
+					Log.debug(`FolderPathService => Fetch Folder Paths`, result.value);
+
 					this.setState({ folderPaths: result.value }, 'Set Folder Paths');
 				}
 			});

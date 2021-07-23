@@ -61,10 +61,16 @@
 						<v-simple-table class="section-table">
 							<tbody>
 								<!--	Download Destinations	-->
-								<tr v-for="library in plexServer.plexLibraries" :key="library.id">
+								<tr v-for="library in plexLibraries" :key="library.id">
 									<td style="width: 50%"><media-type-icon :media-type="library.type" class="mx-3" />{{ library.title }}</td>
 									<td>
-										<p-select :value="{}" item-text="displayName" item-value="id" :items="getFolderPathOptions(library.type)" />
+										<p-select
+											:value="library.defaultDestinationId"
+											item-text="displayName"
+											item-value="id"
+											:items="getFolderPathOptions(library.type)"
+											@change="updateDefaultDestination(library.id, $event)"
+										/>
 									</td>
 								</tr>
 							</tbody>
@@ -85,8 +91,8 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { FolderPathDTO, FolderType, PlexMediaType, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
-import { FolderPathService, ServerService } from '@service';
+import { FolderPathDTO, FolderType, PlexLibraryDTO, PlexMediaType, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { FolderPathService, LibraryService, ServerService } from '@service';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 
@@ -99,6 +105,7 @@ export default class ServerDialog extends Vue {
 
 	plexServer: PlexServerDTO | null = null;
 	folderPaths: FolderPathDTO[] = [];
+	plexLibraries: PlexLibraryDTO[] = [];
 
 	get serverStatus(): PlexServerStatusDTO | null {
 		return this.plexServer?.status ?? null;
@@ -123,16 +130,29 @@ export default class ServerDialog extends Vue {
 		this.$emit('close');
 	}
 
+	updateDefaultDestination(libraryId: number, folderPathId: number): void {
+		LibraryService.updateDefaultDestination(libraryId, folderPathId);
+	}
+
 	mounted(): void {
 		this.$subscribeTo(
 			this.$watchAsObservable('serverId').pipe(
 				map((x: { oldValue: number; newValue: number }) => x.newValue),
 				tap((value) => Log.debug('new value:', value)),
-				switchMap((value) => combineLatest([ServerService.getServer(value), FolderPathService.getFolderPaths()])),
+				switchMap((value) =>
+					combineLatest([
+						ServerService.getServer(value),
+						LibraryService.getLibrariesByServerId(value),
+						FolderPathService.getFolderPaths(),
+					]),
+				),
 			),
-			([plexServer, folderPaths]: [PlexServerDTO | null, FolderPathDTO[]]) => {
+			([plexServer, plexLibraries, folderPaths]: [PlexServerDTO | null, PlexLibraryDTO[], FolderPathDTO[]]) => {
 				if (plexServer) {
 					this.plexServer = plexServer;
+				}
+				if (plexLibraries) {
+					this.plexLibraries = plexLibraries;
 				}
 				if (folderPaths) {
 					this.folderPaths = folderPaths;

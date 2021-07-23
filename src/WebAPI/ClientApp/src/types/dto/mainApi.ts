@@ -77,6 +77,9 @@ export enum PlexMediaType {
   Music = "Music",
   Album = "Album",
   Song = "Song",
+  Photos = "Photos",
+  OtherVideos = "OtherVideos",
+  Games = "Games",
   Unknown = "Unknown",
 }
 
@@ -126,6 +129,10 @@ export enum FolderType {
   DownloadFolder = "DownloadFolder",
   MovieFolder = "MovieFolder",
   TvShowFolder = "TvShowFolder",
+  MusicFolder = "MusicFolder",
+  PhotosFolder = "PhotosFolder",
+  OtherVideosFolder = "OtherVideosFolder",
+  GamesVideosFolder = "GamesVideosFolder",
 }
 
 export type ResultDTOOfFileSystemDTO = ResultDTO & { value: FileSystemDTO };
@@ -259,6 +266,10 @@ export interface PlexLibraryDTO {
   /** @format int32 */
   libraryLocationId: number;
   libraryLocationPath: string;
+  defaultDestination: FolderPathDTO;
+
+  /** @format int32 */
+  defaultDestinationId: number;
 
   /** @format int32 */
   plexServerId: number;

@@ -54,6 +54,11 @@
 								</tr>
 							</tbody>
 						</v-simple-table>
+						<!--	Close action	-->
+						<v-card-actions>
+							<v-spacer></v-spacer>
+							<p-btn text-id="check-server-status" @click="checkServer" />
+						</v-card-actions>
 					</v-tab-item>
 
 					<!--	Library Download Destinations	Tab Content -->
@@ -78,12 +83,6 @@
 					</v-tab-item>
 				</v-tabs>
 			</v-card-text>
-
-			<!--	Close action	-->
-			<v-card-actions>
-				<v-spacer></v-spacer>
-				<p-btn text-id="check-server-status" @click="checkServer" />
-			</v-card-actions>
 		</v-card>
 	</v-dialog>
 </template>

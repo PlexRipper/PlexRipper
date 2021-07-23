@@ -19,8 +19,8 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET: api/<FolderPathController>
         [HttpGet("OkResult")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(Result))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult GetOkResult([FromQuery] bool fail)
         {
             if (!fail)
@@ -31,8 +31,8 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET: api/<FolderPathController>
         [HttpGet("OkResult/int")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<int>))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(Result))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<int>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult GetOkResultInt([FromQuery] bool fail)
         {
             if (!fail)
@@ -43,8 +43,8 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET: api/<FolderPathController>
         [HttpGet("OkResult/object")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Result<DownloadTaskDTO>))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(Result))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<DownloadTaskDTO>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult GetOkResultObject([FromQuery] bool fail)
         {
             if (!fail)

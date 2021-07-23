@@ -158,7 +158,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
 
         /// <inheritdoc/>
-        public async Task<Result<bool>> RefreshPlexAccount(int plexAccountId = 0)
+        public async Task<Result> RefreshPlexAccount(int plexAccountId = 0)
         {
             if (plexAccountId == 0)
             {
@@ -192,7 +192,7 @@ namespace PlexRipper.Application.PlexAccounts
                 }
             }
 
-            return Result.Ok(true);
+            return Result.Ok();
         }
 
         /// <summary>
@@ -373,7 +373,7 @@ namespace PlexRipper.Application.PlexAccounts
         /// </summary>
         /// <param name="plexAccountId"></param>
         /// <returns></returns>
-        public async Task<Result<bool>> DeletePlexAccountAsync(int plexAccountId)
+        public async Task<Result> DeletePlexAccountAsync(int plexAccountId)
         {
             var deleteAccountResult = await _mediator.Send(new DeletePlexAccountCommand(plexAccountId));
             if (deleteAccountResult.IsFailed)

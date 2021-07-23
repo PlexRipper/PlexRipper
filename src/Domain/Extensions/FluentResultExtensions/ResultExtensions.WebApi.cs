@@ -24,14 +24,24 @@ namespace PlexRipper.Domain
             return false;
         }
 
-        private static Result _AddStatusCode(Result result, int statusCode, string message = "")
+        private static Result _AddStatusCodeError(Result result, int statusCode, string message = "")
         {
             return result.WithError(GetStatusCodeError(statusCode, message));
         }
 
-        private static Result _AddStatusCode(Result result, Error error)
+        private static Result _AddStatusCodeError(Result result, Error error)
         {
             return result.WithError(error);
+        }
+
+        private static Result _AddStatusCodeSuccess(Result result, int statusCode, string message = "")
+        {
+            return result.WithSuccess(GetStatusCodeSuccess(statusCode, message));
+        }
+
+        private static Result _AddStatusCodeSuccess(Result result, Success success)
+        {
+            return result.WithSuccess(success);
         }
 
         private static Result _CreateStatusCode(int statusCode, string message = "")
@@ -53,7 +63,7 @@ namespace PlexRipper.Domain
                 message = "Created successful";
             }
 
-            return _AddStatusCode(result, Get201CreatedRequestSuccess(message));
+            return _AddStatusCodeSuccess(result, Get201CreatedRequestSuccess(message));
         }
 
         private static Result _create201CreatedRequestSuccess(string message = "")
@@ -82,7 +92,7 @@ namespace PlexRipper.Domain
                 message = "Could not find object";
             }
 
-            return _AddStatusCode(result, Get400BadRequestError(message));
+            return _AddStatusCodeError(result, Get400BadRequestError(message));
         }
 
         private static Result _create400BadRequestResult(string message = "")
@@ -111,7 +121,7 @@ namespace PlexRipper.Domain
                 message = "Could not find object";
             }
 
-            _AddStatusCode(result, Get404NotFoundError(message));
+            _AddStatusCodeError(result, Get404NotFoundError(message));
         }
 
         private static Result Create404NotFoundResult1(string message = "")
@@ -251,6 +261,20 @@ namespace PlexRipper.Domain
         #endregion
 
         #region Result<T> Signatures
+
+        #region 201
+
+        public static bool Has201CreatedRequestSuccess<T>(this Result<T> result)
+        {
+            return _has201CreatedRequestSuccess(result);
+        }
+
+        public static Result Add201CreatedRequestSuccess<T>(this Result<T> result, string message = "")
+        {
+            return _add201CreatedRequestSuccess(result, message);
+        }
+
+        #endregion
 
         #region 400
 

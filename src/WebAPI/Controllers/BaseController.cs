@@ -80,40 +80,22 @@ namespace PlexRipper.WebAPI.Controllers
             return new OkObjectResult(resultDTO);
         }
 
-        private IActionResult ConvertToActionResult<T>(Result<T> result)
-        {
-            // Status Code 200
-            if (result.IsSuccess)
-            {
-                var resultDTO = _mapper.Map<ResultDTO<T>>(result);
-                return new OkObjectResult(resultDTO);
-            }
-
-            var failedResult = _mapper.Map<ResultDTO>(result);
-            if (result.Has400BadRequestError())
-            {
-                return new BadRequestObjectResult(failedResult);
-            }
-
-            if (result.Has404NotFoundError())
-            {
-                return new NotFoundObjectResult(failedResult);
-            }
-
-            // Status Code 500
-            return new ObjectResult(failedResult)
-            {
-                StatusCode = StatusCodes.Status500InternalServerError,
-            };
-        }
-
-
-        private IActionResult ConvertToActionResult(Result result)
+        [NonAction]
+        protected IActionResult ToActionResult(Result result)
         {
             // Status Code 200
             if (result.IsSuccess)
             {
                 var resultDTO = _mapper.Map<ResultDTO>(result);
+                if (result.Has201CreatedRequestSuccess())
+                {
+                    // Status code 201 Created
+                    return new ObjectResult(resultDTO)
+                    {
+                        StatusCode = StatusCodes.Status201Created,
+                    };
+                }
+
                 return new OkObjectResult(resultDTO);
             }
 
@@ -136,25 +118,40 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         [NonAction]
-        protected IActionResult ToActionResult(Result result)
-        {
-            return ConvertToActionResult(result);
-        }
-
-        [NonAction]
         protected IActionResult ToActionResult<TEntity, TDTO>(Result<TEntity> result)
         {
-            Result<TDTO> resultDto;
+            // Status Code 200
             if (result.IsSuccess)
             {
-                resultDto = Result.Ok(_mapper.Map<TDTO>(result.Value));
-            }
-            else
-            {
-                resultDto = result.ToResult();
+                var resultDTO = _mapper.Map<ResultDTO<TDTO>>(result);
+                if (result.Has201CreatedRequestSuccess())
+                {
+                    // Status code 201 Created
+                    return new ObjectResult(resultDTO)
+                    {
+                        StatusCode = StatusCodes.Status201Created,
+                    };
+                }
+
+                return new OkObjectResult(resultDTO);
             }
 
-            return ConvertToActionResult(resultDto);
+            var failedResult = _mapper.Map<ResultDTO>(result);
+            if (result.Has400BadRequestError())
+            {
+                return new BadRequestObjectResult(failedResult);
+            }
+
+            if (result.Has404NotFoundError())
+            {
+                return new NotFoundObjectResult(failedResult);
+            }
+
+            // Status Code 500
+            return new ObjectResult(failedResult)
+            {
+                StatusCode = StatusCodes.Status500InternalServerError,
+            };
         }
     }
 }

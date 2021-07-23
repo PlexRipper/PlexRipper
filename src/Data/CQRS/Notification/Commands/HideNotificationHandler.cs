@@ -19,11 +19,11 @@ namespace PlexRipper.Data.CQRS
         }
     }
 
-    public class HideNotificationHandler : BaseHandler, IRequestHandler<HideNotificationCommand, Result<bool>>
+    public class HideNotificationHandler : BaseHandler, IRequestHandler<HideNotificationCommand, Result>
     {
         public HideNotificationHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<bool>> Handle(HideNotificationCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(HideNotificationCommand command, CancellationToken cancellationToken)
         {
             var notification = _dbContext.Notifications.AsTracking().FirstOrDefault(x => x.Id == command.Id);
             if (notification == null)
@@ -33,7 +33,7 @@ namespace PlexRipper.Data.CQRS
 
             notification.Hidden = true;
             await SaveChangesAsync();
-            return Result.Ok(true);
+            return Result.Ok();
         }
     }
 }

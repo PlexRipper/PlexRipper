@@ -166,20 +166,20 @@ namespace PlexRipper.FileSystem
             return drive.AvailableFreeSpace;
         }
 
-        public FileSystemResult LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
+        public Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
         {
             // If path is invalid return root file system
             if (string.IsNullOrWhiteSpace(query) || !Directory.Exists(query))
             {
-                return new FileSystemResult
+                return Result.Ok(new FileSystemResult
                 {
                     Directories = GetDrives(),
-                };
+                });
             }
 
             if (allowFoldersWithoutTrailingSlashes)
             {
-                return GetResult(query, includeFiles);
+                return Result.Ok(GetResult(query, includeFiles));
             }
 
             var lastSeparatorIndex = query.LastIndexOf(Path.DirectorySeparatorChar);
@@ -187,10 +187,10 @@ namespace PlexRipper.FileSystem
 
             if (lastSeparatorIndex != -1)
             {
-                return GetResult(path, includeFiles);
+                return Result.Ok(GetResult(path, includeFiles));
             }
 
-            return new FileSystemResult();
+            return Result.Ok(new FileSystemResult());
         }
 
         public Result<FileStream> SaveFile(string directory, string fileName, long fileSize)

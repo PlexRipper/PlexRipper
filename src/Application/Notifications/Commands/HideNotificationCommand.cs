@@ -3,7 +3,7 @@ using MediatR;
 
 namespace PlexRipper.Application.Notifications
 {
-    public class HideNotificationCommand : IRequest<Result<bool>>
+    public class HideNotificationCommand : IRequest<Result>
     {
         public int Id { get; }
 

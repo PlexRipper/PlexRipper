@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
-using PlexRipper.Application.Common.DTO.WebApi;
+using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common

@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Data;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Download;

@@ -1,8 +1,8 @@
 using System;
 using System.Xml.Serialization;
-using Plex.Api;
+using PlexRipper.PlexApi.Helpers;
 
-namespace PlexRipper.PlexApi.Models.Server
+namespace PlexRipper.PlexApi.Models
 {
     public class Server
     {

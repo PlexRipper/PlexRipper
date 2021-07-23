@@ -9,10 +9,10 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
+using PlexRipper.Application;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.FileManager.Command;
 using PlexRipper.Application.FileManager.Queries;
-using PlexRipper.Application.PlexDownloads;
 using PlexRipper.Domain;
 
 namespace PlexRipper.FileSystem

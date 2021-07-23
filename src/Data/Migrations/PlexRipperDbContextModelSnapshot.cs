@@ -199,6 +199,55 @@ namespace PlexRipper.Data.Migrations
                             DirectoryPath = "/tvshows",
                             DisplayName = "Tv Show Destination Path",
                             Type = "TvShowFolder"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DirectoryPath = "/music",
+                            DisplayName = "Music Destination Path",
+                            Type = "MusicFolder"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DirectoryPath = "/photos",
+                            DisplayName = "Photos Destination Path",
+                            Type = "PhotosFolder"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DirectoryPath = "/other",
+                            DisplayName = "Other Videos Destination Path",
+                            Type = "OtherVideosFolder"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            DirectoryPath = "/games",
+                            DisplayName = "Games Videos Destination Path",
+                            Type = "GamesVideosFolder"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            DirectoryPath = "/",
+                            DisplayName = "Reserved #1 Destination Path",
+                            Type = "None"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            DirectoryPath = "/",
+                            DisplayName = "Reserved #2 Destination Path",
+                            Type = "None"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            DirectoryPath = "/",
+                            DisplayName = "Reserved #3 Destination Path",
+                            Type = "None"
                         });
                 });
 
@@ -351,6 +400,9 @@ namespace PlexRipper.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("DefaultDestinationId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Key")
                         .HasColumnType("TEXT");
 
@@ -383,6 +435,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DefaultDestinationId");
 
                     b.HasIndex("PlexServerId");
 
@@ -1026,11 +1080,18 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.PlexLibrary", b =>
                 {
+                    b.HasOne("PlexRipper.Domain.FolderPath", "DefaultDestination")
+                        .WithMany("PlexLibraries")
+                        .HasForeignKey("DefaultDestinationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
                         .WithMany("PlexLibraries")
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("DefaultDestination");
 
                     b.Navigation("PlexServer");
                 });
@@ -1230,6 +1291,11 @@ namespace PlexRipper.Data.Migrations
             modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerTask", b =>
                 {
                     b.Navigation("DownloadWorkerTaskLogs");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.FolderPath", b =>
+                {
+                    b.Navigation("PlexLibraries");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexAccount", b =>

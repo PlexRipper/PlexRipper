@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using PlexRipper.Application.Common.DTO.WebApi;
 using PlexRipper.Domain;
+using PlexRipper.WebAPI.Common.DTO.FolderPath;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
@@ -43,6 +43,12 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("libraryLocationPath", Required = Required.Always)]
         public string LibraryLocationPath { get; set; }
+
+        [JsonProperty("defaultDestination", Required = Required.Always)]
+        public FolderPathDTO DefaultDestination { get; set; }
+
+        [JsonProperty("defaultDestinationId", Required = Required.Always)]
+        public int DefaultDestinationId { get; set; }
 
         [JsonProperty("plexServerId", Required = Required.Always)]
         public int PlexServerId { get; set; }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -217,6 +218,11 @@ namespace PlexRipper.Application.PlexLibraries
             return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true, topLevelMediaOnly));
         }
 
+        public async Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync()
+        {
+            return await _mediator.Send(new GetAllPlexLibrariesQuery());
+        }
+
         /// <inheritdoc/>
         public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, bool topLevelMediaOnly = false)
         {
@@ -230,6 +236,11 @@ namespace PlexRipper.Application.PlexLibraries
             plexServer.PlexLibraries.Clear();
             plexServer.PlexLibraries.Add(plexLibrary.Value);
             return Result.Ok(plexServer);
+        }
+
+        public async Task<Result> UpdateDefaultDestinationLibrary(int libraryId, int folderPathId)
+        {
+            return await _mediator.Send(new UpdatePlexLibraryDefaultDestinationByIdCommand(libraryId, folderPathId));
         }
 
         #region RefreshLibrary
@@ -300,6 +311,9 @@ namespace PlexRipper.Application.PlexLibraries
             {
                 return result;
             }
+
+            // Get the default folder path id for the destination
+            newPlexLibrary.DefaultDestinationId = newPlexLibrary.Type.ToDefaultDestinationFolderId();
 
             switch (newPlexLibrary.Type)
             {

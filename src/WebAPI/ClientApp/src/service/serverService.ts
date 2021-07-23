@@ -1,12 +1,14 @@
+import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { finalize, switchMap } from 'rxjs/operators';
 import { PlexServerDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/IStoreState';
-import { BaseService, AccountService } from '@service';
+import { BaseService, GlobalService } from '@service';
 
 export class ServerService extends BaseService {
+	// region Constructor and Setup
 	public constructor() {
 		super({
 			stateSliceSelector: (state: IStoreState) => {
@@ -19,15 +21,24 @@ export class ServerService extends BaseService {
 
 	public setup(nuxtContext: Context): void {
 		super.setup(nuxtContext);
-
-		AccountService.getActiveAccount()
-			.pipe(switchMap(() => getPlexServers()))
-			.subscribe((data) => {
-				if (data.isSuccess) {
-					this.setState({ servers: data.value ?? [] }, 'Initial Server Data');
-				}
-			});
+		GlobalService.getAxiosReady()
+			.pipe(finalize(() => this.fetchServers()))
+			.subscribe();
 	}
+	// endregion
+
+	// region Fetch
+
+	public fetchServers(): void {
+		getPlexServers().subscribe((servers) => {
+			if (servers.isSuccess) {
+				Log.debug(`ServerService => Fetch Servers`, servers.value);
+				this.setState({ servers: servers.value ?? [] }, 'Fetch Server Data');
+			}
+		});
+	}
+
+	// endregion
 
 	public get servers(): PlexServerDTO[] {
 		return this.getState().servers;

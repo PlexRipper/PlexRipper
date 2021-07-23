@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
 using MediatR;
-using PlexRipper.Application.PlexDownloads;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.CQRS.PlexDownloads

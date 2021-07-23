@@ -11,11 +11,11 @@ namespace PlexRipper.Application.Settings.Models
     {
         private bool _firstTimeSetup = true;
 
-        private AccountSettingsModel _accountSettings = new AccountSettingsModel();
+        private AccountSettingsModel _accountSettings = new();
 
-        private UserInterfaceSettingsModel _userInterfaceSettings = new UserInterfaceSettingsModel();
+        private UserInterfaceSettingsModel _userInterfaceSettings = new();
 
-        private AdvancedSettingsModel _advancedSettings = new AdvancedSettingsModel();
+        private AdvancedSettingsModel _advancedSettings = new();
 
         #region Properties
 
@@ -43,7 +43,7 @@ namespace PlexRipper.Application.Settings.Models
                 {
                     // During every settings load this needs to be subscribed to again
                     _accountSettings = value;
-                    _accountSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                    _accountSettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }
         }
@@ -58,7 +58,7 @@ namespace PlexRipper.Application.Settings.Models
                 {
                     // During every settings load this needs to be subscribed to again
                     _advancedSettings = value;
-                    _advancedSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                    _advancedSettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }
         }
@@ -73,7 +73,7 @@ namespace PlexRipper.Application.Settings.Models
                 {
                     // During every settings load this needs to be subscribed to again
                     _userInterfaceSettings = value;
-                    _userInterfaceSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                    _userInterfaceSettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }
         }

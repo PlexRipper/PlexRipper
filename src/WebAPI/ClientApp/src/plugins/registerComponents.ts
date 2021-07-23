@@ -1,11 +1,12 @@
 import Vue from 'vue';
-import Page from '@components/General/Page.vue';
+import Page from '@components/Layout/Page.vue';
 import Background from '@components/General/Background.vue';
 import Logo from '@components/General/Logo.vue';
-import PBtn from '@components/General/PlexRipperButton.vue';
+import PBtn from '@components/Extensions/PButton.vue';
+import PTextField from '@components/Extensions/PTextField.vue';
 import DateTime from '@components/General/DateTime.vue';
-import PCheckbox from '@components/General/PlexRipperCheckBox.vue';
-import PSection from '@components/General/Section.vue';
+import PCheckbox from '@components/Extensions/PCheckBox.vue';
+import PSection from '@components/Layout/Section.vue';
 import HelpIcon from '@components/Help/HelpIcon.vue';
 import Status from '@components/General/Status.vue';
 import FileSize from '@components/General/FileSize.vue';
@@ -13,6 +14,7 @@ import Duration from '@components/General/Duration.vue';
 import VTreeViewTable from '@vTreeViewTable/VTreeViewTable.vue';
 import MediaTypeIcon from '@components/General/MediaTypeIcon.vue';
 import ConfirmationDialog from '@components/General/ConfirmationDialog.vue';
+import LoadingSpinner from '@components/LoadingSpinner.vue';
 import Print from '@components/DebugTools/Print.vue';
 
 export default (): void => {
@@ -21,6 +23,7 @@ export default (): void => {
 		Background,
 		Logo,
 		PBtn,
+		PTextField,
 		PCheckbox,
 		DateTime,
 		PSection,
@@ -32,6 +35,7 @@ export default (): void => {
 		MediaTypeIcon,
 		Print,
 		ConfirmationDialog,
+		LoadingSpinner,
 	};
 
 	Object.entries(components).forEach(([name, component]) => {

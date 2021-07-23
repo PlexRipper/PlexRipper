@@ -27,9 +27,7 @@ namespace PlexRipper.PlexApi
                 Converters = { new LongToDateTime() },
             };
 
-        private readonly IAsyncPolicy<IRestResponse> _policy2;
-
-        private static readonly List<HttpStatusCode> invalidStatusCodes = new List<HttpStatusCode>
+        private static readonly List<HttpStatusCode> invalidStatusCodes = new()
         {
             HttpStatusCode.BadGateway,
             HttpStatusCode.Unauthorized,

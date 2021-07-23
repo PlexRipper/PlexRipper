@@ -10,10 +10,10 @@ import {
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { startWith, switchMap, take } from 'rxjs/operators';
+import { map, startWith, switchMap, take } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
-import { BaseService, ProgressService, AccountService } from '@service';
+import { AccountService, BaseService, ProgressService } from '@service';
 import { Context } from '@nuxt/types';
 
 export class DownloadService extends BaseService {
@@ -54,6 +54,20 @@ export class DownloadService extends BaseService {
 				}
 				return of([]);
 			}),
+		);
+	}
+
+	public getActiveDownloadList(serverId: number = 0): Observable<DownloadTaskDTO[]> {
+		return this.getDownloadList(serverId).pipe(
+			map((x) =>
+				x.filter(
+					(y) =>
+						y.status === DownloadStatus.Downloading ||
+						y.status === DownloadStatus.Moving ||
+						y.status === DownloadStatus.Merging ||
+						y.status === DownloadStatus.Paused,
+				),
+			),
 		);
 	}
 

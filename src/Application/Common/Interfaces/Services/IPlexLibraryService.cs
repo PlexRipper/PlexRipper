@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Domain;
 
@@ -30,5 +31,9 @@ namespace PlexRipper.Application.Common
         Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, bool topLevelMediaOnly = false);
 
         Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, bool topLevelMediaOnly = false);
+
+        Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync();
+
+        Task<Result> UpdateDefaultDestinationLibrary(int libraryId, int folderPathId);
     }
 }

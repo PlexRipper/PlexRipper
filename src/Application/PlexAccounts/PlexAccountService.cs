@@ -15,18 +15,14 @@ namespace PlexRipper.Application.PlexAccounts
 
         private readonly IPlexServerService _plexServerService;
 
-        private readonly IPlexLibraryService _plexLibraryService;
-
         private readonly IPlexApiService _plexApiService;
 
         private readonly ISignalRService _signalRService;
 
-        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexLibraryService plexLibraryService,
-            IPlexApiService plexApiService, ISignalRService signalRService)
+        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexApiService plexApiService, ISignalRService signalRService)
         {
             _mediator = mediator;
             _plexServerService = plexServerService;
-            _plexLibraryService = plexLibraryService;
             _plexApiService = plexApiService;
             _signalRService = signalRService;
         }
@@ -162,7 +158,7 @@ namespace PlexRipper.Application.PlexAccounts
         }
 
         /// <inheritdoc/>
-        public async Task<Result<bool>> RefreshPlexAccount(int plexAccountId = 0)
+        public async Task<Result> RefreshPlexAccount(int plexAccountId = 0)
         {
             if (plexAccountId == 0)
             {
@@ -196,7 +192,7 @@ namespace PlexRipper.Application.PlexAccounts
                 }
             }
 
-            return Result.Ok(true);
+            return Result.Ok();
         }
 
         /// <summary>
@@ -377,7 +373,7 @@ namespace PlexRipper.Application.PlexAccounts
         /// </summary>
         /// <param name="plexAccountId"></param>
         /// <returns></returns>
-        public async Task<Result<bool>> DeletePlexAccountAsync(int plexAccountId)
+        public async Task<Result> DeletePlexAccountAsync(int plexAccountId)
         {
             var deleteAccountResult = await _mediator.Send(new DeletePlexAccountCommand(plexAccountId));
             if (deleteAccountResult.IsFailed)

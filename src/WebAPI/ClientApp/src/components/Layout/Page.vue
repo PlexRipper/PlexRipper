@@ -1,6 +1,8 @@
 <template>
 	<v-container :fluid="fluid" :class="['page', 'px-0', $getThemeClass()]">
-		<slot></slot>
+		<perfect-scrollbar>
+			<slot></slot>
+		</perfect-scrollbar>
 	</v-container>
 </template>
 

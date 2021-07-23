@@ -27,17 +27,9 @@ namespace PlexRipper.Data.CQRS
 
         public async Task<Result<int>> Handle(CreateNotificationCommand command, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _dbContext.Notifications.AddAsync(command.Notification);
-                await _dbContext.SaveChangesAsync();
-                return Result.Ok(command.Notification.Id);
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.Message);
-                return Result.Fail(new ExceptionalError(e));
-            }
+            await _dbContext.Notifications.AddAsync(command.Notification);
+            await _dbContext.SaveChangesAsync();
+            return Result.Ok(command.Notification.Id);
         }
     }
 }

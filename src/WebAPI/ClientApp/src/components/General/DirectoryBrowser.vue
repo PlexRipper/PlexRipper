@@ -9,46 +9,52 @@
 								<label>Select {{ path.displayName }}</label>
 							</v-col>
 							<v-col cols="12" style="max-height: 75px">
-								<v-text-field
-									v-model="newDirectory"
-									outlined
-									color="red"
-									placeholder="Start typing or select a path below"
-									@input="newDirectory = $event"
-								/>
+								<v-text-field v-model="newDirectory" outlined color="red" placeholder="Start typing or select a path below" />
 							</v-col>
 						</v-row>
 					</v-card-title>
 					<v-divider />
+
 					<v-card-text style="height: 100%; overflow-y: hidden">
-						<!--	Directory browser table header -->
-						<v-simple-table>
-							<template #default>
-								<thead>
-									<tr>
-										<th class="text-left" :width="100">Type:</th>
-										<th class="text-left">Path:</th>
-									</tr>
-								</thead>
-							</template>
-						</v-simple-table>
-						<!--	Directory browser table content -->
-						<perfect-scrollbar>
-							<div style="height: 50vh; width: 100%">
-								<v-simple-table>
-									<template #default>
-										<tbody>
-											<tr v-for="(item, i) in items" :key="i" style="cursor: pointer" @click="directoryNavigate(item)">
-												<td :width="100">
-													<v-icon>{{ getIcon(item.type) }}</v-icon>
-												</td>
-												<td>{{ item.name }}</td>
-											</tr>
-										</tbody>
-									</template>
-								</v-simple-table>
-							</div>
-						</perfect-scrollbar>
+						<!--	Loading screen	-->
+						<template v-if="isLoading">
+							<v-row style="height: 50vh; width: 100%" justify="center" align="center">
+								<v-col cols="auto">
+									<loading-spinner />
+								</v-col>
+							</v-row>
+						</template>
+						<!--	Directory Browser	-->
+						<template v-else>
+							<!--	Directory browser table header -->
+							<v-simple-table>
+								<template #default>
+									<thead>
+										<tr>
+											<th class="text-left" :width="100">Type:</th>
+											<th class="text-left">Path:</th>
+										</tr>
+									</thead>
+								</template>
+							</v-simple-table>
+							<!--	Directory browser table content -->
+							<perfect-scrollbar>
+								<div style="height: 50vh; width: 100%">
+									<v-simple-table>
+										<template #default>
+											<tbody>
+												<tr v-for="(item, i) in items" :key="i" style="cursor: pointer" @click="directoryNavigate(item)">
+													<td :width="100">
+														<v-icon>{{ getIcon(item.type) }}</v-icon>
+													</td>
+													<td>{{ item.name }}</td>
+												</tr>
+											</tbody>
+										</template>
+									</v-simple-table>
+								</div>
+							</perfect-scrollbar>
+						</template>
 					</v-card-text>
 					<v-card-actions class="justify-end" style="height: 60px">
 						<p-btn :button-type="cancelButtonType" @click="cancel()" />
@@ -61,13 +67,14 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DataTableHeader } from 'vuetify';
 import { getDirectoryPath } from '@api/pathApi';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
 import { FileSystemEntityType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
+import { debounce, distinctUntilChanged, map } from 'rxjs/operators';
+import { timer } from 'rxjs';
 
 @Component
 export default class DirectoryBrowser extends Vue {
@@ -79,6 +86,7 @@ export default class DirectoryBrowser extends Vue {
 
 	parentPath: string = '';
 	newDirectory: string = '';
+	isLoading: boolean = true;
 
 	items: FileSystemModelDTO[] = [];
 
@@ -97,7 +105,6 @@ export default class DirectoryBrowser extends Vue {
 	];
 
 	getIcon(type: FileSystemEntityType): string {
-		Log.info(type);
 		switch (type) {
 			case FileSystemEntityType.Parent:
 				return 'mdi-arrow-left';
@@ -138,7 +145,6 @@ export default class DirectoryBrowser extends Vue {
 	}
 
 	directoryNavigate(dataRow: FileSystemModelDTO): void {
-		Log.info(dataRow);
 		if (dataRow.path === '..') {
 			this.requestDirectories(this.parentPath);
 		} else {
@@ -147,6 +153,10 @@ export default class DirectoryBrowser extends Vue {
 	}
 
 	requestDirectories(path: string): void {
+		if (path === '' || path === '/') {
+			this.isLoading = true;
+		}
+
 		this.$subscribeTo(getDirectoryPath(path), (data) => {
 			if (data.isSuccess && data.value) {
 				this.items = data.value?.directories;
@@ -164,8 +174,23 @@ export default class DirectoryBrowser extends Vue {
 				}
 				this.parentPath = data.value?.parent;
 				this.newDirectory = path;
+				this.isLoading = false;
 			}
 		});
+	}
+
+	mounted(): void {
+		// On user input request the path
+		this.$subscribeTo(
+			this.$watchAsObservable('newDirectory').pipe(
+				map((x: { oldValue: string; newValue: string }) => x.newValue),
+				debounce(() => timer(1000)),
+				distinctUntilChanged(),
+			),
+			(value) => {
+				this.requestDirectories(value);
+			},
+		);
 	}
 }
 </script>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 
@@ -36,7 +37,7 @@ namespace PlexRipper.Domain
         [NotMapped]
         public FolderType FolderType
         {
-            get => Enum.TryParse(Type, out FolderType status) ? status : FolderType.Unknown;
+            get => Enum.TryParse(Type, out FolderType status) ? status : FolderType.None;
             set => Type = value.ToString();
         }
 
@@ -44,6 +45,12 @@ namespace PlexRipper.Domain
         {
             return Directory.Exists(DirectoryPath);
         }
+
+        #endregion
+
+        #region Relationships
+
+        public List<PlexLibrary> PlexLibraries { get; set; }
 
         #endregion
     }

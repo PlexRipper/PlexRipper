@@ -21,8 +21,8 @@
 						<v-list nav dense>
 							<v-list-item-group color="primary">
 								<!-- Render libraries -->
-								<template v-if="server.plexLibraries.length > 0">
-									<v-list-item v-for="(library, y) in server.plexLibraries" :key="y" @click="openMediaPage(library)">
+								<template v-if="filterLibraries(server.id).length > 0">
+									<v-list-item v-for="(library, y) in filterLibraries(server.id)" :key="y" @click="openMediaPage(library)">
 										<v-list-item-icon>
 											<media-type-icon :media-type="library.type" />
 										</v-list-item-icon>
@@ -65,7 +65,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import { ServerService } from '@service';
+import { LibraryService, ServerService } from '@service';
 import { PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import ServerDialog from '@components/Navigation/ServerDialog.vue';
 
@@ -83,6 +83,8 @@ interface INavItem {
 export default class ServerDrawer extends Vue {
 	items: object[] = [];
 	plexServers: PlexServerDTO[] = [];
+	plexLibraries: PlexLibraryDTO[] = [];
+
 	selectedServerId: number = 0;
 
 	get getNavItems(): INavItem[] {
@@ -93,6 +95,10 @@ export default class ServerDrawer extends Vue {
 				link: '/settings',
 			},
 		];
+	}
+
+	filterLibraries(plexServerId: number): PlexLibraryDTO[] {
+		return this.plexLibraries.filter((x) => x.plexServerId === plexServerId);
 	}
 
 	openServerSettings(serverId: number): void {
@@ -122,6 +128,10 @@ export default class ServerDrawer extends Vue {
 	mounted(): void {
 		this.$subscribeTo(ServerService.getServers(), (data: PlexServerDTO[]) => {
 			this.plexServers = data;
+		});
+
+		this.$subscribeTo(LibraryService.getLibraries(), (data: PlexLibraryDTO[]) => {
+			this.plexLibraries = data;
 		});
 	}
 }

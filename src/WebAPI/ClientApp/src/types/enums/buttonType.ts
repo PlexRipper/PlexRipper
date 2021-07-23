@@ -11,6 +11,8 @@ enum ButtonType {
 	Error = 'error',
 	Cancel = 'cancel',
 	Confirm = 'confirm',
+	Add = 'add',
+	Edit = 'edit',
 	Delete = 'delete',
 	Save = 'save',
 	Restart = 'restart',

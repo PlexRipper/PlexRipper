@@ -144,7 +144,6 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
 import ITreeViewTableRow from '@vTreeViewTable/ITreeViewTableRow';
@@ -196,6 +195,9 @@ export default class VTreeViewTable extends Vue {
 	loadingButtons: string[] = [];
 	isMounted: boolean = false;
 
+	@Ref('scrollbar')
+	readonly containerRef!: HTMLButtonElement;
+
 	@Watch('items')
 	updateVisible(): void {
 		this.items.forEach(() => this.visible.push(false));
@@ -213,17 +215,12 @@ export default class VTreeViewTable extends Vue {
 		return this.getSelected.length < this.items.length && this.getSelected.length > 0;
 	}
 
-	get containerRef(): any {
-		return this.$refs.scrollbar;
-	}
-
 	get getHeight(): string {
 		if (this.heightAuto) {
 			return 'auto';
 		}
 		if (this.isMounted) {
 			const height = this.$vuetify.breakpoint.height - this.treeViewContainer?.getBoundingClientRect().top ?? 0;
-			Log.debug('v-tree-view-container height: ', height);
 			return height + 'px';
 		}
 		return 'auto';

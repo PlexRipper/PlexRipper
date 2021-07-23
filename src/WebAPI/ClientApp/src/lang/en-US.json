@@ -17,6 +17,10 @@
 			"check-server-status": "Check server status",
 			"reset-db": "Reset Database",
 			"add-alert": "Add Alert"
+		},
+		"alerts": {
+			"invalid-directory": "Directory is not a valid path!",
+			"disabled-paths": "Editing the paths is disabled when there are active downloads. Make sure all downloads are stopped or cleared!"
 		}
 	},
 	"help": {
@@ -67,9 +71,9 @@
 					"text": "The default path of Movies when no custom destination has been selected."
 				},
 				"tv-show-folder": {
-					"label": "Tv Show Path",
-					"title": "Tv Show Path",
-					"text": "The default path of Tv Shows when no custom destination has been selected."
+					"label": "TV-Show Path",
+					"title": "TV-Show Path",
+					"text": "The default path of TV-Show when no custom destination has been selected."
 				}
 			},
 			"ui": {
@@ -209,7 +213,15 @@
 				"header": "Debug"
 			},
 			"paths": {
-				"header": "Paths"
+				"main": {
+					"header": "Default Paths"
+				},
+				"movie": {
+					"header": "Movie Paths"
+				},
+				"tv-show": {
+					"header": "TV-Show Paths"
+				}
 			}
 		}
 	}

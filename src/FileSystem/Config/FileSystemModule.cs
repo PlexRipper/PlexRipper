@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using System.IO.Abstractions;
 using PlexRipper.Application.Common;
 using IFileSystem = PlexRipper.Application.Common.IFileSystem;
 

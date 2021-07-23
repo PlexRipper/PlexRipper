@@ -74,19 +74,11 @@
           "description": "",
           "attributes": [
             {
-              "name": "show",
+              "name": "alert",
               "required": true,
               "value": {
                 "kind": "expression",
-                "type": "boolean"
-              }
-            },
-            {
-              "name": "id",
-              "required": true,
-              "value": {
-                "kind": "expression",
-                "type": "string"
+                "type": "IAlert"
               }
             }
           ],
@@ -411,6 +403,37 @@
           ],
           "source": {
             "module": "./src/components/General/Duration.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "EditableText",
+          "description": "",
+          "attributes": [
+            {
+              "name": "value",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              }
+            },
+            {
+              "name": "disabled",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "save"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Form/EditableText.vue",
             "symbol": "default"
           }
         },
@@ -910,7 +933,25 @@
               "default": "36"
             },
             {
+              "name": "height",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "36"
+            },
+            {
               "name": "block",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "name": "noText",
               "required": false,
               "value": {
                 "kind": "expression",
@@ -970,7 +1011,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/General/PlexRipperButton.vue",
+            "module": "./src/components/Extensions/PlexRipperButton.vue",
             "symbol": "default"
           }
         },
@@ -979,21 +1020,26 @@
           "description": "",
           "attributes": [
             {
-              "name": "value",
-              "required": true,
+              "name": "color",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "'red'"
+            },
+            {
+              "name": "hideDetails",
+              "required": false,
               "value": {
                 "kind": "expression",
                 "type": "boolean"
-              }
-            }
-          ],
-          "events": [
-            {
-              "name": "input"
+              },
+              "default": "true"
             }
           ],
           "source": {
-            "module": "./src/components/General/PlexRipperCheckBox.vue",
+            "module": "./src/components/Extensions/PlexRipperCheckBox.vue",
             "symbol": "default"
           }
         },
@@ -1009,7 +1055,99 @@
             }
           ],
           "source": {
-            "module": "./src/components/General/Section.vue",
+            "module": "./src/components/Layout/Section.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "PSelect",
+          "description": "",
+          "attributes": [
+            {
+              "name": "height",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "50"
+            },
+            {
+              "name": "dense",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "name": "outlined",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "name": "solo",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Extensions/PlexRipperSelect.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "PTextField",
+          "description": "",
+          "attributes": [
+            {
+              "name": "height",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "50"
+            },
+            {
+              "name": "dense",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "name": "outlined",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "name": "solo",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Extensions/PlexRipperTextField.vue",
             "symbol": "default"
           }
         },
@@ -1033,15 +1171,33 @@
             }
           ],
           "source": {
-            "module": "./src/components/General/Page.vue",
+            "module": "./src/components/Layout/Page.vue",
             "symbol": "default"
           }
         },
         {
-          "name": "PathsOverview",
+          "name": "PathsCustomOverview",
+          "description": "",
+          "attributes": [
+            {
+              "name": "folderType",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "FolderType"
+              }
+            }
+          ],
+          "source": {
+            "module": "./src/components/overviews/PathsCustomOverview.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "PathsDefaultOverview",
           "description": "",
           "source": {
-            "module": "./src/components/overviews/PathsOverview.vue",
+            "module": "./src/components/overviews/PathsDefaultOverview.vue",
             "symbol": "default"
           }
         },
@@ -1210,15 +1366,6 @@
                 "kind": "expression",
                 "type": "boolean"
               }
-            },
-            {
-              "name": "pulse",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "true"
             }
           ],
           "source": {

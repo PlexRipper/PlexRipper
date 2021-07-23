@@ -85,6 +85,16 @@ namespace PlexRipper.Domain
         /// </summary>
         public int PlexServerId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the default download destination <see cref="FolderPath"/>.
+        /// </summary>
+        public FolderPath DefaultDestination { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Id of the Default Destination <see cref="FolderPath"/>.
+        /// </summary>
+        public int? DefaultDestinationId { get; set; }
+
         public List<PlexMovie> Movies { get; set; }
 
         public List<PlexTvShow> TvShows { get; set; }

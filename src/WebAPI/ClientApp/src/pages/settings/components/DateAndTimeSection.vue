@@ -13,18 +13,7 @@
 								<help-icon help-id="help.settings.ui.date-and-time.short-date-format" />
 							</td>
 							<td>
-								<v-select
-									:value="shortDateFormat"
-									color="red"
-									filled
-									outlined
-									dense
-									class="my-3"
-									hide-details="auto"
-									:menu-props="getMenuProps"
-									:items="shortDateOptions"
-									@input="updateSettings(0, $event)"
-								/>
+								<p-select :value="shortDateFormat" :items="shortDateOptions" @input="updateSettings(0, $event)" />
 							</td>
 						</tr>
 						<!--	Long Date Format Setting	-->
@@ -33,18 +22,7 @@
 								<help-icon help-id="help.settings.ui.date-and-time.long-date-format" />
 							</td>
 							<td>
-								<v-select
-									:value="longDateFormat"
-									color="red"
-									filled
-									outlined
-									dense
-									class="my-3"
-									hide-details="auto"
-									:menu-props="getMenuProps"
-									:items="longDateOptions"
-									@input="updateSettings(1, $event)"
-								/>
+								<p-select :value="longDateFormat" :items="longDateOptions" @input="updateSettings(1, $event)" />
 							</td>
 						</tr>
 						<!--	Time Format Setting	-->
@@ -53,18 +31,7 @@
 								<help-icon help-id="help.settings.ui.date-and-time.time-format" />
 							</td>
 							<td>
-								<v-select
-									:value="timeFormat"
-									color="red"
-									filled
-									outlined
-									dense
-									class="my-3"
-									hide-details="auto"
-									:menu-props="getMenuProps"
-									:items="timeFormatOptions"
-									@input="updateSettings(2, $event)"
-								/>
+								<p-select :value="timeFormat" :items="timeFormatOptions" @input="updateSettings(2, $event)" />
 							</td>
 						</tr>
 						<!--	Time Zone Setting	-->
@@ -87,6 +54,7 @@
 						<!--								/>-->
 						<!--							</td>-->
 						<!--						</tr>-->
+
 						<!--	Show Relative Dates Setting	-->
 						<tr>
 							<td>

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
-using PlexRipper.PlexApi.Models.Server;
 using RestSharp;
 using DataFormat = RestSharp.DataFormat;
 

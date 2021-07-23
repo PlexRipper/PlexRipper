@@ -35,7 +35,6 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="plexLibrary"></param>
         /// <param name="authToken"></param>
-        /// <param name="plexServerBaseUrl"></param>
         /// <returns></returns>
         Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken);
 

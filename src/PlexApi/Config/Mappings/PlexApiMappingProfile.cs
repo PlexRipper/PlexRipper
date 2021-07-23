@@ -4,7 +4,6 @@ using AutoMapper;
 using PlexRipper.Domain;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
 using PlexRipper.PlexApi.Models;
-using PlexRipper.PlexApi.Models.Server;
 
 namespace PlexRipper.PlexApi.Config.Mappings
 {
@@ -63,7 +62,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.HasTheme, opt => opt.MapFrom(x => !string.IsNullOrEmpty(x.Theme)))
                 .ForMember(dest => dest.MetaDataKey, opt => opt.MapFrom(x => RetrieveMetaDataKey(x)))
                 .ForPath(dest => dest.MediaData.MediaData, opt => opt.MapFrom(x => x.Media))
-                .ForMember(dest => dest.OriginallyAvailableAt, opt => opt.ConvertUsing(new StringToDateTimeUTC()));
+                .ForMember(dest => dest.OriginallyAvailableAt, opt => opt.ConvertUsing(new StringToDateTimeUtc()));
 
             // Medium -> PlexMediaData
             CreateMap<Medium, PlexMediaData>(MemberList.Destination)

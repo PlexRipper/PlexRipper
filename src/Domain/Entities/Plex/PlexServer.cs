@@ -45,11 +45,11 @@ namespace PlexRipper.Domain
 
         #region Relationships
 
-        public List<PlexAccountServer> PlexAccountServers { get; set; } = new List<PlexAccountServer>();
+        public List<PlexAccountServer> PlexAccountServers { get; set; } = new();
 
-        public List<PlexLibrary> PlexLibraries { get; set; } = new List<PlexLibrary>();
+        public List<PlexLibrary> PlexLibraries { get; set; } = new();
 
-        public List<PlexServerStatus> ServerStatus { get; set; } = new List<PlexServerStatus>();
+        public List<PlexServerStatus> ServerStatus { get; set; } = new();
 
         #endregion
 

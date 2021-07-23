@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using FluentResults;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
@@ -11,7 +12,6 @@ namespace PlexRipper.Data
 {
     public class PlexRipperDbContext : DbContext, ISetup
     {
-
         #region Properties
 
         #region Tables
@@ -72,7 +72,7 @@ namespace PlexRipper.Data
 
         public static bool IsTestMode => Environment.GetEnvironmentVariable("IntegrationTestMode") is "true";
 
-        public static  bool ResetDatabase => Environment.GetEnvironmentVariable("ResetDB") is "true";
+        public static bool ResetDatabase => Environment.GetEnvironmentVariable("ResetDB") is "true";
 
         public static string DatabaseName => IsTestMode ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
 
@@ -90,8 +90,6 @@ namespace PlexRipper.Data
 
         #region Methods
 
-
-
         public async Task<Result> SetupAsync()
         {
             // Should the Database be deleted and re-created
@@ -101,15 +99,24 @@ namespace PlexRipper.Data
                 await Database.EnsureDeletedAsync();
             }
 
-            if (!IsTestMode)
-            {
-                Log.Information("Attempting to migrate database");
-                await Database.MigrateAsync();
-            }
-            else
+            if (IsTestMode)
             {
                 Log.Information("Database will be setup in TestMode");
                 await Database.EnsureCreatedAsync();
+            }
+
+            try
+            {
+                if (!IsTestMode)
+                {
+                    Log.Information("Attempting to migrate database");
+                    await Database.MigrateAsync();
+                }
+            }
+            catch (SqliteException e)
+            {
+                Log.Error("Failed to migrate the database.");
+                return Result.Fail(new ExceptionalError(e)).LogError();
             }
 
             // Check if database exists and can be connected to.

@@ -7,21 +7,28 @@ namespace PlexRipper.Application.Common
 {
     public interface IPlexServerService
     {
-        Task<Result<List<PlexServer>>> GetServersAsync(PlexAccount plexAccount, bool refresh = false);
-
         Task<Result<bool>> RefreshPlexServersAsync(PlexAccount plexAccount);
 
         Task<Result<PlexServer>> GetServerAsync(int plexServerId);
 
         Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(int plexServerId, int plexAccountId = 0, bool trimEntries = true);
 
+
+        Task<Result> RemoveInaccessibleServers();
+
         /// <summary>
         /// Retrieves all <see cref="PlexServer"/>s from the Database with the included <see cref="PlexLibrary"/>.
         /// </summary>
         /// <param name="plexAccountId">Retrieve only the <see cref="PlexServer"/> which are accessible by this <see cref="PlexAccount"/>.</param>
         /// <returns>The list of <see cref="PlexServer"/>s.</returns>
-        Task<Result<List<PlexServer>>> GetServersAsync(int plexAccountId = 0);
+        Task<Result<List<PlexServer>>> GetAllServersAsync(bool includeLibraries, int plexAccountId = 0);
 
-        Task<Result> RemoveInaccessibleServers();
+        /// <summary>
+        /// Retrieves all <see cref="PlexServer"/>s accessible by this <see cref="PlexAccount"/> from the Database.
+        /// </summary>
+        /// <param name="plexAccount">The <see cref="PlexAccount"/> to check with.</param>
+        /// <param name="refresh">Should the <see cref="PlexServer"/>s data be retrieved from the PlexApi.</param>
+        /// <returns>The list of <see cref="PlexServer"/>s.</returns>
+        Task<Result<List<PlexServer>>> GetServersByPlexAccountAsync(PlexAccount plexAccount, bool refresh = false);
     }
 }

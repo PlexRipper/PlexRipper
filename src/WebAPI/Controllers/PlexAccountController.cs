@@ -64,21 +64,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequestInvalidId();
             }
 
-            try
-            {
-                var result = await _plexAccountService.GetPlexAccountAsync(id);
-                if (result.IsFailed)
-                {
-                    return NotFound(result);
-                }
-
-                var mapResult = Result.Ok(_mapper.Map<PlexAccountDTO>(result.Value));
-                return Ok(Result.Ok(mapResult));
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.GetPlexAccountAsync(id));
         }
 
         // PUT api/<PlexAccountController>/5
@@ -94,22 +80,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequestInvalidId();
             }
 
-            try
-            {
-                account.Id = id;
-                var result = await _plexAccountService.UpdatePlexAccountAsync(account);
-                if (result.IsFailed)
-                {
-                    return BadRequest(result);
-                }
-
-                var mapResult = _mapper.Map<PlexAccountDTO>(result.Value);
-                return Ok(Result.Ok(mapResult));
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.UpdatePlexAccountAsync(account));
         }
 
         // POST api/<AccountController>
@@ -119,29 +90,18 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Post([FromBody] CreatePlexAccountDTO newAccount)
         {
-            try
+            if (newAccount is null)
             {
-                var mapResult = _mapper.Map<PlexAccount>(newAccount);
-                var result = await _plexAccountService.CreatePlexAccountAsync(mapResult);
-                if (result.IsFailed)
-                {
-                    return BadRequest(result.WithError("Could not process the account"));
-                }
+                return BadRequest("The new account was null");
+            }
 
-                var msg = $"Account with id {result.Value?.Id} was created and/or retrieved successfully";
-                Log.Information(msg);
-                var mapResultDto = _mapper.Map<PlexAccountDTO>(result.Value);
-                return Created(msg, Result.Ok(mapResultDto).WithSuccess(msg));
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            var mapResult = _mapper.Map<PlexAccount>(newAccount);
+            return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.CreatePlexAccountAsync(mapResult));
         }
 
         // DELETE api/<AccountController>/5
         [HttpDelete("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
@@ -152,22 +112,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequestInvalidId();
             }
 
-            try
-            {
-                var result = await _plexAccountService.DeletePlexAccountAsync(id);
-                if (result.IsFailed)
-                {
-                    return BadRequest(result);
-                }
-
-                var msg = $"Successfully deleted account with id: {id}";
-                Log.Debug(msg);
-                return Ok(Result.Ok(true).WithSuccess(msg));
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            return ToActionResult(await _plexAccountService.DeletePlexAccountAsync(id));
         }
 
         [HttpPost("validate")]
@@ -251,20 +196,12 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> RefreshPlexAccount(int id)
         {
-            try
+            if (id <= 0)
             {
-                var result = await _plexAccountService.RefreshPlexAccount(id);
-                if (result.IsFailed)
-                {
-                    InternalServerError(result);
-                }
+                return BadRequestInvalidId();
+            }
 
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            return ToActionResult(await _plexAccountService.RefreshPlexAccount(id));
         }
     }
 }

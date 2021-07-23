@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -17,7 +16,6 @@ using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
 using PlexRipper.WebAPI.SignalR.Hubs;
-using Polly;
 
 namespace PlexRipper.WebAPI
 {
@@ -60,7 +58,7 @@ namespace PlexRipper.WebAPI
                             .AllowAnyMethod()
 
                             // The combo all origin is allowed with allow credentials is needed to make SignalR work from the client.
-                            .SetIsOriginAllowed(x => true)
+                            .SetIsOriginAllowed(_ => true)
                             .AllowCredentials();
                     });
             });

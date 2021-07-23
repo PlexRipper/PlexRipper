@@ -1,26 +1,36 @@
 <template>
 	<v-container fluid>
-		<v-row v-for="(folderPath, i) in folderPaths" :key="i" no-gutters>
+		<!--	Show warning when no allowed to edit	-->
+		<template v-if="!allowEditing">
+			<v-row>
+				<v-col>
+					<v-alert border="bottom" colored-border type="warning" elevation="2">
+						{{ $t('general.alerts.disabled-paths') }}
+					</v-alert>
+				</v-col>
+			</v-row>
+		</template>
+		<!--	Default FolderPaths	-->
+		<v-row v-for="folderPath in getFolderPaths" :key="folderPath.id" no-gutters>
 			<v-col cols="3">
 				<help-icon :help-id="toTranslation(folderPath.type)" />
 			</v-col>
 			<v-col>
-				<v-text-field
+				<p-text-field
 					append-icon="mdi-folder-open"
 					:value="folderPath.directory"
-					:height="50"
-					dense
-					outlined
-					solo
 					readonly
+					:disabled="!allowEditing"
 					@click:append="openDirectoryBrowser(folderPath)"
-				></v-text-field>
+				/>
 			</v-col>
-			<v-col cols="1">
-				<valid-icon :valid="folderPath.isValid" text="Directory is not a valid path!" />
+			<!--	Is Valid Icon -->
+			<v-col cols="2">
+				<valid-icon :valid="folderPath.isValid" :text="$t('general.alerts.invalid-directory')" />
 			</v-col>
 		</v-row>
-		<v-row v-if="selectedFolderPath">
+		<!--	Directory Browser	-->
+		<v-row v-if="selectedFolderPath && allowEditing">
 			<v-col>
 				<directory-browser
 					:open="isDirectoryBrowserOpen"
@@ -34,28 +44,31 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Vue, Component } from 'vue-property-decorator';
 import { FolderPathDTO } from '@dto/mainApi';
-import Log from 'consola';
-import { getFolderPaths, updateFolderPath } from '@api/pathApi';
-import ValidIcon from '@components/General/ValidIcon.vue';
-import HelpIcon from '@components/Help/HelpIcon.vue';
+import { updateFolderPath } from '@api/pathApi';
 import { kebabCase } from 'lodash';
-import DirectoryBrowser from '../General/DirectoryBrowser.vue';
+import ButtonType from '@enums/buttonType';
+import { DownloadService, FolderPathService } from '@service';
 
-@Component({
-	components: {
-		DirectoryBrowser,
-		ValidIcon,
-		HelpIcon,
-	},
-})
-export default class PathsOverview extends Vue {
+@Component
+export default class PathsDefaultOverview extends Vue {
 	folderPaths: FolderPathDTO[] = [];
 
 	isDirectoryBrowserOpen: boolean = false;
 
 	selectedFolderPath: FolderPathDTO | null = null;
+
+	addBtn: ButtonType = ButtonType.Add;
+	deleteBtn: ButtonType = ButtonType.Delete;
+
+	allowEditing: boolean = true;
+
+	get getFolderPaths(): FolderPathDTO[] {
+		// The first 3 folderPaths are always the default ones.
+		return this.folderPaths.filter((x) => x.id === 1 || x.id === 2 || x.id === 3);
+	}
 
 	openDirectoryBrowser(path: FolderPathDTO): void {
 		this.selectedFolderPath = path;
@@ -86,10 +99,14 @@ export default class PathsOverview extends Vue {
 	}
 
 	created(): void {
-		this.$subscribeTo(getFolderPaths(), (data) => {
-			if (data.isSuccess && data.value) {
-				this.folderPaths = data.value;
-			}
+		this.$subscribeTo(FolderPathService.getFolderPaths(), (data) => {
+			this.folderPaths = data ?? [];
+		});
+
+		// Ensure there are no active downloads before being allowed to change.
+		this.$subscribeTo(DownloadService.getActiveDownloadList(), (data) => {
+			Log.debug('data', data);
+			this.allowEditing = data?.length === 0 ?? false;
 		});
 	}
 }

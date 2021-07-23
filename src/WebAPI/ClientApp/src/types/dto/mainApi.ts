@@ -77,6 +77,9 @@ export enum PlexMediaType {
   Music = "Music",
   Album = "Album",
   Song = "Song",
+  Photos = "Photos",
+  OtherVideos = "OtherVideos",
+  Games = "Games",
   Unknown = "Unknown",
 }
 
@@ -115,10 +118,21 @@ export type ResultDTOOfListOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[
 export interface FolderPathDTO {
   /** @format int32 */
   id: number;
-  type: string;
+  type: FolderType;
   displayName: string;
   directory: string;
   isValid: boolean;
+}
+
+export enum FolderType {
+  None = "None",
+  DownloadFolder = "DownloadFolder",
+  MovieFolder = "MovieFolder",
+  TvShowFolder = "TvShowFolder",
+  MusicFolder = "MusicFolder",
+  PhotosFolder = "PhotosFolder",
+  OtherVideosFolder = "OtherVideosFolder",
+  GamesVideosFolder = "GamesVideosFolder",
 }
 
 export type ResultDTOOfFileSystemDTO = ResultDTO & { value: FileSystemDTO };
@@ -148,6 +162,8 @@ export enum FileSystemEntityType {
   Folder = "Folder",
   File = "File",
 }
+
+export type ResultDTOOfFolderPathDTO = ResultDTO & { value: FolderPathDTO };
 
 export type ResultDTOOfListOfNotificationDTO = ResultDTO & { value: NotificationDTO[] };
 
@@ -250,6 +266,10 @@ export interface PlexLibraryDTO {
   /** @format int32 */
   libraryLocationId: number;
   libraryLocationPath: string;
+  defaultDestination: FolderPathDTO;
+
+  /** @format int32 */
+  defaultDestinationId: number;
 
   /** @format int32 */
   plexServerId: number;

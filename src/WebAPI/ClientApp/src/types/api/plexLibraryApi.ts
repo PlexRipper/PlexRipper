@@ -7,6 +7,12 @@ import ResultDTO from '@dto/ResultDTO';
 const logText = 'From PlexLibraryAPI => ';
 const apiPath = '/plexLibrary';
 
+export function getAllPlexLibraries(): Observable<ResultDTO<PlexLibraryDTO[]>> {
+	preApiRequest(logText, 'getAllPlexLibraries');
+	const result = Axios.get(`${apiPath}`);
+	return checkResponse<ResultDTO<PlexLibraryDTO[]>>(result, logText, 'getAllPlexLibraries');
+}
+
 export function getPlexLibrary(libraryId: number, plexAccountId: number): Observable<ResultDTO<PlexLibraryDTO>> {
 	preApiRequest(logText, 'getPlexLibrary');
 	const result = Axios.get(`${apiPath}/${libraryId}?plexAccountId=${plexAccountId}`);
@@ -25,4 +31,13 @@ export function refreshPlexLibrary(libraryId: number): Observable<ResultDTO<Plex
 		plexLibraryId: libraryId,
 	});
 	return checkResponse<ResultDTO<PlexLibraryDTO | null>>(result, logText, 'refreshPlexLibrary');
+}
+
+export function updateDefaultDestination(libraryId: number, folderPathId: number): Observable<ResultDTO> {
+	preApiRequest(logText, 'updateDefaultDestination');
+	const result = Axios.put(`${apiPath}/settings/default/destination`, {
+		libraryId,
+		folderPathId,
+	});
+	return checkResponse<ResultDTO>(result, logText, 'updateDefaultDestination');
 }

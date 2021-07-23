@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI.Common.DTO.FolderPath
 {
@@ -8,7 +9,7 @@ namespace PlexRipper.WebAPI.Common.DTO.FolderPath
         public int Id { get; set; }
 
         [JsonProperty("type", Required = Required.Always)]
-        public string Type { get; set; }
+        public FolderType Type { get; set; }
 
         [JsonProperty("displayName", Required = Required.Always)]
         public string DisplayName { get; set; }

@@ -10,7 +10,7 @@ namespace PlexRipper.Application.Common
 
         string ToAbsolutePath(string relativePath);
 
-        FileSystemResult LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
+        Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
 
         Result<Stream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize);
 

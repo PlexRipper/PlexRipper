@@ -79,5 +79,79 @@ namespace PlexRipper.WebAPI.Controllers
             var resultDTO = _mapper.Map<ResultDTO<T>>(result);
             return new OkObjectResult(resultDTO);
         }
+
+        [NonAction]
+        protected IActionResult ToActionResult(Result result)
+        {
+            // Status Code 200
+            if (result.IsSuccess)
+            {
+                var resultDTO = _mapper.Map<ResultDTO>(result);
+                if (result.Has201CreatedRequestSuccess())
+                {
+                    // Status code 201 Created
+                    return new ObjectResult(resultDTO)
+                    {
+                        StatusCode = StatusCodes.Status201Created,
+                    };
+                }
+
+                return new OkObjectResult(resultDTO);
+            }
+
+            var failedResult = _mapper.Map<ResultDTO>(result);
+            if (result.Has400BadRequestError())
+            {
+                return new BadRequestObjectResult(failedResult);
+            }
+
+            if (result.Has404NotFoundError())
+            {
+                return new NotFoundObjectResult(failedResult);
+            }
+
+            // Status Code 500
+            return new ObjectResult(failedResult)
+            {
+                StatusCode = StatusCodes.Status500InternalServerError,
+            };
+        }
+
+        [NonAction]
+        protected IActionResult ToActionResult<TEntity, TDTO>(Result<TEntity> result)
+        {
+            // Status Code 200
+            if (result.IsSuccess)
+            {
+                var resultDTO = _mapper.Map<ResultDTO<TDTO>>(result);
+                if (result.Has201CreatedRequestSuccess())
+                {
+                    // Status code 201 Created
+                    return new ObjectResult(resultDTO)
+                    {
+                        StatusCode = StatusCodes.Status201Created,
+                    };
+                }
+
+                return new OkObjectResult(resultDTO);
+            }
+
+            var failedResult = _mapper.Map<ResultDTO>(result);
+            if (result.Has400BadRequestError())
+            {
+                return new BadRequestObjectResult(failedResult);
+            }
+
+            if (result.Has404NotFoundError())
+            {
+                return new NotFoundObjectResult(failedResult);
+            }
+
+            // Status Code 500
+            return new ObjectResult(failedResult)
+            {
+                StatusCode = StatusCodes.Status500InternalServerError,
+            };
+        }
     }
 }

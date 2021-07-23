@@ -294,7 +294,6 @@ namespace PlexRipper.DownloadManager.Download
 
         #endregion
 
-        /// <inheritdoc/>
         public void Dispose()
         {
             _destinationStream.Close();

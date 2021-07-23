@@ -116,7 +116,7 @@ namespace DownloadManager.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Start_ShouldHaveStatusDownloading_WhenStarted()
+        public void Start_ShouldHaveStatusDownloading_WhenStarted()
         {
             //Arrange
             var memoryStream = new MemoryStream();

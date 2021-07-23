@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -33,15 +32,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult GetSettings()
         {
-            try
-            {
-                var result = _settingsService.GetSettings();
-                return result.IsFailed ? InternalServerError(result) : Ok(result);
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            return ToActionResult(_settingsService.GetSettings());
         }
 
         // PUT api/<SettingsController>/
@@ -51,15 +42,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult UpdateSettings([FromBody] SettingsModel settingsModel)
         {
-            try
-            {
-                var result = _settingsService.UpdateSettings(settingsModel);
-                return result.IsFailed ? BadRequest(result) : Ok(result);
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            return ToActionResult(_settingsService.UpdateSettings(settingsModel));
         }
 
         // GET api/<SettingsController>/ResetDb
@@ -68,15 +51,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> ResetDatabase()
         {
-            try
-            {
-                var result = await _plexRipperDatabaseService.ResetDatabase();
-                return result.IsFailed ? InternalServerError(result) : Ok(result);
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            return ToActionResult(await _plexRipperDatabaseService.ResetDatabase());
         }
     }
 }

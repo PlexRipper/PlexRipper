@@ -1,13 +1,15 @@
 import Log from 'consola';
 import { Observable, of, combineLatest } from 'rxjs';
-import { getAllAccounts } from '@api/accountApi';
+import { getAccount, getAllAccounts } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { switchMap, tap } from 'rxjs/operators';
 import { BaseService, GlobalService, SettingsService } from '@service';
 import { Context } from '@nuxt/types';
 import IStoreState from '@interfaces/IStoreState';
 
 export class AccountService extends BaseService {
+	// region Constructor and Setup
+
 	public constructor() {
 		super({
 			stateSliceSelector: (state: IStoreState) => {
@@ -24,19 +26,38 @@ export class AccountService extends BaseService {
 		GlobalService.getAxiosReady()
 			.pipe(
 				tap(() => Log.debug('Retrieving all accounts')),
-				finalize(() => this.fetchAccounts()),
+				switchMap(() => this.fetchAccounts()),
 			)
 			.subscribe();
 	}
+	// endregion
 
-	public fetchAccounts(): void {
-		getAllAccounts().subscribe((accounts) => {
-			if (accounts.isSuccess) {
-				Log.debug(`AccountService => Fetch Accounts`, accounts.value);
-				this.setState({ accounts: accounts.value });
-			}
-		});
+	// region Fetch
+	public fetchAccount(accountId: Number): Observable<PlexAccountDTO | null> {
+		return getAccount(accountId).pipe(
+			switchMap((accountResult) => of(accountResult?.value ?? null)),
+			tap((account) => {
+				if (account) {
+					Log.debug(`AccountService => Fetch Account`, account);
+					this.setState(
+						{ accounts: this.getState().accounts.addOrReplace((x) => x.id === account.id, account) },
+						'Account Fetched',
+					);
+				}
+			}),
+		);
 	}
+
+	public fetchAccounts(): Observable<PlexAccountDTO[]> {
+		return getAllAccounts().pipe(
+			switchMap((accountResult) => of(accountResult?.value ?? [])),
+			tap((accounts) => {
+				Log.debug(`AccountService => Fetch Accounts`, accounts);
+				this.setState({ accounts });
+			}),
+		);
+	}
+	// endregion
 
 	public getAccounts(): Observable<PlexAccountDTO[]> {
 		return this.stateChanged.pipe(switchMap((x) => of(x?.accounts ?? [])));

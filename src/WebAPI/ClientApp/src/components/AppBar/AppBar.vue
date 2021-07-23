@@ -58,10 +58,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { GlobalService, SettingsService, AccountService, SignalrService } from '@service';
+import { GlobalService, SettingsService, AccountService, ServerService } from '@service';
 import { refreshAccount } from '@api/accountApi';
-import { switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import { PlexAccountRefreshProgress } from '@dto/mainApi';
 import DarkModeToggle from '@components/General/DarkModeToggle.vue';
@@ -98,11 +96,11 @@ export default class AppBar extends Vue {
 	refreshAccount(accountId: number = 0): void {
 		const index = accountId === 0 ? 0 : this.accounts.findIndex((x) => x.id === accountId);
 		this.loading.splice(index, 1, true);
-		refreshAccount(accountId)
-			.pipe(switchMap(() => of(AccountService.fetchAccounts())))
-			.subscribe(() => {
-				this.loading.splice(index, 1, false);
-			});
+		refreshAccount(accountId).subscribe(() => {
+			AccountService.fetchAccounts();
+			ServerService.fetchServers();
+			this.loading.splice(index, 1, false);
+		});
 	}
 
 	created(): void {
@@ -127,18 +125,20 @@ export default class AppBar extends Vue {
 			}
 		});
 
-		this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
-			const index = this.accountRefreshProgress.findIndex((x) => x.plexAccountId === data.plexAccountId);
-			if (index > -1) {
-				if (!data.isComplete) {
-					this.accountRefreshProgress.splice(index, 1, data);
-				} else {
-					this.accountRefreshProgress.splice(index, 1);
-				}
-			} else {
-				this.accountRefreshProgress.push(data);
-			}
-		});
+		// this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
+		// 	if (data) {
+		// 		const index = this.accountRefreshProgress.findIndex((x) => x.plexAccountId === data.plexAccountId);
+		// 		if (index > -1) {
+		// 			if (!data.isComplete) {
+		// 				this.accountRefreshProgress.splice(index, 1, data);
+		// 			} else {
+		// 				this.accountRefreshProgress.splice(index, 1);
+		// 			}
+		// 		} else {
+		// 			this.accountRefreshProgress.push(data);
+		// 		}
+		// 	}
+		// });
 	}
 }
 </script>

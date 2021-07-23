@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
+using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.SignalR.Common;
 
@@ -25,6 +26,7 @@ namespace PlexRipper.WebAPI.Config
                 typeof(DownloadTaskCreationProgress),
                 typeof(LibraryProgress),
                 typeof(PlexAccountRefreshProgress),
+                typeof(InspectServerProgress),
                 typeof(FileMergeProgress),
                 typeof(NotificationDTO),
             };

@@ -83,11 +83,16 @@ namespace PlexRipper.WebAPI
             services.AddHealthChecks();
 
             // Fluent Validator
-            services.AddMvc(options => { options.Filters.Add<ValidateFilter>(); })
+            services.AddMvc(options =>
+                {
+                    options.Filters.Add<ValidateFilter>();
+
+                })
                 .AddFluentValidation(fv =>
                 {
+                    // ValidatorOptions.Global.CascadeMode = CascadeMode.Stop;
+                    fv.RegisterValidatorsFromAssemblyContaining<WebApiModule>();
                     fv.RegisterValidatorsFromAssemblyContaining<ApplicationModule>();
-                    fv.RegisterValidatorsFromAssemblyContaining<ValidateFilter>();
                     fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
                 });
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

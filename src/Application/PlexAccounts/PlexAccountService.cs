@@ -19,31 +19,13 @@ namespace PlexRipper.Application.PlexAccounts
 
         private readonly ISignalRService _signalRService;
 
-        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexApiService plexApiService, ISignalRService signalRService)
+        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexApiService plexApiService,
+            ISignalRService signalRService)
         {
             _mediator = mediator;
             _plexServerService = plexServerService;
             _plexApiService = plexApiService;
             _signalRService = signalRService;
-        }
-
-        public async Task<Result<List<PlexServer>>> GetPlexServersAsync(PlexAccount plexAccount, bool refresh = false)
-        {
-            if (refresh)
-            {
-                await _plexServerService.RefreshPlexServersAsync(plexAccount);
-            }
-
-            var result = await _mediator.Send(new GetPlexServersByPlexAccountIdQuery(plexAccount.Id));
-            if (!result.IsFailed)
-            {
-                Log.Warning("Validation failed when attempting to retrieve the PlexServers by PlexAccount id");
-                return result;
-            }
-
-            Log.Information($"Retrieved {result.Value.Count} PlexServers from the database"
-                            + (refresh ? ", after refresh from the plexApi" : string.Empty));
-            return result;
         }
 
         /// <summary>
@@ -88,22 +70,14 @@ namespace PlexRipper.Application.PlexAccounts
         /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi. It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
         /// </summary>
         /// <param name="plexAccount">The <see cref="PlexAccount"/> to setup.</param>
-        /// <returns>If the setup was successful.</returns>
-        private async Task<Result<bool>> SetupAccountAsync(PlexAccount plexAccount)
+        /// <returns>The list of <see cref="PlexServer">PlexServers</see> which are accessible by this account.</returns>
+        private async Task<Result<List<PlexServer>>> SetupAccountAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
-            {
-                string msg = "plexAccount was null";
-                Log.Warning(msg);
-                return Result.Fail(msg);
-            }
+                return Result.Fail("plexAccount was null").LogWarning();
 
             if (plexAccount.Id <= 0)
-            {
-                string msg = $"plexAccount.id was {plexAccount.Id}";
-                Log.Warning(msg);
-                return Result.Fail(msg);
-            }
+                return Result.Fail($"plexAccount.id was {plexAccount.Id}").LogWarning();
 
             Log.Debug("Setting up new PlexAccount");
 
@@ -113,10 +87,7 @@ namespace PlexRipper.Application.PlexAccounts
             var plexAccountFromApi = await _plexApiService.PlexSignInAsync(plexAccount.Username, plexAccount.Password);
             if (plexAccountFromApi == null)
             {
-                string msg = $"The plexAccount with {plexAccount.Username} was invalid when sent to the PlexApi";
-
-                Log.Warning(msg);
-                return Result.Fail(msg);
+                return Result.Fail($"The plexAccount with {plexAccount.Username} was invalid when sent to the PlexApi").LogWarning();
             }
 
             // Merge the plexAccount from the Api into the current one.
@@ -125,19 +96,14 @@ namespace PlexRipper.Application.PlexAccounts
 
             if (result.IsFailed)
             {
-                string msg = "Failed to validate the plexAccount before the update process in the database";
-
-                Log.Warning(msg);
-                return result.ToResult().WithError(msg);
+                return result.ToResult().WithError("Failed to validate the plexAccount before the update process in the database").LogWarning();
             }
 
             // Retrieve and store servers
             var refreshResult = await _plexServerService.RefreshPlexServersAsync(plexAccount);
             if (refreshResult.IsFailed)
             {
-                string msg = "Failed to refresh the PlexServers when setting up the PlexAccount";
-                Log.Warning(msg);
-                return refreshResult.ToResult().WithError(msg);
+                return refreshResult.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
             }
 
             var plexServerList = await _mediator.Send(new GetPlexServersByPlexAccountIdQuery(plexAccount.Id));
@@ -146,15 +112,11 @@ namespace PlexRipper.Application.PlexAccounts
                 return plexServerList.ToResult();
             }
 
-            // Retrieve and store the corresponding PlexLibraries
-            if (!plexServerList.Value.Any())
-            {
-                Log.Debug("Account was setup successfully, but did not have access to any servers!");
-                return Result.Ok(false);
-            }
+            string msg = !plexServerList.Value.Any()
+                ? "Account was setup successfully, but did not have access to any servers!"
+                : "Account was setup successfully!";
 
-            Log.Debug("Account was setup successfully!");
-            return Result.Ok(true);
+            return Result.Ok(plexServerList.Value).WithSuccess(msg).LogDebug();
         }
 
         /// <inheritdoc/>
@@ -310,19 +272,13 @@ namespace PlexRipper.Application.PlexAccounts
                 return accountInDb;
             }
 
-            var isSuccessful = await SetupAccountAsync(accountInDb.Value);
-            if (isSuccessful.IsFailed)
+            var setupAccountResult = await SetupAccountAsync(accountInDb.Value);
+            if (setupAccountResult.IsFailed)
             {
-                return isSuccessful.ToResult();
+                return setupAccountResult.ToResult();
             }
 
-            if (isSuccessful.Value)
-            {
-                return await _mediator.Send(new GetPlexAccountByIdQuery(accountInDb.Value.Id, true, true));
-            }
-
-            // Failed to setup account successfully, return errors
-            return isSuccessful.ToResult<PlexAccount>();
+            return await _mediator.Send(new GetPlexAccountByIdQuery(accountInDb.Value.Id, true, true));
         }
 
         public async Task<Result<PlexAccount>> UpdatePlexAccountAsync(dynamic plexAccountDto)

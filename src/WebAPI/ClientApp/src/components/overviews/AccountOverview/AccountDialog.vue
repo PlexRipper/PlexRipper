@@ -345,10 +345,12 @@ export default class AccountDialog extends Vue {
 	}
 
 	created(): void {
-		this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
-			this.accountSetupProgress = data;
-			if (data.isComplete) {
-				this.closeDialog(true);
+		this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(this.getAccount.id), (data) => {
+			if (data) {
+				this.accountSetupProgress = data;
+				if (data.isComplete) {
+					this.closeDialog(true);
+				}
 			}
 		});
 	}

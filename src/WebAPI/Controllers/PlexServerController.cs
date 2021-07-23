@@ -61,5 +61,18 @@ namespace PlexRipper.WebAPI.Controllers
 
             return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(await _plexServerService.CheckPlexServerStatusAsync(id, plexAccountId));
         }
+
+        // GET api/<PlexServerController>/5/check
+        [HttpPost("inspect")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> CheckStatus([FromBody] InspectServerDTO inspectServer)
+        {
+            if (!ModelState.IsValid) return ToResult(ModelState);
+
+            return ToActionResult(
+                await _plexServerService.InspectPlexServers(inspectServer.PlexAccountId, inspectServer.PlexServerIds));
+        }
     }
 }

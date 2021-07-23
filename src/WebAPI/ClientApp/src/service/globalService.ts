@@ -37,8 +37,12 @@ export class GlobalService extends Service.BaseService {
 			alerts: [],
 			helpIdDialog: '',
 			settings: {} as SettingsModel,
-			fileMergeProgressList: [],
 			downloadTaskUpdateList: [],
+			// Progress Service
+			fileMergeProgressList: [],
+			accountRefreshProgress: [],
+			inspectServerProgress: [],
+			plexAccountRefreshProgress: [],
 		} as IStoreState);
 
 		for (const key of Object.keys(Service)) {

@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';

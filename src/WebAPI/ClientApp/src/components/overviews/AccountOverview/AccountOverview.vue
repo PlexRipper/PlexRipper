@@ -21,7 +21,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import { SignalrService, AccountService } from '@service';
+import { AccountService } from '@service';
 import { PlexAccountDTO } from '@dto/mainApi';
 import AccountDialog from '@overviews/AccountOverview/AccountDialog.vue';
 import AccountCard from './AccountCard.vue';
@@ -53,10 +53,6 @@ export default class AccountOverview extends Vue {
 		this.$subscribeTo(AccountService.getAccounts(), (data) => {
 			this.accounts = data ?? [];
 			Log.debug(this.accounts);
-		});
-
-		this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
-			Log.debug(data);
 		});
 	}
 }

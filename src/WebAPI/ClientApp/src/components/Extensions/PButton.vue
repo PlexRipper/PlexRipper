@@ -137,6 +137,8 @@ export default class PBtn extends Vue {
 				return prefix + 'delete';
 			case ButtonType.Error:
 				return prefix + 'error';
+			case ButtonType.Hide:
+				return prefix + 'hide';
 		}
 		return '';
 	}

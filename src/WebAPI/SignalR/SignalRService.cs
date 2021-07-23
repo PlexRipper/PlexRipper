@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
@@ -106,6 +107,18 @@ namespace PlexRipper.WebAPI.SignalR
 
             var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
             Task.Run(() => _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", downloadTaskDTO));
+        }
+
+        public void SendServerInspectStatusProgress(InspectServerProgress progress)
+        {
+            if (_progressHub?.Clients?.All == null)
+            {
+                Log.Warning("No Clients connected to ProgressHub");
+                return;
+            }
+
+            Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progress));
+
         }
 
         /// <inheritdoc/>

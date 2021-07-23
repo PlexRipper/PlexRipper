@@ -70,6 +70,14 @@
           }
         },
         {
+          "name": "AccountSetupProgress",
+          "description": "",
+          "source": {
+            "module": "./src/components/Progress/AccountSetupProgress.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "AlertDialog",
           "description": "",
           "attributes": [
@@ -1011,7 +1019,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/Extensions/PlexRipperButton.vue",
+            "module": "./src/components/Extensions/PButton.vue",
             "symbol": "default"
           }
         },
@@ -1039,7 +1047,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/Extensions/PlexRipperCheckBox.vue",
+            "module": "./src/components/Extensions/PCheckBox.vue",
             "symbol": "default"
           }
         },
@@ -1064,16 +1072,16 @@
           "description": "",
           "attributes": [
             {
-              "name": "height",
+              "name": "dense",
               "required": false,
               "value": {
                 "kind": "expression",
-                "type": "number"
+                "type": "boolean"
               },
-              "default": "50"
+              "default": "true"
             },
             {
-              "name": "dense",
+              "name": "filled",
               "required": false,
               "value": {
                 "kind": "expression",
@@ -1091,17 +1099,35 @@
               "default": "true"
             },
             {
-              "name": "solo",
+              "name": "color",
               "required": false,
               "value": {
                 "kind": "expression",
-                "type": "boolean"
+                "type": "string"
               },
-              "default": "true"
+              "default": "'red'"
+            },
+            {
+              "name": "hideDetails",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "'auto'"
+            },
+            {
+              "name": "menuProps",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "any"
+              },
+              "default": "() => {\r\n    return { offsetY: true, contentClass: 'menu-background' };\r\n}"
             }
           ],
           "source": {
-            "module": "./src/components/Extensions/PlexRipperSelect.vue",
+            "module": "./src/components/Extensions/PSelect.vue",
             "symbol": "default"
           }
         },
@@ -1147,7 +1173,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/Extensions/PlexRipperTextField.vue",
+            "module": "./src/components/Extensions/PTextField.vue",
             "symbol": "default"
           }
         },

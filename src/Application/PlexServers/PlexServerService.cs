@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Common.WebApi;
+using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexServers
@@ -36,11 +38,12 @@ namespace PlexRipper.Application.PlexServers
         }
 
         /// <summary>
-        /// Retrieves the latest <see cref="PlexServer"/> data, and the corresponding <see cref="PlexLibrary"/>, from the PlexAPI and stores it in the Database.
+        /// Retrieves the latest <see cref="PlexServer"/> data, and the corresponding <see cref="PlexLibrary"/>,
+        /// from the PlexAPI and stores it in the Database.
         /// </summary>
         /// <param name="plexAccount">PlexAccount to use to retrieve the servers.</param>
         /// <returns>Is successful.</returns>
-        public async Task<Result<bool>> RefreshPlexServersAsync(PlexAccount plexAccount)
+        public async Task<Result> RefreshPlexServersAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
             {
@@ -61,29 +64,11 @@ namespace PlexRipper.Application.PlexServers
 
             if (!serverList.Any())
             {
-                return Result.Ok(false);
+                return Result.Ok();
             }
 
-            // Add initial entry for the plex servers
-            var result = await _mediator.Send(new AddOrUpdatePlexServersCommand(plexAccount, serverList));
-            if (result.IsFailed)
-            {
-                return result;
-            }
-
-            var plexServersResult = await InspectPlexServers(plexAccount, serverList);
-            if (plexServersResult.IsFailed)
-            {
-                return plexServersResult.ToResult();
-            }
-
-            return await _mediator.Send(new UpdatePlexServersCommand(plexServersResult.Value));
-        }
-
-        private async Task<Result<List<PlexServer>>> InspectPlexServers(PlexAccount plexAccount, List<PlexServer> plexServers)
-        {
             // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
-            plexServers.ForEach(plexServer =>
+            serverList.ForEach(plexServer =>
             {
                 if (plexServer.OwnerId == 0)
                 {
@@ -96,7 +81,27 @@ namespace PlexRipper.Application.PlexServers
                 }
             });
 
-            await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, 0, plexServers.Count);
+            // Add initial entry for the plex servers
+            return await _mediator.Send(new AddOrUpdatePlexServersCommand(plexAccount, serverList));
+        }
+
+        public async Task<Result> InspectPlexServers(int plexAccountId, List<int> plexServerIds)
+        {
+            var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
+            if (plexAccountResult.IsFailed)
+            {
+                return plexAccountResult.WithError($"Could not retrieve any PlexAccount from database with id {plexAccountId}.").LogError();
+            }
+
+            var plexServersResult = await _mediator.Send(new GetPlexServersByIdsQuery(plexServerIds));
+            if (plexServersResult.IsFailed)
+            {
+                return plexServersResult.WithError("Could not retrieve any PlexServers from database to inspect.").LogError();
+            }
+
+            var plexServers = plexServersResult.Value;
+
+            await _signalRService.SendPlexAccountRefreshUpdate(plexAccountId, 0, plexServers.Count);
 
             int finishedCount = 0;
 
@@ -105,12 +110,18 @@ namespace PlexRipper.Application.PlexServers
                 Interlocked.Increment(ref finishedCount);
 
                 // Send progress update to clients
-                await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, finishedCount, plexServers.Count);
+                await _signalRService.SendPlexAccountRefreshUpdate(plexAccountId, finishedCount, plexServers.Count);
+            }
+
+            void SendServerProgress(InspectServerProgress progress)
+            {
+                // Send progress update to clients
+                _signalRService.SendServerInspectStatusProgress(progress);
             }
 
             var tasks = plexServers.Select(async plexServer =>
             {
-                var serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccount.Id, false);
+                var serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false);
                 if (serverStatusResult.IsFailed)
                 {
                     Log.Error($"Failed to retrieve the serverStatus for {plexServer.Name} - {plexServer.ServerUrl}");
@@ -123,7 +134,8 @@ namespace PlexRipper.Application.PlexServers
                 {
                     Log.Information($"Attempting to DNS fix the connection with server {plexServer.Name}");
                     plexServer.ServerFixApplyDNSFix = true;
-                    serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccount.Id, false);
+                    serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false);
+
                     if (!serverStatusResult.Value.IsSuccessful)
                     {
                         plexServer.ServerFixApplyDNSFix = false;
@@ -131,17 +143,18 @@ namespace PlexRipper.Application.PlexServers
                         Log.Error($"ServerFixApplyDNSFix did not help with server {plexServer.Name} - {plexServer.ServerUrl}");
                         return;
                     }
+
                     Log.Information($"ServerFixApplyDNSFix worked on {plexServer.Name}, connection successful!");
                 }
 
-                await _plexLibraryService.RefreshLibrariesAsync(plexAccount, plexServer);
+                await _plexLibraryService.RefreshLibrariesAsync(plexAccountResult.Value, plexServer);
 
                 await SendProgress();
             });
 
             await Task.WhenAll(tasks);
 
-            return Result.Ok(plexServers);
+            return await _mediator.Send(new UpdatePlexServersCommand(plexServersResult.Value));
         }
 
         /// <summary>
@@ -207,45 +220,6 @@ namespace PlexRipper.Application.PlexServers
         public Task<Result<PlexServer>> GetServerAsync(int plexServerId)
         {
             return _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
-        }
-
-        /// <summary>
-        /// Retrieves all <see cref="PlexServer"/>s accessible by this <see cref="PlexAccount"/> from the Database.
-        /// </summary>
-        /// <param name="plexAccount">The <see cref="PlexAccount"/> to check with.</param>
-        /// <param name="refresh">Should the <see cref="PlexServer"/>s data be retrieved from the PlexApi.</param>
-        /// <returns>The list of <see cref="PlexServer"/>s.</returns>
-        public async Task<Result<List<PlexServer>>> GetServersByPlexAccountAsync(PlexAccount plexAccount, bool refresh = false)
-        {
-            if (plexAccount == null)
-            {
-                Log.Warning("The plexAccount was null");
-                return Result.Fail("The plexAccount was null");
-            }
-
-            // Retrieve all servers
-            var serverList = await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccount.Id));
-            if (refresh || !serverList.Value.Any())
-            {
-                if (!serverList.Value.Any())
-                {
-                    Log.Warning($"PlexAccount {plexAccount.Id} did not have any PlexServers assigned");
-                }
-
-                var refreshSuccess = await RefreshPlexServersAsync(plexAccount);
-                if (refreshSuccess.IsFailed)
-                {
-                    return refreshSuccess.ToResult();
-                }
-
-                serverList = await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccount.Id));
-                if (serverList.IsFailed)
-                {
-                    return serverList;
-                }
-            }
-
-            return serverList;
         }
 
         /// <inheritdoc/>

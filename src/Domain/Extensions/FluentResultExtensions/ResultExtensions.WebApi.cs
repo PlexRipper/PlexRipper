@@ -39,6 +39,35 @@ namespace PlexRipper.Domain
             return Result.Fail(GetStatusCodeError(statusCode, message));
         }
 
+        #region 201
+
+        private static bool _has201CreatedRequestSuccess(Result result)
+        {
+            return FindStatusCode(result, HttpCodes.Status201Created);
+        }
+
+        private static Result _add201CreatedRequestSuccess(Result result, string message = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                message = "Created successful";
+            }
+
+            return _AddStatusCode(result, Get201CreatedRequestSuccess(message));
+        }
+
+        private static Result _create201CreatedRequestSuccess(string message = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                message = "Created successful";
+            }
+
+            return _CreateStatusCode(HttpCodes.Status201Created, message);
+        }
+
+        #endregion
+
         #region 400
 
         private static bool _has400BadRequestError(Result result)
@@ -106,6 +135,21 @@ namespace PlexRipper.Domain
             return new Error(message).WithMetadata(_statusCode, statusCode);
         }
 
+        public static Success GetStatusCodeSuccess(int statusCode, string message = "")
+        {
+            return new Success(message).WithMetadata(_statusCode, statusCode);
+        }
+
+        public static Success Get201CreatedRequestSuccess(string message = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                message = "Created Request Success";
+            }
+
+            return GetStatusCodeSuccess(HttpCodes.Status201Created, message);
+        }
+
         public static Error Get400BadRequestError(string message = "")
         {
             if (string.IsNullOrEmpty(message))
@@ -130,6 +174,15 @@ namespace PlexRipper.Domain
 
         #region General
 
+        #region 201
+
+        public static Result Create201CreatedResult(string message = "")
+        {
+            return _CreateStatusCode(HttpCodes.Status201Created, message);
+        }
+
+        #endregion
+
         #region 400
 
         public static Result Create400BadRequestResult(string message = "")
@@ -151,6 +204,20 @@ namespace PlexRipper.Domain
         #endregion
 
         #region Result Signatures
+
+        #region 201
+
+        public static bool Has201CreatedRequestSuccess(this Result result)
+        {
+            return _has201CreatedRequestSuccess(result);
+        }
+
+        public static Result Add201CreatedRequestSuccess(this Result result, string message = "")
+        {
+            return _add201CreatedRequestSuccess(result, message);
+        }
+
+        #endregion
 
         #region 400
 
@@ -214,6 +281,5 @@ namespace PlexRipper.Domain
         #endregion
 
         #endregion
-
     }
 }

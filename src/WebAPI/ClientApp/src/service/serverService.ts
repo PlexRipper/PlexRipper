@@ -65,7 +65,6 @@ export class ServerService extends BaseService {
 					server.status = serverStatus.value;
 					servers.splice(index, 1, server);
 					this.setState({ servers }, 'Update server status for ' + plexServerId);
-					this.logHistory();
 				}
 			});
 		}

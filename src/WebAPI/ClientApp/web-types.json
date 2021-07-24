@@ -72,6 +72,21 @@
         {
           "name": "AccountSetupProgress",
           "description": "",
+          "attributes": [
+            {
+              "name": "account",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "PlexAccountDTO"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "complete"
+            }
+          ],
           "source": {
             "module": "./src/components/Progress/AccountSetupProgress.vue",
             "symbol": "default"
@@ -1342,6 +1357,33 @@
                 "type": "boolean"
               },
               "default": "true"
+            },
+            {
+              "name": "circularMode",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "name": "completed",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "name": "indeterminate",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
             }
           ],
           "source": {

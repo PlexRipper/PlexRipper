@@ -1,8 +1,8 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
-import { DownloadTaskDTO, FileMergeProgress, PlexAccountRefreshProgress } from '@dto/mainApi';
+import { filter, switchMap } from 'rxjs/operators';
+import { DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import { BaseService, SignalrService } from '@service';
 
@@ -13,7 +13,6 @@ export class ProgressService extends BaseService {
 				return {
 					fileMergeProgressList: state.fileMergeProgressList,
 					downloadTaskUpdateList: state.downloadTaskUpdateList,
-					plexAccountRefreshProgress: state.plexAccountRefreshProgress,
 				};
 			},
 		});
@@ -78,12 +77,6 @@ export class ProgressService extends BaseService {
 				of(state?.downloadTaskUpdateList.filter((x) => (serverId > 0 ? x.plexServerId === serverId : true))),
 			),
 			filter((x) => x && x !== []),
-		);
-	}
-
-	public getPlexAccountRefreshProgress(plexAccountId: number = 0): Observable<PlexAccountRefreshProgress | null> {
-		return this.stateChanged.pipe(
-			map((state: IStoreState) => state?.plexAccountRefreshProgress.find((x) => x.plexAccountId === plexAccountId) ?? null),
 		);
 	}
 }

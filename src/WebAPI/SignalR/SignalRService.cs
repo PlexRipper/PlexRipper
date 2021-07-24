@@ -35,27 +35,6 @@ namespace PlexRipper.WebAPI.SignalR
 
         #region ProgressHub
 
-        public async Task SendPlexAccountRefreshUpdate(int plexAccountId, int received, int total, bool isRefreshing = true)
-        {
-            if (_progressHub?.Clients?.All == null)
-            {
-                Log.Warning("No Clients connected to ProgressHub");
-                return;
-            }
-
-            var progress = new PlexAccountRefreshProgress
-            {
-                PlexAccountId = plexAccountId,
-                Received = received,
-                Total = total,
-                Percentage = DataFormat.GetPercentage(received, total),
-                IsRefreshing = isRefreshing,
-                IsComplete = received >= total,
-            };
-
-            await _progressHub.Clients.All.SendAsync(nameof(PlexAccountRefreshProgress), progress);
-        }
-
         public async Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)
         {
             if (_progressHub?.Clients?.All == null)

@@ -26,11 +26,6 @@
 					<v-list-item v-for="(account, index) in accounts" :key="index" @click="updateActiveAccountId(account.id)">
 						<v-list-item-content>
 							<v-list-item-title> {{ account.displayName }}</v-list-item-title>
-							<progress-component
-								v-if="getRefreshProgress(account.id)"
-								:show-circular="false"
-								:percentage="getRefreshProgress(account.id).percentage"
-							/>
 						</v-list-item-content>
 						<v-list-item-action>
 							<v-btn
@@ -61,7 +56,6 @@ import { Component, Vue } from 'vue-property-decorator';
 import { GlobalService, SettingsService, AccountService, ServerService } from '@service';
 import { refreshAccount } from '@api/accountApi';
 import type { PlexAccountDTO } from '@dto/mainApi';
-import { PlexAccountRefreshProgress } from '@dto/mainApi';
 import DarkModeToggle from '@components/General/DarkModeToggle.vue';
 import NotificationButton from '@components/AppBar/NotificationButton.vue';
 import ProgressComponent from '@components/ProgressComponent.vue';
@@ -78,7 +72,6 @@ export default class AppBar extends Vue {
 	private loading: boolean[] = [false];
 	private version: string = '?';
 
-	private plexAccountRefreshProgress: PlexAccountRefreshProgress[] = [];
 	activeAccountId: number = 0;
 
 	get isLoading(): boolean {
@@ -87,10 +80,6 @@ export default class AppBar extends Vue {
 
 	updateActiveAccountId(accountId: number): void {
 		SettingsService.updateActiveAccountSettings(accountId);
-	}
-
-	getRefreshProgress(plexAccountId: number): PlexAccountRefreshProgress | null {
-		return this.plexAccountRefreshProgress.find((x) => x.plexAccountId === plexAccountId) ?? null;
 	}
 
 	refreshAccount(accountId: number = 0): void {

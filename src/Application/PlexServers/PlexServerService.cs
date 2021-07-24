@@ -106,8 +106,6 @@ namespace PlexRipper.Application.PlexServers
 
             var plexServers = plexServersResult.Value;
 
-            await _signalRService.SendPlexAccountRefreshUpdate(plexAccountId, 0, plexServers.Count);
-
             // Create inspect tasks for all plexServers
             var tasks = plexServers.Select(async plexServer =>
             {
@@ -147,7 +145,7 @@ namespace PlexRipper.Application.PlexServers
                     if (serverStatusResult.Value.IsSuccessful)
                     {
                         // DNS fix worked
-                        dnsFixMsg = $"ServerFixApplyDNSFix worked on {plexServer.Name}, connection successful!";
+                        dnsFixMsg = $"Server DNS Fix worked on {plexServer.Name}, connection successful!";
                         Log.Information(dnsFixMsg);
                         SendServerProgress(new InspectServerProgress
                         {
@@ -159,7 +157,7 @@ namespace PlexRipper.Application.PlexServers
                     }
 
                     // DNS fix did not work
-                    dnsFixMsg = $"ServerFixApplyDNSFix did not help with server {plexServer.Name} - {plexServer.ServerUrl}";
+                    dnsFixMsg = $"Server DNS Fix did not help with server {plexServer.Name} - {plexServer.ServerUrl}";
                     Log.Warning(dnsFixMsg);
                     SendServerProgress(new InspectServerProgress
                     {

@@ -4,7 +4,6 @@ import {
 	FolderPathDTO,
 	NotificationDTO,
 	PlexAccountDTO,
-	PlexAccountRefreshProgress,
 	PlexLibraryDTO,
 	PlexServerDTO,
 	SettingsModel,
@@ -27,6 +26,5 @@ export default interface IStoreState {
 	downloadTaskUpdateList: DownloadTaskDTO[];
 	// Progress Service
 	fileMergeProgressList: FileMergeProgress[];
-	plexAccountRefreshProgress: PlexAccountRefreshProgress[];
 	inspectServerProgress: InspectServerProgress[];
 }

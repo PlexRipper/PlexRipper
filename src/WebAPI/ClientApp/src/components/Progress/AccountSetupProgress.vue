@@ -4,7 +4,10 @@
 			<!-- The total progress -->
 			<progress-component
 				:percentage="getTotalPercentage"
-				:text="`Checking accessible servers ${getCompletedCount} of ${plexServers.length}`"
+				:completed="getTotalPercentage === 100"
+				:text="getProgressText"
+				circular-mode
+				:indeterminate="plexServers.length === 0"
 			/>
 			<!--	Server Connection Details	-->
 			<v-simple-table class="section-table">
@@ -13,10 +16,22 @@
 						<!--	Server name and status	-->
 						<td style="width: 30%">
 							<status :value="progress ? progress.connectionSuccessful && progress.completed : false" />
-							{{ server.id }} - {{ server.name }}
+							{{ server.name }}
+						</td>
+						<!--	Status icon	-->
+						<td style="width: 10%">
+							<template v-if="progress">
+								<template v-if="!progress.completed">
+									<v-progress-circular indeterminate color="red" />
+								</template>
+								<template v-else>
+									<v-icon v-if="progress.connectionSuccessful">mdi-check</v-icon>
+									<v-icon v-else>mdi-close</v-icon>
+								</template>
+							</template>
 						</td>
 						<!--	Current Action	-->
-						<td style="width: 35%">
+						<td style="width: 30%">
 							<template v-if="progress">
 								<template v-if="!progress.completed">
 									<span v-if="progress && progress.retryAttemptIndex > 0">
@@ -25,13 +40,13 @@
 								</template>
 								<!--	Completed -->
 								<template v-else>
-									<span v-if="progress.connectionSuccessful"> <v-icon>mdi-check</v-icon> Server is connectable! </span>
-									<span v-else> <v-icon>mdi-close</v-icon> Could not connect to server. </span>
+									<span v-if="progress.connectionSuccessful"> Server is connectable! </span>
+									<span v-else> Could not connect to server. </span>
 								</template>
 							</template>
 						</td>
 						<!--	Error message	-->
-						<td style="width: 35%">
+						<td style="width: 30%">
 							<template v-if="progress">
 								<span v-if="progress && progress.message">
 									{{ progress.message }}
@@ -43,22 +58,25 @@
 			</v-simple-table>
 		</v-card-text>
 		<v-card-actions>
-			<p-btn :button-type="hideButtonType" />
-			<p-btn :button-type="confirmButtonType" @click="refreshAccount(1)" />
+			<v-row justify="end">
+				<v-col cols="auto">
+					<p-btn :button-type="hideButtonType" @click="$emit('hide')" />
+				</v-col>
+			</v-row>
 		</v-card-actions>
 	</v-card>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { AccountService, ProgressService, SignalrService } from '@service';
-import { InspectServerProgress, PlexAccountRefreshProgress, PlexServerDTO } from '@dto/mainApi';
+import _ from 'lodash';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { switchMap } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { AccountService, SignalrService } from '@service';
+import type { InspectServerProgress, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import { refreshAccount } from '@api/accountApi';
-import { switchMap } from 'rxjs';
 import { inspectPlexServers } from '@api/plexServerApi';
-import { tap } from 'rxjs/operators';
-import _ from 'lodash';
 
 declare interface ServerUpdate {
 	id: number;
@@ -68,12 +86,14 @@ declare interface ServerUpdate {
 
 @Component
 export default class AccountSetupProgress extends Vue {
-	accountSetupProgress: PlexAccountRefreshProgress | null = null;
 	inspectServerProgresses: InspectServerProgress[] = [];
 
 	hideButtonType: ButtonType = ButtonType.Hide;
 	confirmButtonType: ButtonType = ButtonType.Confirm;
 	plexServers: PlexServerDTO[] = [];
+
+	@Prop({ required: false, type: Object as () => PlexAccountDTO })
+	readonly account!: PlexAccountDTO;
 
 	get getServerUpdates(): ServerUpdate[] {
 		const serverUpdates: ServerUpdate[] = [];
@@ -89,6 +109,16 @@ export default class AccountSetupProgress extends Vue {
 		return serverUpdates;
 	}
 
+	get getProgressText(): string {
+		if (this.plexServers.length === 0) {
+			return `Retrieving accessible servers for account ${this.account?.displayName ?? ''}`;
+		}
+		if (this.getTotalPercentage === 100) {
+			return `Completed inspection of ${this.plexServers.length} Plex servers!`;
+		}
+		return `Inspecting accessible servers, completed ${this.getCompletedCount} of ${this.plexServers.length}`;
+	}
+
 	get getCompletedCount(): number {
 		return this.inspectServerProgresses.filter((x) => x.completed).length;
 	}
@@ -98,12 +128,6 @@ export default class AccountSetupProgress extends Vue {
 	}
 
 	refreshAccount(accountId: number = 0): void {
-		this.$subscribeTo(ProgressService.getPlexAccountRefreshProgress(), (progress) => {
-			if (progress) {
-				this.accountSetupProgress = progress;
-			}
-		});
-
 		this.$subscribeTo(
 			refreshAccount(accountId).pipe(
 				// Get account with accessible plexServers
@@ -122,7 +146,9 @@ export default class AccountSetupProgress extends Vue {
 					),
 				),
 			),
-			() => {},
+			() => {
+				this.$emit('complete');
+			},
 		);
 	}
 

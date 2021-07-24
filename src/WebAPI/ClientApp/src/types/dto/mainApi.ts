@@ -541,22 +541,6 @@ export interface LibraryProgress {
   isComplete: boolean;
 }
 
-export interface PlexAccountRefreshProgress {
-  /** @format int32 */
-  plexAccountId: number;
-
-  /** @format decimal */
-  percentage: number;
-
-  /** @format int32 */
-  received: number;
-
-  /** @format int32 */
-  total: number;
-  isRefreshing: boolean;
-  isComplete: boolean;
-}
-
 export interface InspectServerProgress {
   /** @format int32 */
   plexServerId: number;

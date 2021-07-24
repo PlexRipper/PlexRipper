@@ -81,8 +81,6 @@ namespace PlexRipper.Application.PlexAccounts
 
             Log.Debug("Setting up new PlexAccount");
 
-            await _signalRService.SendPlexAccountRefreshUpdate(plexAccount.Id, 0, 1);
-
             // Request new PlexAccount
             var plexAccountFromApi = await _plexApiService.PlexSignInAsync(plexAccount.Username, plexAccount.Password);
             if (plexAccountFromApi == null)

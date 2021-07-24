@@ -8,7 +8,6 @@ import {
 	DownloadTaskCreationProgress,
 	FileMergeProgress,
 	NotificationDTO,
-	PlexAccountRefreshProgress,
 	DownloadTaskDTO,
 	InspectServerProgress,
 } from '@dto/mainApi';
@@ -40,7 +39,6 @@ export class SignalrService extends BaseService {
 			stateSliceSelector: (state: IStoreState) => {
 				return {
 					fileMergeProgressList: state.fileMergeProgressList,
-					plexAccountRefreshProgress: state.plexAccountRefreshProgress,
 					inspectServerProgress: state.inspectServerProgress,
 				};
 			},
@@ -105,13 +103,8 @@ export class SignalrService extends BaseService {
 			this._libraryProgressSubject.next(data);
 		});
 
-		this._progressHubConnection?.on<PlexAccountRefreshProgress>('PlexAccountRefreshProgress').subscribe((data) => {
-			this.updateStore('plexAccountRefreshProgress', data, 'plexAccountId');
-		});
-
 		this._progressHubConnection?.on<InspectServerProgress>('InspectServerProgress').subscribe((data) => {
 			this.updateStore('inspectServerProgress', data, 'plexServerId');
-			this.logHistory();
 		});
 
 		this._notificationHubConnection?.on<NotificationDTO>('Notification').subscribe((data) => {
@@ -162,10 +155,6 @@ export class SignalrService extends BaseService {
 		return this.stateChanged.pipe(switchMap((x) => of(x?.fileMergeProgressList ?? [])));
 	}
 
-	public getAllPlexAccountRefreshProgress(): Observable<PlexAccountRefreshProgress[]> {
-		return this.stateChanged.pipe(map((x) => x?.plexAccountRefreshProgress ?? []));
-	}
-
 	public getAllInspectServerProgress(): Observable<InspectServerProgress[]> {
 		return this.stateChanged.pipe(map((x) => x?.inspectServerProgress ?? []));
 	}
@@ -175,10 +164,6 @@ export class SignalrService extends BaseService {
 
 	public getFileMergeProgress(id: number): Observable<FileMergeProgress | null> {
 		return this.getAllFileMergeProgress().pipe(map((x) => x?.find((x) => x.id === id) ?? null));
-	}
-
-	public getPlexAccountRefreshProgress(id: number): Observable<PlexAccountRefreshProgress | null> {
-		return this.getAllPlexAccountRefreshProgress().pipe(map((x) => x?.find((x) => x.plexAccountId === id) ?? null));
 	}
 
 	public getInspectServerProgress(plexServerId: number): Observable<InspectServerProgress | null> {
@@ -213,7 +198,6 @@ export interface ProgressHub {
 	DownloadTaskUpdate: DownloadTaskDTO;
 	DownloadTaskCreationProgress: DownloadTaskCreationProgress;
 	LibraryProgress: LibraryProgress;
-	PlexAccountRefreshProgress: PlexAccountRefreshProgress;
 	InspectServerProgress: InspectServerProgress;
 }
 

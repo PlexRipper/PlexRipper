@@ -562,12 +562,20 @@ export interface InspectServerProgress {
   plexServerId: number;
 
   /** @format int32 */
-  attemptIndex: number;
+  retryAttemptIndex: number;
 
   /** @format int32 */
-  attemptCount: number;
+  retryAttemptCount: number;
+
+  /** @format int32 */
+  timeToNextRetry: number;
+
+  /** @format int32 */
+  statusCode: number;
   connectionSuccessful: boolean;
-  serverFixApplyDNSFix: boolean;
+  completed: boolean;
+  message: string;
+  attemptingApplyDNSFix: boolean;
 }
 
 export interface FileMergeProgress {

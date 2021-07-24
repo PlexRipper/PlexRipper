@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentResults;
@@ -109,16 +108,7 @@ namespace PlexRipper.Application.PlexServers
 
             await _signalRService.SendPlexAccountRefreshUpdate(plexAccountId, 0, plexServers.Count);
 
-            int finishedCount = 0;
-
-            async Task SendProgress()
-            {
-                Interlocked.Increment(ref finishedCount);
-
-                // Send progress update to clients
-                await _signalRService.SendPlexAccountRefreshUpdate(plexAccountId, finishedCount, plexServers.Count);
-            }
-
+            // Create inspect tasks for all plexServers
             var tasks = plexServers.Select(async plexServer =>
             {
                 // Send server inspect status to front-end
@@ -140,33 +130,49 @@ namespace PlexRipper.Application.PlexServers
                     return;
                 }
 
-                SendServerProgress(new InspectServerProgress
-                {
-                    ConnectionSuccessful = true,
-                    PlexServerId = plexServer.Id,
-                });
-
                 // Apply possible fixes and try again
                 if (!serverStatusResult.Value.IsSuccessful)
                 {
-                    Log.Information($"Attempting to DNS fix the connection with server {plexServer.Name}");
+                    var dnsFixMsg = $"Attempting to DNS fix the connection with server {plexServer.Name}";
+                    Log.Information(dnsFixMsg);
+                    SendServerProgress(new InspectServerProgress
+                    {
+                        AttemptingApplyDNSFix = true,
+                        Message = dnsFixMsg,
+                    });
+
                     plexServer.ServerFixApplyDNSFix = true;
                     serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false);
 
-                    if (!serverStatusResult.Value.IsSuccessful)
+                    if (serverStatusResult.Value.IsSuccessful)
                     {
-                        plexServer.ServerFixApplyDNSFix = false;
-                        await SendProgress();
-                        Log.Error($"ServerFixApplyDNSFix did not help with server {plexServer.Name} - {plexServer.ServerUrl}");
-                        return;
+                        // DNS fix worked
+                        dnsFixMsg = $"ServerFixApplyDNSFix worked on {plexServer.Name}, connection successful!";
+                        Log.Information(dnsFixMsg);
+                        SendServerProgress(new InspectServerProgress
+                        {
+                            Message = dnsFixMsg,
+                            Completed = true,
+                            ConnectionSuccessful = true,
+                            AttemptingApplyDNSFix = true,
+                        });
                     }
 
-                    Log.Information($"ServerFixApplyDNSFix worked on {plexServer.Name}, connection successful!");
+                    // DNS fix did not work
+                    dnsFixMsg = $"ServerFixApplyDNSFix did not help with server {plexServer.Name} - {plexServer.ServerUrl}";
+                    Log.Warning(dnsFixMsg);
+                    SendServerProgress(new InspectServerProgress
+                    {
+                        AttemptingApplyDNSFix = true,
+                        Completed = true,
+                        Message = dnsFixMsg,
+                    });
+
+                    plexServer.ServerFixApplyDNSFix = false;
+                    return;
                 }
 
                 await _plexLibraryService.RefreshLibrariesAsync(plexAccountResult.Value, plexServer);
-
-                await SendProgress();
             });
 
             await Task.WhenAll(tasks);

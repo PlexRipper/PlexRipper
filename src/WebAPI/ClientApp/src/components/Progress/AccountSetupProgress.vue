@@ -1,27 +1,46 @@
 <template>
-	<!-- The setup account progress -->
 	<v-card>
 		<v-card-text>
-			<template v-if="accountSetupProgress">
-				<print :object="accountSetupProgress" />
-				<progress-component :percentage="accountSetupProgress.percentage" :text="`Retrieving accessible servers 1 of 8`" />
-			</template>
+			<!-- The total progress -->
+			<progress-component
+				:percentage="getTotalPercentage"
+				:text="`Checking accessible servers ${getCompletedCount} of ${plexServers.length}`"
+			/>
+			<!--	Server Connection Details	-->
 			<v-simple-table class="section-table">
 				<tbody>
-					<tr v-for="server in plexServers" :key="server.id">
-						<td style="width: 25%">
-							<status
-								:value="getInspectServerProgress(server.id) ? getInspectServerProgress(server.id).connectionSuccessful : false"
-							/>
-							{{ server.name }}
+					<tr v-for="{ server, progress } in getServerUpdates" :key="server.id">
+						<!--	Server name and status	-->
+						<td style="width: 30%">
+							<status :value="progress ? progress.connectionSuccessful && progress.completed : false" />
+							{{ server.id }} - {{ server.name }}
 						</td>
-						<td>
-							<pre>{{ object }}</pre>
+						<!--	Current Action	-->
+						<td style="width: 35%">
+							<template v-if="progress">
+								<template v-if="!progress.completed">
+									<span v-if="progress && progress.retryAttemptIndex > 0">
+										Attempting to retry connection, {{ progress.retryAttemptIndex }} of {{ progress.retryAttemptCount }} attempt.
+									</span>
+								</template>
+								<!--	Completed -->
+								<template v-else>
+									<span v-if="progress.connectionSuccessful"> <v-icon>mdi-check</v-icon> Server is connectable! </span>
+									<span v-else> <v-icon>mdi-close</v-icon> Could not connect to server. </span>
+								</template>
+							</template>
+						</td>
+						<!--	Error message	-->
+						<td style="width: 35%">
+							<template v-if="progress">
+								<span v-if="progress && progress.message">
+									{{ progress.message }}
+								</span>
+							</template>
 						</td>
 					</tr>
 				</tbody>
 			</v-simple-table>
-			<print :object="inspectServerProgresses" />
 		</v-card-text>
 		<v-card-actions>
 			<p-btn :button-type="hideButtonType" />
@@ -39,6 +58,13 @@ import { refreshAccount } from '@api/accountApi';
 import { switchMap } from 'rxjs';
 import { inspectPlexServers } from '@api/plexServerApi';
 import { tap } from 'rxjs/operators';
+import _ from 'lodash';
+
+declare interface ServerUpdate {
+	id: number;
+	server: PlexServerDTO;
+	progress: InspectServerProgress | null;
+}
 
 @Component
 export default class AccountSetupProgress extends Vue {
@@ -49,8 +75,26 @@ export default class AccountSetupProgress extends Vue {
 	confirmButtonType: ButtonType = ButtonType.Confirm;
 	plexServers: PlexServerDTO[] = [];
 
-	getInspectServerProgress(plexServerId: number): InspectServerProgress | null {
-		return this.inspectServerProgresses.find((x) => x.plexServerId === plexServerId) ?? null;
+	get getServerUpdates(): ServerUpdate[] {
+		const serverUpdates: ServerUpdate[] = [];
+
+		this.plexServers?.forEach((x) => {
+			serverUpdates.push({
+				id: x.id,
+				server: x,
+				progress: this.inspectServerProgresses.find((y) => x.id === y.plexServerId) ?? null,
+			});
+		});
+
+		return serverUpdates;
+	}
+
+	get getCompletedCount(): number {
+		return this.inspectServerProgresses.filter((x) => x.completed).length;
+	}
+
+	get getTotalPercentage(): number {
+		return _.clamp((this.getCompletedCount / this.plexServers.length) * 100, 0, 100);
 	}
 
 	refreshAccount(accountId: number = 0): void {

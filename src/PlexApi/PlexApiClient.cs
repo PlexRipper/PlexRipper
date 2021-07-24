@@ -77,7 +77,7 @@ namespace PlexRipper.PlexApi
                                 TimeToNextRetry = (int)timespan.TotalSeconds,
                                 RetryAttemptIndex = retryAttempt,
                                 RetryAttemptCount = retryAttemptCount,
-                                ErrorMessage = outcome.Result.ErrorMessage,
+                                Message = outcome.Result.ErrorMessage,
                             });
                         }
 
@@ -106,6 +106,7 @@ namespace PlexRipper.PlexApi
                     action(new PlexApiClientProgress
                     {
                         StatusCode = (int)response.StatusCode,
+                        Message = "Request successful.",
                         ConnectionSuccessful = true,
                         Completed = true,
                     });
@@ -126,7 +127,7 @@ namespace PlexRipper.PlexApi
                     action(new PlexApiClientProgress
                     {
                         StatusCode = (int)response.StatusCode,
-                        ErrorMessage = response.ErrorMessage,
+                        Message = response.ErrorMessage,
                         ConnectionSuccessful = false,
                         Completed = true,
                     });
@@ -138,18 +139,19 @@ namespace PlexRipper.PlexApi
                     .LogError();
             }
 
+            string msg = $"Time-out error on request {request.Resource}";
             if (action is not null)
             {
                 action(new PlexApiClientProgress
                 {
                     StatusCode = (int)response.StatusCode,
-                    ErrorMessage = response.ErrorMessage,
+                    Message = response.ErrorMessage,
                     ConnectionSuccessful = false,
                     Completed = true,
                 });
             }
 
-            return Result.Fail(new Error($"Time-out error on request {request.Resource}").WithMetadata(metaData)).LogError();
+            return Result.Fail(new Error(msg).WithMetadata(metaData)).LogError();
         }
 
         public async Task<byte[]> SendImageRequestAsync(RestRequest request)

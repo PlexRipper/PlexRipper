@@ -14,6 +14,6 @@
 
         public bool Completed { get; set; }
 
-        public string ErrorMessage { get; set; }
+        public string Message { get; set; }
     }
 }

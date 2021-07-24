@@ -25,10 +25,10 @@ namespace PlexRipper.Application.Common.WebApi
         [JsonProperty("completed", Required = Required.Always)]
         public bool Completed { get; set; }
 
-        [JsonProperty("errorMessage", Required = Required.Always)]
-        public string ErrorMessage { get; set; }
+        [JsonProperty("message", Required = Required.Always)]
+        public string Message { get; set; }
 
-        [JsonProperty("serverFixApplyDNSFix", Required = Required.Always)]
-        public bool ServerFixApplyDNSFix { get; set; }
+        [JsonProperty("attemptingApplyDNSFix", Required = Required.Always)]
+        public bool AttemptingApplyDNSFix { get; set; }
     }
 }

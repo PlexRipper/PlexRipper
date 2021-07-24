@@ -40,9 +40,8 @@ export class GlobalService extends Service.BaseService {
 			downloadTaskUpdateList: [],
 			// Progress Service
 			fileMergeProgressList: [],
-			accountRefreshProgress: [],
-			inspectServerProgress: [],
 			plexAccountRefreshProgress: [],
+			inspectServerProgress: [],
 		} as IStoreState);
 
 		for (const key of Object.keys(Service)) {

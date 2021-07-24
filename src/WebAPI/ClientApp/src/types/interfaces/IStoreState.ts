@@ -27,7 +27,6 @@ export default interface IStoreState {
 	downloadTaskUpdateList: DownloadTaskDTO[];
 	// Progress Service
 	fileMergeProgressList: FileMergeProgress[];
-	accountRefreshProgress: PlexAccountRefreshProgress[];
-	inspectServerProgress: InspectServerProgress[];
 	plexAccountRefreshProgress: PlexAccountRefreshProgress[];
+	inspectServerProgress: InspectServerProgress[];
 }

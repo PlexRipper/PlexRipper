@@ -13,7 +13,7 @@ export class ProgressService extends BaseService {
 				return {
 					fileMergeProgressList: state.fileMergeProgressList,
 					downloadTaskUpdateList: state.downloadTaskUpdateList,
-					accountRefreshProgress: state.accountRefreshProgress,
+					plexAccountRefreshProgress: state.plexAccountRefreshProgress,
 				};
 			},
 		});
@@ -83,7 +83,7 @@ export class ProgressService extends BaseService {
 
 	public getPlexAccountRefreshProgress(plexAccountId: number = 0): Observable<PlexAccountRefreshProgress | null> {
 		return this.stateChanged.pipe(
-			map((state: IStoreState) => state?.accountRefreshProgress.find((x) => x.plexAccountId === plexAccountId) ?? null),
+			map((state: IStoreState) => state?.plexAccountRefreshProgress.find((x) => x.plexAccountId === plexAccountId) ?? null),
 		);
 	}
 }

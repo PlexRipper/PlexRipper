@@ -53,7 +53,7 @@ export class AccountService extends BaseService {
 			switchMap((accountResult) => of(accountResult?.value ?? [])),
 			tap((accounts) => {
 				Log.debug(`AccountService => Fetch Accounts`, accounts);
-				this.setState({ accounts });
+				this.setState({ accounts }, 'Fetch Accounts');
 			}),
 		);
 	}

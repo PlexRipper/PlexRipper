@@ -78,7 +78,7 @@ export default class AppBar extends Vue {
 	private loading: boolean[] = [false];
 	private version: string = '?';
 
-	private accountRefreshProgress: PlexAccountRefreshProgress[] = [];
+	private plexAccountRefreshProgress: PlexAccountRefreshProgress[] = [];
 	activeAccountId: number = 0;
 
 	get isLoading(): boolean {
@@ -90,7 +90,7 @@ export default class AppBar extends Vue {
 	}
 
 	getRefreshProgress(plexAccountId: number): PlexAccountRefreshProgress | null {
-		return this.accountRefreshProgress.find((x) => x.plexAccountId === plexAccountId) ?? null;
+		return this.plexAccountRefreshProgress.find((x) => x.plexAccountId === plexAccountId) ?? null;
 	}
 
 	refreshAccount(accountId: number = 0): void {

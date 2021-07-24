@@ -129,6 +129,12 @@ namespace PlexRipper.Application.PlexServers
                     return;
                 }
 
+                SendServerProgress(new InspectServerProgress
+                {
+                    ConnectionSuccessful = true,
+                    PlexServerId = plexServer.Id,
+                });
+
                 // Apply possible fixes and try again
                 if (!serverStatusResult.Value.IsSuccessful)
                 {

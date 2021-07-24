@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
@@ -13,6 +15,8 @@ namespace PlexRipper.Application.PlexServers
 {
     public class PlexServerService : IPlexServerService
     {
+        private readonly IMapper _mapper;
+
         private readonly IMediator _mediator;
 
         private readonly IPlexLibraryService _plexLibraryService;
@@ -24,12 +28,14 @@ namespace PlexRipper.Application.PlexServers
         private readonly IPlexAuthenticationService _plexAuthenticationService;
 
         public PlexServerService(
+            IMapper mapper,
             IMediator mediator,
             IPlexApiService plexServiceApi,
             IPlexAuthenticationService plexAuthenticationService,
             IPlexLibraryService plexLibraryService,
             ISignalRService signalRService)
         {
+            _mapper = mapper;
             _mediator = mediator;
             _plexLibraryService = plexLibraryService;
             _signalRService = signalRService;
@@ -113,15 +119,20 @@ namespace PlexRipper.Application.PlexServers
                 await _signalRService.SendPlexAccountRefreshUpdate(plexAccountId, finishedCount, plexServers.Count);
             }
 
-            void SendServerProgress(InspectServerProgress progress)
-            {
-                // Send progress update to clients
-                _signalRService.SendServerInspectStatusProgress(progress);
-            }
-
             var tasks = plexServers.Select(async plexServer =>
             {
-                var serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false);
+                // Send server inspect status to front-end
+                void SendServerProgress(InspectServerProgress progress)
+                {
+                    progress.PlexServerId = plexServer.Id;
+                    _signalRService.SendServerInspectStatusProgress(progress);
+                }
+
+                // The call-back action from the httpClient
+                var action = new Action<PlexApiClientProgress>(progress => SendServerProgress(_mapper.Map<InspectServerProgress>(progress)));
+
+                // Start with simple status request
+                var serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false, action);
                 if (serverStatusResult.IsFailed)
                 {
                     Log.Error($"Failed to retrieve the serverStatus for {plexServer.Name} - {plexServer.ServerUrl}");
@@ -182,7 +193,8 @@ namespace PlexRipper.Application.PlexServers
             return await CheckPlexServerStatusAsync(plexServer.Value, plexAccountId, trimEntries);
         }
 
-        public async Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(PlexServer plexServer, int plexAccountId = 0, bool trimEntries = true)
+        public async Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(PlexServer plexServer, int plexAccountId = 0, bool trimEntries = true,
+            Action<PlexApiClientProgress> progressAction = null)
         {
             // Get plexServer authToken
             var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id, plexAccountId);
@@ -192,7 +204,7 @@ namespace PlexRipper.Application.PlexServers
             }
 
             // Request status
-            var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.ServerUrl);
+            var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.ServerUrl, progressAction);
             serverStatus.PlexServer = plexServer;
             serverStatus.PlexServerId = plexServer.Id;
 

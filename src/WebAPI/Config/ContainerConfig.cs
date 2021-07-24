@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using AutoMapper;
 using PlexRipper.Application.Config;
-using PlexRipper.Application.Config.Mappings;
 using PlexRipper.Data.Config;
 using PlexRipper.Domain.AutoMapper;
 using PlexRipper.DownloadManager.Config;

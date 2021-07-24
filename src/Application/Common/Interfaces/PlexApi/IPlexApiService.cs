@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Domain;
@@ -42,7 +43,7 @@ namespace PlexRipper.Application.Common
 
         Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey);
 
-        Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl);
+        Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl, Action<PlexApiClientProgress> action = null);
 
         Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
 

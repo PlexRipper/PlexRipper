@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
@@ -65,13 +66,13 @@ namespace PlexRipper.PlexApi.Api
             return string.Empty;
         }
 
-        public async Task<PlexServerStatus> GetServerStatusAsync(string authToken, string serverBaseUrl)
+        public async Task<PlexServerStatus> GetServerStatusAsync(string authToken, string serverBaseUrl, Action<PlexApiClientProgress> action = null)
         {
             // TODO Use healthCheck from here:
             // https://github.com/Arcanemagus/plex-api/wiki/Plex-Web-API-Overview
             var request = new RestRequest(new Uri($"{serverBaseUrl}/identity"), Method.GET);
             request.AddToken(authToken);
-            var response = await _client.SendRequestAsync<RestResponse>(request);
+            var response = await _client.SendRequestAsync<RestResponse>(request, action);
             if (response.IsFailed)
             {
                 var error = response.Errors.First();

@@ -21,10 +21,10 @@
 						<v-list nav dense>
 							<v-list-item-group color="primary">
 								<!-- Render libraries -->
-								<template v-if="server.plexLibraries.length > 0">
-									<v-list-item v-for="(library, y) in server.plexLibraries" :key="y" @click="openMediaPage(library)">
+								<template v-if="filterLibraries(server.id).length > 0">
+									<v-list-item v-for="(library, y) in filterLibraries(server.id)" :key="y" @click="openMediaPage(library)">
 										<v-list-item-icon>
-											<v-icon>{{ library.type | mediaTypeIcon }}</v-icon>
+											<media-type-icon :media-type="library.type" />
 										</v-list-item-icon>
 										<v-list-item-content>
 											<v-list-item-title v-text="library.title"></v-list-item-title>
@@ -35,7 +35,7 @@
 								<template v-else>
 									<v-list-item>
 										<v-list-item-icon>
-											<v-icon>{{ '' | mediaTypeIcon }}</v-icon>
+											<media-type-icon media-type="" />
 										</v-list-item-icon>
 										<v-list-item-content>
 											<v-list-item-title>No libraries available</v-list-item-title>
@@ -65,7 +65,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import ServerService from '@state/serverService';
+import { LibraryService, ServerService } from '@service';
 import { PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import ServerDialog from '@components/Navigation/ServerDialog.vue';
 
@@ -83,6 +83,8 @@ interface INavItem {
 export default class ServerDrawer extends Vue {
 	items: object[] = [];
 	plexServers: PlexServerDTO[] = [];
+	plexLibraries: PlexLibraryDTO[] = [];
+
 	selectedServerId: number = 0;
 
 	get getNavItems(): INavItem[] {
@@ -95,12 +97,15 @@ export default class ServerDrawer extends Vue {
 		];
 	}
 
+	filterLibraries(plexServerId: number): PlexLibraryDTO[] {
+		return this.plexLibraries.filter((x) => x.plexServerId === plexServerId);
+	}
+
 	openServerSettings(serverId: number): void {
 		this.selectedServerId = serverId;
 	}
 
 	openMediaPage(library: PlexLibraryDTO): void {
-		Log.debug(library);
 		switch (library.type) {
 			case PlexMediaType.Movie:
 				this.$router.push(`/movies/${library.id}`);
@@ -120,9 +125,13 @@ export default class ServerDrawer extends Vue {
 		this.selectedServerId = 0;
 	}
 
-	created(): void {
-		ServerService.getServers().subscribe((data: PlexServerDTO[]) => {
+	mounted(): void {
+		this.$subscribeTo(ServerService.getServers(), (data: PlexServerDTO[]) => {
 			this.plexServers = data;
+		});
+
+		this.$subscribeTo(LibraryService.getLibraries(), (data: PlexLibraryDTO[]) => {
+			this.plexLibraries = data;
 		});
 	}
 }

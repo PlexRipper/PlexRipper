@@ -12,7 +12,9 @@ namespace PlexRipper.Application.Common
         /// <summary>
         /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
         /// </summary>
-        /// <param name="downloadTask">The <see cref="DownloadTask"/> to be added as a <see cref="DownloadFileTask"/>.</param>
-        Task<Result> AddFileTask(DownloadTask downloadTask);
+        /// <param name="downloadTaskId"></param>
+        Task<Result> AddFileTaskFromDownloadTask(int downloadTaskId);
+
+        Task ExecuteFileTasks();
     }
 }

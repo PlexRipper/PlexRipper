@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexDownloads;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
@@ -29,6 +30,11 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
             if (request.IncludePlexLibrary)
             {
                 query = query.Include(x => x.PlexLibrary);
+            }
+
+            if (request.DownloadTaskIds != null && request.DownloadTaskIds.Any())
+            {
+                query = query.Where(x => request.DownloadTaskIds.Contains(x.Id));
             }
 
             var downloadList = await query

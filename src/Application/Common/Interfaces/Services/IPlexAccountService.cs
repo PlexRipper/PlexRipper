@@ -52,7 +52,7 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="plexAccountId"></param>
         /// <returns></returns>
-        Task<Result<bool>> DeletePlexAccountAsync(int plexAccountId);
+        Task<Result> DeletePlexAccountAsync(int plexAccountId);
 
         Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount);
 
@@ -63,6 +63,6 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="plexAccountId">Can be 0 to refresh all enabled PlexAccounts.</param>
         /// <returns>If successful.</returns>
-        Task<Result<bool>> RefreshPlexAccount(int plexAccountId = 0);
+        Task<Result> RefreshPlexAccount(int plexAccountId = 0);
     }
 }

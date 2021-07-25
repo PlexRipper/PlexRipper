@@ -1,15 +1,18 @@
 import { PlexMediaType } from '@dto/mainApi';
-import IMediaData from '@mediaOverview/MediaTable/types/IMediaData';
+import ITreeViewTableRow from '@components/General/VTreeViewTable/ITreeViewTableRow';
 
-export default interface ITreeViewItem {
-	id: number;
-	key: string;
-	title: string;
-	year?: number;
-	size?: number;
+export default interface ITreeViewItem extends ITreeViewTableRow {
+	year: number;
+	mediaSize: number;
+	duration: number;
+	hasThumb: boolean;
+	hasArt: boolean;
+	hasBanner: boolean;
+	hasTheme: boolean;
 	addedAt: string;
 	updatedAt: string;
-	type: PlexMediaType;
-	mediaData: IMediaData[];
-	children?: ITreeViewItem[];
+	plexLibraryId: number;
+	plexServerId: number;
+	mediaType: PlexMediaType;
+	actions: string[];
 }

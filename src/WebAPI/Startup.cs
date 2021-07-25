@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -14,10 +13,9 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application.Config;
 using PlexRipper.Domain;
-using PlexRipper.SignalR.Hubs;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
-using Polly;
+using PlexRipper.WebAPI.SignalR.Hubs;
 
 namespace PlexRipper.WebAPI
 {
@@ -60,7 +58,7 @@ namespace PlexRipper.WebAPI
                             .AllowAnyMethod()
 
                             // The combo all origin is allowed with allow credentials is needed to make SignalR work from the client.
-                            .SetIsOriginAllowed(x => true)
+                            .SetIsOriginAllowed(_ => true)
                             .AllowCredentials();
                     });
             });
@@ -118,11 +116,8 @@ namespace PlexRipper.WebAPI
                 configure.DocumentProcessors.Add(new NSwagAddExtraTypes());
             });
 
-            // Autofac
-            services.AddHttpClient("Default").AddTransientHttpErrorPolicy(builder =>
-                builder.WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
-            );
             services.AddOptions();
+            // Autofac
         }
 
         /// <summary>

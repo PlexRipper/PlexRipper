@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -5,7 +6,6 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexMovies;
-using PlexRipper.Application.PlexServers;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
@@ -46,7 +46,7 @@ namespace PlexRipper.Application.PlexLibraries
         #region Private
 
         /// <summary>
-        /// Retrieves all tvshow, season and episode data and stores it in the database.
+        /// Retrieves all TvShow, season and episode data and stores it in the database.
         /// </summary>
         /// <param name="authToken"></param>
         /// <param name="plexLibrary"></param>
@@ -96,12 +96,21 @@ namespace PlexRipper.Application.PlexLibraries
             foreach (var plexTvShow in plexLibrary.TvShows)
             {
                 plexTvShow.Seasons = rawSeasonDataResult.Value.FindAll(x => x.ParentKey == plexTvShow.Key);
+                plexTvShow.ChildCount = plexTvShow.Seasons.Count;
+
                 foreach (var plexTvShowSeason in plexTvShow.Seasons)
                 {
                     plexTvShowSeason.PlexLibraryId = plexLibrary.Id;
                     plexTvShowSeason.PlexLibrary = plexLibrary;
                     plexTvShowSeason.TvShow = plexTvShow;
                     plexTvShowSeason.Episodes = rawEpisodesDataResult.Value.FindAll(x => x.ParentKey == plexTvShowSeason.Key);
+                    plexTvShowSeason.ChildCount = plexTvShowSeason.Episodes.Count;
+
+                    // Assume the season started on the year of the first episode
+                    if (plexTvShowSeason.Year == 0)
+                    {
+                        plexTvShowSeason.Year = plexTvShowSeason.Episodes.First()?.Year ?? 0;
+                    }
 
                     // Set libraryId in each episode
                     plexTvShowSeason.Episodes.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
@@ -127,12 +136,6 @@ namespace PlexRipper.Application.PlexLibraries
             if (updateResult.IsFailed)
             {
                 return updateResult.ToResult();
-            }
-
-            var deleteResult = await _mediator.Send(new DeleteMediaFromPlexLibraryCommand(plexLibrary.Id));
-            if (deleteResult.IsFailed)
-            {
-                return deleteResult.ToResult();
             }
 
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
@@ -173,12 +176,6 @@ namespace PlexRipper.Application.PlexLibraries
                 return updateResult.ToResult();
             }
 
-            var deleteResult = await _mediator.Send(new DeleteMediaFromPlexLibraryCommand(plexLibrary.Id));
-            if (deleteResult.IsFailed)
-            {
-                return deleteResult.ToResult();
-            }
-
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             if (createResult.IsFailed)
             {
@@ -194,7 +191,7 @@ namespace PlexRipper.Application.PlexLibraries
         #region Public
 
         /// <inheritdoc/>
-        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false)
+        public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, bool topLevelMediaOnly = false)
         {
             await _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
 
@@ -210,7 +207,7 @@ namespace PlexRipper.Application.PlexLibraries
             {
                 Log.Information($"PlexLibrary with id {libraryId} has no media, forcing refresh from the PlexApi");
 
-                var refreshResult = await RefreshLibraryMediaAsync(libraryId, plexAccountId);
+                var refreshResult = await RefreshLibraryMediaAsync(libraryId);
                 if (refreshResult.IsFailed)
                 {
                     return refreshResult.ToResult();
@@ -221,10 +218,15 @@ namespace PlexRipper.Application.PlexLibraries
             return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true, topLevelMediaOnly));
         }
 
-        /// <inheritdoc/>
-        public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false)
+        public async Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync()
         {
-            var plexLibrary = await GetPlexLibraryAsync(libraryId, plexAccountId, topLevelMediaOnly);
+            return await _mediator.Send(new GetAllPlexLibrariesQuery());
+        }
+
+        /// <inheritdoc/>
+        public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, bool topLevelMediaOnly = false)
+        {
+            var plexLibrary = await GetPlexLibraryAsync(libraryId, topLevelMediaOnly);
             if (plexLibrary.IsFailed)
             {
                 return plexLibrary.ToResult();
@@ -234,6 +236,11 @@ namespace PlexRipper.Application.PlexLibraries
             plexServer.PlexLibraries.Clear();
             plexServer.PlexLibraries.Add(plexLibrary.Value);
             return Result.Ok(plexServer);
+        }
+
+        public async Task<Result> UpdateDefaultDestinationLibrary(int libraryId, int folderPathId)
+        {
+            return await _mediator.Send(new UpdatePlexLibraryDefaultDestinationByIdCommand(libraryId, folderPathId));
         }
 
         #region RefreshLibrary
@@ -270,7 +277,7 @@ namespace PlexRipper.Application.PlexLibraries
         }
 
         /// <inheritdoc/>
-        public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId, int plexAccountId = 0)
+        public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId)
         {
             var plexLibraryResult = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibraryId, true));
             if (plexLibraryResult.IsFailed)
@@ -291,7 +298,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             // Get plexServer authToken
-            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexLibrary.PlexServer.Id, plexAccountId);
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexLibrary.PlexServer.Id);
             if (authToken.IsFailed)
             {
                 return authToken.ToResult();
@@ -304,6 +311,9 @@ namespace PlexRipper.Application.PlexLibraries
             {
                 return result;
             }
+
+            // Get the default folder path id for the destination
+            newPlexLibrary.DefaultDestinationId = newPlexLibrary.Type.ToDefaultDestinationFolderId();
 
             switch (newPlexLibrary.Type)
             {
@@ -323,35 +333,6 @@ namespace PlexRipper.Application.PlexLibraries
         }
 
         #endregion
-
-        public async Task<Result<byte[]>> GetThumbnailImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0)
-        {
-            var thumbUrl = await _mediator.Send(new GetThumbUrlByPlexMediaIdQuery(mediaId, mediaType));
-            if (thumbUrl.IsFailed)
-            {
-                return thumbUrl.ToResult();
-            }
-
-            var plexServer = await _mediator.Send(new GetPlexServerByPlexMediaIdQuery(mediaId, mediaType));
-            if (plexServer.IsFailed)
-            {
-                return plexServer.ToResult();
-            }
-
-            var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Value.Id);
-            if (token.IsFailed)
-            {
-                return token.ToResult();
-            }
-
-            byte[] image = await _plexServiceApi.GetThumbnailAsync(thumbUrl.Value, token.Value, width, height);
-            if (image == null || image.Length == 0)
-            {
-                return Result.Fail("Failed to retrieve image.");
-            }
-
-            return Result.Ok(image);
-        }
 
         #endregion
 

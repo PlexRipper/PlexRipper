@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace PlexRipper.PlexApi.Models.Server
+namespace PlexRipper.PlexApi.Models
 {
     public class Resource
     {

@@ -6,10 +6,10 @@ using PlexRipper.Data.Config;
 using PlexRipper.Domain.AutoMapper;
 using PlexRipper.DownloadManager.Config;
 using PlexRipper.FileSystem.Config;
+using PlexRipper.HttpClient.Config;
 using PlexRipper.PlexApi.Config;
 using PlexRipper.PlexApi.Config.Mappings;
 using PlexRipper.Settings.Config;
-using PlexRipper.SignalR.Config;
 
 namespace PlexRipper.WebAPI.Config
 {
@@ -30,7 +30,7 @@ namespace PlexRipper.WebAPI.Config
             builder.RegisterModule<FileSystemModule>();
             builder.RegisterModule<PlexApiModule>();
             builder.RegisterModule<SettingsModule>();
-            builder.RegisterModule<SignalRModule>();
+            builder.RegisterModule<HttpClientModule>();
 
             // Presentation
             builder.RegisterModule<WebApiModule>();
@@ -44,7 +44,6 @@ namespace PlexRipper.WebAPI.Config
                     cfg.AddProfile(new ApplicationMappingProfile());
                     cfg.AddProfile(new PlexApiMappingProfile());
                     cfg.AddProfile(new WebApiMappingProfile());
-                    cfg.AddProfile(new SignalRMappingProfile());
                 });
                 config.AssertConfigurationIsValid();
                 return config;

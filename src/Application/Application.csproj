@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Interfaces\WebApi" />
+    <Folder Include="Common\DTO\DownloadManager" />
     <Folder Include="PlexAuthentication\Commands\" />
   </ItemGroup>
 

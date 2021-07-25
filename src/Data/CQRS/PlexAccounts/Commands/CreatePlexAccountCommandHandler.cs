@@ -32,7 +32,7 @@ namespace PlexRipper.Data.CQRS
             await _dbContext.SaveChangesAsync(cancellationToken);
             await _dbContext.Entry(command.PlexAccount).GetDatabaseValuesAsync(cancellationToken);
 
-            return Result.Ok(command.PlexAccount.Id);
+            return Result.Ok(command.PlexAccount.Id).Add201CreatedRequestSuccess("PlexAccount created successfully.");
         }
     }
 }

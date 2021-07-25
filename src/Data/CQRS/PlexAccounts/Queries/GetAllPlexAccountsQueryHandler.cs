@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -17,12 +16,7 @@ namespace PlexRipper.Data.CQRS
 
     public class GetAllPlexAccountsQueryHandler : BaseHandler, IRequestHandler<GetAllPlexAccountsQuery, Result<List<PlexAccount>>>
     {
-        private readonly IMapper _mapper;
-
-        public GetAllPlexAccountsQueryHandler(PlexRipperDbContext dbContext, IMapper mapper) : base(dbContext)
-        {
-            _mapper = mapper;
-        }
+        public GetAllPlexAccountsQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
         public async Task<Result<List<PlexAccount>>> Handle(GetAllPlexAccountsQuery request,
             CancellationToken cancellationToken)

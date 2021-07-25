@@ -14,7 +14,13 @@
 			"validate": "Validate",
 			"skip-setup": "Skip setup",
 			"finish-setup": "Finish setup",
-			"check-server-status": "Check server status"
+			"check-server-status": "Check server status",
+			"reset-db": "Reset Database",
+			"add-alert": "Add Alert"
+		},
+		"alerts": {
+			"invalid-directory": "Directory is not a valid path!",
+			"disabled-paths": "Editing the paths is disabled when there are active downloads. Make sure all downloads are stopped or cleared!"
 		}
 	},
 	"help": {
@@ -51,29 +57,23 @@
 				"text": "The password of your Plex account."
 			}
 		},
-		"download-manager-section": {
-			"download-segments": {
-				"label": "Download Segments",
-				"title": "Download Segments",
-				"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
-			}
-		},
+
 		"settings": {
 			"paths": {
 				"download-folder": {
 					"label": "Download Path",
 					"title": "Download Path",
-					"text": "The password of your Plex account."
+					"text": "The path all files will be downloaded to in multiple parts before being merged into one in their destination folder."
 				},
 				"movie-folder": {
 					"label": "Movie Path",
 					"title": "Movie Path",
-					"text": "The username of your Plex account"
+					"text": "The default path of Movies when no custom destination has been selected."
 				},
 				"tv-show-folder": {
-					"label": "Tv Show Path",
-					"title": "Tv Show Path",
-					"text": "The password of your Plex account."
+					"label": "TV-Show Path",
+					"title": "TV-Show Path",
+					"text": "The default path of TV-Show when no custom destination has been selected."
 				}
 			},
 			"ui": {
@@ -106,6 +106,20 @@
 						"text": ""
 					}
 				}
+			},
+			"advanced": {
+				"download-manager-section": {
+					"download-segments": {
+						"label": "Download Segments",
+						"title": "Download Segments",
+						"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
+					}
+				},
+				"reset-db": {
+					"label": "Reset Database",
+					"title": "Reset Database",
+					"text": "Resets the database and creates a back-up of the old one."
+				}
 			}
 		}
 	},
@@ -117,6 +131,10 @@
 		"delete-account": {
 			"title": "Are you sure?",
 			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
+		},
+		"reset-db": {
+			"title": "Are you sure?",
+			"text": "This will back-up the current database to \"config/Database Backup/\" and create a new one, after which you will be redirected to the setup page. This will not reset settings since those are stored in \"config/PlexRipperSettings.json\""
 		}
 	},
 	"pages": {
@@ -181,10 +199,29 @@
 				}
 			},
 			"advanced": {
-				"header": "Download Manager"
+				"download-manager": {
+					"header": "Download Manager"
+				},
+				"database": {
+					"header": "Database"
+				}
 			},
 			"accounts": {
 				"header": "Plex Accounts"
+			},
+			"debug": {
+				"header": "Debug"
+			},
+			"paths": {
+				"main": {
+					"header": "Default Paths"
+				},
+				"movie": {
+					"header": "Movie Paths"
+				},
+				"tv-show": {
+					"header": "TV-Show Paths"
+				}
 			}
 		}
 	}

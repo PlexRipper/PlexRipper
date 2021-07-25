@@ -10,6 +10,16 @@ grid
 	}
 }
 
+/**
+ * Temporary fix for breaking change in Vuetify v-grid
+ * (see : https://github.com/vuetifyjs/vuetify/issues/11408)
+ * TODO - remove this after migration
+ */
+.row:not([class*='my-']):not([class*='ma-']):not([class*='mt-']):not([class*='mb-']) {
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+}
+
 /*
 v-app
 */
@@ -143,6 +153,19 @@ v-expansion-panels
 /*
 v-btn
 */
+
+.v-btn:not(.v-btn--round).v-size--default {
+	min-width: 0;
+}
+
+.theme--dark.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+	background-color: transparent;
+}
+
+.theme--light.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+	background-color: transparent;
+}
+
 // Remove background color on button disabled
 .theme--dark.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
 	background-color: transparent !important;
@@ -151,4 +174,37 @@ v-btn
 // Remove background color on button disabled
 .theme--light.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
 	background-color: transparent !important;
+}
+
+/*
+v-card
+*/
+.theme--dark.v-card {
+	background-color: $dark-theme-glass-background;
+}
+.theme--light.v-card {
+	background-color: $light-theme-glass-background;
+}
+
+/*
+v-tabs
+*/
+.v-tabs--vertical {
+	.v-tab {
+		justify-content: left;
+	}
+}
+
+/*
+Transparent Background
+*/
+
+.theme--dark {
+	&.v-tabs > .v-tabs-bar {
+		@extend .no-background;
+	}
+
+	&.v-tabs-items {
+		@extend .no-background;
+	}
 }

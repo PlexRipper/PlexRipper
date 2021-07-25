@@ -39,6 +39,7 @@ namespace PlexRipper.Domain
                     "success" => NotificationLevel.Success,
                     "warning" => NotificationLevel.Warning,
                     "error" => NotificationLevel.Error,
+                    _ => NotificationLevel.None,
                 };
             }
 

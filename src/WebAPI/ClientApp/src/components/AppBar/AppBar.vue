@@ -21,9 +21,9 @@
 				</v-btn>
 			</template>
 			<v-list>
-				<v-list-item-group v-if="accounts.length > 0" v-model="activeAccountId">
+				<v-list-item-group v-if="accounts.length > 0" :value="activeAccountId">
 					<!--	Button per account	-->
-					<v-list-item v-for="(account, index) in accounts" :key="index" @click="setActiveAccount(account.id)">
+					<v-list-item v-for="(account, index) in accounts" :key="index" @click="updateActiveAccountId(account.id)">
 						<v-list-item-content>
 							<v-list-item-title> {{ account.displayName }}</v-list-item-title>
 							<progress-component
@@ -58,18 +58,16 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import type { PlexAccountDTO } from '@dto/mainApi';
-import GlobalService from '@state/globalService';
-import AccountService from '@service/accountService';
-import NotificationButton from '@components/AppBar/NotificationButton.vue';
-import DarkModeToggle from '@components/General/DarkModeToggle.vue';
+import { GlobalService, SettingsService, AccountService, SignalrService } from '@service';
 import { refreshAccount } from '@api/accountApi';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import SignalrService from '@service/signalrService';
-import ProgressComponent from '@components/ProgressComponent.vue';
+import type { PlexAccountDTO } from '@dto/mainApi';
 import { PlexAccountRefreshProgress } from '@dto/mainApi';
-import { settingsStore } from '~/store';
+import DarkModeToggle from '@components/General/DarkModeToggle.vue';
+import NotificationButton from '@components/AppBar/NotificationButton.vue';
+import ProgressComponent from '@components/ProgressComponent.vue';
+
 @Component({
 	components: {
 		NotificationButton,
@@ -83,20 +81,14 @@ export default class AppBar extends Vue {
 	private version: string = '?';
 
 	private accountRefreshProgress: PlexAccountRefreshProgress[] = [];
-	get activeAccountId(): number {
-		return settingsStore.activeAccountId;
-	}
-
-	set activeAccountId(value: number) {
-		settingsStore.setActiveAccountId(value);
-	}
+	activeAccountId: number = 0;
 
 	get isLoading(): boolean {
 		return this.loading.some((x) => x);
 	}
 
-	setActiveAccount(accountId: number): void {
-		this.activeAccountId = accountId;
+	updateActiveAccountId(accountId: number): void {
+		SettingsService.updateActiveAccountSettings(accountId);
 	}
 
 	getRefreshProgress(plexAccountId: number): PlexAccountRefreshProgress | null {
@@ -114,11 +106,11 @@ export default class AppBar extends Vue {
 	}
 
 	created(): void {
-		GlobalService.getConfigReady().subscribe((config) => {
+		this.$subscribeTo(GlobalService.getConfigReady(), (config) => {
 			this.version = config.version;
 		});
 
-		AccountService.getAccounts().subscribe((data) => {
+		this.$subscribeTo(AccountService.getAccounts(), (data) => {
 			this.accounts = [
 				{
 					id: 0,
@@ -129,7 +121,13 @@ export default class AppBar extends Vue {
 			this.accounts.forEach(() => this.loading.push(false));
 		});
 
-		SignalrService.getPlexAccountRefreshProgress().subscribe((data) => {
+		this.$subscribeTo(SettingsService.getActiveAccountId(), (activeAccountId) => {
+			if (activeAccountId || activeAccountId >= 0) {
+				this.activeAccountId = activeAccountId;
+			}
+		});
+
+		this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
 			const index = this.accountRefreshProgress.findIndex((x) => x.plexAccountId === data.plexAccountId);
 			if (index > -1) {
 				if (!data.isComplete) {

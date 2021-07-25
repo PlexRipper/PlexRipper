@@ -35,7 +35,7 @@ namespace PlexRipper.Application.Notifications
             return await _mediator.Send(new GetNotificationsQuery());
         }
 
-        public async Task<Result<bool>> HideNotification(int id)
+        public async Task<Result> HideNotification(int id)
         {
             return await _mediator.Send(new HideNotificationCommand(id));
         }

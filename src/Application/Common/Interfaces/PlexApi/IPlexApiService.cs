@@ -35,7 +35,6 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="plexLibrary"></param>
         /// <param name="authToken"></param>
-        /// <param name="plexServerBaseUrl"></param>
         /// <returns></returns>
         Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken);
 
@@ -48,6 +47,8 @@ namespace PlexRipper.Application.Common
         Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
 
         Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken, int width = 0, int height = 0);
+
+        Task<byte[]> GetBannerAsync(string bannerUrl, string authToken, int width = 0, int height = 0);
 
         #endregion
 

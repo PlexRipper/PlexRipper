@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace PlexRipper.Domain
 {
+    [Table("PlexTvShow")]
     public class PlexTvShow : PlexMedia, IToDownloadTask
     {
-        public PlexMediaType Type => PlexMediaType.TvShow;
+        public override PlexMediaType Type => PlexMediaType.TvShow;
 
         #region Relationships
 
@@ -23,7 +25,11 @@ namespace PlexRipper.Domain
         {
             var downloadTasks = Seasons.SelectMany(x => x.CreateDownloadTasks()).ToList();
 
-            downloadTasks.ForEach(downloadTask => downloadTask.TitleTvShow = Title);
+            downloadTasks.ForEach(downloadTask =>
+            {
+                downloadTask.MetaData.TvShowTitle = Title;
+                downloadTask.MetaData.TvShowKey = Key;
+            });
 
             return downloadTasks;
         }

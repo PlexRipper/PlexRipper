@@ -42,5 +42,11 @@ namespace PlexRipper.Domain
 
         [JsonProperty("bytesRemaining", Required = Required.Always)]
         public long BytesRemaining => DataTotal - DataTransferred;
+
+        [JsonProperty("plexServerId", Required = Required.Always)]
+        public int PlexServerId { get; set; }
+
+        [JsonProperty("plexLibraryId", Required = Required.Always)]
+        public int PlexLibraryId { get; set; }
     }
 }

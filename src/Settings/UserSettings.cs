@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Settings.Models;
@@ -40,7 +41,7 @@ namespace PlexRipper.Settings
 
         #region Public
 
-        public Result<bool> Setup()
+        public async Task<Result> SetupAsync()
         {
             // TODO Add result based error handling here
             Log.Information("Setting up UserSettings");
@@ -146,5 +147,7 @@ namespace PlexRipper.Settings
         #endregion
 
         #endregion
+
+
     }
 }

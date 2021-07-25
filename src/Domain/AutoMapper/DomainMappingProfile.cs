@@ -8,6 +8,9 @@ namespace PlexRipper.Domain.AutoMapper
     /// </summary>
     public class DomainMappingProfile : Profile
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DomainMappingProfile"/> class.
+        /// </summary>
         public DomainMappingProfile()
         {
             // string <-> Guid
@@ -26,12 +29,6 @@ namespace PlexRipper.Domain.AutoMapper
             // PlexAccountServer => PlexServer
             CreateMap<PlexAccountServer, PlexServer>(MemberList.Destination)
                 .ConvertUsing(source => source.PlexServer ?? null);
-
-            // PlexMediaData -> PlexMovieData
-            CreateMap<PlexMediaData, PlexMovieData>(MemberList.Source).ReverseMap();
-
-            // PlexMediaDataPart -> PlexMovieDataPart
-            CreateMap<PlexMediaDataPart, PlexMovieDataPart>(MemberList.Source).ReverseMap();
         }
 
         private static int ToInt(string stringInt)

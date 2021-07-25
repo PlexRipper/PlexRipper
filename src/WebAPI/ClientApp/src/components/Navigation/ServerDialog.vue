@@ -1,66 +1,99 @@
 <template>
-	<v-dialog :value="show" max-width="800" @click:outside="close">
+	<v-dialog :value="serverId > 0" max-width="1000" @click:outside="close">
 		<v-card v-if="plexServer">
 			<v-card-title class="headline">{{ plexServer.name }} configuration</v-card-title>
 
 			<v-card-text>
-				<v-container>
-					<v-row>
-						<v-col>
-							<v-simple-table class="section-table">
-								<tbody>
-									<tr>
-										<td style="width: 25%">Server URL:</td>
-										<td>{{ plexServer.serverUrl }}</td>
-									</tr>
-									<tr>
-										<td>Machine Identifier:</td>
-										<td>{{ plexServer.machineIdentifier }}</td>
-									</tr>
-									<tr>
-										<td>Plex Version:</td>
-										<td>{{ plexServer.version }}</td>
-									</tr>
-									<tr>
-										<td>Created On:</td>
-										<td><date-time short-date :text="plexServer.createdAt" /></td>
-									</tr>
-									<tr>
-										<td>Last updated on:</td>
-										<td><date-time short-date :text="plexServer.updatedAt" /></td>
-									</tr>
-									<tr v-if="serverStatus">
-										<td>Current status:</td>
-										<td>
-											<status pulse :value="serverStatus.isSuccessful" />
-											{{ serverStatus.statusCode }} -
-											{{ serverStatus.statusMessage }}
-										</td>
-									</tr>
-									<tr v-if="serverStatus">
-										<td>Last checked on:</td>
-										<td><date-time short-date :text="serverStatus.lastChecked" /></td>
-									</tr>
-								</tbody>
-							</v-simple-table>
-						</v-col>
-					</v-row>
-				</v-container>
-			</v-card-text>
+				<v-tabs vertical>
+					<!--	Server Data	Tab Header-->
+					<v-tab>
+						<span style="text-align: left"><v-icon left> mdi-account </v-icon>Server Data</span>
+					</v-tab>
+					<!--	Library Destinations Tab Header	-->
+					<v-tab>
+						<v-icon left> mdi-lock </v-icon>
+						Download Destinations
+					</v-tab>
 
-			<!--	Close action	-->
-			<v-card-actions>
-				<v-spacer></v-spacer>
-				<p-btn text-id="check-server-status" @click="checkServer" />
-			</v-card-actions>
+					<!--	Server Data Tab Content	-->
+					<v-tab-item>
+						<v-simple-table class="section-table">
+							<tbody>
+								<tr>
+									<td style="width: 25%">Server URL:</td>
+									<td>{{ plexServer.serverUrl }}</td>
+								</tr>
+								<tr>
+									<td>Machine Identifier:</td>
+									<td>{{ plexServer.machineIdentifier }}</td>
+								</tr>
+								<tr>
+									<td>Plex Version:</td>
+									<td>{{ plexServer.version }}</td>
+								</tr>
+								<tr>
+									<td>Created On:</td>
+									<td><date-time short-date :text="plexServer.createdAt" /></td>
+								</tr>
+								<tr>
+									<td>Last updated on:</td>
+									<td><date-time short-date :text="plexServer.updatedAt" /></td>
+								</tr>
+								<tr v-if="serverStatus">
+									<td>Current status:</td>
+									<td>
+										<status pulse :value="serverStatus.isSuccessful" />
+										{{ serverStatus.statusCode }} -
+										{{ serverStatus.statusMessage }}
+									</td>
+								</tr>
+								<!--	Server Status	-->
+								<tr v-if="serverStatus">
+									<td>Last checked on:</td>
+									<td><date-time short-date :text="serverStatus.lastChecked" /></td>
+								</tr>
+							</tbody>
+						</v-simple-table>
+						<!--	Close action	-->
+						<v-card-actions>
+							<v-spacer></v-spacer>
+							<p-btn text-id="check-server-status" @click="checkServer" />
+						</v-card-actions>
+					</v-tab-item>
+
+					<!--	Library Download Destinations	Tab Content -->
+					<v-tab-item>
+						<v-simple-table class="section-table">
+							<tbody>
+								<!--	Download Destinations	-->
+								<tr v-for="library in plexLibraries" :key="library.id">
+									<td style="width: 50%"><media-type-icon :media-type="library.type" class="mx-3" />{{ library.title }}</td>
+									<td>
+										<p-select
+											:value="library.defaultDestinationId"
+											item-text="displayName"
+											item-value="id"
+											:items="getFolderPathOptions(library.type)"
+											@change="updateDefaultDestination(library.id, $event)"
+										/>
+									</td>
+								</tr>
+							</tbody>
+						</v-simple-table>
+					</v-tab-item>
+				</v-tabs>
+			</v-card-text>
 		</v-card>
 	</v-dialog>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
-import ServerService from '@state/serverService';
+import Log from 'consola';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { FolderPathDTO, FolderType, PlexLibraryDTO, PlexMediaType, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { FolderPathService, LibraryService, ServerService } from '@service';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
 
 @Component
 export default class ServerDialog extends Vue {
@@ -70,24 +103,22 @@ export default class ServerDialog extends Vue {
 	show: boolean = false;
 
 	plexServer: PlexServerDTO | null = null;
-	@Watch('serverId')
-	onServerIdChanged(id: number) {
-		this.show = id > 0;
-		if (this.show) {
-			this.getServerData();
-		}
-	}
+	folderPaths: FolderPathDTO[] = [];
+	plexLibraries: PlexLibraryDTO[] = [];
 
 	get serverStatus(): PlexServerStatusDTO | null {
 		return this.plexServer?.status ?? null;
 	}
 
-	getServerData(): void {
-		ServerService.getServer(this.serverId).subscribe((server) => {
-			if (server) {
-				this.plexServer = server;
-			}
-		});
+	getFolderPathOptions(type: PlexMediaType): FolderPathDTO[] {
+		switch (type) {
+			case PlexMediaType.Movie:
+				return this.folderPaths.filter((x) => x.type === FolderType.MovieFolder);
+			case PlexMediaType.TvShow:
+				return this.folderPaths.filter((x) => x.type === FolderType.TvShowFolder);
+			default:
+				return this.folderPaths;
+		}
 	}
 
 	checkServer(): void {
@@ -96,6 +127,37 @@ export default class ServerDialog extends Vue {
 
 	close(): void {
 		this.$emit('close');
+	}
+
+	updateDefaultDestination(libraryId: number, folderPathId: number): void {
+		LibraryService.updateDefaultDestination(libraryId, folderPathId);
+	}
+
+	mounted(): void {
+		this.$subscribeTo(
+			this.$watchAsObservable('serverId').pipe(
+				map((x: { oldValue: number; newValue: number }) => x.newValue),
+				tap((value) => Log.debug('new value:', value)),
+				switchMap((value) =>
+					combineLatest([
+						ServerService.getServer(value),
+						LibraryService.getLibrariesByServerId(value),
+						FolderPathService.getFolderPaths(),
+					]),
+				),
+			),
+			([plexServer, plexLibraries, folderPaths]: [PlexServerDTO | null, PlexLibraryDTO[], FolderPathDTO[]]) => {
+				if (plexServer) {
+					this.plexServer = plexServer;
+				}
+				if (plexLibraries) {
+					this.plexLibraries = plexLibraries;
+				}
+				if (folderPaths) {
+					this.folderPaths = folderPaths;
+				}
+			},
+		);
 	}
 }
 </script>

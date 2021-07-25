@@ -1,6 +1,6 @@
 using System.Xml.Serialization;
 
-namespace PlexRipper.PlexApi.Models.Friends
+namespace PlexRipper.PlexApi.Models
 {
     [XmlRoot(ElementName = "User")]
     public class Friend

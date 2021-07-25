@@ -47,7 +47,9 @@ namespace PlexRipper.Domain.Behavior.Pipelines
             }
             catch (Exception e)
             {
-                return Result.Fail(new ExceptionalError(e)).LogError() as TResponse;
+                var result = new TResponse();
+                result.Reasons.Add(new ExceptionalError(e));
+                return result;
             }
         }
     }

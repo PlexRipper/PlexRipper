@@ -2,7 +2,6 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { Context } from '@nuxt/types';
 import { Inject } from '@nuxt/types/app';
-// import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 
 Vue.use(Vuetify);
@@ -13,6 +12,9 @@ Vue.use(Vuetify);
 export default (ctx: Context, inject: Inject): void => {
 	const vuetify = new Vuetify({
 		customVariables: ['~/assets/scss/_variables.scss'],
+		icons: {
+			iconfont: 'mdi',
+		},
 		theme: {
 			dark: true,
 			options: {

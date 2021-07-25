@@ -28,8 +28,3 @@ export default class ValidIcon extends Vue {
 	}
 }
 </script>
-<style lang="scss">
-.valid-icon {
-	margin: 10px;
-}
-</style>

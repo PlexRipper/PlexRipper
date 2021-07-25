@@ -41,11 +41,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Base", "Base", "{033AA8B6-0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "src\Data\Data.csproj", "{92810180-C144-4D76-BB6B-B02134CA2C39}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR", "src\SignalR\SignalR.csproj", "{E0AA73DE-F78B-420A-B726-0278C9F00C6F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileSystem", "src\FileSystem\FileSystem.csproj", "{E19F855E-B9CC-4A8D-982E-6BCCE0A58348}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DownloadManager.UnitTests", "tests\DownloadManager.UnitTests\DownloadManager.UnitTests.csproj", "{E0E9AA81-AF60-4019-9AB8-811AFC39DE24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DownloadManager.Tests", "tests\DownloadManager.Tests\DownloadManager.Tests.csproj", "{E0E9AA81-AF60-4019-9AB8-811AFC39DE24}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B5DD9F30-A643-4E3C-B375-5EBF2FB2CBAC}"
 	ProjectSection(SolutionItems) = preProject
@@ -53,6 +51,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.UnitTests", "tests\Data.UnitTests\Data.UnitTests.csproj", "{18A93138-6F01-4934-8402-88A99778BFA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpClient", "src\HttpClient\HttpClient.csproj", "{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -116,10 +116,6 @@ Global
 		{92810180-C144-4D76-BB6B-B02134CA2C39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92810180-C144-4D76-BB6B-B02134CA2C39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92810180-C144-4D76-BB6B-B02134CA2C39}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E0AA73DE-F78B-420A-B726-0278C9F00C6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E0AA73DE-F78B-420A-B726-0278C9F00C6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E0AA73DE-F78B-420A-B726-0278C9F00C6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E0AA73DE-F78B-420A-B726-0278C9F00C6F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E19F855E-B9CC-4A8D-982E-6BCCE0A58348}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E19F855E-B9CC-4A8D-982E-6BCCE0A58348}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E19F855E-B9CC-4A8D-982E-6BCCE0A58348}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -132,6 +128,10 @@ Global
 		{18A93138-6F01-4934-8402-88A99778BFA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18A93138-6F01-4934-8402-88A99778BFA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18A93138-6F01-4934-8402-88A99778BFA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -151,12 +151,15 @@ Global
 		{AEBDD5D0-B66A-487B-A5D7-15432164907E} = {033AA8B6-0752-4E0F-80A2-FC46A0D88354}
 		{033AA8B6-0752-4E0F-80A2-FC46A0D88354} = {664D406C-2F83-48F0-BFC3-408D5CB53C65}
 		{92810180-C144-4D76-BB6B-B02134CA2C39} = {B5FA026C-E81F-40B9-84FA-E74F5BD2FBD7}
-		{E0AA73DE-F78B-420A-B726-0278C9F00C6F} = {B5FA026C-E81F-40B9-84FA-E74F5BD2FBD7}
 		{E19F855E-B9CC-4A8D-982E-6BCCE0A58348} = {B5FA026C-E81F-40B9-84FA-E74F5BD2FBD7}
 		{E0E9AA81-AF60-4019-9AB8-811AFC39DE24} = {664D406C-2F83-48F0-BFC3-408D5CB53C65}
 		{18A93138-6F01-4934-8402-88A99778BFA8} = {664D406C-2F83-48F0-BFC3-408D5CB53C65}
+		{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C} = {B5FA026C-E81F-40B9-84FA-E74F5BD2FBD7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B4C02A51-7A0F-40AF-B559-20772614ED60}
+	EndGlobalSection
+	GlobalSection(RiderSharedRunConfigurations) = postSolution
+		File = src\WebAPI\ClientApp\.run\Nuxt Debug JavaScript.run.xml
 	EndGlobalSection
 EndGlobal

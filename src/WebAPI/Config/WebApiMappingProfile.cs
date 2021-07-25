@@ -6,6 +6,7 @@ using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 using PlexRipper.WebAPI.Common.FluentResult;
+using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Config
 {
@@ -44,38 +45,8 @@ namespace PlexRipper.WebAPI.Config
             // PlexLibrary -> PlexLibraryDTO
             CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.MediaCount))
-                .ForMember(dto => dto.MediaSize, entity => entity.MapFrom(x => x.MediaSize))
                 .ForMember(dto => dto.SeasonCount, entity => entity.MapFrom(x => x.SeasonCount))
                 .ForMember(dto => dto.EpisodeCount, entity => entity.MapFrom(x => x.EpisodeCount));
-
-            // PlexTvShow <-> PlexTvShowDTO
-            CreateMap<PlexTvShow, PlexTvShowDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Size, entity => entity.MapFrom(x => x.MediaSize))
-                .ReverseMap();
-
-            // PlexTvShowSeason <-> PlexTvShowSeasonDTO
-            CreateMap<PlexTvShowSeason, PlexTvShowSeasonDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Size, entity => entity.MapFrom(x => x.MediaSize))
-                .ReverseMap();
-
-            // PlexTvShowEpisode <-> PlexTvShowEpisodeDTO
-            CreateMap<PlexTvShowEpisode, PlexTvShowEpisodeDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Size, entity => entity.MapFrom(x => x.MediaSize))
-                .ReverseMap();
-
-            // PlexMovie -> PlexMovieDTO
-            CreateMap<PlexMovie, PlexMovieDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Size, entity => entity.MapFrom(x => x.GetParts.SelectMany(y => y.PlexMovieData.Parts).Sum(z => z.Size)));
-
-            // PlexMovieData -> PlexMovieDataDTO
-            CreateMap<PlexMovieData, PlexMovieDataDTO>(MemberList.Destination);
-
-            // PlexMovieDataPart -> PlexMovieDataPartDTO
-            CreateMap<PlexMovieDataPart, PlexMovieDataPartDTO>(MemberList.Destination);
-
-            // DownloadTask -> DownloadTaskDTO
-            CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.DownloadStatus));
 
             // FolderPath -> FolderPathDTO
             CreateMap<FolderPath, FolderPathDTO>(MemberList.Destination)
@@ -87,6 +58,82 @@ namespace PlexRipper.WebAPI.Config
 
             // FileSystemModel -> FileSystemModelDTO
             CreateMap<FileSystemModel, FileSystemModelDTO>(MemberList.Destination).ReverseMap();
+
+            // Notification <-> NotificationUpdate
+            CreateMap<Notification, NotificationDTO>(MemberList.Destination)
+                .ForSourceMember(x => x.Level, opt => opt.DoNotValidate())
+                .ForMember(x => x.Level, opt => opt.MapFrom(x => x.NotificationLevel)).ReverseMap();
+
+            DownloadTaskMappings();
+            PlexMediaMappings();
+            PlexMovieMappings();
+            PlexTvShowMappings();
+        }
+
+        private void DownloadTaskMappings()
+        {
+            CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Id, opt => opt.MapFrom(entity => entity.Id))
+                .ForMember(dto => dto.FullTitle, opt => opt.MapFrom(entity => entity.TitlePath))
+                .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
+                .ForMember(dto => dto.Children, opt => opt.Ignore())
+                .ForMember(dto => dto.Actions, opt => opt.Ignore());
+
+        }
+
+        private void PlexMediaMappings()
+        {
+            // PlexMediaData -> PlexMediaDataDTO
+            CreateMap<PlexMedia, PlexMediaDTO>(MemberList.Destination)
+                .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => entity.Id.ToString()))
+                .ForMember(dto => dto.TvShowId, opt => opt.Ignore())
+                .ForMember(dto => dto.TvShowSeasonId, opt => opt.Ignore())
+                .ForMember(dto => dto.MediaData, opt => opt.Ignore())
+                .ForMember(dto => dto.Children, opt => opt.Ignore());
+
+            // PlexMediaData -> PlexMediaDataDTO
+            CreateMap<PlexMediaData, PlexMediaDataDTO>(MemberList.Destination);
+
+            CreateMap<PlexMediaDataPart, PlexMediaDataPartDTO>(MemberList.Destination);
+        }
+
+        private void PlexMovieMappings()
+        {
+            // PlexMovie -> PlexMovieDTO
+            CreateMap<PlexMovie, PlexMediaDTO>(MemberList.Destination)
+                .IncludeBase<PlexMedia, PlexMediaDTO>()
+                .ForMember(dto => dto.MediaData, entity => entity.MapFrom(x => x.MovieData));
+        }
+
+        private void PlexTvShowMappings()
+        {
+            // PlexTvShow -> PlexTvShowDTO
+            CreateMap<PlexTvShow, PlexMediaDTO>(MemberList.Destination)
+                .IncludeBase<PlexMedia, PlexMediaDTO>()
+                .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.Id))
+                .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => entity.Id.ToString()))
+                .ForMember(dto => dto.TvShowSeasonId, opt => opt.Ignore())
+                .ForMember(dto => dto.Children, opt => opt.MapFrom(entity => entity.Seasons))
+                .ForMember(dto => dto.MediaData, opt => opt.Ignore());
+
+            // PlexTvShowSeason -> PlexTvShowSeasonDTO
+            CreateMap<PlexTvShowSeason, PlexMediaDTO>(MemberList.Destination)
+                .IncludeBase<PlexMedia, PlexMediaDTO>()
+                .ForMember(dto => dto.TvShowSeasonId, opt => opt.MapFrom(entity => entity.Id))
+                .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => $"{entity.TvShowId.ToString()}-{entity.Id.ToString()}"))
+                .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.TvShowId))
+                .ForMember(dto => dto.Children, opt => opt.MapFrom(entity => entity.Episodes))
+                .ForMember(dto => dto.MediaData, opt => opt.Ignore());
+
+            // PlexTvShowEpisode -> PlexTvShowEpisodeDTO
+            CreateMap<PlexTvShowEpisode, PlexMediaDTO>(MemberList.Destination)
+                .IncludeBase<PlexMedia, PlexMediaDTO>()
+                .ForMember(dto => dto.Children, opt => opt.Ignore())
+                .ForMember(dto => dto.TreeKeyId,
+                    opt => opt.MapFrom(entity => $"{entity.TvShowId.ToString()}-{entity.TvShowSeasonId.ToString()}-{entity.Id.ToString()}"))
+                .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.TvShowId))
+                .ForMember(dto => dto.TvShowSeasonId, opt => opt.MapFrom(entity => entity.TvShowSeasonId))
+                .ForMember(dto => dto.MediaData, entity => entity.MapFrom(x => x.EpisodeData));
         }
     }
 }

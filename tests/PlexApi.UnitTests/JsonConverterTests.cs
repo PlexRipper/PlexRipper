@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
-using FluentAssertions;
 using PlexRipper.BaseTests;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -8,12 +8,9 @@ namespace PlexApi.UnitTests
 {
     public class JsonConverterTests
     {
-        private BaseContainer Container { get; }
-
         public JsonConverterTests(ITestOutputHelper output)
         {
             BaseDependanciesTest.SetupLogging(output);
-            Container = new BaseContainer();
         }
 
         [Fact]
@@ -26,9 +23,9 @@ namespace PlexApi.UnitTests
             var longValue = JsonSerializer.Deserialize<TestDTO>(jsonString);
 
             // Assert
-            longValue.Should().NotBeNull();
-            longValue.ContentChangedAt.Should().BeGreaterOrEqualTo(long.MinValue);
-            longValue.ContentChangedAt.Should().BeLessOrEqualTo(long.MaxValue);
+            longValue.ShouldNotBeNull();
+            longValue.ContentChangedAt.ShouldBeGreaterThanOrEqualTo(long.MinValue);
+            longValue.ContentChangedAt.ShouldBeLessThanOrEqualTo(long.MaxValue);
         }
     }
 }

@@ -6,7 +6,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import HealthService from '@service/healthService';
 
 @Component
 export default class Footer extends Vue {
@@ -18,12 +17,6 @@ export default class Footer extends Vue {
 
 	get getServerStatus(): string {
 		return this.status ? 'Server is online!' : 'Server is offline';
-	}
-
-	created(): void {
-		HealthService.getServerStatus().subscribe((status) => {
-			this.status = status;
-		});
 	}
 }
 </script>

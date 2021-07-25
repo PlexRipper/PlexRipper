@@ -8,13 +8,9 @@ namespace PlexRipper.Application.UnitTests.Common.Mappings
     {
         private readonly IConfigurationProvider _configuration;
 
-        private readonly IMapper _mapper;
-
         public MappingTests()
         {
             _configuration = new MapperConfiguration(cfg => { cfg.AddProfile<ApplicationMappingProfile>(); });
-
-            _mapper = _configuration.CreateMapper();
         }
 
         [Fact]

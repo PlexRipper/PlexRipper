@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.IO;
 using System.Linq;
 
 namespace PlexRipper.Domain
@@ -8,9 +7,7 @@ namespace PlexRipper.Domain
     [Table("PlexMovie")]
     public class PlexMovie : PlexMedia, IToDownloadTask
     {
-        #region Properties
-
-        public List<PlexMovieData> PlexMovieDatas { get; set; }
+        #region Relationships
 
         public List<PlexMovieGenre> PlexMovieGenres { get; set; }
 
@@ -21,7 +18,10 @@ namespace PlexRipper.Domain
         #region Helpers
 
         [NotMapped]
-        public List<PlexMovieDataPart> GetParts => PlexMovieDatas.SelectMany(x => x.Parts).ToList();
+        public List<PlexMediaDataPart> MovieParts => MovieData.SelectMany(x => x.Parts).ToList();
+
+        [NotMapped]
+        public List<PlexMediaData> MovieData => MediaData.MediaData;
 
         [NotMapped]
         public override PlexMediaType Type => PlexMediaType.Movie;
@@ -32,26 +32,16 @@ namespace PlexRipper.Domain
         /// <returns>The <see cref="DownloadTask"/>s created from all parts.</returns>
         public List<DownloadTask> CreateDownloadTasks()
         {
-            var baseDownloadTask = CreateBaseDownloadTask();
-            var downloadTasks = new List<DownloadTask>();
+            var downloadTask = CreateBaseDownloadTask();
+            downloadTask.MediaType = Type;
+            downloadTask.MetaData.MovieTitle = Title;
+            downloadTask.MetaData.MediaData = MovieData;
+            downloadTask.MetaData.MovieKey = Key;
 
-            foreach (var part in GetParts)
+            return new List<DownloadTask>
             {
-                var downloadTask = baseDownloadTask;
-                downloadTask.Title = Title;
-                downloadTask.FileLocationUrl = part.ObfuscatedFilePath;
-                downloadTask.DataTotal = part.Size;
-                downloadTask.FileName = Path.GetFileName(part.File);
-                downloadTask.MediaType = Type;
-                downloadTask.ReleaseYear = Year;
-                downloadTask.PlexLibraryId = PlexLibrary?.Id ?? 0;
-                downloadTask.PlexLibrary = PlexLibrary;
-                downloadTask.PlexServerId = PlexLibrary?.PlexServer?.Id ?? 0;
-                downloadTask.PlexServer = PlexLibrary?.PlexServer;
-                downloadTasks.Add(downloadTask);
-            }
-
-            return downloadTasks;
+                downloadTask,
+            };
         }
 
         #endregion

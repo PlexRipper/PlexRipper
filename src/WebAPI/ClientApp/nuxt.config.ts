@@ -2,6 +2,7 @@ import * as path from 'path';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
+import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 const config: NuxtConfig = {
 	ssr: false,
@@ -28,10 +29,58 @@ const config: NuxtConfig = {
 		],
 		link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.png' }],
 	},
+
+	// Global CSS: https://go.nuxtjs.dev/config-css
+	css: ['@/assets/scss/style.scss'],
+
 	/*
 	 ** Customize the progress-bar color
 	 */
 	loading: false,
+	/*
+	 ** Auto-import components
+	 *  Doc: https://github.com/nuxt/components
+	 */
+	components: [
+		// '~/components/AppBar',
+		// '~/components/DebugTools',
+		// '~/components/Dialogs',
+		// '~/components/Footer',
+		// '~/components/Form',
+		// '~/components/General/VTreeViewTable',
+		// '~/components/Help',
+		// '~/components/MediaOverview/index.ts',
+		// '~/pages/downloads/components',
+		// '~/pages/settings/components',
+		// '~/pages/setup/components',
+		'~/components/Extensions',
+		{
+			path: '~/components',
+			pattern: '**/*.vue',
+			extensions: ['vue'],
+		},
+		{
+			path: '~/components/General',
+			pattern: '**/*.vue',
+			extensions: ['vue'],
+		},
+		{
+			path: '~/components/Layout',
+			pattern: '**/*.vue',
+			extensions: ['vue'],
+		},
+		{
+			path: '~/components/Form',
+			pattern: '**/*.vue',
+			extensions: ['vue'],
+		},
+
+		{
+			path: '~/pages',
+			pattern: '**/components/*.vue',
+			extensions: ['vue'],
+		},
+	],
 	/*
 	 ** Plugins to load before mounting the App
 	 */
@@ -43,9 +92,23 @@ const config: NuxtConfig = {
 		{ src: '@plugins/i18nPlugin.ts', mode: 'client' },
 		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
 		{ src: '@plugins/registerComponents.ts', mode: 'client' },
+		{ src: '@plugins/typeExtensions.ts', mode: 'client' },
 	],
 	router: {
 		middleware: ['pageRedirect'],
+		extendRoutes(routes, resolve) {
+			routes.push({
+				name: 'details-overview',
+				path: '/tvshows/:id',
+				component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
+				children: [
+					{
+						path: 'details/:mediaid',
+						component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
+					},
+				],
+			});
+		},
 	},
 	/*
 	 ** Nuxt.js dev-modules
@@ -71,7 +134,7 @@ const config: NuxtConfig = {
 	],
 	i18n: {
 		lazy: true,
-		langDir: '/lang/',
+		langDir: 'lang/',
 		locales: [{ code: 'en', iso: 'en-US', file: 'en-US.json' }],
 		defaultLocale: 'en',
 	},
@@ -87,6 +150,7 @@ const config: NuxtConfig = {
 				overlay: false,
 			},
 		},
+		extractCSS: true,
 		// Will allow for debugging in Typescript + Nuxt
 		// Doc: https://nordschool.com/enable-vs-code-debugger-for-nuxt-and-typescript/
 		extend(config: WebpackConfiguration, { isDev, isClient }: NuxtWebpackEnv): void {
@@ -94,22 +158,8 @@ const config: NuxtConfig = {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
 			}
 
-			// Make sure to also update the tsconfig.json when adding aliases for import resolving.
-			// These are necessary to tell webpack which aliases are used.
-			if (config && config.resolve && config.resolve.alias) {
-				config.resolve.alias['@store'] = path.resolve(__dirname, 'src/store/');
-				config.resolve.alias['@dto'] = path.resolve(__dirname, 'src/types/dto/');
-				config.resolve.alias['@api'] = path.resolve(__dirname, 'src/types/api/');
-				config.resolve.alias['@state'] = path.resolve(__dirname, 'src/types/state/');
-				config.resolve.alias['@img'] = path.resolve(__dirname, 'src/assets/img/');
-				config.resolve.alias['@enums'] = path.resolve(__dirname, 'src/types/enums/');
-				config.resolve.alias['@interfaces'] = path.resolve(__dirname, 'src/types/interfaces/');
-				config.resolve.alias['@service'] = path.resolve(__dirname, 'src/types/service/');
-				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
-				config.resolve.alias['@components'] = path.resolve(__dirname, 'src/components/');
-				config.resolve.alias['@overviews'] = path.resolve(__dirname, 'src/components/overviews');
-				config.resolve.alias['@mediaOverview'] = path.resolve(__dirname, 'src/components/MediaOverview/');
-			}
+			// Doc: https://github.com/dividab/tsconfig-paths-webpack-plugin
+			config.resolve?.plugins?.push(new TsconfigPathsPlugin());
 		},
 	},
 };

@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
-import Page from '@components/General/Page.vue';
+import Page from '@components/Layout/Page.vue';
 import DateAndTimeSection from '~/pages/settings/components/DateAndTimeSection.vue';
 import ConfirmationSection from '~/pages/settings/components/ConfirmationSection.vue';
 

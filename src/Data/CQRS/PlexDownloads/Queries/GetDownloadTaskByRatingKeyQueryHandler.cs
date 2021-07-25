@@ -4,7 +4,7 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexDownloads;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
@@ -35,7 +35,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 .Include(x => x.DownloadWorkerTasks)
                 .Include(x => x.DestinationFolder)
                 .Include(x => x.DownloadFolder)
-                .FirstOrDefaultAsync(x => x.RatingKey == request.RatingKey, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Key == request.RatingKey, cancellationToken);
 
             if (downloadTask == null)
             {

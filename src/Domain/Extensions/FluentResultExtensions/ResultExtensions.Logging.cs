@@ -234,15 +234,56 @@ namespace PlexRipper.Domain
             string memberName = "",
             string sourceFilePath = "")
         {
-            foreach (var reason in result.Reasons)
+            foreach (var error in result.Errors)
             {
-                LogByType(logLevel, reason.Message, e, memberName, sourceFilePath);
+                LogByType(logLevel, error.Message, null, memberName, sourceFilePath);
 
-                if (reason.Metadata.Any())
+                if (error.Metadata.Any())
                 {
-                    foreach (KeyValuePair<string, object> entry in reason.Metadata)
+                    foreach (KeyValuePair<string, object> entry in error.Metadata)
                     {
                         LogByType(logLevel, $"{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
+                    }
+                }
+
+                foreach (var errorReason in error.Reasons)
+                {
+                    LogByType(logLevel, "--" + errorReason.Message, null, memberName, sourceFilePath);
+                    if (errorReason.Metadata.Any())
+                    {
+                        foreach (KeyValuePair<string, object> entry in errorReason.Metadata)
+                        {
+                            LogByType(logLevel, $"--{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
+                        }
+                    }
+
+                    foreach (var childErrorReason in errorReason.Reasons)
+                    {
+                        LogByType(logLevel, "----" + childErrorReason.Message, null, memberName, sourceFilePath);
+                        if (childErrorReason.Metadata.Any())
+                        {
+                            foreach (KeyValuePair<string, object> entry in childErrorReason.Metadata)
+                            {
+                                LogByType(logLevel, $"----MetaData: {entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
+                            }
+                        }
+                    }
+                }
+
+                if (error is ExceptionalError exceptional)
+                {
+                    var exception = exceptional.Exception;
+                    LogByType(logLevel, "Exception", null, memberName, sourceFilePath);
+                    LogByType(logLevel, $"--{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
+                    if (exception.InnerException is not null)
+                    {
+                        exception = exception.InnerException;
+                        LogByType(logLevel, $"----{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
+                        if (exception.InnerException is not null)
+                        {
+                            exception = exception.InnerException.InnerException;
+                            LogByType(logLevel, $"-------{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
+                        }
                     }
                 }
             }

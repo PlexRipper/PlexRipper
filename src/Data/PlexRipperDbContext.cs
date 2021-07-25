@@ -1,17 +1,17 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using FluentResults;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
-    public class PlexRipperDbContext : DbContext
+    public class PlexRipperDbContext : DbContext, ISetup
     {
-        private readonly IFileSystem _fileSystem;
-
         #region Properties
 
         #region Tables
@@ -21,6 +21,8 @@ namespace PlexRipper.Data
         public DbSet<DownloadTask> DownloadTasks { get; set; }
 
         public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
+
+        public DbSet<DownloadWorkerLog> DownloadWorkerTasksLogs { get; set; }
 
         public DbSet<FolderPath> FolderPaths { get; set; }
 
@@ -36,10 +38,6 @@ namespace PlexRipper.Data
 
         public DbSet<PlexMovie> PlexMovies { get; set; }
 
-        public DbSet<PlexMovieData> PlexMovieData { get; set; }
-
-        public DbSet<PlexMovieDataPart> PlexMovieDataParts { get; set; }
-
         #endregion
 
         #region PlexTvShow
@@ -49,10 +47,6 @@ namespace PlexRipper.Data
         public DbSet<PlexTvShowSeason> PlexTvShowSeason { get; set; }
 
         public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
-
-        public DbSet<PlexTvShowEpisodeData> PlexTvShowEpisodeData { get; set; }
-
-        public DbSet<PlexTvShowEpisodeDataPart> PlexTvShowEpisodeDataParts { get; set; }
 
         #endregion
 
@@ -76,34 +70,19 @@ namespace PlexRipper.Data
 
         #endregion
 
-        private static bool IsTestMode
-        {
-            get
-            {
-                var testMode = Environment.GetEnvironmentVariable("IntegrationTestMode");
-                return testMode != null && testMode == "true";
-            }
-        }
+        public static bool IsTestMode => Environment.GetEnvironmentVariable("IntegrationTestMode") is "true";
 
-        private static bool ResetDatabase
-        {
-            get
-            {
-                var resetDb = Environment.GetEnvironmentVariable("ResetDB");
-                return resetDb != null && resetDb == "true";
-            }
-        }
+        public static bool ResetDatabase => Environment.GetEnvironmentVariable("ResetDB") is "true";
 
-        private static string DatabaseName => IsTestMode ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
+        public static string DatabaseName => IsTestMode ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
+
+        public readonly string DatabasePath = Path.Combine(FileSystemPaths.ConfigDirectory, DatabaseName);
 
         #endregion Properties
 
         #region Constructors
 
-        public PlexRipperDbContext(IFileSystem fileSystem)
-        {
-            _fileSystem = fileSystem;
-        }
+        public PlexRipperDbContext() { }
 
         public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
 
@@ -111,30 +90,40 @@ namespace PlexRipper.Data
 
         #region Methods
 
-        public Result Setup()
+        public async Task<Result> SetupAsync()
         {
             // Should the Database be deleted and re-created
             if (ResetDatabase)
             {
                 Log.Warning("ResetDB command is true, database will be deleted and re-created.");
-                Database.EnsureDeleted();
+                await Database.EnsureDeletedAsync();
             }
 
-            if (!IsTestMode)
-            {
-                Database.Migrate();
-            }
-            else
+            if (IsTestMode)
             {
                 Log.Information("Database will be setup in TestMode");
-                Database.EnsureCreated();
+                await Database.EnsureCreatedAsync();
+            }
+
+            try
+            {
+                if (!IsTestMode)
+                {
+                    Log.Information("Attempting to migrate database");
+                    await Database.MigrateAsync();
+                }
+            }
+            catch (SqliteException e)
+            {
+                Log.Error("Failed to migrate the database.");
+                return Result.Fail(new ExceptionalError(e)).LogError();
             }
 
             // Check if database exists and can be connected to.
-            var exist = Database.CanConnect();
+            var exist = await Database.CanConnectAsync();
             if (exist)
             {
-                Log.Information("Database was successfully created and connected!");
+                Log.Information("Database was successfully connected!");
                 return Result.Ok();
             }
 
@@ -146,13 +135,11 @@ namespace PlexRipper.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                string dbPath = Path.Combine(FileSystemPaths.ConfigDirectory, DatabaseName);
-
                 // optionsBuilder.UseLazyLoadingProxies();
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder
                     .UseSqlite(
-                        $"Data Source={dbPath}",
+                        $"Data Source={DatabasePath}",
                         b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
             }
         }
@@ -160,6 +147,22 @@ namespace PlexRipper.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            builder.Entity<PlexMovie>()
+                .Property(x => x.MediaData)
+                .HasJsonValueConversion();
+
+            builder.Entity<PlexTvShow>()
+                .Property(x => x.MediaData)
+                .HasJsonValueConversion();
+
+            builder.Entity<PlexTvShowSeason>()
+                .Property(x => x.MediaData)
+                .HasJsonValueConversion();
+
+            builder.Entity<PlexTvShowEpisode>()
+                .Property(x => x.MediaData)
+                .HasJsonValueConversion();
 
             builder = PlexRipperDBContextSeed.SeedDatabase(builder);
 

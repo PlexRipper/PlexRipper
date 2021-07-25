@@ -1,7 +1,7 @@
 using System;
-using PlexRipper.PlexApi.Models.Server;
+using PlexRipper.PlexApi.Models;
 
-namespace Plex.Api
+namespace PlexRipper.PlexApi.Helpers
 {
     public static class UriHelper
     {

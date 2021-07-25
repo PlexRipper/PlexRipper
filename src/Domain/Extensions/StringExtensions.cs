@@ -8,8 +8,6 @@ namespace PlexRipper.Domain
     {
         private static Random random = new Random();
 
-        private static readonly char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
-
         public static string GetActualCasing(this string path)
         {
             if (OsInfo.IsNotWindows || path.StartsWith("\\"))
@@ -35,25 +33,6 @@ namespace PlexRipper.Domain
             return Path.Combine(GetProperCapitalization(dirInfo), fileName);
         }
 
-        private static string GetProperCapitalization(DirectoryInfo dirInfo)
-        {
-            var parentDirInfo = dirInfo.Parent;
-            if (parentDirInfo == null)
-            {
-                //Drive letter
-                return dirInfo.Name.ToUpper();
-            }
-
-            var folderName = dirInfo.Name;
-
-            if (dirInfo.Exists)
-            {
-                folderName = parentDirInfo.GetDirectories(dirInfo.Name)[0].Name;
-            }
-
-            return Path.Combine(GetProperCapitalization(parentDirInfo), folderName);
-        }
-
         public static string RandomString(int length, bool allowNumbers = false, bool allowCapitalLetters = false)
         {
             string chars = "abcdefghijklmnopqrstuvwxyz";
@@ -71,9 +50,30 @@ namespace PlexRipper.Domain
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public static string SanitizePath(this string path)
+        public static string SanitizeFolderName(this string folderName)
         {
-            return new string(path.Where(ch => !invalidFileNameChars.Contains(ch)).ToArray());
+            folderName = folderName.Replace(@"·", "-").Replace(":", " ");
+
+            return new string(folderName.Where(ch => !Path.GetInvalidFileNameChars().Contains(ch)).ToArray());
+        }
+
+        private static string GetProperCapitalization(DirectoryInfo dirInfo)
+        {
+            var parentDirInfo = dirInfo.Parent;
+            if (parentDirInfo == null)
+            {
+                // Drive letter
+                return dirInfo.Name.ToUpper();
+            }
+
+            var folderName = dirInfo.Name;
+
+            if (dirInfo.Exists)
+            {
+                folderName = parentDirInfo.GetDirectories(dirInfo.Name)[0].Name;
+            }
+
+            return Path.Combine(GetProperCapitalization(parentDirInfo), folderName);
         }
     }
 }

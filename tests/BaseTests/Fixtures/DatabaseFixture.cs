@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.BaseTests.Fixtures
+﻿namespace PlexRipper.BaseTests
 {
     public class DatabaseFixture
     {

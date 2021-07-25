@@ -1,225 +1,173 @@
 <template>
-	<v-data-table
-		fixed-header
-		show-select
-		hide-default-footer
-		:headers="getHeaders"
-		:items-per-page="30"
-		:items="downloads"
-		:loading="loading"
-		:value="value"
-		@input="$emit('input', $event)"
-	>
-		<!-- Data received -->
-		<template #item.dataReceived="{ item }">
-			<strong>
-				<file-size :size="item.dataReceived" />
-			</strong>
-		</template>
-		<!-- Data total -->
-		<template #item.dataTotal="{ item }">
-			<strong>
-				<file-size :size="item.dataTotal" />
-			</strong>
-		</template>
-		<!-- Download speed -->
-		<template #item.downloadSpeed="{ item }">
-			<strong v-if="item.downloadSpeed > 0">
-				<file-size :size="item.downloadSpeed" speed />
-			</strong>
-			<strong v-else> - </strong>
-		</template>
-		<!-- Download Time Remaining -->
-		<template #item.timeRemaining="{ item }">
-			<strong> {{ formatCountdown(item.timeRemaining) }} </strong>
-		</template>
-		<!-- Percentage -->
-		<template #item.percentage="{ item }">
-			<v-progress-linear :value="item.percentage" stream striped color="red" height="25">
-				<template #default="{ value }">
-					<strong>{{ value }}%</strong>
-				</template>
-			</v-progress-linear>
-		</template>
-		<!-- Actions -->
-		<template #item.actions="{ item }">
-			<v-btn-toggle borderless dense group tile>
-				<template v-for="(action, i) in availableActions(item)">
-					<!-- Render buttons -->
-					<template v-for="(button, y) in getButtons">
-						<v-btn v-if="action === button.value" :key="`${i}-${y}`" icon @click="command(action, item.id)">
-							<v-tooltip top>
-								<template #activator="{ on, attrs }">
-									<!-- Button icon-->
-									<v-icon v-bind="attrs" v-on="on"> {{ button.icon }} </v-icon>
-								</template>
-								<!-- Tooltip text -->
-								<span>{{ button.name }}</span>
-							</v-tooltip>
-						</v-btn>
-					</template>
-				</template>
-			</v-btn-toggle>
-		</template>
-	</v-data-table>
+	<div>
+		<v-tree-view-table
+			:items="downloadRows"
+			:headers="getHeaders"
+			height-auto
+			media-icons
+			@action="tableAction"
+			@selected="$emit('selected', $event)"
+		/>
+	</div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
-import { DownloadStatus } from '@dto/mainApi';
-import { DataTableHeader } from 'vuetify/types';
+import Log from 'consola';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { DownloadStatus, DownloadTaskDTO, FileMergeProgress, PlexMediaType } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import IDownloadRow from '../types/IDownloadRow';
+import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
+import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
+import ButtonType from '@enums/buttonType';
+import { DownloadService, ProgressService } from '@service';
+
 @Component({
 	components: {
 		LoadingSpinner,
 	},
 })
 export default class DownloadsTable extends Vue {
-	@Prop({ required: true, type: Array as () => IDownloadRow[] })
-	readonly downloads!: IDownloadRow[];
-
 	@Prop({ type: Boolean })
 	readonly loading: Boolean = false;
 
-	@Prop({ required: true, type: Array as () => IDownloadRow[] })
-	readonly value!: IDownloadRow[];
+	@Prop({ required: true, type: Array as () => DownloadTaskDTO[] })
+	readonly value!: DownloadTaskDTO[];
 
-	get getHeaders(): DataTableHeader<IDownloadRow>[] {
+	@Prop({ required: true, type: Number })
+	readonly serverId!: number;
+
+	fileMergeProgressList: FileMergeProgress[] = [];
+
+	downloadRows: DownloadTaskDTO[] = [];
+
+	get getHeaders(): ITreeViewTableHeader[] {
 		return [
-			// {
-			// 	text: 'Id',
-			// 	value: 'id',
-			// },
 			{
 				text: 'Title',
 				value: 'title',
+				maxWidth: 250,
 			},
 			{
 				text: 'Status',
 				value: 'status',
+				width: 120,
 			},
 			{
-				text: 'Data Received',
+				text: 'Received',
 				value: 'dataReceived',
+				type: TreeViewTableHeaderEnum.FileSize,
+				width: 120,
 			},
 			{
 				text: 'Size',
 				value: 'dataTotal',
+				type: TreeViewTableHeaderEnum.FileSize,
+				width: 120,
 			},
 			{
 				text: 'Speed',
 				value: 'downloadSpeed',
+				type: TreeViewTableHeaderEnum.FileSpeed,
+				width: 120,
 			},
 			{
 				text: 'ETA',
 				value: 'timeRemaining',
+				type: TreeViewTableHeaderEnum.Duration,
+				width: 120,
 			},
 			{
 				text: 'Percentage',
 				value: 'percentage',
+				type: TreeViewTableHeaderEnum.Percentage,
+				width: 120,
 			},
 			{
 				text: 'Actions',
 				value: 'actions',
-				width: '100px',
+				type: TreeViewTableHeaderEnum.Actions,
+				width: 160,
 				sortable: false,
 			},
 		];
 	}
 
-	get getButtons(): any {
-		return [
-			{
-				name: 'Restart',
-				value: 'restart',
-				icon: 'mdi-refresh',
-			},
-			{
-				name: 'Start / Resume',
-				value: 'start',
-				icon: 'mdi-play',
-			},
-			{
-				name: 'Pause',
-				value: 'pause',
-				icon: 'mdi-pause',
-			},
-			{
-				name: 'Stop',
-				value: 'stop',
-				icon: 'mdi-stop',
-			},
-			{
-				name: 'Delete',
-				value: 'delete',
-				icon: 'mdi-delete',
-			},
-			{
-				name: 'Clear',
-				value: 'clear',
-				icon: 'mdi-notification-clear-all',
-			},
-			{
-				name: 'Details',
-				value: 'details',
-				icon: 'mdi-chart-box-outline',
-			},
-		];
-	}
-
-	formatCountdown(seconds: number): string {
-		if (!seconds || seconds <= 0) {
-			return '0:00';
-		}
-		return new Date(seconds * 1000)?.toISOString()?.substr(11, 8)?.toString() ?? '?';
-	}
-
-	availableActions(item: IDownloadRow): string[] {
-		const actions: string[] = ['details'];
-		switch (item.status) {
+	availableActions(status: DownloadStatus): ButtonType[] {
+		const availableActions: ButtonType[] = [ButtonType.Details];
+		switch (status) {
 			case DownloadStatus.Initialized:
-				actions.push('delete');
-				break;
-			case DownloadStatus.Starting:
-				actions.push('stop');
-				actions.push('delete');
+				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Queued:
-				actions.push('start');
-				actions.push('delete');
+				availableActions.push(ButtonType.Start);
+				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Downloading:
-				actions.push('pause');
-				actions.push('stop');
+				availableActions.push(ButtonType.Pause);
+				availableActions.push(ButtonType.Stop);
 				break;
 			case DownloadStatus.Paused:
-				actions.push('start');
-				actions.push('restart');
-				actions.push('stop');
+				availableActions.push(ButtonType.Start);
+				availableActions.push(ButtonType.Stop);
+				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Completed:
-				actions.push('clear');
-				break;
-			case DownloadStatus.Stopping:
-				actions.push('delete');
+				availableActions.push(ButtonType.Clear);
+				availableActions.push(ButtonType.Restart);
 				break;
 			case DownloadStatus.Stopped:
-				actions.push('restart');
-				actions.push('delete');
+				availableActions.push(ButtonType.Restart);
+				availableActions.push(ButtonType.Delete);
 				break;
 			case DownloadStatus.Merging:
 				break;
 			case DownloadStatus.Error:
-				actions.push('restart');
-				actions.push('delete');
+				availableActions.push(ButtonType.Restart);
+				availableActions.push(ButtonType.Delete);
 				break;
 		}
-		return actions;
+		return availableActions;
 	}
 
-	command(action: string, itemId: number): void {
-		this.$emit(action, itemId);
+	tableAction({ action, item }: { action: string; item: DownloadTaskDTO }) {
+		Log.info('command', { action, item });
+		this.$emit(action, item.id);
+	}
+
+	mounted(): void {
+		// Retrieve initial download list
+		this.$subscribeTo(DownloadService.getDownloadList(this.serverId), (data: DownloadTaskDTO[]) => {
+			if (data && data.length > 0) {
+				for (const rootDownloadTask of data) {
+					// For movies download tasks
+					if (rootDownloadTask.mediaType === PlexMediaType.Movie) {
+						rootDownloadTask.actions = this.availableActions(rootDownloadTask.status);
+						rootDownloadTask.children = undefined;
+					}
+
+					// For tvShows download tasks
+					if (rootDownloadTask.mediaType === PlexMediaType.TvShow) {
+						if (rootDownloadTask.children && rootDownloadTask.children.length > 0) {
+							rootDownloadTask?.children?.forEach((season) => {
+								if (season.children && season.children.length > 0) {
+									season.children?.forEach(() => {
+										// this.mergeDownloadRow(episode);
+									});
+								} else {
+									Log.warn(`Season: ${season.title} had no episodes`);
+								}
+							});
+						}
+					}
+				}
+
+				this.downloadRows = [...data] as DownloadTaskDTO[];
+			} else {
+				this.downloadRows = [];
+			}
+		});
+
+		this.$subscribeTo(ProgressService.getFileMergeProgress(this.serverId), (x) => (this.fileMergeProgressList = x));
 	}
 }
 </script>

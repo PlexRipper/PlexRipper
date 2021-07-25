@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using FluentResults;
-using Innofactor.EfCoreJsonValueConverter;
 
 namespace PlexRipper.Domain
 {
@@ -69,7 +68,6 @@ namespace PlexRipper.Domain
         /// Gets or sets the <see cref="PlexLibraryMetaData"/>, this is a JSON field that contains a collection
         /// of various values that dont warrant their own database column.
         /// </summary>
-        [JsonField]
         [Column(Order = 12)]
         public PlexLibraryMetaData MetaData { get; set; }
 
@@ -86,6 +84,16 @@ namespace PlexRipper.Domain
         /// Gets or sets the PlexServerId of the PlexServer this PlexLibrary belongs to.
         /// </summary>
         public int PlexServerId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the default download destination <see cref="FolderPath"/>.
+        /// </summary>
+        public FolderPath DefaultDestination { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Id of the Default Destination <see cref="FolderPath"/>.
+        /// </summary>
+        public int? DefaultDestinationId { get; set; }
 
         public List<PlexMovie> Movies { get; set; }
 

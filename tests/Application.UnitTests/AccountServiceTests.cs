@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using FluentAssertions;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,7 +28,7 @@ namespace PlexRipper.Application.UnitTests
             var account = await accountService.CreatePlexAccountAsync(newAccount);
 
             // Assert
-            account.Should().NotBeNull();
+            account.ShouldNotBeNull();
         }
 
         [Fact]
@@ -43,8 +43,8 @@ namespace PlexRipper.Application.UnitTests
             var account2 = await accountService.CreatePlexAccountAsync(newAccount);
 
             // Assert
-            account.Should().NotBeNull();
-            account2.Should().BeNull();
+            account.ShouldNotBeNull();
+            account2.ShouldBeNull();
         }
 
         [Fact]
@@ -61,8 +61,8 @@ namespace PlexRipper.Application.UnitTests
             accountDB = (await accountService.UpdatePlexAccountAsync(updatedAccount)).Value;
 
             // Assert
-            accountDB.Should().NotBeNull();
-            accountDB.Password.Should().Be(updatedAccount.Password);
+            accountDB.ShouldNotBeNull();
+            accountDB.Password.ShouldBe(updatedAccount.Password);
         }
     }
 }

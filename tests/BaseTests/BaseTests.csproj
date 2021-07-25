@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="5.10.3" />
+    <PackageReference Include="Bogus" Version="33.0.2" />
+    <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="Serilog.Sinks.XUnit" Version="2.0.4" />
+    <PackageReference Include="Shouldly" Version="4.0.3" />
+    <PackageReference Include="WireMock.Net" Version="1.4.15" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.abstractions" Version="2.0.3" />
     <PackageReference Include="Xunit.Priority" Version="1.1.6" />
@@ -26,6 +29,12 @@
     <None Update="secretCredentials.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="PlexMockServer\media\movies\default\test-video.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

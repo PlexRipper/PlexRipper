@@ -32,12 +32,30 @@ namespace PlexRipper.Data.Common
 
         #region Properties
 
+        protected IQueryable<PlexServer> PlexServerQueryable => _dbContext.PlexServers.AsQueryable();
+
         protected IQueryable<PlexLibrary> PlexLibraryQueryable => _dbContext.PlexLibraries.AsQueryable();
 
         /// <summary>
-        /// Creates a PlexMovie IQueryable with all PlexMovie data included -> PlexMovieDatas -> Parts.
+        /// Creates a PlexMovie IQueryable.
         /// </summary>
-        protected IQueryable<PlexMovie> PlexMoviesQueryable => _dbContext.PlexMovies.AsQueryable().IncludeMovieData();
+        protected IQueryable<PlexMovie> PlexMoviesQueryable => _dbContext.PlexMovies.AsQueryable();
+
+        /// <summary>
+        /// Creates a PlexTvShow IQueryable.
+        /// </summary>
+        protected IQueryable<PlexTvShow> PlexTvShowsQueryable => _dbContext.PlexTvShows.AsQueryable();
+
+        /// <summary>
+        /// Creates a PlexTvShowSeason IQueryable.
+        /// </summary>
+        protected IQueryable<PlexTvShowSeason> PlexTvShowSeasonsQueryable => _dbContext.PlexTvShowSeason.AsQueryable();
+
+        /// <summary>
+        /// Creates a PlexTvShowEpisode IQueryable.
+        /// </summary>
+        protected IQueryable<PlexTvShowEpisode> PlexTvShowEpisodesQueryable => _dbContext.PlexTvShowEpisodes.AsQueryable();
+
 
         #endregion
 
@@ -66,7 +84,7 @@ namespace PlexRipper.Data.Common
                 switch (type)
                 {
                     case PlexMediaType.Movie:
-                        return plexLibraryQuery.IncludeMovies(topLevelMediaOnly);
+                        return plexLibraryQuery.IncludeMovies();
                     case PlexMediaType.TvShow:
                         return plexLibraryQuery.IncludeTvShows(topLevelMediaOnly);
                     default:

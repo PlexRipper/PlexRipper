@@ -5,11 +5,11 @@ namespace PlexRipper.Application.Settings.Models
 {
     public class UserInterfaceSettingsModel : BaseModel
     {
-        private ConfirmationSettingsModel _confirmationSettings = new ConfirmationSettingsModel();
+        private ConfirmationSettingsModel _confirmationSettings = new();
 
-        private DisplaySettingsModel _displaySettings = new DisplaySettingsModel();
+        private DisplaySettingsModel _displaySettings = new();
 
-        private DateTimeModel _dateTimeSettings = new DateTimeModel();
+        private DateTimeModel _dateTimeSettings = new();
 
         #region Properties
 
@@ -22,7 +22,7 @@ namespace PlexRipper.Application.Settings.Models
                 if (value != null)
                 {
                     _confirmationSettings = value;
-                    _confirmationSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                    _confirmationSettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }
         }
@@ -36,7 +36,7 @@ namespace PlexRipper.Application.Settings.Models
                 if (value != null)
                 {
                     _displaySettings = value;
-                    _displaySettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                    _displaySettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }
         }
@@ -50,7 +50,7 @@ namespace PlexRipper.Application.Settings.Models
                 if (value != null)
                 {
                     _dateTimeSettings = value;
-                    _dateTimeSettings.PropertyChanged += (sender, args) => OnPropertyChanged();
+                    _dateTimeSettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }
         }

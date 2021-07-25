@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Domain;
 
@@ -10,9 +11,8 @@ namespace PlexRipper.Application.Common
         /// Retrieves the new media metadata from the PlexApi and stores it in the database.
         /// </summary>
         /// <param name="plexLibraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
-        /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to use for authentication.</param>
         /// <returns>Returns the PlexLibrary with the containing media.</returns>
-        Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId, int plexAccountId = 0);
+        Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId);
 
         /// <summary>
         /// Retrieve the latest <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database.
@@ -26,13 +26,14 @@ namespace PlexRipper.Application.Common
         /// Returns the PlexLibrary by the Id, will refresh if the library has no media assigned.
         /// </summary>
         /// <param name="libraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
-        /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to use for authentication.</param>
         /// <param name="topLevelMediaOnly"></param>
         /// <returns>Valid result if found.</returns>
-        Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false);
+        Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, bool topLevelMediaOnly = false);
 
-        Task<Result<byte[]>> GetThumbnailImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0);
+        Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, bool topLevelMediaOnly = false);
 
-        Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, int plexAccountId = 0, bool topLevelMediaOnly = false);
+        Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync();
+
+        Task<Result> UpdateDefaultDestinationLibrary(int libraryId, int folderPathId);
     }
 }

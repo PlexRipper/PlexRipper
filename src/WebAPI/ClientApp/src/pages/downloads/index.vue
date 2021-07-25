@@ -3,33 +3,34 @@
 		<!-- Download Toolbar -->
 		<download-bar
 			:has-selected="hasSelected"
-			@pause="pauseDownloadTasks"
-			@stop="stopDownloadTasks"
-			@restart="restartDownloadTasks"
-			@start="startDownloadTasks"
-			@clear="clearDownloadTasks"
-			@delete="deleteDownloadTasks"
+			@pause="pauseDownloadTasks(getSelected)"
+			@stop="stopDownloadTasks(getSelected)"
+			@restart="restartDownloadTasks(getSelected)"
+			@start="startDownloadTasks(getSelected)"
+			@clear="clearDownloadTasks(getSelected)"
+			@delete="deleteDownloadTasks(getSelected)"
 		/>
 		<!--	The Download Table	-->
 		<perfect-scrollbar class="download-page-tables">
 			<v-row v-if="plexServers.length > 0">
 				<v-col>
 					<v-expansion-panels v-model="openExpansions" multiple>
-						<v-expansion-panel v-for="plexServer in plexServers" :key="plexServer.id">
+						<v-expansion-panel v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
 							<v-expansion-panel-header>
 								<h2>{{ plexServer.name }}</h2>
 							</v-expansion-panel-header>
 							<v-expansion-panel-content>
 								<downloads-table
 									v-model="selected"
-									:downloads="getDownloadRows(plexServer.id)"
-									@pause="pauseDownloadTask"
-									@clear="clearDownloadTask"
-									@delete="deleteDownloadTask"
-									@stop="stopDownloadTask"
-									@restart="restartDownloadTask"
-									@start="startDownloadTask"
-									@details="detailsDownloadTask"
+									:server-id="plexServer.id"
+									@selected="updateSelected(plexServer.id, $event)"
+									@pause="pauseDownloadTasks([$event])"
+									@clear="clearDownloadTasks([$event])"
+									@delete="deleteDownloadTasks([$event])"
+									@stop="stopDownloadTasks([$event])"
+									@restart="restartDownloadTasks([$event])"
+									@start="startDownloadTasks([$event])"
+									@details="detailsDownloadTask($event)"
 								/>
 							</v-expansion-panel-content>
 						</v-expansion-panel>
@@ -47,23 +48,12 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
-import { pauseDownloadTask, restartDownloadTask, startDownloadTask } from '@api/plexDownloadApi';
-import DownloadService from '@state/downloadService';
-import SignalrService from '@service/signalrService';
-import {
-	DownloadProgress,
-	DownloadStatus,
-	DownloadStatusChanged,
-	DownloadTaskDTO,
-	FileMergeProgress,
-	PlexServerDTO,
-} from '@dto/mainApi';
+import { DownloadService, ServerService } from '@service';
+import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import _ from 'lodash';
+import ISelection from '@interfaces/ISelection';
 import DownloadsTable from './components/DownloadsTable.vue';
-import IDownloadRow from './types/IDownloadRow';
 import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
 import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsDialog.vue';
 
@@ -78,136 +68,75 @@ import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsD
 export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
 	downloads: DownloadTaskDTO[] = [];
-	downloadProgressList: DownloadProgress[] = [];
-	fileMergeProgressList: FileMergeProgress[] = [];
-	downloadStatusList: DownloadStatusChanged[] = [];
 	openExpansions: number[] = [];
-	selected: IDownloadRow[] = [];
 	downloadTaskDetail: DownloadTaskDTO | null = null;
+	selected: ISelection[] = [];
+
 	private dialog: boolean = false;
 
-	/**
-	 * Merge the SignalR feeds into 1 update IDownloadRow
-	 */
-	getDownloadRows(serverId: number): IDownloadRow[] {
-		const downloadRows: IDownloadRow[] = [];
-		const downloads: DownloadTaskDTO[] = this.downloads.filter((x) => x.plexServerId === serverId);
-		for (let i = 0; i < downloads.length; i++) {
-			const download = downloads[i];
-			const downloadProgress = this.downloadProgressList.find((x) => x.id === download.id);
-			const downloadStatusUpdate = this.downloadStatusList.find((x) => x.id === download.id);
-			// Merge the various feeds
-			const downloadRow: IDownloadRow = {
-				...download,
-				...downloadProgress,
-				// Status priority: downloadStatusUpdate > getDownloadList
-				status: downloadStatusUpdate?.status ?? download.status,
-			} as IDownloadRow;
-
-			if (downloadRow.status === DownloadStatus.Merging) {
-				const fileMergeProgress = this.fileMergeProgressList.find((x) => x.downloadTaskId === download.id);
-				downloadRow.percentage = fileMergeProgress?.percentage ?? 0;
-				downloadRow.dataReceived = fileMergeProgress?.dataTransferred ?? 0;
-				downloadRow.timeRemaining = fileMergeProgress?.timeRemaining ?? 0;
-				downloadRow.downloadSpeed = fileMergeProgress?.transferSpeed ?? 0;
-			}
-
-			if (downloadRow.status === DownloadStatus.Completed) {
-				downloadRow.percentage = 100;
-				downloadRow.timeRemaining = 0;
-				downloadRow.downloadSpeed = 0;
-				downloadRow.dataReceived = downloadRow.dataTotal;
-				this.cleanupProgress(download.id);
-			}
-			downloadRows.push(downloadRow);
-		}
-		return downloadRows;
+	get getSelected(): number[] {
+		return this.selected.map((x) => +x.keys).flat(1);
 	}
 
-	get selectedIds(): number[] {
-		return this.selected.map((x) => x.id);
+	get getServersWithDownloads(): PlexServerDTO[] {
+		return this.plexServers.filter((x) => this.downloads.some((y) => y.plexServerId === x.id));
 	}
 
 	get hasSelected(): boolean {
-		return this.selectedIds.length > 0;
-	}
-
-	updateDownloadProgress(downloadProgress: DownloadProgress): void {
-		// Check if there is already a progress object for this Id
-		const i = this.downloadProgressList.findIndex((x) => x.id === downloadProgress.id);
-		if (i > -1) {
-			// Update
-			this.downloadProgressList.splice(i, 1, downloadProgress);
-		} else {
-			// Add
-			this.downloadProgressList.push(downloadProgress);
-		}
+		return this.getSelected.length > 0;
 	}
 
 	// region single commands
 
-	clearDownloadTask(downloadTaskId: number): void {
-		DownloadService.clearDownloadTasks([downloadTaskId]);
-		this.selected = _.filter(this.selected, (x) => x.id !== downloadTaskId);
-	}
-
-	startDownloadTask(downloadTaskId: number): void {
-		startDownloadTask(downloadTaskId).subscribe();
-	}
-
-	pauseDownloadTask(downloadTaskId: number): void {
-		pauseDownloadTask(downloadTaskId).subscribe();
-	}
-
-	stopDownloadTask(downloadTaskId: number): void {
-		DownloadService.stopDownloadTasks([downloadTaskId]);
-	}
-
-	restartDownloadTask(downloadTaskId: number): void {
-		restartDownloadTask(downloadTaskId).subscribe();
-	}
-
-	deleteDownloadTask(downloadTaskId: number): void {
-		DownloadService.deleteDownloadTasks([downloadTaskId]);
-		this.selected = _.filter(this.selected, (x) => x.id !== downloadTaskId);
-	}
-
-	detailsDownloadTask(downloadTaskId: number): void {
-		this.downloadTaskDetail = this.downloads.find((x) => x.id === downloadTaskId) ?? null;
+	detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
+		this.downloadTaskDetail = downloadTask;
 		this.dialog = true;
+	}
+
+	updateSelected(plexServerId: number, selected: string[]) {
+		const index = this.selected.findIndex((x) => x.indexKey === plexServerId);
+		if (index === -1) {
+			this.selected.push({ indexKey: plexServerId, keys: selected });
+		} else {
+			this.selected.splice(index, 1, { indexKey: plexServerId, keys: selected });
+		}
 	}
 
 	// endregion
 
 	// region batch commands
-	clearDownloadTasks(): void {
-		if (!this.hasSelected) {
-			DownloadService.clearDownloadTasks([]);
-		} else {
-			DownloadService.clearDownloadTasks(this.selectedIds);
+	clearDownloadTasks(downloadTaskIds: number[]): void {
+		if (downloadTaskIds && downloadTaskIds.length > 0) {
+			DownloadService.clearDownloadTasks(downloadTaskIds);
+			return;
+		}
+
+		if (this.hasSelected) {
+			DownloadService.clearDownloadTasks(this.getSelected);
 			this.selected = [];
+		} else {
+			DownloadService.clearDownloadTasks();
 		}
 	}
 
-	startDownloadTasks(): void {
-		Log.info('startDownloadTasks not implemented');
+	startDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.startDownloadTasks(downloadTaskIds);
 	}
 
-	pauseDownloadTasks(): void {
-		Log.info('pauseDownloadTasks not implemented');
+	pauseDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.pauseDownloadTasks(downloadTaskIds);
 	}
 
-	stopDownloadTasks(): void {
-		Log.info('stopDownloadTasks not implemented');
+	stopDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.stopDownloadTasks(downloadTaskIds);
 	}
 
-	restartDownloadTasks(): void {
-		Log.info('restartDownloadTasks not implemented');
+	restartDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.restartDownloadTasks(downloadTaskIds);
 	}
 
-	deleteDownloadTasks(): void {
-		DownloadService.deleteDownloadTasks(this.selectedIds);
-		this.selected = [];
+	deleteDownloadTasks(downloadTaskIds: number[]): void {
+		DownloadService.deleteDownloadTasks(downloadTaskIds);
 	}
 
 	// endregion
@@ -217,77 +146,15 @@ export default class Downloads extends Vue {
 		this.dialog = false;
 	}
 
-	cleanupProgress(downloadTaskId: number): void {
-		// Clean-up progress objects
-		const downloadProgressIndex = this.downloadProgressList.findIndex((x) => x.id === downloadTaskId);
-		if (downloadProgressIndex > -1) {
-			this.downloadProgressList.splice(downloadProgressIndex, 1);
-		}
-
-		const fileMergeProgressIndex = this.fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
-		if (fileMergeProgressIndex > -1) {
-			this.fileMergeProgressList.splice(fileMergeProgressIndex, 1);
-		}
-	}
-
 	created(): void {
-		DownloadService.getDownloadListInServers().subscribe((data) => {
-			this.plexServers = data;
-			this.openExpansions = [...Array(this.plexServers?.length).keys()] ?? [];
+		this.$subscribeTo(ServerService.getServers(), (servers) => {
+			this.plexServers = servers;
+			this.openExpansions = [...Array(servers?.length).keys()] ?? [];
 		});
 
-		// Retrieve download list
-		DownloadService.getDownloadList().subscribe((data) => {
-			Log.info('getDownloadList', data);
-			this.downloads = data ?? [];
-		});
-
-		// Retrieve download status from SignalR
-		SignalrService.getDownloadStatus().subscribe((data) => {
-			if (data) {
-				const index = this.downloadStatusList.findIndex((x) => x.id === data.id);
-				if (index > -1) {
-					this.downloadStatusList.splice(index, 1);
-					// Clean-up progress result if the download has finished
-					if (data.status === DownloadStatus.Completed) {
-						const progressIndex = this.downloadProgressList.findIndex((x) => x.id === data.id);
-						if (progressIndex > -1) {
-							this.downloadProgressList.splice(progressIndex, 1);
-						}
-					}
-				}
-				this.downloadStatusList.push(data);
-			}
-		});
-
-		SignalrService.getDownloadProgress().subscribe((data) => {
-			if (data) {
-				this.updateDownloadProgress(data);
-			} else {
-				Log.error(`DownloadProgress was undefined`);
-			}
-		});
-
-		SignalrService.getFileMergeProgress().subscribe((fileMergeProgress) => {
-			if (fileMergeProgress) {
-				// Check if there is already a progress object for this Id
-				const i = this.fileMergeProgressList.findIndex((x) => x.id === fileMergeProgress.id);
-				if (i > -1) {
-					// Update
-					this.fileMergeProgressList.splice(i, 1, fileMergeProgress);
-				} else {
-					// Add
-					this.fileMergeProgressList.push(fileMergeProgress);
-				}
-			} else {
-				Log.error(`FileMergeProgress was undefined`);
-			}
+		this.$subscribeTo(DownloadService.getDownloadList(), (downloads) => {
+			this.downloads = downloads;
 		});
 	}
 }
 </script>
-<style scoped lang="scss">
-tr.v-data-table__selected {
-	background: transparent !important;
-}
-</style>

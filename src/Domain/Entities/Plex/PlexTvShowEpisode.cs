@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain
 {
@@ -11,15 +10,11 @@ namespace PlexRipper.Domain
         /// </summary>
         public int ParentKey { get; set; }
 
-        #region Helpers
-
-        public override PlexMediaType Type => PlexMediaType.Episode;
-
-        #endregion
-
         #region Relationships
 
-        public List<PlexTvShowEpisodeData> EpisodeData { get; set; } = new List<PlexTvShowEpisodeData>();
+        public PlexTvShow TvShow { get; set; }
+
+        public int TvShowId { get; set; }
 
         public PlexTvShowSeason TvShowSeason { get; set; }
 
@@ -27,36 +22,33 @@ namespace PlexRipper.Domain
 
         #endregion
 
+        #region Helpers
+
+        [NotMapped]
+        public List<PlexMediaData> EpisodeData => MediaData.MediaData;
+
+        [NotMapped]
+        public override PlexMediaType Type => PlexMediaType.Episode;
+
+        #endregion
+
         public List<DownloadTask> CreateDownloadTasks()
         {
-            var baseDownloadTask = CreateBaseDownloadTask();
-            var downloadTasks = new List<DownloadTask>();
-            var parts = EpisodeData.SelectMany(x => x.Parts).ToList();
-            foreach (var part in parts)
+            var downloadTask = CreateBaseDownloadTask();
+            downloadTask.MediaType = Type;
+            downloadTask.MetaData.TvShowTitle = TvShowSeason?.TvShow?.Title ?? string.Empty;
+            downloadTask.MetaData.TvShowSeasonTitle = TvShowSeason?.Title ?? string.Empty;
+            downloadTask.MetaData.TvShowEpisodeTitle = Title;
+            downloadTask.MetaData.MediaData = EpisodeData;
+
+            downloadTask.MetaData.TvShowKey = TvShowSeason?.TvShow?.Key ?? 0;
+            downloadTask.MetaData.TvShowSeasonKey = ParentKey;
+            downloadTask.MetaData.TvShowEpisodeKey = Key;
+
+            return new List<DownloadTask>
             {
-                var downloadTask = baseDownloadTask;
-                downloadTask.Title = Title;
-                downloadTask.FileLocationUrl = part.ObfuscatedFilePath;
-                downloadTask.DataTotal = part.Size;
-                downloadTask.FileName = Path.GetFileName(part.File);
-                downloadTask.MediaType = Type;
-                downloadTask.PlexLibraryId = PlexLibrary?.Id ?? 0;
-                downloadTask.PlexLibrary = PlexLibrary;
-                downloadTask.PlexServerId = PlexLibrary?.PlexServer?.Id ?? 0;
-                downloadTask.PlexServer = PlexLibrary?.PlexServer;
-                if (TvShowSeason != null)
-                {
-                    downloadTask.TitleTvShowSeason = TvShowSeason.Title;
-                    if (TvShowSeason.TvShow != null)
-                    {
-                        downloadTask.TitleTvShow = TvShowSeason.TvShow.Title;
-                    }
-                }
-
-                downloadTasks.Add(downloadTask);
-            }
-
-            return downloadTasks;
+                downloadTask,
+            };
         }
     }
 }

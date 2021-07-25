@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import PBtn from '@components/General/PlexRipperButton.vue';
+import PBtn from '@components/Extensions/PButton.vue';
 import ButtonType from '@enums/buttonType';
 
 @Component({

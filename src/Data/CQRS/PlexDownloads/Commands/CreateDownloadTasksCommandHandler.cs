@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
 using MediatR;
-using PlexRipper.Application.PlexDownloads;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexDownloads
 {
@@ -15,20 +14,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
     {
         public CreateDownloadTasksCommandValidator()
         {
-            RuleForEach(x => x.DownloadTasks).ChildRules(downloadTask =>
-            {
-                downloadTask.RuleFor(x => x.Id).Equal(0);
-                downloadTask.RuleFor(x => x.PlexServerId).GreaterThan(0);
-                downloadTask.RuleFor(x => x.DataTotal).GreaterThan(0);
-                downloadTask.RuleFor(x => x.RatingKey).GreaterThan(0);
-                downloadTask.RuleFor(x => x.MediaType).NotEqual(PlexMediaType.None);
-                downloadTask.RuleFor(x => x.MediaType).NotEqual(PlexMediaType.Unknown);
-                downloadTask.RuleFor(x => x.DownloadFolderId).GreaterThan(0);
-                downloadTask.RuleFor(x => x.DestinationFolderId).GreaterThan(0);
-                downloadTask.RuleFor(x => x.PlexLibraryId).GreaterThan(0);
-                downloadTask.RuleFor(x => x.FileName).NotEmpty();
-                downloadTask.RuleFor(x => x.FileLocationUrl).NotEmpty();
-            });
+            RuleForEach(x => x.DownloadTasks).ChildRules(downloadTask => { downloadTask.RuleFor(x => x.IsValid().IsSuccess).Equal(true); });
         }
     }
 
@@ -45,7 +31,6 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 x.DownloadFolder = null;
                 x.PlexServer = null;
                 x.PlexLibrary = null;
-                x.DownloadWorkerTasks = new List<DownloadWorkerTask>();
             });
 
             await _dbContext.AddRangeAsync(command.DownloadTasks, cancellationToken);

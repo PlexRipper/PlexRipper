@@ -149,6 +149,7 @@ namespace PlexRipper.Application.PlexServers
         /// </summary>
         /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to get the latest status for.</param>
         /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to authenticate with.</param>
+        /// <param name="trimEntries">Delete entries which are older than a certain threshold.</param>
         /// <returns>The latest <see cref="PlexServerStatus"/>.</returns>
         public async Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(int plexServerId, int plexAccountId = 0, bool trimEntries = true)
         {
@@ -196,6 +197,11 @@ namespace PlexRipper.Application.PlexServers
             return await _mediator.Send(new GetPlexServerStatusByIdQuery(result.Value));
         }
 
+        public Task<Result> RemoveInaccessibleServers()
+        {
+            return _mediator.Send(new RemoveInaccessibleServersCommand());
+        }
+
         #region CRUD
 
         public Task<Result<PlexServer>> GetServerAsync(int plexServerId)
@@ -209,7 +215,7 @@ namespace PlexRipper.Application.PlexServers
         /// <param name="plexAccount">The <see cref="PlexAccount"/> to check with.</param>
         /// <param name="refresh">Should the <see cref="PlexServer"/>s data be retrieved from the PlexApi.</param>
         /// <returns>The list of <see cref="PlexServer"/>s.</returns>
-        public async Task<Result<List<PlexServer>>> GetServersAsync(PlexAccount plexAccount, bool refresh = false)
+        public async Task<Result<List<PlexServer>>> GetServersByPlexAccountAsync(PlexAccount plexAccount, bool refresh = false)
         {
             if (plexAccount == null)
             {
@@ -243,10 +249,10 @@ namespace PlexRipper.Application.PlexServers
         }
 
         /// <inheritdoc/>
-        public async Task<Result<List<PlexServer>>> GetServersAsync(int plexAccountId = 0)
+        public async Task<Result<List<PlexServer>>> GetAllServersAsync(bool includeLibraries, int plexAccountId = 0)
         {
             // Retrieve all servers
-            return await _mediator.Send(new GetAllPlexServersQuery(plexAccountId));
+            return await _mediator.Send(new GetAllPlexServersQuery(includeLibraries, plexAccountId));
         }
 
         #endregion

@@ -3,10 +3,11 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexDownloads
+namespace PlexRipper.Application
 {
     /// <summary>
     ///     Request all downloadTasks sorted in their respective <see cref="PlexServer" /> and <see cref="PlexLibrary" />.
+    ///     Includes the <see cref="DownloadWorkerTask"/>.
     /// </summary>
     public class GetAllDownloadTasksInPlexServersQuery : IRequest<Result<List<PlexServer>>>
     {

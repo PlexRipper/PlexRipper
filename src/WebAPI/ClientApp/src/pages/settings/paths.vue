@@ -1,21 +1,35 @@
 <template>
 	<page>
-		<paths-overview />
+		<p-section>
+			<template #header> {{ $t('pages.settings.paths.main.header') }} </template>
+			<paths-default-overview />
+		</p-section>
+		<p-section>
+			<template #header> {{ $t('pages.settings.paths.movie.header') }} </template>
+			<paths-custom-overview :folder-type="movieFolderType" />
+		</p-section>
+		<p-section>
+			<template #header> {{ $t('pages.settings.paths.tv-show.header') }} </template>
+			<paths-custom-overview :folder-type="tvShowFolderType" />
+		</p-section>
 	</page>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-import PathsOverview from '@overviews/PathsOverview.vue';
-import Page from '@components/General/Page.vue';
+import { Component, Vue } from 'vue-property-decorator';
+import PathsDefaultOverview from '@overviews/PathsDefaultOverview.vue';
+import PathsCustomOverview from '@overviews/PathsCustomOverview.vue';
+import { FolderType } from '@dto/mainApi';
 
 @Component({
 	components: {
-		PathsOverview,
-		Page,
+		PathsDefaultOverview,
+		PathsCustomOverview,
 	},
 })
 export default class SettingsPaths extends Vue {
 	moduleName: string = 'Settings Paths';
+	movieFolderType: FolderType = FolderType.MovieFolder;
+	tvShowFolderType: FolderType = FolderType.TvShowFolder;
 }
 </script>

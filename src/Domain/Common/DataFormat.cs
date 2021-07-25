@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Security.Cryptography;
 
 namespace PlexRipper.Domain
 {
@@ -108,7 +110,7 @@ namespace PlexRipper.Domain
         /// <param name="bytesReceived"></param>
         /// <param name="elapsedTimeInSeconds"></param>
         /// <returns></returns>
-        public static int GetDownloadSpeed(long bytesReceived, double elapsedTimeInSeconds)
+        public static int GetTransferSpeed(long bytesReceived, double elapsedTimeInSeconds)
         {
             return elapsedTimeInSeconds <= 0 ? 0 : (int)Math.Round(bytesReceived / elapsedTimeInSeconds, 2);
         }
@@ -145,6 +147,26 @@ namespace PlexRipper.Domain
             }
 
             return list;
+        }
+
+        public static string CalculateMD5(string path)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(path))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty).ToLower();
+                }
+            }
+        }
+
+        public static string CalculateMD5(Stream stream)
+        {
+            using (var md5 = MD5.Create())
+            {
+                return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty).ToLower();
+            }
         }
     }
 }

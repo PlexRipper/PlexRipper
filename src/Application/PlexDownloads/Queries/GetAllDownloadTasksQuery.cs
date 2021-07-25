@@ -3,15 +3,18 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexDownloads
+namespace PlexRipper.Application
 {
     public class GetAllDownloadTasksQuery : IRequest<Result<List<DownloadTask>>>
     {
-        public GetAllDownloadTasksQuery(bool includeServer = false, bool includePlexLibrary = false)
+        public GetAllDownloadTasksQuery(List<int> downloadTaskIds = null, bool includeServer = false, bool includePlexLibrary = false)
         {
+            DownloadTaskIds = downloadTaskIds;
             IncludeServer = includeServer;
             IncludePlexLibrary = includePlexLibrary;
         }
+
+        public List<int> DownloadTaskIds { get; }
 
         public bool IncludeServer { get; }
 

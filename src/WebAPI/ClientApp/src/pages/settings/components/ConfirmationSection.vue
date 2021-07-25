@@ -11,7 +11,7 @@
 								<help-icon help-id="help.settings.ui.confirmation-settings.download-movie-confirmation" />
 							</td>
 							<td>
-								<p-checkbox v-model="askDownloadMovieConfirmation" />
+								<p-checkbox :value="askDownloadMovieConfirmation" @input="updateSettings(0, $event)" />
 							</td>
 						</tr>
 						<!--	Ask Download TvShow Confirmation	-->
@@ -20,7 +20,7 @@
 								<help-icon help-id="help.settings.ui.confirmation-settings.download-tvshow-confirmation" />
 							</td>
 							<td>
-								<p-checkbox v-model="askDownloadTvShowConfirmation" />
+								<p-checkbox :value="askDownloadTvShowConfirmation" @input="updateSettings(1, $event)" />
 							</td>
 						</tr>
 						<!--	Ask Download Season Confirmation	-->
@@ -29,7 +29,7 @@
 								<help-icon help-id="help.settings.ui.confirmation-settings.download-season-confirmation" />
 							</td>
 							<td>
-								<p-checkbox v-model="askDownloadSeasonConfirmation" />
+								<p-checkbox :value="askDownloadSeasonConfirmation" @input="updateSettings(2, $event)" />
 							</td>
 						</tr>
 						<!--	Ask Download Episode Confirmation	-->
@@ -38,7 +38,7 @@
 								<help-icon help-id="help.settings.ui.confirmation-settings.download-episode-confirmation" />
 							</td>
 							<td>
-								<p-checkbox v-model="askDownloadEpisodeConfirmation" />
+								<p-checkbox :value="askDownloadEpisodeConfirmation" @input="updateSettings(3, $event)" />
 							</td>
 						</tr>
 					</tbody>
@@ -50,40 +50,33 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { settingsStore } from '~/store';
+import { SettingsService } from '@service';
 
 @Component
 export default class ConfirmationSection extends Vue {
-	get askDownloadMovieConfirmation(): boolean {
-		return settingsStore.askDownloadMovieConfirmation;
+	askDownloadMovieConfirmation: boolean = false;
+	askDownloadTvShowConfirmation: boolean = false;
+	askDownloadSeasonConfirmation: boolean = false;
+	askDownloadEpisodeConfirmation: boolean = false;
+
+	updateSettings(index: number, state: boolean): void {
+		SettingsService.updateConfirmationSettings({
+			askDownloadMovieConfirmation: index === 0 ? state : this.askDownloadMovieConfirmation,
+			askDownloadTvShowConfirmation: index === 1 ? state : this.askDownloadTvShowConfirmation,
+			askDownloadSeasonConfirmation: index === 2 ? state : this.askDownloadSeasonConfirmation,
+			askDownloadEpisodeConfirmation: index === 3 ? state : this.askDownloadEpisodeConfirmation,
+		});
 	}
 
-	set askDownloadMovieConfirmation(value: boolean) {
-		settingsStore.setAskDownloadMovieConfirmation(value);
-	}
-
-	get askDownloadTvShowConfirmation(): boolean {
-		return settingsStore.askDownloadTvShowConfirmation;
-	}
-
-	set askDownloadTvShowConfirmation(value: boolean) {
-		settingsStore.setAskDownloadTvShowConfirmation(value);
-	}
-
-	get askDownloadSeasonConfirmation(): boolean {
-		return settingsStore.askDownloadSeasonConfirmation;
-	}
-
-	set askDownloadSeasonConfirmation(value: boolean) {
-		settingsStore.setAskDownloadSeasonConfirmation(value);
-	}
-
-	get askDownloadEpisodeConfirmation(): boolean {
-		return settingsStore.askDownloadEpisodeConfirmation;
-	}
-
-	set askDownloadEpisodeConfirmation(value: boolean) {
-		settingsStore.setAskDownloadEpisodeConfirmation(value);
+	mounted(): void {
+		this.$subscribeTo(SettingsService.getConfirmationSettings(), (uiSettings) => {
+			if (uiSettings) {
+				this.askDownloadMovieConfirmation = uiSettings.askDownloadMovieConfirmation;
+				this.askDownloadTvShowConfirmation = uiSettings.askDownloadTvShowConfirmation;
+				this.askDownloadSeasonConfirmation = uiSettings.askDownloadSeasonConfirmation;
+				this.askDownloadEpisodeConfirmation = uiSettings.askDownloadEpisodeConfirmation;
+			}
+		});
 	}
 }
 </script>

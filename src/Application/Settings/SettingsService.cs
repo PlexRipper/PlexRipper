@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using FluentResults;
+﻿using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Settings.Models;
 
@@ -22,10 +21,10 @@ namespace PlexRipper.Application.Settings
             return Result.Ok(_userSettings as SettingsModel);
         }
 
-        public async Task<Result<bool>> UpdateSettings(SettingsModel settingsModel)
+        public Result<SettingsModel> UpdateSettings(SettingsModel settingsModel)
         {
             _userSettings.UpdateSettings(settingsModel);
-            return Result.Ok(true);
+            return GetSettings();
         }
     }
 }

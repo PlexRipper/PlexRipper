@@ -5,4 +5,4 @@ bin/
 obj/
 node_modules/
 static/
-.vscode/vscode-chrome-debug-userdatadir/
+.vscode

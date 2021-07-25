@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentResults;
@@ -18,18 +18,22 @@ namespace PlexRipper.WebAPI.Controllers
     {
         private readonly IPlexTvShowService _plexTvShowService;
 
-        private readonly IMapper _mapper;
+        private readonly IPlexMovieService _plexMovieService;
 
-        public PlexMediaController(IPlexTvShowService plexTvShowService, IMapper mapper, INotificationsService notificationsService) : base(
+        private readonly IPlexMediaService _plexMediaService;
+
+        public PlexMediaController(IMapper mapper, INotificationsService notificationsService, IPlexTvShowService plexTvShowService,
+            IPlexMovieService plexMovieService, IPlexMediaService plexMediaService) : base(
             mapper, notificationsService)
         {
             _plexTvShowService = plexTvShowService;
-            _mapper = mapper;
+            _plexMovieService = plexMovieService;
+            _plexMediaService = plexMediaService;
         }
 
         // GET api/<PlexMedia>/tvshow/5
         [HttpGet("tvshow/{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexTvShowDTO>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexMediaDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
@@ -51,7 +55,7 @@ namespace PlexRipper.WebAPI.Controllers
 
                 if (data.Value != null)
                 {
-                    return Ok(Result.Ok(_mapper.Map<PlexTvShowDTO>(data.Value)));
+                    return Ok(Result.Ok(_mapper.Map<PlexMediaDTO>(data.Value)));
                 }
 
                 string message = $"Could not find a {nameof(PlexTvShow)} with Id: {id}";
@@ -64,5 +68,58 @@ namespace PlexRipper.WebAPI.Controllers
             }
         }
 
+        // GET api/<PlexMedia>/5
+        [HttpGet("thumb")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileContentResult))]
+        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(FileContentResult))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> GetThumb(int plexMediaId, PlexMediaType plexMediaType, int width, int height)
+        {
+            if (plexMediaId == 0)
+            {
+                return BadRequestInvalidId();
+            }
+
+            var result = await _plexMediaService.GetThumbnailImage(plexMediaId, plexMediaType, width, height);
+
+            if (result.IsSuccess)
+            {
+                if (result.Value.Any())
+                {
+                    return File(result.Value, "image/jpeg");
+                }
+
+                return NoContent();
+            }
+
+            return InternalServerError(result);
+        }
+
+        // GET api/<PlexMedia>/5
+        [HttpGet("banner")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileContentResult))]
+        [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(FileContentResult))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> GetBanner(int plexMediaId, PlexMediaType plexMediaType, int width, int height)
+        {
+            if (plexMediaId == 0)
+            {
+                return BadRequestInvalidId();
+            }
+
+            var result = await _plexMediaService.GetBannerImage(plexMediaId, plexMediaType, width, height);
+
+            if (result.IsSuccess)
+            {
+                if (result.Value.Any())
+                {
+                    return File(result.Value, "image/jpeg");
+                }
+
+                return NoContent();
+            }
+
+            return InternalServerError(result);
+        }
     }
 }

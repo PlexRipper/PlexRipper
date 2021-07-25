@@ -1,83 +1,67 @@
-import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import { PlexMediaType, PlexMovieDTO, PlexTvShowDTO } from '@dto/mainApi';
-import IMediaData from '@mediaOverview/MediaTable/types/IMediaData';
+import { PlexMediaType } from '@dto/mainApi';
+import ButtonType from '@enums/buttonType';
 
 export default abstract class Convert {
-	public static tvShowsToTreeViewItems(tvShows: PlexTvShowDTO[]): ITreeViewItem[] {
-		const items: ITreeViewItem[] = [];
-
-		tvShows.forEach((tvShow: PlexTvShowDTO) => {
-			const seasons: ITreeViewItem[] = [];
-			if (tvShow.seasons) {
-				tvShow.seasons.forEach((season) => {
-					const episodes: ITreeViewItem[] = [];
-					if (season.episodes) {
-						season.episodes.forEach((episode) => {
-							// Add Episode
-							episodes.push({
-								id: episode.id,
-								key: `${tvShow.id}-${season.id}-${episode.id}`,
-								title: episode.title ?? '',
-								type: PlexMediaType.Episode,
-								mediaData: [] as IMediaData[],
-								size: episode.size,
-								addedAt: episode.addedAt ?? '',
-								updatedAt: episode.updatedAt ?? '',
-							});
-						});
-						// Add seasons
-						seasons.push({
-							id: season.id,
-							key: `${tvShow.id}-${season.id}`,
-							title: season.title ?? '',
-							type: PlexMediaType.Season,
-							children: episodes,
-							mediaData: [] as IMediaData[],
-							size: season.size,
-							addedAt: season.addedAt ?? '',
-							updatedAt: season.updatedAt ?? '',
-						});
-					}
-				});
-				// Add tvShow
-				items.push({
-					id: tvShow.id,
-					key: `${tvShow.id}`,
-					title: tvShow.title ?? '',
-					year: tvShow.year,
-					type: PlexMediaType.TvShow,
-					size: tvShow.size,
-					mediaData: [] as IMediaData[],
-					children: seasons,
-					addedAt: tvShow.addedAt ?? '',
-					updatedAt: tvShow.updatedAt ?? '',
-				});
-			}
-		});
-
-		return items;
+	public static buttonTypeToIcon(type: ButtonType): string {
+		switch (type) {
+			case ButtonType.Warning:
+				return 'mdi-alert';
+			case ButtonType.Cancel:
+				return 'mdi-cancel';
+			case ButtonType.Confirm:
+				return 'mdi-check';
+			case ButtonType.Save:
+				return 'mdi-content-save';
+			case ButtonType.Download:
+				return 'mdi-download';
+			case ButtonType.Delete:
+				return 'mdi-delete';
+			case ButtonType.Error:
+				return 'mdi-alert-circle';
+			case ButtonType.ExternalLink:
+				return 'mdi-open-in-new';
+			case ButtonType.Forward:
+				return 'mdi-arrow-right';
+			case ButtonType.Back:
+				return 'mdi-arrow-left';
+			case ButtonType.Skip:
+				return 'mdi-debug-step-over';
+			case ButtonType.Add:
+				return 'mdi-plus-box-outline';
+			case ButtonType.Edit:
+				return 'mdi-pencil';
+			case ButtonType.Start:
+			case ButtonType.Resume:
+				return 'mdi-play';
+			case ButtonType.Restart:
+				return 'mdi-refresh';
+			case ButtonType.Pause:
+				return 'mdi-pause';
+			case ButtonType.Stop:
+				return 'mdi-stop';
+			case ButtonType.Clear:
+				return 'mdi-notification-clear-all';
+			case ButtonType.Details:
+				return 'mdi-chart-box-outline';
+			default:
+				return '';
+		}
 	}
 
-	public static moviesToTreeViewItems(movies: PlexMovieDTO[]): ITreeViewItem[] {
-		const items: ITreeViewItem[] = [];
-
-		movies.forEach((movie: PlexMovieDTO) => {
-			if (movie) {
-				// Add movie
-				items.push({
-					id: movie.id,
-					key: `${movie.id}`,
-					title: movie.title ?? '',
-					year: movie.year,
-					size: movie.size,
-					type: PlexMediaType.Movie,
-					mediaData: movie.plexMovieDatas as IMediaData[],
-					children: [],
-					addedAt: movie.addedAt ?? '',
-					updatedAt: movie.updatedAt ?? '',
-				});
-			}
-		});
-		return items;
+	public static mediaTypeToIcon(mediaType: PlexMediaType): string {
+		switch (mediaType) {
+			case PlexMediaType.TvShow:
+				return 'mdi-television-classic';
+			case PlexMediaType.Season:
+				return 'mdi-play-box-multiple';
+			case PlexMediaType.Episode:
+				return 'mdi-movie-open';
+			case PlexMediaType.Movie:
+				return 'mdi-filmstrip';
+			case PlexMediaType.Music:
+				return 'mdi-music';
+			default:
+				return 'mdi-help-circle-outline';
+		}
 	}
 }

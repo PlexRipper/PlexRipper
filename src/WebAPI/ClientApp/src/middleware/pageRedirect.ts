@@ -1,15 +1,18 @@
 import Log from 'consola';
-import SettingsService from '@service/settingsService';
-import { settingsStore } from '~/store';
+import { SettingsService } from '@service';
 
+let subscriptionCreated: boolean = false;
 export default function ({ route, redirect }) {
 	// Redirect to setup if it is the first time setup
-	let subscriptionCreated: boolean = false;
 	if (!subscriptionCreated) {
 		subscriptionCreated = true;
-		SettingsService.getSettings().subscribe(() => {
+
+		SettingsService.getFirstTimeSetup().subscribe((state) => {
+			if (state === null) {
+				return;
+			}
 			Log.info('Redirecting to the setup page');
-			if (settingsStore.firstTimeSetup && route.path !== '/setup') {
+			if (state && route.path !== '/setup') {
 				return redirect('/setup');
 			}
 		});

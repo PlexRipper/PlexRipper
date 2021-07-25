@@ -1,94 +1,26 @@
 <template>
-	<v-row justify="center" class="media-table">
-		<v-col cols="12">
-			<!-- Table Headers -->
-			<v-row class="media-table-header">
-				<!-- Checkbox -->
-				<v-col class="ml-6 select-all-check" style="max-width: 50px">
-					<v-checkbox :indeterminate="isIndeterminate" color="red" @change="selectAll($event)"></v-checkbox>
-				</v-col>
-				<!-- Title -->
-				<v-col cols="4" class="title-column">
-					{{ getHeaders[0].text }}
-				</v-col>
-				<v-spacer />
-				<!-- Other columns -->
-				<v-col v-for="(header, i) in getHeaders.slice(1, getHeaders.length)" :key="i" cols="auto">
-					<v-sheet :width="header.width" :max-width="header.width" class="no-background">{{ header.text }}</v-sheet>
-				</v-col>
-				<!-- Actions -->
-				<v-col cols="auto" class="text-center">
-					<v-sheet width="70" class="no-background">Actions</v-sheet>
-				</v-col>
-			</v-row>
-			<!-- TreeView Table -->
-			<v-row no-gutters class="media-table-content">
-				<perfect-scrollbar>
-					<v-col class="col-12 px-0">
-						<template v-for="(x, y) in tempItems.length">
-							<v-lazy
-								:key="y"
-								:options="{
-									threshold: 0.5,
-								}"
-								:min-height="50"
-							>
-								<v-treeview
-									selectable
-									selected-color="red"
-									selection-type="leaf"
-									hoverable
-									expand-icon="mdi-chevron-down"
-									:items="tempItems.slice(y, y + 1)"
-									:load-children="getMedia"
-									transition
-									open-on-click
-									item-key="key"
-									item-text="title"
-									@input="updateSelected"
-								>
-									<template #label="{ item }">
-										<v-row class="media-table-content-row">
-											<!-- Title -->
-											<v-col cols="4" class="title-column">
-												{{ item[getHeaders[0].value] }}
-											</v-col>
-											<v-spacer />
-											<!-- Other columns -->
-											<v-col v-for="(header, index) in getHeaders.slice(1, getHeaders.length)" :key="index" cols="auto">
-												<v-sheet :width="header.width" :max-width="header.width" class="no-background">
-													<date-time v-if="header.type === 'date'" :text="item[header.value]" :time="false" short-date />
-													<file-size v-else-if="header.type === 'data'" :size="item[header.value]" />
-													<span v-else>{{ item[header.value] }}</span>
-												</v-sheet>
-											</v-col>
-											<!-- Actions -->
-											<v-col cols="auto">
-												<v-sheet width="70" class="no-background text-center">
-													<v-icon small @click="downloadMedia(item)"> mdi-download </v-icon>
-												</v-sheet>
-											</v-col>
-										</v-row>
-									</template>
-								</v-treeview>
-							</v-lazy>
-						</template>
-					</v-col>
-				</perfect-scrollbar>
-			</v-row>
-		</v-col>
-	</v-row>
+	<v-tree-view-table
+		:items="items"
+		:headers="getHeaders"
+		:navigation="!hideNavigation"
+		:open-all="detailMode"
+		item-key="treeKeyId"
+		load-children
+		@selected="updateSelected"
+		@download="downloadMedia"
+		@load-children="getMedia"
+	/>
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaType } from '@dto/mainApi';
-import IMediaTableHeader from '@interfaces/IMediaTableHeader';
+import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
 import ProgressComponent from '@components/ProgressComponent.vue';
+import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
-import { getTvShow } from '@api/mediaApi';
-import Convert from '@mediaOverview/MediaTable/types/Convert';
-import ITreeViewItem from './types/ITreeViewItem';
+import ITreeDownloadItem from '@mediaOverview/MediaTable/types/ITreeDownloadItem';
 
 @Component({
 	components: {
@@ -97,13 +29,20 @@ import ITreeViewItem from './types/ITreeViewItem';
 	},
 })
 export default class MediaTable extends Vue {
-	@Prop({ required: true, type: Array as () => ITreeViewItem[] })
-	readonly items!: ITreeViewItem[];
+	@Prop({ required: true, type: Array as () => PlexMediaDTO[] })
+	readonly items!: PlexMediaDTO[];
 
 	@Prop({ required: true, type: String })
 	readonly mediaType!: PlexMediaType;
 
-	selected: string[] = [];
+	@Prop({ required: false, type: Boolean })
+	readonly hideNavigation!: boolean;
+
+	@Prop({ type: Boolean })
+	readonly detailMode!: boolean;
+
+	@Prop({ required: true, type: Number })
+	readonly libraryId!: number;
 
 	expanded: string[] = [];
 
@@ -112,43 +51,29 @@ export default class MediaTable extends Vue {
 	progress: DownloadTaskCreationProgress | null = null;
 
 	visible: boolean[] = [];
-	active: boolean[] = [];
-	tempItems: ITreeViewItem[] = [];
+	loadingButtons: string[] = [];
 
-	@Watch('tempItems')
+	selected: string[] = [];
+
+	@Watch('items')
 	updateVisible(): void {
-		this.tempItems.forEach(() => this.visible.push(false));
+		this.items.forEach(() => this.visible.push(false));
 	}
 
-	get getLeafs(): string[] {
-		if (this.mediaType === PlexMediaType.Movie) {
-			return this.tempItems.map((x) => x.key);
-		}
-		return this.tempItems.map((x) => x.children?.map((y) => y.children?.map((z) => z.key) ?? []) ?? [])?.flat(2) ?? [];
+	get containerRef(): any {
+		return this.$refs.scrollbar;
 	}
 
-	get isIndeterminate(): boolean {
-		return this.getLeafs.length !== this.selected.length && this.selected.length > 0;
+	isLoading(key: string): boolean {
+		return this.loadingButtons.includes(key);
 	}
 
-	updateSelected(selected: string[]) {
-		this.$emit('selected', selected);
-	}
-
-	selectAll(state: boolean): void {
-		this.updateSelected(state ? this.getLeafs : []);
-	}
-
-	get getHeaders(): IMediaTableHeader[] {
+	get getHeaders(): ITreeViewTableHeader[] {
 		return [
-			// {
-			// 	text: 'Id',
-			// 	value: 'id',
-			// },
 			{
 				text: 'Title',
 				value: 'title',
-				width: 400,
+				maxWidth: 250,
 			},
 			{
 				text: 'Year',
@@ -157,53 +82,161 @@ export default class MediaTable extends Vue {
 			},
 			{
 				text: 'Size',
-				value: 'size',
+				value: 'mediaSize',
+				type: TreeViewTableHeaderEnum.FileSize,
 				width: 100,
-				type: 'data',
 			},
 			{
 				text: 'Added At',
 				value: 'addedAt',
-				width: 150,
-				type: 'date',
+				type: TreeViewTableHeaderEnum.Date,
+				width: 100,
 			},
 			{
 				text: 'Updated At',
 				value: 'updatedAt',
-				width: 150,
-				type: 'date',
+				type: TreeViewTableHeaderEnum.Date,
+				width: 100,
+			},
+			{
+				text: 'Actions',
+				value: 'actions',
+				type: TreeViewTableHeaderEnum.Actions,
+				width: 100,
+				sortable: false,
+				defaultActions: ['download'],
 			},
 		];
 	}
 
-	getMedia(item: ITreeViewItem): Promise<ITreeViewItem> {
-		return getTvShow(item.id)
-			.toPromise()
-			.then((response) => {
-				const convert = Convert.tvShowsToTreeViewItems([response])[0];
-				item.children?.push(...(convert?.children ?? []));
-				const i = this.tempItems.findIndex((x) => x.key === item.key);
-				this.tempItems.splice(i, 1, item);
-				return item;
+	createDownloadCommands(): DownloadMediaDTO[] {
+		const downloads: DownloadMediaDTO[] = [];
+
+		if (this.mediaType === PlexMediaType.TvShow) {
+			const treeTvShows: ITreeDownloadItem[] = [];
+			const episodesKeys: string[] = this.selected.filter((x) => x?.split('-')?.length === 3 ?? false);
+
+			// Create a hierarchical tree of all selected media, TvShow -> Season -> Episode
+			episodesKeys.forEach((x) => {
+				const tvShowId = +x.split('-')[0];
+				const seasonId = +x.split('-')[1];
+				const episodeId = +x.split('-')[2];
+
+				// Add tvShow to tree
+				if (!treeTvShows.some((tvShow) => tvShow.id === tvShowId)) {
+					treeTvShows.push({ id: tvShowId, children: [] });
+				}
+
+				// Add season to tree
+				if (!treeTvShows.some((tvShow) => tvShow.children?.some((season) => season.id === seasonId))) {
+					treeTvShows.find((x) => x.id === tvShowId)?.children?.push({ id: seasonId, children: [] });
+				}
+
+				// Add episode to tree
+				treeTvShows
+					.find((x) => x.id === tvShowId)
+					?.children?.find((x) => x.id === seasonId)
+					?.children?.push({ id: episodeId });
 			});
+
+			// Use the hierarchical tree and create downloadCommands.
+			// The objective is to only return a seasonDownloadCommand, if all episodes have been selected
+			// Instead of 10 episodeIds, we get 1 seasonId if all episodes in that season have been selected.
+			// Same thing for a tvShowId, instead of multiple seasonIds, we get a single tvShowId if all seasons have been selected.
+			const tvShowIds: number[] = [];
+			let seasonIds: number[] = [];
+			const episodesIds: number[] = [];
+			treeTvShows.forEach((treeTvShow) => {
+				// Find tvShow
+				const tvShow = this.items.find((tvShow) => tvShow.id === treeTvShow.id);
+				if (tvShow) {
+					const tmpSeasonIds: number[] = [];
+					treeTvShow.children?.forEach((treeSeason) => {
+						// Find season
+						const season = tvShow?.children?.find((x) => x.id === treeSeason.id);
+						if (treeSeason?.children?.length === season?.children?.length) {
+							tmpSeasonIds.push(treeSeason.id);
+						} else {
+							treeSeason.children?.forEach((x) => episodesIds.push(x.id));
+						}
+					});
+
+					// Check if all seasons are checked, if so then add the TvShowId
+					if (tvShow?.children?.length === tmpSeasonIds.length) {
+						tvShowIds.push(treeTvShow.id);
+						// If not then add the remaining to the seasonIds
+					} else if (tmpSeasonIds.length > 0) {
+						seasonIds = seasonIds.concat(tmpSeasonIds);
+					}
+				}
+			});
+
+			if (tvShowIds.length > 0) {
+				downloads.push({
+					mediaIds: tvShowIds,
+					type: PlexMediaType.TvShow,
+					plexAccountId: 0,
+					libraryId: this.libraryId,
+				});
+			}
+
+			if (seasonIds.length > 0) {
+				downloads.push({
+					mediaIds: seasonIds,
+					type: PlexMediaType.Season,
+					plexAccountId: 0,
+					libraryId: this.libraryId,
+				});
+			}
+
+			if (episodesIds.length > 0) {
+				downloads.push({
+					mediaIds: episodesIds,
+					type: PlexMediaType.Episode,
+					plexAccountId: 0,
+					libraryId: this.libraryId,
+				});
+			}
+		}
+
+		if (this.mediaType === PlexMediaType.Movie) {
+			downloads.push({
+				mediaIds: this.selected?.map((x) => +x),
+				type: PlexMediaType.Movie,
+				plexAccountId: 0,
+				libraryId: this.libraryId,
+			});
+		}
+
+		return downloads;
 	}
 
-	downloadMedia(item: ITreeViewItem): void {
+	updateSelected(selected: string[]): void {
+		this.selected = selected;
+		this.$emit('selected', selected);
+	}
+
+	async downloadMedia(item: PlexMediaDTO): Promise<void> {
+		// Set as currently loading.
+		this.loadingButtons.push(item.key.toString());
 		const downloadCommand: DownloadMediaDTO = {
 			type: item.type,
 			mediaIds: [],
-			libraryId: 0,
 			plexAccountId: 0,
+			libraryId: this.libraryId,
 		};
 		switch (item.type) {
 			case PlexMediaType.Movie:
 				downloadCommand.mediaIds.push(item.id);
 				break;
 			case PlexMediaType.TvShow:
-				downloadCommand.mediaIds = item?.children?.flatMap((x) => x.children?.flatMap((y) => y.id) ?? []) ?? [];
+				if (item.children?.length === 0) {
+					await new Promise((resolve) => this.getMedia({ item, resolve }));
+				}
+				downloadCommand.mediaIds.push(item.id);
 				break;
 			case PlexMediaType.Season:
-				downloadCommand.mediaIds = item?.children?.flatMap((x) => x?.id) ?? [];
+				downloadCommand.mediaIds.push(item.id);
 				break;
 			case PlexMediaType.Episode:
 				downloadCommand.mediaIds.push(item.id);
@@ -211,33 +244,22 @@ export default class MediaTable extends Vue {
 			default:
 				return;
 		}
-
-		this.$emit('download', downloadCommand);
+		// Set finished loading
+		const i = this.loadingButtons.findIndex((x) => x === item.key.toString());
+		if (i > -1) {
+			this.loadingButtons.splice(i, 1);
+		} else {
+			this.loadingButtons = [];
+		}
+		Log.info('download', downloadCommand);
+		this.$emit('download', [downloadCommand]);
 	}
 
-	created(): void {
-		// This is needed to refresh the TreeView when a node is expanded.
-		// We edit the copy instead of the prop
-		this.tempItems = this.items;
+	/*
+A promise is send to the parent, which will resolve once the data is available. After which the node expands.
+ */
+	getMedia(payload: { item: any; resolve: Function }): void {
+		this.$emit('request-media', payload);
 	}
 }
 </script>
-
-<style lang="scss">
-.v-treeview.theme--dark {
-	.v-treeview-node {
-		border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
-	}
-}
-
-.table-header-dark {
-	border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
-}
-
-.select-all-check {
-	.v-input--selection-controls {
-		padding: 0 0 0 2px !important;
-		margin: 0 !important;
-	}
-}
-</style>

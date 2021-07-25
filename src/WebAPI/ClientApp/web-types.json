@@ -173,6 +173,7 @@
             {
               "name": "textId",
               "required": true,
+              "description": "The Vue-i18n text id used for the confirmation window that pops-up.",
               "value": {
                 "kind": "expression",
                 "type": "string"
@@ -182,6 +183,7 @@
             {
               "name": "buttonTextId",
               "required": true,
+              "description": "The Vue-i18n text id used for the text inside the button.",
               "value": {
                 "kind": "expression",
                 "type": "string"

@@ -16,6 +16,7 @@
 			"finish-setup": "Finish setup",
 			"check-server-status": "Check server status",
 			"reset-db": "Reset Database",
+			"go-to-setup-page": "Go To Setup Page",
 			"add-alert": "Add Alert",
 			"hide": "Hide"
 		},
@@ -116,6 +117,13 @@
 						"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
 					}
 				},
+				"setup-section": {
+					"go-to-setup-page": {
+						"label": "Go To Setup Page",
+						"title": "Go To Setup Page",
+						"text": "Will navigate to the PlexRipper setup page."
+					}
+				},
 				"reset-db": {
 					"label": "Reset Database",
 					"title": "Reset Database",
@@ -205,6 +213,9 @@
 				},
 				"database": {
 					"header": "Database"
+				}	,
+				"setup": {
+					"header": "PlexRipper Setup"
 				}
 			},
 			"accounts": {

@@ -22,15 +22,8 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { AccountService } from '@service';
 import { PlexAccountDTO } from '@dto/mainApi';
-import AccountDialog from '@overviews/AccountOverview/AccountDialog.vue';
-import AccountCard from './AccountCard.vue';
 
-@Component({
-	components: {
-		AccountCard,
-		AccountDialog,
-	},
-})
+@Component
 export default class AccountOverview extends Vue {
 	private accounts: PlexAccountDTO[] = [];
 	private dialog: boolean = false;

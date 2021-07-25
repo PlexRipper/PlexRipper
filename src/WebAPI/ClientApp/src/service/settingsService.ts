@@ -177,7 +177,7 @@ export class SettingsService extends BaseService {
 	}
 
 	public getDownloadManagerSettings(): Observable<DownloadManagerModel> {
-		return this.getAdvancedSettings().pipe(switchMap((x) => of(x.downloadManager)));
+		return this.getAdvancedSettings().pipe(switchMap((x) => of(x?.downloadManager)));
 	}
 
 	public updateAdvancedSettings(advancedSettings: AdvancedSettingsModel): void {

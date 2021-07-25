@@ -39,9 +39,17 @@ import ButtonType from '@enums/buttonType';
 	},
 })
 export default class ConfirmationDialog extends Vue {
+	/**
+	 * The Vue-i18n text id used for the confirmation window that pops-up.
+	 * @type {string}
+	 */
 	@Prop({ required: true, type: String, default: '' })
 	readonly textId!: string;
 
+	/**
+	 * The Vue-i18n text id used for the text inside the button.
+	 * @type {string}
+	 */
 	@Prop({ required: true, type: String, default: '' })
 	readonly buttonTextId!: string;
 

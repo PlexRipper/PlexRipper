@@ -7,7 +7,9 @@
 					<v-col cols="auto">
 						<v-progress-circular :size="100" :width="15" :value="percentage" :indeterminate="indeterminate" color="red">
 							<template v-if="!indeterminate">
-								<span v-if="percentage < 100"> {{ percentage }}% </span>
+								<span v-if="percentage < 100">
+									<b>{{ percentage }}%</b>
+								</span>
 								<v-icon v-else large>mdi-check</v-icon>
 							</template>
 						</v-progress-circular>

@@ -20,8 +20,8 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		Log.warn('history', this.stateHistory);
 	}
 
-	protected updateStore(propertyName: string, newObject: any, idName: string = 'id'): void {
-		const x = this.getState()[propertyName];
+	protected updateStore(propertyName: keyof IStoreState, newObject: any, idName: string = 'id'): void {
+		const x = this.getState()[propertyName.toString()];
 		if (!x) {
 			Log.error(`Failed to get IStoreProperty property name: ${propertyName}`, this.getState());
 			return;

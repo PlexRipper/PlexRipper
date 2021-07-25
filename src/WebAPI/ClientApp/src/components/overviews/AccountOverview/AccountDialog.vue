@@ -2,13 +2,13 @@
 	<v-dialog :value="dialog" persistent :max-width="IsSettingUpAccount ? 1000 : 900">
 		<!-- The setup account progress -->
 		<account-setup-progress
-			v-if="IsSettingUpAccount"
+			v-show="IsSettingUpAccount"
 			ref="accountSetupProgress"
-			:account="getAccount"
+			:account-id="getAccount.id"
 			@hide="closeDialog(true)"
 		/>
 		<!-- The account pop-up -->
-		<v-card v-else>
+		<v-card v-show="!IsSettingUpAccount">
 			<v-card-title class="headline">
 				{{ getDisplayName }}
 			</v-card-title>
@@ -131,11 +131,13 @@
 
 <script lang="ts">
 import Log from 'consola';
-import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
-import { createAccount, deleteAccount, updateAccount, validateAccount } from '@api/accountApi';
+import { deleteAccount, validateAccount } from '@api/accountApi';
 import ButtonType from '@/types/enums/buttonType';
 import AccountSetupProgress from '@components/Progress/AccountSetupProgress.vue';
+import { AccountService } from '@service';
+import { map } from 'rxjs/operators';
 
 @Component
 export default class AccountDialog extends Vue {
@@ -291,21 +293,12 @@ export default class AccountDialog extends Vue {
 	saveAccount(): void {
 		this.saving = true;
 		if (this.getAccount) {
-			if (this.isNew) {
-				this.$subscribeTo(createAccount(this.getAccount), (data) => {
-					if (data.isSuccess) {
-						this.IsSettingUpAccount = true;
-						this.$nextTick(() => this.accountSetupProgressRef?.refreshAccount(data.value?.id));
-					}
-				});
-			} else {
-				this.$subscribeTo(updateAccount(this.getAccount), (data) => {
-					if (data.isSuccess) {
-						this.IsSettingUpAccount = true;
-						this.$nextTick(() => this.accountSetupProgressRef?.refreshAccount(data.value?.id));
-					}
-				});
-			}
+			this.$subscribeTo(AccountService.createOrUpdateAccount(this.getAccount), (data) => {
+				if (data.isSuccess) {
+					this.IsSettingUpAccount = true;
+					this.$nextTick(() => this.accountSetupProgressRef?.refreshAccount(data.value?.id));
+				}
+			});
 		}
 	}
 
@@ -319,7 +312,6 @@ export default class AccountDialog extends Vue {
 		}
 	}
 
-	@Watch('dialog')
 	onOpenDialog(dialogState: boolean): void {
 		if (dialogState) {
 			if (this.account) {
@@ -339,6 +331,12 @@ export default class AccountDialog extends Vue {
 		this.IsSettingUpAccount = false;
 		this.saving = false;
 		this.$emit('dialog-closed', refreshAccounts);
+	}
+
+	mounted(): void {
+		this.$subscribeTo(this.$watchAsObservable('dialog').pipe(map((x) => x.newValue)), (dialogState) => {
+			this.onOpenDialog(dialogState);
+		});
 	}
 }
 </script>

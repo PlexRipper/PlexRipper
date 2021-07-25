@@ -19,7 +19,6 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { AccountService } from '@service';
 import { PlexAccountDTO } from '@dto/mainApi';
@@ -52,7 +51,6 @@ export default class AccountOverview extends Vue {
 	created(): void {
 		this.$subscribeTo(AccountService.getAccounts(), (data) => {
 			this.accounts = data ?? [];
-			Log.debug(this.accounts);
 		});
 	}
 }

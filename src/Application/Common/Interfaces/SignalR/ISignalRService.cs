@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
@@ -19,6 +20,6 @@ namespace PlexRipper.Application.Common
 
         Task SendNotification(Notification notification);
 
-        Task SendPlexAccountRefreshUpdate(int plexAccountId, int received, int total, bool isRefreshing = true);
+        void SendServerInspectStatusProgress(InspectServerProgress progress);
     }
 }

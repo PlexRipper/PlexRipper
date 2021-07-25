@@ -1,15 +1,16 @@
 import {
 	DownloadTaskDTO,
-	FileMergeProgress, FolderPathDTO,
+	FileMergeProgress,
+	FolderPathDTO,
 	NotificationDTO,
 	PlexAccountDTO,
 	PlexLibraryDTO,
 	PlexServerDTO,
 	SettingsModel,
+	InspectServerProgress,
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
 import IAlert from '@interfaces/IAlert';
-import { FolderPathService } from '~/service/folderPathService';
 
 export default interface IStoreState {
 	accounts: PlexAccountDTO[];
@@ -22,6 +23,8 @@ export default interface IStoreState {
 	mediaUrls: IObjectUrl[];
 	settings: SettingsModel;
 	helpIdDialog: string;
-	fileMergeProgressList: FileMergeProgress[];
 	downloadTaskUpdateList: DownloadTaskDTO[];
+	// Progress Service
+	fileMergeProgressList: FileMergeProgress[];
+	inspectServerProgress: InspectServerProgress[];
 }

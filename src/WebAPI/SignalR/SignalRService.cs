@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
@@ -33,27 +34,6 @@ namespace PlexRipper.WebAPI.SignalR
         }
 
         #region ProgressHub
-
-        public async Task SendPlexAccountRefreshUpdate(int plexAccountId, int received, int total, bool isRefreshing = true)
-        {
-            if (_progressHub?.Clients?.All == null)
-            {
-                Log.Warning("No Clients connected to ProgressHub");
-                return;
-            }
-
-            var progress = new PlexAccountRefreshProgress
-            {
-                PlexAccountId = plexAccountId,
-                Received = received,
-                Total = total,
-                Percentage = DataFormat.GetPercentage(received, total),
-                IsRefreshing = isRefreshing,
-                IsComplete = received >= total,
-            };
-
-            await _progressHub.Clients.All.SendAsync(nameof(PlexAccountRefreshProgress), progress);
-        }
 
         public async Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)
         {
@@ -106,6 +86,18 @@ namespace PlexRipper.WebAPI.SignalR
 
             var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
             Task.Run(() => _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", downloadTaskDTO));
+        }
+
+        public void SendServerInspectStatusProgress(InspectServerProgress progress)
+        {
+            if (_progressHub?.Clients?.All == null)
+            {
+                Log.Warning("No Clients connected to ProgressHub");
+                return;
+            }
+
+            Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progress));
+
         }
 
         /// <inheritdoc/>

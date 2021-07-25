@@ -10,6 +10,7 @@
 								<div class="server-name"><status :value="server.status.isSuccessful" /> {{ server.name }}</div>
 							</v-col>
 							<v-spacer></v-spacer>
+							<!--	Open Server Settings	-->
 							<v-col cols="auto">
 								<v-btn icon @click.native.stop="openServerSettings(server.id)">
 									<v-icon>mdi-cog</v-icon>

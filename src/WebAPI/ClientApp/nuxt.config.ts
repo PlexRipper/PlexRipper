@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
@@ -42,42 +41,17 @@ const config: NuxtConfig = {
 	 *  Doc: https://github.com/nuxt/components
 	 */
 	components: [
-		// '~/components/AppBar',
-		// '~/components/DebugTools',
-		// '~/components/Dialogs',
-		// '~/components/Footer',
-		// '~/components/Form',
-		// '~/components/General/VTreeViewTable',
-		// '~/components/Help',
-		// '~/components/MediaOverview/index.ts',
-		// '~/pages/downloads/components',
-		// '~/pages/settings/components',
-		// '~/pages/setup/components',
-		'~/components/Extensions',
+		// Components
 		{
 			path: '~/components',
-			pattern: '**/*.vue',
+			pathPrefix: false,
 			extensions: ['vue'],
 		},
-		{
-			path: '~/components/General',
-			pattern: '**/*.vue',
-			extensions: ['vue'],
-		},
-		{
-			path: '~/components/Layout',
-			pattern: '**/*.vue',
-			extensions: ['vue'],
-		},
-		{
-			path: '~/components/Form',
-			pattern: '**/*.vue',
-			extensions: ['vue'],
-		},
-
+		// Pages
 		{
 			path: '~/pages',
-			pattern: '**/components/*.vue',
+			pattern: '**/**/components/*.vue',
+			pathPrefix: false,
 			extensions: ['vue'],
 		},
 	],

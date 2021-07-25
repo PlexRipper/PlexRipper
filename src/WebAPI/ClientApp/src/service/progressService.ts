@@ -21,22 +21,22 @@ export class ProgressService extends BaseService {
 	public setup(nuxtContext: Context): void {
 		super.setup(nuxtContext);
 
-		SignalrService.getFileMergeProgress().subscribe((fileMergeProgress) => {
-			if (fileMergeProgress) {
-				const { fileMergeProgressList } = this.getState();
-				const i = fileMergeProgressList.findIndex((x) => x.id === fileMergeProgress.id);
-				if (i > -1) {
-					// Update entry
-					fileMergeProgressList.splice(i, 1, fileMergeProgress);
-				} else {
-					// Add new entry
-					fileMergeProgressList.push(fileMergeProgress);
-				}
-				this.setState({ fileMergeProgressList });
-			} else {
-				Log.error(`FileMergeProgress was ${fileMergeProgress}`);
-			}
-		});
+		// SignalrService.getFileMergeProgress().subscribe((fileMergeProgress) => {
+		// 	if (fileMergeProgress) {
+		// 		const { fileMergeProgressList } = this.getState();
+		// 		const i = fileMergeProgressList.findIndex((x) => x.id === fileMergeProgress.id);
+		// 		if (i > -1) {
+		// 			// Update entry
+		// 			fileMergeProgressList.splice(i, 1, fileMergeProgress);
+		// 		} else {
+		// 			// Add new entry
+		// 			fileMergeProgressList.push(fileMergeProgress);
+		// 		}
+		// 		this.setState({ fileMergeProgressList });
+		// 	} else {
+		// 		Log.error(`FileMergeProgress was ${fileMergeProgress}`);
+		// 	}
+		// });
 
 		SignalrService.getDownloadTaskUpdate().subscribe((downloadTaskUpdate) => {
 			if (downloadTaskUpdate) {
@@ -79,22 +79,6 @@ export class ProgressService extends BaseService {
 			filter((x) => x && x !== []),
 		);
 	}
-
-	// public cleanUpProgressByDownloadTaskId(downloadTaskId: number): void {
-	// 	const { fileMergeProgressList } = this.getState();
-	// 	const fileMergeProgressIndex = fileMergeProgressList.findIndex((x) => x.downloadTaskId === downloadTaskId);
-	// 	if (fileMergeProgressIndex > -1) {
-	// 		fileMergeProgressList.splice(fileMergeProgressIndex, 1);
-	// 		this.setState({ fileMergeProgressList });
-	// 	}
-	//
-	// 	const { downloadTaskUpdateList } = this.getState();
-	// 	const downloadTaskUpdateListIndex = downloadTaskUpdateList.findIndex((x) => x.id === downloadTaskId);
-	// 	if (downloadTaskUpdateListIndex > -1) {
-	// 		downloadTaskUpdateList.splice(downloadTaskUpdateListIndex, 1);
-	// 		this.setState({ downloadTaskUpdateList });
-	// 	}
-	// }
 }
 
 const progressService = new ProgressService();

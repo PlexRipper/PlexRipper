@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
+using PlexRipper.WebAPI.Common.Extensions;
 
 namespace PlexRipper.WebAPI.Common
 {
@@ -9,10 +9,10 @@ namespace PlexRipper.WebAPI.Common
         {
             if (!context.ModelState.IsValid)
             {
-                context.Result = new BadRequestObjectResult(context.ModelState);
+                context.Result = context.ModelState.ToBadRequestResult();
             }
         }
 
         public void OnActionExecuted(ActionExecutedContext context) { }
-    }
 }
+    }

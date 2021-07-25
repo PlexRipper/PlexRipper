@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Mime;
 using AutoMapper;
 using FluentResults;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.FluentResult;
@@ -152,6 +154,19 @@ namespace PlexRipper.WebAPI.Controllers
             {
                 StatusCode = StatusCodes.Status500InternalServerError,
             };
+        }
+
+        protected IActionResult ToResult(ModelStateDictionary dictionary)
+        {
+            var result = Result.Fail("Bad request error:");
+
+            foreach (KeyValuePair<string, ModelStateEntry> keyValuePair in dictionary)
+            {
+                result = result.WithError(new Error($"{keyValuePair.Key} - {keyValuePair.Value.RawValue}"));
+            }
+
+            var resultDTO = _mapper.Map<ResultDTO>(result);
+            return new BadRequestObjectResult(resultDTO);
         }
     }
 }

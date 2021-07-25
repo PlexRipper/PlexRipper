@@ -100,8 +100,6 @@ export type Error = Reason & { reasons?: Error[] | null };
 
 export type Success = Reason & object;
 
-export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
-
 export interface DownloadMediaDTO {
   mediaIds: number[];
   type: PlexMediaType;
@@ -424,10 +422,14 @@ export interface CreatePlexAccountDTO {
   isMain: boolean;
 }
 
+export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
+
 export interface CredentialsDTO {
   username?: string;
   password?: string;
 }
+
+export type ResultDTOOfListOfPlexLibraryDTO = ResultDTO & { value: PlexLibraryDTO[] };
 
 export type ResultDTOOfPlexLibraryDTO = ResultDTO & { value: PlexLibraryDTO };
 
@@ -441,11 +443,25 @@ export interface RefreshPlexLibraryDTO {
   plexLibraryId?: number;
 }
 
+export interface UpdateDefaultDestinationDTO {
+  /** @format int32 */
+  libraryId: number;
+
+  /** @format int32 */
+  folderPathId: number;
+}
+
 export type ResultDTOOfPlexMediaDTO = ResultDTO & { value: PlexMediaDTO };
 
 export type ResultDTOOfListOfPlexServerDTO = ResultDTO & { value: PlexServerDTO[] };
 
 export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStatusDTO };
+
+export interface InspectServerDTO {
+  /** @format int32 */
+  plexAccountId: number;
+  plexServerIds: number[];
+}
 
 export type ResultDTOOfSettingsModel = ResultDTO & { value: SettingsModel };
 
@@ -493,6 +509,10 @@ export type DateTimeModel = BaseModel & {
   showRelativeDates: boolean;
 };
 
+export type ResultDTOOfInteger = ResultDTO & { value: number };
+
+export type ResultDTOOfDownloadTaskDTO = ResultDTO & { value: DownloadTaskDTO };
+
 export interface DownloadTaskCreationProgress {
   /** @format decimal */
   percentage: number;
@@ -521,20 +541,25 @@ export interface LibraryProgress {
   isComplete: boolean;
 }
 
-export interface PlexAccountRefreshProgress {
+export interface InspectServerProgress {
   /** @format int32 */
-  plexAccountId: number;
-
-  /** @format decimal */
-  percentage: number;
+  plexServerId: number;
 
   /** @format int32 */
-  received: number;
+  retryAttemptIndex: number;
 
   /** @format int32 */
-  total: number;
-  isRefreshing: boolean;
-  isComplete: boolean;
+  retryAttemptCount: number;
+
+  /** @format int32 */
+  timeToNextRetry: number;
+
+  /** @format int32 */
+  statusCode: number;
+  connectionSuccessful: boolean;
+  completed: boolean;
+  message: string;
+  attemptingApplyDNSFix: boolean;
 }
 
 export interface FileMergeProgress {

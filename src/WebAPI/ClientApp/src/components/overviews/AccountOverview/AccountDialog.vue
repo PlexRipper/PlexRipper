@@ -1,22 +1,20 @@
 <template>
-	<v-dialog :value="dialog" persistent max-width="900">
+	<v-dialog :value="dialog" persistent :max-width="IsSettingUpAccount ? 1000 : 900">
 		<!-- The setup account progress -->
-		<v-card v-if="accountSetupProgress">
-			<v-card-text>
-				<progress-component
-					:percentage="accountSetupProgress.percentage"
-					:text="`Retrieving accessible servers ${accountSetupProgress.received} of ${accountSetupProgress.total}`"
-				/>
-			</v-card-text>
-		</v-card>
+		<account-setup-progress
+			v-show="IsSettingUpAccount"
+			ref="accountSetupProgress"
+			:account-id="getAccount.id"
+			@hide="closeDialog(true)"
+		/>
 		<!-- The account pop-up -->
-		<v-card v-else>
+		<v-card v-show="!IsSettingUpAccount">
 			<v-card-title class="headline">
 				{{ getDisplayName }}
 			</v-card-title>
 			<v-divider></v-divider>
 			<v-card-text class="mt-2">
-				<v-form ref="form" v-model="valid">
+				<v-form ref="accountForm" v-model="valid">
 					<!-- Is account enabled -->
 					<v-row no-gutters>
 						<v-col :cols="labelCol">
@@ -133,26 +131,15 @@
 
 <script lang="ts">
 import Log from 'consola';
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import type { PlexAccountDTO, PlexAccountRefreshProgress } from '@dto/mainApi';
-import { createAccount, deleteAccount, updateAccount, validateAccount } from '@api/accountApi';
-import LoadingSpinner from '@components/LoadingSpinner.vue';
-import HelpIcon from '@components/Help/HelpIcon.vue';
-import ProgressComponent from '@components/ProgressComponent.vue';
-import { SignalrService } from '@service';
-import ConfirmationDialog from '@components/General/ConfirmationDialog.vue';
-import PBtn from '@components/Extensions/PButton.vue';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import type { PlexAccountDTO } from '@dto/mainApi';
+import { deleteAccount, validateAccount } from '@api/accountApi';
 import ButtonType from '@/types/enums/buttonType';
+import AccountSetupProgress from '@components/Progress/AccountSetupProgress.vue';
+import { AccountService } from '@service';
+import { map } from 'rxjs/operators';
 
-@Component({
-	components: {
-		LoadingSpinner,
-		HelpIcon,
-		ProgressComponent,
-		ConfirmationDialog,
-		PBtn,
-	},
-})
+@Component
 export default class AccountDialog extends Vue {
 	@Prop({ required: false, type: Object as () => PlexAccountDTO })
 	readonly account!: PlexAccountDTO | null;
@@ -160,7 +147,13 @@ export default class AccountDialog extends Vue {
 	@Prop({ required: true, type: Boolean, default: false })
 	dialog: boolean = false;
 
-	accountSetupProgress: PlexAccountRefreshProgress | null = null;
+	@Ref('accountSetupProgress')
+	readonly accountSetupProgressRef!: AccountSetupProgress;
+
+	@Ref('accountForm')
+	readonly accountForm!: any;
+
+	IsSettingUpAccount: boolean = false;
 
 	validateLoading: boolean = false;
 
@@ -255,12 +248,8 @@ export default class AccountDialog extends Vue {
 		}
 	}
 
-	get getForm(): Vue & { validate: () => boolean; reset: () => void; resetValidation: () => void } {
-		return this.$refs.form as Vue & { validate: () => boolean; reset: () => void; resetValidation: () => void };
-	}
-
 	validate(): void {
-		this.getForm.validate();
+		this.accountForm?.validate();
 
 		if (this.valid) {
 			this.validateLoading = true;
@@ -294,7 +283,7 @@ export default class AccountDialog extends Vue {
 
 	resetValidation(): void {
 		this.valid = false;
-		this.getForm.resetValidation();
+		this.accountForm?.resetValidation();
 	}
 
 	cancel(): void {
@@ -304,11 +293,12 @@ export default class AccountDialog extends Vue {
 	saveAccount(): void {
 		this.saving = true;
 		if (this.getAccount) {
-			if (this.isNew) {
-				createAccount(this.getAccount).subscribe();
-			} else {
-				updateAccount(this.getAccount).subscribe();
-			}
+			this.$subscribeTo(AccountService.createOrUpdateAccount(this.getAccount), (data) => {
+				if (data.isSuccess) {
+					this.IsSettingUpAccount = true;
+					this.$nextTick(() => this.accountSetupProgressRef?.refreshAccount(data.value?.id));
+				}
+			});
 		}
 	}
 
@@ -322,7 +312,6 @@ export default class AccountDialog extends Vue {
 		}
 	}
 
-	@Watch('dialog')
 	onOpenDialog(dialogState: boolean): void {
 		if (dialogState) {
 			if (this.account) {
@@ -339,17 +328,14 @@ export default class AccountDialog extends Vue {
 	}
 
 	closeDialog(refreshAccounts: boolean = false): void {
-		this.accountSetupProgress = null;
+		this.IsSettingUpAccount = false;
 		this.saving = false;
 		this.$emit('dialog-closed', refreshAccounts);
 	}
 
-	created(): void {
-		this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
-			this.accountSetupProgress = data;
-			if (data.isComplete) {
-				this.closeDialog(true);
-			}
+	mounted(): void {
+		this.$subscribeTo(this.$watchAsObservable('dialog').pipe(map((x) => x.newValue)), (dialogState) => {
+			this.onOpenDialog(dialogState);
 		});
 	}
 }

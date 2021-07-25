@@ -282,7 +282,10 @@ namespace PlexRipper.Domain
                         if (exception.InnerException is not null)
                         {
                             exception = exception.InnerException.InnerException;
-                            LogByType(logLevel, $"-------{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
+                            if (exception is not null)
+                            {
+                                LogByType(logLevel, $"-------{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
+                            }
                         }
                     }
                 }

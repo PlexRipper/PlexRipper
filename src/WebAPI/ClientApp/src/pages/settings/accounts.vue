@@ -9,12 +9,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import AccountOverview from '@overviews/AccountOverview/AccountOverview.vue';
 
-@Component({
-	components: {
-		AccountOverview,
-	},
-})
+@Component
 export default class Accounts extends Vue {}
 </script>

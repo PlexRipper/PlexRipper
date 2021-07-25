@@ -164,9 +164,9 @@ namespace PlexRipper.PlexApi.Services
             return _mapper.Map<PlexMediaMetaData>(result);
         }
 
-        public Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl)
+        public Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl, Action<PlexApiClientProgress> action = null)
         {
-            return _plexApi.GetServerStatusAsync(authToken, serverBaseUrl);
+            return _plexApi.GetServerStatusAsync(authToken, serverBaseUrl, action);
         }
 
         public async Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow)

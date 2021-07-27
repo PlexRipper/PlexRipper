@@ -31,6 +31,17 @@ export class AccountService extends BaseService {
 	// endregion
 
 	// region Fetch
+
+	public fetchAccounts(): Observable<PlexAccountDTO[]> {
+		return getAllAccounts().pipe(
+			switchMap((accountResult) => of(accountResult?.value ?? [])),
+			tap((accounts) => {
+				Log.debug(`AccountService => Fetch Accounts`, accounts);
+				this.setState({ accounts }, 'Fetch Accounts');
+			}),
+		);
+	}
+
 	public fetchAccount(accountId: Number): Observable<PlexAccountDTO | null> {
 		return getAccount(accountId).pipe(
 			switchMap((accountResult) => of(accountResult?.value ?? null)),
@@ -43,15 +54,6 @@ export class AccountService extends BaseService {
 		);
 	}
 
-	public fetchAccounts(): Observable<PlexAccountDTO[]> {
-		return getAllAccounts().pipe(
-			switchMap((accountResult) => of(accountResult?.value ?? [])),
-			tap((accounts) => {
-				Log.debug(`AccountService => Fetch Accounts`, accounts);
-				this.setState({ accounts }, 'Fetch Accounts');
-			}),
-		);
-	}
 	// endregion
 
 	public getAccounts(): Observable<PlexAccountDTO[]> {

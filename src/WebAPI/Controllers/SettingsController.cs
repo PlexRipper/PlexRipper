@@ -32,7 +32,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult GetSettings()
         {
-            return ToActionResult(_settingsService.GetSettings());
+            return ToActionResult<SettingsModel, SettingsModel>(_settingsService.GetSettings());
         }
 
         // PUT api/<SettingsController>/
@@ -42,7 +42,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult UpdateSettings([FromBody] SettingsModel settingsModel)
         {
-            return ToActionResult(_settingsService.UpdateSettings(settingsModel));
+            return ToActionResult<SettingsModel, SettingsModel>(_settingsService.UpdateSettings(settingsModel));
         }
 
         // GET api/<SettingsController>/ResetDb

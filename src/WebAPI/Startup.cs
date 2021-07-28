@@ -16,6 +16,7 @@ using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
 using PlexRipper.WebAPI.SignalR.Hubs;
+using Quartz;
 
 namespace PlexRipper.WebAPI
 {
@@ -96,6 +97,19 @@ namespace PlexRipper.WebAPI
                     fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
                 });
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Quartz setup
+            services.AddQuartz(q =>
+            {
+                // base quartz scheduler, job and trigger configuration
+            });
+
+            // ASP.NET Core hosting
+            services.AddQuartzServer(options =>
+            {
+                // when shutting down we want jobs to complete gracefully
+                options.WaitForJobsToComplete = true;
+            });
 
             // SignalR
             services.AddSignalR().AddJsonProtocol(options =>

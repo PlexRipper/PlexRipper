@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Autofac;
+using Autofac.Extras.Quartz;
 using FluentValidation;
 using MediatR;
 using PlexRipper.Application.Common;
@@ -37,6 +38,18 @@ namespace PlexRipper.Application.Config
                 .Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces()
                 .InstancePerDependency();
+
+            // Register Quartz dependancies
+            // Source: https://stackoverflow.com/q/16908342/8205497
+            // builder.Register((x) => new StdSchedulerFactory().GetScheduler()).As<IScheduler>();
+            //
+            // builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly()).Where(x => typeof(IJob).IsAssignableFrom(x));
+            //
+            // builder.Register(context => new AutofacJobFactory(context)).SingleInstance();
+
+            builder.RegisterModule(new QuartzAutofacFactoryModule());
+
+            builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
         }
     }
 }

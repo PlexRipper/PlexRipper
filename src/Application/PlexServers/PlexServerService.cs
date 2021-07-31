@@ -20,6 +20,8 @@ namespace PlexRipper.Application.PlexServers
 
         private readonly IPlexLibraryService _plexLibraryService;
 
+        private readonly ISchedulerService _schedulerService;
+
         private readonly ISignalRService _signalRService;
 
         private readonly IPlexApiService _plexServiceApi;
@@ -32,11 +34,13 @@ namespace PlexRipper.Application.PlexServers
             IPlexApiService plexServiceApi,
             IPlexAuthenticationService plexAuthenticationService,
             IPlexLibraryService plexLibraryService,
+            ISchedulerService schedulerService,
             ISignalRService signalRService)
         {
             _mapper = mapper;
             _mediator = mediator;
             _plexLibraryService = plexLibraryService;
+            _schedulerService = schedulerService;
             _signalRService = signalRService;
             _plexServiceApi = plexServiceApi;
             _plexAuthenticationService = plexAuthenticationService;
@@ -46,9 +50,9 @@ namespace PlexRipper.Application.PlexServers
         /// Retrieves the latest <see cref="PlexServer"/> data, and the corresponding <see cref="PlexLibrary"/>,
         /// from the PlexAPI and stores it in the Database.
         /// </summary>
-        /// <param name="plexAccount">PlexAccount to use to retrieve the servers.</param>
+        /// <param name="plexAccount">The <see cref="PlexAccount"/> used to retrieve the accessible <see cref="PlexServer">PlexServers</see>.</param>
         /// <returns>Is successful.</returns>
-        public async Task<Result> RefreshPlexServersAsync(PlexAccount plexAccount)
+        public async Task<Result> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
             {
@@ -61,8 +65,7 @@ namespace PlexRipper.Application.PlexServers
 
             if (string.IsNullOrEmpty(token))
             {
-                Log.Warning("Token was empty");
-                return Result.Fail("Token was empty");
+                return Result.Fail("Token was empty").LogWarning();
             }
 
             var serverList = await _plexServiceApi.GetServersAsync(token);
@@ -90,6 +93,99 @@ namespace PlexRipper.Application.PlexServers
             return await _mediator.Send(new AddOrUpdatePlexServersCommand(plexAccount, serverList));
         }
 
+        public async Task<Result> SyncPlexServers()
+        {
+            var plexServersResult = await GetAllPlexServersAsync(false);
+            if (plexServersResult.IsFailed)
+            {
+                return plexServersResult;
+            }
+
+            var plexServers = plexServersResult.Value; // TODO Add constraint to prevent constant sync, like by last sync time
+
+            var results = new List<Result>();
+
+            foreach (var plexServer in plexServers)
+            {
+                var result = await SyncPlexServer(plexServer.Id);
+                if (result.IsFailed)
+                {
+                    results.Add(result);
+                }
+            }
+
+            if (results.Any())
+            {
+                var failedResult = Result.Fail("Some libraries failed to sync");
+                results.ForEach(x => { failedResult.AddNestedErrors(x.Errors); });
+                return failedResult.LogError();
+            }
+
+            return Result.Ok();
+        }
+
+        public async Task<Result> SyncPlexServer(int plexServerId)
+        {
+            var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
+            if (plexServerResult.IsFailed)
+            {
+                return plexServerResult;
+            }
+
+            var plexServer = plexServerResult.Value;
+            var results = new List<Result>();
+
+            if (!plexServer.PlexLibraries.Any())
+            {
+                return Result.Fail($"PlexServer {plexServer.Name} with id {plexServer.Id} has no libraries to sync").LogWarning();
+            }
+
+            // Sync movie type libraries first because it is a lot quicker than TvShows.
+            foreach (var library in plexServer.PlexLibraries.FindAll(x => x.Type == PlexMediaType.Movie))
+            {
+                var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id);
+                if (result.IsFailed)
+                {
+                    results.Add(result);
+                }
+            }
+
+            foreach (var library in plexServer.PlexLibraries.FindAll(x => x.Type == PlexMediaType.TvShow))
+            {
+                var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id);
+                if (result.IsFailed)
+                {
+                    results.Add(result);
+                }
+            }
+
+            // Sync the rest
+            foreach (var library in plexServer.PlexLibraries.FindAll(x => x.Type != PlexMediaType.Movie && x.Type != PlexMediaType.TvShow))
+            {
+                var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id);
+                if (result.IsFailed)
+                {
+                    results.Add(result);
+                }
+            }
+
+            if (results.Any())
+            {
+                var failedResult = Result.Fail($"Some libraries failed to sync in PlexServer: {plexServer.Name}");
+                results.ForEach(x => { failedResult.AddNestedErrors(x.Errors); });
+                return failedResult.LogError();
+            }
+
+            return Result.Ok();
+        }
+
+        /// <summary>
+        /// Inspects the <see cref="PlexServer">PlexServers</see> for connectivity and attempts to fix those which return errors.
+        /// When successfully connected, the <see cref="PlexLibrary">PlexLibraries</see> are stored in the database.
+        /// </summary>
+        /// <param name="plexAccountId"></param>
+        /// <param name="plexServerIds"></param>
+        /// <returns></returns>
         public async Task<Result> InspectPlexServers(int plexAccountId, List<int> plexServerIds)
         {
             var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
@@ -170,12 +266,18 @@ namespace PlexRipper.Application.PlexServers
                     return;
                 }
 
-                await _plexLibraryService.RefreshLibrariesAsync(plexAccountResult.Value, plexServer);
+                await _plexLibraryService.RetrieveAccessibleLibrariesAsync(plexAccountResult.Value, plexServer);
             });
 
             await Task.WhenAll(tasks);
 
-            return await _mediator.Send(new UpdatePlexServersCommand(plexServersResult.Value));
+            var updateResult = await _mediator.Send(new UpdatePlexServersCommand(plexServersResult.Value));
+            if (updateResult.IsFailed)
+            {
+                return updateResult;
+            }
+
+            return await _schedulerService.TriggerSyncPlexServersJob();
         }
 
         /// <summary>
@@ -245,7 +347,7 @@ namespace PlexRipper.Application.PlexServers
         }
 
         /// <inheritdoc/>
-        public async Task<Result<List<PlexServer>>> GetAllServersAsync(bool includeLibraries, int plexAccountId = 0)
+        public async Task<Result<List<PlexServer>>> GetAllPlexServersAsync(bool includeLibraries, int plexAccountId = 0)
         {
             // Retrieve all servers
             return await _mediator.Send(new GetAllPlexServersQuery(includeLibraries, plexAccountId));

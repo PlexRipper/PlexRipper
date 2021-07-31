@@ -7,7 +7,7 @@ namespace PlexRipper.Application.Common
 {
     public interface IPlexServerService
     {
-        Task<Result> RefreshPlexServersAsync(PlexAccount plexAccount);
+        Task<Result> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount);
 
         Task<Result<PlexServer>> GetServerAsync(int plexServerId);
 
@@ -21,8 +21,12 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="plexAccountId">Retrieve only the <see cref="PlexServer"/> which are accessible by this <see cref="PlexAccount"/>.</param>
         /// <returns>The list of <see cref="PlexServer"/>s.</returns>
-        Task<Result<List<PlexServer>>> GetAllServersAsync(bool includeLibraries, int plexAccountId = 0);
+        Task<Result<List<PlexServer>>> GetAllPlexServersAsync(bool includeLibraries, int plexAccountId = 0);
 
         Task<Result> InspectPlexServers(int plexAccountId, List<int> plexServerIds);
+
+        Task<Result> SyncPlexServers();
+
+        Task<Result> SyncPlexServer(int plexServerId);
     }
 }

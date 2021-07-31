@@ -106,7 +106,7 @@ namespace PlexRipper.PlexApi.Services
             var updatedPlexLibrary = plexLibraries.Find(x => x.Key == plexLibrary.Key);
             updatedPlexLibrary.Id = plexLibrary.Id;
             updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
-            updatedPlexLibrary.CheckedAt = DateTime.Now;
+            updatedPlexLibrary.SyncedAt = DateTime.Now;
 
             // Retrieve the media for this library
             var result = await _plexApi.GetMetadataForLibraryAsync(authToken, plexLibrary.ServerUrl, plexLibrary.Key);

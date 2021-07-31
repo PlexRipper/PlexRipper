@@ -6,6 +6,6 @@ namespace PlexRipper.Application
 {
     public interface ISchedulerService : ISetup
     {
-        Task<Result> SyncService();
+        Task<Result> TriggerSyncPlexServersJob();
     }
 }

@@ -28,23 +28,36 @@ namespace PlexRipper.Domain
         [Column(Order = 3)]
         public PlexMediaType Type { get; set; }
 
+        /// <summary>
+        /// Gets or sets the creation date of this <see cref="PlexLibrary"/> on the <see cref="PlexServer"/> by the owner.
+        /// Value is set by the PlexApi.
+        /// </summary>
         [Column(Order = 4)]
         public DateTime CreatedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last time this <see cref="PlexLibrary"/> was updated by the <see cref="PlexServer"/> owner.
+        /// Value is set by the PlexApi.
+        /// </summary>
         [Column(Order = 5)]
         public DateTime UpdatedAt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last time this <see cref="PlexLibrary"/> was scanned for new media by the <see cref="PlexServer"/> owner.
+        /// Value is set by the PlexApi.
+        /// </summary>
         [Column(Order = 6)]
         public DateTime ScannedAt { get; set; }
+
 
         [Column(Order = 7)]
         public DateTime ContentChangedAt { get; set; }
 
         /// <summary>
-        /// Gets or sets the DateTime this library was last refreshed from the PlexApi.
+        /// Gets or sets the DateTime this <see cref="PlexLibrary"/> was last synced with the PlexApi.
         /// </summary>
         [Column(Order = 8)]
-        public DateTime CheckedAt { get; set; }
+        public DateTime SyncedAt { get; set; }
 
         /// <summary>
         /// Gets or sets the unique id of the <see cref="PlexLibrary"/>.

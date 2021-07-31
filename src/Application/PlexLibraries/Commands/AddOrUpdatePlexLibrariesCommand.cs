@@ -5,7 +5,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexLibraries
 {
-    public class AddOrUpdatePlexLibrariesCommand : IRequest<Result<bool>>
+    public class AddOrUpdatePlexLibrariesCommand : IRequest<Result>
     {
         public PlexAccount PlexAccount { get; }
 

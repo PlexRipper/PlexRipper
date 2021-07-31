@@ -98,7 +98,7 @@ namespace PlexRipper.Application.PlexAccounts
             }
 
             // Retrieve and store servers
-            var refreshResult = await _plexServerService.RefreshPlexServersAsync(plexAccount);
+            var refreshResult = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
             if (refreshResult.IsFailed)
             {
                 return refreshResult.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();

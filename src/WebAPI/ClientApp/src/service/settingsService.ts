@@ -8,7 +8,6 @@ import {
 	DateTimeModel,
 	DisplaySettingsModel,
 	DownloadManagerModel,
-	PlexAccountDTO,
 	SettingsModel,
 	UserInterfaceSettingsModel,
 	ViewMode,
@@ -17,7 +16,6 @@ import { filter, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, GlobalService } from '@service';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import { Context } from '@nuxt/types';
-import { getAllAccounts } from '@api/accountApi';
 
 export class SettingsService extends BaseService {
 	// region Constructor and Setup

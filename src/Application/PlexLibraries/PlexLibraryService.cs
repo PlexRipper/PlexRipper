@@ -107,9 +107,9 @@ namespace PlexRipper.Application.PlexLibraries
                     plexTvShowSeason.ChildCount = plexTvShowSeason.Episodes.Count;
 
                     // Assume the season started on the year of the first episode
-                    if (plexTvShowSeason.Year == 0)
+                    if (plexTvShowSeason.Year == 0 && plexTvShowSeason.Episodes.Any())
                     {
-                        plexTvShowSeason.Year = plexTvShowSeason.Episodes.First()?.Year ?? 0;
+                        plexTvShowSeason.Year = plexTvShowSeason.Episodes.First().Year;
                     }
 
                     // Set libraryId in each episode
@@ -246,18 +246,16 @@ namespace PlexRipper.Application.PlexLibraries
         #region RefreshLibrary
 
         /// <inheritdoc/>
-        public async Task<Result<bool>> RefreshLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer)
+        public async Task<Result<bool>> RetrieveAccessibleLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer)
         {
             if (plexServer == null)
             {
-                string msg = "plexServer was null";
-                Log.Warning(msg);
-                return Result.Fail(msg);
+                return Result.Fail("plexServer was null").LogWarning();
             }
 
             Log.Debug($"Refreshing PlexLibraries for plexServer: {plexServer.Name}");
 
-            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id, plexAccount.Id);
+            var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id);
 
             if (authToken.IsFailed)
             {
@@ -269,8 +267,7 @@ namespace PlexRipper.Application.PlexLibraries
             if (!libraries.Any())
             {
                 string msg = $"plexLibraries returned for server {plexServer.Name} - {plexServer.ServerUrl} was empty";
-                Log.Warning(msg);
-                return Result.Fail(msg);
+                return Result.Fail(msg).LogWarning();
             }
 
             return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, plexServer, libraries));
@@ -292,9 +289,7 @@ namespace PlexRipper.Application.PlexLibraries
             if (plexLibrary.Type != PlexMediaType.Movie && plexLibrary.Type != PlexMediaType.TvShow)
             {
                 // TODO Remove this if all media types are supported
-                string msg = $"Library type {plexLibrary.Type} is currently not supported by PlexRipper";
-                Log.Warning(msg);
-                return Result.Fail(msg);
+                return Result.Fail($"Library type {plexLibrary.Type} is currently not supported by PlexRipper").LogWarning();
             }
 
             // Get plexServer authToken

@@ -2,6 +2,7 @@
 using AutoMapper;
 using FluentResults;
 using MediatR;
+using PlexRipper.Domain;
 using Quartz;
 using Quartz.Impl;
 
@@ -15,6 +16,9 @@ namespace PlexRipper.Application
 
         private readonly IScheduler _scheduler;
 
+        private readonly JobKey _syncServerJobKey = new ("SyncServer", "SyncGroup");
+        private readonly TriggerKey _syncServerTriggerKey = new ("StartNow", "TriggerGroup");
+
         public SchedulerService(IMapper mapper, IMediator mediator, IScheduler scheduler)
         {
             _mapper = mapper;
@@ -22,20 +26,30 @@ namespace PlexRipper.Application
             _scheduler = scheduler;
         }
 
-        public async Task<Result> SyncService()
-        {
 
+        private async Task<Result> SetupSyncPlexServersJob()
+        {
             IJobDetail job = JobBuilder.Create<SyncServerJob>()
-                .WithIdentity("SyncServer", "SyncGroup")
+                .WithIdentity(_syncServerJobKey)
                 .Build();
 
             // Trigger the job to run now, and then every 40 seconds
             ITrigger trigger = TriggerBuilder.Create()
-                .WithIdentity("StartNow", "TriggerGroup")
-                .StartNow()
+                .WithIdentity(_syncServerTriggerKey)
+                .WithSimpleSchedule(x => x
+                    .WithIntervalInHours(24)
+                    .RepeatForever())
                 .Build();
 
             await _scheduler.ScheduleJob(job, trigger);
+
+            return Result.Ok();
+        }
+
+        public async Task<Result> TriggerSyncPlexServersJob()
+        {
+
+            await _scheduler.TriggerJob(_syncServerJobKey);
 
             // Max 3 servers at once
 
@@ -51,9 +65,9 @@ namespace PlexRipper.Application
         {
             await _scheduler.Start();
 
-            await SyncService();
+            await SetupSyncPlexServersJob();
 
-            return _scheduler.IsStarted ? Result.Ok() : Result.Fail("Could not start Sync Server Scheduler");
+            return _scheduler.IsStarted ? Result.Ok() : Result.Fail("Could not start Sync Server Scheduler").LogError();
         }
     }
 }

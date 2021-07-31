@@ -1,28 +1,21 @@
-﻿using System;
-using System.Threading.Tasks;
-using AutoMapper;
-using PlexRipper.Domain;
+﻿using System.Threading.Tasks;
+using PlexRipper.Application.Common;
 using Quartz;
 
 namespace PlexRipper.Application
 {
     public class SyncServerJob : IJob
     {
-        private readonly IMapper _mapper;
+        private readonly IPlexServerService _plexServerService;
 
-        public SyncServerJob(IMapper mapper)
+        public SyncServerJob(IPlexServerService plexServerService)
         {
-            _mapper = mapper;
+            _plexServerService = plexServerService;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            if (_mapper is not null)
-            {
-                Log.Debug("Mapper is set!");
-            }
-
-            await Console.Out.WriteLineAsync("HelloJob is executing.");
+            await _plexServerService.SyncPlexServers();
         }
     }
 }

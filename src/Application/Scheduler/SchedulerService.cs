@@ -1,31 +1,22 @@
 ﻿using System.Threading.Tasks;
-using AutoMapper;
 using FluentResults;
-using MediatR;
 using PlexRipper.Domain;
 using Quartz;
-using Quartz.Impl;
 
 namespace PlexRipper.Application
 {
     public class SchedulerService : ISchedulerService
     {
-        private readonly IMapper _mapper;
-
-        private readonly IMediator _mediator;
-
         private readonly IScheduler _scheduler;
 
-        private readonly JobKey _syncServerJobKey = new ("SyncServer", "SyncGroup");
-        private readonly TriggerKey _syncServerTriggerKey = new ("StartNow", "TriggerGroup");
+        private readonly JobKey _syncServerJobKey = new("SyncServer", "SyncGroup");
 
-        public SchedulerService(IMapper mapper, IMediator mediator, IScheduler scheduler)
+        private readonly TriggerKey _syncServerTriggerKey = new("StartNow", "TriggerGroup");
+
+        public SchedulerService(IScheduler scheduler)
         {
-            _mapper = mapper;
-            _mediator = mediator;
             _scheduler = scheduler;
         }
-
 
         private async Task<Result> SetupSyncPlexServersJob()
         {
@@ -37,7 +28,7 @@ namespace PlexRipper.Application
             ITrigger trigger = TriggerBuilder.Create()
                 .WithIdentity(_syncServerTriggerKey)
                 .WithSimpleSchedule(x => x
-                    .WithIntervalInHours(24)
+                    .WithIntervalInHours(6)
                     .RepeatForever())
                 .Build();
 
@@ -48,7 +39,6 @@ namespace PlexRipper.Application
 
         public async Task<Result> TriggerSyncPlexServersJob()
         {
-
             await _scheduler.TriggerJob(_syncServerJobKey);
 
             // Max 3 servers at once

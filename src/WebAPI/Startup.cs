@@ -91,7 +91,6 @@ namespace PlexRipper.WebAPI
                 })
                 .AddFluentValidation(fv =>
                 {
-                    // ValidatorOptions.Global.CascadeMode = CascadeMode.Stop;
                     fv.RegisterValidatorsFromAssemblyContaining<WebApiModule>();
                     fv.RegisterValidatorsFromAssemblyContaining<ApplicationModule>();
                     fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
@@ -161,17 +160,6 @@ namespace PlexRipper.WebAPI
                 app.UseSpaStaticFiles();
                 app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
             }
-
-            // if (CurrentEnvironment.IsDevelopment())
-            // {
-            //     app.UseSpaStaticFiles();
-            //     app.UseSpa(spa =>
-            //     {
-            //         spa.Options.SourcePath = "ClientApp";
-            //         spa.Options.DevServerPort = 3000;
-            //         spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
-            //     });
-            // }
         }
 
         public void ConfigureContainer(ContainerBuilder builder)

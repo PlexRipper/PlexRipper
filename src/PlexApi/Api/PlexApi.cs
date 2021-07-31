@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Helpers;
@@ -21,8 +22,6 @@ namespace PlexRipper.PlexApi.Api
         private PlexApiClient _client { get; }
 
         private const string SignInUri = "https://plex.tv/users/sign_in.json";
-
-        private const string FriendsUri = "https://plex.tv/pms/friends/all";
 
         private const string GetAccountUri = "https://plex.tv/users/account.json";
 
@@ -124,13 +123,12 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="plexAuthToken"></param>
         /// <param name="plexFullHost"></param>
         /// <returns></returns>
-        public async Task<PlexMediaContainerDTO> GetLibrarySectionsAsync(string plexAuthToken, string plexFullHost)
+        public async Task<Result<PlexMediaContainerDTO>> GetLibrarySectionsAsync(string plexAuthToken, string plexFullHost)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/sections"), Method.GET);
             request.AddToken(plexAuthToken);
             Log.Debug($"GetLibrarySectionsAsync => {request.Resource}");
-            var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-            return result.ValueOrDefault;
+            return await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
         }
 
         public async Task<PlexMediaContainerDTO> GetMetadataForLibraryAsync(string authToken, string plexServerBaseUrl, string libraryKey)

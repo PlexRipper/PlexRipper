@@ -60,7 +60,9 @@ namespace PlexRipper.Application.PlexLibraries
                 return Result.Fail("PlexLibrary is not of type TvShow").LogError();
 
             if (plexLibrary.TvShows.Count == 0)
-                return Result.Fail("PlexLibrary does not contain any TvShows and thus cannot request the corresponding media").LogError();
+                return Result.Fail(
+                        $"PlexLibrary {plexLibrary.Name} with id {plexLibrary.Id} does not contain any TvShows and thus cannot request the corresponding media")
+                    .LogError();
 
             var result = await _mediator.Send(new GetPlexLibraryByIdWithServerQuery(plexLibrary.Id));
             if (result.IsFailed)
@@ -246,7 +248,7 @@ namespace PlexRipper.Application.PlexLibraries
         #region RefreshLibrary
 
         /// <inheritdoc/>
-        public async Task<Result<bool>> RetrieveAccessibleLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer)
+        public async Task<Result> RetrieveAccessibleLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer)
         {
             if (plexServer == null)
             {
@@ -263,14 +265,18 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             var libraries = await _plexServiceApi.GetLibrarySectionsAsync(authToken.Value, plexServer.ServerUrl);
+            if (libraries.IsFailed)
+            {
+                return libraries.ToResult();
+            }
 
-            if (!libraries.Any())
+            if (!libraries.Value.Any())
             {
                 string msg = $"plexLibraries returned for server {plexServer.Name} - {plexServer.ServerUrl} was empty";
                 return Result.Fail(msg).LogWarning();
             }
 
-            return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, plexServer, libraries));
+            return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, plexServer, libraries.Value));
         }
 
         /// <inheritdoc/>
@@ -300,12 +306,13 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             // Retrieve overview of all media belonging to this PlexLibrary
-            var newPlexLibrary = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value);
-            var result = Result.Fail($"Failed to refresh library {plexLibrary.Id}");
-            if (newPlexLibrary == null)
+            var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value);
+            if (newPlexLibraryResult.IsFailed)
             {
-                return result;
+                return newPlexLibraryResult;
             }
+
+            var newPlexLibrary = newPlexLibraryResult.Value;
 
             // Get the default folder path id for the destination
             newPlexLibrary.DefaultDestinationId = newPlexLibrary.Type.ToDefaultDestinationFolderId();
@@ -316,11 +323,6 @@ namespace PlexRipper.Application.PlexLibraries
                     return await RefreshPlexMovieLibrary(newPlexLibrary);
                 case PlexMediaType.TvShow:
                     return await RefreshPlexTvShowLibrary(authToken.Value, newPlexLibrary);
-            }
-
-            if (result.IsFailed)
-            {
-                return result.ToResult<PlexLibrary>();
             }
 
             Log.Information($"Successfully refreshed library {newPlexLibrary.Title} with id: {newPlexLibrary.Id}");

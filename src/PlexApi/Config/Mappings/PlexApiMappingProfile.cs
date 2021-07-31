@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using PlexRipper.Domain;
@@ -83,7 +84,6 @@ namespace PlexRipper.PlexApi.Config.Mappings
             CreateMap<Metadata, PlexMovie>(MemberList.None)
                 .IncludeBase<Metadata, PlexMedia>()
                 .ForMember(dest => dest.MovieData, opt => opt.MapFrom(x => x.Media));
-
         }
 
         private void PlexTvShowMappings()
@@ -102,7 +102,6 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .IncludeBase<Metadata, PlexMedia>()
                 .ForMember(dest => dest.ParentKey, opt => opt.MapFrom(x => x.ParentRatingKey))
                 .ForMember(dest => dest.EpisodeData, opt => opt.MapFrom(x => x.Media));
-
         }
 
         /// <summary>

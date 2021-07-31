@@ -93,7 +93,7 @@ namespace PlexRipper.Application.PlexServers
             return await _mediator.Send(new AddOrUpdatePlexServersCommand(plexAccount, serverList));
         }
 
-        public async Task<Result> SyncPlexServers()
+        public async Task<Result> SyncPlexServers(bool forceSync = false)
         {
             var plexServersResult = await GetAllPlexServersAsync(false);
             if (plexServersResult.IsFailed)
@@ -101,13 +101,11 @@ namespace PlexRipper.Application.PlexServers
                 return plexServersResult;
             }
 
-            var plexServers = plexServersResult.Value; // TODO Add constraint to prevent constant sync, like by last sync time
-
             var results = new List<Result>();
 
-            foreach (var plexServer in plexServers)
+            foreach (var plexServer in plexServersResult.Value)
             {
-                var result = await SyncPlexServer(plexServer.Id);
+                var result = await SyncPlexServer(plexServer.Id, forceSync);
                 if (result.IsFailed)
                 {
                     results.Add(result);
@@ -124,7 +122,8 @@ namespace PlexRipper.Application.PlexServers
             return Result.Ok();
         }
 
-        public async Task<Result> SyncPlexServer(int plexServerId)
+        /// <inheritdoc/>
+        public async Task<Result> SyncPlexServer(int plexServerId, bool forceSync = false)
         {
             var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
             if (plexServerResult.IsFailed)
@@ -135,13 +134,18 @@ namespace PlexRipper.Application.PlexServers
             var plexServer = plexServerResult.Value;
             var results = new List<Result>();
 
-            if (!plexServer.PlexLibraries.Any())
+            var plexLibraries = forceSync ? plexServer.PlexLibraries : plexServer.PlexLibraries.FindAll(
+                x => x.Outdated
+                && (x.Type is PlexMediaType.Movie or PlexMediaType.TvShow));
+
+            if (!plexLibraries.Any())
             {
-                return Result.Fail($"PlexServer {plexServer.Name} with id {plexServer.Id} has no libraries to sync").LogWarning();
+                return Result.Ok().WithReason(new Success($"PlexServer {plexServer.Name} with id {plexServer.Id} has no libraries to sync")).LogInformation();
             }
+
 
             // Sync movie type libraries first because it is a lot quicker than TvShows.
-            foreach (var library in plexServer.PlexLibraries.FindAll(x => x.Type == PlexMediaType.Movie))
+            foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.Movie))
             {
                 var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id);
                 if (result.IsFailed)
@@ -150,17 +154,7 @@ namespace PlexRipper.Application.PlexServers
                 }
             }
 
-            foreach (var library in plexServer.PlexLibraries.FindAll(x => x.Type == PlexMediaType.TvShow))
-            {
-                var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id);
-                if (result.IsFailed)
-                {
-                    results.Add(result);
-                }
-            }
-
-            // Sync the rest
-            foreach (var library in plexServer.PlexLibraries.FindAll(x => x.Type != PlexMediaType.Movie && x.Type != PlexMediaType.TvShow))
+            foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.TvShow))
             {
                 var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id);
                 if (result.IsFailed)

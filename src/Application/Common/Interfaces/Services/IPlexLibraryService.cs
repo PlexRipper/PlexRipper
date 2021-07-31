@@ -20,7 +20,7 @@ namespace PlexRipper.Application.Common
         /// <param name="plexAccount"></param>
         /// <param name="plexServer"></param>
         /// <returns>If successful.</returns>
-        Task<Result<bool>> RetrieveAccessibleLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer);
+        Task<Result> RetrieveAccessibleLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer);
 
         /// <summary>
         /// Returns the PlexLibrary by the Id, will refresh if the library has no media assigned.

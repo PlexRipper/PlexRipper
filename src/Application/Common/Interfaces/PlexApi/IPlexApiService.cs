@@ -29,7 +29,7 @@ namespace PlexRipper.Application.Common
         /// <returns>The accessible <see cref="PlexServer"/>s.</returns>
         Task<List<PlexServer>> GetServersAsync(string plexAccountToken);
 
-        Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl);
+        Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl);
 
         /// <summary>
         ///     Returns and PlexLibrary container with either Movies, Series, Music or Photos depending on the type.
@@ -37,7 +37,7 @@ namespace PlexRipper.Application.Common
         /// <param name="plexLibrary"></param>
         /// <param name="authToken"></param>
         /// <returns></returns>
-        Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken);
+        Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken);
 
         Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl);
 

@@ -49,39 +49,35 @@ namespace PlexRipper.Domain
         [Column(Order = 6)]
         public DateTime ScannedAt { get; set; }
 
-
-        [Column(Order = 7)]
-        public DateTime ContentChangedAt { get; set; }
-
         /// <summary>
         /// Gets or sets the DateTime this <see cref="PlexLibrary"/> was last synced with the PlexApi.
         /// </summary>
-        [Column(Order = 8)]
+        [Column(Order = 6)]
         public DateTime SyncedAt { get; set; }
 
         /// <summary>
         /// Gets or sets the unique id of the <see cref="PlexLibrary"/>.
         /// </summary>
-        [Column(Order = 9)]
+        [Column(Order = 7)]
         public Guid Uuid { get; set; }
 
         /// <summary>
         /// Gets or sets this is the relative path Id of the Library location.
         /// </summary>
-        [Column(Order = 10)]
+        [Column(Order = 8)]
         public int LibraryLocationId { get; set; }
 
         /// <summary>
         /// Gets or sets the relative path of the Library location, e.g: /AnimeSeries.
         /// </summary>
-        [Column(Order = 11)]
+        [Column(Order = 9)]
         public string LibraryLocationPath { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="PlexLibraryMetaData"/>, this is a JSON field that contains a collection
         /// of various values that dont warrant their own database column.
         /// </summary>
-        [Column(Order = 12)]
+        [Column(Order = 10)]
         public PlexLibraryMetaData MetaData { get; set; }
 
         #endregion
@@ -188,6 +184,12 @@ namespace PlexRipper.Domain
 
         [NotMapped]
         public string Name => Title;
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="PlexLibrary"/> has been updated since it was last synced with PlexRipper.
+        /// </summary>
+        [NotMapped]
+        public bool Outdated => SyncedAt < UpdatedAt;
 
         public void ClearMedia()
         {

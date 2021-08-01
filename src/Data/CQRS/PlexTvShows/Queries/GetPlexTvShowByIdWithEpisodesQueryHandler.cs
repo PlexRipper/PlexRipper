@@ -51,7 +51,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
             if (plexTvShow == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexTvShow), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexTvShow), request.Id);
             }
 
             plexTvShow.Seasons = plexTvShow.Seasons.OrderBy(x => x.Title).ToList();

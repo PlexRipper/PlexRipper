@@ -6,7 +6,7 @@ using Xunit;
 
 namespace FluentResultExtensionTests
 {
-    public class ResultExtensionsWebApi201
+    public class ResultExtensionsWebApi201Tests
     {
         #region Result
 

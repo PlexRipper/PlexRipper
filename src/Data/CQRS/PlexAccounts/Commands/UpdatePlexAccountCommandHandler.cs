@@ -41,7 +41,7 @@ namespace PlexRipper.Data.CQRS
 
             if (accountInDb == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexAccount), plexAccount.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccount.Id);
             }
 
             _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);

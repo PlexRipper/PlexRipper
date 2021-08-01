@@ -44,7 +44,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
             if (plexTvShowSeason == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexTvShowSeason), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexTvShowSeason), request.Id);
             }
 
             return Result.Ok(plexTvShowSeason);

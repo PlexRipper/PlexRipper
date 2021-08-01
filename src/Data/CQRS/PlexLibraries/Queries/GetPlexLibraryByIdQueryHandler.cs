@@ -29,7 +29,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
             var result = await query.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (result == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexLibrary), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexLibrary), request.Id);
             }
 
             var plexLibrary = await GetPlexLibraryQueryableByType(result.Type, request.IncludePlexServer, request.IncludeMedia, request.TopLevelMediaOnly)
@@ -37,7 +37,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
 
             if (plexLibrary == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexLibrary), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexLibrary), request.Id);
             }
 
             return Result.Ok(plexLibrary.SortMedia());

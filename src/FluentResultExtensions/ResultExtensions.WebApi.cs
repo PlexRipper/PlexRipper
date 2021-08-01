@@ -51,12 +51,12 @@ namespace FluentResults
 
         #region CreateStatusCodeReasons
 
-        public static Error GetStatusCodeError(int statusCode, string message = "")
+        private static Error GetStatusCodeError(int statusCode, string message = "")
         {
             return new Error(message).WithMetadata(StatusCodeName, statusCode);
         }
 
-        public static Success GetStatusCodeSuccess(int statusCode, string message = "")
+        private static Success GetStatusCodeSuccess(int statusCode, string message = "")
         {
             return new Success(message).WithMetadata(StatusCodeName, statusCode);
         }

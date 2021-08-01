@@ -26,7 +26,7 @@ namespace PlexRipper.Data.CQRS.FolderPaths
             var folderPath = await _dbContext.FolderPaths.FindAsync(request.Id);
             if (folderPath == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(FolderPath), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(FolderPath), request.Id);
             }
 
             return Result.Ok(folderPath);

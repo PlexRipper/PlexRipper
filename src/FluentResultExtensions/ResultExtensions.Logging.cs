@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using FluentResults;
+using Serilog;
 using Serilog.Events;
 
-namespace PlexRipper.Domain
+// ReSharper disable once CheckNamespace
+namespace FluentResults
 {
     /// <summary>
     /// Part of the <see cref="ResultExtensions"/> class - Logging related functionality.

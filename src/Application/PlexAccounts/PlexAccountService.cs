@@ -237,7 +237,7 @@ namespace PlexRipper.Application.PlexAccounts
                 return result.ToResult<PlexAccount>();
             }
 
-            if (result.Value == false)
+            if (!result.Value)
             {
                 string msg =
                     $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";

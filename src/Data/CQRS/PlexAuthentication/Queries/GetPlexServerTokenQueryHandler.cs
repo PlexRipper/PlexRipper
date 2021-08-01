@@ -6,7 +6,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexAuthentication.Queries;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexAuthentication
 {

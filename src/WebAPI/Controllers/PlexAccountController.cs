@@ -96,7 +96,8 @@ namespace PlexRipper.WebAPI.Controllers
             }
 
             var mapResult = _mapper.Map<PlexAccount>(newAccount);
-            return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.CreatePlexAccountAsync(mapResult));
+            var createResult = await _plexAccountService.CreatePlexAccountAsync(mapResult);
+            return ToActionResult<PlexAccount, PlexAccountDTO>(createResult);
         }
 
         // DELETE api/<AccountController>/5

@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using FluentResults;
-using PlexRipper.Domain;
 using Quartz;
 
 namespace PlexRipper.Application

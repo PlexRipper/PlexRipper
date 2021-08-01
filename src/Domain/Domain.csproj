@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
-    <PackageReference Include="FluentResults" Version="2.5.0" />
     <PackageReference Include="FluentValidation" Version="9.3.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
     <PackageReference Include="MediatR" Version="9.0.0" />
@@ -23,6 +22,10 @@
     </PackageReference>
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FluentResultExtensions\FluentResultExtensions.csproj" />
   </ItemGroup>
 
 </Project>

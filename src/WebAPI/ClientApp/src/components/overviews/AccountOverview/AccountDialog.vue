@@ -273,7 +273,7 @@ export default class AccountDialog extends Vue {
 
 	reset(): void {
 		Log.debug('Reset form');
-		this.isMain = false;
+		this.isMain = true;
 		this.displayName = '';
 		this.username = '';
 		this.password = '';

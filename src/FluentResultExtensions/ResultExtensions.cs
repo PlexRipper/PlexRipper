@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using FluentResults;
 using FluentValidation.Results;
 
-namespace PlexRipper.Domain
+// ReSharper disable once CheckNamespace
+namespace FluentResults
 {
     public static partial class ResultExtensions
     {
@@ -26,9 +26,9 @@ namespace PlexRipper.Domain
             return Result.Fail(new Error($"The {parameterName} parameter contained an invalid id of {value}"));
         }
 
-        private static Result _EntityNotFound(string entityType, int id)
+        private static Result EntityNotFound(string entityType, int id)
         {
-            return Result.Fail(Get404NotFoundError($"The entity of type {entityType} with id {id} could not be found"));
+            return Create404NotFoundResult($"The entity of type {entityType} with id {id} could not be found");
         }
 
         #endregion
@@ -56,7 +56,7 @@ namespace PlexRipper.Domain
 
         public static Result EntityNotFound(this Result result, string entityType, int id)
         {
-            return _EntityNotFound(entityType, id);
+            return EntityNotFound(entityType, id);
         }
 
         #endregion
@@ -86,7 +86,7 @@ namespace PlexRipper.Domain
         /// <returns>A Result.Fail() with a 404 Error.</returns>
         public static Result GetEntityNotFound(string entityType, int entityId)
         {
-            return _EntityNotFound(entityType, entityId);
+            return EntityNotFound(entityType, entityId);
         }
 
         #endregion

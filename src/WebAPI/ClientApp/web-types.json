@@ -1,7 +1,7 @@
 {
   "framework": "vue",
-  "name": "name",
-  "version": "version",
+  "name": "plex-ripper-web-ui",
+  "version": "0.8.0",
   "contributions": {
     "html": {
       "description-markup": "markdown",

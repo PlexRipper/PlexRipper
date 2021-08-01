@@ -1,0 +1,10 @@
+{
+	"watch": false,
+	"componentsRoot": "./",
+	"components": ["src/components/**/[a-zA-Z]*.vue", "src/pages/**/components/**/[a-zA-Z]*.vue"],
+	"outFile": "web-types.json",
+	"packageName": "name",
+	"packageVersion": "version",
+	"descriptionMarkup": "markdown",
+	"typesSyntax": "typescript"
+}

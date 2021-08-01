@@ -13,7 +13,7 @@
 		"lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
 		"lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier-stylelint --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{css,scss}\" --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\"",
 		"test": "jest",
-		"update-web-types": "vue-docgen-web-types",
+		"update-web-types": "vue-docgen-web-types -c web-types-config.json",
 		"npm-upgrade-packages": "npm-upgrade",
 		"analyze": "nuxt build --analyze"
 	},

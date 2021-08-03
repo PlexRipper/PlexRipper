@@ -25,8 +25,8 @@ namespace PlexRipper.BaseTests
         /// </summary>
         public BaseContainer()
         {
-            Environment.SetEnvironmentVariable("IntegrationTestMode", "true");
-            Environment.SetEnvironmentVariable("ResetDB", "true");
+            EnviromentExtensions.SetIntegrationTestMode();
+            EnviromentExtensions.SetResetDatabase();
 
             var builder = new ContainerBuilder();
             ContainerConfig.ConfigureContainer(builder);
@@ -41,8 +41,6 @@ namespace PlexRipper.BaseTests
             builder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
 
             builder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
-
-            //builder.RegisterInstance(BaseDependanciesTest.GetLogger<object>()).As<ILogger>().SingleInstance();
 
             AutofacContainer = builder.Build();
             PlexRipperDbContext.SetupAsync();

@@ -35,7 +35,7 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async Task<PlexAccountDTO> PlexSignInAsync(string username, string password)
+        public async Task<Result<PlexAccountDTO>> PlexSignInAsync(string username, string password)
         {
             var userModel = new PlexUserRequest
             {
@@ -48,17 +48,16 @@ namespace PlexRipper.PlexApi.Api
             var request = new RestRequest(new Uri(SignInUri), Method.POST);
             request.AddJsonBody(userModel);
 
-            var result = await _client.SendRequestAsync<PlexAccountDTO>(request);
-            return result.ValueOrDefault;
+            return await _client.SendRequestAsync<PlexAccountDTO>(request);
         }
 
         public async Task<string> RefreshPlexAuthTokenAsync(PlexAccount plexAccount)
         {
             var result = await PlexSignInAsync(plexAccount.Username, plexAccount.Password);
-            if (result != null)
+            if (result.IsSuccess)
             {
-                Log.Information($"Returned token was: {result.User.AuthenticationToken}");
-                return result.User.AuthenticationToken;
+                Log.Information($"Returned token was: {result.Value.User.AuthenticationToken}");
+                return result.Value.User.AuthenticationToken;
             }
 
             Log.Error("Result from RequestPlexSignInDataAsync() was null.");

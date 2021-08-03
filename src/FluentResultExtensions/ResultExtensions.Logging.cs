@@ -71,6 +71,19 @@ namespace FluentResults
             string memberName = "",
             string sourceFilePath = "")
         {
+            foreach (var success in result.Successes)
+            {
+                LogByType(logLevel, success.Message, null, memberName, sourceFilePath);
+
+                if (success.Metadata.Any())
+                {
+                    foreach (KeyValuePair<string, object> entry in success.Metadata)
+                    {
+                        LogByType(logLevel, $"{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
+                    }
+                }
+            }
+
             foreach (var error in result.Errors)
             {
                 LogByType(logLevel, error.Message, null, memberName, sourceFilePath);
@@ -215,6 +228,23 @@ namespace FluentResults
             return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath);
         }
 
+        /// <summary>
+        /// Logs all nested reasons and metadata on Log.Fatal().
+        /// </summary>
+        /// <param name="result">The result to use for logging.</param>
+        /// <param name="e">The optional exception which can be passed to Log.Error().</param>
+        /// <param name="memberName">The function name where the result happened.</param>
+        /// <param name="sourceFilePath">The path to the source.</param>
+        /// <returns>The result unchanged.</returns>
+        public static Result LogFatal(
+            this Result result,
+            Exception e = null,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "")
+        {
+            return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath);
+        }
+
         #endregion
 
         #region Result<T> Signatures
@@ -299,6 +329,24 @@ namespace FluentResults
             [CallerFilePath] string sourceFilePath = "")
         {
             return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath);
+        }
+
+        /// <summary>
+        /// Logs all nested reasons and metadata on Log.Fatal().
+        /// </summary>
+        /// <param name="result">The result to use for logging.</param>
+        /// <param name="e">The optional exception which can be passed to Log.Error().</param>
+        /// <param name="memberName">The function name where the result happened.</param>
+        /// <param name="sourceFilePath">The path to the source.</param>
+        /// <typeparam name="T">The result type.</typeparam>
+        /// <returns>The result unchanged.</returns>
+        public static Result<T> LogFatal<T>(
+            this Result<T> result,
+            Exception e = null,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "")
+        {
+            return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath);
         }
 
         #endregion

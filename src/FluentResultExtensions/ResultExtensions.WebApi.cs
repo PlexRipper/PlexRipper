@@ -13,6 +13,11 @@ namespace FluentResults
 
         private static bool FindStatusCode(this Result result, int statusCode)
         {
+            if (result is null || statusCode <= 0)
+            {
+                return false;
+            }
+
             foreach (Reason reason in result.Reasons)
             {
                 foreach (var (key, metaData) in reason.Metadata)
@@ -29,7 +34,7 @@ namespace FluentResults
 
         private static bool FindStatusCode<T>(this Result<T> result, int statusCode)
         {
-            return result.ToResult().FindStatusCode(statusCode);
+            return result?.ToResult()?.FindStatusCode(statusCode) ?? false;
         }
 
         #endregion

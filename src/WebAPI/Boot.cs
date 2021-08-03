@@ -55,10 +55,12 @@ namespace PlexRipper.WebAPI
             await _userSettings.SetupAsync();
 
             // Keep running the following
-            var fileMergerSetup = Task.Factory.StartNew(() => _fileMerger.SetupAsync(), TaskCreationOptions.LongRunning);
-            await Task.WhenAll(fileMergerSetup);
-
-            await _schedulerService.SetupAsync();
+            if (!EnviromentExtensions.IsIntegrationTestMode())
+            {
+                var fileMergerSetup = Task.Factory.StartNew(() => _fileMerger.SetupAsync(), TaskCreationOptions.LongRunning);
+                await Task.WhenAll(fileMergerSetup);
+                await _schedulerService.SetupAsync();
+            }
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

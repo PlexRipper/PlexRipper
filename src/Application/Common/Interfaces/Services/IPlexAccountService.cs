@@ -13,14 +13,7 @@ namespace PlexRipper.Application.Common
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns>Are the account credentials valid.</returns>
-        Task<Result<bool>> ValidatePlexAccountAsync(string username, string password);
-
-        /// /// <summary>
-        /// Check if this account is valid by querying the Plex API.
-        /// </summary>
-        /// <param name="plexAccount">The account to check.</param>
-        /// <returns>Are the account credentials valid.</returns>
-        Task<Result<bool>> ValidatePlexAccountAsync(PlexAccount plexAccount);
+        Task<Result> ValidatePlexAccountAsync(string username, string password);
 
         /// <summary>
         /// Checks if an <see cref="PlexAccount"/> with the same username already exists.

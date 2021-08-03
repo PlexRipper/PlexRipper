@@ -27,11 +27,11 @@ namespace PlexRipper.Data.CQRS
         }
     }
 
-    public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexAccountCommand, Result<bool>>
+    public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexAccountCommand, Result>
     {
         public UpdatePlexAccountHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<bool>> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
         {
             var plexAccount = command.PlexAccount;
             var accountInDb = await _dbContext.PlexAccounts
@@ -46,7 +46,7 @@ namespace PlexRipper.Data.CQRS
 
             _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
             await _dbContext.SaveChangesAsync(cancellationToken);
-            return Result.Ok(true);
+            return Result.Ok();
         }
     }
 }

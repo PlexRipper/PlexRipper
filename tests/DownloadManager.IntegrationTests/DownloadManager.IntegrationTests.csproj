@@ -3,8 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <IsPackable>false</IsPackable>
-        <RootNamespace>DownloadManager.Tests</RootNamespace>
-        <AssemblyName>DownloadManager.Tests</AssemblyName>
+        <PackageId>DownloadManager.IntegrationTests</PackageId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,14 +17,10 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\DownloadManager\DownloadManager.csproj" />
       <ProjectReference Include="..\BaseTests\BaseTests.csproj" />
-      <ProjectReference Include="..\MockPlexApiServer\MockPlexApiServer.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <None Remove="HttpResponses\DownloadHeader.json" />
-      <Content Include="HttpResponses\DownloadHeader.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
     </ItemGroup>
 
     <ItemGroup>

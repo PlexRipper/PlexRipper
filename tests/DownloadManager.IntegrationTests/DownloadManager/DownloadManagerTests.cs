@@ -7,7 +7,7 @@ using WireMock.Server;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace DownloadManager.Tests.UnitTests
+namespace DownloadManager.IntegrationTests.DownloadManager
 {
     public class DownloadManagerTests
     {

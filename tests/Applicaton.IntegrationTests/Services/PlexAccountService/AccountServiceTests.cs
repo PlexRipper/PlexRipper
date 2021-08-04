@@ -1,11 +1,12 @@
 ﻿using System.Threading.Tasks;
+using PlexRipper.Application.PlexAccounts;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PlexRipper.Application.UnitTests
+namespace PlexRipper.Application.IntegrationTests.Services.PlexAccountService
 {
     public class AccountServiceTests
     {
@@ -36,15 +37,14 @@ namespace PlexRipper.Application.UnitTests
         {
             // Arrange
             var accountService = Container.GetPlexAccountService;
-            var newAccount = new PlexAccount("TestUsername", "Password123");
+            var newAccount = Container.PlexAccountMain;
 
             // Act
+            await accountService.CreatePlexAccountAsync(newAccount);
             var account = await accountService.CreatePlexAccountAsync(newAccount);
-            var account2 = await accountService.CreatePlexAccountAsync(newAccount);
 
             // Assert
-            account.ShouldNotBeNull();
-            account2.ShouldBeNull();
+            account.IsFailed.ShouldBeTrue();
         }
 
         [Fact]
@@ -52,17 +52,27 @@ namespace PlexRipper.Application.UnitTests
         {
             // Arrange
             var accountService = Container.GetPlexAccountService;
-            var newAccount = new PlexAccount("TestUsername", "Password123");
-            var updatedAccount = new PlexAccount("TestUsername", "123PassWrd123");
+            var newAccount = Container.PlexAccountMain;
 
             // Act
-            var accountDB = (await accountService.CreatePlexAccountAsync(newAccount)).Value;
-            updatedAccount.Id = accountDB.Id;
-            accountDB = (await accountService.UpdatePlexAccountAsync(updatedAccount)).Value;
+            var createAccountResult = await accountService.CreatePlexAccountAsync(newAccount);
+            var dbResult = await Container.Mediator.Send(new GetPlexAccountByIdQuery(createAccountResult.Value.Id));
+            if (dbResult.IsFailed)
+            {
+                dbResult.IsSuccess.ShouldBeTrue();
+            }
+
+            var updatedAccountResult = await accountService.UpdatePlexAccountAsync(dbResult.Value);
 
             // Assert
-            accountDB.ShouldNotBeNull();
-            accountDB.Password.ShouldBe(updatedAccount.Password);
+            createAccountResult.IsSuccess.ShouldBeTrue();
+            createAccountResult.Value.ShouldNotBeNull();
+
+            updatedAccountResult.IsSuccess.ShouldBeTrue();
+            updatedAccountResult.Value.Id.ShouldBe(dbResult.Value.Id);
+            updatedAccountResult.Value.Email.ShouldBe(dbResult.Value.Email);
+            updatedAccountResult.Value.Username.ShouldBe(dbResult.Value.Username);
+            updatedAccountResult.Value.Password.ShouldBe(dbResult.Value.Password);
         }
     }
 }

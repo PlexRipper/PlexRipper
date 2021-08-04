@@ -34,7 +34,7 @@ namespace PlexRipper.WebAPI
         public Startup(IWebHostEnvironment env)
         {
             CurrentEnvironment = env;
-            Log.Information($"PlexRipper running in {CurrentEnvironment.EnvironmentName} mode.");
+            Log.Information($"PlexRipper running in {CurrentEnvironment.EnvironmentName ?? "Unknown"} mode.");
         }
 
         private IWebHostEnvironment CurrentEnvironment { get; }
@@ -84,11 +84,7 @@ namespace PlexRipper.WebAPI
             services.AddHealthChecks();
 
             // Fluent Validator
-            services.AddMvc(options =>
-                {
-                    options.Filters.Add<ValidateFilter>();
-
-                })
+            services.AddMvc(options => { options.Filters.Add<ValidateFilter>(); })
                 .AddFluentValidation(fv =>
                 {
                     fv.RegisterValidatorsFromAssemblyContaining<WebApiModule>();

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using MediatR;
@@ -18,7 +17,15 @@ namespace PlexRipper.BaseTests
 {
     public class BaseContainer
     {
+        private PlexAccount _plexAccountMain;
+
+        private PlexAccount _plexAccountSecond;
+
         protected IContainer AutofacContainer { get; }
+
+        public PlexAccount PlexAccountMain => _plexAccountMain;
+
+        public PlexAccount PlexAccountSecond => _plexAccountSecond;
 
         /// <summary>
         /// Creates a Autofac container and sets up a test database.
@@ -27,6 +34,8 @@ namespace PlexRipper.BaseTests
         {
             EnviromentExtensions.SetIntegrationTestMode();
             EnviromentExtensions.SetResetDatabase();
+
+            SetupSecrets();
 
             var builder = new ContainerBuilder();
             ContainerConfig.ConfigureContainer(builder);
@@ -46,16 +55,30 @@ namespace PlexRipper.BaseTests
             PlexRipperDbContext.SetupAsync();
         }
 
-        public async Task<PlexAccount> SetupTestAccount()
+        private void SetupSecrets()
         {
-            var plexAccount = new PlexAccount(Secrets.Account2.Username, Secrets.Account2.Password)
+            var credentials = Secrets.GetCredentials().Credentials;
+            if (credentials[0] is not null)
             {
-                DisplayName = "Test Account",
-            };
+                _plexAccountMain = new PlexAccount(credentials[0].Username, credentials[0].Password)
+                {
+                    PlexId = 100,
+                    Uuid = "ABCDEFG!@#$%^",
+                    Title = "Main Test Account",
+                    DisplayName = "Main Test Account",
+                };
+            }
 
-            var result = await GetPlexAccountService.CreatePlexAccountAsync(plexAccount);
-
-            return result.Value;
+            if (credentials[1] is not null)
+            {
+                _plexAccountSecond = new PlexAccount(credentials[1].Username, credentials[1].Password)
+                {
+                    PlexId = 200,
+                    Uuid = "ABCDEFG!@#$%^",
+                    Title = "Second Test Account",
+                    DisplayName = "Second Test Account",
+                };
+            }
         }
 
         public static IWebHostEnvironment GetWebHostEnvironment()

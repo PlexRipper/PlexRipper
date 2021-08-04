@@ -192,7 +192,7 @@ namespace PlexRipper.PlexApi.Services
             var result = await _plexApi.PlexSignInAsync(username, password);
             if (result.IsSuccess)
             {
-                var mapResult = _mapper.Map<PlexAccount>(result.Value);
+                var mapResult = _mapper.Map<PlexAccount>(result.Value.User);
                 mapResult.IsValidated = true;
                 mapResult.ValidatedAt = DateTime.Now;
                 Log.Information($"Successfully retrieved the PlexAccount data for user {username} from the PlexApi");

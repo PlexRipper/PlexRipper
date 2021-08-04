@@ -38,9 +38,8 @@ namespace PlexRipper.DownloadManager
                     }
                 }
 
-                // Retrieve next download task queued
-                var downloadingTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Downloading);
-                if (downloadingTask != null)
+                // Check if this server is already downloading a downloadTask
+                if (downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading))
                 {
                     Log.Warning($"PlexServer: {plexServer.Name} already has a download which is in currently downloading");
                     continue;

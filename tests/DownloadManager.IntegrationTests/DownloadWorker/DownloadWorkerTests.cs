@@ -8,12 +8,11 @@ using Moq;
 using PlexRipper.Application.Common;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
-using PlexRipper.DownloadManager.Download;
 using Shouldly;
 using WireMock.Server;
 using Xunit;
 
-namespace DownloadManager.Tests.UnitTests
+namespace DownloadManager.IntegrationTests.DownloadWorker
 {
     public class DownloadWorkerTests
     {
@@ -87,7 +86,7 @@ namespace DownloadManager.Tests.UnitTests
             };
         }
 
-        private DownloadWorker GetDownloadWorker(MemoryStream memoryStream, int downloadSpeedLimitInKb = 0)
+        private PlexRipper.DownloadManager.Download.DownloadWorker GetDownloadWorker(MemoryStream memoryStream, int downloadSpeedLimitInKb = 0)
         {
             var _filesystem = new Mock<IFileSystem>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
@@ -96,7 +95,7 @@ namespace DownloadManager.Tests.UnitTests
             {
                 Id = 1,
             };
-            return new DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient, downloadSpeedLimitInKb);
+            return new PlexRipper.DownloadManager.Download.DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient, downloadSpeedLimitInKb);
         }
 
         [Fact]
@@ -146,24 +145,6 @@ namespace DownloadManager.Tests.UnitTests
         }
 
         [Fact]
-        public async Task Start_ShouldHaveMoreThan0Updates_WhenValidDownload()
-        {
-            //Arrange
-            var memoryStream = new MemoryStream();
-            var downloadWorker = GetDownloadWorker(memoryStream);
-
-            List<DownloadWorkerTask> downloadWorkerUpdates = new();
-            downloadWorker.DownloadWorkerTaskUpdate.Subscribe(downloadWorkerUpdate => downloadWorkerUpdates.Add(downloadWorkerUpdate));
-
-            //Act
-            downloadWorker.Start();
-            await downloadWorker.DownloadProcessTask;
-
-            //Assert
-            downloadWorkerUpdates.Count.ShouldBeGreaterThan(0);
-        }
-
-        [Fact]
         public async Task Start_ShouldHaveAValidDownloadWorkerTask_WhenDownloadWorkerStopped()
         {
             //Arrange
@@ -196,7 +177,7 @@ namespace DownloadManager.Tests.UnitTests
             {
                 Id = 1,
             };
-            var downloadWorker = new DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
+            var downloadWorker = new PlexRipper.DownloadManager.Download.DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
 
             //Act
             downloadWorker.Start();
@@ -205,7 +186,7 @@ namespace DownloadManager.Tests.UnitTests
             lastUpdate.IsSuccess.ShouldBeTrue();
 
             //// Recreate another download worker with a cloned stream as the original got closed
-            var downloadWorker2 = new DownloadWorker(lastUpdate.Value, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
+            var downloadWorker2 = new PlexRipper.DownloadManager.Download.DownloadWorker(lastUpdate.Value, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
             downloadWorker2.Start();
             await downloadWorker2.DownloadProcessTask;
 

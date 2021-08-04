@@ -14,7 +14,7 @@ using WireMock.Server;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace DownloadManager.Tests.UnitTests
+namespace DownloadManager.IntegrationTests
 {
     public class PlexDownloadClientTests
     {
@@ -118,34 +118,34 @@ namespace DownloadManager.Tests.UnitTests
             mediaFile.Md5.ShouldBe(DataFormat.CalculateMD5(memoryStream));
         }
 
-        [Fact]
-        public async Task StartAsync_ShouldDownloadValidFile_WhenPausedAndResumed()
-        {
-            //Arrange
-            var memoryStream = new MemoryStream();
-            var downloadClient = CreatePlexDownloadClient(memoryStream, 1000);
-            downloadClient.IsFailed.ShouldBeFalse();
-            var mediaFile = MockServer.GetMockMediaData().First();
-
-            var _filesystem = new Mock<IFileSystem>();
-            _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
-                .Returns(Result.Ok<Stream>(memoryStream));
-
-            // Act
-            downloadClient.Value.Start();
-            await Task.Delay(3000);
-            //// Stop task
-            var downloadTask = await downloadClient.Value.StopAsync();
-            downloadTask.IsSuccess.ShouldBeTrue();
-            //// Create new client and restart
-            var downloadClient2 = PlexDownloadClient.Create(downloadTask.Value, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
-            downloadClient2.IsSuccess.ShouldBeTrue();
-            downloadClient2.Value.Start();
-            await downloadClient2.Value.DownloadProcessTask;
-
-            // Assert
-            mediaFile.Md5.ShouldBe(DataFormat.CalculateMD5(memoryStream));
-        }
+        // [Fact]
+        // public async Task StartAsync_ShouldDownloadValidFile_WhenPausedAndResumed()
+        // {
+        //     //Arrange
+        //     var memoryStream = new MemoryStream();
+        //     var downloadClient = CreatePlexDownloadClient(memoryStream, 1000);
+        //     downloadClient.IsFailed.ShouldBeFalse();
+        //     var mediaFile = MockServer.GetMockMediaData().First();
+        //
+        //     var _filesystem = new Mock<IFileSystem>();
+        //     _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
+        //         .Returns(Result.Ok<Stream>(memoryStream));
+        //
+        //     // Act
+        //     downloadClient.Value.Start();
+        //     await Task.Delay(3000);
+        //     //// Stop task
+        //     var downloadTask = await downloadClient.Value.StopAsync();
+        //     downloadTask.IsSuccess.ShouldBeTrue();
+        //     //// Create new client and restart
+        //     var downloadClient2 = PlexDownloadClient.Create(downloadTask.Value, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
+        //     downloadClient2.IsSuccess.ShouldBeTrue();
+        //     downloadClient2.Value.Start();
+        //     await downloadClient2.Value.DownloadProcessTask;
+        //
+        //     // Assert
+        //     mediaFile.Md5.ShouldBe(DataFormat.CalculateMD5(memoryStream));
+        // }
 
         [Fact]
         public void Create_ShouldReturnFailedResult_WhenNullDownloadTaskIsGiven()

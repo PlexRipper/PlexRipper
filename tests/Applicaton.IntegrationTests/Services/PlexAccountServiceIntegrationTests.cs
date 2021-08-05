@@ -44,44 +44,5 @@ namespace PlexRipper.Application.IntegrationTests.Services
             result.Value.PlexAccountServers.ShouldNotBeEmpty();
             result.Value.AuthenticationToken.ShouldNotBeEmpty();
         }
-
-        [Fact]
-        public async Task UpdatePlexAccountWithNewDisplayName()
-        {
-            // Arrange
-            var accountService = Container.GetPlexAccountService;
-            var credentials = Secrets.Account1;
-
-            //Act
-            var newAccount = new PlexAccount
-            {
-                DisplayName = "Test Account",
-                Username = credentials.Username,
-                Password = credentials.Password,
-            };
-
-            // Act
-            var createResult = await accountService.CreatePlexAccountAsync(newAccount);
-
-            createResult.Value.DisplayName = "Updated Test Account 999";
-
-            var updateResult = await accountService.UpdatePlexAccountAsync(createResult.Value);
-
-            // Assert
-            createResult.IsSuccess.ShouldBeTrue();
-            createResult.Value.ShouldNotBeNull();
-            createResult.Value.Username.ShouldBe(newAccount.Username);
-            createResult.Value.Password.ShouldBe(newAccount.Password);
-            createResult.Value.PlexAccountServers.ShouldNotBeEmpty();
-            createResult.Value.AuthenticationToken.ShouldNotBeEmpty();
-
-            updateResult.IsSuccess.ShouldBeTrue();
-            updateResult.Value.ShouldNotBeNull();
-            updateResult.Value.DisplayName.ShouldBe("Updated Test Account 999");
-            updateResult.Value.Username.ShouldBe(createResult.Value.Username);
-            updateResult.Value.Password.ShouldBe(createResult.Value.Password);
-            updateResult.Value.PlexAccountServers.ShouldNotBeEmpty();
-            updateResult.Value.AuthenticationToken.ShouldNotBeEmpty();
-        }
     }
 }

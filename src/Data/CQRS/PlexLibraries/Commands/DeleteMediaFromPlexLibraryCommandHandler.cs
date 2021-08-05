@@ -31,7 +31,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
                 var entity = await _dbContext.PlexLibraries.AsNoTracking().FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
                 if (entity == null)
                 {
-                    return ResultExtensions.GetEntityNotFound(nameof(PlexLibrary), command.PlexLibraryId);
+                    return ResultExtensions.EntityNotFound(nameof(PlexLibrary), command.PlexLibraryId);
                 }
 
                 // Then construct the database query,

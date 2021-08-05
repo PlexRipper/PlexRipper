@@ -48,7 +48,7 @@ namespace PlexRipper.Data.CQRS
 
             if (plexAccount == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexAccount), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexAccount), request.Id);
             }
 
             if (request.IncludePlexServers && request.IncludePlexLibraries)

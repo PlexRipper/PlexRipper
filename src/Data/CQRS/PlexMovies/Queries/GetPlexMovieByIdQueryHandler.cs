@@ -40,7 +40,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies
 
             if (plexMovie == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexMovie), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexMovie), request.Id);
             }
 
             return Result.Ok(plexMovie);

@@ -44,7 +44,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
 
             if (downloadTask == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(DownloadTask), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(DownloadTask), request.Id);
             }
 
             return Result.Ok(downloadTask);

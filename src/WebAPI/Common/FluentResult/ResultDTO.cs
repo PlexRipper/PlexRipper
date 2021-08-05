@@ -6,19 +6,19 @@ namespace PlexRipper.WebAPI.Common.FluentResult
 {
     public class ResultDTO
     {
-        [JsonProperty("isFailed")]
+        [JsonProperty("isFailed", Required = Required.Always)]
         public bool IsFailed { get; set; }
 
-        [JsonProperty("isSuccess")]
+        [JsonProperty("isSuccess", Required = Required.Always)]
         public bool IsSuccess { get; set; }
 
-        [JsonProperty("reasons")]
+        [JsonProperty("reasons", Required = Required.Always)]
         public IList<Reason> Reasons { get; set; } = new List<Reason>();
 
-        [JsonProperty("errors")]
+        [JsonProperty("errors", Required = Required.Always)]
         public IList<Error> Errors { get; set; } = new List<Error>();
 
-        [JsonProperty("successes")]
+        [JsonProperty("successes", Required = Required.Always)]
         public IList<Success> Successes { get; set; } = new List<Success>();
     }
 

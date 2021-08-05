@@ -17,19 +17,19 @@ namespace PlexRipper.Domain
             [CallerFilePath] string sourceFilePath = "")
         {
             var fileName = Path.GetFileNameWithoutExtension(sourceFilePath);
-            var methodName = memberName;
 
-            return $"[{fileName}.{methodName}] => {message}";
+            return $"[{fileName}.{memberName}] => {message}";
         }
+
+        #region Verbose
 
         public static void Verbose(
             string message,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            Serilog.Log.Verbose(
-                message
-                    .FormatForContext(memberName, sourceFilePath));
+            var messageTemplate = message.FormatForContext(memberName, sourceFilePath);
+            Serilog.Log.Verbose("{MessageTemplate}", messageTemplate);
         }
 
         public static void Verbose(
@@ -38,10 +38,8 @@ namespace PlexRipper.Domain
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            Serilog.Log.Verbose(
-                message
-                    .FormatForException(ex)
-                    .FormatForContext(memberName, sourceFilePath));
+            var messageTemplate = message.FormatForException(ex).FormatForContext(memberName, sourceFilePath);
+            Serilog.Log.Verbose("{MessageTemplate}", messageTemplate);
         }
 
         public static void Verbose(
@@ -49,8 +47,11 @@ namespace PlexRipper.Domain
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            Serilog.Log.Verbose((ex != null ? ex.ToString() : string.Empty).FormatForContext(memberName, sourceFilePath));
+            var messageTemplate = (ex?.ToString() ?? string.Empty).FormatForContext(memberName, sourceFilePath);
+            Serilog.Log.Verbose("{MessageTemplate}", messageTemplate);
         }
+
+        #endregion
 
         public static void Debug(
             string message,
@@ -195,10 +196,7 @@ namespace PlexRipper.Domain
         {
             FatalAction();
 
-            Serilog.Log.Error(
-                message
-                    .FormatForContext(memberName, sourceFilePath)
-            );
+            Serilog.Log.Fatal(message.FormatForContext(memberName, sourceFilePath));
         }
 
         public static void Fatal(
@@ -209,11 +207,7 @@ namespace PlexRipper.Domain
         {
             FatalAction();
 
-            Serilog.Log.Error(
-                message
-                    .FormatForException(ex)
-                    .FormatForContext(memberName, sourceFilePath)
-            );
+            Serilog.Log.Fatal(message.FormatForException(ex).FormatForContext(memberName, sourceFilePath));
         }
 
         public static void Fatal(
@@ -223,10 +217,7 @@ namespace PlexRipper.Domain
         {
             FatalAction();
 
-            Serilog.Log.Error(
-                (ex != null ? ex.ToString() : string.Empty)
-                .FormatForContext(memberName, sourceFilePath)
-            );
+            Serilog.Log.Fatal((ex?.ToString() ?? string.Empty).FormatForContext(memberName, sourceFilePath));
         }
 
         private static void FatalAction()

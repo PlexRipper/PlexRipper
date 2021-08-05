@@ -29,7 +29,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         public async Task<IActionResult> GetAll()
         {
-            return ToActionResult<List<PlexServer>, List<PlexServerDTO>>(await _plexServerService.GetAllServersAsync(false));
+            return ToActionResult<List<PlexServer>, List<PlexServerDTO>>(await _plexServerService.GetAllPlexServersAsync(false));
         }
 
         // GET api/<PlexServerController>/5

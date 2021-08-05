@@ -32,6 +32,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.3.2" />
         <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
     </ItemGroup>
 

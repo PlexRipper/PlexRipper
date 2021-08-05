@@ -241,10 +241,34 @@
           }
         },
         {
+          "name": "ConfirmationSection",
+          "description": "",
+          "source": {
+            "module": "./src/pages/settings/components/ConfirmationSection.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "DarkModeToggle",
           "description": "",
           "source": {
             "module": "./src/components/General/DarkModeToggle.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "DatabaseSection",
+          "description": "",
+          "source": {
+            "module": "./src/pages/settings/components/DatabaseSection.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "DateAndTimeSection",
+          "description": "",
+          "source": {
+            "module": "./src/pages/settings/components/DateAndTimeSection.vue",
             "symbol": "default"
           }
         },
@@ -291,6 +315,14 @@
           ],
           "source": {
             "module": "./src/components/General/DateTime.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "DebugSection",
+          "description": "",
+          "source": {
+            "module": "./src/pages/settings/components/DebugSection.vue",
             "symbol": "default"
           }
         },
@@ -386,6 +418,29 @@
           }
         },
         {
+          "name": "DownloadBar",
+          "description": "",
+          "attributes": [
+            {
+              "name": "hasSelected",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "<undefined>"
+            }
+          ],
+          "source": {
+            "module": "./src/pages/downloads/components/DownloadBar.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "DownloadConfirmation",
           "description": "",
           "attributes": [
@@ -413,6 +468,84 @@
           ],
           "source": {
             "module": "./src/components/MediaOverview/MediaTable/DownloadConfirmation.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "DownloadDetailsDialog",
+          "description": "",
+          "attributes": [
+            {
+              "name": "downloadTask",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "union"
+              }
+            },
+            {
+              "name": "dialog",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            }
+          ],
+          "events": [
+            {
+              "name": "close"
+            }
+          ],
+          "source": {
+            "module": "./src/pages/downloads/components/DownloadDetailsDialog.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "DownloadManagerSection",
+          "description": "",
+          "source": {
+            "module": "./src/pages/settings/components/DownloadManagerSection.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "DownloadsTable",
+          "description": "",
+          "attributes": [
+            {
+              "name": "loading",
+              "value": {
+                "kind": "expression",
+                "type": "Boolean"
+              }
+            },
+            {
+              "name": "value",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "Array"
+              }
+            },
+            {
+              "name": "serverId",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "selected"
+            }
+          ],
+          "source": {
+            "module": "./src/pages/downloads/components/DownloadsTable.vue",
             "symbol": "default"
           }
         },
@@ -833,6 +966,51 @@
           }
         },
         {
+          "name": "NavigationBar",
+          "description": "",
+          "attributes": [
+            {
+              "name": "disableBack",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "disableNext",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "isLast",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "back"
+            },
+            {
+              "name": "next"
+            },
+            {
+              "name": "finish"
+            }
+          ],
+          "source": {
+            "module": "./src/pages/setup/components/NavigationBar.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "NavigationDrawer",
           "description": "",
           "source": {
@@ -864,6 +1042,7 @@
             {
               "name": "textId",
               "required": false,
+              "description": "The Vue-i18n text id used for the text inside the button.",
               "value": {
                 "kind": "expression",
                 "type": "string"
@@ -873,6 +1052,7 @@
             {
               "name": "tooltipId",
               "required": false,
+              "description": "The Vue-i18n text id used for the text inside the tooltip.",
               "value": {
                 "kind": "expression",
                 "type": "string"
@@ -1425,6 +1605,14 @@
           "description": "",
           "source": {
             "module": "./src/components/Navigation/ServerDrawer.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "SetupSection",
+          "description": "",
+          "source": {
+            "module": "./src/pages/settings/components/SetupSection.vue",
             "symbol": "default"
           }
         },

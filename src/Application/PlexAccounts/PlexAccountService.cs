@@ -17,15 +17,11 @@ namespace PlexRipper.Application.PlexAccounts
 
         private readonly IPlexApiService _plexApiService;
 
-        private readonly ISignalRService _signalRService;
-
-        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexApiService plexApiService,
-            ISignalRService signalRService)
+        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexApiService plexApiService)
         {
             _mediator = mediator;
             _plexServerService = plexServerService;
             _plexApiService = plexApiService;
-            _signalRService = signalRService;
         }
 
         /// <summary>
@@ -34,71 +30,60 @@ namespace PlexRipper.Application.PlexAccounts
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns>If the account credentials valid.</returns>
-        public async Task<Result<bool>> ValidatePlexAccountAsync(string username, string password)
+        public virtual async Task<Result> ValidatePlexAccountAsync(string username, string password)
         {
             if (username == string.Empty || password == string.Empty)
             {
-                string msg = "Either the username or password were empty";
-                Log.Warning(msg);
-                return Result.Fail(msg);
+                return Result.Fail("Either the username or password were empty").LogWarning();
             }
 
-            var plexAccountFromApi = await _plexApiService.PlexSignInAsync(username, password);
-            if (plexAccountFromApi == null)
+            var plexSignInResult = await _plexApiService.PlexSignInAsync(username, password);
+            if (plexSignInResult.IsFailed)
             {
                 string msg = $"The plexAccount with {username} was invalid when sent to the PlexApi";
-
-                Log.Warning(msg);
-                return Result.Fail(msg);
+                return plexSignInResult.WithError(msg).LogWarning();
             }
 
             Log.Debug($"The PlexAccount with username {username} is valid");
-            return Result.Ok(true);
-        }
-
-        /// /// <summary>
-        /// Check if this account is valid by querying the Plex API.
-        /// </summary>
-        /// <param name="plexAccount">The account to check.</param>
-        /// <returns>Are the account credentials valid.</returns>
-        public Task<Result<bool>> ValidatePlexAccountAsync(PlexAccount plexAccount)
-        {
-            return ValidatePlexAccountAsync(plexAccount.Username, plexAccount.Password);
+            return Result.Ok();
         }
 
         /// <summary>
         /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi. It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
         /// </summary>
-        /// <param name="plexAccount">The <see cref="PlexAccount"/> to setup.</param>
+        /// <param name="plexAccountId">The is of <see cref="PlexAccount"/> to setup.</param>
         /// <returns>The list of <see cref="PlexServer">PlexServers</see> which are accessible by this account.</returns>
-        private async Task<Result<List<PlexServer>>> SetupAccountAsync(PlexAccount plexAccount)
+        public virtual async Task<Result<List<PlexServer>>> SetupAccountAsync(int plexAccountId)
         {
-            if (plexAccount == null)
-                return Result.Fail("plexAccount was null").LogWarning();
-
-            if (plexAccount.Id <= 0)
-                return Result.Fail($"plexAccount.id was {plexAccount.Id}").LogWarning();
+            if (plexAccountId <= 0)
+                return Result.Fail($"plexAccount.id was {plexAccountId}").LogWarning();
 
             Log.Debug("Setting up new PlexAccount");
 
-            // Request new PlexAccount
-            var plexAccountFromApi = await _plexApiService.PlexSignInAsync(plexAccount.Username, plexAccount.Password);
-            if (plexAccountFromApi == null)
+            var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
+            if (plexAccountResult.IsFailed)
             {
-                return Result.Fail($"The plexAccount with {plexAccount.Username} was invalid when sent to the PlexApi").LogWarning();
+                return plexAccountResult.ToResult();
+            }
+
+            // Request new PlexAccount
+            var plexAccount = plexAccountResult.Value;
+            var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount.Username, plexAccount.Password);
+            if (plexSignInResult == null)
+            {
+                return Result.Fail($"The plexAccount with {plexAccountResult.Value.Username} was invalid when sent to the PlexApi").LogWarning();
             }
 
             // Merge the plexAccount from the Api into the current one.
-            plexAccount.FromPlexApi(plexAccountFromApi);
+            plexAccount.FromPlexApi(plexSignInResult.Value);
             var result = await _mediator.Send(new UpdatePlexAccountCommand(plexAccount));
-
             if (result.IsFailed)
             {
-                return result.ToResult().WithError("Failed to validate the plexAccount before the update process in the database").LogWarning();
+                return result.WithError("Failed to validate the plexAccount before the update process in the database").LogWarning();
             }
 
             // Retrieve and store servers
-            var refreshResult = await _plexServerService.RefreshPlexServersAsync(plexAccount);
+            var refreshResult = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
             if (refreshResult.IsFailed)
             {
                 return refreshResult.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
@@ -122,7 +107,7 @@ namespace PlexRipper.Application.PlexAccounts
         {
             if (plexAccountId == 0)
             {
-                var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(false, false, true));
+                var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(onlyEnabled: true));
                 if (enabledAccounts.IsFailed)
                 {
                     return enabledAccounts.ToResult();
@@ -130,7 +115,7 @@ namespace PlexRipper.Application.PlexAccounts
 
                 foreach (var plexAccount in enabledAccounts.Value)
                 {
-                    var result = await SetupAccountAsync(plexAccount);
+                    var result = await SetupAccountAsync(plexAccount.Id);
                     if (result.IsFailed)
                     {
                         return result;
@@ -139,13 +124,7 @@ namespace PlexRipper.Application.PlexAccounts
             }
             else
             {
-                var plexAccount = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
-                if (plexAccount.IsFailed)
-                {
-                    return plexAccount.ToResult();
-                }
-
-                var result = await SetupAccountAsync(plexAccount.Value);
+                var result = await SetupAccountAsync(plexAccountId);
                 if (result.IsFailed)
                 {
                     return result.ToResult();
@@ -160,7 +139,7 @@ namespace PlexRipper.Application.PlexAccounts
         /// </summary>
         /// <param name="username">The username to check for.</param>
         /// <returns>true if username is available.</returns>
-        public async Task<Result<bool>> CheckIfUsernameIsAvailableAsync(string username)
+        public virtual async Task<Result<bool>> CheckIfUsernameIsAvailableAsync(string username)
         {
             var result = await _mediator.Send(new GetPlexAccountByUsernameQuery(username));
 
@@ -237,46 +216,33 @@ namespace PlexRipper.Application.PlexAccounts
                 return result.ToResult<PlexAccount>();
             }
 
-            if (result.Value == false)
+            if (!result.Value)
             {
-                string msg =
-                    $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
-                Log.Warning(msg);
-                return result.ToResult().WithError(msg);
+                string msg = $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
+                return result.ToResult().WithError(msg).LogWarning();
             }
 
             // Check account for validity
-            var checkAccount = await ValidatePlexAccountAsync(plexAccount.Username, plexAccount.Password);
-            if (checkAccount.IsFailed || !checkAccount.Value)
+            var validatePlexAccountResult = await ValidatePlexAccountAsync(plexAccount.Username, plexAccount.Password);
+            if (validatePlexAccountResult.IsFailed)
             {
-                return checkAccount.ToResult<PlexAccount>();
+                return validatePlexAccountResult;
             }
 
             // Create PlexAccount
             var createResult = await _mediator.Send(new CreatePlexAccountCommand(plexAccount));
-
             if (createResult.IsFailed)
             {
-                string msg = "Failed to validate the PlexAccount that will be created";
-                createResult.Errors.Add(new Error(msg));
-                createResult.LogError();
                 return createResult.ToResult();
             }
 
-            // Setup PlexAccount
-            var accountInDb = await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
-            if (accountInDb.IsFailed)
-            {
-                return accountInDb;
-            }
-
-            var setupAccountResult = await SetupAccountAsync(accountInDb.Value);
+            var setupAccountResult = await SetupAccountAsync(createResult.Value);
             if (setupAccountResult.IsFailed)
             {
                 return setupAccountResult.ToResult();
             }
 
-            return await _mediator.Send(new GetPlexAccountByIdQuery(accountInDb.Value.Id, true, true));
+            return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
         }
 
         public async Task<Result<PlexAccount>> UpdatePlexAccountAsync(dynamic plexAccountDto)
@@ -303,7 +269,7 @@ namespace PlexRipper.Application.PlexAccounts
             {
                 string msg = "Failed to validate the PlexAccount that will be updated";
                 result.Errors.Add(new Error(msg));
-                return result.ToResult().LogError();
+                return result.LogError();
             }
 
             var plexAccountDb = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccount.Id));
@@ -315,7 +281,7 @@ namespace PlexRipper.Application.PlexAccounts
             // Re-validate if the password changed
             if (plexAccountDb.Value != null && plexAccountDb.Value.Password != plexAccount.Password)
             {
-                await SetupAccountAsync(plexAccountDb.Value);
+                await SetupAccountAsync(plexAccountDb.Value.Id);
                 return await GetPlexAccountAsync(plexAccountDb.Value.Id);
             }
 

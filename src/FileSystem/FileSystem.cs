@@ -168,6 +168,7 @@ namespace PlexRipper.FileSystem
 
         public Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
         {
+            Log.Debug("Looking up path: {query}");
             // If path is invalid return root file system
             if (string.IsNullOrWhiteSpace(query) || !Directory.Exists(query))
             {

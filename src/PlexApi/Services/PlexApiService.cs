@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentResults;
@@ -93,20 +92,20 @@ namespace PlexRipper.PlexApi.Services
         /// <param name="authToken">The token used to authenticate with the <see cref="PlexServer"/>.</param>
         /// <param name="plexServerBaseUrl"></param>
         /// <returns></returns>
-        public async Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken)
+        public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken)
         {
             // Retrieve updated version of the PlexLibrary
             var plexLibraries = await GetLibrarySectionsAsync(authToken, plexLibrary.ServerUrl);
 
-            if (!plexLibraries.Any())
+            if (plexLibraries.IsFailed)
             {
-                return null;
+                return plexLibraries.ToResult();
             }
 
-            var updatedPlexLibrary = plexLibraries.Find(x => x.Key == plexLibrary.Key);
+            var updatedPlexLibrary = plexLibraries.Value.Find(x => x.Key == plexLibrary.Key);
             updatedPlexLibrary.Id = plexLibrary.Id;
             updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
-            updatedPlexLibrary.CheckedAt = DateTime.Now;
+            updatedPlexLibrary.SyncedAt = DateTime.Now;
 
             // Retrieve the media for this library
             var result = await _plexApi.GetMetadataForLibraryAsync(authToken, plexLibrary.ServerUrl, plexLibrary.Key);
@@ -129,7 +128,7 @@ namespace PlexRipper.PlexApi.Services
                     break;
             }
 
-            return updatedPlexLibrary;
+            return Result.Ok(updatedPlexLibrary);
         }
 
         /// <summary>
@@ -138,18 +137,18 @@ namespace PlexRipper.PlexApi.Services
         /// <param name="authToken">The token used to authenticate with the <see cref="PlexServer"/>.</param>
         /// <param name="plexServerBaseUrl">The full PlexServer Url.</param>
         /// <returns>List of accessible <see cref="PlexLibrary"/>.</returns>
-        public async Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl)
+        public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl)
         {
             var result = await _plexApi.GetLibrarySectionsAsync(authToken, plexServerBaseUrl);
-            if (result == null)
+            if (result.IsFailed)
             {
                 Log.Warning($"{plexServerBaseUrl} returned no libraries");
-                return new List<PlexLibrary>();
+                return result.ToResult();
             }
 
-            var directories = result.MediaContainer.Directory;
+            var directories = result.Value.MediaContainer.Directory;
 
-            return _mapper.Map<List<PlexLibrary>>(directories);
+            return Result.Ok(_mapper.Map<List<PlexLibrary>>(directories));
         }
 
         public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey)
@@ -188,23 +187,19 @@ namespace PlexRipper.PlexApi.Services
             return new List<PlexServer>();
         }
 
-        public async Task<PlexAccount> PlexSignInAsync(string username, string password)
+        public async Task<Result<PlexAccount>> PlexSignInAsync(string username, string password)
         {
             var result = await _plexApi.PlexSignInAsync(username, password);
-            if (result != null)
+            if (result.IsSuccess)
             {
-                var mapResult = _mapper.Map<PlexAccount>(result.User);
-                if (mapResult != null)
-                {
-                    mapResult.IsValidated = true;
-                    mapResult.ValidatedAt = DateTime.Now;
-                    Log.Information($"Successfully retrieved the PlexAccount data for user {username} from the PlexApi");
-                    return mapResult;
-                }
+                var mapResult = _mapper.Map<PlexAccount>(result.Value.User);
+                mapResult.IsValidated = true;
+                mapResult.ValidatedAt = DateTime.Now;
+                Log.Information($"Successfully retrieved the PlexAccount data for user {username} from the PlexApi");
+                return Result.Ok(mapResult);
             }
 
-            Log.Warning("The result from the PlexSignIn was null");
-            return null;
+            return Result.Fail("The result from the PlexSignIn was null").LogWarning();
         }
 
         public Task<string> RefreshPlexAuthTokenAsync(PlexAccount account)

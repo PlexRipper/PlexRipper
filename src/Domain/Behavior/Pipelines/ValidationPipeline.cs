@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
@@ -30,7 +31,7 @@ namespace PlexRipper.Domain.Behavior.Pipelines
             if (!fluentValidationResult.IsValid)
             {
                 var result = new TResponse();
-                var error = ResultExtensions.Get400BadRequestError();
+                var error = ResultExtensions.Create400BadRequestResult("Fluent Validation Pipeline Failed.").Errors.First();
                 foreach (var reason in fluentValidationResult.Errors)
                 {
                     error.Reasons.Add(new Error(reason.ErrorMessage));

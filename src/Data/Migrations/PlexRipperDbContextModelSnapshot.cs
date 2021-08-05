@@ -391,12 +391,6 @@ namespace PlexRipper.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("CheckedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("ContentChangedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -419,6 +413,9 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("ScannedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("SyncedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")

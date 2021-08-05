@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Autofac;
+using Autofac.Extras.Quartz;
 using FluentValidation;
 using MediatR;
 using PlexRipper.Application.Common;
@@ -37,6 +38,10 @@ namespace PlexRipper.Application.Config
                 .Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces()
                 .InstancePerDependency();
+
+            // Register Quartz dependancies
+            builder.RegisterModule(new QuartzAutofacFactoryModule());
+            builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
         }
     }
 }

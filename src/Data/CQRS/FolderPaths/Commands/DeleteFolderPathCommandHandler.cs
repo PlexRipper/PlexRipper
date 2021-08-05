@@ -28,7 +28,7 @@ namespace PlexRipper.Data.CQRS.FolderPaths
 
             if (folderPath == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(FolderPath), command.Id);
+                return ResultExtensions.EntityNotFound(nameof(FolderPath), command.Id);
             }
 
             _dbContext.FolderPaths.Remove(folderPath);

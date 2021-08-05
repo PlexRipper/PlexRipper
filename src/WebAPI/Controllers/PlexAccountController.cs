@@ -96,7 +96,8 @@ namespace PlexRipper.WebAPI.Controllers
             }
 
             var mapResult = _mapper.Map<PlexAccount>(newAccount);
-            return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.CreatePlexAccountAsync(mapResult));
+            var createResult = await _plexAccountService.CreatePlexAccountAsync(mapResult);
+            return ToActionResult<PlexAccount, PlexAccountDTO>(createResult);
         }
 
         // DELETE api/<AccountController>/5
@@ -116,39 +117,13 @@ namespace PlexRipper.WebAPI.Controllers
         }
 
         [HttpPost("validate")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Validate([FromBody] CredentialsDTO account)
         {
-            try
-            {
-                var result = await _plexAccountService.ValidatePlexAccountAsync(account.Username, account.Password);
-
-                if (result.IsFailed)
-                {
-                    string msg = $"The account failed to validate, {result}";
-                    Log.Error(msg);
-                    return BadRequest(result.WithError(msg));
-                }
-
-                if (result.Value)
-                {
-                    string msg = $"Account with username: {account.Username} was valid";
-                    Log.Information(msg);
-                    return Ok(Result.Ok(true).WithSuccess(msg));
-                }
-                else
-                {
-                    string msg = $"Account with username: {account.Username} was invalid";
-                    Log.Warning(msg);
-                    return Ok(Result.Fail(msg));
-                }
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            var result = await _plexAccountService.ValidatePlexAccountAsync(account.Username, account.Password);
+            return ToActionResult(result);
         }
 
         [HttpGet("check/{username}")]

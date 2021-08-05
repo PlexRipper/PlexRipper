@@ -9,11 +9,6 @@ namespace PlexRipper.BaseTests
     {
         static ITestOutputHelper Output;
 
-        public static ILogger GetLogger<T>()
-        {
-            return GetLoggerConfig().ForContext<T>();
-        }
-
         public static void SetupLogging(ITestOutputHelper output)
         {
             Output = output;
@@ -25,6 +20,7 @@ namespace PlexRipper.BaseTests
             var config = LogConfigurationExtensions.GetBaseConfiguration;
             return config
                 .WriteTo.TestOutput(Output, outputTemplate: LogConfigurationExtensions.Template)
+                .WriteTo.TestCorrelator()
                 .CreateLogger();
         }
     }

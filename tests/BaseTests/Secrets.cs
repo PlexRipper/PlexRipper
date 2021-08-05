@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests
 {
@@ -23,8 +24,7 @@ namespace PlexRipper.BaseTests
                 }
             }
 
-            //LoggerExtensions.LogWarning(BaseDependanciesTest
-            //        .GetLogger<BaseServiceTest>(), "MAKE SURE TO CREATE A \"secretCredentials.json\" IN THE Infrastructure.UnitTests project TO START TESTING!");
+            Log.Error("No credentials found to use for integration testing!");
             return new TestCredentialsDTO();
         }
 

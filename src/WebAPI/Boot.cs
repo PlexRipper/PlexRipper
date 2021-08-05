@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using PlexRipper.Application;
 using PlexRipper.Application.Common;
 using PlexRipper.Data;
 using PlexRipper.Domain;
@@ -25,10 +26,12 @@ namespace PlexRipper.WebAPI
 
         private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
 
+        private readonly ISchedulerService _schedulerService;
+
         private readonly PlexRipperDbContext _dbContext;
 
         public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
-            IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService,
+            IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
             PlexRipperDbContext dbContext)
         {
             _appLifetime = appLifetime;
@@ -37,6 +40,7 @@ namespace PlexRipper.WebAPI
             _fileMerger = fileMerger;
             _downloadManager = downloadManager;
             _plexRipperDatabaseService = plexRipperDatabaseService;
+            _schedulerService = schedulerService;
             _dbContext = dbContext;
         }
 
@@ -51,8 +55,12 @@ namespace PlexRipper.WebAPI
             await _userSettings.SetupAsync();
 
             // Keep running the following
-            var fileMergerSetup = Task.Factory.StartNew(() => _fileMerger.SetupAsync(), TaskCreationOptions.LongRunning);
-            await Task.WhenAll(fileMergerSetup);
+            if (!EnviromentExtensions.IsIntegrationTestMode())
+            {
+                var fileMergerSetup = Task.Factory.StartNew(() => _fileMerger.SetupAsync(), TaskCreationOptions.LongRunning);
+                await Task.WhenAll(fileMergerSetup);
+                await _schedulerService.SetupAsync();
+            }
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

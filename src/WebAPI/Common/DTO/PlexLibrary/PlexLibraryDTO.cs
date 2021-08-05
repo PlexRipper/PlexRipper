@@ -29,8 +29,11 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("scannedAt", Required = Required.Always)]
         public DateTime ScannedAt { get; set; }
 
-        [JsonProperty("contentChangedAt", Required = Required.Always)]
-        public DateTime ContentChangedAt { get; set; }
+        [JsonProperty("syncedAt", Required = Required.Always)]
+        public DateTime SyncedAt { get; set; }
+
+        [JsonProperty("outdated", Required = Required.Always)]
+        public bool Outdated { get; set; }
 
         [JsonProperty("uuid", Required = Required.Always)]
         public Guid Uuid { get; set; }

@@ -11,9 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{6ED356A7-8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{664D406C-2F83-48F0-BFC3-408D5CB53C65}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.UnitTests", "tests\Application.UnitTests\Application.UnitTests.csproj", "{DEFF4009-1FAB-4392-80B6-707E2DC5C00B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.UnitTests", "tests\UnitTests\Application.UnitTests\Application.UnitTests.csproj", "{DEFF4009-1FAB-4392-80B6-707E2DC5C00B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.IntegrationTests", "tests\Applicaton.IntegrationTests\Application.IntegrationTests.csproj", "{4FF7E541-E4BA-4FF4-BE25-EC907D92BDA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.IntegrationTests", "tests\IntegrationTests\Applicaton.IntegrationTests\Application.IntegrationTests.csproj", "{4FF7E541-E4BA-4FF4-BE25-EC907D92BDA8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "src\WebAPI\WebAPI.csproj", "{1D811D12-E2B0-41F0-9C95-EDF06E4904F0}"
 EndProject
@@ -25,13 +25,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Settings", "src\Settings\Settings.csproj", "{0850F917-C0C1-47F9-BD2D-D50F22AE0ABB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Settings.UnitTests", "tests\Settings.UnitTests\Settings.UnitTests.csproj", "{3A0351BE-B85A-4EDE-95ED-3E1DCEFB9171}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Settings.UnitTests", "tests\UnitTests\Settings.UnitTests\Settings.UnitTests.csproj", "{3A0351BE-B85A-4EDE-95ED-3E1DCEFB9171}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlexApi", "src\PlexApi\PlexApi.csproj", "{A143C6A7-68B0-4C85-8856-F11B1A1B8789}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{3A45E7B9-88B6-41B4-BC14-1814F17ABCB7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlexApi.UnitTests", "tests\PlexApi.UnitTests\PlexApi.UnitTests.csproj", "{F73B439B-9DD6-4958-8D86-FBC8CFCB1799}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlexApi.UnitTests", "tests\UnitTests\PlexApi.UnitTests\PlexApi.UnitTests.csproj", "{F73B439B-9DD6-4958-8D86-FBC8CFCB1799}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseTests", "tests\BaseTests\BaseTests.csproj", "{AEBDD5D0-B66A-487B-A5D7-15432164907E}"
 EndProject
@@ -41,7 +41,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "src\Data\Data.cspro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileSystem", "src\FileSystem\FileSystem.csproj", "{E19F855E-B9CC-4A8D-982E-6BCCE0A58348}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DownloadManager.IntegrationTests", "tests\DownloadManager.IntegrationTests\DownloadManager.IntegrationTests.csproj", "{E0E9AA81-AF60-4019-9AB8-811AFC39DE24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DownloadManager.IntegrationTests", "tests\IntegrationTests\DownloadManager.IntegrationTests\DownloadManager.IntegrationTests.csproj", "{E0E9AA81-AF60-4019-9AB8-811AFC39DE24}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B5DD9F30-A643-4E3C-B375-5EBF2FB2CBAC}"
 	ProjectSection(SolutionItems) = preProject
@@ -52,7 +52,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpClient", "src\HttpClien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentResultExtensions", "src\FluentResultExtensions\FluentResultExtensions.csproj", "{985E17A9-D6EE-458A-931B-108A7D11A3AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentResultExtension.UnitTests", "tests\FluentResultExtension.UnitTests\FluentResultExtension.UnitTests.csproj", "{BE543CE5-0D3B-4463-97BF-E5A97F035EE5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentResultExtension.UnitTests", "tests\UnitTests\FluentResultExtension.UnitTests\FluentResultExtension.UnitTests.csproj", "{BE543CE5-0D3B-4463-97BF-E5A97F035EE5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "IntegrationTests", "{DABD59AB-7F20-4D04-8601-9EC7BE2F4373}"
 EndProject

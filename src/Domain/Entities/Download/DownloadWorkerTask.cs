@@ -12,8 +12,6 @@ namespace PlexRipper.Domain
     {
         #region Constructors
 
-        private DownloadWorkerTask() { }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="DownloadWorkerTask"/> class.
         /// </summary>
@@ -32,6 +30,8 @@ namespace PlexRipper.Domain
             StartByte = startPosition;
             EndByte = endPosition;
         }
+
+        private DownloadWorkerTask() { }
 
         #endregion
 

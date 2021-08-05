@@ -44,7 +44,7 @@ namespace PlexRipper.Domain
         public int MetaDataKey { get; set; }
 
         /// <summary>
-        /// Gets or sets whether this <see cref="PlexMedia"/> has a thumbnail.
+        /// Gets or sets a value indicating whether this <see cref="PlexMedia"/> has a thumbnail.
         /// </summary>
         [Column(Order = 7)]
         public bool HasThumb { get; set; }

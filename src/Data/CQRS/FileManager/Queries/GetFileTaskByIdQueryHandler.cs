@@ -35,7 +35,7 @@ namespace PlexRipper.Data.CQRS.FileManager
 
             if (fileTask == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(DownloadFileTask), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(DownloadFileTask), request.Id);
             }
 
             return Result.Ok(fileTask);

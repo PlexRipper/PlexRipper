@@ -70,11 +70,7 @@ namespace PlexRipper.Data
 
         #endregion
 
-        public static bool IsTestMode => Environment.GetEnvironmentVariable("IntegrationTestMode") is "true";
-
-        public static bool ResetDatabase => Environment.GetEnvironmentVariable("ResetDB") is "true";
-
-        public static string DatabaseName => IsTestMode ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
+        public static string DatabaseName => EnviromentExtensions.IsIntegrationTestMode() ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
 
         public readonly string DatabasePath = Path.Combine(FileSystemPaths.ConfigDirectory, DatabaseName);
 
@@ -93,13 +89,13 @@ namespace PlexRipper.Data
         public async Task<Result> SetupAsync()
         {
             // Should the Database be deleted and re-created
-            if (ResetDatabase)
+            if (EnviromentExtensions.IsResetDatabase())
             {
                 Log.Warning("ResetDB command is true, database will be deleted and re-created.");
                 await Database.EnsureDeletedAsync();
             }
 
-            if (IsTestMode)
+            if (EnviromentExtensions.IsIntegrationTestMode())
             {
                 Log.Information("Database will be setup in TestMode");
                 await Database.EnsureCreatedAsync();
@@ -107,7 +103,7 @@ namespace PlexRipper.Data
 
             try
             {
-                if (!IsTestMode)
+                if (!EnviromentExtensions.IsIntegrationTestMode())
                 {
                     Log.Information("Attempting to migrate database");
                     await Database.MigrateAsync();

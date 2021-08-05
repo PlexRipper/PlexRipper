@@ -35,7 +35,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
             var status = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (status == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexServerStatus), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexServerStatus), request.Id);
             }
 
             return Result.Ok(status);

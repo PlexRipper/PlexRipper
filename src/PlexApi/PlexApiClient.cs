@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FluentResults;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Config.Converters;
@@ -45,25 +47,42 @@ namespace PlexRipper.PlexApi
             _client.UseSystemTextJson(SerializerOptions);
             _client.UseDotNetXmlSerializer();
             _client.Timeout = 10000;
-
             _client.ThrowOnAnyError = true;
         }
 
-        public async Task<Result<T>> SendRequestAsync<T>(RestRequest request)
+        public async Task<Result<T>> SendRequestAsync<T>(RestRequest request, Action<PlexApiClientProgress> action = null)
         {
-            IRestResponse<T> response = null;
+            IRestResponse<T> response;
 
             request = AddHeaders(request);
 
+            var retryAttemptCount = 3;
             var policyResult = await Policy
                 .Handle<WebException>()
+                .OrInner<InvalidOperationException>()
+                .OrInner<HttpRequestException>()
                 .OrResult<IRestResponse<T>>(x => invalidStatusCodes.Contains(x.StatusCode) || x.StatusCode == 0)
-                .WaitAndRetryAsync(3, retryAttempt =>
+                .WaitAndRetryAsync(retryAttemptCount, retryAttempt =>
                     {
                         var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
                         Log.Warning($"Waiting {timeToWait.TotalSeconds} seconds before retrying again.");
                         return timeToWait;
-                    }, (result, span) => { Log.Error(result.Result.ErrorException); }
+                    },
+                    (outcome, timespan, retryAttempt, _) =>
+                    {
+                        if (action is not null)
+                        {
+                            action(new PlexApiClientProgress
+                            {
+                                TimeToNextRetry = (int)timespan.TotalSeconds,
+                                RetryAttemptIndex = retryAttempt,
+                                RetryAttemptCount = retryAttemptCount,
+                                Message = outcome.Result.ErrorMessage,
+                            });
+                        }
+
+                        Log.Error(outcome.Result.ErrorMessage);
+                    }
                 ).ExecuteAndCaptureAsync(() => _client.ExecuteAsync<T>(request));
 
             if (policyResult.Outcome == OutcomeType.Successful)
@@ -82,22 +101,57 @@ namespace PlexRipper.PlexApi
             var metaData = GetMetadata(response);
             if (response.IsSuccessful)
             {
+                if (action is not null)
+                {
+                    action(new PlexApiClientProgress
+                    {
+                        StatusCode = (int)response.StatusCode,
+                        Message = "Request successful.",
+                        ConnectionSuccessful = true,
+                        Completed = true,
+                    });
+                }
+
                 var result = Result.Ok(response.Data)
                     .WithReason(new Success($"Request to {response.ResponseUri} was successful!"))
                     .LogDebug();
                 Log.Verbose($"Response was: {response.Content}");
+
                 return result;
             }
 
             if (response.ErrorException != null)
             {
+                if (action is not null)
+                {
+                    action(new PlexApiClientProgress
+                    {
+                        StatusCode = (int)response.StatusCode,
+                        Message = response.ErrorMessage,
+                        ConnectionSuccessful = false,
+                        Completed = true,
+                    });
+                }
+
                 return Result.Fail(new ExceptionalError(response.ErrorException).WithMessage(
                             $"PlexApi Error: Error on request to {response.ResponseUri} ({response.StatusCode}) - {response.Content}")
                         .WithMetadata(metaData))
                     .LogError();
             }
 
-            return Result.Fail(new Error($"Time-out error on request {request.Resource}").WithMetadata(metaData)).LogError();
+            string msg = $"Time-out error on request {request.Resource}";
+            if (action is not null)
+            {
+                action(new PlexApiClientProgress
+                {
+                    StatusCode = (int)response.StatusCode,
+                    Message = response.ErrorMessage,
+                    ConnectionSuccessful = false,
+                    Completed = true,
+                });
+            }
+
+            return Result.Fail(new Error(msg).WithMetadata(metaData)).LogError();
         }
 
         public async Task<byte[]> SendImageRequestAsync(RestRequest request)

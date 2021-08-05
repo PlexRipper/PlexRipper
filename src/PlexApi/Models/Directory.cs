@@ -65,8 +65,7 @@ namespace PlexRipper.PlexApi.Models
         public bool IsDirectory { get; set; }
 
         [JsonPropertyName("contentChangedAt")]
-        [JsonConverter(typeof(LongToDateTime))]
-        public DateTime ContentChangedAt { get; set; }
+        public long ContentChangedAt { get; set; }
 
         [JsonPropertyName("Location")]
         public List<Location> Location { get; set; }

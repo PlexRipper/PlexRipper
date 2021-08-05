@@ -31,7 +31,7 @@ namespace PlexRipper.Data.CQRS.FolderPaths
 
             if (folderPath == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(FolderPath), command.FolderPath.Id);
+                return ResultExtensions.EntityNotFound(nameof(FolderPath), command.FolderPath.Id);
             }
 
             _dbContext.Entry(folderPath).CurrentValues.SetValues(command.FolderPath);

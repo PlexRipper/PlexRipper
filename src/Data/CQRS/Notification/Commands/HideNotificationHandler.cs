@@ -28,7 +28,7 @@ namespace PlexRipper.Data.CQRS
             var notification = _dbContext.Notifications.AsTracking().FirstOrDefault(x => x.Id == command.Id);
             if (notification == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(Notification), command.Id);
+                return ResultExtensions.EntityNotFound(nameof(Notification), command.Id);
             }
 
             notification.Hidden = true;

@@ -28,7 +28,7 @@ namespace PlexRipper.Data.CQRS
 
             if (plexAccount == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexAccount), command.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexAccount), command.Id);
             }
 
             _dbContext.PlexAccounts.Remove(plexAccount);

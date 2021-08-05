@@ -88,11 +88,10 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { FolderPathDTO, FolderType, PlexLibraryDTO, PlexMediaType, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { FolderPathService, LibraryService, ServerService } from '@service';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 
 @Component
@@ -137,7 +136,6 @@ export default class ServerDialog extends Vue {
 		this.$subscribeTo(
 			this.$watchAsObservable('serverId').pipe(
 				map((x: { oldValue: number; newValue: number }) => x.newValue),
-				tap((value) => Log.debug('new value:', value)),
 				switchMap((value) =>
 					combineLatest([
 						ServerService.getServer(value),

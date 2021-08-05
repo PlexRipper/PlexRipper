@@ -27,7 +27,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
         public async Task<Result<PlexServer>> Handle(GetPlexServerByIdQuery request,
             CancellationToken cancellationToken)
         {
-            var query = _dbContext.PlexServers
+            var query = PlexServerQueryable
                 .Include(x => x.ServerStatus)
                 .AsQueryable();
 
@@ -41,7 +41,7 @@ namespace PlexRipper.Data.CQRS.PlexServers
 
             if (plexServer == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexServer), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexServer), request.Id);
             }
 
             return Result.Ok(plexServer);

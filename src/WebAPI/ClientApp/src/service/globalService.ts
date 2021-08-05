@@ -13,6 +13,22 @@ import { RuntimeConfig } from '~/type_definitions/vueTypes';
 export class GlobalService extends Service.BaseService {
 	private _axiosReady: ReplaySubject<void> = new ReplaySubject();
 	private _configReady: ReplaySubject<AppConfig> = new ReplaySubject();
+	private _defaultStore: IStoreState = {
+		accounts: [],
+		servers: [],
+		downloads: [],
+		libraries: [],
+		mediaUrls: [],
+		notifications: [],
+		folderPaths: [],
+		alerts: [],
+		helpIdDialog: '',
+		settings: {} as SettingsModel,
+		downloadTaskUpdateList: [],
+		// Progress Service
+		fileMergeProgressList: [],
+		inspectServerProgress: [],
+	};
 
 	constructor() {
 		super({} as ObservableStoreSettings);
@@ -26,20 +42,7 @@ export class GlobalService extends Service.BaseService {
 	public setup(nuxtContext: Context): void {
 		super.setup(nuxtContext);
 
-		ObservableStore.initializeState({
-			accounts: [],
-			servers: [],
-			downloads: [],
-			libraries: [],
-			mediaUrls: [],
-			notifications: [],
-			folderPaths: [],
-			alerts: [],
-			helpIdDialog: '',
-			settings: {} as SettingsModel,
-			fileMergeProgressList: [],
-			downloadTaskUpdateList: [],
-		} as IStoreState);
+		ObservableStore.initializeState(this._defaultStore);
 
 		for (const key of Object.keys(Service)) {
 			if (key === 'BaseService' || key === 'GlobalService') {
@@ -49,6 +52,10 @@ export class GlobalService extends Service.BaseService {
 				Service[key].setup(nuxtContext);
 			}
 		}
+	}
+
+	public resetStore(): void {
+		this.setState(this._defaultStore);
 	}
 
 	public setConfigReady(config: RuntimeConfig): void {

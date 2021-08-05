@@ -17,6 +17,7 @@ namespace PlexRipper.WebAPI.Config
             // Result -> ResultDTO
             CreateMap<Result, ResultDTO>(MemberList.None);
             CreateMap(typeof(Result<>), typeof(ResultDTO<>), MemberList.None);
+            CreateMap(typeof(Result<>), typeof(ResultDTO), MemberList.None);
 
             // CreatePlexAccountDTO -> PlexAccount
             CreateMap<CreatePlexAccountDTO, PlexAccount>(MemberList.Source)

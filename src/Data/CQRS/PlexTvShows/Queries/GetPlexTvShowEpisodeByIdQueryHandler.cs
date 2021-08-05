@@ -33,7 +33,7 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
             if (plexTvShowEpisode == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(PlexTvShowEpisode), request.Id);
+                return ResultExtensions.EntityNotFound(nameof(PlexTvShowEpisode), request.Id);
             }
 
             return Result.Ok(plexTvShowEpisode);

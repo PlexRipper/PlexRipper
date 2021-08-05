@@ -18,6 +18,8 @@ import { getSettings, updateSettings } from '@api/settingsApi';
 import { Context } from '@nuxt/types';
 
 export class SettingsService extends BaseService {
+	// region Constructor and Setup
+
 	public constructor() {
 		super({
 			stateSliceSelector: (state: IStoreState) => {
@@ -35,20 +37,31 @@ export class SettingsService extends BaseService {
 		GlobalService.getAxiosReady()
 			.pipe(
 				tap(() => Log.debug('Retrieving settings')),
-				switchMap(() => getSettings()),
+				switchMap(() => this.fetchSettings()),
 				take(1),
 			)
-			.subscribe((settings) => {
-				if (settings.isSuccess) {
-					this.setState({ settings: settings.value });
-				}
-			});
+			.subscribe();
 
 		// On settings service update => send update to back-end
 		this.getSettings()
 			.pipe(switchMap((settings) => updateSettings(settings)))
 			.subscribe();
 	}
+	// endregion
+
+	// region Fetch
+	public fetchSettings(): Observable<SettingsModel | null> {
+		return getSettings().pipe(
+			switchMap((settingsResult) => of(settingsResult?.value ?? null)),
+			tap((settings) => {
+				Log.debug(`SettingsService => Fetch Settings`, settings);
+				if (settings) {
+					this.setState({ settings }, 'Fetch Settings');
+				}
+			}),
+		);
+	}
+	// endregion
 
 	// region Settings
 	public getSettings(): Observable<SettingsModel> {
@@ -177,7 +190,7 @@ export class SettingsService extends BaseService {
 	}
 
 	public getDownloadManagerSettings(): Observable<DownloadManagerModel> {
-		return this.getAdvancedSettings().pipe(switchMap((x) => of(x.downloadManager)));
+		return this.getAdvancedSettings().pipe(switchMap((x) => of(x?.downloadManager)));
 	}
 
 	public updateAdvancedSettings(advancedSettings: AdvancedSettingsModel): void {

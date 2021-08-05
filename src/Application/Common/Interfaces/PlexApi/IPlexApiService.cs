@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Domain;
@@ -15,7 +16,7 @@ namespace PlexRipper.Application.Common
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        Task<PlexAccount> PlexSignInAsync(string username, string password);
+        Task<Result<PlexAccount>> PlexSignInAsync(string username, string password);
 
         Task<string> RefreshPlexAuthTokenAsync(PlexAccount account);
 
@@ -28,7 +29,7 @@ namespace PlexRipper.Application.Common
         /// <returns>The accessible <see cref="PlexServer"/>s.</returns>
         Task<List<PlexServer>> GetServersAsync(string plexAccountToken);
 
-        Task<List<PlexLibrary>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl);
+        Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl);
 
         /// <summary>
         ///     Returns and PlexLibrary container with either Movies, Series, Music or Photos depending on the type.
@@ -36,13 +37,13 @@ namespace PlexRipper.Application.Common
         /// <param name="plexLibrary"></param>
         /// <param name="authToken"></param>
         /// <returns></returns>
-        Task<PlexLibrary> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken);
+        Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken);
 
         Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl);
 
         Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey);
 
-        Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl);
+        Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl, Action<PlexApiClientProgress> action = null);
 
         Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
 

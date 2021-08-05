@@ -4,6 +4,11 @@
 
 Tired of searching for media on different torrent websites or paying for Usenet server access? Well look no further! You can now use PlexRipper to download "everything" from the Plex servers you have access to and expand your collection that way! Let others collect media for you and then just download everything!
 
+## Goals
+
+- Be the best crossplatform Plex downloader there is!
+- Be on the same level of awesomeness as [Radarr](https://github.com/Radarr/Radarr) and [Sonarr](https://github.com/Sonarr/Sonarr)!
+
 ## Current Features
 
 - Runs in a Docker container and can be deployed on any type of platform that can host a Docker container!
@@ -50,14 +55,21 @@ Make PlexRipper easier to use for everyone by translating it to your native lang
 4. Translate only the text after the ":"!
 5. When finished, either create a pull request or send it to  [plexripper@protonmail.com](mailto:plexripper@protonmail.com?subject=[PlexRipper%20Translation])
 
+## Similar Projects
+
+- [plexmedia-downloader](https://github.com/codedninja/plexmedia-downloader)
+- [Saverr](https://github.com/ninthwalker/saverr)
+- [PlexDL](https://github.com/BRH-Media/PlexDL)
+  
 ## Credits
 
 An absolute massive thank you to the following people!
 
 - [Ninthwalker](https://github.com/ninthwalker) for his great work on [Saverr](https://github.com/ninthwalker/saverr), which showed me the method of downloading media from Plex!
 - [Michael Altmann](https://github.com/altmann) for his awesome work on [Fluent Results](https://github.com/altmann/FluentResults) and the time he spent helping with making Fluent Results work in PlexRipper!
+- [Dan Wahlin](https://github.com/DanWahlin) for his awesome work on [Observable-Store](https://github.com/DanWahlin/Observable-Store) and the time he spent helping me out with my questions!
 - [Lenty Sprangers](https://github.com/LentySprangers) for the logo design!
 - [Jetbrains](https://www.jetbrains.com/) for their awesome development tools, in paticular [Rider](https://www.jetbrains.com/rider/) and [Webstorm](https://www.jetbrains.com/webstorm/)!
 - The developers and contributers behind the amazing [Vue.js](https://vuejs.org/), [Vuetify](https://vuetifyjs.com/en/), [Nuxt.js](https://nuxtjs.org/) and [RxJS](https://www.learnrxjs.io/)!
 - The developers and contributers behind the beautiful [Vanta.js](https://www.vantajs.com/) project that is used to show some of the awesome backgrounds in PlexRipper!
-- Several Reddit users over in [/r/Plex](https://old.reddit.com/r/PleX/) for being a pain in the ass several months ago and motivating me to create PlexRipper.
+- Several Reddit users over in [/r/Plex](https://old.reddit.com/r/PleX/) for being a pain in the ass and motivating me to create PlexRipper.

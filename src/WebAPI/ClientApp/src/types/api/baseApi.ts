@@ -19,10 +19,12 @@ export function checkResponse<T = ResultDTO>(response: AxiosObservable<T>, logTe
 				switch (res.status) {
 					case 400:
 						Log.error(`${logText}${fnName} => Bad Request (400) from response:`, res.request);
+						AlertService.showAlert({ id: 0, title: 'Bad Request (400)', text: '', result: response });
 						return;
 
 					case 404:
 						Log.error(`${logText}${fnName} => Not Found (404) from response:`, res.request);
+						AlertService.showAlert({ id: 0, title: 'Not Found (404)', text: '', result: response });
 						return;
 
 					case 500:
@@ -32,6 +34,7 @@ export function checkResponse<T = ResultDTO>(response: AxiosObservable<T>, logTe
 
 					default:
 						Log.error(`${logText}${fnName} => Unknown Error (Status ${res.status}) from response:`, res.request);
+						AlertService.showAlert({ id: 0, title: 'Unknown Error', text: '', result: response });
 						break;
 				}
 			}

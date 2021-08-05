@@ -28,7 +28,7 @@ namespace PlexRipper.Data.CQRS.FileManager
 
             if (downloadFileTask == null)
             {
-                return ResultExtensions.GetEntityNotFound(nameof(DownloadFileTask), command.Id);
+                return ResultExtensions.EntityNotFound(nameof(DownloadFileTask), command.Id);
             }
 
             _dbContext.FileTasks.Remove(downloadFileTask);

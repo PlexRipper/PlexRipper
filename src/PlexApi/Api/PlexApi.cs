@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentResults;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
@@ -21,8 +23,6 @@ namespace PlexRipper.PlexApi.Api
 
         private const string SignInUri = "https://plex.tv/users/sign_in.json";
 
-        private const string FriendsUri = "https://plex.tv/pms/friends/all";
-
         private const string GetAccountUri = "https://plex.tv/users/account.json";
 
         private const string ServerUri = "https://plex.tv/pms/servers.xml";
@@ -35,7 +35,7 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public async Task<PlexAccountDTO> PlexSignInAsync(string username, string password)
+        public async Task<Result<PlexAccountDTO>> PlexSignInAsync(string username, string password)
         {
             var userModel = new PlexUserRequest
             {
@@ -48,30 +48,29 @@ namespace PlexRipper.PlexApi.Api
             var request = new RestRequest(new Uri(SignInUri), Method.POST);
             request.AddJsonBody(userModel);
 
-            var result = await _client.SendRequestAsync<PlexAccountDTO>(request);
-            return result.ValueOrDefault;
+            return await _client.SendRequestAsync<PlexAccountDTO>(request);
         }
 
         public async Task<string> RefreshPlexAuthTokenAsync(PlexAccount plexAccount)
         {
             var result = await PlexSignInAsync(plexAccount.Username, plexAccount.Password);
-            if (result != null)
+            if (result.IsSuccess)
             {
-                Log.Information($"Returned token was: {result.User.AuthenticationToken}");
-                return result.User.AuthenticationToken;
+                Log.Information($"Returned token was: {result.Value.User.AuthenticationToken}");
+                return result.Value.User.AuthenticationToken;
             }
 
             Log.Error("Result from RequestPlexSignInDataAsync() was null.");
             return string.Empty;
         }
 
-        public async Task<PlexServerStatus> GetServerStatusAsync(string authToken, string serverBaseUrl)
+        public async Task<PlexServerStatus> GetServerStatusAsync(string authToken, string serverBaseUrl, Action<PlexApiClientProgress> action = null)
         {
             // TODO Use healthCheck from here:
             // https://github.com/Arcanemagus/plex-api/wiki/Plex-Web-API-Overview
             var request = new RestRequest(new Uri($"{serverBaseUrl}/identity"), Method.GET);
             request.AddToken(authToken);
-            var response = await _client.SendRequestAsync<RestResponse>(request);
+            var response = await _client.SendRequestAsync<RestResponse>(request, action);
             if (response.IsFailed)
             {
                 var error = response.Errors.First();
@@ -123,13 +122,12 @@ namespace PlexRipper.PlexApi.Api
         /// <param name="plexAuthToken"></param>
         /// <param name="plexFullHost"></param>
         /// <returns></returns>
-        public async Task<PlexMediaContainerDTO> GetLibrarySectionsAsync(string plexAuthToken, string plexFullHost)
+        public async Task<Result<PlexMediaContainerDTO>> GetLibrarySectionsAsync(string plexAuthToken, string plexFullHost)
         {
             var request = new RestRequest(new Uri($"{plexFullHost}/library/sections"), Method.GET);
             request.AddToken(plexAuthToken);
             Log.Debug($"GetLibrarySectionsAsync => {request.Resource}");
-            var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-            return result.ValueOrDefault;
+            return await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
         }
 
         public async Task<PlexMediaContainerDTO> GetMetadataForLibraryAsync(string authToken, string plexServerBaseUrl, string libraryKey)

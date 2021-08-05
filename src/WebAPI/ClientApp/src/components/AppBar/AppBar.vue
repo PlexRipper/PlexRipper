@@ -26,11 +26,6 @@
 					<v-list-item v-for="(account, index) in accounts" :key="index" @click="updateActiveAccountId(account.id)">
 						<v-list-item-content>
 							<v-list-item-title> {{ account.displayName }}</v-list-item-title>
-							<progress-component
-								v-if="getRefreshProgress(account.id)"
-								:show-circular="false"
-								:percentage="getRefreshProgress(account.id).percentage"
-							/>
 						</v-list-item-content>
 						<v-list-item-action>
 							<v-btn
@@ -58,12 +53,9 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { GlobalService, SettingsService, AccountService, SignalrService } from '@service';
+import { GlobalService, SettingsService, AccountService, ServerService } from '@service';
 import { refreshAccount } from '@api/accountApi';
-import { switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
 import type { PlexAccountDTO } from '@dto/mainApi';
-import { PlexAccountRefreshProgress } from '@dto/mainApi';
 import DarkModeToggle from '@components/General/DarkModeToggle.vue';
 import NotificationButton from '@components/AppBar/NotificationButton.vue';
 import ProgressComponent from '@components/ProgressComponent.vue';
@@ -80,7 +72,6 @@ export default class AppBar extends Vue {
 	private loading: boolean[] = [false];
 	private version: string = '?';
 
-	private accountRefreshProgress: PlexAccountRefreshProgress[] = [];
 	activeAccountId: number = 0;
 
 	get isLoading(): boolean {
@@ -91,18 +82,14 @@ export default class AppBar extends Vue {
 		SettingsService.updateActiveAccountSettings(accountId);
 	}
 
-	getRefreshProgress(plexAccountId: number): PlexAccountRefreshProgress | null {
-		return this.accountRefreshProgress.find((x) => x.plexAccountId === plexAccountId) ?? null;
-	}
-
 	refreshAccount(accountId: number = 0): void {
 		const index = accountId === 0 ? 0 : this.accounts.findIndex((x) => x.id === accountId);
 		this.loading.splice(index, 1, true);
-		refreshAccount(accountId)
-			.pipe(switchMap(() => of(AccountService.fetchAccounts())))
-			.subscribe(() => {
-				this.loading.splice(index, 1, false);
-			});
+		refreshAccount(accountId).subscribe(() => {
+			AccountService.fetchAccounts();
+			ServerService.fetchServers();
+			this.loading.splice(index, 1, false);
+		});
 	}
 
 	created(): void {
@@ -127,18 +114,20 @@ export default class AppBar extends Vue {
 			}
 		});
 
-		this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
-			const index = this.accountRefreshProgress.findIndex((x) => x.plexAccountId === data.plexAccountId);
-			if (index > -1) {
-				if (!data.isComplete) {
-					this.accountRefreshProgress.splice(index, 1, data);
-				} else {
-					this.accountRefreshProgress.splice(index, 1);
-				}
-			} else {
-				this.accountRefreshProgress.push(data);
-			}
-		});
+		// this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
+		// 	if (data) {
+		// 		const index = this.accountRefreshProgress.findIndex((x) => x.plexAccountId === data.plexAccountId);
+		// 		if (index > -1) {
+		// 			if (!data.isComplete) {
+		// 				this.accountRefreshProgress.splice(index, 1, data);
+		// 			} else {
+		// 				this.accountRefreshProgress.splice(index, 1);
+		// 			}
+		// 		} else {
+		// 			this.accountRefreshProgress.push(data);
+		// 		}
+		// 	}
+		// });
 	}
 }
 </script>

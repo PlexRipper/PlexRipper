@@ -1,18 +1,19 @@
 import Log from 'consola';
 import { BaseService, GlobalService } from '@service';
 import { LogLevel } from '@aspnet/signalr';
-import { Observable, ReplaySubject, Subscription } from 'rxjs';
+import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
 import {
 	LibraryProgress,
 	DownloadTaskCreationProgress,
 	FileMergeProgress,
 	NotificationDTO,
-	PlexAccountRefreshProgress,
 	DownloadTaskDTO,
+	InspectServerProgress,
 } from '@dto/mainApi';
-import { takeWhile } from 'rxjs/operators';
+import { map, switchMap, takeWhile } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
+import IStoreState from '@interfaces/IStoreState';
 
 export class SignalrService extends BaseService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();
@@ -29,15 +30,19 @@ export class SignalrService extends BaseService {
 	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> =
 		new ReplaySubject<DownloadTaskCreationProgress>();
 
-	private _fileMergeProgressSubject: ReplaySubject<FileMergeProgress> = new ReplaySubject<FileMergeProgress>();
 	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
-	private _plexAccountRefreshProgressSubject: ReplaySubject<PlexAccountRefreshProgress> =
-		new ReplaySubject<PlexAccountRefreshProgress>();
 
 	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
 	public constructor() {
-		super({});
+		super({
+			stateSliceSelector: (state: IStoreState) => {
+				return {
+					fileMergeProgressList: state.fileMergeProgressList,
+					inspectServerProgress: state.inspectServerProgress,
+				};
+			},
+		});
 	}
 
 	public setup(nuxtContext: Context): void {
@@ -91,37 +96,25 @@ export class SignalrService extends BaseService {
 		});
 
 		this._progressHubConnection?.on<FileMergeProgress>('FileMergeProgress').subscribe((data) => {
-			this._fileMergeProgressSubject.next(data);
+			this.updateStore('fileMergeProgressList', data);
 		});
 
 		this._progressHubConnection?.on<LibraryProgress>('LibraryProgress').subscribe((data) => {
 			this._libraryProgressSubject.next(data);
 		});
 
-		this._progressHubConnection?.on<PlexAccountRefreshProgress>('PlexAccountRefreshProgress').subscribe((data) => {
-			this._plexAccountRefreshProgressSubject.next(data);
+		this._progressHubConnection?.on<InspectServerProgress>('InspectServerProgress').subscribe((data) => {
+			this.updateStore('inspectServerProgress', data, 'plexServerId');
 		});
 
 		this._notificationHubConnection?.on<NotificationDTO>('Notification').subscribe((data) => {
 			this._NotificationUpdateSubject.next(data);
 		});
 
-		GlobalService.getAxiosReady()
-			// .pipe(finalize(() => this.startProgressHubConnection()))
-			.subscribe(() => {
-				this.startProgressHubConnection();
-				this.startNotificationHubConnection();
-			});
-
-		// Disable connections when server is offline
-		// HealthService.getServerStatus().subscribe((status) => {
-		// 	if (status) {
-		// 		this.startProgressHubConnection();
-		// 	} else {
-		// 		this.stopProgressHubConnection();
-		// 		this.stopNotificationHubConnection();
-		// 	}
-		// });
+		GlobalService.getAxiosReady().subscribe(() => {
+			this.startProgressHubConnection();
+			this.startNotificationHubConnection();
+		});
 	}
 
 	public startProgressHubConnection(): void {
@@ -156,12 +149,31 @@ export class SignalrService extends BaseService {
 		}
 	}
 
-	public getDownloadTaskCreationProgress(): Observable<DownloadTaskCreationProgress> {
-		return this._downloadTaskCreationProgressSubject.asObservable().pipe(takeWhile((data) => !data.isComplete));
+	// region Array Progress
+
+	public getAllFileMergeProgress(): Observable<FileMergeProgress[]> {
+		return this.stateChanged.pipe(switchMap((x) => of(x?.fileMergeProgressList ?? [])));
 	}
 
-	public getFileMergeProgress(): Observable<FileMergeProgress> {
-		return this._fileMergeProgressSubject.asObservable();
+	public getAllInspectServerProgress(): Observable<InspectServerProgress[]> {
+		return this.stateChanged.pipe(map((x) => x?.inspectServerProgress ?? []));
+	}
+	// endregion
+
+	// region Single Progress
+
+	public getFileMergeProgress(id: number): Observable<FileMergeProgress | null> {
+		return this.getAllFileMergeProgress().pipe(map((x) => x?.find((x) => x.id === id) ?? null));
+	}
+
+	public getInspectServerProgress(plexServerId: number): Observable<InspectServerProgress | null> {
+		return this.getAllInspectServerProgress().pipe(map((x) => x?.find((x) => x.plexServerId === plexServerId) ?? null));
+	}
+
+	// endregion
+
+	public getDownloadTaskCreationProgress(): Observable<DownloadTaskCreationProgress> {
+		return this._downloadTaskCreationProgressSubject.asObservable().pipe(takeWhile((data) => !data.isComplete));
 	}
 
 	public getDownloadTaskUpdate(): Observable<DownloadTaskDTO> {
@@ -170,10 +182,6 @@ export class SignalrService extends BaseService {
 
 	public getLibraryProgress(): Observable<LibraryProgress> {
 		return this._libraryProgressSubject.asObservable();
-	}
-
-	public getPlexAccountRefreshProgress(): Observable<PlexAccountRefreshProgress> {
-		return this._plexAccountRefreshProgressSubject.asObservable();
 	}
 
 	public getNotificationUpdates(): Observable<NotificationDTO> {
@@ -190,7 +198,7 @@ export interface ProgressHub {
 	DownloadTaskUpdate: DownloadTaskDTO;
 	DownloadTaskCreationProgress: DownloadTaskCreationProgress;
 	LibraryProgress: LibraryProgress;
-	PlexAccountRefreshProgress: PlexAccountRefreshProgress;
+	InspectServerProgress: InspectServerProgress;
 }
 
 export interface NotificationHub {

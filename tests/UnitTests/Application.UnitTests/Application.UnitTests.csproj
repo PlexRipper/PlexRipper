@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+      <TargetFramework>net5.0</TargetFramework>
+      <RootNamespace>PlexRipper.Application.UnitTests</RootNamespace>
+    <AssemblyName>PlexRipper.Application.UnitTests</AssemblyName>
+
+    <IsPackable>false</IsPackable>
+
+    <LangVersion>9</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Application\Application.csproj" />
+    <ProjectReference Include="..\..\IntegrationTests\Applicaton.IntegrationTests\Application.IntegrationTests.csproj" />
+    <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
+  </ItemGroup>
+
+</Project>

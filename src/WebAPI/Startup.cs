@@ -16,6 +16,7 @@ using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
 using PlexRipper.WebAPI.SignalR.Hubs;
+using Quartz;
 
 namespace PlexRipper.WebAPI
 {
@@ -33,7 +34,7 @@ namespace PlexRipper.WebAPI
         public Startup(IWebHostEnvironment env)
         {
             CurrentEnvironment = env;
-            Log.Information($"PlexRipper running in {CurrentEnvironment.EnvironmentName} mode.");
+            Log.Information($"PlexRipper running in {CurrentEnvironment.EnvironmentName ?? "Unknown"} mode.");
         }
 
         private IWebHostEnvironment CurrentEnvironment { get; }
@@ -86,11 +87,18 @@ namespace PlexRipper.WebAPI
             services.AddMvc(options => { options.Filters.Add<ValidateFilter>(); })
                 .AddFluentValidation(fv =>
                 {
+                    fv.RegisterValidatorsFromAssemblyContaining<WebApiModule>();
                     fv.RegisterValidatorsFromAssemblyContaining<ApplicationModule>();
-                    fv.RegisterValidatorsFromAssemblyContaining<ValidateFilter>();
                     fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
                 });
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Quartz setup
+            services.AddQuartzHostedService(options =>
+            {
+                // when shutting down we want jobs to complete gracefully
+                options.WaitForJobsToComplete = true;
+            });
 
             // SignalR
             services.AddSignalR().AddJsonProtocol(options =>
@@ -117,7 +125,6 @@ namespace PlexRipper.WebAPI
             });
 
             services.AddOptions();
-            // Autofac
         }
 
         /// <summary>
@@ -149,17 +156,6 @@ namespace PlexRipper.WebAPI
                 app.UseSpaStaticFiles();
                 app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
             }
-
-            // if (CurrentEnvironment.IsDevelopment())
-            // {
-            //     app.UseSpaStaticFiles();
-            //     app.UseSpa(spa =>
-            //     {
-            //         spa.Options.SourcePath = "ClientApp";
-            //         spa.Options.DevServerPort = 3000;
-            //         spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
-            //     });
-            // }
         }
 
         public void ConfigureContainer(ContainerBuilder builder)

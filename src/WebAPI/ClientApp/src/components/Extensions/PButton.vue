@@ -43,9 +43,17 @@ export default class PBtn extends Vue {
 	@Prop({ required: false, type: String, default: ButtonType.None })
 	readonly buttonType!: ButtonType;
 
+	/**
+	 * The Vue-i18n text id used for the text inside the button.
+	 * @type {string}
+	 */
 	@Prop({ required: false, type: String, default: '' })
 	readonly textId!: string;
 
+	/**
+	 * The Vue-i18n text id used for the text inside the tooltip.
+	 * @type {string}
+	 */
 	@Prop({ required: false, type: String, default: '' })
 	readonly tooltipId!: string;
 
@@ -137,6 +145,8 @@ export default class PBtn extends Vue {
 				return prefix + 'delete';
 			case ButtonType.Error:
 				return prefix + 'error';
+			case ButtonType.Hide:
+				return prefix + 'hide';
 		}
 		return '';
 	}

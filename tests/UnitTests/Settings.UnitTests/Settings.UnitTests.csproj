@@ -2,12 +2,7 @@
 
   <PropertyGroup>
       <TargetFramework>net5.0</TargetFramework>
-      <RootNamespace>PlexRipper.Application.UnitTests</RootNamespace>
-    <AssemblyName>PlexRipper.Application.UnitTests</AssemblyName>
-
-    <IsPackable>false</IsPackable>
-
-    <LangVersion>9</LangVersion>
+      <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,9 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Application\Application.csproj" />
-    <ProjectReference Include="..\Applicaton.IntegrationTests\Application.IntegrationTests.csproj" />
-    <ProjectReference Include="..\BaseTests\BaseTests.csproj" />
+    <ProjectReference Include="..\..\..\src\Settings\Settings.csproj" />
+    <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
   </ItemGroup>
 
 </Project>

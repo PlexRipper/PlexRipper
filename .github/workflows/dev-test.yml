@@ -18,4 +18,4 @@ jobs:
     - name: Build
       run: dotnet build PlexRipper.sln --no-restore
     - name: Test
-      run: dotnet test PlexRipper.sln --no-build --verbosity normal
+      run: dotnet test ~/tests/UnitTests/UnitTests.sln --no-build --verbosity normal

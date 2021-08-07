@@ -24,7 +24,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
-import ProgressComponent from '@components/ProgressComponent.vue';
+import ProgressComponent from '@components/Progress/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';

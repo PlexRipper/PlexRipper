@@ -74,6 +74,7 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import _ from 'lodash';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { of, switchMap } from 'rxjs';
@@ -83,7 +84,6 @@ import type { InspectServerProgress, PlexAccountDTO, PlexServerDTO } from '@dto/
 import ButtonType from '@enums/buttonType';
 import { refreshAccount } from '@api/accountApi';
 import { inspectPlexServers } from '@api/plexServerApi';
-import Log from 'consola';
 
 declare interface ServerUpdate {
 	id: number;

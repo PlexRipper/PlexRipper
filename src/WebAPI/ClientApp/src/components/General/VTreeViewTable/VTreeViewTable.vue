@@ -147,7 +147,7 @@
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
 import ITreeViewTableRow from '@vTreeViewTable/ITreeViewTableRow';
-import ProgressComponent from '@components/ProgressComponent.vue';
+import ProgressComponent from '@components/Progress/ProgressComponent.vue';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import ButtonType from '@enums/buttonType';

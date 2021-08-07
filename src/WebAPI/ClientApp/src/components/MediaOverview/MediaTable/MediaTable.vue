@@ -17,7 +17,7 @@ import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
-import ProgressComponent from '@components/ProgressComponent.vue';
+import ProgressComponent from '@components/Progress/ProgressComponent.vue';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import LoadingSpinner from '@components/LoadingSpinner.vue';
 import ITreeDownloadItem from '@mediaOverview/MediaTable/types/ITreeDownloadItem';

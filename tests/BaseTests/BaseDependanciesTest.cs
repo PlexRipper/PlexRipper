@@ -17,8 +17,9 @@ namespace PlexRipper.BaseTests
 
         public static ILogger GetLoggerConfig()
         {
-            return LogConfigurationExtensions.GetBaseConfiguration
-                .WriteTo.TestOutput(Output, outputTemplate: LogConfigurationExtensions.Template)
+            // A separate config variable is needed here for some reason
+            var config = LogConfigurationExtensions.GetBaseConfiguration;
+            return config.WriteTo.TestOutput(Output, outputTemplate: LogConfigurationExtensions.Template)
                 .WriteTo.TestCorrelator()
                 .CreateLogger();
         }

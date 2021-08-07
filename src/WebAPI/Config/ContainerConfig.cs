@@ -3,7 +3,7 @@ using AutoMapper;
 using PlexRipper.Application.Config;
 using PlexRipper.Data.Config;
 using PlexRipper.Domain.AutoMapper;
-using PlexRipper.DownloadManager.Config;
+using PlexRipper.DownloadManager.Common.Autofac;
 using PlexRipper.FileSystem.Config;
 using PlexRipper.HttpClient.Config;
 using PlexRipper.PlexApi.Config;

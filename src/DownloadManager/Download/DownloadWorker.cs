@@ -33,7 +33,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private bool _isDownloading = true;
 
-        private readonly Timer _timer = new Timer(100)
+        private readonly Timer _timer = new (100)
         {
             AutoReset = true,
         };
@@ -176,7 +176,7 @@ namespace PlexRipper.DownloadManager.Download
                 SetDownloadWorkerTaskChanged(DownloadStatus.Downloading);
                 DownloadProcessTask = Task.Run(() => DownloadProcessAsync(_fileStreamResult.Value), _cancellationToken.Token);
             }
-            catch (TaskCanceledException e)
+            catch (TaskCanceledException)
             {
                 // Ignore cancellation exceptions
             }

@@ -1,4 +1,5 @@
-﻿using PlexRipper.Domain;
+﻿using FluentResults;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
@@ -11,7 +12,7 @@ namespace PlexRipper.Application.Common
         /// Writes all (nested) property values in the SettingsModel to the json settings file.
         /// </summary>
         /// <returns>Is successful.</returns>
-        bool Save();
+        Result Save();
 
         /// <summary>
         /// Reads the json settings file and updates all SettingsModel properties.

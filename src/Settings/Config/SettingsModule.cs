@@ -8,6 +8,11 @@ namespace PlexRipper.Settings.Config
         protected override void Load(ContainerBuilder builder)
         {
             builder
+                .RegisterType<SettingsService>()
+                .As<ISettingsService>()
+                .InstancePerLifetimeScope();
+
+            builder
                 .RegisterType<UserSettings>()
                 .As<IUserSettings>()
                 .SingleInstance();

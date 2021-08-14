@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
+using PlexRipper.Settings.Config;
 using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings
@@ -21,6 +22,17 @@ namespace PlexRipper.Settings
             WriteIndented = true,
             IncludeFields = false,
             PropertyNameCaseInsensitive = true,
+            Converters =
+            {
+                new TypeMappingConverter<IAccountSettingsModel, AccountSettingsModel>(),
+                new TypeMappingConverter<IAdvancedSettingsModel, AdvancedSettingsModel>(),
+                new TypeMappingConverter<IConfirmationSettingsModel, ConfirmationSettingsModel>(),
+                new TypeMappingConverter<IDateTimeModel, DateTimeModel>(),
+                new TypeMappingConverter<IDisplaySettingsModel, DisplaySettingsModel>(),
+                new TypeMappingConverter<IDownloadManagerModel, DownloadManagerModel>(),
+                new TypeMappingConverter<ISettingsModel, SettingsModel>(),
+                new TypeMappingConverter<IUserInterfaceSettingsModel, UserInterfaceSettingsModel>(),
+            },
         };
 
         private bool _allowSave = true;
@@ -87,12 +99,11 @@ namespace PlexRipper.Settings
         }
 
         /// <inheritdoc/>
-        public bool Save()
+        public Result Save()
         {
             if (!_allowSave)
             {
-                Log.Warning("UserSettings is denied from saving by the allowSave lock");
-                return false;
+                return Result.Fail("UserSettings is denied from saving by the allowSave lock").LogWarning();
             }
 
             Log.Information("Saving UserSettings now.");
@@ -104,12 +115,10 @@ namespace PlexRipper.Settings
             }
             catch (Exception e)
             {
-                Log.Error(e, "Failed to save the UserSettings to json file.");
-                throw;
+                return Result.Fail(new ExceptionalError("Failed to save the UserSettings to json file.", e)).LogError();
             }
 
-            Log.Information("UserSettings were saved successfully!");
-            return true;
+            return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
         }
 
         /// <inheritdoc/>
@@ -117,7 +126,8 @@ namespace PlexRipper.Settings
         {
             _allowSave = false;
 
-            SettingsModel settingsModel = (SettingsModel) sourceSettings;
+            SettingsModel settingsModel = (SettingsModel)sourceSettings;
+
             // Get a list of all properties in the sourceSettings.
             settingsModel.GetType().GetProperties().Where(x => x.CanWrite).ToList().ForEach(sourceSettingsProperty =>
             {
@@ -148,7 +158,5 @@ namespace PlexRipper.Settings
         #endregion
 
         #endregion
-
-
     }
 }

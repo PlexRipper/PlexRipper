@@ -148,7 +148,7 @@ export default class MediaOverview extends Vue {
 	}
 
 	get isLoading(): boolean {
-		return !(this.server && this.library);
+		return this.isRefreshing || !(this.server && this.library);
 	}
 
 	get viewMode(): ViewMode {
@@ -213,9 +213,6 @@ export default class MediaOverview extends Vue {
 
 	@Watch('$route.path')
 	testFunction(newPath: string, oldPath: string): void {
-		Log.info('newPath', newPath);
-		Log.info('oldPath', oldPath);
-
 		if (oldPath.includes('details') && !newPath.includes('details')) {
 			this.resetDetailsOverview();
 		}
@@ -256,9 +253,25 @@ export default class MediaOverview extends Vue {
 
 	refreshLibrary(): void {
 		this.isRefreshing = true;
-		this.library = null;
 		this.resetProgress(true);
-		LibraryService.refreshLibrary(this.libraryId);
+		LibraryService.refreshLibrary(this.libraryId).subscribe((data) => {
+			this.setLibrary(data);
+			this.isRefreshing = false;
+		});
+	}
+
+	setLibrary(data: PlexLibraryDTO | null): void {
+		if (data) {
+			this.library = data;
+			switch (this.mediaType) {
+				case PlexMediaType.Movie:
+					this.items = this.library?.movies ?? [];
+					break;
+				case PlexMediaType.TvShow:
+					this.items = this.library?.tvShows ?? [];
+					break;
+			}
+		}
 	}
 
 	requestMedia(numberPromise: { item: PlexMediaDTO; resolve?: Function }): void {
@@ -349,23 +362,13 @@ export default class MediaOverview extends Vue {
 		this.$subscribeTo(LibraryService.getServerByLibraryID(this.libraryId), (server) => {
 			if (server) {
 				this.server = server;
+				return;
 			}
+			Log.warn('MediaOverview => Server was invalid:', server);
 		});
 
 		// Retrieve library data
-		this.$subscribeTo(LibraryService.getLibrary(this.libraryId), (data) => {
-			if (data?.id === this.libraryId) {
-				this.library = Object.freeze(data);
-				switch (this.mediaType) {
-					case PlexMediaType.Movie:
-						this.items = this.library?.movies ?? [];
-						break;
-					case PlexMediaType.TvShow:
-						this.items = this.library?.tvShows ?? [];
-						break;
-				}
-			}
-		});
+		this.$subscribeTo(LibraryService.getLibrary(this.libraryId), (data) => this.setLibrary(data));
 	}
 }
 </script>

@@ -84,11 +84,11 @@ export enum PlexMediaType {
 }
 
 export interface ResultDTO {
-  isFailed?: boolean;
-  isSuccess?: boolean;
-  reasons?: Reason[] | null;
-  errors?: Error[] | null;
-  successes?: Success[] | null;
+  isFailed: boolean;
+  isSuccess: boolean;
+  reasons: Reason[];
+  errors: Error[];
+  successes: Success[];
 }
 
 export interface Reason {
@@ -202,7 +202,7 @@ export interface PlexAccountDTO {
   email: string | null;
 
   /** @format date-time */
-  joined_at: string;
+  joinedAt: string;
   title: string;
   hasPassword: boolean;
   authToken: string;
@@ -253,7 +253,8 @@ export interface PlexLibraryDTO {
   scannedAt: string;
 
   /** @format date-time */
-  contentChangedAt: string;
+  syncedAt: string;
+  outdated: boolean;
 
   /** @format guid */
   uuid: string;
@@ -377,13 +378,13 @@ export interface PlexMediaDataPartDTO {
   obfuscatedFilePath: string;
 
   /** @format int32 */
-  Duration: number;
-  File: string;
+  duration: number;
+  file: string;
 
   /** @format int64 */
-  Size: number;
-  Container: string;
-  VideoProfile: string;
+  size: number;
+  container: string;
+  videoProfile: string;
 }
 
 export interface PlexServerStatusDTO {
@@ -422,12 +423,12 @@ export interface CreatePlexAccountDTO {
   isMain: boolean;
 }
 
-export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
-
 export interface CredentialsDTO {
   username?: string;
   password?: string;
 }
+
+export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
 
 export type ResultDTOOfListOfPlexLibraryDTO = ResultDTO & { value: PlexLibraryDTO[] };
 
@@ -463,37 +464,46 @@ export interface InspectServerDTO {
   plexServerIds: number[];
 }
 
-export type ResultDTOOfSettingsModel = ResultDTO & { value: SettingsModel };
+export type ResultDTOOfSettingsModelDTO = ResultDTO & { value: SettingsModelDTO };
 
-export type SettingsModel = BaseModel & {
+export interface SettingsModelDTO {
   firstTimeSetup: boolean;
-  accountSettings: AccountSettingsModel;
-  advancedSettings: AdvancedSettingsModel;
-  userInterfaceSettings: UserInterfaceSettingsModel;
-};
+  accountSettings: AccountSettingsModelDTO;
+  advancedSettings: AdvancedSettingsModelDTO;
+  userInterfaceSettings: UserInterfaceSettingsModelDTO;
+}
 
-export type AccountSettingsModel = BaseModel & { activeAccountId: number };
+export interface AccountSettingsModelDTO {
+  /** @format int32 */
+  activeAccountId: number;
+}
 
-export type BaseModel = object;
+export interface AdvancedSettingsModelDTO {
+  downloadManager: DownloadManagerModelDTO;
+}
 
-export type AdvancedSettingsModel = BaseModel & { downloadManager: DownloadManagerModel };
+export interface DownloadManagerModelDTO {
+  /** @format int32 */
+  downloadSegments: number;
+}
 
-export type DownloadManagerModel = BaseModel & { downloadSegments: number };
+export interface UserInterfaceSettingsModelDTO {
+  confirmationSettings: ConfirmationSettingsModelDTO;
+  displaySettings: DisplaySettingsModelDTO;
+  dateTimeSettings: DateTimeModelDTO;
+}
 
-export type UserInterfaceSettingsModel = BaseModel & {
-  confirmationSettings: ConfirmationSettingsModel;
-  displaySettings: DisplaySettingsModel;
-  dateTimeSettings: DateTimeModel;
-};
-
-export type ConfirmationSettingsModel = BaseModel & {
+export interface ConfirmationSettingsModelDTO {
   askDownloadMovieConfirmation: boolean;
   askDownloadTvShowConfirmation: boolean;
   askDownloadSeasonConfirmation: boolean;
   askDownloadEpisodeConfirmation: boolean;
-};
+}
 
-export type DisplaySettingsModel = BaseModel & { tvShowViewMode: ViewMode; movieViewMode: ViewMode };
+export interface DisplaySettingsModelDTO {
+  tvShowViewMode: ViewMode;
+  movieViewMode: ViewMode;
+}
 
 export enum ViewMode {
   Table = "Table",
@@ -501,13 +511,13 @@ export enum ViewMode {
   Overview = "Overview",
 }
 
-export type DateTimeModel = BaseModel & {
+export interface DateTimeModelDTO {
   shortDateFormat: string;
   longDateFormat: string;
   timeFormat: string;
   timeZone: string;
   showRelativeDates: boolean;
-};
+}
 
 export type ResultDTOOfInteger = ResultDTO & { value: number };
 

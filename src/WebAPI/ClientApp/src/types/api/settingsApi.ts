@@ -1,23 +1,23 @@
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
-import { SettingsModel } from '@dto/mainApi';
+import { SettingsModelDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 import { checkResponse, preApiRequest } from './baseApi';
 
 const logText = 'From SettingsAPI => ';
 const apiPath = '/settings';
 
-export function getSettings(): Observable<ResultDTO<SettingsModel>> {
+export function getSettings(): Observable<ResultDTO<SettingsModelDTO>> {
 	preApiRequest(logText, 'getSettings');
-	const result = Axios.get<ResultDTO<SettingsModel>>(`${apiPath}`);
-	return checkResponse<ResultDTO<SettingsModel>>(result, logText, 'getSettings');
+	const result = Axios.get<ResultDTO<SettingsModelDTO>>(`${apiPath}`);
+	return checkResponse<ResultDTO<SettingsModelDTO>>(result, logText, 'getSettings');
 }
 
-export function updateSettings(settings: SettingsModel): Observable<ResultDTO<SettingsModel>> {
+export function updateSettings(settings: SettingsModelDTO): Observable<ResultDTO<SettingsModelDTO>> {
 	preApiRequest(logText, 'updateSettings');
-	const result = Axios.put<ResultDTO<SettingsModel>>(`${apiPath}`, settings);
-	return checkResponse<ResultDTO<SettingsModel>>(result, logText, 'updateSettings');
+	const result = Axios.put<ResultDTO<SettingsModelDTO>>(`${apiPath}`, settings);
+	return checkResponse<ResultDTO<SettingsModelDTO>>(result, logText, 'updateSettings');
 }
 
 export function resetDatabase(): Observable<ResultDTO> {

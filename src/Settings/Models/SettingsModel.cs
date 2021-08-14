@@ -20,7 +20,6 @@ namespace PlexRipper.Settings.Models
 
         #region Properties
 
-        [JsonProperty("firstTimeSetup", Required = Required.Always)]
         public bool FirstTimeSetup
         {
             get => _firstTimeSetup;
@@ -34,7 +33,6 @@ namespace PlexRipper.Settings.Models
             }
         }
 
-        [JsonProperty("accountSettings", Required = Required.Always)]
         public IAccountSettingsModel AccountSettings
         {
             get => _accountSettings;
@@ -49,7 +47,6 @@ namespace PlexRipper.Settings.Models
             }
         }
 
-        [JsonProperty("advancedSettings", Required = Required.Always)]
         public IAdvancedSettingsModel AdvancedSettings
         {
             get => _advancedSettings;
@@ -64,7 +61,6 @@ namespace PlexRipper.Settings.Models
             }
         }
 
-        [JsonProperty("userInterfaceSettings", Required = Required.Always)]
         public IUserInterfaceSettingsModel UserInterfaceSettings
         {
             get => _userInterfaceSettings;

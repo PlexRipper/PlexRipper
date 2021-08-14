@@ -6,7 +6,7 @@ import {
 	PlexAccountDTO,
 	PlexLibraryDTO,
 	PlexServerDTO,
-	SettingsModel,
+	SettingsModelDTO,
 	InspectServerProgress,
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
@@ -21,7 +21,7 @@ export default interface IStoreState {
 	folderPaths: FolderPathDTO[];
 	alerts: IAlert[];
 	mediaUrls: IObjectUrl[];
-	settings: SettingsModel;
+	settings: SettingsModelDTO;
 	helpIdDialog: string;
 	downloadTaskUpdateList: DownloadTaskDTO[];
 	// Progress Service

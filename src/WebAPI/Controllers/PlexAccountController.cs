@@ -35,7 +35,7 @@ namespace PlexRipper.WebAPI.Controllers
             var result = await _plexAccountService.GetAllPlexAccountsAsync(enabledOnly);
             if (result.IsFailed)
             {
-                return BadRequest(result);
+                return BadRequest(result.ToResult());
             }
 
             var mapResult = _mapper.Map<List<PlexAccountDTO>>(result.Value);

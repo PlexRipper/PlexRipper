@@ -7,5 +7,7 @@
         IAdvancedSettingsModel AdvancedSettings { get; set; }
 
         IUserInterfaceSettingsModel UserInterfaceSettings { get; set; }
+
+        bool FirstTimeSetup { get; set; }
     }
 }

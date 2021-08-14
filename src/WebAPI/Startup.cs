@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Autofac;
 using FluentValidation;
@@ -68,8 +69,14 @@ namespace PlexRipper.WebAPI
             services
                 .AddControllers()
                 .AddJsonOptions(
-                    options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+                    options =>
+                    {
+                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+                        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    });
 
+            // Used to deploy the front-end Nuxt client
             if (CurrentEnvironment.IsProduction())
             {
                 services.AddSpaStaticFiles(configuration => { configuration.RootPath = "wwwroot"; });
@@ -151,6 +158,7 @@ namespace PlexRipper.WebAPI
                 endpoints.MapHub<NotificationHub>("/notifications");
             });
 
+            // Used to deploy the front-end Nuxt client
             if (CurrentEnvironment.IsProduction())
             {
                 app.UseSpaStaticFiles();

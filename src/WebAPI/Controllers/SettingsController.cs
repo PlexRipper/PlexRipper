@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
 using PlexRipper.Settings.Models;
+using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -28,21 +29,22 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET api/<SettingsController>/
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModel>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModelDTO>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult GetSettings()
         {
-            return ToActionResult<ISettingsModel, SettingsModel>(_settingsService.GetSettings());
+            return ToActionResult<ISettingsModel, SettingsModelDTO>(_settingsService.GetSettings());
         }
 
         // PUT api/<SettingsController>/
         [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModel>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModelDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public IActionResult UpdateSettings([FromBody] SettingsModel settingsModel)
+        public IActionResult UpdateSettings([FromBody] SettingsModelDTO settingsModelDTO)
         {
-            return ToActionResult<ISettingsModel, SettingsModel>(_settingsService.UpdateSettings(settingsModel));
+            var settingsModel = _mapper.Map<SettingsModel>(settingsModelDTO);
+            return ToActionResult<ISettingsModel, SettingsModelDTO>(_settingsService.UpdateSettings(settingsModel));
         }
 
         // GET api/<SettingsController>/ResetDb

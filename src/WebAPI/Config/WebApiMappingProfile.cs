@@ -1,7 +1,9 @@
 ﻿using System.Linq;
 using AutoMapper;
 using FluentResults;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
+using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
@@ -69,6 +71,7 @@ namespace PlexRipper.WebAPI.Config
             PlexMediaMappings();
             PlexMovieMappings();
             PlexTvShowMappings();
+            SettingsMappings();
         }
 
         private void DownloadTaskMappings()
@@ -79,7 +82,6 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
                 .ForMember(dto => dto.Children, opt => opt.Ignore())
                 .ForMember(dto => dto.Actions, opt => opt.Ignore());
-
         }
 
         private void PlexMediaMappings()
@@ -135,6 +137,20 @@ namespace PlexRipper.WebAPI.Config
                 .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.TvShowId))
                 .ForMember(dto => dto.TvShowSeasonId, opt => opt.MapFrom(entity => entity.TvShowSeasonId))
                 .ForMember(dto => dto.MediaData, entity => entity.MapFrom(x => x.EpisodeData));
+        }
+
+        private void SettingsMappings()
+        {
+            CreateMap<SettingsModelDTO, SettingsModel>(MemberList.Destination).ReverseMap();
+
+            CreateMap<ISettingsModel, SettingsModelDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<IAccountSettingsModel, AccountSettingsModelDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<IAdvancedSettingsModel, AdvancedSettingsModelDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<IConfirmationSettingsModel, ConfirmationSettingsModelDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<IDateTimeModel, DateTimeModelDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<IDisplaySettingsModel, DisplaySettingsModelDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<IDownloadManagerModel, DownloadManagerModelDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<IUserInterfaceSettingsModel, UserInterfaceSettingsModelDTO>(MemberList.Destination).ReverseMap();
         }
     }
 }

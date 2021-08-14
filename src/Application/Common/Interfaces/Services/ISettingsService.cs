@@ -1,12 +1,11 @@
 ﻿using FluentResults;
-using PlexRipper.Application.Settings.Models;
 
 namespace PlexRipper.Application.Common
 {
     public interface ISettingsService
     {
-        Result<SettingsModel> GetSettings();
+        Result<ISettingsModel> GetSettings();
 
-        Result<SettingsModel> UpdateSettings(SettingsModel settingsModel);
+        Result<ISettingsModel> UpdateSettings(ISettingsModel settingsModel);
     }
 }

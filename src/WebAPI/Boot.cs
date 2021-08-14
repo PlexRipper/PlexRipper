@@ -28,11 +28,8 @@ namespace PlexRipper.WebAPI
 
         private readonly ISchedulerService _schedulerService;
 
-        private readonly PlexRipperDbContext _dbContext;
-
         public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
-            IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
-            PlexRipperDbContext dbContext)
+            IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService)
         {
             _appLifetime = appLifetime;
             _userSettings = userSettings;
@@ -41,7 +38,6 @@ namespace PlexRipper.WebAPI
             _downloadManager = downloadManager;
             _plexRipperDatabaseService = plexRipperDatabaseService;
             _schedulerService = schedulerService;
-            _dbContext = dbContext;
         }
 
         public async Task WaitForStartAsync(CancellationToken cancellationToken)

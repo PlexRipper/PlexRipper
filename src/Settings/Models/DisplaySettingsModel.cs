@@ -1,11 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 using Newtonsoft.Json;
-using PlexRipper.Application.Settings.Models.Base;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
+using PlexRipper.Settings.Models.Base;
 
-namespace PlexRipper.Application.Settings.Models
+namespace PlexRipper.Settings.Models
 {
-    public class DisplaySettingsModel : BaseModel
+    public class DisplaySettingsModel : BaseModel, IDisplaySettingsModel
     {
         #region Properties
 

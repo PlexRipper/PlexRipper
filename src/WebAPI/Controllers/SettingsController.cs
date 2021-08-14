@@ -3,7 +3,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.Settings.Models;
+using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers
@@ -32,7 +32,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult GetSettings()
         {
-            return ToActionResult<SettingsModel, SettingsModel>(_settingsService.GetSettings());
+            return ToActionResult<ISettingsModel, SettingsModel>(_settingsService.GetSettings());
         }
 
         // PUT api/<SettingsController>/
@@ -42,7 +42,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult UpdateSettings([FromBody] SettingsModel settingsModel)
         {
-            return ToActionResult<SettingsModel, SettingsModel>(_settingsService.UpdateSettings(settingsModel));
+            return ToActionResult<ISettingsModel, SettingsModel>(_settingsService.UpdateSettings(settingsModel));
         }
 
         // GET api/<SettingsController>/ResetDb

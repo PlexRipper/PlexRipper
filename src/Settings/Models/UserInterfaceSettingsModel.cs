@@ -1,9 +1,10 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Application.Settings.Models.Base;
+using PlexRipper.Application.Common;
+using PlexRipper.Settings.Models.Base;
 
-namespace PlexRipper.Application.Settings.Models
+namespace PlexRipper.Settings.Models
 {
-    public class UserInterfaceSettingsModel : BaseModel
+    public class UserInterfaceSettingsModel : BaseModel, IUserInterfaceSettingsModel
     {
         private ConfirmationSettingsModel _confirmationSettings = new();
 
@@ -14,42 +15,42 @@ namespace PlexRipper.Application.Settings.Models
         #region Properties
 
         [JsonProperty("confirmationSettings", Required = Required.Always)]
-        public ConfirmationSettingsModel ConfirmationSettings
+        public IConfirmationSettingsModel ConfirmationSettings
         {
             get => _confirmationSettings;
             set
             {
                 if (value != null)
                 {
-                    _confirmationSettings = value;
+                    _confirmationSettings = (ConfirmationSettingsModel) value;
                     _confirmationSettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }
         }
 
         [JsonProperty("displaySettings", Required = Required.Always)]
-        public DisplaySettingsModel DisplaySettings
+        public IDisplaySettingsModel DisplaySettings
         {
             get => _displaySettings;
             set
             {
                 if (value != null)
                 {
-                    _displaySettings = value;
+                    _displaySettings = (DisplaySettingsModel) value;
                     _displaySettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }
         }
 
         [JsonProperty("dateTimeSettings", Required = Required.Always)]
-        public DateTimeModel DateTimeSettings
+        public IDateTimeModel DateTimeSettings
         {
             get => _dateTimeSettings;
             set
             {
                 if (value != null)
                 {
-                    _dateTimeSettings = value;
+                    _dateTimeSettings = (DateTimeModel) value;
                     _dateTimeSettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }

@@ -6,8 +6,8 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
+using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings
 {
@@ -113,19 +113,20 @@ namespace PlexRipper.Settings
         }
 
         /// <inheritdoc/>
-        public void UpdateSettings(SettingsModel sourceSettings, bool saveAfterUpdate = true)
+        public void UpdateSettings(ISettingsModel sourceSettings, bool saveAfterUpdate = true)
         {
             _allowSave = false;
 
+            SettingsModel settingsModel = (SettingsModel) sourceSettings;
             // Get a list of all properties in the sourceSettings.
-            sourceSettings.GetType().GetProperties().Where(x => x.CanWrite).ToList().ForEach(sourceSettingsProperty =>
+            settingsModel.GetType().GetProperties().Where(x => x.CanWrite).ToList().ForEach(sourceSettingsProperty =>
             {
                 // Check whether target object has the source property, which will always be true due to inheritance.
                 var targetSettingsProperty = GetType().GetProperty(sourceSettingsProperty.Name);
                 if (targetSettingsProperty != null)
                 {
                     // Now copy the value to the matching property in this UserSettings instance.
-                    var value = sourceSettingsProperty.GetValue(sourceSettings, null);
+                    var value = sourceSettingsProperty.GetValue(settingsModel, null);
                     if (value != null)
                     {
                         GetType().GetProperty(sourceSettingsProperty.Name).SetValue(this, value, null);

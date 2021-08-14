@@ -1,27 +1,31 @@
-﻿using FluentResults;
+﻿using AutoMapper;
+using FluentResults;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.Settings.Models;
+using PlexRipper.Settings.Models;
 
-namespace PlexRipper.Application.Settings
+namespace PlexRipper.Settings
 {
     /// <summary>
     /// Handles API requests concerning the <see cref="IUserSettings"/>.
     /// </summary>
     public class SettingsService : ISettingsService
     {
+        private readonly IMapper _mapper;
+
         private readonly IUserSettings _userSettings;
 
-        public SettingsService(IUserSettings userSettings)
+        public SettingsService(IMapper mapper, IUserSettings userSettings)
         {
+            _mapper = mapper;
             _userSettings = userSettings;
         }
 
-        public Result<SettingsModel> GetSettings()
+        public Result<ISettingsModel> GetSettings()
         {
-            return Result.Ok(_userSettings as SettingsModel);
+            return Result.Ok((ISettingsModel)_userSettings);
         }
 
-        public Result<SettingsModel> UpdateSettings(SettingsModel settingsModel)
+        public Result<ISettingsModel> UpdateSettings(ISettingsModel settingsModel)
         {
             _userSettings.UpdateSettings(settingsModel);
             return GetSettings();

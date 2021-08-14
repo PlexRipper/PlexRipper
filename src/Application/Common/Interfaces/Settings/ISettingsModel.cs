@@ -1,13 +1,11 @@
-﻿using PlexRipper.Application.Settings.Models;
-
-namespace PlexRipper.Application.Common
+﻿namespace PlexRipper.Application.Common
 {
     public interface ISettingsModel
     {
-        AccountSettingsModel AccountSettings { get; set; }
+        IAccountSettingsModel AccountSettings { get; set; }
 
-        AdvancedSettingsModel AdvancedSettings { get; set; }
+        IAdvancedSettingsModel AdvancedSettings { get; set; }
 
-        UserInterfaceSettingsModel UserInterfaceSettings { get; set; }
+        IUserInterfaceSettingsModel UserInterfaceSettings { get; set; }
     }
 }

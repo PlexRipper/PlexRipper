@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.Settings.Models.Base;
+using PlexRipper.Settings.Models.Base;
 
-namespace PlexRipper.Application.Settings.Models
+namespace PlexRipper.Settings.Models
 {
     /// <summary>
     /// Used to model the settings, which is then used to serialize to json.
@@ -13,9 +13,10 @@ namespace PlexRipper.Application.Settings.Models
 
         private AccountSettingsModel _accountSettings = new();
 
+        private AdvancedSettingsModel _advancedSettings = new();
+
         private UserInterfaceSettingsModel _userInterfaceSettings = new();
 
-        private AdvancedSettingsModel _advancedSettings = new();
 
         #region Properties
 
@@ -34,7 +35,7 @@ namespace PlexRipper.Application.Settings.Models
         }
 
         [JsonProperty("accountSettings", Required = Required.Always)]
-        public AccountSettingsModel AccountSettings
+        public IAccountSettingsModel AccountSettings
         {
             get => _accountSettings;
             set
@@ -42,14 +43,14 @@ namespace PlexRipper.Application.Settings.Models
                 if (value != null)
                 {
                     // During every settings load this needs to be subscribed to again
-                    _accountSettings = value;
+                    _accountSettings = (AccountSettingsModel) value;
                     _accountSettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }
         }
 
         [JsonProperty("advancedSettings", Required = Required.Always)]
-        public AdvancedSettingsModel AdvancedSettings
+        public IAdvancedSettingsModel AdvancedSettings
         {
             get => _advancedSettings;
             set
@@ -57,14 +58,14 @@ namespace PlexRipper.Application.Settings.Models
                 if (value != null)
                 {
                     // During every settings load this needs to be subscribed to again
-                    _advancedSettings = value;
+                    _advancedSettings = (AdvancedSettingsModel) value;
                     _advancedSettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }
         }
 
         [JsonProperty("userInterfaceSettings", Required = Required.Always)]
-        public UserInterfaceSettingsModel UserInterfaceSettings
+        public IUserInterfaceSettingsModel UserInterfaceSettings
         {
             get => _userInterfaceSettings;
             set
@@ -72,7 +73,7 @@ namespace PlexRipper.Application.Settings.Models
                 if (value != null)
                 {
                     // During every settings load this needs to be subscribed to again
-                    _userInterfaceSettings = value;
+                    _userInterfaceSettings = (UserInterfaceSettingsModel) value;
                     _userInterfaceSettings.PropertyChanged += (_, _) => OnPropertyChanged();
                 }
             }

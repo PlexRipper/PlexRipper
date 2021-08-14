@@ -1,5 +1,5 @@
 <template>
-	<page>
+	<page no-scrollbar>
 		<!--	Loading screen	-->
 		<template v-if="isLoading">
 			<v-row justify="center" class="mx-0">

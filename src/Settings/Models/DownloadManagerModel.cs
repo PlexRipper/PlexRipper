@@ -1,9 +1,10 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Application.Settings.Models.Base;
+using PlexRipper.Application.Common;
+using PlexRipper.Settings.Models.Base;
 
-namespace PlexRipper.Application.Settings.Models
+namespace PlexRipper.Settings.Models
 {
-    public class DownloadManagerModel : BaseModel
+    public class DownloadManagerModel : BaseModel, IDownloadManagerModel
     {
         #region Fields
 

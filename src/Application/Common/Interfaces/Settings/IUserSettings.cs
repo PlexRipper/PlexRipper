@@ -1,5 +1,4 @@
-﻿using PlexRipper.Application.Settings.Models;
-using PlexRipper.Domain;
+﻿using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
@@ -32,6 +31,6 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="sourceSettings">The values to be used to set this UserSettings instance.</param>
         /// <param name="saveAfterUpdate">Should the settings be written to file after update.</param>
-        void UpdateSettings(SettingsModel sourceSettings, bool saveAfterUpdate = true);
+        void UpdateSettings(ISettingsModel sourceSettings, bool saveAfterUpdate = true);
     }
 }

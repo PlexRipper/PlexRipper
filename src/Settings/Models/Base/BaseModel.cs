@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace PlexRipper.Application.Settings.Models.Base
+namespace PlexRipper.Settings.Models.Base
 {
     /// <summary>
     /// Used to implement the base properties for the <see cref="SettingsModel"/>.

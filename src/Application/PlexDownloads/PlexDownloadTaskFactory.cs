@@ -208,7 +208,7 @@ namespace PlexRipper.Application
             if (serverToken.IsFailed)
                 return serverToken.ToResult();
 
-            var parts = _userSettings.AdvancedSettings.DownloadManager.DownloadSegments;
+            var parts = _userSettings.DownloadSegments;
 
             foreach (var downloadTask in downloadTasks)
             {

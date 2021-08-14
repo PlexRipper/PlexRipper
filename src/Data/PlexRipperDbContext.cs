@@ -10,7 +10,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
-    public class PlexRipperDbContext : DbContext, ISetup
+    public class PlexRipperDbContext : DbContext, ISetupAsync
     {
         #region Properties
 

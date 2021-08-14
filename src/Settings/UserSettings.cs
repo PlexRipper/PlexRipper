@@ -3,11 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
-using PlexRipper.Settings.Config;
 using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings
@@ -22,17 +20,6 @@ namespace PlexRipper.Settings
             WriteIndented = true,
             IncludeFields = false,
             PropertyNameCaseInsensitive = true,
-            Converters =
-            {
-                new TypeMappingConverter<IAccountSettingsModel, AccountSettingsModel>(),
-                new TypeMappingConverter<IAdvancedSettingsModel, AdvancedSettingsModel>(),
-                new TypeMappingConverter<IConfirmationSettingsModel, ConfirmationSettingsModel>(),
-                new TypeMappingConverter<IDateTimeModel, DateTimeModel>(),
-                new TypeMappingConverter<IDisplaySettingsModel, DisplaySettingsModel>(),
-                new TypeMappingConverter<IDownloadManagerModel, DownloadManagerModel>(),
-                new TypeMappingConverter<ISettingsModel, SettingsModel>(),
-                new TypeMappingConverter<IUserInterfaceSettingsModel, UserInterfaceSettingsModel>(),
-            },
         };
 
         private bool _allowSave = true;
@@ -42,7 +29,7 @@ namespace PlexRipper.Settings
         #region Properties
 
         [JsonIgnore]
-        private static string FileName { get; } = "PlexRipperSettings.json";
+        private static string FileName => "PlexRipperSettings.json";
 
         [JsonIgnore]
         private string FileLocation => Path.Join(FileSystemPaths.ConfigDirectory, FileName);
@@ -53,41 +40,38 @@ namespace PlexRipper.Settings
 
         #region Public
 
-        public async Task<Result> SetupAsync()
+        public Result Setup()
         {
-            // TODO Add result based error handling here
             Log.Information("Setting up UserSettings");
             if (!File.Exists(FileLocation))
             {
                 Log.Information($"{FileName} doesn't exist, will create new one now in {FileLocation}");
-                Save();
+                var saveResult = Save();
+                if (saveResult.IsFailed)
+                {
+                    return saveResult;
+                }
             }
 
-            Load();
-
-            PropertyChanged += (sender, args) => Save();
-
-            return Result.Ok(true);
+            return Load();
         }
 
-        public bool Load()
+        public Result Load()
         {
             Log.Information("Loading UserSettings now.");
 
             try
             {
                 string jsonString = File.ReadAllText(FileLocation);
-                var loadedSettings = JsonSerializer.Deserialize<SettingsModel>(jsonString, _jsonSerializerSettings);
-                UpdateSettings(loadedSettings, false);
+                var loadedSettings = JsonSerializer.Deserialize<dynamic>(jsonString, _jsonSerializerSettings);
+                SetFromJsonObject(loadedSettings);
             }
             catch (Exception e)
             {
-                Log.Error(e, "Failed to load the UserSettings to json file.");
-                throw;
+                return Result.Fail(new ExceptionalError("Failed to load the UserSettings to json file.", e)).LogError();
             }
 
-            Log.Information("UserSettings were loaded successfully!");
-            return true;
+            return Result.Ok().WithSuccess("UserSettings were loaded successfully!").LogInformation();
         }
 
         public void Reset()
@@ -110,7 +94,7 @@ namespace PlexRipper.Settings
 
             try
             {
-                string jsonString = JsonSerializer.Serialize(this, _jsonSerializerSettings);
+                string jsonString = JsonSerializer.Serialize(GetJsonObject(), _jsonSerializerSettings);
                 File.WriteAllText(FileLocation, jsonString);
             }
             catch (Exception e)

@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application
 {
-    public interface ISchedulerService : ISetup
+    public interface ISchedulerService : ISetupAsync
     {
         Task<Result> TriggerSyncPlexServersJob();
     }

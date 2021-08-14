@@ -3,11 +3,11 @@ using AutoMapper;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
-using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 using PlexRipper.WebAPI.Common.FluentResult;
+using PlexRipper.WebAPI.Config.Mappings;
 using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Config
@@ -141,16 +141,8 @@ namespace PlexRipper.WebAPI.Config
 
         private void SettingsMappings()
         {
-            CreateMap<SettingsModelDTO, SettingsModel>(MemberList.Destination).ReverseMap();
-
-            CreateMap<ISettingsModel, SettingsModelDTO>(MemberList.Destination).ReverseMap();
-            CreateMap<IAccountSettingsModel, AccountSettingsModelDTO>(MemberList.Destination).ReverseMap();
-            CreateMap<IAdvancedSettingsModel, AdvancedSettingsModelDTO>(MemberList.Destination).ReverseMap();
-            CreateMap<IConfirmationSettingsModel, ConfirmationSettingsModelDTO>(MemberList.Destination).ReverseMap();
-            CreateMap<IDateTimeModel, DateTimeModelDTO>(MemberList.Destination).ReverseMap();
-            CreateMap<IDisplaySettingsModel, DisplaySettingsModelDTO>(MemberList.Destination).ReverseMap();
-            CreateMap<IDownloadManagerModel, DownloadManagerModelDTO>(MemberList.Destination).ReverseMap();
-            CreateMap<IUserInterfaceSettingsModel, UserInterfaceSettingsModelDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<ISettingsModel, SettingsModelDTO>(MemberList.Destination).ConvertUsing<ISettingsModelToSettingsModelDTO>();
+            CreateMap<SettingsModelDTO, ISettingsModel>(MemberList.Destination).ConvertUsing<SettingsModelDTOToISettingsModel>();
         }
     }
 }

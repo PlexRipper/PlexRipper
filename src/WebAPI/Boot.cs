@@ -48,7 +48,7 @@ namespace PlexRipper.WebAPI
             // First await the finishing off all these
             await _fileSystem.SetupAsync();
             await _plexRipperDatabaseService.SetupAsync();
-            await _userSettings.SetupAsync();
+            _userSettings.Setup();
 
             // Keep running the following
             if (!EnviromentExtensions.IsIntegrationTestMode())

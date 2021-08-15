@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using FluentResults;
 using PlexRipper.Application.Common;
-using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings
 {
@@ -27,7 +26,11 @@ namespace PlexRipper.Settings
 
         public Result<ISettingsModel> UpdateSettings(ISettingsModel settingsModel)
         {
-            _userSettings.UpdateSettings(settingsModel);
+            var updateResult = _userSettings.UpdateSettings(settingsModel);
+            if (updateResult.IsFailed)
+            {
+                return updateResult;
+            }
             return GetSettings();
         }
     }

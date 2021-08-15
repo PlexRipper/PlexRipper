@@ -1,5 +1,6 @@
 ﻿using System.Dynamic;
 using System.Text.Json;
+using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
@@ -10,6 +11,11 @@ namespace PlexRipper.Settings.Models
     /// </summary>
     public class SettingsModel : ISettingsModel
     {
+        public SettingsModel()
+        {
+            SetDefaultValues();
+        }
+
         #region Properties
 
         #region Main
@@ -28,7 +34,7 @@ namespace PlexRipper.Settings.Models
 
         #region DownloadManagerSettings
 
-        public int DownloadSegments { get; set; } = 4;
+        public int DownloadSegments { get; set; }
 
         #endregion
 
@@ -50,23 +56,23 @@ namespace PlexRipper.Settings.Models
 
         #region DisplaySettingsModel
 
-        public ViewMode TvShowViewMode { get; set; } = ViewMode.Poster;
+        public ViewMode TvShowViewMode { get; set; }
 
-        public ViewMode MovieViewMode { get; set; } = ViewMode.Poster;
+        public ViewMode MovieViewMode { get; set; }
 
         #endregion
 
         #region DateTimeModel
 
-        public string ShortDateFormat { get; set; } = "dd/MM/yyyy";
+        public string ShortDateFormat { get; set; }
 
-        public string LongDateFormat { get; set; } = "EEEE, dd MMMM yyyy";
+        public string LongDateFormat { get; set; }
 
-        public string TimeFormat { get; set; } = "HH:MM:ss";
+        public string TimeFormat { get; set; }
 
-        public string TimeZone { get; set; } = "UTC";
+        public string TimeZone { get; set; }
 
-        public bool ShowRelativeDates { get; set; } = true;
+        public bool ShowRelativeDates { get; set; }
 
         #endregion
 
@@ -144,5 +150,26 @@ namespace PlexRipper.Settings.Models
         }
 
         #endregion
+
+        protected void SetDefaultValues()
+        {
+            FirstTimeSetup = true;
+            ActiveAccountId = 0;
+            DownloadSegments = 4;
+
+            AskDownloadMovieConfirmation = true;
+            AskDownloadTvShowConfirmation = true;
+            AskDownloadSeasonConfirmation = true;
+            AskDownloadEpisodeConfirmation = true;
+
+            TvShowViewMode = ViewMode.Poster;
+            MovieViewMode = ViewMode.Poster;
+
+            ShortDateFormat = "dd/MM/yyyy";
+            LongDateFormat = "EEEE, dd MMMM yyyy";
+            TimeFormat = "HH:MM:ss";
+            TimeZone = "UTC";
+            ShowRelativeDates = true;
+        }
     }
 }

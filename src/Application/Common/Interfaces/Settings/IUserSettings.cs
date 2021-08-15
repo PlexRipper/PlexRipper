@@ -1,4 +1,4 @@
-﻿using FluentResults;
+using FluentResults;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
@@ -23,7 +23,7 @@ namespace PlexRipper.Application.Common
         /// <summary>
         /// Reverts all settings to their default value.
         /// </summary>
-        void Reset();
+        Result Reset();
 
         /// <summary>
         /// This will copy values from the sourceSettings and set them to this UserSettings
@@ -31,7 +31,6 @@ namespace PlexRipper.Application.Common
         /// instead of having a separate instance of the <see cref="ISettingsModel"/> in the UserSettings.
         /// </summary>
         /// <param name="sourceSettings">The values to be used to set this UserSettings instance.</param>
-        /// <param name="saveAfterUpdate">Should the settings be written to file after update.</param>
-        void UpdateSettings(ISettingsModel sourceSettings, bool saveAfterUpdate = true);
+        Result UpdateSettings(ISettingsModel sourceSettings);
     }
 }

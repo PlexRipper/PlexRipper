@@ -36,6 +36,59 @@ namespace PlexRipper.FileSystem
 
         #region Public Methods
 
+        public Result<bool> FileExists(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return Result.Fail($"path is empty: \"{path}\"");
+            }
+
+            try
+            {
+                return Result.Ok(_fileSystem.File.Exists(path));
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e));
+            }
+        }
+
+        public Result<string> FileReadAllText(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return Result.Fail($"path is empty: \"{path}\"");
+            }
+
+            try
+            {
+                var text = _fileSystem.File.ReadAllText(path);
+                return Result.Ok(text);
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e));
+            }
+        }
+
+        public Result FileWriteAllText(string path, string text)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return Result.Fail($"path is empty: \"{path}\"");
+            }
+
+            try
+            {
+                _fileSystem.File.WriteAllText(path, text);
+                return Result.Ok();
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e));
+            }
+        }
+
         public long CheckDirectoryAvailableSpace(string directory)
         {
             var root = GetPathRoot(directory);

@@ -1,6 +1,10 @@
-﻿using Moq;
+﻿using FluentResults;
+using Moq;
+using PlexRipper.Application.Common;
 using PlexRipper.BaseTests;
 using PlexRipper.Settings;
+using PlexRipper.Settings.Models;
+using Settings.UnitTests.MockData;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -9,29 +13,101 @@ namespace Settings.UnitTests
 {
     public class UserSettingsTests
     {
-        private readonly Mock<UserSettings> _sut;
+        #region Fields
+
+        private readonly Mock<IFileSystem> _fileSystem;
+
+        private readonly Mock<IPathSystem> _pathSystem;
+
+        private readonly UserSettings _sut;
+
+        #endregion
+
+        #region Constructor
 
         public UserSettingsTests(ITestOutputHelper output)
         {
             BaseDependanciesTest.SetupLogging(output);
-            _sut = new Mock<UserSettings>(MockBehavior.Strict);
+            _pathSystem = new Mock<IPathSystem>();
+            _fileSystem = new Mock<IFileSystem>();
+            _sut = new Mock<UserSettings>(_pathSystem.Object, _fileSystem.Object).Object;
+
+            _pathSystem.Setup(x => x.ConfigFileName).Returns("Test_PlexRipperSettings.json");
+            _pathSystem.Setup(x => x.ConfigDirectory).Returns("/config");
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        [Fact]
+        public void UserSettings_Reset_ShouldResetSettings_WhenResetCalled()
+        {
+            // Arrange
+            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.JsonSettings));
+            _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
+
+            // Act
+            var loadResult = _sut.Load();
+            var resetResult = _sut.Reset();
+
+            // Assert
+            loadResult.IsSuccess.ShouldBeTrue();
+            resetResult.IsSuccess.ShouldBeTrue();
+
+            var settingsModel = new SettingsModel();
+            _sut.FirstTimeSetup.ShouldBe(settingsModel.FirstTimeSetup);
+            _sut.ActiveAccountId.ShouldBe(settingsModel.ActiveAccountId);
+            _sut.DownloadSegments.ShouldBe(settingsModel.DownloadSegments);
+
+            _sut.AskDownloadMovieConfirmation.ShouldBe(settingsModel.AskDownloadMovieConfirmation);
+            _sut.AskDownloadTvShowConfirmation.ShouldBe(settingsModel.AskDownloadTvShowConfirmation);
+            _sut.AskDownloadSeasonConfirmation.ShouldBe(settingsModel.AskDownloadSeasonConfirmation);
+            _sut.AskDownloadEpisodeConfirmation.ShouldBe(settingsModel.AskDownloadEpisodeConfirmation);
+
+            _sut.TvShowViewMode.ShouldBe(settingsModel.TvShowViewMode);
+            _sut.MovieViewMode.ShouldBe(settingsModel.MovieViewMode);
+
+            _sut.ShortDateFormat.ShouldBe(settingsModel.ShortDateFormat);
+            _sut.LongDateFormat.ShouldBe(settingsModel.LongDateFormat);
+            _sut.TimeFormat.ShouldBe(settingsModel.TimeFormat);
+            _sut.TimeZone.ShouldBe(settingsModel.TimeZone);
+            _sut.ShowRelativeDates.ShouldBe(settingsModel.ShowRelativeDates);
         }
 
         [Fact]
-        public void UserSettings_ShouldHaveChangedProperty_WhenPropertyIsSaved()
+        public void UserSettings_UpdateSettings_ShouldUpdateSettings_WhenGivenValidSettingsModel()
         {
             // Arrange
-            var userSettings = _sut.Object;
+            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.JsonSettings));
+            _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
 
             // Act
-            userSettings.Setup();
-            userSettings.DownloadSegments = 999;
-            userSettings.ActiveAccountId = 999;
-            userSettings.Save();
+            var settingsModel = UserSettingsFakeData.GetSettingsModel().Generate();
+            var resetResult = _sut.UpdateSettings(settingsModel);
 
             // Assert
-            userSettings.DownloadSegments.ShouldBe(999);
-            userSettings.ActiveAccountId.ShouldBe(999);
+            resetResult.IsSuccess.ShouldBeTrue();
+
+            _sut.FirstTimeSetup.ShouldBe(settingsModel.FirstTimeSetup);
+            _sut.ActiveAccountId.ShouldBe(settingsModel.ActiveAccountId);
+            _sut.DownloadSegments.ShouldBe(settingsModel.DownloadSegments);
+
+            _sut.AskDownloadMovieConfirmation.ShouldBe(settingsModel.AskDownloadMovieConfirmation);
+            _sut.AskDownloadTvShowConfirmation.ShouldBe(settingsModel.AskDownloadTvShowConfirmation);
+            _sut.AskDownloadSeasonConfirmation.ShouldBe(settingsModel.AskDownloadSeasonConfirmation);
+            _sut.AskDownloadEpisodeConfirmation.ShouldBe(settingsModel.AskDownloadEpisodeConfirmation);
+
+            _sut.TvShowViewMode.ShouldBe(settingsModel.TvShowViewMode);
+            _sut.MovieViewMode.ShouldBe(settingsModel.MovieViewMode);
+
+            _sut.ShortDateFormat.ShouldBe(settingsModel.ShortDateFormat);
+            _sut.LongDateFormat.ShouldBe(settingsModel.LongDateFormat);
+            _sut.TimeFormat.ShouldBe(settingsModel.TimeFormat);
+            _sut.TimeZone.ShouldBe(settingsModel.TimeZone);
+            _sut.ShowRelativeDates.ShouldBe(settingsModel.ShowRelativeDates);
         }
+
+        #endregion
     }
 }

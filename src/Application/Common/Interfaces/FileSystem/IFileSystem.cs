@@ -31,5 +31,10 @@ namespace PlexRipper.Application.Common
         /// <returns></returns>
         Result DeleteAllFilesFromDirectory(string directory);
 
+        Result<bool> FileExists(string path);
+
+        Result<string> FileReadAllText(string path);
+
+        Result FileWriteAllText(string path, string text);
     }
 }

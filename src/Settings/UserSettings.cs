@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
@@ -13,6 +12,8 @@ namespace PlexRipper.Settings
     /// <inheritdoc cref="IUserSettings"/>
     public class UserSettings : SettingsModel, IUserSettings
     {
+        private readonly IFileSystem _fileSystem;
+
         #region Fields
 
         private readonly JsonSerializerOptions _jsonSerializerSettings = new JsonSerializerOptions
@@ -24,17 +25,14 @@ namespace PlexRipper.Settings
 
         private bool _allowSave = true;
 
-        #endregion
 
-        #region Properties
-
-        [JsonIgnore]
-        private static string FileName => "PlexRipperSettings.json";
-
-        [JsonIgnore]
-        private string FileLocation => Path.Join(FileSystemPaths.ConfigDirectory, FileName);
 
         #endregion
+
+        public UserSettings(IFileSystem fileSystem)
+        {
+            _fileSystem = fileSystem;
+        }
 
         #region Methods
 
@@ -43,9 +41,9 @@ namespace PlexRipper.Settings
         public Result Setup()
         {
             Log.Information("Setting up UserSettings");
-            if (!File.Exists(FileLocation))
+            if (!File.Exists(_fileSystem.ConfigFileLocation))
             {
-                Log.Information($"{FileName} doesn't exist, will create new one now in {FileLocation}");
+                Log.Information($"{_fileSystem.ConfigFileName} doesn't exist, will create new one now in {_fileSystem.ConfigDirectory}");
                 var saveResult = Save();
                 if (saveResult.IsFailed)
                 {
@@ -62,7 +60,7 @@ namespace PlexRipper.Settings
 
             try
             {
-                string jsonString = File.ReadAllText(FileLocation);
+                string jsonString = File.ReadAllText(_fileSystem.ConfigFileLocation);
                 var loadedSettings = JsonSerializer.Deserialize<dynamic>(jsonString, _jsonSerializerSettings);
                 SetFromJsonObject(loadedSettings);
             }
@@ -77,9 +75,7 @@ namespace PlexRipper.Settings
         public void Reset()
         {
             Log.Debug("Resetting UserSettings");
-
             UpdateSettings(new SettingsModel());
-            Save();
         }
 
         /// <inheritdoc/>
@@ -95,7 +91,7 @@ namespace PlexRipper.Settings
             try
             {
                 string jsonString = JsonSerializer.Serialize(GetJsonObject(), _jsonSerializerSettings);
-                File.WriteAllText(FileLocation, jsonString);
+                File.WriteAllText(_fileSystem.ConfigFileLocation, jsonString);
             }
             catch (Exception e)
             {

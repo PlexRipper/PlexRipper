@@ -1,13 +1,15 @@
-﻿using PlexRipper.Domain;
-using Serilog;
+﻿using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 using Xunit.Abstractions;
-using Log = Serilog.Log;
 
 namespace PlexRipper.BaseTests
 {
     public static class BaseDependanciesTest
     {
         static ITestOutputHelper Output;
+
+        private static readonly string _template = "{NewLine}{Timestamp:HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}";
 
         public static void SetupLogging(ITestOutputHelper output)
         {
@@ -18,8 +20,10 @@ namespace PlexRipper.BaseTests
         public static ILogger GetLoggerConfig()
         {
             // A separate config variable is needed here for some reason
-            var config = LogConfigurationExtensions.GetBaseConfiguration;
-            return config.WriteTo.TestOutput(Output, outputTemplate: LogConfigurationExtensions.Template)
+            return new LoggerConfiguration()
+                .MinimumLevel.Verbose().WriteTo.Debug(outputTemplate: _template, restrictedToMinimumLevel: LogEventLevel.Verbose)
+                .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: _template)
+                .WriteTo.TestOutput(Output, outputTemplate: _template)
                 .WriteTo.TestCorrelator()
                 .CreateLogger();
         }

@@ -14,7 +14,7 @@ namespace PlexRipper.Settings.Models
 
         #region Main
 
-        public bool FirstTimeSetup { get; set; }
+        public bool FirstTimeSetup { get; set; } = true;
 
         #endregion
 

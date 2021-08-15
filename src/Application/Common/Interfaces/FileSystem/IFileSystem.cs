@@ -4,9 +4,9 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
-    public interface IFileSystem : ISetupAsync
+    public interface IFileSystem : ISetup
     {
-        Result<FileStream> SaveFile(string directory, string fileName, long fileSize);
+        Result<Stream> SaveFile(string directory, string fileName, long fileSize);
 
         string ToAbsolutePath(string relativePath);
 
@@ -30,5 +30,21 @@ namespace PlexRipper.Application.Common
         /// <param name="directory">The directory to delete all files from.</param>
         /// <returns></returns>
         Result DeleteAllFilesFromDirectory(string directory);
+
+        string ConfigDirectory { get; }
+
+        string DatabaseBackupDirectory { get; }
+
+        string LogsDirectory { get; }
+
+        string DatabaseName { get; }
+
+        string DatabasePath { get; }
+
+        string ConfigFileName { get; }
+
+        string ConfigFileLocation { get; }
+
+        string RootDirectory { get; }
     }
 }

@@ -2,17 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bogus;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests
 {
-    public class FakeData
+    public class FakeData : IFakeData
     {
+        private readonly IMockServer _mockServer;
+
+        private readonly IFileSystem _fileSystem;
+
         private static readonly Random _random = new Random();
 
-        public static Faker<PlexServer> GetPlexServer(bool includeLibraries = false)
+        public FakeData(IMockServer mockServer, IFileSystem fileSystem)
         {
-            var _server = MockServer.GetPlexMockServer();
+            _mockServer = mockServer;
+            _fileSystem = fileSystem;
+        }
+
+        public Faker<PlexServer> GetPlexServer(bool includeLibraries = false)
+        {
+            var _server = _mockServer.GetPlexMockServer();
             var uri = new Uri(_server.Urls[0]);
 
             var plexServer = new Faker<PlexServer>()
@@ -41,7 +52,7 @@ namespace PlexRipper.BaseTests
             return plexServer;
         }
 
-        public static Faker<PlexLibrary> GetPlexLibrary(int serverId, int plexLibraryId, PlexMediaType type, int numberOfMedia = 0)
+        public Faker<PlexLibrary> GetPlexLibrary(int serverId, int plexLibraryId, PlexMediaType type, int numberOfMedia = 0)
         {
             var plexLibrary = new Faker<PlexLibrary>()
                 .RuleFor(x => x.Id, _ => plexLibraryId)
@@ -70,11 +81,11 @@ namespace PlexRipper.BaseTests
             return plexLibrary;
         }
 
-        public static Faker<DownloadTask> GetMovieDownloadTask()
+        public Faker<DownloadTask> GetMovieDownloadTask()
         {
             var plexServer = GetPlexServer().Generate(1).First();
             var plexLibrary = GetPlexLibrary(plexServer.Id, 1, PlexMediaType.Movie).Generate(1).First();
-            var mediaFile = MockServer.GetDefaultMovieMockMediaData();
+            var mediaFile = _mockServer.GetDefaultMovieMockMediaData();
 
             return new Faker<DownloadTask>()
                 .StrictMode(true)
@@ -113,24 +124,24 @@ namespace PlexRipper.BaseTests
                 })
                 .RuleFor(x => x.DownloadFolder, () => new FolderPath
                 {
-                    DirectoryPath = FileSystemPaths.RootDirectory,
+                    DirectoryPath = _fileSystem.RootDirectory,
                 })
                 .RuleFor(x => x.DownloadFolderId, _ => 1)
                 .RuleFor(x => x.DestinationFolder, () => new FolderPath
                 {
-                    DirectoryPath = FileSystemPaths.RootDirectory,
+                    DirectoryPath = _fileSystem.RootDirectory,
                 })
                 .RuleFor(x => x.DestinationFolderId, _ => 2)
                 .FinishWith((_, u) =>
                 {
                     u.DownloadWorkerTasks = new List<DownloadWorkerTask>
                     {
-                        new (u, 1, 0, u.DataTotal),
+                        new(u, 1, 0, u.DataTotal),
                     };
                 });
         }
 
-        public static Faker<PlexMovie> GetPlexMovies(int plexLibraryId)
+        public Faker<PlexMovie> GetPlexMovies(int plexLibraryId)
         {
             var movieIds = new List<int>();
 
@@ -143,7 +154,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
         }
 
-        public static Faker<PlexTvShow> GetPlexTvShows(int plexLibraryId)
+        public Faker<PlexTvShow> GetPlexTvShows(int plexLibraryId)
         {
             var tvShowIds = new List<int>();
             var seasonIds = new List<int>();

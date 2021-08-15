@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using FluentResults;
@@ -70,9 +68,11 @@ namespace PlexRipper.Data
 
         #endregion
 
-        public static string DatabaseName => EnviromentExtensions.IsIntegrationTestMode() ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
+        public string DatabaseName { get; set; }
 
-        public readonly string DatabasePath = Path.Combine(FileSystemPaths.ConfigDirectory, DatabaseName);
+        public string DatabasePath { get; set; }
+
+        public string ConfigDirectory { get; set; }
 
         #endregion Properties
 
@@ -124,7 +124,7 @@ namespace PlexRipper.Data
             }
 
             Log.Error("Database could not be created and or migrated.");
-            return Result.Fail($"Could not create database {DatabaseName} in {FileSystemPaths.ConfigDirectory}").LogError();
+            return Result.Fail($"Could not create database {DatabaseName} in {ConfigDirectory}").LogError();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

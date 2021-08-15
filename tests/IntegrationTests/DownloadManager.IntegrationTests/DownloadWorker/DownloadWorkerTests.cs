@@ -24,7 +24,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
         {
             Container = new BaseContainer();
 
-            _server = MockServer.GetPlexMockServer();
+            _server = Container.MockServer.GetPlexMockServer();
 
             Log.Debug($"Server running at: {_server.Urls[0]}");
         }
@@ -32,7 +32,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
         private DownloadTask GetTestDownloadTask()
         {
             var uri = new Uri(_server.Urls[0]);
-            var mediaFile = MockServer.GetDefaultMovieMockMediaData();
+            var mediaFile = Container.MockServer.GetDefaultMovieMockMediaData();
 
             return new DownloadTask
             {
@@ -75,12 +75,12 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
                 },
                 DownloadFolder = new FolderPath
                 {
-                    DirectoryPath = FileSystemPaths.RootDirectory,
+                    DirectoryPath = Container.FileSystem.RootDirectory,
                 },
                 DownloadFolderId = 1,
                 DestinationFolder = new FolderPath
                 {
-                    DirectoryPath = FileSystemPaths.RootDirectory,
+                    DirectoryPath = Container.FileSystem.RootDirectory,
                 },
                 DestinationFolderId = 1,
             };
@@ -104,7 +104,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
             //Arrange
             var memoryStream = new MemoryStream();
             var downloadWorker = GetDownloadWorker(memoryStream);
-            var mediaFile = MockServer.GetDefaultMovieMockMediaData();
+            var mediaFile = Container.MockServer.GetDefaultMovieMockMediaData();
 
             //Act
             downloadWorker.Start();
@@ -166,7 +166,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
         public async Task Start_ShouldHaveAValidDownloadFile_WhenDownloadWorkerStoppedAndRestarted()
         {
             //Arrange
-            var mediaFile = MockServer.GetDefaultMovieMockMediaData();
+            var mediaFile = Container.MockServer.GetDefaultMovieMockMediaData();
             var memoryStream = new MemoryStream();
 
             var _filesystem = new Mock<IFileSystem>();

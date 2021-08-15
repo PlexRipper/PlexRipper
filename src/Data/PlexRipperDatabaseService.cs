@@ -18,28 +18,31 @@ namespace PlexRipper.Data
         {
             _dbContext = dbContext;
             _fileSystem = fileSystem;
+            _dbContext.DatabaseName = _fileSystem.DatabaseName;
+            _dbContext.DatabasePath = _fileSystem.DatabasePath;
+            _dbContext.ConfigDirectory = _fileSystem.ConfigDirectory;
         }
 
         public Result BackUpDatabase()
         {
             Log.Information("Attempting to back-up the PlexRipper database");
-            if (!File.Exists(_dbContext.DatabasePath))
+            if (!File.Exists(_fileSystem.DatabasePath))
             {
-                return Result.Fail($"Could not find Database at path: {_dbContext.DatabasePath}").LogError();
+                return Result.Fail($"Could not find Database at path: {_fileSystem.DatabasePath}").LogError();
             }
 
-            var dbBackupName = $"BackUp_{PlexRipperDbContext.DatabaseName.Replace(".db", "")}_" +
+            var dbBackupName = $"BackUp_{_fileSystem.DatabaseName.Replace(".db", "")}_" +
                                $"{DateTime.Now.ToString("dd-MM-yyyy_hh-mm", CultureInfo.InvariantCulture)}.db";
-            var dbBackUpPath = Path.Combine(FileSystemPaths.DatabaseBackupDirectory, dbBackupName);
+            var dbBackUpPath = Path.Combine(_fileSystem.DatabaseBackupDirectory, dbBackupName);
 
             try
             {
                 _fileSystem.CreateDirectoryFromFilePath(dbBackUpPath);
 
                 // Wait until the database is available.
-                StreamExtensions.WaitForFile(_dbContext.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
+                StreamExtensions.WaitForFile(_fileSystem.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
 
-                File.Move(_dbContext.DatabasePath, dbBackUpPath);
+                File.Move(_fileSystem.DatabasePath, dbBackUpPath);
             }
             catch (Exception e)
             {

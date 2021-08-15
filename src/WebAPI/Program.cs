@@ -1,12 +1,14 @@
+using System;
+using System.IO;
 using Autofac.Extensions.DependencyInjection;
+using FluentResults;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Domain;
+using PlexRipper.FileSystem;
 using Serilog;
-using System;
-using System.IO;
 using Log = Serilog.Log;
 
 namespace PlexRipper.WebAPI
@@ -15,7 +17,8 @@ namespace PlexRipper.WebAPI
     {
         public static void Main(string[] args)
         {
-            Log.Logger = LogConfigurationExtensions.GetLogger();
+            // This is the temp log config until LogSystem gets called, until then nothing is logged to file.
+            Log.Logger = LogSystem.GetBaseConfiguration().CreateLogger();
 
             try
             {
@@ -42,7 +45,7 @@ namespace PlexRipper.WebAPI
             }
             catch (Exception e)
             {
-                Domain.Log.Fatal(e);
+               Result.Fail(new ExceptionalError(e)).LogFatal();
             }
             finally
             {

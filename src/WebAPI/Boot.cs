@@ -6,6 +6,7 @@ using PlexRipper.Application;
 using PlexRipper.Application.Common;
 using PlexRipper.Data;
 using PlexRipper.Domain;
+using PlexRipper.FileSystem;
 
 namespace PlexRipper.WebAPI
 {
@@ -20,6 +21,8 @@ namespace PlexRipper.WebAPI
 
         private readonly IFileSystem _fileSystem;
 
+        private readonly ILogSystem _logSystem;
+
         private readonly IFileMerger _fileMerger;
 
         private readonly IDownloadManager _downloadManager;
@@ -28,20 +31,17 @@ namespace PlexRipper.WebAPI
 
         private readonly ISchedulerService _schedulerService;
 
-        private readonly PlexRipperDbContext _dbContext;
-
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
-            IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
-            PlexRipperDbContext dbContext)
+        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, ILogSystem logSystem, IFileMerger fileMerger,
+            IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService)
         {
             _appLifetime = appLifetime;
             _userSettings = userSettings;
             _fileSystem = fileSystem;
+            _logSystem = logSystem;
             _fileMerger = fileMerger;
             _downloadManager = downloadManager;
             _plexRipperDatabaseService = plexRipperDatabaseService;
             _schedulerService = schedulerService;
-            _dbContext = dbContext;
         }
 
         public async Task WaitForStartAsync(CancellationToken cancellationToken)
@@ -50,9 +50,10 @@ namespace PlexRipper.WebAPI
             ServicePointManager.DefaultConnectionLimit = 1000;
 
             // First await the finishing off all these
-            await _fileSystem.SetupAsync();
+            _fileSystem.Setup();
+            _logSystem.Setup();
+            _userSettings.Setup();
             await _plexRipperDatabaseService.SetupAsync();
-            await _userSettings.SetupAsync();
 
             // Keep running the following
             if (!EnviromentExtensions.IsIntegrationTestMode())

@@ -2,7 +2,7 @@
 using PlexRipper.Application.Common;
 using PlexRipper.DownloadManager.Download;
 
-namespace PlexRipper.DownloadManager.Config
+namespace PlexRipper.DownloadManager.Common.Autofac
 {
     public class DownloadManagerModule : Module
     {

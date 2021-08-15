@@ -5,7 +5,14 @@
 			<template v-if="circularMode">
 				<v-row justify="center" no-gutters class="my-3">
 					<v-col cols="auto">
-						<v-progress-circular :size="100" :width="15" :value="percentage" :indeterminate="indeterminate" color="red">
+						<v-progress-circular
+							:size="100"
+							:rotate="-90"
+							:width="15"
+							:value="percentage"
+							:indeterminate="indeterminate"
+							color="red"
+						>
 							<template v-if="!indeterminate">
 								<span v-if="percentage < 100">
 									<b>{{ percentage }}%</b>

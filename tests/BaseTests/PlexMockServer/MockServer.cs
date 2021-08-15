@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
@@ -8,20 +9,27 @@ using WireMock.Server;
 
 namespace PlexRipper.BaseTests
 {
-    public static class MockServer
+    public class MockServer : IMockServer
     {
+        private readonly IPathSystem _pathSystem;
+
         private static readonly List<MockMediaData> _mockMediaData = new();
 
-        public static string MockMovieMediaPath
+        public MockServer(IPathSystem pathSystem)
+        {
+            _pathSystem = pathSystem;
+        }
+
+        public string MockMovieMediaPath
         {
             get
             {
-                var basePath = Directory.GetParent(FileSystemPaths.RootDirectory).Parent.Parent.Parent;
+                var basePath = Directory.GetParent(_pathSystem.RootDirectory).Parent.Parent.Parent;
                 return Path.Join(basePath.FullName, "BaseTests", "PlexMockServer", "media", "movies");
             }
         }
 
-        public static List<MockMediaData> GetMockMediaData()
+        public List<MockMediaData> GetMockMediaData()
         {
             if (!_mockMediaData.Any())
             {
@@ -37,13 +45,13 @@ namespace PlexRipper.BaseTests
             return _mockMediaData;
         }
 
-        public static MockMediaData GetDefaultMovieMockMediaData()
+        public MockMediaData GetDefaultMovieMockMediaData()
         {
             string filepath = Path.Combine(MockMovieMediaPath, "default", "test-video.mp4");
             return new MockMediaData(PlexMediaType.Movie, filepath);
         }
 
-        public static WireMockServer GetPlexMockServer()
+        public WireMockServer GetPlexMockServer()
         {
             var _server = WireMockServer.Start();
 

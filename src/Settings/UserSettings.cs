@@ -1,153 +1,133 @@
 using System;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Application.Common;
-using PlexRipper.Application.Settings.Models;
 using PlexRipper.Domain;
+using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings
 {
     /// <inheritdoc cref="IUserSettings"/>
     public class UserSettings : SettingsModel, IUserSettings
     {
+        private readonly IPathSystem _pathSystem;
+
+        private readonly IFileSystem _fileSystem;
+
         #region Fields
 
-        private readonly JsonSerializerOptions _jsonSerializerSettings = new JsonSerializerOptions
+        private readonly JsonSerializerOptions _jsonSerializerSettings = new()
         {
             WriteIndented = true,
             IncludeFields = false,
             PropertyNameCaseInsensitive = true,
         };
 
-        private bool _allowSave = true;
-
         #endregion
 
-        #region Properties
-
-        [JsonIgnore]
-        private static string FileName { get; } = "PlexRipperSettings.json";
-
-        [JsonIgnore]
-        private string FileLocation => Path.Join(FileSystemPaths.ConfigDirectory, FileName);
-
-        #endregion
+        public UserSettings(IPathSystem pathSystem, IFileSystem fileSystem)
+        {
+            _pathSystem = pathSystem;
+            _fileSystem = fileSystem;
+        }
 
         #region Methods
 
         #region Public
 
-        public async Task<Result> SetupAsync()
+        public Result Setup()
         {
-            // TODO Add result based error handling here
             Log.Information("Setting up UserSettings");
-            if (!File.Exists(FileLocation))
+
+            var fileExistResult = _fileSystem.FileExists(_pathSystem.ConfigFileLocation);
+            if (fileExistResult.IsFailed)
             {
-                Log.Information($"{FileName} doesn't exist, will create new one now in {FileLocation}");
-                Save();
+                return fileExistResult;
             }
 
-            Load();
+            if (!fileExistResult.Value)
+            {
+                Log.Information($"{_pathSystem.ConfigFileName} doesn't exist, will create new one now in {_pathSystem.ConfigDirectory}");
+                return Save();
+            }
 
-            PropertyChanged += (sender, args) => Save();
-
-            return Result.Ok(true);
+            return Load();
         }
 
-        public bool Load()
+        public Result Load()
         {
             Log.Information("Loading UserSettings now.");
 
             try
             {
-                string jsonString = File.ReadAllText(FileLocation);
-                var loadedSettings = JsonSerializer.Deserialize<SettingsModel>(jsonString, _jsonSerializerSettings);
-                UpdateSettings(loadedSettings, false);
+                var readResult = _fileSystem.FileReadAllText(_pathSystem.ConfigFileLocation);
+                if (readResult.IsFailed)
+                {
+                    return readResult;
+                }
+
+                var loadedSettings = JsonSerializer.Deserialize<dynamic>(readResult.Value, _jsonSerializerSettings);
+                SetFromJsonObject(loadedSettings);
             }
             catch (Exception e)
             {
-                Log.Error(e, "Failed to load the UserSettings to json file.");
-                throw;
+                return Result.Fail(new ExceptionalError("Failed to load the UserSettings to json file.", e)).LogError();
             }
 
-            Log.Information("UserSettings were loaded successfully!");
-            return true;
+            return Result.Ok().WithSuccess("UserSettings were loaded successfully!").LogInformation();
         }
 
-        public void Reset()
+        public Result Reset()
         {
-            Log.Debug("Resetting UserSettings");
+            Log.Information("Resetting UserSettings");
 
-            UpdateSettings(new SettingsModel());
-            Save();
+            SetDefaultValues();
+
+            var saveResult = Save();
+            return saveResult.IsFailed ? saveResult : Result.Ok();
         }
 
         /// <inheritdoc/>
-        public bool Save()
+        public Result Save()
         {
-            if (!_allowSave)
-            {
-                Log.Warning("UserSettings is denied from saving by the allowSave lock");
-                return false;
-            }
-
             Log.Information("Saving UserSettings now.");
 
-            try
+            string jsonString = JsonSerializer.Serialize(GetJsonObject(), _jsonSerializerSettings);
+            var writeResult = _fileSystem.FileWriteAllText(_pathSystem.ConfigFileLocation, jsonString);
+            if (writeResult.IsFailed)
             {
-                string jsonString = JsonSerializer.Serialize(this, _jsonSerializerSettings);
-                File.WriteAllText(FileLocation, jsonString);
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, "Failed to save the UserSettings to json file.");
-                throw;
+                return writeResult.WithError("Failed to write save settings").LogError();
             }
 
-            Log.Information("UserSettings were saved successfully!");
-            return true;
+            return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
         }
 
         /// <inheritdoc/>
-        public void UpdateSettings(SettingsModel sourceSettings, bool saveAfterUpdate = true)
+        public Result UpdateSettings(ISettingsModel sourceSettings)
         {
-            _allowSave = false;
+            FirstTimeSetup = sourceSettings.FirstTimeSetup;
+            ActiveAccountId = sourceSettings.ActiveAccountId;
+            DownloadSegments = sourceSettings.DownloadSegments;
 
-            // Get a list of all properties in the sourceSettings.
-            sourceSettings.GetType().GetProperties().Where(x => x.CanWrite).ToList().ForEach(sourceSettingsProperty =>
-            {
-                // Check whether target object has the source property, which will always be true due to inheritance.
-                var targetSettingsProperty = GetType().GetProperty(sourceSettingsProperty.Name);
-                if (targetSettingsProperty != null)
-                {
-                    // Now copy the value to the matching property in this UserSettings instance.
-                    var value = sourceSettingsProperty.GetValue(sourceSettings, null);
-                    if (value != null)
-                    {
-                        GetType().GetProperty(sourceSettingsProperty.Name).SetValue(this, value, null);
-                    }
-                    else
-                    {
-                        Log.Debug($"Value was read from jsonSettings as null for property {targetSettingsProperty}, will maintain default value.");
-                    }
-                }
-            });
+            AskDownloadMovieConfirmation = sourceSettings.AskDownloadMovieConfirmation;
+            AskDownloadTvShowConfirmation = sourceSettings.AskDownloadTvShowConfirmation;
+            AskDownloadSeasonConfirmation = sourceSettings.AskDownloadSeasonConfirmation;
+            AskDownloadEpisodeConfirmation = sourceSettings.AskDownloadEpisodeConfirmation;
 
-            _allowSave = true;
-            if (saveAfterUpdate)
-            {
-                Save();
-            }
+            TvShowViewMode = sourceSettings.TvShowViewMode;
+            MovieViewMode = sourceSettings.MovieViewMode;
+
+            ShortDateFormat = sourceSettings.ShortDateFormat;
+            LongDateFormat = sourceSettings.LongDateFormat;
+            TimeFormat = sourceSettings.TimeFormat;
+            TimeZone = sourceSettings.TimeZone;
+            ShowRelativeDates = sourceSettings.ShowRelativeDates;
+
+            return Save();
         }
 
         #endregion
 
         #endregion
-
-
     }
 }

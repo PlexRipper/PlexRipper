@@ -77,5 +77,14 @@ namespace FluentResults
         }
 
         #endregion
+
+        #region Check
+
+        public static bool HasException(this Result result)
+        {
+            return result.HasError<ExceptionalError>();
+        }
+
+        #endregion
     }
 }

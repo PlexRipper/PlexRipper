@@ -12,7 +12,7 @@ namespace PlexRipper.Settings
     /// <inheritdoc cref="IUserSettings"/>
     public class UserSettings : SettingsModel, IUserSettings
     {
-        private readonly IFileSystem _fileSystem;
+        private readonly IPathSystem _pathSystem;
 
         #region Fields
 
@@ -25,13 +25,11 @@ namespace PlexRipper.Settings
 
         private bool _allowSave = true;
 
-
-
         #endregion
 
-        public UserSettings(IFileSystem fileSystem)
+        public UserSettings(IPathSystem pathSystem)
         {
-            _fileSystem = fileSystem;
+            _pathSystem = pathSystem;
         }
 
         #region Methods
@@ -41,9 +39,9 @@ namespace PlexRipper.Settings
         public Result Setup()
         {
             Log.Information("Setting up UserSettings");
-            if (!File.Exists(_fileSystem.ConfigFileLocation))
+            if (!File.Exists(_pathSystem.ConfigFileLocation))
             {
-                Log.Information($"{_fileSystem.ConfigFileName} doesn't exist, will create new one now in {_fileSystem.ConfigDirectory}");
+                Log.Information($"{_pathSystem.ConfigFileName} doesn't exist, will create new one now in {_pathSystem.ConfigDirectory}");
                 var saveResult = Save();
                 if (saveResult.IsFailed)
                 {
@@ -60,7 +58,7 @@ namespace PlexRipper.Settings
 
             try
             {
-                string jsonString = File.ReadAllText(_fileSystem.ConfigFileLocation);
+                string jsonString = File.ReadAllText(_pathSystem.ConfigFileLocation);
                 var loadedSettings = JsonSerializer.Deserialize<dynamic>(jsonString, _jsonSerializerSettings);
                 SetFromJsonObject(loadedSettings);
             }
@@ -91,7 +89,7 @@ namespace PlexRipper.Settings
             try
             {
                 string jsonString = JsonSerializer.Serialize(GetJsonObject(), _jsonSerializerSettings);
-                File.WriteAllText(_fileSystem.ConfigFileLocation, jsonString);
+                File.WriteAllText(_pathSystem.ConfigFileLocation, jsonString);
             }
             catch (Exception e)
             {

@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using FluentResults;
 using PlexRipper.Application.Common;
-using PlexRipper.Domain;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -12,13 +11,13 @@ namespace PlexRipper.FileSystem
 {
     public class LogSystem : ILogSystem
     {
-        private readonly IFileSystem _fileSystem;
+        private readonly IPathSystem _pathSystem;
 
         public static string Template = "{NewLine}{Timestamp:HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}";
 
-        public LogSystem(IFileSystem fileSystem)
+        public LogSystem(IPathSystem pathSystem)
         {
-            _fileSystem = fileSystem;
+            _pathSystem = pathSystem;
         }
 
         public static LoggerConfiguration GetBaseConfiguration()
@@ -36,7 +35,7 @@ namespace PlexRipper.FileSystem
         {
             return GetBaseConfiguration()
                 .WriteTo.File(
-                    Path.Combine(_fileSystem.LogsDirectory, "log.txt"),
+                    Path.Combine(_pathSystem.LogsDirectory, "log.txt"),
                     LogEventLevel.Debug,
                     Template,
                     rollingInterval: RollingInterval.Day,

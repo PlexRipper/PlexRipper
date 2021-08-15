@@ -77,12 +77,12 @@ namespace DownloadManager.IntegrationTests.PlexDownloadClient
                 },
                 DownloadFolder = new FolderPath
                 {
-                    DirectoryPath = Container.FileSystem.RootDirectory,
+                    DirectoryPath = Container.PathSystem.RootDirectory,
                 },
                 DownloadFolderId = 1,
                 DestinationFolder = new FolderPath
                 {
-                    DirectoryPath = Container.FileSystem.RootDirectory,
+                    DirectoryPath = Container.PathSystem.RootDirectory,
                 },
                 DestinationFolderId = 1,
             };

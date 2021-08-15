@@ -11,14 +11,14 @@ namespace PlexRipper.BaseTests
     {
         private readonly IMockServer _mockServer;
 
-        private readonly IFileSystem _fileSystem;
+        private readonly IPathSystem _pathSystem;
 
-        private static readonly Random _random = new Random();
+        private static readonly Random _random = new();
 
-        public FakeData(IMockServer mockServer, IFileSystem fileSystem)
+        public FakeData(IMockServer mockServer, IPathSystem pathSystem)
         {
             _mockServer = mockServer;
-            _fileSystem = fileSystem;
+            _pathSystem = pathSystem;
         }
 
         public Faker<PlexServer> GetPlexServer(bool includeLibraries = false)
@@ -124,12 +124,12 @@ namespace PlexRipper.BaseTests
                 })
                 .RuleFor(x => x.DownloadFolder, () => new FolderPath
                 {
-                    DirectoryPath = _fileSystem.RootDirectory,
+                    DirectoryPath = _pathSystem.RootDirectory,
                 })
                 .RuleFor(x => x.DownloadFolderId, _ => 1)
                 .RuleFor(x => x.DestinationFolder, () => new FolderPath
                 {
-                    DirectoryPath = _fileSystem.RootDirectory,
+                    DirectoryPath = _pathSystem.RootDirectory,
                 })
                 .RuleFor(x => x.DestinationFolderId, _ => 2)
                 .FinishWith((_, u) =>

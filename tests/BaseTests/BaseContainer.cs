@@ -40,6 +40,7 @@ namespace PlexRipper.BaseTests
 
             var builder = new ContainerBuilder();
             ContainerConfig.ConfigureContainer(builder);
+
             // Setup Test dependancies
             builder.RegisterModule<BaseTestsAutofacModule>();
 
@@ -122,5 +123,7 @@ namespace PlexRipper.BaseTests
         public IFakeData FakeData => AutofacContainer.Resolve<IFakeData>();
 
         public IFileSystem FileSystem => AutofacContainer.Resolve<IFileSystem>();
+
+        public IPathSystem PathSystem => AutofacContainer.Resolve<IPathSystem>();
     }
 }

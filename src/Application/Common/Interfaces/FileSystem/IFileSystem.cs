@@ -31,20 +31,5 @@ namespace PlexRipper.Application.Common
         /// <returns></returns>
         Result DeleteAllFilesFromDirectory(string directory);
 
-        string ConfigDirectory { get; }
-
-        string DatabaseBackupDirectory { get; }
-
-        string LogsDirectory { get; }
-
-        string DatabaseName { get; }
-
-        string DatabasePath { get; }
-
-        string ConfigFileName { get; }
-
-        string ConfigFileLocation { get; }
-
-        string RootDirectory { get; }
     }
 }

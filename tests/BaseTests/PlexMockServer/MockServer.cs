@@ -11,20 +11,20 @@ namespace PlexRipper.BaseTests
 {
     public class MockServer : IMockServer
     {
-        private readonly IFileSystem _fileSystem;
+        private readonly IPathSystem _pathSystem;
 
         private static readonly List<MockMediaData> _mockMediaData = new();
 
-        public MockServer(IFileSystem fileSystem)
+        public MockServer(IPathSystem pathSystem)
         {
-            _fileSystem = fileSystem;
+            _pathSystem = pathSystem;
         }
 
         public string MockMovieMediaPath
         {
             get
             {
-                var basePath = Directory.GetParent(_fileSystem.RootDirectory).Parent.Parent.Parent;
+                var basePath = Directory.GetParent(_pathSystem.RootDirectory).Parent.Parent.Parent;
                 return Path.Join(basePath.FullName, "BaseTests", "PlexMockServer", "media", "movies");
             }
         }

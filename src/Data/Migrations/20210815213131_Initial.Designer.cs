@@ -9,14 +9,14 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    [Migration("20210122162455_Initial")]
+    [Migration("20210815213131_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.1");
+                .HasAnnotation("ProductVersion", "5.0.9");
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadFileTask", b =>
                 {
@@ -46,12 +46,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("DataReceived")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("DataTotal")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("DestinationFolderId")
                         .HasColumnType("INTEGER");
 
@@ -60,12 +54,6 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("DownloadStatus")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FileLocationUrl")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FileName")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Key")
@@ -87,19 +75,7 @@ namespace PlexRipper.Data.Migrations
                     b.Property<long>("Priority")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ReleaseYear")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("ServerToken")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TitleTvShow")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TitleTvShowSeason")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -115,6 +91,32 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("DownloadTasks");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DownloadWorkerTaskId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LogLevel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DownloadWorkerTaskId");
+
+                    b.ToTable("DownloadWorkerTasksLogs");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerTask", b =>
                 {
                     b.Property<int>("Id")
@@ -123,6 +125,10 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<long>("BytesReceived")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("DownloadStatus")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("DownloadTaskId")
                         .HasColumnType("INTEGER");
@@ -136,6 +142,9 @@ namespace PlexRipper.Data.Migrations
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("FilePath")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("PartIndex")
                         .HasColumnType("INTEGER");
 
@@ -143,9 +152,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("TempDirectory")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Url")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -195,6 +201,55 @@ namespace PlexRipper.Data.Migrations
                             DirectoryPath = "/tvshows",
                             DisplayName = "Tv Show Destination Path",
                             Type = "TvShowFolder"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DirectoryPath = "/music",
+                            DisplayName = "Music Destination Path",
+                            Type = "MusicFolder"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DirectoryPath = "/photos",
+                            DisplayName = "Photos Destination Path",
+                            Type = "PhotosFolder"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DirectoryPath = "/other",
+                            DisplayName = "Other Videos Destination Path",
+                            Type = "OtherVideosFolder"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            DirectoryPath = "/games",
+                            DisplayName = "Games Videos Destination Path",
+                            Type = "GamesVideosFolder"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            DirectoryPath = "/",
+                            DisplayName = "Reserved #1 Destination Path",
+                            Type = "None"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            DirectoryPath = "/",
+                            DisplayName = "Reserved #2 Destination Path",
+                            Type = "None"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            DirectoryPath = "/",
+                            DisplayName = "Reserved #3 Destination Path",
+                            Type = "None"
                         });
                 });
 
@@ -338,14 +393,11 @@ namespace PlexRipper.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("CheckedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("ContentChangedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("DefaultDestinationId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Key")
                         .HasColumnType("TEXT");
@@ -365,6 +417,9 @@ namespace PlexRipper.Data.Migrations
                     b.Property<DateTime>("ScannedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("SyncedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
@@ -379,6 +434,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DefaultDestinationId");
 
                     b.HasIndex("PlexServerId");
 
@@ -756,6 +813,9 @@ namespace PlexRipper.Data.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TvShowId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("TvShowSeasonId")
                         .HasColumnType("INTEGER");
 
@@ -770,6 +830,8 @@ namespace PlexRipper.Data.Migrations
                     b.HasIndex("PlexLibraryId");
 
                     b.HasIndex("PlexServerId");
+
+                    b.HasIndex("TvShowId");
 
                     b.HasIndex("TvShowSeasonId");
 
@@ -947,6 +1009,17 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerLog", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.DownloadWorkerTask", "DownloadTask")
+                        .WithMany("DownloadWorkerTaskLogs")
+                        .HasForeignKey("DownloadWorkerTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DownloadTask");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerTask", b =>
                 {
                     b.HasOne("PlexRipper.Domain.DownloadTask", "DownloadTask")
@@ -1006,11 +1079,18 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.PlexLibrary", b =>
                 {
+                    b.HasOne("PlexRipper.Domain.FolderPath", "DefaultDestination")
+                        .WithMany("PlexLibraries")
+                        .HasForeignKey("DefaultDestinationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
                         .WithMany("PlexLibraries")
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("DefaultDestination");
 
                     b.Navigation("PlexServer");
                 });
@@ -1116,6 +1196,12 @@ namespace PlexRipper.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PlexRipper.Domain.PlexTvShow", "TvShow")
+                        .WithMany()
+                        .HasForeignKey("TvShowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("PlexRipper.Domain.PlexTvShowSeason", "TvShowSeason")
                         .WithMany("Episodes")
                         .HasForeignKey("TvShowSeasonId")
@@ -1125,6 +1211,8 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
+
+                    b.Navigation("TvShow");
 
                     b.Navigation("TvShowSeason");
                 });
@@ -1197,6 +1285,16 @@ namespace PlexRipper.Data.Migrations
             modelBuilder.Entity("PlexRipper.Domain.DownloadTask", b =>
                 {
                     b.Navigation("DownloadWorkerTasks");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerTask", b =>
+                {
+                    b.Navigation("DownloadWorkerTaskLogs");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.FolderPath", b =>
+                {
+                    b.Navigation("PlexLibraries");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexAccount", b =>

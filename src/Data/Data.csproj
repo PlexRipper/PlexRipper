@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <Folder Include="CQRS\PlexAuthentication\Commands" />
-    <Folder Include="Migrations" />
   </ItemGroup>
 
 </Project>

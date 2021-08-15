@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using AutoMapper;
+using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
@@ -15,16 +16,16 @@ namespace PlexRipper.WebAPI.Controllers
     {
         private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
 
-        private readonly ISettingsService _settingsService;
+        private readonly IUserSettings _userSettings;
 
         public SettingsController(
             IPlexRipperDatabaseService plexRipperDatabaseService,
-            ISettingsService settingsService,
+            IUserSettings userSettings,
             IMapper mapper,
             INotificationsService notificationsService) : base(mapper, notificationsService)
         {
             _plexRipperDatabaseService = plexRipperDatabaseService;
-            _settingsService = settingsService;
+            _userSettings = userSettings;
         }
 
         // GET api/<SettingsController>/
@@ -33,7 +34,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult GetSettings()
         {
-            return ToActionResult<ISettingsModel, SettingsModelDTO>(_settingsService.GetSettings());
+            return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok((ISettingsModel)_userSettings));
         }
 
         // PUT api/<SettingsController>/
@@ -44,7 +45,13 @@ namespace PlexRipper.WebAPI.Controllers
         public IActionResult UpdateSettings([FromBody] SettingsModelDTO settingsModelDTO)
         {
             var settingsModel = _mapper.Map<SettingsModel>(settingsModelDTO);
-            return ToActionResult<ISettingsModel, SettingsModelDTO>(_settingsService.UpdateSettings(settingsModel));
+            var updateResult = _userSettings.UpdateSettings(settingsModel);
+            if (updateResult.IsFailed)
+            {
+                return ToActionResult(updateResult);
+            }
+
+            return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok((ISettingsModel)_userSettings));
         }
 
         // GET api/<SettingsController>/ResetDb

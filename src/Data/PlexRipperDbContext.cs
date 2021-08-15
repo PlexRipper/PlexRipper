@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application.Common;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
@@ -68,17 +69,19 @@ namespace PlexRipper.Data
 
         #endregion
 
-        public string DatabaseName { get; set; }
+        public static string DatabaseName => EnviromentExtensions.IsIntegrationTestMode() ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
 
-        public string DatabasePath { get; set; }
+        public string DatabasePath => @$"I:\Projects\PlexRipper\src\WebAPI\bin\Debug\net5.0\config\{DatabaseName}";
 
-        public string ConfigDirectory { get; set; }
 
         #endregion Properties
 
         #region Constructors
 
-        public PlexRipperDbContext() { }
+        public PlexRipperDbContext()
+        {
+
+        }
 
         public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
 
@@ -124,11 +127,17 @@ namespace PlexRipper.Data
             }
 
             Log.Error("Database could not be created and or migrated.");
-            return Result.Fail($"Could not create database {DatabaseName} in {ConfigDirectory}").LogError();
+            return Result.Fail($"Could not create database {DatabaseName} in the config directory").LogError();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            if (string.IsNullOrEmpty(DatabasePath))
+            {
+                Log.Error($"DatabasePath is invalid or empty: {DatabasePath}");
+                return;
+            }
+
             if (!optionsBuilder.IsConfigured)
             {
                 // optionsBuilder.UseLazyLoadingProxies();

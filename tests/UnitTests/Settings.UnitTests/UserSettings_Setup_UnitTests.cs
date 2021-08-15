@@ -27,7 +27,7 @@ namespace Settings.UnitTests
             BaseDependanciesTest.SetupLogging(output);
             _pathSystem = new Mock<IPathSystem>();
             _fileSystem = new Mock<IFileSystem>();
-            _sut = new Mock<UserSettings>(_pathSystem.Object, _fileSystem.Object);
+            _sut = new Mock<UserSettings>(MockBehavior.Strict, _pathSystem.Object, _fileSystem.Object);
 
             _pathSystem.Setup(x => x.ConfigFileName).Returns("Test_PlexRipperSettings.json");
             _pathSystem.Setup(x => x.ConfigDirectory).Returns("/config");
@@ -37,9 +37,7 @@ namespace Settings.UnitTests
         public void UserSettings_Setup_ShouldHaveSuccessfulSetup_WhenSettingsAreLoaded()
         {
             // Arrange
-            _sut.Setup(x => x.Load()).Returns(Result.Ok());
             _fileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(true));
-            _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
             _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.JsonSettings));
 
             // Act
@@ -66,30 +64,29 @@ namespace Settings.UnitTests
         public void UserSettings_Setup_ShouldCreateSettingsFile_WhenSettingsFileDoesntExist()
         {
             // Arrange
-            _sut.Setup(x => x.Save()).Returns(Result.Ok());
             _fileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(false));
+            _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
 
             // Act
             var setupResult = _sut.Object.Setup();
 
             // Assert
             setupResult.IsSuccess.ShouldBeTrue();
-            _sut.Verify(x => x.Save(), Times.Once);
+            _fileSystem.Verify(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [Fact]
         public void UserSettings_Setup_ShouldLoadSettingsFile_WhenSettingsFileExists()
         {
             // Arrange
-            _sut.Setup(x => x.Load()).Returns(Result.Ok());
             _fileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(true));
+            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.JsonSettings));
 
             // Act
             var setupResult = _sut.Object.Setup();
 
             // Assert
             setupResult.IsSuccess.ShouldBeTrue();
-            _sut.Verify(x => x.Load(), Times.Once);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Settings.UnitTests
             BaseDependanciesTest.SetupLogging(output);
             _pathSystem = new Mock<IPathSystem>();
             _fileSystem = new Mock<IFileSystem>();
-            _sut = new Mock<UserSettings>(_pathSystem.Object, _fileSystem.Object).Object;
+            _sut = new Mock<UserSettings>(MockBehavior.Strict, _pathSystem.Object, _fileSystem.Object).Object;
 
             _pathSystem.Setup(x => x.ConfigFileName).Returns("Test_PlexRipperSettings.json");
             _pathSystem.Setup(x => x.ConfigDirectory).Returns("/config");

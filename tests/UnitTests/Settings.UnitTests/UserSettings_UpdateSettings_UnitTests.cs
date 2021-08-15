@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Settings.UnitTests
 {
-    public class UserSettingsTests
+    public class UserSettings_UpdateSettings_UnitTests
     {
         #region Fields
 
@@ -25,7 +25,7 @@ namespace Settings.UnitTests
 
         #region Constructor
 
-        public UserSettingsTests(ITestOutputHelper output)
+        public UserSettings_UpdateSettings_UnitTests(ITestOutputHelper output)
         {
             BaseDependanciesTest.SetupLogging(output);
             _pathSystem = new Mock<IPathSystem>();
@@ -41,45 +41,9 @@ namespace Settings.UnitTests
         #region Public Methods
 
         [Fact]
-        public void UserSettings_Reset_ShouldResetSettings_WhenResetCalled()
-        {
-            // Arrange
-            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.JsonSettings));
-            _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
-
-            // Act
-            var loadResult = _sut.Load();
-            var resetResult = _sut.Reset();
-
-            // Assert
-            loadResult.IsSuccess.ShouldBeTrue();
-            resetResult.IsSuccess.ShouldBeTrue();
-
-            var settingsModel = new SettingsModel();
-            _sut.FirstTimeSetup.ShouldBe(settingsModel.FirstTimeSetup);
-            _sut.ActiveAccountId.ShouldBe(settingsModel.ActiveAccountId);
-            _sut.DownloadSegments.ShouldBe(settingsModel.DownloadSegments);
-
-            _sut.AskDownloadMovieConfirmation.ShouldBe(settingsModel.AskDownloadMovieConfirmation);
-            _sut.AskDownloadTvShowConfirmation.ShouldBe(settingsModel.AskDownloadTvShowConfirmation);
-            _sut.AskDownloadSeasonConfirmation.ShouldBe(settingsModel.AskDownloadSeasonConfirmation);
-            _sut.AskDownloadEpisodeConfirmation.ShouldBe(settingsModel.AskDownloadEpisodeConfirmation);
-
-            _sut.TvShowViewMode.ShouldBe(settingsModel.TvShowViewMode);
-            _sut.MovieViewMode.ShouldBe(settingsModel.MovieViewMode);
-
-            _sut.ShortDateFormat.ShouldBe(settingsModel.ShortDateFormat);
-            _sut.LongDateFormat.ShouldBe(settingsModel.LongDateFormat);
-            _sut.TimeFormat.ShouldBe(settingsModel.TimeFormat);
-            _sut.TimeZone.ShouldBe(settingsModel.TimeZone);
-            _sut.ShowRelativeDates.ShouldBe(settingsModel.ShowRelativeDates);
-        }
-
-        [Fact]
         public void UserSettings_UpdateSettings_ShouldUpdateSettings_WhenGivenValidSettingsModel()
         {
             // Arrange
-            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.JsonSettings));
             _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
 
             // Act

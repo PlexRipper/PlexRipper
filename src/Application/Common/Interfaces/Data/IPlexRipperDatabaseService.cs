@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
-    public interface IPlexRipperDatabaseService : ISetup
+    public interface IPlexRipperDatabaseService : ISetupAsync
     {
         Result BackUpDatabase();
 

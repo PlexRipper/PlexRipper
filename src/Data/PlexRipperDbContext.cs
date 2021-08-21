@@ -1,17 +1,18 @@
-using System;
-using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application.Common;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
-    public class PlexRipperDbContext : DbContext, ISetup
+    public class PlexRipperDbContext : DbContext, ISetupAsync
     {
+        private readonly IPathSystem _pathSystem;
+
         #region Properties
 
         #region Tables
@@ -70,15 +71,25 @@ namespace PlexRipper.Data
 
         #endregion
 
-        public static string DatabaseName => EnviromentExtensions.IsIntegrationTestMode() ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
+        public string DatabaseName { get; set; }
 
-        public readonly string DatabasePath = Path.Combine(FileSystemPaths.ConfigDirectory, DatabaseName);
+        public string DatabasePath { get; set; }
+
+        public string ConfigDirectory { get; set; }
 
         #endregion Properties
 
         #region Constructors
 
         public PlexRipperDbContext() { }
+
+        public PlexRipperDbContext(IPathSystem pathSystem)
+        {
+            _pathSystem = pathSystem;
+            DatabaseName = _pathSystem.DatabaseName;
+            DatabasePath = _pathSystem.DatabasePath;
+            ConfigDirectory = _pathSystem.ConfigDirectory;
+        }
 
         public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
 
@@ -124,7 +135,7 @@ namespace PlexRipper.Data
             }
 
             Log.Error("Database could not be created and or migrated.");
-            return Result.Fail($"Could not create database {DatabaseName} in {FileSystemPaths.ConfigDirectory}").LogError();
+            return Result.Fail($"Could not create database {DatabaseName} in {ConfigDirectory}").LogError();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

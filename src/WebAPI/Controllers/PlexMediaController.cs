@@ -1,8 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
@@ -44,28 +42,8 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(id, nameof(id));
             }
 
-            try
-            {
-                var data = await _plexTvShowService.GetTvShow(id);
-
-                if (data.IsFailed)
-                {
-                    return InternalServerError(data);
-                }
-
-                if (data.Value != null)
-                {
-                    return Ok(Result.Ok(_mapper.Map<PlexMediaDTO>(data.Value)));
-                }
-
-                string message = $"Could not find a {nameof(PlexTvShow)} with Id: {id}";
-                Log.Warning(message);
-                return NotFound(message);
-            }
-            catch (Exception e)
-            {
-                return InternalServerError(e);
-            }
+            var data = await _plexTvShowService.GetTvShow(id);
+            return ToActionResult<PlexTvShow, PlexMediaDTO>(data);
         }
 
         // GET api/<PlexMedia>/5

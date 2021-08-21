@@ -1,19 +1,19 @@
 ﻿using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace PlexRipper.Domain
 {
-    [JsonConverter(typeof(StringEnumConverter))]
     public enum ViewMode
     {
+        [EnumMember(Value = "None")]
+        None = 0,
+
         [EnumMember(Value = "Table")]
-        Table = 0,
+        Table = 1,
 
         [EnumMember(Value = "Poster")]
-        Poster = 1,
+        Poster = 2,
 
         [EnumMember(Value = "Overview")]
-        Overview = 2,
+        Overview = 3,
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using PlexRipper.Application.Common;
+using PlexRipper.BaseTests.Config;
 using PlexRipper.Data;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager.Download;
@@ -39,6 +40,9 @@ namespace PlexRipper.BaseTests
 
             var builder = new ContainerBuilder();
             ContainerConfig.ConfigureContainer(builder);
+
+            // Setup Test dependancies
+            builder.RegisterModule<BaseTestsAutofacModule>();
 
             // re-create the startup service collection and add to builder.
             var services = new ServiceCollection();
@@ -113,5 +117,13 @@ namespace PlexRipper.BaseTests
         public PlexRipperDbContext PlexRipperDbContext => AutofacContainer.Resolve<PlexRipperDbContext>();
 
         public IMediator Mediator => AutofacContainer.Resolve<IMediator>();
+
+        public IMockServer MockServer => AutofacContainer.Resolve<IMockServer>();
+
+        public IFakeData FakeData => AutofacContainer.Resolve<IFakeData>();
+
+        public IFileSystem FileSystem => AutofacContainer.Resolve<IFileSystem>();
+
+        public IPathSystem PathSystem => AutofacContainer.Resolve<IPathSystem>();
     }
 }

@@ -18,7 +18,7 @@ namespace DownloadManager.IntegrationTests.DownloadManager
             BaseDependanciesTest.SetupLogging(output);
             Container = new BaseContainer();
 
-            WireMockServer server = MockServer.GetPlexMockServer();
+            WireMockServer server = Container.MockServer.GetPlexMockServer();
 
             Log.Debug($"Server running at: {server.Urls[0]}");
         }

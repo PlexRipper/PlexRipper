@@ -40,9 +40,8 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 			// Add new entry
 			x.push(newObject);
 		}
-
 		const stateObject = {};
 		stateObject[propertyName] = x;
-		this.setState(stateObject, `Update ${propertyName}`);
+		this.setState(stateObject, `Update ${propertyName} with ${idName}: ${newObject[idName]}`);
 	}
 }

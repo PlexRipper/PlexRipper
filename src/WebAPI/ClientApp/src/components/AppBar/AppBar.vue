@@ -58,7 +58,7 @@ import { refreshAccount } from '@api/accountApi';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import DarkModeToggle from '@components/General/DarkModeToggle.vue';
 import NotificationButton from '@components/AppBar/NotificationButton.vue';
-import ProgressComponent from '@components/ProgressComponent.vue';
+import ProgressComponent from '@components/Progress/ProgressComponent.vue';
 
 @Component({
 	components: {

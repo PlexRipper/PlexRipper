@@ -1,11 +1,11 @@
-import { iif, Observable, of } from 'rxjs';
-import { BaseService, GlobalService, ServerService } from '@service';
-import IStoreState from '@interfaces/IStoreState';
-import { finalize, map, switchMap } from 'rxjs/operators';
-import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
-import { getAllPlexLibraries, getPlexLibrary, refreshPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
 import Log from 'consola';
 import { Context } from '@nuxt/types';
+import { Observable, of } from 'rxjs';
+import { BaseService, GlobalService, ServerService } from '@service';
+import IStoreState from '@interfaces/IStoreState';
+import { distinctUntilChanged, filter, finalize, map, switchMap } from 'rxjs/operators';
+import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { getAllPlexLibraries, getPlexLibrary, refreshPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
 
 export class LibraryService extends BaseService {
 	// region Constructor and Setup
@@ -41,55 +41,42 @@ export class LibraryService extends BaseService {
 		});
 	}
 
-	// endregion
-
-	private updateLibraryInStore(library: PlexLibraryDTO | null) {
-		if (!library) {
-			return;
-		}
-		const libraries = this.getState().libraries;
-		const libraryIndex = libraries.findIndex((x) => x.id === library.id);
-		if (libraryIndex === -1) {
-			libraries.push(library);
-		} else {
-			libraries.splice(libraryIndex, 1, library);
-		}
-		this.setState({ libraries }, 'plexLibrary with id: ' + library.id + ' updated');
+	public fetchLibrary(libraryId: number): void {
+		getPlexLibrary(libraryId, 0).subscribe((library) => {
+			if (library.isSuccess && library.value) {
+				// We freeze library here as it doesnt have to be Vue reactive.
+				this.updateStore('libraries', Object.freeze(library.value));
+			}
+		});
 	}
+
+	// endregion
 
 	public getLibraries(): Observable<PlexLibraryDTO[]> {
 		return this.stateChanged.pipe(switchMap((state: IStoreState) => of(state?.libraries ?? [])));
 	}
 
 	public getLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
-		return this.getLibraries().pipe(
-			map((libraries): PlexLibraryDTO | null => libraries.find((y) => y.id === libraryId) ?? null),
-			switchMap((library) => iif(() => library !== null, of(library), this.retrieveLibrary(libraryId))),
-		);
-	}
-
-	public retrieveLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
-		return getPlexLibrary(libraryId, 0).pipe(
-			switchMap((library) => {
-				if (library.isSuccess && library.value) {
-					this.updateLibraryInStore(library.value);
-				}
-				return of(library?.value ?? null);
-			}),
-		);
-	}
-
-	public refreshLibrary(libraryId: number): void {
-		refreshPlexLibrary(libraryId)
-			.pipe(switchMap(() => this.retrieveLibrary(libraryId)))
-			.subscribe((library) => this.updateLibraryInStore(library));
+		this.fetchLibrary(libraryId);
+		return this.getLibraries().pipe(map((libraries): PlexLibraryDTO | null => libraries.find((y) => y.id === libraryId) ?? null));
 	}
 
 	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | null> {
 		return ServerService.getServers().pipe(
-			switchMap((x: PlexServerDTO[]) =>
-				of(x.find((y: PlexServerDTO) => y.plexLibraries.find((z: PlexLibraryDTO) => z.id === libraryId)) ?? null),
-			),
+			switchMap((x: PlexServerDTO[]) => of(x.find((y) => y.plexLibraries.find((z) => z.id === libraryId)) ?? null)),
+			filter((server) => server !== null),
+			distinctUntilChanged(),
+		);
+	}
+
+	public refreshLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
+		return refreshPlexLibrary(libraryId).pipe(
+			switchMap((library) => {
+				if (library.isSuccess && library.value) {
+					this.updateStore('libraries', library.value);
+				}
+				return this.getLibraries().pipe(map((libraries) => libraries.find((y) => y.id === libraryId) ?? null));
+			}),
 		);
 	}
 

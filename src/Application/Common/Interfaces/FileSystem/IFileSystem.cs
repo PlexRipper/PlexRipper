@@ -6,7 +6,7 @@ namespace PlexRipper.Application.Common
 {
     public interface IFileSystem : ISetup
     {
-        Result<FileStream> SaveFile(string directory, string fileName, long fileSize);
+        Result<Stream> SaveFile(string directory, string fileName, long fileSize);
 
         string ToAbsolutePath(string relativePath);
 
@@ -30,5 +30,11 @@ namespace PlexRipper.Application.Common
         /// <param name="directory">The directory to delete all files from.</param>
         /// <returns></returns>
         Result DeleteAllFilesFromDirectory(string directory);
+
+        Result<bool> FileExists(string path);
+
+        Result<string> FileReadAllText(string path);
+
+        Result FileWriteAllText(string path, string text);
     }
 }

@@ -2,14 +2,14 @@ import Log from 'consola';
 import IStoreState from '@interfaces/IStoreState';
 import { Observable, of } from 'rxjs';
 import {
-	AccountSettingsModel,
-	AdvancedSettingsModel,
-	ConfirmationSettingsModel,
-	DateTimeModel,
-	DisplaySettingsModel,
-	DownloadManagerModel,
-	SettingsModel,
-	UserInterfaceSettingsModel,
+	AccountSettingsModelDTO,
+	AdvancedSettingsModelDTO,
+	ConfirmationSettingsModelDTO,
+	DateTimeModelDTO,
+	DisplaySettingsModelDTO,
+	DownloadManagerModelDTO,
+	SettingsModelDTO,
+	UserInterfaceSettingsModelDTO,
 	ViewMode,
 } from '@dto/mainApi';
 import { filter, switchMap, take, tap } from 'rxjs/operators';
@@ -50,7 +50,7 @@ export class SettingsService extends BaseService {
 	// endregion
 
 	// region Fetch
-	public fetchSettings(): Observable<SettingsModel | null> {
+	public fetchSettings(): Observable<SettingsModelDTO | null> {
 		return getSettings().pipe(
 			switchMap((settingsResult) => of(settingsResult?.value ?? null)),
 			tap((settings) => {
@@ -64,7 +64,7 @@ export class SettingsService extends BaseService {
 	// endregion
 
 	// region Settings
-	public getSettings(): Observable<SettingsModel> {
+	public getSettings(): Observable<SettingsModelDTO> {
 		return this.stateChanged.pipe(
 			filter((x) => x !== null),
 			switchMap((x) => of(x.settings)),
@@ -102,33 +102,33 @@ export class SettingsService extends BaseService {
 
 	// region UserInterfaceSettings
 
-	public getUserInterfaceSettings(): Observable<UserInterfaceSettingsModel> {
+	public getUserInterfaceSettings(): Observable<UserInterfaceSettingsModelDTO> {
 		return this.getSettings().pipe(switchMap((x) => of(x.userInterfaceSettings)));
 	}
 
-	public getConfirmationSettings(): Observable<ConfirmationSettingsModel> {
+	public getConfirmationSettings(): Observable<ConfirmationSettingsModelDTO> {
 		return this.getUserInterfaceSettings().pipe(switchMap((x) => of(x.confirmationSettings)));
 	}
 
-	public getDisplaySettings(): Observable<DisplaySettingsModel> {
+	public getDisplaySettings(): Observable<DisplaySettingsModelDTO> {
 		return this.getUserInterfaceSettings().pipe(switchMap((x) => of(x.displaySettings)));
 	}
 
-	public getDateTimeSettings(): Observable<DateTimeModel> {
+	public getDateTimeSettings(): Observable<DateTimeModelDTO> {
 		return this.getUserInterfaceSettings().pipe(switchMap((x) => of(x.dateTimeSettings)));
 	}
 
-	public updateConfirmationSettings(confirmationSettings: ConfirmationSettingsModel): void {
+	public updateConfirmationSettings(confirmationSettings: ConfirmationSettingsModelDTO): void {
 		const userInterfaceSettings = this.getState().settings.userInterfaceSettings;
 		this.updateUserInterfaceSettings({ ...userInterfaceSettings, confirmationSettings });
 	}
 
-	public updateDateTimeSettings(dateTimeSettings: DateTimeModel): void {
+	public updateDateTimeSettings(dateTimeSettings: DateTimeModelDTO): void {
 		const userInterfaceSettings = this.getState().settings.userInterfaceSettings;
 		this.updateUserInterfaceSettings({ ...userInterfaceSettings, dateTimeSettings });
 	}
 
-	public updateDisplaySettings(displaySettings: DisplaySettingsModel): void {
+	public updateDisplaySettings(displaySettings: DisplaySettingsModelDTO): void {
 		const userInterfaceSettings = this.getState().settings.userInterfaceSettings;
 		this.updateUserInterfaceSettings({ ...userInterfaceSettings, displaySettings });
 	}
@@ -143,7 +143,7 @@ export class SettingsService extends BaseService {
 		this.updateDisplaySettings({ ...displaySettings, tvShowViewMode: viewMode });
 	}
 
-	public updateUserInterfaceSettings(userInterfaceSettings: UserInterfaceSettingsModel): void {
+	public updateUserInterfaceSettings(userInterfaceSettings: UserInterfaceSettingsModelDTO): void {
 		const settings = this.getState().settings;
 		this.setState({
 			...this.getState(),
@@ -157,7 +157,7 @@ export class SettingsService extends BaseService {
 
 	// region accountSettings
 
-	public getAccountSettings(): Observable<AccountSettingsModel> {
+	public getAccountSettings(): Observable<AccountSettingsModelDTO> {
 		return this.getSettings().pipe(switchMap((x) => of(x.accountSettings)));
 	}
 
@@ -170,7 +170,7 @@ export class SettingsService extends BaseService {
 		this.updateAccountSettings({ ...accountSettings, activeAccountId });
 	}
 
-	public updateAccountSettings(accountSettings: AccountSettingsModel): void {
+	public updateAccountSettings(accountSettings: AccountSettingsModelDTO): void {
 		const settings = this.getState().settings;
 		this.setState({
 			...this.getState(),
@@ -185,15 +185,15 @@ export class SettingsService extends BaseService {
 
 	// region advancedSettings
 
-	public getAdvancedSettings(): Observable<AdvancedSettingsModel> {
-		return this.getSettings().pipe(switchMap((x: SettingsModel) => of(x.advancedSettings)));
+	public getAdvancedSettings(): Observable<AdvancedSettingsModelDTO> {
+		return this.getSettings().pipe(switchMap((x: SettingsModelDTO) => of(x.advancedSettings)));
 	}
 
-	public getDownloadManagerSettings(): Observable<DownloadManagerModel> {
+	public getDownloadManagerSettings(): Observable<DownloadManagerModelDTO> {
 		return this.getAdvancedSettings().pipe(switchMap((x) => of(x?.downloadManager)));
 	}
 
-	public updateAdvancedSettings(advancedSettings: AdvancedSettingsModel): void {
+	public updateAdvancedSettings(advancedSettings: AdvancedSettingsModelDTO): void {
 		const settings = this.getState().settings;
 		this.setState({
 			...this.getState(),
@@ -204,7 +204,7 @@ export class SettingsService extends BaseService {
 		});
 	}
 
-	public updateDownloadManagerSettings(downloadManager: DownloadManagerModel): void {
+	public updateDownloadManagerSettings(downloadManager: DownloadManagerModelDTO): void {
 		const advancedSettings = this.getState().settings.advancedSettings;
 		this.updateAdvancedSettings({
 			...advancedSettings,

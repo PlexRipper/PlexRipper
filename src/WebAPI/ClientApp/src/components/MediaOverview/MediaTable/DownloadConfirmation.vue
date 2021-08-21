@@ -46,7 +46,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import ProgressComponent from '@components/ProgressComponent.vue';
+import ProgressComponent from '@components/Progress/ProgressComponent.vue';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import Log from 'consola';

@@ -34,7 +34,7 @@ namespace PlexRipper.WebAPI.Controllers
             var result = await _plexDownloadService.GetDownloadTasksAsync();
             if (result.IsFailed)
             {
-                return InternalServerError(result);
+                return InternalServerError(result.ToResult());
             }
 
             return ToActionResult<List<DownloadTaskDTO>, List<DownloadTaskDTO>>(ControllerHelpers.ConvertToDownloadTaskDTOHierarchy(result.Value, _mapper));

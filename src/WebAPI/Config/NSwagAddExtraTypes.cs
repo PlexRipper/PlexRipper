@@ -21,7 +21,7 @@ namespace PlexRipper.WebAPI.Config
         /// <param name="context">The <see cref="DocumentProcessorContext"/> used to register types in.</param>
         public void Process(DocumentProcessorContext context)
         {
-            List<Type> types = new List<Type>
+            List<Type> types = new()
             {
                 typeof(DownloadTaskCreationProgress),
                 typeof(LibraryProgress),

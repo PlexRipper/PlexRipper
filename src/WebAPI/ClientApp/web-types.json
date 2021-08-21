@@ -1389,6 +1389,15 @@
                 "type": "boolean"
               },
               "default": "true"
+            },
+            {
+              "name": "noScrollbar",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
             }
           ],
           "slots": [
@@ -1572,7 +1581,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/ProgressComponent.vue",
+            "module": "./src/components/Progress/ProgressComponent.vue",
             "symbol": "default"
           }
         },

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using MediatR;
@@ -57,6 +58,12 @@ namespace PlexRipper.BaseTests
 
             AutofacContainer = builder.Build();
             PlexRipperDbContext.SetupAsync();
+        }
+
+        public async Task SetupTestAccount()
+        {
+            var plexAccountResult = await GetPlexAccountService.CreatePlexAccountAsync(_plexAccountSecond);
+
         }
 
         private void SetupSecrets()

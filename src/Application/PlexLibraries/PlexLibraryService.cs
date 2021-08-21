@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -5,6 +6,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.Common;
+using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
@@ -50,8 +52,9 @@ namespace PlexRipper.Application.PlexLibraries
         /// </summary>
         /// <param name="authToken"></param>
         /// <param name="plexLibrary"></param>
+        /// <param name="progressAction"></param>
         /// <returns></returns>
-        private async Task<Result> RefreshPlexTvShowLibrary(string authToken, PlexLibrary plexLibrary)
+        private async Task<Result> RefreshPlexTvShowLibrary(string authToken, PlexLibrary plexLibrary, Action<LibraryProgress> progressAction = null)
         {
             if (plexLibrary == null)
                 return ResultExtensions.IsNull("plexLibrary").LogError();
@@ -64,6 +67,13 @@ namespace PlexRipper.Application.PlexLibraries
                         $"PlexLibrary {plexLibrary.Name} with id {plexLibrary.Id} does not contain any TvShows and thus cannot request the corresponding media")
                     .LogError();
 
+            // Send progress
+            void SendProgress(int index, int count)
+            {
+                progressAction?.Invoke(new LibraryProgress(plexLibrary.Id, index, count));
+                _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, index, count);
+            }
+
             var result = await _mediator.Send(new GetPlexLibraryByIdWithServerQuery(plexLibrary.Id));
             if (result.IsFailed)
             {
@@ -73,7 +83,8 @@ namespace PlexRipper.Application.PlexLibraries
             // Request seasons and episodes for every tv show
             var plexLibraryDb = result.Value;
             var serverUrl = plexLibraryDb.PlexServer.ServerUrl;
-            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 0, 3);
+            SendProgress(0, 4);
+
             var timer = new Stopwatch();
             timer.Start();
 
@@ -84,7 +95,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             // Phase 1 of 4: Season data was retrieved successfully.
-            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 1, 4);
+            SendProgress(1, 4);
 
             var rawEpisodesDataResult = await _plexServiceApi.GetAllEpisodesAsync(authToken, serverUrl, plexLibrary.Key);
             if (rawEpisodesDataResult.IsFailed)
@@ -93,7 +104,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             // Phase 2 of 4: Episode data was retrieved successfully.
-            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 2, 4);
+            SendProgress(2, 4);
 
             foreach (var plexTvShow in plexLibrary.TvShows)
             {
@@ -123,7 +134,7 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             // Phase 3 of 4: PlexLibrary media data was parsed successfully.
-            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 3, 4);
+            SendProgress(3, 4);
             Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds}");
             timer.Restart();
 
@@ -149,7 +160,7 @@ namespace PlexRipper.Application.PlexLibraries
             Log.Debug($"Finished updating all media in the database for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds}");
 
             // Phase 4 of 4: Database has been successfully updated with new library data.
-            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, 4, 4);
+            SendProgress(4, 4);
             return Result.Ok();
         }
 
@@ -157,13 +168,23 @@ namespace PlexRipper.Application.PlexLibraries
         /// Refresh the <see cref="PlexLibrary"/>, by first deleting all (related) media and the re-adding the media again.
         /// </summary>
         /// <param name="plexLibrary">The <see cref="PlexLibrary"/> to refresh.</param>
+        /// <param name="progressAction"></param>
         /// <returns></returns>
-        private async Task<Result> RefreshPlexMovieLibrary(PlexLibrary plexLibrary)
+        private async Task<Result> RefreshPlexMovieLibrary(PlexLibrary plexLibrary, Action<LibraryProgress> progressAction = null)
         {
             if (plexLibrary == null)
             {
                 return ResultExtensions.IsNull(nameof(plexLibrary));
             }
+
+            // Send progress
+            void SendProgress(int index, int count)
+            {
+                progressAction?.Invoke(new LibraryProgress(plexLibrary.Id, index, count));
+                _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, index, count);
+            }
+
+            SendProgress(0, 3);
 
             // Update the MetaData of this library
             var updateMetaDataResult = plexLibrary.UpdateMetaData();
@@ -172,11 +193,15 @@ namespace PlexRipper.Application.PlexLibraries
                 return updateMetaDataResult;
             }
 
+            SendProgress(1, 3);
+
             var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
             if (updateResult.IsFailed)
             {
                 return updateResult.ToResult();
             }
+
+            SendProgress(2, 3);
 
             var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
             if (createResult.IsFailed)
@@ -184,7 +209,7 @@ namespace PlexRipper.Application.PlexLibraries
                 return createResult.ToResult();
             }
 
-            await _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, plexLibrary.MediaCount, plexLibrary.MediaCount);
+            SendProgress(3, 3);
             return Result.Ok();
         }
 
@@ -195,13 +220,13 @@ namespace PlexRipper.Application.PlexLibraries
         /// <inheritdoc/>
         public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, bool topLevelMediaOnly = false)
         {
-            await _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
+            _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
 
             var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
 
             if (libraryDB.IsFailed)
             {
-                await _signalRService.SendLibraryProgressUpdate(libraryId, 1, 1, false);
+                _signalRService.SendLibraryProgressUpdate(libraryId, 1, 1, false);
                 return libraryDB;
             }
 
@@ -216,7 +241,7 @@ namespace PlexRipper.Application.PlexLibraries
                 }
             }
 
-            await _signalRService.SendLibraryProgressUpdate(libraryId, 1, 1, false);
+            _signalRService.SendLibraryProgressUpdate(libraryId, 1, 1, false);
             return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true, topLevelMediaOnly));
         }
 
@@ -280,7 +305,7 @@ namespace PlexRipper.Application.PlexLibraries
         }
 
         /// <inheritdoc/>
-        public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId)
+        public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId, Action<LibraryProgress> progressAction = null)
         {
             var plexLibraryResult = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibraryId, true));
             if (plexLibraryResult.IsFailed)
@@ -289,8 +314,6 @@ namespace PlexRipper.Application.PlexLibraries
             }
 
             var plexLibrary = plexLibraryResult.Value;
-
-            await _signalRService.SendLibraryProgressUpdate(plexLibraryId, 0, plexLibrary.MediaCount);
 
             if (plexLibrary.Type != PlexMediaType.Movie && plexLibrary.Type != PlexMediaType.TvShow)
             {
@@ -320,9 +343,9 @@ namespace PlexRipper.Application.PlexLibraries
             switch (newPlexLibrary.Type)
             {
                 case PlexMediaType.Movie:
-                    return await RefreshPlexMovieLibrary(newPlexLibrary);
+                    return await RefreshPlexMovieLibrary(newPlexLibrary, progressAction);
                 case PlexMediaType.TvShow:
-                    return await RefreshPlexTvShowLibrary(authToken.Value, newPlexLibrary);
+                    return await RefreshPlexTvShowLibrary(authToken.Value, newPlexLibrary, progressAction);
             }
 
             Log.Information($"Successfully refreshed library {newPlexLibrary.Title} with id: {newPlexLibrary.Id}");

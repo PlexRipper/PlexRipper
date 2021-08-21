@@ -1,10 +1,22 @@
 ﻿using Newtonsoft.Json;
 using PlexRipper.Domain;
 
-namespace PlexRipper.WebAPI.SignalR.Common
+namespace PlexRipper.Application.Common.WebApi
 {
     public class LibraryProgress
     {
+        public LibraryProgress() { }
+
+        public LibraryProgress(int plexLibraryId, int received, int total, bool isRefreshing = true)
+        {
+            Id = plexLibraryId;
+            Received = received;
+            Total = total;
+            Percentage = DataFormat.GetPercentage(received, total);
+            IsRefreshing = isRefreshing;
+            IsComplete = received >= total;
+        }
+
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 

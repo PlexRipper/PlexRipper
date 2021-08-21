@@ -28,6 +28,8 @@ namespace PlexRipper.Application.PlexServers
 
         private readonly IPlexAuthenticationService _plexAuthenticationService;
 
+        private readonly List<int> _currentSyncingPlexServers = new();
+
         public PlexServerService(
             IMapper mapper,
             IMediator mediator,
@@ -101,11 +103,16 @@ namespace PlexRipper.Application.PlexServers
                 return plexServersResult;
             }
 
+            return await SyncPlexServers(plexServersResult.Value.Select(x => x.Id).ToList());
+        }
+
+        public async Task<Result> SyncPlexServers(List<int> plexServerIds, bool forceSync = false)
+        {
             var results = new List<Result>();
 
-            foreach (var plexServer in plexServersResult.Value)
+            foreach (var plexServerId in plexServerIds)
             {
-                var result = await SyncPlexServer(plexServer.Id, forceSync);
+                var result = await SyncPlexServer(plexServerId, forceSync);
                 if (result.IsFailed)
                 {
                     results.Add(result);
@@ -125,29 +132,57 @@ namespace PlexRipper.Application.PlexServers
         /// <inheritdoc/>
         public async Task<Result> SyncPlexServer(int plexServerId, bool forceSync = false)
         {
+            if (_currentSyncingPlexServers.Contains(plexServerId))
+            {
+                return Result.Ok($"PlexServer with id {plexServerId} is already syncing").LogWarning();
+            }
+
+            _currentSyncingPlexServers.Add(plexServerId);
+
             var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
             if (plexServerResult.IsFailed)
             {
+                _currentSyncingPlexServers.Remove(plexServerId);
                 return plexServerResult;
             }
 
             var plexServer = plexServerResult.Value;
             var results = new List<Result>();
 
-            var plexLibraries = forceSync ? plexServer.PlexLibraries : plexServer.PlexLibraries.FindAll(
-                x => x.Outdated
-                && (x.Type is PlexMediaType.Movie or PlexMediaType.TvShow));
+            var plexLibraries = forceSync
+                ? plexServer.PlexLibraries
+                : plexServer.PlexLibraries.FindAll(
+                    x => x.Outdated
+                         && (x.Type is PlexMediaType.Movie or PlexMediaType.TvShow));
 
             if (!plexLibraries.Any())
             {
-                return Result.Ok().WithReason(new Success($"PlexServer {plexServer.Name} with id {plexServer.Id} has no libraries to sync")).LogInformation();
+                _currentSyncingPlexServers.Remove(plexServerId);
+                return Result.Ok().WithReason(new Success($"PlexServer {plexServer.Name} with id {plexServer.Id} has no libraries to sync"))
+                    .LogInformation();
             }
 
+            // Send progress on every library update
+            var progressList = new List<LibraryProgress>();
+            var progress = new Action<LibraryProgress>(libraryProgress =>
+            {
+                var i = progressList.FindIndex(x => x.Id == libraryProgress.Id);
+                if (i != -1)
+                {
+                    progressList.Add(libraryProgress);
+                }
+                else
+                {
+                    progressList[i] = libraryProgress;
+                }
+
+                _signalRService.SendServerSyncProgressUpdate(new SyncServerProgress(plexServerId, progressList));
+            });
 
             // Sync movie type libraries first because it is a lot quicker than TvShows.
             foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.Movie))
             {
-                var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id);
+                var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id, progress);
                 if (result.IsFailed)
                 {
                     results.Add(result);
@@ -156,7 +191,7 @@ namespace PlexRipper.Application.PlexServers
 
             foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.TvShow))
             {
-                var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id);
+                var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id, progress);
                 if (result.IsFailed)
                 {
                     results.Add(result);
@@ -167,9 +202,11 @@ namespace PlexRipper.Application.PlexServers
             {
                 var failedResult = Result.Fail($"Some libraries failed to sync in PlexServer: {plexServer.Name}");
                 results.ForEach(x => { failedResult.AddNestedErrors(x.Errors); });
+                _currentSyncingPlexServers.Remove(plexServerId);
                 return failedResult.LogError();
             }
 
+            _currentSyncingPlexServers.Remove(plexServerId);
             return Result.Ok();
         }
 
@@ -271,7 +308,8 @@ namespace PlexRipper.Application.PlexServers
                 return updateResult;
             }
 
-            return await _schedulerService.TriggerSyncPlexServersJob();
+            // Sync new plexServers with database
+            return await SyncPlexServers(plexServerIds, true);
         }
 
         /// <summary>

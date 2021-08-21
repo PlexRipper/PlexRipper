@@ -506,6 +506,7 @@ export interface DisplaySettingsModelDTO {
 }
 
 export enum ViewMode {
+  None = "None",
   Table = "Table",
   Poster = "Poster",
   Overview = "Overview",

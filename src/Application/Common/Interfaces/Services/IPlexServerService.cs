@@ -13,7 +13,6 @@ namespace PlexRipper.Application.Common
 
         Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(int plexServerId, int plexAccountId = 0, bool trimEntries = true);
 
-
         Task<Result> RemoveInaccessibleServers();
 
         /// <summary>
@@ -27,6 +26,8 @@ namespace PlexRipper.Application.Common
         Task<Result> InspectPlexServers(int plexAccountId, List<int> plexServerIds);
 
         Task<Result> SyncPlexServers(bool forceSync = false);
+
+        Task<Result> SyncPlexServers(List<int> plexServerIds, bool forceSync = false);
 
         /// <summary>
         /// Take all <see cref="PlexLibrary">PlexLibraries.</see> and retrieve all data to then store in the database.

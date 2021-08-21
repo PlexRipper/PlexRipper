@@ -49,7 +49,8 @@ namespace PlexRipper.Application.PlexAccounts
         }
 
         /// <summary>
-        /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi. It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
+        /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi.
+        /// It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
         /// </summary>
         /// <param name="plexAccountId">The is of <see cref="PlexAccount"/> to setup.</param>
         /// <returns>The list of <see cref="PlexServer">PlexServers</see> which are accessible by this account.</returns>
@@ -218,7 +219,8 @@ namespace PlexRipper.Application.PlexAccounts
 
             if (!result.Value)
             {
-                string msg = $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
+                string msg =
+                    $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
                 return result.ToResult().WithError(msg).LogWarning();
             }
 

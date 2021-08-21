@@ -91,7 +91,7 @@
 						<!-- Checking paths	-->
 						<v-stepper-content class="stepper-content" :step="3">
 							<h2 class="mt-2">Ensure that all paths are valid!</h2>
-							<paths-overview />
+							<paths-default-overview />
 						</v-stepper-content>
 
 						<!-- Plex Accounts	-->

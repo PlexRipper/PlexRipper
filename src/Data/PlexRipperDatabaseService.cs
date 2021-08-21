@@ -22,9 +22,6 @@ namespace PlexRipper.Data
             _dbContext = dbContext;
             _pathSystem = pathSystem;
             _fileSystem = fileSystem;
-            _dbContext.DatabaseName = _pathSystem.DatabaseName;
-            _dbContext.DatabasePath = _pathSystem.DatabasePath;
-            _dbContext.ConfigDirectory = _pathSystem.ConfigDirectory;
         }
 
         public Result BackUpDatabase()

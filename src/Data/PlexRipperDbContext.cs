@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application.Common;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
@@ -10,6 +11,8 @@ namespace PlexRipper.Data
 {
     public class PlexRipperDbContext : DbContext, ISetupAsync
     {
+        private readonly IPathSystem _pathSystem;
+
         #region Properties
 
         #region Tables
@@ -79,6 +82,14 @@ namespace PlexRipper.Data
         #region Constructors
 
         public PlexRipperDbContext() { }
+
+        public PlexRipperDbContext(IPathSystem pathSystem)
+        {
+            _pathSystem = pathSystem;
+            DatabaseName = _pathSystem.DatabaseName;
+            DatabasePath = _pathSystem.DatabasePath;
+            ConfigDirectory = _pathSystem.ConfigDirectory;
+        }
 
         public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
 

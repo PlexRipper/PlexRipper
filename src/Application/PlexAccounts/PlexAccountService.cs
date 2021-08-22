@@ -84,10 +84,17 @@ namespace PlexRipper.Application.PlexAccounts
             }
 
             // Retrieve and store servers
-            var refreshResult = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
-            if (refreshResult.IsFailed)
+            var retrieveResult = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
+            if (retrieveResult.IsFailed)
             {
-                return refreshResult.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
+                return retrieveResult.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
+            }
+
+            // Retrieve libraries for the plexAccount
+            var inspectResult = await _plexServerService.InspectPlexServers(plexAccount.Id, retrieveResult.Value.Select(x => x.Id).ToList());
+            if (inspectResult.IsFailed)
+            {
+                return inspectResult;
             }
 
             var plexServerList = await _mediator.Send(new GetPlexServersByPlexAccountIdQuery(plexAccount.Id));

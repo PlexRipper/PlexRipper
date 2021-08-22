@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using PlexRipper.BaseTests;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -19,12 +21,16 @@ namespace PlexRipper.Application.IntegrationTests.Services.PlexServerService
         public async Task SyncPlexServer_ShouldSyncCorrectly_WhenServerIsAvailable()
         {
             // Arrange
-           // await Container.SetupTestAccount();
+            var plexAccount = await Container.SetupTestAccount();
+            var plexServers = await Container.GetPlexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
+            plexServers.IsSuccess.ShouldBeTrue();
 
             // Act
-           // var result = Container.GetPlexServerService.SyncPlexServer();
+            var syncResult = await Container.GetPlexServerService.SyncPlexServer(plexServers?.Value?.First().Id ?? 0);
 
             // Assert
+            plexAccount.ShouldNotBeNull();
+            syncResult.IsSuccess.ShouldBeTrue();
         }
     }
 }

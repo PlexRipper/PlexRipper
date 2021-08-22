@@ -21,7 +21,8 @@ namespace PlexRipper.BaseTests
         {
             // A separate config variable is needed here for some reason
             return new LoggerConfiguration()
-                .MinimumLevel.Verbose().WriteTo.Debug(outputTemplate: _template, restrictedToMinimumLevel: LogEventLevel.Verbose)
+                .MinimumLevel.Debug()
+                .WriteTo.Debug(outputTemplate: _template, restrictedToMinimumLevel: LogEventLevel.Verbose)
                 .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: _template)
                 .WriteTo.TestOutput(Output, outputTemplate: _template)
                 .WriteTo.TestCorrelator()

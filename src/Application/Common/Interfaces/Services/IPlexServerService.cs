@@ -7,7 +7,7 @@ namespace PlexRipper.Application.Common
 {
     public interface IPlexServerService
     {
-        Task<Result> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount);
+        Task<Result<List<PlexServer>>> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount);
 
         Task<Result<PlexServer>> GetServerAsync(int plexServerId);
 

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,10 +61,16 @@ namespace PlexRipper.BaseTests
             PlexRipperDbContext.SetupAsync();
         }
 
-        public async Task SetupTestAccount()
+        public async Task<PlexAccount> SetupTestAccount()
         {
-            var plexAccountResult = await GetPlexAccountService.CreatePlexAccountAsync(_plexAccountSecond);
+            var result = await GetPlexAccountService.CreatePlexAccountAsync(_plexAccountSecond);
+            if (result.IsFailed)
+            {
+                Log.Error("Failed to create test account for integration test!");
+                return new PlexAccount();
+            }
 
+            return result.Value;
         }
 
         private void SetupSecrets()

@@ -54,7 +54,7 @@ namespace PlexRipper.Application.PlexServers
         /// </summary>
         /// <param name="plexAccount">The <see cref="PlexAccount"/> used to retrieve the accessible <see cref="PlexServer">PlexServers</see>.</param>
         /// <returns>Is successful.</returns>
-        public async Task<Result> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount)
+        public async Task<Result<List<PlexServer>>> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
             {
@@ -92,7 +92,13 @@ namespace PlexRipper.Application.PlexServers
             });
 
             // Add initial entry for the plex servers
-            return await _mediator.Send(new AddOrUpdatePlexServersCommand(plexAccount, serverList));
+            var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(plexAccount, serverList));
+            if (updateResult.IsFailed)
+            {
+                return updateResult;
+            }
+
+            return await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccount.Id));
         }
 
         public async Task<Result> SyncPlexServers(bool forceSync = false)
@@ -169,11 +175,11 @@ namespace PlexRipper.Application.PlexServers
                 var i = progressList.FindIndex(x => x.Id == libraryProgress.Id);
                 if (i != -1)
                 {
-                    progressList.Add(libraryProgress);
+                    progressList[i] = libraryProgress;
                 }
                 else
                 {
-                    progressList[i] = libraryProgress;
+                    progressList.Add(libraryProgress);
                 }
 
                 _signalRService.SendServerSyncProgressUpdate(new SyncServerProgress(plexServerId, progressList));

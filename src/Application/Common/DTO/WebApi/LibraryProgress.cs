@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common.WebApi
@@ -15,6 +16,7 @@ namespace PlexRipper.Application.Common.WebApi
             Percentage = DataFormat.GetPercentage(received, total);
             IsRefreshing = isRefreshing;
             IsComplete = received >= total;
+            TimeStamp = DateTime.UtcNow;
         }
 
         [JsonProperty("id", Required = Required.Always)]
@@ -28,6 +30,9 @@ namespace PlexRipper.Application.Common.WebApi
 
         [JsonProperty("total", Required = Required.Always)]
         public int Total { get; set; }
+
+        [JsonProperty("timeStamp", Required = Required.Always)]
+        public DateTime TimeStamp { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="PlexLibrary"/> is currently refreshing the data from the external PlexServer

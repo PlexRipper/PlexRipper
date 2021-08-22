@@ -154,6 +154,14 @@
           }
         },
         {
+          "name": "AppBarProgressBar",
+          "description": "",
+          "source": {
+            "module": "./src/components/AppBar/AppBarProgressBar.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "Background",
           "description": "",
           "slots": [
@@ -1542,15 +1550,6 @@
                 "kind": "expression",
                 "type": "number"
               }
-            },
-            {
-              "name": "showCircular",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "true"
             },
             {
               "name": "circularMode",

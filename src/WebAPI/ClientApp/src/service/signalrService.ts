@@ -10,10 +10,12 @@ import {
 	NotificationDTO,
 	DownloadTaskDTO,
 	InspectServerProgress,
+	SyncServerProgress,
 } from '@dto/mainApi';
-import { map, switchMap, takeWhile } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, switchMap, takeWhile } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import IStoreState from '@interfaces/IStoreState';
+import { isEqual } from 'lodash';
 
 export class SignalrService extends BaseService {
 	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();
@@ -38,8 +40,10 @@ export class SignalrService extends BaseService {
 		super({
 			stateSliceSelector: (state: IStoreState) => {
 				return {
+					libraryProgress: state.libraryProgress,
 					fileMergeProgressList: state.fileMergeProgressList,
 					inspectServerProgress: state.inspectServerProgress,
+					syncServerProgress: state.syncServerProgress,
 				};
 			},
 		});
@@ -107,6 +111,14 @@ export class SignalrService extends BaseService {
 			this.updateStore('inspectServerProgress', data, 'plexServerId');
 		});
 
+		this._progressHubConnection?.on<SyncServerProgress>('SyncServerProgress').subscribe((data) => {
+			this.updateStore('syncServerProgress', data);
+		});
+
+		this._progressHubConnection?.on<LibraryProgress>('LibraryProgress').subscribe((data) => {
+			this.updateStore('libraryProgress', data);
+		});
+
 		this._notificationHubConnection?.on<NotificationDTO>('Notification').subscribe((data) => {
 			this._NotificationUpdateSubject.next(data);
 		});
@@ -116,6 +128,8 @@ export class SignalrService extends BaseService {
 			this.startNotificationHubConnection();
 		});
 	}
+
+	// region Start / Stop Hub Connections
 
 	public startProgressHubConnection(): void {
 		if (this._progressHubConnection && this._progressHubConnectionState === ConnectionStatus.disconnected) {
@@ -148,26 +162,71 @@ export class SignalrService extends BaseService {
 			});
 		}
 	}
+	// endregion
 
 	// region Array Progress
 
 	public getAllFileMergeProgress(): Observable<FileMergeProgress[]> {
-		return this.stateChanged.pipe(switchMap((x) => of(x?.fileMergeProgressList ?? [])));
+		return this.stateChanged.pipe(
+			switchMap((x) => of(x?.fileMergeProgressList ?? [])),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
 	public getAllInspectServerProgress(): Observable<InspectServerProgress[]> {
-		return this.stateChanged.pipe(map((x) => x?.inspectServerProgress ?? []));
+		return this.stateChanged.pipe(
+			map((x) => x?.inspectServerProgress ?? []),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getAllSyncServerProgress(): Observable<SyncServerProgress[]> {
+		return this.stateChanged.pipe(
+			map((x) => x?.syncServerProgress ?? []),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getAllLibraryProgress(): Observable<LibraryProgress[]> {
+		return this.stateChanged.pipe(
+			map((x) => x?.libraryProgress ?? []),
+			distinctUntilChanged(isEqual),
+		);
 	}
 	// endregion
 
 	// region Single Progress
 
 	public getFileMergeProgress(id: number): Observable<FileMergeProgress | null> {
-		return this.getAllFileMergeProgress().pipe(map((x) => x?.find((x) => x.id === id) ?? null));
+		return this.getAllFileMergeProgress().pipe(
+			map((x) => x?.find((x) => x.id === id) ?? null),
+			filter((progress) => !!progress),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
 	public getInspectServerProgress(plexServerId: number): Observable<InspectServerProgress | null> {
-		return this.getAllInspectServerProgress().pipe(map((x) => x?.find((x) => x.plexServerId === plexServerId) ?? null));
+		return this.getAllInspectServerProgress().pipe(
+			map((x) => x?.find((x) => x.plexServerId === plexServerId) ?? null),
+			filter((progress) => !!progress),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getSyncServerProgress(plexServerId: number): Observable<SyncServerProgress | null> {
+		return this.getAllSyncServerProgress().pipe(
+			map((x) => x?.find((x) => x.id === plexServerId) ?? null),
+			filter((progress) => !!progress),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getLibraryProgress(libraryId: number): Observable<LibraryProgress> {
+		return this.getAllLibraryProgress().pipe(
+			map((x) => x?.find((x) => x.id === libraryId) ?? null),
+			filter((progress) => !!progress),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
 	// endregion
@@ -178,10 +237,6 @@ export class SignalrService extends BaseService {
 
 	public getDownloadTaskUpdate(): Observable<DownloadTaskDTO> {
 		return this._downloadTaskUpdateSubject.asObservable();
-	}
-
-	public getLibraryProgress(): Observable<LibraryProgress> {
-		return this._libraryProgressSubject.asObservable();
 	}
 
 	public getNotificationUpdates(): Observable<NotificationDTO> {
@@ -199,6 +254,7 @@ export interface ProgressHub {
 	DownloadTaskCreationProgress: DownloadTaskCreationProgress;
 	LibraryProgress: LibraryProgress;
 	InspectServerProgress: InspectServerProgress;
+	SyncServerProgress: SyncServerProgress;
 }
 
 export interface NotificationHub {

@@ -74,5 +74,15 @@ namespace PlexRipper.WebAPI.Controllers
             return ToActionResult(
                 await _plexServerService.InspectPlexServers(inspectServer.PlexAccountId, inspectServer.PlexServerIds));
         }
+
+        // GET api/<PlexServerController>/5/sync
+        [HttpGet("{id:int}/sync")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> SyncServer(int id, [FromQuery] bool forceSync = false)
+        {
+            return ToActionResult(await _plexServerService.SyncPlexServer(id, forceSync));
+        }
     }
 }

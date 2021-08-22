@@ -220,13 +220,10 @@ namespace PlexRipper.Application.PlexLibraries
         /// <inheritdoc/>
         public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, bool topLevelMediaOnly = false)
         {
-            _signalRService.SendLibraryProgressUpdate(libraryId, 0, 1, false);
-
             var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
 
             if (libraryDB.IsFailed)
             {
-                _signalRService.SendLibraryProgressUpdate(libraryId, 1, 1, false);
                 return libraryDB;
             }
 
@@ -241,7 +238,6 @@ namespace PlexRipper.Application.PlexLibraries
                 }
             }
 
-            _signalRService.SendLibraryProgressUpdate(libraryId, 1, 1, false);
             return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true, topLevelMediaOnly));
         }
 

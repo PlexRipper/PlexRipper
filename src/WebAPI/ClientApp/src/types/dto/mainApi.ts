@@ -548,6 +548,9 @@ export interface LibraryProgress {
 
   /** @format int32 */
   total: number;
+
+  /** @format date-time */
+  timeStamp: string;
   isRefreshing: boolean;
   isComplete: boolean;
 }
@@ -604,4 +607,13 @@ export interface FileMergeProgress {
 
   /** @format int32 */
   plexLibraryId: number;
+}
+
+export interface SyncServerProgress {
+  /** @format int32 */
+  id: number;
+
+  /** @format decimal */
+  percentage: number;
+  libraryProgresses: LibraryProgress[];
 }

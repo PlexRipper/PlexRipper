@@ -28,6 +28,7 @@ namespace PlexRipper.WebAPI.Config
                 typeof(InspectServerProgress),
                 typeof(FileMergeProgress),
                 typeof(NotificationDTO),
+                typeof(SyncServerProgress),
             };
 
             foreach (Type type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))

@@ -170,6 +170,10 @@ namespace PlexRipper.Application.PlexServers
 
             // Send progress on every library update
             var progressList = new List<LibraryProgress>();
+
+            // Initialize list
+            plexLibraries.ForEach(x => progressList.Add(new LibraryProgress(x.Id, 0, x.MediaCount)));
+
             var progress = new Action<LibraryProgress>(libraryProgress =>
             {
                 var i = progressList.FindIndex(x => x.Id == libraryProgress.Id);
@@ -308,14 +312,7 @@ namespace PlexRipper.Application.PlexServers
 
             await Task.WhenAll(tasks);
 
-            var updateResult = await _mediator.Send(new UpdatePlexServersCommand(plexServersResult.Value));
-            if (updateResult.IsFailed)
-            {
-                return updateResult;
-            }
-
-            // Sync new plexServers with database
-            return await SyncPlexServers(plexServerIds, true);
+            return await _mediator.Send(new UpdatePlexServersCommand(plexServersResult.Value));
         }
 
         /// <summary>

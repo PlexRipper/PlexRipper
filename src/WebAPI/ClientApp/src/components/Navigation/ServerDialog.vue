@@ -7,12 +7,19 @@
 				<v-tabs vertical>
 					<!--	Server Data	Tab Header-->
 					<v-tab>
-						<span style="text-align: left"><v-icon left> mdi-account </v-icon>Server Data</span>
+						<v-icon left> mdi-server </v-icon>
+						Server Data
 					</v-tab>
 					<!--	Library Destinations Tab Header	-->
 					<v-tab>
-						<v-icon left> mdi-lock </v-icon>
+						<v-icon left> mdi-folder-edit-outline </v-icon>
 						Download Destinations
+					</v-tab>
+
+					<!--	Server Commands Tab Header	-->
+					<v-tab>
+						<v-icon left> mdi-console </v-icon>
+						Server Commands
 					</v-tab>
 
 					<!--	Server Data Tab Content	-->
@@ -81,6 +88,17 @@
 							</tbody>
 						</v-simple-table>
 					</v-tab-item>
+					<!--	Server Commands -->
+					<v-tab-item>
+						<v-simple-table class="section-table">
+							<tbody>
+								<tr>
+									<td>Re-sync Library media</td>
+									<td><p-btn text-id="sync-server-libraries" @click="syncServerLibraries" /></td>
+								</tr>
+							</tbody>
+						</v-simple-table>
+					</v-tab-item>
 				</v-tabs>
 			</v-card-text>
 		</v-card>
@@ -93,6 +111,7 @@ import { FolderPathDTO, FolderType, PlexLibraryDTO, PlexMediaType, PlexServerDTO
 import { FolderPathService, LibraryService, ServerService } from '@service';
 import { map, switchMap } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
+import { syncPlexServer } from '@api/plexServerApi';
 
 @Component
 export default class ServerDialog extends Vue {
@@ -130,6 +149,10 @@ export default class ServerDialog extends Vue {
 
 	updateDefaultDestination(libraryId: number, folderPathId: number): void {
 		LibraryService.updateDefaultDestination(libraryId, folderPathId);
+	}
+
+	syncServerLibraries(): void {
+		syncPlexServer(this.serverId, true).subscribe();
 	}
 
 	mounted(): void {

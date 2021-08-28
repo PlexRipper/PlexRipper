@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using FluentResults;
+using Logging;
 using PlexRipper.BaseTests;
 using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
@@ -14,7 +15,7 @@ namespace FluentResultExtensionTests.Logging
     {
         public ResultExtensionsLoggingTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output);
         }
 
         #region Result

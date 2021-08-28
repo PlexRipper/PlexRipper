@@ -24,8 +24,6 @@ namespace PlexRipper.WebAPI
 
         private readonly IFileSystem _fileSystem;
 
-        private readonly ILogSystem _logSystem;
-
         private readonly IFileMerger _fileMerger;
 
         private readonly IDownloadManager _downloadManager;
@@ -34,13 +32,12 @@ namespace PlexRipper.WebAPI
 
         private readonly ISchedulerService _schedulerService;
 
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, ILogSystem logSystem, IFileMerger fileMerger,
+        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
             IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService)
         {
             _appLifetime = appLifetime;
             _userSettings = userSettings;
             _fileSystem = fileSystem;
-            _logSystem = logSystem;
             _fileMerger = fileMerger;
             _downloadManager = downloadManager;
             _plexRipperDatabaseService = plexRipperDatabaseService;

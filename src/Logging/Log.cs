@@ -26,16 +26,15 @@ namespace Logging
             return $"[{fileName}.{memberName}] => {message}";
         }
 
-        public static string Template => "{NewLine}{Timestamp:HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}";
+        private static string Template => "{NewLine}{Timestamp:HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}";
 
-        public static LoggerConfiguration GetBaseConfiguration()
+        private static LoggerConfiguration GetBaseConfiguration()
         {
             return new LoggerConfiguration()
-                .MinimumLevel.Verbose()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
                 .MinimumLevel.Override("Quartz", LogEventLevel.Information)
-                .WriteTo.Debug(outputTemplate: Template, restrictedToMinimumLevel: LogEventLevel.Verbose)
+                .WriteTo.Debug(outputTemplate: Template)
                 .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: Template)
                 .WriteTo.File(
                     Path.Combine(PathSystem.LogsDirectory, "log.txt"),
@@ -43,24 +42,24 @@ namespace Logging
                     Template,
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
-                    retainedFileCountLimit: 7);;
+                    retainedFileCountLimit: 7);
         }
 
         #region Setup
 
-        public static void SetupLogging()
+        public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
         {
             Serilog.Log.Logger =
                 GetBaseConfiguration()
-                    .MinimumLevel.Debug()
+                    .MinimumLevel.Is(minimumLogLevel)
                     .CreateLogger();
         }
 
-        public static void SetupTestLogging(ITestOutputHelper output)
+        public static void SetupTestLogging(ITestOutputHelper output, LogEventLevel minimumLogLevel = LogEventLevel.Debug)
         {
             Serilog.Log.Logger =
                 GetBaseConfiguration()
-                    .MinimumLevel.Debug()
+                    .MinimumLevel.Is(minimumLogLevel)
                     .WriteTo.TestOutput(output, outputTemplate: Template)
                     .WriteTo.TestCorrelator()
                     .CreateLogger();

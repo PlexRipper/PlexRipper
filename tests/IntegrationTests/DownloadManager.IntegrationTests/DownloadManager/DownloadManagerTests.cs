@@ -17,7 +17,7 @@ namespace DownloadManager.IntegrationTests.DownloadManager
 
         public DownloadManagerTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output);
             Container = new BaseContainer();
 
             WireMockServer server = Container.MockServer.GetPlexMockServer();

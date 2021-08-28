@@ -3,12 +3,10 @@ using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Environment;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
-using PlexRipper.FileSystem;
 
 namespace PlexRipper.Data
 {

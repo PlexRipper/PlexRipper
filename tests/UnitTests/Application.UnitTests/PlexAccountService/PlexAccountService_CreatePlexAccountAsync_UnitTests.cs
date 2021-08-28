@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
+using Logging;
 using MediatR;
 using Moq;
 using PlexRipper.Application.Common;
@@ -26,7 +27,7 @@ namespace PlexRipper.Application.UnitTests
 
         public PlexAccountService_CreatePlexAccountAsync_UnitTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output);
             _sut = new Mock<PlexAccountService>(MockBehavior.Strict, _iMediator.Object, _plexServerService.Object, _plexApiService.Object);
         }
 

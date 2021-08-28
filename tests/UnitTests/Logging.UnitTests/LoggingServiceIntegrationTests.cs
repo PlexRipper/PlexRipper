@@ -1,21 +1,17 @@
 ﻿using System.Linq;
-using FluentResultExtensions.lib;
-using Logging;
-using PlexRipper.BaseTests;
-using PlexRipper.Domain;
 using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PlexRipper.Application.IntegrationTests.Services
+namespace Logging.UnitTests
 {
     public class LoggingServiceIntegrationTests
     {
         public LoggingServiceIntegrationTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output, LogEventLevel.Verbose);
         }
 
         [Fact]

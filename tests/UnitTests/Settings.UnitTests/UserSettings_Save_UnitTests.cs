@@ -1,5 +1,6 @@
 ﻿using Environment;
 using FluentResults;
+using Logging;
 using Moq;
 using PlexRipper.Application.Common;
 using PlexRipper.BaseTests;
@@ -25,7 +26,7 @@ namespace Settings.UnitTests
 
         public UserSettings_Save_UnitTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output);
             _pathSystem = new Mock<IPathSystem>();
             _fileSystem = new Mock<IFileSystem>();
             _sut = new Mock<UserSettings>(MockBehavior.Strict, _pathSystem.Object, _fileSystem.Object).Object;

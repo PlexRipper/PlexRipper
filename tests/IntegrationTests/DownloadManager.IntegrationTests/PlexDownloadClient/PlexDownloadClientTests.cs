@@ -25,7 +25,7 @@ namespace DownloadManager.IntegrationTests.PlexDownloadClient
 
         public PlexDownloadClientTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output);
             Container = new BaseContainer();
 
             _server = Container.MockServer.GetPlexMockServer();

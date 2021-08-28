@@ -21,7 +21,7 @@ namespace DownloadManager.IntegrationTests.DownloadQueue
 
         public DownloadQueueTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output);
             Container = new BaseContainer();
 
             _server = Container.MockServer.GetPlexMockServer();

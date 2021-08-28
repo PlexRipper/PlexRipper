@@ -26,6 +26,7 @@ namespace PlexRipper.WebAPI.SignalR
         /// </summary>
         /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
         /// <param name="notificationHub">The <see cref="NotificationHub"/>.</param>
+        /// <param name="mapper"></param>
         public SignalRService(IHubContext<ProgressHub> progressHub, IHubContext<NotificationHub> notificationHub, IMapper mapper)
         {
             _progressHub = progressHub;

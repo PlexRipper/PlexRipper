@@ -15,7 +15,7 @@ namespace FluentResultExtensionTests.Logging
     {
         public ResultExtensionsLoggingTests(ITestOutputHelper output)
         {
-            Log.SetupTestLogging(output);
+            Log.SetupTestLogging(output, LogEventLevel.Verbose);
         }
 
         #region Result
@@ -261,7 +261,7 @@ namespace FluentResultExtensionTests.Logging
                 for (int i = 0; i < logContext.Count; i++)
                 {
                     logContext[i].Level.ShouldBe(LogEventLevel.Error);
-                    logContext[i].MessageTemplate.Text.ShouldBe($"Test Error #{i + 1}");
+                    logContext[i].MessageTemplate.Text.ShouldContain($"Test Error #{i + 1}");
                 }
             }
         }
@@ -291,12 +291,12 @@ namespace FluentResultExtensionTests.Logging
                 var logContext = TestCorrelator.GetLogEventsFromCurrentContext().ToList();
 
                 logContext.First().Level.ShouldBe(LogEventLevel.Error);
-                logContext.First().MessageTemplate.Text.ShouldBe("Test Error #1");
+                logContext.First().MessageTemplate.Text.ShouldContain("Test Error #1");
 
                 for (int i = 1; i < logContext.Count; i++)
                 {
                     logContext[i].Level.ShouldBe(LogEventLevel.Error);
-                    logContext[i].MessageTemplate.Text.ShouldBe($"--Error #{i}");
+                    logContext[i].MessageTemplate.Text.ShouldContain($"--Error #{i}");
                 }
             }
         }

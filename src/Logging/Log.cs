@@ -31,6 +31,7 @@ namespace Logging
         private static LoggerConfiguration GetBaseConfiguration()
         {
             return new LoggerConfiguration()
+                .MinimumLevel.Verbose()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
                 .MinimumLevel.Override("Quartz", LogEventLevel.Information)
@@ -74,8 +75,7 @@ namespace Logging
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            var messageTemplate = message.FormatForContext(memberName, sourceFilePath);
-            Serilog.Log.Verbose("{MessageTemplate}", messageTemplate);
+            Serilog.Log.Verbose(message.FormatForContext(memberName, sourceFilePath));
         }
 
         public static void Verbose(
@@ -84,8 +84,10 @@ namespace Logging
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            var messageTemplate = message.FormatForException(ex).FormatForContext(memberName, sourceFilePath);
-            Serilog.Log.Verbose("{MessageTemplate}", messageTemplate);
+            Serilog.Log.Verbose(
+                message
+                    .FormatForException(ex)
+                    .FormatForContext(memberName, sourceFilePath));
         }
 
         public static void Verbose(
@@ -93,8 +95,10 @@ namespace Logging
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            var messageTemplate = (ex?.ToString() ?? string.Empty).FormatForContext(memberName, sourceFilePath);
-            Serilog.Log.Verbose("{MessageTemplate}", messageTemplate);
+            Serilog.Log.Verbose(
+                (ex != null ? ex.ToString() : string.Empty)
+                .FormatForContext(memberName, sourceFilePath)
+            );
         }
 
         #endregion

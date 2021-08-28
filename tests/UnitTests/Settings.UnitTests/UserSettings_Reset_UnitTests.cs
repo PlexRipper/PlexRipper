@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using Environment;
+using FluentResults;
 using Moq;
 using PlexRipper.Application.Common;
 using PlexRipper.BaseTests;

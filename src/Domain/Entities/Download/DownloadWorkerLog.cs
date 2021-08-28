@@ -34,25 +34,25 @@ namespace PlexRipper.Domain
             switch (LogLevel)
             {
                 case LogEventLevel.Verbose:
-                    Domain.Log.Verbose(Message);
+                    Logging.Log.Verbose(Message);
                     break;
                 case LogEventLevel.Debug:
-                    Domain.Log.Debug(Message);
+                    Logging.Log.Debug(Message);
                     break;
                 case LogEventLevel.Information:
-                    Domain.Log.Information(Message);
+                    Logging.Log.Information(Message);
                     break;
                 case LogEventLevel.Warning:
-                    Domain.Log.Warning(Message);
+                    Logging.Log.Warning(Message);
                     break;
                 case LogEventLevel.Error:
-                    Domain.Log.Error(Message);
+                    Logging.Log.Error(Message);
                     break;
                 case LogEventLevel.Fatal:
-                    Domain.Log.Fatal(Message);
+                    Logging.Log.Fatal(Message);
                     break;
                 default:
-                    Domain.Log.Debug(Message);
+                    Logging.Log.Debug(Message);
                     break;
             }
         }

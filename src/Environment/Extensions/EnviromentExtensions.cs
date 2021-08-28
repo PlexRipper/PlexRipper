@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PlexRipper.Domain
+namespace Environment
 {
     public static class EnviromentExtensions
     {
@@ -10,22 +10,22 @@ namespace PlexRipper.Domain
 
         public static bool IsIntegrationTestMode()
         {
-            return Environment.GetEnvironmentVariable(_integrationTestModeKey) is "true";
+            return System.Environment.GetEnvironmentVariable(_integrationTestModeKey) is "true";
         }
 
         public static void SetIntegrationTestMode()
         {
-            Environment.SetEnvironmentVariable(_integrationTestModeKey, "true");
+            System.Environment.SetEnvironmentVariable(_integrationTestModeKey, "true");
         }
 
         public static bool IsResetDatabase()
         {
-            return Environment.GetEnvironmentVariable(_resetDbKey) is "true";
+            return System.Environment.GetEnvironmentVariable(_resetDbKey) is "true";
         }
 
         public static void SetResetDatabase()
         {
-            Environment.SetEnvironmentVariable(_resetDbKey, "true");
+            System.Environment.SetEnvironmentVariable(_resetDbKey, "true");
         }
     }
 }

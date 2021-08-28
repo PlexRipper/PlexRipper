@@ -1,6 +1,9 @@
 using System;
 using System.Text.Json;
+using Environment;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.Settings.Models;

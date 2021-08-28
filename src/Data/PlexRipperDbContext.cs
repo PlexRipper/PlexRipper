@@ -1,6 +1,9 @@
 using System.Reflection;
 using System.Threading.Tasks;
+using Environment;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common;

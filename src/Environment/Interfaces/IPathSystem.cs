@@ -1,5 +1,5 @@
 ﻿
-namespace PlexRipper.Application.Common
+namespace Environment
 {
     public interface IPathSystem
     {

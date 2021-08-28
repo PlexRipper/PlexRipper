@@ -1,15 +1,13 @@
 using System;
 using System.IO;
 using Autofac.Extensions.DependencyInjection;
+using Environment;
 using FluentResults;
+using Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using PlexRipper.Domain;
-using PlexRipper.FileSystem;
-using Serilog;
-using Log = Serilog.Log;
 
 namespace PlexRipper.WebAPI
 {
@@ -18,12 +16,12 @@ namespace PlexRipper.WebAPI
         public static void Main(string[] args)
         {
             // This is the temp log config until LogSystem gets called, until then nothing is logged to file.
-            Log.Logger = LogSystem.GetBaseConfiguration().CreateLogger();
+            Log.SetupLogging();
 
             try
             {
-                Domain.Log.Information("Starting up");
-                Domain.Log.Information($"Currently running on {OsInfo.CurrentOS}");
+                Logging.Log.Information("Starting up");
+                Logging.Log.Information($"Currently running on {OsInfo.CurrentOS}");
 
                 var host = Host.CreateDefaultBuilder(args)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
@@ -38,7 +36,7 @@ namespace PlexRipper.WebAPI
                         config.ClearProviders();
                         config.AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
                     })
-                    .UseSerilog()
+                   // .UseSerilog()
                     .Build();
 
                 host.Run();

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Models;

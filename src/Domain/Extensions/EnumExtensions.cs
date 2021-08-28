@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using FluentResultExtensions.lib;
+using Logging;
 
 namespace PlexRipper.Domain
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace PlexRipper.Domain
+namespace Environment
 {
     public static class OsInfo
     {
@@ -17,7 +17,7 @@ namespace PlexRipper.Domain
 
         static OsInfo()
         {
-            var platform = Environment.OSVersion.Platform;
+            var platform = System.Environment.OSVersion.Platform;
 
             switch (platform)
             {

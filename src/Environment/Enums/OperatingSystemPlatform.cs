@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Domain
+﻿namespace Environment
 {
     public enum OperatingSystemPlatform
     {

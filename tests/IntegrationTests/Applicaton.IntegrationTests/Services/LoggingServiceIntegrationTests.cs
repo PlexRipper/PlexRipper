@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using FluentResultExtensions.lib;
+using Logging;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Serilog.Events;

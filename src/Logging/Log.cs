@@ -1,8 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using Environment;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
+using Xunit.Abstractions;
 
-namespace PlexRipper.Domain
+namespace Logging
 {
     public static class Log
     {
@@ -20,6 +25,48 @@ namespace PlexRipper.Domain
 
             return $"[{fileName}.{memberName}] => {message}";
         }
+
+        public static string Template => "{NewLine}{Timestamp:HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}";
+
+        public static LoggerConfiguration GetBaseConfiguration()
+        {
+            return new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+                .MinimumLevel.Override("Quartz", LogEventLevel.Information)
+                .WriteTo.Debug(outputTemplate: Template, restrictedToMinimumLevel: LogEventLevel.Verbose)
+                .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: Template)
+                .WriteTo.File(
+                    Path.Combine(PathSystem.LogsDirectory, "log.txt"),
+                    LogEventLevel.Debug,
+                    Template,
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    retainedFileCountLimit: 7);;
+        }
+
+        #region Setup
+
+        public static void SetupLogging()
+        {
+            Serilog.Log.Logger =
+                GetBaseConfiguration()
+                    .MinimumLevel.Debug()
+                    .CreateLogger();
+        }
+
+        public static void SetupTestLogging(ITestOutputHelper output)
+        {
+            Serilog.Log.Logger =
+                GetBaseConfiguration()
+                    .MinimumLevel.Debug()
+                    .WriteTo.TestOutput(output, outputTemplate: Template)
+                    .WriteTo.TestCorrelator()
+                    .CreateLogger();
+        }
+
+        #endregion
 
         #region Verbose
 
@@ -53,6 +100,8 @@ namespace PlexRipper.Domain
 
         #endregion
 
+        #region Debug
+
         public static void Debug(
             string message,
             [CallerMemberName] string memberName = "",
@@ -85,6 +134,10 @@ namespace PlexRipper.Domain
             );
         }
 
+        #endregion
+
+        #region Information
+
         public static void Information(
             string message,
             [CallerMemberName] string memberName = "",
@@ -119,6 +172,10 @@ namespace PlexRipper.Domain
                 .FormatForContext(memberName, sourceFilePath)
             );
         }
+
+        #endregion
+
+        #region Warning
 
         public static void Warning(string message,
             [CallerMemberName] string memberName = "",
@@ -154,6 +211,10 @@ namespace PlexRipper.Domain
             );
         }
 
+        #endregion
+
+        #region Error
+
         public static void Error(
             string message,
             [CallerMemberName] string memberName = "",
@@ -189,6 +250,10 @@ namespace PlexRipper.Domain
             );
         }
 
+        #endregion
+
+        #region Fatal
+
         public static void Fatal(
             string message,
             [CallerMemberName] string memberName = "",
@@ -222,7 +287,14 @@ namespace PlexRipper.Domain
 
         private static void FatalAction()
         {
-            Environment.ExitCode = -1;
+            System.Environment.ExitCode = -1;
+        }
+
+        #endregion
+
+        public static void CloseAndFlush()
+        {
+            Serilog.Log.CloseAndFlush();
         }
     }
 }

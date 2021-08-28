@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentResultExtensions.lib;
+using Logging;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.WebApi;

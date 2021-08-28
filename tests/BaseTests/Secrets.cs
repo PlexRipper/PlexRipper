@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using FluentResultExtensions.lib;
+using Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PlexRipper.Domain;

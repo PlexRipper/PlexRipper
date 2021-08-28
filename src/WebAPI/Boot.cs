@@ -1,6 +1,9 @@
 ﻿using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Environment;
+using FluentResultExtensions.lib;
+using Logging;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.Application.Common;
@@ -51,7 +54,7 @@ namespace PlexRipper.WebAPI
 
             // First await the finishing off all these
             _fileSystem.Setup();
-            _logSystem.Setup();
+            Log.SetupLogging();
             _userSettings.Setup();
             await _plexRipperDatabaseService.SetupAsync();
 

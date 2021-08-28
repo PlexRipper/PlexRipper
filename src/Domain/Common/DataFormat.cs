@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
+using FluentResultExtensions.lib;
+using Logging;
 
 namespace PlexRipper.Domain
 {

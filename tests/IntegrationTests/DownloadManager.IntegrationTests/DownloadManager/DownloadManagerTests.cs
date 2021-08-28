@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FluentResultExtensions.lib;
+using Logging;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;

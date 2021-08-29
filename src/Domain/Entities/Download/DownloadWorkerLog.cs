@@ -12,7 +12,7 @@ namespace PlexRipper.Domain
         public DateTime CreatedAt { get; set; }
 
         [Column(Order = 3)]
-        public LogEventLevel LogLevel { get; set; }
+        public NotificationLevel LogLevel { get; set; }
 
         [Column(Order = 2)]
         public string Message { get; set; }
@@ -33,26 +33,30 @@ namespace PlexRipper.Domain
         {
             switch (LogLevel)
             {
-                case LogEventLevel.Verbose:
+                case NotificationLevel.Verbose:
                     Logging.Log.Verbose(Message);
                     break;
-                case LogEventLevel.Debug:
+                case NotificationLevel.Debug:
                     Logging.Log.Debug(Message);
                     break;
-                case LogEventLevel.Information:
+                case NotificationLevel.Information:
                     Logging.Log.Information(Message);
                     break;
-                case LogEventLevel.Warning:
+                case NotificationLevel.Warning:
                     Logging.Log.Warning(Message);
                     break;
-                case LogEventLevel.Error:
+                case NotificationLevel.Error:
                     Logging.Log.Error(Message);
                     break;
-                case LogEventLevel.Fatal:
+                case NotificationLevel.Fatal:
                     Logging.Log.Fatal(Message);
                     break;
+                case NotificationLevel.None:
+                    break;
+                case NotificationLevel.Success:
+                    break;
                 default:
-                    Logging.Log.Debug(Message);
+                    Logging.Log.Information(Message);
                     break;
             }
         }

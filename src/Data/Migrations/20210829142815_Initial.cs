@@ -13,8 +13,9 @@ namespace PlexRipper.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Type = table.Column<string>(type: "TEXT", nullable: true),
                     DisplayName = table.Column<string>(type: "TEXT", nullable: true),
+                    FolderType = table.Column<string>(type: "TEXT", unicode: false, maxLength: 50, nullable: false),
+                    MediaType = table.Column<string>(type: "TEXT", unicode: false, maxLength: 50, nullable: false),
                     DirectoryPath = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -667,53 +668,53 @@ namespace PlexRipper.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "Type" },
-                values: new object[] { 1, "/downloads", "Download Path", "DownloadFolder" });
+                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
+                values: new object[] { 1, "/downloads", "Download Path", "DownloadFolder", "None" });
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "Type" },
-                values: new object[] { 2, "/movies", "Movie Destination Path", "MovieFolder" });
+                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
+                values: new object[] { 2, "/movies", "Movie Destination Path", "MovieFolder", "Movie" });
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "Type" },
-                values: new object[] { 3, "/tvshows", "Tv Show Destination Path", "TvShowFolder" });
+                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
+                values: new object[] { 3, "/tvshows", "Tv Show Destination Path", "TvShowFolder", "TvShow" });
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "Type" },
-                values: new object[] { 4, "/music", "Music Destination Path", "MusicFolder" });
+                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
+                values: new object[] { 4, "/music", "Music Destination Path", "MusicFolder", "Music" });
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "Type" },
-                values: new object[] { 5, "/photos", "Photos Destination Path", "PhotosFolder" });
+                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
+                values: new object[] { 5, "/photos", "Photos Destination Path", "PhotosFolder", "Photos" });
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "Type" },
-                values: new object[] { 6, "/other", "Other Videos Destination Path", "OtherVideosFolder" });
+                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
+                values: new object[] { 6, "/other", "Other Videos Destination Path", "OtherVideosFolder", "OtherVideos" });
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "Type" },
-                values: new object[] { 7, "/games", "Games Videos Destination Path", "GamesVideosFolder" });
+                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
+                values: new object[] { 7, "/games", "Games Videos Destination Path", "GamesVideosFolder", "Games" });
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "Type" },
-                values: new object[] { 8, "/", "Reserved #1 Destination Path", "None" });
+                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
+                values: new object[] { 8, "/", "Reserved #1 Destination Path", "None", "None" });
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "Type" },
-                values: new object[] { 9, "/", "Reserved #2 Destination Path", "None" });
+                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
+                values: new object[] { 9, "/", "Reserved #2 Destination Path", "None", "None" });
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "Type" },
-                values: new object[] { 10, "/", "Reserved #3 Destination Path", "None" });
+                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
+                values: new object[] { 10, "/", "Reserved #3 Destination Path", "None", "None" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTasks_DestinationFolderId",

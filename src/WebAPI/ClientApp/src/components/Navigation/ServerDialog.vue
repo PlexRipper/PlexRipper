@@ -131,9 +131,9 @@ export default class ServerDialog extends Vue {
 	getFolderPathOptions(type: PlexMediaType): FolderPathDTO[] {
 		switch (type) {
 			case PlexMediaType.Movie:
-				return this.folderPaths.filter((x) => x.type === FolderType.MovieFolder);
+				return this.folderPaths.filter((x) => x.folderType === FolderType.MovieFolder);
 			case PlexMediaType.TvShow:
-				return this.folderPaths.filter((x) => x.type === FolderType.TvShowFolder);
+				return this.folderPaths.filter((x) => x.folderType === FolderType.TvShowFolder);
 			default:
 				return this.folderPaths;
 		}

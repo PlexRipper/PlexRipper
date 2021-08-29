@@ -4,15 +4,16 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Configurations
 {
-    public class DownloadWorkerLogConfiguration : IEntityTypeConfiguration<DownloadWorkerLog>
+    public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
     {
-        public void Configure(EntityTypeBuilder<DownloadWorkerLog> builder)
+        public void Configure(EntityTypeBuilder<Notification> builder)
         {
             builder
-                .Property(b => b.LogLevel)
+                .Property(b => b.Level)
                 .HasMaxLength(20)
                 .HasConversion(x => x.ToNotificationLevelString(), x => x.ToNotificationLevel())
                 .IsUnicode(false);
+
         }
     }
 }

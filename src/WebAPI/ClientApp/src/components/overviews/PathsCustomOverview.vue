@@ -84,7 +84,7 @@ export default class PathsCustomOverview extends Vue {
 	allowEditing: boolean = true;
 
 	get getFolderPaths(): FolderPathDTO[] {
-		return this.folderPaths.filter((x) => x.type === this.folderType && x.id >= 4);
+		return this.folderPaths.filter((x) => x.folderType === this.folderType && x.id >= 4);
 	}
 
 	openDirectoryBrowser(path: FolderPathDTO): void {
@@ -111,7 +111,7 @@ export default class PathsCustomOverview extends Vue {
 			id: 0,
 			displayName: `${this.folderType.replace('Folder', ' Folder')} Path`,
 			directory: '',
-			type: this.folderType,
+			folderType: this.folderType,
 			isValid: false,
 		});
 	}

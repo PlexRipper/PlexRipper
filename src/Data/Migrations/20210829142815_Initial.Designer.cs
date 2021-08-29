@@ -9,7 +9,7 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    [Migration("20210815213131_Initial")]
+    [Migration("20210829142815_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -173,7 +173,16 @@ namespace PlexRipper.Data.Migrations
                     b.Property<string>("DisplayName")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Type")
+                    b.Property<string>("FolderType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MediaType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -186,70 +195,80 @@ namespace PlexRipper.Data.Migrations
                             Id = 1,
                             DirectoryPath = "/downloads",
                             DisplayName = "Download Path",
-                            Type = "DownloadFolder"
+                            FolderType = "DownloadFolder",
+                            MediaType = "None"
                         },
                         new
                         {
                             Id = 2,
                             DirectoryPath = "/movies",
                             DisplayName = "Movie Destination Path",
-                            Type = "MovieFolder"
+                            FolderType = "MovieFolder",
+                            MediaType = "Movie"
                         },
                         new
                         {
                             Id = 3,
                             DirectoryPath = "/tvshows",
                             DisplayName = "Tv Show Destination Path",
-                            Type = "TvShowFolder"
+                            FolderType = "TvShowFolder",
+                            MediaType = "TvShow"
                         },
                         new
                         {
                             Id = 4,
                             DirectoryPath = "/music",
                             DisplayName = "Music Destination Path",
-                            Type = "MusicFolder"
+                            FolderType = "MusicFolder",
+                            MediaType = "Music"
                         },
                         new
                         {
                             Id = 5,
                             DirectoryPath = "/photos",
                             DisplayName = "Photos Destination Path",
-                            Type = "PhotosFolder"
+                            FolderType = "PhotosFolder",
+                            MediaType = "Photos"
                         },
                         new
                         {
                             Id = 6,
                             DirectoryPath = "/other",
                             DisplayName = "Other Videos Destination Path",
-                            Type = "OtherVideosFolder"
+                            FolderType = "OtherVideosFolder",
+                            MediaType = "OtherVideos"
                         },
                         new
                         {
                             Id = 7,
                             DirectoryPath = "/games",
                             DisplayName = "Games Videos Destination Path",
-                            Type = "GamesVideosFolder"
+                            FolderType = "GamesVideosFolder",
+                            MediaType = "Games"
                         },
                         new
                         {
                             Id = 8,
                             DirectoryPath = "/",
                             DisplayName = "Reserved #1 Destination Path",
-                            Type = "None"
+                            FolderType = "None",
+                            MediaType = "None"
                         },
                         new
                         {
                             Id = 9,
                             DirectoryPath = "/",
                             DisplayName = "Reserved #2 Destination Path",
-                            Type = "None"
+                            FolderType = "None",
+                            MediaType = "None"
                         },
                         new
                         {
                             Id = 10,
                             DirectoryPath = "/",
                             DisplayName = "Reserved #3 Destination Path",
-                            Type = "None"
+                            FolderType = "None",
+                            MediaType = "None"
                         });
                 });
 

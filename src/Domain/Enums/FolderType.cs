@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-
+using System.Runtime.Serialization;
 
 namespace PlexRipper.Domain
 {
@@ -7,7 +6,6 @@ namespace PlexRipper.Domain
     {
         // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc and that there is no skip in between
         // Otherwise the Typescript DTO translator in the front-end starts messing up.
-
         [EnumMember(Value = "None")]
         None = 0,
 
@@ -31,5 +29,8 @@ namespace PlexRipper.Domain
 
         [EnumMember(Value = "GamesVideosFolder")]
         GamesVideosFolder = 7,
+
+        [EnumMember(Value = "Unknown")]
+        Unknown = 8,
     }
 }

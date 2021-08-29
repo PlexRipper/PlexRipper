@@ -116,7 +116,7 @@ export type ResultDTOOfListOfFolderPathDTO = ResultDTO & { value: FolderPathDTO[
 export interface FolderPathDTO {
   /** @format int32 */
   id: number;
-  type: FolderType;
+  folderType: FolderType;
   displayName: string;
   directory: string;
   isValid: boolean;
@@ -131,6 +131,7 @@ export enum FolderType {
   PhotosFolder = "PhotosFolder",
   OtherVideosFolder = "OtherVideosFolder",
   GamesVideosFolder = "GamesVideosFolder",
+  Unknown = "Unknown",
 }
 
 export type ResultDTOOfFileSystemDTO = ResultDTO & { value: FileSystemDTO };
@@ -177,11 +178,14 @@ export interface NotificationDTO {
 }
 
 export enum NotificationLevel {
-  None = "none",
-  Info = "info",
-  Success = "success",
-  Warning = "warning",
-  Error = "error",
+  None = "None",
+  Verbose = "Verbose",
+  Debug = "Debug",
+  Information = "Information",
+  Success = "Success",
+  Warning = "Warning",
+  Error = "Error",
+  Fatal = "Fatal",
 }
 
 export type ResultDTOOfListOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO[] };

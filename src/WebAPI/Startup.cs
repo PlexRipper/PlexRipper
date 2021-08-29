@@ -73,9 +73,9 @@ namespace PlexRipper.WebAPI
                 .AddJsonOptions(
                     options =>
                     {
-                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                     });
 
             // Used to deploy the front-end Nuxt client
@@ -110,11 +110,7 @@ namespace PlexRipper.WebAPI
             });
 
             // SignalR
-            services.AddSignalR().AddJsonProtocol(options =>
-            {
-                options.PayloadSerializerOptions.Converters
-                    .Add(new JsonStringEnumConverter());
-            });
+            services.AddSignalR().AddJsonProtocol(options => { options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
             // Customise default API behaviour
             services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });

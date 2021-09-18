@@ -28,7 +28,7 @@
 									</tr>
 									<tr>
 										<td>Destination Path:</td>
-										<td>{{ downloadTask.destinationPath }}</td>
+										<td>{{ downloadTask.destinationFilePath }}</td>
 									</tr>
 									<tr>
 										<td>Download URL:</td>

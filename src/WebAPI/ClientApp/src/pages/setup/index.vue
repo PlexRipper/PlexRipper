@@ -179,8 +179,6 @@ export default class Setup extends Vue {
 	stepIndex: number = 1;
 	stepPagesCount: number = 5;
 
-	sliderHeight: number = 600;
-
 	links: string[] = [
 		'https://github.com/PlexRipper/PlexRipper/',
 		'https://github.com/PlexRipper/PlexRipper/issues',

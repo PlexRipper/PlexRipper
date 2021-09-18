@@ -13,7 +13,7 @@
 		<!--	Default FolderPaths	-->
 		<v-row v-for="folderPath in getFolderPaths" :key="folderPath.id" no-gutters>
 			<v-col cols="3">
-				<help-icon :help-id="toTranslation(folderPath.type)" />
+				<help-icon :help-id="toTranslation(folderPath.folderType)" />
 			</v-col>
 			<v-col>
 				<p-text-field

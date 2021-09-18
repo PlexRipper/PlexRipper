@@ -23,14 +23,8 @@
 								<downloads-table
 									v-model="selected"
 									:server-id="plexServer.id"
+									@action="commandSwitch"
 									@selected="updateSelected(plexServer.id, $event)"
-									@pause="pauseDownloadTasks([$event])"
-									@clear="clearDownloadTasks([$event])"
-									@delete="deleteDownloadTasks([$event])"
-									@stop="stopDownloadTasks([$event])"
-									@restart="restartDownloadTasks([$event])"
-									@start="startDownloadTasks([$event])"
-									@details="detailsDownloadTask($event)"
 								/>
 							</v-expansion-panel-content>
 						</v-expansion-panel>
@@ -48,6 +42,7 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { DownloadService, ServerService } from '@service';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
@@ -87,6 +82,34 @@ export default class Downloads extends Vue {
 	}
 
 	// region single commands
+
+	commandSwitch({ action, item }: { action: string; item: any }) {
+		switch (action) {
+			case 'pause':
+				this.pauseDownloadTasks([item]);
+				break;
+			case 'clear':
+				this.clearDownloadTasks([item]);
+				break;
+			case 'delete':
+				this.deleteDownloadTasks([item]);
+				break;
+			case 'stop':
+				this.stopDownloadTasks([item]);
+				break;
+			case 'restart':
+				this.restartDownloadTasks([item]);
+				break;
+			case 'start':
+				this.startDownloadTasks([item]);
+				break;
+			case 'details':
+				this.detailsDownloadTask(item);
+				break;
+			default:
+				Log.error(`Action: ${action} does not have a assigned command with payload: ${item}`, { action, item });
+		}
+	}
 
 	detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
 		this.downloadTaskDetail = downloadTask;

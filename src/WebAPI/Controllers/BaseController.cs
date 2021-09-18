@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Net.Mime;
 using AutoMapper;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

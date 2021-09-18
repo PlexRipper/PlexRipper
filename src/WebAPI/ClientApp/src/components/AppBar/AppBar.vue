@@ -5,6 +5,8 @@
 		</v-toolbar-title>
 
 		<v-spacer></v-spacer>
+		<app-bar-progress-bar />
+		<v-spacer></v-spacer>
 
 		<v-btn icon href="https://github.com/PlexRipper/PlexRipper" target="_blank">
 			<v-icon>mdi-github</v-icon>
@@ -59,9 +61,11 @@ import type { PlexAccountDTO } from '@dto/mainApi';
 import DarkModeToggle from '@components/General/DarkModeToggle.vue';
 import NotificationButton from '@components/AppBar/NotificationButton.vue';
 import ProgressComponent from '@components/Progress/ProgressComponent.vue';
+import AppBarProgressBar from '@components/AppBar/AppBarProgressBar.vue';
 
 @Component({
 	components: {
+		AppBarProgressBar,
 		NotificationButton,
 		DarkModeToggle,
 		ProgressComponent,

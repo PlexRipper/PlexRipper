@@ -8,9 +8,9 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
+using Logging;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
-using Serilog.Events;
 using Timer = System.Timers.Timer;
 
 namespace PlexRipper.DownloadManager.Download
@@ -33,7 +33,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private bool _isDownloading = true;
 
-        private readonly Timer _timer = new (100)
+        private readonly Timer _timer = new(100)
         {
             AutoReset = true,
         };
@@ -106,7 +106,7 @@ namespace PlexRipper.DownloadManager.Download
 
         #region SendData
 
-        private void SendDownloadWorkerLog(LogEventLevel logLevel, string message)
+        private void SendDownloadWorkerLog(NotificationLevel logLevel, string message)
         {
             _downloadWorkerLog.OnNext(new DownloadWorkerLog
             {
@@ -127,7 +127,7 @@ namespace PlexRipper.DownloadManager.Download
             var log = $"Download worker {Id} with {FileName} changed status to {status}";
             Log.Debug(log);
             DownloadWorkerTask.DownloadStatus = status;
-            SendDownloadWorkerLog(LogEventLevel.Information, log);
+            SendDownloadWorkerLog(NotificationLevel.Information, log);
             SendDownloadWorkerUpdate();
         }
 
@@ -143,7 +143,7 @@ namespace PlexRipper.DownloadManager.Download
             Log.Error($"Download worker {Id} with {FileName} had an error!");
             DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
 
-            SendDownloadWorkerLog(LogEventLevel.Error, errorResult.ToString());
+            SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
             SendDownloadWorkerUpdate();
         }
 
@@ -248,6 +248,7 @@ namespace PlexRipper.DownloadManager.Download
             finally
             {
                 _timer.Dispose();
+                await destinationStream.DisposeAsync();
                 _downloadWorkerUpdate.OnCompleted();
                 _downloadWorkerLog.OnCompleted();
             }
@@ -264,7 +265,11 @@ namespace PlexRipper.DownloadManager.Download
             _isDownloading = false;
 
             // Wait for it to gracefully end.
-            await DownloadProcessTask;
+            if (DownloadProcessTask is not null)
+            {
+                await DownloadProcessTask;
+            }
+
             _timer.Stop();
             SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
 

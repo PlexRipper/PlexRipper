@@ -13,6 +13,12 @@ export function getPlexServer(serverId: number): Observable<ResultDTO<PlexServer
 	return checkResponse<ResultDTO<PlexServerDTO>>(result, logText, 'getPlexServer');
 }
 
+export function syncPlexServer(serverId: number, forceSync: boolean = false): Observable<ResultDTO> {
+	preApiRequest(logText, 'syncPlexServer');
+	const result = Axios.get(`${apiPath}/${serverId}/sync?forceSync=${forceSync}`);
+	return checkResponse<ResultDTO>(result, logText, 'syncPlexServer');
+}
+
 export function getPlexServers(): Observable<ResultDTO<PlexServerDTO[]>> {
 	preApiRequest(logText, 'getPlexServers');
 	const result = Axios.get(`${apiPath}`);

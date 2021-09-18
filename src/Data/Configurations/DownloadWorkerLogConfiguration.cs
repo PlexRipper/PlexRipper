@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Domain;
-using Serilog.Events;
 
 namespace PlexRipper.Data.Configurations
 {
@@ -11,8 +9,10 @@ namespace PlexRipper.Data.Configurations
         public void Configure(EntityTypeBuilder<DownloadWorkerLog> builder)
         {
             builder
-                .Property(e => e.LogLevel)
-                .HasConversion(new EnumToStringConverter<LogEventLevel>());
+                .Property(b => b.LogLevel)
+                .HasMaxLength(20)
+                .HasConversion(x => x.ToNotificationLevelString(), x => x.ToNotificationLevel())
+                .IsUnicode(false);
         }
     }
 }

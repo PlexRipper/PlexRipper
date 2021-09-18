@@ -8,8 +8,8 @@ namespace PlexRipper.WebAPI.Common.DTO.FolderPath
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
-        [JsonProperty("type", Required = Required.Always)]
-        public FolderType Type { get; set; }
+        [JsonProperty("folderType", Required = Required.Always)]
+        public FolderType FolderType { get; set; }
 
         [JsonProperty("displayName", Required = Required.Always)]
         public string DisplayName { get; set; }

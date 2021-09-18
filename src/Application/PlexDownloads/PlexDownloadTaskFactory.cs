@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexMedia;

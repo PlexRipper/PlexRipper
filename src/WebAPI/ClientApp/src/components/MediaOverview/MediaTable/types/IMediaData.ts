@@ -1,3 +1,5 @@
+import IPart from '@mediaOverview/MediaTable/types/IPart';
+
 export default interface IMediaData {
 	id: number;
 	mediaFormat: string;
@@ -13,4 +15,5 @@ export default interface IMediaData {
 	audioProfile: string;
 	audioCodec: string;
 	audioChannels: number;
+	parts: IPart[];
 }

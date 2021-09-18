@@ -3,7 +3,7 @@ import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
 import { BaseService, GlobalService, ServerService } from '@service';
 import IStoreState from '@interfaces/IStoreState';
-import { distinctUntilChanged, filter, finalize, map, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, finalize, map, switchMap, take } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, refreshPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
 
@@ -42,12 +42,14 @@ export class LibraryService extends BaseService {
 	}
 
 	public fetchLibrary(libraryId: number): void {
-		getPlexLibrary(libraryId, 0).subscribe((library) => {
-			if (library.isSuccess && library.value) {
-				// We freeze library here as it doesnt have to be Vue reactive.
-				this.updateStore('libraries', Object.freeze(library.value));
-			}
-		});
+		getPlexLibrary(libraryId, 0)
+			.pipe(take(1))
+			.subscribe((library) => {
+				if (library.isSuccess && library.value) {
+					// We freeze library here as it doesnt have to be Vue reactive.
+					this.updateStore('libraries', Object.freeze(library.value));
+				}
+			});
 	}
 
 	// endregion

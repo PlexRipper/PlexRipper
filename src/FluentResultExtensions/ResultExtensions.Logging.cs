@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Serilog;
+using FluentResultExtensions.lib;
+using Logging;
 using Serilog.Events;
 
 // ReSharper disable once CheckNamespace

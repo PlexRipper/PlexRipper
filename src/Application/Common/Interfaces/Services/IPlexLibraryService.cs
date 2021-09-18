@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
+using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
@@ -11,8 +13,9 @@ namespace PlexRipper.Application.Common
         /// Retrieves the new media metadata from the PlexApi and stores it in the database.
         /// </summary>
         /// <param name="plexLibraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
+        /// <param name="progressAction">The action to call for a progress update.</param>
         /// <returns>Returns the PlexLibrary with the containing media.</returns>
-        Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId);
+        Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId, Action<LibraryProgress> progressAction = null);
 
         /// <summary>
         /// Retrieve the latest <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database.

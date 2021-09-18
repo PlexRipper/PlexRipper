@@ -21,7 +21,6 @@
   <ItemGroup>
     <Folder Include="Common\DTO\DownloadManager" />
     <Folder Include="PlexAuthentication\Commands\" />
-    <Folder Include="Settings" />
   </ItemGroup>
 
 </Project>

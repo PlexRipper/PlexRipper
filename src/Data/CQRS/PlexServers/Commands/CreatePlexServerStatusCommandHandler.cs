@@ -1,7 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using FluentResultExtensions.lib;
 using FluentResults;
 using FluentValidation;
+using Logging;
 using MediatR;
 using PlexRipper.Application.PlexServers;
 using PlexRipper.Data.Common;

@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentResultExtensions.lib;
+using Logging;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.WebApi;
@@ -26,6 +28,7 @@ namespace PlexRipper.WebAPI.SignalR
         /// </summary>
         /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
         /// <param name="notificationHub">The <see cref="NotificationHub"/>.</param>
+        /// <param name="mapper"></param>
         public SignalRService(IHubContext<ProgressHub> progressHub, IHubContext<NotificationHub> notificationHub, IMapper mapper)
         {
             _progressHub = progressHub;
@@ -35,7 +38,7 @@ namespace PlexRipper.WebAPI.SignalR
 
         #region ProgressHub
 
-        public async Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)
+        public void SendLibraryProgressUpdate(LibraryProgress libraryProgress)
         {
             if (_progressHub?.Clients?.All == null)
             {
@@ -43,17 +46,18 @@ namespace PlexRipper.WebAPI.SignalR
                 return;
             }
 
-            var progress = new LibraryProgress
-            {
-                Id = id,
-                Received = received,
-                Total = total,
-                Percentage = DataFormat.GetPercentage(received, total),
-                IsRefreshing = isRefreshing,
-                IsComplete = received >= total,
-            };
+            Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(LibraryProgress), libraryProgress));
+        }
 
-            await _progressHub.Clients.All.SendAsync(nameof(LibraryProgress), progress);
+        public void SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)
+        {
+            if (_progressHub?.Clients?.All == null)
+            {
+                Log.Warning("No Clients connected to ProgressHub");
+                return;
+            }
+
+            SendLibraryProgressUpdate(new LibraryProgress(id, received, total, isRefreshing));
         }
 
         public async Task SendDownloadTaskCreationProgressUpdate(int current, int total)
@@ -97,7 +101,6 @@ namespace PlexRipper.WebAPI.SignalR
             }
 
             Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progress));
-
         }
 
         /// <inheritdoc/>
@@ -110,6 +113,17 @@ namespace PlexRipper.WebAPI.SignalR
             }
 
             Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(FileMergeProgress), fileMergeProgress));
+        }
+
+        public void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress)
+        {
+            if (_progressHub?.Clients?.All == null)
+            {
+                Log.Warning("No Clients connected to ProgressHub");
+                return;
+            }
+
+            Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(SyncServerProgress), syncServerProgress));
         }
 
         #endregion

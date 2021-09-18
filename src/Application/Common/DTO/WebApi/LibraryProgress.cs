@@ -1,10 +1,24 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using PlexRipper.Domain;
 
-namespace PlexRipper.WebAPI.SignalR.Common
+namespace PlexRipper.Application.Common.WebApi
 {
     public class LibraryProgress
     {
+        public LibraryProgress() { }
+
+        public LibraryProgress(int plexLibraryId, int received, int total, bool isRefreshing = true)
+        {
+            Id = plexLibraryId;
+            Received = received;
+            Total = total;
+            Percentage = DataFormat.GetPercentage(received, total);
+            IsRefreshing = isRefreshing;
+            IsComplete = received >= total;
+            TimeStamp = DateTime.UtcNow;
+        }
+
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
@@ -16,6 +30,9 @@ namespace PlexRipper.WebAPI.SignalR.Common
 
         [JsonProperty("total", Required = Required.Always)]
         public int Total { get; set; }
+
+        [JsonProperty("timeStamp", Required = Required.Always)]
+        public DateTime TimeStamp { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="PlexLibrary"/> is currently refreshing the data from the external PlexServer

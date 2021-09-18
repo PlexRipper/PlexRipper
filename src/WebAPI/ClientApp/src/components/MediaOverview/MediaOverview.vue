@@ -177,6 +177,7 @@ export default class MediaOverview extends Vue {
 	}
 
 	resetProgress(isRefreshing: boolean): void {
+		this.isRefreshing = isRefreshing;
 		this.libraryProgress = {
 			id: this.libraryId,
 			percentage: 0,
@@ -184,6 +185,7 @@ export default class MediaOverview extends Vue {
 			total: 0,
 			isRefreshing,
 			isComplete: false,
+			timeStamp: '',
 		};
 	}
 
@@ -298,29 +300,6 @@ export default class MediaOverview extends Vue {
 		}
 	}
 
-	mounted(): void {
-		this.$subscribeTo(
-			this.$watchAsObservable('isLoading').pipe(map((x: { oldValue: number; newValue: number }) => x.newValue)),
-			(isLoading) => {
-				if (!isLoading) {
-					if (this.detailsOverview) {
-						if (+this.$route.params.mediaid) {
-							this.openDetails(+this.$route.params.mediaid);
-						}
-					} else {
-						const thisRef = this;
-						this.$nextTick(() => {
-							Log.debug('mediaId', +this.$route.params.mediaid);
-							if (+this.$route.params.mediaid) {
-								thisRef?.openDetails(+this.$route.params.mediaid);
-							}
-						});
-					}
-				}
-			},
-		);
-	}
-
 	created(): void {
 		this.resetProgress(false);
 		this.isRefreshing = false;
@@ -335,10 +314,15 @@ export default class MediaOverview extends Vue {
 		});
 
 		// Setup progress bar
-		this.$subscribeTo(SignalrService.getLibraryProgress(), (data) => {
-			if (data.id === this.libraryId) {
+		this.$subscribeTo(SignalrService.getLibraryProgress(this.libraryId), (data) => {
+			if (data) {
 				this.libraryProgress = data;
-				this.isRefreshing = data.isRefreshing ?? false;
+				this.isRefreshing = data.isRefreshing;
+				if (data.isComplete) {
+					Log.debug(data);
+					this.resetProgress(false);
+					LibraryService.fetchLibrary(this.libraryId);
+				}
 			}
 		});
 
@@ -369,6 +353,29 @@ export default class MediaOverview extends Vue {
 
 		// Retrieve library data
 		this.$subscribeTo(LibraryService.getLibrary(this.libraryId), (data) => this.setLibrary(data));
+	}
+
+	mounted(): void {
+		this.$subscribeTo(
+			this.$watchAsObservable('isLoading').pipe(map((x: { oldValue: number; newValue: number }) => x.newValue)),
+			(isLoading) => {
+				if (!isLoading) {
+					if (this.detailsOverview) {
+						if (+this.$route.params.mediaid) {
+							this.openDetails(+this.$route.params.mediaid);
+						}
+					} else {
+						const thisRef = this;
+						this.$nextTick(() => {
+							Log.debug('mediaId', +this.$route.params.mediaid);
+							if (+this.$route.params.mediaid) {
+								thisRef?.openDetails(+this.$route.params.mediaid);
+							}
+						});
+					}
+				}
+			},
+		);
 	}
 }
 </script>

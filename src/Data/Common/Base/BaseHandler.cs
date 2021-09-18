@@ -2,7 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Common

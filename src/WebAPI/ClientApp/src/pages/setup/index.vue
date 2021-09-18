@@ -91,7 +91,7 @@
 						<!-- Checking paths	-->
 						<v-stepper-content class="stepper-content" :step="3">
 							<h2 class="mt-2">Ensure that all paths are valid!</h2>
-							<paths-overview />
+							<paths-default-overview />
 						</v-stepper-content>
 
 						<!-- Plex Accounts	-->
@@ -178,8 +178,6 @@ import NavigationBar from './components/NavigationBar.vue';
 export default class Setup extends Vue {
 	stepIndex: number = 1;
 	stepPagesCount: number = 5;
-
-	sliderHeight: number = 600;
 
 	links: string[] = [
 		'https://github.com/PlexRipper/PlexRipper/',

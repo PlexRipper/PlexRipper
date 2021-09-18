@@ -3,8 +3,10 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Autofac;
+using FluentResultExtensions.lib;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -71,9 +73,9 @@ namespace PlexRipper.WebAPI
                 .AddJsonOptions(
                     options =>
                     {
-                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
                         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                     });
 
             // Used to deploy the front-end Nuxt client
@@ -108,11 +110,7 @@ namespace PlexRipper.WebAPI
             });
 
             // SignalR
-            services.AddSignalR().AddJsonProtocol(options =>
-            {
-                options.PayloadSerializerOptions.Converters
-                    .Add(new JsonStringEnumConverter());
-            });
+            services.AddSignalR().AddJsonProtocol(options => { options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
             // Customise default API behaviour
             services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });

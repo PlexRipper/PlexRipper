@@ -28,6 +28,8 @@ export class GlobalService extends Service.BaseService {
 		// Progress Service
 		fileMergeProgressList: [],
 		inspectServerProgress: [],
+		syncServerProgress: [],
+		libraryProgress: [],
 	};
 
 	constructor() {

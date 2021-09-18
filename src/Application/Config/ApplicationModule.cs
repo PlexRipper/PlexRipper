@@ -37,7 +37,7 @@ namespace PlexRipper.Application.Config
             builder.RegisterAssemblyTypes(assembly)
                 .Where(t => t.Name.EndsWith("Service"))
                 .AsImplementedInterfaces()
-                .InstancePerDependency();
+                .SingleInstance();
 
             // Register Quartz dependancies
             builder.RegisterModule(new QuartzAutofacFactoryModule());

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
+using Logging;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexServers;
@@ -49,7 +50,8 @@ namespace PlexRipper.Application.PlexAccounts
         }
 
         /// <summary>
-        /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi. It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
+        /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi.
+        /// It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
         /// </summary>
         /// <param name="plexAccountId">The is of <see cref="PlexAccount"/> to setup.</param>
         /// <returns>The list of <see cref="PlexServer">PlexServers</see> which are accessible by this account.</returns>
@@ -83,10 +85,17 @@ namespace PlexRipper.Application.PlexAccounts
             }
 
             // Retrieve and store servers
-            var refreshResult = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
-            if (refreshResult.IsFailed)
+            var retrieveResult = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
+            if (retrieveResult.IsFailed)
             {
-                return refreshResult.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
+                return retrieveResult.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
+            }
+
+            // Retrieve libraries for the plexAccount
+            var inspectResult = await _plexServerService.InspectPlexServers(plexAccount.Id, retrieveResult.Value.Select(x => x.Id).ToList());
+            if (inspectResult.IsFailed)
+            {
+                return inspectResult;
             }
 
             var plexServerList = await _mediator.Send(new GetPlexServersByPlexAccountIdQuery(plexAccount.Id));
@@ -218,7 +227,8 @@ namespace PlexRipper.Application.PlexAccounts
 
             if (!result.Value)
             {
-                string msg = $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
+                string msg =
+                    $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
                 return result.ToResult().WithError(msg).LogWarning();
             }
 

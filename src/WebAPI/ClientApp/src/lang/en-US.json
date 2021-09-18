@@ -15,6 +15,7 @@
 			"skip-setup": "Skip setup",
 			"finish-setup": "Finish setup",
 			"check-server-status": "Check server status",
+			"sync-server-libraries": "Sync server libraries",
 			"reset-db": "Reset Database",
 			"go-to-setup-page": "Go To Setup Page",
 			"add-alert": "Add Alert",

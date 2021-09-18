@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Environment;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 

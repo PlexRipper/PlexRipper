@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using Moq;
 using PlexRipper.Application.Common;
 using PlexRipper.BaseTests;
@@ -23,7 +25,7 @@ namespace DownloadManager.IntegrationTests.PlexDownloadClient
 
         public PlexDownloadClientTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output);
             Container = new BaseContainer();
 
             _server = Container.MockServer.GetPlexMockServer();

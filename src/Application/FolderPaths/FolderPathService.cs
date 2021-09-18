@@ -75,7 +75,7 @@ namespace PlexRipper.Application.FolderPaths
             }
         }
 
-        public async Task<Result> CheckIfFolderPathsAreValid()
+        public async Task<Result> CheckIfFolderPathsAreValid(PlexMediaType mediaType = PlexMediaType.None)
         {
             var folderPaths = await GetAllFolderPathsAsync();
             if (folderPaths.IsFailed)
@@ -83,10 +83,15 @@ namespace PlexRipper.Application.FolderPaths
                 return folderPaths.ToResult();
             }
 
+            if (mediaType is PlexMediaType.None or PlexMediaType.Unknown)
+            {
+                return folderPaths.ToResult();
+            }
+
             var errors = new List<Error>();
             folderPaths.Value.ForEach(folderPath =>
             {
-                if (!folderPath.IsValid())
+                if (folderPath.MediaType == mediaType && !folderPath.IsValid())
                 {
                     errors.Add(new Error($"The {folderPath.DisplayName} is not a valid directory"));
                 }

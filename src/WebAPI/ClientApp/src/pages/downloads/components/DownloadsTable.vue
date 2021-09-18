@@ -129,9 +129,9 @@ export default class DownloadsTable extends Vue {
 		return availableActions;
 	}
 
-	tableAction({ action, item }: { action: string; item: DownloadTaskDTO }) {
-		Log.info('command', { action, item });
-		this.$emit(action, item.id);
+	tableAction(payload: { action: string; item: any }) {
+		Log.info('command', payload);
+		this.$emit('action', payload);
 	}
 
 	mounted(): void {

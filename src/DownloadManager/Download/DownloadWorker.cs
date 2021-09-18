@@ -7,12 +7,10 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
-using Serilog.Events;
 using Timer = System.Timers.Timer;
 
 namespace PlexRipper.DownloadManager.Download
@@ -35,7 +33,7 @@ namespace PlexRipper.DownloadManager.Download
 
         private bool _isDownloading = true;
 
-        private readonly Timer _timer = new (100)
+        private readonly Timer _timer = new(100)
         {
             AutoReset = true,
         };
@@ -266,7 +264,11 @@ namespace PlexRipper.DownloadManager.Download
             _isDownloading = false;
 
             // Wait for it to gracefully end.
-            await DownloadProcessTask;
+            if (DownloadProcessTask is not null)
+            {
+                await DownloadProcessTask;
+            }
+
             _timer.Stop();
             SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
 

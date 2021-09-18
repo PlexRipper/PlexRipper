@@ -20,8 +20,8 @@ namespace PlexRipper.WebAPI
 
             try
             {
-                Logging.Log.Information("Starting up");
-                Logging.Log.Information($"Currently running on {OsInfo.CurrentOS}");
+                Log.Information("Starting up");
+                Log.Information($"Currently running on {OsInfo.CurrentOS}");
 
                 var host = Host.CreateDefaultBuilder(args)
                     .UseServiceProviderFactory(new AutofacServiceProviderFactory())

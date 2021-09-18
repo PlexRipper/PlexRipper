@@ -248,6 +248,7 @@ namespace PlexRipper.DownloadManager.Download
             finally
             {
                 _timer.Dispose();
+                await destinationStream.DisposeAsync();
                 _downloadWorkerUpdate.OnCompleted();
                 _downloadWorkerLog.OnCompleted();
             }

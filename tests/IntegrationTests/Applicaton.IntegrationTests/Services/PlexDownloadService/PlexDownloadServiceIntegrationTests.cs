@@ -2,7 +2,7 @@
 using PlexRipper.BaseTests;
 using Xunit.Abstractions;
 
-namespace PlexRipper.Application.IntegrationTests.Services
+namespace PlexRipper.Application.IntegrationTests
 {
     public class PlexDownloadServiceIntegrationTests
     {

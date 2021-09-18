@@ -7,7 +7,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PlexRipper.Application.IntegrationTests.Services.PlexAccountService
+namespace PlexRipper.Application.IntegrationTests
 {
     public class AccountServiceTests
     {

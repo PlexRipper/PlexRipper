@@ -6,7 +6,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PlexRipper.Application.IntegrationTests.Services.PlexServerService
+namespace PlexRipper.Application.IntegrationTests
 {
     public class PlexServerService_SyncPlexServer_IntegrationTests
     {

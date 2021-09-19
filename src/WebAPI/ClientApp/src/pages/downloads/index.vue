@@ -47,10 +47,14 @@ import { Component, Vue } from 'vue-property-decorator';
 import { DownloadService, ServerService } from '@service';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import ISelection from '@interfaces/ISelection';
 import DownloadsTable from './components/DownloadsTable.vue';
 import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
 import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsDialog.vue';
+
+declare interface ISelection {
+	plexServerId: number;
+	downloadTaskIds: number[];
+}
 
 @Component({
 	components: {
@@ -70,7 +74,7 @@ export default class Downloads extends Vue {
 	private dialog: boolean = false;
 
 	get getSelected(): number[] {
-		return this.selected.map((x) => +x.keys).flat(1);
+		return this.selected.map((x) => x.downloadTaskIds).flat(1);
 	}
 
 	get getServersWithDownloads(): PlexServerDTO[] {
@@ -116,12 +120,12 @@ export default class Downloads extends Vue {
 		this.dialog = true;
 	}
 
-	updateSelected(plexServerId: number, selected: string[]) {
-		const index = this.selected.findIndex((x) => x.indexKey === plexServerId);
+	updateSelected(plexServerId: number, downloadTaskIds: number[]) {
+		const index = this.selected.findIndex((x) => x.plexServerId === plexServerId);
 		if (index === -1) {
-			this.selected.push({ indexKey: plexServerId, keys: selected });
+			this.selected.push({ plexServerId, downloadTaskIds });
 		} else {
-			this.selected.splice(index, 1, { indexKey: plexServerId, keys: selected });
+			this.selected.splice(index, 1, { plexServerId, downloadTaskIds });
 		}
 	}
 

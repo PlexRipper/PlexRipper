@@ -6,7 +6,7 @@
 			height-auto
 			media-icons
 			@action="tableAction"
-			@selected="$emit('selected', $event)"
+			@selected="selectedAction"
 		/>
 	</div>
 </template>
@@ -92,9 +92,21 @@ export default class DownloadsTable extends Vue {
 		];
 	}
 
+	get flatDownloadRows(): DownloadTaskDTO[] {
+		// Concat is to get all un-nested DownloadTasks such as those of type Movie
+		return this.downloadRows
+			.map((x) => x.children?.map((y) => y.children))
+			.concat(this.downloadRows)
+			.flat(3)
+			.filter((x) => !!x);
+	}
+
 	availableActions(status: DownloadStatus): ButtonType[] {
 		const availableActions: ButtonType[] = [ButtonType.Details];
 		switch (status) {
+			case DownloadStatus.Unknown:
+				availableActions.push(ButtonType.Delete);
+				break;
 			case DownloadStatus.Initialized:
 				availableActions.push(ButtonType.Delete);
 				break;
@@ -129,9 +141,15 @@ export default class DownloadsTable extends Vue {
 		return availableActions;
 	}
 
-	tableAction(payload: { action: string; item: any }) {
+	tableAction(payload: { action: string; item: DownloadTaskDTO }) {
 		Log.info('command', payload);
 		this.$emit('action', payload);
+	}
+
+	selectedAction(selected: number[]) {
+		// Convert downloadTask keys to downloadTask Ids
+		const ids = this.flatDownloadRows.filter((x) => selected.includes(x.key)).map((x) => x.id);
+		this.$emit('selected', ids);
 	}
 
 	mounted(): void {

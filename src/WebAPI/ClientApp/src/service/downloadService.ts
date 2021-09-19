@@ -10,11 +10,12 @@ import {
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { map, startWith, switchMap, take } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import { AccountService, BaseService, ProgressService } from '@service';
 import { Context } from '@nuxt/types';
+import _ from 'lodash';
 
 export class DownloadService extends BaseService {
 	public constructor() {
@@ -72,49 +73,18 @@ export class DownloadService extends BaseService {
 	}
 
 	public getDownloadList(serverId: number = 0): Observable<DownloadTaskDTO[]> {
-		return combineLatest([
-			this.getDownloadState(serverId),
-			ProgressService.getDownloadTaskUpdateProgress(serverId).pipe(startWith([])),
-			ProgressService.getFileMergeProgress(serverId).pipe(startWith([])),
-		]).pipe(
+		return combineLatest([this.getDownloadState(serverId), ProgressService.getMergedDownloadTaskProgress(serverId)]).pipe(
 			// Merge the baseDownload with the download progress and return the updated result
-			switchMap(([baseDownloadRows, downloadProgressRows, fileMergeRows]) => {
-				if (!downloadProgressRows || downloadProgressRows === []) {
+			switchMap(([baseDownloadRows, downloadProgressRows]) => {
+				if (baseDownloadRows?.length === 0 && downloadProgressRows?.length === 0) {
+					return of([]);
+				}
+
+				if (baseDownloadRows?.length > 0 && downloadProgressRows?.length === 0) {
 					return of(baseDownloadRows);
 				}
 
-				// Remove updates of finished download task updates
-				// const x1 = downloadProgressRows.filter((x) => baseDownloadRows.find((y) => y.id === x.id));
-				// const y1 = fileMergeRows.filter((x) => baseDownloadRows.find((y) => y.id === x.downloadTaskId));
-				// this.setState({ downloadTaskUpdateList: x1, fileMergeProgressList: y1 }, 'CLEAN UP DOWNLOAD TASK UPDATE LIST', false);
-
-				const mergedDownloadRows: DownloadTaskDTO[] = [];
-				for (const baseDownloadRow of baseDownloadRows) {
-					let mergedDownloadRow: DownloadTaskDTO = { ...baseDownloadRow };
-					// Merge downloadProgress
-					const downloadProgress = downloadProgressRows.find((x) => x.id === baseDownloadRow.id);
-					if (downloadProgress) {
-						mergedDownloadRow = { ...mergedDownloadRow, ...downloadProgress };
-					}
-
-					// Merge filemergeProgress
-					if (mergedDownloadRow.status === DownloadStatus.Merging || mergedDownloadRow.status === DownloadStatus.Moving) {
-						const fileMergeProgress = fileMergeRows.find((x) => x.downloadTaskId === baseDownloadRow.id);
-						if (fileMergeProgress) {
-							mergedDownloadRow = {
-								...mergedDownloadRow,
-								dataReceived: fileMergeProgress.dataTransferred,
-								dataTotal: fileMergeProgress.dataTotal,
-								percentage: fileMergeProgress.percentage,
-								timeRemaining: fileMergeProgress.timeRemaining,
-								downloadSpeed: fileMergeProgress.transferSpeed,
-							};
-						}
-					}
-					mergedDownloadRows.push(mergedDownloadRow);
-				}
-
-				return of(mergedDownloadRows);
+				return _.union([baseDownloadRows, downloadProgressRows]);
 			}),
 		);
 	}

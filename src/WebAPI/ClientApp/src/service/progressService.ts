@@ -1,8 +1,7 @@
-import Log from 'consola';
 import { Context } from '@nuxt/types';
-import { Observable, of } from 'rxjs';
-import { filter, switchMap } from 'rxjs/operators';
-import { DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
+import { combineLatest, of } from 'rxjs';
+import { startWith, switchMap } from 'rxjs/operators';
+import { DownloadStatus, DownloadTaskDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import { BaseService, SignalrService } from '@service';
 
@@ -20,63 +19,47 @@ export class ProgressService extends BaseService {
 
 	public setup(nuxtContext: Context): void {
 		super.setup(nuxtContext);
+	}
 
-		// SignalrService.getFileMergeProgress().subscribe((fileMergeProgress) => {
-		// 	if (fileMergeProgress) {
-		// 		const { fileMergeProgressList } = this.getState();
-		// 		const i = fileMergeProgressList.findIndex((x) => x.id === fileMergeProgress.id);
-		// 		if (i > -1) {
-		// 			// Update entry
-		// 			fileMergeProgressList.splice(i, 1, fileMergeProgress);
-		// 		} else {
-		// 			// Add new entry
-		// 			fileMergeProgressList.push(fileMergeProgress);
-		// 		}
-		// 		this.setState({ fileMergeProgressList });
-		// 	} else {
-		// 		Log.error(`FileMergeProgress was ${fileMergeProgress}`);
-		// 	}
-		// });
-
-		SignalrService.getDownloadTaskUpdate().subscribe((downloadTaskUpdate) => {
-			if (downloadTaskUpdate) {
-				Log.debug('downloadTaskUpdate', downloadTaskUpdate);
-
-				const { downloadTaskUpdateList } = this.getState();
-				const i = downloadTaskUpdateList.findIndex((x) => x.id === downloadTaskUpdate.id);
-				if (i > -1) {
-					// Update entry
-					downloadTaskUpdateList.splice(i, 1, downloadTaskUpdate);
-				} else {
-					// Add new entry
-					downloadTaskUpdateList.push(downloadTaskUpdate);
+	public getMergedDownloadTaskProgress(serverId: number = 0) {
+		return combineLatest([
+			SignalrService.getAllDownloadTaskUpdate().pipe(startWith([])),
+			SignalrService.getAllFileMergeProgress().pipe(startWith([])),
+		]).pipe(
+			switchMap(([downloadRows, fileMergeList]) => {
+				if (serverId > 0) {
+					downloadRows = downloadRows.filter((x) => x.plexServerId === serverId);
+					fileMergeList = fileMergeList.filter((x) => x.plexServerId === serverId);
 				}
-				this.setState({ downloadTaskUpdateList });
-			} else {
-				Log.error(`downloadTaskUpdate was ${downloadTaskUpdate}`);
-			}
-		});
-	}
 
-	/**
-	 * Merge the latest fileMergeUpdates into an array to be queried for real-time updates.
-	 */
-	public getFileMergeProgress(serverId: number): Observable<FileMergeProgress[]> {
-		return this.stateChanged.pipe(
-			switchMap((state: IStoreState) => of(state?.fileMergeProgressList.filter((x) => x.plexServerId === serverId))),
-			filter((x) => x && x !== []),
-		);
-	}
+				const mergedDownloadRows: DownloadTaskDTO[] = [];
 
-	/**
-	 * Merge the latest fileMergeUpdates into an array to be queried for real-time updates.
-	 */
-	public getDownloadTaskUpdateProgress(serverId: number = 0): Observable<DownloadTaskDTO[]> {
-		return this.stateChanged.pipe(
-			switchMap((state: IStoreState) =>
-				of(state?.downloadTaskUpdateList.filter((x) => (serverId > 0 ? x.plexServerId === serverId : true))),
-			),
-			filter((x) => x && x !== []),
+				for (let i = 0; i < downloadRows.length; i++) {
+					let mergedDownloadRow = {
+						...downloadRows[i],
+					};
+
+					if (downloadRows[i].status !== DownloadStatus.Merging) {
+						mergedDownloadRows.push(mergedDownloadRow);
+						continue;
+					}
+
+					const fileMergeProgress = fileMergeList.find((x) => x.downloadTaskId === downloadRows[i].id);
+					if (fileMergeProgress) {
+						mergedDownloadRow = {
+							...downloadRows[i],
+							dataReceived: fileMergeProgress.dataTransferred,
+							dataTotal: fileMergeProgress.dataTotal,
+							percentage: fileMergeProgress.percentage,
+							timeRemaining: fileMergeProgress.timeRemaining,
+							downloadSpeed: fileMergeProgress.transferSpeed,
+						};
+					}
+					mergedDownloadRows.push(mergedDownloadRow);
+				}
+
+				return of(mergedDownloadRows);
+			}),
 		);
 	}
 }

@@ -44,4 +44,8 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		stateObject[propertyName] = x;
 		this.setState(stateObject, `Update ${propertyName} with ${idName}: ${newObject[idName]}`);
 	}
+
+	protected getStateSliceProperty<TProp>(propertyName: string, deepCloneReturnedState: boolean = true): TProp {
+		return super.getStateSliceProperty<TProp>(propertyName, deepCloneReturnedState);
+	}
 }

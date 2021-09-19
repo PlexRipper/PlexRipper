@@ -330,6 +330,7 @@ export default class MediaOverview extends Vue {
 		this.$subscribeTo(
 			SignalrService.getDownloadTaskCreationProgress().pipe(
 				tap((data) => {
+					// TODO This needs to work with id's
 					this.downloadTaskCreationProgress = data;
 				}),
 				finalize(() => {

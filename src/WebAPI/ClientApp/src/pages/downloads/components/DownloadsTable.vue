@@ -19,7 +19,7 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import ButtonType from '@enums/buttonType';
-import { DownloadService, ProgressService } from '@service';
+import { DownloadService } from '@service';
 
 @Component({
 	components: {
@@ -93,12 +93,14 @@ export default class DownloadsTable extends Vue {
 	}
 
 	get flatDownloadRows(): DownloadTaskDTO[] {
-		// Concat is to get all un-nested DownloadTasks such as those of type Movie
-		return this.downloadRows
-			.map((x) => x.children?.map((y) => y.children))
-			.concat(this.downloadRows)
+		return [
+			this.downloadRows,
+			this.downloadRows.map((x) => x.children),
+			this.downloadRows.map((x) => x.children?.map((y) => y.children)),
+			this.downloadRows.map((x) => x.children?.map((y) => y.children?.map((z) => z.children))),
+		]
 			.flat(3)
-			.filter((x) => !!x);
+			.filter((x) => !!x) as DownloadTaskDTO[];
 	}
 
 	availableActions(status: DownloadStatus): ButtonType[] {
@@ -184,8 +186,6 @@ export default class DownloadsTable extends Vue {
 				this.downloadRows = [];
 			}
 		});
-
-		this.$subscribeTo(ProgressService.getFileMergeProgress(this.serverId), (x) => (this.fileMergeProgressList = x));
 	}
 }
 </script>

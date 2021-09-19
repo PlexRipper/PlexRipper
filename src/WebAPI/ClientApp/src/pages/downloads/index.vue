@@ -87,25 +87,26 @@ export default class Downloads extends Vue {
 
 	// region single commands
 
-	commandSwitch({ action, item }: { action: string; item: any }) {
+	commandSwitch({ action, item }: { action: string; item: DownloadTaskDTO }) {
+		const ids = [item.id];
 		switch (action) {
 			case 'pause':
-				this.pauseDownloadTasks([item]);
+				this.pauseDownloadTasks(ids);
 				break;
 			case 'clear':
-				this.clearDownloadTasks([item]);
+				this.clearDownloadTasks(ids);
 				break;
 			case 'delete':
-				this.deleteDownloadTasks([item]);
+				this.deleteDownloadTasks(ids);
 				break;
 			case 'stop':
-				this.stopDownloadTasks([item]);
+				this.stopDownloadTasks(ids);
 				break;
 			case 'restart':
-				this.restartDownloadTasks([item]);
+				this.restartDownloadTasks(ids);
 				break;
 			case 'start':
-				this.startDownloadTasks([item]);
+				this.startDownloadTasks(ids);
 				break;
 			case 'details':
 				this.detailsDownloadTask(item);

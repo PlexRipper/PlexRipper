@@ -149,6 +149,8 @@ namespace PlexRipper.Data
             {
                 // optionsBuilder.UseLazyLoadingProxies();
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                optionsBuilder.EnableDetailedErrors();
+                optionsBuilder.EnableSensitiveDataLogging();
                 optionsBuilder
                     .UseSqlite(
                         $"Data Source={DatabasePath}",

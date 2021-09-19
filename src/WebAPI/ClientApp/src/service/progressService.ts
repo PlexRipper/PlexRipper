@@ -2,25 +2,22 @@ import { Context } from '@nuxt/types';
 import { combineLatest, of } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
 import { DownloadStatus, DownloadTaskDTO } from '@dto/mainApi';
-import IStoreState from '@interfaces/IStoreState';
 import { BaseService, SignalrService } from '@service';
 
 export class ProgressService extends BaseService {
 	public constructor() {
-		super({
-			stateSliceSelector: (state: IStoreState) => {
-				return {
-					fileMergeProgressList: state.fileMergeProgressList,
-					downloadTaskUpdateList: state.downloadTaskUpdateList,
-				};
-			},
-		});
+		super({});
 	}
 
 	public setup(nuxtContext: Context): void {
 		super.setup(nuxtContext);
 	}
 
+	/**
+	 * Merges the FileMergeProgress with the DownloadTaskUpdates
+	 * @param {number} serverId
+	 * @returns {Observable<DownloadTaskDTO[]>}
+	 */
 	public getMergedDownloadTaskProgress(serverId: number = 0) {
 		return combineLatest([
 			SignalrService.getAllDownloadTaskUpdate().pipe(startWith([])),

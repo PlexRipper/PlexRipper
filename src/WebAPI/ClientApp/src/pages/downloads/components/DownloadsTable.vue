@@ -5,6 +5,7 @@
 			:headers="getHeaders"
 			height-auto
 			media-icons
+			load-children
 			@action="tableAction"
 			@selected="selectedAction"
 		/>
@@ -14,7 +15,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DownloadStatus, DownloadTaskDTO, FileMergeProgress, PlexMediaType } from '@dto/mainApi';
+import { DownloadStatus, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
@@ -103,6 +104,16 @@ export default class DownloadsTable extends Vue {
 			.filter((x) => !!x) as DownloadTaskDTO[];
 	}
 
+	setAvailableActions(downloadTasks: DownloadTaskDTO[]): DownloadTaskDTO[] {
+		for (const downloadRow of downloadTasks) {
+			downloadRow.actions = this.availableActions(downloadRow.status);
+			if (downloadRow.children) {
+				downloadRow.children = this.setAvailableActions(downloadRow.children);
+			}
+		}
+		return downloadTasks;
+	}
+
 	availableActions(status: DownloadStatus): ButtonType[] {
 		const availableActions: ButtonType[] = [ButtonType.Details];
 		switch (status) {
@@ -157,34 +168,7 @@ export default class DownloadsTable extends Vue {
 	mounted(): void {
 		// Retrieve initial download list
 		this.$subscribeTo(DownloadService.getDownloadList(this.serverId), (data: DownloadTaskDTO[]) => {
-			if (data && data.length > 0) {
-				for (const rootDownloadTask of data) {
-					// For movies download tasks
-					if (rootDownloadTask.mediaType === PlexMediaType.Movie) {
-						rootDownloadTask.actions = this.availableActions(rootDownloadTask.status);
-						rootDownloadTask.children = undefined;
-					}
-
-					// For tvShows download tasks
-					if (rootDownloadTask.mediaType === PlexMediaType.TvShow) {
-						if (rootDownloadTask.children && rootDownloadTask.children.length > 0) {
-							rootDownloadTask?.children?.forEach((season) => {
-								if (season.children && season.children.length > 0) {
-									season.children?.forEach(() => {
-										// this.mergeDownloadRow(episode);
-									});
-								} else {
-									Log.warn(`Season: ${season.title} had no episodes`);
-								}
-							});
-						}
-					}
-				}
-
-				this.downloadRows = [...data] as DownloadTaskDTO[];
-			} else {
-				this.downloadRows = [];
-			}
+			this.downloadRows = this.setAvailableActions([...data]);
 		});
 	}
 }

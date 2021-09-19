@@ -57,6 +57,7 @@ export class ProgressService extends BaseService {
 
 				return of(mergedDownloadRows);
 			}),
+			startWith([]),
 		);
 	}
 }

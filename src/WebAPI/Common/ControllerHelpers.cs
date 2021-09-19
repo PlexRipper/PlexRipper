@@ -79,9 +79,9 @@ namespace PlexRipper.WebAPI.Common
                 {
                     if (downloadTask.MediaType == PlexMediaType.TvShow)
                     {
-                        if (downloadTask.Children is not null && !downloadTask.Children.Any())
+                        if (downloadTask.Children is not null && downloadTask.Children.Any())
                         {
-                            downloadTask.Children.ForEach(season =>
+                            foreach (var season in downloadTask.Children)
                             {
                                 var seasonChildren = downloadTask.Children ?? new List<DownloadTaskDTO>();
                                 if (seasonChildren.Any())
@@ -91,7 +91,7 @@ namespace PlexRipper.WebAPI.Common
                                     season.DataReceived = season.Children.Sum(x => x.DataReceived);
                                     season.Percentage = decimal.Round(season.Children?.Average(x => x.Percentage) ?? 0, 2);
                                 }
-                            });
+                            };
 
                             var children = downloadTask.Children ?? new List<DownloadTaskDTO>();
                             if (children.Any())

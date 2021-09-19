@@ -23,8 +23,7 @@ namespace PlexRipper.Domain.Behavior.Pipelines
             _compositeValidator = compositeValidator;
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken,
-            RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             var fluentValidationResult = await _compositeValidator.ValidateAsync(request, cancellationToken);
 

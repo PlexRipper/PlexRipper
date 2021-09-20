@@ -23,12 +23,14 @@ RUN npm run generate
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
 
-## Core Projects
+## Domain Projects
 COPY ["src/Domain/Domain.csproj", "src/Domain/"]
-COPY ["src/Application/Application.csproj", "src/Application/"]
+COPY ["src/Environment/Environment.csproj", "src/Environment/"]
+COPY ["src/FluentResultExtensions/FluentResultExtensions.csproj", "src/FluentResultExtensions/"]
+COPY ["src/Logging/Logging.csproj", "src/Logging/"]
 
-## Presentation projects
-COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
+## Core Projects
+COPY ["src/Application/Application.csproj", "src/Application/"]
 
 ## Infrastructure Projects
 COPY ["src/Data/Data.csproj", "src/Data/"]
@@ -38,6 +40,8 @@ COPY ["src/HttpClient/HttpClient.csproj", "src/HttpClient/"]
 COPY ["src/PlexApi/PlexApi.csproj", "src/PlexApi/"]
 COPY ["src/Settings/Settings.csproj", "src/Settings/"]
 
+## Presentation projects
+COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
 
 ## Restore Projects
 RUN dotnet restore "src/WebAPI/WebAPI.csproj"

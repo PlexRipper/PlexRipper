@@ -1,13 +1,18 @@
-<script lang="ts">
-import { Component, Prop } from 'vue-property-decorator';
-import { VCheckbox } from 'vuetify/lib';
+<script>
+import VCheckbox from 'vuetify/lib/components/VCheckbox/VCheckbox';
 
-@Component
-export default class PCheckbox extends VCheckbox {
-	@Prop({ required: false, type: String, default: 'red' })
-	readonly color!: string;
-
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly hideDetails!: boolean;
-}
+export default {
+	name: 'PCheckbox',
+	extends: VCheckbox,
+	props: {
+		color: {
+			type: String,
+			default: 'red',
+		},
+		hideDetails: {
+			type: Boolean,
+			default: true,
+		},
+	},
+};
 </script>

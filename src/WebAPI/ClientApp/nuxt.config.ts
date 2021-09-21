@@ -62,12 +62,12 @@ const config: NuxtConfig = {
 	 */
 	plugins: [
 		{ src: '@plugins/setup.ts', mode: 'client' },
-		{ src: '@plugins/vuetify.ts', mode: 'client' },
-		{ src: '@plugins/filters.ts', mode: 'client' },
-		{ src: '@plugins/axios.ts', mode: 'client' },
-		{ src: '@plugins/i18nPlugin.ts', mode: 'client' },
+		{ src: '@plugins/vuetify.ts' },
+		{ src: '@plugins/filters.ts' },
+		{ src: '@plugins/axios.ts' },
+		{ src: '@plugins/i18nPlugin.ts' },
 		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
-		{ src: '@plugins/typeExtensions.ts', mode: 'client' },
+		{ src: '@plugins/typeExtensions.ts' },
 	],
 	router: {
 		middleware: ['pageRedirect'],
@@ -129,6 +129,10 @@ const config: NuxtConfig = {
 				overlay: false,
 			},
 		},
+		transpile: [
+			// This is needed to extend Vuetify components in ~/components/Extensions
+			'vuetify/lib',
+		],
 		extractCSS: true,
 		// Will allow for debugging in Typescript + Nuxt
 		// Doc: https://nordschool.com/enable-vs-code-debugger-for-nuxt-and-typescript/

@@ -164,17 +164,9 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import PathsOverview from '@overviews/PathsCustomOverview.vue';
-import AccountOverview from '@overviews/AccountOverview/AccountOverview.vue';
-import ExternalLink from '@components/General/ExternalLink.vue';
-import PBtn from '@components/Extensions/PBtn.vue';
-import ConfirmationDialog from '@components/General/ConfirmationDialog.vue';
 import { SettingsService } from '@service';
-import NavigationBar from './components/NavigationBar.vue';
 
-@Component({
-	components: { NavigationBar, PathsOverview, AccountOverview, ExternalLink, PBtn, ConfirmationDialog },
-})
+@Component
 export default class Setup extends Vue {
 	stepIndex: number = 1;
 	stepPagesCount: number = 5;

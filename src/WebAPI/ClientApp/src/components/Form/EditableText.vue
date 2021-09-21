@@ -15,9 +15,7 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import ButtonType from '@enums/buttonType';
 
-@Component<EditableText>({
-	components: {},
-})
+@Component
 export default class EditableText extends Vue {
 	@Prop({ required: false, type: String })
 	readonly value!: string;

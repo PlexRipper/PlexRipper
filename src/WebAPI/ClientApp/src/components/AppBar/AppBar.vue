@@ -58,19 +58,8 @@ import { Component, Vue } from 'vue-property-decorator';
 import { GlobalService, SettingsService, AccountService, ServerService } from '@service';
 import { refreshAccount } from '@api/accountApi';
 import type { PlexAccountDTO } from '@dto/mainApi';
-import DarkModeToggle from '@components/General/DarkModeToggle.vue';
-import NotificationButton from '@components/AppBar/NotificationButton.vue';
-import ProgressComponent from '@components/Progress/ProgressComponent.vue';
-import AppBarProgressBar from '@components/AppBar/AppBarProgressBar.vue';
 
-@Component({
-	components: {
-		AppBarProgressBar,
-		NotificationButton,
-		DarkModeToggle,
-		ProgressComponent,
-	},
-})
+@Component
 export default class AppBar extends Vue {
 	private accounts: PlexAccountDTO[] = [];
 	private loading: boolean[] = [false];

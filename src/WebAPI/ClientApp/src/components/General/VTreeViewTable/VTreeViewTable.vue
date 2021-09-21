@@ -147,20 +147,11 @@
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
 import ITreeViewTableRow from '@vTreeViewTable/ITreeViewTableRow';
-import ProgressComponent from '@components/Progress/ProgressComponent.vue';
-import LoadingSpinner from '@components/LoadingSpinner.vue';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import ButtonType from '@enums/buttonType';
-import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 import ISelection from '@interfaces/ISelection';
 
-@Component({
-	components: {
-		LoadingSpinner,
-		ProgressComponent,
-		AlphabetNavigation,
-	},
-})
+@Component
 export default class VTreeViewTable extends Vue {
 	@Prop({ required: true, type: Array as () => any[] })
 	readonly items!: any[];

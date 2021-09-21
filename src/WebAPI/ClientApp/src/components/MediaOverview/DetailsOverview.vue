@@ -100,17 +100,9 @@ import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { DownloadMediaDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
-import LoadingSpinner from '@components/LoadingSpinner.vue';
-import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
 import { MediaService } from '@service';
 
-@Component<DetailsOverview>({
-	components: {
-		MediaTable,
-		LoadingSpinner,
-		MediaOverviewBar,
-	},
-})
+@Component
 export default class DetailsOverview extends Vue {
 	@Prop({ required: true, type: String })
 	readonly mediaType!: PlexMediaType;

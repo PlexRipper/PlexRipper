@@ -16,19 +16,12 @@
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { DownloadStatus, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import ButtonType from '@enums/buttonType';
 import { DownloadService } from '@service';
-import VTreeViewTable from '@vTreeViewTable/VTreeViewTable.vue';
 
-@Component({
-	components: {
-		LoadingSpinner,
-		VTreeViewTable,
-	},
-})
+@Component
 export default class DownloadsTable extends Vue {
 	@Prop({ type: Boolean })
 	readonly loading: Boolean = false;

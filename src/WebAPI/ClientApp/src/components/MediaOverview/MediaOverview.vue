@@ -96,23 +96,10 @@ import { finalize, map, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
-import { MediaTable, MediaOverviewBar, MediaPoster, PosterTable, DetailsOverview, DownloadConfirmation } from '@mediaOverview';
-import ProgressComponent from '@components/Progress/ProgressComponent.vue';
-import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
+import { MediaTable, DetailsOverview, DownloadConfirmation } from '@mediaOverview';
 import { getTvShow } from '@api/mediaApi';
 
-@Component({
-	components: {
-		MediaPoster,
-		MediaTable,
-		ProgressComponent,
-		DownloadConfirmation,
-		MediaOverviewBar,
-		AlphabetNavigation,
-		PosterTable,
-		DetailsOverview,
-	},
-})
+@Component
 export default class MediaOverview extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly libraryId!: number;

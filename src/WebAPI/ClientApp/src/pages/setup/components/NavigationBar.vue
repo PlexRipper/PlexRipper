@@ -19,16 +19,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import DarkModeToggle from '@components/General/DarkModeToggle.vue';
-import PBtn from '@components/Extensions/PBtn.vue';
 import ButtonType from '@enums/buttonType';
 
-@Component({
-	components: {
-		DarkModeToggle,
-		PBtn,
-	},
-})
+@Component
 export default class NavigationBar extends Vue {
 	@Prop({ required: true, type: Boolean })
 	readonly disableBack!: boolean;

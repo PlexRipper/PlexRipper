@@ -68,7 +68,6 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { LibraryService, ServerService } from '@service';
 import { PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
-import ServerDialog from '@components/Navigation/ServerDialog.vue';
 
 interface INavItem {
 	title: string;
@@ -76,11 +75,7 @@ interface INavItem {
 	link: string;
 }
 
-@Component({
-	components: {
-		ServerDialog,
-	},
-})
+@Component
 export default class ServerDrawer extends Vue {
 	items: object[] = [];
 	plexServers: PlexServerDTO[] = [];

@@ -50,7 +50,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { DownloadService } from '@service';
-import ServerDrawer from './ServerDrawer.vue';
 
 interface INavItem {
 	title: string;
@@ -59,9 +58,7 @@ interface INavItem {
 	children?: INavItem[];
 }
 
-@Component({
-	components: { ServerDrawer },
-})
+@Component
 export default class NavigationDrawer extends Vue {
 	items: object[] = [];
 	downloadTaskCount = 0;

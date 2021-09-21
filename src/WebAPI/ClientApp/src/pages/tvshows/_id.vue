@@ -5,13 +5,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 
-import MediaOverview from '@mediaOverview/MediaOverview.vue';
-
-@Component({
-	components: {
-		MediaOverview,
-	},
-})
+@Component
 export default class TvShowsDetail extends Vue {
 	libraryId: number = +this.$route.params.id;
 }

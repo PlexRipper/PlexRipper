@@ -7,12 +7,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import LoadingSpinner from '@components/LoadingSpinner.vue';
 
-@Component({
-	components: {
-		LoadingSpinner,
-	},
-})
+@Component
 export default class MoviesOverview extends Vue {}
 </script>

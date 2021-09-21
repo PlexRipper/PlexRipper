@@ -46,24 +46,13 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { DownloadService, ServerService } from '@service';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import DownloadsTable from './components/DownloadsTable.vue';
-import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
-import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsDialog.vue';
 
 declare interface ISelection {
 	plexServerId: number;
 	downloadTaskIds: number[];
 }
 
-@Component({
-	components: {
-		LoadingSpinner,
-		DownloadsTable,
-		DownloadBar,
-		DownloadDetailsDialog,
-	},
-})
+@Component
 export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
 	downloads: DownloadTaskDTO[] = [];

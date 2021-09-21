@@ -1,8 +1,8 @@
 <template>
-	<page>
+	<page-container>
 		<h1>TvShow Overview</h1>
 		<p>Select a library from the left-hand side</p>
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">

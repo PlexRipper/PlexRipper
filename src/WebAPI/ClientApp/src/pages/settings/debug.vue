@@ -1,7 +1,7 @@
 <template>
-	<page>
+	<page-container>
 		<debug-section />
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">

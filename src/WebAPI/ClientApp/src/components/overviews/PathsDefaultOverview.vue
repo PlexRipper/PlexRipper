@@ -98,7 +98,7 @@ export default class PathsDefaultOverview extends Vue {
 		return `help.settings.paths.${kebabCase(type)}`;
 	}
 
-	created(): void {
+	mounted(): void {
 		this.$subscribeTo(FolderPathService.getFolderPaths(), (data) => {
 			this.folderPaths = data ?? [];
 		});

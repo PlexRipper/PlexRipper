@@ -42,7 +42,7 @@ export default class AppBarProgressBar extends Vue {
 		return `Syncing PlexServer ${finishedCount} of ${this.progressList.length}`;
 	}
 
-	created(): void {
+	mounted(): void {
 		this.$subscribeTo(SignalrService.getAllSyncServerProgress(), (progress) => {
 			this.progressList = progress;
 		});

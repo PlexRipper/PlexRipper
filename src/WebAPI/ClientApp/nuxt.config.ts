@@ -6,7 +6,8 @@ import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 const config: NuxtConfig = {
 	target: 'static',
-	ssr: false,
+	// Should always be true, otherwise SPA won't work once statically generated
+	ssr: true,
 	srcDir: 'src/',
 	publicRuntimeConfig: {
 		nodeEnv: process.env.NODE_ENV || 'development',
@@ -29,10 +30,10 @@ const config: NuxtConfig = {
 		],
 		link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.png' }],
 	},
-
-	// Global CSS: https://go.nuxtjs.dev/config-css
+	/*
+	 ** Global CSS: https://go.nuxtjs.dev/config-css
+	 */
 	css: ['@/assets/scss/style.scss'],
-
 	/*
 	 ** Customize the progress-bar color
 	 */

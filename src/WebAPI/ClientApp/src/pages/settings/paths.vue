@@ -1,5 +1,5 @@
 <template>
-	<page>
+	<page-container>
 		<p-section>
 			<template #header> {{ $t('pages.settings.paths.main.header') }} </template>
 			<paths-default-overview />
@@ -12,7 +12,7 @@
 			<template #header> {{ $t('pages.settings.paths.tv-show.header') }} </template>
 			<paths-custom-overview :folder-type="tvShowFolderType" />
 		</p-section>
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">

@@ -1,5 +1,5 @@
 <template>
-	<v-container :fluid="fluid" :class="['page', 'px-0', $getThemeClass()]">
+	<v-container :fluid="fluid" :class="['page', 'px-0', getThemeClass]">
 		<template v-if="noScrollbar">
 			<slot></slot>
 		</template>
@@ -15,11 +15,15 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
-export default class Page extends Vue {
+export default class PageContainer extends Vue {
 	@Prop({ required: false, type: Boolean, default: true })
 	readonly fluid!: boolean;
 
 	@Prop({ required: false, type: Boolean, default: false })
 	readonly noScrollbar!: boolean;
+
+	get getThemeClass(): string {
+		return this.$getThemeClass();
+	}
 }
 </script>

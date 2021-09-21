@@ -1,5 +1,5 @@
 <template>
-	<page v-show="isOpen">
+	<page-container v-show="isOpen">
 		<template v-if="mediaItem">
 			<!--	Details Overview Bar	-->
 			<v-row class="mx-0">
@@ -92,7 +92,7 @@
 				</v-col>
 			</v-row>
 		</template>
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">

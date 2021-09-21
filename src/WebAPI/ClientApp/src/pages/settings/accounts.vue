@@ -1,10 +1,10 @@
 <template>
-	<page>
+	<page-container>
 		<p-section>
 			<template #header> {{ $t('pages.settings.accounts.header') }} </template>
 			<account-overview />
 		</p-section>
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">

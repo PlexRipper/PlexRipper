@@ -1,5 +1,5 @@
 <template>
-	<page>
+	<page-container>
 		<!-- Download Toolbar -->
 		<download-bar
 			:has-selected="hasSelected"
@@ -38,7 +38,7 @@
 			</v-row>
 		</perfect-scrollbar>
 		<download-details-dialog :download-task="downloadTaskDetail" :dialog="dialog" @close="closeDetailsDialog" />
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">
@@ -174,7 +174,7 @@ export default class Downloads extends Vue {
 		this.dialog = false;
 	}
 
-	created(): void {
+	mounted(): void {
 		this.$subscribeTo(ServerService.getServers(), (servers) => {
 			this.plexServers = servers;
 			this.openExpansions = [...Array(servers?.length).keys()] ?? [];

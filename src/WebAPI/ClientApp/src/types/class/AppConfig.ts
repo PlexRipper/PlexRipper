@@ -27,7 +27,7 @@ export default class AppConfig {
 	 * When in development, the front-end runs on port 3000 and the back-end on port 5000.
 	 */
 	get baseURL(): string {
-		return this.isProduction ? window.location.origin : 'http://localhost:5000';
+		return this.isProduction ? 'http://localhost:5000' : 'http://localhost:5000';
 	}
 
 	get baseApiUrl(): string {

@@ -96,7 +96,7 @@ export default class AppBar extends Vue {
 		});
 	}
 
-	created(): void {
+	mounted(): void {
 		this.$subscribeTo(GlobalService.getConfigReady(), (config) => {
 			this.version = config.version;
 		});

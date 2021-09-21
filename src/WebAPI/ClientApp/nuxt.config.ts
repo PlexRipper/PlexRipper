@@ -1,11 +1,12 @@
+import Log from 'consola';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 const config: NuxtConfig = {
-	ssr: false,
 	target: 'static',
+	ssr: false,
 	srcDir: 'src/',
 	publicRuntimeConfig: {
 		nodeEnv: process.env.NODE_ENV || 'development',
@@ -41,20 +42,20 @@ const config: NuxtConfig = {
 	 *  Doc: https://github.com/nuxt/components
 	 */
 	components: [
-		// Components
+		// Components directory
 		{
-			path: '~/components',
+			path: './components',
 			pathPrefix: false,
 			extensions: ['vue'],
 		},
-		// Pages
+		// Pages directory
 		{
-			path: '~/pages',
-			pattern: '**/**/components/*.vue',
+			path: './pages',
 			pathPrefix: false,
 			extensions: ['vue'],
 		},
 	],
+
 	/*
 	 ** Plugins to load before mounting the App
 	 */
@@ -65,7 +66,6 @@ const config: NuxtConfig = {
 		{ src: '@plugins/axios.ts', mode: 'client' },
 		{ src: '@plugins/i18nPlugin.ts', mode: 'client' },
 		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
-		{ src: '@plugins/registerComponents.ts', mode: 'client' },
 		{ src: '@plugins/typeExtensions.ts', mode: 'client' },
 	],
 	router: {
@@ -83,6 +83,10 @@ const config: NuxtConfig = {
 				],
 			});
 		},
+	},
+	generate: {
+		// eslint-disable-next-line prefer-regex-literals
+		exclude: [new RegExp('components')],
 	},
 	/*
 	 ** Nuxt.js dev-modules
@@ -133,7 +137,11 @@ const config: NuxtConfig = {
 			}
 
 			// Doc: https://github.com/dividab/tsconfig-paths-webpack-plugin
-			config.resolve?.plugins?.push(new TsconfigPathsPlugin());
+			if (config.resolve?.plugins) {
+				config.resolve.plugins.push(new TsconfigPathsPlugin());
+			} else {
+				Log.fatal('Setting up TS Path aliases in nuxt.config.ts => config.resolve.plugins was undefined');
+			}
 		},
 	},
 };

@@ -29,6 +29,7 @@
 			"@enums/*": ["./types/enums/*"],
 			"@interfaces/*": ["./types/interfaces/*"],
 			"@components/*": ["./components/*"],
+			"@pages/*": ["./pages/*"],
 			"@overviews/*": ["./components/overviews/*"],
 			"@mediaOverview": ["./components/MediaOverview/index.ts"],
 			"@mediaOverview/*": ["./components/MediaOverview/*"],

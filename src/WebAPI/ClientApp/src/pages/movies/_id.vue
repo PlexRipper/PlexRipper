@@ -4,8 +4,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-
-import MediaOverview from '~/components/MediaOverview/MediaOverview.vue';
+import MediaOverview from '@components/MediaOverview/MediaOverview.vue';
 
 @Component({
 	components: {

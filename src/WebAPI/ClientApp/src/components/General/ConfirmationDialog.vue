@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import PBtn from '@components/Extensions/PButton.vue';
+import PBtn from '@components/Extensions/PBtn.vue';
 import IText from '@interfaces/IText';
 import ButtonType from '@enums/buttonType';
 

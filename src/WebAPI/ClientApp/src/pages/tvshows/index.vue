@@ -1,6 +1,6 @@
 <template>
 	<page>
-		<h1>Movies Overview</h1>
+		<h1>TvShow Overview</h1>
 		<p>Select a library from the left-hand side</p>
 	</page>
 </template>
@@ -14,5 +14,5 @@ import LoadingSpinner from '@components/LoadingSpinner.vue';
 		LoadingSpinner,
 	},
 })
-export default class MoviesOverview extends Vue {}
+export default class TvShowOverview extends Vue {}
 </script>

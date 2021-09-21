@@ -58,7 +58,7 @@ export default class Default extends Vue {
 		AlertService.removeAlert(alert.id);
 	}
 
-	created(): void {
+	mounted(): void {
 		this.$subscribeTo(HelpService.getHelpDialog(), (helpId) => {
 			if (helpId) {
 				this.helpId = helpId;

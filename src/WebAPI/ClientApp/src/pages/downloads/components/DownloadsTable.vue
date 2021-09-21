@@ -21,10 +21,12 @@ import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import ButtonType from '@enums/buttonType';
 import { DownloadService } from '@service';
+import VTreeViewTable from '@vTreeViewTable/VTreeViewTable.vue';
 
 @Component({
 	components: {
 		LoadingSpinner,
+		VTreeViewTable,
 	},
 })
 export default class DownloadsTable extends Vue {

@@ -74,18 +74,19 @@ const config: NuxtConfig = {
 		extendRoutes(routes, resolve) {
 			routes.push({
 				name: 'details-overview',
-				path: '/tvshows/:id',
-				component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
+				path: '/tvshows/:libraryId',
+				component: resolve(__dirname, 'src/pages/tvshows/_tvShowId.vue'),
 				children: [
 					{
-						path: 'details/:mediaid',
-						component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
+						path: 'details/:tvShowId',
+						component: resolve(__dirname, 'src/pages/tvshows/_tvShowId.vue'),
 					},
 				],
 			});
 		},
 	},
 	generate: {
+		// Don't create paths for the components folders in the pages directory
 		// eslint-disable-next-line prefer-regex-literals
 		exclude: [new RegExp('components')],
 	},

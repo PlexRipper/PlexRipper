@@ -3,8 +3,6 @@ import { Context } from '@nuxt/types';
 import { ObservableStore } from '@codewithdan/observable-store';
 import IStoreState from '@interfaces/IStoreState';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 export default abstract class BaseService extends ObservableStore<IStoreState> {
 	protected _nuxtContext!: Context;

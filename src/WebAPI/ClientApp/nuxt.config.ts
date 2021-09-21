@@ -42,21 +42,23 @@ const config: NuxtConfig = {
 	 ** Auto-import components
 	 *  Doc: https://github.com/nuxt/components
 	 */
-	components: [
-		// Components directory
-		{
-			path: './components',
-			pathPrefix: false,
-			extensions: ['vue'],
-		},
-		// Pages directory
-		{
-			path: './pages',
-			pathPrefix: false,
-			extensions: ['vue'],
-		},
-	],
-
+	components: {
+		loader: true,
+		dirs: [
+			// Components directory
+			{
+				path: './components',
+				pathPrefix: false,
+				extensions: ['vue'],
+			},
+			// Pages directory
+			{
+				path: './pages',
+				pathPrefix: false,
+				extensions: ['vue'],
+			},
+		],
+	},
 	/*
 	 ** Plugins to load before mounting the App
 	 */
@@ -102,6 +104,9 @@ const config: NuxtConfig = {
 		'@nuxtjs/stylelint-module',
 		// Doc: https://github.com/nuxt-community/vuetify-module
 		'@nuxtjs/vuetify',
+		// Doc: https://github.com/nuxt/components
+		// Note: this is added to fix the error "render function or template not defined in component: "
+		'@nuxt/components',
 	],
 	/*
 	 ** Nuxt.js modules

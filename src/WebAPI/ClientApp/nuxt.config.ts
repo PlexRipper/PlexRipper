@@ -14,6 +14,10 @@ const config: NuxtConfig = {
 		version: process.env.npm_package_version || '?',
 	},
 	/*
+	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
+	 */
+	telemetry: false,
+	/*
 	 ** Headers of the page
 	 */
 	head: {

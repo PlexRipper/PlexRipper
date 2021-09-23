@@ -1240,7 +1240,6 @@
           "attributes": [
             {
               "name": "color",
-              "required": false,
               "value": {
                 "kind": "expression",
                 "type": "string"
@@ -1249,7 +1248,6 @@
             },
             {
               "name": "hideDetails",
-              "required": false,
               "value": {
                 "kind": "expression",
                 "type": "boolean"

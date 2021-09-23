@@ -5,7 +5,7 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { ObservableStore } from '@codewithdan/observable-store';
-import { SettingsModelDTO } from '@dto/mainApi';
+import { DownloadTaskCreationProgress, SettingsModelDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import * as Service from '@service';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
@@ -30,6 +30,7 @@ export class GlobalService extends Service.BaseService {
 		inspectServerProgress: [],
 		syncServerProgress: [],
 		libraryProgress: [],
+		downloadTaskCreationProgress: {} as DownloadTaskCreationProgress,
 	};
 
 	constructor() {

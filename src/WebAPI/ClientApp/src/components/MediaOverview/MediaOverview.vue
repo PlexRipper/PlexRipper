@@ -1,5 +1,5 @@
 <template>
-	<page no-scrollbar>
+	<page-container no-scrollbar>
 		<!--	Loading screen	-->
 		<template v-if="isLoading">
 			<v-row justify="center" class="mx-0">
@@ -86,7 +86,7 @@
 			:progress="downloadTaskCreationProgress"
 			@download="sendDownloadCommand"
 		/>
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">
@@ -96,23 +96,10 @@ import { finalize, map, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
-import { MediaTable, MediaOverviewBar, MediaPoster, PosterTable, DetailsOverview, DownloadConfirmation } from '@mediaOverview';
-import ProgressComponent from '@components/Progress/ProgressComponent.vue';
-import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
+import { MediaTable, DetailsOverview, DownloadConfirmation } from '@mediaOverview';
 import { getTvShow } from '@api/mediaApi';
 
-@Component({
-	components: {
-		MediaPoster,
-		MediaTable,
-		ProgressComponent,
-		DownloadConfirmation,
-		MediaOverviewBar,
-		AlphabetNavigation,
-		PosterTable,
-		DetailsOverview,
-	},
-})
+@Component
 export default class MediaOverview extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly libraryId!: number;
@@ -300,9 +287,30 @@ export default class MediaOverview extends Vue {
 		}
 	}
 
-	created(): void {
+	mounted(): void {
 		this.resetProgress(false);
 		this.isRefreshing = false;
+
+		this.$subscribeTo(
+			this.$watchAsObservable('isLoading').pipe(map((x: { oldValue: number; newValue: number }) => x.newValue)),
+			(isLoading) => {
+				if (!isLoading) {
+					if (this.detailsOverview) {
+						if (+this.$route.params.mediaid) {
+							this.openDetails(+this.$route.params.mediaid);
+						}
+					} else {
+						const thisRef = this;
+						this.$nextTick(() => {
+							Log.debug('mediaId', +this.$route.params.mediaid);
+							if (+this.$route.params.mediaid) {
+								thisRef?.openDetails(+this.$route.params.mediaid);
+							}
+						});
+					}
+				}
+			},
+		);
 
 		// Get Active account Id
 		this.$subscribeTo(SettingsService.getActiveAccountId(), (id) => (this.activeAccountId = id));
@@ -330,6 +338,7 @@ export default class MediaOverview extends Vue {
 		this.$subscribeTo(
 			SignalrService.getDownloadTaskCreationProgress().pipe(
 				tap((data) => {
+					// TODO This needs to work with id's
 					this.downloadTaskCreationProgress = data;
 				}),
 				finalize(() => {
@@ -353,29 +362,6 @@ export default class MediaOverview extends Vue {
 
 		// Retrieve library data
 		this.$subscribeTo(LibraryService.getLibrary(this.libraryId), (data) => this.setLibrary(data));
-	}
-
-	mounted(): void {
-		this.$subscribeTo(
-			this.$watchAsObservable('isLoading').pipe(map((x: { oldValue: number; newValue: number }) => x.newValue)),
-			(isLoading) => {
-				if (!isLoading) {
-					if (this.detailsOverview) {
-						if (+this.$route.params.mediaid) {
-							this.openDetails(+this.$route.params.mediaid);
-						}
-					} else {
-						const thisRef = this;
-						this.$nextTick(() => {
-							Log.debug('mediaId', +this.$route.params.mediaid);
-							if (+this.$route.params.mediaid) {
-								thisRef?.openDetails(+this.$route.params.mediaid);
-							}
-						});
-					}
-				}
-			},
-		);
 	}
 }
 </script>

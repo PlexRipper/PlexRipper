@@ -1,7 +1,7 @@
 import Log from 'consola';
 import { BaseService, GlobalService } from '@service';
 import { LogLevel } from '@aspnet/signalr';
-import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
+import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
 import {
 	LibraryProgress,
@@ -12,7 +12,7 @@ import {
 	InspectServerProgress,
 	SyncServerProgress,
 } from '@dto/mainApi';
-import { distinctUntilChanged, filter, map, switchMap, takeWhile } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, takeWhile } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import IStoreState from '@interfaces/IStoreState';
 import { isEqual } from 'lodash';
@@ -28,22 +28,19 @@ export class SignalrService extends BaseService {
 	private _notificationHubConnection: HubConnection<NotificationHub> | null = null;
 	private _notificationHubSubscription: Subscription | null = null;
 
-	private _downloadTaskUpdateSubject: ReplaySubject<DownloadTaskDTO> = new ReplaySubject<DownloadTaskDTO>();
 	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> =
 		new ReplaySubject<DownloadTaskCreationProgress>();
-
-	private _libraryProgressSubject: ReplaySubject<LibraryProgress> = new ReplaySubject<LibraryProgress>();
-
-	private _NotificationUpdateSubject: ReplaySubject<NotificationDTO> = new ReplaySubject<NotificationDTO>();
 
 	public constructor() {
 		super({
 			stateSliceSelector: (state: IStoreState) => {
 				return {
+					downloadTaskUpdateList: state.downloadTaskUpdateList,
 					libraryProgress: state.libraryProgress,
 					fileMergeProgressList: state.fileMergeProgressList,
 					inspectServerProgress: state.inspectServerProgress,
 					syncServerProgress: state.syncServerProgress,
+					notifications: state.notifications,
 				};
 			},
 		});
@@ -77,22 +74,22 @@ export class SignalrService extends BaseService {
 
 			this._progressHubConnection = this._hubFactory.get<ProgressHub>('ProgressHub');
 			this._notificationHubConnection = this._hubFactory.get<NotificationHub>('NotificationHub');
+			// Connections
+			this._progressHubConnection?.connectionState$.subscribe((connectionState) => {
+				this._progressHubConnectionState = connectionState.status;
+			});
+
+			this._notificationHubConnection?.connectionState$.subscribe((connectionState) => {
+				this._notificationHubConnectionState = connectionState.status;
+			});
 
 			this.setupSubscriptions();
 		});
 	}
 
 	private setupSubscriptions(): void {
-		this._progressHubConnection?.connectionState$.subscribe((connectionState) => {
-			this._progressHubConnectionState = connectionState.status;
-		});
-
-		this._notificationHubConnection?.connectionState$.subscribe((connectionState) => {
-			this._notificationHubConnectionState = connectionState.status;
-		});
-
 		this._progressHubConnection?.on<DownloadTaskDTO>('DownloadTaskUpdate').subscribe((data) => {
-			this._downloadTaskUpdateSubject.next(data);
+			this.updateStore('downloadTaskUpdateList', data);
 		});
 
 		this._progressHubConnection?.on<DownloadTaskCreationProgress>('DownloadTaskCreationProgress').subscribe((data) => {
@@ -104,7 +101,7 @@ export class SignalrService extends BaseService {
 		});
 
 		this._progressHubConnection?.on<LibraryProgress>('LibraryProgress').subscribe((data) => {
-			this._libraryProgressSubject.next(data);
+			this.updateStore('libraryProgress', data);
 		});
 
 		this._progressHubConnection?.on<InspectServerProgress>('InspectServerProgress').subscribe((data) => {
@@ -120,7 +117,7 @@ export class SignalrService extends BaseService {
 		});
 
 		this._notificationHubConnection?.on<NotificationDTO>('Notification').subscribe((data) => {
-			this._NotificationUpdateSubject.next(data);
+			this.updateStore('notifications', data);
 		});
 
 		GlobalService.getAxiosReady().subscribe(() => {
@@ -165,10 +162,16 @@ export class SignalrService extends BaseService {
 	// endregion
 
 	// region Array Progress
+	public getAllDownloadTaskUpdate(): Observable<DownloadTaskDTO[]> {
+		return this.stateChanged.pipe(
+			map((x) => x?.downloadTaskUpdateList ?? []),
+			distinctUntilChanged(isEqual),
+		);
+	}
 
 	public getAllFileMergeProgress(): Observable<FileMergeProgress[]> {
 		return this.stateChanged.pipe(
-			switchMap((x) => of(x?.fileMergeProgressList ?? [])),
+			map((x) => x?.fileMergeProgressList ?? []),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -193,6 +196,14 @@ export class SignalrService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
+	public getAllNotifications(): Observable<NotificationDTO[]> {
+		return this.stateChanged.pipe(
+			map((x) => x?.notifications ?? []),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
 	// endregion
 
 	// region Single Progress
@@ -229,19 +240,11 @@ export class SignalrService extends BaseService {
 		);
 	}
 
-	// endregion
-
 	public getDownloadTaskCreationProgress(): Observable<DownloadTaskCreationProgress> {
 		return this._downloadTaskCreationProgressSubject.asObservable().pipe(takeWhile((data) => !data.isComplete));
 	}
 
-	public getDownloadTaskUpdate(): Observable<DownloadTaskDTO> {
-		return this._downloadTaskUpdateSubject.asObservable();
-	}
-
-	public getNotificationUpdates(): Observable<NotificationDTO> {
-		return this._NotificationUpdateSubject.asObservable();
-	}
+	// endregion
 }
 
 const signalrService = new SignalrService();

@@ -55,14 +55,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import ExternalLink from '@components/General/ExternalLink.vue';
 import { DownloadTaskDTO } from '@dto/mainApi';
 
-@Component<DownloadDetailsDialog>({
-	components: {
-		ExternalLink,
-	},
-})
+@Component
 export default class DownloadDetailsDialog extends Vue {
 	@Prop({ required: false, type: Object as () => DownloadTaskDTO })
 	readonly downloadTask!: DownloadTaskDTO | null;

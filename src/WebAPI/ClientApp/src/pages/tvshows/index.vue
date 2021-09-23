@@ -1,10 +1,7 @@
 <template>
 	<page-container>
-		<v-row>
-			<v-col>
-				<h1>WORKING!</h1>
-			</v-col>
-		</v-row>
+		<h1>TvShow Overview</h1>
+		<p>Select a library from the left-hand side</p>
 	</page-container>
 </template>
 
@@ -12,5 +9,5 @@
 import { Component, Vue } from 'vue-property-decorator';
 
 @Component
-export default class Home extends Vue {}
+export default class TvShowOverview extends Vue {}
 </script>

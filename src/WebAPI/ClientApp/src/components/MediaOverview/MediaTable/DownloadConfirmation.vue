@@ -46,17 +46,12 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import ProgressComponent from '@components/Progress/ProgressComponent.vue';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import Log from 'consola';
 import { SettingsService } from '@service';
 
-@Component({
-	components: {
-		ProgressComponent,
-	},
-})
+@Component
 export default class DownloadConfirmation extends Vue {
 	@Prop({ required: true, type: Array as () => PlexMediaDTO[] })
 	readonly items!: PlexMediaDTO[];

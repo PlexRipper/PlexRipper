@@ -15,7 +15,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
-export default class Page extends Vue {
+export default class PageContainer extends Vue {
 	@Prop({ required: false, type: Boolean, default: true })
 	readonly fluid!: boolean;
 

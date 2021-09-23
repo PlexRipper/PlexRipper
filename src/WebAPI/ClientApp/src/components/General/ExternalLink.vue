@@ -4,14 +4,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import PBtn from '@components/Extensions/PButton.vue';
 import ButtonType from '@enums/buttonType';
 
-@Component({
-	components: {
-		PBtn,
-	},
-})
+@Component
 export default class ExternalLink extends Vue {
 	@Prop({ required: true, type: String })
 	readonly href!: string;

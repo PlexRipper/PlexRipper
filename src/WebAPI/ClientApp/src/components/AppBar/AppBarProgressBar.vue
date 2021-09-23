@@ -17,13 +17,8 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { ServerService, SignalrService } from '@service';
 import { PlexServerDTO, SyncServerProgress } from '@dto/mainApi';
-import ProgressComponent from '@components/Progress/ProgressComponent.vue';
 
-@Component<AppBarProgressBar>({
-	components: {
-		ProgressComponent,
-	},
-})
+@Component
 export default class AppBarProgressBar extends Vue {
 	progressList: SyncServerProgress[] = [];
 	servers: PlexServerDTO[] = [];
@@ -42,7 +37,7 @@ export default class AppBarProgressBar extends Vue {
 		return `Syncing PlexServer ${finishedCount} of ${this.progressList.length}`;
 	}
 
-	created(): void {
+	mounted(): void {
 		this.$subscribeTo(SignalrService.getAllSyncServerProgress(), (progress) => {
 			this.progressList = progress;
 		});

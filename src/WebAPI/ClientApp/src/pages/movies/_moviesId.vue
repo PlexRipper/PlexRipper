@@ -5,14 +5,8 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 
-import MediaOverview from '~/components/MediaOverview/MediaOverview.vue';
-
-@Component({
-	components: {
-		MediaOverview,
-	},
-})
+@Component
 export default class MoviesDetail extends Vue {
-	libraryId: number = +this.$route.params.id;
+	libraryId: number = +this.$route.params.moviesId;
 }
 </script>

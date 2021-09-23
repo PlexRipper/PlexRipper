@@ -20,15 +20,8 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
-import LoadingSpinner from '@components/LoadingSpinner.vue';
-import HelpIcon from '@components/Help/HelpIcon.vue';
 
-@Component({
-	components: {
-		LoadingSpinner,
-		HelpIcon,
-	},
-})
+@Component
 export default class AccountCard extends Vue {
 	@Prop({ type: Object as () => PlexAccountDTO })
 	readonly account!: PlexAccountDTO;

@@ -196,7 +196,7 @@ namespace PlexRipper.DownloadManager.Download
                 _destinationStream = destinationStream;
 
                 // Is 0 when starting new and > 0 when resuming.
-                destinationStream.Position = DownloadWorkerTask.BytesReceived;
+                _destinationStream.Position = DownloadWorkerTask.BytesReceived;
 
                 // Create download client
                 using var response = await _httpClient.SendAsync(new HttpRequestMessage
@@ -234,8 +234,8 @@ namespace PlexRipper.DownloadManager.Download
                         break;
                     }
 
-                    await destinationStream.WriteAsync(buffer, 0, bytesRead, _cancellationToken.Token);
-                    await destinationStream.FlushAsync(_cancellationToken.Token);
+                    await _destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead), _cancellationToken.Token);
+                    await _destinationStream.FlushAsync(_cancellationToken.Token);
 
                     DownloadWorkerTask.BytesReceived += bytesRead;
                     SendDownloadWorkerUpdate();
@@ -248,7 +248,7 @@ namespace PlexRipper.DownloadManager.Download
             finally
             {
                 _timer.Dispose();
-                await destinationStream.DisposeAsync();
+                await _destinationStream.DisposeAsync();
                 _downloadWorkerUpdate.OnCompleted();
                 _downloadWorkerLog.OnCompleted();
             }

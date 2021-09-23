@@ -1,5 +1,5 @@
 <template>
-	<page>
+	<page-container>
 		<!-- Download Toolbar -->
 		<download-bar
 			:has-selected="hasSelected"
@@ -38,7 +38,7 @@
 			</v-row>
 		</perfect-scrollbar>
 		<download-details-dialog :download-task="downloadTaskDetail" :dialog="dialog" @close="closeDetailsDialog" />
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">
@@ -46,20 +46,13 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { DownloadService, ServerService } from '@service';
 import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import ISelection from '@interfaces/ISelection';
-import DownloadsTable from './components/DownloadsTable.vue';
-import DownloadBar from '~/pages/downloads/components/DownloadBar.vue';
-import DownloadDetailsDialog from '~/pages/downloads/components/DownloadDetailsDialog.vue';
 
-@Component({
-	components: {
-		LoadingSpinner,
-		DownloadsTable,
-		DownloadBar,
-		DownloadDetailsDialog,
-	},
-})
+declare interface ISelection {
+	plexServerId: number;
+	downloadTaskIds: number[];
+}
+
+@Component
 export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
 	downloads: DownloadTaskDTO[] = [];
@@ -70,7 +63,7 @@ export default class Downloads extends Vue {
 	private dialog: boolean = false;
 
 	get getSelected(): number[] {
-		return this.selected.map((x) => +x.keys).flat(1);
+		return this.selected.map((x) => x.downloadTaskIds).flat(1);
 	}
 
 	get getServersWithDownloads(): PlexServerDTO[] {
@@ -83,25 +76,26 @@ export default class Downloads extends Vue {
 
 	// region single commands
 
-	commandSwitch({ action, item }: { action: string; item: any }) {
+	commandSwitch({ action, item }: { action: string; item: DownloadTaskDTO }) {
+		const ids = [item.id];
 		switch (action) {
 			case 'pause':
-				this.pauseDownloadTasks([item]);
+				this.pauseDownloadTasks(ids);
 				break;
 			case 'clear':
-				this.clearDownloadTasks([item]);
+				this.clearDownloadTasks(ids);
 				break;
 			case 'delete':
-				this.deleteDownloadTasks([item]);
+				this.deleteDownloadTasks(ids);
 				break;
 			case 'stop':
-				this.stopDownloadTasks([item]);
+				this.stopDownloadTasks(ids);
 				break;
 			case 'restart':
-				this.restartDownloadTasks([item]);
+				this.restartDownloadTasks(ids);
 				break;
 			case 'start':
-				this.startDownloadTasks([item]);
+				this.startDownloadTasks(ids);
 				break;
 			case 'details':
 				this.detailsDownloadTask(item);
@@ -116,12 +110,12 @@ export default class Downloads extends Vue {
 		this.dialog = true;
 	}
 
-	updateSelected(plexServerId: number, selected: string[]) {
-		const index = this.selected.findIndex((x) => x.indexKey === plexServerId);
+	updateSelected(plexServerId: number, downloadTaskIds: number[]) {
+		const index = this.selected.findIndex((x) => x.plexServerId === plexServerId);
 		if (index === -1) {
-			this.selected.push({ indexKey: plexServerId, keys: selected });
+			this.selected.push({ plexServerId, downloadTaskIds });
 		} else {
-			this.selected.splice(index, 1, { indexKey: plexServerId, keys: selected });
+			this.selected.splice(index, 1, { plexServerId, downloadTaskIds });
 		}
 	}
 
@@ -169,7 +163,7 @@ export default class Downloads extends Vue {
 		this.dialog = false;
 	}
 
-	created(): void {
+	mounted(): void {
 		this.$subscribeTo(ServerService.getServers(), (servers) => {
 			this.plexServers = servers;
 			this.openExpansions = [...Array(servers?.length).keys()] ?? [];

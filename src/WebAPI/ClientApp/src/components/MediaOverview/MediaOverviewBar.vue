@@ -78,7 +78,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
-import VerticalButton from '@components/General/VerticalButton.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { sum } from 'lodash';
 
@@ -87,9 +86,7 @@ interface IViewOptions {
 	viewMode: ViewMode;
 }
 
-@Component({
-	components: { VerticalButton },
-})
+@Component
 export default class MediaOverviewBar extends Vue {
 	@Prop({ required: false, type: Object as () => PlexServerDTO | null })
 	readonly server!: PlexServerDTO | null;

@@ -1,5 +1,5 @@
 <template>
-	<page>
+	<page-container>
 		<p-section>
 			<template #header> {{ $t('pages.settings.paths.main.header') }} </template>
 			<paths-default-overview />
@@ -12,21 +12,14 @@
 			<template #header> {{ $t('pages.settings.paths.tv-show.header') }} </template>
 			<paths-custom-overview :folder-type="tvShowFolderType" />
 		</p-section>
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import PathsDefaultOverview from '@overviews/PathsDefaultOverview.vue';
-import PathsCustomOverview from '@overviews/PathsCustomOverview.vue';
 import { FolderType } from '@dto/mainApi';
 
-@Component({
-	components: {
-		PathsDefaultOverview,
-		PathsCustomOverview,
-	},
-})
+@Component
 export default class SettingsPaths extends Vue {
 	moduleName: string = 'Settings Paths';
 	movieFolderType: FolderType = FolderType.MovieFolder;

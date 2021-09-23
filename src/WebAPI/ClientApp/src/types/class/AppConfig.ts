@@ -25,9 +25,10 @@ export default class AppConfig {
 	 * The baseURL for the application. It is assumed that front and back-end run in a docker container on the same URL when in production
 	 * due to being deployed statically in the wwwroot of the .NET Core back-end. The url is retrieved dynamically as to work with different domains.
 	 * When in development, the front-end runs on port 3000 and the back-end on port 5000.
+	 * When in production, the front-end runs on port 7000 and the back-end on port 5000.
 	 */
 	get baseURL(): string {
-		return this.isProduction ? window.location.origin : 'http://localhost:5000';
+		return this.isProduction ? 'http://localhost:5000' : 'http://localhost:5000';
 	}
 
 	get baseApiUrl(): string {

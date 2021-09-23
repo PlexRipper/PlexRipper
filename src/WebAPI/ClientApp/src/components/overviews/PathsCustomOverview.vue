@@ -128,7 +128,7 @@ export default class PathsCustomOverview extends Vue {
 		}
 	}
 
-	created(): void {
+	mounted(): void {
 		this.$subscribeTo(FolderPathService.getFolderPaths(), (data) => {
 			this.folderPaths = data ?? [];
 		});

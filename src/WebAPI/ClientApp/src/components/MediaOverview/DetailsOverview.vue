@@ -1,5 +1,5 @@
 <template>
-	<page v-show="isOpen">
+	<page-container v-show="isOpen">
 		<template v-if="mediaItem">
 			<!--	Details Overview Bar	-->
 			<v-row class="mx-0">
@@ -92,7 +92,7 @@
 				</v-col>
 			</v-row>
 		</template>
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">
@@ -100,17 +100,9 @@ import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { DownloadMediaDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
-import LoadingSpinner from '@components/LoadingSpinner.vue';
-import MediaOverviewBar from '@mediaOverview/MediaOverviewBar.vue';
 import { MediaService } from '@service';
 
-@Component<DetailsOverview>({
-	components: {
-		MediaTable,
-		LoadingSpinner,
-		MediaOverviewBar,
-	},
-})
+@Component
 export default class DetailsOverview extends Vue {
 	@Prop({ required: true, type: String })
 	readonly mediaType!: PlexMediaType;

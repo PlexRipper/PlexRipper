@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
 
 ## Setup Nuxt front-end
-FROM node:12.20.0-alpine AS client-build
+FROM node:14.17.6-alpine AS client-build
 WORKDIR /tmp/build/ClientApp
 
 ARG PORT=7000

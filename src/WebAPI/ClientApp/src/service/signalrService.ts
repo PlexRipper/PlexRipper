@@ -1,8 +1,8 @@
 import Log from 'consola';
 import { BaseService, GlobalService } from '@service';
-import { LogLevel } from '@aspnet/signalr';
-import { Observable, ReplaySubject, Subscription } from 'rxjs';
-import { HubConnectionFactory, ConnectionOptions, ConnectionStatus, HubConnection } from '@ssv/signalr-client';
+// eslint-disable-next-line import/named
+import { LogLevel, HubConnectionBuilder, IHttpConnectionOptions, HubConnection, HubConnectionState } from '@microsoft/signalr';
+import { Observable } from 'rxjs';
 import {
 	LibraryProgress,
 	DownloadTaskCreationProgress,
@@ -12,24 +12,14 @@ import {
 	InspectServerProgress,
 	SyncServerProgress,
 } from '@dto/mainApi';
-import { distinctUntilChanged, filter, map, takeWhile } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import IStoreState from '@interfaces/IStoreState';
 import { isEqual } from 'lodash';
 
 export class SignalrService extends BaseService {
-	private _hubFactory: HubConnectionFactory = new HubConnectionFactory();
-
-	private _progressHubConnectionState: ConnectionStatus = ConnectionStatus.disconnected;
-	private _progressHubConnection: HubConnection<ProgressHub> | null = null;
-	private _progressHubSubscription: Subscription | null = null;
-
-	private _notificationHubConnectionState: ConnectionStatus = ConnectionStatus.disconnected;
-	private _notificationHubConnection: HubConnection<NotificationHub> | null = null;
-	private _notificationHubSubscription: Subscription | null = null;
-
-	private _downloadTaskCreationProgressSubject: ReplaySubject<DownloadTaskCreationProgress> =
-		new ReplaySubject<DownloadTaskCreationProgress>();
+	private _progressHubConnection: HubConnection | null = null;
+	private _notificationHubConnection: HubConnection | null = null;
 
 	public constructor() {
 		super({
@@ -51,72 +41,45 @@ export class SignalrService extends BaseService {
 
 		GlobalService.getConfigReady().subscribe((config) => {
 			Log.info('Setting up SignalR Service');
-			const options: ConnectionOptions = {
+			const options: IHttpConnectionOptions = {
 				logger: LogLevel.None,
-				retry: {
-					maximumAttempts: 0,
-				},
 			};
 
+			// Setup Connections
 			const baseUrl = config.baseURL;
-			this._hubFactory.create(
-				{
-					key: 'ProgressHub',
-					endpointUri: `${baseUrl}/progress`,
-					options,
-				},
-				{
-					key: 'NotificationHub',
-					endpointUri: `${baseUrl}/notifications`,
-					options,
-				},
-			);
-
-			this._progressHubConnection = this._hubFactory.get<ProgressHub>('ProgressHub');
-			this._notificationHubConnection = this._hubFactory.get<NotificationHub>('NotificationHub');
-			// Connections
-			this._progressHubConnection?.connectionState$.subscribe((connectionState) => {
-				this._progressHubConnectionState = connectionState.status;
-			});
-
-			this._notificationHubConnection?.connectionState$.subscribe((connectionState) => {
-				this._notificationHubConnectionState = connectionState.status;
-			});
+			this._progressHubConnection = new HubConnectionBuilder().withUrl(`${baseUrl}/progress`, options).build();
+			this._notificationHubConnection = new HubConnectionBuilder().withUrl(`${baseUrl}/notifications`, options).build();
 
 			this.setupSubscriptions();
 		});
 	}
 
 	private setupSubscriptions(): void {
-		this._progressHubConnection?.on<DownloadTaskDTO>('DownloadTaskUpdate').subscribe((data) => {
+		this._progressHubConnection?.on('DownloadTaskUpdate', (data: DownloadTaskDTO) => {
 			this.updateStore('downloadTaskUpdateList', data);
 		});
 
-		this._progressHubConnection?.on<DownloadTaskCreationProgress>('DownloadTaskCreationProgress').subscribe((data) => {
-			this._downloadTaskCreationProgressSubject.next(data);
+		this._progressHubConnection?.on('DownloadTaskCreationProgress', (data: DownloadTaskCreationProgress) => {
+			this.updateStore('downloadTaskCreationProgress', data);
 		});
 
-		this._progressHubConnection?.on<FileMergeProgress>('FileMergeProgress').subscribe((data) => {
+		this._progressHubConnection?.on('FileMergeProgress', (data: FileMergeProgress) => {
 			this.updateStore('fileMergeProgressList', data);
 		});
 
-		this._progressHubConnection?.on<LibraryProgress>('LibraryProgress').subscribe((data) => {
+		this._progressHubConnection?.on('LibraryProgress', (data: LibraryProgress) => {
 			this.updateStore('libraryProgress', data);
 		});
 
-		this._progressHubConnection?.on<InspectServerProgress>('InspectServerProgress').subscribe((data) => {
+		this._progressHubConnection?.on('InspectServerProgress', (data: InspectServerProgress) => {
 			this.updateStore('inspectServerProgress', data, 'plexServerId');
 		});
 
-		this._progressHubConnection?.on<SyncServerProgress>('SyncServerProgress').subscribe((data) => {
+		this._progressHubConnection?.on('SyncServerProgress', (data: SyncServerProgress) => {
 			this.updateStore('syncServerProgress', data);
 		});
 
-		this._progressHubConnection?.on<LibraryProgress>('LibraryProgress').subscribe((data) => {
-			this.updateStore('libraryProgress', data);
-		});
-
-		this._notificationHubConnection?.on<NotificationDTO>('Notification').subscribe((data) => {
+		this._notificationHubConnection?.on('Notification', (data: NotificationDTO) => {
 			this.updateStore('notifications', data);
 		});
 
@@ -129,32 +92,32 @@ export class SignalrService extends BaseService {
 	// region Start / Stop Hub Connections
 
 	public startProgressHubConnection(): void {
-		if (this._progressHubConnection && this._progressHubConnectionState === ConnectionStatus.disconnected) {
-			this._progressHubSubscription = this._progressHubConnection.connect().subscribe(() => {
+		if (this._progressHubConnection && this._progressHubConnection.state === HubConnectionState.Disconnected) {
+			this._progressHubConnection.start().then(() => {
 				Log.info('ProgressHub is now connected!');
 			});
 		}
 	}
 
 	public stopProgressHubConnection(): void {
-		if (this._progressHubConnection && this._progressHubConnectionState !== ConnectionStatus.disconnected) {
-			this._progressHubSubscription = this._progressHubConnection.disconnect().subscribe(() => {
+		if (this._progressHubConnection && this._progressHubConnection.state !== HubConnectionState.Disconnected) {
+			this._progressHubConnection.stop().then(() => {
 				Log.info('ProgressHub is now disconnected!');
 			});
 		}
 	}
 
 	public startNotificationHubConnection(): void {
-		if (this._notificationHubConnection && this._notificationHubConnectionState === ConnectionStatus.disconnected) {
-			this._notificationHubSubscription = this._notificationHubConnection.connect().subscribe(() => {
+		if (this._notificationHubConnection && this._notificationHubConnection.state === HubConnectionState.Disconnected) {
+			this._notificationHubConnection.start().then(() => {
 				Log.info('NotificationHub is now connected!');
 			});
 		}
 	}
 
 	public stopNotificationHubConnection(): void {
-		if (this._notificationHubConnection && this._notificationHubConnectionState !== ConnectionStatus.disconnected) {
-			this._notificationHubSubscription = this._notificationHubConnection.disconnect().subscribe(() => {
+		if (this._notificationHubConnection && this._notificationHubConnection.state !== HubConnectionState.Disconnected) {
+			this._notificationHubConnection.stop().then(() => {
 				Log.info('NotificationHub is now disconnected!');
 			});
 		}
@@ -241,7 +204,11 @@ export class SignalrService extends BaseService {
 	}
 
 	public getDownloadTaskCreationProgress(): Observable<DownloadTaskCreationProgress> {
-		return this._downloadTaskCreationProgressSubject.asObservable().pipe(takeWhile((data) => !data.isComplete));
+		return this.stateChanged.pipe(
+			map((x) => x?.downloadTaskCreationProgress ?? null),
+			filter((progress) => !!progress),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
 	// endregion
@@ -249,17 +216,3 @@ export class SignalrService extends BaseService {
 
 const signalrService = new SignalrService();
 export default signalrService;
-
-export interface ProgressHub {
-	FileMergeProgress: FileMergeProgress;
-	DownloadTaskCreation: DownloadTaskCreationProgress;
-	DownloadTaskUpdate: DownloadTaskDTO;
-	DownloadTaskCreationProgress: DownloadTaskCreationProgress;
-	LibraryProgress: LibraryProgress;
-	InspectServerProgress: InspectServerProgress;
-	SyncServerProgress: SyncServerProgress;
-}
-
-export interface NotificationHub {
-	Notification: NotificationDTO;
-}

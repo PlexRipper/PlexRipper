@@ -10,6 +10,7 @@ import {
 	InspectServerProgress,
 	SyncServerProgress,
 	LibraryProgress,
+	DownloadTaskCreationProgress,
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
 import IAlert from '@interfaces/IAlert';
@@ -31,4 +32,5 @@ export default interface IStoreState {
 	fileMergeProgressList: FileMergeProgress[];
 	inspectServerProgress: InspectServerProgress[];
 	syncServerProgress: SyncServerProgress[];
+	downloadTaskCreationProgress: DownloadTaskCreationProgress;
 }

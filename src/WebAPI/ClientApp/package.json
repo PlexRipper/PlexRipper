@@ -29,12 +29,11 @@
 	},
 	"web-types": "./web-types.json",
 	"dependencies": {
-		"@aspnet/signalr": "^1.1.4",
 		"@codewithdan/observable-store": "^2.2.13",
 		"@mdi/font": "^5.9.55",
+		"@microsoft/signalr": "^5.0.10",
 		"@nuxt/typescript-runtime": "^2.1.0",
 		"@nuxtjs/axios": "^5.13.6",
-		"@ssv/signalr-client": "^3.0.0",
 		"@types/node": "^16.6.1",
 		"axios-observable": "^1.2.1",
 		"consola": "^2.15.3",

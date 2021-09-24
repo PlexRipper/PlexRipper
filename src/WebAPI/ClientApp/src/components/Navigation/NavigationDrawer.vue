@@ -1,5 +1,5 @@
 <template>
-	<v-navigation-drawer app clipped class="navigation-drawer no-background" permanent width="300">
+	<v-navigation-drawer :value="showDrawer" app clipped class="navigation-drawer no-background" width="300">
 		<!-- Server drawer -->
 		<server-drawer />
 		<!-- Menu items -->
@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { DownloadService } from '@service';
 
 interface INavItem {
@@ -62,6 +62,10 @@ interface INavItem {
 export default class NavigationDrawer extends Vue {
 	items: object[] = [];
 	downloadTaskCount = 0;
+
+	@Prop({ required: true, type: Boolean })
+	readonly showDrawer!: boolean;
+
 	get getNavItems(): INavItem[] {
 		return [
 			{

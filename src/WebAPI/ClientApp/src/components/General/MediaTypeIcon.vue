@@ -1,4 +1,5 @@
 <script lang="ts">
+// eslint-disable-next-line import/named
 import Vue, { VNode, CreateElement } from 'vue';
 import { RenderContext } from 'vue/types/options';
 import Convert from '@mediaOverview/MediaTable/types/Convert';

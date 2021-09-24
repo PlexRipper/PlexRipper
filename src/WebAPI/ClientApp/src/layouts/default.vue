@@ -14,8 +14,8 @@
 		</template>
 		<!--	Use for everything else	-->
 		<template v-else>
-			<navigation-drawer />
-			<app-bar />
+			<navigation-drawer :show-drawer="drawerState" />
+			<app-bar @show="drawerState = $event" />
 			<v-main class="no-background">
 				<nuxt />
 			</v-main>
@@ -37,7 +37,7 @@ export default class Default extends Vue {
 	helpDialogState: boolean = false;
 	helpId: string = '';
 	alerts: IAlert[] = [];
-
+	drawerState: Boolean = true;
 	get isSetupPage(): boolean {
 		return this.$route.fullPath === '/setup';
 	}

@@ -5,7 +5,7 @@
 			<template v-if="plexServers.length > 0">
 				<v-expansion-panel v-for="(server, i) in plexServers" :key="i">
 					<v-expansion-panel-header>
-						<v-row align="center" no-gutters>
+						<v-row align="center" no-gutters class="flex-nowrap">
 							<v-col cols="auto">
 								<div class="server-name"><status :value="server.status.isSuccessful" /> {{ server.name }}</div>
 							</v-col>

@@ -1,5 +1,5 @@
 <template>
-	<perfect-scrollbar>
+	<vue-scroll>
 		<v-expansion-panels class="server-panels">
 			<!-- With valid server available -->
 			<template v-if="plexServers.length > 0">
@@ -60,7 +60,7 @@
 			</template>
 		</v-expansion-panels>
 		<server-dialog :server-id="selectedServerId" @close="closeDialog" />
-	</perfect-scrollbar>
+	</vue-scroll>
 </template>
 
 <script lang="ts">

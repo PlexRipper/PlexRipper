@@ -6,11 +6,11 @@
 		<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert" />
 		<!--	Use for setup-layout	-->
 		<template v-if="isSetupPage">
-			<perfect-scrollbar style="height: 100vh">
+			<vue-scroll>
 				<v-main class="no-background">
 					<nuxt />
 				</v-main>
-			</perfect-scrollbar>
+			</vue-scroll>
 		</template>
 		<!--	Use for everything else	-->
 		<template v-else>

@@ -56,7 +56,6 @@
 		"vue-property-decorator": "^9.1.2",
 		"vue-rx": "^6.2.0",
 		"vue-status-indicator": "^1.2.1",
-		"vue2-perfect-scrollbar": "^1.5.0",
 		"vuescroll": "^4.17.3",
 		"vuetify": "^2.5.8"
 	},

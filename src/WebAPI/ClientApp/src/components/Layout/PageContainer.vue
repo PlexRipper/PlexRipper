@@ -4,9 +4,9 @@
 			<slot></slot>
 		</template>
 		<template v-else>
-			<perfect-scrollbar>
+			<vue-scroll>
 				<slot></slot>
-			</perfect-scrollbar>
+			</vue-scroll>
 		</template>
 	</v-container>
 </template>

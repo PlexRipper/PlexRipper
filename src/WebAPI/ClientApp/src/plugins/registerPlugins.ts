@@ -1,19 +1,13 @@
 import Vue from 'vue';
 import VueRx from 'vue-rx';
 import vueScroll, { Config } from 'vuescroll';
-// import vuescroll from 'vuescroll/dist/vuescroll-native';
 
-import PerfectScrollbar from 'vue2-perfect-scrollbar';
 import 'vue2-perfect-scrollbar/dist/vue2-perfect-scrollbar.css';
-import StatusIndicator from 'vue-status-indicator';
+import StatusIndicator from 'vue-status-indicator/dist/vue-status-indicator.js';
 
 export default (): void => {
 	// Docs: https://github.com/vuejs/vue-rx
 	Vue.use(VueRx);
-
-	// Docs: https://github.com/mdbootstrap/perfect-scrollbar
-	// Docs: https://github.com/mercs600/vue2-perfect-scrollbar
-	Vue.use(PerfectScrollbar);
 
 	// Docs: https://vuescrolljs.yvescoding.org/guide/getting-started.html
 	Vue.use(vueScroll, {

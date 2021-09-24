@@ -2,7 +2,7 @@
 	<v-row no-gutters>
 		<!-- Poster display-->
 		<v-col>
-			<perfect-scrollbar ref="scrollbarposters">
+			<vue-scroll ref="scrollbarposters">
 				<v-row class="poster-overview" justify="center">
 					<template v-for="item in items">
 						<media-poster
@@ -14,7 +14,7 @@
 						/>
 					</template>
 				</v-row>
-			</perfect-scrollbar>
+			</vue-scroll>
 		</v-col>
 		<!-- Alphabet Navigation-->
 		<alphabet-navigation :items="items" container-ref="scrollbarposters" />

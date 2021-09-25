@@ -58,6 +58,7 @@
 							</v-row>
 						</v-container>
 					</v-img>
+					<!--	Poster bar	-->
 					<v-row justify="center" no-gutters>
 						<v-col cols="auto">
 							<v-chip
@@ -162,6 +163,9 @@ export default class MediaPoster extends Vue {
 						return;
 					}
 					this.imageUrl = imageUrl;
+				},
+				() => {
+					this.defaultImage = true;
 				},
 			);
 		}

@@ -1,9 +1,7 @@
 import Vue from 'vue';
 import VueRx from 'vue-rx';
 import vueScroll, { Config } from 'vuescroll';
-
-import 'vue2-perfect-scrollbar/dist/vue2-perfect-scrollbar.css';
-import StatusIndicator from 'vue-status-indicator/dist/vue-status-indicator.js';
+import StatusIndicator from 'vue-status-indicator';
 
 export default (): void => {
 	// Docs: https://github.com/vuejs/vue-rx
@@ -30,5 +28,6 @@ export default (): void => {
 		} as Config,
 		name: 'vue-scroll',
 	});
+
 	Vue.use(StatusIndicator);
 };

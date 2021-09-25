@@ -1,5 +1,13 @@
 <template>
-	<v-navigation-drawer ref="drawer" :value="showDrawer" :width="width" app clipped class="navigation-drawer no-background">
+	<v-navigation-drawer
+		ref="drawer"
+		:value="showDrawer"
+		:permanent="showDrawer"
+		:width="width"
+		app
+		clipped
+		class="navigation-drawer no-background"
+	>
 		<!-- Server drawer -->
 		<server-drawer />
 		<!-- Menu items -->
@@ -165,8 +173,8 @@ export default class NavigationDrawer extends Vue {
 	}
 
 	mounted(): void {
-		this.setBorderWidth();
-		this.setEvents();
+		// this.setBorderWidth();
+		// this.setEvents();
 		this.$subscribeTo(DownloadService.getDownloadList(), (downloadTasks) => {
 			this.downloadTaskCount = downloadTasks?.length ?? -1;
 		});

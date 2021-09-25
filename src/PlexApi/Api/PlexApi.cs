@@ -207,50 +207,27 @@ namespace PlexRipper.PlexApi.Api
             return result.ValueOrDefault;
         }
 
-        public async Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
-        {
-            if (width > 0 && height > 0)
-            {
-                var uri = new Uri(thumbUrl);
-                thumbUrl =
-                    $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&width={width}&height={height}&minSize=1&upscale=1";
-            }
-
-            var request = new RestRequest(new Uri(thumbUrl), Method.GET);
-
-            request.AddToken(authToken);
-
-            var result = await _client.SendImageRequestAsync(request);
-            return result;
-        }
-
         /// <summary>
         /// Retrieves the banner of <see cref="PlexMedia"/>. Max size is width 680px and height 1000px;
         /// </summary>
-        /// <param name="bannerUrl">The absolute url of the banner, e.g. http://serverurl.com/library/metadata/22519/banner/252352</param>
+        /// <param name="imageUrl">The absolute url of the banner, e.g. http://serverurl.com/library/metadata/22519/banner/252352</param>
         /// <param name="authToken">The server authentication token.</param>
         /// <param name="width">The optional width of the banner, default is 680px.</param>
         /// <param name="height">The optional height of the banner, default is 1000px.</param>
-        /// <returns>The raw image data.</returns>
-        public async Task<byte[]> GetBannerAsync(string bannerUrl, string authToken, int width = 0, int height = 0)
+        /// <returns>The raw image data in a <see cref="Result"/></returns>
+        public async Task<Result<byte[]>> GetPlexMediaImageAsync(string imageUrl, string authToken, int width = 0, int height = 0)
         {
             if (width > 0 && height > 0)
             {
-                var uri = new Uri(bannerUrl);
-                bannerUrl =
+                var uri = new Uri(imageUrl);
+                imageUrl =
                     $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&width={width}&height={height}&minSize=1&upscale=1";
             }
 
-            var request = new RestRequest(new Uri(bannerUrl), Method.GET);
-
+            var request = new RestRequest(new Uri(imageUrl), Method.GET);
             request.AddToken(authToken);
 
-            var result = await _client.SendImageRequestAsync(request);
-            return result;
+            return await _client.SendImageRequestAsync(request);
         }
-
-
-
-
     }
 }

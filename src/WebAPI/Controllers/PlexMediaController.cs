@@ -70,7 +70,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return NoContent();
             }
 
-            return InternalServerError(result);
+            return ToActionResult(result.ToResult());
         }
 
         // GET api/<PlexMedia>/5
@@ -97,7 +97,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return NoContent();
             }
 
-            return InternalServerError(result);
+            return ToActionResult(result.ToResult());
         }
     }
 }

@@ -43,6 +43,42 @@ const config: NuxtConfig = {
 	 */
 	loading: false,
 	/*
+	 ** Plugins to load before mounting the App
+	 */
+	plugins: [
+		{ src: '@plugins/setup.ts', mode: 'client' },
+		{ src: '@plugins/vuetify.ts' },
+		{ src: '@plugins/filters.ts' },
+		{ src: '@plugins/axios.ts' },
+		{ src: '@plugins/i18nPlugin.ts' },
+		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
+		{ src: '@plugins/typeExtensions.ts' },
+	],
+
+	/*
+	 ** Nuxt.js modules
+	 */
+	modules: [
+		// Doc: https://i18n.nuxtjs.org/
+		'nuxt-i18n',
+	],
+	/*
+	 ** Nuxt.js dev-modules
+	 */
+	buildModules: [
+		// Doc: https://github.com/nuxt-community/eslint-module
+		'@nuxtjs/eslint-module',
+		// Doc: https://typescript.nuxtjs.org/guide/
+		'@nuxt/typescript-build',
+		// Doc: https://github.com/nuxt-community/stylelint-module
+		'@nuxtjs/stylelint-module',
+		// Doc: https://github.com/nuxt-community/vuetify-module
+		'@nuxtjs/vuetify',
+		// Doc: https://github.com/nuxt/components
+		// Note: this is added to fix the error "render function or template not defined in component: "
+		'@nuxt/components',
+	],
+	/*
 	 ** Auto-import components
 	 *  Doc: https://github.com/nuxt/components
 	 */
@@ -63,18 +99,6 @@ const config: NuxtConfig = {
 			},
 		],
 	},
-	/*
-	 ** Plugins to load before mounting the App
-	 */
-	plugins: [
-		{ src: '@plugins/setup.ts', mode: 'client' },
-		{ src: '@plugins/vuetify.ts' },
-		{ src: '@plugins/filters.ts' },
-		{ src: '@plugins/axios.ts' },
-		{ src: '@plugins/i18nPlugin.ts' },
-		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
-		{ src: '@plugins/typeExtensions.ts' },
-	],
 	router: {
 		middleware: ['pageRedirect'],
 		extendRoutes(routes, resolve) {
@@ -96,31 +120,6 @@ const config: NuxtConfig = {
 		// eslint-disable-next-line prefer-regex-literals
 		exclude: [new RegExp('components')],
 	},
-	/*
-	 ** Nuxt.js dev-modules
-	 */
-	buildModules: [
-		// Doc: https://github.com/nuxt-community/eslint-module
-		'@nuxtjs/eslint-module',
-		// Doc: https://typescript.nuxtjs.org/guide/
-		'@nuxt/typescript-build',
-		// Doc: https://github.com/nuxt-community/stylelint-module
-		'@nuxtjs/stylelint-module',
-		// Doc: https://github.com/nuxt-community/vuetify-module
-		'@nuxtjs/vuetify',
-		// Doc: https://github.com/nuxt/components
-		// Note: this is added to fix the error "render function or template not defined in component: "
-		'@nuxt/components',
-	],
-	/*
-	 ** Nuxt.js modules
-	 */
-	modules: [
-		// Doc: https://axios.nuxtjs.org/usage
-		'@nuxtjs/axios',
-		// Doc: https://i18n.nuxtjs.org/
-		'nuxt-i18n',
-	],
 	i18n: {
 		lazy: true,
 		langDir: 'lang/',

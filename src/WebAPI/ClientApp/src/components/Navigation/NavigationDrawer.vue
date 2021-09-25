@@ -1,5 +1,13 @@
 <template>
-	<v-navigation-drawer app clipped class="navigation-drawer no-background" permanent width="300">
+	<v-navigation-drawer
+		ref="drawer"
+		:value="showDrawer"
+		:permanent="showDrawer"
+		:width="width"
+		app
+		clipped
+		class="navigation-drawer no-background"
+	>
 		<!-- Server drawer -->
 		<server-drawer />
 		<!-- Menu items -->
@@ -48,8 +56,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import { DownloadService } from '@service';
+import VNavigationDrawer from 'vuetify/lib/components/VNavigationDrawer/VNavigationDrawer.js';
 
 interface INavItem {
 	title: string;
@@ -62,6 +71,15 @@ interface INavItem {
 export default class NavigationDrawer extends Vue {
 	items: object[] = [];
 	downloadTaskCount = 0;
+	width: Number = 350;
+	borderSize: Number = 3;
+
+	@Prop({ required: true, type: Boolean })
+	readonly showDrawer!: boolean;
+
+	@Ref('drawer')
+	readonly drawer!: VNavigationDrawer;
+
 	get getNavItems(): INavItem[] {
 		return [
 			{
@@ -104,7 +122,59 @@ export default class NavigationDrawer extends Vue {
 		];
 	}
 
+	setBorderWidth(): void {
+		const i = this.drawer.$el.querySelector<HTMLElement>('.v-navigation-drawer__border');
+		if (i) {
+			i.style.width = this.borderSize + 'px';
+			i.style.cursor = 'ew-resize';
+		}
+	}
+
+	setEvents() {
+		// https://codepen.io/oze4/pen/mojrZM
+		const minSize = this.borderSize;
+		const el = this.drawer.$el;
+		const drawerBorder = el.querySelector<HTMLElement>('.v-navigation-drawer__border');
+		const vm = this;
+
+		function resize(e) {
+			document.body.style.cursor = 'ew-resize';
+			if (e.clientX > 300) {
+				el.style.width = e.clientX + 'px';
+			}
+		}
+
+		if (drawerBorder) {
+			drawerBorder.addEventListener(
+				'mousedown',
+				function (e) {
+					if (e.offsetX < minSize) {
+						// m_pos = e.x;
+						el.style.transition = 'initial';
+						document.addEventListener('mousemove', resize, false);
+					}
+				},
+				false,
+			);
+		}
+
+		document.addEventListener(
+			'mouseup',
+			() => {
+				if (drawerBorder) {
+					el.style.transition = '';
+					vm.width = +el.style.width;
+				}
+				document.body.style.cursor = '';
+				document.removeEventListener('mousemove', resize, false);
+			},
+			false,
+		);
+	}
+
 	mounted(): void {
+		// this.setBorderWidth();
+		// this.setEvents();
 		this.$subscribeTo(DownloadService.getDownloadList(), (downloadTasks) => {
 			this.downloadTaskCount = downloadTasks?.length ?? -1;
 		});

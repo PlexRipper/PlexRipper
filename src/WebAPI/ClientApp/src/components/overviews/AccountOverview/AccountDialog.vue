@@ -134,10 +134,10 @@ import Log from 'consola';
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
 import { deleteAccount, validateAccount } from '@api/accountApi';
-import ButtonType from '@/types/enums/buttonType';
 import AccountSetupProgress from '@components/Progress/AccountSetupProgress.vue';
 import { AccountService } from '@service';
 import { map } from 'rxjs/operators';
+import ButtonType from '@/types/enums/buttonType';
 
 @Component
 export default class AccountDialog extends Vue {

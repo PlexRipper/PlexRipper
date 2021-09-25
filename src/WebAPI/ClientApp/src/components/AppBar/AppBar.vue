@@ -1,6 +1,7 @@
 <template>
 	<v-app-bar class="app-bar" dense app clipped-left>
 		<v-toolbar-title>
+			<v-app-bar-nav-icon @click.stop="showDrawer()" />
 			<v-btn to="/" outlined nuxt><logo :size="24" class="mr-3" /> PlexRipper - v{{ version }}</v-btn>
 		</v-toolbar-title>
 
@@ -69,6 +70,13 @@ export default class AppBar extends Vue {
 
 	get isLoading(): boolean {
 		return this.loading.some((x) => x);
+	}
+
+	private showDrawerState: boolean = true;
+
+	showDrawer(): void {
+		this.showDrawerState = !this.showDrawerState;
+		this.$emit('show', this.showDrawerState);
 	}
 
 	updateActiveAccountId(accountId: number): void {

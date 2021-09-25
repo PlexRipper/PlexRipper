@@ -9,11 +9,11 @@ namespace FluentResults
 
         #region Implementation
 
-        #region FindStatusCode
+        #region HasStatusCode
 
-        private static bool FindStatusCode(this Result result, int statusCode)
+        public static bool HasStatusCode(this Result result, int statusCode = 0)
         {
-            if (result is null || statusCode <= 0)
+            if (result is null)
             {
                 return false;
             }
@@ -22,7 +22,7 @@ namespace FluentResults
             {
                 foreach (var (key, metaData) in reason.Metadata)
                 {
-                    if (key == StatusCodeName && (int)metaData == statusCode)
+                    if (key == StatusCodeName && (statusCode == 0 || (int)metaData == statusCode))
                     {
                         return true;
                     }
@@ -32,9 +32,39 @@ namespace FluentResults
             return false;
         }
 
-        private static bool FindStatusCode<T>(this Result<T> result, int statusCode)
+        public static bool HasStatusCode<T>(this Result<T> result, int statusCode)
         {
-            return result?.ToResult()?.FindStatusCode(statusCode) ?? false;
+            return result?.ToResult()?.HasStatusCode(statusCode) ?? false;
+        }
+
+        #endregion
+
+        #region FindStatusCode
+
+        public static int FindStatusCode(this Result result)
+        {
+            if (result is null)
+            {
+                return 0;
+            }
+
+            foreach (Reason reason in result.Reasons)
+            {
+                foreach (var (key, metaData) in reason.Metadata)
+                {
+                    if (key == StatusCodeName)
+                    {
+                        return (int)metaData;
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        public static bool FindStatusCode<T>(this Result<T> result, int statusCode)
+        {
+            return result?.ToResult()?.HasStatusCode(statusCode) ?? false;
         }
 
         #endregion
@@ -116,15 +146,6 @@ namespace FluentResults
 
         #endregion
 
-        #region 201
-
-        private static bool _has201CreatedRequestSuccess(Result result)
-        {
-            return FindStatusCode(result, HttpCodes.Status201Created);
-        }
-
-        #endregion
-
         #endregion
 
         #region Result Signatures
@@ -133,7 +154,7 @@ namespace FluentResults
 
         public static bool Has201CreatedRequestSuccess(this Result result)
         {
-            return result.FindStatusCode(HttpCodes.Status201Created);
+            return result.HasStatusCode(HttpCodes.Status201Created);
         }
 
         public static Result Add201CreatedRequestSuccess(this Result result, string message = "Created successful")
@@ -152,7 +173,7 @@ namespace FluentResults
 
         public static bool Has400BadRequestError(this Result result)
         {
-            return result.FindStatusCode(HttpCodes.Status400BadRequest);
+            return result.HasStatusCode(HttpCodes.Status400BadRequest);
         }
 
         public static Result Add400BadRequestError(this Result result, string message = "Bad request")
@@ -171,7 +192,7 @@ namespace FluentResults
 
         public static bool Has404NotFoundError(this Result result)
         {
-            return result.FindStatusCode(HttpCodes.Status404NotFound);
+            return result.HasStatusCode(HttpCodes.Status404NotFound);
         }
 
         public static Result Add404NotFoundError(this Result result, string message = "Not Found")
@@ -186,6 +207,44 @@ namespace FluentResults
 
         #endregion
 
+        #region 408
+
+        public static bool Has408RequestTimeout(this Result result)
+        {
+            return result.HasStatusCode(HttpCodes.Status408RequestTimeout);
+        }
+
+        public static Result Add408RequestTimeoutError(this Result result, string message = "Request Timeout")
+        {
+            return result.AddStatusCodeError(HttpCodes.Status408RequestTimeout, message);
+        }
+
+        public static Result Create408RequestTimeoutError(string message = "")
+        {
+            return CreateErrorStatusCodeResult(HttpCodes.Status408RequestTimeout, message);
+        }
+
+        #endregion
+
+        #region 502
+
+        public static bool Has502BadGatewayNotFoundError(this Result result)
+        {
+            return result.HasStatusCode(HttpCodes.Status502BadGateway);
+        }
+
+        public static Result Add502BadGatewayError(this Result result, string message = "Not Found")
+        {
+            return result.AddStatusCodeError(HttpCodes.Status502BadGateway, message);
+        }
+
+        public static Result Create502BadGatewayResult(string message = "")
+        {
+            return CreateErrorStatusCodeResult(HttpCodes.Status502BadGateway, message);
+        }
+
+        #endregion
+
         #endregion
 
         #region Result<T> Signatures
@@ -194,7 +253,7 @@ namespace FluentResults
 
         public static bool Has201CreatedRequestSuccess<T>(this Result<T> result)
         {
-            return _has201CreatedRequestSuccess(result);
+            return result.HasStatusCode(HttpCodes.Status201Created);
         }
 
         public static Result<T> Add201CreatedRequestSuccess<T>(this Result<T> result, string message = "Created successful")
@@ -213,7 +272,7 @@ namespace FluentResults
 
         public static bool Has400BadRequestError<T>(this Result<T> result)
         {
-            return result.FindStatusCode(HttpCodes.Status400BadRequest);
+            return result.HasStatusCode(HttpCodes.Status400BadRequest);
         }
 
         public static Result<T> Add400BadRequestError<T>(this Result<T> result, string message = "Bad request")
@@ -227,12 +286,40 @@ namespace FluentResults
 
         public static bool Has404NotFoundError<T>(this Result<T> result)
         {
-            return result.FindStatusCode(HttpCodes.Status404NotFound);
+            return result.HasStatusCode(HttpCodes.Status404NotFound);
         }
 
         public static Result<T> Add404NotFoundError<T>(this Result<T> result, string message = "Not Found")
         {
             return result.AddStatusCodeError(HttpCodes.Status404NotFound, message);
+        }
+
+        #endregion
+
+        #region 408
+
+        public static bool Has408RequestTimeout<T>(this Result<T> result)
+        {
+            return result.HasStatusCode(HttpCodes.Status408RequestTimeout);
+        }
+
+        public static Result<T> Add408RequestTimeoutError<T>(this Result<T> result, string message = "Request Timeout")
+        {
+            return result.AddStatusCodeError(HttpCodes.Status408RequestTimeout, message);
+        }
+
+        #endregion
+
+        #region 502
+
+        public static bool Has502BadGatewayNotFoundError<T>(this Result<T> result)
+        {
+            return result.HasStatusCode(HttpCodes.Status502BadGateway);
+        }
+
+        public static Result<T> Add502BadGatewayError<T>(this Result<T> result, string message = "Not Found")
+        {
+            return result.AddStatusCodeError(HttpCodes.Status502BadGateway, message);
         }
 
         #endregion

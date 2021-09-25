@@ -11,7 +11,7 @@
 			@delete="deleteDownloadTasks(getSelected)"
 		/>
 		<!--	The Download Table	-->
-		<perfect-scrollbar class="download-page-tables">
+		<vue-scroll class="download-page-tables">
 			<v-row v-if="plexServers.length > 0">
 				<v-col>
 					<v-expansion-panels v-model="openExpansions" multiple>
@@ -36,7 +36,7 @@
 					<h2>There are currently no downloads in progress</h2>
 				</v-col>
 			</v-row>
-		</perfect-scrollbar>
+		</vue-scroll>
 		<download-details-dialog :download-task="downloadTaskDetail" :dialog="dialog" @close="closeDetailsDialog" />
 	</page-container>
 </template>

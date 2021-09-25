@@ -1,6 +1,6 @@
 {
 	"name": "plex-ripper-web-ui",
-	"version": "0.8.3",
+	"version": "0.8.4",
 	"description": "PlexRipper",
 	"author": "JasonLandbridge",
 	"private": true,
@@ -33,7 +33,6 @@
 		"@mdi/font": "^5.9.55",
 		"@microsoft/signalr": "^5.0.10",
 		"@nuxt/typescript-runtime": "^2.1.0",
-		"@nuxtjs/axios": "^5.13.6",
 		"@types/node": "^16.6.1",
 		"axios-observable": "^1.2.1",
 		"consola": "^2.15.3",
@@ -56,7 +55,7 @@
 		"vue-property-decorator": "^9.1.2",
 		"vue-rx": "^6.2.0",
 		"vue-status-indicator": "^1.2.1",
-		"vue2-perfect-scrollbar": "^1.5.0",
+		"vuescroll": "^4.17.3",
 		"vuetify": "^2.5.8"
 	},
 	"devDependencies": {

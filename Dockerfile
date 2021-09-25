@@ -9,7 +9,7 @@ WORKDIR /tmp/build/ClientApp
 
 ARG PORT=7000
 ENV PORT=$PORT
-
+ENV NUXT_ENV_BASE_URL="TEST IF BASE URL CAME THROUGH"
 # Essential config files
 COPY ./src/WebAPI/ClientApp/package*.json ./
 COPY ./src/WebAPI/ClientApp/tsconfig.json ./
@@ -17,7 +17,7 @@ COPY ./src/WebAPI/ClientApp/nuxt.config.ts ./
 RUN npm install
 ## Copy the rest of the project files
 COPY ./src/WebAPI/ClientApp/ ./
-RUN npm run generate
+RUN npm run generate --fail-on-error
 
 ## Setup .NET Core back-end
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build

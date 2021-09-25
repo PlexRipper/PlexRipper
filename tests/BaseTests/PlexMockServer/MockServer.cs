@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Environment;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using WireMock.RequestBuilders;
@@ -24,7 +25,7 @@ namespace PlexRipper.BaseTests
         {
             get
             {
-                var basePath = Directory.GetParent(_pathSystem.RootDirectory).Parent.Parent.Parent;
+                var basePath = Directory.GetParent(_pathSystem.RootDirectory).Parent.Parent.Parent.Parent;
                 return Path.Join(basePath.FullName, "BaseTests", "PlexMockServer", "media", "movies");
             }
         }

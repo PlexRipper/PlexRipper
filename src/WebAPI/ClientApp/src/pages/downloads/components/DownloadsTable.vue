@@ -5,8 +5,9 @@
 			:headers="getHeaders"
 			height-auto
 			media-icons
+			load-children
 			@action="tableAction"
-			@selected="$emit('selected', $event)"
+			@selected="selectedAction"
 		/>
 	</div>
 </template>
@@ -14,18 +15,13 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DownloadStatus, DownloadTaskDTO, FileMergeProgress, PlexMediaType } from '@dto/mainApi';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import { DownloadStatus, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import ButtonType from '@enums/buttonType';
-import { DownloadService, ProgressService } from '@service';
+import { DownloadService } from '@service';
 
-@Component({
-	components: {
-		LoadingSpinner,
-	},
-})
+@Component
 export default class DownloadsTable extends Vue {
 	@Prop({ type: Boolean })
 	readonly loading: Boolean = false;
@@ -92,9 +88,33 @@ export default class DownloadsTable extends Vue {
 		];
 	}
 
+	get flatDownloadRows(): DownloadTaskDTO[] {
+		return [
+			this.downloadRows,
+			this.downloadRows.map((x) => x.children),
+			this.downloadRows.map((x) => x.children?.map((y) => y.children)),
+			this.downloadRows.map((x) => x.children?.map((y) => y.children?.map((z) => z.children))),
+		]
+			.flat(3)
+			.filter((x) => !!x) as DownloadTaskDTO[];
+	}
+
+	setAvailableActions(downloadTasks: DownloadTaskDTO[]): DownloadTaskDTO[] {
+		for (const downloadRow of downloadTasks) {
+			downloadRow.actions = this.availableActions(downloadRow.status);
+			if (downloadRow.children) {
+				downloadRow.children = this.setAvailableActions(downloadRow.children);
+			}
+		}
+		return downloadTasks;
+	}
+
 	availableActions(status: DownloadStatus): ButtonType[] {
 		const availableActions: ButtonType[] = [ButtonType.Details];
 		switch (status) {
+			case DownloadStatus.Unknown:
+				availableActions.push(ButtonType.Delete);
+				break;
 			case DownloadStatus.Initialized:
 				availableActions.push(ButtonType.Delete);
 				break;
@@ -129,45 +149,22 @@ export default class DownloadsTable extends Vue {
 		return availableActions;
 	}
 
-	tableAction({ action, item }: { action: string; item: DownloadTaskDTO }) {
-		Log.info('command', { action, item });
-		this.$emit(action, item.id);
+	tableAction(payload: { action: string; item: DownloadTaskDTO }) {
+		Log.info('command', payload);
+		this.$emit('action', payload);
+	}
+
+	selectedAction(selected: number[]) {
+		// Convert downloadTask keys to downloadTask Ids
+		const ids = this.flatDownloadRows.filter((x) => selected.includes(x.key)).map((x) => x.id);
+		this.$emit('selected', ids);
 	}
 
 	mounted(): void {
 		// Retrieve initial download list
 		this.$subscribeTo(DownloadService.getDownloadList(this.serverId), (data: DownloadTaskDTO[]) => {
-			if (data && data.length > 0) {
-				for (const rootDownloadTask of data) {
-					// For movies download tasks
-					if (rootDownloadTask.mediaType === PlexMediaType.Movie) {
-						rootDownloadTask.actions = this.availableActions(rootDownloadTask.status);
-						rootDownloadTask.children = undefined;
-					}
-
-					// For tvShows download tasks
-					if (rootDownloadTask.mediaType === PlexMediaType.TvShow) {
-						if (rootDownloadTask.children && rootDownloadTask.children.length > 0) {
-							rootDownloadTask?.children?.forEach((season) => {
-								if (season.children && season.children.length > 0) {
-									season.children?.forEach(() => {
-										// this.mergeDownloadRow(episode);
-									});
-								} else {
-									Log.warn(`Season: ${season.title} had no episodes`);
-								}
-							});
-						}
-					}
-				}
-
-				this.downloadRows = [...data] as DownloadTaskDTO[];
-			} else {
-				this.downloadRows = [];
-			}
+			this.downloadRows = this.setAvailableActions([...data]);
 		});
-
-		this.$subscribeTo(ProgressService.getFileMergeProgress(this.serverId), (x) => (this.fileMergeProgressList = x));
 	}
 }
 </script>

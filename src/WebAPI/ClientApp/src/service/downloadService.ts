@@ -1,4 +1,5 @@
 import Log from 'consola';
+import _ from 'lodash';
 import { combineLatest, Observable, of } from 'rxjs';
 import {
 	clearDownloadTasks,
@@ -10,11 +11,12 @@ import {
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { map, startWith, switchMap, take } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import { AccountService, BaseService, ProgressService } from '@service';
 import { Context } from '@nuxt/types';
+import { determineDownloadStatus } from '@lib/common';
 
 export class DownloadService extends BaseService {
 	public constructor() {
@@ -44,16 +46,7 @@ export class DownloadService extends BaseService {
 
 	private getDownloadState(serverId: number = 0): Observable<DownloadTaskDTO[]> {
 		return this.stateChanged.pipe(
-			switchMap((state: IStoreState) => {
-				// Only return the filtered array by serverId, 0 is all
-				if (state?.downloads) {
-					if (serverId > 0) {
-						return of(state.downloads.filter((x) => x.plexServerId === serverId));
-					}
-					return of(state.downloads);
-				}
-				return of([]);
-			}),
+			map((state) => state?.downloads.filter((x) => (serverId > 0 ? x.plexServerId === serverId : true)) ?? []),
 		);
 	}
 
@@ -71,50 +64,74 @@ export class DownloadService extends BaseService {
 		);
 	}
 
+	private mergeChildren(downloadTask: DownloadTaskDTO, downloadProgressRows: DownloadTaskDTO[]): DownloadTaskDTO {
+		const progress = downloadProgressRows.find((x) => x.id === downloadTask.id);
+		if (progress) {
+			downloadTask = {
+				...downloadTask,
+				...progress,
+				children: downloadTask.children,
+			};
+		}
+		// Check if children have progress
+		if (downloadTask.children) {
+			for (let i = 0; i < downloadTask.children.length; i++) {
+				downloadTask.children.splice(i, 1, this.mergeChildren(downloadTask.children[i], downloadProgressRows));
+			}
+		}
+
+		return downloadTask;
+	}
+
+	private aggregateChildren(downloadTask: DownloadTaskDTO): DownloadTaskDTO {
+		if (downloadTask.mediaType !== PlexMediaType.Season && downloadTask.mediaType !== PlexMediaType.TvShow) {
+			return downloadTask;
+		}
+		if (!downloadTask.children || downloadTask.children.length === 0) {
+			return downloadTask;
+		}
+
+		for (let i = 0; i < downloadTask.children.length; i++) {
+			downloadTask.children.splice(i, 1, this.aggregateChildren(downloadTask.children[i]));
+		}
+
+		downloadTask.percentage = _.mean(downloadTask.children?.map((x) => x.percentage)) ?? 0;
+		downloadTask.downloadSpeed = _.mean(downloadTask.children?.map((x) => x.downloadSpeed)) ?? 0;
+		downloadTask.timeRemaining = _.sum(downloadTask.children?.map((x) => x.timeRemaining)) ?? 0;
+		downloadTask.dataReceived = _.sum(downloadTask.children?.map((x) => x.dataReceived)) ?? 0;
+		downloadTask.dataTotal = _.sum(downloadTask.children?.map((x) => x.dataTotal)) ?? 0;
+
+		const statuses = downloadTask.children?.map((x) => x.status) ?? [];
+		downloadTask.status = determineDownloadStatus(statuses);
+
+		return downloadTask;
+	}
+
 	public getDownloadList(serverId: number = 0): Observable<DownloadTaskDTO[]> {
-		return combineLatest([
-			this.getDownloadState(serverId),
-			ProgressService.getDownloadTaskUpdateProgress(serverId).pipe(startWith([])),
-			ProgressService.getFileMergeProgress(serverId).pipe(startWith([])),
-		]).pipe(
+		return combineLatest([this.getDownloadState(serverId), ProgressService.getMergedDownloadTaskProgress(serverId)]).pipe(
 			// Merge the baseDownload with the download progress and return the updated result
-			switchMap(([baseDownloadRows, downloadProgressRows, fileMergeRows]) => {
-				if (!downloadProgressRows || downloadProgressRows === []) {
-					return of(baseDownloadRows);
+			switchMap(([baseDownloadRows, downloadProgressRows]) => {
+				if (baseDownloadRows.length === 0 && downloadProgressRows.length === 0) {
+					return of([]);
 				}
 
-				// Remove updates of finished download task updates
-				// const x1 = downloadProgressRows.filter((x) => baseDownloadRows.find((y) => y.id === x.id));
-				// const y1 = fileMergeRows.filter((x) => baseDownloadRows.find((y) => y.id === x.downloadTaskId));
-				// this.setState({ downloadTaskUpdateList: x1, fileMergeProgressList: y1 }, 'CLEAN UP DOWNLOAD TASK UPDATE LIST', false);
-
-				const mergedDownloadRows: DownloadTaskDTO[] = [];
-				for (const baseDownloadRow of baseDownloadRows) {
-					let mergedDownloadRow: DownloadTaskDTO = { ...baseDownloadRow };
-					// Merge downloadProgress
-					const downloadProgress = downloadProgressRows.find((x) => x.id === baseDownloadRow.id);
-					if (downloadProgress) {
-						mergedDownloadRow = { ...mergedDownloadRow, ...downloadProgress };
+				if (baseDownloadRows.length > 0 && downloadProgressRows.length === 0) {
+					const mergedRows: DownloadTaskDTO[] = [];
+					for (const baseDownloadRow of baseDownloadRows) {
+						mergedRows.push(this.aggregateChildren(baseDownloadRow));
 					}
-
-					// Merge filemergeProgress
-					if (mergedDownloadRow.status === DownloadStatus.Merging || mergedDownloadRow.status === DownloadStatus.Moving) {
-						const fileMergeProgress = fileMergeRows.find((x) => x.downloadTaskId === baseDownloadRow.id);
-						if (fileMergeProgress) {
-							mergedDownloadRow = {
-								...mergedDownloadRow,
-								dataReceived: fileMergeProgress.dataTransferred,
-								dataTotal: fileMergeProgress.dataTotal,
-								percentage: fileMergeProgress.percentage,
-								timeRemaining: fileMergeProgress.timeRemaining,
-								downloadSpeed: fileMergeProgress.transferSpeed,
-							};
-						}
-					}
-					mergedDownloadRows.push(mergedDownloadRow);
+					return of(mergedRows);
 				}
 
-				return of(mergedDownloadRows);
+				const mergedRows: DownloadTaskDTO[] = [...baseDownloadRows];
+
+				for (let i = 0; i < mergedRows.length; i++) {
+					let mergedDownloadTask = this.mergeChildren(mergedRows[i], downloadProgressRows);
+					mergedDownloadTask = this.aggregateChildren(mergedDownloadTask);
+					mergedRows.splice(i, 1, mergedDownloadTask);
+				}
+
+				return of(mergedRows);
 			}),
 		);
 	}
@@ -196,6 +213,7 @@ export class DownloadService extends BaseService {
 			)
 			.subscribe();
 	}
+
 	// endregion
 
 	private removeDownloadTasks(downloadTaskIds: number[]): void {

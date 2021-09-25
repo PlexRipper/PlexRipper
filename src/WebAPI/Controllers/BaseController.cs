@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Net.Mime;
 using AutoMapper;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -85,35 +87,23 @@ namespace PlexRipper.WebAPI.Controllers
         [NonAction]
         protected IActionResult ToActionResult(Result result)
         {
-            // Status Code 200
+            var resultDTO = _mapper.Map<ResultDTO>(result);
+            if (result.HasStatusCode())
+            {
+                return new ObjectResult(resultDTO)
+                {
+                    StatusCode = result.FindStatusCode(),
+                };
+            }
+
             if (result.IsSuccess)
             {
-                var resultDTO = _mapper.Map<ResultDTO>(result);
-                if (result.Has201CreatedRequestSuccess())
-                {
-                    // Status code 201 Created
-                    return new ObjectResult(resultDTO)
-                    {
-                        StatusCode = StatusCodes.Status201Created,
-                    };
-                }
-
                 return new OkObjectResult(resultDTO);
             }
 
-            var failedResult = _mapper.Map<ResultDTO>(result);
-            if (result.Has400BadRequestError())
-            {
-                return new BadRequestObjectResult(failedResult);
-            }
-
-            if (result.Has404NotFoundError())
-            {
-                return new NotFoundObjectResult(failedResult);
-            }
-
-            // Status Code 500
-            return new ObjectResult(failedResult)
+            // No Status Code found
+            Log.Warning($"Invalid ResultDTO had no status code assigned, defaulting to 500 error: {resultDTO}");
+            return new ObjectResult(resultDTO)
             {
                 StatusCode = StatusCodes.Status500InternalServerError,
             };

@@ -4,7 +4,9 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Api;
@@ -154,33 +156,51 @@ namespace PlexRipper.PlexApi
             return Result.Fail(new Error(msg).WithMetadata(metaData)).LogError();
         }
 
-        public async Task<byte[]> SendImageRequestAsync(RestRequest request)
+        public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)
         {
-            request = AddHeaders(request);
-            var _policy = Policy
-                .Handle<Exception>()
-                .WaitAndRetryAsync(3, retryAttempt =>
+            try
+            {
+                request = AddHeaders(request);
+                var response = await Policy
+                    .Handle<WebException>()
+                    .WaitAndRetryAsync(1, retryAttempt =>
+                        {
+                            var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
+                            Log.Warning($"Waiting {timeToWait.TotalSeconds} seconds before retrying again.");
+                            return timeToWait;
+                        }
+                    ).ExecuteAsync(async () =>
                     {
-                        var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                        Log.Warning($"Waiting {timeToWait.TotalSeconds} seconds before retrying again.");
-                        return timeToWait;
-                    }
-                );
+                        try
+                        {
+                            return await Task.Run(() => _client.DownloadData(request));
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e.Message);
 
-            return await _policy
-                .ExecuteAsync(async () =>
+                            // Needs to throw to catch and retry again
+                            throw;
+                        }
+                    });
+
+                if (response == null || response.Length < 200)
                 {
-                    try
-                    {
-                        var response = await Task.Run(() => _client.DownloadData(request));
-                        return response;
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e);
-                        throw;
-                    }
-                });
+                    return Result.Fail(new Error($"Image response was empty - Url: {request.Resource}")).LogError();
+                }
+
+                return Result.Ok(response);
+            }
+            catch (Exception e)
+            {
+                var result = Result.Fail(new ExceptionalError(e));
+                if (e.Message.Contains("The operation has timed out"))
+                {
+                    return result.Add408RequestTimeoutError().LogError();
+                }
+
+                return result;
+            }
         }
 
         /// <summary>

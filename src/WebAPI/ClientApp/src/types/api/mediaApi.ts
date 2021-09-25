@@ -1,4 +1,3 @@
-import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
 import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
@@ -19,9 +18,15 @@ export function getThumbnail(
 	plexMediaType: PlexMediaType,
 	width: number = 0,
 	height: number = 0,
-): Observable<AxiosResponse> {
+): Observable<any> {
 	preApiRequest(logText, 'getThumbnail');
-	return Axios.get(`${apiPath}/thumb?PlexMediaId=${plexMediaId}&PlexMediaType=${plexMediaType}&Width=${width}&Height=${height}`, {
+	return Axios.get<Blob>(`${apiPath}/thumb`, {
+		params: {
+			plexMediaId,
+			plexMediaType,
+			width,
+			height,
+		},
 		responseType: 'blob',
 	});
 }

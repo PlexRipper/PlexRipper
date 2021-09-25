@@ -5,7 +5,7 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { ObservableStore } from '@codewithdan/observable-store';
-import { SettingsModelDTO } from '@dto/mainApi';
+import { DownloadTaskCreationProgress, SettingsModelDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/IStoreState';
 import * as Service from '@service';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
@@ -28,6 +28,9 @@ export class GlobalService extends Service.BaseService {
 		// Progress Service
 		fileMergeProgressList: [],
 		inspectServerProgress: [],
+		syncServerProgress: [],
+		libraryProgress: [],
+		downloadTaskCreationProgress: {} as DownloadTaskCreationProgress,
 	};
 
 	constructor() {
@@ -60,7 +63,7 @@ export class GlobalService extends Service.BaseService {
 
 	public setConfigReady(config: RuntimeConfig): void {
 		if (process.client || process.static) {
-			Log.info('Runtime Config is ready - ' + config.version);
+			Log.info('Runtime Config is ready - ' + config.version, config);
 			this._configReady.next(new AppConfig(config));
 		} else {
 			Log.error('setConfigReady => Process was neither client or static, was:', process);

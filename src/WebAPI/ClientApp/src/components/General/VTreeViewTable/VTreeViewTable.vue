@@ -30,7 +30,7 @@
 			</v-row>
 			<!-- TreeView Table -->
 			<v-row ref="v-tree-view-container" no-gutters class="v-tree-view-table-body" :style="{ height: getHeight }">
-				<perfect-scrollbar ref="scrollbarmediatable" :options="{ suppressScrollX: true }">
+				<vue-scroll ref="scrollbarmediatable" :ops="{ scrollPanel: { scrollingX: false } }">
 					<v-col class="col pa-0">
 						<template v-for="(parentItem, i) in items">
 							<v-lazy
@@ -136,7 +136,7 @@
 							</v-lazy>
 						</template>
 					</v-col>
-				</perfect-scrollbar>
+				</vue-scroll>
 			</v-row>
 		</v-col>
 		<alphabet-navigation v-if="navigation" :items="items" container-ref="scrollbarmediatable" />
@@ -147,20 +147,11 @@
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
 import ITreeViewTableRow from '@vTreeViewTable/ITreeViewTableRow';
-import ProgressComponent from '@components/Progress/ProgressComponent.vue';
-import LoadingSpinner from '@components/LoadingSpinner.vue';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import ButtonType from '@enums/buttonType';
-import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
 import ISelection from '@interfaces/ISelection';
 
-@Component({
-	components: {
-		LoadingSpinner,
-		ProgressComponent,
-		AlphabetNavigation,
-	},
-})
+@Component
 export default class VTreeViewTable extends Vue {
 	@Prop({ required: true, type: Array as () => any[] })
 	readonly items!: any[];

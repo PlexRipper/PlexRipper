@@ -16,7 +16,7 @@ namespace PlexRipper.Data.CQRS
         {
             RuleFor(x => x.Notification).NotNull();
             RuleFor(x => x.Notification.Message).NotEmpty();
-            RuleFor(x => x.Notification.NotificationLevel).NotEqual(NotificationLevel.None);
+            RuleFor(x => x.Notification.Level).NotEqual(NotificationLevel.None);
             RuleFor(x => x.Notification.CreatedAt).NotEqual(DateTime.MinValue);
         }
     }

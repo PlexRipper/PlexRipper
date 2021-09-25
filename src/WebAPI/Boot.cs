@@ -1,6 +1,9 @@
 ﻿using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Environment;
+using FluentResultExtensions.lib;
+using Logging;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.Application.Common;
@@ -21,8 +24,6 @@ namespace PlexRipper.WebAPI
 
         private readonly IFileSystem _fileSystem;
 
-        private readonly ILogSystem _logSystem;
-
         private readonly IFileMerger _fileMerger;
 
         private readonly IDownloadManager _downloadManager;
@@ -31,13 +32,12 @@ namespace PlexRipper.WebAPI
 
         private readonly ISchedulerService _schedulerService;
 
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, ILogSystem logSystem, IFileMerger fileMerger,
+        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
             IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService)
         {
             _appLifetime = appLifetime;
             _userSettings = userSettings;
             _fileSystem = fileSystem;
-            _logSystem = logSystem;
             _fileMerger = fileMerger;
             _downloadManager = downloadManager;
             _plexRipperDatabaseService = plexRipperDatabaseService;
@@ -51,7 +51,7 @@ namespace PlexRipper.WebAPI
 
             // First await the finishing off all these
             _fileSystem.Setup();
-            _logSystem.Setup();
+            Log.SetupLogging();
             _userSettings.Setup();
             await _plexRipperDatabaseService.SetupAsync();
 

@@ -8,6 +8,9 @@ import {
 	PlexServerDTO,
 	SettingsModelDTO,
 	InspectServerProgress,
+	SyncServerProgress,
+	LibraryProgress,
+	DownloadTaskCreationProgress,
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
 import IAlert from '@interfaces/IAlert';
@@ -25,6 +28,9 @@ export default interface IStoreState {
 	helpIdDialog: string;
 	downloadTaskUpdateList: DownloadTaskDTO[];
 	// Progress Service
+	libraryProgress: LibraryProgress[];
 	fileMergeProgressList: FileMergeProgress[];
 	inspectServerProgress: InspectServerProgress[];
+	syncServerProgress: SyncServerProgress[];
+	downloadTaskCreationProgress: DownloadTaskCreationProgress;
 }

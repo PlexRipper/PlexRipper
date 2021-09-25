@@ -29,15 +29,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import PBtn from '@components/Extensions/PButton.vue';
 import IText from '@interfaces/IText';
 import ButtonType from '@enums/buttonType';
 
-@Component({
-	components: {
-		PBtn,
-	},
-})
+@Component
 export default class ConfirmationDialog extends Vue {
 	/**
 	 * The Vue-i18n text id used for the confirmation window that pops-up.

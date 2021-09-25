@@ -1,10 +1,11 @@
-﻿using PlexRipper.Domain;
+﻿using System.Linq;
+using PlexRipper.Domain;
 using System.Threading;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
@@ -27,18 +28,11 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
 
         public async Task<Result> Handle(UpdateDownloadTasksByIdCommand command, CancellationToken cancellationToken)
         {
-            _dbContext.UpdateRange(command.DownloadTasks);
-
-            // Prevent the navigation properties from being updated
-            command.DownloadTasks.ForEach(x =>
-            {
-                _dbContext.Entry(x.DestinationFolder).State = EntityState.Unchanged;
-                _dbContext.Entry(x.DownloadFolder).State = EntityState.Unchanged;
-                _dbContext.Entry(x.PlexServer).State = EntityState.Unchanged;
-                _dbContext.Entry(x.PlexLibrary).State = EntityState.Unchanged;
-            });
+            await _dbContext.BulkUpdateAsync(command.DownloadTasks, cancellationToken: cancellationToken);
+            await _dbContext.BulkUpdateAsync(command.DownloadTasks.SelectMany(x => x.DownloadWorkerTasks).ToList(), cancellationToken: cancellationToken);
 
             await SaveChangesAsync();
+
             return Result.Ok();
         }
     }

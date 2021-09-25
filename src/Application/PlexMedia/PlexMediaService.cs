@@ -75,13 +75,7 @@ namespace PlexRipper.Application.PlexMedia
                 return token.ToResult();
             }
 
-            byte[] image = await _plexServiceApi.GetThumbnailAsync(plexServer.ServerUrl + thumbPath, token.Value, width, height);
-            if (image == null || image.Length < 200)
-            {
-                return Result.Ok(System.Array.Empty<byte>());
-            }
-
-            return Result.Ok(image);
+            return await _plexServiceApi.GetPlexMediaImageAsync(plexServer.ServerUrl + thumbPath, token.Value, width, height);
         }
 
         public async Task<Result<byte[]>> GetBannerImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0)
@@ -135,13 +129,7 @@ namespace PlexRipper.Application.PlexMedia
                 return token.ToResult();
             }
 
-            byte[] image = await _plexServiceApi.GetBannerAsync(plexServer.ServerUrl + bannerPath, token.Value, width, height);
-            if (image == null || image.Length < 200)
-            {
-                return Result.Ok(System.Array.Empty<byte>());
-            }
-
-            return Result.Ok(image);
+            return await _plexServiceApi.GetPlexMediaImageAsync(plexServer.ServerUrl + bannerPath, token.Value, width, height);
         }
     }
 }

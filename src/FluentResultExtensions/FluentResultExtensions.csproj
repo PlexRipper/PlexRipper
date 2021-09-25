@@ -7,7 +7,10 @@
     <ItemGroup>
       <PackageReference Include="FluentResults" Version="2.5.0" />
       <PackageReference Include="FluentValidation" Version="9.3.0" />
-      <PackageReference Include="Serilog" Version="2.10.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Logging\Logging.csproj" />
     </ItemGroup>
 
 </Project>

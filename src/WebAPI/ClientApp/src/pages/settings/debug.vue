@@ -1,18 +1,12 @@
 <template>
-	<page>
+	<page-container>
 		<debug-section />
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 
-import DebugSection from '~/pages/settings/components/DebugSection.vue';
-
-@Component({
-	components: {
-		DebugSection,
-	},
-})
+@Component
 export default class DebugSettings extends Vue {}
 </script>

@@ -16,8 +16,10 @@ namespace PlexRipper.Data.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder
-                .Property(e => e.DownloadStatus)
-                .HasConversion(new EnumToStringConverter<DownloadStatus>());
+                .Property(b => b.DownloadStatus)
+                .HasMaxLength(20)
+                .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())
+                .IsUnicode(false);
         }
     }
 }

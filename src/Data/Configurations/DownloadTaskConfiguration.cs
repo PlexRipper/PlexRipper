@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
@@ -17,17 +16,20 @@ namespace PlexRipper.Data.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder
-                .Property(e => e.MediaType)
-                .HasConversion(new EnumToStringConverter<PlexMediaType>());
+                .Property(b => b.MediaType)
+                .HasMaxLength(20)
+                .HasConversion(x => x.ToPlexMediaTypeString(), x => x.ToPlexMediaType())
+                .IsUnicode(false);
 
             builder
-                .Property(e => e.DownloadStatus)
-                .HasConversion(new EnumToStringConverter<DownloadStatus>());
+                .Property(b => b.DownloadStatus)
+                .HasMaxLength(20)
+                .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())
+                .IsUnicode(false);
 
             builder
                 .Property(x => x.MetaData)
                 .HasJsonValueConversion();
-
         }
     }
 }

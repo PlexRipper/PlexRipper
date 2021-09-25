@@ -1,27 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 
+// ReSharper disable CollectionNeverUpdated.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace PlexRipper.Domain
 {
     public class FolderPath : BaseEntity
     {
-        #region Properties
-
-        /// <summary>
-        /// The folder type, do now edit or access this property directly. Use the FolderType property!
-        /// </summary>
-        [Column(Order = 1)]
-        public string Type { get; set; }
-
-        [Column(Order = 2)]
-        public string DisplayName { get; set; }
-
-        [Column(Order = 3)]
-        public string DirectoryPath { get; set; }
-
-        #endregion
+        #region Constructor
 
         public FolderPath() { }
 
@@ -32,25 +19,55 @@ namespace PlexRipper.Domain
             DirectoryPath = directoryPath;
         }
 
-        #region Helpers
+        #endregion
 
-        [NotMapped]
-        public FolderType FolderType
-        {
-            get => Enum.TryParse(Type, out FolderType status) ? status : FolderType.None;
-            set => Type = value.ToString();
-        }
+        #region Properties
 
-        public bool IsValid()
-        {
-            return Directory.Exists(DirectoryPath);
-        }
+        /// <summary>
+        /// Gets or sets the display name of this <see cref="FolderPath"/>.
+        /// </summary>
+        [Column(Order = 1)]
+        public string DisplayName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="FolderType"/> of this <see cref="FolderPath"/>.
+        /// </summary>
+        [Column(Order = 2)]
+        public FolderType FolderType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="PlexMediaType"/> associated with this <see cref="FolderPath"/>.
+        /// </summary>
+        [Column(Order = 3)]
+        public PlexMediaType MediaType { get; set; }
+
+        /// <summary>
+        ///  Gets or sets the filesystem directory path of this <see cref="FolderPath"/>.
+        /// </summary>
+        [Column(Order = 4)]
+        public string DirectoryPath { get; set; }
 
         #endregion
 
         #region Relationships
 
+        /// <summary>
+        /// Gets or sets the <see cref="PlexLibraries"/> that use this <see cref="FolderPath"/> as a download destination folder.
+        /// </summary>
         public List<PlexLibrary> PlexLibraries { get; set; }
+
+        #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// Checks if the <see cref="FolderPath"/> is valid by checking if the directory exists.
+        /// </summary>
+        /// <returns>If the check is successful.</returns>
+        public bool IsValid()
+        {
+            return Directory.Exists(DirectoryPath);
+        }
 
         #endregion
     }

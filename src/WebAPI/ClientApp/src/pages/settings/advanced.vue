@@ -1,9 +1,9 @@
 <template>
-	<page>
+	<page-container>
 		<download-manager-section />
 		<database-section />
 		<setup-section />
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">

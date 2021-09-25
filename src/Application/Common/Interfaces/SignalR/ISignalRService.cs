@@ -6,7 +6,9 @@ namespace PlexRipper.Application.Common
 {
     public interface ISignalRService
     {
-        Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true);
+        void SendLibraryProgressUpdate(LibraryProgress libraryProgress);
+
+        void SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true);
 
         Task SendDownloadTaskCreationProgressUpdate(int current, int total);
 
@@ -21,5 +23,7 @@ namespace PlexRipper.Application.Common
         Task SendNotification(Notification notification);
 
         void SendServerInspectStatusProgress(InspectServerProgress progress);
+
+        void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress);
     }
 }

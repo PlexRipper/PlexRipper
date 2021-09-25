@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Logging;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
@@ -6,7 +7,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PlexRipper.Application.IntegrationTests.Services.PlexAccountService
+namespace PlexRipper.Application.IntegrationTests
 {
     public class AccountServiceTests
     {
@@ -14,7 +15,7 @@ namespace PlexRipper.Application.IntegrationTests.Services.PlexAccountService
 
         public AccountServiceTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output);
             Container = new BaseContainer();
         }
 

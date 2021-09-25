@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentResultExtensions.lib;
+using Logging;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;
@@ -19,7 +21,7 @@ namespace DownloadManager.IntegrationTests.DownloadQueue
 
         public DownloadQueueTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output);
             Container = new BaseContainer();
 
             _server = Container.MockServer.GetPlexMockServer();

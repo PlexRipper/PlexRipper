@@ -41,7 +41,7 @@ export default class AccountOverview extends Vue {
 		}
 	}
 
-	created(): void {
+	mounted(): void {
 		this.$subscribeTo(AccountService.getAccounts(), (data) => {
 			this.accounts = data ?? [];
 		});

@@ -38,7 +38,7 @@
 								</template>
 							</v-simple-table>
 							<!--	Directory browser table content -->
-							<perfect-scrollbar>
+							<vue-scroll>
 								<div style="height: 50vh; width: 100%">
 									<v-simple-table>
 										<template #default>
@@ -53,7 +53,7 @@
 										</template>
 									</v-simple-table>
 								</div>
-							</perfect-scrollbar>
+							</vue-scroll>
 						</template>
 					</v-card-text>
 					<v-card-actions class="justify-end" style="height: 60px">

@@ -12,7 +12,7 @@ namespace PlexRipper.Domain
         public DateTime CreatedAt { get; set; }
 
         [Column(Order = 3)]
-        public LogEventLevel LogLevel { get; set; }
+        public NotificationLevel LogLevel { get; set; }
 
         [Column(Order = 2)]
         public string Message { get; set; }
@@ -33,26 +33,30 @@ namespace PlexRipper.Domain
         {
             switch (LogLevel)
             {
-                case LogEventLevel.Verbose:
-                    Domain.Log.Verbose(Message);
+                case NotificationLevel.Verbose:
+                    Logging.Log.Verbose(Message);
                     break;
-                case LogEventLevel.Debug:
-                    Domain.Log.Debug(Message);
+                case NotificationLevel.Debug:
+                    Logging.Log.Debug(Message);
                     break;
-                case LogEventLevel.Information:
-                    Domain.Log.Information(Message);
+                case NotificationLevel.Information:
+                    Logging.Log.Information(Message);
                     break;
-                case LogEventLevel.Warning:
-                    Domain.Log.Warning(Message);
+                case NotificationLevel.Warning:
+                    Logging.Log.Warning(Message);
                     break;
-                case LogEventLevel.Error:
-                    Domain.Log.Error(Message);
+                case NotificationLevel.Error:
+                    Logging.Log.Error(Message);
                     break;
-                case LogEventLevel.Fatal:
-                    Domain.Log.Fatal(Message);
+                case NotificationLevel.Fatal:
+                    Logging.Log.Fatal(Message);
+                    break;
+                case NotificationLevel.None:
+                    break;
+                case NotificationLevel.Success:
                     break;
                 default:
-                    Domain.Log.Debug(Message);
+                    Logging.Log.Information(Message);
                     break;
             }
         }

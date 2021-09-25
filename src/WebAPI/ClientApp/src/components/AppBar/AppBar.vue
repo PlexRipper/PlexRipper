@@ -1,9 +1,12 @@
 <template>
 	<v-app-bar class="app-bar" dense app clipped-left>
 		<v-toolbar-title>
+			<v-app-bar-nav-icon @click.stop="showDrawer()" />
 			<v-btn to="/" outlined nuxt><logo :size="24" class="mr-3" /> PlexRipper - v{{ version }}</v-btn>
 		</v-toolbar-title>
 
+		<v-spacer></v-spacer>
+		<app-bar-progress-bar />
 		<v-spacer></v-spacer>
 
 		<v-btn icon href="https://github.com/PlexRipper/PlexRipper" target="_blank">
@@ -56,17 +59,8 @@ import { Component, Vue } from 'vue-property-decorator';
 import { GlobalService, SettingsService, AccountService, ServerService } from '@service';
 import { refreshAccount } from '@api/accountApi';
 import type { PlexAccountDTO } from '@dto/mainApi';
-import DarkModeToggle from '@components/General/DarkModeToggle.vue';
-import NotificationButton from '@components/AppBar/NotificationButton.vue';
-import ProgressComponent from '@components/Progress/ProgressComponent.vue';
 
-@Component({
-	components: {
-		NotificationButton,
-		DarkModeToggle,
-		ProgressComponent,
-	},
-})
+@Component
 export default class AppBar extends Vue {
 	private accounts: PlexAccountDTO[] = [];
 	private loading: boolean[] = [false];
@@ -76,6 +70,13 @@ export default class AppBar extends Vue {
 
 	get isLoading(): boolean {
 		return this.loading.some((x) => x);
+	}
+
+	private showDrawerState: boolean = true;
+
+	showDrawer(): void {
+		this.showDrawerState = !this.showDrawerState;
+		this.$emit('show', this.showDrawerState);
 	}
 
 	updateActiveAccountId(accountId: number): void {
@@ -92,7 +93,7 @@ export default class AppBar extends Vue {
 		});
 	}
 
-	created(): void {
+	mounted(): void {
 		this.$subscribeTo(GlobalService.getConfigReady(), (config) => {
 			this.version = config.version;
 		});

@@ -2,7 +2,7 @@ import Log from 'consola';
 import { Observable } from 'rxjs';
 import { NotificationDTO } from '@dto/mainApi';
 import { map, switchMap, take, tap } from 'rxjs/operators';
-import { BaseService, GlobalService, SignalrService } from '@service';
+import { BaseService, GlobalService } from '@service';
 import { getNotifications, hideNotification } from '@api/notificationApi';
 import IStoreState from '@interfaces/IStoreState';
 import { Context } from '@nuxt/types';
@@ -31,10 +31,6 @@ export class NotificationService extends BaseService {
 					this.setState({ notifications: result.value }, 'Set Notifications');
 				}
 			});
-
-		SignalrService.getNotificationUpdates().subscribe((data) => {
-			this.setState({ notifications: [...this.getState().notifications, ...[data]] }, 'Add Notifications');
-		});
 	}
 
 	// region Notifications

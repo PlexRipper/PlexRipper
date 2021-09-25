@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Logging;
 using PlexRipper.BaseTests;
 using Shouldly;
 using Xunit;
@@ -10,7 +11,7 @@ namespace PlexApi.UnitTests
     {
         public JsonConverterTests(ITestOutputHelper output)
         {
-            BaseDependanciesTest.SetupLogging(output);
+            Log.SetupTestLogging(output);
         }
 
         [Fact]

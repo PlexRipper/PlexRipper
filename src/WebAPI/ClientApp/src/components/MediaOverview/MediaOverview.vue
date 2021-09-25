@@ -1,5 +1,5 @@
 <template>
-	<page no-scrollbar>
+	<page-container no-scrollbar>
 		<!--	Loading screen	-->
 		<template v-if="isLoading">
 			<v-row justify="center" class="mx-0">
@@ -86,7 +86,7 @@
 			:progress="downloadTaskCreationProgress"
 			@download="sendDownloadCommand"
 		/>
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">
@@ -96,23 +96,10 @@ import { finalize, map, tap } from 'rxjs/operators';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
-import { MediaTable, MediaOverviewBar, MediaPoster, PosterTable, DetailsOverview, DownloadConfirmation } from '@mediaOverview';
-import ProgressComponent from '@components/Progress/ProgressComponent.vue';
-import AlphabetNavigation from '@components/Navigation/AlphabetNavigation.vue';
+import { MediaTable, DetailsOverview, DownloadConfirmation } from '@mediaOverview';
 import { getTvShow } from '@api/mediaApi';
 
-@Component({
-	components: {
-		MediaPoster,
-		MediaTable,
-		ProgressComponent,
-		DownloadConfirmation,
-		MediaOverviewBar,
-		AlphabetNavigation,
-		PosterTable,
-		DetailsOverview,
-	},
-})
+@Component
 export default class MediaOverview extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly libraryId!: number;
@@ -177,6 +164,7 @@ export default class MediaOverview extends Vue {
 	}
 
 	resetProgress(isRefreshing: boolean): void {
+		this.isRefreshing = isRefreshing;
 		this.libraryProgress = {
 			id: this.libraryId,
 			percentage: 0,
@@ -184,6 +172,7 @@ export default class MediaOverview extends Vue {
 			total: 0,
 			isRefreshing,
 			isComplete: false,
+			timeStamp: '',
 		};
 	}
 
@@ -299,6 +288,9 @@ export default class MediaOverview extends Vue {
 	}
 
 	mounted(): void {
+		this.resetProgress(false);
+		this.isRefreshing = false;
+
 		this.$subscribeTo(
 			this.$watchAsObservable('isLoading').pipe(map((x: { oldValue: number; newValue: number }) => x.newValue)),
 			(isLoading) => {
@@ -319,11 +311,6 @@ export default class MediaOverview extends Vue {
 				}
 			},
 		);
-	}
-
-	created(): void {
-		this.resetProgress(false);
-		this.isRefreshing = false;
 
 		// Get Active account Id
 		this.$subscribeTo(SettingsService.getActiveAccountId(), (id) => (this.activeAccountId = id));
@@ -335,10 +322,15 @@ export default class MediaOverview extends Vue {
 		});
 
 		// Setup progress bar
-		this.$subscribeTo(SignalrService.getLibraryProgress(), (data) => {
-			if (data.id === this.libraryId) {
+		this.$subscribeTo(SignalrService.getLibraryProgress(this.libraryId), (data) => {
+			if (data) {
 				this.libraryProgress = data;
-				this.isRefreshing = data.isRefreshing ?? false;
+				this.isRefreshing = data.isRefreshing;
+				if (data.isComplete) {
+					Log.debug(data);
+					this.resetProgress(false);
+					LibraryService.fetchLibrary(this.libraryId);
+				}
 			}
 		});
 
@@ -346,6 +338,7 @@ export default class MediaOverview extends Vue {
 		this.$subscribeTo(
 			SignalrService.getDownloadTaskCreationProgress().pipe(
 				tap((data) => {
+					// TODO This needs to work with id's
 					this.downloadTaskCreationProgress = data;
 				}),
 				finalize(() => {

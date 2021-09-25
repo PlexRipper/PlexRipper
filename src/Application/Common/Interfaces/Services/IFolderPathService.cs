@@ -11,7 +11,7 @@ namespace PlexRipper.Application.Common
 
         Task<Result<FolderPath>> UpdateFolderPathAsync(FolderPath folderPath);
 
-        Task<Result> CheckIfFolderPathsAreValid();
+        Task<Result> CheckIfFolderPathsAreValid(PlexMediaType mediaType = PlexMediaType.None);
 
         /// <summary>
         /// Get the download <see cref="FolderPath"/>.

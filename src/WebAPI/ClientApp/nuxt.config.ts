@@ -1,16 +1,22 @@
+import Log from 'consola';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
 const config: NuxtConfig = {
-	ssr: false,
 	target: 'static',
+	// Should always be true, otherwise SPA won't work once statically generated
+	ssr: true,
 	srcDir: 'src/',
 	publicRuntimeConfig: {
 		nodeEnv: process.env.NODE_ENV || 'development',
 		version: process.env.npm_package_version || '?',
 	},
+	/*
+	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
+	 */
+	telemetry: false,
 	/*
 	 ** Headers of the page
 	 */
@@ -28,62 +34,34 @@ const config: NuxtConfig = {
 		],
 		link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.png' }],
 	},
-
-	// Global CSS: https://go.nuxtjs.dev/config-css
+	/*
+	 ** Global CSS: https://go.nuxtjs.dev/config-css
+	 */
 	css: ['@/assets/scss/style.scss'],
-
 	/*
 	 ** Customize the progress-bar color
 	 */
 	loading: false,
 	/*
-	 ** Auto-import components
-	 *  Doc: https://github.com/nuxt/components
-	 */
-	components: [
-		// Components
-		{
-			path: '~/components',
-			pathPrefix: false,
-			extensions: ['vue'],
-		},
-		// Pages
-		{
-			path: '~/pages',
-			pattern: '**/**/components/*.vue',
-			pathPrefix: false,
-			extensions: ['vue'],
-		},
-	],
-	/*
 	 ** Plugins to load before mounting the App
 	 */
 	plugins: [
 		{ src: '@plugins/setup.ts', mode: 'client' },
-		{ src: '@plugins/vuetify.ts', mode: 'client' },
-		{ src: '@plugins/filters.ts', mode: 'client' },
-		{ src: '@plugins/axios.ts', mode: 'client' },
-		{ src: '@plugins/i18nPlugin.ts', mode: 'client' },
+		{ src: '@plugins/vuetify.ts' },
+		{ src: '@plugins/filters.ts' },
+		{ src: '@plugins/axios.ts' },
+		{ src: '@plugins/i18nPlugin.ts' },
 		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
-		{ src: '@plugins/registerComponents.ts', mode: 'client' },
-		{ src: '@plugins/typeExtensions.ts', mode: 'client' },
+		{ src: '@plugins/typeExtensions.ts' },
 	],
-	router: {
-		middleware: ['pageRedirect'],
-		extendRoutes(routes, resolve) {
-			routes.push({
-				name: 'details-overview',
-				path: '/tvshows/:id',
-				component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
-				children: [
-					{
-						path: 'details/:mediaid',
-						component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
-					},
-				],
-			});
-		},
-	},
+
+	/*
+	 ** Nuxt.js modules
+	 */
+	modules: [
+		// Doc: https://i18n.nuxtjs.org/
+		'nuxt-i18n',
+	],
 	/*
 	 ** Nuxt.js dev-modules
 	 */
@@ -96,16 +74,52 @@ const config: NuxtConfig = {
 		'@nuxtjs/stylelint-module',
 		// Doc: https://github.com/nuxt-community/vuetify-module
 		'@nuxtjs/vuetify',
+		// Doc: https://github.com/nuxt/components
+		// Note: this is added to fix the error "render function or template not defined in component: "
+		'@nuxt/components',
 	],
 	/*
-	 ** Nuxt.js modules
+	 ** Auto-import components
+	 *  Doc: https://github.com/nuxt/components
 	 */
-	modules: [
-		// Doc: https://axios.nuxtjs.org/usage
-		'@nuxtjs/axios',
-		// Doc: https://i18n.nuxtjs.org/
-		'nuxt-i18n',
-	],
+	components: {
+		loader: true,
+		dirs: [
+			// Components directory
+			{
+				path: './components',
+				pathPrefix: false,
+				extensions: ['vue'],
+			},
+			// Pages directory
+			{
+				path: './pages',
+				pathPrefix: false,
+				extensions: ['vue'],
+			},
+		],
+	},
+	router: {
+		middleware: ['pageRedirect'],
+		extendRoutes(routes, resolve) {
+			routes.push({
+				name: 'details-overview',
+				path: '/tvshows/:libraryId',
+				component: resolve(__dirname, 'src/pages/tvshows/_tvShowId.vue'),
+				children: [
+					{
+						path: 'details/:tvShowId',
+						component: resolve(__dirname, 'src/pages/tvshows/_tvShowId.vue'),
+					},
+				],
+			});
+		},
+	},
+	generate: {
+		// Don't create paths for the components folders in the pages directory
+		// eslint-disable-next-line prefer-regex-literals
+		exclude: [new RegExp('components')],
+	},
 	i18n: {
 		lazy: true,
 		langDir: 'lang/',
@@ -124,6 +138,10 @@ const config: NuxtConfig = {
 				overlay: false,
 			},
 		},
+		transpile: [
+			// This is needed to extend Vuetify components in ~/components/Extensions
+			'vuetify/lib',
+		],
 		extractCSS: true,
 		// Will allow for debugging in Typescript + Nuxt
 		// Doc: https://nordschool.com/enable-vs-code-debugger-for-nuxt-and-typescript/
@@ -133,7 +151,11 @@ const config: NuxtConfig = {
 			}
 
 			// Doc: https://github.com/dividab/tsconfig-paths-webpack-plugin
-			config.resolve?.plugins?.push(new TsconfigPathsPlugin());
+			if (config.resolve?.plugins) {
+				config.resolve.plugins.push(new TsconfigPathsPlugin());
+			} else {
+				Log.fatal('Setting up TS Path aliases in nuxt.config.ts => config.resolve.plugins was undefined');
+			}
 		},
 	},
 };

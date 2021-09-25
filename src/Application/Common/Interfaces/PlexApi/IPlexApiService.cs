@@ -47,9 +47,7 @@ namespace PlexRipper.Application.Common
 
         Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
 
-        Task<byte[]> GetThumbnailAsync(string thumbUrl, string authToken, int width = 0, int height = 0);
-
-        Task<byte[]> GetBannerAsync(string bannerUrl, string authToken, int width = 0, int height = 0);
+        Task<Result<byte[]>> GetPlexMediaImageAsync(string thumbUrl, string authToken, int width = 0, int height = 0);
 
         #endregion
 

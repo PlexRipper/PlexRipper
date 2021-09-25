@@ -53,8 +53,6 @@ namespace PlexRipper.Domain
             RuleFor(x => x.DownloadWorkerTasks).NotNull();
             RuleFor(x => x.DownloadWorkerTasks.Any()).Equal(true)
                 .When(x => x.DownloadWorkerTasks != null);
-
-
         }
     }
 }

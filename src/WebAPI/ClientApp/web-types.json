@@ -1,7 +1,7 @@
 {
   "framework": "vue",
   "name": "plex-ripper-web-ui",
-  "version": "0.8.0",
+  "version": "0.8.3",
   "contributions": {
     "html": {
       "description-markup": "markdown",
@@ -148,8 +148,21 @@
         {
           "name": "AppBar",
           "description": "",
+          "events": [
+            {
+              "name": "show"
+            }
+          ],
           "source": {
             "module": "./src/components/AppBar/AppBar.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "AppBarProgressBar",
+          "description": "",
+          "source": {
+            "module": "./src/components/AppBar/AppBarProgressBar.vue",
             "symbol": "default"
           }
         },
@@ -540,6 +553,9 @@
             }
           ],
           "events": [
+            {
+              "name": "action"
+            },
             {
               "name": "selected"
             }
@@ -1013,6 +1029,16 @@
         {
           "name": "NavigationDrawer",
           "description": "",
+          "attributes": [
+            {
+              "name": "showDrawer",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            }
+          ],
           "source": {
             "module": "./src/components/Navigation/NavigationDrawer.vue",
             "symbol": "default"
@@ -1219,7 +1245,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/Extensions/PButton.vue",
+            "module": "./src/components/Extensions/PBtn.vue",
             "symbol": "default"
           }
         },
@@ -1229,7 +1255,6 @@
           "attributes": [
             {
               "name": "color",
-              "required": false,
               "value": {
                 "kind": "expression",
                 "type": "string"
@@ -1238,7 +1263,6 @@
             },
             {
               "name": "hideDetails",
-              "required": false,
               "value": {
                 "kind": "expression",
                 "type": "boolean"
@@ -1247,7 +1271,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/Extensions/PCheckBox.vue",
+            "module": "./src/components/Extensions/PCheckbox.vue",
             "symbol": "default"
           }
         },
@@ -1263,7 +1287,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/Layout/Section.vue",
+            "module": "./src/components/Layout/PSection.vue",
             "symbol": "default"
           }
         },
@@ -1378,7 +1402,7 @@
           }
         },
         {
-          "name": "Page",
+          "name": "PageContainer",
           "description": "",
           "attributes": [
             {
@@ -1406,7 +1430,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/Layout/Page.vue",
+            "module": "./src/components/Layout/PageContainer.vue",
             "symbol": "default"
           }
         },
@@ -1542,15 +1566,6 @@
                 "kind": "expression",
                 "type": "number"
               }
-            },
-            {
-              "name": "showCircular",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "true"
             },
             {
               "name": "circularMode",

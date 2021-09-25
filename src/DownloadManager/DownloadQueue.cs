@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Subjects;
+using FluentResultExtensions.lib;
+using Logging;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 

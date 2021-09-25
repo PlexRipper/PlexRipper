@@ -11,7 +11,7 @@
 				<v-divider />
 				<!-- Show Download Task Preview -->
 				<v-card-text class="pa-0" style="min-height: 60vh; max-height: 60vh">
-					<perfect-scrollbar ref="previewscrollbar" :options="{ suppressScrollX: true }">
+					<vue-scroll ref="previewscrollbar" :ops="{ scrollPanel: { scrollingX: false } }">
 						<v-col cols="12" class="px-2 py-0">
 							<v-treeview :items="downloadPreview" item-text="title" item-key="key" :open="getLeafs" open-all>
 								<template #prepend="{ item }">
@@ -20,7 +20,7 @@
 								<template #append="{ item }"> (<file-size :size="item.mediaSize" />) </template>
 							</v-treeview>
 						</v-col>
-					</perfect-scrollbar>
+					</vue-scroll>
 				</v-card-text>
 				<v-divider />
 
@@ -46,17 +46,12 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import ProgressComponent from '@components/Progress/ProgressComponent.vue';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import Log from 'consola';
 import { SettingsService } from '@service';
 
-@Component({
-	components: {
-		ProgressComponent,
-	},
-})
+@Component
 export default class DownloadConfirmation extends Vue {
 	@Prop({ required: true, type: Array as () => PlexMediaDTO[] })
 	readonly items!: PlexMediaDTO[];

@@ -1,18 +1,13 @@
 <template>
-	<page>
+	<page-container>
 		<h1>Movies Overview</h1>
 		<p>Select a library from the left-hand side</p>
-	</page>
+	</page-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
-@Component({
-	components: {
-		LoadingSpinner,
-	},
-})
+@Component
 export default class MoviesOverview extends Vue {}
 </script>

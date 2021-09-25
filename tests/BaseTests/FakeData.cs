@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bogus;
+using Environment;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 

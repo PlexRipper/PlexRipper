@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
@@ -10,6 +9,16 @@ namespace PlexRipper.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<PlexLibrary> builder)
         {
+            builder
+                .Property(e => e.Type)
+                .HasMaxLength(50)
+                .HasConversion(x => x.ToPlexMediaTypeString(), x => x.ToPlexMediaType())
+                .IsUnicode(false);
+
+            builder
+                .Property(x => x.MetaData)
+                .HasJsonValueConversion();
+
             builder
                 .HasOne(x => x.PlexServer)
                 .WithMany(x => x.PlexLibraries)
@@ -45,16 +54,6 @@ namespace PlexRipper.Data.Configurations
                 .WithMany(x => x.PlexLibraries)
                 .HasForeignKey(x => x.DefaultDestinationId)
                 .OnDelete(DeleteBehavior.SetNull);
-
-
-            var converter = new EnumToStringConverter<PlexMediaType>();
-            builder
-                .Property(e => e.Type)
-                .HasConversion(converter);
-
-            builder
-                .Property(x => x.MetaData)
-                .HasJsonValueConversion();
         }
     }
 }

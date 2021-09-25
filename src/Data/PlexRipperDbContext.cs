@@ -1,6 +1,9 @@
 using System.Reflection;
 using System.Threading.Tasks;
+using Environment;
+using FluentResultExtensions.lib;
 using FluentResults;
+using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common;
@@ -108,7 +111,8 @@ namespace PlexRipper.Data
 
             if (EnviromentExtensions.IsIntegrationTestMode())
             {
-                Log.Information("Database will be setup in TestMode");
+                Log.Warning("Database will be setup in TestMode");
+                Log.Warning($"Database created at: {DatabasePath}");
                 await Database.EnsureCreatedAsync();
             }
 
@@ -131,6 +135,7 @@ namespace PlexRipper.Data
             if (exist)
             {
                 Log.Information("Database was successfully connected!");
+                Log.Information($"Database connected at: {DatabasePath}");
                 return Result.Ok();
             }
 
@@ -144,6 +149,8 @@ namespace PlexRipper.Data
             {
                 // optionsBuilder.UseLazyLoadingProxies();
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                optionsBuilder.EnableDetailedErrors();
+                optionsBuilder.EnableSensitiveDataLogging();
                 optionsBuilder
                     .UseSqlite(
                         $"Data Source={DatabasePath}",

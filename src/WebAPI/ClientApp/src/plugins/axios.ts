@@ -1,38 +1,26 @@
 import Log from 'consola';
-import { Context } from '@nuxt/types';
 import Axios from 'axios-observable';
 import { GlobalService } from '@service';
 
-export default (ctx: Context): void => {
-	ctx.$axios.onRequest((config) => {
-		Log.debug(`Making request to ${config.url}`, config);
-	});
+export default (): void => {
+	// Source: https://github.com/axios/axios/issues/41#issuecomment-484546457
+	Axios.defaults.validateStatus = () => true;
+	// Source: https://github.com/axios/axios/issues/41#issuecomment-386762576
+	Axios.interceptors.response.use(
+		(config) => {
+			return config;
+		},
+		(error) => {
+			// Prevents 400 & 500 status code throwing exceptions
+			return Promise.reject(error);
+		},
+	);
 
 	GlobalService.getConfigReady().subscribe((config) => {
 		Log.info('Axios BaseApiUrl: ' + config.baseApiUrl);
-		ctx.$axios.setBaseURL(config.baseApiUrl);
 		Axios.defaults.baseURL = config.baseApiUrl;
 		Log.debug('Finished setting up Axios');
 
 		GlobalService.setAxiosReady();
 	});
-
-	// Axios.interceptors.response.use(
-	// 	(response): AxiosResponse<Result<any>> => {
-	// 		if (response?.data && (response.data as Result)) {
-	// 			const result = response.data as Result;
-	// 			// eslint-disable-next-line no-prototype-builtins
-	// 			if (result.hasOwnProperty('statusCode')) {
-	// 				result.statusCode = response.status;
-	// 			}
-	// 		}
-	// 		return response;
-	// 	},
-	// 	(error) => {
-	// 		if (error?.response?.data as Result) {
-	// 			(error.response.data as Result).statusCode = error.response.status;
-	// 		}
-	// 		return error.response;
-	// 	},
-	// );
 };

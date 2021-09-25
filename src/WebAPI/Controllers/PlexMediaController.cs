@@ -50,6 +50,7 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpGet("thumb")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileContentResult))]
         [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(FileContentResult))]
+        [ProducesResponseType(StatusCodes.Status408RequestTimeout, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> GetThumb(int plexMediaId, PlexMediaType plexMediaType, int width, int height)
         {

@@ -1,9 +1,10 @@
+import Log from 'consola';
 import IStoreState from '@interfaces/IStoreState';
 import { BaseService } from '@service';
 import { PlexMediaType } from '@dto/mainApi';
 import { Observable, of } from 'rxjs';
 import { getThumbnail } from '@api/mediaApi';
-import { switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 export class MediaService extends BaseService {
 	public constructor() {
@@ -25,17 +26,16 @@ export class MediaService extends BaseService {
 		}
 
 		return getThumbnail(mediaId, mediaType, width, height).pipe(
-			switchMap((response) => {
-				if (response) {
+			map((response) => {
+				if (response.data) {
 					// Convert imageUrl to objectUrl
 					const imageUrl: string = URL.createObjectURL(response.data);
 					if (imageUrl) {
-						// Update the mediaUrls
-						mediaUrls.push({ id: mediaId, type: mediaType, url: imageUrl });
+						this.updateStore('mediaUrls', { id: mediaId, type: mediaType, url: imageUrl });
 					}
-					return of(imageUrl);
+					return imageUrl;
 				}
-				return of('');
+				return '';
 			}),
 		);
 	}

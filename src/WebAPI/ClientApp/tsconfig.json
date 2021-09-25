@@ -35,7 +35,7 @@
 			"@vTreeViewTable/*": ["./components/General/VTreeViewTable/*"]
 		},
 		//"typeRoots": ["./type_definitions"],
-		"types": ["@types/node", "@nuxt/types", "vuetify", "@nuxtjs/axios", "@nuxtjs/vuetify", "nuxt-i18n", "@types/jest"]
+		"types": ["@types/node", "@nuxt/types", "vuetify", "@nuxtjs/vuetify", "nuxt-i18n", "@types/jest"]
 	},
 	"exclude": ["node_modules", ".nuxt", "node_modules/dist", ".vscode"]
 }

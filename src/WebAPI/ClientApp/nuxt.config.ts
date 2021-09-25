@@ -59,8 +59,6 @@ const config: NuxtConfig = {
 	 ** Nuxt.js modules
 	 */
 	modules: [
-		// Doc: https://axios.nuxtjs.org/usage
-		'@nuxtjs/axios',
 		// Doc: https://i18n.nuxtjs.org/
 		'nuxt-i18n',
 	],

@@ -19,8 +19,6 @@ export default (): void => {
 	GlobalService.getConfigReady().subscribe((config) => {
 		Log.info('Axios BaseApiUrl: ' + config.baseApiUrl);
 		Axios.defaults.baseURL = config.baseApiUrl;
-		Log.debug('Finished setting up Axios');
-
 		GlobalService.setAxiosReady();
 	});
 };

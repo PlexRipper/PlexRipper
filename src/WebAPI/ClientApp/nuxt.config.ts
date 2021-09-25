@@ -7,11 +7,12 @@ import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 const config: NuxtConfig = {
 	target: 'static',
 	// Should always be true, otherwise SPA won't work once statically generated
-	ssr: true,
+	ssr: false,
 	srcDir: 'src/',
 	publicRuntimeConfig: {
 		nodeEnv: process.env.NODE_ENV || 'development',
 		version: process.env.npm_package_version || '?',
+		baseURL: process.env.BASE_URL || 'http://localhost:5000',
 	},
 	/*
 	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
@@ -119,6 +120,7 @@ const config: NuxtConfig = {
 		// Don't create paths for the components folders in the pages directory
 		// eslint-disable-next-line prefer-regex-literals
 		exclude: [new RegExp('components')],
+		devtools: true,
 	},
 	i18n: {
 		lazy: true,

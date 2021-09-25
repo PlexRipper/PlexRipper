@@ -1,12 +1,12 @@
 # PlexRipper
 
-**UNDER ACTIVE DEVELOPMENT - ALPHA STAGE**
+**UNDER ACTIVE DEVELOPMENT - ALPHA STAGE => IT "WORKS", BUT NOT ALWAYS!**
 
 Tired of searching for media on different torrent websites or paying for Usenet server access? Well look no further! You can now use PlexRipper to download "everything" from the Plex servers you have access to and expand your collection that way! Let others collect media for you and then just download everything!
 
 ## Goals
 
-- Be the best crossplatform Plex downloader there is!
+- Be the best cross-platform Plex downloader there is!
 - Be on the same level of awesomeness as [Radarr](https://github.com/Radarr/Radarr) and [Sonarr](https://github.com/Sonarr/Sonarr)!
 
 ## Current Features
@@ -14,14 +14,26 @@ Tired of searching for media on different torrent websites or paying for Usenet 
 - Runs in a Docker container and can be deployed on any type of platform that can host a Docker container!
 - Add multiple Plex accounts to easily download from the accessible Plex servers!
 - A beautiful GUI which has a Light and Dark-mode theme!
-- Multi-threaded downloading and moves your finished downloads straight to your own Plex media collection!
+- Multi-threaded downloading and PlexRipper moves your finished downloads straight to your own Plex media collection!
 - Will still work even if Plex.tv is down by connecting directly to the media servers!
-- Has a highly complex neural network which will automatically fix misconfigured servers to allow connecting!
-  
+- Has a "highly complex neural network" which will automatically fix misconfigured servers to allow connecting!
+
 ## Upcoming features
 
 - Download music and photo's, currently only movies and tv shows!
+
 - Search through and filter media available for downloading!
+
+- **PlexRipper Authentication, right now there is ZERO security so make sure to NOT expose the port to the public internet!**
+
+## Version Tags
+
+| Tag    | Description                                      | Command                                    |
+| ------ | ------------------------------------------------ | ------------------------------------------ |
+| latest | Stable branch, only the most stable code is here | `docker pull plexripper/plexripper:latest` |
+| dev    | Development branch, latest changes are made here | `docker pull plexripper/plexripper:dev`    |
+
+## Installation
 
 ## Back-end
 
@@ -42,7 +54,7 @@ Tired of searching for media on different torrent websites or paying for Usenet 
 - Rx.js
 - Vuetify
 
-https://github.com/labs42io/clean-code-typescript
+<https://github.com/labs42io/clean-code-typescript>
 
 ## Translate PlexRipper
 
@@ -53,7 +65,8 @@ Make PlexRipper easier to use for everyone by translating it to your native lang
    - This is to avoid multiple people translating to the same language
 3. Make a copy of [en-US.json](https://github.com/PlexRipper/PlexRipper/tree/master/src/WebUI/src/lang) into the "lang" folder.
 4. Translate only the text after the ":"!
-5. When finished, either create a pull request or send it to  [plexripper@protonmail.com](mailto:plexripper@protonmail.com?subject=[PlexRipper%20Translation])
+
+5. When finished, either create a pull request or send it to [plexripper@protonmail.com](mailto:plexripper@protonmail.com?subject=[PlexRipper%20Translation])
 
 ## Similar Projects
 

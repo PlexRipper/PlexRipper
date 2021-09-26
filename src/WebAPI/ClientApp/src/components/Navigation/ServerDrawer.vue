@@ -75,7 +75,7 @@ interface INavItem {
 	link: string;
 }
 
-@Component
+@Component<ServerDrawer>({})
 export default class ServerDrawer extends Vue {
 	items: object[] = [];
 	plexServers: PlexServerDTO[] = [];

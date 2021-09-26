@@ -146,7 +146,10 @@
           "description": "",
           "events": [
             {
-              "name": "show"
+              "name": "show-navigation"
+            },
+            {
+              "name": "show-notifications"
             }
           ],
           "source": {
@@ -1043,8 +1046,31 @@
         {
           "name": "NotificationButton",
           "description": "",
+          "events": [
+            {
+              "name": "toggle"
+            }
+          ],
           "source": {
             "module": "./src/components/AppBar/NotificationButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "NotificationsDrawer",
+          "description": "",
+          "attributes": [
+            {
+              "name": "showDrawer",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            }
+          ],
+          "source": {
+            "module": "./src/components/overviews/NotificationsDrawer.vue",
             "symbol": "default"
           }
         },

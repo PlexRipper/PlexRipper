@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { NotificationDTO } from '@dto/mainApi';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, GlobalService } from '@service';
-import { getNotifications, hideNotification } from '@api/notificationApi';
+import { clearAllNotifications, getNotifications, hideNotification } from '@api/notificationApi';
 import IStoreState from '@interfaces/IStoreState';
 import { Context } from '@nuxt/types';
 
@@ -47,6 +47,11 @@ export class NotificationService extends BaseService {
 			this.setState({ notifications }, 'Set Notification Hidden');
 		}
 		hideNotification(id).pipe(take(1)).subscribe();
+	}
+
+	public clearAllNotifications(): void {
+		this.setState({ notifications: [] }, 'Clear All Notifications');
+		clearAllNotifications().pipe(take(1)).subscribe();
 	}
 	// endregion
 }

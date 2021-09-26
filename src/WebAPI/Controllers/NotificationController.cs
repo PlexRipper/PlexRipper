@@ -50,5 +50,14 @@ namespace PlexRipper.WebAPI.Controllers
 
             return ToActionResult(await _notificationsService.CreateNotification(notification));
         }
+
+        // POST api/<NotificationController>/clear
+        [HttpPost("clear")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> ClearAllNotifications()
+        {
+            return ToActionResult(await _notificationsService.ClearAllNotifications());
+        }
     }
 }

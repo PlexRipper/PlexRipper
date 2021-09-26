@@ -46,6 +46,16 @@ export class SettingsService extends BaseService {
 		this.getSettings()
 			.pipe(switchMap((settings) => updateSettings(settings)))
 			.subscribe();
+
+		this.getFirstTimeSetup().subscribe((state) => {
+			if (state === null) {
+				return;
+			}
+			Log.info('Redirecting to the setup page');
+			if (state && nuxtContext.route.path !== '/setup') {
+				return nuxtContext.redirect('/setup');
+			}
+		});
 	}
 	// endregion
 

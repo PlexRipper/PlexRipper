@@ -101,7 +101,6 @@ const config: NuxtConfig = {
 		],
 	},
 	router: {
-		middleware: ['pageRedirect'],
 		extendRoutes(routes, resolve) {
 			routes.push({
 				name: 'details-overview',

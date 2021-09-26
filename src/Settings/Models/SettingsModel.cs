@@ -42,6 +42,12 @@ namespace PlexRipper.Settings.Models
 
         #region UserInterfaceSettings
 
+        #region Language
+
+        public string Language { get; set; } = "en-US";
+
+        #endregion
+
         #region ConfirmationSettings
 
         public bool AskDownloadMovieConfirmation { get; set; } = true;
@@ -98,6 +104,7 @@ namespace PlexRipper.Settings.Models
 
             // User Interface Settings
             jsonObject.UserInterfaceSettings = new ExpandoObject();
+            jsonObject.UserInterfaceSettings.Language = Language;
             jsonObject.UserInterfaceSettings.ConfirmationSettings = new ExpandoObject();
             jsonObject.UserInterfaceSettings.ConfirmationSettings.AskDownloadMovieConfirmation = AskDownloadMovieConfirmation;
             jsonObject.UserInterfaceSettings.ConfirmationSettings.AskDownloadTvShowConfirmation = AskDownloadTvShowConfirmation;
@@ -129,8 +136,11 @@ namespace PlexRipper.Settings.Models
             var advancedSettings = jsonElement.GetProperty("AdvancedSettings");
             DownloadSegments = advancedSettings.GetProperty("DownloadManagerSettings").GetProperty(nameof(DownloadSegments)).GetInt32();
 
+            // User Interface
             var userInterfaceSettings = jsonElement.GetProperty("UserInterfaceSettings");
+            Language = userInterfaceSettings.GetProperty(nameof(Language)).GetString();
 
+            // Confirmation
             var confirmationSettings = userInterfaceSettings.GetProperty("ConfirmationSettings");
             AskDownloadMovieConfirmation = confirmationSettings.GetProperty(nameof(AskDownloadMovieConfirmation)).GetBoolean();
             AskDownloadTvShowConfirmation = confirmationSettings.GetProperty(nameof(AskDownloadTvShowConfirmation)).GetBoolean();
@@ -156,6 +166,8 @@ namespace PlexRipper.Settings.Models
             FirstTimeSetup = true;
             ActiveAccountId = 0;
             DownloadSegments = 4;
+
+            Language = "en-US";
 
             AskDownloadMovieConfirmation = true;
             AskDownloadTvShowConfirmation = true;

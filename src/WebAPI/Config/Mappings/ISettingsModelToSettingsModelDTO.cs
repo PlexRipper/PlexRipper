@@ -24,6 +24,7 @@ namespace PlexRipper.WebAPI.Config.Mappings
                 },
                 UserInterfaceSettings = new UserInterfaceSettingsModelDTO
                 {
+                    Language = source.Language,
                     ConfirmationSettings = new ConfirmationSettingsModelDTO
                     {
                         AskDownloadMovieConfirmation = source.AskDownloadMovieConfirmation,

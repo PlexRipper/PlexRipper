@@ -14,10 +14,13 @@ namespace PlexRipper.WebAPI.Config.Mappings
                 FirstTimeSetup = source.FirstTimeSetup,
                 ActiveAccountId = source.AccountSettings.ActiveAccountId,
                 DownloadSegments = source.AdvancedSettings.DownloadManager.DownloadSegments,
+
+                Language = source.UserInterfaceSettings.Language,
                 AskDownloadMovieConfirmation = source.UserInterfaceSettings.ConfirmationSettings.AskDownloadMovieConfirmation,
                 AskDownloadTvShowConfirmation = source.UserInterfaceSettings.ConfirmationSettings.AskDownloadTvShowConfirmation,
                 AskDownloadSeasonConfirmation = source.UserInterfaceSettings.ConfirmationSettings.AskDownloadSeasonConfirmation,
                 AskDownloadEpisodeConfirmation = source.UserInterfaceSettings.ConfirmationSettings.AskDownloadEpisodeConfirmation,
+
                 MovieViewMode = source.UserInterfaceSettings.DisplaySettings.MovieViewMode,
                 TvShowViewMode = source.UserInterfaceSettings.DisplaySettings.TvShowViewMode,
                 TimeFormat = source.UserInterfaceSettings.DateTimeSettings.TimeFormat,

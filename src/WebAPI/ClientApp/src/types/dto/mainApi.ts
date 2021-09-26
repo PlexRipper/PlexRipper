@@ -492,6 +492,7 @@ export interface DownloadManagerModelDTO {
 }
 
 export interface UserInterfaceSettingsModelDTO {
+  language: string;
   confirmationSettings: ConfirmationSettingsModelDTO;
   displaySettings: DisplaySettingsModelDTO;
   dateTimeSettings: DateTimeModelDTO;

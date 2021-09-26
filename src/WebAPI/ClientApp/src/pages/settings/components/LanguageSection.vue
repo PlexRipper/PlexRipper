@@ -13,7 +13,7 @@
 								<help-icon help-id="help.settings.ui.language.language-selection" />
 							</td>
 							<td>
-								<p-select :value="shortDateFormat" :items="languageOptions" @input="updateSettings" />
+								<p-select :value="language" :items="languageOptions" @input="updateSettings" />
 							</td>
 						</tr>
 					</tbody>
@@ -26,6 +26,8 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
+import { SettingsService } from '@service';
+import { map } from 'rxjs/operators';
 interface ILanguageOption {
 	text: string;
 	value: string;
@@ -34,7 +36,7 @@ interface ILanguageOption {
 
 @Component<LanguageSection>({})
 export default class LanguageSection extends Vue {
-	shortDateFormat: string = '';
+	language: string = '';
 	languageOptions: ILanguageOption[] = [];
 
 	updateSettings(langCode: string): void {
@@ -43,6 +45,11 @@ export default class LanguageSection extends Vue {
 	}
 
 	mounted() {
+		this.$subscribeTo(SettingsService.getUserInterfaceSettings().pipe(map((x) => x.language)), (language) => {
+			this.language = language;
+			this.$nuxt.$i18n.setLocale(language);
+		});
+
 		const locals = this.$nuxt.$i18n.locales as any[];
 		for (const localsKey of locals) {
 			this.languageOptions.push({

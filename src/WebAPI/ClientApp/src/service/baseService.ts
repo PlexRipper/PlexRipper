@@ -1,7 +1,7 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { ObservableStore } from '@codewithdan/observable-store';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 
 export default abstract class BaseService extends ObservableStore<IStoreState> {

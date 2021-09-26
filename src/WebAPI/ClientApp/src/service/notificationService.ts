@@ -4,7 +4,7 @@ import { NotificationDTO } from '@dto/mainApi';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, GlobalService } from '@service';
 import { clearAllNotifications, getNotifications, hideNotification } from '@api/notificationApi';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import { Context } from '@nuxt/types';
 
 export class NotificationService extends BaseService {

@@ -6,7 +6,7 @@ import { take } from 'rxjs/operators';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { DownloadTaskCreationProgress, SettingsModelDTO } from '@dto/mainApi';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import * as Service from '@service';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
 

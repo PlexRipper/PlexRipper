@@ -1,5 +1,5 @@
 import Log from 'consola';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import { Observable, of } from 'rxjs';
 import {
 	AccountSettingsModelDTO,

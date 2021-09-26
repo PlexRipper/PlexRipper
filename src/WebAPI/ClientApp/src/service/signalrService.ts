@@ -14,7 +14,7 @@ import {
 } from '@dto/mainApi';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import { isEqual } from 'lodash';
 
 export class SignalrService extends BaseService {

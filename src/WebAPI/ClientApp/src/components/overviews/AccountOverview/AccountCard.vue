@@ -8,11 +8,19 @@
 		<!-- Edit Account -->
 		<v-card-text v-else>
 			<!-- Validation Chip -->
-			<v-chip v-if="account.isValidated" class="ma-2" color="green" text-color="white"> Validated </v-chip>
-			<v-chip v-else class="ma-2" color="red" text-color="white"> NotValidated </v-chip>
+			<v-chip v-if="account.isValidated" class="ma-2" color="green" text-color="white">
+				{{ $t('general.commands.validated') }}
+			</v-chip>
+			<v-chip v-else class="ma-2" color="red" text-color="white">
+				{{ $t('general.commands.not-validated') }}
+			</v-chip>
 			<!-- IsEnabled Chip -->
-			<v-chip v-if="account.isEnabled" class="ma-2" color="green" text-color="white"> Enabled </v-chip>
-			<v-chip v-else class="ma-2" color="red" text-color="white"> Disabled </v-chip>
+			<v-chip v-if="account.isEnabled" class="ma-2" color="green" text-color="white">
+				{{ $t('general.commands.enabled') }}
+			</v-chip>
+			<v-chip v-else class="ma-2" color="red" text-color="white">
+				{{ $t('general.commands.disabled') }}
+			</v-chip>
 		</v-card-text>
 	</v-card>
 </template>

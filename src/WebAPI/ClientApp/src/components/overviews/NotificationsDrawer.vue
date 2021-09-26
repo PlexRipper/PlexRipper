@@ -28,7 +28,7 @@
 							<v-icon>mdi-check-circle-outline</v-icon>
 						</v-list-item-icon>
 						<v-list-item-content>
-							<v-list-item-title>No notifications available</v-list-item-title>
+							<v-list-item-title> {{ $t('components.notifications-drawer.no-notifications') }}</v-list-item-title>
 						</v-list-item-content>
 					</v-list-item>
 				</v-list>
@@ -42,7 +42,7 @@
 						<v-icon>mdi-close-circle</v-icon>
 					</v-list-item-icon>
 					<v-list-item-content>
-						<v-list-item-title>Clear All Notifications </v-list-item-title>
+						<v-list-item-title>{{ $t('components.notifications-drawer.clear-notifications') }}</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
 			</v-list>

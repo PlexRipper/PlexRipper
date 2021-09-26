@@ -35,14 +35,16 @@
 			</template>
 		</vue-scroll>
 		<!-- Menu items -->
-		<template #append>
+		<template v-if="notifications.length > 0" #append>
 			<v-list>
 				<v-list-item @click="clearAllNotifications">
 					<v-list-item-icon>
 						<v-icon>mdi-close-circle</v-icon>
 					</v-list-item-icon>
 					<v-list-item-content>
-						<v-list-item-title>{{ $t('components.notifications-drawer.clear-notifications') }}</v-list-item-title>
+						<v-list-item-title>
+							{{ $t('components.notifications-drawer.clear-notifications') }}
+						</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
 			</v-list>
@@ -72,6 +74,7 @@ export default class NotificationsDrawer extends Vue {
 
 	clearAllNotifications() {
 		NotificationService.clearAllNotifications();
+		this.$emit('cleared');
 	}
 
 	mounted(): void {

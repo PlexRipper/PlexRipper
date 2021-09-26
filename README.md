@@ -99,7 +99,7 @@ Make PlexRipper easier to use for everyone by translating it to your native lang
 2. Create a Github issue explaining the language you would like to translate to.
    - This is to avoid multiple people translating to the same language
 
-3. Make a copy of [en-US.json](https://github.com/PlexRipper/PlexRipper/tree/master/src/WebUI/src/lang) into the "lang" folder.
+3. Make a copy of [en-US.json](https://github.com/PlexRipper/PlexRipper/tree/master/src/WebAPI/ClientApp/src/lang) into the "lang" folder and rename it to your language. e.g. "fr.json, es.json".
 
 4. Translate only the text after the ":"!
 

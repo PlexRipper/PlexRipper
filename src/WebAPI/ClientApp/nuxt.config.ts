@@ -61,7 +61,7 @@ const config: NuxtConfig = {
 	 */
 	modules: [
 		// Doc: https://i18n.nuxtjs.org/
-		'nuxt-i18n',
+		'@nuxtjs/i18n',
 	],
 	/*
 	 ** Nuxt.js dev-modules

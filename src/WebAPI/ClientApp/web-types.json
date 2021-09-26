@@ -727,6 +727,14 @@
           }
         },
         {
+          "name": "LanguageSection",
+          "description": "",
+          "source": {
+            "module": "./src/pages/settings/components/LanguageSection.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "LoadingSpinner",
           "description": "",
           "attributes": [
@@ -1069,6 +1077,11 @@
               }
             }
           ],
+          "events": [
+            {
+              "name": "cleared"
+            }
+          ],
           "source": {
             "module": "./src/components/overviews/NotificationsDrawer.vue",
             "symbol": "default"
@@ -1370,6 +1383,11 @@
                 "type": "any"
               },
               "default": "() => {\r\n    return { offsetY: true, contentClass: 'menu-background' };\r\n}"
+            }
+          ],
+          "slots": [
+            {
+              "name": "top"
             }
           ],
           "source": {

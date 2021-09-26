@@ -124,11 +124,12 @@ const config: NuxtConfig = {
 	i18n: {
 		lazy: true,
 		langDir: 'lang/',
+		defaultLocale: 'en-US',
 		locales: [
-			{ code: 'en', iso: 'en-US', file: 'en-US.json' },
-			{ code: 'fr', iso: 'fr-FR', file: 'fr-FR.json' },
+			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
+			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
 		],
-		defaultLocale: 'en',
+		strategy: 'no_prefix',
 	},
 	/*
 	 ** Build configuration

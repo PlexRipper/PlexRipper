@@ -1,47 +1,47 @@
 <template>
 	<v-select
-		:dense="dense"
-		:filled="filled"
-		:outlined="outlined"
-		:color="color"
-		:hide-details="hideDetails"
-		:menu-props="menuProps"
+		:dense="true"
+		:filled="true"
+		:outlined="true"
+		color="red"
+		hide-details="auto"
+		:menu-props="{ offsetY: true, contentClass: 'menu-background' }"
+		:items="items"
+		:value="value"
 		v-bind="$attrs"
 		v-on="$listeners"
 	>
-		<template #item="slotProps">
-			<slot name="item" v-bind="slotProps"></slot>
+		<template #item="{ item }">
+			<v-row class="my-2 no-wrap" align="center">
+				<v-col cols="auto">
+					<v-icon v-if="item.icon">{{ item.icon }}</v-icon>
+					<v-img v-if="item.img" :src="item.img" :height="50" :max-width="80" :alt="item.text" />
+				</v-col>
+				<v-col cols="10">
+					<span class="pa-2">
+						{{ item.text }}
+					</span>
+				</v-col>
+			</v-row>
 		</template>
 	</v-select>
 </template>
 
-<script lang="ts">
-import { Component, Prop } from 'vue-property-decorator';
+<script>
 import { VSelect } from 'vuetify/lib';
 
-@Component<PSelect>({})
-export default class PSelect extends VSelect {
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly dense!: boolean;
-
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly filled!: boolean;
-
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly outlined!: boolean;
-
-	@Prop({ required: false, type: String, default: 'red' })
-	readonly color!: string;
-
-	@Prop({ required: false, type: String, default: 'auto' })
-	readonly hideDetails!: string;
-
-	@Prop({
-		required: false,
-		default: () => {
-			return { offsetY: true, contentClass: 'menu-background' };
+export default {
+	name: 'PSelect',
+	extends: VSelect,
+	props: {
+		items: {
+			type: Array,
+			default: () => [],
 		},
-	})
-	readonly menuProps!: any;
-}
+		value: {
+			type: String,
+			default: '',
+		},
+	},
+};
 </script>

@@ -84,12 +84,39 @@
 				}
 			},
 			"ui": {
+				"language": {
+					"language-selection": {
+						"label": "Language",
+						"title": "",
+						"text": ""
+					}
+				},
 				"date-and-time": {
-					"short-date-format": "Short Date Format",
-					"long-date-format": "Long Date Format",
-					"time-zone": "Time Zone",
-					"time-format": "Time Format",
-					"show-relative-dates": "Show Relative Dates"
+					"short-date-format": {
+						"label": "Short Date Format",
+						"title": "",
+						"text": ""
+					},
+					"long-date-format": {
+						"label": "Long Date Format",
+						"title": "",
+						"text": ""
+					},
+					"time-zone": {
+						"label": "Time Zone",
+						"title": "",
+						"text": ""
+					},
+					"time-format": {
+						"label": "Time Format",
+						"title": "",
+						"text": ""
+					},
+					"show-relative-dates": {
+						"label": "Show Relative Dates",
+						"title": "",
+						"text": ""
+					}
 				},
 				"confirmation-settings": {
 					"download-movie-confirmation": {
@@ -204,6 +231,9 @@
 		},
 		"settings": {
 			"ui": {
+				"language": {
+					"header": "Language"
+				},
 				"date-and-time": {
 					"header": "Date and Time"
 				},
@@ -242,7 +272,7 @@
 		}
 	},
 	"components": {
-		"account-card: {
+		"account-card": {
 			"no-notifications": "No notifications available",
 			"clear-notifications": "Clear All Notifications"
 		},

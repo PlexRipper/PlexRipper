@@ -112,6 +112,7 @@ namespace PlexRipper.Settings
             ActiveAccountId = sourceSettings.ActiveAccountId;
             DownloadSegments = sourceSettings.DownloadSegments;
 
+            Language = sourceSettings.Language;
             AskDownloadMovieConfirmation = sourceSettings.AskDownloadMovieConfirmation;
             AskDownloadTvShowConfirmation = sourceSettings.AskDownloadTvShowConfirmation;
             AskDownloadSeasonConfirmation = sourceSettings.AskDownloadSeasonConfirmation;

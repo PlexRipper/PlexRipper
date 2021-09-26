@@ -53,12 +53,14 @@ export default class DateTime extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SettingsService.getDateTimeSettings(), (dateTimeSettings) => {
-			if (dateTimeSettings) {
-				this.shortDateFormat = dateTimeSettings.shortDateFormat;
-				this.longDateFormat = dateTimeSettings.longDateFormat;
-				this.timeFormat = dateTimeSettings.timeFormat;
-			}
+		this.$subscribeTo(SettingsService.getShortDateFormat(), (value) => {
+			this.shortDateFormat = value;
+		});
+		this.$subscribeTo(SettingsService.getLongDateFormat(), (value) => {
+			this.longDateFormat = value;
+		});
+		this.$subscribeTo(SettingsService.getTimeFormat(), (value) => {
+			this.timeFormat = value;
 		});
 	}
 }

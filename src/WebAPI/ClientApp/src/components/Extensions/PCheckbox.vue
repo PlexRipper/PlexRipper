@@ -1,18 +1,17 @@
-<script>
-import VCheckbox from 'vuetify/lib/components/VCheckbox/VCheckbox';
+<template>
+	<v-checkbox :value="value" color="red" class="ma-3 pt-0" hide-details @click="handleInput()" />
+</template>
 
-export default {
-	name: 'PCheckbox',
-	extends: VCheckbox,
-	props: {
-		color: {
-			type: String,
-			default: 'red',
-		},
-		hideDetails: {
-			type: Boolean,
-			default: true,
-		},
-	},
-};
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator';
+
+@Component
+export default class PCheckbox extends Vue {
+	@Prop({ required: true, type: Boolean })
+	readonly value!: boolean;
+
+	handleInput(): void {
+		this.$emit('input', !this.value);
+	}
+}
 </script>

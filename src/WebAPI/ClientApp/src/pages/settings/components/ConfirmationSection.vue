@@ -51,6 +51,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { SettingsService } from '@service';
+import Log from 'consola';
 
 @Component
 export default class ConfirmationSection extends Vue {
@@ -60,22 +61,32 @@ export default class ConfirmationSection extends Vue {
 	askDownloadEpisodeConfirmation: boolean = false;
 
 	updateSettings(index: number, state: boolean): void {
-		SettingsService.updateConfirmationSettings({
-			askDownloadMovieConfirmation: index === 0 ? state : this.askDownloadMovieConfirmation,
-			askDownloadTvShowConfirmation: index === 1 ? state : this.askDownloadTvShowConfirmation,
-			askDownloadSeasonConfirmation: index === 2 ? state : this.askDownloadSeasonConfirmation,
-			askDownloadEpisodeConfirmation: index === 3 ? state : this.askDownloadEpisodeConfirmation,
-		});
+		switch (index) {
+			case 0:
+				return SettingsService.updateSetting('askDownloadMovieConfirmation', state);
+			case 1:
+				return SettingsService.updateSetting('askDownloadTvShowConfirmation', state);
+			case 2:
+				return SettingsService.updateSetting('askDownloadSeasonConfirmation', state);
+			case 3:
+				return SettingsService.updateSetting('askDownloadEpisodeConfirmation', state);
+			default:
+				Log.error(`Failed to update settings with index ${index} and value ${state}`);
+		}
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SettingsService.getConfirmationSettings(), (uiSettings) => {
-			if (uiSettings) {
-				this.askDownloadMovieConfirmation = uiSettings.askDownloadMovieConfirmation;
-				this.askDownloadTvShowConfirmation = uiSettings.askDownloadTvShowConfirmation;
-				this.askDownloadSeasonConfirmation = uiSettings.askDownloadSeasonConfirmation;
-				this.askDownloadEpisodeConfirmation = uiSettings.askDownloadEpisodeConfirmation;
-			}
+		this.$subscribeTo(SettingsService.getAskDownloadMovieConfirmation(), (value) => {
+			this.askDownloadMovieConfirmation = value;
+		});
+		this.$subscribeTo(SettingsService.getAskDownloadTvShowConfirmation(), (value) => {
+			this.askDownloadTvShowConfirmation = value;
+		});
+		this.$subscribeTo(SettingsService.getAskDownloadSeasonConfirmation(), (value) => {
+			this.askDownloadSeasonConfirmation = value;
+		});
+		this.$subscribeTo(SettingsService.getAskDownloadEpisodeConfirmation(), (value) => {
+			this.askDownloadEpisodeConfirmation = value;
 		});
 	}
 }

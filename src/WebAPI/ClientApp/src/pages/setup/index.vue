@@ -191,7 +191,7 @@ export default class Setup extends Vue {
 	}
 
 	finishSetup(): void {
-		SettingsService.updateFirstTimeSetup(false);
+		SettingsService.updateSetting('firstTimeSetup', false);
 		this.$router.push('/');
 	}
 

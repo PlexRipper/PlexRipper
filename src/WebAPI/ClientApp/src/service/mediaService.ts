@@ -1,4 +1,3 @@
-import Log from 'consola';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
 import { PlexMediaType } from '@dto/mainApi';

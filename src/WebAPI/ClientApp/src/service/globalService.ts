@@ -5,7 +5,7 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { ObservableStore } from '@codewithdan/observable-store';
-import { DownloadTaskCreationProgress, SettingsModelDTO } from '@dto/mainApi';
+import { DownloadTaskCreationProgress, SettingsModelDTO, ViewMode } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import * as Service from '@service';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
@@ -31,6 +31,22 @@ export class GlobalService extends Service.BaseService {
 		syncServerProgress: [],
 		libraryProgress: [],
 		downloadTaskCreationProgress: {} as DownloadTaskCreationProgress,
+		// Settings
+		activeAccountId: 0,
+		firstTimeSetup: true,
+		downloadSegments: 4,
+		askDownloadMovieConfirmation: true,
+		askDownloadTvShowConfirmation: true,
+		askDownloadSeasonConfirmation: true,
+		askDownloadEpisodeConfirmation: true,
+		tvShowViewMode: ViewMode.Poster,
+		movieViewMode: ViewMode.Poster,
+		shortDateFormat: 'dd/MM/yyyy',
+		longDateFormat: 'EEEE, dd MMMM yyyy',
+		timeFormat: 'HH:MM:ss',
+		timeZone: 'UTC',
+		showRelativeDates: true,
+		language: 'en-US',
 	};
 
 	constructor() {

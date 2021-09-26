@@ -472,42 +472,24 @@ export type ResultDTOOfSettingsModelDTO = ResultDTO & { value: SettingsModelDTO 
 
 export interface SettingsModelDTO {
   firstTimeSetup: boolean;
-  accountSettings: AccountSettingsModelDTO;
-  advancedSettings: AdvancedSettingsModelDTO;
-  userInterfaceSettings: UserInterfaceSettingsModelDTO;
-}
 
-export interface AccountSettingsModelDTO {
   /** @format int32 */
   activeAccountId: number;
-}
 
-export interface AdvancedSettingsModelDTO {
-  downloadManager: DownloadManagerModelDTO;
-}
-
-export interface DownloadManagerModelDTO {
   /** @format int32 */
   downloadSegments: number;
-}
-
-export interface UserInterfaceSettingsModelDTO {
-  language: string;
-  confirmationSettings: ConfirmationSettingsModelDTO;
-  displaySettings: DisplaySettingsModelDTO;
-  dateTimeSettings: DateTimeModelDTO;
-}
-
-export interface ConfirmationSettingsModelDTO {
   askDownloadMovieConfirmation: boolean;
   askDownloadTvShowConfirmation: boolean;
   askDownloadSeasonConfirmation: boolean;
   askDownloadEpisodeConfirmation: boolean;
-}
-
-export interface DisplaySettingsModelDTO {
   tvShowViewMode: ViewMode;
   movieViewMode: ViewMode;
+  shortDateFormat: string;
+  longDateFormat: string;
+  timeFormat: string;
+  timeZone: string;
+  showRelativeDates: boolean;
+  language: string;
 }
 
 export enum ViewMode {
@@ -515,14 +497,6 @@ export enum ViewMode {
   Table = "Table",
   Poster = "Poster",
   Overview = "Overview",
-}
-
-export interface DateTimeModelDTO {
-  shortDateFormat: string;
-  longDateFormat: string;
-  timeFormat: string;
-  timeZone: string;
-  showRelativeDates: boolean;
 }
 
 export type ResultDTOOfInteger = ResultDTO & { value: number };

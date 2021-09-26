@@ -27,7 +27,7 @@
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { SettingsService } from '@service';
-import { map } from 'rxjs/operators';
+
 interface ILanguageOption {
 	text: string;
 	value: string;
@@ -42,10 +42,11 @@ export default class LanguageSection extends Vue {
 	updateSettings(langCode: string): void {
 		Log.debug('Changed language to: ', langCode);
 		this.$nuxt.$i18n.setLocale(langCode);
+		SettingsService.updateSetting('language', langCode);
 	}
 
 	mounted() {
-		this.$subscribeTo(SettingsService.getUserInterfaceSettings().pipe(map((x) => x.language)), (language) => {
+		this.$subscribeTo(SettingsService.getLanguage(), (language) => {
 			this.language = language;
 			this.$nuxt.$i18n.setLocale(language);
 		});

@@ -15,7 +15,7 @@ import {
 import IObjectUrl from '@interfaces/IObjectUrl';
 import IAlert from '@interfaces/IAlert';
 
-export default interface IStoreState {
+export default interface IStoreState extends SettingsModelDTO {
 	accounts: PlexAccountDTO[];
 	servers: PlexServerDTO[];
 	libraries: PlexLibraryDTO[];

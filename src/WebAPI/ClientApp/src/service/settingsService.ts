@@ -1,30 +1,34 @@
 import Log from 'consola';
-import IStoreState from '@interfaces/service/IStoreState';
 import { Observable, of } from 'rxjs';
-import {
-	AccountSettingsModelDTO,
-	AdvancedSettingsModelDTO,
-	ConfirmationSettingsModelDTO,
-	DateTimeModelDTO,
-	DisplaySettingsModelDTO,
-	DownloadManagerModelDTO,
-	SettingsModelDTO,
-	UserInterfaceSettingsModelDTO,
-	ViewMode,
-} from '@dto/mainApi';
-import { filter, switchMap, take, tap } from 'rxjs/operators';
+import { SettingsModelDTO, ViewMode } from '@dto/mainApi';
+import { distinctUntilChanged, map, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, GlobalService } from '@service';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import { Context } from '@nuxt/types';
+import { isEqual } from 'lodash';
+import IStoreState from '@interfaces/service/IStoreState';
 
 export class SettingsService extends BaseService {
 	// region Constructor and Setup
-
 	public constructor() {
 		super({
 			stateSliceSelector: (state: IStoreState) => {
 				return {
-					settings: state.settings,
+					activeAccountId: state.activeAccountId,
+					firstTimeSetup: state.firstTimeSetup,
+					downloadSegments: state.downloadSegments,
+					askDownloadMovieConfirmation: state.askDownloadMovieConfirmation,
+					askDownloadTvShowConfirmation: state.askDownloadTvShowConfirmation,
+					askDownloadSeasonConfirmation: state.askDownloadSeasonConfirmation,
+					askDownloadEpisodeConfirmation: state.askDownloadEpisodeConfirmation,
+					tvShowViewMode: state.tvShowViewMode,
+					movieViewMode: state.movieViewMode,
+					shortDateFormat: state.shortDateFormat,
+					longDateFormat: state.longDateFormat,
+					timeFormat: state.timeFormat,
+					timeZone: state.timeZone,
+					showRelativeDates: state.showRelativeDates,
+					language: state.language,
 				};
 			},
 		});
@@ -40,11 +44,6 @@ export class SettingsService extends BaseService {
 				switchMap(() => this.fetchSettings()),
 				take(1),
 			)
-			.subscribe();
-
-		// On settings service update => send update to back-end
-		this.getSettings()
-			.pipe(switchMap((settings) => updateSettings(settings)))
 			.subscribe();
 
 		this.getFirstTimeSetup().subscribe((state) => {
@@ -66,7 +65,7 @@ export class SettingsService extends BaseService {
 			tap((settings) => {
 				Log.debug(`SettingsService => Fetch Settings`, settings);
 				if (settings) {
-					this.setState({ settings }, 'Fetch Settings');
+					this.setState(settings, 'Fetch Settings');
 				}
 			}),
 		);
@@ -74,154 +73,134 @@ export class SettingsService extends BaseService {
 	// endregion
 
 	// region Settings
-	public getSettings(): Observable<SettingsModelDTO> {
-		return this.stateChanged.pipe(
-			filter((x) => x !== null),
-			switchMap((x) => of(x.settings)),
-		);
-	}
 
-	public updateSettings(): void {
-		const settings = this.getState().settings;
-		if (settings) {
-			updateSettings(settings).subscribe((settings) => {
-				if (settings.isSuccess) {
-					this.setState({ settings: settings.value });
-				}
-			});
-		} else {
-			Log.warn('SettingsService => updateSettings: settings was invalid, will not send as an update.');
-		}
+	public updateSetting<T>(setting: keyof SettingsModelDTO, value: T): void {
+		const x = {};
+		x[setting] = value;
+		this.setState(x, `Update setting: ${setting} with value: ${value}`);
+		updateSettings(this.getState()).pipe(take(1)).subscribe();
 	}
 	// endregion
 
 	public getFirstTimeSetup(): Observable<boolean> {
-		return this.getSettings().pipe(switchMap((x) => of(x.firstTimeSetup)));
+		return this.stateChanged.pipe(
+			map((x) => x?.firstTimeSetup),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
-	public updateFirstTimeSetup(state: boolean): void {
-		const settings = this.getState().settings;
-		this.setState({
-			...this.getState(),
-			settings: {
-				...settings,
-				firstTimeSetup: state,
-			},
-		});
+	// region ConfirmationSettings
+	public getLanguage(): Observable<string> {
+		return this.stateChanged.pipe(
+			map((x) => x?.language),
+			distinctUntilChanged(isEqual),
+		);
 	}
+	// endregion
+
+	// region ConfirmationSettings
+	public getAskDownloadMovieConfirmation(): Observable<boolean> {
+		return this.stateChanged.pipe(
+			map((x) => x?.askDownloadMovieConfirmation),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getAskDownloadTvShowConfirmation(): Observable<boolean> {
+		return this.stateChanged.pipe(
+			map((x) => x?.askDownloadTvShowConfirmation),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getAskDownloadSeasonConfirmation(): Observable<boolean> {
+		return this.stateChanged.pipe(
+			map((x) => x?.askDownloadSeasonConfirmation),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getAskDownloadEpisodeConfirmation(): Observable<boolean> {
+		return this.stateChanged.pipe(
+			map((x) => x?.askDownloadEpisodeConfirmation),
+			distinctUntilChanged(isEqual),
+		);
+	}
+	// endregion
 
 	// region UserInterfaceSettings
 
-	public getUserInterfaceSettings(): Observable<UserInterfaceSettingsModelDTO> {
-		return this.getSettings().pipe(switchMap((x) => of(x.userInterfaceSettings)));
+	// endregion
+
+	// region DateTimeSettings
+	public getShortDateFormat(): Observable<string> {
+		return this.stateChanged.pipe(
+			map((x) => x?.shortDateFormat),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
-	public getConfirmationSettings(): Observable<ConfirmationSettingsModelDTO> {
-		return this.getUserInterfaceSettings().pipe(switchMap((x) => of(x.confirmationSettings)));
+	public getLongDateFormat(): Observable<string> {
+		return this.stateChanged.pipe(
+			map((x) => x?.longDateFormat),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
-	public getDisplaySettings(): Observable<DisplaySettingsModelDTO> {
-		return this.getUserInterfaceSettings().pipe(switchMap((x) => of(x.displaySettings)));
+	public getTimeFormat(): Observable<string> {
+		return this.stateChanged.pipe(
+			map((x) => x?.timeFormat),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
-	public getDateTimeSettings(): Observable<DateTimeModelDTO> {
-		return this.getUserInterfaceSettings().pipe(switchMap((x) => of(x.dateTimeSettings)));
+	public getTimeZone(): Observable<string> {
+		return this.stateChanged.pipe(
+			map((x) => x?.timeZone),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
-	public updateConfirmationSettings(confirmationSettings: ConfirmationSettingsModelDTO): void {
-		const userInterfaceSettings = this.getState().settings.userInterfaceSettings;
-		this.updateUserInterfaceSettings({ ...userInterfaceSettings, confirmationSettings });
+	public getShowRelativeDates(): Observable<boolean> {
+		return this.stateChanged.pipe(
+			map((x) => x?.showRelativeDates),
+			distinctUntilChanged(isEqual),
+		);
+	}
+	// endregion
+
+	// region DisplaySettings
+	public getMovieViewMode(): Observable<ViewMode> {
+		return this.stateChanged.pipe(
+			map((x) => x?.movieViewMode),
+			distinctUntilChanged(isEqual),
+		);
 	}
 
-	public updateDateTimeSettings(dateTimeSettings: DateTimeModelDTO): void {
-		const userInterfaceSettings = this.getState().settings.userInterfaceSettings;
-		this.updateUserInterfaceSettings({ ...userInterfaceSettings, dateTimeSettings });
-	}
-
-	public updateDisplaySettings(displaySettings: DisplaySettingsModelDTO): void {
-		const userInterfaceSettings = this.getState().settings.userInterfaceSettings;
-		this.updateUserInterfaceSettings({ ...userInterfaceSettings, displaySettings });
-	}
-
-	public updateMovieViewMode(viewMode: ViewMode): void {
-		const displaySettings = this.getState().settings.userInterfaceSettings.displaySettings;
-		this.updateDisplaySettings({ ...displaySettings, movieViewMode: viewMode });
-	}
-
-	public updateTvShowViewMode(viewMode: ViewMode): void {
-		const displaySettings = this.getState().settings.userInterfaceSettings.displaySettings;
-		this.updateDisplaySettings({ ...displaySettings, tvShowViewMode: viewMode });
-	}
-
-	public updateUserInterfaceSettings(userInterfaceSettings: UserInterfaceSettingsModelDTO): void {
-		const settings = this.getState().settings;
-		this.setState({
-			...this.getState(),
-			settings: {
-				...settings,
-				userInterfaceSettings,
-			},
-		});
+	public getTvShowViewMode(): Observable<ViewMode> {
+		return this.stateChanged.pipe(
+			map((x) => x?.tvShowViewMode),
+			distinctUntilChanged(isEqual),
+		);
 	}
 	// endregion
 
 	// region accountSettings
-
-	public getAccountSettings(): Observable<AccountSettingsModelDTO> {
-		return this.getSettings().pipe(switchMap((x) => of(x.accountSettings)));
-	}
-
 	public getActiveAccountId(): Observable<number> {
-		return this.getAccountSettings().pipe(switchMap((x) => of(x?.activeAccountId ?? 0)));
+		return this.stateChanged.pipe(
+			map((x) => x?.activeAccountId),
+			distinctUntilChanged(isEqual),
+		);
 	}
-
-	public updateActiveAccountSettings(activeAccountId: number): void {
-		const accountSettings = this.getState().settings.accountSettings;
-		this.updateAccountSettings({ ...accountSettings, activeAccountId });
-	}
-
-	public updateAccountSettings(accountSettings: AccountSettingsModelDTO): void {
-		const settings = this.getState().settings;
-		this.setState({
-			...this.getState(),
-			settings: {
-				...settings,
-				accountSettings,
-			},
-		});
-	}
-
 	// endregion
 
 	// region advancedSettings
-
-	public getAdvancedSettings(): Observable<AdvancedSettingsModelDTO> {
-		return this.getSettings().pipe(switchMap((x: SettingsModelDTO) => of(x.advancedSettings)));
+	public getDownloadSegments(): Observable<number> {
+		return this.stateChanged.pipe(
+			map((x) => x?.downloadSegments),
+			distinctUntilChanged(isEqual),
+		);
 	}
-
-	public getDownloadManagerSettings(): Observable<DownloadManagerModelDTO> {
-		return this.getAdvancedSettings().pipe(switchMap((x) => of(x?.downloadManager)));
-	}
-
-	public updateAdvancedSettings(advancedSettings: AdvancedSettingsModelDTO): void {
-		const settings = this.getState().settings;
-		this.setState({
-			...this.getState(),
-			settings: {
-				...settings,
-				advancedSettings,
-			},
-		});
-	}
-
-	public updateDownloadManagerSettings(downloadManager: DownloadManagerModelDTO): void {
-		const advancedSettings = this.getState().settings.advancedSettings;
-		this.updateAdvancedSettings({
-			...advancedSettings,
-			downloadManager,
-		});
-	}
-
 	// endregion
 }
 

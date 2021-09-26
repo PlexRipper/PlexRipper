@@ -156,9 +156,9 @@ export default class MediaOverview extends Vue {
 	changeView(viewMode: ViewMode): void {
 		switch (this.mediaType) {
 			case PlexMediaType.Movie:
-				return SettingsService.updateMovieViewMode(viewMode);
+				return SettingsService.updateSetting('movieViewMode', viewMode);
 			case PlexMediaType.TvShow:
-				return SettingsService.updateTvShowViewMode(viewMode);
+				return SettingsService.updateSetting('tvShowViewMode', viewMode);
 		}
 		Log.error('Could not set view mode for type' + this.mediaType);
 	}
@@ -316,9 +316,12 @@ export default class MediaOverview extends Vue {
 		this.$subscribeTo(SettingsService.getActiveAccountId(), (id) => (this.activeAccountId = id));
 
 		// Get display settings
-		this.$subscribeTo(SettingsService.getDisplaySettings(), (x) => {
-			this.movieViewMode = x.movieViewMode;
-			this.tvShowViewMode = x.tvShowViewMode;
+		this.$subscribeTo(SettingsService.getMovieViewMode(), (value) => {
+			this.movieViewMode = value;
+		});
+
+		this.$subscribeTo(SettingsService.getTvShowViewMode(), (value) => {
+			this.tvShowViewMode = value;
 		});
 
 		// Setup progress bar

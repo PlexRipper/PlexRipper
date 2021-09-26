@@ -81,7 +81,7 @@ export default class AppBar extends Vue {
 	}
 
 	updateActiveAccountId(accountId: number): void {
-		SettingsService.updateActiveAccountSettings(accountId);
+		SettingsService.updateSetting('activeAccountId', accountId);
 	}
 
 	refreshAccount(accountId: number = 0): void {

@@ -227,13 +227,17 @@ export default class DownloadConfirmation extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SettingsService.getConfirmationSettings(), (uiSettings) => {
-			if (uiSettings) {
-				this.askDownloadMovieConfirmation = uiSettings.askDownloadMovieConfirmation;
-				this.askDownloadTvShowConfirmation = uiSettings.askDownloadTvShowConfirmation;
-				this.askDownloadSeasonConfirmation = uiSettings.askDownloadSeasonConfirmation;
-				this.askDownloadEpisodeConfirmation = uiSettings.askDownloadEpisodeConfirmation;
-			}
+		this.$subscribeTo(SettingsService.getAskDownloadMovieConfirmation(), (value) => {
+			this.askDownloadMovieConfirmation = value;
+		});
+		this.$subscribeTo(SettingsService.getAskDownloadTvShowConfirmation(), (value) => {
+			this.askDownloadTvShowConfirmation = value;
+		});
+		this.$subscribeTo(SettingsService.getAskDownloadSeasonConfirmation(), (value) => {
+			this.askDownloadSeasonConfirmation = value;
+		});
+		this.$subscribeTo(SettingsService.getAskDownloadEpisodeConfirmation(), (value) => {
+			this.askDownloadEpisodeConfirmation = value;
 		});
 	}
 }

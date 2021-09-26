@@ -1,4 +1,5 @@
 name: Publish Docker image on push 'master' branch
+
 'on':
   push:
     branches:
@@ -15,3 +16,20 @@ jobs:
           username: '${{ secrets.DOCKER_USERNAME }}'
           password: '${{ secrets.DOCKER_PASSWORD }}'
           tags: "latest"
+ 
+  PushContainerReadme:
+    runs-on: ubuntu-latest
+    name: Push README to Docker Hub
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+      - name: push README to Dockerhub
+        uses: christian-korneck/update-container-description-action@v1
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}'
+          DOCKER_PASS: '${{ secrets.DOCKER_PASSWORD }}'
+        with:
+          destination_container_repo: plexripper/plexripper
+          provider: dockerhub
+          short_description: 'my short description 😊'
+          readme_file: 'README.md'

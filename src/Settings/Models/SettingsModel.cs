@@ -29,7 +29,7 @@ namespace PlexRipper.Settings.Models
 
         #region AccountSettings
 
-        public int ActiveAccountId { get; set; }
+        public int ActiveAccountId { get; set; } = 0;
 
         #endregion
 
@@ -37,7 +37,7 @@ namespace PlexRipper.Settings.Models
 
         #region DownloadManagerSettings
 
-        public int DownloadSegments { get; set; }
+        public int DownloadSegments { get; set; } = 4;
 
         #endregion
 
@@ -65,23 +65,23 @@ namespace PlexRipper.Settings.Models
 
         #region DisplaySettingsModel
 
-        public ViewMode TvShowViewMode { get; set; }
+        public ViewMode TvShowViewMode { get; set; } = ViewMode.Poster;
 
-        public ViewMode MovieViewMode { get; set; }
+        public ViewMode MovieViewMode { get; set; } = ViewMode.Poster;
 
         #endregion
 
         #region DateTimeModel
 
-        public string ShortDateFormat { get; set; }
+        public string ShortDateFormat { get; set; } = "dd/MM/yyyy";
 
-        public string LongDateFormat { get; set; }
+        public string LongDateFormat { get; set; } = "EEEE, dd MMMM yyyy";
 
-        public string TimeFormat { get; set; }
+        public string TimeFormat { get; set; } = "HH:mm:ss";
 
-        public string TimeZone { get; set; }
+        public string TimeZone { get; set; } = "UTC";
 
-        public bool ShowRelativeDates { get; set; }
+        public bool ShowRelativeDates { get; set; } = true;
 
         #endregion
 
@@ -304,25 +304,27 @@ namespace PlexRipper.Settings.Models
 
         protected void SetDefaultValues()
         {
-            FirstTimeSetup = true;
-            ActiveAccountId = 0;
-            DownloadSegments = 4;
+            var source = new SettingsModel();
 
-            Language = "en-US";
+            FirstTimeSetup = source.FirstTimeSetup;
+            ActiveAccountId = source.ActiveAccountId;
+            DownloadSegments = source.DownloadSegments;
 
-            AskDownloadMovieConfirmation = true;
-            AskDownloadTvShowConfirmation = true;
-            AskDownloadSeasonConfirmation = true;
-            AskDownloadEpisodeConfirmation = true;
+            Language = source.Language;
 
-            TvShowViewMode = ViewMode.Poster;
-            MovieViewMode = ViewMode.Poster;
+            AskDownloadMovieConfirmation = source.AskDownloadMovieConfirmation;
+            AskDownloadTvShowConfirmation = source.AskDownloadTvShowConfirmation;
+            AskDownloadSeasonConfirmation = source.AskDownloadSeasonConfirmation;
+            AskDownloadEpisodeConfirmation = source.AskDownloadEpisodeConfirmation;
 
-            ShortDateFormat = "dd/MM/yyyy";
-            LongDateFormat = "EEEE, dd MMMM yyyy";
-            TimeFormat = "HH:MM:ss";
-            TimeZone = "UTC";
-            ShowRelativeDates = true;
+            TvShowViewMode = source.TvShowViewMode;
+            MovieViewMode = source.MovieViewMode;
+
+            ShortDateFormat = source.ShortDateFormat;
+            LongDateFormat = source.LongDateFormat;
+            TimeFormat = source.TimeFormat;
+            TimeZone = source.TimeZone;
+            ShowRelativeDates = source.ShowRelativeDates;
         }
     }
 }

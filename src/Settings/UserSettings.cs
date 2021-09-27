@@ -91,10 +91,7 @@ namespace PlexRipper.Settings
         {
             Log.Information("Resetting UserSettings");
 
-            SetDefaultValues();
-
-            var saveResult = Save();
-            return saveResult.IsFailed ? saveResult : Result.Ok();
+            return UpdateSettings(new SettingsModel());
         }
 
         /// <inheritdoc/>

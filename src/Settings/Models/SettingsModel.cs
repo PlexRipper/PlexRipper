@@ -14,11 +14,6 @@ namespace PlexRipper.Settings.Models
     /// </summary>
     public class SettingsModel : ISettingsModel
     {
-        public SettingsModel()
-        {
-            SetDefaultValues();
-        }
-
         #region Properties
 
         #region Main
@@ -260,35 +255,35 @@ namespace PlexRipper.Settings.Models
                 {
                     addResult(Result.Fail("Failed to retrieve property ConfirmationSettings"));
                 }
+
+                // Display Settings
+                if (userInterfaceSettings.TryGetProperty("DisplaySettings", out JsonElement displaySettings))
+                {
+                    MovieViewMode = TryGetString(displaySettings, nameof(MovieViewMode), MovieViewMode.ToViewModeString(), addResult).ToViewMode();
+                    TvShowViewMode = TryGetString(displaySettings, nameof(TvShowViewMode), TvShowViewMode.ToViewModeString(), addResult).ToViewMode();
+                }
+                else
+                {
+                    addResult(Result.Fail("Failed to retrieve property DisplaySettings"));
+                }
+
+                // DateTime Settings
+                if (userInterfaceSettings.TryGetProperty("DateTimeSettings", out JsonElement dateTimeSettings))
+                {
+                    TimeFormat = TryGetString(dateTimeSettings, nameof(TimeFormat), TimeFormat, addResult);
+                    TimeZone = TryGetString(dateTimeSettings, nameof(TimeZone), TimeZone, addResult);
+                    ShortDateFormat = TryGetString(dateTimeSettings, nameof(ShortDateFormat), ShortDateFormat, addResult);
+                    LongDateFormat = TryGetString(dateTimeSettings, nameof(LongDateFormat), LongDateFormat, addResult);
+                    ShowRelativeDates = TryGetBoolean(dateTimeSettings, nameof(ShowRelativeDates), ShowRelativeDates, addResult);
+                }
+                else
+                {
+                    addResult(Result.Fail("Failed to retrieve property DateTimeSettings"));
+                }
             }
             else
             {
                 addResult(Result.Fail("Failed to retrieve property UserInterfaceSettings"));
-            }
-
-            // Display Settings
-            if (settingsJsonElement.TryGetProperty("DisplaySettings", out JsonElement displaySettings))
-            {
-                MovieViewMode = TryGetString(displaySettings, nameof(MovieViewMode), MovieViewMode.ToViewModeString(), addResult).ToViewMode();
-                TvShowViewMode = TryGetString(displaySettings, nameof(TvShowViewMode), TvShowViewMode.ToViewModeString(), addResult).ToViewMode();
-            }
-            else
-            {
-                addResult(Result.Fail("Failed to retrieve property DisplaySettings"));
-            }
-
-            // DateTime Settings
-            if (settingsJsonElement.TryGetProperty("DateTimeSettings", out JsonElement dateTimeSettings))
-            {
-                TimeFormat = TryGetString(dateTimeSettings, nameof(TimeFormat), TimeFormat, addResult);
-                TimeZone = TryGetString(dateTimeSettings, nameof(TimeZone), TimeZone, addResult);
-                ShortDateFormat = TryGetString(dateTimeSettings, nameof(ShortDateFormat), ShortDateFormat, addResult);
-                LongDateFormat = TryGetString(dateTimeSettings, nameof(LongDateFormat), LongDateFormat, addResult);
-                ShowRelativeDates = TryGetBoolean(dateTimeSettings, nameof(ShowRelativeDates), ShowRelativeDates, addResult);
-            }
-            else
-            {
-                addResult(Result.Fail("Failed to retrieve property DateTimeSettings"));
             }
 
             // Check if there are any failures
@@ -302,29 +297,5 @@ namespace PlexRipper.Settings.Models
 
         #endregion
 
-        protected void SetDefaultValues()
-        {
-            var source = new SettingsModel();
-
-            FirstTimeSetup = source.FirstTimeSetup;
-            ActiveAccountId = source.ActiveAccountId;
-            DownloadSegments = source.DownloadSegments;
-
-            Language = source.Language;
-
-            AskDownloadMovieConfirmation = source.AskDownloadMovieConfirmation;
-            AskDownloadTvShowConfirmation = source.AskDownloadTvShowConfirmation;
-            AskDownloadSeasonConfirmation = source.AskDownloadSeasonConfirmation;
-            AskDownloadEpisodeConfirmation = source.AskDownloadEpisodeConfirmation;
-
-            TvShowViewMode = source.TvShowViewMode;
-            MovieViewMode = source.MovieViewMode;
-
-            ShortDateFormat = source.ShortDateFormat;
-            LongDateFormat = source.LongDateFormat;
-            TimeFormat = source.TimeFormat;
-            TimeZone = source.TimeZone;
-            ShowRelativeDates = source.ShowRelativeDates;
-        }
     }
 }

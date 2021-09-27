@@ -72,7 +72,7 @@ namespace Settings.UnitTests
         {
             // Arrange
             _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok("Invalid Json"));
-            _userSettings.Setup(x => x.Reset()).Returns(Result.Ok());
+            _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
 
             // Act
             var loadResult = _sut.Load();

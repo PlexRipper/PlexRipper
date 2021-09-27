@@ -44,7 +44,7 @@ export default class Default extends Vue {
 	showNotificationsDrawerState: Boolean = false;
 
 	get isSetupPage(): boolean {
-		return this.$route.fullPath === '/setup';
+		return this.$route.fullPath.includes('setup');
 	}
 
 	closeAlert(alert: IAlert): void {

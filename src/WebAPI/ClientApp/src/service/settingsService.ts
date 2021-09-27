@@ -51,7 +51,7 @@ export class SettingsService extends BaseService {
 				return;
 			}
 			Log.info('Redirecting to the setup page');
-			if (state && nuxtContext.route.path !== '/setup') {
+			if (state && !nuxtContext.route.path.includes('setup')) {
 				return nuxtContext.redirect('/setup');
 			}
 		});

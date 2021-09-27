@@ -17,7 +17,9 @@
 - Fixed an issue where statically generating the WebUI in development would return the wrong api url.
 - Fixed an error when trying to add a Movie or TvShow destination folder under Settings => Paths, should now work correctly
 - Fixed the "no downloads" message not always showing correctly when there are no downloads in progress.
-
+- Fixed the setup page not showing the correct background and throwing an error when that happens
+- Fixed the skip button during the setup wizard not appearing
+  
 ### Changed
 
 - Notifications can now be cleared with a click of a button

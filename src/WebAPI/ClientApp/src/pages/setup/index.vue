@@ -147,13 +147,19 @@
 		<!--	Skip button	-->
 		<v-row justify="center">
 			<v-col cols="3">
-				<confirmation-dialog
-					:disabled="isNextDisabled"
-					:width="100"
+				<p-btn
 					block
+					:width="100"
+					:button-type="getSkipButtonType"
+					:disabled="isNextDisabled"
 					text-id="skip-setup"
-					button-text-id="skip-setup"
+					@click="skipDialogOpen = true"
+				/>
+				<confirmation-dialog
+					text-id="skip-setup"
+					:dialog="skipDialogOpen"
 					@confirm="finishSetup"
+					@close="skipDialogOpen = false"
 				/>
 			</v-col>
 		</v-row>
@@ -163,11 +169,13 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { SettingsService } from '@service';
+import ButtonType from '@enums/buttonType';
 
 @Component
 export default class Setup extends Vue {
 	stepIndex: number = 1;
 	stepPagesCount: number = 5;
+	skipDialogOpen: boolean = false;
 
 	links: string[] = [
 		'https://github.com/PlexRipper/PlexRipper/',
@@ -175,6 +183,10 @@ export default class Setup extends Vue {
 		'https://github.com/PlexRipper/PlexRipper#translate-plexripper',
 		'https://github.com/PlexRipper/PlexRipper/',
 	];
+
+	get getSkipButtonType(): ButtonType {
+		return ButtonType.Skip;
+	}
 
 	back(): void {
 		if (this.stepIndex > 1) {

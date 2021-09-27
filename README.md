@@ -17,6 +17,10 @@ Tired of searching for media on different torrent websites or paying for Usenet 
 
 Let others collect media for you and then just download everything!
 
+## Feedback
+
+Any feedback, good or bad, is very much appreciated! You can create an [Github issue](https://github.com/PlexRipper/PlexRipper/issues) or send an e-mail to [PlexRipper@protonmail.com](mailto:PlexRipper@protonmail.com?subject=[GitHub]%20Feedback%20PlexRipper). If you like to stay up to date with the progress, then consider following the [project](https://github.com/PlexRipper) and giving it a star if you like it!
+
 ## Goals
 
 - Be the best cross-platform Plex downloader there is!
@@ -55,6 +59,8 @@ Let others collect media for you and then just download everything!
 | [dev](https://hub.docker.com/r/plexripper/plexripper/tags?page=1&ordering=last_updated)    | Development branch, latest changes are made here | `docker pull plexripper/plexripper:dev`    |
 
 ### Unraid
+
+Note: [Unraid support thread](https://forums.unraid.net/topic/114103-support-plexripper-the-best-cross-platform-plex-media-downloader-there-is/)
 
 1. Ensure you have [Community Applications](https://unraid.net/community/apps?q=plexripper#r) installed.
 2. Search for PlexRipper and click install.

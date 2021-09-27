@@ -117,6 +117,7 @@ export interface FolderPathDTO {
   /** @format int32 */
   id: number;
   folderType: FolderType;
+  mediaType: PlexMediaType;
   displayName: string;
   directory: string;
   isValid: boolean;

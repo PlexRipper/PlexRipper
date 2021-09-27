@@ -1,9 +1,12 @@
 {
 	"general": {
+		"name": "PlexRipper",
+		"name-version": "PlexRipper - V{version}",
 		"commands": {
 			"cancel": "Cancel",
 			"confirm": "Confirm",
 			"save": "Save",
+			"close": "Close",
 			"create": "Create",
 			"update": "Update",
 			"delete": "Delete",
@@ -11,6 +14,7 @@
 			"back": "Back",
 			"next": "Next",
 			"error": "Error",
+			"unknown": "Unknown",
 			"enabled": "Enabled",
 			"disabled": "Disabled",
 			"validate": "Validate",
@@ -24,6 +28,9 @@
 			"go-to-setup-page": "Go To Setup Page",
 			"add-alert": "Add Alert",
 			"hide": "Hide"
+		},
+		"units": {
+			"per-second": "/s"
 		},
 		"alerts": {
 			"invalid-directory": "Directory is not a valid path!",
@@ -307,6 +314,9 @@
 		}
 	},
 	"components": {
+		"app-bar": {
+			"no-accounts": "No Accounts available"
+		},
 		"account-card": {
 			"no-account-name": "Add Account Display Name",
 			"no-notifications": "No notifications available",
@@ -315,6 +325,26 @@
 		"notifications-drawer": {
 			"no-notifications": "No notifications available",
 			"clear-notifications": "Clear All Notifications"
+		},
+		"media-overview": {
+			"is-refreshing": "Refreshing library \"{library}\" data from {server}",
+			"no-data": "Could not display this library.",
+			"retrieving-library": "Retrieving library from PlexRipper database!"
+		},
+		"details-overview": {
+			"duration": "Duration:",
+			"database-id": "Database ID:"
+		},
+		"directory-browser": {
+			"select-path": "Select {pathName}",
+			"type": "Type",
+			"path": "Path"
+		},
+		"download-confirmation": {
+			"header": "Are you sure?",
+			"description": "Plex Ripper will start downloading the following:",
+			"total-size": "Total size:",
+			"creating-tasks": "Creating download tasks {current} of {total}"
 		},
 		"server-dialog": {
 			"header": "{serverName} configuration",
@@ -349,6 +379,19 @@
 		},
 		"paths-custom-overview": {
 			"no-paths": "No paths are set"
+		},
+		"server-drawer": {
+			"no-libraries": "No libraries available",
+			"no-servers": {
+				"header": "There are no servers available!",
+				"description": "Make sure that you have a Plex account registered in the settings and have selected an account with accessible plex servers in the top right account selector."
+			}
+		},
+		"account-setup-progress": {
+			"retry-connection": "Attempting to retry connection, { attemptIndex } of { attemptCount } attempt.",
+			"server-connectable": "Server is connectable!",
+			"server-un-connectable": "Could not connect to server.",
+			"no-server-warning": "Account {displayName} has no servers which it can access."
 		}
 	}
 }

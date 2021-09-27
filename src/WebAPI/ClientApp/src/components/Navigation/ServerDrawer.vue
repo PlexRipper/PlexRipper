@@ -39,7 +39,7 @@
 											<media-type-icon media-type="" />
 										</v-list-item-icon>
 										<v-list-item-content>
-											<v-list-item-title>No libraries available</v-list-item-title>
+											<v-list-item-title>{{ $t('components.server-drawer.no-libraries') }} </v-list-item-title>
 										</v-list-item-content>
 									</v-list-item>
 								</template>
@@ -51,10 +51,9 @@
 			<!-- No servers available -->
 			<template v-else>
 				<v-expansion-panel>
-					<v-expansion-panel-header>There are no servers available!</v-expansion-panel-header>
+					<v-expansion-panel-header>{{ $t('components.server-drawer.no-servers.header') }}</v-expansion-panel-header>
 					<v-expansion-panel-content>
-						Make sure that you have a Plex account registered in the settings and have selected an account with accessible plex
-						servers in the top right account selector.
+						{{ $t('components.server-drawer.no-servers.description') }}
 					</v-expansion-panel-content>
 				</v-expansion-panel>
 			</template>

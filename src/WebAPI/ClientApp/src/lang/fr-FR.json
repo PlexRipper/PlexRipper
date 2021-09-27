@@ -1,9 +1,12 @@
 {
 	"general": {
+		"name": "PlexRipper",
+		"name-version": "PlexRipper - V{version}",
 		"commands": {
 			"cancel": "Cancel",
 			"confirm": "Confirm",
 			"save": "Save",
+			"close": "Close",
 			"create": "Create",
 			"update": "Update",
 			"delete": "Delete",
@@ -11,6 +14,7 @@
 			"back": "Back",
 			"next": "Next",
 			"error": "Error",
+			"unknown": "Unknown",
 			"enabled": "Enabled",
 			"disabled": "Disabled",
 			"validate": "Validate",
@@ -24,6 +28,9 @@
 			"go-to-setup-page": "Go To Setup Page",
 			"add-alert": "Add Alert",
 			"hide": "Hide"
+		},
+		"units": {
+			"per-second": "/s"
 		},
 		"alerts": {
 			"invalid-directory": "Directory is not a valid path!",
@@ -179,8 +186,11 @@
 		}
 	},
 	"pages": {
+		"home": {
+			"header": "WORKING!"
+		},
 		"setup": {
-			"page-1": {
+			"intro": {
 				"header": "Being called awesome!",
 				"title": "You are awesome for trying out Plex Ripper!",
 				"text": {
@@ -194,28 +204,33 @@
 					"item-5": "A word of caution: Plex, and maybe Plex server owners, do not like you to download all \"their\" 100% legally acquired copies of media. Which is why there are some safe guards in place to protect Plex Ripper users from being banned by Plex. However, be respectful to Plex server owners by not taking up all their precious bandwidth and don't complain to me about being kicked of a server. In the future I would also like to protect Plex server owners from Plex Ripper abuse, any ideas or input are welcome."
 				}
 			},
-			"page-2": {
+			"future-plans": {
 				"header": "Future plans!",
-				"title": "You are now ready to start using PlexRipper!",
+				"title": "Here are some planned features!",
 				"text": {
-					"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+					"p-1": "Planned features:",
+					"p-2": "Any ideas are very welcome!"
+				},
+				"list": {
+					"item-1": "Radarr and Sonarr integration",
+					"item-1-1": "Any searches for media can be redirected to Plex Ripper, and Plex Ripper will search all available servers, download the media and notify Radarr/Sonarr of the finished download.",
+					"item-2": "Music and Photo's download support!",
+					"item-3": "Subtitles download support!",
+					"item-4": "Telegram notification support!",
+					"item-5": "Multi-language support",
+					"item-6": "Better Plex integration!",
+					"item-6-1": "Download collections, add to own Plex server and automatically copy over all Plex related settings and configurations."
 				}
 			},
-			"page-3": {
+			"paths": {
 				"header": "Checking paths",
-				"title": "You are now ready to start using PlexRipper!",
-				"text": {
-					"p-1": "If you like this project and would like to show your appreciation then consider the following:"
-				}
+				"title": "Ensure that all paths are valid!"
 			},
-			"page-4": {
+			"accounts": {
 				"header": "Plex Accounts",
-				"title": "You are now ready to start using PlexRipper!",
-				"text": {
-					"p-1": "If you like this project and would like to show your appreciation then consider the following:"
-				}
+				"title": "Add your Plex Accounts!"
 			},
-			"page-5": {
+			"finished": {
 				"header": "Finished!",
 				"title": "You are now ready to start using PlexRipper!",
 				"text": {
@@ -232,7 +247,7 @@
 		"settings": {
 			"ui": {
 				"language": {
-					"header": "SDGSGGSDGSDG"
+					"header": "Language"
 				},
 				"date-and-time": {
 					"header": "Date and Time"
@@ -269,16 +284,114 @@
 					"header": "TV-Show Paths"
 				}
 			}
+		},
+		"downloads": {
+			"no-downloads": "There are currently no downloads in progress"
+		},
+		"tvshows": {
+			"index": {
+				"header": "TvShow Overview",
+				"sub-header": "Select a library from the left-hand side"
+			}
+		},
+		"movies": {
+			"index": {
+				"header": "Movies Overview",
+				"sub-header": "Select a library from the left-hand side"
+			}
+		},
+		"music": {
+			"index": {
+				"header": "Music Libraries are unfortunately not yet supported :("
+			},
+			"_musicId": {
+				"header": "Music Libraries are unfortunately not yet supported :("
+			}
+		},
+		"error": {
+			"header": "Error!",
+			"return-link": "Go back to home page"
 		}
 	},
 	"components": {
+		"app-bar": {
+			"no-accounts": "No Accounts available"
+		},
 		"account-card": {
+			"no-account-name": "Add Account Display Name",
 			"no-notifications": "No notifications available",
 			"clear-notifications": "Clear All Notifications"
 		},
 		"notifications-drawer": {
 			"no-notifications": "No notifications available",
 			"clear-notifications": "Clear All Notifications"
+		},
+		"media-overview": {
+			"is-refreshing": "Refreshing library \"{library}\" data from {server}",
+			"no-data": "Could not display this library.",
+			"retrieving-library": "Retrieving library from PlexRipper database!"
+		},
+		"details-overview": {
+			"duration": "Duration:",
+			"database-id": "Database ID:"
+		},
+		"directory-browser": {
+			"select-path": "Select {pathName}",
+			"type": "Type",
+			"path": "Path"
+		},
+		"download-confirmation": {
+			"header": "Are you sure?",
+			"description": "Plex Ripper will start downloading the following:",
+			"total-size": "Total size:",
+			"creating-tasks": "Creating download tasks {current} of {total}"
+		},
+		"server-dialog": {
+			"header": "{serverName} configuration",
+			"tabs": {
+				"server-data": {
+					"header": "Server Data",
+					"server-url": "Server URL",
+					"machine-id": "Machine Identifier",
+					"plex-version": "Plex Version",
+					"created-on": "Created On",
+					"last-updated-on": "Last updated on",
+					"current-status": "Current status",
+					"last-checked-on": "Last checked on"
+				},
+				"download-destinations": {
+					"header": "Download Destinations"
+				},
+				"server-commands": {
+					"header": "Server Commands",
+					"re-sync-server": "Re-sync Library media"
+				}
+			}
+		},
+		"download-details-dialog": {
+			"overview": {
+				"status": "Status",
+				"file-name": "File Name",
+				"download-path": "Download Path",
+				"destination-path": "Destination Path",
+				"download-url": "Download URL"
+			}
+		},
+		"paths-custom-overview": {
+			"no-paths": "No paths are set"
+		},
+		"server-drawer": {
+			"no-libraries": "No libraries available",
+			"no-servers": {
+				"header": "There are no servers available!",
+				"description": "Make sure that you have a Plex account registered in the settings and have selected an account with accessible plex servers in the top right account selector."
+			}
+		},
+		"account-setup-progress": {
+			"retry-connection": "Attempting to retry connection, { attemptIndex } of { attemptCount } attempt.",
+			"server-connectable": "Server is connectable!",
+			"server-un-connectable": "Could not connect to server.",
+			"no-server-warning": "Account {displayName} has no servers which it can access."
 		}
 	}
 }

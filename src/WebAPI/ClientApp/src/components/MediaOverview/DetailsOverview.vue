@@ -57,10 +57,10 @@
 						<v-card-text>
 							<v-row no-gutters>
 								<v-col cols="12">
-									<span>Duration: <duration :value="mediaItem.duration" /> </span>
+									<span>{{ $t('components.details-overview.duration') }} <duration :value="mediaItem.duration" /> </span>
 								</v-col>
 								<v-col cols="12">
-									<span>Database ID: {{ mediaItem.id }}</span>
+									<span>{{ $t('components.details-overview.database-id') }} {{ mediaItem.id }}</span>
 								</v-col>
 							</v-row>
 						</v-card-text>

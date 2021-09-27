@@ -1,5 +1,5 @@
 <template>
-	<span v-if="size > 0">{{ formattedString }}{{ speed ? '/s' : '' }}</span>
+	<span v-if="size > 0">{{ formattedString }}{{ speed ? $t('general.units.per-second') : '' }}</span>
 	<span v-else> - </span>
 </template>
 

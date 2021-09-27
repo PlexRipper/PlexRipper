@@ -2,7 +2,7 @@
 	<v-app-bar class="app-bar" dense app clipped-left clipped-right>
 		<v-toolbar-title>
 			<v-app-bar-nav-icon @click.stop="showNavigationDrawer" />
-			<v-btn to="/" outlined nuxt><logo :size="24" class="mr-3" /> PlexRipper - v{{ version }}</v-btn>
+			<v-btn to="/" outlined nuxt><logo :size="24" class="mr-3" /> {{ $t('general.name-version', { version }) }}</v-btn>
 		</v-toolbar-title>
 
 		<v-spacer></v-spacer>
@@ -44,7 +44,7 @@
 				</v-list-item-group>
 				<!--	No account found -->
 				<v-list-item v-else>
-					<v-list-item-title> No Accounts available</v-list-item-title>
+					<v-list-item-title> {{ $t('components.app-bar.no-accounts') }}</v-list-item-title>
 				</v-list-item>
 			</v-list>
 		</v-menu>

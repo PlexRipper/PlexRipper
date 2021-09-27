@@ -23,7 +23,7 @@ module.exports = {
 			{
 				ignoreNodes: ['md-icon', 'v-icon'],
 				ignorePattern: '^[-#:()&]+$',
-				ignoreText: ['EUR', 'HKD', 'USD', '%'],
+				ignoreText: ['EUR', 'HKD', 'USD', '%', '?', ''],
 			},
 		],
 	},

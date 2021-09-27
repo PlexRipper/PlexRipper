@@ -35,13 +35,22 @@
 							<template v-if="progress">
 								<template v-if="!progress.completed">
 									<span v-if="progress && progress.retryAttemptIndex > 0">
-										Attempting to retry connection, {{ progress.retryAttemptIndex }} of {{ progress.retryAttemptCount }} attempt.
+										{{
+											$t('components.account-setup-progress.retry-connection', {
+												attemptIndex: progress.retryAttemptIndex,
+												attemptCount: progress.retryAttemptCount,
+											})
+										}}
 									</span>
 								</template>
 								<!--	Completed -->
 								<template v-else>
-									<span v-if="progress.connectionSuccessful"> Server is connectable! </span>
-									<span v-else> Could not connect to server. </span>
+									<span v-if="progress.connectionSuccessful">
+										{{ $t('components.account-setup-progress.server-connectable') }}
+									</span>
+									<span v-else>
+										{{ $t('components.account-setup-progress.server-un-connectable') }}
+									</span>
 								</template>
 							</template>
 						</td>
@@ -59,7 +68,13 @@
 			<!-- No Server Warning	-->
 			<v-row v-else justify="center">
 				<v-col cols="auto">
-					<h2>Account {{ account ? account.displayName : 'unknown' }} has no servers which it can access.</h2>
+					<h2>
+						{{
+							$t('components.account-setup-progress.no-server-warning', {
+								displayName: account ? account.displayName : 'unknown',
+							})
+						}}
+					</h2>
 				</v-col>
 			</v-row>
 		</v-card-text>

@@ -37,7 +37,7 @@
 		<template v-else>
 			<v-row justify="center">
 				<v-col cols="auto">
-					<h2>No paths are set.</h2>
+					<h2>{{ $t('components.paths-custom-overview.no-paths') }}</h2>
 				</v-col>
 			</v-row>
 		</template>

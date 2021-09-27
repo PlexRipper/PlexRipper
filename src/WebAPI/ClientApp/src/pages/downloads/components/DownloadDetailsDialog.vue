@@ -15,23 +15,23 @@
 							<v-simple-table class="section-table">
 								<tbody>
 									<tr>
-										<td style="width: 25%">Status:</td>
+										<td style="width: 25%">{{ $t('components.download-details-dialog.overview.status') }}:</td>
 										<td>{{ downloadTask.status }}</td>
 									</tr>
 									<tr>
-										<td>File Name:</td>
+										<td>{{ $t('components.download-details-dialog.overview.file-name') }}:</td>
 										<td>{{ downloadTask.fileName }}</td>
 									</tr>
 									<tr>
-										<td>Download Path:</td>
+										<td>{{ $t('components.download-details-dialog.overview.download-path') }} :</td>
 										<td>{{ downloadTask.downloadPath }}</td>
 									</tr>
 									<tr>
-										<td>Destination Path:</td>
+										<td>{{ $t('components.download-details-dialog.overview.destination-path') }} :</td>
 										<td>{{ downloadTask.destinationFilePath }}</td>
 									</tr>
 									<tr>
-										<td>Download URL:</td>
+										<td>{{ $t('components.download-details-dialog.overview.download-url') }} :</td>
 										<td>
 											<v-row no-gutters class="no-wrap">
 												<v-col>

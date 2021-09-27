@@ -2,7 +2,7 @@
 	<page-container>
 		<v-row>
 			<v-col>
-				<h1>WORKING!</h1>
+				<h1>{{ $t('pages.home.header') }}</h1>
 			</v-col>
 		</v-row>
 	</page-container>

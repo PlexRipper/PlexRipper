@@ -21,7 +21,7 @@
 								editable
 								edit-icon="$complete"
 							>
-								{{ header }}
+								{{ $t(`pages.setup.${header}.header`) }}
 							</v-stepper-step>
 							<v-divider v-if="i < stepPagesCount - 1" :key="i + 100" />
 						</template>
@@ -34,17 +34,17 @@
 							<v-container fluid>
 								<v-row no-gutters>
 									<v-col>
-										<h2 class="mt-2">{{ $t('pages.setup.page-1.title') }}</h2>
-										<p>{{ $t('pages.setup.page-1.text.p-1') }}</p>
+										<h2 class="mt-2">{{ $t('pages.setup.intro.title') }}</h2>
+										<p>{{ $t('pages.setup.intro.text.p-1') }}</p>
 										<ul>
 											<li>
-												{{ $t('pages.setup.page-1.list.item-1') }}
+												{{ $t('pages.setup.intro.list.item-1') }}
 												<external-link href="https://github.com/PlexRipper/PlexRipper/issues" />
 											</li>
-											<li v-html="$t('pages.setup.page-1.list.item-2')"></li>
-											<li v-html="$t('pages.setup.page-1.list.item-3')"></li>
-											<li v-html="$t('pages.setup.page-1.list.item-4')"></li>
-											<li v-html="$t('pages.setup.page-1.list.item-5')"></li>
+											<li>{{ $t('pages.setup.intro.list.item-2') }}</li>
+											<li>{{ $t('pages.setup.intro.list.item-3') }}</li>
+											<li>{{ $t('pages.setup.intro.list.item-4') }}</li>
+											<li>{{ $t('pages.setup.intro.list.item-5') }}</li>
 										</ul>
 									</v-col>
 								</v-row>
@@ -56,33 +56,31 @@
 							<v-container fluid>
 								<v-row no-gutters>
 									<v-col>
-										<h2>Future plans for Plex Ripper!</h2>
-										<p>Here are some possible features:</p>
+										<h2>{{ $t('pages.setup.future-plans.title') }}</h2>
+										<p>{{ $t('pages.setup.future-plans.text.p-1') }}</p>
 										<ul>
 											<li>
-												Radarr and Sonarr integration
+												{{ $t('pages.setup.future-plans.list.item-1') }}
 												<ul>
 													<li>
-														Any searches for media can be redirected to Plex Ripper, and Plex Ripper will search all available
-														servers, download the media and notify Radarr/Sonarr of the finished download.
+														{{ $t('pages.setup.future-plans.list.item-1-1') }}
 													</li>
 												</ul>
 											</li>
-											<li>Music and Photo's download support.</li>
-											<li>Subtitles download support.</li>
-											<li>Telegram notification support.</li>
-											<li>Multi-language support.</li>
+											<li>{{ $t('pages.setup.future-plans.list.item-2') }}</li>
+											<li>{{ $t('pages.setup.future-plans.list.item-3') }}</li>
+											<li>{{ $t('pages.setup.future-plans.list.item-4') }}</li>
+											<li>{{ $t('pages.setup.future-plans.list.item-5') }}</li>
 											<li>
-												Better Plex integration
+												{{ $t('pages.setup.future-plans.list.item-6') }}
 												<ul>
 													<li>
-														Download collections, add to own Plex server and automatically copy over all Plex related settings and
-														configurations.
+														{{ $t('pages.setup.future-plans.list.item-6-1') }}
 													</li>
 												</ul>
 											</li>
 										</ul>
-										<p>Any ideas are very welcome!</p>
+										<h2 class="text-center">{{ $t('pages.setup.future-plans.text.p-2') }}</h2>
 									</v-col>
 								</v-row>
 							</v-container>
@@ -90,13 +88,13 @@
 
 						<!-- Checking paths	-->
 						<v-stepper-content class="stepper-content" :step="3">
-							<h2 class="mt-2">Ensure that all paths are valid!</h2>
+							<h2 class="mt-2">{{ $t('pages.setup.paths.title') }}</h2>
 							<paths-default-overview />
 						</v-stepper-content>
 
 						<!-- Plex Accounts	-->
 						<v-stepper-content class="stepper-content" :step="4">
-							<h2 class="mt-2">Add your Plex Accounts!</h2>
+							<h2 class="mt-2">{{ $t('pages.setup.accounts.title') }}</h2>
 							<account-overview />
 						</v-stepper-content>
 
@@ -105,19 +103,19 @@
 							<v-container fluid>
 								<v-row no-gutters>
 									<v-col>
-										<h2 class="mt-2">{{ $t('pages.setup.page-5.title') }}</h2>
+										<h2 class="mt-2">{{ $t('pages.setup.finished.title') }}</h2>
 									</v-col>
 								</v-row>
 								<v-row no-gutters>
 									<v-col>
-										<p>{{ $t('pages.setup.page-5.text.p-1') }}</p>
+										<p>{{ $t('pages.setup.finished.text.p-1') }}</p>
 										<v-list dense class="no-background">
 											<v-list-item v-for="(link, i) in links" :key="i" :href="link" target="_blank">
 												<v-list-item-title>
 													<ul>
 														<li>
 															<span v-if="messages" style="font-weight: normal">
-																{{ messages['page-5'].list['item-' + (i + 1)] }}
+																{{ messages['finished'].list['item-' + (i + 1)] }}
 															</span>
 														</li>
 													</ul>
@@ -196,16 +194,7 @@ export default class Setup extends Vue {
 	}
 
 	get headers(): string[] {
-		if (!this.messages) {
-			return [];
-		}
-		const headers: string[] = [];
-		for (let i = 1; i <= this.stepPagesCount; i++) {
-			if (this.messages['page-' + i]) {
-				headers.push(this.messages['page-' + i].header);
-			}
-		}
-		return headers;
+		return ['intro', 'future-plans', 'paths', 'accounts', 'finished'];
 	}
 
 	get isBackDisabled(): boolean {

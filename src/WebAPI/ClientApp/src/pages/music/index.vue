@@ -2,7 +2,7 @@
 	<page-container>
 		<v-row>
 			<v-col>
-				<h1>Music Libraries are unfortunately not yet supported...</h1>
+				<h1>{{ $t('pages.music.index.header') }}</h1>
 			</v-col>
 		</v-row>
 	</page-container>

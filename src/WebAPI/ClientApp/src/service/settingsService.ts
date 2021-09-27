@@ -1,7 +1,7 @@
 import Log from 'consola';
 import { Observable, of } from 'rxjs';
 import { SettingsModelDTO, ViewMode } from '@dto/mainApi';
-import { distinctUntilChanged, map, switchMap, take, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, GlobalService } from '@service';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import { Context } from '@nuxt/types';
@@ -85,6 +85,7 @@ export class SettingsService extends BaseService {
 	public getFirstTimeSetup(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.firstTimeSetup),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -93,6 +94,7 @@ export class SettingsService extends BaseService {
 	public getLanguage(): Observable<string> {
 		return this.stateChanged.pipe(
 			map((x) => x?.language),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -102,6 +104,7 @@ export class SettingsService extends BaseService {
 	public getAskDownloadMovieConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.askDownloadMovieConfirmation),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -109,6 +112,7 @@ export class SettingsService extends BaseService {
 	public getAskDownloadTvShowConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.askDownloadTvShowConfirmation),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -116,6 +120,7 @@ export class SettingsService extends BaseService {
 	public getAskDownloadSeasonConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.askDownloadSeasonConfirmation),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -123,6 +128,7 @@ export class SettingsService extends BaseService {
 	public getAskDownloadEpisodeConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.askDownloadEpisodeConfirmation),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -136,6 +142,7 @@ export class SettingsService extends BaseService {
 	public getShortDateFormat(): Observable<string> {
 		return this.stateChanged.pipe(
 			map((x) => x?.shortDateFormat),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -143,6 +150,7 @@ export class SettingsService extends BaseService {
 	public getLongDateFormat(): Observable<string> {
 		return this.stateChanged.pipe(
 			map((x) => x?.longDateFormat),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -150,6 +158,7 @@ export class SettingsService extends BaseService {
 	public getTimeFormat(): Observable<string> {
 		return this.stateChanged.pipe(
 			map((x) => x?.timeFormat),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -157,6 +166,7 @@ export class SettingsService extends BaseService {
 	public getTimeZone(): Observable<string> {
 		return this.stateChanged.pipe(
 			map((x) => x?.timeZone),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -164,6 +174,7 @@ export class SettingsService extends BaseService {
 	public getShowRelativeDates(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.showRelativeDates),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -173,6 +184,7 @@ export class SettingsService extends BaseService {
 	public getMovieViewMode(): Observable<ViewMode> {
 		return this.stateChanged.pipe(
 			map((x) => x?.movieViewMode),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -180,6 +192,7 @@ export class SettingsService extends BaseService {
 	public getTvShowViewMode(): Observable<ViewMode> {
 		return this.stateChanged.pipe(
 			map((x) => x?.tvShowViewMode),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -189,6 +202,7 @@ export class SettingsService extends BaseService {
 	public getActiveAccountId(): Observable<number> {
 		return this.stateChanged.pipe(
 			map((x) => x?.activeAccountId),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -198,6 +212,7 @@ export class SettingsService extends BaseService {
 	public getDownloadSegments(): Observable<number> {
 		return this.stateChanged.pipe(
 			map((x) => x?.downloadSegments),
+			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}

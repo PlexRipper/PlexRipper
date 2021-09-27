@@ -70,11 +70,18 @@ namespace PlexRipper.Settings
                 }
 
                 var loadedSettings = JsonSerializer.Deserialize<dynamic>(readResult.Value, _jsonSerializerSettings);
-                SetFromJsonObject(loadedSettings);
+                Result result = SetFromJsonObject(loadedSettings);
+                if (result.IsFailed)
+                {
+                    Log.Warning("Certain properties were missing or had missing or invalid values. Will correct those and re-save now!");
+                    result.LogWarning();
+                    Save();
+                }
             }
             catch (Exception e)
             {
-                return Result.Fail(new ExceptionalError("Failed to load the UserSettings to json file.", e)).LogError();
+                Reset();
+                return Result.Fail(new ExceptionalError("Failed to load the UserSettings to json file. Resetting now!", e)).LogError();
             }
 
             return Result.Ok().WithSuccess("UserSettings were loaded successfully!").LogInformation();

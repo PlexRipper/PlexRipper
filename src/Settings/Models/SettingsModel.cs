@@ -1,4 +1,7 @@
-﻿using System.Dynamic;
+﻿using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
 using System.Text.Json;
 using FluentResults;
 using PlexRipper.Application.Common;
@@ -125,38 +128,176 @@ namespace PlexRipper.Settings.Models
             return jsonObject;
         }
 
-        protected void SetFromJsonObject(JsonElement jsonElement)
+        private bool TryGetBoolean(JsonElement jsonElement, string property, bool defaultValue, Action<Result> failed)
         {
-            FirstTimeSetup = jsonElement.GetProperty(nameof(FirstTimeSetup)).GetBoolean();
+            try
+            {
+                if (jsonElement.TryGetProperty(property, out jsonElement))
+                {
+                    failed(Result.Ok());
+                    return jsonElement.GetBoolean();
+                }
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
+
+            failed(Result.Fail($"Failed to retrieve boolean property: {property}"));
+            return defaultValue;
+        }
+
+        private int TryGetInteger(JsonElement jsonElement, string property, int defaultValue, Action<Result> failed)
+        {
+            try
+            {
+                if (jsonElement.TryGetProperty(property, out jsonElement))
+                {
+                    if (jsonElement.TryGetInt32(out int value))
+                    {
+                        failed(Result.Ok());
+                        return value;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
+
+            failed(Result.Fail($"Failed to retrieve integer property: {property}"));
+            return defaultValue;
+        }
+
+        private string TryGetString(JsonElement jsonElement, string property, string defaultValue, Action<Result> failed)
+        {
+            try
+            {
+                if (jsonElement.TryGetProperty(property, out jsonElement))
+                {
+                    var value = jsonElement.GetString();
+                    if (!string.IsNullOrEmpty(value) && !string.IsNullOrWhiteSpace(value))
+                    {
+                        failed(Result.Ok());
+                        return value;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
+
+            failed(Result.Fail($"Failed to retrieve string property: {property}"));
+            return defaultValue;
+        }
+
+        /// <summary>
+        /// Parses the Json Element from the PlexRipperSettings.json and defaults its value if nothing is found.
+        /// This also works when adding new settings and ensuring old config files get used as much as possible.
+        /// </summary>
+        /// <param name="settingsJsonElement"></param>
+        protected Result SetFromJsonObject(JsonElement settingsJsonElement)
+        {
+            List<Result> results = new List<Result>();
+
+            var addResult = new Action<Result>(result => results.Add(result));
+
+            FirstTimeSetup = TryGetBoolean(settingsJsonElement, nameof(FirstTimeSetup), FirstTimeSetup, addResult);
 
             // Account Settings
-            ActiveAccountId = jsonElement.GetProperty("AccountSettings").GetProperty(nameof(ActiveAccountId)).GetInt32();
+            if (settingsJsonElement.TryGetProperty("AccountSettings", out JsonElement accountSettings))
+            {
+                // ActiveAccountId
+                ActiveAccountId = TryGetInteger(accountSettings, nameof(ActiveAccountId), ActiveAccountId, addResult);
+            }
+            else
+            {
+                addResult(Result.Fail("Failed to retrieve property AccountSettings"));
+            }
 
             // Advanced Settings
-            var advancedSettings = jsonElement.GetProperty("AdvancedSettings");
-            DownloadSegments = advancedSettings.GetProperty("DownloadManagerSettings").GetProperty(nameof(DownloadSegments)).GetInt32();
+            if (settingsJsonElement.TryGetProperty("AdvancedSettings", out JsonElement advancedSettings))
+            {
+                // DownloadManagerSettings
+                if (advancedSettings.TryGetProperty("DownloadManagerSettings", out JsonElement downloadManagerSettings))
+                {
+                    // DownloadSegments
+                    DownloadSegments = TryGetInteger(downloadManagerSettings, nameof(DownloadSegments), DownloadSegments, addResult);
+                }
+                else
+                {
+                    addResult(Result.Fail("Failed to retrieve property DownloadManagerSettings"));
+                }
+            }
+            else
+            {
+                addResult(Result.Fail("Failed to retrieve property AdvancedSettings"));
+            }
 
-            // User Interface
-            var userInterfaceSettings = jsonElement.GetProperty("UserInterfaceSettings");
-            Language = userInterfaceSettings.GetProperty(nameof(Language)).GetString();
+            // User Interface Settings
+            if (settingsJsonElement.TryGetProperty("UserInterfaceSettings", out JsonElement userInterfaceSettings))
+            {
+                Language = TryGetString(userInterfaceSettings, nameof(Language), Language, addResult);
 
-            // Confirmation
-            var confirmationSettings = userInterfaceSettings.GetProperty("ConfirmationSettings");
-            AskDownloadMovieConfirmation = confirmationSettings.GetProperty(nameof(AskDownloadMovieConfirmation)).GetBoolean();
-            AskDownloadTvShowConfirmation = confirmationSettings.GetProperty(nameof(AskDownloadTvShowConfirmation)).GetBoolean();
-            AskDownloadSeasonConfirmation = confirmationSettings.GetProperty(nameof(AskDownloadSeasonConfirmation)).GetBoolean();
-            AskDownloadEpisodeConfirmation = confirmationSettings.GetProperty(nameof(AskDownloadEpisodeConfirmation)).GetBoolean();
+                // Confirmation Settings
+                if (userInterfaceSettings.TryGetProperty("ConfirmationSettings", out JsonElement confirmationSettings))
+                {
+                    // Ask Confirmation Settings on Media Type
+                    AskDownloadMovieConfirmation = TryGetBoolean(confirmationSettings, nameof(AskDownloadMovieConfirmation),
+                        AskDownloadMovieConfirmation, addResult);
 
-            var displaySettings = userInterfaceSettings.GetProperty("DisplaySettings");
-            MovieViewMode = displaySettings.GetProperty(nameof(MovieViewMode)).ToString().ToViewMode();
-            TvShowViewMode = displaySettings.GetProperty(nameof(TvShowViewMode)).ToString().ToViewMode();
+                    AskDownloadTvShowConfirmation = TryGetBoolean(confirmationSettings, nameof(AskDownloadTvShowConfirmation),
+                        AskDownloadTvShowConfirmation, addResult);
 
-            var dateTimeSettings = userInterfaceSettings.GetProperty("DateTimeSettings");
-            TimeFormat = dateTimeSettings.GetProperty(nameof(TimeFormat)).ToString();
-            TimeZone = dateTimeSettings.GetProperty(nameof(TimeZone)).ToString();
-            ShortDateFormat = dateTimeSettings.GetProperty(nameof(ShortDateFormat)).ToString();
-            LongDateFormat = dateTimeSettings.GetProperty(nameof(LongDateFormat)).ToString();
-            ShowRelativeDates = dateTimeSettings.GetProperty(nameof(ShowRelativeDates)).GetBoolean();
+                    AskDownloadSeasonConfirmation = TryGetBoolean(confirmationSettings, nameof(AskDownloadSeasonConfirmation),
+                        AskDownloadSeasonConfirmation, addResult);
+
+                    AskDownloadEpisodeConfirmation = TryGetBoolean(confirmationSettings, nameof(AskDownloadEpisodeConfirmation),
+                        AskDownloadEpisodeConfirmation, addResult);
+                }
+                else
+                {
+                    addResult(Result.Fail("Failed to retrieve property ConfirmationSettings"));
+                }
+            }
+            else
+            {
+                addResult(Result.Fail("Failed to retrieve property UserInterfaceSettings"));
+            }
+
+            // Display Settings
+            if (settingsJsonElement.TryGetProperty("DisplaySettings", out JsonElement displaySettings))
+            {
+                MovieViewMode = TryGetString(displaySettings, nameof(MovieViewMode), MovieViewMode.ToViewModeString(), addResult).ToViewMode();
+                TvShowViewMode = TryGetString(displaySettings, nameof(TvShowViewMode), TvShowViewMode.ToViewModeString(), addResult).ToViewMode();
+            }
+            else
+            {
+                addResult(Result.Fail("Failed to retrieve property DisplaySettings"));
+            }
+
+            // DateTime Settings
+            if (settingsJsonElement.TryGetProperty("DateTimeSettings", out JsonElement dateTimeSettings))
+            {
+                TimeFormat = TryGetString(dateTimeSettings, nameof(TimeFormat), TimeFormat, addResult);
+                TimeZone = TryGetString(dateTimeSettings, nameof(TimeZone), TimeZone, addResult);
+                ShortDateFormat = TryGetString(dateTimeSettings, nameof(ShortDateFormat), ShortDateFormat, addResult);
+                LongDateFormat = TryGetString(dateTimeSettings, nameof(LongDateFormat), LongDateFormat, addResult);
+                ShowRelativeDates = TryGetBoolean(dateTimeSettings, nameof(ShowRelativeDates), ShowRelativeDates, addResult);
+            }
+            else
+            {
+                addResult(Result.Fail("Failed to retrieve property DateTimeSettings"));
+            }
+
+            // Check if there are any failures
+            if (results.Select(x => x.IsFailed).Any(x => x))
+            {
+                return Result.Fail("Parsing the PlexRipperSettings.json had errors:").WithErrors(results.SelectMany(x => x.Errors));
+            }
+
+            return Result.Ok();
         }
 
         #endregion

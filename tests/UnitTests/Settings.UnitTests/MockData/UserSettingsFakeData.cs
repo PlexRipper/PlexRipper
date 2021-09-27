@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using Bogus;
+using Bogus.Platform;
+using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using PlexRipper.Settings.Models;
 
@@ -8,10 +13,6 @@ namespace Settings.UnitTests.MockData
     public static class UserSettingsFakeData
     {
         private static readonly Random _random = new();
-
-        public static string JsonSettings =>
-            "{\"FirstTimeSetup\":false,\"AccountSettings\":{\"ActiveAccountId\":999},\"AdvancedSettings\":{\"DownloadManagerSettings\":{\"DownloadSegments\":40}},\"UserInterfaceSettings\":{\"ConfirmationSettings\":{\"AskDownloadMovieConfirmation\":true,\"AskDownloadTvShowConfirmation\":true,\"AskDownloadSeasonConfirmation\":true,\"AskDownloadEpisodeConfirmation\":true},\"DisplaySettings\":{\"TvShowViewMode\":\"Poster\",\"MovieViewMode\":\"Poster\"},\"DateTimeSettings\":{\"ShortDateFormat\":\"dd\\/MM\\/yyyy\",\"LongDateFormat\":\"EEEE, dd MMMM yyyy\",\"TimeFormat\":\"HH:MM:ss\",\"TimeZone\":\"UTC\",\"ShowRelativeDates\":true}}}";
-
 
         public static Faker<SettingsModel> GetSettingsModel()
         {
@@ -30,7 +31,13 @@ namespace Settings.UnitTests.MockData
                 .RuleFor(x => x.LongDateFormat, f => f.Random.String())
                 .RuleFor(x => x.TimeFormat, f => f.Random.String())
                 .RuleFor(x => x.TimeZone, f => f.Random.String())
+                .RuleFor(x => x.Language, f => f.Random.String(1, 4))
                 .RuleFor(x => x.ShowRelativeDates, f => f.Random.Bool());
+        }
+
+        public static string GetValidJsonSettings()
+        {
+            return typeof(UserSettingsFakeData).GetAssembly().GetResourceAsString("MockData", "ValidJsonSettings.json");
         }
     }
 }

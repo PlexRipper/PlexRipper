@@ -40,7 +40,7 @@ namespace Settings.UnitTests
         {
             // Arrange
             _fileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(true));
-            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.JsonSettings));
+            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
 
             // Act
             var setupResult = _sut.Object.Setup();
@@ -82,7 +82,7 @@ namespace Settings.UnitTests
         {
             // Arrange
             _fileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(true));
-            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.JsonSettings));
+            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
 
             // Act
             var setupResult = _sut.Object.Setup();

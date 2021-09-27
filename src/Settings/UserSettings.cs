@@ -87,7 +87,7 @@ namespace PlexRipper.Settings
             return Result.Ok().WithSuccess("UserSettings were loaded successfully!").LogInformation();
         }
 
-        public Result Reset()
+        public virtual Result Reset()
         {
             Log.Information("Resetting UserSettings");
 

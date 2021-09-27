@@ -1,6 +1,6 @@
 <template>
 	<v-footer app>
-		<span>&copy; {{ currentYear }} - {{ getServerStatus }}</span>
+		<span> {{ currentYear }} - {{ getServerStatus }}</span>
 	</v-footer>
 </template>
 

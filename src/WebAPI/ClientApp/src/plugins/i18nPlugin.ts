@@ -3,7 +3,8 @@ import VueI18n from 'vue-i18n';
 import { Inject } from '@nuxt/types/app';
 
 export default (ctx: Context, inject: Inject): void => {
-	// Doc: https://nuxtjs.org/guide/plugins/
+	// Doc: https://i18n.nuxtjs.org/
+
 	// Create a simple function to retrieve the entire translation messages object;
 	inject('messages', (): VueI18n.LocaleMessageObject => messages(ctx));
 

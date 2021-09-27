@@ -6,7 +6,9 @@
 					<v-card-title>
 						<v-row>
 							<v-col cols="12">
-								<label>Select {{ path.displayName }}</label>
+								<label>
+									{{ $t('components.directory-browser.select-path', { pathName: path.displayName }) }}
+								</label>
 							</v-col>
 							<v-col cols="12" style="max-height: 75px">
 								<v-text-field v-model="newDirectory" outlined color="red" placeholder="Start typing or select a path below" />
@@ -31,8 +33,8 @@
 								<template #default>
 									<thead>
 										<tr>
-											<th class="text-left" :width="100">Type:</th>
-											<th class="text-left">Path:</th>
+											<th class="text-left" :width="100">{{ $t('components.directory-browser.type') }}:</th>
+											<th class="text-left">{{ $t('components.directory-browser.path') }}:</th>
 										</tr>
 									</thead>
 								</template>

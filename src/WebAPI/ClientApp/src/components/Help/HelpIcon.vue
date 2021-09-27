@@ -1,7 +1,7 @@
 <template>
 	<v-row justify="space-between" class="flex-nowrap" no-gutters>
 		<v-col>
-			<v-subheader class="form-label text-no-wrap">{{ getLabel }}:</v-subheader>
+			<v-subheader class="form-label text-no-wrap">{{ getLabel }}</v-subheader>
 		</v-col>
 		<v-col v-if="hasHelpPage" cols="auto">
 			<v-btn style="margin: 8px" icon @click="openDialog">
@@ -15,7 +15,13 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { HelpService } from '@service';
 
-@Component
+interface IHelp {
+	label: string;
+	title: string;
+	text: string;
+}
+
+@Component<HelpIcon>({})
 export default class HelpIcon extends Vue {
 	@Prop({ required: false, type: String, default: '' })
 	readonly labelId!: string;
@@ -24,17 +30,16 @@ export default class HelpIcon extends Vue {
 	readonly helpId!: string;
 
 	get getLabel(): string {
-		if (this.hasHelpPage) {
-			return this.$ts(`${this.helpId}.label`);
-		} else {
-			return this.$ts(this.helpId);
-		}
+		return this.$ts(`${this.helpId}.label`);
 	}
 
 	get hasHelpPage(): boolean {
 		if (this.helpId) {
-			// Is true if it has an object with label, title and text
-			return typeof this.$getMessage(this.helpId) === 'object';
+			const msgObject = this.$getMessage(this.helpId) as IHelp;
+			// Complains about returning string if I return directly, instead of an if statement returning true
+			if (msgObject && msgObject.title && msgObject.text) {
+				return true;
+			}
 		}
 		return false;
 	}

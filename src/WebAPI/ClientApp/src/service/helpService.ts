@@ -1,5 +1,5 @@
 import { Observable, of } from 'rxjs';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import { switchMap } from 'rxjs/operators';
 import { BaseService } from '@service';
 

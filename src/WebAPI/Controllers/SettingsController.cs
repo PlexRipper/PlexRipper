@@ -42,10 +42,9 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModelDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public IActionResult UpdateSettings([FromBody] SettingsModelDTO settingsModelDTO)
+        public IActionResult UpdateSettings([FromBody] SettingsModelDTO settingsModelDto)
         {
-            var settingsModel = _mapper.Map<SettingsModel>(settingsModelDTO);
-            var updateResult = _userSettings.UpdateSettings(settingsModel);
+            var updateResult = _userSettings.UpdateSettings(settingsModelDto);
             if (updateResult.IsFailed)
             {
                 return ToActionResult(updateResult);

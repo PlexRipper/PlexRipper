@@ -5,7 +5,7 @@ import { PlexAccountDTO } from '@dto/mainApi';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { BaseService, GlobalService, SettingsService } from '@service';
 import { Context } from '@nuxt/types';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import ResultDTO from '@dto/ResultDTO';
 
 export class AccountService extends BaseService {

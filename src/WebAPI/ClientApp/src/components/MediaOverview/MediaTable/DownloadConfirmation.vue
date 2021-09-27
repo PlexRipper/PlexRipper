@@ -3,10 +3,10 @@
 	<v-col cols="12">
 		<v-dialog v-model="showDialog" :max-width="500" scrollable>
 			<v-card v-if="isConfirmationEnabled && progress === null">
-				<v-card-title> Are you sure? </v-card-title>
+				<v-card-title> {{ $t('components.download-confirmation.header') }} </v-card-title>
 				<v-card-subtitle class="py-2">
-					<span>Plex Ripper will start downloading the following:</span> <br />
-					<span>Total size: <file-size :size="totalSize" /></span>
+					<span>{{ $t('components.download-confirmation.description') }}</span> <br />
+					<span>{{ $t('components.download-confirmation.total-size') }}<file-size :size="totalSize" /></span>
 				</v-card-subtitle>
 				<v-divider />
 				<!-- Show Download Task Preview -->
@@ -34,7 +34,7 @@
 			<!-- Download Task Creation Progressbar -->
 			<v-card v-if="progress">
 				<v-card-title class="justify-center">
-					Creating download tasks {{ progress.current }} of {{ progress.total }}
+					{{ $t('components.download-confirmation.creating-tasks', { current: progress.current, total: progress.total }) }}
 				</v-card-title>
 				<v-card-text>
 					<progress-component :percentage="progress.percentage" text="" />
@@ -227,13 +227,17 @@ export default class DownloadConfirmation extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SettingsService.getConfirmationSettings(), (uiSettings) => {
-			if (uiSettings) {
-				this.askDownloadMovieConfirmation = uiSettings.askDownloadMovieConfirmation;
-				this.askDownloadTvShowConfirmation = uiSettings.askDownloadTvShowConfirmation;
-				this.askDownloadSeasonConfirmation = uiSettings.askDownloadSeasonConfirmation;
-				this.askDownloadEpisodeConfirmation = uiSettings.askDownloadEpisodeConfirmation;
-			}
+		this.$subscribeTo(SettingsService.getAskDownloadMovieConfirmation(), (value) => {
+			this.askDownloadMovieConfirmation = value;
+		});
+		this.$subscribeTo(SettingsService.getAskDownloadTvShowConfirmation(), (value) => {
+			this.askDownloadTvShowConfirmation = value;
+		});
+		this.$subscribeTo(SettingsService.getAskDownloadSeasonConfirmation(), (value) => {
+			this.askDownloadSeasonConfirmation = value;
+		});
+		this.$subscribeTo(SettingsService.getAskDownloadEpisodeConfirmation(), (value) => {
+			this.askDownloadEpisodeConfirmation = value;
 		});
 	}
 }

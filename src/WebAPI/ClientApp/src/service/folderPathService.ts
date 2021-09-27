@@ -3,7 +3,7 @@ import { FolderPathDTO } from '@dto/mainApi';
 import { finalize, map, take } from 'rxjs/operators';
 import { BaseService, GlobalService } from '@service';
 import { getFolderPaths, createFolderPath, updateFolderPath, deleteFolderPath } from '@api/pathApi';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import { Context } from '@nuxt/types';
 import Log from 'consola';
 

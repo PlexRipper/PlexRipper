@@ -1,5 +1,4 @@
-import Log from 'consola';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
 import { PlexMediaType } from '@dto/mainApi';
 import { Observable, of } from 'rxjs';

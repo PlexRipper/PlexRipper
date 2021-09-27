@@ -8,9 +8,14 @@
 						<v-progress-circular :size="70" :width="7" color="red" indeterminate></v-progress-circular>
 					</v-layout>
 					<h1 v-if="isRefreshing">
-						Refreshing library "{{ library ? library.title : '' }}" data {{ server ? 'from ' + server.name : '' }}
+						{{
+							$t('components.media-overview.is-refreshing', {
+								library: library ? library.title : $t('general.commands.unknown'),
+								server: server ? server.name : $t('general.commands.unknown'),
+							})
+						}}
 					</h1>
-					<h1 v-else>Retrieving library from PlexRipper database</h1>
+					<h1 v-else>{{ $t('components.media-overview.retrieving-library') }}</h1>
 					<!-- Library progress bar -->
 					<v-progress-linear :value="getPercentage" height="20" striped color="deep-orange">
 						<template #default="{ value }">
@@ -77,7 +82,7 @@
 			/>
 		</template>
 		<template v-else>
-			<h1>Could not display this library.</h1>
+			<h1>{{ $t('components.media-overview.no-data') }}</h1>
 		</template>
 		<!--	Download confirmation dialog	-->
 		<download-confirmation
@@ -156,9 +161,9 @@ export default class MediaOverview extends Vue {
 	changeView(viewMode: ViewMode): void {
 		switch (this.mediaType) {
 			case PlexMediaType.Movie:
-				return SettingsService.updateMovieViewMode(viewMode);
+				return SettingsService.updateSetting('movieViewMode', viewMode);
 			case PlexMediaType.TvShow:
-				return SettingsService.updateTvShowViewMode(viewMode);
+				return SettingsService.updateSetting('tvShowViewMode', viewMode);
 		}
 		Log.error('Could not set view mode for type' + this.mediaType);
 	}
@@ -316,9 +321,12 @@ export default class MediaOverview extends Vue {
 		this.$subscribeTo(SettingsService.getActiveAccountId(), (id) => (this.activeAccountId = id));
 
 		// Get display settings
-		this.$subscribeTo(SettingsService.getDisplaySettings(), (x) => {
-			this.movieViewMode = x.movieViewMode;
-			this.tvShowViewMode = x.tvShowViewMode;
+		this.$subscribeTo(SettingsService.getMovieViewMode(), (value) => {
+			this.movieViewMode = value;
+		});
+
+		this.$subscribeTo(SettingsService.getTvShowViewMode(), (value) => {
+			this.tvShowViewMode = value;
 		});
 
 		// Setup progress bar

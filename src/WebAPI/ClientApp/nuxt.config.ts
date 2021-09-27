@@ -61,7 +61,7 @@ const config: NuxtConfig = {
 	 */
 	modules: [
 		// Doc: https://i18n.nuxtjs.org/
-		'nuxt-i18n',
+		'@nuxtjs/i18n',
 	],
 	/*
 	 ** Nuxt.js dev-modules
@@ -101,7 +101,6 @@ const config: NuxtConfig = {
 		],
 	},
 	router: {
-		middleware: ['pageRedirect'],
 		extendRoutes(routes, resolve) {
 			routes.push({
 				name: 'details-overview',
@@ -125,8 +124,12 @@ const config: NuxtConfig = {
 	i18n: {
 		lazy: true,
 		langDir: 'lang/',
-		locales: [{ code: 'en', iso: 'en-US', file: 'en-US.json' }],
-		defaultLocale: 'en',
+		defaultLocale: 'en-US',
+		locales: [
+			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
+			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
+		],
+		strategy: 'no_prefix',
 	},
 	/*
 	 ** Build configuration

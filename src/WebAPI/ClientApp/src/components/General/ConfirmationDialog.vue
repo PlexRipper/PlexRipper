@@ -51,7 +51,7 @@ export default class ConfirmationDialog extends Vue {
 				text: 'Could not find the correct confirmation text..',
 			};
 		}
-		const msg = this.$getMessage(`confirmation.${this.textId}`);
+		const msg: any = this.$getMessage(`confirmation.${this.textId}`);
 		return {
 			id: this.textId,
 			title: msg?.title ?? '',
@@ -80,7 +80,7 @@ export default class ConfirmationDialog extends Vue {
 	}
 
 	mounted() {
-		this.$watchAsObservable('dialog', () => {
+		this.$watchAsObservable('dialog').subscribe(() => {
 			this.loading = false;
 		});
 	}

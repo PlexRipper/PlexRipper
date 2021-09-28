@@ -129,6 +129,9 @@ const config: NuxtConfig = {
 			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
 			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
 		],
+		vueI18n: {
+			fallbackLocale: 'en-US',
+		},
 		strategy: 'no_prefix',
 	},
 	/*

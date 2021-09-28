@@ -369,6 +369,15 @@
 				}
 			}
 		},
+		"navigation-drawer": {
+			"downloads": "Downloads",
+			"settings": "Settings",
+			"accounts": "Accounts",
+			"paths": "Paths",
+			"ui": "UI",
+			"advanced": "Advanced",
+			"debug": "Debug"
+		},
 		"download-details-dialog": {
 			"overview": {
 				"status": "Status",

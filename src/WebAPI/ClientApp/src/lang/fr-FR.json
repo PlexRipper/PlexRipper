@@ -178,7 +178,8 @@
 		},
 		"delete-account": {
 			"title": "Êtes vous sûr ?",
-			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
+			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched.",
+			"warning": "Cela peut prendre environ 5 minutes ou plus, puis cette fenêtre se fermera d'elle-même!"
 		},
 		"reset-db": {
 			"title": "Êtes vous sûr ?",
@@ -367,6 +368,15 @@
 					"re-sync-server": "Resyncroniser les bibliothèques"
 				}
 			}
+		},
+		"navigation-drawer": {
+			"downloads": "Téléchargements",
+			"settings": "Paramètres",
+			"accounts": "Comptes",
+			"paths": "Chemins",
+			"ui": "Interface utilisateur",
+			"advanced": "Avancée",
+			"debug": "Déboguer"
 		},
 		"download-details-dialog": {
 			"overview": {

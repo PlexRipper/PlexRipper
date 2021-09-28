@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using MediatR;
@@ -50,12 +49,7 @@ namespace PlexRipper.Application.PlexServers
             _plexAuthenticationService = plexAuthenticationService;
         }
 
-        /// <summary>
-        /// Retrieves the latest <see cref="PlexServer"/> data, and the corresponding <see cref="PlexLibrary"/>,
-        /// from the PlexAPI and stores it in the Database.
-        /// </summary>
-        /// <param name="plexAccount">The <see cref="PlexAccount"/> used to retrieve the accessible <see cref="PlexServer">PlexServers</see>.</param>
-        /// <returns>Is successful.</returns>
+        /// <inheritdoc/>
         public async Task<Result<List<PlexServer>>> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
@@ -227,23 +221,18 @@ namespace PlexRipper.Application.PlexServers
         /// When successfully connected, the <see cref="PlexLibrary">PlexLibraries</see> are stored in the database.
         /// </summary>
         /// <param name="plexAccountId"></param>
-        /// <param name="plexServerIds"></param>
         /// <returns></returns>
-        public async Task<Result> InspectPlexServers(int plexAccountId, List<int> plexServerIds)
+        public async Task<Result> InspectPlexServers(int plexAccountId)
         {
-            var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
+            var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId, true));
             if (plexAccountResult.IsFailed)
             {
                 return plexAccountResult.WithError($"Could not retrieve any PlexAccount from database with id {plexAccountId}.").LogError();
             }
 
-            var plexServersResult = await _mediator.Send(new GetPlexServersByIdsQuery(plexServerIds));
-            if (plexServersResult.IsFailed)
-            {
-                return plexServersResult.WithError("Could not retrieve any PlexServers from database to inspect.").LogError();
-            }
+            var plexServers = plexAccountResult.Value.PlexServers;
 
-            var plexServers = plexServersResult.Value;
+            Log.Information($"Inspecting {plexServers.Count} PlexServers for PlexAccount: {plexAccountResult.Value.DisplayName}");
 
             // Create inspect tasks for all plexServers
             var tasks = plexServers.Select(async plexServer =>
@@ -314,7 +303,7 @@ namespace PlexRipper.Application.PlexServers
 
             await Task.WhenAll(tasks);
 
-            return await _mediator.Send(new UpdatePlexServersCommand(plexServersResult.Value));
+            return await _mediator.Send(new UpdatePlexServersCommand(plexServers));
         }
 
         /// <summary>

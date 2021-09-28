@@ -1,14 +1,7 @@
 <template>
-	<v-dialog :value="dialog" persistent :max-width="IsSettingUpAccount ? 1000 : 900">
-		<!-- The setup account progress -->
-		<account-setup-progress
-			v-show="IsSettingUpAccount"
-			ref="accountSetupProgress"
-			:account-id="getAccount.id"
-			@hide="closeDialog(true)"
-		/>
+	<v-dialog :value="dialog" persistent :max-width="isSettingUpAccount ? 1000 : 900">
 		<!-- The account pop-up -->
-		<v-card v-show="!IsSettingUpAccount">
+		<v-card v-show="!isSettingUpAccount">
 			<v-card-title class="headline">
 				{{ getDisplayName }}
 			</v-card-title>
@@ -87,14 +80,19 @@
 			<!-- Dialog Actions	-->
 			<v-card-actions>
 				<!-- Delete account -->
-				<confirmation-dialog
+				<p-btn
 					v-if="!isNew"
+					:width="130"
+					:button-type="getDeleteButtonType"
+					text-id="delete"
+					@click="confirmationDialogState = true"
+				/>
+				<confirmation-dialog
 					class="mr-4"
 					text-id="delete-account"
-					icon="mdi-delete"
-					:button-type="getDeleteButtonType"
-					:width="130"
-					button-text-id="delete"
+					:dialog="confirmationDialogState"
+					:confirm-loading="true"
+					@cancel="confirmationDialogState = false"
 					@confirm="deleteAccount"
 				/>
 				<!-- Reset Form -->
@@ -126,6 +124,8 @@
 				/>
 			</v-card-actions>
 		</v-card>
+		<!-- The setup account progress -->
+		<account-setup-progress v-show="isSettingUpAccount" :account="getAccount" @hide="closeDialog(true)" />
 	</v-dialog>
 </template>
 
@@ -133,10 +133,10 @@
 import Log from 'consola';
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
-import { deleteAccount, validateAccount } from '@api/accountApi';
-import AccountSetupProgress from '@components/Progress/AccountSetupProgress.vue';
+import { validateAccount } from '@api/accountApi';
 import { AccountService } from '@service';
 import { map } from 'rxjs/operators';
+import { PlexServerDTO } from '@dto/mainApi';
 import ButtonType from '@/types/enums/buttonType';
 
 @Component
@@ -147,13 +147,10 @@ export default class AccountDialog extends Vue {
 	@Prop({ required: true, type: Boolean, default: false })
 	dialog: boolean = false;
 
-	@Ref('accountSetupProgress')
-	readonly accountSetupProgressRef!: AccountSetupProgress;
-
 	@Ref('accountForm')
 	readonly accountForm!: any;
 
-	IsSettingUpAccount: boolean = false;
+	isSettingUpAccount: boolean = false;
 
 	validateLoading: boolean = false;
 
@@ -176,6 +173,10 @@ export default class AccountDialog extends Vue {
 	labelCol: number = 3;
 
 	isValidated: string = '';
+
+	plexServers: PlexServerDTO[] = [];
+
+	confirmationDialogState: Boolean = false;
 
 	get isNew(): boolean {
 		return !this.account;
@@ -211,6 +212,7 @@ export default class AccountDialog extends Vue {
 			displayName: this.displayName,
 			username: this.username,
 			password: this.password,
+			plexServers: this.plexServers,
 		} as PlexAccountDTO;
 	}
 
@@ -292,24 +294,21 @@ export default class AccountDialog extends Vue {
 
 	saveAccount(): void {
 		this.saving = true;
-		if (this.getAccount) {
-			this.$subscribeTo(AccountService.createOrUpdateAccount(this.getAccount), (data) => {
-				if (data.isSuccess) {
-					this.IsSettingUpAccount = true;
-					this.$nextTick(() => this.accountSetupProgressRef?.refreshAccount(data.value?.id));
-				}
-			});
-		}
+
+		this.$subscribeTo(AccountService.createOrUpdateAccount(this.getAccount), (data) => {
+			if (data.isSuccess) {
+				this.plexServers = data.value?.plexServers ?? [];
+				this.isSettingUpAccount = true;
+			} else {
+				Log.error('Result was invalid when saving account', data);
+			}
+		});
 	}
 
 	deleteAccount(): void {
-		if (this.account) {
-			deleteAccount(this.account.id).subscribe(() => {
-				this.closeDialog(true);
-			});
-		} else {
-			Log.error('Could not delete account because it was null');
-		}
+		AccountService.deleteAccount(this.getAccount.id).subscribe(() => {
+			this.closeDialog(true);
+		});
 	}
 
 	onOpenDialog(dialogState: boolean): void {
@@ -328,7 +327,8 @@ export default class AccountDialog extends Vue {
 	}
 
 	closeDialog(refreshAccounts: boolean = false): void {
-		this.IsSettingUpAccount = false;
+		this.isSettingUpAccount = false;
+		this.confirmationDialogState = false;
 		this.saving = false;
 		this.$emit('dialog-closed', refreshAccounts);
 	}

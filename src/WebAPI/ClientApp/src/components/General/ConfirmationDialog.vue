@@ -1,5 +1,5 @@
 <template>
-	<v-dialog v-model="dialog" width="500" persistent>
+	<v-dialog :value="dialog" width="500" persistent @click:outside="cancel">
 		<v-card>
 			<v-card-title class="headline i18n-formatting">{{ $t(getText.title) }}</v-card-title>
 
@@ -8,9 +8,9 @@
 			<v-divider></v-divider>
 
 			<v-card-actions>
-				<p-btn :button-type="getCancelButtonType" @click="closeDialog" />
+				<p-btn :button-type="getCancelButtonType" @click="cancel" />
 				<v-spacer></v-spacer>
-				<p-btn :button-type="getConfirmationButtonType" @click="confirm" />
+				<p-btn :button-type="getConfirmationButtonType" :loading="loading" @click="confirm" />
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -32,6 +32,11 @@ export default class ConfirmationDialog extends Vue {
 
 	@Prop({ required: true, type: Boolean })
 	readonly dialog!: boolean;
+
+	@Prop({ required: true, type: Boolean })
+	readonly confirmLoading!: boolean;
+
+	loading: boolean = false;
 
 	get getText(): IText {
 		if (this.textId === '') {
@@ -56,16 +61,15 @@ export default class ConfirmationDialog extends Vue {
 		return ButtonType.Confirm;
 	}
 
-	closeDialog(): void {
-		this.$emit('close');
-	}
-
 	cancel(): void {
 		this.$emit('cancel');
 	}
 
 	confirm(): void {
 		this.$emit('confirm');
+		if (this.confirmLoading) {
+			this.loading = true;
+		}
 	}
 }
 </script>

@@ -1,6 +1,6 @@
 import Log from 'consola';
 import { Observable, of, combineLatest } from 'rxjs';
-import { createAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
+import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { BaseService, GlobalService, SettingsService } from '@service';
@@ -84,17 +84,29 @@ export class AccountService extends BaseService {
 	 * @returns {Observable<ResultDTO<PlexAccountDTO | null>>}
 	 */
 	public createOrUpdateAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
-		return of(1).pipe(
-			tap(() => Log.debug(`${account.id === 0 ? 'Creating' : 'Updating'} account`, account)),
-			switchMap(() => {
-				return account.id === 0 ? createAccount(account) : updateAccount(account);
-			}),
-			tap((account) => {
-				if (account.isSuccess) {
-					this.updateStore('accounts', account.value);
-				}
-			}),
-		);
+		if (account.id === 0) {
+			return createAccount(account).pipe(
+				tap((createdAccount) => {
+					if (createdAccount.isSuccess) {
+						return this.updateStore('accounts', createdAccount.value);
+					}
+					Log.error(`Failed to create account ${account.displayName}`, createdAccount);
+				}),
+			);
+		} else {
+			return updateAccount(account).pipe(
+				tap((createdAccount) => {
+					if (createdAccount.isSuccess) {
+						return this.updateStore('accounts', createdAccount.value);
+					}
+					Log.error(`Failed to update account ${account.displayName}`, createdAccount);
+				}),
+			);
+		}
+	}
+
+	public deleteAccount(accountId: number) {
+		return deleteAccount(accountId).pipe(switchMap(() => this.fetchAccounts()));
 	}
 }
 

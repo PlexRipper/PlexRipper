@@ -55,5 +55,13 @@ namespace PlexRipper.Application.Common
         /// <param name="plexAccountId">Can be 0 to refresh all enabled PlexAccounts.</param>
         /// <returns>If successful.</returns>
         Task<Result> RefreshPlexAccount(int plexAccountId = 0);
+
+        /// <summary>
+        /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi.
+        /// It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
+        /// </summary>
+        /// <param name="plexAccountId">The is of <see cref="PlexAccount"/> to setup.</param>
+        /// <returns>The list of <see cref="PlexServer">PlexServers</see> which are accessible by this account.</returns>
+        Task<Result<List<PlexServer>>> SetupAccountAsync(int plexAccountId);
     }
 }

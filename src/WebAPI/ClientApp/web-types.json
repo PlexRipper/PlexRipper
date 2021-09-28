@@ -74,20 +74,17 @@
           "description": "",
           "attributes": [
             {
-              "name": "accountId",
+              "name": "account",
               "required": true,
               "value": {
                 "kind": "expression",
-                "type": "number"
+                "type": "PlexAccountDTO"
               }
             }
           ],
           "events": [
             {
               "name": "hide"
-            },
-            {
-              "name": "complete"
             }
           ],
           "source": {
@@ -199,12 +196,17 @@
                 "kind": "expression",
                 "type": "boolean"
               }
+            },
+            {
+              "name": "confirmLoading",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
             }
           ],
           "events": [
-            {
-              "name": "close"
-            },
             {
               "name": "cancel"
             },

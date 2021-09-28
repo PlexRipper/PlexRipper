@@ -18,11 +18,15 @@ namespace PlexRipper.Application.PlexAccounts
 
         private readonly IPlexApiService _plexApiService;
 
-        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexApiService plexApiService)
+        private readonly ISchedulerService _schedulerService;
+
+        public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexApiService plexApiService,
+            ISchedulerService schedulerService)
         {
             _mediator = mediator;
             _plexServerService = plexServerService;
             _plexApiService = plexApiService;
+            _schedulerService = schedulerService;
         }
 
         /// <summary>
@@ -85,30 +89,20 @@ namespace PlexRipper.Application.PlexAccounts
             }
 
             // Retrieve and store servers
-            var retrieveResult = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
-            if (retrieveResult.IsFailed)
+            var plexServerList = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
+            if (plexServerList.IsFailed)
             {
-                return retrieveResult.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
+                return plexServerList.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
             }
 
             // Retrieve libraries for the plexAccount
-            var inspectResult = await _plexServerService.InspectPlexServers(plexAccount.Id, retrieveResult.Value.Select(x => x.Id).ToList());
-            if (inspectResult.IsFailed)
-            {
-                return inspectResult;
-            }
-
-            var plexServerList = await _mediator.Send(new GetPlexServersByPlexAccountIdQuery(plexAccount.Id));
-            if (plexServerList.IsFailed)
-            {
-                return plexServerList.ToResult();
-            }
+            await _schedulerService.InspectPlexServersAsyncJob(plexAccount.Id);
 
             string msg = !plexServerList.Value.Any()
                 ? "Account was setup successfully, but did not have access to any servers!"
                 : "Account was setup successfully!";
 
-            return Result.Ok(plexServerList.Value).WithSuccess(msg).LogDebug();
+            return Result.Ok(plexServerList.Value).WithSuccess(msg).LogInformation();
         }
 
         /// <inheritdoc/>

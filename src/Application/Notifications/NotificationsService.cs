@@ -40,6 +40,11 @@ namespace PlexRipper.Application.Notifications
             return await _mediator.Send(new HideNotificationCommand(id));
         }
 
+        public async Task<Result> ClearAllNotifications()
+        {
+            return await _mediator.Send(new ClearAllNotificationsCommand());
+        }
+
         public async Task<Result> SendResult(Result result)
         {
             if (result.HasError<Error>())

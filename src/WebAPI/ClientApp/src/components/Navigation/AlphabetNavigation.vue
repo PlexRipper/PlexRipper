@@ -17,15 +17,11 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import Log from 'consola';
 
 @Component
 export default class AlphabetNavigation extends Vue {
 	@Prop({ required: true, type: Array as () => ITreeViewItem[] })
 	readonly items!: ITreeViewItem[];
-
-	@Prop({ required: true, type: String, default: '' })
-	readonly containerRef!: string;
 
 	get alphabet(): string[] {
 		const numeric: string = '!@0123456789';
@@ -50,24 +46,7 @@ export default class AlphabetNavigation extends Vue {
 	}
 
 	scrollTo(letter: string): void {
-		const ref = this.$parent.$refs[this.containerRef];
-		if (!ref) {
-			Log.error('Could not find container with reference: ' + this.containerRef);
-			return;
-		}
-
-		let scrollHeight = 0;
-		if (letter !== '#') {
-			const children = (ref as Vue).$children;
-			const index = children.findIndex((x) => (x.$el as HTMLElement)?.getAttribute('data-title')?.startsWith(letter)) ?? -1;
-			if (index > -1 && children[index]) {
-				scrollHeight = (children[index].$el as HTMLElement).offsetTop;
-			} else {
-				Log.error('Could not find an index with letter ' + letter);
-			}
-		}
-
-		((ref as Vue).$el as Element).scrollTop = scrollHeight;
+		this.$emit('scroll-to', letter);
 	}
 }
 </script>

@@ -72,6 +72,7 @@
 </template>
 
 <script lang="ts">
+import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { format } from 'date-fns';
 import { SettingsService } from '@service';
@@ -152,24 +153,37 @@ export default class DateAndTimeSection extends Vue {
 	}
 
 	updateSettings(index: number, state: any): void {
-		SettingsService.updateDateTimeSettings({
-			shortDateFormat: index === 0 ? state : this.shortDateFormat,
-			longDateFormat: index === 1 ? state : this.longDateFormat,
-			timeFormat: index === 2 ? state : this.timeFormat,
-			timeZone: index === 3 ? state : this.timeZone,
-			showRelativeDates: index === 4 ? state : this.showRelativeDates,
-		});
+		switch (index) {
+			case 0:
+				return SettingsService.updateSetting('shortDateFormat', state);
+			case 1:
+				return SettingsService.updateSetting('longDateFormat', state);
+			case 2:
+				return SettingsService.updateSetting('timeFormat', state);
+			case 3:
+				return SettingsService.updateSetting('timeZone', state);
+			case 4:
+				return SettingsService.updateSetting('showRelativeDates', state);
+			default:
+				Log.error(`Failed to update settings with index ${index} and value ${state}`);
+		}
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SettingsService.getDateTimeSettings(), (dateTimeSettings) => {
-			if (dateTimeSettings) {
-				this.shortDateFormat = dateTimeSettings.shortDateFormat;
-				this.longDateFormat = dateTimeSettings.longDateFormat;
-				this.timeFormat = dateTimeSettings.timeFormat;
-				this.timeZone = dateTimeSettings.timeZone;
-				this.showRelativeDates = dateTimeSettings.showRelativeDates;
-			}
+		this.$subscribeTo(SettingsService.getShortDateFormat(), (value) => {
+			this.shortDateFormat = value;
+		});
+		this.$subscribeTo(SettingsService.getLongDateFormat(), (value) => {
+			this.longDateFormat = value;
+		});
+		this.$subscribeTo(SettingsService.getTimeFormat(), (value) => {
+			this.timeFormat = value;
+		});
+		this.$subscribeTo(SettingsService.getTimeZone(), (value) => {
+			this.timeZone = value;
+		});
+		this.$subscribeTo(SettingsService.getShowRelativeDates(), (value) => {
+			this.showRelativeDates = value;
 		});
 	}
 }

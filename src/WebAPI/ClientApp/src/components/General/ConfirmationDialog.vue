@@ -1,16 +1,5 @@
 <template>
 	<v-dialog v-model="dialog" width="500" persistent>
-		<template #activator="{}">
-			<p-btn
-				:button-type="buttonType"
-				:width="width"
-				:block="block"
-				:disabled="disabled"
-				:text-id="buttonTextId"
-				@click="openDialog"
-			/>
-		</template>
-
 		<v-card>
 			<v-card-title class="headline i18n-formatting">{{ $t(getText.title) }}</v-card-title>
 
@@ -32,7 +21,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import IText from '@interfaces/IText';
 import ButtonType from '@enums/buttonType';
 
-@Component
+@Component<ConfirmationDialog>({})
 export default class ConfirmationDialog extends Vue {
 	/**
 	 * The Vue-i18n text id used for the confirmation window that pops-up.
@@ -41,26 +30,8 @@ export default class ConfirmationDialog extends Vue {
 	@Prop({ required: true, type: String, default: '' })
 	readonly textId!: string;
 
-	/**
-	 * The Vue-i18n text id used for the text inside the button.
-	 * @type {string}
-	 */
-	@Prop({ required: true, type: String, default: '' })
-	readonly buttonTextId!: string;
-
-	@Prop({ required: false, type: Number, default: 150 })
-	readonly width!: number;
-
-	@Prop({ required: false, type: Boolean, default: false })
-	readonly disabled!: boolean;
-
-	@Prop({ required: false, type: String, default: ButtonType.None })
-	readonly buttonType!: ButtonType;
-
-	@Prop({ required: false, type: Boolean, default: false })
-	readonly block!: boolean;
-
-	dialog: boolean = false;
+	@Prop({ required: true, type: Boolean })
+	readonly dialog!: boolean;
 
 	get getText(): IText {
 		if (this.textId === '') {
@@ -86,11 +57,7 @@ export default class ConfirmationDialog extends Vue {
 	}
 
 	closeDialog(): void {
-		this.dialog = false;
-	}
-
-	openDialog(): void {
-		this.dialog = true;
+		this.$emit('close');
 	}
 
 	cancel(): void {

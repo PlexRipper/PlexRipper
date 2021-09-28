@@ -11,6 +11,9 @@ namespace PlexRipper.WebAPI.Common.DTO.FolderPath
         [JsonProperty("folderType", Required = Required.Always)]
         public FolderType FolderType { get; set; }
 
+        [JsonProperty("mediaType", Required = Required.Always)]
+        public PlexMediaType MediaType { get; set; }
+
         [JsonProperty("displayName", Required = Required.Always)]
         public string DisplayName { get; set; }
 

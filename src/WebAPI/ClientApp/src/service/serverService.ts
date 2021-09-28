@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { finalize, switchMap } from 'rxjs/operators';
 import { PlexServerDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, GlobalService } from '@service';
 
 export class ServerService extends BaseService {

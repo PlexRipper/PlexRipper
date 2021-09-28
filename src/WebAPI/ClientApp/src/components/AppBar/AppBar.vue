@@ -1,8 +1,8 @@
 <template>
-	<v-app-bar class="app-bar" dense app clipped-left>
+	<v-app-bar class="app-bar" dense app clipped-left clipped-right>
 		<v-toolbar-title>
-			<v-app-bar-nav-icon @click.stop="showDrawer()" />
-			<v-btn to="/" outlined nuxt><logo :size="24" class="mr-3" /> PlexRipper - v{{ version }}</v-btn>
+			<v-app-bar-nav-icon @click.stop="showNavigationDrawer" />
+			<v-btn to="/" outlined nuxt><logo :size="24" class="mr-3" /> {{ $t('general.name-version', { version }) }}</v-btn>
 		</v-toolbar-title>
 
 		<v-spacer></v-spacer>
@@ -44,13 +44,13 @@
 				</v-list-item-group>
 				<!--	No account found -->
 				<v-list-item v-else>
-					<v-list-item-title> No Accounts available</v-list-item-title>
+					<v-list-item-title> {{ $t('components.app-bar.no-accounts') }}</v-list-item-title>
 				</v-list-item>
 			</v-list>
 		</v-menu>
 
 		<!-- Notifications Selector -->
-		<notification-button />
+		<notification-button @toggle="showNotificationsDrawer" />
 	</v-app-bar>
 </template>
 
@@ -72,15 +72,16 @@ export default class AppBar extends Vue {
 		return this.loading.some((x) => x);
 	}
 
-	private showDrawerState: boolean = true;
+	showNavigationDrawer(): void {
+		this.$emit('show-navigation');
+	}
 
-	showDrawer(): void {
-		this.showDrawerState = !this.showDrawerState;
-		this.$emit('show', this.showDrawerState);
+	showNotificationsDrawer(): void {
+		this.$emit('show-notifications');
 	}
 
 	updateActiveAccountId(accountId: number): void {
-		SettingsService.updateActiveAccountSettings(accountId);
+		SettingsService.updateSetting('activeAccountId', accountId);
 	}
 
 	refreshAccount(accountId: number = 0): void {

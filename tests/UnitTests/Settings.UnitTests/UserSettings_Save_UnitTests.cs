@@ -39,7 +39,7 @@ namespace Settings.UnitTests
         public void UserSettings_Save_ShouldSaveSettings_WhenSettingChanged()
         {
             // Arrange
-            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.JsonSettings));
+            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
             _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
 
             // Act

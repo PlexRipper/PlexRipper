@@ -27,12 +27,6 @@ import { SettingsService } from '@service';
 export default class DownloadManagerSection extends Vue {
 	downloadSegments: number = 0;
 
-	updateSettings(index: number, state: any): void {
-		SettingsService.updateDownloadManagerSettings({
-			downloadSegments: index === 0 ? state : this.downloadSegments,
-		});
-	}
-
 	mounted(): void {
 		this.$subscribeTo(
 			this.$watchAsObservable('downloadSegments').pipe(
@@ -40,15 +34,11 @@ export default class DownloadManagerSection extends Vue {
 				debounce(() => timer(1000)),
 				distinctUntilChanged(),
 			),
-			(value) => {
-				this.updateSettings(0, value);
-			},
+			(value) => SettingsService.updateSetting('downloadSegments', value),
 		);
 
-		this.$subscribeTo(SettingsService.getDownloadManagerSettings(), (downloadManagerSettings) => {
-			if (downloadManagerSettings) {
-				this.downloadSegments = downloadManagerSettings.downloadSegments;
-			}
+		this.$subscribeTo(SettingsService.getDownloadSegments(), (downloadSegments) => {
+			this.downloadSegments = downloadSegments;
 		});
 	}
 }

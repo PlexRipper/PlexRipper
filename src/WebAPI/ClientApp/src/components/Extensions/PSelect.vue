@@ -1,30 +1,37 @@
-<script lang="ts">
-import { Component, Prop } from 'vue-property-decorator';
+<script>
+import Vue from 'vue';
 import { VSelect } from 'vuetify/lib';
+const base = Vue.extend({ mixins: [VSelect] });
 
-@Component
-export default class PSelect extends VSelect {
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly dense!: boolean;
-
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly filled!: boolean;
-
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly outlined!: boolean;
-
-	@Prop({ required: false, type: String, default: 'red' })
-	readonly color!: string;
-
-	@Prop({ required: false, type: String, default: 'auto' })
-	readonly hideDetails!: string;
-
-	@Prop({
-		required: false,
-		default: () => {
-			return { offsetY: true, contentClass: 'menu-background' };
+export default base.extend({
+	name: 'p-select',
+	props: {
+		dense: {
+			type: Boolean,
+			default: true,
 		},
-	})
-	readonly menuProps!: any;
-}
+		filled: {
+			type: Boolean,
+			default: true,
+		},
+		outlined: {
+			type: Boolean,
+			default: true,
+		},
+		color: {
+			type: String,
+			default: 'red',
+		},
+		hideDetails: {
+			type: String,
+			default: 'auto',
+		},
+		menuProps: {
+			type: Object,
+			default: () => {
+				return { offsetY: true, contentClass: 'menu-background' };
+			},
+		},
+	},
+});
 </script>

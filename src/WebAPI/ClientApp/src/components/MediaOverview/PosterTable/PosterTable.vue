@@ -17,14 +17,16 @@
 			</vue-scroll>
 		</v-col>
 		<!-- Alphabet Navigation-->
-		<alphabet-navigation :items="items" container-ref="scrollbarposters" />
+		<alphabet-navigation :items="items" @scroll-to="scrollToIndex" />
 	</v-row>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import Log from 'consola';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
+import VueScroll from 'vuescroll';
 
 @Component
 export default class PosterTable extends Vue {
@@ -40,6 +42,9 @@ export default class PosterTable extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly activeAccountId!: number;
 
+	@Ref('scrollbarposters')
+	readonly scrollBar!: VueScroll;
+
 	downloadMedia(downloadMediaCommands: DownloadMediaDTO[]): void {
 		downloadMediaCommands.forEach((x) => {
 			x.libraryId = this.libraryId;
@@ -50,6 +55,26 @@ export default class PosterTable extends Vue {
 
 	openDetails(mediaId: number): void {
 		this.$emit('open-details', mediaId);
+	}
+
+	scrollToIndex(letter: string) {
+		if (!this.scrollBar) {
+			Log.error('Could not find container with reference: ' + this.scrollBar);
+			return;
+		}
+
+		let scrollHeight = 0;
+		if (letter !== '#') {
+			const children = this.scrollBar.$children[0].$children;
+			const index = children.findIndex((x) => (x.$el as HTMLElement)?.getAttribute('data-title')?.startsWith(letter)) ?? -1;
+			if (index > -1 && children[index]) {
+				scrollHeight = (children[index].$el as HTMLElement).offsetTop;
+			} else {
+				Log.error('Could not find an index with letter ' + letter);
+			}
+		}
+
+		this.scrollBar.scrollTo({ y: scrollHeight }, 0);
 	}
 }
 </script>

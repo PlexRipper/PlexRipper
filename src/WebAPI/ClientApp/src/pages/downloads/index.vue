@@ -12,7 +12,7 @@
 		/>
 		<!--	The Download Table	-->
 		<vue-scroll class="download-page-tables">
-			<v-row v-if="plexServers.length > 0">
+			<v-row v-if="downloads.length > 0">
 				<v-col>
 					<v-expansion-panels v-model="openExpansions" multiple>
 						<v-expansion-panel v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
@@ -33,7 +33,7 @@
 			</v-row>
 			<v-row v-else justify="center">
 				<v-col cols="auto">
-					<h2>There are currently no downloads in progress</h2>
+					<h2>{{ $t('pages.downloads.no-downloads') }}</h2>
 				</v-col>
 			</v-row>
 		</vue-scroll>

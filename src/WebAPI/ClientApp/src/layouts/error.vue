@@ -3,7 +3,7 @@
 		<v-container>
 			<v-row justify="center">
 				<v-col cols="auto">
-					<h1>ERROR!</h1>
+					<h1>{{ $t('pages.error.header') }}</h1>
 					<h1 class="text-left">
 						<pre><code class="no-background">{{ errorFormatted }}</code></pre>
 					</h1>
@@ -12,7 +12,7 @@
 			<v-row justify="center">
 				<v-col cols="auto">
 					<h1>
-						<NuxtLink to="/">Go back to home page </NuxtLink>
+						<NuxtLink to="/">{{ $t('pages.error.return-link') }} </NuxtLink>
 					</h1>
 				</v-col>
 			</v-row>

@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaseService } from '@service';
-import IStoreState from '@interfaces/IStoreState';
+import IStoreState from '@interfaces/service/IStoreState';
 import { Context } from '@nuxt/types';
 import IAlert from '@interfaces/IAlert';
 

@@ -37,7 +37,7 @@
 		<template v-else>
 			<v-row justify="center">
 				<v-col cols="auto">
-					<h2>No paths are set.</h2>
+					<h2>{{ $t('components.paths-custom-overview.no-paths') }}</h2>
 				</v-col>
 			</v-row>
 		</template>
@@ -62,8 +62,9 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator';
-import { FolderPathDTO, FolderType } from '@dto/mainApi';
+import Log from 'consola';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import { DownloadService, FolderPathService } from '@service';
 
@@ -85,6 +86,28 @@ export default class PathsCustomOverview extends Vue {
 
 	get getFolderPaths(): FolderPathDTO[] {
 		return this.folderPaths.filter((x) => x.folderType === this.folderType && x.id >= 4);
+	}
+
+	get getMediaType(): PlexMediaType {
+		switch (this.folderType) {
+			case FolderType.TvShowFolder:
+				return PlexMediaType.TvShow;
+
+			case FolderType.MovieFolder:
+				return PlexMediaType.Movie;
+
+			case FolderType.MusicFolder:
+				return PlexMediaType.Music;
+
+			case FolderType.PhotosFolder:
+				return PlexMediaType.Photos;
+
+			case FolderType.GamesVideosFolder:
+				return PlexMediaType.Games;
+			default:
+				Log.error(`PathsCustomOverview.vue => Failed to convert ${this.folderType} to PlexMediaType`);
+				return PlexMediaType.Unknown;
+		}
 	}
 
 	openDirectoryBrowser(path: FolderPathDTO): void {
@@ -112,6 +135,7 @@ export default class PathsCustomOverview extends Vue {
 			displayName: `${this.folderType.replace('Folder', ' Folder')} Path`,
 			directory: '',
 			folderType: this.folderType,
+			mediaType: this.getMediaType,
 			isValid: false,
 		});
 	}

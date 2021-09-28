@@ -97,7 +97,7 @@
 												<template v-else-if="header.type === 'percentage'">
 													<v-progress-linear :value="item.percentage" stream striped color="red" height="25">
 														<template #default="{ value }">
-															<strong>{{ value }}%</strong>
+															<strong>{{ Math.round(value * 100) / 100 }}%</strong>
 														</template>
 													</v-progress-linear>
 												</template>
@@ -151,7 +151,7 @@ import Convert from '@mediaOverview/MediaTable/types/Convert';
 import ButtonType from '@enums/buttonType';
 import ISelection from '@interfaces/ISelection';
 
-@Component
+@Component<VTreeViewTable>({})
 export default class VTreeViewTable extends Vue {
 	@Prop({ required: true, type: Array as () => any[] })
 	readonly items!: any[];

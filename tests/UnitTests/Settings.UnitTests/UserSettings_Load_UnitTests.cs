@@ -1,4 +1,5 @@
-﻿using Environment;
+﻿using Bogus.Platform;
+using Environment;
 using FluentResults;
 using Logging;
 using Moq;
@@ -20,6 +21,8 @@ namespace Settings.UnitTests
 
         private readonly Mock<IPathSystem> _pathSystem;
 
+        private readonly Mock<UserSettings> _userSettings;
+
         private readonly UserSettings _sut;
 
         #endregion
@@ -29,7 +32,8 @@ namespace Settings.UnitTests
             Log.SetupTestLogging(output);
             _pathSystem = new Mock<IPathSystem>();
             _fileSystem = new Mock<IFileSystem>();
-            _sut = new Mock<UserSettings>(MockBehavior.Strict, _pathSystem.Object, _fileSystem.Object).Object;
+            _userSettings = new Mock<UserSettings>(MockBehavior.Strict, _pathSystem.Object, _fileSystem.Object);
+            _sut = _userSettings.Object;
 
             _pathSystem.Setup(x => x.ConfigFileName).Returns("Test_PlexRipperSettings.json");
             _pathSystem.Setup(x => x.ConfigDirectory).Returns("/config");
@@ -39,7 +43,7 @@ namespace Settings.UnitTests
         public void UserSettings_Load_ShouldLoadSettings_WhenGivenValidSettings()
         {
             // Arrange
-            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.JsonSettings));
+            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
 
             // Act
             var loadResult = _sut.Load();
@@ -68,6 +72,7 @@ namespace Settings.UnitTests
         {
             // Arrange
             _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok("Invalid Json"));
+            _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
 
             // Act
             var loadResult = _sut.Load();

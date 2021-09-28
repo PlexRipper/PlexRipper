@@ -14,8 +14,9 @@
 		</template>
 		<!--	Use for everything else	-->
 		<template v-else>
-			<navigation-drawer :show-drawer="drawerState" />
-			<app-bar @show="drawerState = $event" />
+			<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
+			<navigation-drawer :show-drawer="showNavigationDrawerState" />
+			<notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
 			<v-main class="no-background">
 				<nuxt />
 			</v-main>
@@ -29,21 +30,33 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { HelpService, AlertService } from '@service';
 import IAlert from '@interfaces/IAlert';
+import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
 
 @Component({
+	components: { NotificationsDrawer },
 	loading: false,
 })
 export default class Default extends Vue {
 	helpDialogState: boolean = false;
 	helpId: string = '';
 	alerts: IAlert[] = [];
-	drawerState: Boolean = true;
+	showNavigationDrawerState: Boolean = true;
+	showNotificationsDrawerState: Boolean = false;
+
 	get isSetupPage(): boolean {
-		return this.$route.fullPath === '/setup';
+		return this.$route.fullPath.includes('setup');
 	}
 
 	closeAlert(alert: IAlert): void {
 		AlertService.removeAlert(alert.id);
+	}
+
+	toggleNavigationsDrawer() {
+		this.showNavigationDrawerState = !this.showNavigationDrawerState;
+	}
+
+	toggleNotificationsDrawer() {
+		this.showNotificationsDrawerState = !this.showNotificationsDrawerState;
 	}
 
 	mounted(): void {

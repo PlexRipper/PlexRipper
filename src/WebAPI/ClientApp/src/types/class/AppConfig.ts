@@ -28,6 +28,12 @@ export default class AppConfig {
 	 * When in production, the front-end runs on the same port as the back-end, by default on port 7000.
 	 */
 	get baseURL(): string {
+		// Are we production testing in a local development environment
+		if (this.isProduction && window.location.origin === 'http://localhost:3000') {
+			return 'http://localhost:5000';
+		}
+
+		// Docker production environment
 		return this.isProduction ? window.location.origin : 'http://localhost:5000';
 	}
 

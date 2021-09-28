@@ -18,4 +18,9 @@
     <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="MockData\ValidJsonSettings.json" />
+    <EmbeddedResource Include="MockData\ValidJsonSettings.json" />
+  </ItemGroup>
+
 </Project>

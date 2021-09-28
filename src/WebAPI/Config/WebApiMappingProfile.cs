@@ -7,7 +7,6 @@ using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 using PlexRipper.WebAPI.Common.FluentResult;
-using PlexRipper.WebAPI.Config.Mappings;
 using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Config
@@ -140,8 +139,7 @@ namespace PlexRipper.WebAPI.Config
 
         private void SettingsMappings()
         {
-            CreateMap<ISettingsModel, SettingsModelDTO>(MemberList.Destination).ConvertUsing<ISettingsModelToSettingsModelDTO>();
-            CreateMap<SettingsModelDTO, ISettingsModel>(MemberList.Destination).ConvertUsing<SettingsModelDTOToISettingsModel>();
+            CreateMap<ISettingsModel, SettingsModelDTO>(MemberList.Destination).ReverseMap();
         }
     }
 }

@@ -51,7 +51,7 @@
 							v-on="$listeners"
 						>
 							<template #default="{ value }">
-								<strong>{{ value }}%</strong>
+								<strong>{{ Math.round(value * 100) / 100 }}%</strong>
 							</template>
 						</v-progress-linear>
 					</v-col>

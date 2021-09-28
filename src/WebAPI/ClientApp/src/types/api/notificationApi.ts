@@ -18,3 +18,9 @@ export function hideNotification(id: number): Observable<ResultDTO<boolean>> {
 	const result = Axios.put(`${apiPath}/${id}`);
 	return checkResponse<ResultDTO<boolean>>(result, logText, 'hideNotification');
 }
+
+export function clearAllNotifications(): Observable<ResultDTO> {
+	preApiRequest(logText, 'clearAllNotifications');
+	const result = Axios.post(`${apiPath}/clear`);
+	return checkResponse<ResultDTO>(result, logText, 'clearAllNotifications');
+}

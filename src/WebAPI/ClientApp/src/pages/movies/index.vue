@@ -1,7 +1,7 @@
 <template>
 	<page-container>
-		<h1>Movies Overview</h1>
-		<p>Select a library from the left-hand side</p>
+		<h1>{{ $t('pages.movies.index.header') }}</h1>
+		<p>{{ $t('pages.movies.index.sub-header') }}</p>
 	</page-container>
 </template>
 

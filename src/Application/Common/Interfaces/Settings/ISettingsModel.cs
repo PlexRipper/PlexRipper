@@ -60,6 +60,8 @@ namespace PlexRipper.Application.Common
 
         public bool ShowRelativeDates { get; set; }
 
+        string Language { get; set; }
+
         #endregion
 
         #endregion

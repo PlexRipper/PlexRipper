@@ -1,25 +1,25 @@
 <template>
 	<v-dialog :value="serverId > 0" max-width="1000" @click:outside="close">
 		<v-card v-if="plexServer">
-			<v-card-title class="headline">{{ plexServer.name }} configuration</v-card-title>
+			<v-card-title class="headline">{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }} </v-card-title>
 
 			<v-card-text>
 				<v-tabs vertical>
 					<!--	Server Data	Tab Header-->
 					<v-tab>
 						<v-icon left> mdi-server </v-icon>
-						Server Data
+						{{ $t('components.server-dialog.tabs.server-data.header') }}
 					</v-tab>
 					<!--	Library Destinations Tab Header	-->
 					<v-tab>
 						<v-icon left> mdi-folder-edit-outline </v-icon>
-						Download Destinations
+						{{ $t('components.server-dialog.tabs.download-destinations.header') }}
 					</v-tab>
 
 					<!--	Server Commands Tab Header	-->
 					<v-tab>
 						<v-icon left> mdi-console </v-icon>
-						Server Commands
+						{{ $t('components.server-dialog.tabs.server-commands.header') }}
 					</v-tab>
 
 					<!--	Server Data Tab Content	-->
@@ -27,27 +27,27 @@
 						<v-simple-table class="section-table">
 							<tbody>
 								<tr>
-									<td style="width: 25%">Server URL:</td>
+									<td style="width: 25%">{{ $t('components.server-dialog.tabs.server-data.server-url') }}:</td>
 									<td>{{ plexServer.serverUrl }}</td>
 								</tr>
 								<tr>
-									<td>Machine Identifier:</td>
+									<td>{{ $t('components.server-dialog.tabs.server-data.machine-id') }}:</td>
 									<td>{{ plexServer.machineIdentifier }}</td>
 								</tr>
 								<tr>
-									<td>Plex Version:</td>
+									<td>{{ $t('components.server-dialog.tabs.server-data.plex-version') }}:</td>
 									<td>{{ plexServer.version }}</td>
 								</tr>
 								<tr>
-									<td>Created On:</td>
+									<td>{{ $t('components.server-dialog.tabs.server-data.created-on') }}:</td>
 									<td><date-time short-date :text="plexServer.createdAt" /></td>
 								</tr>
 								<tr>
-									<td>Last updated on:</td>
+									<td>{{ $t('components.server-dialog.tabs.server-data.last-updated-on') }}:</td>
 									<td><date-time short-date :text="plexServer.updatedAt" /></td>
 								</tr>
 								<tr v-if="serverStatus">
-									<td>Current status:</td>
+									<td>{{ $t('components.server-dialog.tabs.server-data.current-status') }}:</td>
 									<td>
 										<status pulse :value="serverStatus.isSuccessful" />
 										{{ serverStatus.statusCode }} -
@@ -56,7 +56,7 @@
 								</tr>
 								<!--	Server Status	-->
 								<tr v-if="serverStatus">
-									<td>Last checked on:</td>
+									<td>{{ $t('components.server-dialog.tabs.server-data.last-checked-on') }}:</td>
 									<td><date-time short-date :text="serverStatus.lastChecked" /></td>
 								</tr>
 							</tbody>
@@ -93,8 +93,10 @@
 						<v-simple-table class="section-table">
 							<tbody>
 								<tr>
-									<td>Re-sync Library media</td>
-									<td><p-btn text-id="sync-server-libraries" @click="syncServerLibraries" /></td>
+									<td>{{ $t('components.server-dialog.tabs.server-commands.re-sync-server') }}</td>
+									<td>
+										<p-btn text-id="sync-server-libraries" @click="syncServerLibraries" />
+									</td>
 								</tr>
 							</tbody>
 						</v-simple-table>

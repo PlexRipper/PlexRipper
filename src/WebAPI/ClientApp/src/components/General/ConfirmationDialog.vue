@@ -38,7 +38,7 @@ export default class ConfirmationDialog extends Vue {
 	@Prop({ required: true, type: Boolean })
 	readonly dialog!: boolean;
 
-	@Prop({ required: true, type: Boolean })
+	@Prop({ required: false, type: Boolean, default: false })
 	readonly confirmLoading!: boolean;
 
 	loading: boolean = false;

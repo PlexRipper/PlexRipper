@@ -3,7 +3,12 @@
 		<v-card>
 			<v-card-title class="headline i18n-formatting">{{ $t(getText.title) }}</v-card-title>
 
-			<v-card-text class="i18n-formatting">{{ $t(getText.text) }} </v-card-text>
+			<v-card-text class="i18n-formatting">
+				<p>{{ $t(getText.text) }}</p>
+				<p v-if="getText.warning" class="text-center">
+					<b>{{ $t(getText.warning) }}</b>
+				</p>
+			</v-card-text>
 
 			<v-divider></v-divider>
 
@@ -46,10 +51,12 @@ export default class ConfirmationDialog extends Vue {
 				text: 'Could not find the correct confirmation text..',
 			};
 		}
+		const msg = this.$getMessage(`confirmation.${this.textId}`);
 		return {
 			id: this.textId,
-			title: `confirmation.${this.textId}.title`,
-			text: `confirmation.${this.textId}.text`,
+			title: msg?.title ?? '',
+			text: msg?.text ?? '',
+			warning: msg?.warning ?? '',
 		};
 	}
 
@@ -70,6 +77,12 @@ export default class ConfirmationDialog extends Vue {
 		if (this.confirmLoading) {
 			this.loading = true;
 		}
+	}
+
+	mounted() {
+		this.$watchAsObservable('dialog', () => {
+			this.loading = false;
+		});
 	}
 }
 </script>

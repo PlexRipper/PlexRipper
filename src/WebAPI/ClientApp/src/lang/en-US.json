@@ -178,7 +178,8 @@
 		},
 		"delete-account": {
 			"title": "Are you sure?",
-			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched."
+			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched.",
+			"warning": "This might take around 5 minutes or longer and then this window will close on its own!"
 		},
 		"reset-db": {
 			"title": "Are you sure?",

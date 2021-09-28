@@ -115,7 +115,8 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequestInvalidId();
             }
 
-            return ToActionResult(await _plexAccountService.DeletePlexAccountAsync(id));
+            var deleteResult = await _plexAccountService.DeletePlexAccountAsync(id);
+            return ToActionResult(deleteResult);
         }
 
         [HttpPost("validate")]

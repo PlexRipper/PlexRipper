@@ -56,5 +56,9 @@ namespace PlexRipper.Application.Common
 
         Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(string serverAuthToken, string plexFullHost,
             string plexLibraryKey);
+
+        Task<Result<AuthPin>> GetPin();
+
+        Task<Result<AuthPin>> CheckPin(int pinId, string pinCode, string clientId);
     }
 }

@@ -59,6 +59,9 @@ namespace PlexRipper.Domain
         [Column(Order = 8)]
         public string Uuid { get; set; }
 
+        [Column(Order = 9)]
+        public string ClientId { get; set; }
+
         public string Email { get; set; }
 
         public DateTime JoinedAt { get; set; }

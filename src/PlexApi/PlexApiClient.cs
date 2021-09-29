@@ -56,8 +56,6 @@ namespace PlexRipper.PlexApi
         {
             IRestResponse<T> response;
 
-            request = AddHeaders(request);
-
             var retryAttemptCount = 3;
             var policyResult = await Policy
                 .Handle<WebException>()
@@ -141,7 +139,6 @@ namespace PlexRipper.PlexApi
                     .LogError();
             }
 
-            string msg = $"Time-out error on request {request.Resource}";
             if (action is not null)
             {
                 action(new PlexApiClientProgress
@@ -153,14 +150,14 @@ namespace PlexRipper.PlexApi
                 });
             }
 
-            return Result.Fail(new Error(msg).WithMetadata(metaData)).LogError();
+            return Result.Fail(new Error($"API Request: {request.Resource} failed").WithMetadata(metaData).WithMetadata("content", response.Content))
+                .LogError();
         }
 
         public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)
         {
             try
             {
-                request = AddHeaders(request);
                 var response = await Policy
                     .Handle<WebException>()
                     .WaitAndRetryAsync(1, retryAttempt =>
@@ -201,21 +198,6 @@ namespace PlexRipper.PlexApi
 
                 return result;
             }
-        }
-
-        /// <summary>
-        /// This will add the necessary headers to the request.
-        /// </summary>
-        /// <param name="request">The request to change.</param>
-        /// <returns>The request with headers added.</returns>
-        private RestRequest AddHeaders(RestRequest request)
-        {
-            foreach (var headerPair in PlexHeaderData.GetBasicHeaders)
-            {
-                request.AddHeader(headerPair.Key, headerPair.Value);
-            }
-
-            return request;
         }
 
         private Dictionary<string, object> GetMetadata(IRestResponse response)

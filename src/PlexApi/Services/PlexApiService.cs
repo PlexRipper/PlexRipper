@@ -214,6 +214,23 @@ namespace PlexRipper.PlexApi.Services
             return await _plexApi.GetPlexMediaImageAsync(thumbUrl, authToken, width, height);
         }
 
+        public async Task<Result<AuthPin>> GetPin()
+        {
+            return await _plexApi.GetPin();
+        }
+
+        public async Task<Result<AuthPin>> CheckPin(int pinId, string pinCode, string clientId)
+        {
+            var response = await _plexApi.CheckPin(pinId, pinCode, clientId);
+            if (response.IsFailed)
+            {
+                return response.ToResult();
+            }
+
+            //var mapResult = _mapper.Map<AuthPin>(response);
+            return Result.Ok(response.Value);
+        }
+
         #endregion
 
         #endregion

@@ -2,12 +2,6 @@
 
 namespace PlexRipper.PlexApi.Models
 {
-    public class PlexUserRequest
-    {
-        [JsonPropertyName("user")]
-        public UserRequest User { get; set; }
-    }
-
     public class UserRequest
     {
         [JsonPropertyName("login")]
@@ -15,5 +9,11 @@ namespace PlexRipper.PlexApi.Models
 
         [JsonPropertyName("password")]
         public string Password { get; set; }
+
+        [JsonPropertyName("verificationCode")]
+        public int VerificationCode { get; set; }
+
+        [JsonPropertyName("rememberMe")]
+        public string RememberMe { get; set; }
     }
 }

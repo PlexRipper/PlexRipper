@@ -199,11 +199,12 @@
             },
             {
               "name": "confirmLoading",
-              "required": true,
+              "required": false,
               "value": {
                 "kind": "expression",
                 "type": "boolean"
-              }
+              },
+              "default": "false"
             }
           ],
           "events": [

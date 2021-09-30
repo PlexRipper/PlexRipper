@@ -1,4 +1,5 @@
-﻿using RestSharp;
+﻿using PlexRipper.Domain;
+using RestSharp;
 
 namespace PlexRipper.PlexApi.Helpers
 {
@@ -12,8 +13,18 @@ namespace PlexRipper.PlexApi.Helpers
         public static RestRequest AddToken(this RestRequest request, string authToken)
         {
             request.AddQueryParameter("X-Plex-Token", authToken);
+            return request;
+        }
+
+        /// <summary>
+        /// Adds the required headers and also the authorization header.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="clientId">The unique ClientId belonging to a <see cref="PlexAccount"/></param>
+        public static RestRequest AddPlexHeaders(this RestRequest request, string clientId)
+        {
             request.AddQueryParameter("X-Plex-Product", "Plex Web");
-            request.AddQueryParameter("X-Plex-Client-Identifier:", "");
+            request.AddQueryParameter("X-Plex-Client-Identifier", clientId);
             request.AddQueryParameter("X-Plex-Platform", "Chrome");
             request.AddQueryParameter("X-Plex-Platform-Version", "87.0");
             request.AddQueryParameter("X-Plex-Sync-Version", "2");

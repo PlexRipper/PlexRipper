@@ -38,7 +38,7 @@ namespace PlexRipper.Application.UnitTests
             var newAccount = new PlexAccount("TestUsername", "Password123");
 
             _sut.Setup(x => x.CheckIfUsernameIsAvailableAsync(newAccount.Username)).ReturnsAsync(Result.Ok(true));
-            _sut.Setup(x => x.ValidatePlexAccountAsync(newAccount.Username, newAccount.Password)).ReturnsAsync(Result.Ok());
+            _sut.Setup(x => x.ValidatePlexAccountAsync(newAccount)).ReturnsAsync(Result.Ok());
             _sut.Setup(x => x.SetupAccountAsync(It.IsAny<int>())).ReturnsAsync(Result.Ok());
             _iMediator.Setup(m => m.Send(It.IsAny<CreatePlexAccountCommand>(), CancellationToken.None)).ReturnsAsync(Result.Ok(1));
             _iMediator.Setup(m => m.Send(It.IsAny<GetPlexAccountByIdQuery>(), CancellationToken.None)).ReturnsAsync(Result.Ok(new PlexAccount()));
@@ -85,7 +85,7 @@ namespace PlexRipper.Application.UnitTests
             // Arrange
             var newAccount = new PlexAccount("TestUsername", "Password123");
             _sut.Setup(x => x.CheckIfUsernameIsAvailableAsync(newAccount.Username)).ReturnsAsync(Result.Ok(true));
-            _sut.Setup(x => x.ValidatePlexAccountAsync(newAccount.Username, newAccount.Password)).ReturnsAsync(Result.Fail("Error #1"));
+            _sut.Setup(x => x.ValidatePlexAccountAsync(newAccount)).ReturnsAsync(Result.Fail("Error #1"));
 
             // Act
             var result = await _sut.Object.CreatePlexAccountAsync(newAccount);
@@ -101,7 +101,7 @@ namespace PlexRipper.Application.UnitTests
             // Arrange
             var newAccount = new PlexAccount("TestUsername", "Password123");
             _sut.Setup(x => x.CheckIfUsernameIsAvailableAsync(newAccount.Username)).ReturnsAsync(Result.Ok(true));
-            _sut.Setup(x => x.ValidatePlexAccountAsync(newAccount.Username, newAccount.Password)).ReturnsAsync(Result.Ok());
+            _sut.Setup(x => x.ValidatePlexAccountAsync(newAccount)).ReturnsAsync(Result.Ok());
             _iMediator.Setup(m => m.Send(It.IsAny<CreatePlexAccountCommand>(), CancellationToken.None)).ReturnsAsync(Result.Fail("Error #1"));
 
             // Act
@@ -118,7 +118,7 @@ namespace PlexRipper.Application.UnitTests
             // Arrange
             var newAccount = new PlexAccount("TestUsername", "Password123");
             _sut.Setup(x => x.CheckIfUsernameIsAvailableAsync(newAccount.Username)).ReturnsAsync(Result.Ok(true));
-            _sut.Setup(x => x.ValidatePlexAccountAsync(newAccount.Username, newAccount.Password)).ReturnsAsync(Result.Ok());
+            _sut.Setup(x => x.ValidatePlexAccountAsync(newAccount)).ReturnsAsync(Result.Ok());
             _iMediator.Setup(m => m.Send(It.IsAny<CreatePlexAccountCommand>(), CancellationToken.None)).ReturnsAsync(Result.Ok(1));
             _sut.Setup(x => x.SetupAccountAsync(It.IsAny<int>())).ReturnsAsync(Result.Fail("Error #1"));
 

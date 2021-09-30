@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentResultExtensions.lib;
@@ -36,33 +37,37 @@ namespace PlexRipper.PlexApi.Api
         /// This is for authenticating users credentials with Plex.
         /// <para>NOTE: Plex "Managed" users do not work.</para>
         /// </summary>
+        /// <param name="clientId"></param>
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <param name="verificationCode">Optional verification code with 2FA enabled</param>
         /// <returns></returns>
-        public async Task<Result<PlexAccountDTO>> PlexSignInAsync(string username, string password, int verificationCode = 0)
+        public async Task<Result<PlexAccountDTO>> PlexSignInAsync(string clientId, string username, string password, int verificationCode = 0)
         {
-            var userModel = new UserRequest
+            dynamic credentials = new ExpandoObject();
+            credentials.login = username;
+            credentials.password = password;
+            credentials.rememberMe = false;
+
+            if (verificationCode > 0)
             {
-                Login = username,
-                Password = password,
-                VerificationCode = verificationCode,
-            };
+                credentials.verificationCode = verificationCode;
+            }
 
             var request = new RestRequest(new Uri(_signInUrl), Method.POST);
+            request.AddPlexHeaders(clientId);
+            request.AddJsonBody(credentials);
 
-            request.AddJsonBody(userModel);
-
-            return await _client.SendRequestAsync<PlexAccountDTO>(request);
+            return await _client.SendRequestAsync<PlexAccountDTO>(request, 1);
         }
 
         public async Task<string> RefreshPlexAuthTokenAsync(PlexAccount plexAccount)
         {
-            var result = await PlexSignInAsync(plexAccount.Username, plexAccount.Password);
+            var result = await PlexSignInAsync(plexAccount.ClientId, plexAccount.Username, plexAccount.Password);
             if (result.IsSuccess)
             {
-                Log.Information($"Returned token was: {result.Value.User.AuthenticationToken}");
-                return result.Value.User.AuthenticationToken;
+                Log.Information($"Returned token was: {result.Value.AuthToken}");
+                return result.Value.AuthToken;
             }
 
             Log.Error("Result from RequestPlexSignInDataAsync() was null.");
@@ -78,7 +83,7 @@ namespace PlexRipper.PlexApi.Api
 
             request.AddToken(authToken);
 
-            var response = await _client.SendRequestAsync<RestResponse>(request, action);
+            var response = await _client.SendRequestAsync<RestResponse>(request, 1, action);
             if (response.IsFailed)
             {
                 var error = response.Errors.First();

@@ -8,12 +8,12 @@ namespace PlexRipper.Application.Common
     public interface IPlexAccountService
     {
         /// <summary>
-        /// Check if this account is valid by querying the Plex API.
+        /// Checks if this account is valid by querying the Plex API. If Result.Ok(true) then 2FA is enabled,
+        /// Result.Ok(false) then the account was valid with no 2FA and will be Result.Fail with any other error.
         /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns>Are the account credentials valid.</returns>
-        Task<Result> ValidatePlexAccountAsync(string username, string password);
+        /// <param name="plexAccount">Requires the Username, Password and ClientId</param>
+        /// <returns>Result based on validity of the credentials.</returns>
+        Task<Result<bool>> ValidatePlexAccountAsync(PlexAccount plexAccount);
 
         /// <summary>
         /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
@@ -23,7 +23,8 @@ namespace PlexRipper.Application.Common
         Task<Result<bool>> CheckIfUsernameIsAvailableAsync(string username);
 
         /// <summary>
-        /// Returns the <see cref="PlexAccount"/> with the corresponding <see cref="PlexAccount"/> and the accessible <see cref="PlexServer"/>s.
+        /// Returns the <see cref="PlexAccount"/> with the corresponding <see cref="PlexAccount"/>
+        /// and the accessible <see cref="PlexServer">PlexServers</see>.
         /// </summary>
         /// <param name="accountId">The Id to retrieve the <see cref="PlexAccount"/> by.</param>
         /// <returns>The account found.</returns>

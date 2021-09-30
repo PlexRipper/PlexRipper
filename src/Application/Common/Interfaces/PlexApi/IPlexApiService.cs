@@ -13,10 +13,11 @@ namespace PlexRipper.Application.Common
         /// <summary>
         ///     Returns the <see cref="PlexAccount" /> after PlexApi validation.
         /// </summary>
+        /// <param name="clientId"></param>
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        Task<Result<PlexAccount>> PlexSignInAsync(string username, string password);
+        Task<Result<PlexAccount>> PlexSignInAsync(string clientId, string username, string password, int verificationCode = 0);
 
         Task<string> RefreshPlexAuthTokenAsync(PlexAccount account);
 

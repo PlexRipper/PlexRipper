@@ -29,36 +29,39 @@ namespace PlexRipper.Application.PlexAccounts
             _schedulerService = schedulerService;
         }
 
-        /// <summary>
-        /// Check if this account is valid by querying the Plex API.
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns>If the account credentials valid.</returns>
-        public virtual async Task<Result> ValidatePlexAccountAsync(string username, string password)
+        /// <inheritdoc/>
+        public virtual async Task<Result<bool>> ValidatePlexAccountAsync(PlexAccount plexAccount)
         {
-            if (username == string.Empty || password == string.Empty)
+            if (plexAccount.Username == string.Empty || plexAccount.Password == string.Empty)
             {
                 return Result.Fail("Either the username or password were empty").LogWarning();
             }
 
-            var plexSignInResult = await _plexApiService.PlexSignInAsync(username, password);
+            var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount.ClientId, plexAccount.Username, plexAccount.Password);
             if (plexSignInResult.IsFailed)
             {
-                string msg = $"The plexAccount with {username} was invalid when sent to the PlexApi";
-                return plexSignInResult.WithError(msg).LogWarning();
+                // Check if 2FA might be enabled
+                if (plexSignInResult.HasError<PlexError>())
+                {
+                    List<PlexError> errors = plexSignInResult.Errors.OfType<PlexError>().ToList();
+
+                    // If the message is "Please enter the verification code" then 2FA is enabled.
+                    var accountHas2FA = errors.Any(x => x.Code == 1029);
+                    if (accountHas2FA)
+                    {
+                        return Result.Ok(true);
+                    }
+                }
+
+                string msg = $"The plexAccount with {plexAccount.Username} was invalid when sent to the PlexApi";
+                return plexSignInResult.ToResult().WithError(msg).LogWarning();
             }
 
-            Log.Debug($"The PlexAccount with username {username} is valid");
-            return Result.Ok();
+            Log.Debug($"The PlexAccount with username {plexAccount.Password} is valid");
+            return Result.Ok(false);
         }
 
-        /// <summary>
-        /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi.
-        /// It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
-        /// </summary>
-        /// <param name="plexAccountId">The is of <see cref="PlexAccount"/> to setup.</param>
-        /// <returns>The list of <see cref="PlexServer">PlexServers</see> which are accessible by this account.</returns>
+        /// <inheritdoc/>
         public virtual async Task<Result<List<PlexServer>>> SetupAccountAsync(int plexAccountId)
         {
             if (plexAccountId <= 0)
@@ -74,7 +77,7 @@ namespace PlexRipper.Application.PlexAccounts
 
             // Request new PlexAccount
             var plexAccount = plexAccountResult.Value;
-            var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount.Username, plexAccount.Password);
+            var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount.ClientId, plexAccount.Username, plexAccount.Password);
             if (plexSignInResult == null)
             {
                 return Result.Fail($"The plexAccount with {plexAccountResult.Value.Username} was invalid when sent to the PlexApi").LogWarning();
@@ -216,7 +219,7 @@ namespace PlexRipper.Application.PlexAccounts
             // Fail on validation errors
             if (result.IsFailed)
             {
-                return result.ToResult<PlexAccount>();
+                return result.ToResult();
             }
 
             if (!result.Value)
@@ -224,13 +227,6 @@ namespace PlexRipper.Application.PlexAccounts
                 string msg =
                     $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
                 return result.ToResult().WithError(msg).LogWarning();
-            }
-
-            // Check account for validity
-            var validatePlexAccountResult = await ValidatePlexAccountAsync(plexAccount.Username, plexAccount.Password);
-            if (validatePlexAccountResult.IsFailed)
-            {
-                return validatePlexAccountResult;
             }
 
             // Create PlexAccount

@@ -125,7 +125,8 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> Validate([FromBody] CredentialsDTO account)
         {
-            var result = await _plexAccountService.ValidatePlexAccountAsync(account.Username, account.Password);
+            var plexAccount = new PlexAccount(account.Username, account.Password);
+            var result = await _plexAccountService.ValidatePlexAccountAsync(plexAccount);
             return ToActionResult(result);
         }
 
@@ -176,5 +177,7 @@ namespace PlexRipper.WebAPI.Controllers
         {
             return ToActionResult(await _plexAccountService.RefreshPlexAccount(id));
         }
+
+
     }
 }

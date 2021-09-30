@@ -13,7 +13,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
         public PlexApiMappingProfile()
         {
             // PlexUser -> PlexAccount
-            CreateMap<PlexUserDTO, PlexAccount>(MemberList.None)
+            CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
                 .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Id, opt => opt.Ignore());

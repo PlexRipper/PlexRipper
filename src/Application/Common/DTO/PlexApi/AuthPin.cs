@@ -7,7 +7,7 @@ namespace PlexRipper.Application.Common
     public class AuthPin
     {
         [JsonProperty(Required = Required.Always)]
-        public List<AuthPinErrors> Errors { get; set; }
+        public List<PlexError> Errors { get; set; }
 
         [JsonProperty(Required = Required.Always)]
         public int Id { get; set; }

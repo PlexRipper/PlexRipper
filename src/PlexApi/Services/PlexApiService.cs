@@ -189,19 +189,19 @@ namespace PlexRipper.PlexApi.Services
             return new List<PlexServer>();
         }
 
-        public async Task<Result<PlexAccount>> PlexSignInAsync(string username, string password)
+        public async Task<Result<PlexAccount>> PlexSignInAsync(string clientId, string username, string password, int verificationCode = 0)
         {
-            var result = await _plexApi.PlexSignInAsync(username, password);
+            var result = await _plexApi.PlexSignInAsync(clientId, username, password, verificationCode);
             if (result.IsSuccess)
             {
-                var mapResult = _mapper.Map<PlexAccount>(result.Value.User);
+                var mapResult = _mapper.Map<PlexAccount>(result.Value);
                 mapResult.IsValidated = true;
                 mapResult.ValidatedAt = DateTime.Now;
-                Log.Information($"Successfully retrieved the PlexAccount data for user {username} from the PlexApi");
-                return Result.Ok(mapResult);
+                Log.Information($"Successfully retrieved the PlexAccount data for user {mapResult.DisplayName} from the PlexApi");
+                return result.ToResult((_ => mapResult));
             }
 
-            return Result.Fail("The result from the PlexSignIn was null").LogWarning();
+            return result.ToResult();
         }
 
         public Task<string> RefreshPlexAuthTokenAsync(PlexAccount account)
@@ -209,26 +209,19 @@ namespace PlexRipper.PlexApi.Services
             return _plexApi.RefreshPlexAuthTokenAsync(account);
         }
 
-        public async Task<Result<byte[]>> GetPlexMediaImageAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
+        public Task<Result<byte[]>> GetPlexMediaImageAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
         {
-            return await _plexApi.GetPlexMediaImageAsync(thumbUrl, authToken, width, height);
+            return _plexApi.GetPlexMediaImageAsync(thumbUrl, authToken, width, height);
         }
 
-        public async Task<Result<AuthPin>> GetPin()
+        public Task<Result<AuthPin>> GetPin()
         {
-            return await _plexApi.GetPin();
+            return _plexApi.GetPin();
         }
 
-        public async Task<Result<AuthPin>> CheckPin(int pinId, string pinCode, string clientId)
+        public Task<Result<AuthPin>> CheckPin(int pinId, string pinCode, string clientId)
         {
-            var response = await _plexApi.CheckPin(pinId, pinCode, clientId);
-            if (response.IsFailed)
-            {
-                return response.ToResult();
-            }
-
-            //var mapResult = _mapper.Map<AuthPin>(response);
-            return Result.Ok(response.Value);
+            return _plexApi.CheckPin(pinId, pinCode, clientId);
         }
 
         #endregion

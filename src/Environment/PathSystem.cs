@@ -15,7 +15,7 @@ namespace Environment
 
         public static string DatabaseBackupDirectory => Path.Combine(ConfigDirectory, "Database BackUp");
 
-        public static string DatabaseName => EnviromentExtensions.IsIntegrationTestMode() ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
+        public static string DatabaseName => EnvironmentExtensions.IsIntegrationTestMode() ? "PlexRipperDB_Tests.db" : "PlexRipperDB.db";
 
         public static string DatabasePath => Path.Combine(ConfigDirectory, DatabaseName);
 

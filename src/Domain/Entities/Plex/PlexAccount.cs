@@ -12,6 +12,8 @@ namespace PlexRipper.Domain
     /// </summary>
     public class PlexAccount : BaseEntity
     {
+        private string _clientId;
+
         #region Constructors
 
         /// <summary>
@@ -59,8 +61,15 @@ namespace PlexRipper.Domain
         [Column(Order = 8)]
         public string Uuid { get; set; }
 
+        /// <summary>
+        /// The unique client identifier used for all PlexApi communication.
+        /// </summary>
         [Column(Order = 9)]
-        public string ClientId { get; set; }
+        public string ClientId
+        {
+            get => string.IsNullOrEmpty(this._clientId) ? GenerateClientId() : _clientId;
+            private set => _clientId = value;
+        }
 
         public string Email { get; set; }
 
@@ -101,6 +110,16 @@ namespace PlexRipper.Domain
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Generates an unique 24 character ClientId and sets it to this <see cref="PlexAccount"/>
+        /// </summary>
+        /// <returns>The generated ClientId.</returns>
+        public string GenerateClientId()
+        {
+            this._clientId = StringExtensions.RandomString(24, true, true);
+            return this._clientId;
+        }
 
         /// <summary>
         ///     This merges the response of the PlexApi into this <see cref="PlexAccount" />.

@@ -56,7 +56,7 @@ namespace PlexRipper.WebAPI
             await _plexRipperDatabaseService.SetupAsync();
 
             // Keep running the following
-            if (!EnviromentExtensions.IsIntegrationTestMode())
+            if (!EnvironmentExtensions.IsIntegrationTestMode())
             {
                 var fileMergerSetup = Task.Factory.StartNew(() => _fileMerger.SetupAsync(), TaskCreationOptions.LongRunning);
                 await Task.WhenAll(fileMergerSetup);

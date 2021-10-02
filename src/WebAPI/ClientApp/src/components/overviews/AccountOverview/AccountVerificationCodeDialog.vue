@@ -7,7 +7,12 @@
 				<!--	Verification Code input	-->
 				<v-row justify="center">
 					<v-col cols="auto">
-						<CodeInput :loading="false" class="input" @change="onChange" @complete="onComplete" />
+						<CodeInput :loading="false" class="input" @change="onChange" @complete="onComplete" @keyup.enter="onEnter" />
+					</v-col>
+				</v-row>
+				<v-row v-if="errors.length > 0" justify="center">
+					<v-col cols="auto">
+						<span style="color: red; font-weight: bold">The verification code was invalid, please try again.</span>
 					</v-col>
 				</v-row>
 			</v-card-text>
@@ -32,11 +37,16 @@ import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import CodeInput from 'vue-verification-code-input';
 import ButtonType from '@enums/buttonType';
+import { Error } from '@dto/mainApi';
+import { map } from 'rxjs/operators';
 
 @Component<AccountVerificationCodeDialog>({ components: { CodeInput } })
 export default class AccountVerificationCodeDialog extends Vue {
 	@Prop({ required: false, type: Boolean, default: false })
 	readonly dialog!: boolean;
+
+	@Prop({ required: true, type: Array as () => Error[] })
+	readonly errors!: Error[];
 
 	code: string = '0';
 
@@ -62,6 +72,19 @@ export default class AccountVerificationCodeDialog extends Vue {
 
 	submitCode() {
 		this.$emit('submit', this.code);
+	}
+
+	onEnter() {
+		Log.info('Enter pressed');
+	}
+
+	mounted() {
+		// If an error appears, then clear the code
+		this.$subscribeTo(this.$watchAsObservable('errors').pipe(map((x) => x.newValue)), (value) => {
+			if (value.length > 0) {
+				this.code = '0';
+			}
+		});
 	}
 }
 </script>

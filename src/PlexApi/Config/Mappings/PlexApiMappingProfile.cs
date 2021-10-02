@@ -16,6 +16,9 @@ namespace PlexRipper.PlexApi.Config.Mappings
             CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
                 .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.AuthenticationToken, opt => opt.MapFrom(src => src.AuthToken))
+                .ForMember(dest => dest.Uuid, opt => opt.MapFrom(src => src.Uuid))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             // Server <-> PlexServer

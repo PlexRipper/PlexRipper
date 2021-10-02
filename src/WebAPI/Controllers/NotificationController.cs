@@ -48,7 +48,8 @@ namespace PlexRipper.WebAPI.Controllers
         {
             var notification = _mapper.Map<Notification>(notificationDto);
 
-            return ToActionResult(await _notificationsService.CreateNotification(notification));
+            var result = await _notificationsService.CreateNotification(notification);
+            return ToActionResult(result.ToResult());
         }
 
         // POST api/<NotificationController>/clear

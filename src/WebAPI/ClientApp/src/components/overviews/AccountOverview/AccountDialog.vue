@@ -61,8 +61,9 @@
 		<!--	Account Verification Code Dialog	-->
 		<account-verification-code-dialog
 			:dialog="verificationCodeDialogState"
+			:errors="validateErrors"
 			@close="verificationCodeDialogState = false"
-			@submit="sendVerificationCode"
+			@submit="validateAfterVerificationCode"
 		/>
 		<!--	Delete Confirmation Dialog	-->
 		<confirmation-dialog
@@ -79,15 +80,15 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import { iif, of } from 'rxjs';
-import type { PlexAccountDTO } from '@dto/mainApi';
+import type { Error, PlexAccountDTO } from '@dto/mainApi';
+import { PlexServerDTO } from '@dto/mainApi';
 import { generateClientId, validateAccount } from '@api/accountApi';
 import { AccountService } from '@service';
-import { map, switchMap, tap } from 'rxjs/operators';
-import { PlexServerDTO } from '@dto/mainApi';
+import { map } from 'rxjs/operators';
 import AccountVerificationCodeDialog from '@overviews/AccountOverview/AccountVerificationCodeDialog.vue';
 import AccountForm from '@overviews/AccountOverview/AccountForm.vue';
 import ButtonType from '@/types/enums/buttonType';
+
 @Component({
 	components: { AccountForm, AccountVerificationCodeDialog },
 })
@@ -114,6 +115,7 @@ export default class AccountDialog extends Vue {
 
 	saving: boolean = false;
 
+	validateErrors: Error[] = [];
 	plexServers: PlexServerDTO[] = [];
 
 	confirmationDialogState: Boolean = false;
@@ -156,31 +158,53 @@ export default class AccountDialog extends Vue {
 
 	validate(): void {
 		this.validateLoading = true;
+		this.$subscribeTo(validateAccount(this.plexAccount), (data) => {
+			// Account has no 2FA and was valid
+			if (data.isSuccess && data.value) {
+				this.plexAccount.is2Fa = data.value.is2Fa;
+				this.plexAccount.authenticationToken = data.value.authenticationToken;
 
-		this.$subscribeTo(
-			validateAccount(this.plexAccount).pipe(
-				tap((data) => {
-					if (data.isSuccess && data.value) {
-						this.plexAccount = { ...this.plexAccount, ...data.value, verificationCode: '' };
+				this.plexAccount.isValidated = data.value.isValidated;
+				this.plexAccount.joinedAt = data.value.joinedAt;
+				this.plexAccount.validatedAt = data.value.validatedAt;
+				this.plexAccount.hasPassword = data.value.hasPassword;
+				this.plexAccount.uuid = data.value.uuid;
 
-						Log.info('PlexAccount', this.plexAccount);
-						if (this.plexAccount.is2Fa) {
-							this.verificationCodeDialogState = true;
-						}
-					}
-				}),
-				switchMap(() => iif(() => this.plexAccount.is2Fa, validateAccount(this.plexAccount), of('validated'))),
-			),
-			(data) => {
-				Log.info('Authpin', data);
-				// TODO show notification with errors if any
-				if (data === 'validated') {
-					this.verificationCodeDialogState = false;
+				Log.info('PlexAccount', this.plexAccount);
+				if (this.plexAccount.is2Fa) {
+					this.verificationCodeDialogState = true;
+				} else {
+					this.isValidated = 'ERROR';
 				}
+			} else {
+				Log.error('Validating account failed:', data);
+			}
+		});
+	}
+
+	validateAfterVerificationCode(verificationCode: string) {
+		this.plexAccount.verificationCode = verificationCode;
+		this.$subscribeTo(validateAccount(this.plexAccount), (data) => {
+			if (data && data.isSuccess && data.value) {
+				// Take over the authToken
+				this.plexAccount.is2Fa = data.value.is2Fa;
+				this.plexAccount.authenticationToken = data.value.authenticationToken;
+
+				this.plexAccount.isValidated = data.value.isValidated;
+				this.plexAccount.joinedAt = data.value.joinedAt;
+				this.plexAccount.validatedAt = data.value.validatedAt;
+				this.plexAccount.hasPassword = data.value.hasPassword;
+				this.plexAccount.uuid = data.value.uuid;
 
 				this.validateLoading = false;
-			},
-		);
+				this.verificationCodeDialogState = false;
+				this.isValidated = 'OK';
+			} else {
+				this.validateErrors = data.errors ?? [];
+				this.isValidated = 'ERROR';
+				Log.error('Validate Error', data);
+			}
+		});
 	}
 
 	// region Button Commands
@@ -196,14 +220,27 @@ export default class AccountDialog extends Vue {
 	saveAccount(): void {
 		this.saving = true;
 
-		this.$subscribeTo(AccountService.createOrUpdateAccount(this.plexAccount), (data) => {
-			if (data.isSuccess) {
-				this.plexServers = data.value?.plexServers ?? [];
-				this.isSettingUpAccount = true;
-			} else {
-				Log.error('Result was invalid when saving account', data);
-			}
-		});
+		if (this.newAccount) {
+			this.$subscribeTo(AccountService.createPlexAccount(this.plexAccount), (data) => {
+				if (data.isSuccess) {
+					this.plexServers = data.value?.plexServers ?? [];
+					this.isSettingUpAccount = true;
+				} else {
+					Log.error('Result was invalid when saving a created account', data);
+					this.saving = false;
+				}
+			});
+		} else {
+			this.$subscribeTo(AccountService.updatePlexAccount(this.plexAccount), (data) => {
+				if (data.isSuccess) {
+					this.plexServers = data.value?.plexServers ?? [];
+					this.isSettingUpAccount = true;
+				} else {
+					Log.error('Result was invalid when saving an updated account', data);
+					this.saving = false;
+				}
+			});
+		}
 	}
 
 	deleteAccount(): void {
@@ -218,17 +255,12 @@ export default class AccountDialog extends Vue {
 		this.$emit('dialog-closed', refreshAccounts);
 	}
 
-	sendVerificationCode(verificationCode: string) {
-		this.plexAccount.verificationCode = verificationCode;
-		this.validate();
-	}
-
 	mounted(): void {
 		this.$subscribeTo(this.$watchAsObservable('dialog').pipe(map((x) => x.newValue)), (dialogState) => {
 			if (dialogState) {
 				// Setup values
 				if (this.account) {
-					this.plexAccount = this.account;
+					this.plexAccount = { ...this.account };
 					this.isValidated = this.account.isValidated ? 'OK' : 'ERROR';
 				}
 
@@ -245,7 +277,7 @@ export default class AccountDialog extends Vue {
 				this.isSettingUpAccount = false;
 				this.confirmationDialogState = false;
 				this.saving = false;
-
+				this.verificationCodeDialogState = false;
 				this.reset();
 				this.closeDialog();
 			}

@@ -77,32 +77,26 @@ export class AccountService extends BaseService {
 		);
 	}
 
-	/**
-	 * Creates/Updates the PlexAccount and stores the new result in the store.
-	 * If id is 0 then it is assumed to be an account that should be created.
-	 * @param {PlexAccountDTO} account
-	 * @returns {Observable<ResultDTO<PlexAccountDTO | null>>}
-	 */
-	public createOrUpdateAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
-		if (account.id === 0) {
-			return createAccount(account).pipe(
-				tap((createdAccount) => {
-					if (createdAccount.isSuccess) {
-						return this.updateStore('accounts', createdAccount.value);
-					}
-					Log.error(`Failed to create account ${account.displayName}`, createdAccount);
-				}),
-			);
-		} else {
-			return updateAccount(account).pipe(
-				tap((createdAccount) => {
-					if (createdAccount.isSuccess) {
-						return this.updateStore('accounts', createdAccount.value);
-					}
-					Log.error(`Failed to update account ${account.displayName}`, createdAccount);
-				}),
-			);
-		}
+	public createPlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO>> {
+		return createAccount(account).pipe(
+			tap((createdAccount) => {
+				if (createdAccount.isSuccess) {
+					return this.updateStore('accounts', createdAccount.value);
+				}
+				Log.error(`Failed to create account ${account.displayName}`, createdAccount);
+			}),
+		);
+	}
+
+	public updatePlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO>> {
+		return updateAccount(account).pipe(
+			tap((updatedAccount) => {
+				if (updatedAccount.isSuccess) {
+					return this.updateStore('accounts', updatedAccount.value);
+				}
+				Log.error(`Failed to update account ${account.displayName}`, updatedAccount);
+			}),
+		);
 	}
 
 	public deleteAccount(accountId: number) {

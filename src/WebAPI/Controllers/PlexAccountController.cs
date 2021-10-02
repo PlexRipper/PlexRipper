@@ -88,7 +88,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ResultDTO<PlexAccountDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> CreateAccount([FromBody] CreatePlexAccountDTO newAccount)
+        public async Task<IActionResult> CreateAccount([FromBody] PlexAccountDTO newAccount)
         {
             if (newAccount is null)
             {
@@ -145,7 +145,7 @@ namespace PlexRipper.WebAPI.Controllers
 
                 if (result.IsFailed)
                 {
-                    return BadRequest(result);
+                    return BadRequest(result.ToResult());
                 }
 
                 if (result.Value)

@@ -59,10 +59,6 @@ namespace PlexRipper.WebAPI.Config
         private void PlexAccountMappings()
         {
             // CreatePlexAccountDTO -> PlexAccount
-            CreateMap<CreatePlexAccountDTO, PlexAccount>(MemberList.Source)
-                .ReverseMap();
-
-            // CreatePlexAccountDTO -> PlexAccount
             CreateMap<UpdatePlexAccountDTO, PlexAccount>(MemberList.Source)
                 .ReverseMap();
 
@@ -74,9 +70,6 @@ namespace PlexRipper.WebAPI.Config
             // PlexAccount -> PlexAccountDTO
             CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
                 .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));
-
-            // CredentialsDTO -> PlexAccount
-            CreateMap<CredentialsDTO, PlexAccount>(MemberList.Source);
         }
 
         private void DownloadTaskMappings()

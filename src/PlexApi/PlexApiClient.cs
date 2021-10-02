@@ -96,10 +96,12 @@ namespace PlexRipper.PlexApi
                         {
                             Log.Error($"Error Content: {result.Content}");
                         }
-
-                        response = result;
                     }
-                ).ExecuteAndCaptureAsync(() => _client.ExecuteAsync<T>(request));
+                ).ExecuteAndCaptureAsync(async () =>
+                {
+                    response = await _client.ExecuteAsync<T>(request);
+                    return response;
+                });
 
             if (policyResult.Outcome == OutcomeType.Successful)
             {

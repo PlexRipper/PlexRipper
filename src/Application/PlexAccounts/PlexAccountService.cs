@@ -54,8 +54,7 @@ namespace PlexRipper.Application.PlexAccounts
                     }
                 }
 
-                string msg = $"The plexAccount with {plexAccount.Username} was invalid when sent to the PlexApi";
-                return plexSignInResult.WithError(msg).LogWarning();
+                return plexSignInResult;
             }
 
             plexAccount.FromPlexApi(plexSignInResult.Value);
@@ -78,21 +77,7 @@ namespace PlexRipper.Application.PlexAccounts
                 return plexAccountResult.ToResult();
             }
 
-            // Request new PlexAccount
             var plexAccount = plexAccountResult.Value;
-            var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount);
-            if (plexSignInResult == null)
-            {
-                return Result.Fail($"The plexAccount with {plexAccountResult.Value.Username} was invalid when sent to the PlexApi").LogWarning();
-            }
-
-            // Merge the plexAccount from the Api into the current one.
-            plexAccount.FromPlexApi(plexSignInResult.Value);
-            var result = await _mediator.Send(new UpdatePlexAccountCommand(plexAccount));
-            if (result.IsFailed)
-            {
-                return result.WithError("Failed to validate the plexAccount before the update process in the database").LogWarning();
-            }
 
             // Retrieve and store servers
             var plexServerList = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);

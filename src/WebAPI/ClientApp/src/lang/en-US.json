@@ -323,6 +323,10 @@
 			"no-notifications": "No notifications available",
 			"clear-notifications": "Clear All Notifications"
 		},
+		"account-dialog": {
+			"add-account-title": "Add Plex Account",
+			"edit-account-title": "Edit Plex Account"
+		},
 		"notifications-drawer": {
 			"no-notifications": "No notifications available",
 			"clear-notifications": "Clear All Notifications"
@@ -402,6 +406,10 @@
 			"server-connectable": "Server is connectable!",
 			"server-un-connectable": "Could not connect to server.",
 			"no-server-warning": "Account {displayName} has no servers which it can access."
+		},
+		"account-verification-code-dialog": {
+			"title": "Input Verification Code",
+			"sub-title": "The account has Two-factor authentication enabled."
 		}
 	}
 }

@@ -4,10 +4,19 @@ namespace PlexRipper.WebAPI.Common.DTO
 {
     public class CredentialsDTO
     {
-        [JsonProperty("username", Required = Required.DisallowNull)]
+        [JsonProperty(Required = Required.Always)]
+        public string DisplayName { get; set; }
+
+        [JsonProperty(Required = Required.Always)]
         public string Username { get; set; }
 
-        [JsonProperty("password", Required = Required.DisallowNull)]
+        [JsonProperty(Required = Required.Always)]
         public string Password { get; set; }
+
+        [JsonProperty(Required = Required.Always)]
+        public string ClientId { get; set; }
+
+        [JsonProperty(Required = Required.AllowNull)]
+        public string VerificationCode { get; set; }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,15 +30,14 @@ namespace PlexRipper.Application.PlexAccounts
             _schedulerService = schedulerService;
         }
 
-        /// <inheritdoc/>
-        public virtual async Task<Result<bool>> ValidatePlexAccountAsync(PlexAccount plexAccount)
+        public virtual async Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount)
         {
-            if (plexAccount.Username == string.Empty || plexAccount.Password == string.Empty)
+            if (plexAccount.Username == string.Empty || plexAccount.Password == string.Empty || plexAccount.ClientId == string.Empty)
             {
                 return Result.Fail("Either the username or password were empty").LogWarning();
             }
 
-            var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount.ClientId, plexAccount.Username, plexAccount.Password);
+            var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount);
             if (plexSignInResult.IsFailed)
             {
                 // Check if 2FA might be enabled
@@ -46,19 +46,22 @@ namespace PlexRipper.Application.PlexAccounts
                     List<PlexError> errors = plexSignInResult.Errors.OfType<PlexError>().ToList();
 
                     // If the message is "Please enter the verification code" then 2FA is enabled.
-                    var accountHas2FA = errors.Any(x => x.Code == 1029);
-                    if (accountHas2FA)
+                    var has2Fa = errors.Any(x => x.Code == 1029);
+                    if (has2Fa)
                     {
-                        return Result.Ok(true);
+                        plexAccount.Is2Fa = true;
+                        return Result.Ok(plexAccount);
                     }
                 }
 
                 string msg = $"The plexAccount with {plexAccount.Username} was invalid when sent to the PlexApi";
-                return plexSignInResult.ToResult().WithError(msg).LogWarning();
+                return plexSignInResult.WithError(msg).LogWarning();
             }
 
+            plexAccount.FromPlexApi(plexSignInResult.Value);
+
             Log.Debug($"The PlexAccount with username {plexAccount.Password} is valid");
-            return Result.Ok(false);
+            return plexSignInResult;
         }
 
         /// <inheritdoc/>
@@ -77,7 +80,7 @@ namespace PlexRipper.Application.PlexAccounts
 
             // Request new PlexAccount
             var plexAccount = plexAccountResult.Value;
-            var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount.ClientId, plexAccount.Username, plexAccount.Password);
+            var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount);
             if (plexSignInResult == null)
             {
                 return Result.Fail($"The plexAccount with {plexAccountResult.Value.Username} was invalid when sent to the PlexApi").LogWarning();
@@ -167,6 +170,26 @@ namespace PlexRipper.Application.PlexAccounts
 
             Log.Debug($"The username: {username} is available.");
             return Result.Ok(true);
+        }
+
+        public Result<string> GeneratePlexAccountClientId()
+        {
+            return Result.Ok(StringExtensions.RandomString(24, true, true));
+        }
+
+        /// <summary>
+        /// If 2FA is enabled for a PlexAccount, then a Pin needs to be requested and checked every second for having be resolved.
+        /// </summary>
+        /// <param name="clientId">The account clientId.</param>
+        /// <returns></returns>
+        public Task<Result<AuthPin>> Get2FAPin(string clientId)
+        {
+            return _plexApiService.Get2FAPin(clientId);
+        }
+
+        public Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId)
+        {
+            return _plexApiService.Check2FAPin(pinId, clientId);
         }
 
         #region CRUD

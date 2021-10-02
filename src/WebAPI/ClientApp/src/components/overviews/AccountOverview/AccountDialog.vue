@@ -7,94 +7,25 @@
 			</v-card-title>
 			<v-divider></v-divider>
 			<v-card-text class="mt-2">
-				<v-form ref="accountForm" v-model="valid">
-					<!-- Is account enabled -->
-					<v-row no-gutters>
-						<v-col :cols="labelCol">
-							<help-icon help-id="help.account-form.is-enabled" />
-						</v-col>
-						<v-col>
-							<v-checkbox v-model="isEnabled" color="red" class="ma-3 pt-0" hide-details></v-checkbox>
-						</v-col>
-					</v-row>
-					<!-- Is main account -->
-					<v-row no-gutters>
-						<v-col :cols="labelCol">
-							<help-icon help-id="help.account-form.is-main" />
-						</v-col>
-						<v-col>
-							<v-checkbox v-model="isMain" color="red" class="ma-3 pt-0" hide-details></v-checkbox>
-						</v-col>
-					</v-row>
-					<!-- Display Name -->
-					<v-row no-gutters>
-						<v-col :cols="labelCol">
-							<help-icon help-id="help.account-form.display-name" />
-						</v-col>
-						<v-col>
-							<v-text-field v-model="displayName" :rules="getDisplayNameRules" color="red" full-width outlined required />
-						</v-col>
-					</v-row>
-
-					<!-- Username -->
-					<v-row no-gutters>
-						<v-col :cols="labelCol">
-							<help-icon help-id="help.account-form.username" />
-						</v-col>
-						<v-col>
-							<v-text-field
-								v-model="username"
-								:rules="getUsernameRules"
-								color="red"
-								full-width
-								outlined
-								required
-								@input="inputChanged"
-							/>
-						</v-col>
-					</v-row>
-
-					<!-- Password -->
-					<v-row no-gutters>
-						<v-col :cols="labelCol">
-							<help-icon help-id="help.account-form.password" />
-						</v-col>
-						<v-col>
-							<v-text-field
-								v-model="password"
-								:rules="getPasswordRules"
-								color="red"
-								full-width
-								outlined
-								required
-								:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-								:type="showPassword ? 'text' : 'password'"
-								@click:append="showPassword = !showPassword"
-								@input="inputChanged"
-							/>
-						</v-col>
-					</v-row>
-				</v-form>
+				<account-form ref="accountForm" v-model="plexAccount" @isValid="isValid = $event" />
+				{{ plexAccount }}
+				{{ isValid }}
+				{{ isValidated }}
 			</v-card-text>
 
 			<!-- Dialog Actions	-->
 			<v-card-actions>
 				<!-- Delete account -->
 				<p-btn
-					v-if="!isNew"
+					v-if="!newAccount"
 					:width="130"
 					:button-type="getDeleteButtonType"
 					text-id="delete"
 					@click="confirmationDialogState = true"
 				/>
-				<confirmation-dialog
-					class="mr-4"
-					text-id="delete-account"
-					:dialog="confirmationDialogState"
-					:confirm-loading="true"
-					@cancel="confirmationDialogState = false"
-					@confirm="deleteAccount"
-				/>
+
+				<!--	Account Verification Code Dialog	-->
+				<p-btn :width="130" :button-type="getVerificationCodeButtonType" @click="verificationCodeDialogState = true" />
 				<!-- Reset Form -->
 				<p-btn icon="mdi-restore" text-id="reset" :width="130" @click="reset" />
 				<v-spacer />
@@ -103,13 +34,14 @@
 				<p-btn :width="130" :button-type="getCancelButtonType" @click="cancel" />
 
 				<!-- Validation button -->
+				{{ plexAccount.verificationCode }}
 				<p-btn
 					:icon="validationIcon"
 					:loading="validateLoading"
-					:disabled="!valid || validateLoading"
-					:color="getValidationBtnColor"
+					:disabled="!isValid || validateLoading"
+					:color="isValid ? 'green' : 'red'"
 					class="mr-4"
-					:text-id="!valid ? 'validate' : ''"
+					:text-id="!isValid ? 'validate' : ''"
 					:width="130"
 					@click="validate"
 				/>
@@ -118,28 +50,47 @@
 				<p-btn
 					:width="130"
 					:disabled="!(isValidated === 'OK') || saving"
-					:text-id="isNew ? 'create' : 'update'"
+					:text-id="newAccount ? 'create' : 'update'"
 					:button-type="getSaveButtonType"
 					@click="saveAccount"
 				/>
 			</v-card-actions>
 		</v-card>
-		<!-- The setup account progress -->
-		<account-setup-progress v-show="isSettingUpAccount" :account="getAccount" @hide="closeDialog(true)" />
+		<!--	The setup account progress -->
+		<account-setup-progress v-show="isSettingUpAccount" :account="plexAccount" @hide="closeDialog(true)" />
+		<!--	Account Verification Code Dialog	-->
+		<account-verification-code-dialog
+			:dialog="verificationCodeDialogState"
+			@close="verificationCodeDialogState = false"
+			@submit="sendVerificationCode"
+		/>
+		<!--	Delete Confirmation Dialog	-->
+		<confirmation-dialog
+			class="mr-4"
+			text-id="delete-account"
+			:dialog="confirmationDialogState"
+			:confirm-loading="true"
+			@cancel="confirmationDialogState = false"
+			@confirm="deleteAccount"
+		/>
 	</v-dialog>
 </template>
 
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import { iif, of } from 'rxjs';
 import type { PlexAccountDTO } from '@dto/mainApi';
-import { validateAccount } from '@api/accountApi';
+import { generateClientId, validateAccount } from '@api/accountApi';
 import { AccountService } from '@service';
-import { map } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { PlexServerDTO } from '@dto/mainApi';
+import AccountVerificationCodeDialog from '@overviews/AccountOverview/AccountVerificationCodeDialog.vue';
+import AccountForm from '@overviews/AccountOverview/AccountForm.vue';
 import ButtonType from '@/types/enums/buttonType';
-
-@Component
+@Component({
+	components: { AccountForm, AccountVerificationCodeDialog },
+})
 export default class AccountDialog extends Vue {
 	@Prop({ required: false, type: Object as () => PlexAccountDTO })
 	readonly account!: PlexAccountDTO | null;
@@ -147,43 +98,37 @@ export default class AccountDialog extends Vue {
 	@Prop({ required: true, type: Boolean, default: false })
 	dialog: boolean = false;
 
+	@Prop({ required: true, type: Boolean })
+	readonly newAccount!: boolean;
+
 	@Ref('accountForm')
-	readonly accountForm!: any;
+	readonly accountForm!: AccountForm;
+
+	plexAccount: PlexAccountDTO = {} as PlexAccountDTO;
 
 	isSettingUpAccount: boolean = false;
 
 	validateLoading: boolean = false;
-
-	valid: boolean = false;
-
-	showPassword: boolean = false;
-
-	displayName: string = '';
-
-	username: string = '';
-
-	password: string = '';
-
-	isEnabled: boolean = true;
-
-	isMain: boolean = true;
+	isValidated: string = '';
+	isValid: boolean = true;
 
 	saving: boolean = false;
-
-	labelCol: number = 3;
-
-	isValidated: string = '';
 
 	plexServers: PlexServerDTO[] = [];
 
 	confirmationDialogState: Boolean = false;
+	verificationCodeDialogState: Boolean = false;
 
-	get isNew(): boolean {
-		return !this.account;
+	get isFormValid(): boolean {
+		return this.isValid && this.isValidated === 'OK';
 	}
 
 	get getDeleteButtonType(): ButtonType {
 		return ButtonType.Delete;
+	}
+
+	get getVerificationCodeButtonType(): ButtonType {
+		return ButtonType.Info;
 	}
 
 	get getCancelButtonType(): ButtonType {
@@ -204,88 +149,44 @@ export default class AccountDialog extends Vue {
 		}
 	}
 
-	get getAccount(): PlexAccountDTO {
-		return {
-			id: this.isNew ? 0 : this.account?.id ?? 0,
-			isEnabled: this.isEnabled,
-			isMain: this.isMain,
-			displayName: this.displayName,
-			username: this.username,
-			password: this.password,
-			plexServers: this.plexServers,
-		} as PlexAccountDTO;
-	}
-
 	get getDisplayName(): string {
-		const title = `${this.isNew ? 'Add' : 'Edit'} Plex account`;
-		return this.displayName !== '' ? `${title}: ${this.displayName}` : title;
-	}
-
-	get getDisplayNameRules(): unknown {
-		return [
-			(v: string): boolean | string => !!v || 'Display name is required',
-			(v: string): boolean | string => (v && v.length >= 4) || 'Display name must be at least 4 characters',
-		];
-	}
-
-	get getUsernameRules(): unknown {
-		return [(v: string): boolean | string => !!v || 'Username is required'];
-	}
-
-	get getPasswordRules(): unknown {
-		return [
-			(v: string): boolean | string => !!v || 'Password is required',
-			(v: string): boolean | string => (v && v.length >= 8) || 'Password must be at least 8 characters',
-		];
-	}
-
-	get getValidationBtnColor(): string {
-		switch (this.isValidated) {
-			case 'OK':
-				return 'green';
-			case 'ERROR':
-				return 'red';
-			default:
-				return '';
-		}
+		const title = this.$t(`components.account-dialog.${this.newAccount ? 'add-account-title' : 'edit-account-title'}`).toString();
+		return this.plexAccount?.displayName !== '' ? `${title}: ${this.plexAccount?.displayName}` : title;
 	}
 
 	validate(): void {
-		this.accountForm?.validate();
+		this.validateLoading = true;
 
-		if (this.valid) {
-			this.validateLoading = true;
-			validateAccount(this.getAccount).subscribe((data) => {
+		this.$subscribeTo(
+			validateAccount(this.plexAccount).pipe(
+				tap((data) => {
+					if (data.isSuccess && data.value) {
+						this.plexAccount = { ...this.plexAccount, ...data.value, verificationCode: '' };
+
+						Log.info('PlexAccount', this.plexAccount);
+						if (this.plexAccount.is2Fa) {
+							this.verificationCodeDialogState = true;
+						}
+					}
+				}),
+				switchMap(() => iif(() => this.plexAccount.is2Fa, validateAccount(this.plexAccount), of('validated'))),
+			),
+			(data) => {
+				Log.info('Authpin', data);
 				// TODO show notification with errors if any
-				if (data) {
-					this.isValidated = 'OK';
-				} else {
-					this.isValidated = 'ERROR';
+				if (data === 'validated') {
+					this.verificationCodeDialogState = false;
 				}
+
 				this.validateLoading = false;
-			});
-		}
+			},
+		);
 	}
 
-	inputChanged(): void {
-		if (this.isValidated === 'OK') {
-			this.isValidated = '';
-		}
-	}
+	// region Button Commands
 
 	reset(): void {
-		Log.debug('Reset form');
-		this.isMain = true;
-		this.displayName = '';
-		this.username = '';
-		this.password = '';
-		this.isValidated = '';
-		this.resetValidation();
-	}
-
-	resetValidation(): void {
-		this.valid = false;
-		this.accountForm?.resetValidation();
+		this.accountForm?.reset();
 	}
 
 	cancel(): void {
@@ -295,7 +196,7 @@ export default class AccountDialog extends Vue {
 	saveAccount(): void {
 		this.saving = true;
 
-		this.$subscribeTo(AccountService.createOrUpdateAccount(this.getAccount), (data) => {
+		this.$subscribeTo(AccountService.createOrUpdateAccount(this.plexAccount), (data) => {
 			if (data.isSuccess) {
 				this.plexServers = data.value?.plexServers ?? [];
 				this.isSettingUpAccount = true;
@@ -306,36 +207,48 @@ export default class AccountDialog extends Vue {
 	}
 
 	deleteAccount(): void {
-		AccountService.deleteAccount(this.getAccount.id).subscribe(() => {
+		AccountService.deleteAccount(this.plexAccount.id).subscribe(() => {
 			this.closeDialog(true);
 		});
 	}
 
-	onOpenDialog(dialogState: boolean): void {
-		if (dialogState) {
-			if (this.account) {
-				this.isEnabled = this.account.isEnabled;
-				this.isMain = this.account.isMain;
-				this.displayName = this.account.displayName;
-				this.username = this.account.username;
-				this.password = this.account.password;
-				this.isValidated = this.account.isValidated ? 'OK' : 'ERROR';
-			}
-		} else {
-			this.reset();
-		}
-	}
+	// endregion
 
 	closeDialog(refreshAccounts: boolean = false): void {
-		this.isSettingUpAccount = false;
-		this.confirmationDialogState = false;
-		this.saving = false;
 		this.$emit('dialog-closed', refreshAccounts);
+	}
+
+	sendVerificationCode(verificationCode: string) {
+		this.plexAccount.verificationCode = verificationCode;
+		this.validate();
 	}
 
 	mounted(): void {
 		this.$subscribeTo(this.$watchAsObservable('dialog').pipe(map((x) => x.newValue)), (dialogState) => {
-			this.onOpenDialog(dialogState);
+			if (dialogState) {
+				// Setup values
+				if (this.account) {
+					this.plexAccount = this.account;
+					this.isValidated = this.account.isValidated ? 'OK' : 'ERROR';
+				}
+
+				if (this.newAccount) {
+					// This is a new account, generate a clientId for it
+					this.$subscribeTo(generateClientId(), (value) => {
+						if (value.isSuccess) {
+							this.plexAccount.clientId = value.value ?? '';
+						}
+					});
+				}
+			} else {
+				// Reset values
+				this.isSettingUpAccount = false;
+				this.confirmationDialogState = false;
+				this.saving = false;
+
+				this.reset();
+				this.closeDialog();
+			}
 		});
 	}
 }

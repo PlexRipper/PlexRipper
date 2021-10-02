@@ -36,10 +36,22 @@ namespace PlexRipper.BaseTests
         /// </summary>
         public static TestAccountDTO Account1 => GetCredentials().Credentials.Count > 0 ? GetCredentials().Credentials[0] : new TestAccountDTO();
 
+        public static PlexAccount PlexAccount1 => new PlexAccount(Account1.Username, Account1.Password);
+
         /// <summary>
         /// Requires a valid account with 2FA enabled which has access to at least 1 server.
         /// Preferably access to the server of Account1
         /// </summary>
         public static TestAccountDTO Account2 => GetCredentials().Credentials.Count > 1 ? GetCredentials().Credentials[1] : new TestAccountDTO();
+
+        public static PlexAccount PlexAccount2 => new PlexAccount(Account2.Username, Account2.Password);
+
+        /// <summary>
+        /// Requires a valid account with 2FA enabled which has access to at least 1 server.
+        /// Preferably access to the server of Account1
+        /// </summary>
+        public static TestAccountDTO Account3 => GetCredentials().Credentials.Count > 1 ? GetCredentials().Credentials[2] : new TestAccountDTO();
+
+        public static PlexAccount PlexAccount3 => new PlexAccount(Account3.Username, Account3.Password);
     }
 }

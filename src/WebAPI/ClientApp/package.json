@@ -1,6 +1,6 @@
 {
 	"name": "plex-ripper-web-ui",
-	"version": "0.8.6",
+	"version": "0.8.7",
 	"description": "PlexRipper",
 	"author": "JasonLandbridge",
 	"private": true,
@@ -52,9 +52,11 @@
 		"vue": "^2.6.14",
 		"vue-class-component": "^7.2.6",
 		"vue-docgen-web-types": "^0.1.7",
+		"vue-pincode-input": "^0.4.0",
 		"vue-property-decorator": "^9.1.2",
 		"vue-rx": "^6.2.0",
 		"vue-status-indicator": "^1.2.1",
+		"vue-verification-code-input": "^1.0.0",
 		"vuescroll": "^4.17.3",
 		"vuetify": "^2.5.8"
 	},

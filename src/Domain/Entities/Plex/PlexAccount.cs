@@ -12,8 +12,6 @@ namespace PlexRipper.Domain
     /// </summary>
     public class PlexAccount : BaseEntity
     {
-        private string _clientId;
-
         #region Constructors
 
         /// <summary>
@@ -31,6 +29,14 @@ namespace PlexRipper.Domain
             Username = username;
             Password = password;
             IsEnabled = true;
+        }
+
+        public PlexAccount(string username, string password, string clientId, string verificationCode = "")
+        {
+            Username = username;
+            Password = password;
+            ClientId = clientId;
+            VerificationCode = verificationCode;
         }
 
         #endregion
@@ -65,11 +71,7 @@ namespace PlexRipper.Domain
         /// The unique client identifier used for all PlexApi communication.
         /// </summary>
         [Column(Order = 9)]
-        public string ClientId
-        {
-            get => string.IsNullOrEmpty(this._clientId) ? GenerateClientId() : _clientId;
-            private set => _clientId = value;
-        }
+        public string ClientId { get; set; }
 
         public string Email { get; set; }
 
@@ -105,21 +107,23 @@ namespace PlexRipper.Domain
         [NotMapped]
         public List<PlexServer> PlexServers => PlexAccountServers.Select(x => x.PlexServer).ToList();
 
+        /// <summary>
+        /// Gets or sets whether this <see cref="PlexAccount"/> is 2FA protected.
+        /// </summary>
+        [NotMapped]
+        public bool Is2Fa { get; set; }
+
+        /// <summary>
+        /// The verification code given by the user if 2FA is enabled.
+        /// </summary>
+        [NotMapped]
+        public string VerificationCode { get; set; }
+
         #endregion
 
         #endregion
 
         #region Methods
-
-        /// <summary>
-        /// Generates an unique 24 character ClientId and sets it to this <see cref="PlexAccount"/>
-        /// </summary>
-        /// <returns>The generated ClientId.</returns>
-        public string GenerateClientId()
-        {
-            this._clientId = StringExtensions.RandomString(24, true, true);
-            return this._clientId;
-        }
 
         /// <summary>
         ///     This merges the response of the PlexApi into this <see cref="PlexAccount" />.
@@ -144,6 +148,7 @@ namespace PlexRipper.Domain
             JoinedAt = plexAccount.JoinedAt;
             Title = plexAccount.Title;
             HasPassword = plexAccount.HasPassword;
+            ClientId = plexAccount.ClientId;
             AuthenticationToken = plexAccount.AuthenticationToken;
             IsValidated = true;
             ValidatedAt = DateTime.Now;

@@ -7,13 +7,8 @@ namespace PlexRipper.Application.Common
 {
     public interface IPlexAccountService
     {
-        /// <summary>
-        /// Checks if this account is valid by querying the Plex API. If Result.Ok(true) then 2FA is enabled,
-        /// Result.Ok(false) then the account was valid with no 2FA and will be Result.Fail with any other error.
-        /// </summary>
-        /// <param name="plexAccount">Requires the Username, Password and ClientId</param>
-        /// <returns>Result based on validity of the credentials.</returns>
-        Task<Result<bool>> ValidatePlexAccountAsync(PlexAccount plexAccount);
+
+        Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount);
 
         /// <summary>
         /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
@@ -64,5 +59,11 @@ namespace PlexRipper.Application.Common
         /// <param name="plexAccountId">The is of <see cref="PlexAccount"/> to setup.</param>
         /// <returns>The list of <see cref="PlexServer">PlexServers</see> which are accessible by this account.</returns>
         Task<Result<List<PlexServer>>> SetupAccountAsync(int plexAccountId);
+
+        Task<Result<AuthPin>> Get2FAPin(string clientId);
+
+        Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
+
+        Result<string> GeneratePlexAccountClientId();
     }
 }

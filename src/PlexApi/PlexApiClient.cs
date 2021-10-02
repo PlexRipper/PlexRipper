@@ -58,6 +58,8 @@ namespace PlexRipper.PlexApi
 
         public async Task<Result<T>> SendRequestAsync<T>(RestRequest request, int retryCount = 2, Action<PlexApiClientProgress> action = null)
         {
+            Serilog.Log.Verbose($"Sending request: {request.Resource}");
+
             IRestResponse<T> response = new RestResponse<T>();
             var policyResult = await Policy
                 .Handle<WebException>()

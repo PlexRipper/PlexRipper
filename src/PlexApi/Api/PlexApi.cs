@@ -37,33 +37,29 @@ namespace PlexRipper.PlexApi.Api
         /// This is for authenticating users credentials with Plex.
         /// <para>NOTE: Plex "Managed" users do not work.</para>
         /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <param name="verificationCode">Optional verification code with 2FA enabled</param>
         /// <returns></returns>
-        public async Task<Result<PlexAccountDTO>> PlexSignInAsync(string clientId, string username, string password, int verificationCode = 0)
+        public async Task<Result<PlexAccountDTO>> PlexSignInAsync(PlexAccount plexAccount)
         {
             dynamic credentials = new ExpandoObject();
-            credentials.login = username;
-            credentials.password = password;
+            credentials.login = plexAccount.Username;
+            credentials.password = plexAccount.Password;
             credentials.rememberMe = false;
 
-            if (verificationCode > 0)
+            if (plexAccount.Is2Fa)
             {
-                credentials.verificationCode = verificationCode;
+                credentials.verificationCode = plexAccount.VerificationCode;
             }
 
             var request = new RestRequest(new Uri(_signInUrl), Method.POST);
-            request.AddPlexHeaders(clientId);
+            request.AddPlexHeaders(plexAccount.ClientId);
             request.AddJsonBody(credentials);
 
-            return await _client.SendRequestAsync<PlexAccountDTO>(request, 1);
+            return await _client.SendRequestAsync<PlexAccountDTO>(request, 0);
         }
 
         public async Task<string> RefreshPlexAuthTokenAsync(PlexAccount plexAccount)
         {
-            var result = await PlexSignInAsync(plexAccount.ClientId, plexAccount.Username, plexAccount.Password);
+            var result = await PlexSignInAsync(plexAccount);
             if (result.IsSuccess)
             {
                 Log.Information($"Returned token was: {result.Value.AuthToken}");
@@ -261,22 +257,20 @@ namespace PlexRipper.PlexApi.Api
             return await _client.SendImageRequestAsync(request);
         }
 
-        public async Task<Result<AuthPin>> GetPin()
+        public async Task<Result<AuthPin>> Get2FAPin(string clientId)
         {
             var request = new RestRequest(new Uri(_plexPinUrl), Method.POST);
 
-            request.AddHeader("X-Plex-Product", "Plex Web");
-            request.AddHeader("X-Plex-Client-Identifier", "SDRHDFHNADFNADNFADNF");
+            request.AddPlexHeaders(clientId);
 
             return await _client.SendRequestAsync<AuthPin>(request);
         }
 
-        public async Task<Result<AuthPin>> CheckPin(int pinId, string pinCode, string clientId)
+        public async Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId)
         {
             var request = new RestRequest(new Uri($"{_plexPinUrl}/{pinId}"), Method.GET, DataFormat.Json);
 
-            request.AddQueryParameter("code", pinCode);
-            request.AddQueryParameter("X-Plex-Client-Identifier", clientId);
+            request.AddPlexHeaders(clientId);
 
             return await _client.SendRequestAsync<AuthPin>(request);
         }

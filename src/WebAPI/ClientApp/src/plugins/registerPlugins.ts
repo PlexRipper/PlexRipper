@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRx from 'vue-rx';
 import vueScroll, { Config } from 'vuescroll';
 import StatusIndicator from 'vue-status-indicator';
+import CodeInput from 'vue-verification-code-input';
 
 export default (): void => {
 	// Docs: https://github.com/vuejs/vue-rx
@@ -30,4 +31,5 @@ export default (): void => {
 	});
 
 	Vue.use(StatusIndicator);
+	Vue.use(CodeInput);
 };

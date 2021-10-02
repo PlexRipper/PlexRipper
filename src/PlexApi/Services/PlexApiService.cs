@@ -189,15 +189,15 @@ namespace PlexRipper.PlexApi.Services
             return new List<PlexServer>();
         }
 
-        public async Task<Result<PlexAccount>> PlexSignInAsync(string clientId, string username, string password, int verificationCode = 0)
+        public async Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount)
         {
-            var result = await _plexApi.PlexSignInAsync(clientId, username, password, verificationCode);
+            var result = await _plexApi.PlexSignInAsync(plexAccount);
             if (result.IsSuccess)
             {
                 var mapResult = _mapper.Map<PlexAccount>(result.Value);
                 mapResult.IsValidated = true;
                 mapResult.ValidatedAt = DateTime.Now;
-                Log.Information($"Successfully retrieved the PlexAccount data for user {mapResult.DisplayName} from the PlexApi");
+                Log.Information($"Successfully retrieved the PlexAccount data for user {plexAccount.DisplayName} from the PlexApi");
                 return result.ToResult((_ => mapResult));
             }
 
@@ -214,14 +214,14 @@ namespace PlexRipper.PlexApi.Services
             return _plexApi.GetPlexMediaImageAsync(thumbUrl, authToken, width, height);
         }
 
-        public Task<Result<AuthPin>> GetPin()
+        public Task<Result<AuthPin>> Get2FAPin(string clientId)
         {
-            return _plexApi.GetPin();
+            return _plexApi.Get2FAPin(clientId);
         }
 
-        public Task<Result<AuthPin>> CheckPin(int pinId, string pinCode, string clientId)
+        public Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId)
         {
-            return _plexApi.CheckPin(pinId, pinCode, clientId);
+            return _plexApi.Check2FAPin(pinId, clientId);
         }
 
         #endregion

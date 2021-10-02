@@ -28,10 +28,11 @@ namespace PlexApi.IntegrationTests
         {
             // Arrange
             var plexApiService = Container.GetPlexApiService;
-            var plexAccount = new PlexAccount(Secrets.Account1.Username, Secrets.Account1.Password);
+            var plexAccount = new PlexAccount(Secrets.Account1.Username, Secrets.Account1.Password, "AABBCCDDEERRFFGWEG");
+
 
             // Act
-            var signInResult = await plexApiService.PlexSignInAsync(plexAccount.ClientId, plexAccount.Username, plexAccount.Password);
+            var signInResult = await plexApiService.PlexSignInAsync(plexAccount);
 
             // Assert
             signInResult.IsSuccess.ShouldBeTrue();
@@ -43,37 +44,15 @@ namespace PlexApi.IntegrationTests
         {
             // Arrange
             var plexApiService = Container.GetPlexApiService;
-            var plexAccount = new PlexAccount(Secrets.Account2.Username, Secrets.Account2.Password);
+            var plexAccount = Secrets.PlexAccount2;
 
             // Act
-            var authPin = await plexApiService.GetPin();
-            authPin.IsSuccess.ShouldBeTrue();
-
-            // Result<AuthPin> authResult;
-            // while (true)
-            // {
-            //     await Task.Delay(1000);
-            //     authResult = await plexApiService.CheckPin(authPin.Value.Id, authPin.Value.Code, authPin.Value.ClientIdentifier);
-            //     if (authResult.IsSuccess)
-            //     {
-            //         break;
-            //     }
-            // }
-            //
-            // var userInput = 235256;
-
-            var signInResult = await plexApiService.PlexSignInAsync(plexAccount.ClientId, plexAccount.Username, plexAccount.Password);
-
-            if (signInResult.HasError<PlexError>())
-            {
-                List<PlexError> errors = signInResult.Errors.OfType<PlexError>().ToList();
-                // If the message is "Please enter the verification code" then 2FA is enabled.
-                var accountHas2FA = errors.Any(x => x.Code == 1029);
-            }
+            var signInResult = await plexApiService.PlexSignInAsync(plexAccount);
 
             // Assert
             signInResult.IsSuccess.ShouldBeFalse();
             signInResult.Has401UnauthorizedError().ShouldBeTrue();
+            signInResult.Errors.OfType<PlexError>().ToList().Any(x => x.Code == 1029).ShouldBeTrue();
         }
     }
 }

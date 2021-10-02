@@ -61,8 +61,8 @@ namespace Logging
             Serilog.Log.Logger =
                 GetBaseConfiguration()
                     .MinimumLevel.Is(minimumLogLevel)
-                    .WriteTo.TestOutput(output, outputTemplate: Template)
-                    .WriteTo.TestCorrelator()
+                    .WriteTo.TestOutput(output, minimumLogLevel, Template)
+                    .WriteTo.TestCorrelator(minimumLogLevel)
                     .CreateLogger();
         }
 

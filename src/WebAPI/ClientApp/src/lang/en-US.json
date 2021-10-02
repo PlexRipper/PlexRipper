@@ -409,7 +409,8 @@
 		},
 		"account-verification-code-dialog": {
 			"title": "Input Verification Code",
-			"sub-title": "The account has Two-factor authentication enabled."
+			"sub-title": "The account has Two-factor authentication enabled.",
+			"error": "The verification code was invalid, please try again."
 		}
 	}
 }

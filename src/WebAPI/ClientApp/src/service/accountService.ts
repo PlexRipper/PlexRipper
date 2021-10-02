@@ -77,7 +77,7 @@ export class AccountService extends BaseService {
 		);
 	}
 
-	public createPlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO>> {
+	public createPlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
 		return createAccount(account).pipe(
 			tap((createdAccount) => {
 				if (createdAccount.isSuccess) {
@@ -88,7 +88,7 @@ export class AccountService extends BaseService {
 		);
 	}
 
-	public updatePlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO>> {
+	public updatePlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
 		return updateAccount(account).pipe(
 			tap((updatedAccount) => {
 				if (updatedAccount.isSuccess) {

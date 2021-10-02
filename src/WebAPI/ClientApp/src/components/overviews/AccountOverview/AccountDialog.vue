@@ -7,10 +7,7 @@
 			</v-card-title>
 			<v-divider></v-divider>
 			<v-card-text class="mt-2">
-				<account-form ref="accountForm" v-model="plexAccount" @isValid="isValid = $event" />
-				{{ plexAccount }}
-				{{ isValid }}
-				{{ isValidated }}
+				<account-form ref="accountForm" :value="plexAccount" @input="formChanged" @isValid="isValid = $event" />
 			</v-card-text>
 
 			<!-- Dialog Actions	-->
@@ -34,7 +31,6 @@
 				<p-btn :width="130" :button-type="getCancelButtonType" @click="cancel" />
 
 				<!-- Validation button -->
-				{{ plexAccount.verificationCode }}
 				<p-btn
 					:icon="validationIcon"
 					:loading="validateLoading"
@@ -81,7 +77,6 @@
 import Log from 'consola';
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import type { Error, PlexAccountDTO } from '@dto/mainApi';
-import { PlexServerDTO } from '@dto/mainApi';
 import { generateClientId, validateAccount } from '@api/accountApi';
 import { AccountService } from '@service';
 import { map } from 'rxjs/operators';
@@ -116,7 +111,6 @@ export default class AccountDialog extends Vue {
 	saving: boolean = false;
 
 	validateErrors: Error[] = [];
-	plexServers: PlexServerDTO[] = [];
 
 	confirmationDialogState: Boolean = false;
 	verificationCodeDialogState: Boolean = false;
@@ -154,6 +148,10 @@ export default class AccountDialog extends Vue {
 	get getDisplayName(): string {
 		const title = this.$t(`components.account-dialog.${this.newAccount ? 'add-account-title' : 'edit-account-title'}`).toString();
 		return this.plexAccount?.displayName !== '' ? `${title}: ${this.plexAccount?.displayName}` : title;
+	}
+
+	formChanged({ prop, value }: { prop: string; value: string | boolean }) {
+		this.plexAccount[prop] = value;
 	}
 
 	validate(): void {
@@ -223,7 +221,7 @@ export default class AccountDialog extends Vue {
 		if (this.newAccount) {
 			this.$subscribeTo(AccountService.createPlexAccount(this.plexAccount), (data) => {
 				if (data.isSuccess) {
-					this.plexServers = data.value?.plexServers ?? [];
+					this.plexAccount.plexServers = data.value?.plexServers ?? [];
 					this.isSettingUpAccount = true;
 				} else {
 					Log.error('Result was invalid when saving a created account', data);
@@ -233,7 +231,7 @@ export default class AccountDialog extends Vue {
 		} else {
 			this.$subscribeTo(AccountService.updatePlexAccount(this.plexAccount), (data) => {
 				if (data.isSuccess) {
-					this.plexServers = data.value?.plexServers ?? [];
+					this.plexAccount.plexServers = data.value?.plexServers ?? [];
 					this.isSettingUpAccount = true;
 				} else {
 					Log.error('Result was invalid when saving an updated account', data);
@@ -252,6 +250,11 @@ export default class AccountDialog extends Vue {
 	// endregion
 
 	closeDialog(refreshAccounts: boolean = false): void {
+		this.isSettingUpAccount = false;
+		this.confirmationDialogState = false;
+		this.saving = false;
+		this.verificationCodeDialogState = false;
+		this.plexAccount = {} as PlexAccountDTO;
 		this.$emit('dialog-closed', refreshAccounts);
 	}
 
@@ -274,12 +277,8 @@ export default class AccountDialog extends Vue {
 				}
 			} else {
 				// Reset values
-				this.isSettingUpAccount = false;
-				this.confirmationDialogState = false;
-				this.saving = false;
-				this.verificationCodeDialogState = false;
-				this.reset();
 				this.closeDialog();
+				this.reset();
 			}
 		});
 	}

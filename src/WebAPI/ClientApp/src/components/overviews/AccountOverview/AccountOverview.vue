@@ -2,11 +2,11 @@
 	<v-container>
 		<v-row justify="center">
 			<!-- Plex Accounts -->
-			<v-col v-for="(account, index) in accounts" :key="index" cols="4" style="min-width: 395px">
+			<v-col v-for="(account, index) in accounts" :key="index" xs="12" md="6" cols="4" style="min-width: 395px">
 				<account-card :account="account" @open-dialog="openDialog(false, account)" @dialog-closed="dialog = false" />
 			</v-col>
 			<!-- Add new Account card -->
-			<v-col cols="4" style="min-width: 395px">
+			<v-col xs="12" md="6" cols="4" style="min-width: 395px">
 				<account-card @open-dialog="openDialog(true, null)" />
 			</v-col>
 		</v-row>

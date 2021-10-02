@@ -6,7 +6,13 @@
 				<help-icon help-id="help.account-form.is-enabled" />
 			</v-col>
 			<v-col>
-				<v-checkbox v-model="isEnabled" color="red" class="ma-3 pt-0" hide-details @change="inputChanged" />
+				<v-checkbox
+					:value="value.isEnabled"
+					color="red"
+					class="ma-3 pt-0"
+					hide-details
+					@change="inputChanged({ prop: 'isEnabled', value: $event })"
+				/>
 			</v-col>
 		</v-row>
 		<!-- Is main account -->
@@ -15,7 +21,13 @@
 				<help-icon help-id="help.account-form.is-main" />
 			</v-col>
 			<v-col>
-				<v-checkbox v-model="isMain" color="red" class="ma-3 pt-0" hide-details @change="inputChanged" />
+				<v-checkbox
+					:value="value.isMain"
+					color="red"
+					class="ma-3 pt-0"
+					hide-details
+					@change="inputChanged({ prop: 'isMain', value: $event })"
+				/>
 			</v-col>
 		</v-row>
 		<!-- Display Name -->
@@ -25,13 +37,13 @@
 			</v-col>
 			<v-col>
 				<v-text-field
-					v-model="displayName"
+					:value="value.displayName"
 					:rules="getDisplayNameRules"
 					color="red"
 					full-width
 					outlined
 					required
-					@input="inputChanged"
+					@input="inputChanged({ prop: 'displayName', value: $event })"
 				/>
 			</v-col>
 		</v-row>
@@ -43,13 +55,13 @@
 			</v-col>
 			<v-col>
 				<v-text-field
-					v-model="username"
+					:value="value.username"
 					:rules="getUsernameRules"
 					color="red"
 					full-width
 					outlined
 					required
-					@input="inputChanged"
+					@input="inputChanged({ prop: 'username', value: $event })"
 				/>
 			</v-col>
 		</v-row>
@@ -61,7 +73,7 @@
 			</v-col>
 			<v-col>
 				<v-text-field
-					v-model="password"
+					:value="value.password"
 					:rules="getPasswordRules"
 					color="red"
 					full-width
@@ -70,7 +82,7 @@
 					:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
 					:type="showPassword ? 'text' : 'password'"
 					@click:append="showPassword = !showPassword"
-					@input="inputChanged"
+					@input="inputChanged({ prop: 'password', value: $event })"
 				/>
 			</v-col>
 		</v-row>
@@ -83,11 +95,6 @@ import { PlexAccountDTO } from '@dto/mainApi';
 
 @Component<AccountForm>({})
 export default class AccountForm extends Vue {
-	isEnabled: boolean = true;
-	isMain: boolean = true;
-	displayName: string = '';
-	username: string = '';
-	password: string = '';
 	showPassword: boolean = false;
 
 	valid: boolean = false;
@@ -118,33 +125,15 @@ export default class AccountForm extends Vue {
 	}
 	// endregion
 
-	get getAccount(): PlexAccountDTO {
-		return {
-			...this.value,
-			isEnabled: this.isEnabled,
-			isMain: this.isMain,
-			displayName: this.displayName,
-			username: this.username,
-			password: this.password,
-		} as PlexAccountDTO;
-	}
-
-	inputChanged(): void {
-		this.$emit('input', this.getAccount);
+	inputChanged({ prop, value }: { prop: string; value: string | boolean }): void {
+		this.$emit('input', { prop, value });
 		this.$emit('is-valid', this.valid);
 	}
 
 	reset(): void {
-		this.isMain = true;
-		this.displayName = '';
-		this.username = '';
-		this.password = '';
 		this.isValidated = '';
 		this.valid = false;
-	}
-
-	mounted() {
-		this.inputChanged();
+		this.showPassword = false;
 	}
 }
 </script>

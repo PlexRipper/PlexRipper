@@ -12,7 +12,7 @@
 				</v-row>
 				<v-row v-if="errors.length > 0" justify="center">
 					<v-col cols="auto">
-						<span style="color: red; font-weight: bold">The verification code was invalid, please try again.</span>
+						<span style="color: red; font-weight: bold">{{ $t('components.account-verification-code-dialog.error') }}</span>
 					</v-col>
 				</v-row>
 			</v-card-text>

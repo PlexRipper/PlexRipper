@@ -17,19 +17,5 @@ namespace PlexRipper.Application.IntegrationTests
             Log.SetupTestLogging(output, LogEventLevel.Verbose);
             Container = new BaseContainer();
         }
-
-        [Fact]
-        public async Task Should_When()
-        {
-            // Arrange
-            var plexAccount = Secrets.PlexAccount3;
-            plexAccount.ClientId = Container.GetPlexAccountService.GeneratePlexAccountClientId().Value;
-
-            // Act
-            var result = await Container.GetPlexAccountService.ValidatePlexAccountAsync(plexAccount);
-
-            // Assert
-            result.IsSuccess.ShouldBeTrue();
-        }
     }
 }

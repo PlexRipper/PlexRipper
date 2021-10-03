@@ -105,11 +105,11 @@ const config: NuxtConfig = {
 			routes.push({
 				name: 'details-overview',
 				path: '/tvshows/:libraryId',
-				component: resolve(__dirname, 'src/pages/tvshows/_tvShowId.vue'),
+				component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
 				children: [
 					{
 						path: 'details/:tvShowId',
-						component: resolve(__dirname, 'src/pages/tvshows/_tvShowId.vue'),
+						component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
 					},
 				],
 			});
@@ -129,6 +129,9 @@ const config: NuxtConfig = {
 			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
 			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
 		],
+		vueI18n: {
+			fallbackLocale: 'en-US',
+		},
 		strategy: 'no_prefix',
 	},
 	/*

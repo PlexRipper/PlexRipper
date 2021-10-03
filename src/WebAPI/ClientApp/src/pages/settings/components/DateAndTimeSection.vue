@@ -75,6 +75,8 @@
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { format } from 'date-fns';
+import { enUS, fr } from 'date-fns/locale';
+
 import { SettingsService } from '@service';
 
 interface ISelectItem {
@@ -104,6 +106,17 @@ export default class DateAndTimeSection extends Vue {
 		};
 	}
 
+	get getLocale(): { locale?: Locale } {
+		switch (this.$i18n.locale) {
+			case 'en-US':
+				return { locale: enUS };
+			case 'fr-FR':
+				return { locale: fr };
+			default:
+				return { locale: enUS };
+		}
+	}
+
 	get shortDateOptions(): ISelectItem[] {
 		const values: string[] = ['MMM dd yyyy', 'dd MMM yyyy', 'MM/dd/yyyy', 'dd/MM/yyyy', 'yyyy-MM-dd'];
 		const options: ISelectItem[] = [];
@@ -111,7 +124,7 @@ export default class DateAndTimeSection extends Vue {
 		values.forEach((x) => {
 			options.push({
 				value: x,
-				text: format(date, x),
+				text: format(date, x, this.getLocale),
 			});
 		});
 
@@ -125,7 +138,7 @@ export default class DateAndTimeSection extends Vue {
 		values.forEach((x) => {
 			options.push({
 				value: x,
-				text: format(date, x),
+				text: format(date, x, this.getLocale),
 			});
 		});
 
@@ -139,7 +152,7 @@ export default class DateAndTimeSection extends Vue {
 		values.forEach((x) => {
 			options.push({
 				value: x,
-				text: format(date, x),
+				text: format(date, x, this.getLocale),
 			});
 		});
 

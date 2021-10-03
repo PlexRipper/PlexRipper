@@ -4,10 +4,10 @@
 			<!-- The total progress -->
 			<progress-component
 				:percentage="getTotalPercentage"
-				:completed="getTotalPercentage === 100 || noServers"
+				:completed="getTotalPercentage === 100"
 				:text="getProgressText"
 				circular-mode
-				:indeterminate="plexServers.length === 0 && !noServers"
+				:indeterminate="plexServers.length === 0"
 			/>
 			<!--	Server Connection Details	-->
 			<v-simple-table v-if="getServerUpdates.length > 0" class="section-table">
@@ -89,16 +89,11 @@
 </template>
 
 <script lang="ts">
-import Log from 'consola';
 import _ from 'lodash';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { of, switchMap } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
-import { AccountService, SignalrService } from '@service';
+import { SignalrService } from '@service';
 import type { InspectServerProgress, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
-import { refreshAccount } from '@api/accountApi';
-import { inspectPlexServers } from '@api/plexServerApi';
 
 declare interface ServerUpdate {
 	id: number;
@@ -108,21 +103,17 @@ declare interface ServerUpdate {
 
 @Component
 export default class AccountSetupProgress extends Vue {
-	@Prop({ required: true, type: Number })
-	readonly accountId!: number;
+	@Prop({ required: true, type: Object as () => PlexAccountDTO })
+	readonly account!: PlexAccountDTO;
 
-	account: PlexAccountDTO | null = null;
 	inspectServerProgresses: InspectServerProgress[] = [];
 
 	hideButtonType: ButtonType = ButtonType.Hide;
 	confirmButtonType: ButtonType = ButtonType.Confirm;
-	plexServers: PlexServerDTO[] = [];
 
-	/**
-	 * Triggered when the API responds with no Plex servers.
-	 * @type {boolean}
-	 */
-	noServers: boolean = false;
+	get plexServers(): PlexServerDTO[] {
+		return this.account.plexServers ?? [];
+	}
 
 	get getServerUpdates(): ServerUpdate[] {
 		const serverUpdates: ServerUpdate[] = [];
@@ -156,50 +147,10 @@ export default class AccountSetupProgress extends Vue {
 		return _.clamp((this.getCompletedCount / this.plexServers.length) * 100, 0, 100);
 	}
 
-	refreshAccount(accountId: number = 0): void {
-		this.$subscribeTo(
-			refreshAccount(accountId).pipe(
-				// Get account with accessible plexServers
-				switchMap(() => AccountService.fetchAccount(accountId)),
-				// Save plexServers
-				tap((account) => {
-					if (account) {
-						this.plexServers = account.plexServers;
-						this.noServers = this.plexServers.length === 0;
-					}
-				}),
-				// Check status and connectivity of all plexServers
-				switchMap(() => {
-					if (!this.noServers) {
-						return inspectPlexServers(
-							accountId,
-							this.plexServers.map((x) => x.id),
-						);
-					}
-					return of(null);
-				}),
-			),
-			() => {
-				this.$emit('complete');
-			},
-		);
-	}
-
 	mounted(): void {
 		this.$subscribeTo(SignalrService.getAllInspectServerProgress(), (data) => {
 			this.inspectServerProgresses = data;
 		});
-
-		this.$subscribeTo(
-			this.$watchAsObservable('accountId').pipe(
-				map((x) => x.newValue),
-				tap((x) => Log.debug('accountId', x)),
-				switchMap((x) => AccountService.getAccount(x)),
-			),
-			(account) => {
-				this.account = account;
-			},
-		);
 	}
 }
 </script>

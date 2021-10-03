@@ -39,6 +39,40 @@ namespace FluentResults
 
         #endregion
 
+        #region AddStatusCode
+
+        public static Result AddStatusCode(this Result result, int statusCode)
+        {
+            return statusCode switch
+            {
+                200 => result.Add200OkRequestSuccess(),
+                201 => result.Add201CreatedRequestSuccess(),
+                400 => result.Add400BadRequestError(),
+                401 => result.Add401UnauthorizedError(),
+                404 => result.Add404NotFoundError(),
+                408 => result.Add408RequestTimeoutError(),
+                502 => result.Add502BadGatewayError(),
+                _ => result.AddStatusCodeError(statusCode),
+            };
+        }
+
+        public static Result<T> AddStatusCode<T>(this Result<T> result, int statusCode)
+        {
+            return statusCode switch
+            {
+                200 => result.Add200OkRequestSuccess(),
+                201 => result.Add201CreatedRequestSuccess(),
+                400 => result.Add400BadRequestError(),
+                401 => result.Add401UnauthorizedError(),
+                404 => result.Add404NotFoundError(),
+                408 => result.Add408RequestTimeoutError(),
+                502 => result.Add502BadGatewayError(),
+                _ => result.AddStatusCodeError(statusCode),
+            };
+        }
+
+        #endregion
+
         #region FindStatusCode
 
         public static int FindStatusCode(this Result result)
@@ -150,6 +184,25 @@ namespace FluentResults
 
         #region Result Signatures
 
+        #region 200
+
+        public static bool Has200OkRequestSuccess(this Result result)
+        {
+            return result.HasStatusCode(HttpCodes.Status200OK);
+        }
+
+        public static Result Add200OkRequestSuccess(this Result result, string message = "Ok successful")
+        {
+            return result.AddStatusCodeSuccess(HttpCodes.Status200OK, message);
+        }
+
+        public static Result Create200OkResult(string message = "")
+        {
+            return CreateSuccessStatusCodeResult(HttpCodes.Status200OK, message);
+        }
+
+        #endregion
+
         #region 201
 
         public static bool Has201CreatedRequestSuccess(this Result result)
@@ -184,6 +237,25 @@ namespace FluentResults
         public static Result Create400BadRequestResult(string message = "")
         {
             return CreateErrorStatusCodeResult(HttpCodes.Status400BadRequest, message);
+        }
+
+        #endregion
+
+        #region 401
+
+        public static bool Has401UnauthorizedError(this Result result)
+        {
+            return result.HasStatusCode(HttpCodes.Status401Unauthorized);
+        }
+
+        public static Result Add401UnauthorizedError(this Result result, string message = "Unauthorized")
+        {
+            return result.AddStatusCodeError(HttpCodes.Status401Unauthorized, message);
+        }
+
+        public static Result Create401UnauthorizedResult(string message = "")
+        {
+            return CreateErrorStatusCodeResult(HttpCodes.Status401Unauthorized, message);
         }
 
         #endregion
@@ -249,6 +321,25 @@ namespace FluentResults
 
         #region Result<T> Signatures
 
+        #region 200
+
+        public static bool Has200OkRequestSuccess<T>(this Result<T> result)
+        {
+            return result.HasStatusCode(HttpCodes.Status200OK);
+        }
+
+        public static Result<T> Add200OkRequestSuccess<T>(this Result<T> result, string message = "Ok successful")
+        {
+            return result.AddStatusCodeSuccess(HttpCodes.Status200OK, message);
+        }
+
+        public static Result<T> Create200OkResult<T>(T value, string message = "")
+        {
+            return CreateSuccessStatusCodeResult(value, HttpCodes.Status200OK, message);
+        }
+
+        #endregion
+
         #region 201
 
         public static bool Has201CreatedRequestSuccess<T>(this Result<T> result)
@@ -278,6 +369,20 @@ namespace FluentResults
         public static Result<T> Add400BadRequestError<T>(this Result<T> result, string message = "Bad request")
         {
             return result.AddStatusCodeError(HttpCodes.Status400BadRequest, message);
+        }
+
+        #endregion
+
+        #region 401
+
+        public static bool Has401UnauthorizedError<T>(this Result<T> result)
+        {
+            return result.HasStatusCode(HttpCodes.Status401Unauthorized);
+        }
+
+        public static Result<T> Add401UnauthorizedError<T>(this Result<T> result, string message = "Unauthorized")
+        {
+            return result.AddStatusCodeError(HttpCodes.Status401Unauthorized, message);
         }
 
         #endregion

@@ -2,17 +2,18 @@
 	<v-container>
 		<v-row justify="center">
 			<!-- Plex Accounts -->
-			<v-col v-for="(account, index) in accounts" :key="index" cols="4" style="min-width: 395px">
-				<account-card :account="account" @open-dialog="openDialog(account)" @dialog-closed="dialog = false" />
+			<v-col v-for="(account, index) in accounts" :key="index" xs="12" md="6" cols="4" style="min-width: 395px">
+				<account-card :account="account" @open-dialog="openDialog(false, account)" @dialog-closed="dialog = false" />
 			</v-col>
 			<!-- Add new Account card -->
-			<v-col cols="4" style="min-width: 395px">
-				<account-card @open-dialog="openDialog" />
+			<v-col xs="12" md="6" cols="4" style="min-width: 395px">
+				<account-card @open-dialog="openDialog(true, null)" />
 			</v-col>
 		</v-row>
+		<!-- Account Dialog -->
 		<v-row>
 			<v-col>
-				<account-dialog :dialog="dialog" :account="selectedAccount" @dialog-closed="closeDialog" />
+				<account-dialog :dialog="dialog" :new-account="newAccount" :account="selectedAccount" @dialog-closed="closeDialog" />
 			</v-col>
 		</v-row>
 	</v-container>
@@ -20,16 +21,19 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { AccountService } from '@service';
+import { AccountService, LibraryService, ServerService } from '@service';
 import { PlexAccountDTO } from '@dto/mainApi';
 
-@Component
+@Component<AccountOverview>({})
 export default class AccountOverview extends Vue {
 	private accounts: PlexAccountDTO[] = [];
 	private dialog: boolean = false;
 	private selectedAccount: PlexAccountDTO | null = null;
 
-	openDialog(account: PlexAccountDTO | null = null): void {
+	private newAccount: Boolean = false;
+
+	openDialog(newAccount: boolean, account: PlexAccountDTO | null = null): void {
+		this.newAccount = newAccount;
 		this.selectedAccount = account;
 		this.dialog = true;
 	}
@@ -38,6 +42,8 @@ export default class AccountOverview extends Vue {
 		this.dialog = false;
 		if (refreshAccounts) {
 			AccountService.fetchAccounts();
+			ServerService.fetchServers();
+			LibraryService.fetchLibraries();
 		}
 	}
 

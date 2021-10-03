@@ -20,7 +20,7 @@
 							<v-list-item-icon>
 								<v-icon>{{ item.icon }}</v-icon>
 							</v-list-item-icon>
-							<v-list-item-title>{{ item.title }}</v-list-item-title>
+							<v-list-item-title>{{ $t(item.title) }}</v-list-item-title>
 						</template>
 						<v-list-item v-for="(child, j) in item.children" :key="j" link nuxt :to="child.link">
 							<v-list-item-icon>
@@ -28,7 +28,7 @@
 							</v-list-item-icon>
 
 							<v-list-item-content>
-								<v-list-item-title>{{ child.title }}</v-list-item-title>
+								<v-list-item-title>{{ $t(child.title) }}</v-list-item-title>
 							</v-list-item-content>
 						</v-list-item>
 					</v-list-group>
@@ -40,10 +40,10 @@
 
 						<v-list-item-content>
 							<v-list-item-title>
-								{{ item.title }}
+								{{ $t(item.title) }}
 							</v-list-item-title>
 						</v-list-item-content>
-						<v-list-item-action v-if="item.title === 'Downloads'">
+						<v-list-item-action v-if="item.title.includes('downloads')">
 							<v-avatar v-if="downloadTaskCount > 0" class="red" size="32">
 								<b>{{ downloadTaskCount }}</b>
 							</v-avatar>
@@ -83,37 +83,37 @@ export default class NavigationDrawer extends Vue {
 	get getNavItems(): INavItem[] {
 		return [
 			{
-				title: 'Downloads',
+				title: 'components.navigation-drawer.downloads',
 				icon: 'mdi-download',
 				link: '/downloads',
 			},
 			{
-				title: 'Settings',
+				title: 'components.navigation-drawer.settings',
 				icon: 'mdi-cog',
 				link: '/settings',
 				children: [
 					{
-						title: 'Accounts',
+						title: 'components.navigation-drawer.accounts',
 						icon: 'mdi-account',
 						link: '/settings/accounts',
 					},
 					{
-						title: 'Paths',
+						title: 'components.navigation-drawer.paths',
 						icon: 'mdi-folder',
 						link: '/settings/paths',
 					},
 					{
-						title: 'UI',
+						title: 'components.navigation-drawer.ui',
 						icon: 'mdi-television-guide',
 						link: '/settings/ui',
 					},
 					{
-						title: 'Advanced',
+						title: 'components.navigation-drawer.advanced',
 						icon: 'mdi-wrench',
 						link: '/settings/advanced',
 					},
 					{
-						title: 'Debug',
+						title: 'components.navigation-drawer.debug',
 						icon: 'mdi-bug-outline',
 						link: '/settings/debug',
 					},

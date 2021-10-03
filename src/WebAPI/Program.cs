@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog.Events;
 
 namespace PlexRipper.WebAPI
 {
@@ -15,8 +16,7 @@ namespace PlexRipper.WebAPI
     {
         public static void Main(string[] args)
         {
-            // This is the temp log config until LogSystem gets called, until then nothing is logged to file.
-            Log.SetupLogging();
+            Log.SetupLogging(LogEventLevel.Verbose);
 
             try
             {

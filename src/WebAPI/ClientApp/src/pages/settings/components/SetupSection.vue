@@ -7,7 +7,7 @@
 				<help-icon help-id="help.settings.advanced.setup-section.go-to-setup-page" />
 			</v-col>
 			<v-col cols="8" align-self="center">
-				<p-btn :button-type="goToSetupPageBtn" text-id="go-to-setup-page" @click="goToSetupPage" />
+				<p-btn :button-type="goToSetupPageBtn" :width="400" text-id="go-to-setup-page" @click="goToSetupPage" />
 			</v-col>
 		</v-row>
 	</p-section>

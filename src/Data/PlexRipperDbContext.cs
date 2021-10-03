@@ -103,13 +103,13 @@ namespace PlexRipper.Data
         public async Task<Result> SetupAsync()
         {
             // Should the Database be deleted and re-created
-            if (EnviromentExtensions.IsResetDatabase())
+            if (EnvironmentExtensions.IsResetDatabase())
             {
                 Log.Warning("ResetDB command is true, database will be deleted and re-created.");
                 await Database.EnsureDeletedAsync();
             }
 
-            if (EnviromentExtensions.IsIntegrationTestMode())
+            if (EnvironmentExtensions.IsIntegrationTestMode())
             {
                 Log.Warning("Database will be setup in TestMode");
                 Log.Warning($"Database created at: {DatabasePath}");
@@ -118,7 +118,7 @@ namespace PlexRipper.Data
 
             try
             {
-                if (!EnviromentExtensions.IsIntegrationTestMode())
+                if (!EnvironmentExtensions.IsIntegrationTestMode())
                 {
                     Log.Information("Attempting to migrate database");
                     await Database.MigrateAsync();

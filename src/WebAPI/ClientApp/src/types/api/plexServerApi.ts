@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import Axios from 'axios-observable';
 import { checkResponse, preApiRequest } from '@api/baseApi';
-import { InspectServerDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 
 const logText = 'From PlexServerAPI => ';
@@ -28,13 +28,4 @@ export function checkPlexServer(serverId: number): Observable<ResultDTO<PlexServ
 	preApiRequest(logText, 'checkPlexServer');
 	const result = Axios.get(`${apiPath}/${serverId}/check`);
 	return checkResponse<ResultDTO<PlexServerStatusDTO>>(result, logText, 'checkPlexServer');
-}
-
-export function inspectPlexServers(plexAccountId: number, plexServerIds: number[]): Observable<ResultDTO> {
-	preApiRequest(logText, 'checkPlexServer');
-	const result = Axios.post(`${apiPath}/inspect`, {
-		plexAccountId,
-		plexServerIds,
-	} as InspectServerDTO);
-	return checkResponse<ResultDTO>(result, logText, 'checkPlexServer');
 }

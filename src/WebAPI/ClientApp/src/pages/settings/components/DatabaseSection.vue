@@ -6,13 +6,14 @@
 			<v-col cols="4" align-self="center">
 				<help-icon help-id="help.settings.advanced.reset-db" />
 			</v-col>
+			<!--	Reset Database button	-->
 			<v-col cols="8" align-self="center">
+				<p-btn :width="400" :button-type="dbResetButtonType" text-id="reset-db" @click="confirmationDialog = true" />
 				<confirmation-dialog
-					:button-type="dbResetButtonType"
-					button-text-id="reset-db"
 					text-id="reset-db"
-					:width="200"
+					:dialog="confirmationDialog"
 					@confirm="resetDatabaseCommand"
+					@cancel="confirmationDialog = false"
 				/>
 			</v-col>
 		</v-row>
@@ -29,6 +30,7 @@ import { GlobalService } from '@service';
 @Component
 export default class DatabaseSection extends Vue {
 	dbResetButtonType: ButtonType = ButtonType.Warning;
+	confirmationDialog: boolean = false;
 
 	resetDatabaseCommand(): void {
 		this.$subscribeTo(resetDatabase(), (value) => {

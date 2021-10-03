@@ -20,23 +20,6 @@ namespace PlexRipper.WebAPI.Config
             CreateMap(typeof(Result<>), typeof(ResultDTO<>), MemberList.None);
             CreateMap(typeof(Result<>), typeof(ResultDTO), MemberList.None);
 
-            // CreatePlexAccountDTO -> PlexAccount
-            CreateMap<CreatePlexAccountDTO, PlexAccount>(MemberList.Source)
-                .ReverseMap();
-
-            // CreatePlexAccountDTO -> PlexAccount
-            CreateMap<UpdatePlexAccountDTO, PlexAccount>(MemberList.Source)
-                .ReverseMap();
-
-            // PlexAccountDTO <-> PlexAccount
-            CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
-                .ForMember(x => x.PlexServers, opt => opt.Ignore())
-                .ForMember(x => x.PlexAccountServers, opt => opt.Ignore());
-
-            CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
-                .ForMember(dto => dto.AuthToken, opt => opt.MapFrom(x => x.AuthenticationToken))
-                .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));
-
             // PlexServer -> PlexServerDTO
             CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.Status));
@@ -65,11 +48,28 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<Notification, NotificationDTO>(MemberList.Destination)
                 .ReverseMap();
 
+            PlexAccountMappings();
             DownloadTaskMappings();
             PlexMediaMappings();
             PlexMovieMappings();
             PlexTvShowMappings();
             SettingsMappings();
+        }
+
+        private void PlexAccountMappings()
+        {
+            // CreatePlexAccountDTO -> PlexAccount
+            CreateMap<UpdatePlexAccountDTO, PlexAccount>(MemberList.Source)
+                .ReverseMap();
+
+            // PlexAccountDTO <-> PlexAccount
+            CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
+                .ForMember(x => x.PlexServers, opt => opt.Ignore())
+                .ForMember(x => x.PlexAccountServers, opt => opt.Ignore());
+
+            // PlexAccount -> PlexAccountDTO
+            CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
+                .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));
         }
 
         private void DownloadTaskMappings()

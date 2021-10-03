@@ -19,10 +19,8 @@ namespace PlexRipper.WebAPI.Controllers
     {
         private readonly IPlexAccountService _plexAccountService;
 
-        public PlexAccountController(
-            IPlexAccountService plexAccountService,
-            IMapper mapper,
-            INotificationsService notificationsService) : base(mapper, notificationsService)
+        public PlexAccountController(IPlexAccountService plexAccountService, IMapper mapper, INotificationsService notificationsService) : base(
+            mapper, notificationsService)
         {
             _plexAccountService = plexAccountService;
         }
@@ -75,14 +73,15 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Put(int id, [FromBody] UpdatePlexAccountDTO account)
+        public async Task<IActionResult> Put(int id, [FromBody] PlexAccountDTO updatedAccount, [FromQuery] bool inspect = false)
         {
             if (id <= 0)
             {
                 return BadRequestInvalidId();
             }
 
-            return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.UpdatePlexAccountAsync(account));
+            var mapResult = _mapper.Map<PlexAccount>(updatedAccount);
+            return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.UpdatePlexAccountAsync(mapResult, inspect));
         }
 
         // POST api/<AccountController>
@@ -90,7 +89,7 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ResultDTO<PlexAccountDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> CreateAccount([FromBody] CreatePlexAccountDTO newAccount)
+        public async Task<IActionResult> CreateAccount([FromBody] PlexAccountDTO newAccount)
         {
             if (newAccount is null)
             {
@@ -115,17 +114,19 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequestInvalidId();
             }
 
-            return ToActionResult(await _plexAccountService.DeletePlexAccountAsync(id));
+            var deleteResult = await _plexAccountService.DeletePlexAccountAsync(id);
+            return ToActionResult(deleteResult);
         }
 
         [HttpPost("validate")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Validate([FromBody] CredentialsDTO account)
+        public async Task<IActionResult> Validate([FromBody] PlexAccountDTO account)
         {
-            var result = await _plexAccountService.ValidatePlexAccountAsync(account.Username, account.Password);
-            return ToActionResult(result);
+            var plexAccount = _mapper.Map<PlexAccount>(account);
+            var result = await _plexAccountService.ValidatePlexAccountAsync(plexAccount);
+            return ToActionResult<PlexAccount, PlexAccountDTO>(result);
         }
 
         [HttpGet("check/{username}")]
@@ -145,7 +146,7 @@ namespace PlexRipper.WebAPI.Controllers
 
                 if (result.IsFailed)
                 {
-                    return BadRequest(result);
+                    return BadRequest(result.ToResult());
                 }
 
                 if (result.Value)
@@ -173,12 +174,40 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> RefreshPlexAccount(int id)
         {
-            if (id <= 0)
+            return ToActionResult(await _plexAccountService.RefreshPlexAccount(id));
+        }
+
+        [HttpGet("clientid")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<string>))]
+        public IActionResult GenerateClientId()
+        {
+            var result = Result.Ok(_plexAccountService.GeneratePlexAccountClientId());
+            return ToActionResult<string, string>(result);
+        }
+
+        // GET api/<PlexAccountController>/authpin/
+        [HttpGet("authpin")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<AuthPin>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> GetAndCheck2FaPin([FromQuery] string clientId, [FromQuery] int authPinId = 0)
+        {
+            if (string.IsNullOrEmpty(clientId))
             {
-                return BadRequestInvalidId();
+                return ToActionResult(Result.Fail("Plex Account Client id was empty").Add400BadRequestError());
             }
 
-            return ToActionResult(await _plexAccountService.RefreshPlexAccount(id));
+            Result<AuthPin> authPinResult;
+            if (authPinId == 0)
+            {
+                authPinResult = await _plexAccountService.Get2FAPin(clientId);
+            }
+            else
+            {
+                authPinResult = await _plexAccountService.Check2FAPin(authPinId, clientId);
+            }
+
+            return ToActionResult<AuthPin, AuthPin>(authPinResult);
         }
     }
 }

@@ -66,7 +66,7 @@ export default class DownloadBar extends Vue {
 				name: 'Clear Completed',
 				value: 'clear',
 				icon: 'mdi-notification-clear-all',
-				disableOnNoSelected: false,
+				disableOnNoSelected: true,
 			},
 			{
 				name: 'Start',

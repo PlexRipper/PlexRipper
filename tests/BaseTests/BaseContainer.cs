@@ -36,10 +36,11 @@ namespace PlexRipper.BaseTests
         /// <summary>
         /// Creates a Autofac container and sets up a test database.
         /// </summary>
-        public BaseContainer()
+        public BaseContainer(bool setToDiskTestDatabase = false)
         {
-            EnviromentExtensions.SetIntegrationTestMode();
-            EnviromentExtensions.SetResetDatabase();
+            EnvironmentExtensions.SetIntegrationTestMode();
+            EnvironmentExtensions.SetResetDatabase();
+            EnvironmentExtensions.SetInMemoryDatabase(!setToDiskTestDatabase);
 
             SetupSecrets();
 

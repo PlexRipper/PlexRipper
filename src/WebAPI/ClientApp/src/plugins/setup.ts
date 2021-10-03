@@ -8,7 +8,7 @@ export default (ctx: Context): void => {
 		// Setup logging
 		Vue.config.devtools = !config.isProduction;
 		Vue.config.productionTip = false;
-		Log.level = config.isProduction ? 3 : 5;
+		Log.level = config.isProduction ? 5 : 5;
 	});
 
 	// Setup Config

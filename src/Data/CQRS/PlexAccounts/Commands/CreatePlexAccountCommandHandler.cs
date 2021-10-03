@@ -18,6 +18,7 @@ namespace PlexRipper.Data.CQRS
             RuleFor(x => x.PlexAccount.Id).Equal(0).WithMessage("The Id should be 0 when creating a new PlexAccount");
             RuleFor(x => x.PlexAccount.Username).NotEmpty().MinimumLength(5);
             RuleFor(x => x.PlexAccount.Password).NotEmpty().MinimumLength(5);
+            RuleFor(x => x.PlexAccount.ClientId).NotEmpty().MinimumLength(5);
             RuleFor(x => x.PlexAccount.DisplayName).NotEmpty();
         }
     }

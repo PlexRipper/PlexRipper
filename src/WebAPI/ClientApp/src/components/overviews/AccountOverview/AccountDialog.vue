@@ -274,7 +274,7 @@ export default class AccountDialog extends Vue {
 					if (this.hasCredentialsChanged) {
 						this.isSettingUpAccount = true;
 					} else {
-						this.closeDialog();
+						this.closeDialog(true);
 					}
 				} else {
 					Log.error('Result was invalid when saving an updated account', data);

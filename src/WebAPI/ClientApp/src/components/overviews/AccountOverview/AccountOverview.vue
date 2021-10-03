@@ -21,7 +21,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { AccountService } from '@service';
+import { AccountService, ServerService } from '@service';
 import { PlexAccountDTO } from '@dto/mainApi';
 
 @Component<AccountOverview>({})
@@ -42,6 +42,7 @@ export default class AccountOverview extends Vue {
 		this.dialog = false;
 		if (refreshAccounts) {
 			AccountService.fetchAccounts();
+			ServerService.fetchServers();
 		}
 	}
 

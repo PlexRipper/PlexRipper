@@ -155,9 +155,9 @@ namespace PlexRipper.Application.PlexAccounts
             return Result.Ok(true);
         }
 
-        public Result<string> GeneratePlexAccountClientId()
+        public string GeneratePlexAccountClientId()
         {
-            return Result.Ok(StringExtensions.RandomString(24, true, true));
+            return StringExtensions.RandomString(24, true, true);
         }
 
         /// <summary>

@@ -181,7 +181,8 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<string>))]
         public IActionResult GenerateClientId()
         {
-            return ToActionResult<string, string>(_plexAccountService.GeneratePlexAccountClientId());
+            var result = Result.Ok(_plexAccountService.GeneratePlexAccountClientId());
+            return ToActionResult<string, string>(result);
         }
 
         // GET api/<PlexAccountController>/authpin/

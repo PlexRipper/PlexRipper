@@ -7,7 +7,6 @@ namespace PlexRipper.Application.Common
 {
     public interface IPlexAccountService
     {
-
         Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount);
 
         /// <summary>
@@ -62,6 +61,6 @@ namespace PlexRipper.Application.Common
 
         Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
 
-        Result<string> GeneratePlexAccountClientId();
+        string GeneratePlexAccountClientId();
     }
 }

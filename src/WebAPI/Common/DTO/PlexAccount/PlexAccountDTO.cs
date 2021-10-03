@@ -39,9 +39,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("email", Required = Required.AllowNull)]
         public string Email { get; set; }
 
-        [JsonProperty("joined_at", Required = Required.Always)]
-        public DateTime JoinedAt { get; set; }
-
         [JsonProperty("title", Required = Required.Always)]
         public string Title { get; set; }
 

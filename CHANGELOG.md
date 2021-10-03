@@ -26,6 +26,7 @@
 - Fixed the DateTime settings not being translatable.
 - Fixed the browser client not updating its store after resetting the database.
 - Fixed the error window having a very wide window due to unwrapped text.
+- Fixed the TvShows libraries getting stuck in a infinite loading loop when viewed, TV show libraries can now be viewed again.
 
 ## [0.8.6]
 

@@ -195,10 +195,18 @@ namespace PlexRipper.PlexApi.Services
             if (result.IsSuccess)
             {
                 var mapResult = _mapper.Map<PlexAccount>(result.Value);
+                mapResult.Id = plexAccount.Id;
+                mapResult.ClientId = plexAccount.ClientId;
+                mapResult.DisplayName = plexAccount.DisplayName;
+                mapResult.Password = plexAccount.Password;
+                mapResult.IsEnabled = plexAccount.IsEnabled;
+                mapResult.IsMain = plexAccount.IsMain;
                 mapResult.IsValidated = true;
                 mapResult.ValidatedAt = DateTime.Now;
+                mapResult.VerificationCode = "";
+
                 Log.Information($"Successfully retrieved the PlexAccount data for user {plexAccount.DisplayName} from the PlexApi");
-                return result.ToResult((_ => mapResult));
+                return Result.Ok(mapResult);
             }
 
             return result.ToResult();

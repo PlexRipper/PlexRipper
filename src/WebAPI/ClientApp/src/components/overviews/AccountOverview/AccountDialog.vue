@@ -57,7 +57,7 @@
 		<account-verification-code-dialog
 			:dialog="verificationCodeDialogState"
 			:errors="validateErrors"
-			@close="verificationCodeDialogState = false"
+			@close="closeVerificationDialog"
 			@submit="validateAfterVerificationCode"
 		/>
 		<!--	Delete Confirmation Dialog	-->
@@ -131,10 +131,11 @@ export default class AccountDialog extends Vue {
 			verificationCode: '',
 			uuid: '',
 			hasPassword: false,
-			validatedAt: '',
-			joinedAt: '',
+			validatedAt: '0001-01-01T00:00:00Z',
+			joinedAt: '0001-01-01T00:00:00Z',
 			is2Fa: false,
 			title: '',
+			plexId: 0,
 			isValidated: false,
 			authenticationToken: '',
 			email: '',
@@ -143,7 +144,7 @@ export default class AccountDialog extends Vue {
 	}
 
 	get isAllowedToSave(): boolean {
-		return !this.saving && !(this.isValidated === 'OK') && this.inputHasChanged && this.isValid;
+		return !this.saving && this.isValidated === 'OK' && this.isValid;
 	}
 
 	get getDeleteButtonType(): ButtonType {
@@ -187,25 +188,26 @@ export default class AccountDialog extends Vue {
 		this.$subscribeTo(validateAccount(this.plexAccount), (data) => {
 			// Account has no 2FA and was valid
 			if (data.isSuccess && data.value) {
-				this.plexAccount.is2Fa = data.value.is2Fa;
-				this.plexAccount.authenticationToken = data.value.authenticationToken;
-
-				this.plexAccount.isValidated = data.value.isValidated;
-				this.plexAccount.joinedAt = data.value.joinedAt;
-				this.plexAccount.validatedAt = data.value.validatedAt;
-				this.plexAccount.hasPassword = data.value.hasPassword;
-				this.plexAccount.uuid = data.value.uuid;
+				this.plexAccount = data.value;
 
 				Log.info('PlexAccount', this.plexAccount);
 				if (this.plexAccount.is2Fa) {
 					this.verificationCodeDialogState = true;
 				} else {
+					this.validateErrors = data.errors ?? [];
 					this.isValidated = 'ERROR';
+					return;
 				}
+				this.isValidated = 'OK';
 			} else {
 				Log.error('Validating account failed:', data);
 			}
 		});
+	}
+
+	closeVerificationDialog() {
+		this.verificationCodeDialogState = false;
+		this.validateLoading = false;
 	}
 
 	validateAfterVerificationCode(verificationCode: string) {
@@ -213,14 +215,7 @@ export default class AccountDialog extends Vue {
 		this.$subscribeTo(validateAccount(this.plexAccount), (data) => {
 			if (data && data.isSuccess && data.value) {
 				// Take over the authToken
-				this.plexAccount.is2Fa = data.value.is2Fa;
-				this.plexAccount.authenticationToken = data.value.authenticationToken;
-
-				this.plexAccount.isValidated = data.value.isValidated;
-				this.plexAccount.joinedAt = data.value.joinedAt;
-				this.plexAccount.validatedAt = data.value.validatedAt;
-				this.plexAccount.hasPassword = data.value.hasPassword;
-				this.plexAccount.uuid = data.value.uuid;
+				this.plexAccount = data.value;
 
 				this.validateLoading = false;
 				this.verificationCodeDialogState = false;

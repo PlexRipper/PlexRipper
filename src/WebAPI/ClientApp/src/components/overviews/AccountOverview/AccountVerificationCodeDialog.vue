@@ -88,3 +88,10 @@ export default class AccountVerificationCodeDialog extends Vue {
 	}
 }
 </script>
+
+<style>
+.react-code-input > input[data-v-e1087700]:focus {
+	border: 1px solid #ff0000 !important;
+	caret-color: #ff0000 !important;
+}
+</style>

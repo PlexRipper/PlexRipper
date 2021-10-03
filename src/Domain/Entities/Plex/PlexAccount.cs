@@ -125,38 +125,5 @@ namespace PlexRipper.Domain
         #endregion
 
         #endregion
-
-        #region Methods
-
-        /// <summary>
-        ///     This merges the response of the PlexApi into this <see cref="PlexAccount" />.
-        /// </summary>
-        /// <param name="plexAccount">The <see cref="PlexAccount" /> from the PlexApi.</param>
-        public void FromPlexApi(PlexAccount plexAccount)
-        {
-            if (plexAccount == null)
-            {
-                Log.Warning("The plexAccount was null");
-                return;
-            }
-
-            if (plexAccount.AuthenticationToken == string.Empty)
-            {
-                Log.Warning("The plexAccount has an invalid AuthenticationToken and was most likely not valid");
-                return;
-            }
-
-            PlexId = plexAccount.PlexId;
-            Uuid = plexAccount.Uuid;
-            JoinedAt = plexAccount.JoinedAt;
-            Title = plexAccount.Title;
-            HasPassword = plexAccount.HasPassword;
-            ClientId = plexAccount.ClientId;
-            AuthenticationToken = plexAccount.AuthenticationToken;
-            IsValidated = true;
-            ValidatedAt = DateTime.Now;
-        }
-
-        #endregion
     }
 }

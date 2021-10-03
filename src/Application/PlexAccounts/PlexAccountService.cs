@@ -57,8 +57,6 @@ namespace PlexRipper.Application.PlexAccounts
                 return plexSignInResult;
             }
 
-            plexAccount.FromPlexApi(plexSignInResult.Value);
-
             Log.Debug($"The PlexAccount with displayName {plexAccount.DisplayName} has been validated");
             return plexSignInResult;
         }

@@ -105,11 +105,11 @@ const config: NuxtConfig = {
 			routes.push({
 				name: 'details-overview',
 				path: '/tvshows/:libraryId',
-				component: resolve(__dirname, 'src/pages/tvshows/_tvShowId.vue'),
+				component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
 				children: [
 					{
 						path: 'details/:tvShowId',
-						component: resolve(__dirname, 'src/pages/tvshows/_tvShowId.vue'),
+						component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
 					},
 				],
 			});

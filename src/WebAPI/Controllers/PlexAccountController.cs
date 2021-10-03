@@ -73,14 +73,15 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Put(int id, [FromBody] UpdatePlexAccountDTO account)
+        public async Task<IActionResult> Put(int id, [FromBody] PlexAccountDTO updatedAccount)
         {
             if (id <= 0)
             {
                 return BadRequestInvalidId();
             }
 
-            return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.UpdatePlexAccountAsync(account));
+            var mapResult = _mapper.Map<PlexAccount>(updatedAccount);
+            return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.UpdatePlexAccountAsync(mapResult));
         }
 
         // POST api/<AccountController>

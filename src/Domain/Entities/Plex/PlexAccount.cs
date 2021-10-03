@@ -73,13 +73,16 @@ namespace PlexRipper.Domain
         [Column(Order = 9)]
         public string ClientId { get; set; }
 
-        public string Email { get; set; }
-
-        public DateTime JoinedAt { get; set; }
-
+        [Column(Order = 10)]
         public string Title { get; set; }
 
-        // public Uri Thumb { get; set; }
+        [Column(Order = 11)]
+        public DateTime JoinedAt { get; set; }
+
+        [Column(Order = 12)]
+        public string Email { get; set; }
+
+        [Column(Order = 13)]
         public bool HasPassword { get; set; }
 
         /// <summary>

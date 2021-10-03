@@ -18,19 +18,25 @@ namespace PlexRipper.WebAPI
     /// </summary>
     internal class Boot : IHostLifetime, IHostedService
     {
+        #region Fields
+
         private readonly IHostApplicationLifetime _appLifetime;
 
-        private readonly IUserSettings _userSettings;
-
-        private readonly IFileSystem _fileSystem;
+        private readonly IDownloadManager _downloadManager;
 
         private readonly IFileMerger _fileMerger;
 
-        private readonly IDownloadManager _downloadManager;
+        private readonly IFileSystem _fileSystem;
 
         private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
 
         private readonly ISchedulerService _schedulerService;
+
+        private readonly IUserSettings _userSettings;
+
+        #endregion
+
+        #region Constructor
 
         public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
             IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService)
@@ -42,6 +48,25 @@ namespace PlexRipper.WebAPI
             _downloadManager = downloadManager;
             _plexRipperDatabaseService = plexRipperDatabaseService;
             _schedulerService = schedulerService;
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            _appLifetime.ApplicationStarted.Register(OnStarted);
+            _appLifetime.ApplicationStopping.Register(OnStopping);
+            _appLifetime.ApplicationStopped.Register(OnStopped);
+
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            Log.Information("Shutting down the container");
+            return Task.CompletedTask;
         }
 
         public async Task WaitForStartAsync(CancellationToken cancellationToken)
@@ -64,25 +89,22 @@ namespace PlexRipper.WebAPI
             }
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            _appLifetime.ApplicationStarted.Register(OnStarted);
-            _appLifetime.ApplicationStopping.Register(OnStopping);
-            _appLifetime.ApplicationStopped.Register(OnStopped);
+        #endregion
 
-            return Task.CompletedTask;
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
+        #region Private Methods
 
         private void OnStarted()
         {
             Log.Information("Boot.OnStarted has been called.");
 
             // Perform post-startup activities here
+        }
+
+        private void OnStopped()
+        {
+            Log.Information("Boot.OnStopped has been called.");
+
+            // Perform post-stopped activities here
         }
 
         private void OnStopping()
@@ -92,11 +114,6 @@ namespace PlexRipper.WebAPI
             // Perform on-stopping activities here
         }
 
-        private void OnStopped()
-        {
-            Log.Information("Boot.OnStopped has been called.");
-
-            // Perform post-stopped activities here
-        }
+        #endregion
     }
 }

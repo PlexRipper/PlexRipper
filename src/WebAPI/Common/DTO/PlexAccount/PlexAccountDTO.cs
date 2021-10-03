@@ -33,6 +33,9 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("uuid", Required = Required.Always)]
         public string Uuid { get; set; }
 
+        [JsonProperty("plexId", Required = Required.Always)]
+        public long PlexId { get; set; }
+
         [JsonProperty("email", Required = Required.AllowNull)]
         public string Email { get; set; }
 

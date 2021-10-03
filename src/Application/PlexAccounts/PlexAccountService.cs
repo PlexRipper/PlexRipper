@@ -59,7 +59,7 @@ namespace PlexRipper.Application.PlexAccounts
 
             plexAccount.FromPlexApi(plexSignInResult.Value);
 
-            Log.Debug($"The PlexAccount with username {plexAccount.Password} is valid");
+            Log.Debug($"The PlexAccount with displayName {plexAccount.DisplayName} has been validated");
             return plexSignInResult;
         }
 
@@ -251,23 +251,6 @@ namespace PlexRipper.Application.PlexAccounts
             }
 
             return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
-        }
-
-        public async Task<Result<PlexAccount>> UpdatePlexAccountAsync(dynamic plexAccountDto)
-        {
-            var plexAccountDb = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountDto.Id));
-            if (plexAccountDb.IsFailed)
-            {
-                return plexAccountDb;
-            }
-
-            plexAccountDb.Value.IsEnabled = plexAccountDto.IsEnabled;
-            plexAccountDb.Value.IsMain = plexAccountDto.IsMain;
-            plexAccountDb.Value.DisplayName = plexAccountDto.DisplayName;
-            plexAccountDb.Value.Username = plexAccountDto.Username;
-            plexAccountDb.Value.Password = plexAccountDto.Password;
-
-            return await UpdatePlexAccountAsync(plexAccountDb.Value);
         }
 
         public async Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount)

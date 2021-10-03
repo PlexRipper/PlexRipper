@@ -8,6 +8,7 @@
 			<v-divider></v-divider>
 			<v-card-text class="mt-2">
 				<account-form ref="accountForm" :value="plexAccount" @input="formChanged" @isValid="isValid = $event" />
+				{{ { ...plexAccount, plexServers: [] } }}
 			</v-card-text>
 
 			<!-- Dialog Actions	-->
@@ -21,8 +22,6 @@
 					@click="confirmationDialogState = true"
 				/>
 
-				<!--	Account Verification Code Dialog	-->
-				<p-btn :width="130" :button-type="getVerificationCodeButtonType" @click="verificationCodeDialogState = true" />
 				<!-- Reset Form -->
 				<p-btn icon="mdi-restore" text-id="reset" :width="130" @click="reset" />
 				<v-spacer />
@@ -45,7 +44,7 @@
 				<!-- Save account -->
 				<p-btn
 					:width="130"
-					:disabled="!(isValidated === 'OK') || saving"
+					:disabled="!isAllowedToSave"
 					:text-id="newAccount ? 'create' : 'update'"
 					:button-type="getSaveButtonType"
 					@click="saveAccount"
@@ -100,7 +99,7 @@ export default class AccountDialog extends Vue {
 	@Ref('accountForm')
 	readonly accountForm!: AccountForm;
 
-	plexAccount: PlexAccountDTO = {} as PlexAccountDTO;
+	plexAccount: PlexAccountDTO = this.getDefaultAccount;
 
 	isSettingUpAccount: boolean = false;
 
@@ -114,9 +113,37 @@ export default class AccountDialog extends Vue {
 
 	confirmationDialogState: Boolean = false;
 	verificationCodeDialogState: Boolean = false;
+	inputHasChanged: Boolean = false;
 
 	get isFormValid(): boolean {
 		return this.isValid && this.isValidated === 'OK';
+	}
+
+	get getDefaultAccount(): PlexAccountDTO {
+		return {
+			id: 0,
+			isEnabled: true,
+			isMain: true,
+			username: '',
+			password: '',
+			displayName: '',
+			clientId: '',
+			verificationCode: '',
+			uuid: '',
+			hasPassword: false,
+			validatedAt: '',
+			joinedAt: '',
+			is2Fa: false,
+			title: '',
+			isValidated: false,
+			authenticationToken: '',
+			email: '',
+			plexServers: [],
+		};
+	}
+
+	get isAllowedToSave(): boolean {
+		return !this.saving && !(this.isValidated === 'OK') && this.inputHasChanged && this.isValid;
 	}
 
 	get getDeleteButtonType(): ButtonType {
@@ -151,6 +178,7 @@ export default class AccountDialog extends Vue {
 	}
 
 	formChanged({ prop, value }: { prop: string; value: string | boolean }) {
+		this.inputHasChanged = true;
 		this.plexAccount[prop] = value;
 	}
 
@@ -208,6 +236,7 @@ export default class AccountDialog extends Vue {
 	// region Button Commands
 
 	reset(): void {
+		this.plexAccount = this.getDefaultAccount;
 		this.accountForm?.reset();
 	}
 
@@ -254,7 +283,8 @@ export default class AccountDialog extends Vue {
 		this.confirmationDialogState = false;
 		this.saving = false;
 		this.verificationCodeDialogState = false;
-		this.plexAccount = {} as PlexAccountDTO;
+		this.inputHasChanged = false;
+		this.reset();
 		this.$emit('dialog-closed', refreshAccounts);
 	}
 
@@ -278,7 +308,6 @@ export default class AccountDialog extends Vue {
 			} else {
 				// Reset values
 				this.closeDialog();
-				this.reset();
 			}
 		});
 	}

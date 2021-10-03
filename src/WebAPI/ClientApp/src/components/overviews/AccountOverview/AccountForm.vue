@@ -1,5 +1,5 @@
 <template>
-	<v-form v-model="valid">
+	<v-form ref="accountForm" v-model="valid">
 		<!-- Is account enabled -->
 		<v-row no-gutters>
 			<v-col :cols="labelCol">
@@ -7,7 +7,7 @@
 			</v-col>
 			<v-col>
 				<v-checkbox
-					:value="value.isEnabled"
+					:input-value="value.isEnabled"
 					color="red"
 					class="ma-3 pt-0"
 					hide-details
@@ -22,7 +22,7 @@
 			</v-col>
 			<v-col>
 				<v-checkbox
-					:value="value.isMain"
+					:input-value="value.isMain"
 					color="red"
 					class="ma-3 pt-0"
 					hide-details
@@ -90,19 +90,22 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import { PlexAccountDTO } from '@dto/mainApi';
+import VForm from 'vuetify/lib/components/VForm/VForm.js';
 
 @Component<AccountForm>({})
 export default class AccountForm extends Vue {
-	showPassword: boolean = false;
-
-	valid: boolean = false;
-	isValidated: string = '';
 	labelCol: number = 3;
+	valid: boolean = true;
+	isValidated: string = '';
+	showPassword: boolean = false;
 
 	@Prop({ required: false, type: Object as () => PlexAccountDTO })
 	readonly value!: PlexAccountDTO | null;
+
+	@Ref('accountForm')
+	readonly accountForm!: VForm;
 
 	// region Validation Rules
 
@@ -123,6 +126,7 @@ export default class AccountForm extends Vue {
 			(v: string): boolean | string => (v && v.length >= 8) || 'Password must be at least 8 characters',
 		];
 	}
+
 	// endregion
 
 	inputChanged({ prop, value }: { prop: string; value: string | boolean }): void {
@@ -132,8 +136,9 @@ export default class AccountForm extends Vue {
 
 	reset(): void {
 		this.isValidated = '';
-		this.valid = false;
+		this.valid = true;
 		this.showPassword = false;
+		this.accountForm.resetValidation();
 	}
 }
 </script>

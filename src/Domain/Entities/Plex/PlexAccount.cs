@@ -77,12 +77,9 @@ namespace PlexRipper.Domain
         public string Title { get; set; }
 
         [Column(Order = 11)]
-        public DateTime JoinedAt { get; set; }
-
-        [Column(Order = 12)]
         public string Email { get; set; }
 
-        [Column(Order = 13)]
+        [Column(Order = 12)]
         public bool HasPassword { get; set; }
 
         /// <summary>

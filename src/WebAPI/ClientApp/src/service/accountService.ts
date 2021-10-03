@@ -88,8 +88,8 @@ export class AccountService extends BaseService {
 		);
 	}
 
-	public updatePlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
-		return updateAccount(account).pipe(
+	public updatePlexAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<ResultDTO<PlexAccountDTO | null>> {
+		return updateAccount(account, inspect).pipe(
 			tap((updatedAccount) => {
 				if (updatedAccount.isSuccess) {
 					return this.updateStore('accounts', updatedAccount.value);

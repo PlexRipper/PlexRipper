@@ -198,6 +198,7 @@ namespace PlexRipper.PlexApi.Services
                 mapResult.Id = plexAccount.Id;
                 mapResult.ClientId = plexAccount.ClientId;
                 mapResult.DisplayName = plexAccount.DisplayName;
+                mapResult.Username = plexAccount.Username;
                 mapResult.Password = plexAccount.Password;
                 mapResult.IsEnabled = plexAccount.IsEnabled;
                 mapResult.IsMain = plexAccount.IsMain;

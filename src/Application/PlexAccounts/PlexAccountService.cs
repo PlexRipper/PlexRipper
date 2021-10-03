@@ -251,7 +251,7 @@ namespace PlexRipper.Application.PlexAccounts
             return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
         }
 
-        public async Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount)
+        public async Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount, bool inspectServers = false)
         {
             var result = await _mediator.Send(new UpdatePlexAccountCommand(plexAccount));
             if (result.IsFailed)
@@ -267,8 +267,8 @@ namespace PlexRipper.Application.PlexAccounts
                 return plexAccountDb;
             }
 
-            // Re-validate if the password changed
-            if (plexAccountDb.Value != null && plexAccountDb.Value.Password != plexAccount.Password)
+            // Re-validate if the credentials changed
+            if (inspectServers || plexAccountDb.Value.Username != plexAccount.Username || plexAccountDb.Value.Password != plexAccount.Password)
             {
                 await SetupAccountAsync(plexAccountDb.Value.Id);
                 return await GetPlexAccountAsync(plexAccountDb.Value.Id);

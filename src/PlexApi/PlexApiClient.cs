@@ -113,7 +113,7 @@ namespace PlexRipper.PlexApi
                 response.ErrorException = policyResult.FinalException;
             }
 
-            return GenerateResult(response);
+            return GenerateResult(response, action);
         }
 
         public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)
@@ -177,7 +177,7 @@ namespace PlexRipper.PlexApi
                 result = Result.Fail($"PlexApi Error: Error on request to {response.ResponseUri} ({response.StatusCode}) - {response.Content}");
 
                 // Plex sometimes gives some errors back
-                result = ParsePlexErrors(result, response.Content);
+                result = ParsePlexErrors(result.ToResult(), response.Content);
 
                 result.AddStatusCode((int)response.StatusCode);
                 if (response.ErrorException != null)
@@ -217,7 +217,7 @@ namespace PlexRipper.PlexApi
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return result.WithError(new Error("Failed to deserialize").WithMessage(jsonString));
             }

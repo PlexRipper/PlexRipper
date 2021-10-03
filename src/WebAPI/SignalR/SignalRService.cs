@@ -92,7 +92,7 @@ namespace PlexRipper.WebAPI.SignalR
             Task.Run(() => _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", downloadTaskDTO));
         }
 
-        public void SendServerInspectStatusProgress(InspectServerProgress progress)
+        public async Task SendServerInspectStatusProgress(InspectServerProgress progress)
         {
             if (_progressHub?.Clients?.All == null)
             {
@@ -100,7 +100,9 @@ namespace PlexRipper.WebAPI.SignalR
                 return;
             }
 
-            Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progress));
+            Log.Debug($"{nameof(InspectServerProgress)} => {progress}");
+
+            await _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progress);
         }
 
         /// <inheritdoc/>

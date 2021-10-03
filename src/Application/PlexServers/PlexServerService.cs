@@ -21,8 +21,6 @@ namespace PlexRipper.Application.PlexServers
 
         private readonly IPlexLibraryService _plexLibraryService;
 
-        private readonly ISchedulerService _schedulerService;
-
         private readonly ISignalRService _signalRService;
 
         private readonly IPlexApiService _plexServiceApi;
@@ -37,13 +35,11 @@ namespace PlexRipper.Application.PlexServers
             IPlexApiService plexServiceApi,
             IPlexAuthenticationService plexAuthenticationService,
             IPlexLibraryService plexLibraryService,
-            ISchedulerService schedulerService,
             ISignalRService signalRService)
         {
             _mapper = mapper;
             _mediator = mediator;
             _plexLibraryService = plexLibraryService;
-            _schedulerService = schedulerService;
             _signalRService = signalRService;
             _plexServiceApi = plexServiceApi;
             _plexAuthenticationService = plexAuthenticationService;
@@ -238,14 +234,15 @@ namespace PlexRipper.Application.PlexServers
             var tasks = plexServers.Select(async plexServer =>
             {
                 // Send server inspect status to front-end
-                void SendServerProgress(InspectServerProgress progress)
+                async Task SendServerProgress(InspectServerProgress progress)
                 {
                     progress.PlexServerId = plexServer.Id;
-                    _signalRService.SendServerInspectStatusProgress(progress);
+                    await _signalRService.SendServerInspectStatusProgress(progress);
                 }
 
                 // The call-back action from the httpClient
-                var action = new Action<PlexApiClientProgress>(progress => SendServerProgress(_mapper.Map<InspectServerProgress>(progress)));
+                var action = new Action<PlexApiClientProgress>(async progress =>
+                    await SendServerProgress(_mapper.Map<InspectServerProgress>(progress)));
 
                 // Start with simple status request
                 var serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false, action);
@@ -261,7 +258,7 @@ namespace PlexRipper.Application.PlexServers
                 {
                     var dnsFixMsg = $"Attempting to DNS fix the connection with server {plexServer.Name}";
                     Log.Information(dnsFixMsg);
-                    SendServerProgress(new InspectServerProgress
+                    await SendServerProgress(new InspectServerProgress
                     {
                         AttemptingApplyDNSFix = true,
                         Message = dnsFixMsg,
@@ -275,7 +272,7 @@ namespace PlexRipper.Application.PlexServers
                         // DNS fix worked
                         dnsFixMsg = $"Server DNS Fix worked on {plexServer.Name}, connection successful!";
                         Log.Information(dnsFixMsg);
-                        SendServerProgress(new InspectServerProgress
+                        await SendServerProgress(new InspectServerProgress
                         {
                             Message = dnsFixMsg,
                             Completed = true,
@@ -287,7 +284,7 @@ namespace PlexRipper.Application.PlexServers
                     // DNS fix did not work
                     dnsFixMsg = $"Server DNS Fix did not help with server {plexServer.Name} - {plexServer.ServerUrl}";
                     Log.Warning(dnsFixMsg);
-                    SendServerProgress(new InspectServerProgress
+                    await SendServerProgress(new InspectServerProgress
                     {
                         AttemptingApplyDNSFix = true,
                         Completed = true,

@@ -8,7 +8,6 @@
 			<v-divider></v-divider>
 			<v-card-text class="mt-2">
 				<account-form ref="accountForm" :value="plexAccount" @input="formChanged" @isValid="isValid = $event" />
-				{{ { ...plexAccount, plexServers: [] } }}
 			</v-card-text>
 
 			<!-- Dialog Actions	-->
@@ -34,7 +33,7 @@
 					:icon="validationIcon"
 					:loading="validateLoading"
 					:disabled="!isValid || validateLoading"
-					:color="isValid ? 'green' : 'red'"
+					:color="validationColor"
 					class="mr-4"
 					:text-id="!isValid ? 'validate' : ''"
 					:width="130"
@@ -147,6 +146,13 @@ export default class AccountDialog extends Vue {
 		return !this.saving && this.isValidated === 'OK' && this.isValid;
 	}
 
+	get hasCredentialsChanged(): boolean {
+		if (!this.newAccount) {
+			return this.account?.username !== this.plexAccount.username || this.account?.password !== this.plexAccount.password;
+		}
+		return false;
+	}
+
 	get getDeleteButtonType(): ButtonType {
 		return ButtonType.Delete;
 	}
@@ -173,6 +179,17 @@ export default class AccountDialog extends Vue {
 		}
 	}
 
+	get validationColor(): string {
+		switch (this.isValidated) {
+			case 'ERROR':
+				return 'red';
+			case 'OK':
+				return 'green';
+			default:
+				return 'white';
+		}
+	}
+
 	get getDisplayName(): string {
 		const title = this.$t(`components.account-dialog.${this.newAccount ? 'add-account-title' : 'edit-account-title'}`).toString();
 		return this.plexAccount?.displayName !== '' ? `${title}: ${this.plexAccount?.displayName}` : title;
@@ -193,12 +210,10 @@ export default class AccountDialog extends Vue {
 				Log.info('PlexAccount', this.plexAccount);
 				if (this.plexAccount.is2Fa) {
 					this.verificationCodeDialogState = true;
-				} else {
-					this.validateErrors = data.errors ?? [];
-					this.isValidated = 'ERROR';
 					return;
 				}
 				this.isValidated = 'OK';
+				this.validateLoading = false;
 			} else {
 				Log.error('Validating account failed:', data);
 			}
@@ -253,10 +268,14 @@ export default class AccountDialog extends Vue {
 				}
 			});
 		} else {
-			this.$subscribeTo(AccountService.updatePlexAccount(this.plexAccount), (data) => {
+			this.$subscribeTo(AccountService.updatePlexAccount(this.plexAccount, this.hasCredentialsChanged), (data) => {
 				if (data.isSuccess) {
 					this.plexAccount.plexServers = data.value?.plexServers ?? [];
-					this.isSettingUpAccount = true;
+					if (this.hasCredentialsChanged) {
+						this.isSettingUpAccount = true;
+					} else {
+						this.closeDialog();
+					}
 				} else {
 					Log.error('Result was invalid when saving an updated account', data);
 					this.saving = false;
@@ -279,6 +298,7 @@ export default class AccountDialog extends Vue {
 		this.saving = false;
 		this.verificationCodeDialogState = false;
 		this.inputHasChanged = false;
+		this.isValidated = '';
 		this.reset();
 		this.$emit('dialog-closed', refreshAccounts);
 	}

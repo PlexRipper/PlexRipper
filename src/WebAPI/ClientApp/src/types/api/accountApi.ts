@@ -31,9 +31,9 @@ export function createAccount(account: PlexAccountDTO): Observable<ResultDTO<Ple
 	return checkResponse<ResultDTO<PlexAccountDTO | null>>(result, logText, 'createAccount');
 }
 
-export function updateAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
+export function updateAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<ResultDTO<PlexAccountDTO | null>> {
 	preApiRequest(logText, 'updateAccount');
-	const result = Axios.put<ResultDTO<PlexAccountDTO>>(`${apiPath}/${account.id}`, account);
+	const result = Axios.put<ResultDTO<PlexAccountDTO>>(`${apiPath}/${account.id}?inspect=${inspect}`, account);
 	return checkResponse<ResultDTO<PlexAccountDTO | null>>(result, logText, 'updateAccount');
 }
 

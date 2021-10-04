@@ -7,13 +7,7 @@ namespace PlexRipper.Application.Common
 {
     public interface IPlexAccountService
     {
-        /// <summary>
-        /// Check if this account is valid by querying the Plex API.
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns>Are the account credentials valid.</returns>
-        Task<Result> ValidatePlexAccountAsync(string username, string password);
+        Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount);
 
         /// <summary>
         /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
@@ -23,7 +17,8 @@ namespace PlexRipper.Application.Common
         Task<Result<bool>> CheckIfUsernameIsAvailableAsync(string username);
 
         /// <summary>
-        /// Returns the <see cref="PlexAccount"/> with the corresponding <see cref="PlexAccount"/> and the accessible <see cref="PlexServer"/>s.
+        /// Returns the <see cref="PlexAccount"/> with the corresponding <see cref="PlexAccount"/>
+        /// and the accessible <see cref="PlexServer">PlexServers</see>.
         /// </summary>
         /// <param name="accountId">The Id to retrieve the <see cref="PlexAccount"/> by.</param>
         /// <returns>The account found.</returns>
@@ -45,9 +40,7 @@ namespace PlexRipper.Application.Common
         /// <returns></returns>
         Task<Result> DeletePlexAccountAsync(int plexAccountId);
 
-        Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount);
-
-        Task<Result<PlexAccount>> UpdatePlexAccountAsync(dynamic plexAccountDto);
+        Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount, bool inspectServers = false);
 
         /// <summary>
         /// Refreshes the <see cref="PlexServer"/> and <see cref="PlexLibrary"/> access of the <see cref="PlexAccount"/>.
@@ -55,5 +48,19 @@ namespace PlexRipper.Application.Common
         /// <param name="plexAccountId">Can be 0 to refresh all enabled PlexAccounts.</param>
         /// <returns>If successful.</returns>
         Task<Result> RefreshPlexAccount(int plexAccountId = 0);
+
+        /// <summary>
+        /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi.
+        /// It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
+        /// </summary>
+        /// <param name="plexAccountId">The is of <see cref="PlexAccount"/> to setup.</param>
+        /// <returns>The list of <see cref="PlexServer">PlexServers</see> which are accessible by this account.</returns>
+        Task<Result<List<PlexServer>>> SetupAccountAsync(int plexAccountId);
+
+        Task<Result<AuthPin>> Get2FAPin(string clientId);
+
+        Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
+
+        string GeneratePlexAccountClientId();
     }
 }

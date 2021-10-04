@@ -18,6 +18,7 @@ module.exports = {
 		'vue/no-v-html': 'off',
 		'no-use-before-define': 'off',
 		'no-extend-native': 'off',
+		'import/no-named-as-default': 'off',
 		'@intlify/vue-i18n/no-raw-text': [
 			'warn',
 			{

@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.PlexApi.Models
 {
@@ -7,13 +9,19 @@ namespace PlexRipper.PlexApi.Models
         [JsonPropertyName("active")]
         public bool Active { get; set; }
 
+        [JsonPropertyName("subscribedAt")]
+        public DateTime SubscribedAt { get; set; }
+
         [JsonPropertyName("status")]
         public string Status { get; set; }
+
+        [JsonPropertyName("paymentService")]
+        public object PaymentService { get; set; }
 
         [JsonPropertyName("plan")]
         public object Plan { get; set; }
 
         [JsonPropertyName("features")]
-        public object Features { get; set; }
+        public List<string> Features { get; set; }
     }
 }

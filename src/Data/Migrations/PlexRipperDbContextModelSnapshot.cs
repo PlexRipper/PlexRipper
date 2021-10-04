@@ -52,6 +52,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("DownloadStatus")
                         .IsRequired()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Key")
@@ -59,6 +61,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("MediaType")
                         .IsRequired()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("MetaData")
@@ -103,6 +107,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("LogLevel")
                         .IsRequired()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Message")
@@ -126,6 +132,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("DownloadStatus")
                         .IsRequired()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DownloadTaskId")
@@ -283,6 +291,9 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Level")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Message")
@@ -302,6 +313,9 @@ namespace PlexRipper.Data.Migrations
                     b.Property<string>("AuthenticationToken")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ClientId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("DisplayName")
                         .HasColumnType("TEXT");
 
@@ -319,9 +333,6 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<bool>("IsValidated")
                         .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
                         .HasColumnType("TEXT");
@@ -442,6 +453,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("Type")
                         .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")

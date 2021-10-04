@@ -40,7 +40,7 @@ namespace PlexRipper.Application.PlexAuthentication
                 }
 
                 Log.Information("Plex AuthToken has expired, refreshing Plex AuthToken now.");
-
+                // TODO Account for 2FA
                 return await _plexApiService.RefreshPlexAuthTokenAsync(plexAccount);
             }
 

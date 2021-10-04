@@ -1,6 +1,6 @@
 import Log from 'consola';
 import { Observable, of, combineLatest } from 'rxjs';
-import { createAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
+import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { BaseService, GlobalService, SettingsService } from '@service';
@@ -77,24 +77,30 @@ export class AccountService extends BaseService {
 		);
 	}
 
-	/**
-	 * Creates/Updates the PlexAccount and stores the new result in the store.
-	 * If id is 0 then it is assumed to be an account that should be created.
-	 * @param {PlexAccountDTO} account
-	 * @returns {Observable<ResultDTO<PlexAccountDTO | null>>}
-	 */
-	public createOrUpdateAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
-		return of(1).pipe(
-			tap(() => Log.debug(`${account.id === 0 ? 'Creating' : 'Updating'} account`, account)),
-			switchMap(() => {
-				return account.id === 0 ? createAccount(account) : updateAccount(account);
-			}),
-			tap((account) => {
-				if (account.isSuccess) {
-					this.updateStore('accounts', account.value);
+	public createPlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
+		return createAccount(account).pipe(
+			tap((createdAccount) => {
+				if (createdAccount.isSuccess) {
+					return this.updateStore('accounts', createdAccount.value);
 				}
+				Log.error(`Failed to create account ${account.displayName}`, createdAccount);
 			}),
 		);
+	}
+
+	public updatePlexAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<ResultDTO<PlexAccountDTO | null>> {
+		return updateAccount(account, inspect).pipe(
+			tap((updatedAccount) => {
+				if (updatedAccount.isSuccess) {
+					return this.updateStore('accounts', updatedAccount.value);
+				}
+				Log.error(`Failed to update account ${account.displayName}`, updatedAccount);
+			}),
+		);
+	}
+
+	public deleteAccount(accountId: number) {
+		return deleteAccount(accountId).pipe(switchMap(() => this.fetchAccounts()));
 	}
 }
 

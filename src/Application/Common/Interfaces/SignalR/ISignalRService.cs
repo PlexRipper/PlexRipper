@@ -22,7 +22,7 @@ namespace PlexRipper.Application.Common
 
         Task SendNotification(Notification notification);
 
-        void SendServerInspectStatusProgress(InspectServerProgress progress);
+        Task SendServerInspectStatusProgress(InspectServerProgress progress);
 
         void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress);
     }

@@ -31,6 +31,14 @@ namespace PlexRipper.Domain
             IsEnabled = true;
         }
 
+        public PlexAccount(string username, string password, string clientId, string verificationCode = "")
+        {
+            Username = username;
+            Password = password;
+            ClientId = clientId;
+            VerificationCode = verificationCode;
+        }
+
         #endregion
 
         #region Properties
@@ -59,13 +67,19 @@ namespace PlexRipper.Domain
         [Column(Order = 8)]
         public string Uuid { get; set; }
 
-        public string Email { get; set; }
+        /// <summary>
+        /// The unique client identifier used for all PlexApi communication.
+        /// </summary>
+        [Column(Order = 9)]
+        public string ClientId { get; set; }
 
-        public DateTime JoinedAt { get; set; }
-
+        [Column(Order = 10)]
         public string Title { get; set; }
 
-        // public Uri Thumb { get; set; }
+        [Column(Order = 11)]
+        public string Email { get; set; }
+
+        [Column(Order = 12)]
         public bool HasPassword { get; set; }
 
         /// <summary>
@@ -93,39 +107,19 @@ namespace PlexRipper.Domain
         [NotMapped]
         public List<PlexServer> PlexServers => PlexAccountServers.Select(x => x.PlexServer).ToList();
 
-        #endregion
-
-        #endregion
-
-        #region Methods
+        /// <summary>
+        /// Gets or sets whether this <see cref="PlexAccount"/> is 2FA protected.
+        /// </summary>
+        [NotMapped]
+        public bool Is2Fa { get; set; }
 
         /// <summary>
-        ///     This merges the response of the PlexApi into this <see cref="PlexAccount" />.
+        /// The verification code given by the user if 2FA is enabled.
         /// </summary>
-        /// <param name="plexAccount">The <see cref="PlexAccount" /> from the PlexApi.</param>
-        public void FromPlexApi(PlexAccount plexAccount)
-        {
-            if (plexAccount == null)
-            {
-                Log.Warning("The plexAccount was null");
-                return;
-            }
+        [NotMapped]
+        public string VerificationCode { get; set; }
 
-            if (plexAccount.AuthenticationToken == string.Empty)
-            {
-                Log.Warning("The plexAccount has an invalid AuthenticationToken and was most likely not valid");
-                return;
-            }
-
-            PlexId = plexAccount.PlexId;
-            Uuid = plexAccount.Uuid;
-            JoinedAt = plexAccount.JoinedAt;
-            Title = plexAccount.Title;
-            HasPassword = plexAccount.HasPassword;
-            AuthenticationToken = plexAccount.AuthenticationToken;
-            IsValidated = true;
-            ValidatedAt = DateTime.Now;
-        }
+        #endregion
 
         #endregion
     }

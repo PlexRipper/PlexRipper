@@ -30,12 +30,13 @@ Any feedback, good or bad, is very much appreciated! You can create an [Github i
 ## Current Features
 
 - Runs in a Docker container and can be deployed on any type of platform that can host a Docker container!
+- A beautiful GUI which has a Light and Dark-mode theme!
 
 - Add multiple Plex accounts to easily download from the accessible Plex servers!
 
-- A beautiful GUI which has a Light and Dark-mode theme!
-
 - Multi-threaded downloading and PlexRipper moves your finished downloads straight to your own Plex media collection!
+  
+- Multi-language support, currently with English and French
 
 - Will still work even if Plex.tv is down by connecting directly to the media servers!
 
@@ -44,8 +45,9 @@ Any feedback, good or bad, is very much appreciated! You can create an [Github i
 ## Upcoming features
 
 - Download music and photo's, currently only movies and tv shows!
-
 - Search through and filter media available for downloading!
+- Sonarr and Radarr integration
+- Download Plex Collections with custom banner and thumbnail
 
 - **PlexRipper Authentication, right now there is ZERO security so make sure to NOT expose the Web UI to the public internet! e.g. forwarding a domain to the container etc**
 
@@ -122,6 +124,8 @@ Make PlexRipper easier to use for everyone by translating it to your native lang
 ## Acknowledgements
 
 An absolute massive thank you to the following people!
+
+- [Starnakin](https://github.com/starnakin) for his awesome work on translating PlexRipper to French!
 
 - [Ninthwalker](https://github.com/ninthwalker) for his great work on [Saverr](https://github.com/ninthwalker/saverr), which showed me the method of downloading media from Plex!
 

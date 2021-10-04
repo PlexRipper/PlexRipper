@@ -202,6 +202,7 @@ export default class Setup extends Vue {
 
 	finishSetup(): void {
 		SettingsService.updateSetting('firstTimeSetup', false);
+		// TODO Refresh the page when we go to the home page to make sure we get all new data.
 		this.$router.push('/');
 	}
 

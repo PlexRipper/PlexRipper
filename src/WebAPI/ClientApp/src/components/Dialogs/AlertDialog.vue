@@ -5,7 +5,7 @@
 
 			<v-card-text class="i18n-formatting">
 				<p>{{ alert.text }}</p>
-				<pre>{{ errors }}</pre>
+				<pre style="white-space: break-spaces">{{ errors }}</pre>
 			</v-card-text>
 
 			<!--	Close action	-->

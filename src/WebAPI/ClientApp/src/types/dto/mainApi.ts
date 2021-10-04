@@ -204,13 +204,19 @@ export interface PlexAccountDTO {
   /** @format date-time */
   validatedAt: string;
   uuid: string;
+
+  /** @format int64 */
+  plexId: number;
   email: string | null;
 
   /** @format date-time */
   joinedAt: string;
   title: string;
   hasPassword: boolean;
-  authToken: string;
+  authenticationToken: string;
+  clientId: string;
+  verificationCode: string;
+  is2Fa: boolean;
   plexServers: PlexServerDTO[];
 }
 
@@ -410,30 +416,47 @@ export interface PlexServerStatusDTO {
 
 export type ResultDTOOfPlexAccountDTO = ResultDTO & { value: PlexAccountDTO };
 
-export interface UpdatePlexAccountDTO {
+export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
+
+export type ResultDTOOfString = ResultDTO & { value: string };
+
+export type ResultDTOOfAuthPin = ResultDTO & { value: AuthPin };
+
+export interface AuthPin {
+  errors: PlexError[];
+
   /** @format int32 */
   id: number;
-  displayName: string;
-  username: string;
-  password: string;
-  isEnabled: boolean;
-  isMain: boolean;
+  code: string;
+  trusted: boolean;
+  clientIdentifier: string;
+  location: AuthPinLocation;
+
+  /** @format int32 */
+  expiresIn: number;
+
+  /** @format date-time */
+  createdAt: string;
+
+  /** @format date-time */
+  expiresAt: string;
+  authToken: string;
+  newRegistration: string;
 }
 
-export interface CreatePlexAccountDTO {
-  displayName: string;
-  username: string;
-  password: string;
-  isEnabled: boolean;
-  isMain: boolean;
-}
+export type PlexError = Error & { code: number; status: number };
 
-export interface CredentialsDTO {
-  username?: string;
-  password?: string;
+export interface AuthPinLocation {
+  code: string;
+  europeanUnionMember: boolean;
+  continentCode: string;
+  country: string;
+  city: string;
+  timeZone: string;
+  postalCode: string;
+  subdivisions: string;
+  coordinates: string;
 }
-
-export type ResultDTOOfBoolean = ResultDTO & { value: boolean };
 
 export type ResultDTOOfListOfPlexLibraryDTO = ResultDTO & { value: PlexLibraryDTO[] };
 
@@ -462,12 +485,6 @@ export type ResultDTOOfPlexMediaDTO = ResultDTO & { value: PlexMediaDTO };
 export type ResultDTOOfListOfPlexServerDTO = ResultDTO & { value: PlexServerDTO[] };
 
 export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStatusDTO };
-
-export interface InspectServerDTO {
-  /** @format int32 */
-  plexAccountId: number;
-  plexServerIds: number[];
-}
 
 export type ResultDTOOfSettingsModelDTO = ResultDTO & { value: SettingsModelDTO };
 

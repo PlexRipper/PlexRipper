@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentResults;
 using Quartz;
 
@@ -10,6 +11,8 @@ namespace PlexRipper.Application
 
         private readonly JobKey _syncServerJobKey = new("SyncServer", "SyncGroup");
 
+        private readonly JobKey _setupAccountJobKey = new("SetupAccountJobKey", "SyncGroup");
+
         private readonly TriggerKey _syncServerTriggerKey = new("StartNow", "TriggerGroup");
 
         public SchedulerService(IScheduler scheduler)
@@ -19,7 +22,7 @@ namespace PlexRipper.Application
 
         private async Task<Result> SetupSyncPlexServersJob()
         {
-            IJobDetail job = JobBuilder.Create<SyncServerJob>()
+            var job = JobBuilder.Create<SyncServerJob>()
                 .WithIdentity(_syncServerJobKey)
                 .Build();
 
@@ -34,6 +37,18 @@ namespace PlexRipper.Application
             await _scheduler.ScheduleJob(job, trigger);
 
             return Result.Ok();
+        }
+
+        public async Task InspectPlexServersAsyncJob(int plexAccountId)
+        {
+            var job = JobBuilder.Create<InspectPlexServersJob>()
+                .WithIdentity(_setupAccountJobKey)
+                .UsingJobData("plexAccountId", plexAccountId)
+                .Build();
+
+            var trigger = TriggerBuilder.Create().StartNow().Build();
+
+            await _scheduler.ScheduleJob(job, trigger);
         }
 
         public async Task<Result> TriggerSyncPlexServersJob()

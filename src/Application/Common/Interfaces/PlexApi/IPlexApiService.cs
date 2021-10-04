@@ -13,10 +13,8 @@ namespace PlexRipper.Application.Common
         /// <summary>
         ///     Returns the <see cref="PlexAccount" /> after PlexApi validation.
         /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
         /// <returns></returns>
-        Task<Result<PlexAccount>> PlexSignInAsync(string username, string password);
+        Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount);
 
         Task<string> RefreshPlexAuthTokenAsync(PlexAccount account);
 
@@ -56,5 +54,9 @@ namespace PlexRipper.Application.Common
 
         Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(string serverAuthToken, string plexFullHost,
             string plexLibraryKey);
+
+        Task<Result<AuthPin>> Get2FAPin(string clientId);
+
+        Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
     }
 }

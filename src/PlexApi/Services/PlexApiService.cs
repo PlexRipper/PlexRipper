@@ -189,19 +189,28 @@ namespace PlexRipper.PlexApi.Services
             return new List<PlexServer>();
         }
 
-        public async Task<Result<PlexAccount>> PlexSignInAsync(string username, string password)
+        public async Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount)
         {
-            var result = await _plexApi.PlexSignInAsync(username, password);
+            var result = await _plexApi.PlexSignInAsync(plexAccount);
             if (result.IsSuccess)
             {
-                var mapResult = _mapper.Map<PlexAccount>(result.Value.User);
+                var mapResult = _mapper.Map<PlexAccount>(result.Value);
+                mapResult.Id = plexAccount.Id;
+                mapResult.ClientId = plexAccount.ClientId;
+                mapResult.DisplayName = plexAccount.DisplayName;
+                mapResult.Username = plexAccount.Username;
+                mapResult.Password = plexAccount.Password;
+                mapResult.IsEnabled = plexAccount.IsEnabled;
+                mapResult.IsMain = plexAccount.IsMain;
                 mapResult.IsValidated = true;
                 mapResult.ValidatedAt = DateTime.Now;
-                Log.Information($"Successfully retrieved the PlexAccount data for user {username} from the PlexApi");
+                mapResult.VerificationCode = "";
+
+                Log.Information($"Successfully retrieved the PlexAccount data for user {plexAccount.DisplayName} from the PlexApi");
                 return Result.Ok(mapResult);
             }
 
-            return Result.Fail("The result from the PlexSignIn was null").LogWarning();
+            return result.ToResult();
         }
 
         public Task<string> RefreshPlexAuthTokenAsync(PlexAccount account)
@@ -209,9 +218,19 @@ namespace PlexRipper.PlexApi.Services
             return _plexApi.RefreshPlexAuthTokenAsync(account);
         }
 
-        public async Task<Result<byte[]>> GetPlexMediaImageAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
+        public Task<Result<byte[]>> GetPlexMediaImageAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
         {
-            return await _plexApi.GetPlexMediaImageAsync(thumbUrl, authToken, width, height);
+            return _plexApi.GetPlexMediaImageAsync(thumbUrl, authToken, width, height);
+        }
+
+        public Task<Result<AuthPin>> Get2FAPin(string clientId)
+        {
+            return _plexApi.Get2FAPin(clientId);
+        }
+
+        public Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId)
+        {
+            return _plexApi.Check2FAPin(pinId, clientId);
         }
 
         #endregion

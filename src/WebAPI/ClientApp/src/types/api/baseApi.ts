@@ -14,7 +14,7 @@ export function checkResponse<T = ResultDTO>(response: AxiosObservable<T>, logTe
 	// Pipe response
 	return response.pipe(
 		tap((res) => {
-			if (res?.status && res?.status !== 200) {
+			if (res && res.status && !res.status.toString().startsWith('2')) {
 				const response = res.data;
 				switch (res.status) {
 					case 400:

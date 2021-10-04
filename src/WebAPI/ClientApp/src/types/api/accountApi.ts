@@ -1,4 +1,4 @@
-import { PlexAccountDTO } from '@dto/mainApi';
+import { AuthPin, PlexAccountDTO } from '@dto/mainApi';
 import { Observable } from 'rxjs';
 import Axios from 'axios-observable';
 import ResultDTO from '@dto/ResultDTO';
@@ -19,10 +19,10 @@ export function getAllEnabledAccounts(): Observable<ResultDTO<PlexAccountDTO[]>>
 	return checkResponse<ResultDTO<PlexAccountDTO[]>>(result, logText, 'getAllEnabledAccounts');
 }
 
-export function validateAccount(account: PlexAccountDTO): Observable<ResultDTO<boolean>> {
+export function validateAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO>> {
 	preApiRequest(logText, 'validateAccount');
-	const result = Axios.post<ResultDTO<boolean>>(`${apiPath}/validate`, account);
-	return checkResponse<ResultDTO<boolean>>(result, logText, 'validateAccount');
+	const result = Axios.post<ResultDTO<PlexAccountDTO>>(`${apiPath}/validate`, account);
+	return checkResponse<ResultDTO<PlexAccountDTO>>(result, logText, 'validateAccount');
 }
 
 export function createAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
@@ -31,9 +31,9 @@ export function createAccount(account: PlexAccountDTO): Observable<ResultDTO<Ple
 	return checkResponse<ResultDTO<PlexAccountDTO | null>>(result, logText, 'createAccount');
 }
 
-export function updateAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
+export function updateAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<ResultDTO<PlexAccountDTO | null>> {
 	preApiRequest(logText, 'updateAccount');
-	const result = Axios.put<ResultDTO<PlexAccountDTO>>(`${apiPath}/${account.id}`, account);
+	const result = Axios.put<ResultDTO<PlexAccountDTO>>(`${apiPath}/${account.id}?inspect=${inspect}`, account);
 	return checkResponse<ResultDTO<PlexAccountDTO | null>>(result, logText, 'updateAccount');
 }
 
@@ -53,4 +53,27 @@ export function refreshAccount(accountId: Number): Observable<ResultDTO> {
 	preApiRequest(logText, 'refreshAccount');
 	const result = Axios.get<ResultDTO>(`${apiPath}/refresh/${accountId}`);
 	return checkResponse<ResultDTO>(result, logText, 'refreshAccount');
+}
+
+export function GetAndCheck2FaPin(clientId: String, authPinId: number = 0): Observable<ResultDTO<AuthPin>> {
+	preApiRequest(logText, 'getAuthPin');
+	const result = Axios.get<ResultDTO<AuthPin>>(`${apiPath}/authpin`, {
+		params: {
+			clientId,
+			authPinId,
+		},
+	});
+	return checkResponse<ResultDTO<AuthPin>>(result, logText, 'getAuthPin');
+}
+
+export function checkAuthPin(clientId: String): Observable<ResultDTO<AuthPin>> {
+	preApiRequest(logText, 'checkAuthPin');
+	const result = Axios.get<ResultDTO<AuthPin>>(`${apiPath}/authpin/${clientId}/check`);
+	return checkResponse<ResultDTO<AuthPin>>(result, logText, 'checkAuthPin');
+}
+
+export function generateClientId(): Observable<ResultDTO<string>> {
+	preApiRequest(logText, 'generateClientId');
+	const result = Axios.get<ResultDTO<string>>(`${apiPath}/clientid`);
+	return checkResponse<ResultDTO<string>>(result, logText, 'generateClientId');
 }

@@ -74,7 +74,7 @@ export class GlobalService extends Service.BaseService {
 	}
 
 	public resetStore(): void {
-		this.setState(this._defaultStore);
+		ObservableStore.resetState(this._defaultStore);
 	}
 
 	public setConfigReady(config: RuntimeConfig): void {

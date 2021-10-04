@@ -5,4 +5,5 @@ export default interface IText {
 	id: string;
 	title: string;
 	text: string;
+	warning?: string;
 }

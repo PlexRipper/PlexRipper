@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using MediatR;
@@ -22,8 +21,6 @@ namespace PlexRipper.Application.PlexServers
 
         private readonly IPlexLibraryService _plexLibraryService;
 
-        private readonly ISchedulerService _schedulerService;
-
         private readonly ISignalRService _signalRService;
 
         private readonly IPlexApiService _plexServiceApi;
@@ -38,24 +35,17 @@ namespace PlexRipper.Application.PlexServers
             IPlexApiService plexServiceApi,
             IPlexAuthenticationService plexAuthenticationService,
             IPlexLibraryService plexLibraryService,
-            ISchedulerService schedulerService,
             ISignalRService signalRService)
         {
             _mapper = mapper;
             _mediator = mediator;
             _plexLibraryService = plexLibraryService;
-            _schedulerService = schedulerService;
             _signalRService = signalRService;
             _plexServiceApi = plexServiceApi;
             _plexAuthenticationService = plexAuthenticationService;
         }
 
-        /// <summary>
-        /// Retrieves the latest <see cref="PlexServer"/> data, and the corresponding <see cref="PlexLibrary"/>,
-        /// from the PlexAPI and stores it in the Database.
-        /// </summary>
-        /// <param name="plexAccount">The <see cref="PlexAccount"/> used to retrieve the accessible <see cref="PlexServer">PlexServers</see>.</param>
-        /// <returns>Is successful.</returns>
+        /// <inheritdoc/>
         public async Task<Result<List<PlexServer>>> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount)
         {
             if (plexAccount == null)
@@ -227,36 +217,32 @@ namespace PlexRipper.Application.PlexServers
         /// When successfully connected, the <see cref="PlexLibrary">PlexLibraries</see> are stored in the database.
         /// </summary>
         /// <param name="plexAccountId"></param>
-        /// <param name="plexServerIds"></param>
         /// <returns></returns>
-        public async Task<Result> InspectPlexServers(int plexAccountId, List<int> plexServerIds)
+        public async Task<Result> InspectPlexServers(int plexAccountId)
         {
-            var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
+            var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId, true));
             if (plexAccountResult.IsFailed)
             {
                 return plexAccountResult.WithError($"Could not retrieve any PlexAccount from database with id {plexAccountId}.").LogError();
             }
 
-            var plexServersResult = await _mediator.Send(new GetPlexServersByIdsQuery(plexServerIds));
-            if (plexServersResult.IsFailed)
-            {
-                return plexServersResult.WithError("Could not retrieve any PlexServers from database to inspect.").LogError();
-            }
+            var plexServers = plexAccountResult.Value.PlexServers;
 
-            var plexServers = plexServersResult.Value;
+            Log.Information($"Inspecting {plexServers.Count} PlexServers for PlexAccount: {plexAccountResult.Value.DisplayName}");
 
             // Create inspect tasks for all plexServers
             var tasks = plexServers.Select(async plexServer =>
             {
                 // Send server inspect status to front-end
-                void SendServerProgress(InspectServerProgress progress)
+                async Task SendServerProgress(InspectServerProgress progress)
                 {
                     progress.PlexServerId = plexServer.Id;
-                    _signalRService.SendServerInspectStatusProgress(progress);
+                    await _signalRService.SendServerInspectStatusProgress(progress);
                 }
 
                 // The call-back action from the httpClient
-                var action = new Action<PlexApiClientProgress>(progress => SendServerProgress(_mapper.Map<InspectServerProgress>(progress)));
+                var action = new Action<PlexApiClientProgress>(async progress =>
+                    await SendServerProgress(_mapper.Map<InspectServerProgress>(progress)));
 
                 // Start with simple status request
                 var serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false, action);
@@ -272,7 +258,7 @@ namespace PlexRipper.Application.PlexServers
                 {
                     var dnsFixMsg = $"Attempting to DNS fix the connection with server {plexServer.Name}";
                     Log.Information(dnsFixMsg);
-                    SendServerProgress(new InspectServerProgress
+                    await SendServerProgress(new InspectServerProgress
                     {
                         AttemptingApplyDNSFix = true,
                         Message = dnsFixMsg,
@@ -286,7 +272,7 @@ namespace PlexRipper.Application.PlexServers
                         // DNS fix worked
                         dnsFixMsg = $"Server DNS Fix worked on {plexServer.Name}, connection successful!";
                         Log.Information(dnsFixMsg);
-                        SendServerProgress(new InspectServerProgress
+                        await SendServerProgress(new InspectServerProgress
                         {
                             Message = dnsFixMsg,
                             Completed = true,
@@ -298,7 +284,7 @@ namespace PlexRipper.Application.PlexServers
                     // DNS fix did not work
                     dnsFixMsg = $"Server DNS Fix did not help with server {plexServer.Name} - {plexServer.ServerUrl}";
                     Log.Warning(dnsFixMsg);
-                    SendServerProgress(new InspectServerProgress
+                    await SendServerProgress(new InspectServerProgress
                     {
                         AttemptingApplyDNSFix = true,
                         Completed = true,
@@ -314,7 +300,7 @@ namespace PlexRipper.Application.PlexServers
 
             await Task.WhenAll(tasks);
 
-            return await _mediator.Send(new UpdatePlexServersCommand(plexServersResult.Value));
+            return await _mediator.Send(new UpdatePlexServersCommand(plexServers));
         }
 
         /// <summary>

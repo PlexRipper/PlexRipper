@@ -33,11 +33,11 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("uuid", Required = Required.Always)]
         public string Uuid { get; set; }
 
+        [JsonProperty("plexId", Required = Required.Always)]
+        public long PlexId { get; set; }
+
         [JsonProperty("email", Required = Required.AllowNull)]
         public string Email { get; set; }
-
-        [JsonProperty("joined_at", Required = Required.Always)]
-        public DateTime JoinedAt { get; set; }
 
         [JsonProperty("title", Required = Required.Always)]
         public string Title { get; set; }
@@ -45,8 +45,17 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("hasPassword", Required = Required.Always)]
         public bool HasPassword { get; set; }
 
-        [JsonProperty("authToken", Required = Required.Always)]
-        public string AuthToken { get; set; }
+        [JsonProperty("authenticationToken", Required = Required.Always)]
+        public string AuthenticationToken { get; set; }
+
+        [JsonProperty("clientId", Required = Required.Always)]
+        public string ClientId { get; set; }
+
+        [JsonProperty("clientId", Required = Required.Always)]
+        public string VerificationCode { get; set; }
+
+        [JsonProperty("is2Fa", Required = Required.Always)]
+        public bool Is2Fa { get; set; }
 
         [JsonProperty("plexServers", Required = Required.Always)]
         public List<PlexServerDTO> PlexServers { get; set; }

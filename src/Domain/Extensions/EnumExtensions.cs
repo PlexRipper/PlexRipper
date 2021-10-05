@@ -146,7 +146,7 @@ namespace PlexRipper.Domain
 
             PlexMediaType DefaultException()
             {
-                Log.Error($"Failed to convert string \"{value}\" to type {nameof(FolderType)}");
+                Log.Error($"Failed to convert string \"{value}\" to type {nameof(PlexMediaType)}");
                 throw new ArgumentOutOfRangeException(nameof(value), value, null);
             }
         }
@@ -359,6 +359,68 @@ namespace PlexRipper.Domain
             string DefaultException()
             {
                 Log.Error($"Failed to convert \"{value}\" to string of type {nameof(FileSystemEntityType)}");
+                throw new ArgumentOutOfRangeException(nameof(value), value, null);
+            }
+        }
+
+        #endregion
+
+        #region DownloadTaskType
+
+        /// <summary>
+        /// Converts string to <see cref="DownloadTaskType"/> by a fast method.
+        /// </summary>
+        /// <param name="value">The string representation of <see cref="DownloadTaskType"/>.</param>
+        /// <returns>The converted enum of type <see cref="DownloadTaskType"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Throws exception if value is not found.</exception>
+        public static DownloadTaskType ToDownloadTaskType(this string value)
+        {
+            return value switch
+            {
+                "None" => DownloadTaskType.None,
+                "Movie" => DownloadTaskType.Movie,
+                "MovieData" => DownloadTaskType.MovieData,
+                "MoviePart" => DownloadTaskType.MoviePart,
+                "TvShow" => DownloadTaskType.TvShow,
+                "Season" => DownloadTaskType.Season,
+                "Episode" => DownloadTaskType.Episode,
+                "EpisodeData" => DownloadTaskType.EpisodeData,
+                "EpisodePart" => DownloadTaskType.EpisodePart,
+                _ => DefaultException(),
+            };
+
+            DownloadTaskType DefaultException()
+            {
+                Log.Error($"Failed to convert string \"{value}\" to type {nameof(DownloadTaskType)}");
+                throw new ArgumentOutOfRangeException(nameof(value), value, null);
+            }
+        }
+
+        /// <summary>
+        /// Converts <see cref="DownloadTaskType"/> to string by a fast method.
+        /// </summary>
+        /// <param name="value">The enum of type <see cref="DownloadTaskType"/>.</param>
+        /// <returns>The string value of the <see cref="DownloadTaskType"/> property.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Throws exception if value is not found.</exception>
+        public static string ToDownloadTaskString(this DownloadTaskType value)
+        {
+            return value switch
+            {
+                DownloadTaskType.None => "None",
+                DownloadTaskType.Movie => "Movie",
+                DownloadTaskType.MovieData => "MovieData",
+                DownloadTaskType.MoviePart => "MoviePart",
+                DownloadTaskType.TvShow => "TvShow",
+                DownloadTaskType.Season => "Season",
+                DownloadTaskType.Episode => "Episode",
+                DownloadTaskType.EpisodeData => "EpisodeData",
+                DownloadTaskType.EpisodePart => "EpisodePart",
+                _ => DefaultException(),
+            };
+
+            string DefaultException()
+            {
+                Log.Error($"Failed to convert \"{value}\" to string of type {nameof(DownloadTaskType)}");
                 throw new ArgumentOutOfRangeException(nameof(value), value, null);
             }
         }

@@ -26,6 +26,8 @@ namespace PlexRipper.Domain
 
         public List<PlexMediaData> MediaData { get; set; }
 
+        public bool HasMultipleQualities => MediaData.Count > 1;
+
         #endregion
     }
 }

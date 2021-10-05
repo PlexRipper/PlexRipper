@@ -33,5 +33,7 @@ namespace PlexRipper.Application.Common
         /// <param name="downloadTasks">The <see cref="DownloadTask">DownloadTasks</see> to regenerate.</param>
         /// <returns>A list of newly generated <see cref="DownloadTask">DownloadTasks</see></returns>
         Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<DownloadTask> downloadTasks);
+
+        Result<List<DownloadTask>> CreateDownloadTask(List<PlexMovie> movies);
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentResultExtensions.lib;
@@ -291,7 +293,6 @@ namespace PlexRipper.Application
                 downloadTasksResult.Value[0].Priority = downloadTask.Priority;
                 downloadTasksResult.Value[0].DownloadWorkerTasks.ForEach(x => x.DownloadTaskId = downloadTask.Id);
 
-
                 freshDownloadTasks.AddRange(downloadTasksResult.Value);
             }
 
@@ -300,9 +301,74 @@ namespace PlexRipper.Application
             {
                 Log.Error("Failed to generate");
             }
+
             return Result.Ok(freshDownloadTasks);
         }
 
-        #endregion
+        public Result<List<DownloadTask>> CreateDownloadTask(List<PlexMovie> movies)
+        {
+            if (!movies.Any())
+            {
+                return ResultExtensions.IsEmpty(nameof(movies));
+            }
+
+            static DownloadTask CreateBaseTask(PlexMovie plexMovie)
+            {
+                return new()
+                {
+                    MediaType = PlexMediaType.Movie,
+                    DownloadTaskType = DownloadTaskType.Movie,
+                    DownloadStatus = DownloadStatus.Initialized,
+                    Created = DateTime.UtcNow,
+                    Title = plexMovie.Title,
+                    PlexLibrary = plexMovie.PlexLibrary,
+                    PlexLibraryId = plexMovie.PlexLibraryId,
+                    PlexServer = plexMovie.PlexServer,
+                    PlexServerId = plexMovie.PlexServerId,
+                    Key = plexMovie.Key,
+                    Children = new List<DownloadTask>(),
+                    MediaId = plexMovie.Id,
+                    DataTotal = 0,
+                    MetaData = new DownloadTaskMetaData
+                    {
+                        MediaData = plexMovie.MovieData,
+                        ReleaseYear = plexMovie.Year,
+                    },
+                };
+            }
+
+            var downloadTasks = new List<DownloadTask>();
+            foreach (var plexMovie in movies)
+            {
+                var movieDownloadTask = CreateBaseTask(plexMovie);
+
+                // TODO Add quality chooser, will download everything now
+                foreach (var movieData in plexMovie.MovieData)
+                {
+                    var movieDataDownloadTask = CreateBaseTask(plexMovie);
+                    movieDataDownloadTask.DownloadTaskType = DownloadTaskType.MovieData;
+
+                    // create a downloadTask for each multi-part movie.
+                    foreach (var part in movieData.Parts)
+                    {
+                        var moviePartDownloadTask = CreateBaseTask(plexMovie);
+                        moviePartDownloadTask.DownloadTaskType = DownloadTaskType.MoviePart;
+                        moviePartDownloadTask.FileName = Path.GetFileName(part.File);
+                        moviePartDownloadTask.DataTotal = part.Size;
+                        movieDataDownloadTask.Children.Add(moviePartDownloadTask);
+                    }
+
+                    movieDataDownloadTask.DataTotal = movieDataDownloadTask.Children.Sum(x => x.DataTotal);
+                    movieDownloadTask.Children.Add(movieDataDownloadTask);
+                }
+
+                movieDownloadTask.DataTotal = movieDownloadTask.Children.Sum(x => x.DataTotal);
+                downloadTasks.Add(movieDownloadTask);
+            }
+
+            return Result.Ok(downloadTasks);
+        }
     }
+
+    #endregion
 }

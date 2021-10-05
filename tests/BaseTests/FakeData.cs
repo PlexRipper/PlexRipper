@@ -10,22 +10,13 @@ namespace PlexRipper.BaseTests
 {
     public class FakeData : IFakeData
     {
-        private readonly IMockServer _mockServer;
-
-        private readonly IPathSystem _pathSystem;
-
         private static readonly Random _random = new();
 
-        public FakeData(IMockServer mockServer, IPathSystem pathSystem)
-        {
-            _mockServer = mockServer;
-            _pathSystem = pathSystem;
-        }
+        public FakeData() { }
 
-        public Faker<PlexServer> GetPlexServer(bool includeLibraries = false)
+        public Faker<PlexServer> GetPlexServer(bool includeLibraries = false, string serverUrl = "")
         {
-            var _server = _mockServer.GetPlexMockServer();
-            var uri = new Uri(_server.Urls[0]);
+            var uri = new Uri(serverUrl);
 
             var plexServer = new Faker<PlexServer>()
                 .UseSeed(_random.Next(1, 100))
@@ -86,7 +77,6 @@ namespace PlexRipper.BaseTests
         {
             var plexServer = GetPlexServer().Generate(1).First();
             var plexLibrary = GetPlexLibrary(plexServer.Id, 1, PlexMediaType.Movie).Generate(1).First();
-            var mediaFile = _mockServer.GetDefaultMovieMockMediaData();
 
             return new Faker<DownloadTask>()
                 .StrictMode(true)
@@ -115,9 +105,9 @@ namespace PlexRipper.BaseTests
                             {
                                 new()
                                 {
-                                    Size = mediaFile.ByteSize,
-                                    ObfuscatedFilePath = mediaFile.RelativeUrl,
-                                    File = mediaFile.FileName,
+                                    Size = 0,
+                                    ObfuscatedFilePath = "Missing",
+                                    File = "Missing FileName",
                                 },
                             },
                         },
@@ -125,12 +115,12 @@ namespace PlexRipper.BaseTests
                 })
                 .RuleFor(x => x.DownloadFolder, () => new FolderPath
                 {
-                    DirectoryPath = _pathSystem.RootDirectory,
+                    DirectoryPath = PathSystem.RootDirectory,
                 })
                 .RuleFor(x => x.DownloadFolderId, _ => 1)
                 .RuleFor(x => x.DestinationFolder, () => new FolderPath
                 {
-                    DirectoryPath = _pathSystem.RootDirectory,
+                    DirectoryPath = PathSystem.RootDirectory,
                 })
                 .RuleFor(x => x.DestinationFolderId, _ => 2)
                 .FinishWith((_, u) =>
@@ -142,17 +132,59 @@ namespace PlexRipper.BaseTests
                 });
         }
 
-        public Faker<PlexMovie> GetPlexMovies(int plexLibraryId)
+        public Faker<PlexMovie> GetPlexMovies(int plexLibraryId, int movieQualities = 1, int movieParts = 1)
         {
             var movieIds = new List<int>();
+            var plexServerId = _random.Next(1, 10);
 
             return new Faker<PlexMovie>()
+                .RuleFor(x => x.Id, f => f.Random.Int(1, 100000))
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
+                .RuleFor(x => x.MediaData, _ => new PlexMediaContainer
+                {
+                    MediaData = GetPlexMediaData(movieParts).Generate(movieQualities),
+                })
+                .RuleFor(x => x.PlexLibrary, _ => new PlexLibrary
+                {
+                    Id = plexLibraryId,
+                    PlexServerId = plexServerId,
+                })
+                .RuleFor(x => x.PlexServer, _ => new PlexServer()
+                {
+                    Id = plexServerId,
+                })
+                .RuleFor(x => x.PlexServerId, _ => plexServerId)
                 .RuleFor(x => x.PlexLibraryId, _ => plexLibraryId)
                 .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, movieIds))
                 .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
+        }
+
+        public Faker<PlexMediaData> GetPlexMediaData(int movieParts = 1)
+        {
+            return new Faker<PlexMediaData>()
+                .RuleFor(x => x.Bitrate, f => f.Random.Int(1900, 2030))
+                .RuleFor(x => x.MediaFormat, f => f.System.FileExt("video/mp4"))
+                .RuleFor(x => x.Width, f => f.Random.Int(240, 10000))
+                .RuleFor(x => x.Height, f => f.Random.Int(240, 10000))
+                .RuleFor(x => x.VideoCodec, f => f.System.FileType())
+                .RuleFor(x => x.AudioChannels, f => f.Random.Int(2, 5))
+                .RuleFor(x => x.VideoResolution, f => f.Random.Word())
+                .RuleFor(x => x.Duration, f => f.Random.Long(50000, 55124400))
+                .RuleFor(x => x.Parts, f => GetPlexMediaPart().Generate(movieParts));
+        }
+
+        public Faker<PlexMediaDataPart> GetPlexMediaPart()
+        {
+            return new Faker<PlexMediaDataPart>()
+                .RuleFor(x => x.ObfuscatedFilePath, f => "/library/parts/65125/1193813456/file.avi")
+                .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
+                .RuleFor(x => x.File, f => "/KidsMovies/Fantastic Four 2/F4 Rise of the Silver Surfer.avi")
+                .RuleFor(x => x.Size, f => f.Random.Long(50000, 55124400))
+                .RuleFor(x => x.Container, f => f.System.FileExt("video/mp4"))
+                .RuleFor(x => x.VideoProfile, f => f.Random.Words(2))
+                .RuleFor(x => x.Indexes, f => f.Random.Word());
         }
 
         public Faker<PlexTvShow> GetPlexTvShows(int plexLibraryId)

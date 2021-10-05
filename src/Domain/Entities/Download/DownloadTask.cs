@@ -14,17 +14,33 @@ namespace PlexRipper.Domain
     /// </summary>
     public class DownloadTask : BaseEntity
     {
-        public PlexMediaType MediaType { get; set; }
-
-        public DownloadStatus DownloadStatus { get; set; }
-
-        public DateTime Created { get; set; }
-
         /// <summary>
-        /// The unique identifier used by the Plex Api to keep track of media.
+        /// Gets or sets the unique identifier used by the Plex Api to keep track of media.
         /// This is only unique on that specific server.
         /// </summary>
+        [Column(Order = 1)]
         public int Key { get; set; }
+
+        /// <summary>
+        /// Gets or sets the media display title.
+        /// </summary>
+        [Column(Order = 2)]
+        public string Title { get; set; }
+
+        [Column(Order = 3)]
+        public long DataTotal { get; set; }
+
+        [Column(Order = 4)]
+        public PlexMediaType MediaType { get; set; }
+
+        [Column(Order = 5)]
+        public DownloadStatus DownloadStatus { get; set; }
+
+        [Column(Order = 6)]
+        public DownloadTaskType DownloadTaskType { get; set; }
+
+        [Column(Order = 7)]
+        public DateTime Created { get; set; }
 
         /// <summary>
         /// The download priority, the higher the more important.
@@ -62,12 +78,17 @@ namespace PlexRipper.Domain
 
         public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new List<DownloadWorkerTask>();
 
+        public int ParentId { get; set; }
+
+        public DownloadTask Parent { get; set; }
+
+        public List<DownloadTask> Children { get; set; }
+
+        public int MediaId { get; set; }
+
         #endregion
 
         #region Helpers
-
-        [NotMapped]
-        public long DataTotal => MetaData?.MediaData?.First()?.Parts?.First()?.Size ?? 0;
 
         [NotMapped]
         public long DataReceived => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.Sum(x => x.BytesReceived) : 0;
@@ -83,21 +104,6 @@ namespace PlexRipper.Domain
 
         [NotMapped]
         public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
-
-        public string Title
-        {
-            get
-            {
-                return MediaType switch
-                {
-                    PlexMediaType.Movie => TitleMovie,
-                    PlexMediaType.TvShow => TitleTvShow,
-                    PlexMediaType.Season => TitleTvShowSeason,
-                    PlexMediaType.Episode => TitleTvShowEpisode,
-                    _ => "TitleNotFound",
-                };
-            }
-        }
 
         /// <summary>
         /// The full formatted media title, based on the <see cref="PlexMediaType"/>.
@@ -141,7 +147,7 @@ namespace PlexRipper.Domain
         public string TitleTvShowEpisode => MetaData?.TvShowEpisodeTitle ?? string.Empty;
 
         [NotMapped]
-        public string FileName => Path.GetFileName(MetaData?.MediaData?.First()?.Parts?.First()?.File ?? string.Empty);
+        public string FileName { get; set; }
 
         /// <summary>
         /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
@@ -187,7 +193,8 @@ namespace PlexRipper.Domain
         /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
         /// </summary>
         [NotMapped]
-        public string DestinationFilePath => DestinationFolder != null ? Path.Combine(DestinationFolder.DirectoryPath, MediaPath, FileName) : string.Empty;
+        public string DestinationFilePath =>
+            DestinationFolder != null ? Path.Combine(DestinationFolder.DirectoryPath, MediaPath, FileName) : string.Empty;
 
         [NotMapped]
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);

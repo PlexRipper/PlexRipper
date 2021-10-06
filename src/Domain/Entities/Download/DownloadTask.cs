@@ -27,20 +27,29 @@ namespace PlexRipper.Domain
         [Column(Order = 2)]
         public string Title { get; set; }
 
+        /// <summary>
+        /// Gets or sets the release year of the media.
+        /// </summary>
         [Column(Order = 3)]
-        public long DataTotal { get; set; }
+        public int Year { get; set; }
 
         [Column(Order = 4)]
-        public PlexMediaType MediaType { get; set; }
+        public long DataTotal { get; set; }
 
         [Column(Order = 5)]
-        public DownloadStatus DownloadStatus { get; set; }
+        public PlexMediaType MediaType { get; set; }
 
         [Column(Order = 6)]
-        public DownloadTaskType DownloadTaskType { get; set; }
+        public DownloadStatus DownloadStatus { get; set; }
 
         [Column(Order = 7)]
+        public DownloadTaskType DownloadTaskType { get; set; }
+
+        [Column(Order = 8)]
         public DateTime Created { get; set; }
+
+        [Column(Order = 9)]
+        public string FileName { get; set; }
 
         /// <summary>
         /// The download priority, the higher the more important.
@@ -96,12 +105,6 @@ namespace PlexRipper.Domain
         [NotMapped]
         public decimal Percentage => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.Average(x => x.Percentage) : 0;
 
-        /// <summary>
-        /// The release year of the media.
-        /// </summary>
-        [NotMapped]
-        public int ReleaseYear => MetaData?.ReleaseYear ?? -1;
-
         [NotMapped]
         public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
 
@@ -145,9 +148,6 @@ namespace PlexRipper.Domain
         /// </summary>
         [NotMapped]
         public string TitleTvShowEpisode => MetaData?.TvShowEpisodeTitle ?? string.Empty;
-
-        [NotMapped]
-        public string FileName { get; set; }
 
         /// <summary>
         /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
@@ -219,7 +219,7 @@ namespace PlexRipper.Domain
                 switch (MediaType)
                 {
                     case PlexMediaType.Movie:
-                        return Path.Combine($"{Title}" + (ReleaseYear > 0 ? $" ({ReleaseYear})" : string.Empty).SanitizeFolderName());
+                        return Path.Combine($"{Title}" + (Year > 0 ? $" ({Year})" : string.Empty).SanitizeFolderName());
                     case PlexMediaType.Episode:
                         // If the same, than it will most likely be an anime type of tvShow which can have no seasons.
                         if (TitleTvShow == TitleTvShowSeason)

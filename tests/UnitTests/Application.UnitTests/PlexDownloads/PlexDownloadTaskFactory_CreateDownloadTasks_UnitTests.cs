@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus.Extensions;
@@ -51,7 +52,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
             var movies = new List<PlexMovie>();
 
             // Act
-            var result = _sut.Object.CreateDownloadTask(movies);
+            var result = _sut.Object.CreateDownloadTasks(movies);
 
             // Assert
             result.IsFailed.ShouldBeTrue();
@@ -64,7 +65,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
             var movies = _fakeData.GetPlexMovies(1).Generate(5);
 
             // Act
-            var result = _sut.Object.CreateDownloadTask(movies);
+            var result = _sut.Object.CreateDownloadTasks(movies);
 
             // Assert
             result.IsSuccess.ShouldBeTrue();
@@ -78,6 +79,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                 downloadTask.Key.ShouldBe(plexMovie.Key);
                 downloadTask.Title.ShouldBe(plexMovie.Title);
                 downloadTask.DataTotal.ShouldBe(plexMovie.MovieData.SelectMany(x => x.Parts).Sum(x => x.Size));
+                downloadTask.Year.ShouldBe(plexMovie.Year);
 
                 downloadTask.PlexLibrary.ShouldNotBeNull();
                 downloadTask.PlexLibraryId.ShouldBeGreaterThan(0);
@@ -100,6 +102,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
 
                     downloadTaskData.Key.ShouldBe(plexMovie.Key);
                     downloadTaskData.Title.ShouldBe(plexMovie.Title);
+                    downloadTaskData.Year.ShouldBe(plexMovie.Year);
                     downloadTask.DataTotal.ShouldBe(plexMovieData.Parts.Sum(x => x.Size));
 
                     downloadTaskData.PlexLibrary.ShouldNotBeNull();
@@ -125,6 +128,8 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                         downloadTaskPart.Key.ShouldBe(plexMovie.Key);
                         downloadTaskPart.Title.ShouldBe(plexMovie.Title);
                         downloadTaskPart.DataTotal.ShouldBe(plexMoviePart.Size);
+                        downloadTaskPart.Year.ShouldBe(plexMovie.Year);
+                        downloadTaskPart.FileName.ShouldBe(Path.GetFileName(plexMoviePart.File));
 
                         downloadTaskPart.PlexLibrary.ShouldNotBeNull();
                         downloadTaskPart.PlexLibraryId.ShouldBeGreaterThan(0);

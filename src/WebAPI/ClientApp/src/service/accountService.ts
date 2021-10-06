@@ -1,5 +1,5 @@
 import Log from 'consola';
-import { Observable, of, combineLatest } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { map, switchMap, tap } from 'rxjs/operators';
@@ -28,6 +28,7 @@ export class AccountService extends BaseService {
 			.pipe(switchMap(() => this.fetchAccounts()))
 			.subscribe();
 	}
+
 	// endregion
 
 	// region Fetch
@@ -106,3 +107,4 @@ export class AccountService extends BaseService {
 
 const accountService = new AccountService();
 export default accountService;
+

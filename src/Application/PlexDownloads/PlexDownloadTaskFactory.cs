@@ -87,21 +87,121 @@ namespace PlexRipper.Application
             if (plexMoviesResult.IsFailed)
                 return plexMoviesResult.ToResult();
 
-            var downloadTasks = new List<DownloadTask>();
-            foreach (var plexMovie in plexMoviesResult.Value)
-            {
-                downloadTasks.AddRange(plexMovie.CreateDownloadTasks());
+            var downloadTasks = CreateDownloadTasks(plexMoviesResult.Value);
 
-                Log.Debug($"Created download task(s) for movie: {plexMovie.Title}");
-            }
-
-            var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks);
+            var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks.Value);
             if (finalizeDownloadTasksResult.IsFailed)
             {
                 return finalizeDownloadTasksResult.ToResult().LogError();
             }
 
             return Result.Ok(finalizeDownloadTasksResult.Value);
+        }
+
+        public Result<List<DownloadTask>> CreateDownloadTasks(List<PlexMovie> movies)
+        {
+            if (!movies.Any())
+            {
+                return ResultExtensions.IsEmpty(nameof(movies));
+            }
+
+            static DownloadTask CreateBaseTask(PlexMovie plexMovie)
+            {
+                return new()
+                {
+                    MediaType = PlexMediaType.Movie,
+                    DownloadTaskType = DownloadTaskType.Movie,
+                    DownloadStatus = DownloadStatus.Initialized,
+                    Created = DateTime.UtcNow,
+                    Title = plexMovie.Title,
+                    Year = plexMovie.Year,
+                    PlexLibrary = plexMovie.PlexLibrary,
+                    PlexLibraryId = plexMovie.PlexLibraryId,
+                    PlexServer = plexMovie.PlexServer,
+                    PlexServerId = plexMovie.PlexServerId,
+                    Key = plexMovie.Key,
+                    Children = new List<DownloadTask>(),
+                    MediaId = plexMovie.Id,
+                    DataTotal = 0,
+                    MetaData = new DownloadTaskMetaData
+                    {
+                        MediaData = plexMovie.MovieData,
+                        ReleaseYear = plexMovie.Year,
+                    },
+                };
+            }
+
+            var downloadTasks = new List<DownloadTask>();
+            foreach (var plexMovie in movies)
+            {
+                var movieDownloadTask = CreateBaseTask(plexMovie);
+
+                // TODO Add quality chooser, will download everything now
+                foreach (var movieData in plexMovie.MovieData)
+                {
+                    var movieDataDownloadTask = CreateBaseTask(plexMovie);
+                    movieDataDownloadTask.DownloadTaskType = DownloadTaskType.MovieData;
+
+                    // create a downloadTask for each multi-part movie.
+                    foreach (var part in movieData.Parts)
+                    {
+                        var moviePartDownloadTask = CreateBaseTask(plexMovie);
+                        moviePartDownloadTask.DownloadTaskType = DownloadTaskType.MoviePart;
+                        moviePartDownloadTask.FileName = Path.GetFileName(part.File);
+                        moviePartDownloadTask.DataTotal = part.Size;
+                        movieDataDownloadTask.Children.Add(moviePartDownloadTask);
+                    }
+
+                    movieDataDownloadTask.DataTotal = movieDataDownloadTask.Children.Sum(x => x.DataTotal);
+                    movieDownloadTask.Children.Add(movieDataDownloadTask);
+                }
+
+                movieDownloadTask.DataTotal = movieDownloadTask.Children.Sum(x => x.DataTotal);
+                downloadTasks.Add(movieDownloadTask);
+            }
+
+            return Result.Ok(downloadTasks);
+        }
+
+        public Result<List<DownloadTask>> CreateDownloadTasks(List<PlexTvShow> plexTvShows)
+        {
+            if (!plexTvShows.Any())
+            {
+                return ResultExtensions.IsEmpty(nameof(plexTvShows));
+            }
+            static DownloadTask CreateBaseTask(PlexTvShow plexMovie)
+            {
+                return new()
+                {
+                    MediaType = PlexMediaType.Movie,
+                    DownloadTaskType = DownloadTaskType.Movie,
+                    DownloadStatus = DownloadStatus.Initialized,
+                    Created = DateTime.UtcNow,
+                    Title = plexMovie.Title,
+                    Year = plexMovie.Year,
+                    PlexLibrary = plexMovie.PlexLibrary,
+                    PlexLibraryId = plexMovie.PlexLibraryId,
+                    PlexServer = plexMovie.PlexServer,
+                    PlexServerId = plexMovie.PlexServerId,
+                    Key = plexMovie.Key,
+                    Children = new List<DownloadTask>(),
+                    MediaId = plexMovie.Id,
+                    DataTotal = 0,
+                    MetaData = new DownloadTaskMetaData
+                    {
+                        MediaData = plexMovie.MovieData,
+                        ReleaseYear = plexMovie.Year,
+                    },
+                };
+            }
+
+            var downloadTasks = new List<DownloadTask>();
+            foreach (var plexTvShow in plexTvShows)
+            {
+
+            }
+
+
         }
 
         public async Task<Result<List<DownloadTask>>> GenerateDownloadTvShowTasksAsync(List<int> plexTvShowIds)
@@ -142,6 +242,7 @@ namespace PlexRipper.Application
             var plexTvShowSeasonResult =
                 await _mediator.Send(new GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery(plexTvShowSeasonIds, true, true, true));
             if (plexTvShowSeasonResult.IsFailed)
+
                 return plexTvShowSeasonResult.ToResult();
 
             var downloadTasks = new List<DownloadTask>();
@@ -173,6 +274,7 @@ namespace PlexRipper.Application
 
             var plexTvShowEpisodeResult = await _mediator.Send(new GetMultiplePlexTvShowEpisodesByIdQuery(plexTvShowEpisodeId, true, true, true));
             if (plexTvShowEpisodeResult.IsFailed)
+
                 return plexTvShowEpisodeResult.ToResult();
 
             var downloadTasks = new List<DownloadTask>();
@@ -203,7 +305,7 @@ namespace PlexRipper.Application
                 return downloadFolder.ToResult();
 
             // Get the destination folder
-            var destinationFolder = await _folderPathService.GetDestinationFolderByMediaType(downloadTasks.First().MediaType);
+            var destinationFolder = await _folderPathService.GetDestinationFolderByMediaType(downloadTasks);
             if (destinationFolder.IsFailed)
                 return destinationFolder.ToResult();
 
@@ -213,13 +315,16 @@ namespace PlexRipper.Application
                 return serverToken.ToResult();
 
             var parts = _userSettings.DownloadSegments;
-
             foreach (var downloadTask in downloadTasks)
             {
                 downloadTask.DownloadFolderId = downloadFolder.Value.Id;
+
                 downloadTask.DownloadFolder = downloadFolder.Value;
+
                 downloadTask.DestinationFolderId = destinationFolder.Value.Id;
+
                 downloadTask.DestinationFolder = destinationFolder.Value;
+
                 downloadTask.ServerToken = serverToken.Value;
 
                 downloadTask.DownloadWorkerTasks = GenerateDownloadWorkerTasks(downloadTask, parts);
@@ -305,70 +410,6 @@ namespace PlexRipper.Application
             return Result.Ok(freshDownloadTasks);
         }
 
-        public Result<List<DownloadTask>> CreateDownloadTask(List<PlexMovie> movies)
-        {
-            if (!movies.Any())
-            {
-                return ResultExtensions.IsEmpty(nameof(movies));
-            }
-
-            static DownloadTask CreateBaseTask(PlexMovie plexMovie)
-            {
-                return new()
-                {
-                    MediaType = PlexMediaType.Movie,
-                    DownloadTaskType = DownloadTaskType.Movie,
-                    DownloadStatus = DownloadStatus.Initialized,
-                    Created = DateTime.UtcNow,
-                    Title = plexMovie.Title,
-                    PlexLibrary = plexMovie.PlexLibrary,
-                    PlexLibraryId = plexMovie.PlexLibraryId,
-                    PlexServer = plexMovie.PlexServer,
-                    PlexServerId = plexMovie.PlexServerId,
-                    Key = plexMovie.Key,
-                    Children = new List<DownloadTask>(),
-                    MediaId = plexMovie.Id,
-                    DataTotal = 0,
-                    MetaData = new DownloadTaskMetaData
-                    {
-                        MediaData = plexMovie.MovieData,
-                        ReleaseYear = plexMovie.Year,
-                    },
-                };
-            }
-
-            var downloadTasks = new List<DownloadTask>();
-            foreach (var plexMovie in movies)
-            {
-                var movieDownloadTask = CreateBaseTask(plexMovie);
-
-                // TODO Add quality chooser, will download everything now
-                foreach (var movieData in plexMovie.MovieData)
-                {
-                    var movieDataDownloadTask = CreateBaseTask(plexMovie);
-                    movieDataDownloadTask.DownloadTaskType = DownloadTaskType.MovieData;
-
-                    // create a downloadTask for each multi-part movie.
-                    foreach (var part in movieData.Parts)
-                    {
-                        var moviePartDownloadTask = CreateBaseTask(plexMovie);
-                        moviePartDownloadTask.DownloadTaskType = DownloadTaskType.MoviePart;
-                        moviePartDownloadTask.FileName = Path.GetFileName(part.File);
-                        moviePartDownloadTask.DataTotal = part.Size;
-                        movieDataDownloadTask.Children.Add(moviePartDownloadTask);
-                    }
-
-                    movieDataDownloadTask.DataTotal = movieDataDownloadTask.Children.Sum(x => x.DataTotal);
-                    movieDownloadTask.Children.Add(movieDataDownloadTask);
-                }
-
-                movieDownloadTask.DataTotal = movieDownloadTask.Children.Sum(x => x.DataTotal);
-                downloadTasks.Add(movieDownloadTask);
-            }
-
-            return Result.Ok(downloadTasks);
-        }
+        #endregion
     }
-
-    #endregion
 }

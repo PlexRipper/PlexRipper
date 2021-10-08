@@ -52,6 +52,13 @@ namespace PlexRipper.Domain
         public string FileName { get; set; }
 
         /// <summary>
+        /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
+        /// E.g. "TvShow/Season/Episode".
+        /// </summary>
+        [Column(Order = 10)]
+        public string FullTitle { get; set; }
+
+        /// <summary>
         /// The download priority, the higher the more important.
         /// </summary>
         public long Priority { get; set; }
@@ -60,12 +67,6 @@ namespace PlexRipper.Domain
         /// Used to authenticate download request with the server.
         /// </summary>
         public string ServerToken { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="DownloadTaskMetaData"/>, this is a JSON field that contains a collection
-        /// of various values that dont warrant their own database column.
-        /// </summary>
-        public DownloadTaskMetaData MetaData { get; set; }
 
         #region Relationships
 
@@ -108,52 +109,13 @@ namespace PlexRipper.Domain
         [NotMapped]
         public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
 
-        /// <summary>
-        /// The full formatted media title, based on the <see cref="PlexMediaType"/>.
-        /// E.g. "TvShow/Season/Episode".
-        /// </summary>
-        [NotMapped]
-        public string TitlePath
-        {
-            get
-            {
-                return MediaType switch
-                {
-                    PlexMediaType.Movie => TitleMovie,
-                    PlexMediaType.TvShow => TitleTvShow,
-                    PlexMediaType.Season => $"{TitleTvShow}/{TitleTvShowSeason}",
-                    PlexMediaType.Episode => $"{TitleTvShow}/{TitleTvShowSeason}/{TitleTvShowEpisode}",
-                    _ => "TitleNotFound",
-                };
-            }
-        }
 
-        [NotMapped]
-        public string TitleMovie => MetaData?.MovieTitle ?? string.Empty;
-
-        /// <summary>
-        /// If the type is an TvShow, Season or Episode, then this will be the title of that TvShow.
-        /// </summary>
-        [NotMapped]
-        public string TitleTvShow => MetaData?.TvShowTitle ?? string.Empty;
-
-        /// <summary>
-        /// If the type is an TvShow, Season or Episode, then this will be the title of that TvShow season.
-        /// </summary>
-        [NotMapped]
-        public string TitleTvShowSeason => MetaData?.TvShowSeasonTitle ?? string.Empty;
-
-        /// <summary>
-        /// If the type is an TvShow, Season or Episode, then this will be the title of that TvShow episode.
-        /// </summary>
-        [NotMapped]
-        public string TitleTvShowEpisode => MetaData?.TvShowEpisodeTitle ?? string.Empty;
 
         /// <summary>
         /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
         /// </summary>
         [NotMapped]
-        public string FileLocationUrl => MetaData?.MediaData?.First()?.Parts?.First()?.ObfuscatedFilePath ?? string.Empty;
+        public string FileLocationUrl { get; set; }
 
         [NotMapped]
         public string DownloadUrl => PlexServer != null ? $"{PlexServer?.ServerUrl}{FileLocationUrl}?X-Plex-Token={ServerToken}" : string.Empty;
@@ -189,12 +151,13 @@ namespace PlexRipper.Domain
             }
         }
 
+        // TODO Get valid destination file path
         /// <summary>
         /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
         /// </summary>
         [NotMapped]
         public string DestinationFilePath =>
-            DestinationFolder != null ? Path.Combine(DestinationFolder.DirectoryPath, MediaPath, FileName) : string.Empty;
+            DestinationFolder != null ? Path.Combine(DestinationFolder.DirectoryPath, "TODO", FileName) : string.Empty;
 
         [NotMapped]
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
@@ -208,31 +171,6 @@ namespace PlexRipper.Domain
         [NotMapped]
         public long BytesRemaining => DataTotal - DataReceived;
 
-        /// <summary>
-        /// Gets the sanitized sub-path based on the <see cref="PlexMediaType"/>, e.g: [TvShow]/[Season]/ or [Movie] [ReleaseYear]/.
-        /// </summary>
-        [NotMapped]
-        public string MediaPath
-        {
-            get
-            {
-                switch (MediaType)
-                {
-                    case PlexMediaType.Movie:
-                        return Path.Combine($"{Title}" + (Year > 0 ? $" ({Year})" : string.Empty).SanitizeFolderName());
-                    case PlexMediaType.Episode:
-                        // If the same, than it will most likely be an anime type of tvShow which can have no seasons.
-                        if (TitleTvShow == TitleTvShowSeason)
-                        {
-                            return Path.Combine(TitleTvShow.SanitizeFolderName());
-                        }
-
-                        return Path.Combine(TitleTvShow.SanitizeFolderName(), TitleTvShowSeason.SanitizeFolderName());
-                    default:
-                        return Path.Combine($"{FileNameWithoutExtention.SanitizeFolderName()}");
-                }
-            }
-        }
 
         public Result IsValid()
         {

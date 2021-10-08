@@ -56,25 +56,6 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
                 PlexServerId = 1,
                 PlexLibraryId = 1,
                 ServerToken = "AAABBBCCCDDDEEEFFFGGG",
-                MetaData = new()
-                {
-                    MovieTitle = mediaFile.ParentFolderName,
-                    MediaData = new List<PlexMediaData>
-                    {
-                        new()
-                        {
-                            Parts = new List<PlexMediaDataPart>
-                            {
-                                new()
-                                {
-                                    Size = mediaFile.ByteSize,
-                                    ObfuscatedFilePath = mediaFile.RelativeUrl,
-                                    File = mediaFile.FileName,
-                                },
-                            },
-                        },
-                    },
-                },
                 DownloadFolder = new FolderPath
                 {
                     DirectoryPath = Container.PathSystem.RootDirectory,

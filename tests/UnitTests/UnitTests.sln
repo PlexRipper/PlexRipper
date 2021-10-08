@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlexApi.UnitTests", "PlexAp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Settings.UnitTests", "Settings.UnitTests\Settings.UnitTests.csproj", "{2F8310F2-2374-4EBE-9A00-FEECCD4DDCFC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.UnitTests", "Data.UnitTests\Data.UnitTests.csproj", "{00719205-85E3-4EE0-9C9F-DBDE35E72542}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.UnitTests", "Logging.UnitTests\Logging.UnitTests.csproj", "{9F6AAFD1-599F-453D-A24C-DAF033353503}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,13 @@ Global
 		{2F8310F2-2374-4EBE-9A00-FEECCD4DDCFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F8310F2-2374-4EBE-9A00-FEECCD4DDCFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F8310F2-2374-4EBE-9A00-FEECCD4DDCFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00719205-85E3-4EE0-9C9F-DBDE35E72542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00719205-85E3-4EE0-9C9F-DBDE35E72542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00719205-85E3-4EE0-9C9F-DBDE35E72542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00719205-85E3-4EE0-9C9F-DBDE35E72542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F6AAFD1-599F-453D-A24C-DAF033353503}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F6AAFD1-599F-453D-A24C-DAF033353503}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F6AAFD1-599F-453D-A24C-DAF033353503}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F6AAFD1-599F-453D-A24C-DAF033353503}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

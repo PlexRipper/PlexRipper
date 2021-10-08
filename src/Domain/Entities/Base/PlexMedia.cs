@@ -143,29 +143,6 @@ namespace PlexRipper.Domain
         [NotMapped]
         public string ThemeUrl => HasTheme ? $"{MetaDataUrl}/theme/{MetaDataKey}" : string.Empty;
 
-        /// <summary>
-        /// The base <see cref="DownloadTask"/> used as a template to create DownloadTasks in child classes.
-        /// </summary>
-        /// <returns>The base <see cref="DownloadTask"/>.</returns>
-        protected DownloadTask CreateBaseDownloadTask()
-        {
-            return new DownloadTask
-            {
-                MetaData = new DownloadTaskMetaData
-                {
-                    MediaData = MediaData.MediaData,
-                    ReleaseYear = Year,
-                },
-                PlexLibrary = PlexLibrary,
-                PlexLibraryId = PlexLibraryId,
-                PlexServer = PlexServer,
-                PlexServerId = PlexServerId,
-                Created = DateTime.Now,
-                DownloadStatus = DownloadStatus.Initialized,
-                Key = Key,
-            };
-        }
-
         #endregion
     }
 }

@@ -129,16 +129,11 @@ namespace PlexRipper.BaseTests
 
         public IPlexRipperHttpClient GetPlexRipperHttpClient => AutofacContainer.Resolve<IPlexRipperHttpClient>();
 
-        public Func<DownloadTask, PlexDownloadClient> GetPlexDownloadClientFactory =>
-            AutofacContainer.Resolve<Func<DownloadTask, PlexDownloadClient>>();
-
         public PlexRipperDbContext PlexRipperDbContext => AutofacContainer.Resolve<PlexRipperDbContext>();
 
         public IMediator Mediator => AutofacContainer.Resolve<IMediator>();
 
         public IMockServer MockServer => AutofacContainer.Resolve<IMockServer>();
-
-        public IFakeData FakeData => AutofacContainer.Resolve<IFakeData>();
 
         public IFileSystem FileSystem => AutofacContainer.Resolve<IFileSystem>();
 

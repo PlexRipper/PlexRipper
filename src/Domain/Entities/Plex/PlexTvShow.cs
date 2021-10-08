@@ -4,8 +4,7 @@ using System.Linq;
 
 namespace PlexRipper.Domain
 {
-    [Table("PlexTvShow")]
-    public class PlexTvShow : PlexMedia, IToDownloadTask
+    public class PlexTvShow : PlexMedia
     {
         public override PlexMediaType Type => PlexMediaType.TvShow;
 
@@ -19,21 +18,6 @@ namespace PlexRipper.Domain
 
         #endregion
 
-        #region Helpers
 
-        public List<DownloadTask> CreateDownloadTasks()
-        {
-            var downloadTasks = Seasons.SelectMany(x => x.CreateDownloadTasks()).ToList();
-
-            downloadTasks.ForEach(downloadTask =>
-            {
-                downloadTask.MetaData.TvShowTitle = Title;
-                downloadTask.MetaData.TvShowKey = Key;
-            });
-
-            return downloadTasks;
-        }
-
-        #endregion
     }
 }

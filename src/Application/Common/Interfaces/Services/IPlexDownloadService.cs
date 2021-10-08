@@ -18,7 +18,7 @@ namespace PlexRipper.Application.Common
 
         Task<Result> PauseDownloadTask(List<int> downloadTaskIds);
 
-        Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadMedias);
+        Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders);
 
         Task<Result> DeleteDownloadTasksAsync(List<int> downloadTaskIds);
 

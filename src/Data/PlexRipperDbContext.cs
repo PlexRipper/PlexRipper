@@ -4,6 +4,7 @@ using Environment;
 using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Common;
@@ -151,10 +152,17 @@ namespace PlexRipper.Data
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.EnableDetailedErrors();
                 optionsBuilder.EnableSensitiveDataLogging();
-                optionsBuilder
-                    .UseSqlite(
-                        $"Data Source={DatabasePath}",
-                        b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+                if (!EnvironmentExtensions.IsInMemoryDatabase())
+                {
+                    optionsBuilder
+                        .UseSqlite(
+                            $"Data Source={DatabasePath}",
+                            b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+                }
+                else
+                {
+                    optionsBuilder.UseInMemoryDatabase("memory_database");
+                }
             }
         }
 

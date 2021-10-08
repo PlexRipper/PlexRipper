@@ -31,8 +31,6 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
 
         private readonly Mock<IUserSettings> _userSettings = new();
 
-        private readonly FakeData _fakeData = new();
-
         public PlexDownloadTaskFactory_CreateDownloadTasks_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
@@ -62,7 +60,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
         public void CreateDownloadTasks_ShouldHaveValidDownloadTasks_WhenPlexMoviesAreValid()
         {
             // Arrange
-            var movies = _fakeData.GetPlexMovies(1).Generate(5);
+            var movies = FakeData.GetPlexMovies(1, 1).Generate(5);
 
             // Act
             var result = _sut.Object.CreateDownloadTasks(movies);

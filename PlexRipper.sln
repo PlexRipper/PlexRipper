@@ -68,6 +68,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.UnitTests", "tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlexApi.IntegrationTests", "tests\IntegrationTests\PlexApi.IntegrationTests\PlexApi.IntegrationTests.csproj", "{521C9269-ED53-48DB-BE46-1F283F81CA1D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.UnitTests", "tests\UnitTests\Data.UnitTests\Data.UnitTests.csproj", "{56D5CFB5-B3D4-4611-8687-7EB27582B89F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -162,6 +164,10 @@ Global
 		{521C9269-ED53-48DB-BE46-1F283F81CA1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{521C9269-ED53-48DB-BE46-1F283F81CA1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{521C9269-ED53-48DB-BE46-1F283F81CA1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56D5CFB5-B3D4-4611-8687-7EB27582B89F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56D5CFB5-B3D4-4611-8687-7EB27582B89F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56D5CFB5-B3D4-4611-8687-7EB27582B89F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56D5CFB5-B3D4-4611-8687-7EB27582B89F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -191,6 +197,7 @@ Global
 		{F601827D-2C9B-4012-B595-C7A3B5ADC56B} = {EEB5E527-6D2D-4280-9A24-7472229C7B91}
 		{54F528D3-4782-4A8F-A3B2-532F12DB9179} = {BC7C4F2B-5B33-4A5F-9718-3A672B10A312}
 		{521C9269-ED53-48DB-BE46-1F283F81CA1D} = {DABD59AB-7F20-4D04-8601-9EC7BE2F4373}
+		{56D5CFB5-B3D4-4611-8687-7EB27582B89F} = {BC7C4F2B-5B33-4A5F-9718-3A672B10A312}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B4C02A51-7A0F-40AF-B559-20772614ED60}

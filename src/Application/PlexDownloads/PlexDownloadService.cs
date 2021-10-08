@@ -62,17 +62,17 @@ namespace PlexRipper.Application
 
         #region Commands
 
-        public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadMedias)
+        public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders)
         {
-            int mediaCount = downloadMedias.Select(x => x.MediaIds.Count).Sum();
+            int mediaCount = downloadTaskOrders.Select(x => x.MediaIds.Count).Sum();
             await _signalRService.SendDownloadTaskCreationProgressUpdate(1, mediaCount);
             int count = 0;
 
             List<DownloadTask> downloadTasks = new();
 
-            foreach (var downloadMedia in downloadMedias)
+            foreach (var downloadMedia in downloadTaskOrders)
             {
-                var result = await _plexDownloadTaskFactory.GenerateAsync(downloadMedia.MediaIds, downloadMedia.Type);
+                var result = await _plexDownloadTaskFactory.GenerateAsync(downloadTaskOrders);
 
                 if (result.IsFailed)
                 {

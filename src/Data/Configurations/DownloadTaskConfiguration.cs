@@ -39,9 +39,6 @@ namespace PlexRipper.Data.Configurations
                 .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())
                 .IsUnicode(false);
 
-            builder
-                .Property(x => x.MetaData)
-                .HasJsonValueConversion();
         }
     }
 }

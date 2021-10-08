@@ -216,18 +216,18 @@ namespace PlexRipper.DownloadManager
                 var downloadTask = downloadTasks[i];
 
                 // Check validity
-                Log.Debug($"Checking DownloadTask {i + 1} of {downloadTasks.Count} with title {downloadTask.TitlePath}");
+                Log.Debug($"Checking DownloadTask {i + 1} of {downloadTasks.Count} with title {downloadTask.FullTitle}");
                 var validationResult = downloadTask.IsValid();
                 if (validationResult.IsFailed)
                 {
                     validationResult.LogError();
                     failedList.Add(downloadTask);
-                    validationResult.Errors.ForEach(x => x.WithMetadata("downloadTask Title", downloadTask.TitlePath));
+                    validationResult.Errors.ForEach(x => x.WithMetadata("downloadTask Title", downloadTask.FullTitle));
                     result.AddNestedErrors(validationResult.Errors);
                 }
                 else
                 {
-                    Log.Information($"DownloadTask {i + 1} of {downloadTasks.Count} with title {downloadTask.TitlePath} was valid");
+                    Log.Information($"DownloadTask {i + 1} of {downloadTasks.Count} with title {downloadTask.FullTitle} was valid");
                 }
 
                 // TODO Need a different way to check for duplicate, media consisting of multiple parts have the same rating key

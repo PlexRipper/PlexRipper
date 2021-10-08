@@ -31,8 +31,7 @@ namespace PlexRipper.Domain
             RuleFor(x => x.FileLocationUrl).NotEmpty();
             RuleFor(x => x.Created).NotEqual(DateTime.MinValue);
 
-            RuleFor(x => x.TitleTvShow).NotEmpty().When(x => x.MediaType == PlexMediaType.Episode);
-            RuleFor(x => x.TitleTvShowSeason).NotEmpty().When(x => x.MediaType == PlexMediaType.Episode);
+            RuleFor(x => x.FullTitle).NotEmpty();
 
             RuleFor(x => x.PlexServerId).GreaterThan(0);
             RuleFor(x => x.PlexServer).NotNull();

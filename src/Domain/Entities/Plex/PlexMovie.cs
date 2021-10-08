@@ -5,7 +5,7 @@ using System.Linq;
 namespace PlexRipper.Domain
 {
     [Table("PlexMovie")]
-    public class PlexMovie : PlexMedia, IToDownloadTask
+    public class PlexMovie : PlexMedia
     {
         #region Relationships
 
@@ -25,24 +25,6 @@ namespace PlexRipper.Domain
 
         [NotMapped]
         public override PlexMediaType Type => PlexMediaType.Movie;
-
-        /// <summary>
-        /// A <see cref="PlexMovie"/> can have multiple media parts, which is why we return a list.
-        /// </summary>
-        /// <returns>The <see cref="DownloadTask"/>s created from all parts.</returns>
-        public List<DownloadTask> CreateDownloadTasks()
-        {
-            var downloadTask = CreateBaseDownloadTask();
-            downloadTask.MediaType = Type;
-            downloadTask.MetaData.MovieTitle = Title;
-            downloadTask.MetaData.MediaData = MovieData;
-            downloadTask.MetaData.MovieKey = Key;
-
-            return new List<DownloadTask>
-            {
-                downloadTask,
-            };
-        }
 
         #endregion
     }

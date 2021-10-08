@@ -23,68 +23,73 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
         public async Task<Result<List<PlexTvShow>>> Handle(GetPlexTvShowTreeByMediaIdsQuery request, CancellationToken cancellationToken)
         {
-            var plexTvShows =
-                await PlexTvShowsQueryable
-                    .IncludeSeasons()
-                    .IncludeEpisodes()
-                    .IncludeServer()
-                    .IncludePlexLibrary()
-                    .Where(x => request.TvShowIds.Contains(x.Id))
-                    .ToListAsync(cancellationToken);
+            List<PlexTvShowEpisode> episodes = new List<PlexTvShowEpisode>();
+            var existingEpisodeIds = new List<int>();
 
-            var plexTvShowSeasons =
-                await PlexTvShowSeasonsQueryable
-                    .IncludeEpisodes()
-                    .IncludeServer()
-                    .IncludePlexLibrary()
-                    .Where(x => request.TvShowSeasonIds.Contains(x.Id))
-                    .ToListAsync(cancellationToken);
+            if (request.TvShowIds.Any())
+            {
+                var episodeIdsFromTvShows =
+                    await PlexTvShowsQueryable
+                        .IncludeServer()
+                        .IncludePlexLibrary()
+                        .Include(x => x.Seasons)
+                        .ThenInclude(x => x.Episodes)
+                        .ThenInclude(x => x.TvShowSeason)
+                        .ThenInclude(x => x.TvShow)
 
-            var plexTvShowEpisodes =
-                await PlexTvShowEpisodesQueryable
+                        // Include PlexLibrary
+                        .Include(x => x.Seasons)
+                        .ThenInclude(x => x.Episodes)
+                        .ThenInclude(x => x.PlexLibrary)
+
+                        // Include PlexServer
+                        .Include(x => x.Seasons)
+                        .ThenInclude(x => x.Episodes)
+                        .ThenInclude(x => x.PlexServer)
+
+                        // Filter on only the requested ones
+                        .Where(x => request.TvShowIds.Contains(x.Id))
+                        .SelectMany(x => x.Seasons.SelectMany(y => y.Episodes))
+                        .ToListAsync(cancellationToken);
+
+                episodes.AddRange(episodeIdsFromTvShows);
+                existingEpisodeIds.AddRange(episodes.Select(x => x.Id).ToList());
+            }
+
+            if (request.TvShowSeasonIds.Any())
+            {
+                var episodeIdsFromTvShowSeasons =
+                    await PlexTvShowSeasonsQueryable
+                        .Include(x => x.Episodes)
+                        .ThenInclude(x => x.TvShowSeason)
+                        .ThenInclude(x => x.TvShow)
+                        .Where(x => request.TvShowSeasonIds.Contains(x.Id)
+                                    && !existingEpisodeIds.Contains(x.Id))
+                        .SelectMany(y => y.Episodes)
+                        .ToListAsync(cancellationToken);
+
+                episodes.AddRange(episodeIdsFromTvShowSeasons);
+                existingEpisodeIds.AddRange(episodes.Select(x => x.Id).ToList());
+            }
+
+            if (request.TvShowEpisodeIds.Any())
+            {
+                var episodesFromTvShowEpisodes = await PlexTvShowEpisodesQueryable
                     .Include(x => x.TvShowSeason)
                     .ThenInclude(x => x.TvShow)
-                    .IncludeServer()
-                    .IncludePlexLibrary()
-                    .Where(x => request.TvShowEpisodeIds.Contains(x.Id))
+                    .Where(x => request.TvShowEpisodeIds.Contains(x.Id)
+                                && !existingEpisodeIds.Contains(x.Id))
                     .ToListAsync(cancellationToken);
 
-            var mergedPlexTvShows = new List<PlexTvShow>();
-
-            // Add all TvShows as the contains all seasons and episodes
-            mergedPlexTvShows.AddRange(plexTvShows);
-
-            // Create hierarchy with the TvShow as the root with seasons and episodes
-            var seasonTvShows = plexTvShowSeasons.Select(x => x.TvShow).ToList();
-            foreach (var season in plexTvShowSeasons)
-            {
-                var tvShow = seasonTvShows.Find(x => x.Id == season.TvShowId);
-                tvShow?.Seasons.Add(season);
+                episodes.AddRange(episodesFromTvShowEpisodes);
             }
 
-            mergedPlexTvShows.AddRange(seasonTvShows);
+            var shows = episodes.Select(x => x.TvShowSeason.TvShow)
+                .GroupBy(x => x.Id)
+                .Select(g => g.First())
+                .ToList();
 
-            // Create hierarchy with the TvShow as the root with seasons and episodes
-
-            var episodesTvShows = plexTvShowEpisodes.Select(x => x.TvShow).ToList();
-            foreach (var episode in plexTvShowEpisodes)
-            {
-                var tvShow = seasonTvShows.Find(x => x.Id == episode.TvShowId);
-            }
-
-            await _dbContext.PlexTvShows
-                .Where(x => request.TvShowIds.Contains(x.Id))
-                .Select(x => new
-                {
-                    Seasons = x.Seasons.Where(y => request.TvShowSeasonIds.Contains(y.Id))
-                        .Select(y => new
-                        {
-                            Episodes = y.Episodes.Where(z => request.TvShowEpisodeIds.Contains(z.Id)).ToList();
-                        }).ToList(),
-                })
-                .ToListAsync();
-
-            return ReturnResult(entity, request.Id);
+            return Result.Ok(shows);
         }
     }
 }

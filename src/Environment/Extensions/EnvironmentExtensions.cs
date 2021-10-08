@@ -25,6 +25,11 @@ namespace Environment
             return System.Environment.GetEnvironmentVariable(_resetDbKey) is "true";
         }
 
+        public static bool IsInMemoryDatabase()
+        {
+            return System.Environment.GetEnvironmentVariable(_memoryDbKey) is "true";
+        }
+
         public static void SetResetDatabase()
         {
             System.Environment.SetEnvironmentVariable(_resetDbKey, "true");

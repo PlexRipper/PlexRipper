@@ -37,13 +37,7 @@ namespace PlexRipper.WebAPI.Config
             // Auto Mapper
             builder.Register(ctx =>
             {
-                var config = new MapperConfiguration(cfg =>
-                {
-                    cfg.AddProfile(new DomainMappingProfile());
-                    cfg.AddProfile(new ApplicationMappingProfile());
-                    cfg.AddProfile(new PlexApiMappingProfile());
-                    cfg.AddProfile(new WebApiMappingProfile());
-                });
+                var config = MapperSetup.Configuration;
                 config.AssertConfigurationIsValid();
                 return config;
             });

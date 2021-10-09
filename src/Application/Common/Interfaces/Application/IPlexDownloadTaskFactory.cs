@@ -29,8 +29,6 @@ namespace PlexRipper.Application.Common
         /// <returns>A list of newly generated <see cref="DownloadTask">DownloadTasks</see></returns>
         Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<DownloadTask> downloadTasks);
 
-        Result<List<DownloadTask>> CreateDownloadTasks(List<PlexMovie> movies);
-
         Task<Result<List<DownloadTask>>> GenerateDownloadTvShowTasksAsync(
             List<int> plexTvShowIds,
             List<int> plexTvShowSeasonIds,

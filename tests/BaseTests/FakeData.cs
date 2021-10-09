@@ -88,7 +88,6 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.DownloadWorkerTasks, _ => new())
                 .RuleFor(x => x.MediaType, PlexMediaType.Movie)
                 .RuleFor(x => x.Key, _ => _random.Next(0, 10000))
-                .RuleFor(x => x.ServerToken, f => f.Random.Guid().ToString())
                 .RuleFor(x => x.Created, f => f.Date.Recent(30))
                 .RuleFor(x => x.PlexServer, _ => plexServer)
                 .RuleFor(x => x.PlexServerId, _ => plexServer.Id)
@@ -125,7 +124,9 @@ namespace PlexRipper.BaseTests
                     MediaData = GetPlexMediaData(movieParts).Generate(movieQualities),
                 })
                 .RuleFor(x => x.PlexServerId, _ => plexServerId)
+                .RuleFor(x => x.PlexServer, _ => new PlexServer() { Id = plexLibraryId })
                 .RuleFor(x => x.PlexLibraryId, _ => plexLibraryId)
+                .RuleFor(x => x.PlexLibrary, _ => new PlexLibrary() { Id = plexLibraryId })
                 .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, movieKeys))
                 .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
@@ -141,7 +142,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.Height, f => f.Random.Int(240, 10000))
                 .RuleFor(x => x.VideoCodec, f => f.System.FileType())
                 .RuleFor(x => x.AudioChannels, f => f.Random.Int(2, 5))
-                .RuleFor(x => x.VideoResolution, f => f.Random.Word())
+                .RuleFor(x => x.VideoResolution, f => f.PickRandom("sd", "720p", "1080p"))
                 .RuleFor(x => x.Duration, f => f.Random.Long(50000, 55124400))
                 .RuleFor(x => x.Parts, f => GetPlexMediaPart().Generate(movieParts));
         }

@@ -57,7 +57,6 @@ namespace DownloadManager.IntegrationTests.PlexDownloadClient
                 },
                 PlexServerId = 1,
                 PlexLibraryId = 1,
-                ServerToken = "AAABBBCCCDDDEEEFFFGGG",
                 DownloadFolder = new FolderPath
                 {
                     DirectoryPath = Container.PathSystem.RootDirectory,

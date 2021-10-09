@@ -17,7 +17,6 @@ namespace PlexRipper.Domain
 
             RuleFor(x => x.FileName).NotEmpty();
             RuleFor(x => x.Title).NotEmpty();
-            RuleFor(x => x.ServerToken).NotEmpty();
             RuleFor(x => x.DownloadUrl).NotEmpty();
 
             RuleFor(x => x.DownloadPath).NotEmpty();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AutoMapper;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.WebApi;
@@ -13,6 +14,8 @@ namespace PlexRipper.Application.Config
             // PlexApiClientProgress -> InspectServerProgress
             CreateMap<PlexApiClientProgress, InspectServerProgress>(MemberList.None)
                 .ReverseMap();
+
+            PlexMediaToDownloadTask();
         }
 
         private void PlexMediaToDownloadTask()
@@ -24,33 +27,30 @@ namespace PlexRipper.Application.Config
                 .ForMember(task => task.Year, opt => opt.MapFrom(entity => entity.Year))
                 .ForMember(task => task.MediaType, opt => opt.MapFrom(entity => entity.Type))
                 .ForMember(task => task.DownloadStatus, opt => opt.MapFrom(entity => DownloadStatus.Initialized))
+                .ForMember(task => task.Children, opt => opt.MapFrom(entity => new List<DownloadTask>()))
                 .ForMember(task => task.Created, opt => opt.MapFrom(entity => DateTime.UtcNow))
                 .ForMember(task => task.PlexLibrary, opt => opt.MapFrom(entity => entity.PlexLibrary))
                 .ForMember(task => task.PlexLibraryId, opt => opt.MapFrom(entity => entity.PlexLibraryId))
                 .ForMember(task => task.PlexServer, opt => opt.MapFrom(entity => entity.PlexServer))
                 .ForMember(task => task.PlexServerId, opt => opt.MapFrom(entity => entity.PlexServerId));
 
-            CreateMap<PlexMovie, DownloadTask>(MemberList.Destination)
+            CreateMap<PlexMovie, DownloadTask>(MemberList.None)
                 .IncludeBase<Domain.PlexMedia, DownloadTask>()
-                .ForMember(task => task.Children, opt => opt.MapFrom(entity => entity.MediaData.MediaData))
                 .ForMember(task => task.DownloadTaskType, opt => opt.MapFrom(entity => DownloadTaskType.Movie));
 
-            CreateMap<PlexTvShow, DownloadTask>(MemberList.Destination)
+            CreateMap<PlexTvShow, DownloadTask>(MemberList.None)
                 .IncludeBase<Domain.PlexMedia, DownloadTask>()
-                .ForMember(task => task.Children, opt => opt.MapFrom(entity => entity.Seasons))
                 .ForMember(task => task.DownloadTaskType, opt => opt.MapFrom(entity => DownloadTaskType.TvShow));
 
-            CreateMap<PlexTvShowSeason, DownloadTask>(MemberList.Destination)
+            CreateMap<PlexTvShowSeason, DownloadTask>(MemberList.None)
                 .IncludeBase<Domain.PlexMedia, DownloadTask>()
-                .ForMember(task => task.Children, opt => opt.MapFrom(entity => entity.Episodes))
                 .ForMember(task => task.DownloadTaskType, opt => opt.MapFrom(entity => DownloadTaskType.Season));
 
-            CreateMap<PlexTvShowEpisode, DownloadTask>(MemberList.Destination)
+            CreateMap<PlexTvShowEpisode, DownloadTask>(MemberList.None)
                 .IncludeBase<Domain.PlexMedia, DownloadTask>()
-                .ForMember(task => task.Children, opt => opt.MapFrom(entity => entity.MediaData.MediaData))
                 .ForMember(task => task.DownloadTaskType, opt => opt.MapFrom(entity => DownloadTaskType.Episode));
 
-
+            CreateMap<PlexMediaData, DownloadTask>(MemberList.None);
         }
     }
 }

@@ -52,21 +52,25 @@ namespace PlexRipper.Domain
         public string FileName { get; set; }
 
         /// <summary>
+        /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
+        /// </summary>
+        [Column(Order = 10)]
+        public string FileLocationUrl { get; set; }
+
+        /// <summary>
         /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
         /// E.g. "TvShow/Season/Episode".
         /// </summary>
-        [Column(Order = 10)]
+        [Column(Order = 11)]
         public string FullTitle { get; set; }
+
+        [Column(Order = 12)]
+        public string Quality { get; set; }
 
         /// <summary>
         /// The download priority, the higher the more important.
         /// </summary>
         public long Priority { get; set; }
-
-        /// <summary>
-        /// Used to authenticate download request with the server.
-        /// </summary>
-        public string ServerToken { get; set; }
 
         #region Relationships
 
@@ -109,16 +113,9 @@ namespace PlexRipper.Domain
         [NotMapped]
         public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
 
-
-
-        /// <summary>
-        /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
-        /// </summary>
+        // TODO Add Server Token
         [NotMapped]
-        public string FileLocationUrl { get; set; }
-
-        [NotMapped]
-        public string DownloadUrl => PlexServer != null ? $"{PlexServer?.ServerUrl}{FileLocationUrl}?X-Plex-Token={ServerToken}" : string.Empty;
+        public string DownloadUrl => PlexServer != null ? $"{PlexServer?.ServerUrl}{FileLocationUrl}" : string.Empty;
 
         [NotMapped]
         public Uri DownloadUri => !string.IsNullOrWhiteSpace(DownloadUrl) ? new Uri(DownloadUrl, UriKind.Absolute) : null;
@@ -151,13 +148,49 @@ namespace PlexRipper.Domain
             }
         }
 
-        // TODO Get valid destination file path
         /// <summary>
         /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
+        /// TODO Get valid destination file path.
         /// </summary>
         [NotMapped]
-        public string DestinationFilePath =>
-            DestinationFolder != null ? Path.Combine(DestinationFolder.DirectoryPath, "TODO", FileName) : string.Empty;
+        public string DestinationFilePath
+        {
+            get
+            {
+                if (DestinationFolder != null)
+                {
+                    switch (MediaType)
+                    {
+                        case PlexMediaType.Movie:
+                            return Path.Combine(DestinationFolder.DirectoryPath, FullTitle, FileName);
+                        case PlexMediaType.TvShow:
+                            break;
+                        case PlexMediaType.Season:
+                            break;
+                        case PlexMediaType.Episode:
+                            break;
+                        case PlexMediaType.Music:
+                            break;
+                        case PlexMediaType.Album:
+                            break;
+                        case PlexMediaType.Song:
+                            break;
+                        case PlexMediaType.Photos:
+                            break;
+                        case PlexMediaType.OtherVideos:
+                            break;
+                        case PlexMediaType.Games:
+                            break;
+                        case PlexMediaType.Unknown:
+                            break;
+                        default:
+                            return Path.Combine(DestinationFolder.DirectoryPath, FullTitle, FileName);
+                    }
+                }
+
+                return "INVALID";
+            }
+        }
 
         [NotMapped]
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
@@ -170,7 +203,6 @@ namespace PlexRipper.Domain
 
         [NotMapped]
         public long BytesRemaining => DataTotal - DataReceived;
-
 
         public Result IsValid()
         {

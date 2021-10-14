@@ -41,8 +41,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
             // MediaContainer -> PlexLibrary
             CreateMap<MediaContainer, PlexLibrary>(MemberList.None)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.Type,
-                    opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter()))
+                .ForMember(dest => dest.Type, opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter()))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
 
             // Directory -> PlexLibrary
@@ -64,6 +63,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
             CreateMap<Metadata, PlexMedia>(MemberList.None)
                 .ForMember(dest => dest.Key, opt => opt.MapFrom(x => x.RatingKey))
                 .ForMember(dest => dest.MediaSize, opt => opt.MapFrom(x => x.Media.Sum(y => y.Part.Sum(z => z.Size))))
+                .ForMember(dest => dest.SortTitle, opt => opt.MapFrom(x => x.TitleSort))
                 .ForMember(dest => dest.HasThumb, opt => opt.MapFrom(x => !string.IsNullOrEmpty(x.Thumb)))
                 .ForMember(dest => dest.HasBanner, opt => opt.MapFrom(x => !string.IsNullOrEmpty(x.Banner)))
                 .ForMember(dest => dest.HasArt, opt => opt.MapFrom(x => !string.IsNullOrEmpty(x.Art)))
@@ -90,6 +90,7 @@ namespace PlexRipper.PlexApi.Config.Mappings
             // Metadata -> PlexMovie
             CreateMap<Metadata, PlexMovie>(MemberList.None)
                 .IncludeBase<Metadata, PlexMedia>()
+                .ForMember(dest => dest.FullTitle, opt => opt.MapFrom(x => $"{x.Title} ({x.Year})"))
                 .ForMember(dest => dest.MovieData, opt => opt.MapFrom(x => x.Media));
         }
 
@@ -97,16 +98,19 @@ namespace PlexRipper.PlexApi.Config.Mappings
         {
             // Metadata -> PlexTvShow
             CreateMap<Metadata, PlexTvShow>(MemberList.None)
-                .IncludeBase<Metadata, PlexMedia>();
+                .IncludeBase<Metadata, PlexMedia>()
+                .ForMember(dest => dest.FullTitle, opt => opt.MapFrom(x => x.Title));
 
             // Metadata -> PlexTvShowSeason
             CreateMap<Metadata, PlexTvShowSeason>(MemberList.None)
                 .IncludeBase<Metadata, PlexMedia>()
+                .ForMember(dest => dest.FullTitle, opt => opt.MapFrom(x =>  $"{x.ParentTitle}/{x.Title}" ))
                 .ForMember(dest => dest.ParentKey, opt => opt.MapFrom(x => x.ParentRatingKey));
 
             // Metadata -> PlexTvShowEpisode
             CreateMap<Metadata, PlexTvShowEpisode>(MemberList.None)
                 .IncludeBase<Metadata, PlexMedia>()
+                .ForMember(dest => dest.FullTitle, opt => opt.MapFrom(x =>  $"{x.GrandparentTitle}/{x.ParentTitle}/{x.Title}" ))
                 .ForMember(dest => dest.ParentKey, opt => opt.MapFrom(x => x.ParentRatingKey))
                 .ForMember(dest => dest.EpisodeData, opt => opt.MapFrom(x => x.Media));
         }

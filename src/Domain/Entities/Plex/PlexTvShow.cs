@@ -18,6 +18,5 @@ namespace PlexRipper.Domain
 
         #endregion
 
-
     }
 }

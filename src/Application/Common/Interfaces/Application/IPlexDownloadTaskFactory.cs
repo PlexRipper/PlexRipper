@@ -17,8 +17,6 @@ namespace PlexRipper.Application.Common
         /// <returns>The created <see cref="DownloadTask"/>.</returns>
         Task<Result<List<DownloadTask>>> GenerateMovieDownloadTasksAsync(List<int> plexMovieIds);
 
-        Task<Result<List<DownloadTask>>> FinalizeDownloadTasks(List<DownloadTask> downloadTasks, int plexAccountId = 0);
-
         List<DownloadWorkerTask> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts);
 
         /// <summary>

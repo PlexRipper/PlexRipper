@@ -24,6 +24,7 @@ namespace PlexRipper.Application.Config
                 .ForMember(task => task.MediaId, opt => opt.MapFrom(entity => entity.Id))
                 .ForMember(task => task.Key, opt => opt.MapFrom(entity => entity.Key))
                 .ForMember(task => task.Title, opt => opt.MapFrom(entity => entity.Title))
+                .ForMember(task => task.FullTitle, opt => opt.MapFrom(entity => entity.FullTitle))
                 .ForMember(task => task.Year, opt => opt.MapFrom(entity => entity.Year))
                 .ForMember(task => task.MediaType, opt => opt.MapFrom(entity => entity.Type))
                 .ForMember(task => task.DownloadStatus, opt => opt.MapFrom(entity => DownloadStatus.Initialized))

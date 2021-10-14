@@ -86,7 +86,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                 downloadTask.Key.ShouldBe(plexMovie.Key);
                 downloadTask.Title.ShouldBe(plexMovie.Title);
                 downloadTask.FullTitle.ShouldBe(fullTitle);
-                downloadTask.DataTotal.ShouldBe(plexMovie.MovieData.SelectMany(x => x.Parts).Sum(x => x.Size));
+                downloadTask.DataTotal.ShouldBe(plexMovie.MediaSize);
                 downloadTask.Year.ShouldBe(plexMovie.Year);
 
                 downloadTask.PlexLibrary.ShouldNotBeNull();
@@ -99,7 +99,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                 downloadTask.DownloadTaskType.ShouldBe(DownloadTaskType.Movie);
                 downloadTask.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
                 downloadTask.Created.ShouldBeGreaterThan(DateTime.MinValue);
-                downloadTask.Created.ShouldBeLessThan(DateTime.MaxValue);
+                downloadTask.Created.ShouldBeLessThan(DateTime.UtcNow);
 
                 downloadTask.Children.ShouldNotBeEmpty();
                 downloadTask.Children.Count.ShouldBe(plexMovie.MovieData.Count);
@@ -111,6 +111,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
 
                     downloadTaskPart.Key.ShouldBe(plexMovie.Key);
                     downloadTaskPart.Title.ShouldBe(plexMovie.Title);
+                    downloadTaskPart.FullTitle.ShouldBe(plexMovie.FullTitle);
                     downloadTaskPart.DataTotal.ShouldBe(plexMoviePart.Size);
                     downloadTaskPart.Year.ShouldBe(plexMovie.Year);
                     downloadTaskPart.FileLocationUrl.ShouldNotBeEmpty();
@@ -126,7 +127,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                     // TODO Should check DownloadTaskType
                     downloadTaskPart.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
                     downloadTaskPart.Created.ShouldBeGreaterThan(DateTime.MinValue);
-                    downloadTaskPart.Created.ShouldBeLessThan(DateTime.MaxValue);
+                    downloadTaskPart.Created.ShouldBeLessThan(DateTime.UtcNow);
 
                     downloadTaskPart.Children.ShouldBeEmpty();
                 }

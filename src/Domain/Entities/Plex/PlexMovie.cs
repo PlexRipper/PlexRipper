@@ -21,7 +21,7 @@ namespace PlexRipper.Domain
         public List<PlexMediaDataPart> MovieParts => MovieData.SelectMany(x => x.Parts).ToList();
 
         [NotMapped]
-        public List<PlexMediaData> MovieData => MediaData.MediaData;
+        public List<PlexMediaData> MovieData => MediaData.MediaData ?? new List<PlexMediaData>();
 
         [NotMapped]
         public override PlexMediaType Type => PlexMediaType.Movie;

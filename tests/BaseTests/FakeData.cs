@@ -144,6 +144,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.AudioChannels, f => f.Random.Int(2, 5))
                 .RuleFor(x => x.VideoResolution, f => f.PickRandom("sd", "720p", "1080p"))
                 .RuleFor(x => x.Duration, f => f.Random.Long(50000, 55124400))
+                .RuleFor(x => x.OptimizedForStreaming, f => f.Random.Bool())
                 .RuleFor(x => x.Parts, f => GetPlexMediaPart().Generate(movieParts));
         }
 
@@ -168,15 +169,21 @@ namespace PlexRipper.BaseTests
             var episodes = new Faker<PlexTvShowEpisode>()
                 .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, episodeIds))
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
+                .RuleFor(x => x.FullTitle, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexLibraryId, _ => plexLibraryId)
                 .RuleFor(x => x.PlexServerId, _ => plexServerId)
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
+                .RuleFor(x => x.MediaData, _ => new PlexMediaContainer
+                {
+                    MediaData = GetPlexMediaData(1).Generate(1),
+                })
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
 
             var seasonIndex = 1;
             var seasons = new Faker<PlexTvShowSeason>()
                 .RuleFor(x => x.Title, _ => $"Season {seasonIndex++}")
+                .RuleFor(x => x.FullTitle, f => $"{f.Lorem.Word()}/{f.Lorem.Word()}")
                 .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, seasonIds))
                 .RuleFor(x => x.PlexLibraryId, _ => plexLibraryId)
                 .RuleFor(x => x.PlexServerId, _ => plexServerId)
@@ -187,6 +194,7 @@ namespace PlexRipper.BaseTests
 
             return new Faker<PlexTvShow>()
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
+                .RuleFor(x => x.FullTitle, f => $"{f.Lorem.Word()}/{f.Lorem.Word()}/{f.Lorem.Word()}")
                 .RuleFor(x => x.PlexLibraryId, _ => plexLibraryId)
                 .RuleFor(x => x.PlexServerId, _ => plexServerId)
                 .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, tvShowIds))

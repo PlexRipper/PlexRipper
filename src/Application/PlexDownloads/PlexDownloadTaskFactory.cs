@@ -19,17 +19,23 @@ namespace PlexRipper.Application
 {
     public class PlexDownloadTaskFactory : IPlexDownloadTaskFactory
     {
-        private readonly IMediator _mediator;
-
-        private readonly IMapper _mapper;
-
-        private readonly IPlexAuthenticationService _plexAuthenticationService;
-
-        private readonly INotificationsService _notificationsService;
+        #region Fields
 
         private readonly IFolderPathService _folderPathService;
 
+        private readonly IMapper _mapper;
+
+        private readonly IMediator _mediator;
+
+        private readonly INotificationsService _notificationsService;
+
+        private readonly IPlexAuthenticationService _plexAuthenticationService;
+
         private readonly IUserSettings _userSettings;
+
+        #endregion
+
+        #region Constructor
 
         public PlexDownloadTaskFactory(
             IMediator mediator,
@@ -46,6 +52,50 @@ namespace PlexRipper.Application
 
             _folderPathService = folderPathService;
             _userSettings = userSettings;
+        }
+
+        #endregion
+
+        #region Public Methods
+
+
+        private async Task<Result<List<DownloadTask>>> FinalizeDownloadTasks(List<DownloadTask> downloadTasks)
+        {
+            if (!downloadTasks.Any())
+                return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
+
+            // Get the download folder
+            var downloadFolder = await _folderPathService.GetDownloadFolderAsync();
+            if (downloadFolder.IsFailed)
+                return downloadFolder.ToResult();
+
+            // Get the destination folder
+            // var destinationFolder = await _folderPathService.GetDestinationFolderByMediaType(downloadTasks);
+            // if (destinationFolder.IsFailed)
+            //     return destinationFolder.ToResult();
+
+            // Get plex server access token
+            var serverToken = await _plexAuthenticationService.GetPlexServerTokenAsync(downloadTasks.First().PlexServerId);
+            if (serverToken.IsFailed)
+                return serverToken.ToResult();
+
+            var parts = _userSettings.DownloadSegments;
+            foreach (var downloadTask in downloadTasks)
+            {
+                downloadTask.DownloadFolderId = downloadFolder.Value.Id;
+
+                downloadTask.DownloadFolder = downloadFolder.Value;
+
+                //   downloadTask.DestinationFolderId = destinationFolder.Value.Id;
+
+                //   downloadTask.DestinationFolder = destinationFolder.Value;
+
+                // downloadTask.ServerToken = serverToken.Value;
+
+                downloadTask.DownloadWorkerTasks = GenerateDownloadWorkerTasks(downloadTask, parts);
+            }
+
+            return Result.Ok(downloadTasks);
         }
 
         public async Task<Result<List<DownloadTask>>> GenerateAsync(List<DownloadMediaDTO> downloadMedias)
@@ -97,7 +147,81 @@ namespace PlexRipper.Application
             return Result.Ok(finalizeDownloadTasksResult.Value);
         }
 
-        #region Private Methods
+        public async Task<Result<List<DownloadTask>>> GenerateDownloadTvShowTasksAsync(
+            List<int> plexTvShowIds,
+            List<int> plexTvShowSeasonIds,
+            List<int> plexTvShowEpisodeIds)
+        {
+            var plexTvShows = await _mediator.Send(new GetPlexTvShowTreeByMediaIdsQuery(plexTvShowIds, plexTvShowSeasonIds, plexTvShowEpisodeIds));
+            if (plexTvShows.IsFailed)
+                return plexTvShows.ToResult();
+
+            // Create download tasks
+            var downloadTasks = new List<DownloadTask>();
+            foreach (var tvShow in plexTvShows.Value)
+            {
+                var tvShowDownloadTask = _mapper.Map<DownloadTask>(tvShow);
+
+                foreach (var season in tvShow.Seasons)
+                {
+                    var seasonDownloadTask = _mapper.Map<DownloadTask>(season);
+
+                    foreach (var episode in season.Episodes)
+                    {
+                        var episodeDownloadTask = _mapper.Map<DownloadTask>(episode);
+
+                        foreach (var mediaData in episode.EpisodeData)
+                        {
+                            // TODO Add quality selector
+                            foreach (var episodePart in mediaData.Parts)
+                            {
+                                var episodePartTask = _mapper.Map<DownloadTask>(episode);
+                                episodePartTask.MediaType = PlexMediaType.Episode;
+                                episodePartTask.DownloadTaskType =
+                                    mediaData.Parts.Count == 1 ? DownloadTaskType.EpisodeData : DownloadTaskType.EpisodePart;
+                                episodePartTask.DataTotal = episodePart.Size;
+                                episodePartTask.FileName = episodePart.File;
+                                episodePartTask.FileLocationUrl = episodePart.ObfuscatedFilePath;
+                                episodeDownloadTask.Children.Add(episodePartTask);
+                            }
+                        }
+
+                        seasonDownloadTask.Children.Add(episodeDownloadTask);
+                    }
+
+                    tvShowDownloadTask.Children.Add(seasonDownloadTask);
+                }
+
+                downloadTasks.Add(tvShowDownloadTask);
+            }
+
+            return Result.Ok(downloadTasks);
+        }
+
+        public List<DownloadWorkerTask> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts)
+        {
+            // Create download worker tasks/segments/ranges
+            var totalBytesToReceive = downloadTask.DataTotal;
+            var partSize = totalBytesToReceive / parts;
+            var remainder = totalBytesToReceive - partSize * parts;
+
+            var downloadWorkerTasks = new List<DownloadWorkerTask>();
+
+            for (int i = 0; i < parts; i++)
+            {
+                long start = partSize * i;
+                long end = start + partSize;
+                if (i == parts - 1 && remainder > 0)
+                {
+                    // Add the remainder to the last download range
+                    end += remainder;
+                }
+
+                downloadWorkerTasks.Add(new DownloadWorkerTask(downloadTask, i + 1, start, end));
+            }
+
+            return downloadWorkerTasks;
+        }
 
         /// <summary>
         /// Creates <see cref="DownloadTask"/>s from a <see cref="PlexMovie"/> and send it to the <see cref="IDownloadManager"/>.
@@ -144,280 +268,6 @@ namespace PlexRipper.Application
             }
 
             return Result.Ok(downloadTasks);
-        }
-
-        #region Create DownloadTasks
-
-        public Result<List<DownloadTask>> CreateDownloadTasks(List<PlexTvShow> plexTvShows)
-        {
-            if (!plexTvShows.Any())
-            {
-                return ResultExtensions.IsEmpty(nameof(plexTvShows));
-            }
-
-            static DownloadTask CreateBaseTask(PlexTvShow plexTvShow)
-            {
-                return new()
-                {
-                    MediaType = PlexMediaType.TvShow,
-                    DownloadTaskType = DownloadTaskType.TvShow,
-                    DownloadStatus = DownloadStatus.Initialized,
-                    Created = DateTime.UtcNow,
-                    Title = plexTvShow.Title,
-                    Year = plexTvShow.Year,
-                    PlexLibrary = plexTvShow.PlexLibrary,
-                    PlexLibraryId = plexTvShow.PlexLibraryId,
-                    PlexServer = plexTvShow.PlexServer,
-                    PlexServerId = plexTvShow.PlexServerId,
-                    Key = plexTvShow.Key,
-                    Children = new List<DownloadTask>(),
-                    MediaId = plexTvShow.Id,
-                    DataTotal = 0,
-                };
-            }
-
-            var downloadTasks = new List<DownloadTask>();
-            foreach (var tvShow in plexTvShows)
-            {
-                var tvShowDownloadTask = CreateBaseTask(tvShow);
-                var result = CreateDownloadTasks(tvShow.Seasons);
-                if (result.IsFailed)
-                {
-                    result.LogError();
-                    continue;
-                }
-
-                tvShowDownloadTask.Children = result.Value;
-            }
-
-            return Result.Ok(downloadTasks);
-        }
-
-        public Result<List<DownloadTask>> CreateDownloadTasks(List<PlexTvShowSeason> plexTvShowSeasons)
-        {
-            if (!plexTvShowSeasons.Any())
-            {
-                return ResultExtensions.IsEmpty(nameof(plexTvShowSeasons));
-            }
-
-            static DownloadTask CreateBaseTask(PlexTvShowSeason plexTvShowSeason)
-            {
-                return new()
-                {
-                    MediaType = PlexMediaType.Season,
-                    DownloadTaskType = DownloadTaskType.Season,
-                    DownloadStatus = DownloadStatus.Initialized,
-                    Created = DateTime.UtcNow,
-                    Title = plexTvShowSeason.Title,
-                    Year = plexTvShowSeason.Year,
-                    PlexLibrary = plexTvShowSeason.PlexLibrary,
-                    PlexLibraryId = plexTvShowSeason.PlexLibraryId,
-                    PlexServer = plexTvShowSeason.PlexServer,
-                    PlexServerId = plexTvShowSeason.PlexServerId,
-                    Key = plexTvShowSeason.Key,
-                    Children = new List<DownloadTask>(),
-                    MediaId = plexTvShowSeason.Id,
-                    DataTotal = 0,
-                };
-            }
-
-            var downloadTasks = new List<DownloadTask>();
-            foreach (var season in plexTvShowSeasons)
-            {
-                var seasonDownloadTask = CreateBaseTask(season);
-                var result = CreateDownloadTasks(season.Episodes);
-                if (result.IsFailed)
-                {
-                    result.LogError();
-                    continue;
-                }
-
-                seasonDownloadTask.Children = result.Value;
-
-                downloadTasks.Add(seasonDownloadTask);
-            }
-
-            return Result.Ok(downloadTasks);
-        }
-
-        public Result<List<DownloadTask>> CreateDownloadTasks(List<PlexTvShowEpisode> plexTvEpisodes)
-        {
-            if (!plexTvEpisodes.Any())
-            {
-                return ResultExtensions.IsEmpty(nameof(plexTvEpisodes));
-            }
-
-            static DownloadTask CreateBaseTask(PlexTvShowEpisode plexTvShowEpisode)
-            {
-                return new()
-                {
-                    MediaType = PlexMediaType.Episode,
-                    DownloadTaskType = DownloadTaskType.Episode,
-                    DownloadStatus = DownloadStatus.Initialized,
-                    Created = DateTime.UtcNow,
-                    Title = plexTvShowEpisode.Title,
-                    Year = plexTvShowEpisode.Year,
-                    PlexLibrary = plexTvShowEpisode.PlexLibrary,
-                    PlexLibraryId = plexTvShowEpisode.PlexLibraryId,
-                    PlexServer = plexTvShowEpisode.PlexServer,
-                    PlexServerId = plexTvShowEpisode.PlexServerId,
-                    Key = plexTvShowEpisode.Key,
-                    Children = new List<DownloadTask>(),
-                    MediaId = plexTvShowEpisode.Id,
-                    DataTotal = 0,
-                };
-            }
-
-            var downloadTasks = new List<DownloadTask>();
-            foreach (var episode in plexTvEpisodes)
-            {
-                var episodeDownloadTask = CreateBaseTask(episode);
-
-                // TODO Add quality selector, now it only download the first one
-                foreach (var episodePart in episode.EpisodeData.First().Parts)
-                {
-                    var episodePartTask = CreateBaseTask(episode);
-                    episodePartTask.MediaType = PlexMediaType.Episode;
-                    episodePartTask.DownloadTaskType = DownloadTaskType.EpisodePart;
-                    episodePartTask.DataTotal = episodePart.Size;
-                    episodeDownloadTask.Children.Add(episodePartTask);
-                }
-
-                downloadTasks.Add(episodeDownloadTask);
-            }
-
-            return Result.Ok(downloadTasks);
-        }
-
-        #endregion
-
-        public async Task<Result<List<DownloadTask>>> GenerateDownloadTvShowTasksAsync(
-            List<int> plexTvShowIds,
-            List<int> plexTvShowSeasonIds,
-            List<int> plexTvShowEpisodeIds)
-        {
-            var plexTvShows = await _mediator.Send(new GetPlexTvShowTreeByMediaIdsQuery(plexTvShowIds, plexTvShowSeasonIds, plexTvShowEpisodeIds));
-            if (plexTvShows.IsFailed)
-                return plexTvShows.ToResult();
-
-            var downloadTasks = CreateDownloadTasks(plexTvShows.Value);
-            if (downloadTasks.IsFailed)
-                return downloadTasks.ToResult();
-
-            var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks.Value);
-            if (finalizeDownloadTasksResult.IsFailed)
-                return finalizeDownloadTasksResult.ToResult().LogError();
-
-            return Result.Ok(finalizeDownloadTasksResult.Value);
-        }
-
-        public async Task<Result<List<DownloadTask>>> GenerateDownloadTvShowSeasonTasksAsync(List<int> plexTvShowSeasonIds)
-        {
-            Log.Debug($"Creating download request for TvShow season with id: {plexTvShowSeasonIds}");
-
-            var plexTvShowSeasonResult =
-                await _mediator.Send(new GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery(plexTvShowSeasonIds, true, true, true));
-            if (plexTvShowSeasonResult.IsFailed)
-
-                return plexTvShowSeasonResult.ToResult();
-
-            var downloadTasks = new List<DownloadTask>();
-
-            var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks);
-            if (finalizeDownloadTasksResult.IsFailed)
-            {
-                return finalizeDownloadTasksResult.ToResult().LogError();
-            }
-
-            return Result.Ok(finalizeDownloadTasksResult.Value);
-        }
-
-        public async Task<Result<List<DownloadTask>>> GenerateDownloadTvShowEpisodeTasksAsync(List<int> plexTvShowEpisodeId)
-        {
-            Log.Debug($"Creating download request for TvShow episode with id: {plexTvShowEpisodeId}");
-
-            var plexTvShowEpisodeResult = await _mediator.Send(new GetMultiplePlexTvShowEpisodesByIdQuery(plexTvShowEpisodeId, true, true, true));
-            if (plexTvShowEpisodeResult.IsFailed)
-
-                return plexTvShowEpisodeResult.ToResult();
-
-            var downloadTasks = new List<DownloadTask>();
-            foreach (var plexTvShowSeason in plexTvShowEpisodeResult.Value)
-            {
-                Log.Debug($"Created download task(s) for tvShowEpisodes: {plexTvShowSeason.Title}");
-            }
-
-            var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks);
-            if (finalizeDownloadTasksResult.IsFailed)
-            {
-                return finalizeDownloadTasksResult.ToResult().LogError();
-            }
-
-            return Result.Ok(finalizeDownloadTasksResult.Value);
-        }
-
-        public async Task<Result<List<DownloadTask>>> FinalizeDownloadTasks(List<DownloadTask> downloadTasks, int plexAccountId = 0)
-        {
-            if (!downloadTasks.Any())
-                return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
-
-            // Get the download folder
-            var downloadFolder = await _folderPathService.GetDownloadFolderAsync();
-            if (downloadFolder.IsFailed)
-                return downloadFolder.ToResult();
-
-            // Get the destination folder
-            // var destinationFolder = await _folderPathService.GetDestinationFolderByMediaType(downloadTasks);
-            // if (destinationFolder.IsFailed)
-            //     return destinationFolder.ToResult();
-
-            // Get plex server access token
-            var serverToken = await _plexAuthenticationService.GetPlexServerTokenAsync(downloadTasks.First().PlexServerId, plexAccountId);
-            if (serverToken.IsFailed)
-                return serverToken.ToResult();
-
-            var parts = _userSettings.DownloadSegments;
-            foreach (var downloadTask in downloadTasks)
-            {
-                downloadTask.DownloadFolderId = downloadFolder.Value.Id;
-
-                downloadTask.DownloadFolder = downloadFolder.Value;
-
-                //   downloadTask.DestinationFolderId = destinationFolder.Value.Id;
-
-                //   downloadTask.DestinationFolder = destinationFolder.Value;
-
-                // downloadTask.ServerToken = serverToken.Value;
-
-                downloadTask.DownloadWorkerTasks = GenerateDownloadWorkerTasks(downloadTask, parts);
-            }
-
-            return Result.Ok(downloadTasks);
-        }
-
-        public List<DownloadWorkerTask> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts)
-        {
-            // Create download worker tasks/segments/ranges
-            var totalBytesToReceive = downloadTask.DataTotal;
-            var partSize = totalBytesToReceive / parts;
-            var remainder = totalBytesToReceive - partSize * parts;
-
-            var downloadWorkerTasks = new List<DownloadWorkerTask>();
-
-            for (int i = 0; i < parts; i++)
-            {
-                long start = partSize * i;
-                long end = start + partSize;
-                if (i == parts - 1 && remainder > 0)
-                {
-                    // Add the remainder to the last download range
-                    end += remainder;
-                }
-
-                downloadWorkerTasks.Add(new DownloadWorkerTask(downloadTask, i + 1, start, end));
-            }
-
-            return downloadWorkerTasks;
         }
 
         /// <inheritdoc/>

@@ -25,10 +25,11 @@ namespace PlexRipper.Domain
         #region Helpers
 
         [NotMapped]
-        public List<PlexMediaData> EpisodeData => MediaData.MediaData;
+        public List<PlexMediaData> EpisodeData => MediaData.MediaData ?? new List<PlexMediaData>();
 
         [NotMapped]
         public override PlexMediaType Type => PlexMediaType.Episode;
+
 
         #endregion
     }

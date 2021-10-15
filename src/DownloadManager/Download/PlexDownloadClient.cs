@@ -156,7 +156,7 @@ namespace PlexRipper.DownloadManager.Download
         {
             _downloadWorkers.ForEach(x => x.Dispose());
             _downloadWorkers.Clear();
-            Log.Debug($"DownloadWorkers have been disposed for {DownloadTask.DownloadPath}");
+            Log.Debug($"DownloadWorkers have been disposed for {DownloadTask.DownloadDirectory}");
         }
 
         #region Subscriptions

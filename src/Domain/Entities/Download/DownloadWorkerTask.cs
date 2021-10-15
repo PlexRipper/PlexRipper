@@ -22,7 +22,7 @@ namespace PlexRipper.Domain
         public DownloadWorkerTask(DownloadTask downloadTask, int partIndex, long startPosition, long endPosition)
         {
             FileName = downloadTask.FileName;
-            TempDirectory = downloadTask.DownloadPath;
+            TempDirectory = downloadTask.DownloadDirectory;
             DownloadTask = downloadTask;
             DownloadTaskId = downloadTask.Id;
 
@@ -129,14 +129,12 @@ namespace PlexRipper.Domain
         /// <summary>
         /// The time remaining in seconds for this DownloadWorker to finish.
         /// </summary>
-
         [NotMapped]
         public long TimeRemaining => DataFormat.GetTimeRemaining(DataRemaining, DownloadSpeed);
 
         /// <summary>
         /// The time elapsed of this DownloadWorker.
         /// </summary>
-
         [NotMapped]
         public bool IsCompleted => BytesReceived == DataTotal;
 

@@ -142,16 +142,20 @@ namespace PlexRipper.Application
                                 episodePartTask.DownloadTaskType =
                                     mediaData.Parts.Count == 1 ? DownloadTaskType.EpisodeData : DownloadTaskType.EpisodePart;
                                 episodePartTask.DataTotal = episodePart.Size;
-                                episodePartTask.FileName = episodePart.File;
+                                episodePartTask.FileName = Path.GetFileName(episodePart.File);
                                 episodePartTask.FileLocationUrl = episodePart.ObfuscatedFilePath;
                                 episodeDownloadTask.Children.Add(episodePartTask);
                             }
                         }
 
+                        episodeDownloadTask.DataTotal = episodeDownloadTask.Children.Select(x => x.DataTotal).Sum();
+
                         seasonDownloadTask.Children.Add(episodeDownloadTask);
+                        seasonDownloadTask.DataTotal = seasonDownloadTask.Children.Select(x => x.DataTotal).Sum();
                     }
 
                     tvShowDownloadTask.Children.Add(seasonDownloadTask);
+                    tvShowDownloadTask.DataTotal = tvShowDownloadTask.Children.Select(x => x.DataTotal).Sum();
                 }
 
                 downloadTasks.Add(tvShowDownloadTask);
@@ -163,14 +167,10 @@ namespace PlexRipper.Application
         public Result<List<DownloadWorkerTask>> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts)
         {
             if (downloadTask is null)
-            {
                 return ResultExtensions.IsNull(nameof(downloadTask));
-            }
 
             if (parts <= 0)
-            {
                 return Result.Fail($"Parameter {nameof(parts)} was {parts}, prevented division by invalid value").LogWarning();
-            }
 
             // Create download worker tasks/segments/ranges
             var totalBytesToReceive = downloadTask.DataTotal;
@@ -314,7 +314,7 @@ namespace PlexRipper.Application
                 return downloadFolder.ToResult();
 
             // Get Plex libraries
-            var plexLibraries = await _mediator.Send(new GetAllPlexLibrariesQuery());
+            var plexLibraries = await _mediator.Send(new GetAllPlexLibrariesQuery(true));
             if (plexLibraries.IsFailed)
                 return plexLibraries.ToResult();
 
@@ -339,6 +339,9 @@ namespace PlexRipper.Application
                     if (plexLibrary is not null)
                     {
                         downloadTask.PlexLibrary = plexLibrary;
+                        downloadTask.PlexLibraryId = plexLibrary.Id;
+                        downloadTask.PlexServer = plexLibrary.PlexServer;
+                        downloadTask.PlexServerId = plexLibrary.PlexServer.Id;
 
                         if (plexLibrary.DefaultDestinationId is not null)
                         {
@@ -353,7 +356,21 @@ namespace PlexRipper.Application
                         }
                     }
 
-                    // downloadTask.ServerToken = serverToken.Value;
+                    // Determine download directory
+                    var downloadDir = GetDownloadDirectory(downloadTask);
+                    if (downloadDir.IsFailed)
+                        return downloadDir.ToResult();
+
+                    downloadTask.DownloadDirectory = downloadDir.Value;
+
+                    // Determine destination directory
+                    var destinationDir = GetDestinationDirectory(downloadTask);
+                    if (destinationDir.IsFailed)
+                        return destinationDir.ToResult();
+
+                    downloadTask.DestinationDirectory = destinationDir.Value;
+
+                    // Generate DownloadWorkerTasks
                     if (downloadTask.MediaType is PlexMediaType.Episode or PlexMediaType.Movie)
                     {
                         var downloadWorkerTasks = GenerateDownloadWorkerTasks(downloadTask, parts);
@@ -367,6 +384,11 @@ namespace PlexRipper.Application
 
                     if (downloadTask.Children.Any())
                     {
+                        foreach (var childTask in downloadTask.Children)
+                        {
+                            childTask.Parent = downloadTask;
+                        }
+
                         var result = FillDownloadTasks(downloadTask.Children);
                         if (result.IsFailed)
                         {
@@ -381,6 +403,54 @@ namespace PlexRipper.Application
             }
 
             return FillDownloadTasks(downloadTasks);
+        }
+
+        private Result<string> GetDownloadDirectory(DownloadTask downloadTask)
+        {
+            if (downloadTask?.DownloadFolder is null)
+                return Result.Fail("DownloadTask had an invalid DownloadFolder value");
+
+            var basePath = downloadTask.DownloadFolder.DirectoryPath;
+
+            var parent = downloadTask.Parent;
+            switch (downloadTask.MediaType)
+            {
+                case PlexMediaType.Movie:
+                    return Result.Ok(Path.Join(basePath, "Movies", $"{downloadTask.Title} ({downloadTask.Year})"));
+                case PlexMediaType.TvShow:
+                    return Result.Ok(Path.Join(basePath, "TvShows", $"{downloadTask.Title} ({downloadTask.Year})"));
+                case PlexMediaType.Season:
+                    return Result.Ok(Path.Join(basePath, "TvShows", $"{parent.Title} ({parent.Year})", downloadTask.Title));
+                case PlexMediaType.Episode:
+                    var grandParent = downloadTask.Parent?.Parent;
+                    return Result.Ok(Path.Join(basePath, "TvShows", $"{grandParent.Title} ({grandParent.Year})", parent.Title));
+                default:
+                    return Result.Ok(Path.Join(basePath, "Other", $"{downloadTask.Title} ({downloadTask.Year})"));
+            }
+        }
+
+        private Result<string> GetDestinationDirectory(DownloadTask downloadTask)
+        {
+            if (downloadTask?.DestinationFolder is null)
+                return Result.Fail("DownloadTask had an invalid DestinationFolder value");
+
+            var basePath = downloadTask.DestinationFolder.DirectoryPath;
+
+            var parent = downloadTask.Parent;
+            switch (downloadTask.MediaType)
+            {
+                case PlexMediaType.Movie:
+                    return Result.Ok(Path.Join(basePath, "Movies", $"{downloadTask.Title} ({downloadTask.Year})"));
+                case PlexMediaType.TvShow:
+                    return Result.Ok(Path.Join(basePath, "TvShows", $"{downloadTask.Title} ({downloadTask.Year})"));
+                case PlexMediaType.Season:
+                    return Result.Ok(Path.Join(basePath, "TvShows", $"{parent.Title} ({parent.Year})", downloadTask.Title));
+                case PlexMediaType.Episode:
+                    var grandParent = downloadTask.Parent?.Parent;
+                    return Result.Ok(Path.Join(basePath, "TvShows", $"{grandParent.Title} ({grandParent.Year})", parent.Title));
+                default:
+                    return Result.Ok(Path.Join(basePath, "Other", $"{downloadTask.Title} ({downloadTask.Year})"));
+            }
         }
 
         #endregion

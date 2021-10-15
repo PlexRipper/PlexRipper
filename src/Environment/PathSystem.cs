@@ -31,7 +31,7 @@ namespace Environment
                     case OperatingSystemPlatform.Osx:
                         return "/";
                     case OperatingSystemPlatform.Windows:
-                        return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
+                        return Path.GetPathRoot(Assembly.GetExecutingAssembly().Location) ?? @"C:\";
                     default:
                         return "/";
                 }

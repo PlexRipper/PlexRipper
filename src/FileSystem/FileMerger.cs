@@ -108,7 +108,7 @@ namespace PlexRipper.FileSystem
                 try
                 {
                     // Ensure destination directory exists and is otherwise created.
-                    var result = _fileSystem.CreateDirectoryFromFilePath(fileTask.DownloadTask.DestinationFilePath);
+                    var result = _fileSystem.CreateDirectoryFromFilePath(fileTask.DownloadTask.DestinationDirectory);
                     if (result.IsFailed)
                     {
                         // TODO do something here with the error
@@ -117,7 +117,7 @@ namespace PlexRipper.FileSystem
                     }
 
                     // Merge files
-                    await using (var outputStream = File.Create(fileTask.DownloadTask.DestinationFilePath, 4096, FileOptions.SequentialScan))
+                    await using (var outputStream = File.Create(fileTask.DownloadTask.DestinationDirectory, 4096, FileOptions.SequentialScan))
                     {
                         Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
                         await StreamExtensions.CopyMultipleToAsync(fileTask.FilePaths, outputStream, _bytesReceivedProgress);

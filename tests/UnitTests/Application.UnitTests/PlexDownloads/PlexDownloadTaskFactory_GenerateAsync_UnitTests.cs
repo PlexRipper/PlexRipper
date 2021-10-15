@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Environment;
 using FluentResults;
 using Logging;
 using MediatR;
@@ -96,11 +98,15 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
             {
                 Id = 1,
                 FolderType = FolderType.DownloadFolder,
+                DirectoryPath = Path.Combine(PathSystem.RootDirectory, "downloads"),
                 PlexLibraries = new List<PlexLibrary>(),
+                DisplayName = "Download Folder",
+                MediaType = PlexMediaType.None,
             }));
-            _folderPathService.Setup(x => x.GetDefaultDestinationFolderDictionary()).ReturnsAsync(Result.Ok(new Dictionary<PlexMediaType, FolderPath>()
+            _folderPathService.Setup(x => x.GetDefaultDestinationFolderDictionary()).ReturnsAsync(Result.Ok(
+                new Dictionary<PlexMediaType, FolderPath>()
                 {
-                    { PlexMediaType.Movie, folderPaths.FirstOrDefault(x => x.Id == 1) },
+                    { PlexMediaType.Movie, folderPaths.FirstOrDefault(x => x.Id == 2) },
                     { PlexMediaType.TvShow, folderPaths.FirstOrDefault(x => x.Id == 3) },
                     { PlexMediaType.Season, folderPaths.FirstOrDefault(x => x.Id == 3) },
                     { PlexMediaType.Episode, folderPaths.FirstOrDefault(x => x.Id == 3) },
@@ -119,6 +125,10 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                 new()
                 {
                     Id = 1,
+                    PlexServer = new()
+                    {
+                        Id = 1,
+                    },
                 },
             }));
             _iMediator.Setup(x => x.Send(It.IsAny<GetAllFolderPathsQuery>(), CancellationToken.None)).ReturnsAsync(Result.Ok(folderPaths));
@@ -165,7 +175,12 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                 downloadTask.DataTotal.ShouldBe(tvShow.MediaSize);
                 downloadTask.Year.ShouldBe(tvShow.Year);
 
+                downloadTask.DownloadDirectory.ShouldNotBeEmpty();
+                downloadTask.DestinationDirectory.ShouldNotBeEmpty();
+
+                downloadTask.PlexLibrary.ShouldNotBeNull();
                 downloadTask.PlexLibraryId.ShouldBe(tvShow.PlexLibraryId);
+                downloadTask.PlexServer.ShouldNotBeNull();
                 downloadTask.PlexServerId.ShouldBe(tvShow.PlexServerId);
                 downloadTask.MediaId.ShouldBe(tvShow.Id);
 
@@ -189,7 +204,12 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                     seasonDownloadTask.DataTotal.ShouldBe(tvShowSeason.MediaSize);
                     seasonDownloadTask.Year.ShouldBe(tvShowSeason.Year);
 
+                    seasonDownloadTask.DownloadDirectory.ShouldNotBeEmpty();
+                    seasonDownloadTask.DestinationDirectory.ShouldNotBeEmpty();
+
+                    seasonDownloadTask.PlexLibrary.ShouldNotBeNull();
                     seasonDownloadTask.PlexLibraryId.ShouldBe(seasonDownloadTask.PlexLibraryId);
+                    seasonDownloadTask.PlexServer.ShouldNotBeNull();
                     seasonDownloadTask.PlexServerId.ShouldBe(seasonDownloadTask.PlexServerId);
                     seasonDownloadTask.MediaId.ShouldBe(tvShowSeason.Id);
 
@@ -214,7 +234,12 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                         episodeDownloadTask.DataTotal.ShouldBe(tvShowEpisode.MediaSize);
                         episodeDownloadTask.Year.ShouldBe(tvShowEpisode.Year);
 
+                        episodeDownloadTask.DownloadDirectory.ShouldNotBeEmpty();
+                        episodeDownloadTask.DestinationDirectory.ShouldNotBeEmpty();
+
+                        episodeDownloadTask.PlexLibrary.ShouldNotBeNull();
                         episodeDownloadTask.PlexLibraryId.ShouldBe(tvShowEpisode.PlexLibraryId);
+                        episodeDownloadTask.PlexServer.ShouldNotBeNull();
                         episodeDownloadTask.PlexServerId.ShouldBe(tvShowEpisode.PlexServerId);
                         episodeDownloadTask.MediaId.ShouldBe(tvShowEpisode.Id);
 
@@ -243,6 +268,13 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                                 episodeDataPartDownloadTask.FullTitle.ShouldBe(tvShowEpisode.FullTitle);
                                 episodeDataPartDownloadTask.DataTotal.ShouldBe(tvShowEpisodeDataPart.Size);
                                 episodeDataPartDownloadTask.Year.ShouldBe(tvShowEpisode.Year);
+
+                                episodeDataPartDownloadTask.FileName.ShouldNotBeEmpty();
+                                episodeDataPartDownloadTask.FileName.ShouldNotContain(@"/");
+                                episodeDataPartDownloadTask.FileName.ShouldNotContain(@"\");
+                                episodeDataPartDownloadTask.FileLocationUrl.ShouldNotBeEmpty();
+                                episodeDataPartDownloadTask.DownloadDirectory.ShouldNotBeEmpty();
+                                episodeDataPartDownloadTask.DestinationDirectory.ShouldNotBeEmpty();
 
                                 episodeDataPartDownloadTask.PlexLibraryId.ShouldBe(tvShowEpisode.PlexLibraryId);
                                 episodeDataPartDownloadTask.PlexServerId.ShouldBe(tvShowEpisode.PlexServerId);

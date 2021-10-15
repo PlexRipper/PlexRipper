@@ -287,7 +287,7 @@ namespace PlexRipper.DownloadManager
 
         private Result RemoveDownloadTempFiles(DownloadTask downloadTask)
         {
-            return _fileSystem.DeleteAllFilesFromDirectory(downloadTask.DownloadPath);
+            return _fileSystem.DeleteAllFilesFromDirectory(downloadTask.DownloadDirectory);
         }
 
         /// <summary>

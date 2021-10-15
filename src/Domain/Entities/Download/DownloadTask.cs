@@ -68,6 +68,18 @@ namespace PlexRipper.Domain
         public string Quality { get; set; }
 
         /// <summary>
+        /// Gets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
+        /// </summary>
+        [Column(Order = 13)]
+        public string DownloadDirectory { get; set; }
+
+        /// <summary>
+        /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
+        /// </summary>
+        [Column(Order = 14)]
+        public string DestinationDirectory { get; set; }
+
+        /// <summary>
         /// The download priority, the higher the more important.
         /// </summary>
         public long Priority { get; set; }
@@ -119,78 +131,6 @@ namespace PlexRipper.Domain
 
         [NotMapped]
         public Uri DownloadUri => !string.IsNullOrWhiteSpace(DownloadUrl) ? new Uri(DownloadUrl, UriKind.Absolute) : null;
-
-        [NotMapped]
-        public string FileNameWithoutExtention => !string.IsNullOrWhiteSpace(FileName) ? Path.GetFileNameWithoutExtension(FileName) : string.Empty;
-
-        /// <summary>
-        /// Gets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
-        /// </summary>
-        [NotMapped]
-        public string DownloadPath
-        {
-            get
-            {
-                if (DownloadFolder is null)
-                {
-                    return string.Empty;
-                }
-
-                switch (MediaType)
-                {
-                    case PlexMediaType.Movie:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "Movies", $"{FileNameWithoutExtention}".SanitizeFolderName());
-                    case PlexMediaType.Episode:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "TvShows", $"{FileNameWithoutExtention}".SanitizeFolderName());
-                    default:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "Other", $"{FileNameWithoutExtention}".SanitizeFolderName());
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
-        /// TODO Get valid destination file path.
-        /// </summary>
-        [NotMapped]
-        public string DestinationFilePath
-        {
-            get
-            {
-                if (DestinationFolder != null)
-                {
-                    switch (MediaType)
-                    {
-                        case PlexMediaType.Movie:
-                            return Path.Combine(DestinationFolder.DirectoryPath, FullTitle, FileName);
-                        case PlexMediaType.TvShow:
-                            break;
-                        case PlexMediaType.Season:
-                            break;
-                        case PlexMediaType.Episode:
-                            break;
-                        case PlexMediaType.Music:
-                            break;
-                        case PlexMediaType.Album:
-                            break;
-                        case PlexMediaType.Song:
-                            break;
-                        case PlexMediaType.Photos:
-                            break;
-                        case PlexMediaType.OtherVideos:
-                            break;
-                        case PlexMediaType.Games:
-                            break;
-                        case PlexMediaType.Unknown:
-                            break;
-                        default:
-                            return Path.Combine(DestinationFolder.DirectoryPath, FullTitle, FileName);
-                    }
-                }
-
-                return "INVALID";
-            }
-        }
 
         [NotMapped]
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);

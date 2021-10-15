@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Environment;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 
@@ -8,94 +9,96 @@ namespace PlexRipper.Data
     {
         public static ModelBuilder SeedDatabase(ModelBuilder builder)
         {
-            var list = new List<FolderPath>()
+            var root = PathSystem.RootDirectory;
+
+            var list = new List<FolderPath>
             {
-                new FolderPath
+                new()
                 {
                     Id = 1,
                     DisplayName = "Download Path",
-                    DirectoryPath = "/downloads",
+                    DirectoryPath = root + "downloads",
                     FolderType = FolderType.DownloadFolder,
                     MediaType = PlexMediaType.None,
                 },
 
-                new FolderPath
+                new()
                 {
                     Id = 2,
                     DisplayName = "Movie Destination Path",
-                    DirectoryPath = "/movies",
+                    DirectoryPath = root + "movies",
                     FolderType = FolderType.MovieFolder,
                     MediaType = PlexMediaType.Movie,
                 },
 
-                new FolderPath
+                new()
                 {
                     Id = 3,
                     DisplayName = "Tv Show Destination Path",
-                    DirectoryPath = "/tvshows",
+                    DirectoryPath = root + "tvshows",
                     FolderType = FolderType.TvShowFolder,
                     MediaType = PlexMediaType.TvShow,
                 },
 
-                new FolderPath
+                new()
                 {
                     Id = 4,
                     DisplayName = "Music Destination Path",
-                    DirectoryPath = "/music",
+                    DirectoryPath = root + "music",
                     FolderType = FolderType.MusicFolder,
                     MediaType = PlexMediaType.Music,
                 },
 
-                new FolderPath
+                new()
                 {
                     Id = 5,
                     DisplayName = "Photos Destination Path",
-                    DirectoryPath = "/photos",
+                    DirectoryPath = root + "photos",
                     FolderType = FolderType.PhotosFolder,
                     MediaType = PlexMediaType.Photos,
                 },
 
-                new FolderPath
+                new()
                 {
                     Id = 6,
                     DisplayName = "Other Videos Destination Path",
-                    DirectoryPath = "/other",
+                    DirectoryPath = root + "other",
                     FolderType = FolderType.OtherVideosFolder,
                     MediaType = PlexMediaType.OtherVideos,
                 },
 
-                new FolderPath
+                new()
                 {
                     Id = 7,
                     DisplayName = "Games Videos Destination Path",
-                    DirectoryPath = "/games",
+                    DirectoryPath = root + "games",
                     FolderType = FolderType.GamesVideosFolder,
                     MediaType = PlexMediaType.Games,
                 },
 
-                new FolderPath
+                new()
                 {
                     Id = 8,
                     DisplayName = "Reserved #1 Destination Path",
-                    DirectoryPath = "/",
+                    DirectoryPath = root + "",
                     FolderType = FolderType.None,
                     MediaType = PlexMediaType.None,
                 },
 
-                new FolderPath
+                new()
                 {
                     Id = 9,
                     DisplayName = "Reserved #2 Destination Path",
-                    DirectoryPath = "/",
+                    DirectoryPath = root + "",
                     FolderType = FolderType.None,
                     MediaType = PlexMediaType.None,
                 },
 
-                new FolderPath
+                new()
                 {
                     Id = 10,
                     DisplayName = "Reserved #3 Destination Path",
-                    DirectoryPath = "/",
+                    DirectoryPath = root + "",
                     FolderType = FolderType.None,
                     MediaType = PlexMediaType.None,
                 },

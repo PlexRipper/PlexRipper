@@ -188,7 +188,6 @@ namespace PlexRipper.BaseTests
             return new Faker<PlexTvShow>()
                 .RuleFor(x => x.Id, _ => _plexTvShowId++)
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
-                .RuleFor(x => x.FullTitle, f => $"{f.Lorem.Word()}/{f.Lorem.Word()}/{f.Lorem.Word()}")
                 .RuleFor(x => x.SortTitle, f => $"{f.Lorem.Word()}")
                 .RuleFor(x => x.PlexLibraryId, _ => plexLibraryId)
                 .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
@@ -203,17 +202,21 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
                 .FinishWith((f, tvShow) =>
                 {
-                    foreach (var plexTvShowSeason in tvShow.Seasons)
+                    foreach (var tvShowSeason in tvShow.Seasons)
                     {
-                        plexTvShowSeason.TvShow = tvShow;
-                        plexTvShowSeason.TvShowId = tvShow.Id;
+                        tvShowSeason.TvShow = tvShow;
+                        tvShowSeason.TvShowId = tvShow.Id;
+                        tvShowSeason.FullTitle = $"{tvShow.Title}/{tvShowSeason.Title}";
 
-                        foreach (var episode in plexTvShowSeason.Episodes)
+                        foreach (var episode in tvShowSeason.Episodes)
                         {
                             episode.TvShow = tvShow;
                             episode.TvShowId = tvShow.Id;
+                            episode.FullTitle = $"{tvShow.Title}/{tvShowSeason.Title}/{episode.Title}";
                         }
                     }
+
+                    tvShow.MediaSize = tvShow.Seasons.Select(x => x.MediaSize).Sum();
                 });
         }
 
@@ -225,7 +228,6 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.Id, _ => _plexSeasonId++)
                 .RuleFor(x => x.ParentKey, _ => parentKey)
                 .RuleFor(x => x.Title, _ => $"Season {seasonIndex++}")
-                .RuleFor(x => x.FullTitle, f => $"{f.Lorem.Word()}/{f.Lorem.Word()}")
                 .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, seasonKeys))
                 .RuleFor(x => x.PlexLibraryId, _ => plexLibraryId)
                 .RuleFor(x => x.PlexServerId, _ => plexServerId)
@@ -248,7 +250,10 @@ namespace PlexRipper.BaseTests
                     {
                         episode.TvShowSeason = tvShowSeason;
                         episode.TvShowSeasonId = tvShowSeason.Id;
+                        episode.FullTitle = $"{tvShowSeason.Title}/{episode.Title}";
                     }
+
+                    tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum();
                 });
         }
 
@@ -261,7 +266,6 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.ParentKey, _ => parentKey)
                 .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, episodeKeys))
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
-                .RuleFor(x => x.FullTitle, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexLibraryId, _ => plexLibraryId)
                 .RuleFor(x => x.PlexServerId, _ => plexServerId)
                 .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
@@ -273,7 +277,11 @@ namespace PlexRipper.BaseTests
                 {
                     MediaData = GetPlexMediaData(1).Generate(1),
                 })
-                .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30));
+                .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
+                .FinishWith((f, tvShowEpisode) =>
+                {
+                    tvShowEpisode.MediaSize = tvShowEpisode.EpisodeData.SelectMany(x => x.Parts.Select(y => y.Size)).Sum();
+                });
         }
 
         public static Faker<FolderPath> GetFolderPaths()

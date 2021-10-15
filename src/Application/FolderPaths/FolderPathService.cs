@@ -85,7 +85,7 @@ namespace PlexRipper.Application.FolderPaths
 
             var dict = new Dictionary<PlexMediaType, FolderPath>()
             {
-                { PlexMediaType.Movie, folderPaths.Value.FirstOrDefault(x => x.Id == 1) },
+                { PlexMediaType.Movie, folderPaths.Value.FirstOrDefault(x => x.Id == 2) },
                 { PlexMediaType.TvShow, folderPaths.Value.FirstOrDefault(x => x.Id == 3) },
                 { PlexMediaType.Season, folderPaths.Value.FirstOrDefault(x => x.Id == 3) },
                 { PlexMediaType.Episode, folderPaths.Value.FirstOrDefault(x => x.Id == 3) },

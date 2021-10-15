@@ -9,15 +9,13 @@ namespace PlexRipper.Data
     {
         public static ModelBuilder SeedDatabase(ModelBuilder builder)
         {
-            var root = PathSystem.RootDirectory;
-
             var list = new List<FolderPath>
             {
                 new()
                 {
                     Id = 1,
                     DisplayName = "Download Path",
-                    DirectoryPath = root + "downloads",
+                    DirectoryPath = "/downloads",
                     FolderType = FolderType.DownloadFolder,
                     MediaType = PlexMediaType.None,
                 },
@@ -26,7 +24,7 @@ namespace PlexRipper.Data
                 {
                     Id = 2,
                     DisplayName = "Movie Destination Path",
-                    DirectoryPath = root + "movies",
+                    DirectoryPath = "/movies",
                     FolderType = FolderType.MovieFolder,
                     MediaType = PlexMediaType.Movie,
                 },
@@ -35,7 +33,7 @@ namespace PlexRipper.Data
                 {
                     Id = 3,
                     DisplayName = "Tv Show Destination Path",
-                    DirectoryPath = root + "tvshows",
+                    DirectoryPath = "/tvshows",
                     FolderType = FolderType.TvShowFolder,
                     MediaType = PlexMediaType.TvShow,
                 },
@@ -44,7 +42,7 @@ namespace PlexRipper.Data
                 {
                     Id = 4,
                     DisplayName = "Music Destination Path",
-                    DirectoryPath = root + "music",
+                    DirectoryPath = "/music",
                     FolderType = FolderType.MusicFolder,
                     MediaType = PlexMediaType.Music,
                 },
@@ -53,7 +51,7 @@ namespace PlexRipper.Data
                 {
                     Id = 5,
                     DisplayName = "Photos Destination Path",
-                    DirectoryPath = root + "photos",
+                    DirectoryPath = "/photos",
                     FolderType = FolderType.PhotosFolder,
                     MediaType = PlexMediaType.Photos,
                 },
@@ -62,7 +60,7 @@ namespace PlexRipper.Data
                 {
                     Id = 6,
                     DisplayName = "Other Videos Destination Path",
-                    DirectoryPath = root + "other",
+                    DirectoryPath = "/other",
                     FolderType = FolderType.OtherVideosFolder,
                     MediaType = PlexMediaType.OtherVideos,
                 },
@@ -71,7 +69,7 @@ namespace PlexRipper.Data
                 {
                     Id = 7,
                     DisplayName = "Games Videos Destination Path",
-                    DirectoryPath = root + "games",
+                    DirectoryPath = "/games",
                     FolderType = FolderType.GamesVideosFolder,
                     MediaType = PlexMediaType.Games,
                 },
@@ -80,7 +78,7 @@ namespace PlexRipper.Data
                 {
                     Id = 8,
                     DisplayName = "Reserved #1 Destination Path",
-                    DirectoryPath = root + "",
+                    DirectoryPath = "/",
                     FolderType = FolderType.None,
                     MediaType = PlexMediaType.None,
                 },
@@ -89,7 +87,7 @@ namespace PlexRipper.Data
                 {
                     Id = 9,
                     DisplayName = "Reserved #2 Destination Path",
-                    DirectoryPath = root + "",
+                    DirectoryPath = "/",
                     FolderType = FolderType.None,
                     MediaType = PlexMediaType.None,
                 },
@@ -98,7 +96,7 @@ namespace PlexRipper.Data
                 {
                     Id = 10,
                     DisplayName = "Reserved #3 Destination Path",
-                    DirectoryPath = root + "",
+                    DirectoryPath = "/",
                     FolderType = FolderType.None,
                     MediaType = PlexMediaType.None,
                 },

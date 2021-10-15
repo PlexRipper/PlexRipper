@@ -21,11 +21,11 @@ namespace PlexRipper.Domain
         /// <param name="endPosition"></param>
         public DownloadWorkerTask(DownloadTask downloadTask, int partIndex, long startPosition, long endPosition)
         {
-            FileName = downloadTask.FileName;
+            FileName = $"{Path.GetFileNameWithoutExtension(FileName)}.part{PartIndex}{Path.GetExtension(FileName)}";
             TempDirectory = downloadTask.DownloadDirectory;
             DownloadTask = downloadTask;
             DownloadTaskId = downloadTask.Id;
-
+            DownloadStatus = DownloadStatus.Initialized;
             PartIndex = partIndex;
             StartByte = startPosition;
             EndByte = endPosition;
@@ -44,18 +44,15 @@ namespace PlexRipper.Domain
         public string FileName { get; internal set; }
 
         [Column(Order = 2)]
-        public string FilePath { get; set; }
-
-        [Column(Order = 3)]
         public int PartIndex { get; set; }
 
-        [Column(Order = 4)]
+        [Column(Order = 3)]
         public long StartByte { get; set; }
 
-        [Column(Order = 5)]
+        [Column(Order = 4)]
         public long EndByte { get; set; }
 
-        [Column(Order = 6)]
+        [Column(Order = 5)]
         public DownloadStatus DownloadStatus { get; set; }
 
         /// <summary>
@@ -91,10 +88,7 @@ namespace PlexRipper.Domain
         #region Helpers
 
         [NotMapped]
-        public string TempFileName => $"{Path.GetFileNameWithoutExtension(FileName)}.part{PartIndex}{Path.GetExtension(FileName)}";
-
-        [NotMapped]
-        public string TempFilePath => Path.Combine(TempDirectory, TempFileName);
+        public string TempFilePath => Path.Combine(TempDirectory, FileName);
 
         [NotMapped]
         public string Url => DownloadTask.DownloadUrl;

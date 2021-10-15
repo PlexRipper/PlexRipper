@@ -38,7 +38,6 @@ namespace PlexRipper.Data.Configurations
                 .HasMaxLength(20)
                 .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())
                 .IsUnicode(false);
-
         }
     }
 }

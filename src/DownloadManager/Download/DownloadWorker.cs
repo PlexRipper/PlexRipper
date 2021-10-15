@@ -80,7 +80,7 @@ namespace PlexRipper.DownloadManager.Download
         /// </summary>
         public DownloadWorkerTask DownloadWorkerTask { get; }
 
-        public string FileName => DownloadWorkerTask.TempFileName;
+        public string FileName => DownloadWorkerTask.FileName;
 
         /// <summary>
         /// The download worker id, which is the same as the <see cref="DownloadWorkerTask"/> Id.

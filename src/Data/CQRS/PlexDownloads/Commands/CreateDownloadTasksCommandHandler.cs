@@ -2,11 +2,13 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Data.CQRS.PlexDownloads
 {
@@ -25,7 +27,14 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
         public async Task<Result<List<int>>> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
         {
             // Prevent the navigation properties from being updated
-            command.DownloadTasks.ForEach(x =>
+            CleanUp(command.DownloadTasks);
+
+            return Result.Ok(command.DownloadTasks.Select(x => x.Id).ToList());
+        }
+
+        private void CleanUp(List<DownloadTask> downloadTasks)
+        {
+            downloadTasks.ForEach(x =>
             {
                 x.DestinationFolder = null;
                 x.DownloadFolder = null;
@@ -33,10 +42,20 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 x.PlexLibrary = null;
             });
 
-            await _dbContext.AddRangeAsync(command.DownloadTasks, cancellationToken);
-            await SaveChangesAsync();
+            _dbContext.BulkInsert(downloadTasks, _bulkConfig);
 
-            return Result.Ok(command.DownloadTasks.Select(x => x.Id).ToList());
+            foreach (var downloadTask in downloadTasks)
+            {
+                if (downloadTask.Children.Any())
+                {
+                    foreach (var downloadTaskChild in downloadTask.Children)
+                    {
+                        downloadTaskChild.ParentId = downloadTask.Id;
+                    }
+
+                    CleanUp(downloadTask.Children);
+                }
+            }
         }
     }
 }

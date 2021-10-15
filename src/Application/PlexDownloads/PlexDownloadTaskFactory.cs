@@ -51,7 +51,6 @@ namespace PlexRipper.Application
             _mapper = mapper;
             _plexAuthenticationService = plexAuthenticationService;
             _notificationsService = notificationsService;
-
             _folderPathService = folderPathService;
             _userSettings = userSettings;
         }

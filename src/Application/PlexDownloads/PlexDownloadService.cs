@@ -64,33 +64,12 @@ namespace PlexRipper.Application
 
         public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders)
         {
-            int mediaCount = downloadTaskOrders.Select(x => x.MediaIds.Count).Sum();
-            await _signalRService.SendDownloadTaskCreationProgressUpdate(1, mediaCount);
-            int count = 0;
-
-            List<DownloadTask> downloadTasks = new();
-
-            foreach (var downloadMedia in downloadTaskOrders)
-            {
-                var result = await _plexDownloadTaskFactory.GenerateAsync(downloadTaskOrders);
-
-                if (result.IsFailed)
-                {
-                    await _notificationsService.SendResult(result);
-                }
-                else
-                {
-                    downloadTasks.AddRange(result.Value);
-                }
-
-                count += downloadMedia.MediaIds.Count;
-                await _signalRService.SendDownloadTaskCreationProgressUpdate(count, mediaCount);
-            }
-
-            await _signalRService.SendDownloadTaskCreationProgressUpdate(mediaCount, mediaCount);
+            var downloadTasks = await _plexDownloadTaskFactory.GenerateAsync(downloadTaskOrders);
+            if (downloadTasks.IsFailed)
+                return downloadTasks.ToResult();
 
             // Sent to download manager
-            return await _downloadManager.AddToDownloadQueueAsync(downloadTasks);
+            return await _downloadManager.AddToDownloadQueueAsync(downloadTasks.Value);
         }
 
         public async Task<Result> DeleteDownloadTasksAsync(List<int> downloadTaskIds)

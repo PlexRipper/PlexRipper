@@ -46,7 +46,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         public int Key { get; set; }
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
-        public int DownloadSpeed { get; set;}
+        public int DownloadSpeed { get; set; }
 
         [JsonProperty("dataReceived", Required = Required.Always)]
         public long DataReceived { get; set; }
@@ -56,6 +56,12 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("percentage", Required = Required.Always)]
         public decimal Percentage { get; set; }
+
+        [JsonProperty("downloadDirectory", Required = Required.Always)]
+        public string DownloadDirectory { get; set; }
+
+        [JsonProperty("destinationDirectory", Required = Required.Always)]
+        public string DestinationDirectory { get; set; }
 
         /// <summary>
         /// The download priority, the higher the more important.
@@ -71,12 +77,6 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("timeRemaining", Required = Required.Always)]
         public long TimeRemaining { get; set; }
-
-        [JsonProperty("destinationFilePath", Required = Required.Always)]
-        public string DestinationFilePath { get; set; }
-
-        [JsonProperty("downloadPath", Required = Required.Always)]
-        public string DownloadPath { get; set; }
 
         [JsonProperty("downloadUrl", Required = Required.Always)]
         public string DownloadUrl { get; set; }

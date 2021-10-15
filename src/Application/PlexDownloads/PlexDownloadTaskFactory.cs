@@ -10,6 +10,8 @@ using Logging;
 using MediatR;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.WebApi;
+using PlexRipper.Application.FolderPaths;
+using PlexRipper.Application.PlexLibraries;
 using PlexRipper.Application.PlexMedia;
 using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexTvShows;
@@ -57,46 +59,6 @@ namespace PlexRipper.Application
         #endregion
 
         #region Public Methods
-
-
-        private async Task<Result<List<DownloadTask>>> FinalizeDownloadTasks(List<DownloadTask> downloadTasks)
-        {
-            if (!downloadTasks.Any())
-                return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
-
-            // Get the download folder
-            var downloadFolder = await _folderPathService.GetDownloadFolderAsync();
-            if (downloadFolder.IsFailed)
-                return downloadFolder.ToResult();
-
-            // Get the destination folder
-            // var destinationFolder = await _folderPathService.GetDestinationFolderByMediaType(downloadTasks);
-            // if (destinationFolder.IsFailed)
-            //     return destinationFolder.ToResult();
-
-            // Get plex server access token
-            var serverToken = await _plexAuthenticationService.GetPlexServerTokenAsync(downloadTasks.First().PlexServerId);
-            if (serverToken.IsFailed)
-                return serverToken.ToResult();
-
-            var parts = _userSettings.DownloadSegments;
-            foreach (var downloadTask in downloadTasks)
-            {
-                downloadTask.DownloadFolderId = downloadFolder.Value.Id;
-
-                downloadTask.DownloadFolder = downloadFolder.Value;
-
-                //   downloadTask.DestinationFolderId = destinationFolder.Value.Id;
-
-                //   downloadTask.DestinationFolder = destinationFolder.Value;
-
-                // downloadTask.ServerToken = serverToken.Value;
-
-                downloadTask.DownloadWorkerTasks = GenerateDownloadWorkerTasks(downloadTask, parts);
-            }
-
-            return Result.Ok(downloadTasks);
-        }
 
         public async Task<Result<List<DownloadTask>>> GenerateAsync(List<DownloadMediaDTO> downloadMedias)
         {
@@ -198,8 +160,18 @@ namespace PlexRipper.Application
             return Result.Ok(downloadTasks);
         }
 
-        public List<DownloadWorkerTask> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts)
+        public Result<List<DownloadWorkerTask>> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts)
         {
+            if (downloadTask is null)
+            {
+                return ResultExtensions.IsNull(nameof(downloadTask));
+            }
+
+            if (parts <= 0)
+            {
+                return Result.Fail($"Parameter {nameof(parts)} was {parts}, prevented division by invalid value").LogWarning();
+            }
+
             // Create download worker tasks/segments/ranges
             var totalBytesToReceive = downloadTask.DataTotal;
             var partSize = totalBytesToReceive / parts;
@@ -207,10 +179,10 @@ namespace PlexRipper.Application
 
             var downloadWorkerTasks = new List<DownloadWorkerTask>();
 
-            for (int i = 0; i < parts; i++)
+            for (var i = 0; i < parts; i++)
             {
-                long start = partSize * i;
-                long end = start + partSize;
+                var start = partSize * i;
+                var end = start + partSize;
                 if (i == parts - 1 && remainder > 0)
                 {
                     // Add the remainder to the last download range
@@ -220,7 +192,7 @@ namespace PlexRipper.Application
                 downloadWorkerTasks.Add(new DownloadWorkerTask(downloadTask, i + 1, start, end));
             }
 
-            return downloadWorkerTasks;
+            return Result.Ok(downloadWorkerTasks);
         }
 
         /// <summary>
@@ -321,6 +293,94 @@ namespace PlexRipper.Application
             }
 
             return Result.Ok(freshDownloadTasks);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private async Task<Result<List<DownloadTask>>> FinalizeDownloadTasks(List<DownloadTask> downloadTasks)
+        {
+            if (!downloadTasks.Any())
+                return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
+
+            var parts = _userSettings.DownloadSegments;
+            if (parts <= 0)
+                return Result.Fail($"The DownloadSegments value has an invalid value of {parts}");
+
+            // Get the download folder
+            var downloadFolder = await _folderPathService.GetDownloadFolderAsync();
+            if (downloadFolder.IsFailed)
+                return downloadFolder.ToResult();
+
+            // Get Plex libraries
+            var plexLibraries = await _mediator.Send(new GetAllPlexLibrariesQuery());
+            if (plexLibraries.IsFailed)
+                return plexLibraries.ToResult();
+
+            // Get Plex libraries
+            var folderPaths = await _mediator.Send(new GetAllFolderPathsQuery());
+            if (folderPaths.IsFailed)
+                return folderPaths.ToResult();
+
+            // Default destination dictionary
+            var defaultDestinationDict = await _folderPathService.GetDefaultDestinationFolderDictionary();
+            if (defaultDestinationDict.IsFailed)
+                return defaultDestinationDict.ToResult();
+
+            Result<List<DownloadTask>> FillDownloadTasks(List<DownloadTask> tasks)
+            {
+                foreach (var downloadTask in tasks)
+                {
+                    downloadTask.DownloadFolderId = downloadFolder.Value.Id;
+                    downloadTask.DownloadFolder = downloadFolder.Value;
+
+                    var plexLibrary = plexLibraries.Value.Find(x => x.Id == downloadTask.PlexLibraryId);
+                    if (plexLibrary is not null)
+                    {
+                        downloadTask.PlexLibrary = plexLibrary;
+
+                        if (plexLibrary.DefaultDestinationId is not null)
+                        {
+                            downloadTask.DestinationFolderId = plexLibrary.DefaultDestinationId ?? default(int);
+                            downloadTask.DestinationFolder = folderPaths.Value.Find(x => x.Id == downloadTask.DestinationFolderId);
+                        }
+                        else
+                        {
+                            var destination = defaultDestinationDict.Value[downloadTask.MediaType];
+                            downloadTask.DestinationFolderId = destination.Id;
+                            downloadTask.DestinationFolder = destination;
+                        }
+                    }
+
+                    // downloadTask.ServerToken = serverToken.Value;
+                    if (downloadTask.MediaType is PlexMediaType.Episode or PlexMediaType.Movie)
+                    {
+                        var downloadWorkerTasks = GenerateDownloadWorkerTasks(downloadTask, parts);
+                        if (downloadWorkerTasks.IsFailed)
+                        {
+                            return downloadWorkerTasks.ToResult();
+                        }
+
+                        downloadTask.DownloadWorkerTasks = downloadWorkerTasks.Value;
+                    }
+
+                    if (downloadTask.Children.Any())
+                    {
+                        var result = FillDownloadTasks(downloadTask.Children);
+                        if (result.IsFailed)
+                        {
+                            return result.ToResult();
+                        }
+
+                        downloadTask.Children = result.Value;
+                    }
+                }
+
+                return Result.Ok(tasks);
+            }
+
+            return FillDownloadTasks(downloadTasks);
         }
 
         #endregion

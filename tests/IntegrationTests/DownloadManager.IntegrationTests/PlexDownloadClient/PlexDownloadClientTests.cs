@@ -70,16 +70,24 @@ namespace DownloadManager.IntegrationTests.PlexDownloadClient
             };
         }
 
-        private Result<PlexRipper.DownloadManager.Download.PlexDownloadClient> CreatePlexDownloadClient(MemoryStream memoryStream, int downloadSpeedLimitInKb = 0)
+        private Result<PlexRipper.DownloadManager.Download.PlexDownloadClient> CreatePlexDownloadClient(MemoryStream memoryStream,
+            int downloadSpeedLimitInKb = 0)
         {
             var _filesystem = new Mock<IFileSystem>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
                 .Returns(Result.Ok<Stream>(memoryStream));
 
             var downloadTask = GetTestDownloadTask();
-            downloadTask.DownloadWorkerTasks = Container.GetPlexDownloadTaskFactory.GenerateDownloadWorkerTasks(downloadTask, 4);
+            var downloadWorkerTasks = Container.GetPlexDownloadTaskFactory.GenerateDownloadWorkerTasks(downloadTask, 4);
+            if (downloadWorkerTasks.IsFailed)
+            {
+                return downloadWorkerTasks.ToResult();
+            }
 
-            return PlexRipper.DownloadManager.Download.PlexDownloadClient.Create(downloadTask, _filesystem.Object, Container.GetPlexRipperHttpClient, downloadSpeedLimitInKb);
+            downloadTask.DownloadWorkerTasks = downloadWorkerTasks.Value;
+
+            return PlexRipper.DownloadManager.Download.PlexDownloadClient.Create(downloadTask, _filesystem.Object, Container.GetPlexRipperHttpClient,
+                downloadSpeedLimitInKb);
         }
 
         [Fact]
@@ -138,7 +146,8 @@ namespace DownloadManager.IntegrationTests.PlexDownloadClient
                 .Returns(Result.Ok<Stream>(memoryStream));
 
             // Act
-            var downloadClient = PlexRipper.DownloadManager.Download.PlexDownloadClient.Create(null, _filesystem.Object, Container.GetPlexRipperHttpClient);
+            var downloadClient =
+                PlexRipper.DownloadManager.Download.PlexDownloadClient.Create(null, _filesystem.Object, Container.GetPlexRipperHttpClient);
 
             // Assert
             downloadClient.IsFailed.ShouldBeTrue();
@@ -155,7 +164,9 @@ namespace DownloadManager.IntegrationTests.PlexDownloadClient
                 .Returns(Result.Ok<Stream>(memoryStream));
 
             // Act
-            var downloadClient = PlexRipper.DownloadManager.Download.PlexDownloadClient.Create(new DownloadTask(), _filesystem.Object, Container.GetPlexRipperHttpClient);
+            var downloadClient =
+                PlexRipper.DownloadManager.Download.PlexDownloadClient.Create(new DownloadTask(), _filesystem.Object,
+                    Container.GetPlexRipperHttpClient);
 
             // Assert
             downloadClient.IsFailed.ShouldBeTrue();

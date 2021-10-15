@@ -36,5 +36,12 @@ namespace PlexRipper.Application.Common
         Task<Result<FolderPath>> CreateFolderPath(FolderPath folderPath);
 
         Task<Result> DeleteFolderPathAsync(int folderPathId);
+
+        /// <summary>
+        /// Creates a <see cref="Dictionary{TKey,TValue}"/> with <see cref="PlexMediaType"/> keys,
+        /// which are mapped to the default <see cref="FolderPath"/> destinations.
+        /// </summary>
+        /// <returns>Default destination dictionary.</returns>
+        Task<Result<Dictionary<PlexMediaType, FolderPath>>> GetDefaultDestinationFolderDictionary();
     }
 }

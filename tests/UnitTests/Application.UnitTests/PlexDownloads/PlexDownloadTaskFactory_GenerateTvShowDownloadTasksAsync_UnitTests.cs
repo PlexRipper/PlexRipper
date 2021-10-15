@@ -184,6 +184,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                                 episodeDataPartDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
                                 episodeDataPartDownloadTask.Created.ShouldBeGreaterThan(DateTime.MinValue);
                                 episodeDataPartDownloadTask.Created.ShouldBeLessThan(DateTime.UtcNow);
+                                episodeDataPartDownloadTask.DownloadWorkerTasks.ShouldNotBeEmpty();
                             }
                         }
                     }

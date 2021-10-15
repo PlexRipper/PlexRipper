@@ -39,6 +39,9 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("mediaType", Required = Required.Always)]
         public PlexMediaType MediaType { get; set; }
 
+        [JsonProperty("downloadTaskType", Required = Required.Always)]
+        public DownloadTaskType DownloadTaskType { get; set; }
+
         /// <summary>
         /// The identifier used by Plex to keep track of media.
         /// </summary>
@@ -69,17 +72,30 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("priority", Required = Required.Always)]
         public int Priority { get; set; }
 
+        #region Relationships
+
         [JsonProperty("plexServerId", Required = Required.Always)]
         public int PlexServerId { get; set; }
 
         [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }
 
+        [JsonProperty("parentId", Required = Required.Always)]
+        public int? ParentId { get; set; }
+
+        [JsonProperty("mediaId", Required = Required.Always)]
+        public int MediaId { get; set; }
+
+        #endregion
+
         [JsonProperty("timeRemaining", Required = Required.Always)]
         public long TimeRemaining { get; set; }
 
         [JsonProperty("downloadUrl", Required = Required.Always)]
         public string DownloadUrl { get; set; }
+
+        [JsonProperty("quality", Required = Required.Always)]
+        public string Quality { get; set; }
 
         /// <summary>
         /// The nested <see cref="DownloadTask"/> used for seasons and episodes.

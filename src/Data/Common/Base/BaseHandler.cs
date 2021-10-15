@@ -36,6 +36,8 @@ namespace PlexRipper.Data.Common
 
         protected IQueryable<PlexServer> PlexServerQueryable => _dbContext.PlexServers.AsQueryable();
 
+        protected IQueryable<DownloadTask> DownloadTasksQueryable => _dbContext.DownloadTasks.AsQueryable();
+
         protected IQueryable<PlexLibrary> PlexLibraryQueryable => _dbContext.PlexLibraries.AsQueryable();
 
         /// <summary>
@@ -57,7 +59,6 @@ namespace PlexRipper.Data.Common
         /// Creates a PlexTvShowEpisode IQueryable.
         /// </summary>
         protected IQueryable<PlexTvShowEpisode> PlexTvShowEpisodesQueryable => _dbContext.PlexTvShowEpisodes.AsQueryable();
-
 
         #endregion
 

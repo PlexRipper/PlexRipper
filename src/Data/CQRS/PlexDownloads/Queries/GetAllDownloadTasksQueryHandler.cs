@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +21,8 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
 
         public async Task<Result<List<DownloadTask>>> Handle(GetAllDownloadTasksQuery request, CancellationToken cancellationToken)
         {
-            var query = _dbContext.DownloadTasks.AsQueryable();
+            // AsTracking due to Children->Parent cycle error
+            var query = DownloadTasksQueryable.AsTracking();
 
             if (request.IncludeServer)
             {
@@ -37,12 +39,10 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 query = query.Where(x => request.DownloadTaskIds.Contains(x.Id));
             }
 
+            // Where clause is to retrieve only the root DownloadTasks
             var downloadList = await query
-                .Include(x => x.DownloadWorkerTasks)
-                .Include(x => x.DestinationFolder)
-                .Include(x => x.DownloadFolder)
-                .Include(x => x.PlexServer)
-                .Include(x => x.PlexLibrary)
+                .IncludeDownloadTasks()
+                .Where(x => x.ParentId == null)
                 .ToListAsync(cancellationToken);
             return Result.Ok(downloadList);
         }

@@ -75,10 +75,7 @@ namespace PlexRipper.WebAPI.Config
         private void DownloadTaskMappings()
         {
             CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
-                .ForMember(dto => dto.Id, opt => opt.MapFrom(entity => entity.Id))
-                .ForMember(dto => dto.FullTitle, opt => opt.MapFrom(entity => entity.FullTitle))
                 .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
-                .ForMember(dto => dto.Children, opt => opt.Ignore())
                 .ForMember(dto => dto.Actions, opt => opt.Ignore());
         }
 

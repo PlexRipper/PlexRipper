@@ -46,6 +46,16 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
 
             foreach (var downloadTask in downloadTasks)
             {
+                if (downloadTask.DownloadWorkerTasks.Any())
+                {
+                    foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
+                    {
+                        downloadWorkerTask.DownloadTaskId = downloadTask.Id;
+                    }
+
+                    _dbContext.BulkInsert(downloadTask.DownloadWorkerTasks, _bulkConfig);
+                }
+
                 if (downloadTask.Children.Any())
                 {
                     foreach (var downloadTaskChild in downloadTask.Children)

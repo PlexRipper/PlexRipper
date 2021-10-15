@@ -176,7 +176,7 @@ namespace PlexRipper.FileSystem
                 return ResultExtensions.IsInvalidId(nameof(downloadTaskId)).LogError();
             }
 
-            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true));
+            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
             if (downloadTask.IsFailed)
             {
                 return downloadTask.LogError();

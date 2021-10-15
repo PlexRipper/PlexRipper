@@ -130,6 +130,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                     downloadTaskPart.Created.ShouldBeLessThan(DateTime.UtcNow);
 
                     downloadTaskPart.Children.ShouldBeEmpty();
+                    downloadTaskPart.DownloadWorkerTasks.ShouldNotBeEmpty();
                 }
             }
         }

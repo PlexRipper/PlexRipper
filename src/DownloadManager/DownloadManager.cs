@@ -127,64 +127,6 @@ namespace PlexRipper.DownloadManager
         }
 
         /// <summary>
-        /// Checks if a <see cref="DownloadTask"/> with this Id or ratingKey has already been added.
-        /// </summary>
-        /// <param name="downloadTask">The <see cref="DownloadTask"/> to check for.</param>
-        /// <returns>True if it already exists.</returns>
-        private async Task<Result<bool>> DownloadTaskExistsAsync(DownloadTask downloadTask)
-        {
-            if (downloadTask == null)
-            {
-                return ResultExtensions.IsNull(nameof(downloadTask)).LogError();
-            }
-
-            Result<DownloadTask> downloadTaskDB;
-
-            // Download tasks added here might not contain an Id, which is why we also search on ratingKey.
-            if (downloadTask.Id > 0)
-            {
-                // First check if there is an downloadClient with that downloadTask, as that is faster
-                var downloadClient = _downloadsList.Find(x => x.DownloadTaskId == downloadTask.Id);
-                if (downloadClient != null)
-                {
-                    return Result.Ok(true);
-                }
-
-                // Check Database
-                downloadTaskDB = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTask.Id));
-            }
-            else if (downloadTask.Key > 0)
-            {
-                // First check if there is an downloadClient with that downloadTask, as that is faster
-                var downloadClient = _downloadsList.Find(x => x.DownloadTask.Key == downloadTask.Key);
-                if (downloadClient != null)
-                {
-                    return Result.Ok(true);
-                }
-
-                // Check DataBase
-                downloadTaskDB = await _mediator.Send(new GetDownloadTaskByRatingKeyQuery(downloadTask.Key));
-            }
-            else
-            {
-                return Result.Fail("There was no valid Id or RatingKey available in the downloadTask").LogError();
-            }
-
-            if (downloadTaskDB.IsFailed)
-            {
-                if (downloadTaskDB.Has404NotFoundError())
-                {
-                    return Result.Ok(false);
-                }
-
-                return downloadTaskDB.ToResult();
-            }
-
-            // The only possibility now is that the DownloadTask exists
-            return Result.Ok(true);
-        }
-
-        /// <summary>
         /// Check if a <see cref="PlexDownloadClient"/> has already been assigned to this <see cref="DownloadTask"/>.
         /// </summary>
         /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/>.</param>
@@ -352,7 +294,7 @@ namespace PlexRipper.DownloadManager
             _signalRService.SendFileMergeProgressUpdate(progress);
             if (progress.Percentage >= 100)
             {
-                var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(progress.DownloadTaskId, true, true));
+                var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(progress.DownloadTaskId));
                 if (downloadTaskResult.IsFailed)
                 {
                     downloadTaskResult.LogError();
@@ -541,7 +483,7 @@ namespace PlexRipper.DownloadManager
                 // If no client is actively using the download task than fall back to retrieving it from Db.
                 if (downloadTask is null)
                 {
-                    var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true));
+                    var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
                     if (downloadTaskResult.IsFailed)
                     {
                         continue;

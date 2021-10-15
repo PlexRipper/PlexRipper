@@ -24,23 +24,12 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
 
         public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
         {
-            var query = _dbContext.DownloadTasks.AsQueryable();
-
-            if (request.IncludeServer)
-            {
-                query = query.Include(x => x.PlexServer);
-            }
-
-            if (request.IncludePlexLibrary)
-            {
-                query = query.Include(x => x.PlexLibrary);
-            }
-
-            var downloadTask = await query
-                .Include(x => x.DownloadWorkerTasks)
-                .Include(x => x.DownloadFolder)
-                .Include(x => x.DestinationFolder)
-                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var downloadTask =
+                await DownloadTasksQueryable
+                    .Include(x => x.PlexServer)
+                    .Include(x => x.PlexLibrary)
+                    .IncludeDownloadTasks()
+                    .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (downloadTask == null)
             {

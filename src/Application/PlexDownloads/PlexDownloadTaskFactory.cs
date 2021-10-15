@@ -370,7 +370,11 @@ namespace PlexRipper.Application
                     downloadTask.DestinationDirectory = destinationDir.Value;
 
                     // Generate DownloadWorkerTasks
-                    if (downloadTask.MediaType is PlexMediaType.Episode or PlexMediaType.Movie)
+                    if (downloadTask.DownloadTaskType is
+                        DownloadTaskType.EpisodeData or
+                        DownloadTaskType.EpisodePart or
+                        DownloadTaskType.MovieData or
+                        DownloadTaskType.MoviePart)
                     {
                         var downloadWorkerTasks = GenerateDownloadWorkerTasks(downloadTask, parts);
                         if (downloadWorkerTasks.IsFailed)

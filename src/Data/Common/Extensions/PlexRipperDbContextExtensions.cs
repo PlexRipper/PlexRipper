@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 
@@ -125,6 +126,53 @@ namespace PlexRipper.Data.Common
         public static IQueryable<PlexTvShowEpisode> IncludeServer(this IQueryable<PlexTvShowEpisode> plexTvShowEpisode)
         {
             return plexTvShowEpisode.Include(x => x.PlexServer);
+        }
+
+        #endregion
+
+        #region PlexDownloadTasks
+
+        public static IQueryable<PlexServer> IncludeDownloadTasks(this IQueryable<PlexServer> plexServer)
+        {
+            return plexServer
+                .Include(x => x.PlexLibraries)
+                .IncludeDownloadTasks("PlexLibraries.DownloadTasks.")
+                .AsQueryable();
+        }
+
+        public static IQueryable<PlexLibrary> IncludeDownloadTasks(this IQueryable<PlexLibrary> plexLibrary)
+        {
+            return plexLibrary.IncludeDownloadTasks("DownloadTasks.");
+        }
+
+        public static IQueryable<DownloadTask> IncludeDownloadTasks(this IQueryable<DownloadTask> downloadTasks)
+        {
+            return downloadTasks.IncludeDownloadTasks("");
+        }
+
+        private static IQueryable<T> IncludeDownloadTasks<T>(this IQueryable<T> query, string prefix) where T : class
+        {
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                query = query.Include(prefix.TrimEnd('.'));
+            }
+
+            // Include downloadTask children up to 5 levels deep
+            for (int i = 1; i <= 5; i++)
+            {
+                var childPath = prefix + String.Concat(Enumerable.Repeat("Children.", i));
+
+                query = query
+                    .Include($"{childPath}".TrimEnd('.'))
+                    .Include($"{childPath}PlexServer")
+                    .Include($"{childPath}PlexLibrary")
+                    .Include($"{childPath}DownloadFolder")
+                    .Include($"{childPath}DestinationFolder")
+                    .Include($"{childPath}DownloadWorkerTasks")
+                    .Include($"{childPath}Parent");
+            }
+
+            return query;
         }
 
         #endregion

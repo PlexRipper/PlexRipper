@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.IO;
 using System.Linq;
 using System.Text;
 using FluentResults;
@@ -104,7 +103,7 @@ namespace PlexRipper.Domain
 
         public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new List<DownloadWorkerTask>();
 
-        public int ParentId { get; set; }
+        public int? ParentId { get; set; }
 
         public DownloadTask Parent { get; set; }
 

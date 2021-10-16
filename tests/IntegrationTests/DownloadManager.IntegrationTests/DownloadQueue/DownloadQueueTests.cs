@@ -29,25 +29,6 @@ namespace DownloadManager.IntegrationTests.DownloadQueue
         }
 
         [Fact]
-        public void ExecuteDownloadQueue_ShouldHaveNoUpdates_WhenGivenAnEmptyList()
-        {
-            //Arrange
-            var downloadQueue = Container.GetDownloadQueue;
-            List<DownloadTask> updates = new();
-            List<int> startCommands = new();
-
-            // Act
-            downloadQueue.UpdateDownloadTask.Subscribe(update => updates.Add(update));
-            downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-
-            downloadQueue.ExecuteDownloadQueue(new List<PlexServer>());
-
-            // Assert
-            updates.Any().ShouldBeFalse();
-            startCommands.Any().ShouldBeFalse();
-        }
-
-        [Fact]
         public void ExecuteDownloadQueue_ShouldHaveOneStartCommand_WhenNoCurrentTaskIsDownloading()
         {
             //Arrange

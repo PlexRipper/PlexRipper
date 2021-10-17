@@ -37,5 +37,24 @@ namespace DownloadManager.UnitTests
             updates.Any().ShouldBeFalse();
             startCommands.Any().ShouldBeFalse();
         }
+
+        [Fact]
+        public void ShouldHaveOneStartCommand_WhenGivenOneDownloadTask()
+        {
+            // Arrange
+            List<DownloadTask> updates = new();
+            List<int> startCommands = new();
+            var downloadQueue = new DownloadQueue();
+            var plexServers = FakeData.GetPlexServer(new() { IncludeLibraries = true }).Generate(1);
+
+            // Act
+            downloadQueue.UpdateDownloadTask.Subscribe(update => updates.Add(update));
+            downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
+            downloadQueue.ExecuteDownloadQueue(plexServers);
+
+            // Assert
+            updates.Any().ShouldBeFalse();
+            startCommands.Any().ShouldBeFalse();
+        }
     }
 }

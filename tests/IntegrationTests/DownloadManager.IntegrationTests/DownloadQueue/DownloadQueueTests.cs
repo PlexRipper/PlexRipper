@@ -33,9 +33,13 @@ namespace DownloadManager.IntegrationTests.DownloadQueue
         {
             //Arrange
             var downloadQueue = Container.GetDownloadQueue;
-            var serverList = FakeData.GetPlexServer().Generate(1);
-            serverList[0].PlexLibraries = FakeData.GetPlexLibrary(serverList[0].Id, PlexMediaType.Movie).Generate(1);
-            serverList[0].PlexLibraries[0].DownloadTasks = FakeData.GetMovieDownloadTask().Generate(5);
+            var config = new FakeDataConfig()
+            {
+                IncludeLibraries = true,
+                LibraryType = PlexMediaType.Movie,
+                IncludeDownloadTasks = true,
+            };
+            var serverList = FakeData.GetPlexServer(config).Generate(1);
 
             List<int> startCommands = new();
 
@@ -52,9 +56,14 @@ namespace DownloadManager.IntegrationTests.DownloadQueue
         {
             //Arrange
             var downloadQueue = Container.GetDownloadQueue;
-            var serverList = FakeData.GetPlexServer().Generate(1);
-            serverList[0].PlexLibraries = FakeData.GetPlexLibrary(serverList[0].Id, PlexMediaType.Movie).Generate(1);
-            serverList[0].PlexLibraries[0].DownloadTasks = FakeData.GetMovieDownloadTask().Generate(5);
+            var config = new FakeDataConfig()
+            {
+                IncludeLibraries = true,
+                LibraryType = PlexMediaType.Movie,
+                IncludeDownloadTasks = true,
+            };
+            var serverList = FakeData.GetPlexServer(config).Generate(1);
+
             serverList[0].PlexLibraries[0].DownloadTasks[0].DownloadStatus = DownloadStatus.Completed;
 
             List<int> startCommands = new();
@@ -72,9 +81,13 @@ namespace DownloadManager.IntegrationTests.DownloadQueue
         {
             //Arrange
             var downloadQueue = Container.GetDownloadQueue;
-            var serverList = FakeData.GetPlexServer().Generate(1);
-            serverList[0].PlexLibraries = FakeData.GetPlexLibrary(serverList[0].Id, PlexMediaType.Movie).Generate(1);
-            serverList[0].PlexLibraries[0].DownloadTasks = FakeData.GetMovieDownloadTask().Generate(5);
+            var config = new FakeDataConfig()
+            {
+                IncludeLibraries = true,
+                LibraryType = PlexMediaType.Movie,
+                IncludeDownloadTasks = true,
+            };
+            var serverList = FakeData.GetPlexServer(config).Generate(1);
             serverList[0].PlexLibraries[0].DownloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
 
             List<int> startCommands = new();

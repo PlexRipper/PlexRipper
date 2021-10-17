@@ -22,7 +22,7 @@ namespace PlexRipper.BaseTests
 
         public static PlexRipperDbContext AddPlexServers(this PlexRipperDbContext dbContext, int serverCount = 1)
         {
-            var plexServers = FakeData.GetPlexServer(true).Generate(serverCount);
+            var plexServers = FakeData.GetPlexServer(new() { IncludeLibraries = true }).Generate(serverCount);
             foreach (var plexServer in plexServers)
             {
                 plexServer.Id = 0;
@@ -49,10 +49,10 @@ namespace PlexRipper.BaseTests
                     switch (plexLibrary.Type)
                     {
                         case PlexMediaType.Movie:
-                            dbContext.PlexMovies.AddRange(FakeData.GetPlexMovies(plexLibrary.Id, plexLibrary.PlexServerId).GenerateBetween(20, 100));
+                            dbContext.PlexMovies.AddRange(FakeData.GetPlexMovies().GenerateBetween(20, 100));
                             break;
                         case PlexMediaType.TvShow:
-                            dbContext.PlexTvShows.AddRange(FakeData.GetPlexTvShows(plexLibrary.Id, plexLibrary.PlexServerId).GenerateBetween(10, 20));
+                            dbContext.PlexTvShows.AddRange(FakeData.GetPlexTvShows().GenerateBetween(10, 20));
                             break;
                         default:
                             throw new NotSupportedException($"{plexLibrary.Type} not supported in MockDatabase.AddMedia");
@@ -64,6 +64,5 @@ namespace PlexRipper.BaseTests
 
             return dbContext;
         }
-
     }
 }

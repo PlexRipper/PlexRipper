@@ -67,7 +67,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
         public async Task ShouldHaveValidDownloadTasks_WhenPlexMoviesAreValid()
         {
             // Arrange
-            var movies = FakeData.GetPlexMovies(1, 1).Generate(5);
+            var movies = FakeData.GetPlexMovies().Generate(5);
             _iMediator.Setup(x => x.Send(It.IsAny<GetMultiplePlexMoviesByIdsQuery>(), CancellationToken.None)).ReturnsAsync(Result.Ok(movies));
 
             // Act

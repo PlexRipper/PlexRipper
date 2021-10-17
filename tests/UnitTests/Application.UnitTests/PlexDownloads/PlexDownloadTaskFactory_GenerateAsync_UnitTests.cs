@@ -91,7 +91,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
         public async Task ShouldHaveValidDownloadTasks_WhenPlexTvShowsAreValid()
         {
             // Arrange
-            var tvShows = FakeData.GetPlexTvShows(1, 1).Generate(5);
+            var tvShows = FakeData.GetPlexTvShows().Generate(5);
             var folderPaths = FakeData.GetFolderPaths().Generate(10);
             _folderPathService.Setup(x => x.CheckIfFolderPathsAreValid(PlexMediaType.None)).ReturnsAsync(Result.Ok());
             _folderPathService.Setup(x => x.GetDownloadFolderAsync()).ReturnsAsync(Result.Ok(new FolderPath()

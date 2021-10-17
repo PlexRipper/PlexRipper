@@ -69,7 +69,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
         public async Task ShouldHaveValidDownloadTasks_WhenPlexTvShowsAreValid()
         {
             // Arrange
-            var tvShows = FakeData.GetPlexTvShows(1, 1).Generate(5);
+            var tvShows = FakeData.GetPlexTvShows().Generate(5);
             _iMediator.Setup(x => x.Send(It.IsAny<GetPlexTvShowTreeByMediaIdsQuery>(), CancellationToken.None)).ReturnsAsync(Result.Ok(tvShows));
 
             var tvShowIds = new List<int>();

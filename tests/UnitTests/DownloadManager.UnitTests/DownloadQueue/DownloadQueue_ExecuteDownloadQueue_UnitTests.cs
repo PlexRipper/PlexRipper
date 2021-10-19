@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Logging;
-using Moq;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
-using PlexRipper.WebAPI.Config;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -25,11 +23,11 @@ namespace DownloadManager.UnitTests
         {
             // Arrange
             List<DownloadTask> updates = new();
-            List<int> startCommands = new();
+            List<DownloadTask> startCommands = new();
             var downloadQueue = new DownloadQueue();
 
             // Act
-            downloadQueue.UpdateDownloadTask.Subscribe(update => updates.Add(update));
+            downloadQueue.UpdateDownloadTasks.Subscribe(update => updates = update);
             downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
             downloadQueue.ExecuteDownloadQueue(new List<PlexServer>());
 
@@ -39,22 +37,126 @@ namespace DownloadManager.UnitTests
         }
 
         [Fact]
-        public void ShouldHaveOneStartCommand_WhenGivenOneDownloadTask()
+        public void ShouldHaveNoDownloadTasksInitialized_WhenGivenDownloadTasksWithInitialized()
         {
             // Arrange
-            List<DownloadTask> updates = new();
-            List<int> startCommands = new();
+            int updateIndex = 1;
+            Dictionary<int, List<DownloadTask>> updates = new();
+            List<DownloadTask> startCommands = new();
+            var config = new FakeDataConfig
+            {
+                IncludeLibraries = true,
+                LibraryCount = 1,
+                LibraryType = PlexMediaType.Movie,
+                IncludeDownloadTasks = true,
+                DownloadTasksCount = 2,
+            };
             var downloadQueue = new DownloadQueue();
-            var plexServers = FakeData.GetPlexServer(new() { IncludeLibraries = true }).Generate(1);
+            var plexServers = FakeData.GetPlexServer(config).Generate(1);
 
             // Act
-            downloadQueue.UpdateDownloadTask.Subscribe(update => updates.Add(update));
+            downloadQueue.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
             downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
             downloadQueue.ExecuteDownloadQueue(plexServers);
 
             // Assert
-            updates.Any().ShouldBeFalse();
-            startCommands.Any().ShouldBeFalse();
+
+            var downloadTasks = updates[updateIndex];
+            downloadTasks.Any().ShouldBeTrue();
+            downloadTasks.All(x => x.DownloadStatus is not DownloadStatus.Initialized).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void ShouldHaveOneDownloadTaskStarted_WhenGivenMovieDownloadTasks()
+        {
+            // Arrange
+            List<DownloadTask> startCommands = new();
+            var config = new FakeDataConfig
+            {
+                Seed = 5000,
+                IncludeLibraries = true,
+                LibraryCount = 1,
+                LibraryType = PlexMediaType.Movie,
+                IncludeDownloadTasks = true,
+                DownloadTasksCount = 2,
+            };
+            var downloadQueue = new DownloadQueue();
+            var plexServers = FakeData.GetPlexServer(config).Generate(1);
+
+            // Act
+            downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
+            downloadQueue.ExecuteDownloadQueue(plexServers);
+
+            // Assert
+            var startedDownloadTask = plexServers[0].PlexLibraries[0].DownloadTasks[0].Children[0];
+            startCommands.Count.ShouldBe(1);
+            startCommands[0].Id.ShouldBe(startedDownloadTask.Id);
+        }
+
+        [Fact]
+        public void ShouldHaveOneDownloadTaskDownloadingStatus_WhenGivenMovieDownloadTasks()
+        {
+            // Arrange
+            int updateIndex = 1;
+            Dictionary<int, List<DownloadTask>> updates = new();
+            var config = new FakeDataConfig
+            {
+                Seed = 25,
+                IncludeLibraries = true,
+                LibraryCount = 1,
+                LibraryType = PlexMediaType.Movie,
+                IncludeDownloadTasks = true,
+                DownloadTasksCount = 2,
+            };
+            var downloadQueue = new DownloadQueue();
+            var plexServers = FakeData.GetPlexServer(config).Generate(1);
+
+            // Act
+            downloadQueue.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
+            downloadQueue.ExecuteDownloadQueue(plexServers);
+
+            // Assert
+
+            var downloadTasks = updates[updateIndex];
+            downloadTasks.Any().ShouldBeTrue();
+            downloadTasks[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+            downloadTasks[0].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+
+            downloadTasks[1].DownloadStatus.ShouldBe(DownloadStatus.Queued);
+            downloadTasks[1].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Queued);
+        }
+
+        [Fact]
+        public void ShouldHaveOneDownloadTaskDownloadingStatus_WhenGivenTvShowDownloadTasks()
+        {
+            // Arrange
+            int updateIndex = 1;
+            Dictionary<int, List<DownloadTask>> updates = new();
+            var config = new FakeDataConfig
+            {
+                Seed = 67,
+                IncludeLibraries = true,
+                LibraryCount = 1,
+                LibraryType = PlexMediaType.TvShow,
+                IncludeDownloadTasks = true,
+                DownloadTasksCount = 2,
+            };
+            var downloadQueue = new DownloadQueue();
+            var plexServers = FakeData.GetPlexServer(config).Generate(1);
+
+            // Act
+            downloadQueue.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
+            downloadQueue.ExecuteDownloadQueue(plexServers);
+
+            // Assert
+
+            var downloadTasks = updates[updateIndex];
+            downloadTasks.Any().ShouldBeTrue();
+            downloadTasks[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+            downloadTasks[0].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+
+            downloadTasks[1].DownloadStatus.ShouldBe(DownloadStatus.Queued);
+            downloadTasks[1].Children.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Queued);
         }
     }
 }

@@ -6,9 +6,9 @@ namespace PlexRipper.Application.Common
 {
     public interface IDownloadQueue
     {
-        Subject<DownloadTask> UpdateDownloadTask { get; }
+        Subject<List<DownloadTask>> UpdateDownloadTasks { get; }
 
-        Subject<int> StartDownloadTask { get; }
+        Subject<DownloadTask> StartDownloadTask { get; }
 
         void ExecuteDownloadQueue(List<PlexServer> plexServers);
     }

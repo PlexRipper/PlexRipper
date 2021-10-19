@@ -82,9 +82,9 @@ namespace PlexRipper.DownloadManager
             // Setup DownloadQueue subscriptions
             _downloadQueue
                 .StartDownloadTask
-                .SubscribeAsync(async id =>
+                .SubscribeAsync(async downloadTask =>
                 {
-                    var result = await StartDownloadTasksAsync(new List<int> { id });
+                    var result = await StartDownloadTasksAsync(new List<int> { downloadTask.Id });
                     if (result.IsFailed)
                     {
                         result.LogError();
@@ -93,8 +93,8 @@ namespace PlexRipper.DownloadManager
                 });
 
             _downloadQueue
-                .UpdateDownloadTask
-                .SubscribeAsync(UpdateDownloadTaskAsync);
+                .UpdateDownloadTasks
+                .SubscribeAsync(UpdateDownloadTasksAsync);
 
             _fileMerger
                 .FileMergeProgressObservable
@@ -316,6 +316,18 @@ namespace PlexRipper.DownloadManager
             }
 
             _signalRService.SendDownloadTaskUpdate(downloadTask);
+        }
+
+        private async Task UpdateDownloadTasksAsync(List<DownloadTask> downloadTasks)
+        {
+            var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasks));
+            if (updateResult.IsFailed)
+            {
+                updateResult.LogError();
+            }
+
+            // TODO Determine if update should be send in a list
+            //_signalRService.SendDownloadTaskUpdate(downloadTask);
         }
 
         #endregion

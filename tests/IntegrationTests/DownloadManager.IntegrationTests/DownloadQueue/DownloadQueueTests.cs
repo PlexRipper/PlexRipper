@@ -41,7 +41,7 @@ namespace DownloadManager.IntegrationTests.DownloadQueue
             };
             var serverList = FakeData.GetPlexServer(config).Generate(1);
 
-            List<int> startCommands = new();
+            List<DownloadTask> startCommands = new();
 
             // Act
             downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
@@ -66,7 +66,7 @@ namespace DownloadManager.IntegrationTests.DownloadQueue
 
             serverList[0].PlexLibraries[0].DownloadTasks[0].DownloadStatus = DownloadStatus.Completed;
 
-            List<int> startCommands = new();
+            List<DownloadTask> startCommands = new();
             downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
 
             // Act
@@ -90,14 +90,15 @@ namespace DownloadManager.IntegrationTests.DownloadQueue
             var serverList = FakeData.GetPlexServer(config).Generate(1);
             serverList[0].PlexLibraries[0].DownloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
 
-            List<int> startCommands = new();
+            List<DownloadTask> startCommands = new();
             List<DownloadTask> updates = new();
             downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-            downloadQueue.UpdateDownloadTask.Subscribe(update =>
+            downloadQueue.UpdateDownloadTasks.Subscribe(update =>
             {
-                updates.Add(update);
-                var i = serverList[0].PlexLibraries[0].DownloadTasks.FindIndex(x => x.Id == update.Id);
-                serverList[0].PlexLibraries[0].DownloadTasks[i] = update;
+                // TODO Either delete or refactor
+                updates.AddRange(update);
+               // var i = serverList[0].PlexLibraries[0].DownloadTasks.FindIndex(x => x.Id == update.Id);
+               // serverList[0].PlexLibraries[0].DownloadTasks[i] = update;
             });
 
             // Act

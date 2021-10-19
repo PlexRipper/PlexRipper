@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Subjects;
-using FluentResultExtensions.lib;
+using FluentResults;
 using Logging;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
@@ -13,9 +13,9 @@ namespace PlexRipper.DownloadManager
     /// </summary>
     public class DownloadQueue : IDownloadQueue
     {
-        public Subject<DownloadTask> UpdateDownloadTask { get; } = new();
+        public Subject<List<DownloadTask>> UpdateDownloadTasks { get; } = new();
 
-        public Subject<int> StartDownloadTask { get; } = new();
+        public Subject<DownloadTask> StartDownloadTask { get; } = new();
 
         public void ExecuteDownloadQueue(List<PlexServer> plexServers)
         {
@@ -31,34 +31,96 @@ namespace PlexRipper.DownloadManager
                 var downloadTasks = plexServer.PlexLibraries.SelectMany(x => x.DownloadTasks).ToList();
 
                 // Set all initialized to Queued
-                foreach (var downloadTask in downloadTasks)
-                {
-                    if (downloadTask.DownloadStatus == DownloadStatus.Initialized)
-                    {
-                        downloadTask.DownloadStatus = DownloadStatus.Queued;
-                        UpdateDownloadTask.OnNext(downloadTask);
-                    }
-                }
+                downloadTasks = SetToQueued(downloadTasks);
 
-                // Check if this server is already downloading a downloadTask
-                if (downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading))
+                var nextDownloadTask = GetNextDownloadTask(ref downloadTasks);
+                if (nextDownloadTask.IsFailed)
                 {
-                    Log.Warning($"PlexServer: {plexServer.Name} already has a download which is in currently downloading");
                     continue;
                 }
 
-                var queuedDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Queued);
-                if (queuedDownloadTask != null)
-                {
-                    Log.Debug(
-                        $"Starting the next Queued downloadTask with id {queuedDownloadTask.Id} - {queuedDownloadTask.Title} for server {plexServer.Name}");
-                   // UpdateDownloadTask.OnNext(queuedDownloadTask);
-                    StartDownloadTask.OnNext(queuedDownloadTask.Id);
-                    return;
-                }
+                downloadTasks = SetToDownloading(downloadTasks);
+
+                StartDownloadTask.OnNext(nextDownloadTask.Value);
+
+                // Check if this server is already downloading a downloadTask
+                // if (downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading))
+                // {
+                //     Log.Warning($"PlexServer: {plexServer.Name} already has a download which is in currently downloading");
+                //     continue;
+                // }
+
+                // var queuedDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Queued);
+                // if (queuedDownloadTask != null)
+                // {
+                //     Log.Debug(
+                //         $"Starting the next Queued downloadTask with id {queuedDownloadTask.Id} - {queuedDownloadTask.Title} for server {plexServer.Name}");
+                //
+                //     // UpdateDownloadTask.OnNext(queuedDownloadTask);
+                //     return;
+                // }
+
+                UpdateDownloadTasks.OnNext(downloadTasks);
 
                 Log.Information($"There are no available downloadTasks remaining for PlexServer: {plexServer.Name}");
             }
+        }
+
+        private List<DownloadTask> SetToQueued(List<DownloadTask> downloadTasks)
+        {
+            foreach (var downloadTask in downloadTasks)
+            {
+                if (downloadTask.DownloadStatus is DownloadStatus.Initialized)
+                {
+                    downloadTask.DownloadStatus = DownloadStatus.Queued;
+                }
+
+                if (downloadTask.Children.Any())
+                {
+                    downloadTask.Children = SetToQueued(downloadTask.Children);
+                }
+            }
+
+            return downloadTasks;
+        }
+
+        private Result<DownloadTask> GetNextDownloadTask(ref List<DownloadTask> downloadTasks)
+        {
+            // Check if there is anything downloading already
+            var nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Downloading);
+            if (nextDownloadTask is null)
+            {
+                nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Queued);
+                if (nextDownloadTask is null)
+                    return Result.Fail("There were no downloadTasks left to download").LogDebug();
+            }
+
+            if (!nextDownloadTask.Children.Any())
+            {
+                nextDownloadTask.DownloadStatus = DownloadStatus.Downloading;
+                return Result.Ok(nextDownloadTask);
+            }
+
+            var children = nextDownloadTask.Children;
+            return GetNextDownloadTask(ref children);
+        }
+
+        private List<DownloadTask> SetToDownloading(List<DownloadTask> downloadTasks)
+        {
+            foreach (var downloadTask in downloadTasks)
+            {
+                if (downloadTask.Children.Any())
+                {
+                    downloadTask.Children = SetToDownloading(downloadTask.Children);
+                }
+
+                if (downloadTask.Children.Any(x => x.DownloadStatus is DownloadStatus.Downloading))
+                {
+                    downloadTask.DownloadStatus = DownloadStatus.Downloading;
+                }
+            }
+
+            return downloadTasks;
         }
     }
 }

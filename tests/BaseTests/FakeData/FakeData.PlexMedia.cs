@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Bogus;
 using Bogus.Extensions;
-using Environment;
-using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests
@@ -37,8 +35,16 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.Host, uri.Host)
                 .RuleFor(x => x.CreatedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
+                .RuleFor(x => x.Version, _ => "1.24.3.5033-757abe6b4")
+                .RuleFor(x => x.LocalAddresses, f => f.Internet.Ip())
+                .RuleFor(x => x.MachineIdentifier, _ => Guid.NewGuid().ToString())
+                .RuleFor(x => x.OwnerId, f => f.Random.Int(1000, 100000))
+                .RuleFor(x => x.ServerFixApplyDNSFix, f => f.Random.Bool())
+                .RuleFor(x => x.PlexAccountServers, _ => new List<PlexAccountServer>())
+                .RuleFor(x => x.ServerStatus, _ => new List<PlexServerStatus>())
+                .RuleFor(x => x.AccessToken, _ => "DO NOT USE")
                 .RuleFor(x => x.PlexLibraries,
-                    _ => config.IncludeLibraries ? GetPlexLibrary(config).GenerateBetween(2, 8) : new List<PlexLibrary>())
+                    _ => config.IncludeLibraries ? GetPlexLibrary(config).Generate(config.LibraryCount) : new List<PlexLibrary>())
                 .FinishWith((_, server) =>
                 {
                     foreach (var plexLibrary in server.PlexLibraries)
@@ -84,6 +90,7 @@ namespace PlexRipper.BaseTests
                 .StrictMode(true)
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.Id, _ => plexLibraryId++)
+                .RuleFor(x => x.Key, f => f.Random.Int(1, 10000).ToString())
                 .RuleFor(x => x.Title, f => f.Company.CompanyName())
                 .RuleFor(x => x.Type, _ => type)
                 .RuleFor(x => x.PlexServerId, f => f.Random.Int(1, 10000))
@@ -107,9 +114,12 @@ namespace PlexRipper.BaseTests
                 {
                     if (config.IncludeDownloadTasks)
                     {
-                        if (type is PlexMediaType.Movie)
+                        switch (type)
                         {
-                            return GetMovieDownloadTask(config).Generate(config.DownloadTasksMaxCount);
+                            case PlexMediaType.Movie:
+                                return GetMovieDownloadTask(config).Generate(config.DownloadTasksCount);
+                            case PlexMediaType.TvShow:
+                                return GetTvShowDownloadTask(config).Generate(config.DownloadTasksCount);
                         }
                     }
 
@@ -141,13 +151,13 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
                 .RuleFor(x => x.MediaData, _ => new PlexMediaContainer
                 {
-                    MediaData = GetPlexMediaData(movieParts).Generate(movieQualities),
+                    MediaData = GetPlexMediaData(config).Generate(movieQualities),
                 })
                 .RuleFor(x => x.PlexServerId, f => f.Random.Int(1, 10000))
                 .RuleFor(x => x.PlexServer, _ => new PlexServer())
                 .RuleFor(x => x.PlexLibraryId, f => f.Random.Int(1, 10000))
                 .RuleFor(x => x.PlexLibrary, _ => new PlexLibrary())
-                .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, movieKeys))
+                .RuleFor(x => x.Key, _ => GetUniqueId(movieKeys, config))
                 .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
@@ -160,26 +170,44 @@ namespace PlexRipper.BaseTests
 
         #endregion
 
-        public static Faker<PlexMediaData> GetPlexMediaData(int movieParts = 1)
+        public static Faker<PlexMediaData> GetPlexMediaData(FakeDataConfig config = null)
         {
+            config ??= new FakeDataConfig();
+
             return new Faker<PlexMediaData>()
+                .StrictMode(true)
+                .UseSeed(config.Seed)
                 .RuleFor(x => x.Bitrate, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.MediaFormat, f => f.System.FileExt("video/mp4"))
                 .RuleFor(x => x.Width, f => f.Random.Int(240, 10000))
                 .RuleFor(x => x.Height, f => f.Random.Int(240, 10000))
+                .RuleFor(x => x.VideoFrameRate, _ => "24p")
+                .RuleFor(x => x.VideoProfile, _ => "high")
+                .RuleFor(x => x.AudioCodec, _ => "dca")
+                .RuleFor(x => x.AudioProfile, _ => "dts")
+                .RuleFor(x => x.Protocol, _ => "unknown")
+                .RuleFor(x => x.Selected, f => f.Random.Bool())
+                .RuleFor(x => x.AspectRatio, _ => 1.78)
                 .RuleFor(x => x.VideoCodec, f => f.System.FileType())
                 .RuleFor(x => x.AudioChannels, f => f.Random.Int(2, 5))
                 .RuleFor(x => x.VideoResolution, f => f.PickRandom("sd", "720p", "1080p"))
                 .RuleFor(x => x.Duration, f => f.Random.Long(50000, 55124400))
                 .RuleFor(x => x.OptimizedForStreaming, f => f.Random.Bool())
-                .RuleFor(x => x.Parts, f => GetPlexMediaPart().Generate(movieParts));
+                .RuleFor(x => x.Parts, f => GetPlexMediaPart().GenerateBetween(1, config.IncludeMultiPartMovies ? 2 : 1));
         }
 
-        public static Faker<PlexMediaDataPart> GetPlexMediaPart()
+        public static Faker<PlexMediaDataPart> GetPlexMediaPart(FakeDataConfig config = null)
         {
+            config ??= new FakeDataConfig();
+
             return new Faker<PlexMediaDataPart>()
+                .StrictMode(true)
+                .UseSeed(config.Seed)
                 .RuleFor(x => x.ObfuscatedFilePath, f => "/library/parts/65125/1193813456/file.avi")
                 .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
+                .RuleFor(x => x.AudioProfile, _ => "dts")
+                .RuleFor(x => x.HasThumbnail, f => f.Random.Bool())
+                .RuleFor(x => x.HasChapterTextStream, f => f.Random.Bool())
                 .RuleFor(x => x.File, f => "/KidsMovies/Fantastic Four 2/F4 Rise of the Silver Surfer.avi")
                 .RuleFor(x => x.Size, f => f.Random.Long(50000, 55124400))
                 .RuleFor(x => x.Container, f => f.System.FileExt("video/mp4"))
@@ -207,8 +235,8 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PlexLibrary, _ => new PlexLibrary())
                 .RuleFor(x => x.PlexTvShowGenres, _ => new List<PlexTvShowGenre>())
                 .RuleFor(x => x.PlexTvShowRoles, _ => new List<PlexTvShowRole>())
-                .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, tvShowKeys))
-                .RuleFor(x => x.Seasons, f => GetPlexTvShowSeason(config).Generate(f.Random.Int(2, 5)))
+                .RuleFor(x => x.Key, _ => GetUniqueId(tvShowKeys, config))
+                .RuleFor(x => x.Seasons, f => GetPlexTvShowSeason(config).GenerateBetween(1, config.TvShowSeasonCountMax))
                 .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
@@ -252,8 +280,8 @@ namespace PlexRipper.BaseTests
             return new Faker<PlexTvShowSeason>()
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.Id, _ => _plexSeasonId++)
-                .RuleFor(x => x.ParentKey, _ => GetUniqueId(1, 10000, seasonKeys))
-                .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, seasonKeys))
+                .RuleFor(x => x.ParentKey, _ => GetUniqueId(seasonKeys, config))
+                .RuleFor(x => x.Key, f => f.Random.Int(1, 10000000))
                 .RuleFor(x => x.Title, _ => $"Season {seasonIndex++}")
                 .RuleFor(x => x.PlexServerId, f => f.Random.Int(1, 10000))
                 .RuleFor(x => x.PlexServer, _ => new PlexServer())
@@ -261,7 +289,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PlexLibrary, _ => new PlexLibrary())
                 .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
                 .RuleFor(x => x.TvShowId, f => f.Random.Int(1, 10000))
-                .RuleFor(x => x.Episodes, f => GetPlexTvShowEpisode(config).Generate(f.Random.Int(6, 10)))
+                .RuleFor(x => x.Episodes, f => GetPlexTvShowEpisode(config).GenerateBetween(1, config.TvShowEpisodeCountMax))
                 .RuleFor(x => x.AddedAt, f => f.Date.Past(10, DateTime.Now))
                 .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
@@ -290,8 +318,8 @@ namespace PlexRipper.BaseTests
             return new Faker<PlexTvShowEpisode>()
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.Id, _ => _plexEpisodeId++)
-                .RuleFor(x => x.ParentKey, _ => GetUniqueId(1, 10000, episodeKeys))
-                .RuleFor(x => x.Key, _ => GetUniqueId(1, 10000, episodeKeys))
+                .RuleFor(x => x.ParentKey, _ => GetUniqueId(episodeKeys, config))
+                .RuleFor(x => x.Key, f => f.Random.Int(1, 10000000))
                 .RuleFor(x => x.Title, f => f.Lorem.Word())
                 .RuleFor(x => x.PlexServerId, f => f.Random.Int(1, 10000))
                 .RuleFor(x => x.PlexServer, _ => new PlexServer())
@@ -304,7 +332,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
                 .RuleFor(x => x.MediaData, _ => new PlexMediaContainer
                 {
-                    MediaData = GetPlexMediaData(1).Generate(1),
+                    MediaData = GetPlexMediaData().Generate(1),
                 })
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
                 .FinishWith((f, tvShowEpisode) =>
@@ -329,11 +357,12 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>());
         }
 
-        private static int GetUniqueId(int min, int max, List<int> alreadyGenerated)
+        private static int GetUniqueId(List<int> alreadyGenerated, FakeDataConfig config = null)
         {
+            var rnd = new Random(config.Seed);
             while (true)
             {
-                int value = _random.Next(min, max);
+                int value = rnd.Next(1, 10000000);
                 if (!alreadyGenerated.Contains(value))
                 {
                     alreadyGenerated.Add(value);

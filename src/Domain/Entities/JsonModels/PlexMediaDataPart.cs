@@ -21,7 +21,7 @@
 
         public string AudioProfile { get; set; }
 
-        public string HasThumbnail { get; set; }
+        public bool HasThumbnail { get; set; }
 
         public string Indexes { get; set; }
 

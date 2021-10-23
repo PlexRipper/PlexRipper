@@ -10,7 +10,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Data.UnitTests.CQRS.PlexTvShows.Queries
+namespace Data.UnitTests
 {
     public class GetPlexTvShowTreeByMediaIdsQueryHandler_UnitTests
     {

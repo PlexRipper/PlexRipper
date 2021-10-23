@@ -32,7 +32,6 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.DestinationDirectory, f => f.System.FilePath())
                 .RuleFor(x => x.ParentId, _ => null)
                 .RuleFor(x => x.Parent, _ => null)
-                .RuleFor(x => x.MediaType, PlexMediaType.Movie)
                 .RuleFor(x => x.Key, _ => _random.Next(1, 10000))
                 .RuleFor(x => x.MediaId, _ => _random.Next(1, 10000))
                 .RuleFor(x => x.Created, f => f.Date.Recent(30))
@@ -63,6 +62,7 @@ namespace PlexRipper.BaseTests
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
                 .UseSeed(config.Seed)
+                .RuleFor(x => x.MediaType, PlexMediaType.Movie)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
                 .RuleFor(x => x.Children, _ => GetMovieDataDownloadTask(config).Generate(1))
                 .FinishWith((_, downloadTask) =>
@@ -82,6 +82,7 @@ namespace PlexRipper.BaseTests
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
                 .UseSeed(config.Seed)
+                .RuleFor(x => x.MediaType, PlexMediaType.Movie)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.MovieData)
                 .FinishWith((_, downloadTask) =>
                 {
@@ -103,8 +104,9 @@ namespace PlexRipper.BaseTests
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
                 .UseSeed(config.Seed)
+                .RuleFor(x => x.MediaType, PlexMediaType.TvShow)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.TvShow)
-                .RuleFor(x => x.Children, _ => GetTvShowSeasonDownloadTask(config).Generate(1))
+                .RuleFor(x => x.Children, _ => GetTvShowSeasonDownloadTask(config).Generate(config.TvShowSeasonCountMax))
                 .FinishWith((_, downloadTask) =>
                 {
                     downloadTask.Children.ForEach(x =>
@@ -122,8 +124,9 @@ namespace PlexRipper.BaseTests
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
                 .UseSeed(config.Seed)
+                .RuleFor(x => x.MediaType, PlexMediaType.Season)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Season)
-                .RuleFor(x => x.Children, _ => GetTvShowEpisodeDownloadTask(config).Generate(config.MediaCount))
+                .RuleFor(x => x.Children, _ => GetTvShowEpisodeDownloadTask(config).Generate(config.TvShowEpisodeCountMax))
                 .FinishWith((_, downloadTask) =>
                 {
                     downloadTask.Children.ForEach(x =>
@@ -141,8 +144,9 @@ namespace PlexRipper.BaseTests
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
                 .UseSeed(config.Seed)
+                .RuleFor(x => x.MediaType, PlexMediaType.Episode)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode)
-                .RuleFor(x => x.Children, _ => GetTvShowEpisodeDataDownloadTask(config).Generate(config.MediaCount))
+                .RuleFor(x => x.Children, _ => GetTvShowEpisodeDataDownloadTask(config).Generate(1))
                 .FinishWith((_, downloadTask) =>
                 {
                     downloadTask.Children.ForEach(x =>
@@ -160,6 +164,7 @@ namespace PlexRipper.BaseTests
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
                 .UseSeed(config.Seed)
+                .RuleFor(x => x.MediaType, PlexMediaType.Episode)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.EpisodeData);
         }
 

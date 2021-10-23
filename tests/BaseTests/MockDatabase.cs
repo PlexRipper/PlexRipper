@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Bogus.Extensions;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data;
 using PlexRipper.Domain;
-using Xunit.Abstractions;
 
 namespace PlexRipper.BaseTests
 {
     public static class MockDatabase
     {
+        private static Random _rnd = new Random();
+
         public static PlexRipperDbContext GetMemoryDbContext()
         {
             var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
-            optionsBuilder.UseInMemoryDatabase("memory_database");
+
+            optionsBuilder.UseInMemoryDatabase($"memory_database_{_rnd.Next(1, int.MaxValue)}_{_rnd.Next(1, int.MaxValue)}");
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             return new PlexRipperDbContext(optionsBuilder.Options);
         }
@@ -62,6 +63,27 @@ namespace PlexRipper.BaseTests
                 dbContext.SaveChanges();
             }
 
+            return dbContext;
+        }
+
+        public static PlexRipperDbContext AddDownloadTasks(this PlexRipperDbContext dbContext, FakeDataConfig config = null)
+        {
+            List<DownloadTask> downloadTasks;
+            switch (config.LibraryType)
+            {
+                case PlexMediaType.Movie:
+                    downloadTasks = FakeData.GetMovieDownloadTask(config).Generate(config.DownloadTasksCount);
+                    break;
+                case PlexMediaType.TvShow:
+                    downloadTasks = FakeData.GetTvShowDownloadTask(config).Generate(config.DownloadTasksCount);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            dbContext.DownloadTasks.AddRange(downloadTasks);
+
+            dbContext.SaveChanges();
             return dbContext;
         }
     }

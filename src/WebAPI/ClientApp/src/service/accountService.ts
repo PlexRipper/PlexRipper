@@ -1,9 +1,9 @@
 import Log from 'consola';
-import { combineLatest, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { map, switchMap, tap } from 'rxjs/operators';
-import { BaseService, GlobalService, SettingsService } from '@service';
+import { BaseService, GlobalService } from '@service';
 import { Context } from '@nuxt/types';
 import IStoreState from '@interfaces/service/IStoreState';
 import ResultDTO from '@dto/ResultDTO';
@@ -65,19 +65,6 @@ export class AccountService extends BaseService {
 		return this.getAccounts().pipe(map((x) => x?.find((x) => x.id === accountId) ?? null));
 	}
 
-	public getActiveAccount(): Observable<PlexAccountDTO | null> {
-		return combineLatest([SettingsService.getActiveAccountId(), this.getAccounts()]).pipe(
-			switchMap((result: [number, PlexAccountDTO[]]) => {
-				const activeAccountId = result[0];
-				// Check if there is an valid account
-				if (activeAccountId > 0) {
-					return of(result[1].find((account) => account.id === activeAccountId) ?? null);
-				}
-				return of(null);
-			}),
-		);
-	}
-
 	public createPlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
 		return createAccount(account).pipe(
 			tap((createdAccount) => {
@@ -107,4 +94,3 @@ export class AccountService extends BaseService {
 
 const accountService = new AccountService();
 export default accountService;
-

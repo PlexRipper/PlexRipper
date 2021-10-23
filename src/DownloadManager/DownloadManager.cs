@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using MediatR;
@@ -470,6 +469,8 @@ namespace PlexRipper.DownloadManager
             {
                 return Result.Fail("Parameter downloadTasks was empty or null").LogError();
             }
+
+            //var downloadTasks = _mediator.Send(new GetAllDownloadTasksQuery(downloadTaskIds));
 
             var downloadTasks = new List<DownloadTask>();
 

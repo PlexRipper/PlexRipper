@@ -36,33 +36,15 @@ namespace PlexRipper.DownloadManager
                 var nextDownloadTask = GetNextDownloadTask(ref downloadTasks);
                 if (nextDownloadTask.IsFailed)
                 {
+                    Log.Information($"There are no available downloadTasks remaining for PlexServer: {plexServer.Name}");
                     continue;
                 }
 
                 downloadTasks = SetToDownloading(downloadTasks);
+                UpdateDownloadTasks.OnNext(downloadTasks);
 
                 StartDownloadTask.OnNext(nextDownloadTask.Value);
 
-                // Check if this server is already downloading a downloadTask
-                // if (downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading))
-                // {
-                //     Log.Warning($"PlexServer: {plexServer.Name} already has a download which is in currently downloading");
-                //     continue;
-                // }
-
-                // var queuedDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Queued);
-                // if (queuedDownloadTask != null)
-                // {
-                //     Log.Debug(
-                //         $"Starting the next Queued downloadTask with id {queuedDownloadTask.Id} - {queuedDownloadTask.Title} for server {plexServer.Name}");
-                //
-                //     // UpdateDownloadTask.OnNext(queuedDownloadTask);
-                //     return;
-                // }
-
-                UpdateDownloadTasks.OnNext(downloadTasks);
-
-                Log.Information($"There are no available downloadTasks remaining for PlexServer: {plexServer.Name}");
             }
         }
 

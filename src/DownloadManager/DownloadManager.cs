@@ -471,14 +471,13 @@ namespace PlexRipper.DownloadManager
                 return Result.Fail("Parameter downloadTasks was empty or null").LogError();
             }
 
-            var allRelatedIds = _mediator.Send(new GetAllRelatedDownloadTaskIds(downloadTaskIds));
+            var allRelatedIds = await _mediator.Send(new GetAllRelatedDownloadTaskIds(downloadTaskIds));
 
-            var downloadTasks = new List<DownloadTask>();
-
-            Log.Information($"Stopping {downloadTaskIds.Count} from downloading");
+            Log.Information($"Stopping {allRelatedIds.Value.Count} from downloading");
 
             // Retrieve download client
-            foreach (int downloadTaskId in downloadTaskIds)
+            var downloadTasks = new List<DownloadTask>();
+            foreach (int downloadTaskId in allRelatedIds.Value)
             {
                 var downloadClient = GetDownloadClient(downloadTaskId);
                 DownloadTask downloadTask = null;

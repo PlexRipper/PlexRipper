@@ -20,6 +20,7 @@ export interface DownloadTaskDTO {
   fileLocationUrl: string;
   fileName: string;
   mediaType: PlexMediaType;
+  downloadTaskType: DownloadTaskType;
 
   /** @format int32 */
   key: number;
@@ -35,6 +36,8 @@ export interface DownloadTaskDTO {
 
   /** @format decimal */
   percentage: number;
+  downloadDirectory: string;
+  destinationDirectory: string;
 
   /** @format int32 */
   priority: number;
@@ -45,11 +48,16 @@ export interface DownloadTaskDTO {
   /** @format int32 */
   plexLibraryId: number;
 
+  /** @format int32 */
+  parentId: number;
+
+  /** @format int32 */
+  mediaId: number;
+
   /** @format int64 */
   timeRemaining: number;
-  destinationFilePath: string;
-  downloadPath: string;
   downloadUrl: string;
+  quality: string;
   children?: DownloadTaskDTO[] | null;
   actions: string[];
 }
@@ -81,6 +89,18 @@ export enum PlexMediaType {
   OtherVideos = "OtherVideos",
   Games = "Games",
   Unknown = "Unknown",
+}
+
+export enum DownloadTaskType {
+  None = "None",
+  Movie = "Movie",
+  MovieData = "MovieData",
+  MoviePart = "MoviePart",
+  TvShow = "TvShow",
+  Season = "Season",
+  Episode = "Episode",
+  EpisodeData = "EpisodeData",
+  EpisodePart = "EpisodePart",
 }
 
 export interface ResultDTO {
@@ -208,9 +228,6 @@ export interface PlexAccountDTO {
   /** @format int64 */
   plexId: number;
   email: string | null;
-
-  /** @format date-time */
-  joinedAt: string;
   title: string;
   hasPassword: boolean;
   authenticationToken: string;

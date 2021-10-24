@@ -26,6 +26,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
         {
             var downloadTask =
                 await DownloadTasksQueryable
+                    .AsTracking()
                     .IncludeDownloadTasks(request.IncludeServer, request.IncludeLibrary)
                     .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 

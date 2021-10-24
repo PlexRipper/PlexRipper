@@ -206,7 +206,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.ObfuscatedFilePath, f => "/library/parts/65125/1193813456/file.avi")
                 .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
                 .RuleFor(x => x.AudioProfile, _ => "dts")
-                .RuleFor(x => x.HasThumbnail, f => f.Random.Bool())
+                .RuleFor(x => x.HasThumbnail, f => f.Random.Int(0, 1).ToString())
                 .RuleFor(x => x.HasChapterTextStream, f => f.Random.Bool())
                 .RuleFor(x => x.File, f => "/KidsMovies/Fantastic Four 2/F4 Rise of the Silver Surfer.avi")
                 .RuleFor(x => x.Size, f => f.Random.Long(50000, 55124400))

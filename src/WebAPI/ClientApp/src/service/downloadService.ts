@@ -14,7 +14,7 @@ import {
 import { map, switchMap, take } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { AccountService, BaseService, ProgressService } from '@service';
+import { BaseService, ProgressService } from '@service';
 import { Context } from '@nuxt/types';
 import { determineDownloadStatus } from '@lib/common';
 import globalService from '~/service/globalService';

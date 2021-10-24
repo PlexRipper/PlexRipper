@@ -10,7 +10,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexDownloads
+namespace PlexRipper.Data
 {
     public class GetAllDownloadTasksInPlexServersQueryValidator : AbstractValidator<GetAllDownloadTasksInPlexServersQuery> { }
 
@@ -21,8 +21,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
 
         public async Task<Result<List<PlexServer>>> Handle(GetAllDownloadTasksInPlexServersQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<PlexServer> query = PlexServerQueryable
-                .IncludeDownloadTasks(true);
+            var query = PlexServerQueryable.IncludeDownloadTasks(true);
 
             if (request.IncludeServerStatus)
             {

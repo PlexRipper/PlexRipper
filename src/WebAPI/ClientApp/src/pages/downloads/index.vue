@@ -14,6 +14,7 @@
 		<vue-scroll class="download-page-tables">
 			<v-row v-if="downloads.length > 0">
 				<v-col>
+					<print :object="selected" />
 					<v-expansion-panels v-model="openExpansions" multiple>
 						<v-expansion-panel v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
 							<v-expansion-panel-header>

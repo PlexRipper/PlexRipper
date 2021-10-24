@@ -10,7 +10,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexDownloads
+namespace PlexRipper.Data
 {
     public class GetAllRelatedDownloadTaskIdsValidator : AbstractValidator<GetAllRelatedDownloadTaskIds>
     {
@@ -33,7 +33,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 .Where(x => request.DownloadTaskIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
-            var downloadTasksIds = downloadTasks.Flatten().GroupBy(x => x.Id).Select(x => x.First().Id).ToList();
+            var downloadTasksIds = downloadTasks.Flatten(x => x.Children).GroupBy(x => x.Id).Select(x => x.First().Id).ToList();
 
             return Result.Ok(downloadTasksIds);
         }

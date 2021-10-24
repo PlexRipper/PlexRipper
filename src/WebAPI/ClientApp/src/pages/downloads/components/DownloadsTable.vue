@@ -1,5 +1,6 @@
 <template>
 	<div>
+		<print :object="downloadRows" />
 		<v-tree-view-table
 			:items="downloadRows"
 			:headers="getHeaders"

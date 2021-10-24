@@ -40,6 +40,11 @@ export default class DownloadsTable extends Vue {
 	get getHeaders(): ITreeViewTableHeader[] {
 		return [
 			{
+				text: 'Id',
+				value: 'id',
+				maxWidth: 50,
+			},
+			{
 				text: 'Title',
 				value: 'title',
 				maxWidth: 250,
@@ -156,9 +161,7 @@ export default class DownloadsTable extends Vue {
 	}
 
 	selectedAction(selected: number[]) {
-		// Convert downloadTask keys to downloadTask Ids
-		const ids = this.flatDownloadRows.filter((x) => selected.includes(x.key)).map((x) => x.id);
-		this.$emit('selected', ids);
+		this.$emit('selected', selected);
 	}
 
 	mounted(): void {

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
@@ -14,29 +15,31 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
     {
         public UpdateDownloadStatusOfDownloadTaskCommandValidator()
         {
-            RuleFor(x => x.DownloadTaskId).GreaterThan(0);
+            RuleForEach(x => x.DownloadTaskIds).ChildRules(x => x.RuleFor(y => y).GreaterThan(0));
             RuleFor(x => x.DownloadStatus).NotEqual(DownloadStatus.Unknown);
         }
     }
 
     public class UpdateDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
-        IRequestHandler<UpdateDownloadStatusOfDownloadTaskCommand, Result<bool>>
+        IRequestHandler<UpdateDownloadStatusOfDownloadTaskCommand, Result>
     {
         public UpdateDownloadStatusOfDownloadTaskCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<bool>> Handle(UpdateDownloadStatusOfDownloadTaskCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(UpdateDownloadStatusOfDownloadTaskCommand command, CancellationToken cancellationToken)
         {
-            var downloadTask = await _dbContext.DownloadTasks.AsTracking()
-                .FirstOrDefaultAsync(x => x.Id == command.DownloadTaskId, cancellationToken);
+            var downloadTasks = await DownloadTasksQueryable
+                .AsTracking()
+                .Where(x => command.DownloadTaskIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
 
-            if (downloadTask != null)
+            foreach (var downloadTask in downloadTasks)
             {
                 downloadTask.DownloadStatus = command.DownloadStatus;
-                await _dbContext.SaveChangesAsync(cancellationToken);
-                return Result.Ok(true);
             }
 
-            return ResultExtensions.Create404NotFoundResult();
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return Result.Ok();
         }
     }
 }

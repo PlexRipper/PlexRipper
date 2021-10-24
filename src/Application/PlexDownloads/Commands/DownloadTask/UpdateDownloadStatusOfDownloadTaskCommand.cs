@@ -1,18 +1,19 @@
-﻿using FluentResults;
+﻿using System.Collections.Generic;
+using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application
 {
-    public class UpdateDownloadStatusOfDownloadTaskCommand : IRequest<Result<bool>>
+    public class UpdateDownloadStatusOfDownloadTaskCommand : IRequest<Result>
     {
-        public UpdateDownloadStatusOfDownloadTaskCommand(int downloadTaskId, DownloadStatus downloadStatus)
+        public UpdateDownloadStatusOfDownloadTaskCommand(List<int> downloadTaskIds, DownloadStatus downloadStatus)
         {
-            DownloadTaskId = downloadTaskId;
+            DownloadTaskIds = downloadTaskIds;
             DownloadStatus = downloadStatus;
         }
 
-        public int DownloadTaskId { get; }
+        public List<int> DownloadTaskIds { get; }
 
         public DownloadStatus DownloadStatus { get; }
     }

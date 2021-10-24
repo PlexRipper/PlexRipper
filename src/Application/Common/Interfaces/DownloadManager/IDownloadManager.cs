@@ -15,7 +15,7 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="downloadTaskIds">The ids of the <see cref="DownloadTask"/> to stop.</param>
         /// <returns>If successful a list of the DownloadTasks that were stopped.</returns>
-        Task<Result<List<DownloadTask>>> StopDownloadTasksAsync(List<int> downloadTaskIds);
+        Task<Result<List<int>>> StopDownloadTasksAsync(List<int> downloadTaskIds);
 
         /// <summary>
         /// Adds a list of <see cref="DownloadTask"/>s to the download queue.

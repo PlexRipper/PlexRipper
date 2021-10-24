@@ -242,30 +242,32 @@ namespace PlexRipper.Application
         }
 
         /// <inheritdoc/>
-        public async Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<DownloadTask> downloadTasks)
+        public async Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<int> downloadTaskIds)
         {
-            if (downloadTasks is null || !downloadTasks.Any())
+            if (downloadTaskIds is null || !downloadTaskIds.Any())
             {
                 return Result.Fail("Parameter downloadTasks was empty or null").LogError();
             }
 
-            Log.Debug($"Regenerating {downloadTasks.Count} download tasks.");
+            Log.Debug($"Regenerating {downloadTaskIds.Count} download tasks.");
+
+
 
             var freshDownloadTasks = new List<DownloadTask>();
 
-            foreach (var downloadTask in downloadTasks)
+            foreach (var downloadTask in downloadTaskIds)
             {
-                var mediaIdResult =
-                    await _mediator.Send(new GetPlexMediaIdByKeyQuery(downloadTask.Key, downloadTask.MediaType, downloadTask.PlexServerId));
-                if (mediaIdResult.IsFailed)
-                {
-                    var result = Result.Fail($"Could not recreate the download task for {downloadTask.FullTitle}");
-                    result.WithReasons(mediaIdResult.Reasons);
-                    await _notificationsService.SendResult(result);
-                    continue;
-                }
-
                 // TODO Re-enable
+                // var mediaIdResult =
+                //     await _mediator.Send(new GetPlexMediaIdByKeyQuery(downloadTask.Key, downloadTask.MediaType, downloadTask.PlexServerId));
+                // if (mediaIdResult.IsFailed)
+                // {
+                //     var result = Result.Fail($"Could not recreate the download task for {downloadTask.FullTitle}");
+                //     result.WithReasons(mediaIdResult.Reasons);
+                //     await _notificationsService.SendResult(result);
+                //     continue;
+                // }
+
                 // var downloadTasksResult = await GenerateAsync(new List<int> { mediaIdResult.Value }, downloadTask.MediaType);
                 // if (downloadTasksResult.IsFailed)
                 // {
@@ -285,8 +287,8 @@ namespace PlexRipper.Application
                 // freshDownloadTasks.AddRange(downloadTasksResult.Value);
             }
 
-            Log.Debug($"Successfully regenerated {freshDownloadTasks.Count} out of {downloadTasks.Count} download tasks.");
-            if (downloadTasks.Count - freshDownloadTasks.Count > 0)
+            Log.Debug($"Successfully regenerated {freshDownloadTasks.Count} out of {downloadTaskIds.Count} download tasks.");
+            if (downloadTaskIds.Count - freshDownloadTasks.Count > 0)
             {
                 Log.Error("Failed to generate");
             }

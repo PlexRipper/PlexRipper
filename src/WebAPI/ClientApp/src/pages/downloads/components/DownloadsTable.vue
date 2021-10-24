@@ -1,12 +1,12 @@
 <template>
 	<div>
-		<print :object="downloadRows" />
 		<v-tree-view-table
 			:items="downloadRows"
 			:headers="getHeaders"
 			height-auto
 			media-icons
 			load-children
+			item-key="id"
 			@action="tableAction"
 			@selected="selectedAction"
 		/>

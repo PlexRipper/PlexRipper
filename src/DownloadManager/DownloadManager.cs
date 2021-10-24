@@ -78,6 +78,17 @@ namespace PlexRipper.DownloadManager
 
             Log.Information("Running DownloadManager setup.");
 
+            SetupSubscriptions();
+        }
+
+        #endregion
+
+        #region Methods
+
+        #region Private
+
+        private void SetupSubscriptions()
+        {
             // Setup DownloadQueue subscriptions
             _downloadQueue
                 .StartDownloadTask
@@ -99,12 +110,6 @@ namespace PlexRipper.DownloadManager
                 .FileMergeProgressObservable
                 .SubscribeAsync(OnFileMergeProgress);
         }
-
-        #endregion
-
-        #region Methods
-
-        #region Private
 
         private async Task<Result<PlexDownloadClient>> CreateDownloadClient(int downloadTaskId)
         {
@@ -225,11 +230,6 @@ namespace PlexRipper.DownloadManager
             }
 
             Log.Debug($"Cleaned-up PlexDownloadClient with id {downloadTaskId} from the DownloadManager");
-        }
-
-        private Result RemoveDownloadTempFiles(DownloadTask downloadTask)
-        {
-            return _fileSystem.DeleteAllFilesFromDirectory(downloadTask.DownloadDirectory);
         }
 
         /// <summary>
@@ -462,10 +462,14 @@ namespace PlexRipper.DownloadManager
         {
             if (downloadTaskIds is null || !downloadTaskIds.Any())
             {
-                return Result.Fail("Parameter downloadTasks was empty or null").LogError();
+                return ResultExtensions.IsEmpty(nameof(downloadTaskIds)).LogWarning();
             }
 
             var allRelatedIds = await _mediator.Send(new GetAllRelatedDownloadTaskIds(downloadTaskIds));
+            if (allRelatedIds.IsFailed)
+            {
+                return allRelatedIds;
+            }
 
             Log.Information($"Stopping {allRelatedIds.Value.Count} from downloading");
 
@@ -494,7 +498,7 @@ namespace PlexRipper.DownloadManager
                         CleanUpDownloadClient(downloadTask.Value.Id);
                     }
 
-                    var removeTempResult = RemoveDownloadTempFiles(downloadTask.Value);
+                    var removeTempResult = _fileSystem.DeleteAllFilesFromDirectory(downloadTask.Value.DownloadDirectory);
                     if (removeTempResult.IsFailed)
                     {
                         await _notificationsService.SendResult(removeTempResult);

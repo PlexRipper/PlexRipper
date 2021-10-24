@@ -13,7 +13,7 @@ namespace PlexRipper.Domain
         /// <param name="selectChildren"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IEnumerable<T> Flatten<T>(this IEnumerable<T> nodes, Func<T, IEnumerable<T>> selectChildren = null)
+        public static IEnumerable<T> Flatten<T>(this IEnumerable<T> nodes, Func<T, IEnumerable<T>> selectChildren)
         {
             if (nodes == null) yield break;
 

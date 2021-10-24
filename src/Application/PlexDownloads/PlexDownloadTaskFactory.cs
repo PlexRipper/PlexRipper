@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using MediatR;
@@ -251,40 +249,51 @@ namespace PlexRipper.Application
 
             Log.Debug($"Regenerating {downloadTaskIds.Count} download tasks.");
 
-
-
             var freshDownloadTasks = new List<DownloadTask>();
 
-            foreach (var downloadTask in downloadTaskIds)
+            foreach (var downloadTaskId in downloadTaskIds)
             {
-                // TODO Re-enable
-                // var mediaIdResult =
-                //     await _mediator.Send(new GetPlexMediaIdByKeyQuery(downloadTask.Key, downloadTask.MediaType, downloadTask.PlexServerId));
-                // if (mediaIdResult.IsFailed)
-                // {
-                //     var result = Result.Fail($"Could not recreate the download task for {downloadTask.FullTitle}");
-                //     result.WithReasons(mediaIdResult.Reasons);
-                //     await _notificationsService.SendResult(result);
-                //     continue;
-                // }
+                var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
+                if (downloadTaskResult.IsFailed)
+                {
+                    continue;
+                }
 
-                // var downloadTasksResult = await GenerateAsync(new List<int> { mediaIdResult.Value }, downloadTask.MediaType);
-                // if (downloadTasksResult.IsFailed)
-                // {
-                //     var result = Result.Fail($"Could not recreate the download task for {downloadTask.FullTitle}");
-                //     result.WithReasons(mediaIdResult.Reasons);
-                //     await _notificationsService.SendResult(result);
-                //     continue;
-                // }
-                //
-                // await _mediator.Send(new DeleteDownloadWorkerTasksByDownloadTaskIdCommand(downloadTask.Id));
-                //
-                // //TODO Certain properties should be copied over such as priority to maintain the same order in the front-end
-                // downloadTasksResult.Value[0].Id = downloadTask.Id;
-                // downloadTasksResult.Value[0].Priority = downloadTask.Priority;
-                // downloadTasksResult.Value[0].DownloadWorkerTasks.ForEach(x => x.DownloadTaskId = downloadTask.Id);
-                //
-                // freshDownloadTasks.AddRange(downloadTasksResult.Value);
+                var downloadTask = downloadTaskResult.Value;
+
+                var mediaIdResult = await _mediator.Send(new GetPlexMediaIdByKeyQuery(downloadTask));
+                if (mediaIdResult.IsFailed)
+                {
+                    var result = Result.Fail($"Could not recreate the download task for {downloadTask.FullTitle}");
+                    result.WithReasons(mediaIdResult.Reasons);
+                    await _notificationsService.SendResult(result);
+                    continue;
+                }
+
+                var list = new List<DownloadMediaDTO>
+                {
+                    new DownloadMediaDTO
+                    {
+                        Type = downloadTask.MediaType,
+                        MediaIds = new List<int> { mediaIdResult.Value },
+                    },
+                };
+
+                var downloadTasksResult = await GenerateAsync(list);
+                if (downloadTasksResult.IsFailed)
+                {
+                    var result = Result.Fail($"Could not recreate the download task for {downloadTask.FullTitle}").WithReasons(mediaIdResult.Reasons);
+                    await _notificationsService.SendResult(result);
+                    continue;
+                }
+
+                await _mediator.Send(new DeleteDownloadWorkerTasksByDownloadTaskIdCommand(downloadTask.Id));
+
+                downloadTasksResult.Value[0].Id = downloadTask.Id;
+                downloadTasksResult.Value[0].Priority = downloadTask.Priority;
+                downloadTasksResult.Value[0].DownloadWorkerTasks.ForEach(x => x.DownloadTaskId = downloadTask.Id);
+
+                freshDownloadTasks.AddRange(downloadTasksResult.Value);
             }
 
             Log.Debug($"Successfully regenerated {freshDownloadTasks.Count} out of {downloadTaskIds.Count} download tasks.");

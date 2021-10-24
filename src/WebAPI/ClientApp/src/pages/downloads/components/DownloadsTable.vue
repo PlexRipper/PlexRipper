@@ -39,11 +39,11 @@ export default class DownloadsTable extends Vue {
 
 	get getHeaders(): ITreeViewTableHeader[] {
 		return [
-			{
-				text: 'Id',
-				value: 'id',
-				maxWidth: 50,
-			},
+			// {
+			// 	text: 'Id',
+			// 	value: 'id',
+			// 	maxWidth: 50,
+			// },
 			{
 				text: 'Title',
 				value: 'title',

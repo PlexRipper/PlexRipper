@@ -167,6 +167,10 @@ namespace PlexRipper.Data.Common
                 query = query.Include(prefix.TrimEnd('.'));
             }
 
+            // The Include path 'Children->Parent' results in a cycle.
+            // Cycles are not allowed in no-tracking queries; either use a tracking query or remove the cycle
+            query = query.AsTracking();
+
             // Include downloadTask children up to 5 levels deep
             for (int i = 1; i <= 5; i++)
             {

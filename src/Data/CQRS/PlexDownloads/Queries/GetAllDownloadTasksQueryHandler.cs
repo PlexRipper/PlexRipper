@@ -10,7 +10,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexDownloads
+namespace PlexRipper.Data
 {
     public class GetAllDownloadTasksQueryValidator : AbstractValidator<GetAllDownloadTasksQuery> { }
 
@@ -20,95 +20,46 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
 
         public async Task<Result<List<DownloadTask>>> Handle(GetAllDownloadTasksQuery request, CancellationToken cancellationToken)
         {
-            // AsTracking due to Children->Parent cycle error
-            var query = DownloadTasksQueryable.AsTracking();
-
-            if (request.IncludeServer)
-            {
-                query = query.Include(x => x.PlexServer);
-            }
-
-            if (request.IncludePlexLibrary)
-            {
-                query = query.Include(x => x.PlexLibrary);
-            }
-
-            if (request.DownloadTaskIds != null && request.DownloadTaskIds.Any())
-            {
-                var downloadTasks = await query.IncludeDownloadTasks()
-                    .Where(x => request.DownloadTaskIds.Contains(x.Id))
-                    .ToListAsync(cancellationToken);
-                return Result.Ok(BuildDownloadTaskTree(downloadTasks, request.DownloadTaskIds));
-            }
-
-            // Where clause is to retrieve only the root DownloadTasks
-            var downloadList = await query
-                .IncludeDownloadTasks()
-                .Where(x => x.ParentId == null)
+            // AsTracking due to Children->Parent cycle error, therefore all navigation properties are added as well
+            var downloadList = await DownloadTasksQueryable
+                .AsTracking()
+                .IncludeDownloadTasks(true, true)
+                .Where(x => x.ParentId == null) // Where clause is to retrieve only the root DownloadTasks
                 .ToListAsync(cancellationToken);
             return Result.Ok(downloadList);
         }
 
         private static List<DownloadTask> BuildDownloadTaskTree(List<DownloadTask> downloadTasks, List<int> downloadTaskIds)
         {
-            var rootTasks = downloadTasks.FindAll(x => x.Parent is null);
+            var flatten = downloadTasks.Flatten(x => x.Children).ToList();
 
-            // Find tasks that are not already included in the rootTasks
-            var nonRootTasks = downloadTasks.FindAll(x => x.Parent is not null);
+            var rootTasks = new List<DownloadTask>();
+            var childTasks = flatten.FindAll(x => x.Parent is not null);
 
-            //var invertedTasks = new List<DownloadTask>();
-
-            foreach (var downloadTask in nonRootTasks)
+            var tvShows = flatten.FindAll(x => x.DownloadTaskType is DownloadTaskType.TvShow).ToList();
+            foreach (var tvShow in tvShows)
             {
-                rootTasks.Add(InvertDownloadTask(downloadTask));
+                tvShow.Children = childTasks.FindAll(x => x.DownloadTaskType is DownloadTaskType.Season && x.ParentId == tvShow.Id);
+                childTasks.RemoveAll(x => tvShow.Children.Select(y => y.Id).Contains(x.Id));
+
+                foreach (var season in tvShow.Children)
+                {
+                    season.Children = childTasks.FindAll(x => x.DownloadTaskType is DownloadTaskType.Episode && x.ParentId == season.Id);
+                    childTasks.RemoveAll(x => season.Children.Select(y => y.Id).Contains(x.Id));
+
+                    foreach (var episode in season.Children)
+                    {
+                        episode.Children = childTasks.FindAll(x => x.IsDataOrPart() && x.ParentId == episode.Id);
+                        childTasks.RemoveAll(x => episode.Children.Select(y => y.Id).Contains(x.Id));
+                    }
+                }
             }
 
-            // foreach (var nonRootTask in nonRootTasks)
-            // {
-            //     if (nonRootTask.DownloadTaskType is DownloadTaskType.Season)
-            //     {
-            //         var result = rootTasks.Find(x => x.Id == nonRootTask.ParentId);
-            //         if (result is not null)
-            //         {
-            //             result.Children.Add(nonRootTask);
-            //         }
-            //         else
-            //         {
-            //             var newTask = nonRootTask.Parent;
-            //             newTask.Children = new List<DownloadTask> { nonRootTask };
-            //             rootTasks.Add(newTask);
-            //         }
-            //     }
-            //
-            //     if (nonRootTask.DownloadTaskType is DownloadTaskType.Episode)
-            //     {
-            //         // Is Episode already added
-            //         var result = rootTasks.Find(x => x.Children.Any(y => y.Children.Any(z => z.Id == nonRootTask.Id)));
-            //         if (result is not null)
-            //         {
-            //             result = result.Children.Find(x => x.Id == nonRootTask.ParentId);
-            //             if (result is not null)
-            //             {
-            //                 result.Children.Add(nonRootTask);
-            //             }
-            //         }
-            //         else
-            //         {
-            //             var newTask = InvertDownloadTask(nonRootTask);
-            //             rootTasks.Add(newTask);
-            //         }
-            //     }
-            // }
+            rootTasks.AddRange(tvShows);
 
-            // var newParentTask = childTasks.Select(x => x.Parent).GroupBy(x => x.Id).Select(x => x.First()).ToList();
-            // foreach (var downloadTask in newParentTask)
-            // {
-            //     downloadTask.Children = childTasks.FindAll(x => x.ParentId == downloadTask.Id);
-            // }
-            //
-            // rootTasks.AddRange(newParentTask);
+            rootTasks = MergeInto(rootTasks, childTasks);
 
-            rootTasks = GroupBy(rootTasks);
+            // rootTasks = GroupBy(rootTasks);
             return rootTasks;
         }
 
@@ -123,18 +74,54 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
             return downloadTask;
         }
 
-        private static List<DownloadTask> GroupBy(List<DownloadTask> downloadTasks)
+        private static List<DownloadTask> MergeInto(List<DownloadTask> baseDownloadTasks, List<DownloadTask> newList)
         {
-            foreach (var downloadTask in downloadTasks)
+            for (var i = 0; i < newList.Count; i++)
             {
-                if (downloadTask.Children.Any())
+                var newDownloadTask = newList[i];
+
+                if (newDownloadTask.DownloadTaskType is DownloadTaskType.Episode)
                 {
-                    downloadTask.Children = GroupBy(downloadTask.Children);
-                    downloadTask.Children = downloadTask.Children.GroupBy(x => x.Id).Select(x => x.First()).ToList();
+                    var tvShow = newDownloadTask.Parent.Parent;
+                    tvShow.Children = new List<DownloadTask>();
+                    var season = newDownloadTask.Parent;
+                    season.Children = new List<DownloadTask> { newDownloadTask };
+                    tvShow.Children.Add(season);
+
+                    newDownloadTask = tvShow;
+                }
+
+                if (newDownloadTask.DownloadTaskType is DownloadTaskType.TvShow)
+                {
+                    var tvShow = baseDownloadTasks.Find(x => x.Id == newDownloadTask.Id);
+                    if (tvShow is null)
+                    {
+                        baseDownloadTasks.Add(newDownloadTask);
+                        tvShow = baseDownloadTasks.Last();
+                    }
+
+                    foreach (var season in newDownloadTask.Children)
+                    {
+                        var baseSeason = tvShow.Children.Find(x => x.Id == season.Id);
+                        if (baseSeason is null)
+                        {
+                            tvShow.Children.Add(season);
+                            baseSeason = tvShow.Children.Last();
+                        }
+
+                        foreach (var episode in season.Children)
+                        {
+                            var baseEpisode = baseSeason.Children.Find(x => x.Id == episode.Id);
+                            if (baseEpisode is null)
+                            {
+                                baseSeason.Children.Add(episode);
+                            }
+                        }
+                    }
                 }
             }
 
-            return downloadTasks.GroupBy(x => x.Id).Select(x => x.First()).ToList();;
+            return baseDownloadTasks;
         }
     }
 }

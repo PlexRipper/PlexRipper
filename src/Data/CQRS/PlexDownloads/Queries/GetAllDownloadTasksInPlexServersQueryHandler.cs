@@ -22,7 +22,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
         public async Task<Result<List<PlexServer>>> Handle(GetAllDownloadTasksInPlexServersQuery request, CancellationToken cancellationToken)
         {
             IQueryable<PlexServer> query = PlexServerQueryable
-                .IncludeDownloadTasks();
+                .IncludeDownloadTasks(true);
 
             if (request.IncludeServerStatus)
             {

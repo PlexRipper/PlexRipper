@@ -148,6 +148,14 @@ namespace PlexRipper.Domain
             return new DownloadTaskValidator().Validate(this).ToFluentResult();
         }
 
+        public bool IsDataOrPart()
+        {
+            return DownloadTaskType is DownloadTaskType.EpisodeData
+                or DownloadTaskType.EpisodePart
+                or DownloadTaskType.MovieData
+                or DownloadTaskType.MoviePart;
+        }
+
         /// <inheritdoc/>
         public override string ToString()
         {
@@ -172,5 +180,36 @@ namespace PlexRipper.Domain
 
         #endregion
 
+        #region Equality Members
+
+        public bool Equals(DownloadTask other)
+        {
+            if (other is null)
+                return false;
+
+            return Id == other.Id;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            return obj.GetType() == GetType() && Equals((DownloadTask)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
+
+        #endregion
     }
 }

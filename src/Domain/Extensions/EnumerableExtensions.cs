@@ -7,19 +7,31 @@ namespace PlexRipper.Domain
     public static class EnumerableExtensions
     {
         /// <summary>
-        /// Completely flattens a multi-dimensional List
-        /// Source: (https://stackoverflow.com/a/21054096/8205497).
+        /// Source: https://stackoverflow.com/a/49847583/8205497.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="recursion"></param>
+        /// <param name="nodes"></param>
+        /// <param name="selectChildren"></param>
         /// <typeparam name="T"></typeparam>
-        /// <typeparam name="R"></typeparam>
         /// <returns></returns>
-        public static IEnumerable<T> Flatten<T, R>(this IEnumerable<T> source, Func<T, R> recursion)
-            where R : IEnumerable<T>
+        public static IEnumerable<T> Flatten<T>(this IEnumerable<T> nodes, Func<T, IEnumerable<T>> selectChildren = null)
         {
-            return source.SelectMany(x => recursion(x) != null && recursion(x).Any() ? recursion(x).Flatten(recursion) : null)
-                .Where(x => x != null);
+            if (nodes == null) yield break;
+
+            foreach (var node in nodes)
+            {
+                yield return node;
+
+                var children = selectChildren == null
+                    ? node as IEnumerable<T>
+                    : selectChildren(node);
+
+                if (children == null) continue;
+
+                foreach (var child in children.Flatten(selectChildren))
+                {
+                    yield return child;
+                }
+            }
         }
     }
 }

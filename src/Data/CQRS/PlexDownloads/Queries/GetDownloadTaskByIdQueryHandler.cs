@@ -26,17 +26,10 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
         {
             var downloadTask =
                 await DownloadTasksQueryable
-                    .Include(x => x.PlexServer)
-                    .Include(x => x.PlexLibrary)
-                    .IncludeDownloadTasks()
+                    .IncludeDownloadTasks(request.IncludeServer, request.IncludeLibrary)
                     .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-            if (downloadTask == null)
-            {
-                return ResultExtensions.EntityNotFound(nameof(DownloadTask), request.Id);
-            }
-
-            return Result.Ok(downloadTask);
+            return ReturnResult(downloadTask, request.Id);
         }
     }
 }

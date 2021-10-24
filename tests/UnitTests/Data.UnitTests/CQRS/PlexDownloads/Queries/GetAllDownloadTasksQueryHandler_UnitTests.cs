@@ -1,9 +1,10 @@
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Logging;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;
+using PlexRipper.Data;
 using PlexRipper.Data.CQRS.PlexDownloads;
 using PlexRipper.Domain;
 using Shouldly;
@@ -45,32 +46,37 @@ namespace Data.UnitTests
         }
 
         [Fact]
-        public async Task ShouldReturnDownloadTasks_WhenMovieIdsAreGiven()
+        public async Task ShouldReturnMovieDownloadTasks_WhenMovieDownloadTasksAreInDB()
         {
             // Arrange
             var config = new FakeDataConfig
             {
-                Seed = 28467,
+                Seed = 21467,
                 DownloadTasksCount = 10,
                 LibraryType = PlexMediaType.Movie,
             };
             await using var context = MockDatabase.GetMemoryDbContext().AddDownloadTasks(config);
-            var downloadTaskIds = new List<int> { 2, 3, 4, 5 };
             var handle = new GetAllDownloadTasksQueryHandler(context);
-            var request = new GetAllDownloadTasksQuery(downloadTaskIds);
+            var request = new GetAllDownloadTasksQuery();
 
             // Act
             var result = await handle.Handle(request, CancellationToken.None);
 
             // Assert
             result.IsSuccess.ShouldBeTrue();
-            var value = result.Value;
-            value.ShouldNotBeEmpty();
-            value.Count.ShouldBe(3);
+            var downloadTasks = result.Value;
+            downloadTasks.ShouldNotBeEmpty();
+            downloadTasks.Count.ShouldBe(10);
+
+            var flatList = downloadTasks.Flatten(x => x.Children).ToList();
+            flatList.ShouldAllBe(x => x.PlexServer != null);
+            flatList.ShouldAllBe(x => x.PlexLibrary != null);
+            flatList.ShouldAllBe(x => x.DownloadFolder != null);
+            flatList.ShouldAllBe(x => x.DestinationFolder != null);
         }
 
         [Fact]
-        public async Task ShouldReturnDownloadTasks_WhenTvShowIdsAreGiven()
+        public async Task ShouldReturnTvShowDownloadTasks_WhenTvShowDownloadTasksAreInDB()
         {
             // Arrange
             var config = new FakeDataConfig
@@ -82,19 +88,23 @@ namespace Data.UnitTests
                 LibraryType = PlexMediaType.TvShow,
             };
             await using var context = MockDatabase.GetMemoryDbContext().AddDownloadTasks(config);
-            var downloadTaskIds = new List<int> { 1, 2, 3, 73, 117, 119 };
             var handle = new GetAllDownloadTasksQueryHandler(context);
-            var request = new GetAllDownloadTasksQuery(downloadTaskIds);
+            var request = new GetAllDownloadTasksQuery();
 
             // Act
             var result = await handle.Handle(request, CancellationToken.None);
 
             // Assert
             result.IsSuccess.ShouldBeTrue();
-            var value = result.Value;
-            value.ShouldNotBeEmpty();
-            value.Count.ShouldBe(2);
-            value[0].Id.ShouldBe(1);
+            var downloadTasks = result.Value;
+            downloadTasks.ShouldNotBeEmpty();
+            downloadTasks.Count.ShouldBe(10);
+
+            var flatList = downloadTasks.Flatten(x => x.Children).ToList();
+            flatList.ShouldAllBe(x => x.PlexServer != null);
+            flatList.ShouldAllBe(x => x.PlexLibrary != null);
+            flatList.ShouldAllBe(x => x.DownloadFolder != null);
+            flatList.ShouldAllBe(x => x.DestinationFolder != null);
         }
     }
 }

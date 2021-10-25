@@ -37,9 +37,7 @@ namespace PlexRipper.Domain
 
             When(
                 c => c.DownloadTaskType is
-                    DownloadTaskType.EpisodeData or
                     DownloadTaskType.EpisodePart or
-                    DownloadTaskType.MovieData or
                     DownloadTaskType.MoviePart,
                 () =>
                 {

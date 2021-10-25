@@ -83,7 +83,7 @@ namespace PlexRipper.BaseTests
                 .ApplyBaseDownloadTask(config)
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.MediaType, PlexMediaType.Movie)
-                .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.MovieData)
+                .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
                 .FinishWith((_, downloadTask) =>
                 {
                     downloadTask.DownloadWorkerTasks = new List<DownloadWorkerTask>
@@ -165,7 +165,7 @@ namespace PlexRipper.BaseTests
                 .ApplyBaseDownloadTask(config)
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.MediaType, PlexMediaType.Episode)
-                .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.EpisodeData);
+                .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode);
         }
 
         #endregion

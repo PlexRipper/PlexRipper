@@ -148,11 +148,10 @@ namespace PlexRipper.Domain
             return new DownloadTaskValidator().Validate(this).ToFluentResult();
         }
 
-        public bool IsDataOrPart()
+        public bool IsDownloadTaskPart()
         {
-            return DownloadTaskType is DownloadTaskType.EpisodeData
-                or DownloadTaskType.EpisodePart
-                or DownloadTaskType.MovieData
+            return DownloadTaskType
+                is DownloadTaskType.EpisodePart
                 or DownloadTaskType.MoviePart;
         }
 

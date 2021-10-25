@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
-using Bogus.Extensions;
 using FluentResults;
 using Logging;
 using MediatR;
@@ -67,7 +65,11 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
         public async Task ShouldHaveValidDownloadTasks_WhenPlexMoviesAreValid()
         {
             // Arrange
-            var movies = FakeData.GetPlexMovies().Generate(5);
+            var config = new FakeDataConfig
+            {
+                Seed = 324,
+            };
+            var movies = FakeData.GetPlexMovies(config).Generate(5);
             _iMediator.Setup(x => x.Send(It.IsAny<GetMultiplePlexMoviesByIdsQuery>(), CancellationToken.None)).ReturnsAsync(Result.Ok(movies));
 
             // Act
@@ -124,13 +126,13 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                     downloadTaskPart.MediaId.ShouldBe(plexMovie.Id);
 
                     downloadTaskPart.MediaType.ShouldBe(plexMovie.Type);
+
                     // TODO Should check DownloadTaskType
                     downloadTaskPart.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
                     downloadTaskPart.Created.ShouldBeGreaterThan(DateTime.MinValue);
                     downloadTaskPart.Created.ShouldBeLessThan(DateTime.UtcNow);
 
                     downloadTaskPart.Children.ShouldBeEmpty();
-                    downloadTaskPart.DownloadWorkerTasks.ShouldNotBeEmpty();
                 }
             }
         }

@@ -163,8 +163,12 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
                 .FinishWith((_, movie) =>
                 {
+                    movie.FullTitle = $"{movie.Title} ({movie.Year})";
                     movie.PlexServer.Id = movie.PlexServerId;
                     movie.PlexLibrary.Id = movie.PlexLibraryId;
+
+                    // TODO Need quality selector in the case of multiple quality media
+                    movie.MediaSize = movie.MovieData.First().Parts.Sum(x => x.Size);
                 });
         }
 

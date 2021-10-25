@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
-using Bogus.Extensions;
 using FluentResults;
 using Logging;
 using MediatR;
@@ -153,38 +150,38 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                         episodeDownloadTask.Created.ShouldBeGreaterThan(DateTime.MinValue);
                         episodeDownloadTask.Created.ShouldBeLessThan(DateTime.UtcNow);
 
-                        var plexMediaDataParts = tvShowEpisode.EpisodeData.SelectMany(x => x.Parts).ToList();
-
-                        episodeDownloadTask.Children.ShouldNotBeEmpty();
-                        episodeDownloadTask.Children.Count.ShouldBe(plexMediaDataParts.Count);
-
-                        for (int m = 0; m < tvShowEpisode.EpisodeData.Count; m++)
+                        var plexMediaDataParts = tvShowEpisode.EpisodeData.First().Parts;
+                        if (plexMediaDataParts.Count > 1)
                         {
-                            var tvShowEpisodeData = tvShowEpisode.EpisodeData[m];
+                            episodeDownloadTask.Children.ShouldNotBeEmpty();
+                            episodeDownloadTask.Children.Count.ShouldBe(plexMediaDataParts.Count);
 
-                            for (int l = 0; l < tvShowEpisodeData.Parts.Count; l++)
+                            for (int m = 0; m < tvShowEpisode.EpisodeData.Count; m++)
                             {
-                                var tvShowEpisodeDataPart = tvShowEpisodeData.Parts[l];
-                                var episodeDataPartDownloadTask = episodeDownloadTask.Children[m + l];
+                                var tvShowEpisodeData = tvShowEpisode.EpisodeData[m];
 
-                                episodeDataPartDownloadTask.Key.ShouldBe(tvShowEpisode.Key);
-                                episodeDataPartDownloadTask.Title.ShouldBe(tvShowEpisode.Title);
-                                episodeDataPartDownloadTask.FullTitle.ShouldBe(tvShowEpisode.FullTitle);
-                                episodeDataPartDownloadTask.DataTotal.ShouldBe(tvShowEpisodeDataPart.Size);
-                                episodeDataPartDownloadTask.Year.ShouldBe(tvShowEpisode.Year);
+                                for (int l = 0; l < tvShowEpisodeData.Parts.Count; l++)
+                                {
+                                    var tvShowEpisodeDataPart = tvShowEpisodeData.Parts[l];
+                                    var episodeDataPartDownloadTask = episodeDownloadTask.Children[m + l];
 
-                                episodeDataPartDownloadTask.PlexLibraryId.ShouldBe(tvShowEpisode.PlexLibraryId);
-                                episodeDataPartDownloadTask.PlexServerId.ShouldBe(tvShowEpisode.PlexServerId);
-                                episodeDataPartDownloadTask.MediaId.ShouldBe(tvShowEpisode.Id);
+                                    episodeDataPartDownloadTask.Key.ShouldBe(tvShowEpisode.Key);
+                                    episodeDataPartDownloadTask.Title.ShouldBe(tvShowEpisode.Title);
+                                    episodeDataPartDownloadTask.FullTitle.ShouldBe(tvShowEpisode.FullTitle);
+                                    episodeDataPartDownloadTask.DataTotal.ShouldBe(tvShowEpisodeDataPart.Size);
+                                    episodeDataPartDownloadTask.Year.ShouldBe(tvShowEpisode.Year);
 
-                                episodeDataPartDownloadTask.MediaType.ShouldBe(tvShowEpisode.Type);
-                                episodeDataPartDownloadTask.DownloadTaskType.ShouldBe(tvShowEpisodeData.Parts.Count == 1
-                                    ? DownloadTaskType.EpisodeData
-                                    : DownloadTaskType.EpisodePart);
-                                episodeDataPartDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
-                                episodeDataPartDownloadTask.Created.ShouldBeGreaterThan(DateTime.MinValue);
-                                episodeDataPartDownloadTask.Created.ShouldBeLessThan(DateTime.UtcNow);
-                                episodeDataPartDownloadTask.DownloadWorkerTasks.ShouldNotBeEmpty();
+                                    episodeDataPartDownloadTask.PlexLibraryId.ShouldBe(tvShowEpisode.PlexLibraryId);
+                                    episodeDataPartDownloadTask.PlexServerId.ShouldBe(tvShowEpisode.PlexServerId);
+                                    episodeDataPartDownloadTask.MediaId.ShouldBe(tvShowEpisode.Id);
+
+                                    episodeDataPartDownloadTask.MediaType.ShouldBe(tvShowEpisode.Type);
+                                    episodeDataPartDownloadTask.DownloadTaskType.ShouldBe(DownloadTaskType.EpisodePart);
+                                    episodeDataPartDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
+                                    episodeDataPartDownloadTask.Created.ShouldBeGreaterThan(DateTime.MinValue);
+                                    episodeDataPartDownloadTask.Created.ShouldBeLessThan(DateTime.UtcNow);
+                                    episodeDataPartDownloadTask.DownloadWorkerTasks.ShouldNotBeEmpty();
+                                }
                             }
                         }
                     }

@@ -483,7 +483,7 @@ namespace PlexRipper.DownloadManager
                     continue;
                 }
 
-                if (!downloadTask.Value.IsDataOrPart())
+                if (!downloadTask.Value.IsDownloadTaskPart())
                 {
                     // Check if currently downloading
                     var downloadClient = GetDownloadClient(downloadTaskId);

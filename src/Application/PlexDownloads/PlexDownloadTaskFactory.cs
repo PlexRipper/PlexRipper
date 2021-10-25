@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -129,23 +129,33 @@ namespace PlexRipper.Application
                     {
                         var episodeDownloadTask = _mapper.Map<DownloadTask>(episode);
 
-                        foreach (var mediaData in episode.EpisodeData)
+                        // TODO Takes first entry which assumes its the highest quality one
+                        var episodeData = episode.EpisodeData.First();
+
+                        if (episodeData.IsMultiPart)
                         {
-                            // TODO Add quality selector
-                            foreach (var episodePart in mediaData.Parts)
+                            foreach (var episodePart in episodeData.Parts)
                             {
                                 var episodePartTask = _mapper.Map<DownloadTask>(episode);
                                 episodePartTask.MediaType = PlexMediaType.Episode;
-                                episodePartTask.DownloadTaskType =
-                                    mediaData.Parts.Count == 1 ? DownloadTaskType.EpisodeData : DownloadTaskType.EpisodePart;
+                                episodePartTask.DownloadTaskType = DownloadTaskType.EpisodePart;
                                 episodePartTask.DataTotal = episodePart.Size;
                                 episodePartTask.FileName = Path.GetFileName(episodePart.File);
                                 episodePartTask.FileLocationUrl = episodePart.ObfuscatedFilePath;
                                 episodeDownloadTask.Children.Add(episodePartTask);
                             }
-                        }
 
-                        episodeDownloadTask.DataTotal = episodeDownloadTask.Children.Select(x => x.DataTotal).Sum();
+                            episodeDownloadTask.DataTotal = episodeDownloadTask.Children.Select(x => x.DataTotal).Sum();
+                        }
+                        else
+                        {
+                            var part = episodeData.Parts.First();
+                            episodeDownloadTask.MediaType = PlexMediaType.Episode;
+                            episodeDownloadTask.DownloadTaskType = DownloadTaskType.Episode;
+                            episodeDownloadTask.DataTotal = part.Size;
+                            episodeDownloadTask.FileName = Path.GetFileName(part.File);
+                            episodeDownloadTask.FileLocationUrl = part.ObfuscatedFilePath;
+                        }
 
                         seasonDownloadTask.Children.Add(episodeDownloadTask);
                         seasonDownloadTask.DataTotal = seasonDownloadTask.Children.Select(x => x.DataTotal).Sum();
@@ -213,22 +223,35 @@ namespace PlexRipper.Application
                 var fullTitle = $"{plexMovie.Title} ({plexMovie.Year})";
                 movieDownloadTask.FullTitle = fullTitle;
 
-                // TODO Add quality chooser, will download everything now
-                foreach (var mediaData in plexMovie.MovieData)
+                // TODO Takes first entry which assumes its the highest quality one
+                var movieData = plexMovie.MovieData.First();
+
+                if (movieData.IsMultiPart)
                 {
                     // create a downloadTask for each multi-part movie.
-                    foreach (var part in mediaData.Parts)
+                    foreach (var part in movieData.Parts)
                     {
                         var moviePartDownloadTask = _mapper.Map<DownloadTask>(plexMovie);
                         moviePartDownloadTask.FullTitle = fullTitle;
-                        moviePartDownloadTask.DownloadTaskType = mediaData.Parts.Count == 1 ? DownloadTaskType.MovieData : DownloadTaskType.MoviePart;
+                        moviePartDownloadTask.DownloadTaskType = DownloadTaskType.MoviePart;
                         moviePartDownloadTask.FileName = Path.GetFileName(part.File);
                         moviePartDownloadTask.DataTotal = part.Size;
-                        moviePartDownloadTask.Quality = mediaData.VideoResolution;
+                        moviePartDownloadTask.Quality = movieData.VideoResolution;
                         moviePartDownloadTask.FileLocationUrl = part.ObfuscatedFilePath;
                         moviePartDownloadTask.FileName = Path.GetFileName(part.File);
                         movieDownloadTask.Children.Add(moviePartDownloadTask);
                     }
+
+                    movieDownloadTask.DataTotal = movieDownloadTask.Children.Select(x => x.DataTotal).Sum();
+                }
+                else
+                {
+                    var part = movieData.Parts.First();
+                    movieDownloadTask.MediaType = PlexMediaType.Movie;
+                    movieDownloadTask.DownloadTaskType = DownloadTaskType.Movie;
+                    movieDownloadTask.DataTotal = part.Size;
+                    movieDownloadTask.FileName = Path.GetFileName(part.File);
+                    movieDownloadTask.FileLocationUrl = part.ObfuscatedFilePath;
                 }
 
                 // Calculate total data
@@ -381,11 +404,7 @@ namespace PlexRipper.Application
                     downloadTask.DestinationDirectory = destinationDir.Value;
 
                     // Generate DownloadWorkerTasks
-                    if (downloadTask.DownloadTaskType is
-                        DownloadTaskType.EpisodeData or
-                        DownloadTaskType.EpisodePart or
-                        DownloadTaskType.MovieData or
-                        DownloadTaskType.MoviePart)
+                    if (downloadTask.IsDownloadTaskPart())
                     {
                         var downloadWorkerTasks = GenerateDownloadWorkerTasks(downloadTask, parts);
                         if (downloadWorkerTasks.IsFailed)

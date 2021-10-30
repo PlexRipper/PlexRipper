@@ -1,11 +1,9 @@
 using System;
 using System.Text.Json;
 using Environment;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using PlexRipper.Application.Common;
-using PlexRipper.Domain;
 using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings
@@ -133,6 +131,19 @@ namespace PlexRipper.Settings
 
             return Save();
         }
+
+        #region Helpers
+
+        public int GetDownloadSpeedLimit(string machineIdentifier)
+        {
+            if (DownloadLimit.TryGetValue(machineIdentifier, out int speedLimit))
+            {
+                return speedLimit;
+            }
+            return 0;
+        }
+
+        #endregion
 
         #endregion
 

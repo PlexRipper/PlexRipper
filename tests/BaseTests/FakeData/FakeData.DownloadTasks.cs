@@ -8,6 +8,7 @@ namespace PlexRipper.BaseTests
     public static partial class FakeData
     {
         private static int _plexDownloadTaskId = 1;
+        private static int _plexDownloadWorkerTaskId = 1;
 
         public static Faker<T> ApplyBaseDownloadTask<T>(this Faker<T> faker, FakeDataConfig config = null) where T : DownloadTask
         {
@@ -166,6 +167,36 @@ namespace PlexRipper.BaseTests
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.MediaType, PlexMediaType.Episode)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode);
+        }
+
+        #endregion
+
+        #region DownloadWorkerTasks
+
+        public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(FakeDataConfig config = null)
+        {
+            config ??= new FakeDataConfig();
+
+            int partIndex = 1;
+            int downloadTaskId = new Faker().Random.Int(1);
+            return new Faker<DownloadWorkerTask>()
+                .StrictMode(true)
+                .UseSeed(config.Seed)
+                .RuleFor(x => x.Id, _ => _plexDownloadWorkerTaskId++)
+                .RuleFor(x => x.FileName, f => f.System.FileName() + ".mp4")
+                .RuleFor(x => x.StartByte, f => f.Random.Long(0))
+                .RuleFor(x => x.EndByte, f => f.Random.Long(0))
+                .RuleFor(x => x.BytesReceived, 0)
+                .RuleFor(x => x.PartIndex, _ => partIndex++)
+                .RuleFor(x => x.TempDirectory, f => f.System.FilePath())
+                .RuleFor(x => x.ElapsedTime, 0)
+                .RuleFor(x => x.DownloadStatus, DownloadStatus.Initialized)
+                .RuleFor(x => x.DownloadTaskId, downloadTaskId)
+                .RuleFor(x => x.DownloadTask, new DownloadTask
+                {
+                    Id = downloadTaskId,
+                })
+                .RuleFor(x => x.DownloadWorkerTaskLogs, new List<DownloadWorkerLog>());
         }
 
         #endregion

@@ -74,7 +74,7 @@ namespace DownloadManager.UnitTests
         public async Task ShouldHaveFailedResult_WhenGetAllRelatedDownloadTaskIdsFails()
         {
             // Arrange
-            _iMediator.Setup(x => x.Send(It.IsAny<GetAllRelatedDownloadTaskIds>(), CancellationToken.None))
+            _iMediator.Setup(x => x.Send(It.IsAny<GetAllRelatedDownloadTaskIdsQuery>(), CancellationToken.None))
                 .ReturnsAsync(Result.Fail(""));
             var list = new List<int> { 1 };
 
@@ -91,7 +91,7 @@ namespace DownloadManager.UnitTests
             // Arrange
             var downloadTasks = FakeData.GetMovieDownloadTask().Generate(1).Flatten(x => x.Children).ToList();
             var downloadTaskIds = downloadTasks.Select(x => x.Id).ToList();
-            _iMediator.Setup(x => x.Send(It.IsAny<GetAllRelatedDownloadTaskIds>(), CancellationToken.None))
+            _iMediator.Setup(x => x.Send(It.IsAny<GetAllRelatedDownloadTaskIdsQuery>(), CancellationToken.None))
                 .ReturnsAsync(Result.Ok(downloadTaskIds));
 
             _iMediator.Setup(x => x.Send(It.IsAny<GetDownloadTaskByIdQuery>(), CancellationToken.None))

@@ -148,6 +148,16 @@ namespace PlexRipper.Domain
             return new DownloadTaskValidator().Validate(this).ToFluentResult();
         }
 
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="DownloadTask"/> is downloadable.
+        /// e.g. A episode or movie part, an episode or movie without parts.
+        /// </summary>
+        public bool IsDownloadable =>
+            IsDownloadTaskPart()
+            || (DownloadTaskType is DownloadTaskType.Episode && !Children.Any())
+            || (DownloadTaskType is DownloadTaskType.Movie && !Children.Any());
+
         public bool IsDownloadTaskPart()
         {
             return DownloadTaskType

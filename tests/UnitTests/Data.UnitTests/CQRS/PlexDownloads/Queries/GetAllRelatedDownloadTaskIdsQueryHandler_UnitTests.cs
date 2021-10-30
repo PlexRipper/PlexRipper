@@ -33,7 +33,7 @@ namespace Data.UnitTests
 
             var ids = context.DownloadTasks.Where(x => x.DownloadTaskType == DownloadTaskType.Movie).Take(5).Select(x => x.Id).ToList();
             var handle = new GetAllRelatedDownloadTaskIdsHandler(context);
-            var request = new GetAllRelatedDownloadTaskIds(ids);
+            var request = new GetAllRelatedDownloadTaskIdsQuery(ids);
 
             // Act
             var result = await handle.Handle(request, CancellationToken.None);
@@ -61,7 +61,7 @@ namespace Data.UnitTests
 
             var ids = context.DownloadTasks.Where(x => x.DownloadTaskType == DownloadTaskType.TvShow).Take(5).Select(x => x.Id).ToList();
             var handle = new GetAllRelatedDownloadTaskIdsHandler(context);
-            var request = new GetAllRelatedDownloadTaskIds(ids);
+            var request = new GetAllRelatedDownloadTaskIdsQuery(ids);
 
             // Act
             var result = await handle.Handle(request, CancellationToken.None);

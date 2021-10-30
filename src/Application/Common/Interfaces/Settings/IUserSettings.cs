@@ -32,5 +32,7 @@ namespace PlexRipper.Application.Common
         /// </summary>
         /// <param name="sourceSettings">The values to be used to set this UserSettings instance.</param>
         Result UpdateSettings(ISettingsModel sourceSettings);
+
+        int GetDownloadSpeedLimit(string machineIdentifier);
     }
 }

@@ -6,13 +6,13 @@ using PlexRipper.Domain;
 namespace PlexRipper.Application
 {
 
-    public class GetAllRelatedDownloadTaskIdsQuery : IRequest<Result<List<int>>>
+    public class GetAllRelatedDownloadTasksQuery : IRequest<Result<List<DownloadTask>>>
     {
         /// <summary>
-        /// Creates a flattened list of <see cref="DownloadTask">DownloadTaskIds</see> which are a child of the ids that are given.
+        /// Creates a flattened list of <see cref="DownloadTask">DownloadTasks</see> which are a child of the ids that are given.
         /// </summary>
         /// <param name="downloadTaskIds"></param>
-        public GetAllRelatedDownloadTaskIdsQuery(List<int> downloadTaskIds)
+        public GetAllRelatedDownloadTasksQuery(List<int> downloadTaskIds)
         {
             DownloadTaskIds = downloadTaskIds;
         }

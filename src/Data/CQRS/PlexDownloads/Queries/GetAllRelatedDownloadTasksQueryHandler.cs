@@ -12,20 +12,20 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
-    public class GetAllRelatedDownloadTaskIdsValidator : AbstractValidator<GetAllRelatedDownloadTaskIdsQuery>
+    public class GetAllRelatedDownloadTasksValidator : AbstractValidator<GetAllRelatedDownloadTasksQuery>
     {
-        public GetAllRelatedDownloadTaskIdsValidator()
+        public GetAllRelatedDownloadTasksValidator()
         {
             RuleFor(x => x.DownloadTaskIds).NotEmpty();
             RuleForEach(x => x.DownloadTaskIds).ChildRules(x => x.RuleFor(y => y).GreaterThan(0));
         }
     }
 
-    public class GetAllRelatedDownloadTaskIdsHandler : BaseHandler, IRequestHandler<GetAllRelatedDownloadTaskIdsQuery, Result<List<int>>>
+    public class GetAllRelatedDownloadTasksHandler : BaseHandler, IRequestHandler<GetAllRelatedDownloadTasksQuery, Result<List<DownloadTask>>>
     {
-        public GetAllRelatedDownloadTaskIdsHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        public GetAllRelatedDownloadTasksHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<List<int>>> Handle(GetAllRelatedDownloadTaskIdsQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<DownloadTask>>> Handle(GetAllRelatedDownloadTasksQuery request, CancellationToken cancellationToken)
         {
             var downloadTasks = await DownloadTasksQueryable
                 .AsTracking()
@@ -33,7 +33,7 @@ namespace PlexRipper.Data
                 .Where(x => request.DownloadTaskIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
-            var downloadTasksIds = downloadTasks.Flatten(x => x.Children).GroupBy(x => x.Id).Select(x => x.First().Id).ToList();
+            var downloadTasksIds = downloadTasks.Flatten(x => x.Children).GroupBy(x => x.Id).Select(x => x.First()).ToList();
 
             return Result.Ok(downloadTasksIds);
         }

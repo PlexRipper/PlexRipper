@@ -17,8 +17,6 @@ namespace PlexRipper.Application.Common
         /// <returns>The created <see cref="DownloadTask"/>.</returns>
         Task<Result<List<DownloadTask>>> GenerateMovieDownloadTasksAsync(List<int> plexMovieIds);
 
-        Result<List<DownloadWorkerTask>> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts);
-
         /// <summary>
         /// Regenerates <see cref="DownloadTask">DownloadTasks</see> while maintaining the Id and priority.
         /// Will also remove old <see cref="DownloadWorkerTask">DownloadWorkerTasks</see> assigned to the old downloadTasks from the database.
@@ -26,10 +24,5 @@ namespace PlexRipper.Application.Common
         /// <param name="downloadTaskIds"></param>
         /// <returns>A list of newly generated <see cref="DownloadTask">DownloadTasks</see></returns>
         Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<int> downloadTaskIds);
-
-        Task<Result<List<DownloadTask>>> GenerateDownloadTvShowTasksAsync(
-            List<int> plexTvShowIds,
-            List<int> plexTvShowSeasonIds,
-            List<int> plexTvShowEpisodeIds);
     }
 }

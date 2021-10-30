@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -171,36 +172,7 @@ namespace PlexRipper.Application
             return Result.Ok(downloadTasks);
         }
 
-        public Result<List<DownloadWorkerTask>> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts)
-        {
-            if (downloadTask is null)
-                return ResultExtensions.IsNull(nameof(downloadTask));
 
-            if (parts <= 0)
-                return Result.Fail($"Parameter {nameof(parts)} was {parts}, prevented division by invalid value").LogWarning();
-
-            // Create download worker tasks/segments/ranges
-            var totalBytesToReceive = downloadTask.DataTotal;
-            var partSize = totalBytesToReceive / parts;
-            var remainder = totalBytesToReceive - partSize * parts;
-
-            var downloadWorkerTasks = new List<DownloadWorkerTask>();
-
-            for (var i = 0; i < parts; i++)
-            {
-                var start = partSize * i;
-                var end = start + partSize;
-                if (i == parts - 1 && remainder > 0)
-                {
-                    // Add the remainder to the last download range
-                    end += remainder;
-                }
-
-                downloadWorkerTasks.Add(new DownloadWorkerTask(downloadTask, i + 1, start, end));
-            }
-
-            return Result.Ok(downloadWorkerTasks);
-        }
 
         /// <summary>
         /// Creates <see cref="DownloadTask"/>s from a <see cref="PlexMovie"/> and send it to the <see cref="IDownloadManager"/>.
@@ -242,6 +214,7 @@ namespace PlexRipper.Application
                         movieDownloadTask.Children.Add(moviePartDownloadTask);
                     }
 
+                    // Calculate total data
                     movieDownloadTask.DataTotal = movieDownloadTask.Children.Select(x => x.DataTotal).Sum();
                 }
                 else
@@ -254,8 +227,6 @@ namespace PlexRipper.Application
                     movieDownloadTask.FileLocationUrl = part.ObfuscatedFilePath;
                 }
 
-                // Calculate total data
-                movieDownloadTask.DataTotal = movieDownloadTask.Children.Sum(x => x.DataTotal);
                 downloadTasks.Add(movieDownloadTask);
             }
 
@@ -402,18 +373,6 @@ namespace PlexRipper.Application
                         return destinationDir.ToResult();
 
                     downloadTask.DestinationDirectory = destinationDir.Value;
-
-                    // Generate DownloadWorkerTasks
-                    if (downloadTask.IsDownloadTaskPart())
-                    {
-                        var downloadWorkerTasks = GenerateDownloadWorkerTasks(downloadTask, parts);
-                        if (downloadWorkerTasks.IsFailed)
-                        {
-                            return downloadWorkerTasks.ToResult();
-                        }
-
-                        downloadTask.DownloadWorkerTasks = downloadWorkerTasks.Value;
-                    }
 
                     if (downloadTask.Children.Any())
                     {

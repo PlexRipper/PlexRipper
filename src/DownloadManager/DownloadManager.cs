@@ -40,6 +40,8 @@ namespace PlexRipper.DownloadManager
 
         private readonly IPlexRipperHttpClient _httpClient;
 
+        private readonly Func<PlexDownloadClient> _plexDownloadClientFactory;
+
         private readonly IDownloadQueue _downloadQueue;
 
         #endregion
@@ -55,8 +57,8 @@ namespace PlexRipper.DownloadManager
         /// <param name="fileMerger">.</param>
         /// <param name="downloadQueue">Used to retrieve the next <see cref="DownloadTask"/> from the <see cref="DownloadQueue"/>.</param>
         /// <param name="notificationsService"></param>
-        /// <param name="plexDownloadTaskFactory"></param>
         /// <param name="httpClient"></param>
+        /// <param name="plexDownloadClientFactory"></param>
         public DownloadManager(
             IMediator mediator,
             ISignalRService signalRService,
@@ -65,7 +67,8 @@ namespace PlexRipper.DownloadManager
             IDownloadQueue downloadQueue,
             INotificationsService notificationsService,
             IPlexDownloadTaskFactory plexDownloadTaskFactory,
-            IPlexRipperHttpClient httpClient)
+            IPlexRipperHttpClient httpClient,
+            Func<PlexDownloadClient> plexDownloadClientFactory)
         {
             _mediator = mediator;
             _signalRService = signalRService;
@@ -74,6 +77,7 @@ namespace PlexRipper.DownloadManager
             _notificationsService = notificationsService;
             _plexDownloadTaskFactory = plexDownloadTaskFactory;
             _httpClient = httpClient;
+            _plexDownloadClientFactory = plexDownloadClientFactory;
             _downloadQueue = downloadQueue;
 
             Log.Information("Running DownloadManager setup.");
@@ -113,14 +117,14 @@ namespace PlexRipper.DownloadManager
 
         private async Task<Result<PlexDownloadClient>> CreateDownloadClient(int downloadTaskId)
         {
-            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
+            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true));
             if (downloadTaskResult.IsFailed)
             {
                 return downloadTaskResult.ToResult();
             }
 
             // Create download client
-            var newClient = PlexDownloadClient.Create(downloadTaskResult.Value, _fileSystem, _httpClient);
+            var newClient = await _plexDownloadClientFactory().Setup(downloadTaskResult.Value);
             if (newClient.IsFailed)
             {
                 return newClient.ToResult().LogError();
@@ -378,7 +382,7 @@ namespace PlexRipper.DownloadManager
                 return Result.Fail("Parameter downloadTasks was empty or null").LogError();
             }
 
-            var downloadTasksIdsResult = await _mediator.Send(new GetAllRelatedDownloadTaskIds(downloadTaskIds));
+            var downloadTasksIdsResult = await _mediator.Send(new GetAllRelatedDownloadTaskIdsQuery(downloadTaskIds));
             if (downloadTasksIdsResult.IsFailed)
             {
                 return downloadTasksIdsResult;
@@ -403,26 +407,29 @@ namespace PlexRipper.DownloadManager
                 return Result.Fail("Parameter downloadTasks was empty or null").LogError();
             }
 
-            var downloadTaskIdsResult = await _mediator.Send(new GetAllRelatedDownloadTaskIds(downloadTaskIds));
-            if (downloadTaskIdsResult.IsFailed)
+            var downloadTasksResult = await _mediator.Send(new GetAllRelatedDownloadTasksQuery(downloadTaskIds));
+            if (downloadTasksResult.IsFailed)
             {
-                return downloadTaskIdsResult;
+                return downloadTasksResult;
             }
 
-            foreach (var downloadTaskId in downloadTaskIdsResult.Value)
+            foreach (var downloadTask in downloadTasksResult.Value)
             {
-                var downloadClient = GetDownloadClient(downloadTaskId);
-                if (downloadClient.IsFailed)
+                if (downloadTask.IsDownloadable)
                 {
-                    downloadClient = await CreateDownloadClient(downloadTaskId);
+                    var downloadClient = GetDownloadClient(downloadTask.Id);
                     if (downloadClient.IsFailed)
                     {
-                        downloadClient.LogError();
-                        continue;
+                        downloadClient = await CreateDownloadClient(downloadTask.Id);
+                        if (downloadClient.IsFailed)
+                        {
+                            downloadClient.LogError();
+                            continue;
+                        }
                     }
-                }
 
-                downloadClient.Value.Start();
+                    downloadClient.Value.Start();
+                }
             }
 
             return Result.Ok();
@@ -465,7 +472,7 @@ namespace PlexRipper.DownloadManager
                 return ResultExtensions.IsEmpty(nameof(downloadTaskIds)).LogWarning();
             }
 
-            var allRelatedIds = await _mediator.Send(new GetAllRelatedDownloadTaskIds(downloadTaskIds));
+            var allRelatedIds = await _mediator.Send(new GetAllRelatedDownloadTaskIdsQuery(downloadTaskIds));
             if (allRelatedIds.IsFailed)
             {
                 return allRelatedIds;

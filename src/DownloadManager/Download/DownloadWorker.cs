@@ -301,7 +301,7 @@ namespace PlexRipper.DownloadManager.Download
 
         public void Dispose()
         {
-            _destinationStream.Close();
+            _destinationStream?.Close();
         }
 
         #endregion

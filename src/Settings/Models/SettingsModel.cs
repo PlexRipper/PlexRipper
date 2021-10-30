@@ -24,7 +24,7 @@ namespace PlexRipper.Settings.Models
 
         #region AccountSettings
 
-        public int ActiveAccountId { get; set; } = 0;
+        public int ActiveAccountId { get; set; }
 
         #endregion
 
@@ -33,6 +33,8 @@ namespace PlexRipper.Settings.Models
         #region DownloadManagerSettings
 
         public int DownloadSegments { get; set; } = 4;
+
+        public Dictionary<string, int> DownloadLimit { get; set; }
 
         #endregion
 
@@ -99,6 +101,7 @@ namespace PlexRipper.Settings.Models
             jsonObject.AdvancedSettings = new ExpandoObject();
             jsonObject.AdvancedSettings.DownloadManagerSettings = new ExpandoObject();
             jsonObject.AdvancedSettings.DownloadManagerSettings.DownloadSegments = DownloadSegments;
+            jsonObject.AdvancedSettings.DownloadManagerSettings.DownloadLimit = DownloadLimit;
 
             // User Interface Settings
             jsonObject.UserInterfaceSettings = new ExpandoObject();
@@ -219,6 +222,15 @@ namespace PlexRipper.Settings.Models
                 {
                     // DownloadSegments
                     DownloadSegments = TryGetInteger(downloadManagerSettings, nameof(DownloadSegments), DownloadSegments, addResult);
+
+                    if (downloadManagerSettings.TryGetProperty(nameof(DownloadLimit), out var downloadLimit))
+                    {
+                        DownloadLimit = JsonSerializer.Deserialize<Dictionary<string, int>>(downloadLimit.GetRawText());
+                    }
+                    else
+                    {
+                        addResult(Result.Fail("Failed to retrieve property DownloadManagerSettings.DownloadLimit"));
+                    }
                 }
                 else
                 {
@@ -296,6 +308,5 @@ namespace PlexRipper.Settings.Models
         }
 
         #endregion
-
     }
 }

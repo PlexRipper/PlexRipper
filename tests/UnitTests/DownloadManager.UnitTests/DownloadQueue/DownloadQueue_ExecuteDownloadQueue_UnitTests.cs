@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Autofac.Extras.Moq;
 using Logging;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
@@ -22,14 +23,16 @@ namespace DownloadManager.UnitTests
         public void ShouldHaveNoUpdates_WhenGivenAnEmptyList()
         {
             // Arrange
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<DownloadQueue>();
+
             List<DownloadTask> updates = new();
             List<DownloadTask> startCommands = new();
-            var downloadQueue = new DownloadQueue();
 
             // Act
-            downloadQueue.UpdateDownloadTasks.Subscribe(update => updates = update);
-            downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-            downloadQueue.ExecuteDownloadQueue(new List<PlexServer>());
+            _sut.UpdateDownloadTasks.Subscribe(update => updates = update);
+            _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
+            _sut.ExecuteDownloadQueue(new List<PlexServer>());
 
             // Assert
             updates.Any().ShouldBeFalse();
@@ -40,6 +43,8 @@ namespace DownloadManager.UnitTests
         public void ShouldHaveNoStartCommands_WhenATaskIsAlreadyDownloading()
         {
             // Arrange
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<DownloadQueue>();
             var config = new FakeDataConfig
             {
                 IncludeLibraries = true,
@@ -51,13 +56,12 @@ namespace DownloadManager.UnitTests
 
             List<DownloadTask> startCommands = new();
             var plexServers = FakeData.GetPlexServer(config).Generate(1);
-            var downloadQueue = new DownloadQueue();
             var startedDownloadTask = plexServers[0].PlexLibraries[0].DownloadTasks[0];
             startedDownloadTask.DownloadStatus = DownloadStatus.Downloading;
 
             // Act
-            downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-            downloadQueue.ExecuteDownloadQueue(new List<PlexServer>());
+            _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
+            _sut.ExecuteDownloadQueue(new List<PlexServer>());
 
             // Assert
             startCommands.Any().ShouldBeFalse();
@@ -67,6 +71,8 @@ namespace DownloadManager.UnitTests
         public void ShouldHaveNoDownloadTasksInitialized_WhenGivenDownloadTasksWithInitialized()
         {
             // Arrange
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<DownloadQueue>();
             int updateIndex = 1;
             Dictionary<int, List<DownloadTask>> updates = new();
             var config = new FakeDataConfig
@@ -77,12 +83,11 @@ namespace DownloadManager.UnitTests
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
             };
-            var downloadQueue = new DownloadQueue();
             var plexServers = FakeData.GetPlexServer(config).Generate(1);
 
             // Act
-            downloadQueue.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
-            downloadQueue.ExecuteDownloadQueue(plexServers);
+            _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
+            _sut.ExecuteDownloadQueue(plexServers);
 
             // Assert
 
@@ -95,6 +100,8 @@ namespace DownloadManager.UnitTests
         public void ShouldHaveOneDownloadTaskStarted_WhenGivenMovieDownloadTasks()
         {
             // Arrange
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<DownloadQueue>();
             List<DownloadTask> startCommands = new();
             var config = new FakeDataConfig
             {
@@ -105,12 +112,11 @@ namespace DownloadManager.UnitTests
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
             };
-            var downloadQueue = new DownloadQueue();
             var plexServers = FakeData.GetPlexServer(config).Generate(1);
 
             // Act
-            downloadQueue.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-            downloadQueue.ExecuteDownloadQueue(plexServers);
+            _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
+            _sut.ExecuteDownloadQueue(plexServers);
 
             // Assert
             var startedDownloadTask = plexServers[0].PlexLibraries[0].DownloadTasks[0].Children[0];
@@ -122,6 +128,8 @@ namespace DownloadManager.UnitTests
         public void ShouldHaveOneDownloadTaskDownloadingStatus_WhenGivenMovieDownloadTasks()
         {
             // Arrange
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<DownloadQueue>();
             int updateIndex = 1;
             Dictionary<int, List<DownloadTask>> updates = new();
             var config = new FakeDataConfig
@@ -133,12 +141,11 @@ namespace DownloadManager.UnitTests
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
             };
-            var downloadQueue = new DownloadQueue();
             var plexServers = FakeData.GetPlexServer(config).Generate(1);
 
             // Act
-            downloadQueue.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
-            downloadQueue.ExecuteDownloadQueue(plexServers);
+            _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
+            _sut.ExecuteDownloadQueue(plexServers);
 
             // Assert
 
@@ -155,6 +162,8 @@ namespace DownloadManager.UnitTests
         public void ShouldHaveOneDownloadTaskDownloadingStatus_WhenGivenTvShowDownloadTasks()
         {
             // Arrange
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<DownloadQueue>();
             int updateIndex = 1;
             Dictionary<int, List<DownloadTask>> updates = new();
             var config = new FakeDataConfig
@@ -166,12 +175,11 @@ namespace DownloadManager.UnitTests
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
             };
-            var downloadQueue = new DownloadQueue();
             var plexServers = FakeData.GetPlexServer(config).Generate(1);
 
             // Act
-            downloadQueue.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
-            downloadQueue.ExecuteDownloadQueue(plexServers);
+            _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
+            _sut.ExecuteDownloadQueue(plexServers);
 
             // Assert
 
@@ -188,6 +196,8 @@ namespace DownloadManager.UnitTests
         public void ShouldHaveNextQueuedDownloadTask_WhenGivenAMovieDownloadTasksWithCompleted()
         {
             // Arrange
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<DownloadQueue>();
             int updateIndex = 0;
             Dictionary<int, List<DownloadTask>> updates = new();
             var config = new FakeDataConfig
@@ -199,7 +209,6 @@ namespace DownloadManager.UnitTests
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
             };
-            var downloadQueue = new DownloadQueue();
             var plexServers = FakeData.GetPlexServer(config).Generate(1);
 
             // Set first task to Completed
@@ -208,8 +217,8 @@ namespace DownloadManager.UnitTests
             movieDownloadTask.Children.ForEach(x => x.DownloadStatus = DownloadStatus.Completed);
 
             // Act
-            downloadQueue.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
-            downloadQueue.ExecuteDownloadQueue(plexServers);
+            _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
+            _sut.ExecuteDownloadQueue(plexServers);
 
             // Assert
             var downloadTasks = updates[updateIndex];
@@ -236,6 +245,8 @@ namespace DownloadManager.UnitTests
             }
 
             // Arrange
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<DownloadQueue>();
             int updateIndex = 0;
             Dictionary<int, List<DownloadTask>> updates = new();
             var config = new FakeDataConfig
@@ -247,7 +258,6 @@ namespace DownloadManager.UnitTests
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
             };
-            var downloadQueue = new DownloadQueue();
             var plexServers = FakeData.GetPlexServer(config).Generate(1);
 
             // Set first task to Completed
@@ -256,8 +266,8 @@ namespace DownloadManager.UnitTests
             tvShowDownloadTask.Children = SetToCompleted(tvShowDownloadTask.Children);
 
             // Act
-            downloadQueue.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
-            downloadQueue.ExecuteDownloadQueue(plexServers);
+            _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
+            _sut.ExecuteDownloadQueue(plexServers);
 
             // Assert
             var downloadTasks = updates[updateIndex];
@@ -267,7 +277,7 @@ namespace DownloadManager.UnitTests
             downloadTasks[1].Children[0].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
             downloadTasks[1].Children[0].Children[1].DownloadStatus.ShouldBe(DownloadStatus.Queued);
             downloadTasks[1].Children[0].Children[0].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-            downloadTasks[1].Children[0].Children[0].Children[1].DownloadStatus.ShouldBe(DownloadStatus.Queued);
         }
+
     }
 }

@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using FluentResults;
 using Logging;
+using MediatR;
+using PlexRipper.Application;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
@@ -13,9 +16,33 @@ namespace PlexRipper.DownloadManager
     /// </summary>
     public class DownloadQueue : IDownloadQueue
     {
-        public Subject<List<DownloadTask>> UpdateDownloadTasks { get; } = new();
+        private readonly IMediator _mediator;
+
+        public DownloadQueue(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+        #region Properties
 
         public Subject<DownloadTask> StartDownloadTask { get; } = new();
+
+        public Subject<List<DownloadTask>> UpdateDownloadTasks { get; } = new();
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Check the DownloadQueue for downloadTasks which can be started.
+        /// </summary>
+        public async Task CheckDownloadQueue()
+        {
+            Log.Debug("Checking for download tasks which can be processed.");
+            var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
+            var serverList = serverListResult.Value.Where(x => x.HasDownloadTasks).ToList();
+
+            ExecuteDownloadQueue(serverList);
+        }
 
         public void ExecuteDownloadQueue(List<PlexServer> plexServers)
         {
@@ -40,31 +67,17 @@ namespace PlexRipper.DownloadManager
                     continue;
                 }
 
+                Log.Information($"Selected download task {nextDownloadTask.Value.FullTitle} to start as the next task");
                 downloadTasks = SetToDownloading(downloadTasks);
                 UpdateDownloadTasks.OnNext(downloadTasks);
 
                 StartDownloadTask.OnNext(nextDownloadTask.Value);
-
             }
         }
 
-        private List<DownloadTask> SetToQueued(List<DownloadTask> downloadTasks)
-        {
-            foreach (var downloadTask in downloadTasks)
-            {
-                if (downloadTask.DownloadStatus is DownloadStatus.Initialized)
-                {
-                    downloadTask.DownloadStatus = DownloadStatus.Queued;
-                }
+        #endregion
 
-                if (downloadTask.Children.Any())
-                {
-                    downloadTask.Children = SetToQueued(downloadTask.Children);
-                }
-            }
-
-            return downloadTasks;
-        }
+        #region Private Methods
 
         private Result<DownloadTask> GetNextDownloadTask(ref List<DownloadTask> downloadTasks)
         {
@@ -104,5 +117,25 @@ namespace PlexRipper.DownloadManager
 
             return downloadTasks;
         }
+
+        private List<DownloadTask> SetToQueued(List<DownloadTask> downloadTasks)
+        {
+            foreach (var downloadTask in downloadTasks)
+            {
+                if (downloadTask.DownloadStatus is DownloadStatus.Initialized)
+                {
+                    downloadTask.DownloadStatus = DownloadStatus.Queued;
+                }
+
+                if (downloadTask.Children.Any())
+                {
+                    downloadTask.Children = SetToQueued(downloadTask.Children);
+                }
+            }
+
+            return downloadTasks;
+        }
+
+        #endregion
     }
 }

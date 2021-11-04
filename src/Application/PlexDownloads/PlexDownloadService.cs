@@ -19,6 +19,8 @@ namespace PlexRipper.Application
 
         private readonly IPlexDownloadTaskFactory _plexDownloadTaskFactory;
 
+        private readonly IDownloadCommands _downloadCommands;
+
         private readonly IMediator _mediator;
 
         private readonly ISignalRService _signalRService;
@@ -40,13 +42,15 @@ namespace PlexRipper.Application
             IDownloadManager downloadManager,
             ISignalRService signalRService,
             INotificationsService notificationsService,
-            IPlexDownloadTaskFactory plexDownloadTaskFactory)
+            IPlexDownloadTaskFactory plexDownloadTaskFactory,
+            IDownloadCommands downloadCommands)
         {
             _mediator = mediator;
             _downloadManager = downloadManager;
             _signalRService = signalRService;
             _notificationsService = notificationsService;
             _plexDownloadTaskFactory = plexDownloadTaskFactory;
+            _downloadCommands = downloadCommands;
         }
 
         #endregion
@@ -74,33 +78,33 @@ namespace PlexRipper.Application
 
         public async Task<Result> DeleteDownloadTasksAsync(List<int> downloadTaskIds)
         {
-            return await _downloadManager.DeleteDownloadTaskClientsAsync(downloadTaskIds);
+            return await _downloadCommands.DeleteDownloadTaskClientsAsync(downloadTaskIds);
         }
 
         public Task<Result> RestartDownloadTask(List<int> downloadTaskIds)
         {
-            return _downloadManager.RestartDownloadTasksAsync(downloadTaskIds);
+            return _downloadCommands.RestartDownloadTasksAsync(downloadTaskIds);
         }
 
         public async Task<Result> StopDownloadTask(List<int> downloadTaskIds)
         {
-            var result = await _downloadManager.StopDownloadTasksAsync(downloadTaskIds);
+            var result = await _downloadCommands.StopDownloadTasksAsync(downloadTaskIds);
             return result.IsSuccess ? Result.Ok() : result.ToResult();
         }
 
         public Task<Result> StartDownloadTask(List<int> downloadTaskIds)
         {
-            return _downloadManager.ResumeDownloadTasksAsync(downloadTaskIds);
+            return _downloadCommands.ResumeDownloadTasksAsync(downloadTaskIds);
         }
 
         public Task<Result> PauseDownloadTask(List<int> downloadTaskIds)
         {
-            return _downloadManager.PauseDownload(downloadTaskIds);
+            return _downloadCommands.PauseDownload(downloadTaskIds);
         }
 
         public Task<Result> ClearCompleted(List<int> downloadTaskIds)
         {
-            return _downloadManager.ClearCompletedAsync(downloadTaskIds);
+            return _downloadCommands.ClearCompletedAsync(downloadTaskIds);
         }
 
         #endregion

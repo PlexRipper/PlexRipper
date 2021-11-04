@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Autofac.Extras.Moq;
 using FluentResults;
@@ -24,11 +25,13 @@ namespace DownloadManager.UnitTests
             Log.SetupTestLogging(output);
         }
 
+
         [Fact]
         public async Task ShouldReturnFailedResult_WhenNullDownloadTaskIsGiven()
         {
             //Arrange
             using var mock = AutoMock.GetStrict();
+            mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
             var _sut = mock.Create<PlexDownloadClient>();
 
             // Act

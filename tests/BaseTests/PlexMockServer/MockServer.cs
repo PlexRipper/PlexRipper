@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Environment;
-using PlexRipper.Application.Common;
+using System.Reflection;
 using PlexRipper.Domain;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
@@ -12,21 +11,14 @@ namespace PlexRipper.BaseTests
 {
     public class MockServer : IMockServer
     {
-        private readonly IPathSystem _pathSystem;
-
         private static readonly List<MockMediaData> _mockMediaData = new();
-
-        public MockServer(IPathSystem pathSystem)
-        {
-            _pathSystem = pathSystem;
-        }
 
         public string MockMovieMediaPath
         {
             get
             {
-                var basePath = Directory.GetParent(_pathSystem.RootDirectory).Parent.Parent.Parent.Parent;
-                return Path.Join(basePath.FullName, "BaseTests", "PlexMockServer", "media", "movies");
+                var x = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+                return x.Single(str => str.EndsWith("test-video.mp4"));
             }
         }
 
@@ -48,24 +40,23 @@ namespace PlexRipper.BaseTests
 
         public MockMediaData GetDefaultMovieMockMediaData()
         {
-            string filepath = Path.Combine(MockMovieMediaPath, "default", "test-video.mp4");
-            return new MockMediaData(PlexMediaType.Movie, filepath);
+            return new MockMediaData(PlexMediaType.Movie, MockMovieMediaPath);
         }
 
         public WireMockServer GetPlexMockServer()
         {
             var _server = WireMockServer.Start();
 
-            foreach (var mockMediaData in GetMockMediaData())
-            {
-                _server
-                    .Given(Request.Create().WithPath(mockMediaData.RelativeUrl).UsingGet())
-                    .RespondWith(
-                        Response.Create()
-                            .WithStatusCode(206)
-                            .WithBodyFromFile(Path.Combine(MockMovieMediaPath, mockMediaData.ParentFolderName, mockMediaData.FileName))
-                    );
-            }
+            // foreach (var mockMediaData in GetMockMediaData())
+            // {
+            //     _server
+            //         .Given(Request.Create().WithPath(mockMediaData.RelativeUrl).UsingGet())
+            //         .RespondWith(
+            //             Response.Create()
+            //                 .WithStatusCode(206)
+            //                 .WithBodyFromFile(Path.Combine(MockMovieMediaPath, mockMediaData.ParentFolderName, mockMediaData.FileName))
+            //         );
+            // }
 
             // The default video used for testing
             _server
@@ -73,7 +64,7 @@ namespace PlexRipper.BaseTests
                 .RespondWith(
                     Response.Create()
                         .WithStatusCode(206)
-                        .WithBodyFromFile(Path.Combine(MockMovieMediaPath, "test-video.mp4"))
+                        .WithBodyFromFile(MockMovieMediaPath)
                 );
 
             return _server;

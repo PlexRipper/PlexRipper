@@ -104,9 +104,6 @@ namespace PlexRipper.DownloadManager.Download
 
         private async Task<Result<List<DownloadWorkerTask>>> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts)
         {
-            if (downloadTask is null)
-                return ResultExtensions.IsNull(nameof(downloadTask));
-
             if (parts <= 0)
                 return Result.Fail($"Parameter {nameof(parts)} was {parts}, prevented division by invalid value").LogWarning();
 

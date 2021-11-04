@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
@@ -10,6 +11,9 @@ namespace PlexRipper.Application.Common
 
         Subject<DownloadTask> StartDownloadTask { get; }
 
-        void ExecuteDownloadQueue(List<PlexServer> plexServers);
+        /// <summary>
+        /// Check the DownloadQueue for downloadTasks which can be started.
+        /// </summary>
+        Task CheckDownloadQueue();
     }
 }

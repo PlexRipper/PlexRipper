@@ -69,35 +69,35 @@ namespace DownloadManager.IntegrationTests
                 DestinationFolderId = 1,
             };
         }
-
-        private async Task<Result<PlexDownloadClient>> CreatePlexDownloadClient(MemoryStream memoryStream,
-            int downloadSpeedLimitInKb = 0)
-        {
-            var _filesystem = new Mock<IFileSystem>();
-            _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
-                .Returns(Result.Ok<Stream>(memoryStream));
-
-            var downloadTask = GetTestDownloadTask();
-
-            return await Container.PlexDownloadClient.Setup(downloadTask);
-        }
-
-        [Fact]
-        public async Task StartAsync_ShouldDownloadValidFile_WhenValidUrlIsGiven()
-        {
-            //Arrange
-            var memoryStream = new MemoryStream();
-            var downloadClient = await CreatePlexDownloadClient(memoryStream);
-            downloadClient.IsFailed.ShouldBeFalse();
-            var mediaFile = Container.MockServer.GetMockMediaData().First();
-
-            // Act
-            downloadClient.Value.Start();
-            await downloadClient.Value.DownloadProcessTask;
-
-            // Assert
-            mediaFile.Md5.ShouldBe(DataFormat.CalculateMD5(memoryStream));
-        }
+        //
+        // private async Task<Result<PlexDownloadClient>> CreatePlexDownloadClient(MemoryStream memoryStream,
+        //     int downloadSpeedLimitInKb = 0)
+        // {
+        //     var _filesystem = new Mock<IFileSystem>();
+        //     _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
+        //         .Returns(Result.Ok<Stream>(memoryStream));
+        //
+        //     var downloadTask = GetTestDownloadTask();
+        //
+        //     return await Container.PlexDownloadClient.Setup(downloadTask);
+        // }
+        //
+        // [Fact]
+        // public async Task StartAsync_ShouldDownloadValidFile_WhenValidUrlIsGiven()
+        // {
+        //     //Arrange
+        //     var memoryStream = new MemoryStream();
+        //     var downloadClient = await CreatePlexDownloadClient(memoryStream);
+        //     downloadClient.IsFailed.ShouldBeFalse();
+        //     var mediaFile = Container.MockServer.GetMockMediaData().First();
+        //
+        //     // Act
+        //     downloadClient.Value.Start();
+        //     await downloadClient.Value.DownloadProcessTask;
+        //
+        //     // Assert
+        //     mediaFile.Md5.ShouldBe(DataFormat.CalculateMD5(memoryStream));
+        // }
 
         // [Fact]
         // public async Task StartAsync_ShouldDownloadValidFile_WhenPausedAndResumed()
@@ -129,22 +129,22 @@ namespace DownloadManager.IntegrationTests
         // }
 
 
-
-        [Fact]
-        public async Task Create_ShouldBeDownloadSpeedLimited_WhenDownloadSpeedLimitIsGiven()
-        {
-            //Arrange
-            var memoryStream = new MemoryStream();
-            var downloadClient = await CreatePlexDownloadClient(memoryStream, 500);
-            var updates = new List<DownloadTask>();
-            downloadClient.Value.DownloadTaskUpdate.Subscribe(update => updates.Add(update));
-
-            // Act
-            downloadClient.Value.Start();
-            await downloadClient.Value.DownloadProcessTask;
-
-            // Assert
-            updates.ShouldAllBe(x => x.DownloadSpeed / 1024F > 500 - 100 && x.DownloadSpeed / 1024F < 500 + 100);
-        }
+        //
+        // [Fact]
+        // public async Task Create_ShouldBeDownloadSpeedLimited_WhenDownloadSpeedLimitIsGiven()
+        // {
+        //     //Arrange
+        //     var memoryStream = new MemoryStream();
+        //     var downloadClient = await CreatePlexDownloadClient(memoryStream, 500);
+        //     var updates = new List<DownloadTask>();
+        //     downloadClient.Value.DownloadTaskUpdate.Subscribe(update => updates.Add(update));
+        //
+        //     // Act
+        //     downloadClient.Value.Start();
+        //     await downloadClient.Value.DownloadProcessTask;
+        //
+        //     // Assert
+        //     updates.ShouldAllBe(x => x.DownloadSpeed / 1024F > 500 - 100 && x.DownloadSpeed / 1024F < 500 + 100);
+        // }
     }
 }

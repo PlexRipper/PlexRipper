@@ -1,38 +1,31 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
+using Autofac.Extras.Moq;
 using Logging;
-using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;
-using WireMock.Server;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace DownloadManager.IntegrationTests.DownloadManager
+namespace DownloadManager.UnitTests
 {
-    public class DownloadManagerTests
+    public class DownloadManager_AddToDownloadQueue_UnitTests
     {
-        private BaseContainer Container { get; }
 
-        public DownloadManagerTests(ITestOutputHelper output)
+        public DownloadManager_AddToDownloadQueue_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
-            Container = new BaseContainer();
-
-            WireMockServer server = Container.MockServer.GetPlexMockServer();
-
-            Log.Debug($"Server running at: {server.Urls[0]}");
         }
 
         [Fact]
         public async Task AddToDownloadQueueAsync_ShouldReturnFailedResult_WhenEmptyListIsGiven()
         {
             //Arrange
-            var downloadManager = Container.GetDownloadManager;
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<PlexRipper.DownloadManager.DownloadManager>();
 
             // Act
-            var result = await downloadManager.AddToDownloadQueueAsync(new List<DownloadTask>());
+            var result = await _sut.AddToDownloadQueueAsync(new List<DownloadTask>());
 
             // Assert
             result.IsFailed.ShouldBeTrue();
@@ -42,10 +35,11 @@ namespace DownloadManager.IntegrationTests.DownloadManager
         public async Task AddToDownloadQueueAsync_ShouldReturnFailedResult_WhenInvalidDownloadTasksAreGiven()
         {
             //Arrange
-            var downloadManager = Container.GetDownloadManager;
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<PlexRipper.DownloadManager.DownloadManager>();
 
             // Act
-            var result = await downloadManager.AddToDownloadQueueAsync(new List<DownloadTask>
+            var result = await _sut.AddToDownloadQueueAsync(new List<DownloadTask>
             {
                 new(),
                 new(),

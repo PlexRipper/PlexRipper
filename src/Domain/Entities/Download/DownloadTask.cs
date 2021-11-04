@@ -143,12 +143,6 @@ namespace PlexRipper.Domain
         [NotMapped]
         public long BytesRemaining => DataTotal - DataReceived;
 
-        public Result IsValid()
-        {
-            return new DownloadTaskValidator().Validate(this).ToFluentResult();
-        }
-
-
         /// <summary>
         /// Gets a value indicating whether this <see cref="DownloadTask"/> is downloadable.
         /// e.g. A episode or movie part, an episode or movie without parts.

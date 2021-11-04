@@ -32,9 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="PlexMockServer\media\movies\default\test-video.mp4">
+    <EmbeddedResource Include="PlexMockServer\media\movies\default\test-video.mp4">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

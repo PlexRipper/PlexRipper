@@ -1,13 +1,11 @@
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Environment;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
@@ -95,7 +93,13 @@ namespace PlexRipper.Data
             ConfigDirectory = _pathSystem.ConfigDirectory;
         }
 
-        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
+        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options)
+        {
+            // This is to add tables when created in memory
+            // https://stackoverflow.com/a/60497822/8205497
+            Database.OpenConnection();
+            Database.EnsureCreated();
+        }
 
         #endregion Constructors
 
@@ -119,7 +123,9 @@ namespace PlexRipper.Data
 
             try
             {
-                if (!EnvironmentExtensions.IsIntegrationTestMode())
+                // Don't migrate when running in memory, this causes error:
+                // "Relational-specific methods can only be used when the context is using a relational database provider."
+                if (!Database.IsInMemory() && !EnvironmentExtensions.IsIntegrationTestMode())
                 {
                     Log.Information("Attempting to migrate database");
                     await Database.MigrateAsync();
@@ -152,17 +158,10 @@ namespace PlexRipper.Data
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.EnableDetailedErrors();
                 optionsBuilder.EnableSensitiveDataLogging();
-                if (!EnvironmentExtensions.IsInMemoryDatabase())
-                {
-                    optionsBuilder
-                        .UseSqlite(
-                            $"Data Source={DatabasePath}",
-                            b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
-                }
-                else
-                {
-                    optionsBuilder.UseInMemoryDatabase("memory_database");
-                }
+                optionsBuilder
+                    .UseSqlite(
+                        $"Data Source={DatabasePath}",
+                        b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
             }
         }
 

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Environment;
-using FluentResultExtensions.lib;
-using FluentResults;
 using Logging;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +12,6 @@ using PlexRipper.Application.Common;
 using PlexRipper.BaseTests.Config;
 using PlexRipper.Data;
 using PlexRipper.Domain;
-using PlexRipper.DownloadManager.Download;
 using PlexRipper.WebAPI;
 using PlexRipper.WebAPI.Config;
 
@@ -36,7 +32,7 @@ namespace PlexRipper.BaseTests
         /// <summary>
         /// Creates a Autofac container and sets up a test database.
         /// </summary>
-        public BaseContainer(bool setToDiskTestDatabase = false)
+        public BaseContainer(bool setToDiskTestDatabase = false, string dbName = "")
         {
             EnvironmentExtensions.SetIntegrationTestMode();
             EnvironmentExtensions.SetResetDatabase();
@@ -58,11 +54,13 @@ namespace PlexRipper.BaseTests
 
             // SignalR requires the default ILogger
             builder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
-
             builder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
 
+            // Use inMemory database
+            if (!setToDiskTestDatabase)
+                builder.Register((_, _) => MockDatabase.GetMemoryDbContext(dbName)).InstancePerLifetimeScope();
+
             AutofacContainer = builder.Build();
-            PlexRipperDbContext.SetupAsync();
         }
 
         public async Task<PlexAccount> SetupTestAccount()

@@ -68,12 +68,12 @@ public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<Cr
     public async Task<Result<List<int>>> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
     {
         // Prevent the navigation properties from being updated
-        CleanUp(command.DownloadTasks);
+        InsertDownloadTasks(command.DownloadTasks);
 
         return Result.Ok(command.DownloadTasks.Select(x => x.Id).ToList());
     }
 
-    private void CleanUp(List<DownloadTask> downloadTasks)
+    private void InsertDownloadTasks(List<DownloadTask> downloadTasks)
     {
         downloadTasks.ForEach(x =>
         {
@@ -102,9 +102,10 @@ public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<Cr
                 foreach (var downloadTaskChild in downloadTask.Children)
                 {
                     downloadTaskChild.ParentId = downloadTask.Id;
+                    downloadTaskChild.Parent = null;
                 }
 
-                CleanUp(downloadTask.Children);
+                InsertDownloadTasks(downloadTask.Children);
             }
         }
     }

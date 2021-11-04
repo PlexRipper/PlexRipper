@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bogus.Extensions;
+using EFCore.BulkExtensions;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data;
 using PlexRipper.Domain;
@@ -12,18 +14,39 @@ namespace PlexRipper.BaseTests
     {
         private static Random _rnd = new Random();
 
-        public static PlexRipperDbContext GetMemoryDbContext()
+        public static string GetMemoryDatabaseName()
+        {
+            return $"memory_database_{_rnd.Next(1, int.MaxValue)}_{_rnd.Next(1, int.MaxValue)}";
+        }
+
+        public static PlexRipperDbContext GetMemoryDbContext(string dbName = "")
         {
             var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
 
-            optionsBuilder.UseInMemoryDatabase($"memory_database_{_rnd.Next(1, int.MaxValue)}_{_rnd.Next(1, int.MaxValue)}");
+            // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
+            var connectionString = new SqliteConnectionStringBuilder
+            {
+                Mode = SqliteOpenMode.Memory,
+
+                // Database name
+                DataSource = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName,
+                Cache = SqliteCacheMode.Shared,
+            }.ToString();
+
+            optionsBuilder.UseSqlite(connectionString);
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            optionsBuilder.EnableSensitiveDataLogging();
             return new PlexRipperDbContext(optionsBuilder.Options);
         }
 
-        public static PlexRipperDbContext AddPlexServers(this PlexRipperDbContext dbContext, int serverCount = 1)
+        public static PlexRipperDbContext AddPlexServers(this PlexRipperDbContext dbContext, FakeDataConfig config = null, int serverCount = 1)
         {
-            var plexServers = FakeData.GetPlexServer(new() { IncludeLibraries = true }).Generate(serverCount);
+            config ??= new FakeDataConfig
+            {
+                IncludeLibraries = true,
+            };
+
+            var plexServers = FakeData.GetPlexServer(config).Generate(serverCount);
             foreach (var plexServer in plexServers)
             {
                 plexServer.Id = 0;
@@ -33,9 +56,9 @@ namespace PlexRipper.BaseTests
                 }
             }
 
-            dbContext.PlexServers.AddRange(plexServers);
+            dbContext.BulkInsert(plexServers);
+            dbContext.BulkInsert(plexServers.SelectMany(x => x.PlexLibraries).ToList());
 
-            dbContext.SaveChanges();
             return dbContext;
         }
 

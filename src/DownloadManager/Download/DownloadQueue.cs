@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using FluentResults;
@@ -22,13 +24,18 @@ namespace PlexRipper.DownloadManager
         {
             _mediator = mediator;
         }
+
         #region Properties
 
-        public Subject<DownloadTask> StartDownloadTask { get; } = new();
+        private readonly Subject<DownloadTask> _startDownloadTask = new();
 
-        public Subject<List<DownloadTask>> UpdateDownloadTasks { get; } = new();
+        private readonly Subject<List<DownloadTask>> _updateDownloadTasks = new();
 
         #endregion
+
+        public IObservable<DownloadTask> StartDownloadTask => _startDownloadTask.AsObservable();
+
+        public IObservable<List<DownloadTask>> UpdateDownloadTasks => _updateDownloadTasks.AsObservable();
 
         #region Public Methods
 
@@ -69,9 +76,9 @@ namespace PlexRipper.DownloadManager
 
                 Log.Information($"Selected download task {nextDownloadTask.Value.FullTitle} to start as the next task");
                 downloadTasks = SetToDownloading(downloadTasks);
-                UpdateDownloadTasks.OnNext(downloadTasks);
+                _updateDownloadTasks.OnNext(downloadTasks);
 
-                StartDownloadTask.OnNext(nextDownloadTask.Value);
+                _startDownloadTask.OnNext(nextDownloadTask.Value);
             }
         }
 

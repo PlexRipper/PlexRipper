@@ -8,6 +8,7 @@ namespace PlexRipper.BaseTests
     public static partial class FakeData
     {
         private static int _plexDownloadTaskId = 1;
+
         private static int _plexDownloadWorkerTaskId = 1;
 
         public static Faker<T> ApplyBaseDownloadTask<T>(this Faker<T> faker, FakeDataConfig config = null) where T : DownloadTask
@@ -37,9 +38,9 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.MediaId, _ => _random.Next(1, 10000))
                 .RuleFor(x => x.Created, f => f.Date.Recent(30))
                 .RuleFor(x => x.Quality, f => f.PickRandom("sd", "720", "1080"))
-                .RuleFor(x => x.PlexServerId, f => f.Random.Int(1, 1000))
+                .RuleFor(x => x.PlexServerId, f => config.PlexServerId > 0 ? config.PlexServerId : f.Random.Int(1, 1000))
                 .RuleFor(x => x.PlexServer, _ => new PlexServer())
-                .RuleFor(x => x.PlexLibraryId, f => f.Random.Int(1, 10000))
+                .RuleFor(x => x.PlexLibraryId, f => config.PlexLibraryId > 0 ? config.PlexLibraryId : f.Random.Int(1, 1000))
                 .RuleFor(x => x.PlexLibrary, _ => new PlexLibrary())
                 .RuleFor(x => x.Children, _ => new List<DownloadTask>())
                 .RuleFor(x => x.DownloadFolder, () => new FolderPath
@@ -51,7 +52,12 @@ namespace PlexRipper.BaseTests
                 {
                     DirectoryPath = PathSystem.RootDirectory,
                 })
-                .RuleFor(x => x.DestinationFolderId, _ => 2);
+                .RuleFor(x => x.DestinationFolderId, _ => 2)
+                .FinishWith((_, task) =>
+                {
+                    task.PlexServer.Id = task.PlexServerId;
+                    task.PlexLibrary.Id = task.PlexLibraryId;
+                });
         }
 
         #region Movie

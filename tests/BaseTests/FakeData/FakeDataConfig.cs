@@ -36,5 +36,13 @@ namespace PlexRipper.BaseTests
         public int TvShowEpisodeCountMax { get; set; } = 10;
 
         #endregion
+
+        #region RelationshipIds
+
+        public int PlexServerId { get; set; }
+
+        public int PlexLibraryId { get; set; }
+
+        #endregion
     }
 }

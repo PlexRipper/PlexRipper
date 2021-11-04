@@ -26,7 +26,7 @@ namespace PlexRipper.Data.Config
             builder.RegisterAssemblyTypes(assembly)
                 .AsClosedTypesOf(typeof(IRequestHandler<,>));
 
-            // We get concurrency issues s if we have .InstancePerLifetimeScope();
+            // We get concurrency issues if we have .InstancePerLifetimeScope();
             builder.RegisterType<PlexRipperDbContext>()
                 .InstancePerDependency();
 

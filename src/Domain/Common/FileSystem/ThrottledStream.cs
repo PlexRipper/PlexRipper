@@ -11,13 +11,19 @@ namespace PlexRipper.Domain
     /// </summary>
     public class ThrottledStream : Stream
     {
-        private readonly Stream _inputStream;
+        #region Fields
 
-        private int _throttle;
+        private readonly Stream _inputStream;
 
         private readonly Stopwatch _watch = Stopwatch.StartNew();
 
+        private int _throttle;
+
         private long _totalBytesRead;
+
+        #endregion
+
+        #region Constructor
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ThrottledStream"/> class.
@@ -30,13 +36,15 @@ namespace PlexRipper.Domain
             _inputStream = @in;
         }
 
+        #endregion
+
+        #region Properties
+
         public override bool CanRead => _inputStream.CanRead;
 
         public override bool CanSeek => _inputStream.CanSeek;
 
         public override bool CanWrite => false;
-
-        public override void Flush() { }
 
         public override long Length => _inputStream.Length;
 
@@ -45,6 +53,12 @@ namespace PlexRipper.Domain
             get => _inputStream.Position;
             set => _inputStream.Position = value;
         }
+
+        #endregion
+
+        #region Public Methods
+
+        public override void Flush() { }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -61,16 +75,20 @@ namespace PlexRipper.Domain
 
         public override void SetLength(long value) { }
 
+        public void SetThrottleSpeed(int throttleKb)
+        {
+            _throttle = throttleKb * 1024;
+        }
+
         public override void Write(byte[] buffer, int offset, int count) { }
+
+        #endregion
+
+        #region Private Methods
 
         int GetBytesToReturn(int count)
         {
             return GetBytesToReturnAsync(count).Result;
-        }
-
-        public void SetThrottleSpeed(int throttleKb)
-        {
-            _throttle = throttleKb * 1024;
         }
 
         async Task<int> GetBytesToReturnAsync(int count)
@@ -93,5 +111,7 @@ namespace PlexRipper.Domain
 
             return diff > 0 ? diff : Math.Min(1024 * 8, count);
         }
+
+        #endregion
     }
 }

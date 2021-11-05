@@ -13,7 +13,7 @@ using PlexRipper.Application.Common;
 using PlexRipper.Application.DownloadWorkerTasks;
 using PlexRipper.Domain;
 
-namespace PlexRipper.DownloadManager.Download
+namespace PlexRipper.DownloadManager.DownloadClient
 {
     /// <summary>
     /// The PlexDownloadClient handles a single <see cref="DownloadTask"/> at a time and
@@ -79,7 +79,7 @@ namespace PlexRipper.DownloadManager.Download
 
             if (!DownloadTask.DownloadWorkerTasks.Any())
             {
-                var downloadWorkerTasks = await GenerateDownloadWorkerTasks(DownloadTask, _userSettings.DownloadSegments);
+                var downloadWorkerTasks = await GenerateDownloadWorkerTasks(DownloadTask);
                 if (downloadWorkerTasks.IsFailed)
                 {
                     return downloadWorkerTasks.ToResult();
@@ -102,8 +102,9 @@ namespace PlexRipper.DownloadManager.Download
             return Result.Ok(this);
         }
 
-        private async Task<Result<List<DownloadWorkerTask>>> GenerateDownloadWorkerTasks(DownloadTask downloadTask, int parts)
+        private async Task<Result<List<DownloadWorkerTask>>> GenerateDownloadWorkerTasks(DownloadTask downloadTask)
         {
+            int parts = _userSettings.DownloadSegments;
             if (parts <= 0)
                 return Result.Fail($"Parameter {nameof(parts)} was {parts}, prevented division by invalid value").LogWarning();
 
@@ -303,8 +304,8 @@ namespace PlexRipper.DownloadManager.Download
         /// <returns>Is successful.</returns>
         public Result Start()
         {
-            if (DownloadStatus == DownloadStatus.Downloading)
-                return Result.Fail("The PlexDownloadClient is already downloading and can not be started.");
+            if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
+                return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogError();
 
             Log.Debug($"Start downloading {DownloadTask.FileName}");
             try

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Environment;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using PlexRipper.Application.Common;
@@ -176,10 +175,7 @@ namespace PlexRipper.FileSystem
                 _fileSystem.Directory.CreateDirectory(directory);
                 var availableSpace = CheckDirectoryAvailableSpace(directory);
                 if (availableSpace < fileSize)
-                {
-                    return Result.Fail(
-                        $"There is not enough space available in root directory {directory}");
-                }
+                    return Result.Fail($"There is not enough space available in root directory {directory}");
 
                 var filePath = _fileSystem.Path.Combine(directory, fileName);
 
@@ -200,8 +196,7 @@ namespace PlexRipper.FileSystem
             }
             catch (Exception e)
             {
-                Log.Error(e);
-                throw;
+                return Result.Fail(new ExceptionalError(e)).LogError();
             }
         }
 

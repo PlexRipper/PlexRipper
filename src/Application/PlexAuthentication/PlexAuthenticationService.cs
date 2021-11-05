@@ -58,13 +58,11 @@ namespace PlexRipper.Application.PlexAuthentication
         public async Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId = 0)
         {
             if (string.IsNullOrEmpty(serverUrl))
-            {
-                return ResultExtensions.IsNull(nameof(serverUrl));
-            }
+                return ResultExtensions.IsNull(nameof(serverUrl)).LogWarning();
 
             var token = await GetPlexServerTokenAsync(plexServerId, plexAccountId);
             if (token.IsFailed)
-                return token;
+                return token.ToResult();
 
             // TODO verify that download=1 is not needed.
             return Result.Ok($"{serverUrl}?X-Plex-Token={token.Value}");

@@ -50,11 +50,16 @@ namespace PlexRipper.Domain
         public string FileName { get; set; }
 
         /// <summary>
-        /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
+        /// Gets or sets the relative obfuscated URL of the media to be downloaded,
+        /// e.g: /library/parts/47660/156234666/file.mkv.
         /// </summary>
         [Column(Order = 10)]
         public string FileLocationUrl { get; set; }
 
+        /// <summary>
+        /// Gets or sets the full download url including the <see cref="PlexServer"/> token of the media to be downloaded.
+        /// This is only set if <see cref="DownloadTask"/> is downloadable.
+        /// </summary>
         [Column(Order = 11)]
         public string DownloadUrl { get; set; }
 
@@ -65,23 +70,26 @@ namespace PlexRipper.Domain
         [Column(Order = 12)]
         public string FullTitle { get; set; }
 
+        /// <summary>
+        /// Gets or sets get or sets the media quality of this <see cref="DownloadTask"/>.
+        /// </summary>
         [Column(Order = 13)]
         public string Quality { get; set; }
 
         /// <summary>
-        /// Gets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
+        /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
         /// </summary>
         [Column(Order = 14)]
         public string DownloadDirectory { get; set; }
 
         /// <summary>
-        /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
+        /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
         /// </summary>
         [Column(Order = 15)]
         public string DestinationDirectory { get; set; }
 
         /// <summary>
-        /// The download priority, the higher the more important.
+        /// Gets or sets the download priority, the higher the more important.
         /// </summary>
         public long Priority { get; set; }
 

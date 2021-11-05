@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Domain;
-using PlexRipper.DownloadManager.Download;
+using PlexRipper.DownloadManager.DownloadClient;
 
 namespace PlexRipper.DownloadManager
 {
@@ -26,5 +26,7 @@ namespace PlexRipper.DownloadManager
         IObservable<DownloadTask> DownloadTaskUpdate { get; }
 
         int ActiveDownloadClients { get; }
+
+        Task ExecuteDownloadClient(int downloadTaskId);
     }
 }

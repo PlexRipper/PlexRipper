@@ -25,6 +25,8 @@ namespace PlexRipper.DownloadManager
 
         private readonly INotificationsService _notificationsService;
 
+        private readonly IDownloadScheduler _downloadScheduler;
+
         private readonly IPlexDownloadTaskFactory _plexDownloadTaskFactory;
 
         #endregion
@@ -37,6 +39,7 @@ namespace PlexRipper.DownloadManager
             IDownloadQueue downloadQueue,
             IFileSystem fileSystem,
             INotificationsService notificationsService,
+            IDownloadScheduler downloadScheduler,
             IPlexDownloadTaskFactory plexDownloadTaskFactory)
         {
             _mediator = mediator;
@@ -44,6 +47,7 @@ namespace PlexRipper.DownloadManager
             _downloadQueue = downloadQueue;
             _fileSystem = fileSystem;
             _notificationsService = notificationsService;
+            _downloadScheduler = downloadScheduler;
             _plexDownloadTaskFactory = plexDownloadTaskFactory;
 
             SetupSubscriptions();
@@ -130,30 +134,6 @@ namespace PlexRipper.DownloadManager
 
         #region Start
 
-        public async Task<Result> StartDownloadTaskAsync(DownloadTask downloadTask)
-        {
-            if (downloadTask is null)
-                return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
-
-            if (downloadTask.IsDownloadable)
-            {
-                var downloadClient = _downloadTracker.GetDownloadClient(downloadTask.Id);
-                if (downloadClient.IsFailed)
-                {
-                    downloadClient = await _downloadTracker.CreateDownloadClient(downloadTask.Id);
-                    if (downloadClient.IsFailed)
-                    {
-                        await _notificationsService.SendResult(downloadClient);
-                        return downloadClient.ToResult();
-                    }
-                }
-
-                return downloadClient.Value.Start();
-            }
-
-            return Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable.");
-        }
-
         public async Task<Result> StartDownloadTasksAsync(List<int> downloadTaskIds)
         {
             if (downloadTaskIds is null || !downloadTaskIds.Any())
@@ -173,6 +153,17 @@ namespace PlexRipper.DownloadManager
             }
 
             return Result.Ok();
+        }
+
+        public async Task<Result> StartDownloadTaskAsync(DownloadTask downloadTask)
+        {
+            if (downloadTask is null)
+                return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
+
+            if (downloadTask.IsDownloadable)
+                return await _downloadScheduler.StartDownloadJob(downloadTask.Id);
+
+            return Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable.");
         }
 
         #endregion
@@ -259,6 +250,7 @@ namespace PlexRipper.DownloadManager
 
             return await _mediator.Send(new DeleteDownloadTasksByIdCommand(stopResult.Value));
         }
+
         #endregion
 
         #region Private Methods

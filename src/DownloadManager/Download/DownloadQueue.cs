@@ -51,6 +51,7 @@ namespace PlexRipper.DownloadManager
             ExecuteDownloadQueue(serverList);
         }
 
+        // TODO Might need to do this on a per-server level otherwise many server might influence each other
         public void ExecuteDownloadQueue(List<PlexServer> plexServers)
         {
             if (!plexServers.Any())
@@ -116,7 +117,9 @@ namespace PlexRipper.DownloadManager
                     downloadTask.Children = SetToDownloading(downloadTask.Children);
                 }
 
-                if (downloadTask.Children.Any(x => x.DownloadStatus is DownloadStatus.Downloading))
+                // Only set the parent(s) of the downloadable Tasks to download
+                // because the DownloadClient decides the downloading status of downloadable tasks
+                if (!downloadTask.IsDownloadable && downloadTask.Children.Any(x => x.DownloadStatus is DownloadStatus.Downloading))
                 {
                     downloadTask.DownloadStatus = DownloadStatus.Downloading;
                 }

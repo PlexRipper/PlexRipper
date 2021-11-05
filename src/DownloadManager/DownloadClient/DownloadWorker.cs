@@ -13,7 +13,7 @@ using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using Timer = System.Timers.Timer;
 
-namespace PlexRipper.DownloadManager.Download
+namespace PlexRipper.DownloadManager.DownloadClient
 {
     /// <summary>
     /// The <see cref="DownloadWorker"/> is part of the multi-threaded <see cref="PlexDownloadClient"/>

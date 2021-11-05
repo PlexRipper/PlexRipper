@@ -21,16 +21,16 @@ namespace PlexRipper.Domain
         /// <param name="endPosition"></param>
         public DownloadWorkerTask(DownloadTask downloadTask, int partIndex, long startPosition, long endPosition)
         {
-            FileName = $"{Path.GetFileNameWithoutExtension(downloadTask.FileName)}.part{PartIndex}{Path.GetExtension(downloadTask.FileName)}";
             TempDirectory = downloadTask.DownloadDirectory;
             DownloadUrl = downloadTask.DownloadUrl;
             DownloadTaskId = downloadTask.Id;
             PartIndex = partIndex;
             StartByte = startPosition;
             EndByte = endPosition;
+            FileName = $"{Path.GetFileNameWithoutExtension(downloadTask.FileName)}.part{partIndex}{Path.GetExtension(downloadTask.FileName)}";
         }
 
-        public DownloadWorkerTask() { }
+        private DownloadWorkerTask() { }
 
         #endregion
 

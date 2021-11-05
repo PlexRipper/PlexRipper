@@ -358,18 +358,15 @@ namespace PlexRipper.Application
                     }
 
                     // Create Download URL
-                    if (downloadTask.IsDownloadable)
+                    var downloadUrl = $"{downloadTask.PlexServer.ServerUrl}{downloadTask.FileLocationUrl}";
+                    var serverTokenWithUrl = await _plexAuthenticationService.GetPlexServerTokenWithUrl(downloadTask.PlexServerId, downloadUrl);
+                    if (serverTokenWithUrl.IsFailed)
                     {
-                        var downloadUrl = $"{downloadTask.PlexServer.ServerUrl}{downloadTask.FileLocationUrl}";
-                        var result = await _plexAuthenticationService.GetPlexServerTokenWithUrl(downloadTask.PlexServerId, downloadUrl);
-                        if (result.IsFailed)
-                        {
-                            Log.Error($"Failed to retrieve server token to create DownloadUrl for PlexServer {downloadTask.PlexServer.Name}");
-                            return result.ToResult();
-                        }
-
-                        downloadTask.DownloadUrl = downloadUrl;
+                        Log.Error($"Failed to retrieve server token to create DownloadUrl for PlexServer {downloadTask.PlexServer.Name}");
+                        return serverTokenWithUrl.ToResult();
                     }
+
+                    downloadTask.DownloadUrl = serverTokenWithUrl.Value;
 
                     // Determine download directory
                     var downloadDir = GetDownloadDirectory(downloadTask);

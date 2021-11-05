@@ -9,7 +9,6 @@ using PlexRipper.Application;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.Domain.RxNet;
-using PlexRipper.DownloadManager.Download;
 
 namespace PlexRipper.DownloadManager
 {
@@ -95,8 +94,6 @@ namespace PlexRipper.DownloadManager
                 .FileMergeProgressObservable
                 .SubscribeAsync(OnFileMergeProgress);
         }
-
-
 
         #region Subscriptions
 

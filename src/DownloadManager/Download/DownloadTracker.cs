@@ -7,9 +7,10 @@ using FluentResults;
 using Logging;
 using MediatR;
 using PlexRipper.Application;
+using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.Domain.RxNet;
-using PlexRipper.DownloadManager.Download;
+using PlexRipper.DownloadManager.DownloadClient;
 
 namespace PlexRipper.DownloadManager
 {
@@ -26,15 +27,18 @@ namespace PlexRipper.DownloadManager
 
         private readonly IMediator _mediator;
 
+        private readonly INotificationsService _notificationsService;
+
         private readonly Func<PlexDownloadClient> _plexDownloadClientFactory;
 
         #endregion
 
         #region Constructor
 
-        public DownloadTracker(IMediator mediator, Func<PlexDownloadClient> plexDownloadClientFactory)
+        public DownloadTracker(IMediator mediator, INotificationsService notificationsService, Func<PlexDownloadClient> plexDownloadClientFactory)
         {
             _mediator = mediator;
+            _notificationsService = notificationsService;
             _plexDownloadClientFactory = plexDownloadClientFactory;
         }
 
@@ -45,6 +49,7 @@ namespace PlexRipper.DownloadManager
         public IObservable<DownloadTask> DownloadTaskUpdate => _downloadTaskUpdate.AsObservable();
 
         public int ActiveDownloadClients => _downloadsList.Count;
+
         #endregion
 
         #region Public Methods
@@ -69,6 +74,7 @@ namespace PlexRipper.DownloadManager
                 return Result.Fail($"DownloadTask {downloadTask.FullTitle} is not downloadable").LogWarning();
 
             Log.Debug($"Creating Download client for {downloadTask.FullTitle}");
+
             // Create download client
             var newClient = await _plexDownloadClientFactory().Setup(downloadTask);
             if (newClient.IsFailed)
@@ -117,6 +123,25 @@ namespace PlexRipper.DownloadManager
             }
 
             return Result.Ok(downloadClient);
+        }
+
+        public async Task ExecuteDownloadClient(int downloadTaskId)
+        {
+            var downloadClient = GetDownloadClient(downloadTaskId);
+            if (downloadClient.IsFailed)
+            {
+                downloadClient = await CreateDownloadClient(downloadTaskId);
+                if (downloadClient.IsFailed)
+                {
+                    await _notificationsService.SendResult(downloadClient);
+                    downloadClient.ToResult().LogError();
+                    return;
+                }
+
+            }
+
+            downloadClient.Value.Start();
+            await downloadClient.Value.DownloadProcessTask;
         }
 
         #endregion

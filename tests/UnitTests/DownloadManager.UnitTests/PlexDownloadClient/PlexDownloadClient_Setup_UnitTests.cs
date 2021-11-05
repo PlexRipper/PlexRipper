@@ -11,7 +11,7 @@ using PlexRipper.Application.DownloadWorkerTasks;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain;
-using PlexRipper.DownloadManager.Download;
+using PlexRipper.DownloadManager.DownloadClient;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;

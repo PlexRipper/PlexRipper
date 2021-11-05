@@ -9,7 +9,6 @@ using Moq;
 using PlexRipper.Application.Common;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
-using PlexRipper.DownloadManager.Download;
 using Shouldly;
 using WireMock.Server;
 using Xunit;

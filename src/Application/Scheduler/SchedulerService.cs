@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
+using PlexRipper.Domain;
 using Quartz;
 
 namespace PlexRipper.Application
@@ -10,10 +11,6 @@ namespace PlexRipper.Application
         private readonly IScheduler _scheduler;
 
         private readonly JobKey _syncServerJobKey = new("SyncServer", "SyncGroup");
-
-        private readonly JobKey _setupAccountJobKey = new("SetupAccountJobKey", "SyncGroup");
-
-        private readonly TriggerKey _syncServerTriggerKey = new("StartNow", "TriggerGroup");
 
         public SchedulerService(IScheduler scheduler)
         {
@@ -27,8 +24,7 @@ namespace PlexRipper.Application
                 .Build();
 
             // Trigger the job to run now, and then every 40 seconds
-            ITrigger trigger = TriggerBuilder.Create()
-                .WithIdentity(_syncServerTriggerKey)
+            var trigger = TriggerBuilder.Create()
                 .WithSimpleSchedule(x => x
                     .WithIntervalInHours(6)
                     .RepeatForever())
@@ -42,13 +38,11 @@ namespace PlexRipper.Application
         public async Task InspectPlexServersAsyncJob(int plexAccountId)
         {
             var job = JobBuilder.Create<InspectPlexServersJob>()
-                .WithIdentity(_setupAccountJobKey)
+                .WithIdentity($"{nameof(PlexAccount)}_{plexAccountId}", "InspectPlexServersJobs")
                 .UsingJobData("plexAccountId", plexAccountId)
                 .Build();
 
-            var trigger = TriggerBuilder.Create().StartNow().Build();
-
-            await _scheduler.ScheduleJob(job, trigger);
+            await _scheduler.ScheduleJob(job, TriggerBuilder.Create().StartNow().Build());
         }
 
         public async Task<Result> TriggerSyncPlexServersJob()

@@ -68,7 +68,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
             };
         }
 
-        private PlexRipper.DownloadManager.Download.DownloadWorker GetDownloadWorker(MemoryStream memoryStream, int downloadSpeedLimitInKb = 0)
+        private PlexRipper.DownloadManager.DownloadClient.DownloadWorker GetDownloadWorker(MemoryStream memoryStream, int downloadSpeedLimitInKb = 0)
         {
             var _filesystem = new Mock<IFileSystem>();
             _filesystem.Setup(x => x.DownloadWorkerTempFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
@@ -77,7 +77,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
             {
                 Id = 1,
             };
-            return new PlexRipper.DownloadManager.Download.DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient, downloadSpeedLimitInKb);
+            return new PlexRipper.DownloadManager.DownloadClient.DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient, downloadSpeedLimitInKb);
         }
 
         [Fact]
@@ -159,7 +159,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
             {
                 Id = 1,
             };
-            var downloadWorker = new PlexRipper.DownloadManager.Download.DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
+            var downloadWorker = new PlexRipper.DownloadManager.DownloadClient.DownloadWorker(downloadWorkerTask, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
 
             //Act
             downloadWorker.Start();
@@ -168,7 +168,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
             lastUpdate.IsSuccess.ShouldBeTrue();
 
             //// Recreate another download worker with a cloned stream as the original got closed
-            var downloadWorker2 = new PlexRipper.DownloadManager.Download.DownloadWorker(lastUpdate.Value, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
+            var downloadWorker2 = new PlexRipper.DownloadManager.DownloadClient.DownloadWorker(lastUpdate.Value, _filesystem.Object, Container.GetPlexRipperHttpClient, 1000);
             downloadWorker2.Start();
             await downloadWorker2.DownloadProcessTask;
 

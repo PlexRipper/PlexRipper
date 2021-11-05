@@ -44,6 +44,7 @@ namespace PlexRipper.DownloadManager
 
         public IObservable<DownloadTask> DownloadTaskUpdate => _downloadTaskUpdate.AsObservable();
 
+        public int ActiveDownloadClients => _downloadsList.Count;
         #endregion
 
         #region Public Methods
@@ -56,12 +57,22 @@ namespace PlexRipper.DownloadManager
                 return downloadTaskResult.ToResult();
             }
 
+            return await CreateDownloadClient(downloadTaskResult.Value);
+        }
+
+        public async Task<Result<PlexDownloadClient>> CreateDownloadClient(DownloadTask downloadTask)
+        {
+            if (downloadTask is null)
+                return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
+
+            if (!downloadTask.IsDownloadable)
+                return Result.Fail($"DownloadTask {downloadTask.FullTitle} is not downloadable").LogWarning();
+
+            Log.Debug($"Creating Download client for {downloadTask.FullTitle}");
             // Create download client
-            var newClient = await _plexDownloadClientFactory().Setup(downloadTaskResult.Value);
+            var newClient = await _plexDownloadClientFactory().Setup(downloadTask);
             if (newClient.IsFailed)
-            {
                 return newClient.ToResult().LogError();
-            }
 
             SetupSubscriptions(newClient.Value);
             _downloadsList.Add(newClient.Value);

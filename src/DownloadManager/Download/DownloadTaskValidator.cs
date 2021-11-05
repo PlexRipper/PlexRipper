@@ -181,11 +181,11 @@ namespace PlexRipper.DownloadManager
 
                 When(c => c.IsDownloadable, () =>
                 {
-                    RuleFor(y => y.Parent).NotNull();
-                    RuleFor(y => y.ParentId).GreaterThan(0);
+                    RuleFor(y => y.PlexServerId).GreaterThan(0);
+                    RuleFor(y => y.PlexLibraryId).GreaterThan(0);
 
-                    RuleFor(y => y.PlexServer).NotNull();
-                    RuleFor(y => y.PlexLibrary).NotNull();
+                    RuleFor(y => y.DownloadFolderId).GreaterThan(0);
+                    RuleFor(y => y.DestinationFolderId).GreaterThan(0);
 
                     RuleFor(y => y.FileName).NotEmpty();
 
@@ -198,10 +198,6 @@ namespace PlexRipper.DownloadManager
                     RuleFor(x => Uri.IsWellFormedUriString(x.DownloadUri.AbsoluteUri, UriKind.Absolute)).NotEqual(false)
                         .When(y => y.DownloadUri != null);
                     RuleFor(y => y.Created).NotEqual(DateTime.MinValue);
-
-                    RuleFor(y => y.DownloadWorkerTasks).NotNull();
-                    RuleFor(y => y.DownloadWorkerTasks.Any()).Equal(true)
-                        .When(y => y.DownloadWorkerTasks != null);
                 });
             }
 

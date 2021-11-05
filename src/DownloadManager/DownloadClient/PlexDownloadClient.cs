@@ -66,16 +66,12 @@ namespace PlexRipper.DownloadManager.Download
         public async Task<Result<PlexDownloadClient>> Setup(DownloadTask downloadTask)
         {
             if (downloadTask is null)
-            {
                 return ResultExtensions.IsNull(nameof(downloadTask));
-            }
 
             DownloadTask = downloadTask;
 
             if (DownloadTask.PlexServer is null)
-            {
                 return ResultExtensions.IsNull($"{nameof(DownloadTask)}.{nameof(DownloadTask.PlexServer)}");
-            }
 
             if (!DownloadTask.DownloadWorkerTasks.Any())
             {
@@ -127,6 +123,7 @@ namespace PlexRipper.DownloadManager.Download
                 downloadWorkerTasks.Add(new DownloadWorkerTask(downloadTask, i + 1, start, end));
             }
 
+            downloadTask.DownloadWorkerTasks = downloadWorkerTasks;
             var addResult = await _mediator.Send(new AddDownloadWorkerTasksCommand(downloadTask.DownloadWorkerTasks));
             if (addResult.IsFailed)
             {
@@ -303,9 +300,7 @@ namespace PlexRipper.DownloadManager.Download
         public Result Start()
         {
             if (DownloadStatus == DownloadStatus.Downloading)
-            {
                 return Result.Fail("The PlexDownloadClient is already downloading and can not be started.");
-            }
 
             Log.Debug($"Start downloading {DownloadTask.FileName}");
             try

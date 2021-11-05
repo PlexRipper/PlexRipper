@@ -12,6 +12,7 @@ using PlexRipper.Application.Common;
 using PlexRipper.BaseTests.Config;
 using PlexRipper.Data;
 using PlexRipper.Domain;
+using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI;
 using PlexRipper.WebAPI.Config;
 
@@ -117,17 +118,9 @@ namespace PlexRipper.BaseTests
 
         public IPlexApiService GetPlexApiService => AutofacContainer.Resolve<IPlexApiService>();
 
-        public IDownloadManager GetDownloadManager => AutofacContainer.Resolve<IDownloadManager>();
-
-        public IDownloadQueue GetDownloadQueue => AutofacContainer.Resolve<IDownloadQueue>();
-
         public IFolderPathService GetFolderPathService => AutofacContainer.Resolve<IFolderPathService>();
 
         public IPlexDownloadTaskFactory GetPlexDownloadTaskFactory => AutofacContainer.Resolve<IPlexDownloadTaskFactory>();
-
-        public IPlexRipperHttpClient GetPlexRipperHttpClient => AutofacContainer.Resolve<IPlexRipperHttpClient>();
-
-        public PlexRipperDbContext PlexRipperDbContext => AutofacContainer.Resolve<PlexRipperDbContext>();
 
         public IMediator Mediator => AutofacContainer.Resolve<IMediator>();
 
@@ -136,5 +129,23 @@ namespace PlexRipper.BaseTests
         public IFileSystem FileSystem => AutofacContainer.Resolve<IFileSystem>();
 
         public IPathSystem PathSystem => AutofacContainer.Resolve<IPathSystem>();
+
+        #region DownloadManager
+
+        public IDownloadManager GetDownloadManager => AutofacContainer.Resolve<IDownloadManager>();
+
+        public IDownloadQueue GetDownloadQueue => AutofacContainer.Resolve<IDownloadQueue>();
+
+        public IDownloadTracker GetDownloadTracker => AutofacContainer.Resolve<IDownloadTracker>();
+
+        public IDownloadCommands GetDownloadCommands => AutofacContainer.Resolve<IDownloadCommands>();
+
+        public IDownloadTaskValidator GetDownloadTaskValidator => AutofacContainer.Resolve<IDownloadTaskValidator>();
+
+        public IPlexRipperHttpClient GetPlexRipperHttpClient => AutofacContainer.Resolve<IPlexRipperHttpClient>();
+
+        public PlexRipperDbContext PlexRipperDbContext => AutofacContainer.Resolve<PlexRipperDbContext>();
+
+        #endregion
     }
 }

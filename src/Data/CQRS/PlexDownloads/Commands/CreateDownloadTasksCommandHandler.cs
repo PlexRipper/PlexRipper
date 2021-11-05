@@ -35,11 +35,7 @@ namespace PlexRipper.Data
                 x.RuleFor(y => y.DestinationFolderId).GreaterThan(0);
                 x.When(c => c.IsDownloadable, () =>
                 {
-                    x.RuleFor(y => y.Parent).NotNull();
                     x.RuleFor(y => y.ParentId).GreaterThan(0);
-
-                    x.RuleFor(y => y.PlexServer).NotNull();
-                    x.RuleFor(y => y.PlexLibrary).NotNull();
 
                     x.RuleFor(y => y.FileName).NotEmpty();
 
@@ -51,10 +47,6 @@ namespace PlexRipper.Data
                     x.RuleFor(y => Uri.IsWellFormedUriString(y.DownloadUri.AbsoluteUri, UriKind.Absolute)).NotEqual(false)
                         .When(y => y.DownloadUri != null);
                     x.RuleFor(y => y.Created).NotEqual(DateTime.MinValue);
-
-                    x.RuleFor(y => y.DownloadWorkerTasks).NotNull();
-                    x.RuleFor(y => y.DownloadWorkerTasks.Any()).Equal(true)
-                        .When(y => y.DownloadWorkerTasks != null);
                 });
             });
         }

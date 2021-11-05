@@ -104,6 +104,14 @@ namespace PlexRipper.BaseTests
                     throw new ArgumentOutOfRangeException();
             }
 
+            foreach (var downloadTask in downloadTasks.Flatten(x => x.Children).ToList())
+            {
+                downloadTask.PlexServer = null;
+                downloadTask.PlexLibrary = null;
+                downloadTask.DestinationFolder = null;
+                downloadTask.DownloadFolder = null;
+            }
+
             dbContext.DownloadTasks.AddRange(downloadTasks);
 
             dbContext.SaveChanges();

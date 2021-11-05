@@ -24,5 +24,7 @@ namespace PlexRipper.DownloadManager
         void DeleteDownloadClient(int downloadTaskId);
 
         IObservable<DownloadTask> DownloadTaskUpdate { get; }
+
+        int ActiveDownloadClients { get; }
     }
 }

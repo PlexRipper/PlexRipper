@@ -52,12 +52,7 @@ namespace PlexRipper.BaseTests
                 {
                     DirectoryPath = PathSystem.RootDirectory,
                 })
-                .RuleFor(x => x.DestinationFolderId, _ => 2)
-                .FinishWith((_, task) =>
-                {
-                    task.PlexServer.Id = task.PlexServerId;
-                    task.PlexLibrary.Id = task.PlexLibraryId;
-                });
+                .RuleFor(x => x.DestinationFolderId, _ => 2);
         }
 
         #region Movie
@@ -198,10 +193,6 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.ElapsedTime, 0)
                 .RuleFor(x => x.DownloadStatus, DownloadStatus.Initialized)
                 .RuleFor(x => x.DownloadTaskId, downloadTaskId)
-                .RuleFor(x => x.DownloadTask, new DownloadTask
-                {
-                    Id = downloadTaskId,
-                })
                 .RuleFor(x => x.DownloadWorkerTaskLogs, new List<DownloadWorkerLog>());
         }
 

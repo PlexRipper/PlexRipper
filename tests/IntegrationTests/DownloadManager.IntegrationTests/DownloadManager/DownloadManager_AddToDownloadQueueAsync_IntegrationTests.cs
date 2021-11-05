@@ -3,7 +3,6 @@ using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Logging;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using PlexRipper.Domain.RxNet;

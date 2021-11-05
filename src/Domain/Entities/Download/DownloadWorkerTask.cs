@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
@@ -23,9 +23,8 @@ namespace PlexRipper.Domain
         {
             FileName = $"{Path.GetFileNameWithoutExtension(downloadTask.FileName)}.part{PartIndex}{Path.GetExtension(downloadTask.FileName)}";
             TempDirectory = downloadTask.DownloadDirectory;
-            DownloadTask = downloadTask;
+            DownloadUrl = downloadTask.DownloadUrl;
             DownloadTaskId = downloadTask.Id;
-            DownloadStatus = DownloadStatus.Initialized;
             PartIndex = partIndex;
             StartByte = startPosition;
             EndByte = endPosition;
@@ -53,7 +52,7 @@ namespace PlexRipper.Domain
         public long EndByte { get; set; }
 
         [Column(Order = 5)]
-        public DownloadStatus DownloadStatus { get; set; }
+        public DownloadStatus DownloadStatus { get; set; } = DownloadStatus.Initialized;
 
         /// <summary>
         /// Gets the total bytes received so far.
@@ -73,6 +72,9 @@ namespace PlexRipper.Domain
         [Column(Order = 9)]
         public long ElapsedTime { get; set; }
 
+        [Column(Order = 10)]
+        public string DownloadUrl { get; set; }
+
         #endregion
 
         #region Relationships
@@ -91,10 +93,7 @@ namespace PlexRipper.Domain
         public string TempFilePath => Path.Combine(TempDirectory, FileName);
 
         [NotMapped]
-        public string Url => DownloadTask.DownloadUrl;
-
-        [NotMapped]
-        public Uri Uri => new Uri(Url);
+        public Uri Uri => new Uri(DownloadUrl);
 
         [NotMapped]
         public long DataTotal => EndByte - StartByte;

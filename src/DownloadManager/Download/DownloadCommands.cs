@@ -107,11 +107,8 @@ namespace PlexRipper.DownloadManager
 
         public async Task<Result> ResumeDownloadTasksAsync(List<int> downloadTaskIds)
         {
-            // TODO Implement Pause first and then add start/resume
-            if (downloadTaskIds is null || !downloadTaskIds.Any())
-            {
-                return Result.Fail("Parameter downloadTasks was empty or null").LogError();
-            }
+            if (!downloadTaskIds.Any())
+                return ResultExtensions.IsEmpty(nameof(downloadTaskIds)).LogWarning();
 
             var downloadTasksIdsResult = await _mediator.Send(new GetAllRelatedDownloadTaskIdsQuery(downloadTaskIds));
             if (downloadTasksIdsResult.IsFailed)

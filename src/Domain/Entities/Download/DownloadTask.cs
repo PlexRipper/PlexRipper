@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
-using FluentResults;
 
 namespace PlexRipper.Domain
 {
@@ -56,26 +55,29 @@ namespace PlexRipper.Domain
         [Column(Order = 10)]
         public string FileLocationUrl { get; set; }
 
+        [Column(Order = 11)]
+        public string DownloadUrl { get; set; }
+
         /// <summary>
         /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
         /// E.g. "TvShow/Season/Episode".
         /// </summary>
-        [Column(Order = 11)]
+        [Column(Order = 12)]
         public string FullTitle { get; set; }
 
-        [Column(Order = 12)]
+        [Column(Order = 13)]
         public string Quality { get; set; }
 
         /// <summary>
         /// Gets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
         /// </summary>
-        [Column(Order = 13)]
+        [Column(Order = 14)]
         public string DownloadDirectory { get; set; }
 
         /// <summary>
         /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
         /// </summary>
-        [Column(Order = 14)]
+        [Column(Order = 15)]
         public string DestinationDirectory { get; set; }
 
         /// <summary>
@@ -124,10 +126,6 @@ namespace PlexRipper.Domain
         [NotMapped]
         public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
 
-        // TODO Add Server Token
-        [NotMapped]
-        public string DownloadUrl => PlexServer != null ? $"{PlexServer?.ServerUrl}{FileLocationUrl}" : string.Empty;
-
         [NotMapped]
         public Uri DownloadUri => !string.IsNullOrWhiteSpace(DownloadUrl) ? new Uri(DownloadUrl, UriKind.Absolute) : null;
 
@@ -149,8 +147,8 @@ namespace PlexRipper.Domain
         /// </summary>
         public bool IsDownloadable =>
             IsDownloadTaskPart()
-            || (DownloadTaskType is DownloadTaskType.Episode && !Children.Any())
-            || (DownloadTaskType is DownloadTaskType.Movie && !Children.Any());
+            || DownloadTaskType is DownloadTaskType.Episode && !Children.Any()
+            || DownloadTaskType is DownloadTaskType.Movie && !Children.Any();
 
         public bool IsDownloadTaskPart()
         {

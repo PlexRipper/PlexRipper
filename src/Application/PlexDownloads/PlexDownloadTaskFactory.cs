@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -172,8 +171,6 @@ namespace PlexRipper.Application
             return Result.Ok(downloadTasks);
         }
 
-
-
         /// <summary>
         /// Creates <see cref="DownloadTask"/>s from a <see cref="PlexMovie"/> and send it to the <see cref="IDownloadManager"/>.
         /// </summary>
@@ -332,7 +329,7 @@ namespace PlexRipper.Application
             if (defaultDestinationDict.IsFailed)
                 return defaultDestinationDict.ToResult();
 
-            Result<List<DownloadTask>> FillDownloadTasks(List<DownloadTask> tasks)
+            async Task<Result<List<DownloadTask>>> FillDownloadTasks(List<DownloadTask> tasks)
             {
                 foreach (var downloadTask in tasks)
                 {
@@ -360,6 +357,20 @@ namespace PlexRipper.Application
                         }
                     }
 
+                    // Create Download URL
+                    if (downloadTask.IsDownloadable)
+                    {
+                        var downloadUrl = $"{downloadTask.PlexServer.ServerUrl}{downloadTask.FileLocationUrl}";
+                        var result = await _plexAuthenticationService.GetPlexServerTokenWithUrl(downloadTask.PlexServerId, downloadUrl);
+                        if (result.IsFailed)
+                        {
+                            Log.Error($"Failed to retrieve server token to create DownloadUrl for PlexServer {downloadTask.PlexServer.Name}");
+                            return result.ToResult();
+                        }
+
+                        downloadTask.DownloadUrl = downloadUrl;
+                    }
+
                     // Determine download directory
                     var downloadDir = GetDownloadDirectory(downloadTask);
                     if (downloadDir.IsFailed)
@@ -381,7 +392,7 @@ namespace PlexRipper.Application
                             childTask.Parent = downloadTask;
                         }
 
-                        var result = FillDownloadTasks(downloadTask.Children);
+                        var result = await FillDownloadTasks(downloadTask.Children);
                         if (result.IsFailed)
                         {
                             return result.ToResult();
@@ -394,7 +405,7 @@ namespace PlexRipper.Application
                 return Result.Ok(tasks);
             }
 
-            return FillDownloadTasks(downloadTasks);
+            return await FillDownloadTasks(downloadTasks);
         }
 
         private Result<string> GetDownloadDirectory(DownloadTask downloadTask)

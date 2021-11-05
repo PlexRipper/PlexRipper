@@ -27,6 +27,8 @@ namespace PlexRipper.DownloadManager.Download
 
         private readonly IMediator _mediator;
 
+        private readonly IPlexAuthenticationService _plexAuthenticationService;
+
         #region Fields
 
         private readonly List<DownloadWorker> _downloadWorkers = new();
@@ -50,11 +52,13 @@ namespace PlexRipper.DownloadManager.Download
         public PlexDownloadClient(
             Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
             IUserSettings userSettings,
-            IMediator mediator)
+            IMediator mediator,
+            IPlexAuthenticationService plexAuthenticationService)
         {
             _downloadWorkerFactory = downloadWorkerFactory;
             _userSettings = userSettings;
             _mediator = mediator;
+            _plexAuthenticationService = plexAuthenticationService;
         }
 
         /// <summary>

@@ -180,7 +180,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
         /// <summary>
         /// Gets the Task that completes when all download workers have finished.
         /// </summary>
-        public Task DownloadProcessTask => Task.WhenAll(_downloadWorkers.Select(x => x.DownloadProcessTask));
+        public Task DownloadProcessTask => Task.WhenAll(_downloadWorkers.Select(x => x.DownloadProcessTask ?? Task.CompletedTask));
 
         #region Observables
 

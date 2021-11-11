@@ -67,6 +67,7 @@ namespace PlexRipper.DownloadManager
 
                 // Set all initialized to Queued
                 downloadTasks = SetToQueued(downloadTasks);
+                downloadTasks = SetToCompleted(downloadTasks);
 
                 var nextDownloadTask = GetNextDownloadTask(ref downloadTasks);
                 if (nextDownloadTask.IsFailed)
@@ -83,11 +84,7 @@ namespace PlexRipper.DownloadManager
             }
         }
 
-        #endregion
-
-        #region Private Methods
-
-        private Result<DownloadTask> GetNextDownloadTask(ref List<DownloadTask> downloadTasks)
+        public Result<DownloadTask> GetNextDownloadTask(ref List<DownloadTask> downloadTasks)
         {
             // Check if there is anything downloading already
             var nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Downloading);
@@ -108,7 +105,7 @@ namespace PlexRipper.DownloadManager
             return GetNextDownloadTask(ref children);
         }
 
-        private List<DownloadTask> SetToDownloading(List<DownloadTask> downloadTasks)
+        public List<DownloadTask> SetToDownloading(List<DownloadTask> downloadTasks)
         {
             foreach (var downloadTask in downloadTasks)
             {
@@ -128,7 +125,7 @@ namespace PlexRipper.DownloadManager
             return downloadTasks;
         }
 
-        private List<DownloadTask> SetToQueued(List<DownloadTask> downloadTasks)
+        public List<DownloadTask> SetToQueued(List<DownloadTask> downloadTasks)
         {
             foreach (var downloadTask in downloadTasks)
             {
@@ -141,6 +138,24 @@ namespace PlexRipper.DownloadManager
                 {
                     downloadTask.Children = SetToQueued(downloadTask.Children);
                 }
+            }
+
+            return downloadTasks;
+        }
+
+        public List<DownloadTask> SetToCompleted(List<DownloadTask> downloadTasks)
+        {
+            foreach (var downloadTask in downloadTasks)
+            {
+                if (downloadTask.Children.Any())
+                {
+                    downloadTask.Children = SetToCompleted(downloadTask.Children);
+                    if (downloadTask.Children.All(x => x.DownloadStatus is DownloadStatus.Completed))
+                    {
+                        downloadTask.DownloadStatus = DownloadStatus.Completed;
+                    }
+                }
+
             }
 
             return downloadTasks;

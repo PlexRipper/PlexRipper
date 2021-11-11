@@ -157,6 +157,7 @@ namespace PlexRipper.DownloadManager
             }
 
             downloadClient.Value.Start();
+            _downloadTaskStart.OnNext(downloadClient.Value.DownloadTask);
             await downloadClient.Value.DownloadProcessTask;
             return Result.Ok();
         }
@@ -224,7 +225,7 @@ namespace PlexRipper.DownloadManager
                 .DownloadTaskUpdate
                 .Subscribe(value => _downloadTaskUpdate.OnNext(value));
 
-            // TODO make seperate completed for PlexDownloadClient which fires after everything has been cleaned-up
+            // TODO make separate completed for PlexDownloadClient which fires after everything has been cleaned-up
             newClient
                 .DownloadTaskUpdate
                 .Where(x => x.DownloadStatus is DownloadStatus.Completed)

@@ -105,13 +105,13 @@ namespace PlexRipper.Domain
         /// </summary>
         public int? DefaultDestinationId { get; set; }
 
-        public List<PlexMovie> Movies { get; set; }
+        public List<PlexMovie> Movies { get; set; } = new();
 
-        public List<PlexTvShow> TvShows { get; set; }
+        public List<PlexTvShow> TvShows { get; set; } = new();
 
-        public List<PlexAccountLibrary> PlexAccountLibraries { get; set; }
+        public List<PlexAccountLibrary> PlexAccountLibraries { get; set; } = new();
 
-        public List<DownloadTask> DownloadTasks { get; set; }
+        public List<DownloadTask> DownloadTasks { get; set; } = new();
 
         #endregion
 

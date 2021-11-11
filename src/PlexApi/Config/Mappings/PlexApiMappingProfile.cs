@@ -25,18 +25,18 @@ namespace PlexRipper.PlexApi.Config.Mappings
                 .ForMember(dest => dest.HasPassword, opt => opt.MapFrom(src => src.HasPassword))
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
-            // Server <-> PlexServer
+            // Server -> PlexServer
             CreateMap<Server, PlexServer>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexLibraries, opt => opt.Ignore())
                 .ForMember(dest => dest.ServerStatus, opt => opt.Ignore())
                 .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
                 .ForMember(dest => dest.ServerFixApplyDNSFix, opt => opt.Ignore())
+                .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt,
                     opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
                 .ForMember(dest => dest.UpdatedAt,
-                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
-                .ReverseMap();
+                    opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()));
 
             // MediaContainer -> PlexLibrary
             CreateMap<MediaContainer, PlexLibrary>(MemberList.None)

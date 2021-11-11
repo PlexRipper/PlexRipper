@@ -23,6 +23,8 @@ namespace PlexRipper.DownloadManager.DownloadClient
     {
         #region Fields
 
+        private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
+
         private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new();
 
         private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
@@ -31,24 +33,20 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
         private readonly IPlexRipperHttpClient _httpClient;
 
-        private bool _isDownloading = true;
-
         private readonly Timer _timer = new(100)
         {
             AutoReset = true,
         };
 
-        public Task<Result> DownloadProcessTask { get; internal set; }
+        private Stream _destinationStream;
 
         private int _downloadSpeedLimit;
 
-        private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
-
-        private Stream _destinationStream;
+        private bool _isDownloading = true;
 
         #endregion
 
-        #region Constructors
+        #region Constructor
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
@@ -75,10 +73,19 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
         #region Properties
 
+        public Task<Result> DownloadProcessTask { get; internal set; }
+
+        public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
+
         /// <summary>
         /// Gets the current <see cref="DownloadWorkerTask"/> being executed.
         /// </summary>
         public DownloadWorkerTask DownloadWorkerTask { get; }
+
+        public IObservable<DownloadWorkerTask> DownloadWorkerTaskUpdate =>
+            _downloadWorkerUpdate
+                .Sample(TimeSpan.FromMilliseconds(100))
+                .AsObservable();
 
         public string FileName => DownloadWorkerTask.FileName;
 
@@ -87,76 +94,9 @@ namespace PlexRipper.DownloadManager.DownloadClient
         /// </summary>
         public int Id => DownloadWorkerTask.Id;
 
-        #region Observables
-
-        public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
-
-        public IObservable<DownloadWorkerTask> DownloadWorkerTaskUpdate =>
-            _downloadWorkerUpdate
-                .Sample(TimeSpan.FromMilliseconds(100))
-                .AsObservable();
-
         #endregion
 
-        #endregion
-
-        #region Methods
-
-        #region Private
-
-        #region SendData
-
-        private void SendDownloadWorkerLog(NotificationLevel logLevel, string message)
-        {
-            _downloadWorkerLog.OnNext(new DownloadWorkerLog
-            {
-                Message = message,
-                LogLevel = logLevel,
-                CreatedAt = DateTime.Now,
-                DownloadWorkerTaskId = DownloadWorkerTask.Id,
-            });
-        }
-
-        private void SetDownloadWorkerTaskChanged(DownloadStatus status)
-        {
-            if (DownloadWorkerTask.DownloadStatus == status)
-            {
-                return;
-            }
-
-            var log = $"Download worker {Id} with {FileName} changed status to {status}";
-            Log.Debug(log);
-            DownloadWorkerTask.DownloadStatus = status;
-            SendDownloadWorkerLog(NotificationLevel.Information, log);
-            SendDownloadWorkerUpdate();
-        }
-
-        #endregion
-
-        private void SendDownloadWorkerError(Result errorResult)
-        {
-            if (errorResult.Errors.Any())
-            {
-                errorResult.Errors.First().Metadata.Add(nameof(DownloadWorker) + "Id", Id);
-            }
-
-            Log.Error($"Download worker {Id} with {FileName} had an error!");
-            DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
-
-            SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
-            SendDownloadWorkerUpdate();
-        }
-
-        private void SendDownloadWorkerUpdate()
-        {
-            _downloadWorkerUpdate.OnNext(DownloadWorkerTask);
-        }
-
-        #endregion
-
-        #region Public
-
-        #region Commands
+        #region Public Methods
 
         public Result Start()
         {
@@ -183,6 +123,60 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
             return Result.Ok();
         }
+
+        /// <summary>
+        /// Stops the downloading.
+        /// </summary>
+        /// <returns>Is successful.</returns>
+        public async Task<Result<DownloadWorkerTask>> StopAsync()
+        {
+            _isDownloading = false;
+
+            // Wait for it to gracefully end.
+            if (DownloadProcessTask is not null)
+            {
+                await DownloadProcessTask;
+            }
+
+            _timer.Stop();
+            SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
+
+            return Result.Ok(DownloadWorkerTask);
+        }
+
+        /// <summary>
+        /// Stops the downloading.
+        /// </summary>
+        /// <returns>Is successful.</returns>
+        public async Task<Result<DownloadWorkerTask>> PauseAsync()
+        {
+            _isDownloading = false;
+
+            // Wait for it to gracefully end.
+            if (DownloadProcessTask is not null)
+            {
+                await DownloadProcessTask;
+            }
+
+            _timer.Stop();
+            SetDownloadWorkerTaskChanged(DownloadStatus.Paused);
+
+            return Result.Ok(DownloadWorkerTask);
+        }
+
+        public void SetDownloadSpeedLimit(int speedInKb)
+        {
+            _downloadSpeedLimit = speedInKb;
+        }
+
+        public void Dispose()
+        {
+            _destinationStream?.Close();
+        }
+
+        #endregion
+
+        #region Private Methods
 
         private async Task<Result> DownloadProcessAsync(Stream destinationStream)
         {
@@ -256,55 +250,49 @@ namespace PlexRipper.DownloadManager.DownloadClient
             return Result.Ok();
         }
 
-        /// <summary>
-        /// Stops the downloading.
-        /// </summary>
-        /// <returns>Is successful.</returns>
-        public async Task<Result<DownloadWorkerTask>> StopAsync()
+        private void SendDownloadWorkerError(Result errorResult)
         {
-            _isDownloading = false;
-
-            // Wait for it to gracefully end.
-            if (DownloadProcessTask is not null)
+            if (errorResult.Errors.Any())
             {
-                await DownloadProcessTask;
+                errorResult.Errors.First().Metadata.Add(nameof(DownloadWorker) + "Id", Id);
             }
 
-            _timer.Stop();
-            SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
+            Log.Error($"Download worker {Id} with {FileName} had an error!");
+            DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
 
-            return Result.Ok(DownloadWorkerTask);
+            SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
+            SendDownloadWorkerUpdate();
         }
 
-        /// <summary>
-        /// Stops the downloading.
-        /// </summary>
-        /// <returns>Is successful.</returns>
-        public async Task<Result<DownloadWorkerTask>> PauseAsync()
+        private void SendDownloadWorkerLog(NotificationLevel logLevel, string message)
         {
-            _isDownloading = false;
-
-            // Wait for it to gracefully end.
-            await DownloadProcessTask;
-            _timer.Stop();
-            SetDownloadWorkerTaskChanged(DownloadStatus.Paused);
-
-            return Result.Ok(DownloadWorkerTask);
+            _downloadWorkerLog.OnNext(new DownloadWorkerLog
+            {
+                Message = message,
+                LogLevel = logLevel,
+                CreatedAt = DateTime.Now,
+                DownloadWorkerTaskId = DownloadWorkerTask.Id,
+            });
         }
 
-        public void SetDownloadSpeedLimit(int speedInKb)
+        private void SendDownloadWorkerUpdate()
         {
-            _downloadSpeedLimit = speedInKb;
+            _downloadWorkerUpdate.OnNext(DownloadWorkerTask);
         }
 
-        #endregion
-
-        public void Dispose()
+        private void SetDownloadWorkerTaskChanged(DownloadStatus status)
         {
-            _destinationStream?.Close();
-        }
+            if (DownloadWorkerTask.DownloadStatus == status)
+            {
+                return;
+            }
 
-        #endregion
+            var log = $"Download worker {Id} with {FileName} changed status to {status}";
+            Log.Debug(log);
+            DownloadWorkerTask.DownloadStatus = status;
+            SendDownloadWorkerLog(NotificationLevel.Information, log);
+            SendDownloadWorkerUpdate();
+        }
 
         #endregion
     }

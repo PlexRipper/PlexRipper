@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 
@@ -25,5 +26,7 @@ namespace PlexRipper.Application.Common
         Task SendServerInspectStatusProgress(InspectServerProgress progress);
 
         void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress);
+
+        Task SendDownloadProgressUpdate(List<DownloadTask> downloadTasks);
     }
 }

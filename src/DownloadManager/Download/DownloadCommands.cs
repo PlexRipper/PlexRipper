@@ -49,36 +49,11 @@ namespace PlexRipper.DownloadManager
             _notificationsService = notificationsService;
             _downloadScheduler = downloadScheduler;
             _plexDownloadTaskFactory = plexDownloadTaskFactory;
-
-            SetupSubscriptions();
         }
 
         #endregion
 
         #region Public Methods
-
-        /// <inheritdoc/>
-        public async Task<Result> PauseDownload(List<int> downloadTaskIds)
-        {
-            if (downloadTaskIds == null)
-                return ResultExtensions.IsNull(nameof(downloadTaskIds));
-
-            if (!downloadTaskIds.Any())
-                return ResultExtensions.IsEmpty(nameof(downloadTaskIds));
-
-            foreach (var downloadTaskId in downloadTaskIds)
-            {
-                var client = _downloadTracker.GetDownloadClient(downloadTaskId);
-                if (client.IsSuccess)
-                {
-                    // The paused downloading state will be send through an subscription to the database.
-                    var downloadTask = await client.Value.PauseAsync();
-                    _downloadTracker.DeleteDownloadClient(downloadTaskId);
-                }
-            }
-
-            return Result.Ok();
-        }
 
         /// <inheritdoc/>
         public async Task<Result> RestartDownloadTasksAsync(List<int> downloadTaskIds)
@@ -104,6 +79,7 @@ namespace PlexRipper.DownloadManager
 
             await _mediator.Send(new UpdateDownloadTasksByIdCommand(regeneratedDownloadTasks.Value));
 
+
             await _downloadQueue.CheckDownloadQueue();
 
             return Result.Ok();
@@ -122,11 +98,12 @@ namespace PlexRipper.DownloadManager
 
             foreach (var downloadTaskId in downloadTasksIdsResult.Value)
             {
-                var downloadClient = _downloadTracker.GetDownloadClient(downloadTaskId);
-                if (downloadClient.IsFailed)
-                {
-                    //downloadClient.Value;
-                }
+                // TODO Add Resume download task
+                // var downloadClient = _downloadTracker.GetDownloadClient(downloadTaskId);
+                // if (downloadClient.IsFailed)
+                // {
+                //     //downloadClient.Value;
+                // }
             }
 
             return Result.Ok();
@@ -168,19 +145,17 @@ namespace PlexRipper.DownloadManager
 
         #endregion
 
+        #region Stop
+
         /// <inheritdoc/>
         public async Task<Result<List<int>>> StopDownloadTasksAsync(List<int> downloadTaskIds)
         {
-            if (downloadTaskIds is null || !downloadTaskIds.Any())
-            {
+            if (!downloadTaskIds.Any())
                 return ResultExtensions.IsEmpty(nameof(downloadTaskIds)).LogWarning();
-            }
 
             var allRelatedIds = await _mediator.Send(new GetAllRelatedDownloadTaskIdsQuery(downloadTaskIds));
             if (allRelatedIds.IsFailed)
-            {
                 return allRelatedIds;
-            }
 
             Log.Information($"Stopping {allRelatedIds.Value.Count} from downloading");
 
@@ -194,19 +169,13 @@ namespace PlexRipper.DownloadManager
                     continue;
                 }
 
-                if (!downloadTask.Value.IsDownloadTaskPart())
+                if (!downloadTask.Value.IsDownloadable)
                 {
                     // Check if currently downloading
-                    var downloadClient = _downloadTracker.GetDownloadClient(downloadTaskId);
-                    if (downloadClient.IsSuccess)
+                    var stopResult = await _downloadTracker.StopDownloadClient(downloadTaskId);
+                    if (stopResult.IsFailed)
                     {
-                        var stopResult = await downloadClient.Value.StopAsync();
-                        if (stopResult.IsFailed)
-                        {
-                            await _notificationsService.SendResult(stopResult);
-                        }
-
-                        _downloadTracker.DeleteDownloadClient(downloadTask.Value.Id);
+                        await _notificationsService.SendResult(stopResult);
                     }
 
                     var removeTempResult = _fileSystem.DeleteAllFilesFromDirectory(downloadTask.Value.DownloadDirectory);
@@ -227,6 +196,39 @@ namespace PlexRipper.DownloadManager
 
             return Result.Ok(stoppedDownloadTaskIds);
         }
+
+        #endregion
+
+        #region Pause
+
+        /// <inheritdoc/>
+        public async Task<Result> PauseDownload(List<int> downloadTaskIds)
+        {
+            if (downloadTaskIds == null)
+                return ResultExtensions.IsNull(nameof(downloadTaskIds));
+
+            if (!downloadTaskIds.Any())
+                return ResultExtensions.IsEmpty(nameof(downloadTaskIds));
+
+            var failedTasks = new List<int>();
+            var errors = new List<Error>();
+            foreach (var downloadTaskId in downloadTaskIds)
+            {
+                // The paused downloading state will be send through an subscription to the database.
+                var pauseResult = await _downloadTracker.PauseDownloadClient(downloadTaskId);
+                if (pauseResult.IsFailed)
+                {
+                    failedTasks.Add(downloadTaskId);
+                    errors.AddRange(pauseResult.Errors);
+                }
+            }
+
+            return errors.Any()
+                ? Result.Ok()
+                : Result.Fail($"Failed to Pause {failedTasks.Count} DownloadTasks, Id's: {failedTasks}").WithErrors(errors);
+        }
+
+        #endregion
 
         /// <inheritdoc/>
         public async Task<Result> ClearCompletedAsync(List<int> downloadTaskIds)
@@ -253,16 +255,6 @@ namespace PlexRipper.DownloadManager
 
         #endregion
 
-        #region Private Methods
 
-        private void SetupSubscriptions()
-        {
-            // Setup DownloadQueue subscriptions
-            _downloadQueue
-                .StartDownloadTask
-                .SubscribeAsync(async downloadTask => await StartDownloadTaskAsync(downloadTask));
-        }
-
-        #endregion
     }
 }

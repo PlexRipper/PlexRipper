@@ -5,6 +5,7 @@ using Quartz;
 
 namespace PlexRipper.DownloadManager
 {
+    [DisallowConcurrentExecution]
     public class DownloadJob : IJob
     {
         private readonly IDownloadTracker _downloadTracker;
@@ -20,7 +21,7 @@ namespace PlexRipper.DownloadManager
             JobDataMap dataMap = context.JobDetail.JobDataMap;
             var downloadTaskId = dataMap.GetIntValue("downloadTaskId");
             Log.Debug($"Executing job: {nameof(DownloadJob)} for {nameof(DownloadTask)}: {downloadTaskId}");
-            await _downloadTracker.ExecuteDownloadClient(downloadTaskId);
+            await _downloadTracker.StartDownloadClient(downloadTaskId);
         }
     }
 }

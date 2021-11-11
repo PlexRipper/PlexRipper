@@ -96,6 +96,12 @@ namespace PlexRipper.Domain
         public bool HasDownloadTasks => PlexLibraries?.Any(x => x.DownloadTasks?.Any() ?? false) ?? false;
 
         /// <summary>
+        /// Gets a collection of all <see cref="DownloadTasks"/> included in the nested <see cref="PlexLibrary">PlexLibraries</see>.
+        /// </summary>
+        [NotMapped]
+        public List<DownloadTask> DownloadTasks => PlexLibraries?.SelectMany(x => x.DownloadTasks).ToList() ?? new List<DownloadTask>();
+
+        /// <summary>
         /// Gets the last known server status.
         /// </summary>
         [NotMapped]

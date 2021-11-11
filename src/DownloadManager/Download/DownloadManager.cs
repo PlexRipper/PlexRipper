@@ -82,8 +82,7 @@ namespace PlexRipper.DownloadManager
                 .SubscribeAsync(UpdateDownloadTaskAsync);
 
             _downloadTracker
-                .DownloadTaskUpdate
-                .Where(x => x.DownloadStatus is DownloadStatus.Completed)
+                .DownloadTaskCompleted
                 .SubscribeAsync(OnDownloadFileCompleted);
 
             _downloadQueue
@@ -113,8 +112,6 @@ namespace PlexRipper.DownloadManager
 
             await UpdateDownloadTaskAsync(downloadTask);
             await _fileMerger.AddFileTaskFromDownloadTask(downloadTask.Id);
-
-            _downloadTracker.DeleteDownloadClient(downloadTask.Id);
 
             Log.Information($"The download of {downloadTask.Title} has completed!");
             await _downloadQueue.CheckDownloadQueue();

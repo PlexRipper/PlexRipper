@@ -48,6 +48,9 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("plexLibraries", Required = Required.Always)]
         public List<PlexLibraryDTO> PlexLibraries { get; set; }
 
+        [JsonProperty("downloadTasks", Required = Required.Always)]
+        public List<DownloadTaskDTO> DownloadTasks { get; set; }
+
         [JsonProperty("status", Required = Required.Always)]
         public PlexServerStatusDTO Status { get; set; }
     }

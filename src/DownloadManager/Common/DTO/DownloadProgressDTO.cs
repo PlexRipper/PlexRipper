@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace PlexRipper.WebAPI.Common.DTO
+namespace PlexRipper.DownloadManager
 {
     public class DownloadProgressDTO
     {
@@ -21,5 +22,8 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
         public string DownloadSpeed { get; set; }
+
+        [JsonProperty("children", Required = Required.Always)]
+        public List<DownloadProgressDTO> Children { get; set; }
     }
 }

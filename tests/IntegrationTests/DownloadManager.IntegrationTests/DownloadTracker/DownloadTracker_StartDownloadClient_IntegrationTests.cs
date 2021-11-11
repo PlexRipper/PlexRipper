@@ -32,13 +32,10 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
             var context = container.PlexRipperDbContext.AddPlexServers(config).AddDownloadTasks(config);
 
             // Act
-            var downloadClient = await container.GetDownloadTracker.CreateDownloadClient(2);
-            downloadClient.IsSuccess.ShouldBeTrue();
-            downloadClient.Value.Start();
-            await downloadClient.Value.DownloadProcessTask;
+            var startResult = await container.GetDownloadTracker.StartDownloadClient(2);
 
             // Assert
-            downloadClient.IsSuccess.ShouldBeTrue();
+            startResult.IsSuccess.ShouldBeTrue();
         }
     }
 }

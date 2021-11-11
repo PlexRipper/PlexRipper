@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using PlexRipper.Application.Config;
 using PlexRipper.Domain.AutoMapper;
+using PlexRipper.DownloadManager.AutoMapper;
 using PlexRipper.PlexApi.Config.Mappings;
 
 namespace PlexRipper.WebAPI.Config
@@ -12,6 +13,7 @@ namespace PlexRipper.WebAPI.Config
             cfg.AddProfile(new DomainMappingProfile());
             cfg.AddProfile(new ApplicationMappingProfile());
             cfg.AddProfile(new PlexApiMappingProfile());
+            cfg.AddProfile(new DownloadManagerMappingProfile());
             cfg.AddProfile(new WebApiMappingProfile());
         });
 

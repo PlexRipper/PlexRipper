@@ -233,10 +233,8 @@ namespace PlexRipper.Application
         /// <inheritdoc/>
         public async Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<int> downloadTaskIds)
         {
-            if (downloadTaskIds is null || !downloadTaskIds.Any())
-            {
-                return Result.Fail("Parameter downloadTasks was empty or null").LogError();
-            }
+            if (!downloadTaskIds.Any())
+                return ResultExtensions.IsEmpty(nameof(downloadTaskIds)).LogWarning();
 
             Log.Debug($"Regenerating {downloadTaskIds.Count} download tasks.");
 
@@ -282,7 +280,6 @@ namespace PlexRipper.Application
 
                 downloadTasksResult.Value[0].Id = downloadTask.Id;
                 downloadTasksResult.Value[0].Priority = downloadTask.Priority;
-                downloadTasksResult.Value[0].DownloadWorkerTasks.ForEach(x => x.DownloadTaskId = downloadTask.Id);
 
                 freshDownloadTasks.AddRange(downloadTasksResult.Value);
             }

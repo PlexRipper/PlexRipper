@@ -26,9 +26,18 @@ export interface DownloadProgressDTO {
 
   /** @format decimal */
   percentage: number;
-  dataReceived: string;
-  dataTotal: string;
-  downloadSpeed: string;
+
+  /** @format int64 */
+  dataReceived: number;
+
+  /** @format int64 */
+  dataTotal: number;
+
+  /** @format int64 */
+  downloadSpeed: number;
+
+  /** @format int64 */
+  timeRemaining: number;
   actions: string[];
   children: DownloadProgressDTO[];
 }

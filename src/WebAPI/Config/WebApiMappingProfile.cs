@@ -78,16 +78,16 @@ namespace PlexRipper.WebAPI.Config
         {
             CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
-                .ForMember(dto => dto.Actions, opt => opt.Ignore());
+                .ForMember(dto => dto.Actions, opt => opt.MapFrom(entity => DownloadTaskActions.Convert(entity.DownloadStatus)));
 
             CreateMap<DownloadTask, DownloadProgressDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
-                .ForMember(dto => dto.Actions, opt => opt.Ignore());
+                .ForMember(dto => dto.Actions, opt => opt.MapFrom(entity => DownloadTaskActions.Convert(entity.DownloadStatus)));
 
             CreateMap<List<DownloadTask>, List<ServerDownloadProgressDTO>>(MemberList.None)
                 .ConstructUsing((list, context) =>
                 {
-                    List<ServerDownloadProgressDTO> serverDownloads = new();
+                    var serverDownloads = new List<ServerDownloadProgressDTO>();
                     foreach (var serverId in list.Select(x => x.PlexServerId).Distinct())
                     {
                         var downloadTasks = list.Where(x => x.PlexServerId == serverId).ToList();
@@ -98,6 +98,7 @@ namespace PlexRipper.WebAPI.Config
                             Downloads = downloadTaskDTO,
                         });
                     }
+
                     return serverDownloads;
                 });
         }

@@ -28,13 +28,16 @@ namespace PlexRipper.DownloadManager
         public decimal Percentage { get; set; }
 
         [JsonProperty("dataReceived", Required = Required.Always)]
-        public int DataReceived { get; set; }
+        public long DataReceived { get; set; }
 
         [JsonProperty("dataTotal", Required = Required.Always)]
-        public int DataTotal { get; set; }
+        public long DataTotal { get; set; }
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
-        public int DownloadSpeed { get; set; }
+        public long DownloadSpeed { get; set; }
+
+        [JsonProperty("timeRemaining", Required = Required.Always)]
+        public long TimeRemaining { get; set; }
 
         [JsonProperty("actions", Required = Required.Always)]
         public List<string> Actions { get; set; }

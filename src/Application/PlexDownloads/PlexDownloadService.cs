@@ -37,6 +37,7 @@ namespace PlexRipper.Application
         /// <param name="signalRService"></param>
         /// <param name="notificationsService"></param>
         /// <param name="plexDownloadTaskFactory"></param>
+        /// <param name="downloadCommands"></param>
         public PlexDownloadService(
             IMediator mediator,
             IDownloadManager downloadManager,

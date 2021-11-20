@@ -32,6 +32,7 @@ export class SignalrService extends BaseService {
 					inspectServerProgress: state.inspectServerProgress,
 					syncServerProgress: state.syncServerProgress,
 					notifications: state.notifications,
+					serverDownloads: state.serverDownloads,
 				};
 			},
 		});

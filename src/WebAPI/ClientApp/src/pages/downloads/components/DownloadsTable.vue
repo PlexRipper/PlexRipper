@@ -16,10 +16,9 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DownloadProgressDTO, DownloadStatus, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
+import { DownloadProgressDTO, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
-import ButtonType from '@enums/buttonType';
 import { DownloadService } from '@service';
 
 @Component
@@ -105,56 +104,6 @@ export default class DownloadsTable extends Vue {
 			.filter((x) => !!x) as DownloadProgressDTO[];
 	}
 
-	setAvailableActions(downloadTasks: DownloadTaskDTO[]): DownloadTaskDTO[] {
-		for (const downloadRow of downloadTasks) {
-			downloadRow.actions = this.availableActions(downloadRow.status);
-			if (downloadRow.children) {
-				downloadRow.children = this.setAvailableActions(downloadRow.children);
-			}
-		}
-		return downloadTasks;
-	}
-
-	availableActions(status: DownloadStatus): ButtonType[] {
-		const availableActions: ButtonType[] = [ButtonType.Details];
-		switch (status) {
-			case DownloadStatus.Unknown:
-				availableActions.push(ButtonType.Delete);
-				break;
-			case DownloadStatus.Initialized:
-				availableActions.push(ButtonType.Delete);
-				break;
-			case DownloadStatus.Queued:
-				availableActions.push(ButtonType.Start);
-				availableActions.push(ButtonType.Delete);
-				break;
-			case DownloadStatus.Downloading:
-				availableActions.push(ButtonType.Pause);
-				availableActions.push(ButtonType.Stop);
-				break;
-			case DownloadStatus.Paused:
-				availableActions.push(ButtonType.Start);
-				availableActions.push(ButtonType.Stop);
-				availableActions.push(ButtonType.Delete);
-				break;
-			case DownloadStatus.Completed:
-				availableActions.push(ButtonType.Clear);
-				availableActions.push(ButtonType.Restart);
-				break;
-			case DownloadStatus.Stopped:
-				availableActions.push(ButtonType.Restart);
-				availableActions.push(ButtonType.Delete);
-				break;
-			case DownloadStatus.Merging:
-				break;
-			case DownloadStatus.Error:
-				availableActions.push(ButtonType.Restart);
-				availableActions.push(ButtonType.Delete);
-				break;
-		}
-		return availableActions;
-	}
-
 	tableAction(payload: { action: string; item: DownloadTaskDTO }) {
 		Log.info('command', payload);
 		this.$emit('action', payload);
@@ -167,7 +116,7 @@ export default class DownloadsTable extends Vue {
 	mounted(): void {
 		// Retrieve initial download list
 		this.$subscribeTo(DownloadService.getDownloadList(this.serverId), (data: DownloadProgressDTO[]) => {
-			this.downloadRows = data; // this.setAvailableActions([...data]);
+			this.downloadRows = data;
 		});
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
+using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager
 {
@@ -8,6 +9,18 @@ namespace PlexRipper.DownloadManager
         [JsonProperty("id", Required = Required.Always)]
         public int Id { get; set; }
 
+        /// <summary>
+        /// The formatted media title as shown in Plex.
+        /// </summary>
+        [JsonProperty("title", Required = Required.Always)]
+        public string Title { get; set; }
+
+        /// <summary>
+        /// Note: Naming third just 'type' will cause errors in the Typescript type generating.
+        /// </summary>
+        [JsonProperty("mediaType", Required = Required.Always)]
+        public PlexMediaType MediaType { get; set; }
+
         [JsonProperty("status", Required = Required.Always)]
         public string Status { get; set; }
 
@@ -15,13 +28,16 @@ namespace PlexRipper.DownloadManager
         public decimal Percentage { get; set; }
 
         [JsonProperty("dataReceived", Required = Required.Always)]
-        public string DataReceived { get; set; }
+        public int DataReceived { get; set; }
 
         [JsonProperty("dataTotal", Required = Required.Always)]
-        public string DataTotal { get; set; }
+        public int DataTotal { get; set; }
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
-        public string DownloadSpeed { get; set; }
+        public int DownloadSpeed { get; set; }
+
+        [JsonProperty("actions", Required = Required.Always)]
+        public List<string> Actions { get; set; }
 
         [JsonProperty("children", Required = Required.Always)]
         public List<DownloadProgressDTO> Children { get; set; }

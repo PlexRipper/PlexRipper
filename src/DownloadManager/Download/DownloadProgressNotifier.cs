@@ -39,7 +39,7 @@ namespace PlexRipper.DownloadManager
         {
             if (plexServer.HasDownloadTasks)
             {
-                await _signalRService.SendDownloadProgressUpdate(plexServer.DownloadTasks);
+                await _signalRService.SendDownloadProgressUpdate(plexServer.Id, plexServer.DownloadTasks);
             }
         }
 
@@ -48,7 +48,7 @@ namespace PlexRipper.DownloadManager
             var downloadTasksResult =  await _mediator.Send(new GetAllDownloadTasksInPlexServerByIdQuery(plexServerId));
             if (downloadTasksResult.IsSuccess)
             {
-                await _signalRService.SendDownloadProgressUpdate(downloadTasksResult.Value);
+                await _signalRService.SendDownloadProgressUpdate(plexServerId, downloadTasksResult.Value);
             }
         }
     }

@@ -8,14 +8,24 @@ namespace PlexRipper.DownloadManager
 {
     public class DownloadProgressScheduler : IDownloadProgressScheduler
     {
-        private readonly IScheduler _scheduler;
+        #region Fields
 
         private readonly string _downloadProgressKey = "ServerDownloadProgress";
+
+        private readonly IScheduler _scheduler;
+
+        #endregion
+
+        #region Constructor
 
         public DownloadProgressScheduler(IScheduler scheduler)
         {
             _scheduler = scheduler;
         }
+
+        #endregion
+
+        #region Public Methods
 
         public async Task<Result> StartDownloadProgressJob(int plexServerId)
         {
@@ -55,9 +65,15 @@ namespace PlexRipper.DownloadManager
             return isSuccess ? Result.Ok() : Result.Fail($"Failed to delete {nameof(DownloadProgressJob)} with PlexServerId {plexServerId}");
         }
 
+        #endregion
+
+        #region Private Methods
+
         private JobKey CreateDownloadProgressJobKey(int plexServerId)
         {
             return new JobKey($"{_downloadProgressKey}_{plexServerId}", "DownloadProgressJobs");
         }
+
+        #endregion
     }
 }

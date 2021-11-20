@@ -1,16 +1,16 @@
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
-import { DownloadMediaDTO, DownloadTaskDTO } from '@dto/mainApi';
+import { DownloadMediaDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 import { checkResponse, preApiRequest } from './baseApi';
 
 const logText = 'From PlexDownloadApi => ';
 const apiPath = '/download';
 
-export function getAllDownloads(): Observable<ResultDTO<DownloadTaskDTO[]>> {
+export function getAllDownloads(): Observable<ResultDTO<ServerDownloadProgressDTO[]>> {
 	preApiRequest(logText, 'getAllDownloads');
 	const result = Axios.get(`${apiPath}`);
-	return checkResponse<ResultDTO<DownloadTaskDTO[]>>(result, logText, 'getAllDownloads');
+	return checkResponse<ResultDTO<ServerDownloadProgressDTO[]>>(result, logText, 'getAllDownloads');
 }
 
 export function downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): Observable<ResultDTO<boolean>> {

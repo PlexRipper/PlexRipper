@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
+using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
@@ -77,6 +79,27 @@ namespace PlexRipper.WebAPI.Config
             CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
                 .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
                 .ForMember(dto => dto.Actions, opt => opt.Ignore());
+
+            CreateMap<DownloadTask, DownloadProgressDTO>(MemberList.Destination)
+                .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
+                .ForMember(dto => dto.Actions, opt => opt.Ignore());
+
+            CreateMap<List<DownloadTask>, List<ServerDownloadProgressDTO>>(MemberList.None)
+                .ConstructUsing((list, context) =>
+                {
+                    List<ServerDownloadProgressDTO> serverDownloads = new();
+                    foreach (var serverId in list.Select(x => x.PlexServerId).Distinct())
+                    {
+                        var downloadTasks = list.Where(x => x.PlexServerId == serverId).ToList();
+                        var downloadTaskDTO = context.Mapper.Map<List<DownloadProgressDTO>>(downloadTasks);
+                        serverDownloads.Add(new ServerDownloadProgressDTO
+                        {
+                            Id = serverId,
+                            Downloads = downloadTaskDTO,
+                        });
+                    }
+                    return serverDownloads;
+                });
         }
 
         private void PlexMediaMappings()

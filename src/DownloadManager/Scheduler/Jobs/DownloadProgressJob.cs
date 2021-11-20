@@ -18,7 +18,7 @@ namespace PlexRipper.DownloadManager
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
             var plexServerId = dataMap.GetIntValue("plexServerId");
-            Log.Debug($"Executing job: {nameof(DownloadProgressJob)} for {nameof(PlexServer)}: {plexServerId}");
+            Log.Verbose($"Executing job: {nameof(DownloadProgressJob)} for {nameof(PlexServer)}: {plexServerId}");
 
             await _downloadProgressNotifier.SendDownloadProgress(plexServerId);
         }

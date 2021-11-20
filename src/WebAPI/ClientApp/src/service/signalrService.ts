@@ -11,6 +11,7 @@ import {
 	DownloadTaskDTO,
 	InspectServerProgress,
 	SyncServerProgress,
+	ServerDownloadProgressDTO,
 } from '@dto/mainApi';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
@@ -57,6 +58,10 @@ export class SignalrService extends BaseService {
 	private setupSubscriptions(): void {
 		this._progressHubConnection?.on('DownloadTaskUpdate', (data: DownloadTaskDTO) => {
 			this.updateStore('downloadTaskUpdateList', data);
+		});
+
+		this._progressHubConnection?.on('ServerDownloadProgress', (data: ServerDownloadProgressDTO) => {
+			this.updateStore('serverDownloads', data);
 		});
 
 		this._progressHubConnection?.on('DownloadTaskCreationProgress', (data: DownloadTaskCreationProgress) => {

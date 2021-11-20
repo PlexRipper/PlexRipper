@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
-using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
+using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Controllers
 {
@@ -28,7 +28,7 @@ namespace PlexRipper.WebAPI.Controllers
 
         // GET: api/<DownloadController>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<DownloadTaskDTO>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<ServerDownloadProgressDTO>>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public async Task<IActionResult> GetDownloadTasks()
         {
@@ -38,7 +38,7 @@ namespace PlexRipper.WebAPI.Controllers
                 return InternalServerError(result.ToResult());
             }
 
-            return ToActionResult<List<DownloadTask>, List<DownloadTaskDTO>>(result);
+            return ToActionResult<List<DownloadTask>, List<ServerDownloadProgressDTO>>(result);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpPost("clear")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> ClearComplete([FromBody] List<int> downloadTaskIds)
+        public async Task<IActionResult> ClearCompleted([FromBody] List<int> downloadTaskIds)
         {
             return ToActionResult(await _plexDownloadService.ClearCompleted(downloadTaskIds));
         }

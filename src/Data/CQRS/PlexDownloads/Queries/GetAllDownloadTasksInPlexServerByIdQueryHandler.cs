@@ -32,7 +32,7 @@ namespace PlexRipper.Data
                 .IncludeDownloadTasks(true)
                 .FirstOrDefaultAsync(x => x.Id == request.PlexServerId, cancellationToken);
 
-            return Result.Ok(downloadTasks.DownloadTasks);
+            return Result.Ok(downloadTasks.DownloadTasks.Where(x => x.ParentId == null).ToList());
         }
     }
 

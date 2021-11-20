@@ -16,7 +16,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DownloadStatus, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
+import { DownloadProgressDTO, DownloadStatus, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import ButtonType from '@enums/buttonType';
@@ -35,7 +35,7 @@ export default class DownloadsTable extends Vue {
 
 	fileMergeProgressList: FileMergeProgress[] = [];
 
-	downloadRows: DownloadTaskDTO[] = [];
+	downloadRows: DownloadProgressDTO[] = [];
 
 	get getHeaders(): ITreeViewTableHeader[] {
 		return [
@@ -94,7 +94,7 @@ export default class DownloadsTable extends Vue {
 		];
 	}
 
-	get flatDownloadRows(): DownloadTaskDTO[] {
+	get flatDownloadRows(): DownloadProgressDTO[] {
 		return [
 			this.downloadRows,
 			this.downloadRows.map((x) => x.children),
@@ -102,7 +102,7 @@ export default class DownloadsTable extends Vue {
 			this.downloadRows.map((x) => x.children?.map((y) => y.children?.map((z) => z.children))),
 		]
 			.flat(3)
-			.filter((x) => !!x) as DownloadTaskDTO[];
+			.filter((x) => !!x) as DownloadProgressDTO[];
 	}
 
 	setAvailableActions(downloadTasks: DownloadTaskDTO[]): DownloadTaskDTO[] {
@@ -166,8 +166,8 @@ export default class DownloadsTable extends Vue {
 
 	mounted(): void {
 		// Retrieve initial download list
-		this.$subscribeTo(DownloadService.getDownloadList(this.serverId), (data: DownloadTaskDTO[]) => {
-			this.downloadRows = this.setAvailableActions([...data]);
+		this.$subscribeTo(DownloadService.getDownloadList(this.serverId), (data: DownloadProgressDTO[]) => {
+			this.downloadRows = data; // this.setAvailableActions([...data]);
 		});
 	}
 }

@@ -9,71 +9,28 @@
  * ---------------------------------------------------------------
  */
 
-export type ResultDTOOfListOfDownloadTaskDTO = ResultDTO & { value: DownloadTaskDTO[] };
+export type ResultDTOOfListOfServerDownloadProgressDTO = ResultDTO & { value: ServerDownloadProgressDTO[] };
 
-export interface DownloadTaskDTO {
+export interface ServerDownloadProgressDTO {
+  /** @format int32 */
+  id: number;
+  downloads: DownloadProgressDTO[];
+}
+
+export interface DownloadProgressDTO {
   /** @format int32 */
   id: number;
   title: string;
-  fullTitle: string;
-  status: DownloadStatus;
-  fileLocationUrl: string;
-  fileName: string;
   mediaType: PlexMediaType;
-  downloadTaskType: DownloadTaskType;
-
-  /** @format int32 */
-  key: number;
-
-  /** @format int32 */
-  downloadSpeed: number;
-
-  /** @format int64 */
-  dataReceived: number;
-
-  /** @format int64 */
-  dataTotal: number;
+  status: string;
 
   /** @format decimal */
   percentage: number;
-  downloadDirectory: string;
-  destinationDirectory: string;
-
-  /** @format int32 */
-  priority: number;
-
-  /** @format int32 */
-  plexServerId: number;
-
-  /** @format int32 */
-  plexLibraryId: number;
-
-  /** @format int32 */
-  parentId: number;
-
-  /** @format int32 */
-  mediaId: number;
-
-  /** @format int64 */
-  timeRemaining: number;
-  downloadUrl: string;
-  quality: string;
-  children?: DownloadTaskDTO[] | null;
+  dataReceived: string;
+  dataTotal: string;
+  downloadSpeed: string;
   actions: string[];
-}
-
-export enum DownloadStatus {
-  Unknown = "Unknown",
-  Initialized = "Initialized",
-  Queued = "Queued",
-  Downloading = "Downloading",
-  Paused = "Paused",
-  Stopped = "Stopped",
-  Deleted = "Deleted",
-  Merging = "Merging",
-  Moving = "Moving",
-  Completed = "Completed",
-  Error = "Error",
+  children: DownloadProgressDTO[];
 }
 
 export enum PlexMediaType {
@@ -89,18 +46,6 @@ export enum PlexMediaType {
   OtherVideos = "OtherVideos",
   Games = "Games",
   Unknown = "Unknown",
-}
-
-export enum DownloadTaskType {
-  None = "None",
-  Movie = "Movie",
-  MovieData = "MovieData",
-  MoviePart = "MoviePart",
-  TvShow = "TvShow",
-  Season = "Season",
-  Episode = "Episode",
-  EpisodeData = "EpisodeData",
-  EpisodePart = "EpisodePart",
 }
 
 export interface ResultDTO {
@@ -261,6 +206,7 @@ export interface PlexServerDTO {
   /** @format int32 */
   ownerId: number;
   plexLibraries: PlexLibraryDTO[];
+  downloadTasks: DownloadProgressDTO[];
   status: PlexServerStatusDTO;
 }
 
@@ -413,6 +359,82 @@ export interface PlexMediaDataPartDTO {
   size: number;
   container: string;
   videoProfile: string;
+}
+
+export interface DownloadTaskDTO {
+  /** @format int32 */
+  id: number;
+  title: string;
+  fullTitle: string;
+  status: DownloadStatus;
+  fileLocationUrl: string;
+  fileName: string;
+  mediaType: PlexMediaType;
+  downloadTaskType: DownloadTaskType;
+
+  /** @format int32 */
+  key: number;
+
+  /** @format int32 */
+  downloadSpeed: number;
+
+  /** @format int64 */
+  dataReceived: number;
+
+  /** @format int64 */
+  dataTotal: number;
+
+  /** @format decimal */
+  percentage: number;
+  downloadDirectory: string;
+  destinationDirectory: string;
+
+  /** @format int32 */
+  priority: number;
+
+  /** @format int32 */
+  plexServerId: number;
+
+  /** @format int32 */
+  plexLibraryId: number;
+
+  /** @format int32 */
+  parentId: number;
+
+  /** @format int32 */
+  mediaId: number;
+
+  /** @format int64 */
+  timeRemaining: number;
+  downloadUrl: string;
+  quality: string;
+  children?: DownloadTaskDTO[] | null;
+  actions: string[];
+}
+
+export enum DownloadStatus {
+  Unknown = "Unknown",
+  Initialized = "Initialized",
+  Queued = "Queued",
+  Downloading = "Downloading",
+  DownloadFinished = "DownloadFinished",
+  Paused = "Paused",
+  Stopped = "Stopped",
+  Deleted = "Deleted",
+  Merging = "Merging",
+  Moving = "Moving",
+  Completed = "Completed",
+  Error = "Error",
+}
+
+export enum DownloadTaskType {
+  None = "None",
+  Movie = "Movie",
+  MoviePart = "MoviePart",
+  TvShow = "TvShow",
+  Season = "Season",
+  Episode = "Episode",
+  EpisodePart = "EpisodePart",
 }
 
 export interface PlexServerStatusDTO {

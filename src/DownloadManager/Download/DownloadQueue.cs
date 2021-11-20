@@ -31,11 +31,18 @@ namespace PlexRipper.DownloadManager
 
         private readonly Subject<List<DownloadTask>> _updateDownloadTasks = new();
 
+        private readonly Subject<int> _serverCompletedDownloading = new();
+
         #endregion
 
         public IObservable<DownloadTask> StartDownloadTask => _startDownloadTask.AsObservable();
 
         public IObservable<List<DownloadTask>> UpdateDownloadTasks => _updateDownloadTasks.AsObservable();
+
+        /// <summary>
+        /// Emits the id of a <see cref="PlexServer"/> which has no more <see cref="DownloadTask">DownloadTasks</see> to process.
+        /// </summary>
+        public IObservable<int> ServerCompletedDownloading => _serverCompletedDownloading.AsObservable();
 
         #region Public Methods
 
@@ -73,6 +80,7 @@ namespace PlexRipper.DownloadManager
                 if (nextDownloadTask.IsFailed)
                 {
                     Log.Information($"There are no available downloadTasks remaining for PlexServer: {plexServer.Name}");
+                    _serverCompletedDownloading.OnNext(plexServer.Id);
                     continue;
                 }
 
@@ -155,7 +163,6 @@ namespace PlexRipper.DownloadManager
                         downloadTask.DownloadStatus = DownloadStatus.Completed;
                     }
                 }
-
             }
 
             return downloadTasks;

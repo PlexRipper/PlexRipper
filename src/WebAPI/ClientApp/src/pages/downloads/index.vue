@@ -12,7 +12,7 @@
 		/>
 		<!--	The Download Table	-->
 		<vue-scroll class="download-page-tables">
-			<v-row v-if="downloads.length > 0">
+			<v-row v-if="getServersWithDownloads.length > 0">
 				<v-col>
 					<print :object="selected" />
 					<v-expansion-panels v-model="openExpansions" multiple>
@@ -46,7 +46,7 @@
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { DownloadService, ServerService } from '@service';
-import { DownloadTaskDTO, PlexServerDTO } from '@dto/mainApi';
+import { DownloadTaskDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
 
 declare interface ISelection {
 	plexServerId: number;
@@ -56,7 +56,7 @@ declare interface ISelection {
 @Component
 export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
-	downloads: DownloadTaskDTO[] = [];
+	serverDownloads: ServerDownloadProgressDTO[] = [];
 	openExpansions: number[] = [];
 	downloadTaskDetail: DownloadTaskDTO | null = null;
 	selected: ISelection[] = [];
@@ -68,7 +68,8 @@ export default class Downloads extends Vue {
 	}
 
 	get getServersWithDownloads(): PlexServerDTO[] {
-		return this.plexServers.filter((x) => this.downloads.some((y) => y.plexServerId === x.id));
+		const serverIds = this.serverDownloads.map((x) => x.id);
+		return this.plexServers.filter((x) => serverIds.includes(x.id));
 	}
 
 	get hasSelected(): boolean {
@@ -170,8 +171,8 @@ export default class Downloads extends Vue {
 			this.openExpansions = [...Array(servers?.length).keys()] ?? [];
 		});
 
-		this.$subscribeTo(DownloadService.getDownloadList(), (downloads) => {
-			this.downloads = downloads;
+		this.$subscribeTo(DownloadService.getServerDownloadList(), (downloads) => {
+			this.serverDownloads = downloads;
 		});
 	}
 }

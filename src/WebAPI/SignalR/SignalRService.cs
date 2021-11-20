@@ -93,7 +93,9 @@ namespace PlexRipper.WebAPI.SignalR
             Task.Run(() => _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", downloadTaskDTO));
         }
 
-        public async Task SendDownloadProgressUpdate(List<DownloadTask> downloadTasks)
+        #region DownloadProgress
+
+        public async Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks)
         {
             if (_progressHub?.Clients?.All == null)
             {
@@ -102,8 +104,15 @@ namespace PlexRipper.WebAPI.SignalR
             }
 
             var downloadTasksDTO = _mapper.Map<List<DownloadProgressDTO>>(downloadTasks);
-            await _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", downloadTasksDTO);
+            var update = new ServerDownloadProgressDTO
+            {
+                Id = plexServerId,
+                Downloads = downloadTasksDTO,
+            };
+            await _progressHub.Clients.All.SendAsync("ServerDownloadProgress", update);
         }
+
+        #endregion
 
         public async Task SendServerInspectStatusProgress(InspectServerProgress progress)
         {

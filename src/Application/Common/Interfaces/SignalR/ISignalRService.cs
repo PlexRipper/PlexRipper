@@ -27,6 +27,6 @@ namespace PlexRipper.Application.Common
 
         void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress);
 
-        Task SendDownloadProgressUpdate(List<DownloadTask> downloadTasks);
+        Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks);
     }
 }

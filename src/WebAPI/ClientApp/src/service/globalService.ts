@@ -16,7 +16,6 @@ export class GlobalService extends Service.BaseService {
 	private _defaultStore: IStoreState = {
 		accounts: [],
 		servers: [],
-		downloads: [],
 		libraries: [],
 		mediaUrls: [],
 		notifications: [],
@@ -31,6 +30,7 @@ export class GlobalService extends Service.BaseService {
 		syncServerProgress: [],
 		libraryProgress: [],
 		downloadTaskCreationProgress: {} as DownloadTaskCreationProgress,
+		serverDownloads: [],
 		// Settings
 		activeAccountId: 0,
 		firstTimeSetup: true,

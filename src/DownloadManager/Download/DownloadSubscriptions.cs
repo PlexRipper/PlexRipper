@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using System.Collections.Generic;
+using FluentResults;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.Domain.RxNet;
@@ -38,6 +39,11 @@ namespace PlexRipper.DownloadManager
             _downloadQueue
                 .StartDownloadTask
                 .SubscribeAsync(async downloadTask => await _downloadCommands.StartDownloadTaskAsync(downloadTask));
+
+            // Halt progress updates for PlexServers that are no more active
+            _downloadQueue
+                .ServerCompletedDownloading
+                .SubscribeAsync(async plexServerId => await _downloadProgressScheduler.StopDownloadProgressJob(plexServerId));
 
             return Result.Ok();
         }

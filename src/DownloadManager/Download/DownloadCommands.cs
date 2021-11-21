@@ -186,7 +186,6 @@ namespace PlexRipper.DownloadManager
                         await _notificationsService.SendResult(removeTempResult);
                     }
 
-                    await _downloadProgressScheduler.StopDownloadProgressJob(downloadTask.Value.PlexServerId);
                 }
 
                 stoppedDownloadTaskIds.Add(downloadTask.Value.Id);

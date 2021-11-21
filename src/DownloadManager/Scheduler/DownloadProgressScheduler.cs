@@ -16,9 +16,10 @@ namespace PlexRipper.DownloadManager
 
         private readonly IScheduler _scheduler;
 
-        private Dictionary<int, List<string>> _trackDictionary = new();
+        private readonly Dictionary<int, List<string>> _trackDictionary = new();
 
-        private readonly int _numberOfSameUpdates = 50;
+        private readonly int _numberOfSameUpdates = 20;
+
         #endregion
 
         #region Constructor
@@ -90,11 +91,9 @@ namespace PlexRipper.DownloadManager
                 _trackDictionary.Add(plexServerId, new List<string> { hashCode });
             }
 
-            if (_trackDictionary[plexServerId].Count < _numberOfSameUpdates)
-            {
-                _trackDictionary[plexServerId].Add(hashCode);
-            }
-            else
+            _trackDictionary[plexServerId].Add(hashCode);
+
+            if (_trackDictionary[plexServerId].Count > _numberOfSameUpdates)
             {
                 _trackDictionary[plexServerId].RemoveAt(0);
             }

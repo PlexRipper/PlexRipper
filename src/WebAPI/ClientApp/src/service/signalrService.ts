@@ -44,9 +44,9 @@ export class SignalrService extends BaseService {
 		super.setup(nuxtContext);
 
 		GlobalService.getConfigReady().subscribe((config) => {
-			Log.info('Setting up SignalR Service');
+			Log.debug('Setting up SignalR Service');
 			const options: IHttpConnectionOptions = {
-				logger: LogLevel.None,
+				logger: LogLevel.Warning,
 			};
 
 			// Setup Connections

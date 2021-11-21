@@ -1,7 +1,5 @@
-import { Sign } from 'crypto';
 import Log from 'consola';
-import _ from 'lodash';
-import { Observable, of, merge } from 'rxjs';
+import { Observable, of,  } from 'rxjs';
 import {
 	clearDownloadTasks,
 	deleteDownloadTasks,

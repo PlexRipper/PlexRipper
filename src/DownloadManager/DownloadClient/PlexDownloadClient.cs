@@ -262,6 +262,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
             DownloadTask.DataReceived = DownloadTask.DownloadWorkerTasks.Sum(x => x.BytesReceived);
             DownloadTask.Percentage = DownloadTask.DownloadWorkerTasks.Average(x => x.Percentage);
+            DownloadTask.DownloadSpeed = DownloadTask.DownloadWorkerTasks.Sum(x => x.DownloadSpeed);
 
             var clientStatus = downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList();
 

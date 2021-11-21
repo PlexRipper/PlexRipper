@@ -19,7 +19,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { DownloadProgressDTO, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
 import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
-import { DownloadService } from '@service';
 
 @Component
 export default class DownloadsTable extends Vue {
@@ -34,7 +33,8 @@ export default class DownloadsTable extends Vue {
 
 	fileMergeProgressList: FileMergeProgress[] = [];
 
-	downloadRows: DownloadProgressDTO[] = [];
+	@Prop({ required: true, type: Array as () => DownloadProgressDTO[] })
+	readonly downloadRows!: DownloadProgressDTO[];
 
 	get getHeaders(): ITreeViewTableHeader[] {
 		return [
@@ -111,14 +111,6 @@ export default class DownloadsTable extends Vue {
 
 	selectedAction(selected: number[]) {
 		this.$emit('selected', selected);
-	}
-
-	mounted(): void {
-		// Retrieve initial download list
-		this.$subscribeTo(DownloadService.getDownloadList(this.serverId), (data: DownloadProgressDTO[]) => {
-			Log.info('Update DownloadsTable:', data);
-			this.downloadRows = data;
-		});
 	}
 }
 </script>

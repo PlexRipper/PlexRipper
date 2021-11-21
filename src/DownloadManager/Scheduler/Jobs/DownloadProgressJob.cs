@@ -22,7 +22,6 @@ namespace PlexRipper.DownloadManager
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
             var plexServerId = dataMap.GetIntValue("plexServerId");
-            Log.Verbose($"Executing job: {nameof(DownloadProgressJob)} for {nameof(PlexServer)}: {plexServerId}");
 
             var hashCodeResult = await _downloadProgressNotifier.SendDownloadProgress(plexServerId);
             if (hashCodeResult.IsFailed)
@@ -30,7 +29,7 @@ namespace PlexRipper.DownloadManager
                 hashCodeResult.LogError();
             }
 
-            Log.Debug($"Executing job: {nameof(DownloadProgressJob)} for {nameof(PlexServer)}: {plexServerId} => {hashCodeResult.Value}");
+            Log.Verbose($"Executed job: {nameof(DownloadProgressJob)} for {nameof(PlexServer)}: {plexServerId} => {hashCodeResult.Value}");
 
             var trackResult = await _downloadProgressScheduler.TrackDownloadProgress(plexServerId, hashCodeResult.Value);
             if (trackResult.IsFailed)

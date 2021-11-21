@@ -23,6 +23,7 @@
 							<v-expansion-panel-content>
 								<downloads-table
 									v-model="selected"
+									:download-rows="plexServer.downloadTasks"
 									:server-id="plexServer.id"
 									@action="commandSwitch"
 									@selected="updateSelected(plexServer.id, $event)"
@@ -69,7 +70,11 @@ export default class Downloads extends Vue {
 
 	get getServersWithDownloads(): PlexServerDTO[] {
 		const serverIds = this.serverDownloads.map((x) => x.id);
-		return this.plexServers.filter((x) => serverIds.includes(x.id));
+		const plexServers = this.plexServers.filter((x) => serverIds.includes(x.id));
+		for (const plexServer of plexServers) {
+			plexServer.downloadTasks = this.serverDownloads.find((x) => x.id === plexServer.id)?.downloads ?? [];
+		}
+		return plexServers;
 	}
 
 	get hasSelected(): boolean {
@@ -172,8 +177,6 @@ export default class Downloads extends Vue {
 		});
 
 		this.$subscribeTo(DownloadService.getServerDownloadList(), (downloads) => {
-			Log.info('Update Download Page:', downloads);
-
 			this.serverDownloads = downloads;
 		});
 	}

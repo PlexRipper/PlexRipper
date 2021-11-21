@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
@@ -58,11 +59,6 @@ namespace PlexRipper.DownloadManager
                 .SubscribeAsync(async downloadTask =>
                     await _downloadProgressScheduler.StartDownloadProgressJob(downloadTask.PlexServerId));
 
-            // Halt progress updates for PlexServers that are no more active
-            _downloadQueue
-                .ServerCompletedDownloading
-                .SubscribeAsync(async plexServerId => await _downloadProgressScheduler.StopDownloadProgressJob(plexServerId));
-
             // Start merging or moving file once the download has finished
             _downloadTracker
                 .DownloadTaskFinished
@@ -72,10 +68,11 @@ namespace PlexRipper.DownloadManager
                 .FileMergeProgressObservable
                 .SubscribeAsync(OnFileMergeProgress);
 
+
             return Result.Ok();
         }
 
-        private async Task UpdateDownloadTaskAsync(DownloadTask downloadTask)
+        private async Task<Result> UpdateDownloadTaskAsync(DownloadTask downloadTask)
         {
             Log.Debug(downloadTask.ToString());
             var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { downloadTask }));
@@ -83,24 +80,33 @@ namespace PlexRipper.DownloadManager
             {
                 updateResult.LogError();
             }
+
+            return updateResult;
         }
 
         private async Task OnFileMergeProgress(FileMergeProgress progress)
         {
             Log.Debug(
                 $"Merge Progress: {progress.DataTransferred} / {progress.DataTotal} - {progress.Percentage} - {progress.TransferSpeedFormatted}");
+
+            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(progress.DownloadTaskId));
+            if (downloadTaskResult.IsFailed)
+            {
+                downloadTaskResult.LogError();
+                return;
+            }
+
+            var downloadTask = downloadTaskResult.Value;
+            downloadTask.Percentage = progress.Percentage;
+            downloadTask.DataReceived = progress.DataTransferred;
+            downloadTask.DownloadSpeed = progress.TransferSpeed;
+
             if (progress.Percentage >= 100)
             {
-                var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(progress.DownloadTaskId));
-                if (downloadTaskResult.IsFailed)
-                {
-                    downloadTaskResult.LogError();
-                    return;
-                }
-
-                downloadTaskResult.Value.DownloadStatus = DownloadStatus.Completed;
-                await UpdateDownloadTaskAsync(downloadTaskResult.Value);
+                downloadTask.DownloadStatus = DownloadStatus.Completed;
             }
+
+            await UpdateDownloadTaskAsync(downloadTask);
         }
 
         private async Task OnDownloadFileCompleted(DownloadTask downloadTask)

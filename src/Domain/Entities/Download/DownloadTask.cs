@@ -94,6 +94,9 @@ namespace PlexRipper.Domain
         [Column(Order = 17)]
         public string DestinationDirectory { get; set; }
 
+        [Column(Order = 18)]
+        public int DownloadSpeed { get; set; }
+
         /// <summary>
         /// Gets or sets the download priority, the higher the more important.
         /// </summary>
@@ -141,9 +144,6 @@ namespace PlexRipper.Domain
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
 
         [NotMapped]
-        public int DownloadSpeed => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.AsQueryable().Sum(x => x.DownloadSpeed) : 0;
-
-        [NotMapped]
         public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, DownloadSpeed);
 
         [NotMapped]
@@ -170,7 +170,6 @@ namespace PlexRipper.Domain
                 is DownloadTaskType.EpisodePart
                 or DownloadTaskType.MoviePart;
         }
-
 
         /// <inheritdoc/>
         public override string ToString()

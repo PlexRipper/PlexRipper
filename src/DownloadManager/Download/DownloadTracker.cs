@@ -27,9 +27,11 @@ namespace PlexRipper.DownloadManager
 
         private readonly Subject<DownloadTask> _downloadTaskStart = new();
 
+        private readonly Subject<DownloadTask> _downloadTaskStopped = new();
+
         private readonly Subject<DownloadTask> _downloadTaskUpdate = new();
 
-        private readonly Subject<DownloadTask> _downloadTaskCompleted = new();
+        private readonly Subject<DownloadTask> _downloadTaskFinished = new();
 
         #endregion
 
@@ -48,6 +50,10 @@ namespace PlexRipper.DownloadManager
             _mediator = mediator;
             _notificationsService = notificationsService;
             _plexDownloadClientFactory = plexDownloadClientFactory;
+
+            // Delete client once it has finished downloading
+            DownloadTaskStopped.Subscribe(downloadTask => DeleteDownloadClient(downloadTask.Id));
+            DownloadTaskFinished.Subscribe(downloadTask => DeleteDownloadClient(downloadTask.Id));
         }
 
         #endregion
@@ -56,9 +62,12 @@ namespace PlexRipper.DownloadManager
 
         public IObservable<DownloadTask> DownloadTaskStart => _downloadTaskStart.AsObservable();
 
+        public IObservable<DownloadTask> DownloadTaskStopped => _downloadTaskStopped.AsObservable();
+
         public IObservable<DownloadTask> DownloadTaskUpdate => _downloadTaskUpdate.AsObservable();
 
-        public IObservable<DownloadTask> DownloadTaskCompleted => _downloadTaskCompleted.AsObservable();
+        /// <inheritdoc/>
+        public IObservable<DownloadTask> DownloadTaskFinished => _downloadTaskFinished.AsObservable();
 
         public int ActiveDownloadClients => _downloadsList.Count;
 
@@ -177,7 +186,7 @@ namespace PlexRipper.DownloadManager
                 return stopResult;
             }
 
-            DeleteDownloadClient(downloadTaskId);
+            _downloadTaskStopped.OnNext(downloadClient.Value.DownloadTask);
 
             return Result.Ok();
         }
@@ -225,11 +234,11 @@ namespace PlexRipper.DownloadManager
                 .DownloadTaskUpdate
                 .Subscribe(value => _downloadTaskUpdate.OnNext(value));
 
-            // TODO make separate completed for PlexDownloadClient which fires after everything has been cleaned-up
+            // Alert of a downloadTask that has finished
             newClient
                 .DownloadTaskUpdate
-                .Where(x => x.DownloadStatus is DownloadStatus.Completed)
-                .Subscribe(value => _downloadTaskCompleted.OnNext(value));
+                .Where(x => x.DownloadStatus is DownloadStatus.DownloadFinished)
+                .Subscribe(value => _downloadTaskFinished.OnNext(value));
 
             // Download Worker Log subscription
             newClient.DownloadWorkerLog

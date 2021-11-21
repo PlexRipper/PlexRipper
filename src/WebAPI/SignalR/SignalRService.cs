@@ -109,6 +109,7 @@ namespace PlexRipper.WebAPI.SignalR
                 Id = plexServerId,
                 Downloads = downloadTasksDTO,
             };
+
             await _progressHub.Clients.All.SendAsync("ServerDownloadProgress", update);
         }
 
@@ -123,7 +124,6 @@ namespace PlexRipper.WebAPI.SignalR
             }
 
             Log.Debug($"{nameof(InspectServerProgress)} => {progress}");
-
             await _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progress);
         }
 

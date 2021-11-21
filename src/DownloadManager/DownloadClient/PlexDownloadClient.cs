@@ -27,8 +27,6 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
         private readonly IMediator _mediator;
 
-        private readonly IPlexAuthenticationService _plexAuthenticationService;
-
         #region Fields
 
         private readonly List<DownloadWorker> _downloadWorkers = new();
@@ -49,16 +47,15 @@ namespace PlexRipper.DownloadManager.DownloadClient
         /// <param name="downloadWorkerFactory"></param>
         /// <param name="userSettings"></param>
         /// <param name="mediator"></param>
+        /// <param name="plexAuthenticationService"></param>
         public PlexDownloadClient(
             Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
             IUserSettings userSettings,
-            IMediator mediator,
-            IPlexAuthenticationService plexAuthenticationService)
+            IMediator mediator)
         {
             _downloadWorkerFactory = downloadWorkerFactory;
             _userSettings = userSettings;
             _mediator = mediator;
-            _plexAuthenticationService = plexAuthenticationService;
         }
 
         /// <summary>
@@ -248,12 +245,12 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
         private void OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates)
         {
-            if (_downloadTaskUpdate.IsDisposed)
+            if (_downloadTaskUpdate.IsDisposed || !downloadWorkerUpdates.Any())
             {
                 return;
             }
 
-            // Replace every DownloadWorkerTask with the updated version
+            // Update every DownloadWorkerTask with the updated progress
             foreach (var downloadWorkerTask in downloadWorkerUpdates)
             {
                 var i = DownloadTask.DownloadWorkerTasks.FindIndex(x => x.Id == downloadWorkerTask.Id);
@@ -263,6 +260,9 @@ namespace PlexRipper.DownloadManager.DownloadClient
                 }
             }
 
+            DownloadTask.DataReceived = DownloadTask.DownloadWorkerTasks.Sum(x => x.BytesReceived);
+            DownloadTask.Percentage = DownloadTask.DownloadWorkerTasks.Average(x => x.Percentage);
+
             var clientStatus = downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList();
 
             // If there is any error then set client to error state
@@ -270,23 +270,21 @@ namespace PlexRipper.DownloadManager.DownloadClient
             {
                 DownloadStatus = DownloadStatus.Error;
             }
-
-            if (clientStatus.Any(x => x == DownloadStatus.Downloading))
+            else if (clientStatus.Any(x => x == DownloadStatus.Downloading))
             {
                 DownloadStatus = DownloadStatus.Downloading;
             }
-
-            if (clientStatus.All(x => x == DownloadStatus.Completed))
+            else if (clientStatus.All(x => x == DownloadStatus.DownloadFinished))
             {
-                DownloadStatus = DownloadStatus.Completed;
+                DownloadStatus = DownloadStatus.DownloadFinished;
             }
 
             _downloadTaskUpdate.OnNext(DownloadTask);
 
-            if (DownloadStatus == DownloadStatus.Completed)
+            if (DownloadStatus == DownloadStatus.DownloadFinished)
             {
                 _downloadTaskUpdate.OnCompleted();
-                _downloadTaskUpdate.OnCompleted();
+                _downloadWorkerLog.OnCompleted();
             }
         }
 

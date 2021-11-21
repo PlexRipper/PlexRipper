@@ -224,7 +224,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
                     if (bytesRead <= 0)
                     {
                         SendDownloadWorkerUpdate();
-                        SetDownloadWorkerTaskChanged(DownloadStatus.Completed);
+                        SetDownloadWorkerTaskChanged(DownloadStatus.DownloadFinished);
                         break;
                     }
 

@@ -7,7 +7,6 @@ using MediatR;
 using PlexRipper.Application;
 using PlexRipper.Application.Common;
 using PlexRipper.Domain;
-using PlexRipper.Domain.RxNet;
 
 namespace PlexRipper.DownloadManager
 {
@@ -29,6 +28,8 @@ namespace PlexRipper.DownloadManager
 
         private readonly IPlexDownloadTaskFactory _plexDownloadTaskFactory;
 
+        private readonly IDownloadProgressScheduler _downloadProgressScheduler;
+
         #endregion
 
         #region Constructor
@@ -40,7 +41,8 @@ namespace PlexRipper.DownloadManager
             IFileSystem fileSystem,
             INotificationsService notificationsService,
             IDownloadScheduler downloadScheduler,
-            IPlexDownloadTaskFactory plexDownloadTaskFactory)
+            IPlexDownloadTaskFactory plexDownloadTaskFactory,
+            IDownloadProgressScheduler downloadProgressScheduler)
         {
             _mediator = mediator;
             _downloadTracker = downloadTracker;
@@ -49,6 +51,7 @@ namespace PlexRipper.DownloadManager
             _notificationsService = notificationsService;
             _downloadScheduler = downloadScheduler;
             _plexDownloadTaskFactory = plexDownloadTaskFactory;
+            _downloadProgressScheduler = downloadProgressScheduler;
         }
 
         #endregion
@@ -78,7 +81,6 @@ namespace PlexRipper.DownloadManager
             }
 
             await _mediator.Send(new UpdateDownloadTasksByIdCommand(regeneratedDownloadTasks.Value));
-
 
             await _downloadQueue.CheckDownloadQueue();
 
@@ -183,6 +185,8 @@ namespace PlexRipper.DownloadManager
                     {
                         await _notificationsService.SendResult(removeTempResult);
                     }
+
+                    await _downloadProgressScheduler.StopDownloadProgressJob(downloadTask.Value.PlexServerId);
                 }
 
                 stoppedDownloadTaskIds.Add(downloadTask.Value.Id);
@@ -254,7 +258,5 @@ namespace PlexRipper.DownloadManager
         }
 
         #endregion
-
-
     }
 }

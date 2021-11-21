@@ -1,7 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using FluentResults;
-using MediatR;
-using PlexRipper.Application.Common;
+using Logging;
 using Quartz;
 
 namespace PlexRipper.DownloadManager
@@ -13,6 +14,8 @@ namespace PlexRipper.DownloadManager
         private readonly string _downloadProgressKey = "ServerDownloadProgress";
 
         private readonly IScheduler _scheduler;
+
+        private Dictionary<int, List<string>> _trackDictionary = new();
 
         #endregion
 
@@ -62,7 +65,44 @@ namespace PlexRipper.DownloadManager
                 ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
 
             var isSuccess = await _scheduler.DeleteJob(CreateDownloadProgressJobKey(plexServerId));
-            return isSuccess ? Result.Ok() : Result.Fail($"Failed to delete {nameof(DownloadProgressJob)} with PlexServerId {plexServerId}");
+            if (isSuccess)
+            {
+                _trackDictionary.Remove(plexServerId);
+                return Result.Ok();
+            }
+
+            return Result.Fail($"Failed to delete {nameof(DownloadProgressJob)} with PlexServerId {plexServerId}");
+        }
+
+        public async Task<Result> TrackDownloadProgress(int plexServerId, string hashCode)
+        {
+            if (plexServerId <= 0)
+                ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
+
+            if (string.IsNullOrEmpty(hashCode))
+                return ResultExtensions.IsEmpty(nameof(hashCode)).LogWarning();
+
+            if (!_trackDictionary.ContainsKey(plexServerId))
+            {
+                _trackDictionary.Add(plexServerId, new List<string> { hashCode });
+            }
+
+            if (_trackDictionary[plexServerId].Count <= 5)
+            {
+                _trackDictionary[plexServerId].Add(hashCode);
+            }
+            else
+            {
+                _trackDictionary[plexServerId].RemoveAt(0);
+            }
+
+            if (_trackDictionary[plexServerId].All(x => x == hashCode))
+            {
+                Log.Debug("Download progress job has been sending out the same 5 updates, will stop now.");
+                await StopDownloadProgressJob(plexServerId);
+            }
+
+            return Result.Ok();
         }
 
         #endregion

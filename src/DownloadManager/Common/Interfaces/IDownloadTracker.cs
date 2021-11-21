@@ -7,20 +7,33 @@ namespace PlexRipper.DownloadManager
 {
     public interface IDownloadTracker
     {
-        IObservable<DownloadTask> DownloadTaskUpdate { get; }
-
-        IObservable<DownloadTask> DownloadTaskCompleted { get; }
+        #region Properties
 
         int ActiveDownloadClients { get; }
 
+        /// <summary>
+        /// Gets the observable which fires once a <see cref="DownloadTask"/> has finished downloading.
+        /// </summary>
+        IObservable<DownloadTask> DownloadTaskFinished { get; }
+
         IObservable<DownloadTask> DownloadTaskStart { get; }
 
+        IObservable<DownloadTask> DownloadTaskUpdate { get; }
+
+        IObservable<DownloadTask> DownloadTaskStopped { get; }
+
+        #endregion
+
+        #region Public Methods
+
         bool IsDownloading(int downloadTaskId);
+
+        Task<Result> PauseDownloadClient(int downloadTaskId);
 
         Task<Result> StartDownloadClient(int downloadTaskId);
 
         Task<Result> StopDownloadClient(int downloadTaskId);
 
-        Task<Result> PauseDownloadClient(int downloadTaskId);
+        #endregion
     }
 }

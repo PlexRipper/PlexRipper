@@ -32,60 +32,66 @@ namespace PlexRipper.Domain
         public int Year { get; set; }
 
         [Column(Order = 4)]
-        public long DataTotal { get; set; }
+        public decimal Percentage { get; set; }
 
         [Column(Order = 5)]
-        public PlexMediaType MediaType { get; set; }
+        public long DataReceived { get; set; }
 
         [Column(Order = 6)]
-        public DownloadStatus DownloadStatus { get; set; }
+        public long DataTotal { get; set; }
 
         [Column(Order = 7)]
-        public DownloadTaskType DownloadTaskType { get; set; }
+        public PlexMediaType MediaType { get; set; }
 
         [Column(Order = 8)]
-        public DateTime Created { get; set; }
+        public DownloadStatus DownloadStatus { get; set; }
 
         [Column(Order = 9)]
+        public DownloadTaskType DownloadTaskType { get; set; }
+
+        [Column(Order = 10)]
+        public DateTime Created { get; set; }
+
+        [Column(Order = 11)]
         public string FileName { get; set; }
 
         /// <summary>
         /// Gets or sets the relative obfuscated URL of the media to be downloaded,
         /// e.g: /library/parts/47660/156234666/file.mkv.
         /// </summary>
-        [Column(Order = 10)]
+        [Column(Order = 12)]
         public string FileLocationUrl { get; set; }
 
         /// <summary>
         /// Gets or sets the full download url including the <see cref="PlexServer"/> token of the media to be downloaded.
         /// This is only set if <see cref="DownloadTask"/> is downloadable.
         /// </summary>
-        [Column(Order = 11)]
+        [Column(Order = 13)]
         public string DownloadUrl { get; set; }
 
         /// <summary>
         /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
         /// E.g. "TvShow/Season/Episode".
         /// </summary>
-        [Column(Order = 12)]
+        [Column(Order = 14)]
         public string FullTitle { get; set; }
 
         /// <summary>
         /// Gets or sets get or sets the media quality of this <see cref="DownloadTask"/>.
         /// </summary>
-        [Column(Order = 13)]
+        [Column(Order = 15)]
         public string Quality { get; set; }
 
         /// <summary>
         /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
         /// </summary>
-        [Column(Order = 14)]
+        [Column(Order = 16)]
         public string DownloadDirectory { get; set; }
 
         /// <summary>
         /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
         /// </summary>
-        [Column(Order = 15)]
+        [Column(Order = 17)]
         public string DestinationDirectory { get; set; }
 
         /// <summary>
@@ -126,12 +132,6 @@ namespace PlexRipper.Domain
         #region Helpers
 
         [NotMapped]
-        public long DataReceived => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.Sum(x => x.BytesReceived) : 0;
-
-        [NotMapped]
-        public decimal Percentage => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.Average(x => x.Percentage) : 0;
-
-        [NotMapped]
         public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
 
         [NotMapped]
@@ -150,6 +150,12 @@ namespace PlexRipper.Domain
         public long BytesRemaining => DataTotal - DataReceived;
 
         /// <summary>
+        /// Gets a joined string of temp file paths of the <see cref="DownloadWorkerTasks"/> delimited by ";".
+        /// </summary>
+        [NotMapped]
+        public string GetFilePathsCompressed => string.Join(';', DownloadWorkerTasks.Select(x => x.TempFilePath).ToArray());
+
+        /// <summary>
         /// Gets a value indicating whether this <see cref="DownloadTask"/> is downloadable.
         /// e.g. A episode or movie part, an episode or movie without parts.
         /// </summary>
@@ -164,6 +170,7 @@ namespace PlexRipper.Domain
                 is DownloadTaskType.EpisodePart
                 or DownloadTaskType.MoviePart;
         }
+
 
         /// <inheritdoc/>
         public override string ToString()

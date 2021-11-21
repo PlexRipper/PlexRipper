@@ -5,8 +5,6 @@ namespace PlexRipper.DownloadManager
 {
     public interface IDownloadProgressNotifier
     {
-        Task<Result> SendDownloadProgress();
-
-        Task SendDownloadProgress(int plexServerId);
+        Task<Result<string>> SendDownloadProgress(int plexServerId);
     }
 }

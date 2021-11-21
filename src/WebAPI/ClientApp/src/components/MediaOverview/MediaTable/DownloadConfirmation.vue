@@ -224,6 +224,7 @@ export default class DownloadConfirmation extends Vue {
 
 	confirmDownload(): void {
 		this.$emit('download', this.downloadMediaCommand);
+		this.showDialog = false;
 	}
 
 	mounted(): void {

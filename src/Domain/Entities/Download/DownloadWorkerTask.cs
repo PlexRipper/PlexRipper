@@ -93,7 +93,7 @@ namespace PlexRipper.Domain
         public string TempFilePath => Path.Combine(TempDirectory, FileName);
 
         [NotMapped]
-        public Uri Uri => new Uri(DownloadUrl);
+        public Uri Uri => new(DownloadUrl);
 
         [NotMapped]
         public long DataTotal => EndByte - StartByte;

@@ -2,7 +2,7 @@ import Log from 'consola';
 import { BaseService, GlobalService } from '@service';
 // eslint-disable-next-line import/named
 import { LogLevel, HubConnectionBuilder, IHttpConnectionOptions, HubConnection, HubConnectionState } from '@microsoft/signalr';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import {
 	LibraryProgress,
 	DownloadTaskCreationProgress,
@@ -22,8 +22,11 @@ export class SignalrService extends BaseService {
 	private _progressHubConnection: HubConnection | null = null;
 	private _notificationHubConnection: HubConnection | null = null;
 
+	private _serverDownloadProgress = new Subject<ServerDownloadProgressDTO>();
+
 	public constructor() {
 		super({
+			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
 					downloadTaskUpdateList: state.downloadTaskUpdateList,
@@ -32,7 +35,6 @@ export class SignalrService extends BaseService {
 					inspectServerProgress: state.inspectServerProgress,
 					syncServerProgress: state.syncServerProgress,
 					notifications: state.notifications,
-					serverDownloads: state.serverDownloads,
 				};
 			},
 		});
@@ -62,7 +64,8 @@ export class SignalrService extends BaseService {
 		});
 
 		this._progressHubConnection?.on('ServerDownloadProgress', (data: ServerDownloadProgressDTO) => {
-			this.updateStore('serverDownloads', data);
+			// TODO Each subscription should work like this, every subscription here should pass its values to the designated services for that type
+			this._serverDownloadProgress.next(data);
 		});
 
 		this._progressHubConnection?.on('DownloadTaskCreationProgress', (data: DownloadTaskCreationProgress) => {
@@ -130,10 +133,21 @@ export class SignalrService extends BaseService {
 	}
 	// endregion
 
+	public GetServerDownloadProgress() {
+		return this._serverDownloadProgress.asObservable();
+	}
+
 	// region Array Progress
 	public getAllDownloadTaskUpdate(): Observable<DownloadTaskDTO[]> {
 		return this.stateChanged.pipe(
 			map((x) => x?.downloadTaskUpdateList ?? []),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getAllServerDownloadProgress(): Observable<ServerDownloadProgressDTO[]> {
+		return this.stateChanged.pipe(
+			map((x) => x?.serverDownloads ?? []),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -179,6 +193,14 @@ export class SignalrService extends BaseService {
 
 	public getFileMergeProgress(id: number): Observable<FileMergeProgress | null> {
 		return this.getAllFileMergeProgress().pipe(
+			map((x) => x?.find((x) => x.id === id) ?? null),
+			filter((progress) => !!progress),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getServerDownloadProgress(id: number): Observable<ServerDownloadProgressDTO | null> {
+		return this.getAllServerDownloadProgress().pipe(
 			map((x) => x?.find((x) => x.id === id) ?? null),
 			filter((progress) => !!progress),
 			distinctUntilChanged(isEqual),

@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Autofac;
-using FluentResultExtensions.lib;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Logging;
@@ -15,7 +14,6 @@ using Microsoft.Extensions.Hosting;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application.Config;
-using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
 using PlexRipper.WebAPI.SignalR.Hubs;
@@ -110,11 +108,7 @@ namespace PlexRipper.WebAPI
             });
 
             // SignalR
-            services.AddSignalR().AddJsonProtocol(options =>
-            {
-                options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                options.PayloadSerializerOptions.WriteIndented = true;
-            });
+            services.AddSignalR().AddJsonProtocol(options => { options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
             // Customise default API behaviour
             services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });

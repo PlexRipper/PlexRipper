@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
+using PlexRipper.Domain;
 using Quartz;
 
 namespace PlexRipper.DownloadManager
@@ -17,6 +18,7 @@ namespace PlexRipper.DownloadManager
 
         private Dictionary<int, List<string>> _trackDictionary = new();
 
+        private readonly int _numberOfSameUpdates = 50;
         #endregion
 
         #region Constructor
@@ -38,7 +40,7 @@ namespace PlexRipper.DownloadManager
             var jobKey = CreateDownloadProgressJobKey(plexServerId);
             if (await _scheduler.CheckExists(jobKey))
             {
-                return Result.Fail($"Job with {jobKey} already exists");
+                return Result.Fail($"Job with {jobKey} already exists").LogWarning();
             }
 
             var job = JobBuilder.Create<DownloadProgressJob>()
@@ -68,6 +70,7 @@ namespace PlexRipper.DownloadManager
             if (isSuccess)
             {
                 _trackDictionary.Remove(plexServerId);
+                Log.Information($"{nameof(DownloadProgressJob)} for {nameof(PlexServer)} {plexServerId} was stopped");
                 return Result.Ok();
             }
 
@@ -87,7 +90,7 @@ namespace PlexRipper.DownloadManager
                 _trackDictionary.Add(plexServerId, new List<string> { hashCode });
             }
 
-            if (_trackDictionary[plexServerId].Count <= 5)
+            if (_trackDictionary[plexServerId].Count < _numberOfSameUpdates)
             {
                 _trackDictionary[plexServerId].Add(hashCode);
             }
@@ -96,9 +99,9 @@ namespace PlexRipper.DownloadManager
                 _trackDictionary[plexServerId].RemoveAt(0);
             }
 
-            if (_trackDictionary[plexServerId].All(x => x == hashCode))
+            if (_trackDictionary[plexServerId].Count >= _numberOfSameUpdates && _trackDictionary[plexServerId].All(x => x == hashCode))
             {
-                Log.Debug("Download progress job has been sending out the same 5 updates, will stop now.");
+                Log.Debug($"Download progress job has been sending out the same {_numberOfSameUpdates} updates, will stop now.");
                 await StopDownloadProgressJob(plexServerId);
             }
 

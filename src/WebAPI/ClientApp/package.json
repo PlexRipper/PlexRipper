@@ -29,7 +29,7 @@
 	},
 	"web-types": "./web-types.json",
 	"dependencies": {
-		"@codewithdan/observable-store": "^2.2.13",
+		"@codewithdan/observable-store": "^2.2.14",
 		"@mdi/font": "^5.9.55",
 		"@microsoft/signalr": "^5.0.10",
 		"@nuxt/typescript-runtime": "^2.1.0",

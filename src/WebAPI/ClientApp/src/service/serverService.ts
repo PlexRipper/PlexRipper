@@ -11,6 +11,7 @@ export class ServerService extends BaseService {
 	// region Constructor and Setup
 	public constructor() {
 		super({
+			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
 					servers: state.servers,

@@ -12,6 +12,7 @@ export class SettingsService extends BaseService {
 	// region Constructor and Setup
 	public constructor() {
 		super({
+			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
 					activeAccountId: state.activeAccountId,

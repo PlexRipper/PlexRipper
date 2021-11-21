@@ -48,7 +48,6 @@ namespace PlexRipper.Data
         public async Task<Result> Handle(UpdateDownloadTasksByIdCommand command, CancellationToken cancellationToken)
         {
             var downloadTasks = command.DownloadTasks.Flatten(x => x.Children).ToList();
-            Log.Debug($"Updating {downloadTasks.Count} download tasks.");
 
             await _dbContext.BulkUpdateAsync(downloadTasks, cancellationToken: cancellationToken);
             await _dbContext.BulkUpdateAsync(downloadTasks.SelectMany(x => x.DownloadWorkerTasks).ToList(),

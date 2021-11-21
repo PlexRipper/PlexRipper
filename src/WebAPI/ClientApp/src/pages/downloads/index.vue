@@ -14,7 +14,7 @@
 		<vue-scroll class="download-page-tables">
 			<v-row v-if="getServersWithDownloads.length > 0">
 				<v-col>
-					<print :object="selected" />
+					<print :object="serverDownloads" />
 					<v-expansion-panels v-model="openExpansions" multiple>
 						<v-expansion-panel v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
 							<v-expansion-panel-header>
@@ -172,6 +172,8 @@ export default class Downloads extends Vue {
 		});
 
 		this.$subscribeTo(DownloadService.getServerDownloadList(), (downloads) => {
+			Log.info('Update Download Page:', downloads);
+
 			this.serverDownloads = downloads;
 		});
 	}

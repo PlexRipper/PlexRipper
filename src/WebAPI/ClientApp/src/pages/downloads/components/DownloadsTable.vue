@@ -116,6 +116,7 @@ export default class DownloadsTable extends Vue {
 	mounted(): void {
 		// Retrieve initial download list
 		this.$subscribeTo(DownloadService.getDownloadList(this.serverId), (data: DownloadProgressDTO[]) => {
+			Log.info('Update DownloadsTable:', data);
 			this.downloadRows = data;
 		});
 	}

@@ -6,6 +6,7 @@ import { BaseService } from '@service';
 export class HelpService extends BaseService {
 	public constructor() {
 		super({
+			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
 					helpIdDialog: state.helpIdDialog,

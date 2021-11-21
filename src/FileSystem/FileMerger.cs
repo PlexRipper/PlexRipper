@@ -32,6 +32,8 @@ namespace PlexRipper.FileSystem
 
         private readonly Subject<FileMergeProgress> _fileMergeProgressSubject = new();
 
+        private readonly Subject<DownloadFileTask> _fileMergeStartSubject = new();
+
         private readonly Subject<FileMergeProgress> _fileMergeCompletedSubject = new();
 
         private readonly CancellationToken _token = new CancellationToken();
@@ -50,6 +52,8 @@ namespace PlexRipper.FileSystem
         }
 
         #endregion
+
+        public IObservable<DownloadFileTask> FileMergeStartObservable => _fileMergeStartSubject.AsObservable();
 
         public IObservable<FileMergeProgress> FileMergeProgressObservable => _fileMergeProgressSubject.AsObservable();
 
@@ -74,6 +78,9 @@ namespace PlexRipper.FileSystem
                 }
 
                 Log.Debug($"Executing FileTask {fileTask.FileName} with id {fileTask.Id}");
+
+                _fileMergeStartSubject.OnNext(fileTask);
+
                 foreach (var path in fileTask.FilePaths)
                 {
                     if (!File.Exists(path))

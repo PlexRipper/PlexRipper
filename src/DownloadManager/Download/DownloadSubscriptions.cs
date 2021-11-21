@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
@@ -68,6 +68,16 @@ namespace PlexRipper.DownloadManager
                 .FileMergeProgressObservable
                 .SubscribeAsync(OnFileMergeProgress);
 
+            // On big events send and extra update to front-end to minimize the delay
+            Observable.Merge(new[]
+            {
+                _downloadTracker.DownloadTaskStart,
+                _downloadTracker.DownloadTaskFinished,
+            }).SubscribeAsync(downloadTask => _downloadProgressScheduler.FireDownloadProgressJob(downloadTask.PlexServerId));
+
+            _fileMerger.FileMergeCompletedObservable.SubscribeAsync(task => _downloadProgressScheduler.FireDownloadProgressJob(task.PlexServerId));
+
+            _fileMerger.FileMergeStartObservable.SubscribeAsync(task => _downloadProgressScheduler.FireDownloadProgressJob(task.DownloadTask.PlexServerId));
 
             return Result.Ok();
         }

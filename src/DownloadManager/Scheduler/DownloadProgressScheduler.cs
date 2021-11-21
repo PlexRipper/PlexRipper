@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
@@ -60,6 +61,22 @@ namespace PlexRipper.DownloadManager
             await _scheduler.ScheduleJob(job, trigger);
 
             return Result.Ok();
+        }
+
+        public async Task<Result> FireDownloadProgressJob(int plexServerId)
+        {
+            try
+            {
+                var jobKey = CreateDownloadProgressJobKey(plexServerId);
+                var jobData = new JobDataMap();
+                jobData.Put(nameof(plexServerId), plexServerId);
+                await _scheduler.TriggerJob(jobKey, jobData);
+                return Result.Ok();
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e));
+            }
         }
 
         public async Task<Result> StopDownloadProgressJob(int plexServerId)

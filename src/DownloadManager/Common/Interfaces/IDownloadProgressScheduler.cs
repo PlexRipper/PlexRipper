@@ -10,5 +10,7 @@ namespace PlexRipper.DownloadManager
         Task<Result> StopDownloadProgressJob(int plexServerId);
 
         Task<Result> TrackDownloadProgress(int plexServerId, string hashCode);
+
+        Task<Result> FireDownloadProgressJob(int plexServerId);
     }
 }

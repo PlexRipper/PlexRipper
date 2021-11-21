@@ -11,6 +11,8 @@ namespace PlexRipper.Application.Common
 
         IObservable<FileMergeProgress> FileMergeCompletedObservable { get; }
 
+        IObservable<DownloadFileTask> FileMergeStartObservable { get; }
+
         /// <summary>
         /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
         /// </summary>

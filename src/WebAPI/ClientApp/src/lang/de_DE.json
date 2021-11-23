@@ -214,47 +214,47 @@
 				},
 				"list": {
 					"item-1": "Radarr und Sonarr integration",
-					"item-1-1": "Any searches for media can be redirected to Plex Ripper, and Plex Ripper will search all available servers, download the media and notify Radarr/Sonarr of the finished download.",
-					"item-2": "Music and Photo's download support!",
-					"item-3": "Subtitles download support!",
-					"item-4": "Telegram notification support!",
-					"item-5": "Multi-language support",
-					"item-6": "Better Plex integration!",
-					"item-6-1": "Download collections, add to own Plex server and automatically copy over all Plex related settings and configurations."
+					"item-1-1": "Alle Suchvorgänge können an PlexRipper weitergeleitet werden. PlexRipper durchsucht dann alle verfügbaren Server, lädt dann alle Medien herunter und informiert Radarr/Sonarr wenn der Download fertiggestellt wurde.",
+					"item-2": "Musik und Foto Download",
+					"item-3": "Untertitel Downloads",
+					"item-4": "Telegram Benachrichtigungen",
+					"item-5": "Mehrsprachig",
+					"item-6": "noch bessere Plex Integration",
+					"item-6-1": "Lade Sammlungen herunter und füge alle Plex-relevanten informationen automatisch hinzu."
 				}
 			},
 			"paths": {
-				"header": "Checking paths",
-				"title": "Ensure that all paths are valid!"
+				"header": "Pfade überprüfen",
+				"title": "Stelle sicher, dass alle Pfade korrekt sind!"
 			},
 			"accounts": {
-				"header": "Plex Accounts",
-				"title": "Add your Plex Accounts!"
+				"header": "Plex Konten",
+				"title": "Füge deine Plex Konten hinzu!"
 			},
 			"finished": {
-				"header": "Finished!",
-				"title": "You are now ready to start using PlexRipper!",
+				"header": "Abgeschlossen!",
+				"title": "Jetzt kann es mit PlexRipper losgehen!",
 				"text": {
-					"p-1": "If you like this project and would like to show your appreciation then consider the following:"
+					"p-1": "Wenn Sie das Projekt mögen, würde ich mich über eins der folgenden Punkte freuen:"
 				},
 				"list": {
-					"item-1": "Give a star on the Github page!",
-					"item-2": "Request features and provide bug reports!",
-					"item-3": "Translate PlexRipper to your language!",
-					"item-4": "Go through the code and give feedback or suggest improvements!"
+					"item-1": "Geben Sie mir einen Stern auf Github!",
+					"item-2": "Nennen Sie verbesserungsvorschläge und melden Sie bitte wenn etwas nicht funktioniert!",
+					"item-3": "Übersetze Sie PlexRipper in Ihre Sprache!",
+					"item-4": "Gucken Sie sich den Code an und geben Sie mir Tips wie man es besser machen kann!"
 				}
 			}
 		},
 		"settings": {
 			"ui": {
 				"language": {
-					"header": "Language"
+					"header": "Sprache"
 				},
 				"date-and-time": {
-					"header": "Date and Time"
+					"header": "Datum und Uhrzeit"
 				},
 				"confirmation-settings": {
-					"header": "Confirmation Settings"
+					"header": "Einstellungen übernehmen"
 				}
 			},
 			"advanced": {
@@ -262,155 +262,155 @@
 					"header": "Download Manager"
 				},
 				"database": {
-					"header": "Database"
+					"header": "Datenbank"
 				},
 				"setup": {
 					"header": "PlexRipper Setup"
 				}
 			},
 			"accounts": {
-				"header": "Plex Accounts"
+				"header": "Plex Konten"
 			},
 			"debug": {
-				"header": "Debug"
+				"header": "Fehlersuche"
 			},
 			"paths": {
 				"main": {
-					"header": "Default Paths"
+					"header": "Standart Pfad"
 				},
 				"movie": {
-					"header": "Movie Paths"
+					"header": "Filme Pfad"
 				},
 				"tv-show": {
-					"header": "TV-Show Paths"
+					"header": "Serien Pfad"
 				}
 			}
 		},
 		"downloads": {
-			"no-downloads": "There are currently no downloads in progress"
+			"no-downloads": "Akutell keine Downloads aktiv"
 		},
 		"tvshows": {
 			"index": {
-				"header": "TvShow Overview",
-				"sub-header": "Select a library from the left-hand side"
+				"header": "Serien Übersicht",
+				"sub-header": "Wählen Sie eine Serien-Mediathek auf der linken Seite"
 			}
 		},
 		"movies": {
 			"index": {
-				"header": "Movies Overview",
-				"sub-header": "Select a library from the left-hand side"
+				"header": "Film Überischt",
+				"sub-header": "Wählen Sie eine Film-Mediathek auf der linken Seite"
 			}
 		},
 		"music": {
 			"index": {
-				"header": "Music Libraries are unfortunately not yet supported :("
+				"header": "Musik Mediatheken sind leider noch nicht unterstützt :("
 			},
 			"_musicId": {
-				"header": "Music Libraries are unfortunately not yet supported :("
+				"header": "Musik Mediatheken sind leider noch nicht unterstützt :("
 			}
 		},
 		"error": {
-			"header": "Error!",
-			"return-link": "Go back to home page"
+			"header": "Fehler!",
+			"return-link": "zurück zur Startseite"
 		}
 	},
 	"components": {
 		"app-bar": {
-			"no-accounts": "No Accounts available"
+			"no-accounts": "Keine Konten verfügbar"
 		},
 		"account-card": {
-			"no-account-name": "Add Account Display Name",
-			"no-notifications": "No notifications available",
-			"clear-notifications": "Clear All Notifications"
+			"no-account-name": "Konto Anzeigenamen hinzufügen",
+			"no-notifications": "keine Benachrichtigungen verfügbar",
+			"clear-notifications": "Alle Benachrichtigungen löschen"
 		},
 		"account-dialog": {
-			"add-account-title": "Add Plex Account",
-			"edit-account-title": "Edit Plex Account"
+			"add-account-title": "Plex Konto hinzufügen",
+			"edit-account-title": "Plex Konto bearbeiten"
 		},
 		"notifications-drawer": {
-			"no-notifications": "No notifications available",
-			"clear-notifications": "Clear All Notifications"
+			"no-notifications": "keine Benachrichtigungen verfügbar",
+			"clear-notifications": "Alle Benachrichtigungen löschen"
 		},
 		"media-overview": {
-			"is-refreshing": "Refreshing library \"{library}\" data from {server}",
-			"no-data": "Could not display this library.",
-			"retrieving-library": "Retrieving library from PlexRipper database!"
+			"is-refreshing": "Mediathek \"{library}\" daten von {server} werden aktualisiert",
+			"no-data": "Kann die Mediathek nicht anzeigen",
+			"retrieving-library": "Empfange Mediathek aus PlexRipper Datenbank!"
 		},
 		"details-overview": {
-			"duration": "Duration:",
-			"database-id": "Database ID:"
+			"duration": "Dauer:",
+			"database-id": "Datenbank ID:"
 		},
 		"directory-browser": {
-			"select-path": "Select {pathName}",
-			"type": "Type",
-			"path": "Path"
+			"select-path": "Wähle {pathName}",
+			"type": "typ",
+			"path": "Pfad"
 		},
 		"download-confirmation": {
-			"header": "Are you sure?",
-			"description": "Plex Ripper will start downloading the following:",
-			"total-size": "Total size:",
-			"creating-tasks": "Creating download tasks {current} of {total}"
+			"header": "Sind Sie sicher?",
+			"description": "PlexRipper fängt an folgendes herunterzuladen:",
+			"total-size": "Gesamt größe:",
+			"creating-tasks": "Erstelle download Aufgabe {current} von {total}"
 		},
 		"server-dialog": {
-			"header": "{serverName} configuration",
+			"header": "{serverName} Einstellung",
 			"tabs": {
 				"server-data": {
-					"header": "Server Data",
+					"header": "Server Daten",
 					"server-url": "Server URL",
-					"machine-id": "Machine Identifier",
+					"machine-id": "Machine Identifizierer",
 					"plex-version": "Plex Version",
-					"created-on": "Created On",
-					"last-updated-on": "Last updated on",
-					"current-status": "Current status",
-					"last-checked-on": "Last checked on"
+					"created-on": "erstellt am",
+					"last-updated-on": "zuletzt aktuallisiert",
+					"current-status": "aktueller Status",
+					"last-checked-on": "zuletzt überprüft"
 				},
 				"download-destinations": {
-					"header": "Download Destinations"
+					"header": "Download Ziele"
 				},
 				"server-commands": {
-					"header": "Server Commands",
-					"re-sync-server": "Re-sync Library media"
+					"header": "Server Befehle",
+					"re-sync-server": "Re-sync Mediathekdaten"
 				}
 			}
 		},
 		"navigation-drawer": {
 			"downloads": "Downloads",
-			"settings": "Settings",
-			"accounts": "Accounts",
-			"paths": "Paths",
+			"settings": "Einstellungen",
+			"accounts": "Konten",
+			"paths": "Pfade",
 			"ui": "UI",
-			"advanced": "Advanced",
-			"debug": "Debug"
+			"advanced": "Erweitert",
+			"debug": "Fehlersuche"
 		},
 		"download-details-dialog": {
 			"overview": {
 				"status": "Status",
-				"file-name": "File Name",
-				"download-path": "Download Path",
-				"destination-path": "Destination Path",
+				"file-name": "Datei Name",
+				"download-path": "Download Pfad",
+				"destination-path": "Destination Pfad",
 				"download-url": "Download URL"
 			}
 		},
 		"paths-custom-overview": {
-			"no-paths": "No paths are set"
+			"no-paths": "Keine Pfade festgelegt"
 		},
 		"server-drawer": {
-			"no-libraries": "No libraries available",
+			"no-libraries": "Keine Mediatheken verfügbar",
 			"no-servers": {
-				"header": "There are no servers available!",
-				"description": "Make sure that you have a Plex account registered in the settings and have selected an account with accessible plex servers in the top right account selector."
+				"header": "Keine Server verfügbar!",
+				"description": "Stellen Sie sicher, dass ihr Plex Konto registriert ist und das Sie einen Account ausgewählt haben, der verfügbare Server hat. Auswahl in der Kontoauswahl oben rechts."
 			}
 		},
 		"account-setup-progress": {
-			"retry-connection": "Attempting to retry connection, { attemptIndex } of { attemptCount } attempt.",
-			"server-connectable": "Server is connectable!",
-			"server-un-connectable": "Could not connect to server.",
-			"no-server-warning": "Account {displayName} has no servers which it can access."
+			"retry-connection": "Versuche Verbindung wieder aufzubauen, { attemptIndex } von { attemptCount } Versuch.",
+			"server-connectable": "Server ist erreichbar!",
+			"server-un-connectable": "Server ist nicht erreichbar.",
+			"no-server-warning": "Konto {displayName} hat keine verfügbaren Server."
 		},
 		"account-verification-code-dialog": {
-			"title": "Input Verification Code",
-			"sub-title": "The account has Two-factor authentication enabled.",
-			"error": "The verification code was invalid, please try again."
+			"title": "Bestätigungscode eingeben",
+			"sub-title": "Der Account hat Zwei-Fakto-Authentifizierung aktiviert.",
+			"error": "Der eingegebene Code ist ungültig, bitte versuchen Sie es erneut."
 		}
 	}
 }

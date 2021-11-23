@@ -23,7 +23,7 @@
 			"skip-setup": "Einrichtung überspringen",
 			"finish-setup": "Einrichtung Abschließen",
 			"check-server-status": "Server Status überprüfen",
-			"sync-server-libraries": "Server Datenbanken Synchronisieren",
+			"sync-server-libraries": "Server Mediatheken Synchronisieren",
 			"reset-db": "Datenbank zurücksetzen",
 			"go-to-setup-page": "springe zur Einrichtungsseite",
 			"add-alert": "benachrichtigung hinzufügen",
@@ -39,111 +39,111 @@
 	},
 	"help": {
 		"default": {
-			"label": "Missing Label",
-			"title": "Unknown help",
-			"text": "The language path where this text is stored is incorrect"
+			"label": "Label fehlt",
+			"title": "unbekannte Hilfe",
+			"text": "Der Sprach-Pfad wo dieser Text gespeichert wurde ist nicht korrekt."
 		},
 
 		"account-form": {
 			"is-enabled": {
-				"label": "Is Enabled",
-				"title": "Is enabled",
+				"label": "Ist aktiviert",
+				"title": "Ist aktiviert",
 				"text": "Should this account be used for downloading and retrieving data from the Plex Servers."
 			},
 			"is-main": {
-				"label": "Is Main",
-				"title": "Is main",
-				"text": "A main account is the account which owns your Plex libraries. If a non-main account exists, which has access to the same Plex library of a shared Plex server as a main account, then that will be used first to protect the main account."
+				"label": "Haupt-Account",
+				"title": "Haupt-Account",
+				"text": "Der Haupt-Account ist der Besitzer der Plex Mediatheken. Wenn es einen Account gibt der nicht Besitzer der Mediathek ist aber die gleichen rechte hat, dann wird dieser Account bevorzugt benutzt um den Haupt-Account zu schützen."
 			},
 			"display-name": {
-				"label": "Display Name",
-				"title": "Display Name",
-				"text": "The name used to display this account in the UI."
+				"label": "Anzeigename",
+				"title": "Anzeigename",
+				"text": "Der Name wird im Benutzerbereich angezeigt."
 			},
 			"username": {
-				"label": "Username",
-				"title": "Username",
-				"text": "The username of your Plex account"
+				"label": "Benutzername",
+				"title": "Benutzername",
+				"text": "Der Benutzername des Plex Kontos"
 			},
 			"password": {
-				"label": "Password",
-				"title": "Password",
-				"text": "The password of your Plex account."
+				"label": "Passwort",
+				"title": "Passwort",
+				"text": "Das Passwort des Plex Kontos."
 			}
 		},
 
 		"settings": {
 			"paths": {
 				"download-folder": {
-					"label": "Download Path",
-					"title": "Download Path",
-					"text": "The path all files will be downloaded to in multiple parts before being merged into one in their destination folder."
+					"label": "Download Pfad",
+					"title": "Download Pfad",
+					"text": "In diesen Pfad werden alle teile eines Downloads heruntergeladen und zusammengeführt bevor sie in das Zielverzeichnis verschoben werden."
 				},
 				"movie-folder": {
-					"label": "Movie Path",
-					"title": "Movie Path",
-					"text": "The default path of Movies when no custom destination has been selected."
+					"label": "Filme Pfad",
+					"title": "Filme Pfad",
+					"text": "Standartpfad für Filme wenn kein individueller Pfad angegeben wurde."
 				},
 				"tv-show-folder": {
-					"label": "TV-Show Path",
-					"title": "TV-Show Path",
-					"text": "The default path of TV-Show when no custom destination has been selected."
+					"label": "Serien Pfad",
+					"title": "Serien Pfad",
+					"text": "Standartpfad für Serien wenn kein individueller Pfad angegeben wurde."
 				}
 			},
 			"ui": {
 				"language": {
 					"language-selection": {
-						"label": "Language",
+						"label": "Sprache",
 						"title": "",
 						"text": ""
 					}
 				},
 				"date-and-time": {
 					"short-date-format": {
-						"label": "Short Date Format",
+						"label": "Datum kurzformat",
 						"title": "",
 						"text": ""
 					},
 					"long-date-format": {
-						"label": "Long Date Format",
+						"label": "Dazum langformat",
 						"title": "",
 						"text": ""
 					},
 					"time-zone": {
-						"label": "Time Zone",
+						"label": "Zeitzone",
 						"title": "",
 						"text": ""
 					},
 					"time-format": {
-						"label": "Time Format",
+						"label": "Zeit Format",
 						"title": "",
 						"text": ""
 					},
 					"show-relative-dates": {
-						"label": "Show Relative Dates",
+						"label": "Zeige Relative Daten",
 						"title": "",
 						"text": ""
 					}
 				},
 				"confirmation-settings": {
 					"download-movie-confirmation": {
-						"label": "Ask Download Movie Confirmation",
-						"title": "Ask Download Movie Confirmation",
+						"label": "Frage nach Bestätigung für Filme Download",
+						"title": "Frage nach Bestätigung für Filme Download",
 						"text": ""
 					},
 					"download-tvshow-confirmation": {
-						"label": "Ask Download TvShow Confirmation",
-						"title": "Ask Download TvShow Confirmation",
+						"label": "Frage nach Bestätigung für Serien Download",
+						"title": "Frage nach Bestätigung für Serien Download",
 						"text": ""
 					},
 					"download-season-confirmation": {
-						"label": "Ask Download Season Confirmation",
-						"title": "Ask Download Season Confirmation",
+						"label": "Frage nach Bestätigung für Staffel Download",
+						"title": "Frage nach Bestätigung für Staffel Download",
 						"text": ""
 					},
 					"download-episode-confirmation": {
-						"label": "Ask Download Episode Confirmation",
-						"title": "Ask Download Episode Confirmation",
+						"label": "Frage nach Bestätigung für Folgen Download",
+						"title": "Frage nach Bestätigung für Folgen Download",
 						"text": ""
 					}
 				}
@@ -151,69 +151,69 @@
 			"advanced": {
 				"download-manager-section": {
 					"download-segments": {
-						"label": "Download Segments",
-						"title": "Download Segments",
-						"text": "PlexRipper supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged."
+						"label": "Download Teile",
+						"title": "Download Teile",
+						"text": "PlexRipper Multithread-Downloads und kann Medien, die heruntergeladen werden sollen, in individuellen teilen herunterladen und wieder zusammen führen. Das führt in der regel zu einer höheren Downloadgesschwindigkeit aber benötigt auch etwas mehr Zeit um die Teile wieder zusammenzusetzen.\n\nDas setzen auf den Wert 1 deaktiviert die Funktion und lädt die Datei am Stück herunter. Die Anzahl der Segmente hat keinen Einfluss auf die Dauer des zusammen setzens."
 					}
 				},
 				"setup-section": {
 					"go-to-setup-page": {
-						"label": "Go To Setup Page",
-						"title": "Go To Setup Page",
-						"text": "Will navigate to the PlexRipper setup page."
+						"label": "gehe zur Setup-Seite",
+						"title": "gehe zur Setup-Seite",
+						"text": "Navigiert zur Setup-Seite."
 					}
 				},
 				"reset-db": {
-					"label": "Reset Database",
-					"title": "Reset Database",
-					"text": "Resets the database and creates a back-up of the old one."
+					"label": "Datenbank zurück setzen",
+					"title": "Datenbank zurück setzen",
+					"text": "Setzt die Datenbank zurück und erstellt eine Sicherung der alten Datenbank."
 				}
 			}
 		}
 	},
 	"confirmation": {
 		"skip-setup": {
-			"title": "Are you sure?",
-			"text": "This will skip the setup process and you will have to configure PlexRipper manually"
+			"title": "Sind Sie sicher?",
+			"text": "Das überspringt das Setup und Sie müssen PlexRipper manuell einrichten."
 		},
 		"delete-account": {
-			"title": "Are you sure?",
+			"title": "Sind Sie sicher?",
 			"text": "This will delete this Plex account from Plex Ripper! \n\n This will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched.",
-			"warning": "This might take around 5 minutes or longer and then this window will close on its own!"
+			"warning": "Dies wird ca.5 Minuten oder mehr benötigen. Wenn der Vorgang abgeschlossen ist schließt sich das Fenster selbstständig."
 		},
 		"reset-db": {
-			"title": "Are you sure?",
-			"text": "This will back-up the current database to \"config/Database Backup/\" and create a new one, after which you will be redirected to the setup page. This will not reset settings since those are stored in \"config/PlexRipperSettings.json\""
+			"title": "Sind Sie sicher?",
+			"text": "Das erstellt ein Backup der Datenbank nach \"config/Database Backup/\" und erstellt eine neue. Danach werden Sie auf die Setup-Seite weitergeleitet. Einstellungen werden nicht zurückgesetzt. Diese befinden sich hier:  \"config/PlexRipperSettings.json\""
 		}
 	},
 	"pages": {
 		"home": {
-			"header": "WORKING!"
+			"header": "LÄUFT!"
 		},
 		"setup": {
 			"intro": {
-				"header": "Being called awesome!",
-				"title": "You are awesome for trying out Plex Ripper!",
+				"header": "Sie sind Genial!",
+				"title": "Sie sind Genial, weil Sie PlexRipper ausprobieren!",
 				"text": {
-					"p-1": "Here is some useful info:"
+					"p-1": "Hier ein paar weitere Infos:"
 				},
 				"list": {
-					"item-1": "Plex Ripper is currently under active development, so there might be some bugs here and there. Please make sure to report any you may find on the Github issues page.",
-					"item-2": "Feedback or feature requests are really appreciated! Especially on the source code as this is a personal project meant to improve my coding skills.",
-					"item-3": "Plex Ripper can download Movies and TvShows, other types such as music is currently not supported, but will in the future!",
-					"item-4": "Plex Ripper does not, and will not, collect any data about you or any of your activities. The only data that is sent to Plex is your username and password to authenticate your Plex account. After which, all communication is directly with the shared servers you have access to.",
-					"item-5": "A word of caution: Plex, and maybe Plex server owners, do not like you to download all \"their\" 100% legally acquired copies of media. Which is why there are some safe guards in place to protect Plex Ripper users from being banned by Plex. However, be respectful to Plex server owners by not taking up all their precious bandwidth and don't complain to me about being kicked of a server. In the future I would also like to protect Plex server owners from Plex Ripper abuse, any ideas or input are welcome."
+					"item-1": "PlexRipper wird derzeit aktiv weiter entwickelt. Deshalb kann es sein, dass der ein oder andere Fehler auftaucht. Bitte geben Sie uns eine Rückmeldung via Github wenn etwas nicht so läuft wie es soll.",
+					"item-2": "Feedback und wünsche nach Funktionen werden gerne entgegen geommen. Besonders auch beim Code, da ich hier noch mein Wissen erweitern will.",
+					"item-3": "PlexRipper kann Filme und Serien herunterladen. Andere Medien wie Musik werden noch nicht unterstützt, aber in der Zukunft.",
+					"item-4": "PlexRipper speichert aktuell und in der Zukunft keine Daten über Ihre aktivitäten. Die einzigen Daten die zu Plex gesendet werden, sind die Login daten um dein Konto anzumelden. Danach findet nur noch Kommunikation zwischen den Plex-Servern statt auf die Sie sowieso Zugriff haben.",
+					"item-5": "Ein Word der Warnung: Plex und vielleicht die Plex-Server-Besitzer, mögen es vielleicht nicht, dass Sie alle legal erworbenen Medien herunterladen. Deswegen haben wir ein paar sicherheiten eingebaut um Sie davor zu schützen, dass das Plex Konto gesperrt wird. Sei respektvoll mit den Serverkapazitäten der Nutzer und bitte beschweren Sie sich nicht, wenn Sie deswegen gesperrt werden. In der Zukunft möchte ich auch etwas für die Server besitzer tun um sie vor PlexRipper-Benutzern zu schützen. Vorschläge nehme ich gerne via Github entgegen."
 				}
 			},
 			"future-plans": {
-				"header": "Future plans!",
-				"title": "Here are some planned features!",
+				"header": "Zukunftspläne",
+				"title": "Hier ein paar geplante Erweiterungen:",
 				"text": {
-					"p-1": "Planned features:",
-					"p-2": "Any ideas are very welcome!"
+					"p-1": "geplante Funktionen:",
+					"p-2": "Vorschläge sind gerne gesehen!"
 				},
 				"list": {
-					"item-1": "Radarr and Sonarr integration",
+					"item-1": "Radarr und Sonarr integration",
 					"item-1-1": "Any searches for media can be redirected to Plex Ripper, and Plex Ripper will search all available servers, download the media and notify Radarr/Sonarr of the finished download.",
 					"item-2": "Music and Photo's download support!",
 					"item-3": "Subtitles download support!",

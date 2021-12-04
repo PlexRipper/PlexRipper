@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Bogus.Extensions;
 using EFCore.BulkExtensions;
+using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PlexRipper.Data;
 using PlexRipper.Domain;
 
@@ -35,7 +37,24 @@ namespace PlexRipper.BaseTests
 
             optionsBuilder.UseSqlite(connectionString);
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            optionsBuilder.EnableSensitiveDataLogging();
+            optionsBuilder.EnableDetailedErrors();
+            optionsBuilder.LogTo((id, level) =>
+            {
+                switch (level)
+                {
+                    case LogLevel.Trace:
+                    case LogLevel.Debug:
+                    case LogLevel.Information:
+                        return false;
+                    case LogLevel.Warning:
+                    case LogLevel.Error:
+                    case LogLevel.Critical:
+                    case LogLevel.None:
+                        return true;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(level), level, null);
+                }
+            }, text => Log.Debug($"{text}"));
             return new PlexRipperDbContext(optionsBuilder.Options);
         }
 
@@ -57,7 +76,8 @@ namespace PlexRipper.BaseTests
             }
 
             dbContext.BulkInsert(plexServers);
-            dbContext.BulkInsert(plexServers.SelectMany(x => x.PlexLibraries).ToList());
+            var plexLibraries = plexServers.SelectMany(x => x.PlexLibraries).ToList();
+            dbContext.BulkInsert(plexLibraries);
 
             return dbContext;
         }
@@ -91,31 +111,49 @@ namespace PlexRipper.BaseTests
 
         public static PlexRipperDbContext AddDownloadTasks(this PlexRipperDbContext dbContext, FakeDataConfig config = null)
         {
-            List<DownloadTask> downloadTasks;
-            switch (config.LibraryType)
+            try
             {
-                case PlexMediaType.Movie:
-                    downloadTasks = FakeData.GetMovieDownloadTask(config).Generate(config.DownloadTasksCount);
-                    break;
-                case PlexMediaType.TvShow:
-                    downloadTasks = FakeData.GetTvShowDownloadTask(config).Generate(config.DownloadTasksCount);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                List<DownloadTask> downloadTasks;
+                switch (config.LibraryType)
+                {
+                    case PlexMediaType.Movie:
+                        downloadTasks = FakeData.GetMovieDownloadTask(config).Generate(config.DownloadTasksCount);
+                        break;
+                    case PlexMediaType.TvShow:
+                        downloadTasks = FakeData.GetTvShowDownloadTask(config).Generate(config.DownloadTasksCount);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
-            foreach (var downloadTask in downloadTasks.Flatten(x => x.Children).ToList())
+                var plexServer = dbContext.PlexServers.Include(x => x.PlexLibraries).FirstOrDefault();
+                var plexLibrary = plexServer.PlexLibraries.FirstOrDefault(x => x.Type == config.LibraryType);
+                if (plexServer is null || plexLibrary is null)
+                {
+                    throw new ArgumentNullException($"Ensure {nameof(AddPlexServers)} has been called before {nameof(AddDownloadTasks)}");
+                }
+
+                foreach (var downloadTask in downloadTasks.Flatten(x => x.Children).ToList())
+                {
+                    downloadTask.PlexServerId = plexServer?.Id ?? 1;
+                    downloadTask.PlexLibraryId = plexLibrary?.Id ?? 1;
+                    downloadTask.PlexServer = null;
+                    downloadTask.PlexLibrary = null;
+                    downloadTask.DestinationFolder = null;
+                    downloadTask.DownloadFolder = null;
+                    downloadTask.Parent = null;
+                }
+
+                dbContext.DownloadTasks.AddRange(downloadTasks);
+
+                dbContext.SaveChanges();
+                return dbContext;
+            }
+            catch (Exception e)
             {
-                downloadTask.PlexServer = null;
-                downloadTask.PlexLibrary = null;
-                downloadTask.DestinationFolder = null;
-                downloadTask.DownloadFolder = null;
+                Console.WriteLine(e);
+                throw;
             }
-
-            dbContext.DownloadTasks.AddRange(downloadTasks);
-
-            dbContext.SaveChanges();
-            return dbContext;
         }
     }
 }

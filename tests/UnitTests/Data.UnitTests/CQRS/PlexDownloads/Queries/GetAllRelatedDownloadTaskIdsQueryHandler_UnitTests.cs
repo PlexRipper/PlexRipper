@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace Data.UnitTests
         }
 
         [Fact]
-        public async Task ShouldReturnAllRelatedDownloadTasksIds_WhenPlexMovieDownloadTaskIdsGiven()
+        public async Task ShouldReturnAllParentDownloadTasksIds_WhenChildDownloadTaskIdsAreGiven()
         {
             // Arrange
             var config = new FakeDataConfig
@@ -29,11 +30,11 @@ namespace Data.UnitTests
                 DownloadTasksCount = 10,
                 LibraryType = PlexMediaType.Movie,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().AddDownloadTasks(config);
+            await using var context = MockDatabase.GetMemoryDbContext().AddPlexServers(config).AddDownloadTasks(config);
 
-            var ids = context.DownloadTasks.Where(x => x.DownloadTaskType == DownloadTaskType.Movie).Take(5).Select(x => x.Id).ToList();
+            var childIds = new List<int> { 2, 4, 6, 8, 10 };
             var handle = new GetAllRelatedDownloadTaskIdsHandler(context);
-            var request = new GetAllRelatedDownloadTaskIdsQuery(ids);
+            var request = new GetAllRelatedDownloadTaskIdsQuery(childIds);
 
             // Act
             var result = await handle.Handle(request, CancellationToken.None);
@@ -44,7 +45,7 @@ namespace Data.UnitTests
             downloadTaskIds.ShouldNotBeEmpty();
             downloadTaskIds.Count.ShouldBe(10);
             downloadTaskIds.ShouldBeUnique();
-            ids.ShouldAllBe(x => downloadTaskIds.Contains(x));
+            childIds.ShouldAllBe(x => downloadTaskIds.Contains(x));
         }
 
         [Fact]
@@ -57,7 +58,7 @@ namespace Data.UnitTests
                 DownloadTasksCount = 10,
                 LibraryType = PlexMediaType.TvShow,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().AddDownloadTasks(config);
+            await using var context = MockDatabase.GetMemoryDbContext().AddPlexServers(config).AddDownloadTasks(config);
 
             var ids = context.DownloadTasks.Where(x => x.DownloadTaskType == DownloadTaskType.TvShow).Take(5).Select(x => x.Id).ToList();
             var handle = new GetAllRelatedDownloadTaskIdsHandler(context);

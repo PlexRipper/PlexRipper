@@ -15,7 +15,7 @@ namespace PlexRipper.BaseTests
 
         #region Include
 
-        public bool IncludeLibraries { get; set; }
+        public bool IncludeLibraries { get; set; } = true;
 
         public bool IncludeDownloadTasks { get; set; }
 

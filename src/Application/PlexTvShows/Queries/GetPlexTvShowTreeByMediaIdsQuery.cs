@@ -1,7 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentValidation;
 using MediatR;
 using PlexRipper.Domain;
 using FluentResults;

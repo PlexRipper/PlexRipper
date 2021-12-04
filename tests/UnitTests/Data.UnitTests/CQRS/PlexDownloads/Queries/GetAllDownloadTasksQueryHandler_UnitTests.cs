@@ -30,7 +30,7 @@ namespace Data.UnitTests
                 DownloadTasksCount = 10,
                 LibraryType = PlexMediaType.Movie,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().AddDownloadTasks(config);
+            await using var context = MockDatabase.GetMemoryDbContext().AddPlexServers().AddDownloadTasks(config);
             var handle = new GetAllDownloadTasksQueryHandler(context);
 
             var request = new GetAllDownloadTasksQuery();
@@ -55,7 +55,7 @@ namespace Data.UnitTests
                 DownloadTasksCount = 10,
                 LibraryType = PlexMediaType.Movie,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().AddDownloadTasks(config);
+            await using var context = MockDatabase.GetMemoryDbContext().AddPlexServers().AddDownloadTasks(config);
             var handle = new GetAllDownloadTasksQueryHandler(context);
             var request = new GetAllDownloadTasksQuery();
 
@@ -87,7 +87,7 @@ namespace Data.UnitTests
                 TvShowEpisodeCountMax = 5,
                 LibraryType = PlexMediaType.TvShow,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().AddDownloadTasks(config);
+            await using var context = MockDatabase.GetMemoryDbContext().AddPlexServers().AddDownloadTasks(config);
             var handle = new GetAllDownloadTasksQueryHandler(context);
             var request = new GetAllDownloadTasksQuery();
 

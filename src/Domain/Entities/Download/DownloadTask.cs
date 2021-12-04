@@ -97,6 +97,8 @@ namespace PlexRipper.Domain
         [Column(Order = 18)]
         public int DownloadSpeed { get; set; }
 
+        public int MediaId { get; set; }
+
         /// <summary>
         /// Gets or sets the download priority, the higher the more important.
         /// </summary>
@@ -120,15 +122,13 @@ namespace PlexRipper.Domain
 
         public int DownloadFolderId { get; set; }
 
-        public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new List<DownloadWorkerTask>();
+        public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new();
 
         public int? ParentId { get; set; }
 
         public DownloadTask Parent { get; set; }
 
         public List<DownloadTask> Children { get; set; }
-
-        public int MediaId { get; set; }
 
         #endregion
 

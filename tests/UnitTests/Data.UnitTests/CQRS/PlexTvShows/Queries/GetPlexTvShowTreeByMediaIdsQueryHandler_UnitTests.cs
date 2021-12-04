@@ -6,6 +6,7 @@ using Logging;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.BaseTests;
 using PlexRipper.Data.CQRS.PlexTvShows;
+using PlexRipper.Data.PlexTvShows;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;

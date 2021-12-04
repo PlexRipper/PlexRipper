@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,7 +61,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
         }
 
         [Fact]
-        public async Task ShouldHaveValidDownloadTasks_WhenPlexMoviesAreValid()
+        public async Task ShouldHaveValidSingleNestedDownloadTasks_WhenPlexMoviesAreValid()
         {
             // Arrange
             var config = new FakeDataConfig
@@ -103,37 +102,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                 downloadTask.Created.ShouldBeGreaterThan(DateTime.MinValue);
                 downloadTask.Created.ShouldBeLessThan(DateTime.UtcNow);
 
-                downloadTask.Children.ShouldNotBeEmpty();
-                downloadTask.Children.Count.ShouldBe(plexMovie.MovieData.Count);
-
-                for (var j = 0; j < plexMovie.MovieParts.Count; j++)
-                {
-                    var plexMoviePart = plexMovie.MovieParts[j];
-                    var downloadTaskPart = downloadTask.Children[j];
-
-                    downloadTaskPart.Key.ShouldBe(plexMovie.Key);
-                    downloadTaskPart.Title.ShouldBe(plexMovie.Title);
-                    downloadTaskPart.FullTitle.ShouldBe(plexMovie.FullTitle);
-                    downloadTaskPart.DataTotal.ShouldBe(plexMoviePart.Size);
-                    downloadTaskPart.Year.ShouldBe(plexMovie.Year);
-                    downloadTaskPart.FileLocationUrl.ShouldNotBeEmpty();
-                    downloadTaskPart.FileName.ShouldBe(Path.GetFileName(plexMoviePart.File));
-
-                    downloadTaskPart.PlexLibrary.ShouldNotBeNull();
-                    downloadTaskPart.PlexLibraryId.ShouldBeGreaterThan(0);
-                    downloadTaskPart.PlexServer.ShouldNotBeNull();
-                    downloadTaskPart.PlexServerId.ShouldBeGreaterThan(0);
-                    downloadTaskPart.MediaId.ShouldBe(plexMovie.Id);
-
-                    downloadTaskPart.MediaType.ShouldBe(plexMovie.Type);
-
-                    // TODO Should check DownloadTaskType
-                    downloadTaskPart.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
-                    downloadTaskPart.Created.ShouldBeGreaterThan(DateTime.MinValue);
-                    downloadTaskPart.Created.ShouldBeLessThan(DateTime.UtcNow);
-
-                    downloadTaskPart.Children.ShouldBeEmpty();
-                }
+                downloadTask.Children.ShouldBeEmpty();
             }
         }
     }

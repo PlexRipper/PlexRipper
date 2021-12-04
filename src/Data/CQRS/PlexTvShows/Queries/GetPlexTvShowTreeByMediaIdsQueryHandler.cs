@@ -10,7 +10,7 @@ using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexTvShows
+namespace PlexRipper.Data.PlexTvShows
 {
     public class GetPlexTvShowTreeByMediaIdsQueryValidator : AbstractValidator<GetPlexTvShowTreeByMediaIdsQuery>
     {

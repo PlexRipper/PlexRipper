@@ -27,11 +27,6 @@ namespace DownloadManager.UnitTests
         public DownloadCommands_StopDownloadTasksAsync_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
-
-            // _downloadQueue.SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
-            // _downloadQueue.SetupGet(x => x.UpdateDownloadTasks).Returns(new Subject<List<DownloadTask>>());
-            // _fileMerger.SetupGet(x => x.FileMergeProgressObservable).Returns(new Subject<FileMergeProgress>());
-            // _fileSystem.Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());
         }
 
         private AutoMock GetDefaultMocks()

@@ -27,6 +27,8 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.Priority, _ => 0)
                 .RuleFor(x => x.DataReceived, _ => 0)
                 .RuleFor(x => x.DataTotal, f => f.Random.Long(1, 10000000))
+                .RuleFor(x => x.Percentage, _ => 0)
+                .RuleFor(x => x.DownloadSpeed, _ => 0)
                 .RuleFor(x => x.DownloadWorkerTasks, _ => new())
                 .RuleFor(x => x.FileName, f => f.System.FileName() + ".mp4")
                 .RuleFor(x => x.FileLocationUrl, f => f.System.FilePath())
@@ -87,14 +89,7 @@ namespace PlexRipper.BaseTests
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.MediaType, PlexMediaType.Movie)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
-                .RuleFor(x => x.DownloadUrl, f => f.Internet.Url())
-                .FinishWith((_, downloadTask) =>
-                {
-                    downloadTask.DownloadWorkerTasks = new List<DownloadWorkerTask>
-                    {
-                        new(downloadTask, 1, 0, downloadTask.DataTotal),
-                    };
-                });
+                .RuleFor(x => x.DownloadUrl, f => f.Internet.Url());
         }
 
         #endregion

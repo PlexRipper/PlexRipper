@@ -193,34 +193,21 @@ namespace PlexRipper.Domain
 
         #endregion
 
-        #region Equality Members
+        #region Compare
 
-        public bool Equals(DownloadTask other)
+        public bool Equals(PlexTvShow tvShow)
         {
-            if (other is null)
-                return false;
-
-            return Id == other.Id;
+            return tvShow is not null && PlexServerId == tvShow.PlexServerId && MediaType == tvShow.Type && Key == tvShow.Key;
         }
 
-        public override bool Equals(object obj)
+        public bool Equals(PlexTvShowSeason season)
         {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            return obj.GetType() == GetType() && Equals((DownloadTask)obj);
+            return season is not null && PlexServerId == season.PlexServerId && MediaType == season.Type && Key == season.Key;
         }
 
-        public override int GetHashCode()
+        public bool Equals(PlexTvShowEpisode episode)
         {
-            return Id.GetHashCode();
+            return episode is not null && PlexServerId == episode.PlexServerId && MediaType == episode.Type && Key == episode.Key;
         }
 
         #endregion

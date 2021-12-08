@@ -9,7 +9,7 @@ using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexTvShows
+namespace PlexRipper.Data.PlexTvShows
 {
     public class GetPlexTvShowByIdQueryValidator : AbstractValidator<GetPlexTvShowByIdQuery>
     {
@@ -37,7 +37,10 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
                 query = query.IncludeServer();
             }
 
-            var plexTvShow = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var plexTvShow = await query
+                .Include(x => x.Seasons)
+                .ThenInclude(x => x.Episodes)
+                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (plexTvShow == null)
             {

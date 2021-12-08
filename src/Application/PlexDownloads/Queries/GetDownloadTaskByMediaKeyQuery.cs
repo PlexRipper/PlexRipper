@@ -6,14 +6,14 @@ namespace PlexRipper.Application
 {
     public class GetDownloadTaskByMediaKeyQuery : IRequest<Result<DownloadTask>>
     {
-        public GetDownloadTaskByMediaKeyQuery(int mediaId, PlexMediaType type)
+        public GetDownloadTaskByMediaKeyQuery(int plexServerId, int mediaKey)
         {
-            MediaId = mediaId;
-            Type = type;
+            PlexServerId = plexServerId;
+            MediaKey = mediaKey;
         }
-        public int MediaId { get; }
 
-        public PlexMediaType Type { get; }
+        public int PlexServerId { get; }
 
+        public int MediaKey { get; }
     }
 }

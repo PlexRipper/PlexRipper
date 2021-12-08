@@ -72,12 +72,38 @@ namespace PlexRipper.Application
             var plexTvShowEpisodeIds = downloadMedias.FindAll(x => x.Type == PlexMediaType.Episode).SelectMany(x => x.MediaIds).ToList();
             var plexMovieIds = downloadMedias.FindAll(x => x.Type == PlexMediaType.Movie).SelectMany(x => x.MediaIds).ToList();
 
-            if (plexTvShowIds.Any() || plexTvShowSeasonIds.Any() || plexTvShowEpisodeIds.Any())
+            if (plexTvShowIds.Any())
             {
-                var result = await GenerateDownloadTvShowTasksAsync(plexTvShowIds, plexTvShowSeasonIds, plexTvShowEpisodeIds);
+                var result = await GenerateTvShowDownloadTasksAsync(downloadTasks, plexTvShowIds);
                 if (result.IsSuccess)
                 {
-                    downloadTasks.AddRange(result.Value);
+                    downloadTasks = result.Value;
+                }
+                else
+                {
+                    result.LogError();
+                }
+            }
+
+            if (plexTvShowSeasonIds.Any())
+            {
+                var result = await GenerateTvShowSeasonDownloadTasksAsync(downloadTasks, plexTvShowSeasonIds);
+                if (result.IsSuccess)
+                {
+                    downloadTasks = result.Value;
+                }
+                else
+                {
+                    result.LogError();
+                }
+            }
+
+            if (plexTvShowEpisodeIds.Any())
+            {
+                var result = await GenerateTvShowSeasonDownloadTasksAsync(downloadTasks, plexTvShowEpisodeIds);
+                if (result.IsSuccess)
+                {
+                    downloadTasks = result.Value;
                 }
                 else
                 {
@@ -106,89 +132,191 @@ namespace PlexRipper.Application
             return Result.Ok(finalizeDownloadTasksResult.Value);
         }
 
-        public async Task<Result<List<DownloadTask>>> GenerateDownloadTvShowTasksAsync(
-            List<int> plexTvShowIds,
-            List<int> plexTvShowSeasonIds,
-            List<int> plexTvShowEpisodeIds)
+        private DownloadTask CreateEpisodeDownloadTask(PlexTvShowEpisode episode)
         {
-            var plexTvShows = await _mediator.Send(new GetPlexTvShowTreeByMediaIdsQuery(plexTvShowIds, plexTvShowSeasonIds, plexTvShowEpisodeIds));
-            if (plexTvShows.IsFailed)
-                return plexTvShows.ToResult();
+            var episodeDownloadTask = _mapper.Map<DownloadTask>(episode);
 
-            // Create download tasks
-            var downloadTasks = new List<DownloadTask>();
-            foreach (var tvShow in plexTvShows.Value)
+            // TODO Takes first entry which assumes its the highest quality one
+            var episodeData = episode.EpisodeData.First();
+
+            if (episodeData.IsMultiPart)
             {
-                var tvShowDownloadTask = _mapper.Map<DownloadTask>(tvShow);
-
-                foreach (var season in tvShow.Seasons)
+                foreach (var episodePart in episodeData.Parts)
                 {
-                    var seasonDownloadTask = _mapper.Map<DownloadTask>(season);
-
-                    foreach (var episode in season.Episodes)
-                    {
-                        var episodeDownloadTask = _mapper.Map<DownloadTask>(episode);
-
-                        // TODO Takes first entry which assumes its the highest quality one
-                        var episodeData = episode.EpisodeData.First();
-
-                        if (episodeData.IsMultiPart)
-                        {
-                            foreach (var episodePart in episodeData.Parts)
-                            {
-                                var episodePartTask = _mapper.Map<DownloadTask>(episode);
-                                episodePartTask.MediaType = PlexMediaType.Episode;
-                                episodePartTask.DownloadTaskType = DownloadTaskType.EpisodePart;
-                                episodePartTask.DataTotal = episodePart.Size;
-                                episodePartTask.FileName = Path.GetFileName(episodePart.File);
-                                episodePartTask.FileLocationUrl = episodePart.ObfuscatedFilePath;
-                                episodeDownloadTask.Children.Add(episodePartTask);
-                            }
-
-                            episodeDownloadTask.DataTotal = episodeDownloadTask.Children.Select(x => x.DataTotal).Sum();
-                        }
-                        else
-                        {
-                            var part = episodeData.Parts.First();
-                            episodeDownloadTask.MediaType = PlexMediaType.Episode;
-                            episodeDownloadTask.DownloadTaskType = DownloadTaskType.Episode;
-                            episodeDownloadTask.DataTotal = part.Size;
-                            episodeDownloadTask.FileName = Path.GetFileName(part.File);
-                            episodeDownloadTask.FileLocationUrl = part.ObfuscatedFilePath;
-                        }
-
-                        seasonDownloadTask.Children.Add(episodeDownloadTask);
-                        seasonDownloadTask.DataTotal = seasonDownloadTask.Children.Select(x => x.DataTotal).Sum();
-                    }
-
-                    tvShowDownloadTask.Children.Add(seasonDownloadTask);
-                    tvShowDownloadTask.DataTotal = tvShowDownloadTask.Children.Select(x => x.DataTotal).Sum();
+                    var episodePartTask = _mapper.Map<DownloadTask>(episode);
+                    episodePartTask.MediaType = PlexMediaType.Episode;
+                    episodePartTask.DownloadTaskType = DownloadTaskType.EpisodePart;
+                    episodePartTask.DataTotal = episodePart.Size;
+                    episodePartTask.FileName = Path.GetFileName(episodePart.File);
+                    episodePartTask.FileLocationUrl = episodePart.ObfuscatedFilePath;
+                    episodeDownloadTask.Children.Add(episodePartTask);
                 }
 
-                downloadTasks.Add(tvShowDownloadTask);
+                episodeDownloadTask.DataTotal = episodeDownloadTask.Children.Select(x => x.DataTotal).Sum();
+            }
+            else
+            {
+                var part = episodeData.Parts.First();
+                episodeDownloadTask.MediaType = PlexMediaType.Episode;
+                episodeDownloadTask.DownloadTaskType = DownloadTaskType.Episode;
+                episodeDownloadTask.DataTotal = part.Size;
+                episodeDownloadTask.FileName = Path.GetFileName(part.File);
+                episodeDownloadTask.FileLocationUrl = part.ObfuscatedFilePath;
+            }
+
+            return episodeDownloadTask;
+        }
+
+        public async Task<Result<List<DownloadTask>>> GenerateTvShowDownloadTasksAsync(List<DownloadTask> downloadTasks, List<int> plexTvShowIds)
+        {
+            if (!plexTvShowIds.Any())
+                return ResultExtensions.IsEmpty(nameof(plexTvShowIds)).LogWarning();
+
+            foreach (var tvShowId in plexTvShowIds)
+            {
+                var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(tvShowId));
+                if (tvShowResult.IsFailed)
+                {
+                    tvShowResult.LogError();
+                    continue;
+                }
+
+                var tvShow = tvShowResult.Value;
+
+                // Check if the tvShowDownloadTask has already been created
+                var tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(tvShow));
+                if (tvShowDownloadTaskIndex == -1)
+                {
+                    var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(tvShow.PlexServerId, tvShow.Key));
+                    var tvShowDownloadTask = result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(tvShow);
+                    downloadTasks.Add(tvShowDownloadTask);
+                }
+
+                // Create seasons downloadTasks
+                var seasonIds = tvShow.Seasons.Select(x => x.Id).ToList();
+                var seasonsResult = await GenerateTvShowSeasonDownloadTasksAsync(downloadTasks, seasonIds, tvShow.Seasons);
+                if (seasonsResult.IsFailed)
+                {
+                    seasonsResult.LogError();
+                    continue;
+                }
+
+                downloadTasks = seasonsResult.Value;
             }
 
             return Result.Ok(downloadTasks);
         }
 
-        public async Task<Result<List<DownloadTask>>> GenerateTvShowEpisodesDownloadTasksAsync(List<DownloadTask> downloadTasks,  List<int> plexTvShowEpisodeIds)
+        public async Task<Result<List<DownloadTask>>> GenerateTvShowSeasonDownloadTasksAsync(
+            List<DownloadTask> downloadTasks,
+            List<int> plexTvShowSeasonIds,
+            List<PlexTvShowSeason> seasons = null)
         {
-            foreach (var episodeId in plexTvShowEpisodeIds)
+            if (!plexTvShowSeasonIds.Any())
+                return ResultExtensions.IsEmpty(nameof(plexTvShowSeasonIds)).LogWarning();
+
+            foreach (var seasonId in plexTvShowSeasonIds)
             {
-                var episodeResult = await _mediator.Send(new GetPlexTvShowEpisodeByIdQuery(episodeId));
-                if (episodeResult.IsFailed)
+                var season = seasons?.Find(x => x.Id == seasonId);
+                if (season is null)
                 {
-                    episodeResult.LogError();
+                    var seasonResult = await _mediator.Send(new GetPlexTvShowSeasonByIdQuery(seasonId));
+                    if (seasonResult.IsFailed)
+                    {
+                        seasonResult.LogError();
+                        continue;
+                    }
+
+                    season = seasonResult.Value;
+                }
+
+                // Check if the tvShowDownloadTask has already been created
+                var tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(season.TvShow));
+                if (tvShowDownloadTaskIndex == -1)
+                {
+                    var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(season.TvShow.PlexServerId, season.TvShow.Key));
+                    downloadTasks.Add(result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(season.TvShow));
+                    tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(season.TvShow));
+                }
+
+                // Check if the tvShowSeasonDownloadTask has already been created
+                var seasonDownloadTaskIndex = downloadTasks[tvShowDownloadTaskIndex].Children.FindIndex(x => x.Equals(season));
+                if (seasonDownloadTaskIndex == -1)
+                {
+                    var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(season.PlexServerId, season.Key));
+                    var seasonDownloadTask = result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(season);
+                    seasonDownloadTask.ParentId = downloadTasks[tvShowDownloadTaskIndex].Id;
+                    downloadTasks[tvShowDownloadTaskIndex].Children.Add(seasonDownloadTask);
+                }
+
+                // Create episodes downloadTasks
+                var episodesIds = season.Episodes.Select(x => x.Id).ToList();
+                var seasonsResult = await GenerateTvShowEpisodesDownloadTasksAsync(downloadTasks, episodesIds, season.Episodes);
+                if (seasonsResult.IsFailed)
+                {
+                    seasonsResult.LogError();
                     continue;
                 }
 
-                var episode = episodeResult.Value;
+                downloadTasks = seasonsResult.Value;
+            }
+
+            return Result.Ok(downloadTasks);
+        }
+
+        public async Task<Result<List<DownloadTask>>> GenerateTvShowEpisodesDownloadTasksAsync(List<DownloadTask> downloadTasks,
+            List<int> plexTvShowEpisodeIds, List<PlexTvShowEpisode> episodes = null)
+        {
+            if (!plexTvShowEpisodeIds.Any())
+                return ResultExtensions.IsEmpty(nameof(plexTvShowEpisodeIds)).LogWarning();
+
+            foreach (var episodeId in plexTvShowEpisodeIds)
+            {
+                // Retrieve episode media from database or passed in list
+                var episode = episodes?.Find(x => x.Id == episodeId);
+                if (episode is null)
+                {
+                    var episodeResult = await _mediator.Send(new GetPlexTvShowEpisodeByIdQuery(episodeId));
+                    if (episodeResult.IsFailed)
+                    {
+                        episodeResult.LogError();
+                        continue;
+                    }
+
+                    episode = episodeResult.Value;
+                }
 
                 // Check if the tvShowDownloadTask has already been created
-                var tvShowDownloadTask = downloadTasks.Find(x => x.MediaType == PlexMediaType.TvShow && x.Key == episode.Key);
-                if (tvShowDownloadTask is null)
+                var tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(episode.TvShow));
+                if (tvShowDownloadTaskIndex == -1)
                 {
-                    var tvShowDownloadTaskResult = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(episode.TvShowId, PlexMediaType.TvShow));
+                    var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(episode.TvShow.PlexServerId, episode.TvShow.Key));
+                    downloadTasks.Add(result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(episode.TvShow));
+                    tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(episode.TvShow));
+                }
+
+                // Check if the tvShowSeasonDownloadTask has already been created
+                var seasonDownloadTaskIndex = downloadTasks[tvShowDownloadTaskIndex].Children.FindIndex(x => x.Equals(episode.TvShowSeason));
+                if (seasonDownloadTaskIndex == -1)
+                {
+                    var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(episode.TvShowSeason.PlexServerId,
+                        episode.TvShowSeason.Key));
+                    var seasonDownloadTask = result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(episode.TvShowSeason);
+                    seasonDownloadTask.ParentId = downloadTasks[tvShowDownloadTaskIndex].Id;
+                    downloadTasks[tvShowDownloadTaskIndex].Children.Add(seasonDownloadTask);
+                    seasonDownloadTaskIndex = downloadTasks[tvShowDownloadTaskIndex].Children.FindIndex(x => x.Equals(episode.TvShowSeason));
+                }
+
+                // Check if the tvShowEpisodesDownloadTask has already been created
+                var episodeDownloadTaskIndex = downloadTasks[tvShowDownloadTaskIndex]
+                    .Children[seasonDownloadTaskIndex]
+                    .Children.FindIndex(x => x.Equals(episode));
+                if (episodeDownloadTaskIndex == -1)
+                {
+                    var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(episode.PlexServerId, episode.Key));
+                    var episodeDownloadTask = result.IsSuccess ? result.Value : CreateEpisodeDownloadTask(episode);
+                    episodeDownloadTask.ParentId = downloadTasks[tvShowDownloadTaskIndex].Children[seasonDownloadTaskIndex].Id;
+                    downloadTasks[tvShowDownloadTaskIndex].Children[seasonDownloadTaskIndex].Children.Add(episodeDownloadTask);
                 }
             }
 

@@ -56,7 +56,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
             var tvShowEpisodeIds = new List<int>();
 
             // Act
-            var result = await _sut.Object.GenerateDownloadTvShowTasksAsync(tvShowIds, tvShowSeasonIds, tvShowEpisodeIds);
+            var result = await _sut.Object.GenerateTvShowDownloadTasksAsync(tvShowIds, tvShowSeasonIds, tvShowEpisodeIds);
 
             // Assert
             result.IsFailed.ShouldBeTrue();
@@ -74,7 +74,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
             var tvShowEpisodeIds = new List<int>();
 
             // Act
-            var result = await _sut.Object.GenerateDownloadTvShowTasksAsync(tvShowIds, tvShowSeasonIds, tvShowEpisodeIds);
+            var result = await _sut.Object.GenerateTvShowDownloadTasksAsync(tvShowIds, tvShowSeasonIds, tvShowEpisodeIds);
 
             // Assert
             result.IsSuccess.ShouldBeTrue();

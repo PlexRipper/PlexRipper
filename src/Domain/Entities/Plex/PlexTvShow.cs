@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 
 namespace PlexRipper.Domain
 {
@@ -17,6 +15,5 @@ namespace PlexRipper.Domain
         public List<PlexTvShowSeason> Seasons { get; set; }
 
         #endregion
-
     }
 }

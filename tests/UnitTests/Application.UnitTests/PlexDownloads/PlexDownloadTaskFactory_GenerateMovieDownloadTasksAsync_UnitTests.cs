@@ -94,7 +94,6 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
                 downloadTask.PlexLibraryId.ShouldBeGreaterThan(0);
                 downloadTask.PlexServer.ShouldNotBeNull();
                 downloadTask.PlexServerId.ShouldBeGreaterThan(0);
-                downloadTask.MediaId.ShouldBe(plexMovie.Id);
 
                 downloadTask.MediaType.ShouldBe(plexMovie.Type);
                 downloadTask.DownloadTaskType.ShouldBe(DownloadTaskType.Movie);

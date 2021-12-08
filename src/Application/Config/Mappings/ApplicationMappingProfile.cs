@@ -21,7 +21,6 @@ namespace PlexRipper.Application.Config
         private void PlexMediaToDownloadTask()
         {
             CreateMap<Domain.PlexMedia, DownloadTask>(MemberList.None)
-                .ForMember(task => task.MediaId, opt => opt.MapFrom(entity => entity.Id))
                 .ForMember(task => task.Key, opt => opt.MapFrom(entity => entity.Key))
                 .ForMember(task => task.Title, opt => opt.MapFrom(entity => entity.Title))
                 .ForMember(task => task.FullTitle, opt => opt.MapFrom(entity => entity.FullTitle))

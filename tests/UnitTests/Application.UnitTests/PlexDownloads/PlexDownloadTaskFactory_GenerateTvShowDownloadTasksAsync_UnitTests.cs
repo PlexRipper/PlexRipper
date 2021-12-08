@@ -93,7 +93,6 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
 
                 downloadTask.PlexLibraryId.ShouldBe(tvShow.PlexLibraryId);
                 downloadTask.PlexServerId.ShouldBe(tvShow.PlexServerId);
-                downloadTask.MediaId.ShouldBe(tvShow.Id);
 
                 downloadTask.MediaType.ShouldBe(tvShow.Type);
                 downloadTask.DownloadTaskType.ShouldBe(DownloadTaskType.TvShow);
@@ -117,7 +116,6 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
 
                     seasonDownloadTask.PlexLibraryId.ShouldBe(seasonDownloadTask.PlexLibraryId);
                     seasonDownloadTask.PlexServerId.ShouldBe(seasonDownloadTask.PlexServerId);
-                    seasonDownloadTask.MediaId.ShouldBe(tvShowSeason.Id);
 
                     seasonDownloadTask.MediaType.ShouldBe(tvShowSeason.Type);
 
@@ -142,7 +140,6 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
 
                         episodeDownloadTask.PlexLibraryId.ShouldBe(tvShowEpisode.PlexLibraryId);
                         episodeDownloadTask.PlexServerId.ShouldBe(tvShowEpisode.PlexServerId);
-                        episodeDownloadTask.MediaId.ShouldBe(tvShowEpisode.Id);
 
                         episodeDownloadTask.MediaType.ShouldBe(tvShowEpisode.Type);
                         episodeDownloadTask.DownloadTaskType.ShouldBe(DownloadTaskType.Episode);
@@ -173,7 +170,6 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
 
                                     episodeDataPartDownloadTask.PlexLibraryId.ShouldBe(tvShowEpisode.PlexLibraryId);
                                     episodeDataPartDownloadTask.PlexServerId.ShouldBe(tvShowEpisode.PlexServerId);
-                                    episodeDataPartDownloadTask.MediaId.ShouldBe(tvShowEpisode.Id);
 
                                     episodeDataPartDownloadTask.MediaType.ShouldBe(tvShowEpisode.Type);
                                     episodeDataPartDownloadTask.DownloadTaskType.ShouldBe(DownloadTaskType.EpisodePart);

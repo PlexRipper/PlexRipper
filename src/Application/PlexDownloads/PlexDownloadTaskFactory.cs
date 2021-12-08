@@ -171,6 +171,30 @@ namespace PlexRipper.Application
             return Result.Ok(downloadTasks);
         }
 
+        public async Task<Result<List<DownloadTask>>> GenerateTvShowEpisodesDownloadTasksAsync(List<DownloadTask> downloadTasks,  List<int> plexTvShowEpisodeIds)
+        {
+            foreach (var episodeId in plexTvShowEpisodeIds)
+            {
+                var episodeResult = await _mediator.Send(new GetPlexTvShowEpisodeByIdQuery(episodeId));
+                if (episodeResult.IsFailed)
+                {
+                    episodeResult.LogError();
+                    continue;
+                }
+
+                var episode = episodeResult.Value;
+
+                // Check if the tvShowDownloadTask has already been created
+                var tvShowDownloadTask = downloadTasks.Find(x => x.MediaType == PlexMediaType.TvShow && x.Key == episode.Key);
+                if (tvShowDownloadTask is null)
+                {
+                    var tvShowDownloadTaskResult = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(episode.TvShowId, PlexMediaType.TvShow));
+                }
+            }
+
+            return Result.Ok(downloadTasks);
+        }
+
         /// <summary>
         /// Creates <see cref="DownloadTask"/>s from a <see cref="PlexMovie"/> and send it to the <see cref="IDownloadManager"/>.
         /// </summary>

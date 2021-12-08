@@ -37,7 +37,6 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.ParentId, _ => null)
                 .RuleFor(x => x.Parent, _ => null)
                 .RuleFor(x => x.Key, _ => _random.Next(1, 10000))
-                .RuleFor(x => x.MediaId, _ => _random.Next(1, 10000))
                 .RuleFor(x => x.Created, f => f.Date.Recent(30))
                 .RuleFor(x => x.Quality, f => f.PickRandom("sd", "720", "1080"))
                 .RuleFor(x => x.PlexServerId, f => config.PlexServerId > 0 ? config.PlexServerId : f.Random.Int(1, 1000))

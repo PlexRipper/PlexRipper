@@ -8,7 +8,6 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Data;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
@@ -51,55 +50,54 @@ namespace PlexRipper.Data
             });
         }
     }
-}
 
-public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<CreateDownloadTasksCommand, Result<List<int>>>
-{
-    public CreateDownloadTasksCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
-
-    public async Task<Result<List<int>>> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
+    public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<CreateDownloadTasksCommand, Result<List<int>>>
     {
-        // Prevent the navigation properties from being updated
-        InsertDownloadTasks(command.DownloadTasks);
+        public CreateDownloadTasksCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        return Result.Ok(command.DownloadTasks.Select(x => x.Id).ToList());
-    }
-
-    private void InsertDownloadTasks(List<DownloadTask> downloadTasks)
-    {
-        downloadTasks.ForEach(x =>
+        public async Task<Result<List<int>>> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
         {
-            x.DestinationFolder = null;
-            x.DownloadFolder = null;
-            x.PlexServer = null;
-            x.PlexLibrary = null;
-        });
+            // Prevent the navigation properties from being updated
+            InsertDownloadTasks(command.DownloadTasks);
 
-        _dbContext.BulkInsert(downloadTasks, _bulkConfig);
+            return Result.Ok(command.DownloadTasks.Select(x => x.Id).ToList());
+        }
 
-        foreach (var downloadTask in downloadTasks)
+        private void InsertDownloadTasks(List<DownloadTask> downloadTasks)
         {
-            if (downloadTask.DownloadWorkerTasks.Any())
+            downloadTasks.ForEach(x =>
             {
-                foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
+                x.DestinationFolder = null;
+                x.DownloadFolder = null;
+                x.PlexServer = null;
+                x.PlexLibrary = null;
+            });
+
+            _dbContext.BulkInsert(downloadTasks, _bulkConfig);
+
+            foreach (var downloadTask in downloadTasks)
+            {
+                if (downloadTask.DownloadWorkerTasks.Any())
                 {
-                    downloadWorkerTask.DownloadTaskId = downloadTask.Id;
+                    foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
+                    {
+                        downloadWorkerTask.DownloadTaskId = downloadTask.Id;
+                    }
+
+                    _dbContext.BulkInsert(downloadTask.DownloadWorkerTasks, _bulkConfig);
                 }
 
-                _dbContext.BulkInsert(downloadTask.DownloadWorkerTasks, _bulkConfig);
-            }
-
-            if (downloadTask.Children.Any())
-            {
-                foreach (var downloadTaskChild in downloadTask.Children)
+                if (downloadTask.Children.Any())
                 {
-                    downloadTaskChild.ParentId = downloadTask.Id;
-                    downloadTaskChild.Parent = null;
-                }
+                    foreach (var downloadTaskChild in downloadTask.Children)
+                    {
+                        downloadTaskChild.ParentId = downloadTask.Id;
+                        downloadTaskChild.Parent = null;
+                    }
 
-                InsertDownloadTasks(downloadTask.Children);
+                    InsertDownloadTasks(downloadTask.Children);
+                }
             }
         }
     }
 }
-

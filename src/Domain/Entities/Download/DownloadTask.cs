@@ -97,8 +97,6 @@ namespace PlexRipper.Domain
         [Column(Order = 18)]
         public int DownloadSpeed { get; set; }
 
-        public int MediaId { get; set; }
-
         /// <summary>
         /// Gets or sets the download priority, the higher the more important.
         /// </summary>

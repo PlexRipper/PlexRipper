@@ -82,10 +82,14 @@ namespace PlexRipper.BaseTests
             return dbContext;
         }
 
-        public static PlexRipperDbContext AddMedia(this PlexRipperDbContext dbContext)
+        public static PlexRipperDbContext AddMedia(this PlexRipperDbContext dbContext, FakeDataConfig config = null)
         {
-            var plexLibraries = dbContext.PlexLibraries.ToList();
+            config ??= new FakeDataConfig
+            {
+                IncludeLibraries = true,
+            };
 
+            var plexLibraries = dbContext.PlexLibraries.ToList();
             if (plexLibraries.Any())
             {
                 foreach (var plexLibrary in plexLibraries)
@@ -93,10 +97,10 @@ namespace PlexRipper.BaseTests
                     switch (plexLibrary.Type)
                     {
                         case PlexMediaType.Movie:
-                            dbContext.PlexMovies.AddRange(FakeData.GetPlexMovies().GenerateBetween(20, 100));
+                            dbContext.PlexMovies.AddRange(FakeData.GetPlexMovies(config).GenerateBetween(20, 100));
                             break;
                         case PlexMediaType.TvShow:
-                            dbContext.PlexTvShows.AddRange(FakeData.GetPlexTvShows().GenerateBetween(10, 20));
+                            dbContext.PlexTvShows.AddRange(FakeData.GetPlexTvShows(config).GenerateBetween(10, 20));
                             break;
                         default:
                             throw new NotSupportedException($"{plexLibrary.Type} not supported in MockDatabase.AddMedia");
@@ -104,9 +108,10 @@ namespace PlexRipper.BaseTests
                 }
 
                 dbContext.SaveChanges();
+                return dbContext;
             }
 
-            return dbContext;
+            throw new Exception($"{nameof(AddMedia)} can only be used after PlexLibraries have been added");
         }
 
         public static PlexRipperDbContext AddDownloadTasks(this PlexRipperDbContext dbContext, FakeDataConfig config = null)

@@ -21,7 +21,14 @@ namespace PlexRipper.BaseTests
             return $"memory_database_{_rnd.Next(1, int.MaxValue)}_{_rnd.Next(1, int.MaxValue)}";
         }
 
-        public static PlexRipperDbContext GetMemoryDbContext(string dbName = "")
+        /// <summary>
+        /// Creates an in-memory database only to be used for unit and integration testing.
+        /// </summary>
+        /// <param name="dbName">leave empty to generate a random one</param>
+        /// <param name="disableForeignKeyCheck">By default, don't enforce foreign key check for handling database data.</param>
+        /// <returns>A <see cref="PlexRipperDbContext"/> in memory instance.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static PlexRipperDbContext GetMemoryDbContext(string dbName = "", bool disableForeignKeyCheck = true)
         {
             var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
 
@@ -29,7 +36,7 @@ namespace PlexRipper.BaseTests
             var connectionString = new SqliteConnectionStringBuilder
             {
                 Mode = SqliteOpenMode.Memory,
-
+                ForeignKeys = !disableForeignKeyCheck,
                 // Database name
                 DataSource = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName,
                 Cache = SqliteCacheMode.Shared,
@@ -37,8 +44,7 @@ namespace PlexRipper.BaseTests
 
             optionsBuilder.UseSqlite(connectionString);
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            optionsBuilder.EnableDetailedErrors();
-            optionsBuilder.LogTo((id, level) =>
+            optionsBuilder.LogTo((_, level) =>
             {
                 switch (level)
                 {

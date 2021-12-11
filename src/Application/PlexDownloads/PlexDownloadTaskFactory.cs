@@ -74,7 +74,7 @@ namespace PlexRipper.Application
 
             if (plexTvShowIds.Any())
             {
-                var result = await GenerateTvShowDownloadTasksAsync(downloadTasks, plexTvShowIds);
+                var result = await GenerateTvShowDownloadTasksAsync(plexTvShowIds, downloadTasks);
                 if (result.IsSuccess)
                 {
                     downloadTasks = result.Value;
@@ -87,7 +87,7 @@ namespace PlexRipper.Application
 
             if (plexTvShowSeasonIds.Any())
             {
-                var result = await GenerateTvShowSeasonDownloadTasksAsync(downloadTasks, plexTvShowSeasonIds);
+                var result = await GenerateTvShowSeasonDownloadTasksAsync(plexTvShowSeasonIds, downloadTasks);
                 if (result.IsSuccess)
                 {
                     downloadTasks = result.Value;
@@ -100,7 +100,7 @@ namespace PlexRipper.Application
 
             if (plexTvShowEpisodeIds.Any())
             {
-                var result = await GenerateTvShowSeasonDownloadTasksAsync(downloadTasks, plexTvShowEpisodeIds);
+                var result = await GenerateTvShowSeasonDownloadTasksAsync(plexTvShowEpisodeIds, downloadTasks);
                 if (result.IsSuccess)
                 {
                     downloadTasks = result.Value;
@@ -136,7 +136,7 @@ namespace PlexRipper.Application
         {
             var episodeDownloadTask = _mapper.Map<DownloadTask>(episode);
 
-            // TODO Takes first entry which assumes its the highest quality one
+            // TODO Takes first entry which assumes its the highest quality one, should be configurable
             var episodeData = episode.EpisodeData.First();
 
             if (episodeData.IsMultiPart)
@@ -167,10 +167,13 @@ namespace PlexRipper.Application
             return episodeDownloadTask;
         }
 
-        public async Task<Result<List<DownloadTask>>> GenerateTvShowDownloadTasksAsync(List<DownloadTask> downloadTasks, List<int> plexTvShowIds)
+        public async Task<Result<List<DownloadTask>>> GenerateTvShowDownloadTasksAsync(List<int> plexTvShowIds,
+            List<DownloadTask> downloadTasks = null)
         {
             if (!plexTvShowIds.Any())
                 return ResultExtensions.IsEmpty(nameof(plexTvShowIds)).LogWarning();
+
+            downloadTasks ??= new List<DownloadTask>();
 
             foreach (var tvShowId in plexTvShowIds)
             {
@@ -194,7 +197,7 @@ namespace PlexRipper.Application
 
                 // Create seasons downloadTasks
                 var seasonIds = tvShow.Seasons.Select(x => x.Id).ToList();
-                var seasonsResult = await GenerateTvShowSeasonDownloadTasksAsync(downloadTasks, seasonIds, tvShow.Seasons);
+                var seasonsResult = await GenerateTvShowSeasonDownloadTasksAsync(seasonIds, downloadTasks, tvShow.Seasons);
                 if (seasonsResult.IsFailed)
                 {
                     seasonsResult.LogError();
@@ -204,16 +207,20 @@ namespace PlexRipper.Application
                 downloadTasks = seasonsResult.Value;
             }
 
+            downloadTasks.ForEach(x => x.Calculate());
+
             return Result.Ok(downloadTasks);
         }
 
         public async Task<Result<List<DownloadTask>>> GenerateTvShowSeasonDownloadTasksAsync(
-            List<DownloadTask> downloadTasks,
             List<int> plexTvShowSeasonIds,
+            List<DownloadTask> downloadTasks = null,
             List<PlexTvShowSeason> seasons = null)
         {
             if (!plexTvShowSeasonIds.Any())
                 return ResultExtensions.IsEmpty(nameof(plexTvShowSeasonIds)).LogWarning();
+
+            downloadTasks ??= new List<DownloadTask>();
 
             foreach (var seasonId in plexTvShowSeasonIds)
             {
@@ -251,7 +258,7 @@ namespace PlexRipper.Application
 
                 // Create episodes downloadTasks
                 var episodesIds = season.Episodes.Select(x => x.Id).ToList();
-                var seasonsResult = await GenerateTvShowEpisodesDownloadTasksAsync(downloadTasks, episodesIds, season.Episodes);
+                var seasonsResult = await GenerateTvShowEpisodesDownloadTasksAsync(episodesIds, downloadTasks, season.Episodes);
                 if (seasonsResult.IsFailed)
                 {
                     seasonsResult.LogError();
@@ -261,14 +268,20 @@ namespace PlexRipper.Application
                 downloadTasks = seasonsResult.Value;
             }
 
+            downloadTasks.ForEach(x => x.Calculate());
+
             return Result.Ok(downloadTasks);
         }
 
-        public async Task<Result<List<DownloadTask>>> GenerateTvShowEpisodesDownloadTasksAsync(List<DownloadTask> downloadTasks,
-            List<int> plexTvShowEpisodeIds, List<PlexTvShowEpisode> episodes = null)
+        public async Task<Result<List<DownloadTask>>> GenerateTvShowEpisodesDownloadTasksAsync(
+            List<int> plexTvShowEpisodeIds,
+            List<DownloadTask> downloadTasks = null,
+            List<PlexTvShowEpisode> episodes = null)
         {
             if (!plexTvShowEpisodeIds.Any())
                 return ResultExtensions.IsEmpty(nameof(plexTvShowEpisodeIds)).LogWarning();
+
+            downloadTasks ??= new List<DownloadTask>();
 
             foreach (var episodeId in plexTvShowEpisodeIds)
             {
@@ -319,6 +332,8 @@ namespace PlexRipper.Application
                     downloadTasks[tvShowDownloadTaskIndex].Children[seasonDownloadTaskIndex].Children.Add(episodeDownloadTask);
                 }
             }
+
+            downloadTasks.ForEach(x => x.Calculate());
 
             return Result.Ok(downloadTasks);
         }

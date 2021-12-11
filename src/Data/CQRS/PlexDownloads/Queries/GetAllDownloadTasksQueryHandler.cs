@@ -23,7 +23,7 @@ namespace PlexRipper.Data
             // AsTracking due to Children->Parent cycle error, therefore all navigation properties are added as well
             var downloadList = await DownloadTasksQueryable
                 .AsTracking()
-                .IncludeDownloadTasks(true, true)
+                .IncludeDownloadTasks()
                 .Where(x => x.ParentId == null) // Where clause is to retrieve only the root DownloadTasks
                 .ToListAsync(cancellationToken);
             return Result.Ok(downloadList);

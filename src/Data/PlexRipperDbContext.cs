@@ -11,7 +11,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
-    public class PlexRipperDbContext : DbContext, ISetupAsync
+    public sealed class PlexRipperDbContext : DbContext, ISetupAsync
     {
         private readonly IPathSystem _pathSystem;
 
@@ -154,7 +154,6 @@ namespace PlexRipper.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // optionsBuilder.UseLazyLoadingProxies();
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.EnableDetailedErrors();
                 optionsBuilder

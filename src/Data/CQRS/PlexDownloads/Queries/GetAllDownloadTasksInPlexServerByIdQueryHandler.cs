@@ -29,7 +29,7 @@ namespace PlexRipper.Data
         {
             var downloadTasks = await PlexServerQueryable
                 .AsTracking()
-                .IncludeDownloadTasks(true)
+                .IncludeDownloadTasks()
                 .FirstOrDefaultAsync(x => x.Id == request.PlexServerId, cancellationToken);
 
             return Result.Ok(downloadTasks.DownloadTasks.Where(x => x.ParentId == null).ToList());

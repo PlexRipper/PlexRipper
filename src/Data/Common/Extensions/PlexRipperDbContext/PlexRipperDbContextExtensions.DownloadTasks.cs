@@ -8,29 +8,20 @@ namespace PlexRipper.Data.Common
     {
         #region PlexDownloadTasks
 
-        public static IQueryable<PlexServer> IncludeDownloadTasks(this IQueryable<PlexServer> plexServer, bool includeServer = false,
-            bool includeLibrary = false)
+        public static IQueryable<PlexServer> IncludeDownloadTasks(this IQueryable<PlexServer> plexServer)
         {
             return plexServer
                 .Include(x => x.PlexLibraries)
-                .IncludeDownloadTasks("PlexLibraries.DownloadTasks.", includeServer, includeLibrary)
+                .IncludeDownloadTasks("PlexLibraries.DownloadTasks.")
                 .AsQueryable();
         }
 
-
-        public static IQueryable<DownloadTask> IncludeDownloadTasks(
-            this IQueryable<DownloadTask> downloadTasks,
-            bool includeServer = false,
-            bool includeLibrary = false)
+        public static IQueryable<DownloadTask> IncludeDownloadTasks(this IQueryable<DownloadTask> downloadTasks)
         {
-            return downloadTasks.IncludeDownloadTasks("", includeServer, includeLibrary);
+            return downloadTasks.IncludeDownloadTasks("");
         }
 
-        private static IQueryable<T> IncludeDownloadTasks<T>(
-            this IQueryable<T> query,
-            string prefix,
-            bool includeServer = false,
-            bool includeLibrary = false) where T : class
+        private static IQueryable<T> IncludeDownloadTasks<T>(this IQueryable<T> query, string prefix = "") where T : class
         {
             if (!string.IsNullOrEmpty(prefix))
             {
@@ -51,17 +42,8 @@ namespace PlexRipper.Data.Common
                     .Include($"{childPath}DownloadFolder")
                     .Include($"{childPath}DestinationFolder")
                     .Include($"{childPath}DownloadWorkerTasks")
-                    .Include($"{childPath}Parent");
-
-                if (includeServer)
-                {
-                    query = query.Include($"{childPath}PlexServer");
-                }
-
-                if (includeLibrary)
-                {
-                    query = query.Include($"{childPath}PlexLibrary");
-                }
+                    .Include($"{childPath}PlexServer")
+                    .Include($"{childPath}PlexLibrary");
             }
 
             return query;

@@ -169,6 +169,24 @@ namespace PlexRipper.Domain
                 or DownloadTaskType.MoviePart;
         }
 
+        /// <summary>
+        /// Calculate properties such as DataReceived, DataTotal based on the nested children.
+        /// </summary>
+        public void Calculate()
+        {
+            if (Children.Any())
+            {
+                foreach (var downloadTask in Children)
+                {
+                    downloadTask.Calculate();
+                }
+
+                DataReceived = Children.Select(x => x.DataReceived).Sum();
+                DataTotal = Children.Select(x => x.DataTotal).Sum();
+                Percentage = DataFormat.GetPercentage(DataReceived, DataTotal);
+            }
+        }
+
         /// <inheritdoc/>
         public override string ToString()
         {

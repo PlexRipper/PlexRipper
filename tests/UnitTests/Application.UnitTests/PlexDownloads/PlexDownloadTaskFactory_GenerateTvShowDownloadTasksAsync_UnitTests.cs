@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Extras.Moq;
 using FluentResults;
 using Logging;
-using MediatR;
 using Moq;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.BaseTests;
+using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain;
-using PlexRipper.WebAPI.Config;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,67 +18,47 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
 {
     public class PlexDownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests
     {
-        private readonly Mock<PlexDownloadTaskFactory> _sut;
-
-        private readonly Mock<IMediator> _iMediator = new();
-
-        private readonly Mock<IPlexAuthenticationService> _plexAuthenticationService = new();
-
-        private readonly Mock<INotificationsService> _notificationsService = new();
-
-        private readonly Mock<IFolderPathService> _folderPathService = new();
-
-        private readonly Mock<IUserSettings> _userSettings = new();
 
         public PlexDownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
-
-            _sut = new Mock<PlexDownloadTaskFactory>(
-                MockBehavior.Strict,
-                _iMediator.Object,
-                MapperSetup.CreateMapper(),
-                _plexAuthenticationService.Object,
-                _notificationsService.Object,
-                _folderPathService.Object,
-                _userSettings.Object);
         }
 
         [Fact]
         public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
         {
             // Arrange
-            _iMediator.Setup(x => x.Send(It.IsAny<GetPlexTvShowTreeByMediaIdsQuery>(), CancellationToken.None)).ReturnsAsync(Result.Fail(""));
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<PlexDownloadTaskFactory>();
             var tvShowIds = new List<int>();
-            var tvShowSeasonIds = new List<int>();
-            var tvShowEpisodeIds = new List<int>();
 
             // Act
-            var result = await _sut.Object.GenerateTvShowDownloadTasksAsync(tvShowIds, tvShowSeasonIds, tvShowEpisodeIds);
+            var result = await _sut.GenerateTvShowDownloadTasksAsync(tvShowIds);
 
             // Assert
             result.IsFailed.ShouldBeTrue();
         }
 
         [Fact]
-        public async Task ShouldHaveValidDownloadTasks_WhenPlexTvShowsAreValid()
+        public async Task ShouldHaveValidDownloadTasks_WhenGivenAValidPlexTvShowId()
         {
             // Arrange
             var tvShows = FakeData.GetPlexTvShows().Generate(5);
-            _iMediator.Setup(x => x.Send(It.IsAny<GetPlexTvShowTreeByMediaIdsQuery>(), CancellationToken.None)).ReturnsAsync(Result.Ok(tvShows));
+            using var mock = AutoMock.GetStrict().AddMapper();
+            mock.SetupMediator(It.IsAny<GetPlexTvShowByIdQuery>).ReturnsAsync(Result.Ok(tvShows.Find(x => x.Id == 1)));
+            mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>).ReturnsAsync(Result.Fail(""));
+            var _sut = mock.Create<PlexDownloadTaskFactory>();
 
-            var tvShowIds = new List<int>();
-            var tvShowSeasonIds = new List<int>();
-            var tvShowEpisodeIds = new List<int>();
+            var tvShowIds = new List<int> { 1 };
 
             // Act
-            var result = await _sut.Object.GenerateTvShowDownloadTasksAsync(tvShowIds, tvShowSeasonIds, tvShowEpisodeIds);
+            var result = await _sut.GenerateTvShowDownloadTasksAsync(tvShowIds);
 
             // Assert
             result.IsSuccess.ShouldBeTrue();
-            result.Value.Count.ShouldBe(5);
+            result.Value.Count.ShouldBe(tvShowIds.Count);
 
-            for (var i = 0; i < tvShows.Count; i++)
+            for (var i = 0; i < tvShowIds.Count; i++)
             {
                 var tvShow = tvShows[i];
                 var downloadTask = result.Value[i];

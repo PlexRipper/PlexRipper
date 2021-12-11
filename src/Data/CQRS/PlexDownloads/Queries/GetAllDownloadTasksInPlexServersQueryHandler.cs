@@ -21,7 +21,7 @@ namespace PlexRipper.Data
 
         public async Task<Result<List<PlexServer>>> Handle(GetAllDownloadTasksInPlexServersQuery request, CancellationToken cancellationToken)
         {
-            var query = PlexServerQueryable.AsTracking().IncludeDownloadTasks(true);
+            var query = PlexServerQueryable.AsTracking().IncludeDownloadTasks();
 
             if (request.IncludeServerStatus)
             {

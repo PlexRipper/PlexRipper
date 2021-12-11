@@ -10,6 +10,7 @@ using PlexRipper.Application.PlexTvShows;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain;
+using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -29,7 +30,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
         {
             // Arrange
             using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<PlexDownloadTaskFactory>();
+            var _sut = mock.Create<DownloadTaskFactory>();
             var tvShowIds = new List<int>();
 
             // Act
@@ -47,7 +48,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
             using var mock = AutoMock.GetStrict().AddMapper();
             mock.SetupMediator(It.IsAny<GetPlexTvShowByIdQuery>).ReturnsAsync(Result.Ok(tvShows.Find(x => x.Id == 1)));
             mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>).ReturnsAsync(Result.Fail(""));
-            var _sut = mock.Create<PlexDownloadTaskFactory>();
+            var _sut = mock.Create<DownloadTaskFactory>();
 
             var tvShowIds = new List<int> { 1 };
 

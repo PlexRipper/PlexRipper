@@ -120,7 +120,7 @@ namespace PlexRipper.BaseTests
 
         public IFolderPathService GetFolderPathService => AutofacContainer.Resolve<IFolderPathService>();
 
-        public IPlexDownloadTaskFactory GetPlexDownloadTaskFactory => AutofacContainer.Resolve<IPlexDownloadTaskFactory>();
+        public IDownloadTaskFactory GetDownloadTaskFactory => AutofacContainer.Resolve<IDownloadTaskFactory>();
 
         public IMediator Mediator => AutofacContainer.Resolve<IMediator>();
 

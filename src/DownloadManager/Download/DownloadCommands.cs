@@ -26,7 +26,7 @@ namespace PlexRipper.DownloadManager
 
         private readonly IDownloadScheduler _downloadScheduler;
 
-        private readonly IPlexDownloadTaskFactory _plexDownloadTaskFactory;
+        private readonly IDownloadTaskFactory _downloadTaskFactory;
 
         private readonly IDownloadProgressScheduler _downloadProgressScheduler;
 
@@ -41,7 +41,7 @@ namespace PlexRipper.DownloadManager
             IFileSystem fileSystem,
             INotificationsService notificationsService,
             IDownloadScheduler downloadScheduler,
-            IPlexDownloadTaskFactory plexDownloadTaskFactory,
+            IDownloadTaskFactory downloadTaskFactory,
             IDownloadProgressScheduler downloadProgressScheduler)
         {
             _mediator = mediator;
@@ -50,7 +50,7 @@ namespace PlexRipper.DownloadManager
             _fileSystem = fileSystem;
             _notificationsService = notificationsService;
             _downloadScheduler = downloadScheduler;
-            _plexDownloadTaskFactory = plexDownloadTaskFactory;
+            _downloadTaskFactory = downloadTaskFactory;
             _downloadProgressScheduler = downloadProgressScheduler;
         }
 
@@ -74,7 +74,7 @@ namespace PlexRipper.DownloadManager
                 return stopDownloadTasksResult.ToResult().LogError();
             }
 
-            var regeneratedDownloadTasks = await _plexDownloadTaskFactory.RegenerateDownloadTask(stopDownloadTasksResult.Value);
+            var regeneratedDownloadTasks = await _downloadTaskFactory.RegenerateDownloadTask(stopDownloadTasksResult.Value);
             if (regeneratedDownloadTasks.IsFailed)
             {
                 return regeneratedDownloadTasks.LogError();
@@ -112,27 +112,6 @@ namespace PlexRipper.DownloadManager
         }
 
         #region Start
-
-        public async Task<Result> StartDownloadTasksAsync(List<int> downloadTaskIds)
-        {
-            if (downloadTaskIds is null || !downloadTaskIds.Any())
-            {
-                return Result.Fail("Parameter downloadTasks was empty or null").LogError();
-            }
-
-            var downloadTasksResult = await _mediator.Send(new GetAllRelatedDownloadTasksQuery(downloadTaskIds));
-            if (downloadTasksResult.IsFailed)
-            {
-                return downloadTasksResult;
-            }
-
-            foreach (var downloadTask in downloadTasksResult.Value)
-            {
-                await StartDownloadTaskAsync(downloadTask);
-            }
-
-            return Result.Ok();
-        }
 
         public async Task<Result> StartDownloadTaskAsync(DownloadTask downloadTask)
         {

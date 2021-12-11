@@ -22,6 +22,7 @@ namespace PlexRipper.DownloadManager
             builder.RegisterType<DownloadSubscriptions>().As<IDownloadSubscriptions>().SingleInstance();
             builder.RegisterType<DownloadProgressScheduler>().As<IDownloadProgressScheduler>().SingleInstance();
             builder.RegisterType<DownloadProgressNotifier>().As<IDownloadProgressNotifier>().SingleInstance();
+            builder.RegisterType<DownloadTaskFactory>().As<IDownloadTaskFactory>().InstancePerLifetimeScope();
 
             builder.RegisterType<DownloadWorker>().InstancePerDependency();
             builder.RegisterType<PlexDownloadClient>().InstancePerDependency();

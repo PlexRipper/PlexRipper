@@ -30,8 +30,6 @@ namespace PlexRipper.Application.Common
 
         Task<Result> StartDownloadTaskAsync(DownloadTask downloadTask);
 
-        Task<Result> StartDownloadTasksAsync(List<int> downloadTaskIds);
-
         /// <summary>
         /// Stops and disposes of the PlexDownloadClient executing the <see cref="DownloadTask"/> if it is downloading.
         /// </summary>

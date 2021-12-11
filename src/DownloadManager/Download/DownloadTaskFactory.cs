@@ -6,6 +6,7 @@ using AutoMapper;
 using FluentResults;
 using Logging;
 using MediatR;
+using PlexRipper.Application;
 using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Application.FolderPaths;
@@ -15,9 +16,9 @@ using PlexRipper.Application.PlexMovies;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application
+namespace PlexRipper.DownloadManager
 {
-    public class PlexDownloadTaskFactory : IPlexDownloadTaskFactory
+    public class DownloadTaskFactory : IDownloadTaskFactory
     {
         #region Fields
 
@@ -31,26 +32,22 @@ namespace PlexRipper.Application
 
         private readonly IPlexAuthenticationService _plexAuthenticationService;
 
-        private readonly IUserSettings _userSettings;
-
         #endregion
 
         #region Constructor
 
-        public PlexDownloadTaskFactory(
+        public DownloadTaskFactory(
             IMediator mediator,
             IMapper mapper,
             IPlexAuthenticationService plexAuthenticationService,
             INotificationsService notificationsService,
-            IFolderPathService folderPathService,
-            IUserSettings userSettings)
+            IFolderPathService folderPathService)
         {
             _mediator = mediator;
             _mapper = mapper;
             _plexAuthenticationService = plexAuthenticationService;
             _notificationsService = notificationsService;
             _folderPathService = folderPathService;
-            _userSettings = userSettings;
         }
 
         #endregion
@@ -468,10 +465,6 @@ namespace PlexRipper.Application
         {
             if (!downloadTasks.Any())
                 return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
-
-            var parts = _userSettings.DownloadSegments;
-            if (parts <= 0)
-                return Result.Fail($"The DownloadSegments value has an invalid value of {parts}");
 
             // Get the download folder
             var downloadFolder = await _folderPathService.GetDownloadFolderAsync();

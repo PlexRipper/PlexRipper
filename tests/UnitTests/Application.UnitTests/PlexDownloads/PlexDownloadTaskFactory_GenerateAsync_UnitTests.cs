@@ -9,6 +9,7 @@ using PlexRipper.Application.Common;
 using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
+using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Config;
 using Shouldly;
 using Xunit;
@@ -18,7 +19,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
 {
     public class PlexDownloadTaskFactory_GenerateAsync_UnitTests
     {
-        private readonly Mock<PlexDownloadTaskFactory> _sut;
+        private readonly Mock<DownloadTaskFactory> _sut;
 
         private readonly Mock<IMediator> _iMediator = new();
 
@@ -34,7 +35,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
         {
             Log.SetupTestLogging(output);
 
-            _sut = new Mock<PlexDownloadTaskFactory>(
+            _sut = new Mock<DownloadTaskFactory>(
                 MockBehavior.Strict,
                 _iMediator.Object,
                 MapperSetup.CreateMapper(),

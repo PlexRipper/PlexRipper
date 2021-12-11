@@ -6,7 +6,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Common
 {
-    public interface IPlexDownloadTaskFactory
+    public interface IDownloadTaskFactory
     {
         Task<Result<List<DownloadTask>>> GenerateAsync(List<DownloadMediaDTO> downloadMedias);
 

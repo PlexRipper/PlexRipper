@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
@@ -15,15 +14,11 @@ namespace PlexRipper.Application
 
         private readonly IDownloadManager _downloadManager;
 
-        private readonly INotificationsService _notificationsService;
-
-        private readonly IPlexDownloadTaskFactory _plexDownloadTaskFactory;
+        private readonly IDownloadTaskFactory _downloadTaskFactory;
 
         private readonly IDownloadCommands _downloadCommands;
 
         private readonly IMediator _mediator;
-
-        private readonly ISignalRService _signalRService;
 
         #endregion
 
@@ -34,23 +29,17 @@ namespace PlexRipper.Application
         /// </summary>
         /// <param name="mediator"></param>
         /// <param name="downloadManager"></param>
-        /// <param name="signalRService"></param>
-        /// <param name="notificationsService"></param>
-        /// <param name="plexDownloadTaskFactory"></param>
+        /// <param name="downloadTaskFactory"></param>
         /// <param name="downloadCommands"></param>
         public PlexDownloadService(
             IMediator mediator,
             IDownloadManager downloadManager,
-            ISignalRService signalRService,
-            INotificationsService notificationsService,
-            IPlexDownloadTaskFactory plexDownloadTaskFactory,
+            IDownloadTaskFactory downloadTaskFactory,
             IDownloadCommands downloadCommands)
         {
             _mediator = mediator;
             _downloadManager = downloadManager;
-            _signalRService = signalRService;
-            _notificationsService = notificationsService;
-            _plexDownloadTaskFactory = plexDownloadTaskFactory;
+            _downloadTaskFactory = downloadTaskFactory;
             _downloadCommands = downloadCommands;
         }
 
@@ -69,7 +58,7 @@ namespace PlexRipper.Application
 
         public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders)
         {
-            var downloadTasks = await _plexDownloadTaskFactory.GenerateAsync(downloadTaskOrders);
+            var downloadTasks = await _downloadTaskFactory.GenerateAsync(downloadTaskOrders);
             if (downloadTasks.IsFailed)
                 return downloadTasks.ToResult();
 
@@ -109,29 +98,6 @@ namespace PlexRipper.Application
         }
 
         #endregion
-
-        #endregion
-
-        #region Private
-
-        private Result<DownloadTask> PrioritizeDownloadTask(DownloadTask downloadTask)
-        {
-            // TODO This is intended to change the order of downloads, not finished
-            downloadTask.Priority = DataFormat.GetPriority();
-            return Result.Ok(downloadTask);
-        }
-
-        private Result<List<DownloadTask>> PrioritizeDownloadTasks(List<DownloadTask> downloadTasks)
-        {
-            // TODO This is intended to change the order of downloads, not finished
-            var priorities = DataFormat.GetPriority(downloadTasks.Count);
-            for (int i = 0; i < downloadTasks.Count; i++)
-            {
-                downloadTasks[i].Priority = priorities[i];
-            }
-
-            return Result.Ok(downloadTasks);
-        }
 
         #endregion
 

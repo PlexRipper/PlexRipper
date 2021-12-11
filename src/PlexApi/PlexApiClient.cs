@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Config.Converters;

@@ -2,7 +2,7 @@
 using System.Linq;
 using AutoMapper;
 using FluentResults;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.DTO;

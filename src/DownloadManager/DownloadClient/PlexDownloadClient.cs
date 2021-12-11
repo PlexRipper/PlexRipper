@@ -9,7 +9,6 @@ using FluentResults;
 using Logging;
 using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.DownloadWorkerTasks;
 using PlexRipper.Domain;
 

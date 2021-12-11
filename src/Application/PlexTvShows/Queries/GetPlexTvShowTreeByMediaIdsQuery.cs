@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
+using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
-using FluentResults;
 
-namespace PlexRipper.Application.PlexTvShows
+namespace PlexRipper.Application
 {
     public class GetPlexTvShowTreeByMediaIdsQuery : IRequest<Result<List<PlexTvShow>>>
     {

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using Logging;
 using Moq;
-using PlexRipper.Application.Common;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;

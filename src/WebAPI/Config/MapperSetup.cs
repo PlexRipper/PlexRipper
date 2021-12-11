@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using PlexRipper.Application.Config;
+using PlexRipper.Application;
 using PlexRipper.Domain.AutoMapper;
 using PlexRipper.DownloadManager.AutoMapper;
 using PlexRipper.PlexApi.Config.Mappings;

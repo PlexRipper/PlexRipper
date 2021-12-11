@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
-using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common
+namespace PlexRipper.Application
 {
     public interface IDownloadTaskFactory
     {

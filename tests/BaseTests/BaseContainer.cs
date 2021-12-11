@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.BaseTests.Config;
 using PlexRipper.Data;
 using PlexRipper.Domain;

@@ -5,7 +5,6 @@ using FluentResults;
 using Logging;
 using MediatR;
 using Moq;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;

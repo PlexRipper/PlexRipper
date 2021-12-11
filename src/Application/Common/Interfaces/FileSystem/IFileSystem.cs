@@ -2,7 +2,7 @@
 using FluentResults;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common
+namespace PlexRipper.Application
 {
     public interface IFileSystem : ISetup
     {

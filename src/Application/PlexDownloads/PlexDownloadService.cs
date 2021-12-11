@@ -2,8 +2,6 @@
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application

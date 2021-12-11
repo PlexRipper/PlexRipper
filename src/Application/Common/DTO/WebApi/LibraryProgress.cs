@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.WebApi
+namespace PlexRipper.Application
 {
     public class LibraryProgress
     {

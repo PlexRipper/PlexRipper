@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Logging;
-using PlexRipper.Application.Common;
 using Quartz;
 
 namespace PlexRipper.Application

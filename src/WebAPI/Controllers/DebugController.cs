@@ -2,7 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.FluentResult;
 

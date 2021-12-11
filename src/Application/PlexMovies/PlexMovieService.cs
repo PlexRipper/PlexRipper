@@ -1,8 +1,6 @@
 ﻿using MediatR;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.PlexMedia;
 
-namespace PlexRipper.Application.PlexMovies
+namespace PlexRipper.Application
 {
     public class PlexMovieService : PlexMediaService, IPlexMovieService
     {

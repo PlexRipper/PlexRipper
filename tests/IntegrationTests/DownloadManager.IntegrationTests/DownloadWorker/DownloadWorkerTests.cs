@@ -7,7 +7,7 @@ using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using Moq;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;

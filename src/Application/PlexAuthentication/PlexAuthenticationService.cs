@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using Logging;
 using MediatR;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexAuthentication.Queries;
 using PlexRipper.Domain;
 

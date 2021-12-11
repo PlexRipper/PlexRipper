@@ -1,7 +1,7 @@
 using FluentResults;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common
+namespace PlexRipper.Application
 {
     /// <summary>
     /// Used to store and load settings from a json file.

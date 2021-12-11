@@ -11,7 +11,6 @@ using FluentResults;
 using Logging;
 using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.FileManager.Command;
 using PlexRipper.Application.FileManager.Queries;
 using PlexRipper.Domain;

@@ -7,13 +7,6 @@ using FluentResults;
 using Logging;
 using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.WebApi;
-using PlexRipper.Application.FolderPaths;
-using PlexRipper.Application.PlexLibraries;
-using PlexRipper.Application.PlexMedia;
-using PlexRipper.Application.PlexMovies;
-using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager

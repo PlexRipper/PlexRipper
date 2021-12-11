@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 using Timer = System.Timers.Timer;
 

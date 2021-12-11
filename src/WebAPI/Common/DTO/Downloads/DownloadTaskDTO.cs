@@ -83,9 +83,6 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("parentId", Required = Required.Always)]
         public int? ParentId { get; set; }
 
-        [JsonProperty("mediaId", Required = Required.Always)]
-        public int MediaId { get; set; }
-
         #endregion
 
         [JsonProperty("timeRemaining", Required = Required.Always)]

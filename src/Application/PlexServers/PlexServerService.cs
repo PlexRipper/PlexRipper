@@ -6,12 +6,10 @@ using AutoMapper;
 using FluentResults;
 using Logging;
 using MediatR;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexServers
+namespace PlexRipper.Application
 {
     public class PlexServerService : IPlexServerService
     {

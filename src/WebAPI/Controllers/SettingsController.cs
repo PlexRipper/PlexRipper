@@ -3,7 +3,7 @@ using AutoMapper;
 using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;

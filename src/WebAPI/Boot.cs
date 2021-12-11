@@ -6,7 +6,6 @@ using FluentResultExtensions.lib;
 using Logging;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
-using PlexRipper.Application.Common;
 using PlexRipper.Data;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;

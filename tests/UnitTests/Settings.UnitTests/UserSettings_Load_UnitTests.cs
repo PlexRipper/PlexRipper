@@ -3,7 +3,7 @@ using Environment;
 using FluentResults;
 using Logging;
 using Moq;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.Settings;
 using Settings.UnitTests.MockData;

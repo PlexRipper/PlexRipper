@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Application.Common
+﻿namespace PlexRipper.Application
 {
     public interface IPlexMovieService : IPlexMediaService { }
 }

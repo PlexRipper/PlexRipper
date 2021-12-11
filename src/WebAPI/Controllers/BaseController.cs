@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.FluentResult;
 

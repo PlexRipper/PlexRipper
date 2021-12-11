@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace PlexRipper.Application.Common
+namespace PlexRipper.Application
 {
     public class AuthPin
     {

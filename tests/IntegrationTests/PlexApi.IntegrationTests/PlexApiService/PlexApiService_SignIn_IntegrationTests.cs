@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Serilog.Events;

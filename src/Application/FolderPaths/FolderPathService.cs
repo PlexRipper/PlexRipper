@@ -3,10 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.FolderPaths
+namespace PlexRipper.Application
 {
     public class FolderPathService : IFolderPathService
     {

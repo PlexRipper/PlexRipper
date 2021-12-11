@@ -3,7 +3,7 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexMovies
+namespace PlexRipper.Application
 {
     public class GetPlexMoviesByPlexLibraryId : IRequest<Result<List<PlexMovie>>>
     {

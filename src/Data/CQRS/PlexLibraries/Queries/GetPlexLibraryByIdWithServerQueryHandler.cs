@@ -4,7 +4,7 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexLibraries;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 

@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace PlexRipper.Application.PlexServers
+namespace PlexRipper.Application
 {
     public class TrimPlexServerStatusCommand : IRequest<Result<bool>>
     {

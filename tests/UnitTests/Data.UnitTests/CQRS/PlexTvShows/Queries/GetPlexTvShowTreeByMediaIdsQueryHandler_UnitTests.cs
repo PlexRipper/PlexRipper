@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Logging;
-using PlexRipper.Application.PlexTvShows;
+using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.Data.CQRS.PlexTvShows;
 using PlexRipper.Data.PlexTvShows;

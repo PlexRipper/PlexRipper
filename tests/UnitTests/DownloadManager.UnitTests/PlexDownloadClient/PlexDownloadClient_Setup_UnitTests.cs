@@ -6,7 +6,6 @@ using FluentResults;
 using Logging;
 using Moq;
 using PlexRipper.Application;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.DownloadWorkerTasks;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;

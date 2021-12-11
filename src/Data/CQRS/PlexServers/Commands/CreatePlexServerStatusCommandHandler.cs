@@ -5,7 +5,7 @@ using FluentResults;
 using FluentValidation;
 using Logging;
 using MediatR;
-using PlexRipper.Application.PlexServers;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 

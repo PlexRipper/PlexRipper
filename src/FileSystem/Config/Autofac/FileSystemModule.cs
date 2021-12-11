@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using Environment;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 
 namespace PlexRipper.FileSystem.Config
 {

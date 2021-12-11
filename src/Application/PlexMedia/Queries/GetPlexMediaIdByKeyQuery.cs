@@ -2,7 +2,7 @@
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexMedia
+namespace PlexRipper.Application
 {
     public class GetPlexMediaIdByKeyQuery : IRequest<Result<int>>
     {

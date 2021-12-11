@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.DownloadManager.DownloadClient;
 using Module = Autofac.Module;
 

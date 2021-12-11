@@ -7,7 +7,6 @@ using FluentResults;
 using Logging;
 using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 using PlexRipper.Domain.RxNet;
 using PlexRipper.DownloadManager.DownloadClient;

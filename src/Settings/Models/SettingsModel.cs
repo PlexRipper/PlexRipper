@@ -4,7 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Text.Json;
 using FluentResults;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Settings.Models

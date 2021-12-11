@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace PlexRipper.Application.Common.WebApi
+namespace PlexRipper.Application
 {
     public class InspectServerProgress
     {

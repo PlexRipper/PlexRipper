@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 
 namespace PlexRipper.Settings.Config
 {

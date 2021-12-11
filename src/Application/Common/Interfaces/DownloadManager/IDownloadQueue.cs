@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common
+namespace PlexRipper.Application
 {
     public interface IDownloadQueue
     {

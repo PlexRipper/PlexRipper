@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using PlexRipper.Application.Config;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Config;
 using PlexRipper.WebAPI.SignalR.Hubs;

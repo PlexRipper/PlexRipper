@@ -6,7 +6,6 @@ using Autofac.Extras.Moq;
 using FluentResults;
 using Logging;
 using Moq;
-using PlexRipper.Application.PlexTvShows;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain;

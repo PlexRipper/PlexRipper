@@ -2,7 +2,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
-using PlexRipper.Application.Common;
 using PlexRipper.BaseTests;
 using Serilog.Events;
 using Shouldly;

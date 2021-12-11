@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using AutoMapper;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Config
+namespace PlexRipper.Application
 {
     public class ApplicationMappingProfile : Profile
     {

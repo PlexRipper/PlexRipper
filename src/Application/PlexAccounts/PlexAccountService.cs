@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using Logging;
 using MediatR;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.PlexServers;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application.PlexAccounts

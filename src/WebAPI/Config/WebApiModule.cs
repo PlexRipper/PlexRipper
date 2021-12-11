@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Hosting;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.SignalR;
 using PlexRipper.WebAPI.SignalR.Hubs;
 

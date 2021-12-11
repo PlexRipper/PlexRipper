@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Environment;
 using FluentResults;
 using Logging;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data

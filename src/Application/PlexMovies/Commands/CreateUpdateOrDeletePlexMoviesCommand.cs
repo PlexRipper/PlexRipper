@@ -2,7 +2,7 @@
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexMovies
+namespace PlexRipper.Application
 {
     public class CreateUpdateOrDeletePlexMoviesCommand : IRequest<Result<bool>>
     {

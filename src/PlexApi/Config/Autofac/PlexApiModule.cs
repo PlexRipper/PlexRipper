@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.PlexApi.Services;
 using RestSharp;
 

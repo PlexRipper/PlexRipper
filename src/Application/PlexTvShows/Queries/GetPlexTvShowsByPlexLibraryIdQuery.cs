@@ -3,7 +3,7 @@ using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexTvShows
+namespace PlexRipper.Application
 {
     public class GetPlexTvShowsByPlexLibraryIdQuery : IRequest<Result<List<PlexTvShow>>>
     {

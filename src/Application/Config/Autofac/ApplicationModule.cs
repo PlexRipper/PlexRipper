@@ -3,11 +3,10 @@ using Autofac;
 using Autofac.Extras.Quartz;
 using FluentValidation;
 using MediatR;
-using PlexRipper.Application.Common;
 using PlexRipper.Domain.Behavior.Pipelines;
 using Module = Autofac.Module;
 
-namespace PlexRipper.Application.Config
+namespace PlexRipper.Application
 {
     /// <summary>
     /// Used to register all dependancies in Autofac for the Application project.

@@ -51,16 +51,16 @@ namespace PlexRipper.Data
         }
     }
 
-    public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<CreateDownloadTasksCommand, Result<List<int>>>
+    public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<CreateDownloadTasksCommand, Result>
     {
         public CreateDownloadTasksCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<List<int>>> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
         {
             // Prevent the navigation properties from being updated
             InsertDownloadTasks(command.DownloadTasks);
 
-            return Result.Ok(command.DownloadTasks.Select(x => x.Id).ToList());
+            return Result.Ok();
         }
 
         private void InsertDownloadTasks(List<DownloadTask> downloadTasks)
@@ -73,20 +73,11 @@ namespace PlexRipper.Data
                 x.PlexLibrary = null;
             });
 
-            _dbContext.BulkInsert(downloadTasks, _bulkConfig);
+            // Only create new tasks, downloadTasks can be nested in tasks that already are in the database.
+            _dbContext.BulkInsert(downloadTasks.FindAll(x => x.Id == 0), _bulkConfig);
 
             foreach (var downloadTask in downloadTasks)
             {
-                if (downloadTask.DownloadWorkerTasks.Any())
-                {
-                    foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
-                    {
-                        downloadWorkerTask.DownloadTaskId = downloadTask.Id;
-                    }
-
-                    _dbContext.BulkInsert(downloadTask.DownloadWorkerTasks, _bulkConfig);
-                }
-
                 if (downloadTask.Children.Any())
                 {
                     foreach (var downloadTaskChild in downloadTask.Children)

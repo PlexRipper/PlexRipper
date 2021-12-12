@@ -35,7 +35,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies
 
             if ( request.IncludeServer)
             {
-                query = query.IncludeServer();
+                query = query.IncludePlexServer();
             }
 
             var plexMovies = await query.Where(x => request.Ids.Contains(x.Id) ).ToListAsync(cancellationToken);

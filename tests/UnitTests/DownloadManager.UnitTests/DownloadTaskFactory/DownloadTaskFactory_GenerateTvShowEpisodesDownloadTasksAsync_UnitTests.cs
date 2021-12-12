@@ -12,7 +12,9 @@ using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Asserts;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data.Common;
+using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
+using PlexRipper.WebAPI.Config;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -40,7 +42,7 @@ namespace DownloadManager.UnitTests
             // Assert
             result.IsFailed.ShouldBeTrue();
         }
-    
+
         [Fact]
         public async Task ShouldGenerateValidTvShowDownloadTaskWithEpisodeDownloadTask_WhenNoDownloadTasksExist()
         {
@@ -72,6 +74,49 @@ namespace DownloadManager.UnitTests
             // Assert
             result.IsSuccess.ShouldBeTrue();
             var tvShowDownloadTask = result.Value.First();
+            ShouldDownloadTask.ShouldTvShow(tvShowDownloadTask, tvShowDb);
+        }
+
+        [Fact]
+        public async Task ShouldGenerateValidEpisodeDownloadTask_WhenTvShowParentDownloadTaskAlreadyExist()
+        {
+            // Arrange
+            var config = new UnitTestDataConfig
+            {
+                TvShowCount = 5,
+            };
+            var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            var tvShows = await context.PlexTvShows.IncludeAll().ToListAsync();
+            var tvShowDb = tvShows.Last();
+            var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };
+
+            using var mock = AutoMock.GetStrict().AddMapper();
+            mock.SetupMediator(It.IsAny<GetPlexTvShowByIdQuery>)
+                .ReturnsAsync((GetPlexTvShowByIdQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.Id)));
+
+            mock.SetupMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>)
+                .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>
+                    Result.Ok(context.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
+
+            mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>).ReturnsAsync((GetDownloadTaskByMediaKeyQuery query, CancellationToken _) =>
+            {
+                // We create the downloadTask tvShow to pretend the parent already exists and the episode and season need to be created.
+                if (query.MediaKey == tvShowDb.Key)
+                {
+                    return Result.Ok(MapperSetup.CreateMapper().Map<DownloadTask>(tvShowDb));
+                }
+
+                return Result.Fail("");
+            });
+
+            // Act
+            var _sut = mock.Create<DownloadTaskFactory>();
+            var result = await _sut.GenerateTvShowEpisodesDownloadTasksAsync(episodeIds);
+
+            // Assert
+            result.IsSuccess.ShouldBeTrue();
+            var tvShowDownloadTask = result.Value.First();
+            tvShowDownloadTask.Children.ShouldAllBe(x => x.ParentId == tvShowDownloadTask.Id);
             ShouldDownloadTask.ShouldTvShow(tvShowDownloadTask, tvShowDb);
         }
     }

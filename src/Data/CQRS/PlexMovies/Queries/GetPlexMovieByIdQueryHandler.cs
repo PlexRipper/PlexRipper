@@ -33,7 +33,7 @@ namespace PlexRipper.Data.CQRS.PlexMovies
 
             if ( request.IncludeServer)
             {
-                query = query.IncludeServer();
+                query = query.IncludePlexServer();
             }
 
             var plexMovie = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);

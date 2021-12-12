@@ -84,7 +84,6 @@ namespace PlexRipper.DownloadManager
             if (!downloadTasks.Any())
                 return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
 
-            Log.Debug($"Attempt to add {downloadTasks.Count} DownloadTasks");
             var validateResult = _downloadTaskValidator.ValidateDownloadTasks(downloadTasks);
             if (validateResult.IsFailed)
             {
@@ -96,11 +95,6 @@ namespace PlexRipper.DownloadManager
             if (createResult.IsFailed)
             {
                 return createResult.ToResult().LogError();
-            }
-
-            if (createResult.Value.Count != validateResult.Value.Count)
-            {
-                return Result.Fail("The added download tasks are not stored correctly, missing download tasks.").LogError();
             }
 
             Log.Debug($"Successfully added all {validateResult.Value.Count} DownloadTasks");

@@ -24,7 +24,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
 
         public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdWithServerQuery request, CancellationToken cancellationToken)
         {
-            var plexLibrary = await PlexLibraryQueryable.IncludeServer().FirstOrDefaultAsync(x => x.Id == request.Id);
+            var plexLibrary = await PlexLibraryQueryable.IncludePlexServer().FirstOrDefaultAsync(x => x.Id == request.Id);
 
             return ReturnResult(plexLibrary, request.Id);
         }

@@ -90,7 +90,7 @@ namespace PlexRipper.DownloadManager
 
             if (plexTvShowEpisodeIds.Any())
             {
-                var result = await GenerateTvShowSeasonDownloadTasksAsync(plexTvShowEpisodeIds, downloadTasks);
+                var result = await GenerateTvShowEpisodesDownloadTasksAsync(plexTvShowEpisodeIds, downloadTasks);
                 if (result.IsSuccess)
                 {
                     downloadTasks = result.Value;
@@ -167,7 +167,7 @@ namespace PlexRipper.DownloadManager
 
             foreach (var tvShowId in plexTvShowIds)
             {
-                var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(tvShowId));
+                var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(tvShowId, true, true));
                 if (tvShowResult.IsFailed)
                 {
                     tvShowResult.LogError();

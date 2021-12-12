@@ -78,7 +78,7 @@ namespace PlexRipper.Data.Common
 
             if (includeServer)
             {
-                plexLibraryQuery = plexLibraryQuery.IncludeServer();
+                plexLibraryQuery = plexLibraryQuery.IncludePlexServer();
             }
 
             if (includeMedia)

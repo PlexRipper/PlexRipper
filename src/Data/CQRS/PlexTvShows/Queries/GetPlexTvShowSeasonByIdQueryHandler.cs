@@ -33,7 +33,7 @@ namespace PlexRipper.Data.PlexTvShows
 
             if (request.IncludeServer)
             {
-                query = query.IncludeServer();
+                query = query.IncludePlexServer();
             }
 
             var plexTvShowSeason = await query

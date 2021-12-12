@@ -29,7 +29,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
 
             if (request.IncludePlexServer)
             {
-                query = query.IncludeServer();
+                query = query.IncludePlexServer();
             }
 
             var plexLibraries = await query.ToListAsync(cancellationToken);

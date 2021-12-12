@@ -11,21 +11,22 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Data.PlexTvShows
 {
-    public class GetPlexTvShowByIdQueryValidator : AbstractValidator<GetPlexTvShowByIdQuery>
+    public class GetPlexTvShowByIdWithSeasonsQueryValidator : AbstractValidator<GetPlexTvShowByIdWithSeasonsQuery>
     {
-        public GetPlexTvShowByIdQueryValidator()
+        public GetPlexTvShowByIdWithSeasonsQueryValidator()
         {
             RuleFor(x => x.Id).GreaterThan(0);
         }
     }
 
-    public class GetPlexTvShowByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowByIdQuery, Result<PlexTvShow>>
+    public class GetPlexTvShowByIdWithSeasonsQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowByIdWithSeasonsQuery, Result<PlexTvShow>>
     {
-        public GetPlexTvShowByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        public GetPlexTvShowByIdWithSeasonsQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdWithSeasonsQuery request, CancellationToken cancellationToken)
         {
-            var query = PlexTvShowsQueryable;
+
+            var query = PlexTvShowsQueryable.IncludeSeasons();
 
             if (request.IncludePlexLibrary)
             {
@@ -38,6 +39,7 @@ namespace PlexRipper.Data.PlexTvShows
             }
 
             var plexTvShow = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+
             if (plexTvShow == null)
             {
                 return ResultExtensions.EntityNotFound(nameof(PlexTvShow), request.Id);

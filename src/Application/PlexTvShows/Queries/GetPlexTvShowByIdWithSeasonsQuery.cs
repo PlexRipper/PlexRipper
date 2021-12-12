@@ -5,9 +5,9 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application
 {
-    public class GetPlexTvShowByIdQuery : IRequest<Result<PlexTvShow>>
+    public class GetPlexTvShowByIdWithSeasonsQuery : IRequest<Result<PlexTvShow>>
     {
-        public GetPlexTvShowByIdQuery(int id, bool includePlexServer = false, bool includePlexLibrary = false)
+        public GetPlexTvShowByIdWithSeasonsQuery(int id, bool includePlexServer = false, bool includePlexLibrary = false)
         {
             Id = id;
             IncludePlexServer = includePlexServer;

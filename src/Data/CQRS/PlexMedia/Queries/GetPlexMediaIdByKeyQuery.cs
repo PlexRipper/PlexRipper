@@ -8,7 +8,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexMedia
+namespace PlexRipper.Data.PlexMedia
 {
     public class GetPlexMediaByDownloadTaskQueryValidator : AbstractValidator<GetPlexMediaIdByKeyQuery>
     {

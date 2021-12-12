@@ -25,22 +25,7 @@ namespace PlexRipper.Data.PlexTvShows
 
         public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<PlexTvShow> query = PlexTvShowsQueryable;
-
-            if (request.IncludeLibrary)
-            {
-                query = query.IncludePlexLibrary();
-            }
-
-            if (request.IncludeServer)
-            {
-                query = query.IncludeServer();
-            }
-
-            var plexTvShow = await query
-                .Include(x => x.Seasons)
-                .ThenInclude(x => x.Episodes)
-                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var plexTvShow = await PlexTvShowsQueryable.IncludeAll().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (plexTvShow == null)
             {

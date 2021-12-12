@@ -6,20 +6,20 @@ using Autofac.Extras.Moq;
 using FluentResults;
 using Logging;
 using Moq;
+using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain;
-using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PlexRipper.Application.UnitTests.PlexDownloads
+namespace DownloadManager.UnitTests
 {
-    public class PlexDownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests
+    public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests
     {
 
-        public PlexDownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests(ITestOutputHelper output)
+        public DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
         }
@@ -29,7 +29,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
         {
             // Arrange
             using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<DownloadTaskFactory>();
+            var _sut = mock.Create<PlexRipper.DownloadManager.DownloadTaskFactory>();
             var tvShowIds = new List<int>();
 
             // Act
@@ -47,7 +47,7 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
             using var mock = AutoMock.GetStrict().AddMapper();
             mock.SetupMediator(It.IsAny<GetPlexTvShowByIdQuery>).ReturnsAsync(Result.Ok(tvShows.Find(x => x.Id == 1)));
             mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>).ReturnsAsync(Result.Fail(""));
-            var _sut = mock.Create<DownloadTaskFactory>();
+            var _sut = mock.Create<PlexRipper.DownloadManager.DownloadTaskFactory>();
 
             var tvShowIds = new List<int> { 1 };
 

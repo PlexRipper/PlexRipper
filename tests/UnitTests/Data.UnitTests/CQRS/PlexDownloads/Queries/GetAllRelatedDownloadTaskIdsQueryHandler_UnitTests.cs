@@ -24,7 +24,7 @@ namespace Data.UnitTests
         public async Task ShouldReturnAllParentDownloadTasksIds_WhenChildDownloadTaskIdsAreGiven()
         {
             // Arrange
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 Seed = 2867,
                 DownloadTasksCount = 10,
@@ -52,7 +52,7 @@ namespace Data.UnitTests
         public async Task ShouldReturnAllRelatedDownloadTasksIds_WhenPlexTvShowDownloadTaskIdsGiven()
         {
             // Arrange
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 Seed = 2867,
                 DownloadTasksCount = 10,

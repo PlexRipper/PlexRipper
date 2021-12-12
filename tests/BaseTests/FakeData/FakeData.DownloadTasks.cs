@@ -11,9 +11,9 @@ namespace PlexRipper.BaseTests
 
         private static int _plexDownloadWorkerTaskId = 1;
 
-        public static Faker<T> ApplyBaseDownloadTask<T>(this Faker<T> faker, FakeDataConfig config = null) where T : DownloadTask
+        public static Faker<T> ApplyBaseDownloadTask<T>(this Faker<T> faker, UnitTestDataConfig config = null) where T : DownloadTask
         {
-            config ??= new FakeDataConfig();
+            config ??= new UnitTestDataConfig();
 
             return faker
                 .StrictMode(true)
@@ -39,10 +39,10 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.Key, _ => _random.Next(1, 10000))
                 .RuleFor(x => x.Created, f => f.Date.Recent(30))
                 .RuleFor(x => x.Quality, f => f.PickRandom("sd", "720", "1080"))
-                .RuleFor(x => x.PlexServerId, f => config.PlexServerId > 0 ? config.PlexServerId : f.Random.Int(1, 1000))
-                .RuleFor(x => x.PlexServer, _ => new PlexServer())
-                .RuleFor(x => x.PlexLibraryId, f => config.PlexLibraryId > 0 ? config.PlexLibraryId : f.Random.Int(1, 1000))
-                .RuleFor(x => x.PlexLibrary, _ => new PlexLibrary())
+                .RuleFor(x => x.PlexServerId, _ => 0)
+                .RuleFor(x => x.PlexServer, _ => null)
+                .RuleFor(x => x.PlexLibraryId, _ => 0)
+                .RuleFor(x => x.PlexLibrary, _ => null)
                 .RuleFor(x => x.Children, _ => new List<DownloadTask>())
                 .RuleFor(x => x.DownloadFolder, () => new FolderPath
                 {
@@ -58,9 +58,9 @@ namespace PlexRipper.BaseTests
 
         #region Movie
 
-        public static Faker<DownloadTask> GetMovieDownloadTask(FakeDataConfig config = null)
+        public static Faker<DownloadTask> GetMovieDownloadTask(UnitTestDataConfig config = null)
         {
-            config ??= new FakeDataConfig();
+            config ??= new UnitTestDataConfig();
 
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
@@ -79,9 +79,9 @@ namespace PlexRipper.BaseTests
                 });
         }
 
-        public static Faker<DownloadTask> GetMovieDataDownloadTask(FakeDataConfig config = null)
+        public static Faker<DownloadTask> GetMovieDataDownloadTask(UnitTestDataConfig config = null)
         {
-            config ??= new FakeDataConfig();
+            config ??= new UnitTestDataConfig();
 
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
@@ -95,9 +95,9 @@ namespace PlexRipper.BaseTests
 
         #region TvShow
 
-        public static Faker<DownloadTask> GetTvShowDownloadTask(FakeDataConfig config = null)
+        public static Faker<DownloadTask> GetTvShowDownloadTask(UnitTestDataConfig config = null)
         {
-            config ??= new FakeDataConfig();
+            config ??= new UnitTestDataConfig();
 
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
@@ -116,9 +116,9 @@ namespace PlexRipper.BaseTests
                 });
         }
 
-        public static Faker<DownloadTask> GetTvShowSeasonDownloadTask(FakeDataConfig config = null)
+        public static Faker<DownloadTask> GetTvShowSeasonDownloadTask(UnitTestDataConfig config = null)
         {
-            config ??= new FakeDataConfig();
+            config ??= new UnitTestDataConfig();
 
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
@@ -137,9 +137,9 @@ namespace PlexRipper.BaseTests
                 });
         }
 
-        public static Faker<DownloadTask> GetTvShowEpisodeDownloadTask(FakeDataConfig config = null)
+        public static Faker<DownloadTask> GetTvShowEpisodeDownloadTask(UnitTestDataConfig config = null)
         {
-            config ??= new FakeDataConfig();
+            config ??= new UnitTestDataConfig();
 
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
@@ -158,9 +158,9 @@ namespace PlexRipper.BaseTests
                 });
         }
 
-        public static Faker<DownloadTask> GetTvShowEpisodeDataDownloadTask(FakeDataConfig config = null)
+        public static Faker<DownloadTask> GetTvShowEpisodeDataDownloadTask(UnitTestDataConfig config = null)
         {
-            config ??= new FakeDataConfig();
+            config ??= new UnitTestDataConfig();
 
             return new Faker<DownloadTask>()
                 .ApplyBaseDownloadTask(config)
@@ -174,9 +174,9 @@ namespace PlexRipper.BaseTests
 
         #region DownloadWorkerTasks
 
-        public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(FakeDataConfig config = null)
+        public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(UnitTestDataConfig config = null)
         {
-            config ??= new FakeDataConfig();
+            config ??= new UnitTestDataConfig();
 
             int partIndex = 1;
             int downloadTaskId = new Faker().Random.Int(1);

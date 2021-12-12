@@ -45,10 +45,10 @@ namespace DownloadManager.UnitTests
             // Arrange
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DownloadQueue>();
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 IncludeLibraries = true,
-                LibraryCount = 1,
+                PlexLibraryCount = 1,
                 LibraryType = PlexMediaType.Movie,
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
@@ -75,10 +75,10 @@ namespace DownloadManager.UnitTests
             var _sut = mock.Create<DownloadQueue>();
             int updateIndex = 1;
             Dictionary<int, List<DownloadTask>> updates = new();
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 IncludeLibraries = true,
-                LibraryCount = 1,
+                PlexLibraryCount = 1,
                 LibraryType = PlexMediaType.Movie,
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
@@ -103,11 +103,11 @@ namespace DownloadManager.UnitTests
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DownloadQueue>();
             List<DownloadTask> startCommands = new();
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 Seed = 5000,
                 IncludeLibraries = true,
-                LibraryCount = 1,
+                PlexLibraryCount = 1,
                 LibraryType = PlexMediaType.Movie,
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
@@ -132,11 +132,11 @@ namespace DownloadManager.UnitTests
             var _sut = mock.Create<DownloadQueue>();
             int updateIndex = 1;
             Dictionary<int, List<DownloadTask>> updates = new();
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 Seed = 25,
                 IncludeLibraries = true,
-                LibraryCount = 1,
+                PlexLibraryCount = 1,
                 LibraryType = PlexMediaType.Movie,
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
@@ -166,11 +166,11 @@ namespace DownloadManager.UnitTests
             var _sut = mock.Create<DownloadQueue>();
             int updateIndex = 1;
             Dictionary<int, List<DownloadTask>> updates = new();
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 Seed = 67,
                 IncludeLibraries = true,
-                LibraryCount = 1,
+                PlexLibraryCount = 1,
                 LibraryType = PlexMediaType.TvShow,
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
@@ -200,11 +200,11 @@ namespace DownloadManager.UnitTests
             var _sut = mock.Create<DownloadQueue>();
             int updateIndex = 0;
             Dictionary<int, List<DownloadTask>> updates = new();
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 Seed = 67,
                 IncludeLibraries = true,
-                LibraryCount = 1,
+                PlexLibraryCount = 1,
                 LibraryType = PlexMediaType.Movie,
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,
@@ -249,11 +249,11 @@ namespace DownloadManager.UnitTests
             var _sut = mock.Create<DownloadQueue>();
             int updateIndex = 0;
             Dictionary<int, List<DownloadTask>> updates = new();
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 Seed = 263,
                 IncludeLibraries = true,
-                LibraryCount = 1,
+                PlexLibraryCount = 1,
                 LibraryType = PlexMediaType.TvShow,
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,

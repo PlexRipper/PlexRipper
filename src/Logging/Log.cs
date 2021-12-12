@@ -68,6 +68,25 @@ namespace Logging
 
         #endregion
 
+        public static void DbContextLogger(string message,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "")
+        {
+            switch (message)
+            {
+                // ReSharper disable once StringLiteralTypo
+                case { } s when s.StartsWith("dbug:"):
+                    Debug(message, memberName, sourceFilePath);
+                    break;
+                case { } s when s.StartsWith("info:"):
+                    Information(message, memberName, sourceFilePath);
+                    break;
+                case { } s when s.StartsWith("fail:"):
+                    Error(message, memberName, sourceFilePath);
+                    break;
+            }
+        }
+
         #region Verbose
 
         public static void Verbose(

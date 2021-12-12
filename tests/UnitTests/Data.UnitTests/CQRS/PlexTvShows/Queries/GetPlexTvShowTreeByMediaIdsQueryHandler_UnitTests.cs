@@ -24,7 +24,11 @@ namespace Data.UnitTests
         public async Task ShouldReturnAllTvShowSeasonAndEpisodeIds_WhenAllAreGiven()
         {
             // Arrange
-            await using var context = MockDatabase.GetMemoryDbContext().AddPlexServers().AddMedia();
+            var config = new UnitTestDataConfig()
+            {
+                TvShowCount = 10,
+            };
+            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
             var handle = new GetPlexTvShowTreeByMediaIdsQueryHandler(context);
 
             List<int> tvShowIds = new List<int> { 1, 2, 4, 5 };
@@ -47,7 +51,11 @@ namespace Data.UnitTests
         public async Task ShouldOnlyReturnThoseTvShows_WhichHaveBeenGiven()
         {
             // Arrange
-            await using var context = MockDatabase.GetMemoryDbContext().AddPlexServers().AddMedia();
+            var config = new UnitTestDataConfig()
+            {
+                TvShowCount = 10,
+            };
+            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
             var handle = new GetPlexTvShowTreeByMediaIdsQueryHandler(context);
 
             List<int> tvShowIds = new List<int> { 1, 2, 4, 5 };

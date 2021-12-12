@@ -35,15 +35,15 @@ namespace PlexRipper.Data.Common
             // Include downloadTask children up to 5 levels deep
             for (int i = 1; i <= 5; i++)
             {
-                var childPath = prefix + string.Concat(Enumerable.Repeat("Children.", i));
+                var childPath = prefix + string.Concat(Enumerable.Repeat($"{nameof(DownloadTask.Children)}.", i));
 
                 query = query
                     .Include($"{childPath}".TrimEnd('.'))
-                    .Include($"{childPath}DownloadFolder")
-                    .Include($"{childPath}DestinationFolder")
-                    .Include($"{childPath}DownloadWorkerTasks")
-                    .Include($"{childPath}PlexServer")
-                    .Include($"{childPath}PlexLibrary");
+                    .Include($"{childPath}{nameof(DownloadTask.DownloadFolder)}")
+                    .Include($"{childPath}{nameof(DownloadTask.DestinationFolder)}")
+                    .Include($"{childPath}{nameof(DownloadTask.DownloadWorkerTasks)}")
+                    .Include($"{childPath}{nameof(DownloadTask.PlexServer)}")
+                    .Include($"{childPath}{nameof(DownloadTask.PlexLibrary)}");
             }
 
             return query;

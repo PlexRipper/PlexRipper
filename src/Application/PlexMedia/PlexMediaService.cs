@@ -47,7 +47,7 @@ namespace PlexRipper.Application
                 }
                 case PlexMediaType.TvShow:
                 {
-                    var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, includeServer: true));
+                    var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId));
                     if (tvShowResult.IsFailed)
                     {
                         return tvShowResult.ToResult();
@@ -101,7 +101,7 @@ namespace PlexRipper.Application
                 }
                 case PlexMediaType.TvShow:
                 {
-                    var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, includeServer: true));
+                    var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId));
                     if (tvShowResult.IsFailed)
                     {
                         return tvShowResult.ToResult();

@@ -2,7 +2,7 @@
 
 namespace PlexRipper.BaseTests
 {
-    public class FakeDataConfig
+    public class UnitTestDataConfig
     {
         public int Seed { get; set; }
 
@@ -25,11 +25,17 @@ namespace PlexRipper.BaseTests
 
         #region Count
 
-        public int MediaCount { get; set; } = 10;
+        public int PlexServerCount { get; set; } = 1;
+
+        public int PlexLibraryCount { get; set; } = 5;
 
         public int DownloadTasksCount { get; set; } = 10;
 
-        public int LibraryCount { get; set; } = 5;
+        #region Opt-in
+
+        public int MovieCount { get; set; } = 0;
+
+        public int TvShowCount { get; set; } = 0;
 
         public int TvShowSeasonCountMax { get; set; } = 5;
 
@@ -37,12 +43,7 @@ namespace PlexRipper.BaseTests
 
         #endregion
 
-        #region RelationshipIds
-
-        public int PlexServerId { get; set; }
-
-        public int PlexLibraryId { get; set; }
-
         #endregion
+
     }
 }

@@ -24,7 +24,7 @@ namespace Data.UnitTests
         public async Task ShouldReturnAllDownloadTasks_WhenNoIdsAreGiven()
         {
             // Arrange
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 Seed = 2867,
                 DownloadTasksCount = 10,
@@ -49,7 +49,7 @@ namespace Data.UnitTests
         public async Task ShouldReturnMovieDownloadTasks_WhenMovieDownloadTasksAreInDB()
         {
             // Arrange
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 Seed = 21467,
                 DownloadTasksCount = 10,
@@ -79,7 +79,7 @@ namespace Data.UnitTests
         public async Task ShouldReturnTvShowDownloadTasks_WhenTvShowDownloadTasksAreInDB()
         {
             // Arrange
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 Seed = 21467,
                 DownloadTasksCount = 10,

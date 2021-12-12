@@ -418,7 +418,7 @@ namespace PlexRipper.DownloadManager
 
                 var list = new List<DownloadMediaDTO>
                 {
-                    new DownloadMediaDTO
+                    new()
                     {
                         Type = downloadTask.MediaType,
                         MediaIds = new List<int> { mediaIdResult.Value },
@@ -489,11 +489,6 @@ namespace PlexRipper.DownloadManager
                     var plexLibrary = plexLibraries.Value.Find(x => x.Id == downloadTask.PlexLibraryId);
                     if (plexLibrary is not null)
                     {
-                        downloadTask.PlexLibrary = plexLibrary;
-                        downloadTask.PlexLibraryId = plexLibrary.Id;
-                        downloadTask.PlexServer = plexLibrary.PlexServer;
-                        downloadTask.PlexServerId = plexLibrary.PlexServer.Id;
-
                         if (plexLibrary.DefaultDestinationId is not null)
                         {
                             downloadTask.DestinationFolderId = plexLibrary.DefaultDestinationId ?? default(int);

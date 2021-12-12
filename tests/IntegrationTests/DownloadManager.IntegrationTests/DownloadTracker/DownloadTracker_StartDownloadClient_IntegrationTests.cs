@@ -21,11 +21,9 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
             // Arrange
             var dbName = MockDatabase.GetMemoryDatabaseName();
             var container = new BaseContainer(false, dbName);
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 IncludeLibraries = true,
-                PlexServerId = 1,
-                PlexLibraryId = 1,
                 LibraryType = PlexMediaType.Movie,
                 DownloadTasksCount = 1,
             };

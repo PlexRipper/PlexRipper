@@ -5,18 +5,18 @@ using FluentResults;
 using Logging;
 using MediatR;
 using Moq;
+using PlexRipper.Application;
 using PlexRipper.Domain;
-using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Config;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PlexRipper.Application.UnitTests.PlexDownloads
+namespace DownloadManager.UnitTests
 {
-    public class PlexDownloadTaskFactory_GenerateAsync_UnitTests
+    public class DownloadTaskFactory_GenerateAsync_UnitTests
     {
-        private readonly Mock<DownloadTaskFactory> _sut;
+        private readonly Mock<PlexRipper.DownloadManager.DownloadTaskFactory> _sut;
 
         private readonly Mock<IMediator> _iMediator = new();
 
@@ -28,11 +28,11 @@ namespace PlexRipper.Application.UnitTests.PlexDownloads
 
         private readonly Mock<IUserSettings> _userSettings = new();
 
-        public PlexDownloadTaskFactory_GenerateAsync_UnitTests(ITestOutputHelper output)
+        public DownloadTaskFactory_GenerateAsync_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
 
-            _sut = new Mock<DownloadTaskFactory>(
+            _sut = new Mock<PlexRipper.DownloadManager.DownloadTaskFactory>(
                 MockBehavior.Strict,
                 _iMediator.Object,
                 MapperSetup.CreateMapper(),

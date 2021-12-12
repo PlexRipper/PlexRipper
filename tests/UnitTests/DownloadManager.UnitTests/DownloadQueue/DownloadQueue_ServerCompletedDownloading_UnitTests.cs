@@ -25,10 +25,10 @@ namespace DownloadManager.UnitTests
             // Arrange
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DownloadQueue>();
-            var config = new FakeDataConfig
+            var config = new UnitTestDataConfig
             {
                 IncludeLibraries = true,
-                LibraryCount = 1,
+                PlexLibraryCount = 1,
                 LibraryType = PlexMediaType.Movie,
                 IncludeDownloadTasks = true,
                 DownloadTasksCount = 2,

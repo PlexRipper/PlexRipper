@@ -7,10 +7,6 @@ namespace PlexRipper.BaseTests
 {
     public static partial class FakeData
     {
-        private static int _plexDownloadTaskId = 1;
-
-        private static int _plexDownloadWorkerTaskId = 1;
-
         public static Faker<T> ApplyBaseDownloadTask<T>(this Faker<T> faker, UnitTestDataConfig config = null) where T : DownloadTask
         {
             config ??= new UnitTestDataConfig();
@@ -18,7 +14,7 @@ namespace PlexRipper.BaseTests
             return faker
                 .StrictMode(true)
                 .UseSeed(config.Seed)
-                .RuleFor(x => x.Id, _ => _plexDownloadTaskId++)
+                .RuleFor(x => x.Id, _ => 0)
                 .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Initialized)
                 .RuleFor(x => x.Title, f => f.Company.CompanyName())
                 .RuleFor(x => x.FullTitle, f => f.Company.CompanyName())
@@ -178,12 +174,12 @@ namespace PlexRipper.BaseTests
         {
             config ??= new UnitTestDataConfig();
 
-            int partIndex = 1;
-            int downloadTaskId = new Faker().Random.Int(1);
+            var partIndex = 1;
+            var downloadTaskId = new Faker().Random.Int(1);
             return new Faker<DownloadWorkerTask>()
                 .StrictMode(true)
                 .UseSeed(config.Seed)
-                .RuleFor(x => x.Id, _ => _plexDownloadWorkerTaskId++)
+                .RuleFor(x => x.Id, _ => 0)
                 .RuleFor(x => x.FileName, f => f.System.FileName() + ".mp4")
                 .RuleFor(x => x.StartByte, f => f.Random.Long(0))
                 .RuleFor(x => x.EndByte, f => f.Random.Long(0))
@@ -192,7 +188,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.TempDirectory, f => f.System.FilePath())
                 .RuleFor(x => x.ElapsedTime, 0)
                 .RuleFor(x => x.DownloadStatus, DownloadStatus.Initialized)
-                .RuleFor(x => x.DownloadTaskId, downloadTaskId)
+                .RuleFor(x => x.DownloadTaskId,  _ => 0)
                 .RuleFor(x => x.DownloadWorkerTaskLogs, new List<DownloadWorkerLog>());
         }
 

@@ -15,6 +15,7 @@ namespace PlexRipper.DownloadManager.AutoMapper
         private void PlexMediaToDownloadTask()
         {
             CreateMap<PlexMedia, DownloadTask>(MemberList.None)
+                .ForMember(task => task.Id, opt => opt.Ignore())
                 .ForMember(task => task.Key, opt => opt.MapFrom(entity => entity.Key))
                 .ForMember(task => task.Title, opt => opt.MapFrom(entity => entity.Title))
                 .ForMember(task => task.FullTitle, opt => opt.MapFrom(entity => entity.FullTitle))

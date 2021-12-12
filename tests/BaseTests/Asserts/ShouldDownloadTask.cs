@@ -43,7 +43,7 @@ namespace PlexRipper.BaseTests.Asserts
 
             foreach (var sourceDownloadTask in source.Children)
             {
-                var targetSeason = target.Seasons.FirstOrDefault(x => x.Id == sourceDownloadTask.Id);
+                var targetSeason = target.Seasons.FirstOrDefault(x => x.Key == sourceDownloadTask.Key);
                 ShouldSeason(sourceDownloadTask, targetSeason);
             }
         }
@@ -78,7 +78,7 @@ namespace PlexRipper.BaseTests.Asserts
 
             foreach (var episodeDownloadTask in source.Children)
             {
-                var targetEpisode = target.Episodes.FirstOrDefault(x => x.Id == episodeDownloadTask.Id);
+                var targetEpisode = target.Episodes.FirstOrDefault(x => x.Key == episodeDownloadTask.Key);
                 ShouldEpisode(episodeDownloadTask, targetEpisode);
             }
         }

@@ -74,6 +74,9 @@ namespace DownloadManager.UnitTests
             // Assert
             result.IsSuccess.ShouldBeTrue();
             var tvShowDownloadTask = result.Value.First();
+            tvShowDownloadTask.Id.ShouldBe(0);
+            tvShowDownloadTask.Children.ShouldAllBe(x => x.Id == 0);
+            tvShowDownloadTask.Children.SelectMany(x => x.Children).ToList().ShouldAllBe(x => x.Id == 0);
             ShouldDownloadTask.ShouldTvShow(tvShowDownloadTask, tvShowDb);
         }
 
@@ -103,7 +106,9 @@ namespace DownloadManager.UnitTests
                 // We create the downloadTask tvShow to pretend the parent already exists and the episode and season need to be created.
                 if (query.MediaKey == tvShowDb.Key)
                 {
-                    return Result.Ok(MapperSetup.CreateMapper().Map<DownloadTask>(tvShowDb));
+                    var result = MapperSetup.CreateMapper().Map<DownloadTask>(tvShowDb);
+                    result.Id = 999;
+                    return Result.Ok(result);
                 }
 
                 return Result.Fail("");
@@ -116,6 +121,10 @@ namespace DownloadManager.UnitTests
             // Assert
             result.IsSuccess.ShouldBeTrue();
             var tvShowDownloadTask = result.Value.First();
+            tvShowDownloadTask.Id.ShouldBe(999);
+
+            tvShowDownloadTask.Children.ShouldAllBe(x => x.Id == 0);
+            tvShowDownloadTask.Children.SelectMany(x => x.Children).ToList().ShouldAllBe(x => x.Id == 0);
             tvShowDownloadTask.Children.ShouldAllBe(x => x.ParentId == tvShowDownloadTask.Id);
             ShouldDownloadTask.ShouldTvShow(tvShowDownloadTask, tvShowDb);
         }

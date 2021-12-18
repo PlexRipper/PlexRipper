@@ -6,6 +6,7 @@ using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
 using PlexRipper.Domain;
 using Shouldly;
@@ -67,6 +68,16 @@ namespace PlexRipper.BaseTests
                 context = context.AddPlexTvShows(config);
             }
 
+            if (config.MovieDownloadTasksCount > 0)
+            {
+                context = context.AddMovieDownloadTasks(config);
+            }
+
+            if (config.TvShowDownloadTasksCount > 0)
+            {
+                context = context.AddTvShowDownloadTasks(config);
+            }
+
             return context;
         }
 
@@ -89,14 +100,23 @@ namespace PlexRipper.BaseTests
             plexServers.ShouldNotBeEmpty();
 
             config ??= new UnitTestDataConfig();
-            config.PlexLibraryCount.ShouldBeGreaterThanOrEqualTo(2);
             var plexLibrariesToDb = new List<PlexLibrary>();
 
             foreach (var plexServer in plexServers)
             {
-                var plexLibraries = FakeData.GetPlexLibrary().Generate(config.PlexLibraryCount);
-                plexLibraries[0].Type = PlexMediaType.Movie;
-                plexLibraries[1].Type = PlexMediaType.TvShow;
+                List<PlexLibrary> plexLibraries;
+                if (config.PlexLibraryCount == 0)
+                {
+                    plexLibraries = FakeData.GetPlexLibrary().Generate(2);
+                    plexLibraries[0].Type = PlexMediaType.Movie;
+                    plexLibraries[1].Type = PlexMediaType.TvShow;
+                }
+                else
+                {
+                    plexLibraries = FakeData.GetPlexLibrary().Generate(config.PlexLibraryCount);
+                    plexLibraries[0].Type = PlexMediaType.Movie;
+                    plexLibraries[1].Type = PlexMediaType.TvShow;
+                }
 
                 foreach (var plexLibrary in plexLibraries)
                 {
@@ -112,52 +132,43 @@ namespace PlexRipper.BaseTests
             return dbContext;
         }
 
-        public static PlexRipperDbContext AddDownloadTasks(this PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
+        #region Add DownloadTasks
+
+        public static PlexRipperDbContext AddMovieDownloadTasks(this PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
         {
-            try
-            {
-                List<DownloadTask> downloadTasks;
-                switch (config.LibraryType)
-                {
-                    case PlexMediaType.Movie:
-                        downloadTasks = FakeData.GetMovieDownloadTask(config).Generate(config.DownloadTasksCount);
-                        break;
-                    case PlexMediaType.TvShow:
-                        downloadTasks = FakeData.GetTvShowDownloadTask(config).Generate(config.DownloadTasksCount);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+            config ??= new UnitTestDataConfig();
 
-                var plexServer = dbContext.PlexServers.Include(x => x.PlexLibraries).FirstOrDefault();
-                var plexLibrary = plexServer.PlexLibraries.FirstOrDefault(x => x.Type == config.LibraryType);
-                if (plexServer is null || plexLibrary is null)
-                {
-                    throw new ArgumentNullException($"Ensure {nameof(AddPlexServers)} has been called before {nameof(AddDownloadTasks)}");
-                }
+            var downloadTasks = FakeData.GetMovieDownloadTask(config).Generate(config.MovieDownloadTasksCount);
+            var plexLibrary = dbContext.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.Movie);
+            plexLibrary.ShouldNotBeNull();
 
-                foreach (var downloadTask in downloadTasks.Flatten(x => x.Children).ToList())
-                {
-                    downloadTask.PlexServerId = plexServer?.Id ?? 1;
-                    downloadTask.PlexLibraryId = plexLibrary?.Id ?? 1;
-                    downloadTask.PlexServer = null;
-                    downloadTask.PlexLibrary = null;
-                    downloadTask.DestinationFolder = null;
-                    downloadTask.DownloadFolder = null;
-                    downloadTask.Parent = null;
-                }
+            downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id);
 
-                dbContext.DownloadTasks.AddRange(downloadTasks);
+            dbContext.DownloadTasks.AddRange(downloadTasks);
+            dbContext.SaveChanges();
 
-                dbContext.SaveChanges();
-                return dbContext;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            return dbContext;
         }
+
+        public static PlexRipperDbContext AddTvShowDownloadTasks(this PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
+        {
+            config ??= new UnitTestDataConfig();
+
+            var downloadTasks = FakeData.GetTvShowDownloadTask(config).Generate(config.TvShowDownloadTasksCount);
+            var plexLibrary = dbContext.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.TvShow);
+            plexLibrary.ShouldNotBeNull();
+
+            downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id);
+
+            dbContext.DownloadTasks.AddRange(downloadTasks);
+            dbContext.SaveChanges();
+
+            return dbContext;
+        }
+
+        #endregion
+
+        #region Add Media
 
         private static PlexRipperDbContext AddPlexMovies(this PlexRipperDbContext context, UnitTestDataConfig config = null)
         {
@@ -229,5 +240,7 @@ namespace PlexRipper.BaseTests
 
             return context;
         }
+
+        #endregion
     }
 }

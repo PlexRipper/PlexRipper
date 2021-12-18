@@ -27,7 +27,6 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
                 LibraryType = PlexMediaType.Movie,
                 DownloadTasksCount = 1,
             };
-            var context = container.PlexRipperDbContext.AddPlexServers(config).AddDownloadTasks(config);
 
             // Act
             var startResult = await container.GetDownloadTracker.StartDownloadClient(2);

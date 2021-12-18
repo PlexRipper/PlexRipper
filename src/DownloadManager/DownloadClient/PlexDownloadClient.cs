@@ -84,10 +84,10 @@ namespace PlexRipper.DownloadManager.DownloadClient
                 DownloadTask.DownloadWorkerTasks = downloadWorkerTasks.Value;
             }
 
-            var createResult = await CreateDownloadWorkers(downloadTask);
+            var createResult = CreateDownloadWorkers(downloadTask);
             if (createResult.IsFailed)
             {
-                return createResult.ToResult();
+                return createResult.ToResult().LogError();
             }
 
             // TODO Re-enable when implementing downloadSpeedLimit
@@ -134,7 +134,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
             return Result.Ok(downloadWorkerTasks);
         }
 
-        private async Task<Result<List<DownloadWorkerTask>>> CreateDownloadWorkers(DownloadTask downloadTask)
+        private Result<List<DownloadWorkerTask>> CreateDownloadWorkers(DownloadTask downloadTask)
         {
             if (downloadTask is null)
                 return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
@@ -142,13 +142,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
             if (!downloadTask.DownloadWorkerTasks.Any())
                 return ResultExtensions.IsEmpty($"{nameof(downloadTask)}.{nameof(downloadTask.DownloadWorkerTasks)}").LogWarning();
 
-            var downloadWorkerTasksResult = await _mediator.Send(new GetAllDownloadWorkerTasksByDownloadTaskIdQuery(downloadTask.Id));
-            if (downloadWorkerTasksResult.IsFailed)
-            {
-                return downloadWorkerTasksResult.ToResult();
-            }
-
-            foreach (var downloadWorkerTask in downloadWorkerTasksResult.Value)
+            foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
             {
                 _downloadWorkers.Add(_downloadWorkerFactory(downloadWorkerTask));
             }

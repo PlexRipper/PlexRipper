@@ -6,17 +6,17 @@ namespace PlexRipper.Application
 {
     public class GetPlexTvShowByIdWithEpisodesQuery : IRequest<Result<PlexTvShow>>
     {
-        public GetPlexTvShowByIdWithEpisodesQuery(int id, bool includeLibrary = false, bool includeData = false)
+        public GetPlexTvShowByIdWithEpisodesQuery(int id,  bool includePlexServer = false, bool includeLibrary = false)
         {
             Id = id;
             IncludeLibrary = includeLibrary;
-            IncludeData = includeData;
+            IncludePlexServer = includePlexServer;
         }
 
         public int Id { get; }
 
         public bool IncludeLibrary { get; }
 
-        public bool IncludeData { get; }
+        public bool IncludePlexServer { get; }
     }
 }

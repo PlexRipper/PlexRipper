@@ -40,15 +40,9 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PlexLibraryId, _ => 0)
                 .RuleFor(x => x.PlexLibrary, _ => null)
                 .RuleFor(x => x.Children, _ => new List<DownloadTask>())
-                .RuleFor(x => x.DownloadFolder, () => new FolderPath
-                {
-                    DirectoryPath = PathSystem.RootDirectory,
-                })
+                .RuleFor(x => x.DownloadFolder,  _ => null)
                 .RuleFor(x => x.DownloadFolderId, _ => 1)
-                .RuleFor(x => x.DestinationFolder, () => new FolderPath
-                {
-                    DirectoryPath = PathSystem.RootDirectory,
-                })
+                .RuleFor(x => x.DestinationFolder,  _ => null)
                 .RuleFor(x => x.DestinationFolderId, _ => 2);
         }
 
@@ -65,6 +59,8 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
                 .RuleFor(x => x.Children, _ => GetMovieDataDownloadTask(config).Generate(1))
                 .RuleFor(x => x.DownloadUrl, f => f.Internet.Url())
+                .RuleFor(x => x.DownloadFolderId, _ => 1)
+                .RuleFor(x => x.DestinationFolderId, _ => 2)
                 .FinishWith((_, downloadTask) =>
                 {
                     downloadTask.Children.ForEach(x =>
@@ -175,7 +171,6 @@ namespace PlexRipper.BaseTests
             config ??= new UnitTestDataConfig();
 
             var partIndex = 1;
-            var downloadTaskId = new Faker().Random.Int(1);
             return new Faker<DownloadWorkerTask>()
                 .StrictMode(true)
                 .UseSeed(config.Seed)
@@ -187,8 +182,10 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PartIndex, _ => partIndex++)
                 .RuleFor(x => x.TempDirectory, f => f.System.FilePath())
                 .RuleFor(x => x.ElapsedTime, 0)
+                .RuleFor(x => x.DownloadUrl, f => f.System.FilePath())
                 .RuleFor(x => x.DownloadStatus, DownloadStatus.Initialized)
-                .RuleFor(x => x.DownloadTaskId,  _ => 0)
+                .RuleFor(x => x.DownloadTaskId, _ => 0)
+                .RuleFor(x => x.DownloadTask, _ => null)
                 .RuleFor(x => x.DownloadWorkerTaskLogs, new List<DownloadWorkerLog>());
         }
 

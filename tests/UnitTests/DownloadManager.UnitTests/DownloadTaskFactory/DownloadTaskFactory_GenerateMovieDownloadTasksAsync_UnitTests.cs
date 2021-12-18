@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Extras.Moq;
 using FluentResults;
 using Logging;
 using MediatR;
 using Moq;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;
+using PlexRipper.BaseTests.Extensions;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
-using PlexRipper.WebAPI.Config;
+using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -19,41 +22,23 @@ namespace DownloadManager.UnitTests
 {
     public class DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests
     {
-        private readonly Mock<PlexRipper.DownloadManager.DownloadTaskFactory> _sut;
-
         private readonly Mock<IMediator> _iMediator = new();
-
-        private readonly Mock<IPlexAuthenticationService> _plexAuthenticationService = new();
-
-        private readonly Mock<INotificationsService> _notificationsService = new();
-
-        private readonly Mock<IFolderPathService> _folderPathService = new();
-
-        private readonly Mock<IUserSettings> _userSettings = new();
 
         public DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
-
-            _sut = new Mock<PlexRipper.DownloadManager.DownloadTaskFactory>(
-                MockBehavior.Strict,
-                _iMediator.Object,
-                MapperSetup.CreateMapper(),
-                _plexAuthenticationService.Object,
-                _notificationsService.Object,
-                _folderPathService.Object,
-                _userSettings.Object);
         }
 
         [Fact]
         public async Task ShouldHaveFailedResult_WhenPlexMoviesAreEmpty()
         {
             // Arrange
-            _iMediator.Setup(x => x.Send(It.IsAny<GetMultiplePlexMoviesByIdsQuery>(), CancellationToken.None)).ReturnsAsync(Result.Fail(""));
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<DownloadTaskFactory>();
             var movies = new List<int>();
 
             // Act
-            var result = await _sut.Object.GenerateMovieDownloadTasksAsync(movies);
+            var result = await _sut.GenerateMovieDownloadTasksAsync(movies);
 
             // Assert
             result.IsFailed.ShouldBeTrue();
@@ -66,12 +51,19 @@ namespace DownloadManager.UnitTests
             var config = new UnitTestDataConfig
             {
                 Seed = 324,
+                MovieCount = 5,
             };
-            var movies = FakeData.GetPlexMovies(config).Generate(5);
-            _iMediator.Setup(x => x.Send(It.IsAny<GetMultiplePlexMoviesByIdsQuery>(), CancellationToken.None)).ReturnsAsync(Result.Ok(movies));
+            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            using var mock = AutoMock.GetStrict().AddMapper();
+            var _sut = mock.Create<DownloadTaskFactory>();
+            var movies = context.PlexMovies.IncludePlexLibrary().IncludePlexServer().ToList();
+
+            mock.SetupMediator(It.IsAny<GetMultiplePlexMoviesByIdsQuery>).ReturnsAsync(
+                (GetMultiplePlexMoviesByIdsQuery query, CancellationToken _) => Result.Ok(movies.Where(x => query.Ids.Contains(x.Id)).ToList())
+            );
 
             // Act
-            var result = await _sut.Object.GenerateMovieDownloadTasksAsync(movies.Select(x => x.Id).ToList());
+            var result = await _sut.GenerateMovieDownloadTasksAsync(movies.Select(x => x.Id).ToList());
 
             // Assert
             result.IsSuccess.ShouldBeTrue();

@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Autofac.Extras.Moq;
 using FluentResults;
 using Logging;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using PlexRipper.Application;
-using PlexRipper.Application.DownloadWorkerTasks;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain;
@@ -62,15 +62,17 @@ namespace DownloadManager.UnitTests
         public async Task ShouldGenerateDownloadWorkerTasks_WhenDownloadTaskHasNoDownloadWorkerTasks()
         {
             //Arrange
+            var config = new UnitTestDataConfig()
+            {
+                MovieDownloadTasksCount = 1,
+            };
+            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+
             using var mock = AutoMock.GetStrict();
             mock.SetupMediator(It.IsAny<AddDownloadWorkerTasksCommand>).ReturnsAsync(Result.Ok());
-            mock.SetupMediator(It.IsAny<GetAllDownloadWorkerTasksByDownloadTaskIdQuery>)
-                .ReturnsAsync(Result.Ok(FakeData.GetDownloadWorkerTask().Generate(4)));
-
             mock.Mock<IUserSettings>().SetupGet(x => x.DownloadSegments).Returns(4);
 
-            var downloadTask = FakeData.GetMovieDownloadTask().Generate();
-            downloadTask.DownloadWorkerTasks = new List<DownloadWorkerTask>();
+            var downloadTask = context.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
 
             // Act
             var result = await mock.Create<PlexDownloadClient>().Setup(downloadTask);

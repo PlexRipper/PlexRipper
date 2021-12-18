@@ -27,7 +27,7 @@ namespace PlexRipper.BaseTests
 
         public int PlexServerCount { get; set; } = 1;
 
-        public int PlexLibraryCount { get; set; } = 5;
+        public int PlexLibraryCount { get; set; } = 0;
 
         public int DownloadTasksCount { get; set; } = 10;
 
@@ -41,9 +41,12 @@ namespace PlexRipper.BaseTests
 
         public int TvShowEpisodeCountMax { get; set; } = 10;
 
-        #endregion
+        public int MovieDownloadTasksCount { get; set; } = 0;
+
+        public int TvShowDownloadTasksCount { get; set; } = 0;
 
         #endregion
 
+        #endregion
     }
 }

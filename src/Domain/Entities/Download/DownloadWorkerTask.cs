@@ -30,7 +30,10 @@ namespace PlexRipper.Domain
             FileName = $"{Path.GetFileNameWithoutExtension(downloadTask.FileName)}.part{partIndex}{Path.GetExtension(downloadTask.FileName)}";
         }
 
-        private DownloadWorkerTask() { }
+        public DownloadWorkerTask()
+        {
+
+        }
 
         #endregion
 

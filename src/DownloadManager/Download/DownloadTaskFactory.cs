@@ -185,6 +185,14 @@ namespace PlexRipper.DownloadManager
                     downloadTasks.Add(tvShowDownloadTask);
                 }
 
+                // We set this to not have to query the database to deep
+                tvShow.Seasons.ForEach(x =>
+                {
+                    x.TvShow = tvShow;
+                    x.PlexServer = tvShow.PlexServer;
+                    x.PlexLibrary = tvShow.PlexLibrary;
+                });
+
                 // Create seasons downloadTasks
                 var seasonIds = tvShow.Seasons.Select(x => x.Id).ToList();
                 var seasonsResult = await GenerateTvShowSeasonDownloadTasksAsync(seasonIds, downloadTasks, tvShow.Seasons);
@@ -246,6 +254,14 @@ namespace PlexRipper.DownloadManager
                     downloadTasks[tvShowDownloadTaskIndex].Children.Add(seasonDownloadTask);
                 }
 
+                // We set this to not have to query the database to deep
+                season.Episodes.ForEach(x =>
+                {
+                    x.TvShow = season.TvShow;
+                    x.TvShowSeason = season;
+                    x.PlexServer = season.PlexServer;
+                    x.PlexLibrary = season.PlexLibrary;
+                });
                 // Create episodes downloadTasks
                 var episodesIds = season.Episodes.Select(x => x.Id).ToList();
                 var seasonsResult = await GenerateTvShowEpisodesDownloadTasksAsync(episodesIds, downloadTasks, season.Episodes);
@@ -293,7 +309,7 @@ namespace PlexRipper.DownloadManager
                 var tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(episode.TvShow));
                 if (tvShowDownloadTaskIndex == -1)
                 {
-                    var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(episode.TvShow.PlexServerId, episode.TvShow.Key));
+                    var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(episode.PlexServerId, episode.TvShow.Key));
                     downloadTasks.Add(result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(episode.TvShow));
                     tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(episode.TvShow));
                 }
@@ -335,6 +351,9 @@ namespace PlexRipper.DownloadManager
         /// <returns>The created <see cref="DownloadTask"/>.</returns>
         public async Task<Result<List<DownloadTask>>> GenerateMovieDownloadTasksAsync(List<int> plexMovieIds)
         {
+            if (!plexMovieIds.Any())
+                return ResultExtensions.IsEmpty(nameof(plexMovieIds)).LogWarning();
+
             Log.Debug($"Creating {plexMovieIds.Count} movie download tasks.");
             var plexMoviesResult = await _mediator.Send(new GetMultiplePlexMoviesByIdsQuery(plexMovieIds, true, true));
 

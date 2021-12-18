@@ -1,4 +1,5 @@
-﻿using Environment;
+﻿using Autofac.Extras.Moq;
+using Environment;
 using FluentResults;
 using Logging;
 using Moq;
@@ -14,36 +15,23 @@ namespace Settings.UnitTests
 {
     public class UserSettings_Setup_UnitTests
     {
-        #region Fields
-
-        private readonly Mock<IFileSystem> _fileSystem;
-
-        private readonly Mock<IPathSystem> _pathSystem;
-
-        private readonly Mock<UserSettings> _sut;
-
-        #endregion
-
         public UserSettings_Setup_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
-            _pathSystem = new Mock<IPathSystem>();
-            _fileSystem = new Mock<IFileSystem>();
-            _sut = new Mock<UserSettings>(MockBehavior.Strict, _pathSystem.Object, _fileSystem.Object);
-
-            _pathSystem.Setup(x => x.ConfigFileName).Returns("Test_PlexRipperSettings.json");
-            _pathSystem.Setup(x => x.ConfigDirectory).Returns("/config");
         }
 
         [Fact]
         public void UserSettings_Setup_ShouldHaveSuccessfulSetup_WhenSettingsAreLoaded()
         {
             // Arrange
-            _fileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(true));
-            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
+            using var mock = AutoMock.GetStrict();
+            mock.Mock<IFileSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(true));
+            mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
+            mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
+            mock.Mock<IPathSystem>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
 
             // Act
-            var setupResult = _sut.Object.Setup();
+            var setupResult = mock.Create<UserSettings>().Setup();
 
             // Assert
             setupResult.IsSuccess.ShouldBeTrue();
@@ -53,10 +41,12 @@ namespace Settings.UnitTests
         public void UserSettings_Setup_ShouldReturnFailedResult_WhenFileExistsFailed()
         {
             // Arrange
-            _fileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Fail(""));
+            using var mock = AutoMock.GetStrict();
+            mock.Mock<IFileSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Fail(""));
+            var _sut = mock.Create<UserSettings>();
 
             // Act
-            var setupResult = _sut.Object.Setup();
+            var setupResult = _sut.Setup();
 
             // Assert
             setupResult.IsSuccess.ShouldBeFalse();
@@ -66,26 +56,33 @@ namespace Settings.UnitTests
         public void UserSettings_Setup_ShouldCreateSettingsFile_WhenSettingsFileDoesntExist()
         {
             // Arrange
-            _fileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(false));
-            _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
+            using var mock = AutoMock.GetStrict();
+            mock.Mock<IFileSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(false));
+            mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
+            var _sut = mock.Create<UserSettings>();
 
             // Act
-            var setupResult = _sut.Object.Setup();
+            var setupResult = _sut.Setup();
 
             // Assert
             setupResult.IsSuccess.ShouldBeTrue();
-            _fileSystem.Verify(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            mock.Mock<IFileSystem>().Verify(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [Fact]
         public void UserSettings_Setup_ShouldLoadSettingsFile_WhenSettingsFileExists()
         {
             // Arrange
-            _fileSystem.Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(true));
-            _fileSystem.Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
+            using var mock = AutoMock.GetStrict();
+            mock.Mock<IPathSystem>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
+            mock.Mock<IFileSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(Result.Ok(true));
+            mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
+            mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
+
+            var _sut = mock.Create<UserSettings>();
 
             // Act
-            var setupResult = _sut.Object.Setup();
+            var setupResult = _sut.Setup();
 
             // Assert
             setupResult.IsSuccess.ShouldBeTrue();

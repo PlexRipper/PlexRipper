@@ -21,6 +21,11 @@ namespace PlexRipper.Data.Common
             return downloadTasks.IncludeDownloadTasks("");
         }
 
+        public static IQueryable<DownloadTask> IncludeByRoot(this IQueryable<DownloadTask> downloadTasks)
+        {
+            return downloadTasks.Where(x => x.ParentId == null);
+        }
+
         private static IQueryable<T> IncludeDownloadTasks<T>(this IQueryable<T> query, string prefix = "") where T : class
         {
             if (!string.IsNullOrEmpty(prefix))

@@ -12,20 +12,20 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
-    public class GetAllDownloadTasksInPlexServerByIdQueryValidator : AbstractValidator<GetAllDownloadTasksInPlexServerByIdQuery>
+    public class GetDownloadTasksByPlexServerIdQueryValidator : AbstractValidator<GetDownloadTasksByPlexServerIdQuery>
     {
-        public GetAllDownloadTasksInPlexServerByIdQueryValidator()
+        public GetDownloadTasksByPlexServerIdQueryValidator()
         {
             RuleFor(x => x.PlexServerId).GreaterThan(0);
         }
     }
 
-    public class GetAllDownloadTasksInPlexServerByIdQueryHandler : BaseHandler,
-        IRequestHandler<GetAllDownloadTasksInPlexServerByIdQuery, Result<List<DownloadTask>>>
+    public class GetDownloadTasksByPlexServerIdQueryHandler : BaseHandler,
+        IRequestHandler<GetDownloadTasksByPlexServerIdQuery, Result<List<DownloadTask>>>
     {
-        public GetAllDownloadTasksInPlexServerByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        public GetDownloadTasksByPlexServerIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<List<DownloadTask>>> Handle(GetAllDownloadTasksInPlexServerByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<DownloadTask>>> Handle(GetDownloadTasksByPlexServerIdQuery request, CancellationToken cancellationToken)
         {
             var downloadTasks = await PlexServerQueryable
                 .AsTracking()

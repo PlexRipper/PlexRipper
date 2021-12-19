@@ -58,9 +58,43 @@ namespace PlexRipper.Data
         public async Task<Result> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
         {
             // Prevent the navigation properties from being updated
+            command.DownloadTasks.ForEach(x =>
+            {
+                x.DestinationFolder = null;
+                x.DownloadFolder = null;
+                x.PlexServer = null;
+                x.PlexLibrary = null;
+            });
+
+            // Only create new tasks, downloadTasks can be nested in tasks that already are in the database.
+            await _dbContext.BulkInsertAsync(command.DownloadTasks.FindAll(x => x.Id == 0), _bulkConfig, cancellationToken: cancellationToken);
+
+            foreach (var downloadTask in command.DownloadTasks)
+            {
+                if (downloadTask.Children is null || !downloadTask.Children.Any())
+                    continue;
+
+                downloadTask.Children = SetRootId(downloadTask.Children, downloadTask.Id);
+            }
+
             InsertDownloadTasks(command.DownloadTasks);
 
             return Result.Ok();
+        }
+
+
+        private static List<DownloadTask> SetRootId(List<DownloadTask> downloadTasks, int rootTaskId)
+        {
+            foreach (var downloadTask in downloadTasks)
+            {
+                downloadTask.RootDownloadTaskId = rootTaskId;
+                if (downloadTask.Children is null || !downloadTask.Children.Any())
+                    continue;
+
+                downloadTask.Children = SetRootId(downloadTask.Children, rootTaskId);
+            }
+
+            return downloadTasks;
         }
 
         private void InsertDownloadTasks(List<DownloadTask> downloadTasks)

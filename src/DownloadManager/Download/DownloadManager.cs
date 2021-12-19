@@ -42,37 +42,11 @@ namespace PlexRipper.DownloadManager
             _mediator = mediator;
             _downloadTaskValidator = downloadTaskValidator;
             _downloadQueue = downloadQueue;
-
-            SetupSubscriptions();
         }
 
         #endregion
 
         #region Methods
-
-        #region Private
-
-        private void SetupSubscriptions()
-        {
-            _downloadQueue
-                .UpdateDownloadTasks
-                .SubscribeAsync(UpdateDownloadTasksAsync);
-        }
-
-        #region Subscriptions
-
-        private async Task UpdateDownloadTasksAsync(List<DownloadTask> downloadTasks)
-        {
-            var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasks));
-            if (updateResult.IsFailed)
-            {
-                updateResult.LogError();
-            }
-        }
-
-        #endregion
-
-        #endregion
 
         #region Public
 

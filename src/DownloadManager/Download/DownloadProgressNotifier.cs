@@ -28,7 +28,7 @@ namespace PlexRipper.DownloadManager
 
         public async Task<Result<string>> SendDownloadProgress(int plexServerId)
         {
-            var downloadTasksResult = await _mediator.Send(new GetAllDownloadTasksInPlexServerByIdQuery(plexServerId));
+            var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId));
             if (downloadTasksResult.IsSuccess)
             {
                 await _signalRService.SendDownloadProgressUpdate(plexServerId, downloadTasksResult.Value);

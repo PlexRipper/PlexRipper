@@ -39,7 +39,7 @@ namespace PlexRipper.BaseTests
 
         public int TvShowSeasonCountMax { get; set; } = 5;
 
-        public int TvShowEpisodeCountMax { get; set; } = 10;
+        public int TvShowEpisodeCountMax { get; set; } = 5;
 
         public int MovieDownloadTasksCount { get; set; } = 0;
 

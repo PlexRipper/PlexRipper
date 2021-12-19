@@ -126,6 +126,10 @@ namespace PlexRipper.Domain
 
         public DownloadTask Parent { get; set; }
 
+        public int? RootDownloadTaskId { get; set; }
+
+        public DownloadTask RootDownloadTask { get; set; }
+
         public List<DownloadTask> Children { get; set; }
 
         #endregion

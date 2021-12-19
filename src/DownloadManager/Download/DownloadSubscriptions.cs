@@ -47,6 +47,10 @@ namespace PlexRipper.DownloadManager
                 .StartDownloadTask
                 .SubscribeAsync(async downloadTask => await _downloadCommands.StartDownloadTaskAsync(downloadTask));
 
+            _downloadQueue
+                .UpdateDownloadTasks
+                .SubscribeAsync(UpdateDownloadTasksAsync);
+
             // Update database on downloadTask updates
             _downloadTracker
                 .DownloadTaskUpdate
@@ -74,9 +78,13 @@ namespace PlexRipper.DownloadManager
                 _downloadTracker.DownloadTaskFinished,
             }).SubscribeAsync(downloadTask => _downloadProgressScheduler.FireDownloadProgressJob(downloadTask.PlexServerId));
 
-            _fileMerger.FileMergeCompletedObservable.SubscribeAsync(task => _downloadProgressScheduler.FireDownloadProgressJob(task.PlexServerId));
+            _fileMerger
+                .FileMergeCompletedObservable
+                .SubscribeAsync(task => _downloadProgressScheduler.FireDownloadProgressJob(task.PlexServerId));
 
-            _fileMerger.FileMergeStartObservable.SubscribeAsync(task => _downloadProgressScheduler.FireDownloadProgressJob(task.DownloadTask.PlexServerId));
+            _fileMerger
+                .FileMergeStartObservable
+                .SubscribeAsync(task => _downloadProgressScheduler.FireDownloadProgressJob(task.DownloadTask.PlexServerId));
 
             return Result.Ok();
         }
@@ -91,6 +99,15 @@ namespace PlexRipper.DownloadManager
             }
 
             return updateResult;
+        }
+
+        private async Task UpdateDownloadTasksAsync(List<DownloadTask> downloadTasks)
+        {
+            var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasks));
+            if (updateResult.IsFailed)
+            {
+                updateResult.LogError();
+            }
         }
 
         private async Task OnFileMergeProgress(FileMergeProgress progress)

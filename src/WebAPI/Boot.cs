@@ -2,14 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Environment;
-using FluentResultExtensions.lib;
 using Logging;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
-using PlexRipper.Data;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
-using PlexRipper.FileSystem;
 
 namespace PlexRipper.WebAPI
 {
@@ -36,6 +32,8 @@ namespace PlexRipper.WebAPI
 
         private readonly IDownloadSubscriptions _downloadSubscriptions;
 
+        private readonly IDownloadQueue _downloadQueue;
+
         private readonly IUserSettings _userSettings;
 
         #endregion
@@ -44,7 +42,7 @@ namespace PlexRipper.WebAPI
 
         public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
             IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
-            IMigrationService migrationService, IDownloadSubscriptions downloadSubscriptions)
+            IMigrationService migrationService, IDownloadSubscriptions downloadSubscriptions, IDownloadQueue downloadQueue)
         {
             _appLifetime = appLifetime;
             _userSettings = userSettings;
@@ -55,6 +53,7 @@ namespace PlexRipper.WebAPI
             _schedulerService = schedulerService;
             _migrationService = migrationService;
             _downloadSubscriptions = downloadSubscriptions;
+            _downloadQueue = downloadQueue;
         }
 
         #endregion
@@ -89,6 +88,7 @@ namespace PlexRipper.WebAPI
             await _migrationService.SetupAsync();
 
             _downloadSubscriptions.Setup();
+            _downloadQueue.Setup();
 
             // Keep running the following
             if (!EnvironmentExtensions.IsIntegrationTestMode())

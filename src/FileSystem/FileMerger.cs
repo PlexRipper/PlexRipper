@@ -159,7 +159,7 @@ namespace PlexRipper.FileSystem
 
             if (_copyTask.IsFaulted)
             {
-                return Result.Fail("ExecuteFileTasks failed due to an error");
+                return Result.Fail("ExecuteFileTasks failed due to an error").LogError();
             }
 
             await ResumeFileTasks();

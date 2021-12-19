@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
@@ -32,6 +34,12 @@ namespace PlexRipper.DownloadManager
 
         private readonly Subject<int> _serverCompletedDownloading = new();
 
+        private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
+
+        private readonly CancellationToken _token = new CancellationToken();
+
+        private Task<Task> _copyTask;
+
         #endregion
 
         public IObservable<DownloadTask> StartDownloadTask => _startDownloadTask.AsObservable();
@@ -45,71 +53,109 @@ namespace PlexRipper.DownloadManager
 
         #region Public Methods
 
+        public Result Setup()
+        {
+            _copyTask = Task.Factory.StartNew(ExecuteDownloadQueueCheck, TaskCreationOptions.LongRunning);
+            return _copyTask.IsFaulted ? Result.Fail("ExecuteFileTasks failed due to an error").LogError() : Result.Ok();
+        }
+
+        private async Task ExecuteDownloadQueueCheck()
+        {
+            while (!_token.IsCancellationRequested)
+            {
+                var item = await _plexServersToCheckChannel.Reader.ReadAsync();
+                await CheckDownloadQueueServer(item);
+            }
+        }
+
         /// <summary>
         /// Check the DownloadQueue for downloadTasks which can be started.
         /// </summary>
-        public async Task CheckDownloadQueue()
+        public async Task CheckDownloadQueue(List<int> plexServerIds = null)
         {
             Log.Debug("Checking for download tasks which can be processed.");
-            var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
-            var serverList = serverListResult.Value.Where(x => x.HasDownloadTasks).ToList();
+            plexServerIds ??= new List<int>();
+            if (!plexServerIds.Any())
+            {
+                var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
+                var serverList = serverListResult.Value.Where(x => x.HasDownloadTasks).ToList();
+                plexServerIds = serverList.Select(x => x.Id).ToList();
+            }
 
-            ExecuteDownloadQueue(serverList);
+            foreach (var plexServerId in plexServerIds)
+            {
+                await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId);
+            }
         }
 
-        // TODO Might need to do this on a per-server level otherwise many server might influence each other
-        public void ExecuteDownloadQueue(List<PlexServer> plexServers)
+        public async Task<Result> CheckDownloadQueueServer(int plexServerId)
         {
-            if (!plexServers.Any())
+            if (plexServerId <= 0)
+                return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
+
+            var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId));
+            if (downloadTasksResult.IsFailed)
             {
-                Log.Information("There are no PlexServers with DownloadTasks");
-                return;
+                return downloadTasksResult;
             }
 
-            Log.Information($"Starting the check of {plexServers.Count} PlexServers.");
-            foreach (var plexServer in plexServers)
+            // Set all initialized to Queued
+            var downloadTasks = downloadTasksResult.Value;
+            downloadTasks = SetToQueued(downloadTasks);
+            downloadTasks = SetToCompleted(downloadTasks);
+
+            var nextDownloadTask = GetNextDownloadTask(ref downloadTasks);
+            if (nextDownloadTask.IsFailed)
             {
-                var downloadTasks = plexServer.PlexLibraries.SelectMany(x => x.DownloadTasks).ToList();
-
-                // Set all initialized to Queued
-                downloadTasks = SetToQueued(downloadTasks);
-                downloadTasks = SetToCompleted(downloadTasks);
-
-                var nextDownloadTask = GetNextDownloadTask(ref downloadTasks);
-                if (nextDownloadTask.IsFailed)
-                {
-                    Log.Information($"There are no available downloadTasks remaining for PlexServer: {plexServer.Name}");
-                    _serverCompletedDownloading.OnNext(plexServer.Id);
-                    continue;
-                }
-
-                Log.Information($"Selected download task {nextDownloadTask.Value.FullTitle} to start as the next task");
-                downloadTasks = SetToDownloading(downloadTasks);
-                _updateDownloadTasks.OnNext(downloadTasks);
-
-                _startDownloadTask.OnNext(nextDownloadTask.Value);
+                var plexServerName = await _mediator.Send(new GetPlexServerNameByIdQuery(plexServerId));
+                Log.Information($"There are no available downloadTasks remaining for PlexServer with Id: {plexServerName.Value}");
+                _serverCompletedDownloading.OnNext(plexServerId);
+                return Result.Ok();
             }
+
+            Log.Information($"Selected download task {nextDownloadTask.Value.FullTitle} to start as the next task");
+            downloadTasks = SetToDownloading(downloadTasks);
+            _updateDownloadTasks.OnNext(downloadTasks);
+
+            _startDownloadTask.OnNext(nextDownloadTask.Value);
+
+            return Result.Ok();
         }
 
-        public Result<DownloadTask> GetNextDownloadTask(ref List<DownloadTask> downloadTasks)
+        /// <summary>
+        ///  Determines the next downloadable <see cref="DownloadTask"/>.
+        /// Will only return a successful result if a queued task can be found
+        /// </summary>
+        /// <param name="downloadTasks"></param>
+        /// <returns></returns>
+        public static Result<DownloadTask> GetNextDownloadTask(ref List<DownloadTask> downloadTasks)
         {
             // Check if there is anything downloading already
             var nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Downloading);
+            if (nextDownloadTask is not null)
+            {
+                // Should we check deeper for any nested queued tasks inside downloading tasks
+                if (nextDownloadTask.Children is not null && nextDownloadTask.Children.Any())
+                {
+                    var children = nextDownloadTask.Children;
+                    return GetNextDownloadTask(ref children);
+                }
+
+                return Result.Fail($"DownloadTask {nextDownloadTask.Title} is already downloading").LogDebug();
+            }
+
+            nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Queued);
             if (nextDownloadTask is null)
+                return Result.Fail("There were no downloadTasks left to download.").LogDebug();
+
+            // Should we check deeper for any nested queued tasks in downloading tasks
+            if (nextDownloadTask.Children is not null && nextDownloadTask.Children.Any())
             {
-                nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Queued);
-                if (nextDownloadTask is null)
-                    return Result.Fail("There were no downloadTasks left to download").LogDebug();
+                var children = nextDownloadTask.Children;
+                return GetNextDownloadTask(ref children);
             }
 
-            if (!nextDownloadTask.Children.Any())
-            {
-                nextDownloadTask.DownloadStatus = DownloadStatus.Downloading;
-                return Result.Ok(nextDownloadTask);
-            }
-
-            var children = nextDownloadTask.Children;
-            return GetNextDownloadTask(ref children);
+            return Result.Ok(nextDownloadTask);
         }
 
         public List<DownloadTask> SetToDownloading(List<DownloadTask> downloadTasks)

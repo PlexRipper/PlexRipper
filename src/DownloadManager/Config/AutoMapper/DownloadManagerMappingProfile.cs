@@ -21,7 +21,7 @@ namespace PlexRipper.DownloadManager.AutoMapper
                 .ForMember(task => task.FullTitle, opt => opt.MapFrom(entity => entity.FullTitle))
                 .ForMember(task => task.Year, opt => opt.MapFrom(entity => entity.Year))
                 .ForMember(task => task.MediaType, opt => opt.MapFrom(entity => entity.Type))
-                .ForMember(task => task.DownloadStatus, opt => opt.MapFrom(entity => DownloadStatus.Initialized))
+                .ForMember(task => task.DownloadStatus, opt => opt.MapFrom(entity => DownloadStatus.Queued))
                 .ForMember(task => task.Children, opt => opt.MapFrom(entity => new List<DownloadTask>()))
                 .ForMember(task => task.Created, opt => opt.MapFrom(entity => DateTime.UtcNow))
                 .ForMember(task => task.PlexLibrary, opt => opt.MapFrom(entity => entity.PlexLibrary))

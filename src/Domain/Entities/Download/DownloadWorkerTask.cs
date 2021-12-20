@@ -55,7 +55,7 @@ namespace PlexRipper.Domain
         public long EndByte { get; set; }
 
         [Column(Order = 5)]
-        public DownloadStatus DownloadStatus { get; set; } = DownloadStatus.Initialized;
+        public DownloadStatus DownloadStatus { get; set; } = DownloadStatus.Queued;
 
         /// <summary>
         /// Gets the total bytes received so far.

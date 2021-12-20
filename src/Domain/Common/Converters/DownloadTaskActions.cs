@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using PlexRipper.Domain;
+using System.Linq;
 
-namespace PlexRipper.DownloadManager
+namespace PlexRipper.Domain
 {
     public static class DownloadTaskActions
     {
@@ -19,6 +19,27 @@ namespace PlexRipper.DownloadManager
 
         private const string StatusRestart = "restart";
 
+        private static readonly List<DownloadStatus> AllStatuses = new()
+        {
+            DownloadStatus.Queued,
+            DownloadStatus.Downloading,
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.Completed,
+            DownloadStatus.Deleted,
+            DownloadStatus.Unknown,
+        };
+
+        private static readonly List<DownloadStatus> AnyStatuses = new()
+        {
+            DownloadStatus.Merging,
+            DownloadStatus.Error,
+            DownloadStatus.Downloading,
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.Moving,
+            DownloadStatus.Paused,
+            DownloadStatus.Stopped,
+        };
+
         public static List<string> Convert(DownloadStatus downloadStatus)
         {
             var actions = new List<string>
@@ -29,9 +50,6 @@ namespace PlexRipper.DownloadManager
             switch (downloadStatus)
             {
                 case DownloadStatus.Unknown:
-                    actions.Add(StatusDelete);
-                    break;
-                case DownloadStatus.Initialized:
                     actions.Add(StatusDelete);
                     break;
                 case DownloadStatus.Queued:
@@ -64,6 +82,37 @@ namespace PlexRipper.DownloadManager
             }
 
             return actions;
+        }
+
+        /// <summary>
+        /// Determines the overall <see cref="DownloadStatus"/> based on the child list of <see cref="DownloadStatus"/>
+        /// </summary>
+        /// <param name="downloadStatusList"></param>
+        /// <returns></returns>
+        public static DownloadStatus Aggregate(List<DownloadStatus> downloadStatusList)
+        {
+            foreach (var status in AnyStatuses)
+            {
+                if (downloadStatusList.Any(x => x == status))
+                {
+                    if (status == DownloadStatus.DownloadFinished)
+                    {
+                        return DownloadStatus.Downloading;
+                    }
+
+                    return status;
+                }
+            }
+
+            foreach (var status in AllStatuses)
+            {
+                if (downloadStatusList.All(x => x == status))
+                {
+                    return status;
+                }
+            }
+
+            return DownloadStatus.Unknown;
         }
     }
 }

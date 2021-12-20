@@ -9,8 +9,8 @@ using FluentResults;
 using Logging;
 using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Application.DownloadWorkerTasks;
 using PlexRipper.Domain;
+using PlexRipper.Domain.Converters;
 
 namespace PlexRipper.DownloadManager.DownloadClient
 {
@@ -259,19 +259,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
             var clientStatus = downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList();
 
-            // If there is any error then set client to error state
-            if (clientStatus.Any(x => x == DownloadStatus.Error))
-            {
-                DownloadStatus = DownloadStatus.Error;
-            }
-            else if (clientStatus.Any(x => x == DownloadStatus.Downloading))
-            {
-                DownloadStatus = DownloadStatus.Downloading;
-            }
-            else if (clientStatus.All(x => x == DownloadStatus.DownloadFinished))
-            {
-                DownloadStatus = DownloadStatus.DownloadFinished;
-            }
+            DownloadStatus = DownloadTaskActions.Aggregate(clientStatus);
 
             _downloadTaskUpdate.OnNext(DownloadTask);
 

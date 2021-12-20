@@ -101,8 +101,7 @@ namespace PlexRipper.DownloadManager
 
             // Set all initialized to Queued
             var downloadTasks = downloadTasksResult.Value;
-            downloadTasks = SetToQueued(downloadTasks);
-            downloadTasks = SetToCompleted(downloadTasks);
+            //downloadTasks = SetToCompleted(downloadTasks);
 
             var nextDownloadTask = GetNextDownloadTask(ref downloadTasks);
             if (nextDownloadTask.IsFailed)
@@ -114,7 +113,7 @@ namespace PlexRipper.DownloadManager
             }
 
             Log.Information($"Selected download task {nextDownloadTask.Value.FullTitle} to start as the next task");
-            downloadTasks = SetToDownloading(downloadTasks);
+            //downloadTasks = SetToDownloading(downloadTasks);
             _updateDownloadTasks.OnNext(downloadTasks);
 
             _startDownloadTask.OnNext(nextDownloadTask.Value);
@@ -172,24 +171,6 @@ namespace PlexRipper.DownloadManager
                 if (!downloadTask.IsDownloadable && downloadTask.Children.Any(x => x.DownloadStatus is DownloadStatus.Downloading))
                 {
                     downloadTask.DownloadStatus = DownloadStatus.Downloading;
-                }
-            }
-
-            return downloadTasks;
-        }
-
-        public List<DownloadTask> SetToQueued(List<DownloadTask> downloadTasks)
-        {
-            foreach (var downloadTask in downloadTasks)
-            {
-                if (downloadTask.DownloadStatus is DownloadStatus.Initialized)
-                {
-                    downloadTask.DownloadStatus = DownloadStatus.Queued;
-                }
-
-                if (downloadTask.Children.Any())
-                {
-                    downloadTask.Children = SetToQueued(downloadTask.Children);
                 }
             }
 

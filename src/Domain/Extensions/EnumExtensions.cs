@@ -260,7 +260,6 @@ namespace PlexRipper.Domain
             return value switch
             {
                 "Unknown" => DownloadStatus.Unknown,
-                "Initialized" => DownloadStatus.Initialized,
                 "Queued" => DownloadStatus.Queued,
                 "Downloading" => DownloadStatus.Downloading,
                 "DownloadFinished" => DownloadStatus.DownloadFinished,
@@ -292,7 +291,6 @@ namespace PlexRipper.Domain
             return value switch
             {
                 DownloadStatus.Unknown => "Unknown",
-                DownloadStatus.Initialized => "Initialized",
                 DownloadStatus.Queued => "Queued",
                 DownloadStatus.Downloading => "Downloading",
                 DownloadStatus.DownloadFinished => "DownloadFinished",

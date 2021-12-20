@@ -51,6 +51,11 @@ namespace PlexRipper.DownloadManager
                 .UpdateDownloadTasks
                 .SubscribeAsync(UpdateDownloadTasksAsync);
 
+            // Update the download status of parent download tasks when a child changed
+            _downloadTracker
+                .DownloadStatusChanged
+                .SubscribeAsync(async downloadTask => await OnDownloadStatusChanged(downloadTask));
+
             // Update database on downloadTask updates
             _downloadTracker
                 .DownloadTaskUpdate
@@ -158,6 +163,14 @@ namespace PlexRipper.DownloadManager
 
             Log.Information($"The download of {downloadTask.Title} has finished!");
             await _downloadQueue.CheckDownloadQueue();
+        }
+
+        private async Task OnDownloadStatusChanged(DownloadTask downloadTask)
+        {
+            if (downloadTask.RootDownloadTaskId is null)
+                return;
+
+            await _mediator.Send(new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTask.RootDownloadTaskId ?? 0));
         }
     }
 }

@@ -85,13 +85,13 @@ namespace DownloadManager.UnitTests
 
             foreach (var seasonDownloadTask in downloadTasksResult[1].Children)
             {
-                seasonDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
+                seasonDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
                 foreach (var episodeDownloadTask in seasonDownloadTask.Children)
                 {
-                    episodeDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
+                    episodeDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
                     foreach (var episodeDataDownloadTask in episodeDownloadTask.Children)
                     {
-                        episodeDataDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
+                        episodeDataDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
                     }
                 }
             }

@@ -35,7 +35,7 @@ namespace PlexRipper.BaseTests.Asserts
             source.FileLocationUrl.ShouldBeNull();
 
             source.DownloadTaskType.ShouldBe(DownloadTaskType.TvShow);
-            source.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
+            source.DownloadStatus.ShouldBe(DownloadStatus.Queued);
             source.Created.ShouldBeGreaterThan(DateTime.MinValue);
             source.Created.ShouldBeLessThan(DateTime.UtcNow);
 
@@ -70,7 +70,7 @@ namespace PlexRipper.BaseTests.Asserts
             source.FileLocationUrl.ShouldBeNull();
 
             source.DownloadTaskType.ShouldBe(DownloadTaskType.Season);
-            source.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
+            source.DownloadStatus.ShouldBe(DownloadStatus.Queued);
             source.Created.ShouldBeGreaterThan(DateTime.MinValue);
             source.Created.ShouldBeLessThan(DateTime.UtcNow);
 
@@ -106,7 +106,7 @@ namespace PlexRipper.BaseTests.Asserts
             source.FileName.ShouldNotBeEmpty();
 
             source.DownloadTaskType.ShouldBe(DownloadTaskType.Episode);
-            source.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
+            source.DownloadStatus.ShouldBe(DownloadStatus.Queued);
             source.Created.ShouldBeGreaterThan(DateTime.MinValue);
             source.Created.ShouldBeLessThan(DateTime.UtcNow);
 
@@ -124,7 +124,7 @@ namespace PlexRipper.BaseTests.Asserts
                         var episodeDataPartDownloadTask = source.Children[m + l];
 
                         episodeDataPartDownloadTask.DownloadTaskType.ShouldBe(DownloadTaskType.EpisodePart);
-                        episodeDataPartDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
+                        episodeDataPartDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
                         episodeDataPartDownloadTask.Created.ShouldBeGreaterThan(DateTime.MinValue);
                         episodeDataPartDownloadTask.Created.ShouldBeLessThan(DateTime.UtcNow);
                         episodeDataPartDownloadTask.DownloadWorkerTasks.ShouldBeEmpty();

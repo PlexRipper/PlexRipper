@@ -111,7 +111,7 @@ namespace DownloadManager.UnitTests
             // Assert
             var downloadTasksUpdate = updates[updateIndex];
             downloadTasksUpdate.Any().ShouldBeTrue();
-            downloadTasksUpdate.All(x => x.DownloadStatus is not DownloadStatus.Initialized).ShouldBeTrue();
+            downloadTasksUpdate.All(x => x.DownloadStatus is not DownloadStatus.Queued).ShouldBeTrue();
         }
 
         [Fact]

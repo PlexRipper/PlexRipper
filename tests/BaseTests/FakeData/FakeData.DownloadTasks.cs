@@ -15,7 +15,7 @@ namespace PlexRipper.BaseTests
                 .StrictMode(true)
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.Id, _ => 0)
-                .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Initialized)
+                .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
                 .RuleFor(x => x.Title, f => f.Company.CompanyName())
                 .RuleFor(x => x.FullTitle, f => f.Company.CompanyName())
                 .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
@@ -185,7 +185,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.TempDirectory, f => f.System.FilePath())
                 .RuleFor(x => x.ElapsedTime, 0)
                 .RuleFor(x => x.DownloadUrl, f => f.System.FilePath())
-                .RuleFor(x => x.DownloadStatus, DownloadStatus.Initialized)
+                .RuleFor(x => x.DownloadStatus, DownloadStatus.Queued)
                 .RuleFor(x => x.DownloadTaskId, _ => 0)
                 .RuleFor(x => x.DownloadTask, _ => null)
                 .RuleFor(x => x.DownloadWorkerTaskLogs, new List<DownloadWorkerLog>());

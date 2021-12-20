@@ -14,10 +14,10 @@ namespace PlexRipper.Domain
         Unknown = 0,
 
         /// <summary>
-        /// Download Task is created and set to default values.
+        /// There was an error during download.
         /// </summary>
-        [EnumMember(Value = "Initialized")]
-        Initialized = 1,
+        [EnumMember(Value = "Error")]
+        Error = 1,
 
         /// <summary>
         /// Download is added to the queue.
@@ -72,11 +72,5 @@ namespace PlexRipper.Domain
         /// </summary>
         [EnumMember(Value = "Completed")]
         Completed = 10,
-
-        /// <summary>
-        /// There was an error during download.
-        /// </summary>
-        [EnumMember(Value = "Error")]
-        Error = 11,
     }
 }

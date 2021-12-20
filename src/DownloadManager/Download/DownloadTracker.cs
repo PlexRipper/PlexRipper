@@ -65,6 +65,9 @@ namespace PlexRipper.DownloadManager
 
         public IObservable<DownloadTask> DownloadTaskUpdate => _downloadTaskUpdate.AsObservable();
 
+        public IObservable<DownloadTask> DownloadStatusChanged =>
+            Observable.Merge(DownloadTaskStart, DownloadTaskStopped, DownloadTaskFinished).AsObservable();
+
         /// <inheritdoc/>
         public IObservable<DownloadTask> DownloadTaskFinished => _downloadTaskFinished.AsObservable();
 
@@ -231,18 +234,28 @@ namespace PlexRipper.DownloadManager
         {
             newClient
                 .DownloadTaskUpdate
-                .Subscribe(value => _downloadTaskUpdate.OnNext(value));
-
-            // Alert of a downloadTask that has finished
-            newClient
-                .DownloadTaskUpdate
-                .Where(x => x.DownloadStatus is DownloadStatus.DownloadFinished)
-                .Subscribe(value => _downloadTaskFinished.OnNext(value));
+                .SubscribeAsync(OnDownloadStatusChanged);
 
             // Download Worker Log subscription
             newClient.DownloadWorkerLog
                 .Buffer(TimeSpan.FromSeconds(1))
                 .SubscribeAsync(logs => _mediator.Send(new AddDownloadWorkerLogsCommand(logs)));
+        }
+
+        private async Task OnDownloadStatusChanged(DownloadTask downloadTask)
+        {
+            if (downloadTask.RootDownloadTaskId is null)
+                return;
+
+            await _mediator.Send(new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTask.RootDownloadTaskId ?? 0));
+
+            _downloadTaskUpdate.OnNext(downloadTask);
+
+            // Alert of a downloadTask that has finished
+            if (downloadTask.DownloadStatus is DownloadStatus.DownloadFinished)
+            {
+                _downloadTaskFinished.OnNext(downloadTask);
+            }
         }
 
         #endregion

@@ -88,7 +88,7 @@ namespace DownloadManager.UnitTests
 
                 downloadTask.MediaType.ShouldBe(plexMovie.Type);
                 downloadTask.DownloadTaskType.ShouldBe(DownloadTaskType.Movie);
-                downloadTask.DownloadStatus.ShouldBe(DownloadStatus.Initialized);
+                downloadTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
                 downloadTask.Created.ShouldBeGreaterThan(DateTime.MinValue);
                 downloadTask.Created.ShouldBeLessThan(DateTime.UtcNow);
 

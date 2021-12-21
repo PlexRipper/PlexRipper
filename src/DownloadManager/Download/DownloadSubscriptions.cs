@@ -51,11 +51,6 @@ namespace PlexRipper.DownloadManager
                 .UpdateDownloadTasks
                 .SubscribeAsync(UpdateDownloadTasksAsync);
 
-            // Update the download status of parent download tasks when a child changed
-            _downloadTracker
-                .DownloadStatusChanged
-                .SubscribeAsync(async downloadTask => await OnDownloadStatusChanged(downloadTask));
-
             // Update database on downloadTask updates
             _downloadTracker
                 .DownloadTaskUpdate
@@ -85,13 +80,31 @@ namespace PlexRipper.DownloadManager
 
             _fileMerger
                 .FileMergeCompletedObservable
-                .SubscribeAsync(task => _downloadProgressScheduler.FireDownloadProgressJob(task.PlexServerId));
+                .SubscribeAsync(OnFileMergeCompleted);
 
             _fileMerger
                 .FileMergeStartObservable
                 .SubscribeAsync(task => _downloadProgressScheduler.FireDownloadProgressJob(task.DownloadTask.PlexServerId));
 
             return Result.Ok();
+        }
+
+        private async Task OnFileMergeCompleted(FileMergeProgress task)
+        {
+            await _downloadProgressScheduler.FireDownloadProgressJob(task.PlexServerId);
+
+            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(task.Id));
+            if (downloadTask.IsFailed)
+            {
+                downloadTask.LogError();
+                return;
+            }
+
+            var updateResult = await _mediator.Send(new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTask.Value.RootDownloadTaskId ?? 0));
+            if (updateResult.IsFailed)
+            {
+                updateResult.LogError();
+            }
         }
 
         private async Task<Result> UpdateDownloadTaskAsync(DownloadTask downloadTask)
@@ -163,14 +176,6 @@ namespace PlexRipper.DownloadManager
 
             Log.Information($"The download of {downloadTask.Title} has finished!");
             await _downloadQueue.CheckDownloadQueue();
-        }
-
-        private async Task OnDownloadStatusChanged(DownloadTask downloadTask)
-        {
-            if (downloadTask.RootDownloadTaskId is null)
-                return;
-
-            await _mediator.Send(new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTask.RootDownloadTaskId ?? 0));
         }
     }
 }

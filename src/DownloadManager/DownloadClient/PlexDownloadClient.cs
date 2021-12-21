@@ -10,7 +10,6 @@ using Logging;
 using MediatR;
 using PlexRipper.Application;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Converters;
 
 namespace PlexRipper.DownloadManager.DownloadClient
 {
@@ -257,9 +256,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
             DownloadTask.Percentage = DownloadTask.DownloadWorkerTasks.Average(x => x.Percentage);
             DownloadTask.DownloadSpeed = DownloadTask.DownloadWorkerTasks.Sum(x => x.DownloadSpeed);
 
-            var clientStatus = downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList();
-
-            DownloadStatus = DownloadTaskActions.Aggregate(clientStatus);
+            DownloadStatus = DownloadTaskActions.Aggregate(downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList());
 
             _downloadTaskUpdate.OnNext(DownloadTask);
 

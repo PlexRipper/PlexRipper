@@ -34,7 +34,6 @@ namespace PlexRipper.Domain
             DownloadStatus.Merging,
             DownloadStatus.Error,
             DownloadStatus.Downloading,
-            DownloadStatus.DownloadFinished,
             DownloadStatus.Moving,
             DownloadStatus.Paused,
             DownloadStatus.Stopped,
@@ -59,6 +58,9 @@ namespace PlexRipper.Domain
                 case DownloadStatus.Downloading:
                     actions.Add(StatusPause);
                     actions.Add(StatusStop);
+                    break;
+                case DownloadStatus.DownloadFinished:
+                    actions.Add(StatusDelete);
                     break;
                 case DownloadStatus.Paused:
                     actions.Add(StatusStart);
@@ -87,19 +89,14 @@ namespace PlexRipper.Domain
         /// <summary>
         /// Determines the overall <see cref="DownloadStatus"/> based on the child list of <see cref="DownloadStatus"/>
         /// </summary>
-        /// <param name="downloadStatusList"></param>
-        /// <returns></returns>
+        /// <param name="downloadStatusList">The DownloadStatus list to aggregate from.</param>
+        /// <returns>The aggregated <see cref="DownloadStatus"/>.</returns>
         public static DownloadStatus Aggregate(List<DownloadStatus> downloadStatusList)
         {
             foreach (var status in AnyStatuses)
             {
                 if (downloadStatusList.Any(x => x == status))
                 {
-                    if (status == DownloadStatus.DownloadFinished)
-                    {
-                        return DownloadStatus.Downloading;
-                    }
-
                     return status;
                 }
             }
@@ -110,6 +107,16 @@ namespace PlexRipper.Domain
                 {
                     return status;
                 }
+            }
+
+            if (downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished) && downloadStatusList.Any(x => x == DownloadStatus.Queued))
+            {
+                return DownloadStatus.Downloading;
+            }
+
+            if (downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished) && downloadStatusList.Any(x => x == DownloadStatus.Completed))
+            {
+                return DownloadStatus.DownloadFinished;
             }
 
             return DownloadStatus.Unknown;

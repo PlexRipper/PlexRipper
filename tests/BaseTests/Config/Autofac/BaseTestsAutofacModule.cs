@@ -6,7 +6,7 @@ namespace PlexRipper.BaseTests.Config
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<MockServer>().As<IMockServer>().SingleInstance();
+            // builder.RegisterType<PlexMockServer>().As<IPlexMockServer>().SingleInstance();
         }
     }
 }

@@ -26,7 +26,7 @@ namespace DownloadManager.IntegrationTests
             Log.SetupTestLogging(output);
             Container = new BaseContainer();
 
-            _server = Container.MockServer.GetPlexMockServer();
+            _server = Container.PlexMockServer.GetPlexMockServer();
 
             Log.Debug($"Server running at: {_server.Urls[0]}");
         }
@@ -34,7 +34,7 @@ namespace DownloadManager.IntegrationTests
         private DownloadTask GetTestDownloadTask()
         {
             var uri = new Uri(_server.Urls[0]);
-            var mediaFile = Container.MockServer.GetDefaultMovieMockMediaData();
+            var mediaFile = Container.PlexMockServer.GetDefaultMovieMockMediaData();
 
             return new DownloadTask
             {

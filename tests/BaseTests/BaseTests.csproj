@@ -25,16 +25,4 @@
     <ProjectReference Include="..\..\src\WebAPI\WebAPI.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="secretCredentials.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="PlexMockServer\media\movies\default\test-video.mp4">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-
 </Project>

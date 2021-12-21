@@ -124,7 +124,7 @@ namespace PlexRipper.BaseTests
 
         public IMediator Mediator => AutofacContainer.Resolve<IMediator>();
 
-        public IMockServer MockServer => AutofacContainer.Resolve<IMockServer>();
+        public IPlexMockServer PlexMockServer => AutofacContainer.Resolve<IPlexMockServer>();
 
         public IFileSystem FileSystem => AutofacContainer.Resolve<IFileSystem>();
 

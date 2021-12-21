@@ -26,7 +26,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
         {
             Container = new BaseContainer();
 
-            _server = Container.MockServer.GetPlexMockServer();
+            _server = Container.PlexMockServer.GetPlexMockServer();
 
             Log.Debug($"Server running at: {_server.Urls[0]}");
         }
@@ -34,7 +34,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
         private DownloadTask GetTestDownloadTask()
         {
             var uri = new Uri(_server.Urls[0]);
-            var mediaFile = Container.MockServer.GetDefaultMovieMockMediaData();
+            var mediaFile = Container.PlexMockServer.GetDefaultMovieMockMediaData();
 
             return new DownloadTask
             {
@@ -86,7 +86,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
             //Arrange
             var memoryStream = new MemoryStream();
             var downloadWorker = GetDownloadWorker(memoryStream);
-            var mediaFile = Container.MockServer.GetDefaultMovieMockMediaData();
+            var mediaFile = Container.PlexMockServer.GetDefaultMovieMockMediaData();
 
             //Act
             downloadWorker.Start();
@@ -148,7 +148,7 @@ namespace DownloadManager.IntegrationTests.DownloadWorker
         public async Task Start_ShouldHaveAValidDownloadFile_WhenDownloadWorkerStoppedAndRestarted()
         {
             //Arrange
-            var mediaFile = Container.MockServer.GetDefaultMovieMockMediaData();
+            var mediaFile = Container.PlexMockServer.GetDefaultMovieMockMediaData();
             var memoryStream = new MemoryStream();
 
             var _filesystem = new Mock<IFileSystem>();

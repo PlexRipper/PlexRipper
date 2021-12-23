@@ -93,12 +93,13 @@ namespace PlexRipper.Data
             ConfigDirectory = _pathSystem.ConfigDirectory;
         }
 
-        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options)
+        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName = "") : base(options)
         {
             // This is to add tables when created in memory
             // https://stackoverflow.com/a/60497822/8205497
             Database.OpenConnection();
             Database.EnsureCreated();
+            DatabaseName = databaseName;
         }
 
         #endregion Constructors
@@ -107,25 +108,11 @@ namespace PlexRipper.Data
 
         public async Task<Result> SetupAsync()
         {
-            // Should the Database be deleted and re-created
-            if (EnvironmentExtensions.IsResetDatabase())
-            {
-                Log.Warning("ResetDB command is true, database will be deleted and re-created.");
-                await Database.EnsureDeletedAsync();
-            }
-
-            if (EnvironmentExtensions.IsIntegrationTestMode())
-            {
-                Log.Warning("Database will be setup in TestMode");
-                Log.Warning($"Database created at: {DatabasePath}");
-                await Database.EnsureCreatedAsync();
-            }
-
             try
             {
                 // Don't migrate when running in memory, this causes error:
                 // "Relational-specific methods can only be used when the context is using a relational database provider."
-                if (!Database.IsInMemory() && !EnvironmentExtensions.IsIntegrationTestMode())
+                if (!Database.IsInMemory())
                 {
                     Log.Information("Attempting to migrate database");
                     await Database.MigrateAsync();

@@ -161,12 +161,5 @@ namespace PlexRipper.WebAPI
                 app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
             }
         }
-
-        public void ConfigureContainer(ContainerBuilder builder)
-        {
-            Log.Debug("Setting up Autofac Containers");
-            ContainerConfig.ConfigureContainer(builder);
-            Log.Debug("Finished setting up Autofac Containers");
-        }
     }
 }

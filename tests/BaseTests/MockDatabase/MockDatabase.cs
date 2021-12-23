@@ -32,6 +32,7 @@ namespace PlexRipper.BaseTests
         public static PlexRipperDbContext GetMemoryDbContext(string dbName = "", bool disableForeignKeyCheck = false)
         {
             var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
+            dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
 
             // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
             var connectionString = new SqliteConnectionStringBuilder
@@ -40,7 +41,7 @@ namespace PlexRipper.BaseTests
                 ForeignKeys = !disableForeignKeyCheck,
 
                 // Database name
-                DataSource = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName,
+                DataSource = dbName,
                 Cache = SqliteCacheMode.Shared,
             }.ToString();
 
@@ -50,7 +51,7 @@ namespace PlexRipper.BaseTests
             optionsBuilder.EnableSensitiveDataLogging();
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Error);
-            return new PlexRipperDbContext(optionsBuilder.Options);
+            return new PlexRipperDbContext(optionsBuilder.Options, dbName);
         }
 
         public static PlexRipperDbContext Setup(this PlexRipperDbContext context, UnitTestDataConfig config)

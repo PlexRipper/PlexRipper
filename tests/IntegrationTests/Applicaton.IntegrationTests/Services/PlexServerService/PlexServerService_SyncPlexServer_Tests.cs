@@ -18,20 +18,20 @@ namespace PlexRipper.Application.IntegrationTests
             Container = new BaseContainer();
         }
 
-        [Fact]
-        public async Task SyncPlexServer_ShouldSyncCorrectly_WhenServerIsAvailable()
-        {
-            // Arrange
-            var plexAccount = await Container.SetupTestAccount();
-            var plexServers = await Container.GetPlexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
-            plexServers.IsSuccess.ShouldBeTrue();
-
-            // Act
-            var syncResult = await Container.GetPlexServerService.SyncPlexServer(plexServers?.Value?.First().Id ?? 0);
-
-            // Assert
-            plexAccount.ShouldNotBeNull();
-            syncResult.IsSuccess.ShouldBeTrue();
-        }
+        // [Fact]
+        // public async Task SyncPlexServer_ShouldSyncCorrectly_WhenServerIsAvailable()
+        // {
+        //     // Arrange
+        //     var plexAccount = await Container.SetupTestAccount();
+        //     var plexServers = await Container.GetPlexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
+        //     plexServers.IsSuccess.ShouldBeTrue();
+        //
+        //     // Act
+        //     var syncResult = await Container.GetPlexServerService.SyncPlexServer(plexServers?.Value?.First().Id ?? 0);
+        //
+        //     // Assert
+        //     plexAccount.ShouldNotBeNull();
+        //     syncResult.IsSuccess.ShouldBeTrue();
+        // }
     }
 }

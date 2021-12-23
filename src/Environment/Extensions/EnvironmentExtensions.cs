@@ -8,8 +8,6 @@ namespace Environment
 
         private static string _integrationTestModeKey = "IntegrationTestMode";
 
-        private static string _resetDbKey = "ResetDB";
-
         private static readonly string _trueValue = Convert.ToString(true);
 
         #endregion
@@ -23,11 +21,6 @@ namespace Environment
             return System.Environment.GetEnvironmentVariable(_integrationTestModeKey) == _trueValue;
         }
 
-        public static bool IsResetDatabase()
-        {
-            return System.Environment.GetEnvironmentVariable(_resetDbKey) == _trueValue;
-        }
-
         #endregion
 
         #region Set
@@ -35,11 +28,6 @@ namespace Environment
         public static void SetIntegrationTestMode(bool state = false)
         {
             System.Environment.SetEnvironmentVariable(_integrationTestModeKey, state.ToString());
-        }
-
-        public static void SetResetDatabase(bool state = false)
-        {
-            System.Environment.SetEnvironmentVariable(_resetDbKey, state.ToString());
         }
 
         #endregion

@@ -12,9 +12,6 @@ namespace PlexRipper.Application
         [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType Type { get; set; }
 
-        [JsonProperty("libraryId", Required = Required.Always)]
-        public int LibraryId { get; set; }
-
         [JsonProperty("plexAccountId", Required = Required.Always)]
         public int PlexAccountId { get; set; }
     }

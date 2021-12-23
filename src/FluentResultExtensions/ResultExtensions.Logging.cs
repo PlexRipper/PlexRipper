@@ -48,7 +48,7 @@ namespace FluentResults
             string memberName = "",
             string sourceFilePath = "")
         {
-            LogReasons(result, logLevel, e, memberName, sourceFilePath);
+            LogReasons(result.ToResult(), logLevel, e, memberName, sourceFilePath);
 
             return result;
         }

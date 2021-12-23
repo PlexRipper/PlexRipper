@@ -24,7 +24,6 @@ namespace DownloadManager.UnitTests
             Log.SetupTestLogging(output);
         }
 
-
         [Fact]
         public async Task ShouldReturnFailedResult_WhenNullDownloadTaskIsGiven()
         {

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reactive.Subjects;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Logging;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.BaseTests;
@@ -23,12 +21,12 @@ namespace DownloadManager.IntegrationTests.DownloadManager
         public async Task ShouldAddDownloadTasksAndStartOne_WhenGivenTwoValidMovieDownloadTasks()
         {
             // Arrange
-            var dbName = MockDatabase.GetMemoryDatabaseName();
-            var container = new BaseContainer(false, dbName);
             var config = new UnitTestDataConfig
             {
+                MemoryDbName = MockDatabase.GetMemoryDatabaseName(),
                 IncludeLibraries = true,
             };
+            var container = new BaseContainer(config);
 
             var context = container.PlexRipperDbContext.AddPlexServers();
             var downloadTasks = FakeData.GetMovieDownloadTask(config).Generate(2);

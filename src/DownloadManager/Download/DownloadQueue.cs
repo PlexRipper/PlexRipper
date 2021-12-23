@@ -71,21 +71,18 @@ namespace PlexRipper.DownloadManager
         /// <summary>
         /// Check the DownloadQueue for downloadTasks which can be started.
         /// </summary>
-        public async Task CheckDownloadQueue(List<int> plexServerIds = null)
+        public async Task<Result> CheckDownloadQueue(List<int> plexServerIds)
         {
-            Log.Debug("Checking for download tasks which can be processed.");
-            plexServerIds ??= new List<int>();
             if (!plexServerIds.Any())
-            {
-                var serverListResult = await _mediator.Send(new GetAllDownloadTasksInPlexServersQuery(true));
-                var serverList = serverListResult.Value.Where(x => x.HasDownloadTasks).ToList();
-                plexServerIds = serverList.Select(x => x.Id).ToList();
-            }
+                return ResultExtensions.IsEmpty(nameof(plexServerIds)).LogWarning();
 
+            Log.Information($"Adding {plexServerIds.Count} {nameof(PlexServer)}s to the DownloadQueue to check for the next download.");
             foreach (var plexServerId in plexServerIds)
             {
                 await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId);
             }
+
+            return Result.Ok();
         }
 
         public async Task<Result> CheckDownloadQueueServer(int plexServerId)
@@ -99,20 +96,27 @@ namespace PlexRipper.DownloadManager
                 return downloadTasksResult;
             }
 
+            var plexServerName = await _mediator.Send(new GetPlexServerNameByIdQuery(plexServerId));
+            if (plexServerName.IsFailed)
+                return plexServerName.LogError();
+
+            Log.Debug($"Checking {nameof(PlexServer)}: {plexServerName.Value} for the next download to start");
+
             // Set all initialized to Queued
             var downloadTasks = downloadTasksResult.Value;
+
             //downloadTasks = SetToCompleted(downloadTasks);
 
             var nextDownloadTask = GetNextDownloadTask(ref downloadTasks);
             if (nextDownloadTask.IsFailed)
             {
-                var plexServerName = await _mediator.Send(new GetPlexServerNameByIdQuery(plexServerId));
                 Log.Information($"There are no available downloadTasks remaining for PlexServer with Id: {plexServerName.Value}");
                 _serverCompletedDownloading.OnNext(plexServerId);
                 return Result.Ok();
             }
 
             Log.Information($"Selected download task {nextDownloadTask.Value.FullTitle} to start as the next task");
+
             //downloadTasks = SetToDownloading(downloadTasks);
             _updateDownloadTasks.OnNext(downloadTasks);
 

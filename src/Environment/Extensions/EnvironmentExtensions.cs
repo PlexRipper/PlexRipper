@@ -8,8 +8,6 @@ namespace Environment
 
         private static string _integrationTestModeKey = "IntegrationTestMode";
 
-        private static string _memoryDbKey = "MemoryDB";
-
         private static string _resetDbKey = "ResetDB";
 
         private static readonly string _trueValue = Convert.ToString(true);
@@ -19,11 +17,6 @@ namespace Environment
         #region Public Methods
 
         #region Get
-
-        public static bool IsInMemoryDatabase()
-        {
-            return System.Environment.GetEnvironmentVariable(_memoryDbKey) == _trueValue;
-        }
 
         public static bool IsIntegrationTestMode()
         {
@@ -38,11 +31,6 @@ namespace Environment
         #endregion
 
         #region Set
-
-        public static void SetInMemoryDatabase(bool state = true)
-        {
-            System.Environment.SetEnvironmentVariable(_memoryDbKey, state.ToString());
-        }
 
         public static void SetIntegrationTestMode(bool state = false)
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -70,6 +71,8 @@ namespace PlexRipper.DownloadManager
         public IObservable<DownloadTask> DownloadTaskFinished => _downloadTaskFinished.AsObservable();
 
         public int ActiveDownloadClients => _downloadsList.Count;
+
+        public Task DownloadProcessTask => Task.WhenAll(_downloadsList.Select(x => x.DownloadProcessTask ?? Task.CompletedTask));
 
         #endregion
 

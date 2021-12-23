@@ -30,7 +30,6 @@ namespace PlexRipper.Domain
         [NotMapped]
         public override PlexMediaType Type => PlexMediaType.Episode;
 
-
         #endregion
     }
 }

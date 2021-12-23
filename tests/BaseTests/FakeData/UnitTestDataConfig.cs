@@ -4,9 +4,11 @@ namespace PlexRipper.BaseTests
 {
     public class UnitTestDataConfig
     {
-        public int Seed { get; set; }
+        public string MemoryDbName { get; init; }
 
-        public string ServerUrl { get; set; } = "https://test-server.com";
+        public int Seed { get; init; }
+
+        public string ServerUrl { get; init; } = "https://test-server.com";
 
         /// <summary>
         /// If none, a random will be picked

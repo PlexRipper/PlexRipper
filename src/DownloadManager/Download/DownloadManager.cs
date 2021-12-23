@@ -72,7 +72,8 @@ namespace PlexRipper.DownloadManager
             }
 
             Log.Debug($"Successfully added all {validateResult.Value.Count} DownloadTasks");
-            await _downloadQueue.CheckDownloadQueue();
+            var uniquePlexServers = downloadTasks.Select(x => x.PlexServerId).Distinct().ToList();
+            await _downloadQueue.CheckDownloadQueue(uniquePlexServers);
             return Result.Ok();
         }
 

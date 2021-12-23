@@ -81,7 +81,8 @@ namespace PlexRipper.DownloadManager
 
             await _mediator.Send(new UpdateDownloadTasksByIdCommand(regeneratedDownloadTasks.Value));
 
-            await _downloadQueue.CheckDownloadQueue();
+            var uniquePlexServers = regeneratedDownloadTasks.Value.Select(x => x.PlexServerId).Distinct().ToList();
+            await _downloadQueue.CheckDownloadQueue(uniquePlexServers);
 
             return Result.Ok();
         }

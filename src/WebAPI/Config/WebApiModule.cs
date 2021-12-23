@@ -10,8 +10,6 @@ namespace PlexRipper.WebAPI.Config
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<SignalRService>().As<ISignalRService>();
-            builder.RegisterType<ProgressHub>().ExternallyOwned();
             builder.RegisterType<Boot>()
                 .As<IHostedService>()
                 .InstancePerDependency();
@@ -19,6 +17,11 @@ namespace PlexRipper.WebAPI.Config
             builder.RegisterType<Boot>()
                 .As<IHostLifetime>()
                 .InstancePerDependency();
+
+            // SignalR
+            builder.RegisterType<SignalRService>().As<ISignalRService>();
+            builder.RegisterType<ProgressHub>().ExternallyOwned();
+            builder.RegisterType<NotificationHub>().ExternallyOwned();
         }
     }
 }

@@ -94,8 +94,6 @@ namespace PlexRipper.Domain
                 }
             }
 
-
-
             return null;
         }
     }

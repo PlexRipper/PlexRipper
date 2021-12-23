@@ -56,7 +56,7 @@ namespace PlexRipper.BaseTests
         public static PlexRipperDbContext Setup(this PlexRipperDbContext context, UnitTestDataConfig config)
         {
             // PlexServers and Libraries added
-            context = context.AddPlexServers(config).AddPlexLibraries(config);
+            context = context.AddPlexServers(config).AddPlexLibraries(config).AddPlexAccount(config);
 
             if (config.MovieCount > 0)
             {
@@ -89,6 +89,38 @@ namespace PlexRipper.BaseTests
 
             dbContext.PlexServers.AddRange(plexServers);
 
+            dbContext.SaveChanges();
+
+            return dbContext;
+        }
+
+        public static PlexRipperDbContext AddPlexAccount(this PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
+        {
+            config ??= new UnitTestDataConfig();
+            var plexServers = dbContext.PlexServers.Include(x => x.PlexLibraries).ToList();
+
+            var plexAccount = FakeData.GetPlexAccount(config).Generate();
+
+            dbContext.PlexAccounts.Add(plexAccount);
+            dbContext.SaveChanges();
+
+            // Add account -> server relation
+            dbContext.PlexAccountServers.AddRange(plexServers.Select(x => new PlexAccountServer
+            {
+                AuthTokenCreationDate = DateTime.Now,
+                PlexServerId = x.Id,
+                PlexAccountId = 1,
+                AuthToken = "FAKE_AUTH_TOKEN",
+                Owned = true,
+            }));
+
+            // Add account -> library relation
+            dbContext.PlexAccountLibraries.AddRange(plexServers.SelectMany(x => x.PlexLibraries).Select(x => new PlexAccountLibrary
+            {
+                PlexAccountId = 1,
+                PlexServerId = x.PlexServerId,
+                PlexLibraryId = x.Id,
+            }));
             dbContext.SaveChanges();
 
             return dbContext;

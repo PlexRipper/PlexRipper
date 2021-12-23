@@ -19,14 +19,14 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
         public async Task ShouldCreateDownloadClient_WhenGivenValidDownloadTask()
         {
             // Arrange
-            var dbName = MockDatabase.GetMemoryDatabaseName();
-            var container = new BaseContainer(false, dbName);
             var config = new UnitTestDataConfig
             {
+                MemoryDbName = MockDatabase.GetMemoryDatabaseName(),
                 IncludeLibraries = true,
                 LibraryType = PlexMediaType.Movie,
                 DownloadTasksCount = 1,
             };
+            var container = new BaseContainer(config);
 
             // Act
             var startResult = await container.GetDownloadTracker.StartDownloadClient(2);

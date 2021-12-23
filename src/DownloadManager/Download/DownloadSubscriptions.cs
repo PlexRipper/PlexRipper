@@ -175,7 +175,7 @@ namespace PlexRipper.DownloadManager
             }
 
             Log.Information($"The download of {downloadTask.Title} has finished!");
-            await _downloadQueue.CheckDownloadQueue();
+            await _downloadQueue.CheckDownloadQueue(new List<int> { downloadTask.PlexServerId });
         }
     }
 }

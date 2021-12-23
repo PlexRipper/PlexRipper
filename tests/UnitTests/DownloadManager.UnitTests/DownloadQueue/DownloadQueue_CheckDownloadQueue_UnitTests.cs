@@ -43,7 +43,7 @@ namespace DownloadManager.UnitTests
             _sut.UpdateDownloadTasks.Subscribe(update => updates = update);
             _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
             _sut.Setup();
-            _sut.CheckDownloadQueue();
+            _sut.CheckDownloadQueue(new List<int>());
 
             // Assert
             updates.Any().ShouldBeFalse();

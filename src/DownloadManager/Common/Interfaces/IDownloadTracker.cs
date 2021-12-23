@@ -22,6 +22,8 @@ namespace PlexRipper.DownloadManager
 
         IObservable<DownloadTask> DownloadTaskStopped { get; }
 
+        Task DownloadProcessTask { get; }
+
         #endregion
 
         #region Public Methods

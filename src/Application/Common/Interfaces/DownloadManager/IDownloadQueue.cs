@@ -11,7 +11,7 @@ namespace PlexRipper.Application
         /// <summary>
         /// Check the DownloadQueue for downloadTasks which can be started.
         /// </summary>
-        Task CheckDownloadQueue(List<int> plexServerIds = null);
+        Task<Result> CheckDownloadQueue(List<int> plexServerIds);
 
         IObservable<DownloadTask> StartDownloadTask { get; }
 

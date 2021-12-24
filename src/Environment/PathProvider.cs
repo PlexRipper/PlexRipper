@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Environment
 {
-    public class PathSystem : IPathSystem
+    public class PathProvider : IPathProvider
     {
         #region Properties
 
@@ -40,21 +40,21 @@ namespace Environment
 
         #region Interface Implementations
 
-        string IPathSystem.RootDirectory => RootDirectory;
+        string IPathProvider.RootDirectory => RootDirectory;
 
-        string IPathSystem.ConfigFileLocation => ConfigFileLocation;
+        string IPathProvider.ConfigFileLocation => ConfigFileLocation;
 
-        string IPathSystem.ConfigFileName => ConfigFileName;
+        string IPathProvider.ConfigFileName => ConfigFileName;
 
-        string IPathSystem.DatabaseBackupDirectory => DatabaseBackupDirectory;
+        string IPathProvider.DatabaseBackupDirectory => DatabaseBackupDirectory;
 
-        string IPathSystem.DatabaseName => DatabaseName;
+        string IPathProvider.DatabaseName => DatabaseName;
 
-        string IPathSystem.DatabasePath => DatabasePath;
+        string IPathProvider.DatabasePath => DatabasePath;
 
-        string IPathSystem.LogsDirectory => LogsDirectory;
+        string IPathProvider.LogsDirectory => LogsDirectory;
 
-        string IPathSystem.ConfigDirectory => ConfigDirectory;
+        string IPathProvider.ConfigDirectory => ConfigDirectory;
 
         #endregion
 

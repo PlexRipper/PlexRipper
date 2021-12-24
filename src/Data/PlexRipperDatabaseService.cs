@@ -14,37 +14,37 @@ namespace PlexRipper.Data
     {
         private readonly PlexRipperDbContext _dbContext;
 
-        private readonly IPathSystem _pathSystem;
+        private readonly IPathProvider _pathProvider;
 
         private readonly IFileSystem _fileSystem;
 
-        public PlexRipperDatabaseService(PlexRipperDbContext dbContext, IPathSystem pathSystem, IFileSystem fileSystem)
+        public PlexRipperDatabaseService(PlexRipperDbContext dbContext, IPathProvider pathProvider, IFileSystem fileSystem)
         {
             _dbContext = dbContext;
-            _pathSystem = pathSystem;
+            _pathProvider = pathProvider;
             _fileSystem = fileSystem;
         }
 
         public Result BackUpDatabase()
         {
             Log.Information("Attempting to back-up the PlexRipper database");
-            if (!File.Exists(_pathSystem.DatabasePath))
+            if (!File.Exists(_pathProvider.DatabasePath))
             {
-                return Result.Fail($"Could not find Database at path: {_pathSystem.DatabasePath}").LogError();
+                return Result.Fail($"Could not find Database at path: {_pathProvider.DatabasePath}").LogError();
             }
 
-            var dbBackupName = $"BackUp_{_pathSystem.DatabaseName.Replace(".db", "")}_" +
+            var dbBackupName = $"BackUp_{_pathProvider.DatabaseName.Replace(".db", "")}_" +
                                $"{DateTime.Now.ToString("dd-MM-yyyy_hh-mm", CultureInfo.InvariantCulture)}.db";
-            var dbBackUpPath = Path.Combine(_pathSystem.DatabaseBackupDirectory, dbBackupName);
+            var dbBackUpPath = Path.Combine(_pathProvider.DatabaseBackupDirectory, dbBackupName);
 
             try
             {
                 _fileSystem.CreateDirectoryFromFilePath(dbBackUpPath);
 
                 // Wait until the database is available.
-                StreamExtensions.WaitForFile(_pathSystem.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
+                StreamExtensions.WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
 
-                File.Move(_pathSystem.DatabasePath, dbBackUpPath);
+                File.Move(_pathProvider.DatabasePath, dbBackUpPath);
             }
             catch (Exception e)
             {

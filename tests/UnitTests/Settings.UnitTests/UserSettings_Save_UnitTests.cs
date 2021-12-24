@@ -18,7 +18,7 @@ namespace Settings.UnitTests
 
         private readonly Mock<IFileSystem> _fileSystem;
 
-        private readonly Mock<IPathSystem> _pathSystem;
+        private readonly Mock<IPathProvider> _pathSystem;
 
         private readonly UserSettings _sut;
 
@@ -27,7 +27,7 @@ namespace Settings.UnitTests
         public UserSettings_Save_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
-            _pathSystem = new Mock<IPathSystem>();
+            _pathSystem = new Mock<IPathProvider>();
             _fileSystem = new Mock<IFileSystem>();
             _sut = new Mock<UserSettings>(MockBehavior.Strict, _pathSystem.Object, _fileSystem.Object).Object;
 

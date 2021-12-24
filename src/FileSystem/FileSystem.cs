@@ -14,9 +14,9 @@ namespace PlexRipper.FileSystem
     {
         #region Fields
 
-        private readonly IPathSystem _pathSystem;
+        private readonly IPathProvider _pathProvider;
 
-        private readonly System.IO.Abstractions.IFileSystem _fileSystem;
+        private readonly System.IO.Abstractions.IFileSystem _abstractedFileSystem;
 
         private readonly IDiskProvider _diskProvider;
 
@@ -24,19 +24,32 @@ namespace PlexRipper.FileSystem
 
         #region Constructor
 
-        public FileSystem(IPathSystem pathSystem, System.IO.Abstractions.IFileSystem fileSystem, IDiskProvider diskProvider)
+        public FileSystem(IPathProvider pathProvider, System.IO.Abstractions.IFileSystem abstractedFileSystem, IDiskProvider diskProvider)
         {
-            _pathSystem = pathSystem;
-            _fileSystem = fileSystem;
+            _pathProvider = pathProvider;
+            _abstractedFileSystem = abstractedFileSystem;
             _diskProvider = diskProvider;
         }
 
-        public FileSystem(IPathSystem pathSystem, IDiskProvider diskProvider) : this(pathSystem, new System.IO.Abstractions.FileSystem(),
+        public FileSystem(IPathProvider pathProvider, IDiskProvider diskProvider) : this(pathProvider, new System.IO.Abstractions.FileSystem(),
             diskProvider) { }
 
         #endregion
 
         #region Public Methods
+
+        public Result CreateDirectory(string directory)
+        {
+            try
+            {
+                _abstractedFileSystem.Directory.CreateDirectory(directory);
+                return Result.Ok();
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e)).LogError();
+            }
+        }
 
         public Result<bool> FileExists(string path)
         {
@@ -47,7 +60,7 @@ namespace PlexRipper.FileSystem
 
             try
             {
-                return Result.Ok(_fileSystem.File.Exists(path));
+                return Result.Ok(_abstractedFileSystem.File.Exists(path));
             }
             catch (Exception e)
             {
@@ -64,7 +77,7 @@ namespace PlexRipper.FileSystem
 
             try
             {
-                var text = _fileSystem.File.ReadAllText(path);
+                var text = _abstractedFileSystem.File.ReadAllText(path);
                 return Result.Ok(text);
             }
             catch (Exception e)
@@ -82,7 +95,7 @@ namespace PlexRipper.FileSystem
 
             try
             {
-                _fileSystem.File.WriteAllText(path, text);
+                _abstractedFileSystem.File.WriteAllText(path, text);
                 return Result.Ok();
             }
             catch (Exception e)
@@ -105,20 +118,20 @@ namespace PlexRipper.FileSystem
                 return Result.Fail("parameter filepath was empty");
             }
 
-            var directoryPath = _fileSystem.Path.GetDirectoryName(filePath) ?? string.Empty;
+            var directoryPath = _abstractedFileSystem.Path.GetDirectoryName(filePath) ?? string.Empty;
             if (string.IsNullOrEmpty(directoryPath))
             {
                 return Result.Fail($"Could not determine the directory name of path: {filePath}");
             }
 
-            _fileSystem.Directory.CreateDirectory(directoryPath);
+            _abstractedFileSystem.Directory.CreateDirectory(directoryPath);
             return Result.Ok();
         }
 
         /// <inheritdoc />
         public Result DeleteAllFilesFromDirectory(string directory)
         {
-            if (_fileSystem.Directory.Exists(directory))
+            if (_abstractedFileSystem.Directory.Exists(directory))
             {
                 var di = new DirectoryInfo(directory);
 
@@ -148,12 +161,13 @@ namespace PlexRipper.FileSystem
 
             try
             {
-                var directory = _fileSystem.Path.GetDirectoryName(filePath) ?? string.Empty;
+                var directory = _abstractedFileSystem.Path.GetDirectoryName(filePath) ?? string.Empty;
 
                 // If the filePath is just an empty directory then delete that.
-                if (!string.IsNullOrEmpty(directory) && _fileSystem.Directory.Exists(directory) && !_fileSystem.Directory.GetFiles(directory).Any())
+                if (!string.IsNullOrEmpty(directory) && _abstractedFileSystem.Directory.Exists(directory) &&
+                    !_abstractedFileSystem.Directory.GetFiles(directory).Any())
                 {
-                    _fileSystem.Directory.Delete(directory);
+                    _abstractedFileSystem.Directory.Delete(directory);
                 }
                 else
                 {
@@ -168,42 +182,10 @@ namespace PlexRipper.FileSystem
             return Result.Ok();
         }
 
-        public Result<Stream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize)
-        {
-            try
-            {
-                _fileSystem.Directory.CreateDirectory(directory);
-                var availableSpace = CheckDirectoryAvailableSpace(directory);
-                if (availableSpace < fileSize)
-                    return Result.Fail($"There is not enough space available in root directory {directory}");
-
-                var filePath = _fileSystem.Path.Combine(directory, fileName);
-
-                Stream fileStream;
-                if (_fileSystem.File.Exists(filePath))
-                {
-                    fileStream = _fileSystem.File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete);
-                }
-                else
-                {
-                    fileStream = _fileSystem.File.Create(filePath, 2048, FileOptions.Asynchronous);
-                }
-
-                // var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous);
-                // Pre-allocate the required file size
-                fileStream.SetLength(fileSize);
-                return Result.Ok(fileStream);
-            }
-            catch (Exception e)
-            {
-                return Result.Fail(new ExceptionalError(e)).LogError();
-            }
-        }
-
         public string GetPathRoot(string directory)
         {
             var f = new FileInfo(directory);
-            return _fileSystem.Path.GetPathRoot(f.FullName);
+            return _abstractedFileSystem.Path.GetPathRoot(f.FullName);
         }
 
         public Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
@@ -211,7 +193,7 @@ namespace PlexRipper.FileSystem
             Log.Debug("Looking up path: {query}");
 
             // If path is invalid return root file system
-            if (string.IsNullOrWhiteSpace(query) || !_fileSystem.Directory.Exists(query))
+            if (string.IsNullOrWhiteSpace(query) || !_abstractedFileSystem.Directory.Exists(query))
             {
                 return Result.Ok(new FileSystemResult
                 {
@@ -224,7 +206,7 @@ namespace PlexRipper.FileSystem
                 return Result.Ok(GetResult(query, includeFiles));
             }
 
-            var lastSeparatorIndex = query.LastIndexOf(_fileSystem.Path.DirectorySeparatorChar);
+            var lastSeparatorIndex = query.LastIndexOf(_abstractedFileSystem.Path.DirectorySeparatorChar);
             var path = query.Substring(0, lastSeparatorIndex + 1);
 
             if (lastSeparatorIndex != -1)
@@ -239,13 +221,13 @@ namespace PlexRipper.FileSystem
         {
             try
             {
-                var fullPath = _fileSystem.Path.Combine(directory, fileName);
-                if (_fileSystem.Directory.Exists(fullPath))
+                var fullPath = _abstractedFileSystem.Path.Combine(directory, fileName);
+                if (_abstractedFileSystem.Directory.Exists(fullPath))
                 {
                     Log.Warning($"Path: {fullPath} already exists, will overwrite now");
                 }
 
-                _fileSystem.Directory.CreateDirectory(directory);
+                _abstractedFileSystem.Directory.CreateDirectory(directory);
 
                 var availableSpace = CheckDirectoryAvailableSpace(directory);
 
@@ -255,7 +237,7 @@ namespace PlexRipper.FileSystem
                         $"There is not enough space available in root directory {directory}");
                 }
 
-                Stream fileStream = _fileSystem.File.Create(fullPath, 4096, FileOptions.Asynchronous);
+                Stream fileStream = _abstractedFileSystem.File.Create(fullPath, 4096, FileOptions.Asynchronous);
 
                 // Pre-allocate the required file size
                 fileStream.SetLength(fileSize);
@@ -277,7 +259,7 @@ namespace PlexRipper.FileSystem
 
         public string ToAbsolutePath(string relativePath)
         {
-            return _fileSystem.Path.GetFullPath(_fileSystem.Path.Combine(_pathSystem.RootDirectory, relativePath));
+            return _abstractedFileSystem.Path.GetFullPath(_abstractedFileSystem.Path.Combine(_pathProvider.RootDirectory, relativePath));
         }
 
         #endregion
@@ -288,13 +270,13 @@ namespace PlexRipper.FileSystem
         {
             try
             {
-                if (!_fileSystem.Directory.Exists(_pathSystem.ConfigDirectory))
+                if (!_abstractedFileSystem.Directory.Exists(_pathProvider.ConfigDirectory))
                 {
                     Log.Debug("Config directory doesn't exist, will create now.");
 
-                    _fileSystem.Directory.CreateDirectory(_pathSystem.ConfigDirectory);
+                    _abstractedFileSystem.Directory.CreateDirectory(_pathProvider.ConfigDirectory);
 
-                    Log.Debug($"Directory: \"{_pathSystem.ConfigDirectory}\" created!");
+                    Log.Debug($"Directory: \"{_pathProvider.ConfigDirectory}\" created!");
                 }
                 else
                 {

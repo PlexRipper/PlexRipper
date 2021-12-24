@@ -1,7 +1,7 @@
 ﻿
 namespace Environment
 {
-    public interface IPathSystem
+    public interface IPathProvider
     {
         string ConfigDirectory { get; }
 

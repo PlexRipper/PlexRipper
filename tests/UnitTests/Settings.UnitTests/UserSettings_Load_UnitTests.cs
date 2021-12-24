@@ -28,9 +28,9 @@ namespace Settings.UnitTests
                 .Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
             mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Result.Ok());
-            mock.Mock<IPathSystem>().SetupGet(x => x.ConfigFileName).Returns("Test_PlexRipperSettings.json");
-            mock.Mock<IPathSystem>().SetupGet(x => x.ConfigDirectory).Returns("/config");
-            mock.Mock<IPathSystem>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
+            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns("Test_PlexRipperSettings.json");
+            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns("/config");
+            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
 
             var _sut = mock.Create<UserSettings>();
 
@@ -50,7 +50,7 @@ namespace Settings.UnitTests
             using var mock = AutoMock.GetStrict();
             mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>()))
                 .Returns(Result.Fail("Test Fail"));
-            mock.Mock<IPathSystem>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
+            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
 
             var _sut = mock.Create<UserSettings>();
 
@@ -66,7 +66,7 @@ namespace Settings.UnitTests
         {
             // Arrange
             using var mock = AutoMock.GetStrict();
-            mock.Mock<IPathSystem>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
+            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
             mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>()))
                 .Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
             mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok("Invalid Json"));

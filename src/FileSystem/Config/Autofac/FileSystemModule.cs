@@ -16,7 +16,7 @@ namespace PlexRipper.FileSystem.Config
             builder.RegisterType<System.IO.Abstractions.FileSystem>().As<System.IO.Abstractions.IFileSystem>().SingleInstance();
 
             builder.RegisterType<FileMerger>().As<IFileMerger>().SingleInstance();
-            builder.RegisterType<PathSystem>().As<IPathSystem>().SingleInstance();
+            builder.RegisterType<PathProvider>().As<IPathProvider>().SingleInstance();
             builder.RegisterType<DiskProvider>().As<IDiskProvider>().SingleInstance();
         }
     }

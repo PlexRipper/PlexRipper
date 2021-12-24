@@ -11,7 +11,7 @@ namespace PlexRipper.Settings
     /// <inheritdoc cref="IUserSettings"/>
     public class UserSettings : SettingsModel, IUserSettings
     {
-        private readonly IPathSystem _pathSystem;
+        private readonly IPathProvider _pathProvider;
 
         private readonly IFileSystem _fileSystem;
 
@@ -26,9 +26,9 @@ namespace PlexRipper.Settings
 
         #endregion
 
-        public UserSettings(IPathSystem pathSystem, IFileSystem fileSystem)
+        public UserSettings(IPathProvider pathProvider, IFileSystem fileSystem)
         {
-            _pathSystem = pathSystem;
+            _pathProvider = pathProvider;
             _fileSystem = fileSystem;
         }
 
@@ -40,7 +40,7 @@ namespace PlexRipper.Settings
         {
             Log.Information("Setting up UserSettings");
 
-            var fileExistResult = _fileSystem.FileExists(_pathSystem.ConfigFileLocation);
+            var fileExistResult = _fileSystem.FileExists(_pathProvider.ConfigFileLocation);
             if (fileExistResult.IsFailed)
             {
                 return fileExistResult;
@@ -48,7 +48,7 @@ namespace PlexRipper.Settings
 
             if (!fileExistResult.Value)
             {
-                Log.Information($"{_pathSystem.ConfigFileName} doesn't exist, will create new one now in {_pathSystem.ConfigDirectory}");
+                Log.Information($"{_pathProvider.ConfigFileName} doesn't exist, will create new one now in {_pathProvider.ConfigDirectory}");
                 return Save();
             }
 
@@ -61,7 +61,7 @@ namespace PlexRipper.Settings
 
             try
             {
-                var readResult = _fileSystem.FileReadAllText(_pathSystem.ConfigFileLocation);
+                var readResult = _fileSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
                 if (readResult.IsFailed)
                 {
                     return readResult;
@@ -98,7 +98,7 @@ namespace PlexRipper.Settings
             Log.Information("Saving UserSettings now.");
 
             string jsonString = JsonSerializer.Serialize(GetJsonObject(), _jsonSerializerSettings);
-            var writeResult = _fileSystem.FileWriteAllText(_pathSystem.ConfigFileLocation, jsonString);
+            var writeResult = _fileSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonString);
             if (writeResult.IsFailed)
             {
                 return writeResult.WithError("Failed to write save settings").LogError();

@@ -57,12 +57,12 @@ namespace DownloadManager.IntegrationTests
                 PlexLibraryId = 1,
                 DownloadFolder = new FolderPath
                 {
-                    DirectoryPath = Container.PathSystem.RootDirectory,
+                    DirectoryPath = Container.PathProvider.RootDirectory,
                 },
                 DownloadFolderId = 1,
                 DestinationFolder = new FolderPath
                 {
-                    DirectoryPath = Container.PathSystem.RootDirectory,
+                    DirectoryPath = Container.PathProvider.RootDirectory,
                 },
                 DestinationFolderId = 1,
             };

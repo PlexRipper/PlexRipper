@@ -38,7 +38,7 @@ namespace Logging
                 .WriteTo.Debug(outputTemplate: Template)
                 .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: Template)
                 .WriteTo.File(
-                    Path.Combine(PathSystem.LogsDirectory, "log.txt"),
+                    Path.Combine(PathProvider.LogsDirectory, "log.txt"),
                     LogEventLevel.Debug,
                     Template,
                     rollingInterval: RollingInterval.Day,

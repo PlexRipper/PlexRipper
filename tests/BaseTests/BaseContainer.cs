@@ -76,7 +76,7 @@ namespace PlexRipper.BaseTests
 
         public IMapper Mapper => Resolve<IMapper>();
 
-        public IPathSystem PathSystem => Resolve<IPathSystem>();
+        public IPathProvider PathProvider => Resolve<IPathProvider>();
 
         //TODO This should be deleted
         public IPlexMockServer PlexMockServer => Resolve<IPlexMockServer>();

@@ -40,7 +40,7 @@ namespace BaseTests.IntegrationTests.Setup
             Container.GetPlexRipperHttpClient.ShouldNotBeNull();
             Container.GetPlexServerService.ShouldNotBeNull();
             Container.Mediator.ShouldNotBeNull();
-            Container.PathSystem.ShouldNotBeNull();
+            Container.PathProvider.ShouldNotBeNull();
             Container.PlexRipperDbContext.ShouldNotBeNull();
         }
 

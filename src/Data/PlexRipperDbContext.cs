@@ -13,7 +13,7 @@ namespace PlexRipper.Data
 {
     public sealed class PlexRipperDbContext : DbContext, ISetupAsync
     {
-        private readonly IPathSystem _pathSystem;
+        private readonly IPathProvider _pathProvider;
 
         #region Properties
 
@@ -85,12 +85,12 @@ namespace PlexRipper.Data
 
         public PlexRipperDbContext() { }
 
-        public PlexRipperDbContext(IPathSystem pathSystem)
+        public PlexRipperDbContext(IPathProvider pathProvider)
         {
-            _pathSystem = pathSystem;
-            DatabaseName = _pathSystem.DatabaseName;
-            DatabasePath = _pathSystem.DatabasePath;
-            ConfigDirectory = _pathSystem.ConfigDirectory;
+            _pathProvider = pathProvider;
+            DatabaseName = _pathProvider.DatabaseName;
+            DatabasePath = _pathProvider.DatabasePath;
+            ConfigDirectory = _pathProvider.ConfigDirectory;
         }
 
         public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName = "") : base(options)

@@ -20,19 +20,20 @@ namespace PlexRipper.FileSystem
 
         private readonly IDiskProvider _diskProvider;
 
+        private readonly IDiskSystem _diskSystem;
+
         #endregion
 
         #region Constructor
 
-        public FileSystem(IPathProvider pathProvider, System.IO.Abstractions.IFileSystem abstractedFileSystem, IDiskProvider diskProvider)
+        public FileSystem(IPathProvider pathProvider, System.IO.Abstractions.IFileSystem abstractedFileSystem, IDiskProvider diskProvider,
+            IDiskSystem diskSystem)
         {
             _pathProvider = pathProvider;
             _abstractedFileSystem = abstractedFileSystem;
             _diskProvider = diskProvider;
+            _diskSystem = diskSystem;
         }
-
-        public FileSystem(IPathProvider pathProvider, IDiskProvider diskProvider) : this(pathProvider, new System.IO.Abstractions.FileSystem(),
-            diskProvider) { }
 
         #endregion
 
@@ -42,8 +43,7 @@ namespace PlexRipper.FileSystem
         {
             try
             {
-                _abstractedFileSystem.Directory.CreateDirectory(directory);
-                return Result.Ok();
+                return Result.Ok(_abstractedFileSystem.Directory.CreateDirectory(directory));
             }
             catch (Exception e)
             {
@@ -51,20 +51,32 @@ namespace PlexRipper.FileSystem
             }
         }
 
-        public Result<bool> FileExists(string path)
+        public bool FileExists(string path)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                return Result.Fail($"path is empty: \"{path}\"");
-            }
+            return !string.IsNullOrEmpty(path) && _abstractedFileSystem.File.Exists(path);
+        }
 
+        public Result<Stream> Open(string path, FileMode mode, FileAccess access, FileShare share)
+        {
             try
             {
-                return Result.Ok(_abstractedFileSystem.File.Exists(path));
+                return Result.Ok(_abstractedFileSystem.File.Open(path, mode, access, share));
             }
             catch (Exception e)
             {
-                return Result.Fail(new ExceptionalError(e));
+                return Result.Fail(new ExceptionalError(e)).LogError();
+            }
+        }
+
+        public Result<Stream> Create(string path, int bufferSize, FileOptions options)
+        {
+            try
+            {
+                return Result.Ok(_abstractedFileSystem.File.Create(path, bufferSize, options));
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e)).LogError();
             }
         }
 
@@ -102,13 +114,6 @@ namespace PlexRipper.FileSystem
             {
                 return Result.Fail(new ExceptionalError(e));
             }
-        }
-
-        public long CheckDirectoryAvailableSpace(string directory)
-        {
-            var root = GetPathRoot(directory);
-            var drive = new DriveInfo(root);
-            return drive.AvailableFreeSpace;
         }
 
         public Result CreateDirectoryFromFilePath(string filePath)
@@ -182,11 +187,6 @@ namespace PlexRipper.FileSystem
             return Result.Ok();
         }
 
-        public string GetPathRoot(string directory)
-        {
-            var f = new FileInfo(directory);
-            return _abstractedFileSystem.Path.GetPathRoot(f.FullName);
-        }
 
         public Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
         {
@@ -229,15 +229,19 @@ namespace PlexRipper.FileSystem
 
                 _abstractedFileSystem.Directory.CreateDirectory(directory);
 
-                var availableSpace = CheckDirectoryAvailableSpace(directory);
-
-                if (availableSpace < fileSize)
+                var availableSpace = _diskSystem.HasDirectoryEnoughAvailableSpace(directory, fileSize);
+                if (availableSpace.IsFailed)
                 {
-                    return Result.Fail(
-                        $"There is not enough space available in root directory {directory}");
+                    return availableSpace.LogError();
                 }
 
-                Stream fileStream = _abstractedFileSystem.File.Create(fullPath, 4096, FileOptions.Asynchronous);
+                var createResult = Create(fullPath, 4096, FileOptions.Asynchronous);
+                if (createResult.IsFailed)
+                {
+                    return createResult.ToResult().LogError();
+                }
+
+                Stream fileStream = createResult.Value;
 
                 // Pre-allocate the required file size
                 fileStream.SetLength(fileSize);

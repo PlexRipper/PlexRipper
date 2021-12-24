@@ -12,8 +12,6 @@ namespace PlexRipper.Application
 
         Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
 
-        Result<Stream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize);
-
         Result CreateDirectoryFromFilePath(string filePath);
 
         /// <summary>
@@ -31,10 +29,16 @@ namespace PlexRipper.Application
         /// <returns></returns>
         Result DeleteAllFilesFromDirectory(string directory);
 
-        Result<bool> FileExists(string path);
+        bool FileExists(string path);
 
         Result<string> FileReadAllText(string path);
 
         Result FileWriteAllText(string path, string text);
+
+        Result CreateDirectory(string directory);
+
+        Result<Stream> Open(string path, FileMode mode, FileAccess access, FileShare share);
+
+        Result<Stream> Create(string path, int bufferSize, FileOptions options);
     }
 }

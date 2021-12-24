@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common;
 
 namespace PlexRipper.BaseTests
@@ -30,11 +31,20 @@ namespace PlexRipper.BaseTests
                             .Setup(_config))
                         .InstancePerLifetimeScope();
 
+                    SetMockedDependancies(autoFacBuilder);
                     //     // SignalR requires the default ILogger
                     //     autoFacBuilder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
                     //     autoFacBuilder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
                 });
             return base.CreateHost(builder);
+        }
+
+        private void SetMockedDependancies(ContainerBuilder builder)
+        {
+            if (_config.MockFileSystem is not null)
+            {
+                builder.RegisterInstance(_config.MockFileSystem).As<IFileSystem>();
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
+using Autofac.Extras.Moq;
 using Logging;
+using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Settings.Models;
@@ -23,9 +25,16 @@ namespace WebAPI.IntegrationTests.SettingsController
         public async Task ShouldHaveDefaultSettings_OnFirstTimeBoot()
         {
             // Arrange
-            var container = new BaseContainer();
+            var mock = AutoMock.GetStrict().Mock<IFileSystem>();
+            mock.Setup(x => x.Create())
+            var _fileSystemMock = mock.Create<IFileSystem>();
+            var config = new UnitTestDataConfig
+            {
+                Seed = 9999,
+                MockFileSystem = _fileSystemMock,
+            };
 
-
+            var container = new BaseContainer(config);
 
             // Act
             var response = await container.ApiClient.GetAsync(ApiRoutes.Settings.GetSettings);

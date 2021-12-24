@@ -88,7 +88,7 @@ namespace PlexRipper.Settings.Models
 
         #region Methods
 
-        protected dynamic GetJsonObject()
+        public dynamic GetJsonObject()
         {
             dynamic jsonObject = new ExpandoObject();
             jsonObject.FirstTimeSetup = FirstTimeSetup;
@@ -195,7 +195,7 @@ namespace PlexRipper.Settings.Models
         /// This also works when adding new settings and ensuring old config files get used as much as possible.
         /// </summary>
         /// <param name="settingsJsonElement"></param>
-        protected Result SetFromJsonObject(JsonElement settingsJsonElement)
+        public Result SetFromJsonObject(JsonElement settingsJsonElement)
         {
             List<Result> results = new List<Result>();
 

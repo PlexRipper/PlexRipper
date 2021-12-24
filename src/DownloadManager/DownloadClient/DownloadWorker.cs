@@ -29,7 +29,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
         private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
 
-        private readonly IFileSystem _fileSystem;
+        private readonly IDownloadFileStream _downloadFileSystem;
 
         private readonly IPlexRipperHttpClient _httpClient;
 
@@ -52,17 +52,17 @@ namespace PlexRipper.DownloadManager.DownloadClient
         /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
         /// </summary>
         /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
-        /// <param name="fileSystem">The filesystem used to store the downloaded data.</param>
+        /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
         /// <param name="httpClient"></param>
         /// <param name="downloadSpeedLimit"></param>
         public DownloadWorker(
             DownloadWorkerTask downloadWorkerTask,
-            IFileSystem fileSystem,
+            IDownloadFileStream downloadFileSystem,
             IPlexRipperHttpClient httpClient,
             int downloadSpeedLimit = 0)
         {
             DownloadWorkerTask = downloadWorkerTask;
-            _fileSystem = fileSystem;
+            _downloadFileSystem = downloadFileSystem;
             _httpClient = httpClient;
 
             _timer.Elapsed += (_, _) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
@@ -104,7 +104,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
             // Create and check Filestream to which to download.
             var _fileStreamResult =
-                _fileSystem.DownloadWorkerTempFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
+                _downloadFileSystem.CreateDownloadFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
             if (_fileStreamResult.IsFailed)
             {
                 SendDownloadWorkerError(_fileStreamResult);

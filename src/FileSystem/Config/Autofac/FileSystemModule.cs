@@ -1,6 +1,8 @@
-﻿using Autofac;
+﻿using System.IO.Abstractions;
+using Autofac;
 using Environment;
 using PlexRipper.Application;
+using IFileSystem = PlexRipper.Application.IFileSystem;
 
 namespace PlexRipper.FileSystem.Config
 {
@@ -13,11 +15,16 @@ namespace PlexRipper.FileSystem.Config
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
-            builder.RegisterType<System.IO.Abstractions.FileSystem>().As<System.IO.Abstractions.IFileSystem>().SingleInstance();
+            builder.RegisterType<PathSystem>().As<IPathSystem>().SingleInstance();
+            builder.RegisterType<DiskSystem>().As<IDiskSystem>().SingleInstance();
 
             builder.RegisterType<FileMerger>().As<IFileMerger>().SingleInstance();
             builder.RegisterType<PathProvider>().As<IPathProvider>().SingleInstance();
             builder.RegisterType<DiskProvider>().As<IDiskProvider>().SingleInstance();
+
+            // System.IO.Abstractions
+            builder.RegisterType<System.IO.Abstractions.FileSystem>().As<System.IO.Abstractions.IFileSystem>().SingleInstance();
+            builder.RegisterType<PathWrapper>().As<IPath>().SingleInstance();
         }
     }
 }

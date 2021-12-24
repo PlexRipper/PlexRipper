@@ -1,4 +1,5 @@
-﻿using PlexRipper.Domain;
+﻿using PlexRipper.Application;
+using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests
 {
@@ -50,5 +51,7 @@ namespace PlexRipper.BaseTests
         #endregion
 
         #endregion
+
+        public IFileSystem MockFileSystem { get; init; }
     }
 }

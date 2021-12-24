@@ -1,3 +1,4 @@
+using System;
 using FluentResults;
 using PlexRipper.Domain;
 
@@ -6,24 +7,12 @@ namespace PlexRipper.Application
     /// <summary>
     /// Used to store and load settings from a json file.
     /// </summary>
-    public interface IUserSettings : ISettingsModel, ISetup
+    public interface IUserSettings : ISettingsModel
     {
-        /// <summary>
-        /// Writes all (nested) property values in the SettingsModel to the json settings file.
-        /// </summary>
-        /// <returns>Is successful.</returns>
-        Result Save();
-
-        /// <summary>
-        /// Reads the json settings file and updates all SettingsModel properties.
-        /// </summary>
-        /// <returns>Is successful.</returns>
-        Result Load();
-
         /// <summary>
         /// Reverts all settings to their default value.
         /// </summary>
-        Result Reset();
+        void Reset();
 
         /// <summary>
         /// This will copy values from the sourceSettings and set them to this UserSettings
@@ -31,8 +20,12 @@ namespace PlexRipper.Application
         /// instead of having a separate instance of the <see cref="ISettingsModel"/> in the UserSettings.
         /// </summary>
         /// <param name="sourceSettings">The values to be used to set this UserSettings instance.</param>
-        Result UpdateSettings(ISettingsModel sourceSettings);
+        void UpdateSettings(ISettingsModel sourceSettings);
 
         int GetDownloadSpeedLimit(string machineIdentifier);
+
+        Result<string> GetJsonSettingsObject();
+
+        IObservable<int> SettingsUpdated { get; }
     }
 }

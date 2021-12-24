@@ -112,7 +112,7 @@ namespace PlexRipper.Data
             {
                 // Don't migrate when running in memory, this causes error:
                 // "Relational-specific methods can only be used when the context is using a relational database provider."
-                if (!Database.IsInMemory())
+                if (!Database.IsInMemory() && !EnvironmentExtensions.IsIntegrationTestMode())
                 {
                     Log.Information("Attempting to migrate database");
                     await Database.MigrateAsync();

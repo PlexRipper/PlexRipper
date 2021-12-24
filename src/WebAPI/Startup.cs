@@ -68,13 +68,7 @@ namespace PlexRipper.WebAPI
             // Controllers and Json options
             services
                 .AddControllers()
-                .AddJsonOptions(
-                    options =>
-                    {
-                        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-                        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    });
+                .AddJsonOptions(JsonSerializerOptionsWebApi.Config);
 
             // Used to deploy the front-end Nuxt client
             if (CurrentEnvironment.IsProduction())

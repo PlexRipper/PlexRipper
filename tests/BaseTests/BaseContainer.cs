@@ -1,5 +1,6 @@
 ﻿using System;
 using Autofac;
+using AutoMapper;
 using Environment;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -72,6 +73,8 @@ namespace PlexRipper.BaseTests
         public IPlexServerService GetPlexServerService => Resolve<IPlexServerService>();
 
         public IMediator Mediator => Resolve<IMediator>();
+
+        public IMapper Mapper => Resolve<IMapper>();
 
         public IPathSystem PathSystem => Resolve<IPathSystem>();
 

@@ -47,7 +47,6 @@ namespace PlexRipper.BaseTests
 
             optionsBuilder.UseSqlite(connectionString);
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-
             optionsBuilder.EnableSensitiveDataLogging();
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Error);

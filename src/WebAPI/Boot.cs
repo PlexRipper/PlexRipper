@@ -18,7 +18,7 @@ namespace PlexRipper.WebAPI
 
         private readonly IHostApplicationLifetime _appLifetime;
 
-        private readonly IDownloadManager _downloadManager;
+        private readonly IConfigManager _configManager;
 
         private readonly IFileMerger _fileMerger;
 
@@ -34,21 +34,17 @@ namespace PlexRipper.WebAPI
 
         private readonly IDownloadQueue _downloadQueue;
 
-        private readonly IUserSettings _userSettings;
-
         #endregion
 
         #region Constructor
 
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
-            IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
+        public Boot(IHostApplicationLifetime appLifetime, IConfigManager configManager, IFileSystem fileSystem, IFileMerger fileMerger, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
             IMigrationService migrationService, IDownloadSubscriptions downloadSubscriptions, IDownloadQueue downloadQueue)
         {
             _appLifetime = appLifetime;
-            _userSettings = userSettings;
+            _configManager = configManager;
             _fileSystem = fileSystem;
             _fileMerger = fileMerger;
-            _downloadManager = downloadManager;
             _plexRipperDatabaseService = plexRipperDatabaseService;
             _schedulerService = schedulerService;
             _migrationService = migrationService;
@@ -83,7 +79,7 @@ namespace PlexRipper.WebAPI
             // First await the finishing off all these
             _fileSystem.Setup();
             Log.SetupLogging();
-            _userSettings.Setup();
+            _configManager.Setup();
             await _plexRipperDatabaseService.SetupAsync();
             await _migrationService.SetupAsync();
 

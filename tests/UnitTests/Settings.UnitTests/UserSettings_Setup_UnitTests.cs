@@ -6,7 +6,6 @@ using Moq;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.Settings;
-using Settings.UnitTests.MockData;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -27,11 +26,11 @@ namespace Settings.UnitTests
             using var mock = AutoMock.GetStrict();
             mock.Mock<IFileSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
             mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
-            mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
+            mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok());
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
 
             // Act
-            var setupResult = mock.Create<UserSettings>().Setup();
+            var setupResult = mock.Create<IConfigManager>().Setup();
 
             // Assert
             setupResult.IsSuccess.ShouldBeTrue();
@@ -43,7 +42,7 @@ namespace Settings.UnitTests
             // Arrange
             using var mock = AutoMock.GetStrict();
             mock.Mock<IFileSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(false);
-            var _sut = mock.Create<UserSettings>();
+            var _sut = mock.Create<IConfigManager>();
 
             // Act
             var setupResult = _sut.Setup();
@@ -53,13 +52,13 @@ namespace Settings.UnitTests
         }
 
         [Fact]
-        public void UserSettings_Setup_ShouldCreateSettingsFile_WhenSettingsFileDoesntExist()
+        public void UserSettings_Setup_ShouldCreateSettingsFile_WhenSettingsFileDoesNotExist()
         {
             // Arrange
             using var mock = AutoMock.GetStrict();
             mock.Mock<IFileSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(false);
             mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
-            var _sut = mock.Create<UserSettings>();
+            var _sut = mock.Create<IConfigManager>();
 
             // Act
             var setupResult = _sut.Setup();
@@ -76,10 +75,10 @@ namespace Settings.UnitTests
             using var mock = AutoMock.GetStrict();
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
             mock.Mock<IFileSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
-            mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
+            mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok());
             mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
 
-            var _sut = mock.Create<UserSettings>();
+            var _sut = mock.Create<IConfigManager>();
 
             // Act
             var setupResult = _sut.Setup();

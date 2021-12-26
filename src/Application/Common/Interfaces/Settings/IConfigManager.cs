@@ -12,5 +12,7 @@ namespace PlexRipper.Application
         Result SaveConfig();
 
         Result ResetConfig();
+
+        Result LoadConfig();
     }
 }

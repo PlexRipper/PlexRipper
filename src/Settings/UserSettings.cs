@@ -1,6 +1,7 @@
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using AutoMapper;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
@@ -11,17 +12,24 @@ namespace PlexRipper.Settings
     /// <inheritdoc cref="IUserSettings"/>
     public class UserSettings : SettingsModel, IUserSettings
     {
+        private readonly IMapper _mapper;
+
         #region Fields
 
-        private readonly Subject<int> _settingsUpdated = new();
+        private readonly Subject<ISettingsModel> _settingsUpdated = new();
 
         #endregion
+
+        public UserSettings(IMapper mapper)
+        {
+            _mapper = mapper;
+        }
 
         #region Methods
 
         #region Public
 
-        public IObservable<int> SettingsUpdated => _settingsUpdated.AsObservable();
+        public IObservable<ISettingsModel> SettingsUpdated => _settingsUpdated.AsObservable();
 
         public void Reset()
         {
@@ -43,7 +51,7 @@ namespace PlexRipper.Settings
         }
 
         /// <inheritdoc/>
-        public void UpdateSettings(ISettingsModel sourceSettings)
+        public Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings)
         {
             FirstTimeSetup = sourceSettings.FirstTimeSetup;
             ActiveAccountId = sourceSettings.ActiveAccountId;
@@ -64,7 +72,10 @@ namespace PlexRipper.Settings
             TimeZone = sourceSettings.TimeZone;
             ShowRelativeDates = sourceSettings.ShowRelativeDates;
 
-            _settingsUpdated.OnNext(0);
+            var settingsModel = _mapper.Map<ISettingsModel>(this);
+            _settingsUpdated.OnNext(settingsModel);
+
+            return Result.Ok(settingsModel);
         }
 
         #region Helpers

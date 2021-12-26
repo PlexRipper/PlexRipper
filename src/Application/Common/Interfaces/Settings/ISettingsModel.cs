@@ -1,4 +1,5 @@
-﻿using FluentResults;
+using System.Text.Json;
+using FluentResults;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application
@@ -66,14 +67,5 @@ namespace PlexRipper.Application
         #endregion
 
         #endregion
-
-        /// <summary>
-        /// Parses the Json Element from the PlexRipperSettings.json and defaults its value if nothing is found.
-        /// This also works when adding new settings and ensuring old config files get used as much as possible.
-        /// </summary>
-        /// <param name="settingsJsonElement"></param>
-        Result SetFromJsonObject(JsonElement settingsJsonElement);
-
-        dynamic GetJsonObject();
     }
 }

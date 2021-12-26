@@ -1,23 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Text.Json;
 using Bogus;
-using Bogus.Platform;
-using PlexRipper.BaseTests;
 using PlexRipper.Domain;
+using PlexRipper.Domain.Config;
 using PlexRipper.Settings.Models;
 
-namespace Settings.UnitTests.MockData
+namespace PlexRipper.BaseTests
 {
-    public static class UserSettingsFakeData
+    public static partial class FakeData
     {
-        private static readonly Random _random = new();
-
-        public static Faker<SettingsModel> GetSettingsModel()
+        public static Faker<SettingsModel> GetSettingsModel(UnitTestDataConfig config = null)
         {
+            config ??= new UnitTestDataConfig();
+
             return new Faker<SettingsModel>()
-                .UseSeed(_random.Next(1, 100))
+                .StrictMode(true)
+                .UseSeed(config.Seed)
                 .RuleFor(x => x.FirstTimeSetup, f => f.Random.Bool())
                 .RuleFor(x => x.ActiveAccountId, f => f.Random.Int(1, 99))
                 .RuleFor(x => x.DownloadSegments, f => f.Random.Int(1, 99))
@@ -32,12 +30,14 @@ namespace Settings.UnitTests.MockData
                 .RuleFor(x => x.TimeFormat, f => f.Random.String())
                 .RuleFor(x => x.TimeZone, f => f.Random.String())
                 .RuleFor(x => x.Language, f => f.Random.String(1, 4))
+                .RuleFor(x => x.DownloadLimit, _ => new Dictionary<string, int>())
                 .RuleFor(x => x.ShowRelativeDates, f => f.Random.Bool());
         }
 
-        public static string GetValidJsonSettings()
+        public static string GetSettingsModelJson(UnitTestDataConfig config = null)
         {
-            return typeof(UserSettingsFakeData).GetAssembly().GetResourceAsString("MockData", "ValidJsonSettings.json");
+            var settings = GetSettingsModel(config).Generate();
+            return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.Config);
         }
     }
 }

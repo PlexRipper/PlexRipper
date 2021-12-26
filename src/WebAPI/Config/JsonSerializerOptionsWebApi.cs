@@ -1,6 +1,5 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Domain.Config;
 
 namespace PlexRipper.WebAPI.Config
 {
@@ -8,23 +7,13 @@ namespace PlexRipper.WebAPI.Config
     {
         public static void Config(JsonOptions options)
         {
-            var config = SerializerConfig();
+            var config = DefaultJsonSerializerOptions.Config;
             options.JsonSerializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
             options.JsonSerializerOptions.PropertyNamingPolicy = config.PropertyNamingPolicy;
             foreach (var converter in config.Converters)
             {
                 options.JsonSerializerOptions.Converters.Add(converter);
             }
-        }
-
-        public static JsonSerializerOptions SerializerConfig()
-        {
-            return new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                Converters = { new JsonStringEnumConverter() },
-            };
         }
     }
 }

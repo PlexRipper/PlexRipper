@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using FluentResults;
 using PlexRipper.Domain;
 
@@ -20,12 +21,19 @@ namespace PlexRipper.Application
         /// instead of having a separate instance of the <see cref="ISettingsModel"/> in the UserSettings.
         /// </summary>
         /// <param name="sourceSettings">The values to be used to set this UserSettings instance.</param>
-        void UpdateSettings(ISettingsModel sourceSettings);
+        Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings);
 
         int GetDownloadSpeedLimit(string machineIdentifier);
 
         Result<string> GetJsonSettingsObject();
 
-        IObservable<int> SettingsUpdated { get; }
+        IObservable<ISettingsModel> SettingsUpdated { get; }
+
+        /// <summary>
+        /// Parses the Json Element from the PlexRipperSettings.json and defaults its value if nothing is found.
+        /// This also works when adding new settings and ensuring old config files get used as much as possible.
+        /// </summary>
+        /// <param name="settingsJsonElement"></param>
+        Result SetFromJsonObject(JsonElement settingsJsonElement);
     }
 }

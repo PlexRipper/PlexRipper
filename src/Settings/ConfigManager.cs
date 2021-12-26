@@ -60,20 +60,22 @@ namespace PlexRipper.Settings
             try
             {
                 Log.Information("Loading user config settings now.");
-
                 var readResult = _fileSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
                 if (readResult.IsFailed)
                 {
-                    return readResult;
+                    Log.Error($"Failed to read {_pathProvider.ConfigFileName} from {_pathProvider.ConfigDirectory}");
+                    readResult.LogError();
+                    Log.Information($"Resetting {_pathProvider.ConfigFileName} because it could not be loaded correctly");
+                    return ResetConfig();
                 }
 
-                var loadedSettings = JsonSerializer.Deserialize<dynamic>(readResult.Value, _jsonSerializerSettings);
+                var loadedSettings = JsonSerializer.Deserialize<JsonElement>(readResult.Value, _jsonSerializerSettings);
                 var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
                 if (setFromJsonResult.IsFailed)
                 {
                     Log.Warning("Certain properties were missing or had missing or invalid values. Will correct those and re-save now!");
                     setFromJsonResult.LogWarning();
-                    SaveConfig();
+                    return ResetConfig();
                 }
 
                 return Result.Ok().WithSuccess("UserSettings were loaded successfully!").LogInformation();
@@ -84,7 +86,7 @@ namespace PlexRipper.Settings
             }
         }
 
-        public Result ResetConfig()
+        public virtual Result ResetConfig()
         {
             _userSettings.Reset();
             var saveResult = SaveConfig();

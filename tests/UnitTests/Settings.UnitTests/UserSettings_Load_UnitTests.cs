@@ -5,7 +5,6 @@ using Logging;
 using Moq;
 using PlexRipper.Application;
 using PlexRipper.Settings;
-using Settings.UnitTests.MockData;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,30 +19,6 @@ namespace Settings.UnitTests
         }
 
         [Fact]
-        public void UserSettings_Load_ShouldLoadSettings_WhenGivenValidSettings()
-        {
-            // Arrange
-            using var mock = AutoMock.GetStrict();
-            mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>()))
-                .Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
-            mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Result.Ok());
-            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns("Test_PlexRipperSettings.json");
-            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns("/config");
-            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
-
-            var _sut = mock.Create<UserSettings>();
-
-            // Act
-            var loadResult = _sut.Load();
-
-            // Assert
-            loadResult.IsSuccess.ShouldBeTrue();
-            _sut.ActiveAccountId.ShouldBe(999);
-            _sut.DownloadSegments.ShouldBe(40);
-        }
-
-        [Fact]
         public void UserSettings_Load_ShouldFailToLoadSettings_WhenFailingToReadSettings()
         {
             // Arrange
@@ -52,10 +27,10 @@ namespace Settings.UnitTests
                 .Returns(Result.Fail("Test Fail"));
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
 
-            var _sut = mock.Create<UserSettings>();
+            var _sut = mock.Create<IConfigManager>();
 
             // Act
-            var loadResult = _sut.Load();
+            var loadResult = _sut.LoadConfig();
 
             // Assert
             loadResult.IsSuccess.ShouldBeFalse();
@@ -68,13 +43,13 @@ namespace Settings.UnitTests
             using var mock = AutoMock.GetStrict();
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns("/config/Test_PlexRipperSettings.json");
             mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>()))
-                .Returns(Result.Ok(UserSettingsFakeData.GetValidJsonSettings()));
+                .Returns(Result.Ok());
             mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(Result.Ok("Invalid Json"));
             mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
-            var _sut = mock.Create<UserSettings>();
+            var _sut = mock.Create<IConfigManager>();
 
             // Act
-            var loadResult = _sut.Load();
+            var loadResult = _sut.LoadConfig();
 
             // Assert
             loadResult.IsFailed.ShouldBeTrue();

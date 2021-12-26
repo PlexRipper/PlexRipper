@@ -20,7 +20,10 @@
 
   <ItemGroup>
     <None Remove="MockData\ValidJsonSettings.json" />
-    <EmbeddedResource Include="MockData\ValidJsonSettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UserSettings" />
   </ItemGroup>
 
 </Project>

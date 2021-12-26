@@ -6,7 +6,6 @@ using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.Settings;
 using PlexRipper.Settings.Models;
-using Settings.UnitTests.MockData;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -49,7 +48,7 @@ namespace Settings.UnitTests
             _fileSystem.Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
 
             // Act
-            var settingsModel = UserSettingsFakeData.GetSettingsModel().Generate();
+            var settingsModel = FakeData.GetSettingsModel().Generate();
             var resetResult = _sut.UpdateSettings(settingsModel);
 
             // Assert

@@ -55,20 +55,20 @@ namespace PlexRipper.Settings
             return loadResult.IsFailed ? loadResult : Result.Ok();
         }
 
-        public Result LoadConfig()
+        public virtual Result LoadConfig()
         {
+            Log.Information("Loading user config settings now.");
+            var readResult = _fileSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
+            if (readResult.IsFailed)
+            {
+                Log.Error($"Failed to read {_pathProvider.ConfigFileName} from {_pathProvider.ConfigDirectory}");
+                readResult.LogError();
+                Log.Information($"Resetting {_pathProvider.ConfigFileName} because it could not be loaded correctly");
+                return ResetConfig();
+            }
+
             try
             {
-                Log.Information("Loading user config settings now.");
-                var readResult = _fileSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
-                if (readResult.IsFailed)
-                {
-                    Log.Error($"Failed to read {_pathProvider.ConfigFileName} from {_pathProvider.ConfigDirectory}");
-                    readResult.LogError();
-                    Log.Information($"Resetting {_pathProvider.ConfigFileName} because it could not be loaded correctly");
-                    return ResetConfig();
-                }
-
                 var loadedSettings = JsonSerializer.Deserialize<JsonElement>(readResult.Value, _jsonSerializerSettings);
                 var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
                 if (setFromJsonResult.IsFailed)
@@ -82,7 +82,9 @@ namespace PlexRipper.Settings
             }
             catch (Exception e)
             {
-                return Result.Fail(new ExceptionalError("Failed to load the UserSettings to json file", e)).LogError();
+                Log.Error($"Failed to JSON parse the contents from {_pathProvider.ConfigFileName}");
+                Log.Error($"Contents: {readResult.Value}");
+                return ResetConfig();
             }
         }
 
@@ -98,7 +100,7 @@ namespace PlexRipper.Settings
             return Result.Ok();
         }
 
-        public Result SaveConfig()
+        public virtual Result SaveConfig()
         {
             Log.Information("Saving user config settings now.");
 
@@ -119,14 +121,14 @@ namespace PlexRipper.Settings
             return writeResult.IsFailed ? writeResult.WithError("Failed to write save settings").LogError() : Result.Ok();
         }
 
-        #endregion
-
-        #region Private Methods
-
-        private bool ConfigFileExists()
+        public virtual bool ConfigFileExists()
         {
             return _fileSystem.FileExists(_pathProvider.ConfigFileLocation);
         }
+
+        #endregion
+
+        #region Private Methods
 
         private Result CreateConfigFile()
         {

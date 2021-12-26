@@ -44,7 +44,7 @@ namespace Settings.UnitTests
         }
 
         [Fact]
-        public void ShouldFailToLoadSettings_WhenFailingToReadSettingsFromFile()
+        public void ShouldResetSettings_WhenFailingToReadSettingsFromFile()
         {
             // Arrange
             using var mock = AutoMock.GetStrict();
@@ -60,6 +60,7 @@ namespace Settings.UnitTests
                 mock.Container.Resolve<IPathProvider>(),
                 mock.Container.Resolve<IUserSettings>());
             sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
+            sut.Setup(x => x.LoadConfig()).CallBase();
 
             // Act
             var loadResult = sut.Object.LoadConfig();
@@ -67,6 +68,61 @@ namespace Settings.UnitTests
             // Assert
             loadResult.IsSuccess.ShouldBeTrue();
             sut.Verify(x => x.ResetConfig(), Times.Once);
+        }
+
+        [Fact]
+        public void ShouldResetSettingsWhenUserSettingsCouldNotBeSetFromJsonSerialization_WhenReadingInvalidParsedJsonSettings()
+        {
+            // Arrange
+            using var mock = AutoMock.GetStrict();
+            mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(() => Result.Ok("{}"));
+            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
+            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
+            mock.Mock<IUserSettings>().Setup(x => x.SetFromJsonObject(It.IsAny<JsonElement>())).Returns(Result.Fail(""));
+            mock.Mock<IUserSettings>().Setup(x => x.Reset());
+
+            var sut = new Mock<ConfigManager>(
+                MockBehavior.Strict,
+                mock.Container.Resolve<IFileSystem>(),
+                mock.Container.Resolve<IPathProvider>(),
+                mock.Container.Resolve<IUserSettings>());
+            sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
+            sut.Setup(x => x.LoadConfig()).CallBase();
+
+            // Act
+            var loadResult = sut.Object.LoadConfig();
+
+            // Assert
+            loadResult.IsSuccess.ShouldBeTrue();
+            sut.Verify(x => x.ResetConfig(), Times.Once);
+
+        }
+
+        [Fact]
+        public void ShouldResetSettingsWhenSerializationThrowsException_WhenReadingInvalidJsonSettings()
+        {
+            // Arrange
+            using var mock = AutoMock.GetStrict();
+            mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(() => Result.Ok("@#$%^&"));
+            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
+            mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
+            mock.Mock<IUserSettings>().Setup(x => x.Reset());
+
+            var sut = new Mock<ConfigManager>(
+                MockBehavior.Strict,
+                mock.Container.Resolve<IFileSystem>(),
+                mock.Container.Resolve<IPathProvider>(),
+                mock.Container.Resolve<IUserSettings>());
+            sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
+            sut.Setup(x => x.LoadConfig()).CallBase();
+
+            // Act
+            var loadResult = sut.Object.LoadConfig();
+
+            // Assert
+            loadResult.IsSuccess.ShouldBeTrue();
+            sut.Verify(x => x.ResetConfig(), Times.Once);
+
         }
     }
 }

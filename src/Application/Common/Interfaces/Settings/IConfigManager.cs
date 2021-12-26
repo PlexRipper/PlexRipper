@@ -14,5 +14,7 @@ namespace PlexRipper.Application
         Result ResetConfig();
 
         Result LoadConfig();
+
+        bool ConfigFileExists();
     }
 }

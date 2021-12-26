@@ -22,8 +22,4 @@
     <None Remove="MockData\ValidJsonSettings.json" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UserSettings" />
-  </ItemGroup>
-
 </Project>

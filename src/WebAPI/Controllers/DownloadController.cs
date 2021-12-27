@@ -67,11 +67,11 @@ namespace PlexRipper.WebAPI.Controllers
 
         #region BatchCommands
 
-        // POST api/<DownloadController>/start/{id:int}
+        // POST api/<DownloadController>/start/
         [HttpPost("start")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Start([FromBody] List<int> downloadTaskIds)
+        public async Task<IActionResult> StartCommand([FromBody] List<int> downloadTaskIds)
         {
             if (!downloadTaskIds.Any())
             {
@@ -81,11 +81,11 @@ namespace PlexRipper.WebAPI.Controllers
             return ToActionResult(await _plexDownloadService.StartDownloadTask(downloadTaskIds));
         }
 
-        // POST api/<DownloadController>/restart/{id:int}
+        // POST api/<DownloadController>/pause/
         [HttpPost("pause")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Pause([FromBody] List<int> downloadTaskIds)
+        public async Task<IActionResult> PauseCommand([FromBody] List<int> downloadTaskIds)
         {
             if (!downloadTaskIds.Any())
             {
@@ -103,7 +103,7 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpPost("delete")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Delete([FromBody] List<int> downloadTaskIds)
+        public async Task<IActionResult> DeleteCommand([FromBody] List<int> downloadTaskIds)
         {
             if (!downloadTaskIds.Any())
             {
@@ -131,7 +131,7 @@ namespace PlexRipper.WebAPI.Controllers
         [HttpPost("stop")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-        public async Task<IActionResult> Stop([FromBody] List<int> downloadTaskIds)
+        public async Task<IActionResult> StopCommand([FromBody] List<int> downloadTaskIds)
         {
             if (!downloadTaskIds.Any())
             {

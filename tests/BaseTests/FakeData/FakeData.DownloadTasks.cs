@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Bogus;
-using Environment;
 using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests
@@ -40,11 +39,11 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PlexLibraryId, _ => 0)
                 .RuleFor(x => x.PlexLibrary, _ => null)
                 .RuleFor(x => x.Children, _ => new List<DownloadTask>())
-                .RuleFor(x => x.DownloadFolder,  _ => null)
+                .RuleFor(x => x.DownloadFolder, _ => null)
                 .RuleFor(x => x.DownloadFolderId, _ => 1)
-                .RuleFor(x => x.DestinationFolder,  _ => null)
+                .RuleFor(x => x.DestinationFolder, _ => null)
                 .RuleFor(x => x.DestinationFolderId, _ => 2)
-                .RuleFor(x => x.RootDownloadTask,  _ => null)
+                .RuleFor(x => x.RootDownloadTask, _ => null)
                 .RuleFor(x => x.RootDownloadTaskId, _ => null);
         }
 
@@ -99,15 +98,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.MediaType, PlexMediaType.TvShow)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.TvShow)
                 .RuleFor(x => x.DownloadUrl, _ => "")
-                .RuleFor(x => x.Children, _ => GetTvShowSeasonDownloadTask(config).Generate(config.TvShowSeasonCountMax))
-                .FinishWith((_, downloadTask) =>
-                {
-                    downloadTask.Children.ForEach(x =>
-                    {
-                        x.Parent = x;
-                        x.ParentId = x.Id;
-                    });
-                });
+                .RuleFor(x => x.Children, _ => GetTvShowSeasonDownloadTask(config).Generate(config.TvShowSeasonCountMax));
         }
 
         public static Faker<DownloadTask> GetTvShowSeasonDownloadTask(UnitTestDataConfig config = null)
@@ -120,15 +111,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.MediaType, PlexMediaType.Season)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Season)
                 .RuleFor(x => x.DownloadUrl, _ => "")
-                .RuleFor(x => x.Children, _ => GetTvShowEpisodeDownloadTask(config).Generate(config.TvShowEpisodeCountMax))
-                .FinishWith((_, downloadTask) =>
-                {
-                    downloadTask.Children.ForEach(x =>
-                    {
-                        x.Parent = x;
-                        x.ParentId = x.Id;
-                    });
-                });
+                .RuleFor(x => x.Children, _ => GetTvShowEpisodeDownloadTask(config).Generate(config.TvShowEpisodeCountMax));
         }
 
         public static Faker<DownloadTask> GetTvShowEpisodeDownloadTask(UnitTestDataConfig config = null)
@@ -141,15 +124,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.MediaType, PlexMediaType.Episode)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode)
                 .RuleFor(x => x.DownloadUrl, f => f.Internet.Url())
-                .RuleFor(x => x.Children, _ => GetTvShowEpisodeDataDownloadTask(config).Generate(1))
-                .FinishWith((_, downloadTask) =>
-                {
-                    downloadTask.Children.ForEach(x =>
-                    {
-                        x.Parent = x;
-                        x.ParentId = x.Id;
-                    });
-                });
+                .RuleFor(x => x.Children, _ => GetTvShowEpisodeDataDownloadTask(config).Generate(1));
         }
 
         public static Faker<DownloadTask> GetTvShowEpisodeDataDownloadTask(UnitTestDataConfig config = null)

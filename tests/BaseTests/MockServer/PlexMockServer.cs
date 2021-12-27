@@ -27,9 +27,6 @@ namespace PlexRipper.BaseTests
             ServerUrl = Server.Urls[0];
             GetDownloadUri = new Uri($"{ServerUrl}{_fileUrl}");
 
-            var x = Assembly.GetExecutingAssembly().GetManifestResourceNames();
-            var path = x.Single(str => str.EndsWith("test-video.mp4"));
-
             Setup(config);
         }
 

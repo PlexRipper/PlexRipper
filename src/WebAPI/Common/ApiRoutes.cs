@@ -1,5 +1,4 @@
-﻿using System;
-using PlexRipper.WebAPI.Controllers;
+﻿using PlexRipper.WebAPI.Controllers;
 
 namespace PlexRipper.WebAPI.Common
 {
@@ -16,6 +15,27 @@ namespace PlexRipper.WebAPI.Common
             public static string UpdateSettings => Controller;
 
             public static string ResetDatabase => Controller + "ResetDb";
+        }
+
+        public static class Download
+        {
+            public static string Controller => Base + "/" + nameof(DownloadController).Replace("Controller", string.Empty);
+
+            public static string GetDownloadTasks => Controller;
+
+            public static string PostClearCompleted => Controller + "/clear";
+
+            public static string PostDownloadMedia => Controller + "/download";
+
+            public static string PostStartCommand => Controller + "/start";
+
+            public static string PostPauseCommand => Controller + "/pause";
+
+            public static string PostDeleteCommand => Controller + "/delete";
+
+            public static string PostRestartCommand => Controller + "/restart";
+
+            public static string PostStopCommand => Controller + "/stop";
         }
     }
 }

@@ -14,7 +14,7 @@ using PlexRipper.WebAPI;
 
 namespace PlexRipper.BaseTests
 {
-    public class BaseContainer
+    public partial class BaseContainer
     {
         #region Fields
 

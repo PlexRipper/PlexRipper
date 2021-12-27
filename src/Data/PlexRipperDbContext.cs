@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Environment;
@@ -128,8 +127,12 @@ namespace PlexRipper.Data
             var exist = await Database.CanConnectAsync();
             if (exist)
             {
-                Log.Information("Database was successfully connected!");
-                Log.Information($"Database connected at: {DatabasePath}");
+                if (!EnvironmentExtensions.IsIntegrationTestMode())
+                {
+                    Log.Information("Database was successfully connected!");
+                    Log.Information($"Database connected at: {DatabasePath}");
+                }
+
                 return Result.Ok();
             }
 

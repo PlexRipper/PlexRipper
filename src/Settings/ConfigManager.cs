@@ -43,7 +43,7 @@ namespace PlexRipper.Settings
         {
             _userSettings.SettingsUpdated.Subscribe(_ => SaveConfig());
 
-            Log.Information($"Checking if {_pathProvider.ConfigFileName} exists");
+            Log.Information($"Checking if {_pathProvider.ConfigFileName} exists at {_pathProvider.ConfigDirectory}");
 
             if (!ConfigFileExists())
             {

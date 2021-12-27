@@ -25,13 +25,9 @@ namespace WebAPI.IntegrationTests.SettingsController
         public async Task ShouldHaveDefaultSettings_OnFirstTimeBoot()
         {
             // Arrange
-            // var mock = AutoMock.GetStrict().Mock<IFileSystem>();
-            // mock.Setup(x => x.())
-            // var _fileSystemMock = mock.Create<IFileSystem>();
             var config = new UnitTestDataConfig
             {
-                Seed = 9999,
-                MockFileSystem = null,
+                Seed = 4564,
             };
 
             var container = new BaseContainer(config);

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
+using PlexRipper.BaseTests.MockClasses;
 using PlexRipper.WebAPI.Common;
 
 namespace PlexRipper.BaseTests
@@ -41,6 +42,9 @@ namespace PlexRipper.BaseTests
 
         private void SetMockedDependancies(ContainerBuilder builder)
         {
+
+            builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
+
             if (_config.MockFileSystem is not null)
             {
                 builder.RegisterInstance(_config.MockFileSystem).As<IFileSystem>();

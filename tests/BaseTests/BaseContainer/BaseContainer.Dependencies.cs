@@ -14,7 +14,7 @@ using PlexRipper.WebAPI;
 
 namespace PlexRipper.BaseTests
 {
-    public partial class BaseContainer
+    public partial class BaseContainer : IDisposable
     {
         #region Fields
 
@@ -95,5 +95,11 @@ namespace PlexRipper.BaseTests
         }
 
         #endregion
+
+        public void Dispose()
+        {
+            _factory?.Dispose();
+            ApiClient?.Dispose();
+        }
     }
 }

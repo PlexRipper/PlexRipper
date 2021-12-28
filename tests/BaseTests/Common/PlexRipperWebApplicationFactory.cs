@@ -1,9 +1,10 @@
-﻿using Autofac;
+using Autofac;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.MockClasses;
+using PlexRipper.Data;
 using PlexRipper.WebAPI.Common;
 
 namespace PlexRipper.BaseTests
@@ -15,6 +16,7 @@ namespace PlexRipper.BaseTests
         public PlexRipperWebApplicationFactory(UnitTestDataConfig config = null)
         {
             _config = config ?? new UnitTestDataConfig();
+            MockDatabase.GetMemoryDbContext(_config.MemoryDbName).Setup(_config);
         }
 
         protected override IHostBuilder CreateHostBuilder()
@@ -27,10 +29,9 @@ namespace PlexRipper.BaseTests
             builder
                 .ConfigureContainer<ContainerBuilder>(autoFacBuilder =>
                 {
-                    autoFacBuilder.Register((_, _) => MockDatabase
-                            .GetMemoryDbContext(_config.MemoryDbName)
-                            .Setup(_config))
-                        .InstancePerLifetimeScope();
+                    autoFacBuilder
+                        .Register((_, _) => MockDatabase.GetMemoryDbContext(_config.MemoryDbName))
+                        .InstancePerDependency();
 
                     SetMockedDependancies(autoFacBuilder);
                     //     // SignalR requires the default ILogger

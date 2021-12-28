@@ -33,14 +33,16 @@ namespace WebAPI.IntegrationTests.DownloadController
             };
 
             var container = new BaseContainer(config);
+            var dbContext = container.PlexRipperDbContext;
             var plexTvShow = container.PlexRipperDbContext.PlexTvShows.FirstOrDefault(x => x.Id == 1);
+            plexTvShow.ShouldNotBeNull();
             var request = new List<DownloadMediaDTO>
             {
                 new()
                 {
                     MediaIds = new List<int>
                     {
-                        plexTvShow.Id,
+                        1,
                     },
                     Type = PlexMediaType.TvShow,
                 },
@@ -49,7 +51,7 @@ namespace WebAPI.IntegrationTests.DownloadController
             // Act
             var response = await container.PostAsync(ApiRoutes.Download.PostDownloadMedia, request);
             var result = await response.Deserialize<ResultDTO<List<ServerDownloadProgressDTO>>>();
-            await Task.Delay(2000);
+            await Task.Delay(10000);
             await container.GetDownloadTracker.DownloadProcessTask;
 
             // Assert
@@ -59,6 +61,7 @@ namespace WebAPI.IntegrationTests.DownloadController
             plexServer.ShouldNotBeNull();
             plexServer.Downloads.Count.ShouldBe(5);
             plexServer.Downloads.ShouldAllBe(x => x.Children.Count == 5);
+            container.Dispose();
         }
     }
 }

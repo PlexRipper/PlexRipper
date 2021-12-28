@@ -92,9 +92,7 @@ namespace PlexRipper.DownloadManager
 
             var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId));
             if (downloadTasksResult.IsFailed)
-            {
-                return downloadTasksResult;
-            }
+                return downloadTasksResult.LogError();
 
             var plexServerName = await _mediator.Send(new GetPlexServerNameByIdQuery(plexServerId));
             if (plexServerName.IsFailed)

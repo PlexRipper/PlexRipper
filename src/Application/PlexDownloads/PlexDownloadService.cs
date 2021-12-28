@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentResults;
+using Logging;
 using MediatR;
 using PlexRipper.Domain;
 
@@ -56,6 +57,7 @@ namespace PlexRipper.Application
 
         public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders)
         {
+            Log.Debug($"Attempting to add download task orders: {downloadTaskOrders}");
             var downloadTasks = await _downloadTaskFactory.GenerateAsync(downloadTaskOrders);
             if (downloadTasks.IsFailed)
                 return downloadTasks.ToResult();

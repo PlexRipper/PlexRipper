@@ -6,7 +6,7 @@ using MediatR.Extensions.Autofac.DependencyInjection;
 using PlexRipper.Application;
 using Module = Autofac.Module;
 
-namespace PlexRipper.Data.Config
+namespace PlexRipper.Data
 {
     public class DataModule : Module
     {

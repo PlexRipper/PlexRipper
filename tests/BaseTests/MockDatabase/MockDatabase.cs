@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using EFCore.BulkExtensions;
 using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
@@ -103,24 +104,27 @@ namespace PlexRipper.BaseTests
 
             dbContext.PlexAccounts.Add(plexAccount);
             dbContext.SaveChanges();
-
-            // Add account -> server relation
-            dbContext.PlexAccountServers.AddRange(plexServers.Select(x => new PlexAccountServer
+            var plexAccountServer = plexServers.Select(x => new PlexAccountServer
             {
                 AuthTokenCreationDate = DateTime.Now,
                 PlexServerId = x.Id,
-                PlexAccountId = 1,
+                PlexAccountId = plexAccount.Id,
                 AuthToken = "FAKE_AUTH_TOKEN",
                 Owned = true,
-            }));
+            });
+
+            // Add account -> server relation
+            dbContext.PlexAccountServers.AddRange(plexAccountServer);
+            dbContext.SaveChanges();
 
             // Add account -> library relation
-            dbContext.PlexAccountLibraries.AddRange(plexServers.SelectMany(x => x.PlexLibraries).Select(x => new PlexAccountLibrary
+            var plexAccountLibraries = plexServers.SelectMany(x => x.PlexLibraries).Select(x => new PlexAccountLibrary
             {
-                PlexAccountId = 1,
+                PlexAccountId = plexAccount.Id,
                 PlexServerId = x.PlexServerId,
                 PlexLibraryId = x.Id,
-            }));
+            });
+            dbContext.PlexAccountLibraries.AddRange(plexAccountLibraries);
             dbContext.SaveChanges();
 
             return dbContext;

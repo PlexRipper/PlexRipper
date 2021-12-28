@@ -27,13 +27,11 @@ namespace PlexRipper.Domain
             PartIndex = partIndex;
             StartByte = startPosition;
             EndByte = endPosition;
+            PlexServerId = downloadTask.PlexServerId;
             FileName = $"{Path.GetFileNameWithoutExtension(downloadTask.FileName)}.part{partIndex}{Path.GetExtension(downloadTask.FileName)}";
         }
 
-        public DownloadWorkerTask()
-        {
-
-        }
+        public DownloadWorkerTask() { }
 
         #endregion
 
@@ -85,6 +83,10 @@ namespace PlexRipper.Domain
         public DownloadTask DownloadTask { get; set; }
 
         public int DownloadTaskId { get; set; }
+
+        public PlexServer PlexServer { get; set; }
+
+        public int PlexServerId { get; set; }
 
         public ICollection<DownloadWorkerLog> DownloadWorkerTaskLogs { get; set; }
 

@@ -30,7 +30,7 @@ namespace Data.UnitTests
                 DownloadTasksCount = 10,
                 LibraryType = PlexMediaType.Movie,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
 
             var childIds = new List<int> { 2, 4, 6, 8, 10 };
             var handle = new GetAllRelatedDownloadTaskIdsHandler(context);
@@ -58,7 +58,7 @@ namespace Data.UnitTests
                 DownloadTasksCount = 10,
                 LibraryType = PlexMediaType.TvShow,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
 
             var ids = context.DownloadTasks.Where(x => x.DownloadTaskType == DownloadTaskType.TvShow).Take(5).Select(x => x.Id).ToList();
             var handle = new GetAllRelatedDownloadTaskIdsHandler(context);

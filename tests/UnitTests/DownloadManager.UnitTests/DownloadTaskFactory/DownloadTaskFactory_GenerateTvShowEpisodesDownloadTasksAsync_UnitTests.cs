@@ -51,7 +51,7 @@ namespace DownloadManager.UnitTests
             {
                 TvShowCount = 5,
             };
-            var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            var context = await MockDatabase.GetMemoryDbContext().Setup(config);
             var tvShows = await context.PlexTvShows.IncludeAll().ToListAsync();
 
             using var mock = AutoMock.GetStrict().AddMapper();
@@ -88,7 +88,7 @@ namespace DownloadManager.UnitTests
             {
                 TvShowCount = 5,
             };
-            var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            var context = await MockDatabase.GetMemoryDbContext().Setup(config);
             var tvShows = await context.PlexTvShows.IncludeAll().ToListAsync();
             var tvShowDb = tvShows.Last();
             var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };

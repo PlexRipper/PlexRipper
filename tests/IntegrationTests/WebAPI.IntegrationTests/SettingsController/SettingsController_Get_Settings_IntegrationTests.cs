@@ -30,7 +30,7 @@ namespace WebAPI.IntegrationTests.SettingsController
                 Seed = 4564,
             };
 
-            var container = new BaseContainer(config);
+            var container = await BaseContainer.Create();
 
             // Act
             var response = await container.ApiClient.GetAsync(ApiRoutes.Settings.GetSettings);

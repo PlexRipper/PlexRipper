@@ -53,7 +53,7 @@ namespace DownloadManager.UnitTests
                 Seed = 324,
                 MovieCount = 5,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
             using var mock = AutoMock.GetStrict().AddMapper();
             var _sut = mock.Create<DownloadTaskFactory>();
             var movies = context.PlexMovies.IncludePlexLibrary().IncludePlexServer().ToList();

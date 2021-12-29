@@ -1,8 +1,6 @@
 using System.Linq;
 using System.Reflection;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using Autofac;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Logging;
@@ -91,7 +89,11 @@ namespace PlexRipper.WebAPI
                     fv.RegisterValidatorsFromAssemblyContaining<WebApiModule>();
                     fv.RegisterValidatorsFromAssemblyContaining<ApplicationModule>();
                     fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
-                });
+                })
+
+                // https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html#controllers-as-services
+                .AddControllersAsServices();
+
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             // Quartz setup

@@ -32,8 +32,12 @@ namespace PlexRipper.WebAPI.Config
             // Presentation
             builder.RegisterModule<WebApiModule>();
 
+            // Packages
+            builder.RegisterModule<QuartzModule>();
+            builder.RegisterModule<MediatrModule>();
+
             // Auto Mapper
-            builder.Register(ctx =>
+            builder.Register(_ =>
             {
                 var config = MapperSetup.Configuration;
                 config.AssertConfigurationIsValid();

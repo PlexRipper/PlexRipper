@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Autofac;
-using Autofac.Extras.Quartz;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager.DownloadClient;
 using Module = Autofac.Module;
@@ -21,16 +20,13 @@ namespace PlexRipper.DownloadManager
             builder.RegisterType<DownloadScheduler>().As<IDownloadScheduler>().SingleInstance();
             builder.RegisterType<DownloadSubscriptions>().As<IDownloadSubscriptions>().SingleInstance();
             builder.RegisterType<DownloadProgressScheduler>().As<IDownloadProgressScheduler>().SingleInstance();
-            builder.RegisterType<DownloadProgressNotifier>().As<IDownloadProgressNotifier>().SingleInstance();
             builder.RegisterType<DownloadTaskFactory>().As<IDownloadTaskFactory>().SingleInstance();
             builder.RegisterType<DownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
 
+            builder.RegisterType<DownloadProgressNotifier>().As<IDownloadProgressNotifier>().InstancePerDependency();
+
             builder.RegisterType<DownloadWorker>().InstancePerDependency();
             builder.RegisterType<PlexDownloadClient>().InstancePerDependency();
-
-            // Register Quartz dependancies
-            builder.RegisterModule(new QuartzAutofacFactoryModule());
-            builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
         }
     }
 }

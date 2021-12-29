@@ -26,7 +26,7 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
                 LibraryType = PlexMediaType.Movie,
                 DownloadTasksCount = 1,
             };
-            var container = new BaseContainer(config);
+            var container = await BaseContainer.Create();
 
             // Act
             var startResult = await container.GetDownloadTracker.StartDownloadClient(2);

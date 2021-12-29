@@ -51,11 +51,6 @@ namespace PlexRipper.DownloadManager
                 .UpdateDownloadTasks
                 .SubscribeAsync(UpdateDownloadTasksAsync);
 
-            // Update database on downloadTask updates
-            _downloadTracker
-                .DownloadTaskUpdate
-                .SubscribeAsync(UpdateDownloadTaskAsync);
-
             // Start sending updates to the front-end when starting a DownloadTask
             _downloadTracker
                 .DownloadTaskStart
@@ -109,7 +104,6 @@ namespace PlexRipper.DownloadManager
 
         private async Task<Result> UpdateDownloadTaskAsync(DownloadTask downloadTask)
         {
-            Log.Debug(downloadTask.ToString());
             var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { downloadTask }));
             if (updateResult.IsFailed)
             {

@@ -48,7 +48,7 @@ namespace DownloadManager.UnitTests
             {
                 TvShowCount = 1,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
             var tvShows = context.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().ToList();
 
             using var mock = AutoMock.GetStrict().AddMapper();

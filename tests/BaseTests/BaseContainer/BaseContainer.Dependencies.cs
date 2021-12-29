@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using Environment;
+using Logging;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,21 +29,32 @@ namespace PlexRipper.BaseTests
         /// <summary>
         /// Creates a Autofac container and sets up a test database.
         /// </summary>
-        public BaseContainer(UnitTestDataConfig config = null)
+        private BaseContainer(PlexRipperDbContext dbContext, PlexMockServer mockServer = null, UnitTestDataConfig config = null)
+        {
+            _mockServer = mockServer;
+            _factory = new PlexRipperWebApplicationFactory<Startup>(dbContext, config);
+            ApiClient = _factory.CreateClient();
+        }
+
+        public static async Task<BaseContainer> Create(UnitTestDataConfig config = null)
         {
             config ??= new UnitTestDataConfig();
 
+            Log.Debug($"Setting up BaseContainer with database: {config.MemoryDbName}");
+
             EnvironmentExtensions.SetIntegrationTestMode(true);
+
+            var dbContext = await MockDatabase.GetMemoryDbContext(config.MemoryDbName).Setup(config);
 
             if (config.MockServerConfig is not null)
             {
-                _mockServer = new PlexMockServer(config.MockServerConfig);
-                config.MockServerConfig.DownloadUri = _mockServer.GetDownloadUri;
-                config.MockServerConfig.ServerUri = _mockServer.ServerUri;
+                var mockServer = new PlexMockServer(config.MockServerConfig);
+                config.MockServerConfig.DownloadUri = mockServer.GetDownloadUri;
+                config.MockServerConfig.ServerUri = mockServer.ServerUri;
+                return new BaseContainer(dbContext, mockServer, config);
             }
 
-            _factory = new PlexRipperWebApplicationFactory<Startup>(config);
-            ApiClient = _factory.CreateClient();
+            return new BaseContainer(dbContext, config: config);
         }
 
         #endregion

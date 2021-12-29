@@ -26,9 +26,10 @@ namespace DownloadManager.IntegrationTests.DownloadManager
                 MemoryDbName = MockDatabase.GetMemoryDatabaseName(),
                 IncludeLibraries = true,
             };
-            var container = new BaseContainer(config);
 
-            var context = container.PlexRipperDbContext.AddPlexServers();
+            var container = await BaseContainer.Create();
+
+            var context = await container.PlexRipperDbContext.AddPlexServers();
             var downloadTasks = FakeData.GetMovieDownloadTask(config).Generate(2);
             foreach (var downloadTask in downloadTasks)
             {

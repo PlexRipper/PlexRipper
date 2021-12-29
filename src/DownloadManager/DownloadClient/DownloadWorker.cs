@@ -22,7 +22,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
     {
         #region Fields
 
-        private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationToken = new();
 
         private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new();
 

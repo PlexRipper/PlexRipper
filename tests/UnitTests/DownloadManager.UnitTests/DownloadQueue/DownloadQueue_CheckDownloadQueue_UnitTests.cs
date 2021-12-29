@@ -60,7 +60,7 @@ namespace DownloadManager.UnitTests
             {
                 MovieDownloadTasksCount = 5,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
             var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
             mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
                 .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
@@ -98,7 +98,7 @@ namespace DownloadManager.UnitTests
             {
                 MovieDownloadTasksCount = 10,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
             var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
             mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
                 .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
@@ -222,7 +222,7 @@ namespace DownloadManager.UnitTests
                 Seed = 67,
                 MovieDownloadTasksCount = 5,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DownloadQueue>();
             var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
@@ -259,7 +259,7 @@ namespace DownloadManager.UnitTests
                 Seed = 263,
                 TvShowDownloadTasksCount = 2,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DownloadQueue>();
 

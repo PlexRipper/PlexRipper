@@ -28,7 +28,7 @@ namespace PlexRipper.Application.IntegrationTests
                 Seed = 9999,
                 MovieCount = 5,
             };
-            var testContainer = new BaseContainer(config);
+            var testContainer = await BaseContainer.Create(config);
             var moviesDb = await testContainer.PlexRipperDbContext.PlexMovies.ToListAsync();
             var downloadMediaDTO = new List<DownloadMediaDTO>
             {

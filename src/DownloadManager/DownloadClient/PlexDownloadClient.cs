@@ -211,7 +211,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
             if (DownloadTask is not null)
             {
-                Log.Debug($"DownloadWorkers have been disposed for {DownloadTask.DownloadDirectory}");
+                Log.Debug($"DownloadWorkers have been disposed for {DownloadTask.FullTitle}");
             }
         }
 
@@ -325,7 +325,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
             _downloadWorkers
                 .Select(x => x.DownloadWorkerTaskUpdate)
                 .CombineLatest()
-                .Sample(TimeSpan.FromMilliseconds(1000), _timeThreadContext)
+                .Sample(TimeSpan.FromMilliseconds(400), _timeThreadContext)
                 .Subscribe(OnDownloadWorkerTaskUpdate);
 
             // On download worker log

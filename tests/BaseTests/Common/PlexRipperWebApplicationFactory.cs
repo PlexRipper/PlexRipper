@@ -13,10 +13,12 @@ namespace PlexRipper.BaseTests
     {
         private readonly UnitTestDataConfig _config;
 
-        public PlexRipperWebApplicationFactory(UnitTestDataConfig config = null)
+        private readonly PlexRipperDbContext _dbContext;
+
+        public PlexRipperWebApplicationFactory(PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
         {
             _config = config ?? new UnitTestDataConfig();
-            MockDatabase.GetMemoryDbContext(_config.MemoryDbName).Setup(_config);
+            _dbContext = dbContext;
         }
 
         protected override IHostBuilder CreateHostBuilder()

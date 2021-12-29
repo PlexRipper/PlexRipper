@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Bogus;
 using Bogus.Extensions;
@@ -137,17 +136,22 @@ namespace PlexRipper.BaseTests
                 .ApplyBasePlexMedia(config)
                 .RuleFor(x => x.PlexTvShowGenres, _ => new List<PlexTvShowGenre>())
                 .RuleFor(x => x.PlexTvShowRoles, _ => new List<PlexTvShowRole>())
-                .RuleFor(x => x.Seasons, f => GetPlexTvShowSeason(config).GenerateBetween(1, config.TvShowSeasonCountMax))
+                .RuleFor(x => x.Seasons, f => GetPlexTvShowSeason(config).Generate(config.TvShowSeasonCount))
                 .FinishWith((_, tvShow) =>
                 {
-                    foreach (var tvShowSeason in tvShow.Seasons)
+                    for (int seasonIndex = 0; seasonIndex < tvShow.Seasons.Count; seasonIndex++)
                     {
-                        tvShowSeason.ParentKey = tvShow.Key;
-                        tvShowSeason.FullTitle = $"{tvShow.Title}/{tvShowSeason.Title}";
+                        tvShow.Seasons[seasonIndex].Title = $"S{seasonIndex + 1} - {tvShow.Title}";
+                        tvShow.Seasons[seasonIndex].ParentKey = tvShow.Key;
+                        tvShow.Seasons[seasonIndex].FullTitle = $"{tvShow.Title}/{tvShow.Seasons[seasonIndex].Title}";
 
-                        foreach (var episode in tvShowSeason.Episodes)
+                        for (int episodeIndex = 0; episodeIndex < tvShow.Seasons[seasonIndex].Episodes.Count; episodeIndex++)
                         {
-                            episode.FullTitle = $"{tvShow.Title}/{tvShowSeason.Title}/{episode.Title}";
+                            var title = tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title;
+                            tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title = $"S{seasonIndex + 1}E{episodeIndex + 1} - {title}";
+                            tvShow.Seasons[seasonIndex].Episodes[episodeIndex].ParentKey = tvShow.Seasons[seasonIndex].Key;
+                            tvShow.Seasons[seasonIndex].Episodes[episodeIndex].FullTitle =
+                                $"{tvShow.Title}/{tvShow.Seasons[seasonIndex].Title}/{tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title}";
                         }
                     }
 
@@ -167,14 +171,9 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.ParentKey, _ => GetUniqueId(seasonKeys, config))
                 .RuleFor(x => x.TvShowId, _ => 0)
                 .RuleFor(x => x.TvShow, _ => null)
-                .RuleFor(x => x.Episodes, f => GetPlexTvShowEpisode(config).GenerateBetween(1, config.TvShowEpisodeCountMax))
+                .RuleFor(x => x.Episodes, f => GetPlexTvShowEpisode(config).Generate(config.TvShowEpisodeCount))
                 .FinishWith((f, tvShowSeason) =>
                 {
-                    foreach (var episode in tvShowSeason.Episodes)
-                    {
-                        episode.FullTitle = $"{tvShowSeason.Title}/{episode.Title}";
-                    }
-
                     tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum();
                 });
         }

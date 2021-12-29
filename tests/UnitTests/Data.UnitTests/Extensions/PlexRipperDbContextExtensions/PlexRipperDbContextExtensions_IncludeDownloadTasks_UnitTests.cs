@@ -26,7 +26,7 @@ namespace Data.UnitTests.Extensions
             {
                 MovieDownloadTasksCount = 5,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
 
             // Act
             var downloadTasks = context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();
@@ -48,10 +48,10 @@ namespace Data.UnitTests.Extensions
             {
                 Seed = 3535,
                 TvShowDownloadTasksCount = 5,
-                TvShowSeasonCountMax = 5,
-                TvShowEpisodeCountMax = 5,
+                TvShowSeasonCount = 5,
+                TvShowEpisodeCount = 5,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
 
             // Act
             var downloadTasksDb = context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();
@@ -69,10 +69,10 @@ namespace Data.UnitTests.Extensions
             {
                 Seed = 3882,
                 TvShowDownloadTasksCount = 5,
-                TvShowSeasonCountMax = 5,
-                TvShowEpisodeCountMax = 5,
+                TvShowSeasonCount = 5,
+                TvShowEpisodeCount = 5,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
 
             // Act
             var downloadTasksDb = context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();

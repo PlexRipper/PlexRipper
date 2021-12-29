@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Logging;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
+using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 using PlexRipper.Domain.DownloadManager;
 using PlexRipper.WebAPI.Common;
@@ -31,11 +33,13 @@ namespace WebAPI.IntegrationTests.DownloadController
             {
                 Seed = 4564,
                 TvShowCount = 1,
+                TvShowSeasonCount = 1,
+                TvShowEpisodeCount = 5,
                 MockServerConfig = new PlexMockServerConfig(50),
-                DownloadSpeedLimit = 1000,
+                DownloadSpeedLimit = 2000,
             };
 
-            var container = new BaseContainer(config);
+            var container = await BaseContainer.Create(config);
             var plexServers = container.PlexRipperDbContext.PlexServers.ToList();
             foreach (var plexServer in plexServers)
             {
@@ -46,11 +50,17 @@ namespace WebAPI.IntegrationTests.DownloadController
                     DownloadSpeedLimit = config.DownloadSpeedLimit,
                 });
             }
+
             // Setup sometimes needs a bit longer
             await Task.Delay(1000);
 
-            var plexTvShow = container.PlexRipperDbContext.PlexTvShows.FirstOrDefault(x => x.Id == 1);
-            plexTvShow.ShouldNotBeNull();
+            var plexTvShow = await container.PlexRipperDbContext.PlexTvShows.IncludeEpisodes().FirstOrDefaultAsync(x => x.Id == 1);
+            if (plexTvShow is null)
+            {
+                var dbContext = container.PlexRipperDbContext;
+                plexTvShow.ShouldNotBeNull();
+            }
+
             var request = new List<DownloadMediaDTO>
             {
                 new()
@@ -66,7 +76,7 @@ namespace WebAPI.IntegrationTests.DownloadController
             // Act
             var response = await container.PostAsync(ApiRoutes.Download.PostDownloadMedia, request);
             var result = await response.Deserialize<ResultDTO<List<ServerDownloadProgressDTO>>>();
-            await Task.Delay(10000);
+            await Task.Delay(60000);
             await container.GetDownloadTracker.DownloadProcessTask;
 
             // Assert
@@ -77,7 +87,7 @@ namespace WebAPI.IntegrationTests.DownloadController
             // plexServer.ShouldNotBeNull();
             // plexServer.Downloads.Count.ShouldBe(5);
             // plexServer.Downloads.ShouldAllBe(x => x.Children.Count == 5);
-            container.Dispose();
+            //container.Dispose();
         }
     }
 }

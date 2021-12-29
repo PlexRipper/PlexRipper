@@ -61,11 +61,11 @@ namespace DownloadManager.UnitTests
         public async Task ShouldGenerateDownloadWorkerTasks_WhenDownloadTaskHasNoDownloadWorkerTasks()
         {
             //Arrange
-            var config = new UnitTestDataConfig()
+            var config = new UnitTestDataConfig
             {
                 MovieDownloadTasksCount = 1,
             };
-            await using var context = MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
 
             using var mock = AutoMock.GetStrict();
             mock.SetupMediator(It.IsAny<AddDownloadWorkerTasksCommand>).ReturnsAsync(Result.Ok());

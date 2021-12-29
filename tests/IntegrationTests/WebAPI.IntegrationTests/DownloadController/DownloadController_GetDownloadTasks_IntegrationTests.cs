@@ -32,7 +32,7 @@ namespace WebAPI.IntegrationTests.DownloadController
                 TvShowDownloadTasksCount = 5,
             };
 
-            var container = new BaseContainer(config);
+            var container = await BaseContainer.Create();
 
             // Act
             var response = await container.ApiClient.GetAsync(ApiRoutes.Download.GetDownloadTasks);

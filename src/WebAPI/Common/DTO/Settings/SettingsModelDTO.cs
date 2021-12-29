@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 using PlexRipper.Application;
 using PlexRipper.Domain;
+using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
@@ -14,6 +16,9 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty(Required = Required.Always)]
         public int DownloadSegments { get; set; }
+
+        [JsonProperty(Required = Required.Always)]
+        public List<DownloadSpeedLimitModel> DownloadSpeedLimit { get; set; }
 
         [JsonProperty(Required = Required.Always)]
         public bool AskDownloadMovieConfirmation { get; set; }

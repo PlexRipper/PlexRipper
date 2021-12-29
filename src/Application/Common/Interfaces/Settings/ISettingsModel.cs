@@ -1,6 +1,6 @@
-using System.Text.Json;
-using FluentResults;
+using System.Collections.Generic;
 using PlexRipper.Domain;
+using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.Application
 {
@@ -23,6 +23,8 @@ namespace PlexRipper.Application
         #region DownloadManagerSettings
 
         public int DownloadSegments { get; set; }
+
+        List<DownloadSpeedLimitModel> DownloadSpeedLimit { get; set; }
 
         #endregion
 

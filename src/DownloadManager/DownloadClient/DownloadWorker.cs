@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
-using PlexRipper.Application;
 using PlexRipper.Domain;
 using Timer = System.Timers.Timer;
 
@@ -54,19 +53,16 @@ namespace PlexRipper.DownloadManager.DownloadClient
         /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
         /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
         /// <param name="httpClient"></param>
-        /// <param name="downloadSpeedLimit"></param>
         public DownloadWorker(
             DownloadWorkerTask downloadWorkerTask,
             IDownloadFileStream downloadFileSystem,
-            IPlexRipperHttpClient httpClient,
-            int downloadSpeedLimit = 0)
+            IPlexRipperHttpClient httpClient)
         {
             DownloadWorkerTask = downloadWorkerTask;
             _downloadFileSystem = downloadFileSystem;
             _httpClient = httpClient;
 
             _timer.Elapsed += (_, _) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
-            _downloadSpeedLimit = downloadSpeedLimit;
         }
 
         #endregion

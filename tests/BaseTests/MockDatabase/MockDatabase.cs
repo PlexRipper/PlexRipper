@@ -34,7 +34,7 @@ namespace PlexRipper.BaseTests
         {
             var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
             dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
-
+            
             // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
             var connectionString = new SqliteConnectionStringBuilder
             {

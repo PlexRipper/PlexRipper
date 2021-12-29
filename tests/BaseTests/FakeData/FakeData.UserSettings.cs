@@ -3,6 +3,7 @@ using System.Text.Json;
 using Bogus;
 using PlexRipper.Domain;
 using PlexRipper.Domain.Config;
+using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
 
 namespace PlexRipper.BaseTests
@@ -30,7 +31,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.TimeFormat, f => f.Random.String())
                 .RuleFor(x => x.TimeZone, f => f.Random.String())
                 .RuleFor(x => x.Language, f => f.Random.String(1, 4))
-                .RuleFor(x => x.DownloadLimit, _ => new Dictionary<string, int>())
+                .RuleFor(x => x.DownloadSpeedLimit, _ => new List<DownloadSpeedLimitModel>())
                 .RuleFor(x => x.ShowRelativeDates, f => f.Random.Bool());
         }
 

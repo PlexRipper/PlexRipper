@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Bogus;
-using Bogus.Extensions;
 using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests
@@ -15,7 +13,7 @@ namespace PlexRipper.BaseTests
         {
             config ??= new UnitTestDataConfig();
 
-            var uri = new Uri(config.ServerUrl);
+            var uri = config.MockServerConfig?.ServerUri ?? new Uri("https://test-server.com");
 
             return new Faker<PlexServer>()
                 .StrictMode(true)
@@ -36,12 +34,12 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PlexAccountServers, _ => new List<PlexAccountServer>())
                 .RuleFor(x => x.ServerStatus, _ => new List<PlexServerStatus>())
                 .RuleFor(x => x.AccessToken, _ => "DO NOT USE")
-                .RuleFor(x => x.PlexLibraries, _ =>  new List<PlexLibrary>());
+                .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>());
         }
 
         public static Faker<PlexLibrary> GetPlexLibrary(UnitTestDataConfig config = null)
         {
-            config ??= new UnitTestDataConfig()
+            config ??= new UnitTestDataConfig
             {
                 LibraryType = PlexMediaType.Movie,
             };
@@ -65,8 +63,8 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.MetaData, _ => new PlexLibraryMetaData())
                 .RuleFor(x => x.DefaultDestination, _ => new FolderPath())
                 .RuleFor(x => x.DefaultDestinationId, f => f.Random.Int(1, 5))
-                .RuleFor(x => x.Movies, _ =>  new List<PlexMovie>())
-                .RuleFor(x => x.TvShows, _ =>  new List<PlexTvShow>())
+                .RuleFor(x => x.Movies, _ => new List<PlexMovie>())
+                .RuleFor(x => x.TvShows, _ => new List<PlexTvShow>())
                 .RuleFor(x => x.PlexAccountLibraries, _ => new List<PlexAccountLibrary>())
                 .RuleFor(x => x.DownloadTasks, _ => new List<DownloadTask>());
         }

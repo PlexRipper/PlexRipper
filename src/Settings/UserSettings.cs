@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using AutoMapper;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
+using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings
@@ -18,6 +20,8 @@ namespace PlexRipper.Settings
 
         private readonly Subject<ISettingsModel> _settingsUpdated = new();
 
+        private readonly Subject<DownloadSpeedLimitModel> _downloadSpeedLimits = new();
+
         #endregion
 
         public UserSettings(IMapper mapper)
@@ -30,6 +34,8 @@ namespace PlexRipper.Settings
         #region Public
 
         public IObservable<ISettingsModel> SettingsUpdated => _settingsUpdated.AsObservable();
+
+        public IObservable<DownloadSpeedLimitModel> DownloadSpeedLimitUpdated => _downloadSpeedLimits.AsObservable();
 
         public void Reset()
         {
@@ -56,7 +62,7 @@ namespace PlexRipper.Settings
             FirstTimeSetup = sourceSettings.FirstTimeSetup;
             ActiveAccountId = sourceSettings.ActiveAccountId;
             DownloadSegments = sourceSettings.DownloadSegments;
-
+            DownloadSpeedLimit = sourceSettings.DownloadSpeedLimit;
             Language = sourceSettings.Language;
             AskDownloadMovieConfirmation = sourceSettings.AskDownloadMovieConfirmation;
             AskDownloadTvShowConfirmation = sourceSettings.AskDownloadTvShowConfirmation;
@@ -82,12 +88,40 @@ namespace PlexRipper.Settings
 
         public int GetDownloadSpeedLimit(string machineIdentifier)
         {
-            if (DownloadLimit.TryGetValue(machineIdentifier, out int speedLimit))
+            return DownloadSpeedLimit.FirstOrDefault(x => x.MachineIdentifier == machineIdentifier)?.DownloadSpeedLimit ?? 0;
+        }
+
+        public int GetDownloadSpeedLimit(int plexServerId)
+        {
+            return DownloadSpeedLimit.FirstOrDefault(x => x.PlexServerId == plexServerId)?.DownloadSpeedLimit ?? 0;
+        }
+
+        public void SetDownloadSpeedLimit(DownloadSpeedLimitModel downloadSpeedLimit)
+        {
+            var index = DownloadSpeedLimit
+                .FindIndex(x => x.PlexServerId == downloadSpeedLimit.PlexServerId &&
+                                x.MachineIdentifier == downloadSpeedLimit.MachineIdentifier);
+            if (index > -1)
             {
-                return speedLimit;
+                if (DownloadSpeedLimit[index].DownloadSpeedLimit != downloadSpeedLimit.DownloadSpeedLimit)
+                {
+                    DownloadSpeedLimit[index].DownloadSpeedLimit = downloadSpeedLimit.DownloadSpeedLimit;
+                    _downloadSpeedLimits.OnNext(DownloadSpeedLimit[index]);
+                }
+            }
+            else
+            {
+                DownloadSpeedLimit.Add(downloadSpeedLimit);
+                _downloadSpeedLimits.OnNext(DownloadSpeedLimit.Last());
             }
 
-            return 0;
+            EmitSettingsUpdated();
+        }
+
+        private void EmitSettingsUpdated()
+        {
+            var settingsModel = _mapper.Map<ISettingsModel>(this);
+            _settingsUpdated.OnNext(settingsModel);
         }
 
         #endregion

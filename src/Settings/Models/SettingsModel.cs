@@ -6,6 +6,7 @@ using System.Text.Json;
 using FluentResults;
 using PlexRipper.Application;
 using PlexRipper.Domain;
+using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.Settings.Models
 {
@@ -34,7 +35,7 @@ namespace PlexRipper.Settings.Models
 
         public int DownloadSegments { get; set; } = 4;
 
-        public Dictionary<string, int> DownloadLimit { get; set; }
+        public List<DownloadSpeedLimitModel> DownloadSpeedLimit { get; set; } = new();
 
         #endregion
 
@@ -101,7 +102,7 @@ namespace PlexRipper.Settings.Models
             jsonObject.AdvancedSettings = new ExpandoObject();
             jsonObject.AdvancedSettings.DownloadManagerSettings = new ExpandoObject();
             jsonObject.AdvancedSettings.DownloadManagerSettings.DownloadSegments = DownloadSegments;
-            jsonObject.AdvancedSettings.DownloadManagerSettings.DownloadLimit = DownloadLimit;
+            jsonObject.AdvancedSettings.DownloadManagerSettings.DownloadLimit = DownloadSpeedLimit;
 
             // User Interface Settings
             jsonObject.UserInterfaceSettings = new ExpandoObject();
@@ -223,9 +224,9 @@ namespace PlexRipper.Settings.Models
                     // DownloadSegments
                     DownloadSegments = TryGetInteger(downloadManagerSettings, nameof(DownloadSegments), DownloadSegments, addResult);
 
-                    if (downloadManagerSettings.TryGetProperty(nameof(DownloadLimit), out var downloadLimit))
+                    if (downloadManagerSettings.TryGetProperty(nameof(DownloadSpeedLimit), out var downloadLimit))
                     {
-                        DownloadLimit = JsonSerializer.Deserialize<Dictionary<string, int>>(downloadLimit.GetRawText());
+                        DownloadSpeedLimit = JsonSerializer.Deserialize<List<DownloadSpeedLimitModel>>(downloadLimit.GetRawText());
                     }
                     else
                     {

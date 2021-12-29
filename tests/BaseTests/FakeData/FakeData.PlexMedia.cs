@@ -83,7 +83,7 @@ namespace PlexRipper.BaseTests
             return new Faker<PlexMediaDataPart>()
                 .StrictMode(true)
                 .UseSeed(config.Seed)
-                .RuleFor(x => x.ObfuscatedFilePath, f => "/library/parts/65125/1193813456/file.avi")
+                .RuleFor(x => x.ObfuscatedFilePath, _ => PlexMockServer.FileUrl)
                 .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
                 .RuleFor(x => x.AudioProfile, _ => "dts")
                 .RuleFor(x => x.HasThumbnail, f => f.Random.Int(0, 1).ToString())

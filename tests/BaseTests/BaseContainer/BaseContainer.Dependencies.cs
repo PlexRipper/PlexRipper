@@ -1,10 +1,8 @@
 ﻿using System;
-using Autofac;
 using AutoMapper;
 using Environment;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application;
 using PlexRipper.Data;
@@ -20,6 +18,8 @@ namespace PlexRipper.BaseTests
 
         private readonly WebApplicationFactory<Startup> _factory;
 
+        private readonly PlexMockServer _mockServer;
+
         #endregion
 
         #region Constructor
@@ -32,6 +32,14 @@ namespace PlexRipper.BaseTests
             config ??= new UnitTestDataConfig();
 
             EnvironmentExtensions.SetIntegrationTestMode(true);
+
+            if (config.MockServerConfig is not null)
+            {
+                _mockServer = new PlexMockServer(config.MockServerConfig);
+                config.MockServerConfig.DownloadUri = _mockServer.GetDownloadUri;
+                config.MockServerConfig.ServerUri = _mockServer.ServerUri;
+            }
+
             _factory = new PlexRipperWebApplicationFactory<Startup>(config);
             ApiClient = _factory.CreateClient();
         }
@@ -71,6 +79,8 @@ namespace PlexRipper.BaseTests
         public IPlexRipperHttpClient GetPlexRipperHttpClient => Resolve<IPlexRipperHttpClient>();
 
         public IPlexServerService GetPlexServerService => Resolve<IPlexServerService>();
+
+        public IUserSettings GetUserSettings => Resolve<IUserSettings>();
 
         public IMediator Mediator => Resolve<IMediator>();
 

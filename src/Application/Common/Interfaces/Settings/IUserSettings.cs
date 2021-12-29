@@ -2,6 +2,7 @@ using System;
 using System.Text.Json;
 using FluentResults;
 using PlexRipper.Domain;
+using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.Application
 {
@@ -29,11 +30,17 @@ namespace PlexRipper.Application
 
         IObservable<ISettingsModel> SettingsUpdated { get; }
 
+        IObservable<DownloadSpeedLimitModel> DownloadSpeedLimitUpdated { get; }
+
         /// <summary>
         /// Parses the Json Element from the PlexRipperSettings.json and defaults its value if nothing is found.
         /// This also works when adding new settings and ensuring old config files get used as much as possible.
         /// </summary>
         /// <param name="settingsJsonElement"></param>
         Result SetFromJsonObject(JsonElement settingsJsonElement);
+
+        int GetDownloadSpeedLimit(int plexServerId);
+
+        void SetDownloadSpeedLimit(DownloadSpeedLimitModel downloadSpeedLimit);
     }
 }

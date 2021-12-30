@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application;
+using PlexRipper.BaseTests.MockClasses;
 using PlexRipper.Data;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
@@ -44,17 +45,16 @@ namespace PlexRipper.BaseTests
 
             EnvironmentExtensions.SetIntegrationTestMode(true);
 
-            var dbContext = await MockDatabase.GetMemoryDbContext(config.MemoryDbName).Setup(config);
-
+            PlexMockServer mockServer = null;
             if (config.MockServerConfig is not null)
             {
-                var mockServer = new PlexMockServer(config.MockServerConfig);
+                mockServer = new PlexMockServer(config.MockServerConfig);
                 config.MockServerConfig.DownloadUri = mockServer.GetDownloadUri;
                 config.MockServerConfig.ServerUri = mockServer.ServerUri;
-                return new BaseContainer(dbContext, mockServer, config);
             }
 
-            return new BaseContainer(dbContext, config: config);
+            var dbContext = await MockDatabase.GetMemoryDbContext(config.MemoryDbName).Setup(config);
+            return new BaseContainer(dbContext, mockServer, config);
         }
 
         #endregion
@@ -97,12 +97,9 @@ namespace PlexRipper.BaseTests
 
         public IMediator Mediator => Resolve<IMediator>();
 
-        public IMapper Mapper => Resolve<IMapper>();
-
         public IPathProvider PathProvider => Resolve<IPathProvider>();
 
-        //TODO This should be deleted
-        public IPlexMockServer PlexMockServer => Resolve<IPlexMockServer>();
+        public ITestNotifier TestNotifier => Resolve<ITestNotifier>();
 
         public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
 

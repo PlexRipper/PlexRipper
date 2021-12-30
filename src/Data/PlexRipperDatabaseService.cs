@@ -28,7 +28,7 @@ namespace PlexRipper.Data
         public Result BackUpDatabase()
         {
             Log.Information("Attempting to back-up the PlexRipper database");
-            if (!File.Exists(_pathProvider.DatabasePath))
+            if (!_fileSystem.FileExists(_pathProvider.DatabasePath))
             {
                 return Result.Fail($"Could not find Database at path: {_pathProvider.DatabasePath}").LogError();
             }
@@ -44,7 +44,11 @@ namespace PlexRipper.Data
                 // Wait until the database is available.
                 StreamExtensions.WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
 
-                File.Move(_pathProvider.DatabasePath, dbBackUpPath);
+                var moveResult = _fileSystem.FileMove(_pathProvider.DatabasePath, dbBackUpPath);
+                if (moveResult.IsFailed)
+                {
+                    return moveResult;
+                }
             }
             catch (Exception e)
             {

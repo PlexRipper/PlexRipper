@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -7,6 +6,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Environment;
 using FluentResults;
 using Logging;
 using MediatR;
@@ -14,6 +14,7 @@ using PlexRipper.Application;
 using PlexRipper.Application.FileManager.Command;
 using PlexRipper.Application.FileManager.Queries;
 using PlexRipper.Domain;
+using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.FileSystem
 {
@@ -21,9 +22,11 @@ namespace PlexRipper.FileSystem
     {
         private readonly IMediator _mediator;
 
-        private readonly IFileSystem _fileSystem;
+        private readonly IFileMergeSystem _fileMergeSystem;
 
         private readonly INotificationsService _notificationsService;
+
+        private readonly IFileMergeStreamProvider _fileMergeStreamProvider;
 
         #region Fields
 
@@ -35,7 +38,7 @@ namespace PlexRipper.FileSystem
 
         private readonly Subject<FileMergeProgress> _fileMergeCompletedSubject = new();
 
-        private readonly CancellationToken _token = new CancellationToken();
+        private readonly CancellationToken _token = new();
 
         private Task<Task> _copyTask;
 
@@ -43,11 +46,13 @@ namespace PlexRipper.FileSystem
 
         #region Constructors
 
-        public FileMerger(IMediator mediator, IFileSystem fileSystem, INotificationsService notificationsService)
+        public FileMerger(IMediator mediator, IFileMergeSystem fileMergeSystem, INotificationsService notificationsService,
+            IFileMergeStreamProvider fileMergeStreamProvider)
         {
             _mediator = mediator;
-            _fileSystem = fileSystem;
+            _fileMergeSystem = fileMergeSystem;
             _notificationsService = notificationsService;
+            _fileMergeStreamProvider = fileMergeStreamProvider;
         }
 
         #endregion
@@ -76,13 +81,13 @@ namespace PlexRipper.FileSystem
                     return;
                 }
 
-                Log.Debug($"Executing FileTask {fileTask.FileName} with id {fileTask.Id}");
+                Log.Information($"Executing FileTask {fileTask.FileName} with id {fileTask.Id}");
 
                 _fileMergeStartSubject.OnNext(fileTask);
 
                 foreach (var path in fileTask.FilePaths)
                 {
-                    if (!File.Exists(path))
+                    if (!_fileMergeSystem.FileExists(path))
                     {
                         var result = Result.Fail($"Filepath: {path} does not exist and cannot be used to merge/move the file!").LogError();
                         await _notificationsService.SendResult(result);
@@ -118,22 +123,27 @@ namespace PlexRipper.FileSystem
 
                 try
                 {
-                    // Ensure destination directory exists and is otherwise created.
-                    var result = _fileSystem.CreateDirectoryFromFilePath(fileTask.DownloadTask.DestinationDirectory);
-                    if (result.IsFailed)
+                    var streamResult = await _fileMergeStreamProvider.CreateMergeStream(fileTask.DownloadTask.DestinationDirectory);
+                    if (streamResult.IsFailed)
                     {
-                        await _notificationsService.SendResult(result);
-                        result.LogError();
+                        streamResult.LogError();
                         continue;
                     }
 
                     // Merge files
-                    await using (var outputStream = File.Create(fileTask.DownloadTask.DestinationDirectory, 4096, FileOptions.SequentialScan))
+                    var outputStream = streamResult.Value;
+                    if (EnvironmentExtensions.IsIntegrationTestMode())
                     {
-                        Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
-                        await StreamExtensions.CopyMultipleToAsync(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
-                        _fileSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
+                        outputStream = new ThrottledStream(streamResult.Value, 5000);
                     }
+
+                    Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
+
+                    // TODO Make merge able to be canceled with token
+                    await _fileMergeStreamProvider.MergeFiles(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
+
+                    _fileMergeSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
+                    await outputStream.DisposeAsync();
                 }
                 catch (Exception e)
                 {

@@ -20,7 +20,7 @@ namespace PlexRipper.Data
                 .ChildRules(x =>
                 {
                     x.RuleFor(y => y).NotNull();
-                    x.RuleFor(y => y.DataReceived).GreaterThanOrEqualTo(0).LessThanOrEqualTo(y => y.DataTotal);
+                    x.RuleFor(y => y.DataReceived).GreaterThanOrEqualTo(0);
                     x.RuleFor(y => y.DataTotal).GreaterThan(0);
                     x.RuleFor(y => y.Key).GreaterThan(0);
                     x.RuleFor(y => y.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);

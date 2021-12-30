@@ -187,6 +187,18 @@ namespace PlexRipper.FileSystem
             return Result.Ok();
         }
 
+        public Result DeleteFile(string filePath)
+        {
+            try
+            {
+                _abstractedFileSystem.File.Delete(filePath);
+                return Result.Ok();
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e)).LogError();
+            }
+        }
 
         public Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
         {
@@ -264,6 +276,19 @@ namespace PlexRipper.FileSystem
         public string ToAbsolutePath(string relativePath)
         {
             return _abstractedFileSystem.Path.GetFullPath(_abstractedFileSystem.Path.Combine(_pathProvider.RootDirectory, relativePath));
+        }
+
+        public Result FileMove(string sourceFileName, string destFileName, bool overwrite = true)
+        {
+            try
+            {
+                _abstractedFileSystem.File.Move(sourceFileName, destFileName, overwrite);
+                return Result.Ok();
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e)).LogError();
+            }
         }
 
         #endregion

@@ -5,6 +5,8 @@ using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.MockClasses;
 using PlexRipper.Data;
+using PlexRipper.DownloadManager;
+using PlexRipper.FileSystem.Common;
 using PlexRipper.WebAPI.Common;
 
 namespace PlexRipper.BaseTests
@@ -36,6 +38,7 @@ namespace PlexRipper.BaseTests
                         .InstancePerDependency();
 
                     SetMockedDependancies(autoFacBuilder);
+
                     //     // SignalR requires the default ILogger
                     //     autoFacBuilder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
                     //     autoFacBuilder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
@@ -45,8 +48,11 @@ namespace PlexRipper.BaseTests
 
         private void SetMockedDependancies(ContainerBuilder builder)
         {
-
+            builder.RegisterType<TestNotifier>().As<ITestNotifier>().SingleInstance();
             builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
+            builder.RegisterType<MockDownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
+            builder.RegisterType<MockFileMergeStreamProvider>().As<IFileMergeStreamProvider>().SingleInstance();
+            builder.RegisterType<MockFileMergeSystem>().As<IFileMergeSystem>().SingleInstance();
 
             if (_config.MockFileSystem is not null)
             {

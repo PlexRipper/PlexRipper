@@ -40,5 +40,9 @@ namespace PlexRipper.Application
         Result<Stream> Open(string path, FileMode mode, FileAccess access, FileShare share);
 
         Result<Stream> Create(string path, int bufferSize, FileOptions options);
+
+        Result FileMove(string sourceFileName, string destFileName, bool overwrite = true);
+
+        Result DeleteFile(string filePath);
     }
 }

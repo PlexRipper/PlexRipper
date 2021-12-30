@@ -39,14 +39,14 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.AddedAt, f => f.Date.Recent(30))
                 .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
                 .RuleFor(x => x.OriginallyAvailableAt, f => f.Date.Recent(30))
-                .RuleFor(x => x.MediaData, _ => new PlexMediaContainer
-                {
-                    MediaData = GetPlexMediaData(config).Generate(1),
-                })
                 .RuleFor(x => x.PlexServerId, _ => 0)
                 .RuleFor(x => x.PlexServer, _ => null)
                 .RuleFor(x => x.PlexLibraryId, _ => 0)
-                .RuleFor(x => x.PlexLibrary, _ => null);
+                .RuleFor(x => x.PlexLibrary, _ => null)
+                .RuleFor(x => x.MediaData, _ => new PlexMediaContainer
+                {
+                    MediaData = GetPlexMediaData(config).Generate(1),
+                });
         }
 
         public static Faker<PlexMediaData> GetPlexMediaData(UnitTestDataConfig config = null)
@@ -87,8 +87,8 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.AudioProfile, _ => "dts")
                 .RuleFor(x => x.HasThumbnail, f => f.Random.Int(0, 1).ToString())
                 .RuleFor(x => x.HasChapterTextStream, f => f.Random.Bool())
-                .RuleFor(x => x.File, f => "/KidsMovies/Fantastic Four 2/F4 Rise of the Silver Surfer.avi")
-                .RuleFor(x => x.Size, f => f.Random.Long(50000, 55124400))
+                .RuleFor(x => x.File, f => "/fake_download.mp4")
+                .RuleFor(x => x.Size, f => config.MockServerConfig?.DownloadFileSizeInBytes ?? 50 * 1024)
                 .RuleFor(x => x.Container, f => f.System.FileExt("video/mp4"))
                 .RuleFor(x => x.VideoProfile, f => f.Random.Words(2))
                 .RuleFor(x => x.Indexes, f => f.Random.Word());
@@ -141,14 +141,14 @@ namespace PlexRipper.BaseTests
                 {
                     for (int seasonIndex = 0; seasonIndex < tvShow.Seasons.Count; seasonIndex++)
                     {
-                        tvShow.Seasons[seasonIndex].Title = $"S{seasonIndex + 1} - {tvShow.Title}";
+                        tvShow.Seasons[seasonIndex].Title = $"{tvShow.Title} {seasonIndex + 1:D2}";
                         tvShow.Seasons[seasonIndex].ParentKey = tvShow.Key;
                         tvShow.Seasons[seasonIndex].FullTitle = $"{tvShow.Title}/{tvShow.Seasons[seasonIndex].Title}";
 
                         for (int episodeIndex = 0; episodeIndex < tvShow.Seasons[seasonIndex].Episodes.Count; episodeIndex++)
                         {
                             var title = tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title;
-                            tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title = $"S{seasonIndex + 1}E{episodeIndex + 1} - {title}";
+                            tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title = $"S{seasonIndex + 1:D2}E{episodeIndex + 1:D2} - {title}";
                             tvShow.Seasons[seasonIndex].Episodes[episodeIndex].ParentKey = tvShow.Seasons[seasonIndex].Key;
                             tvShow.Seasons[seasonIndex].Episodes[episodeIndex].FullTitle =
                                 $"{tvShow.Title}/{tvShow.Seasons[seasonIndex].Title}/{tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title}";
@@ -168,14 +168,12 @@ namespace PlexRipper.BaseTests
                 .StrictMode(true)
                 .UseSeed(config.Seed)
                 .ApplyBasePlexMedia(config)
+                .RuleFor(x => x.Title, _ => "Season")
                 .RuleFor(x => x.ParentKey, _ => GetUniqueId(seasonKeys, config))
                 .RuleFor(x => x.TvShowId, _ => 0)
                 .RuleFor(x => x.TvShow, _ => null)
                 .RuleFor(x => x.Episodes, f => GetPlexTvShowEpisode(config).Generate(config.TvShowEpisodeCount))
-                .FinishWith((f, tvShowSeason) =>
-                {
-                    tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum();
-                });
+                .FinishWith((f, tvShowSeason) => { tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum(); });
         }
 
         public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(UnitTestDataConfig config = null)
@@ -196,6 +194,14 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.TvShowSeason, _ => null)
                 .FinishWith((f, tvShowEpisode) =>
                 {
+                    foreach (var mediaData in tvShowEpisode.EpisodeData)
+                    {
+                        foreach (var mediaDataPart in mediaData.Parts)
+                        {
+                            mediaDataPart.File = $"{tvShowEpisode.Title}";
+                        }
+                    }
+
                     tvShowEpisode.MediaSize = tvShowEpisode.EpisodeData.SelectMany(x => x.Parts.Select(y => y.Size)).Sum();
                 });
         }

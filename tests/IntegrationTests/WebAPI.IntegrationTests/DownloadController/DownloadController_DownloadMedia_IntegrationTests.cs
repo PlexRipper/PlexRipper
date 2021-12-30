@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Logging;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,6 @@ using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
-using PlexRipper.Domain.DownloadManager;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
@@ -35,31 +35,23 @@ namespace WebAPI.IntegrationTests.DownloadController
                 TvShowCount = 1,
                 TvShowSeasonCount = 1,
                 TvShowEpisodeCount = 5,
-                MockServerConfig = new PlexMockServerConfig(50),
                 DownloadSpeedLimit = 2000,
+                MockServerConfig = new PlexMockServerConfig
+                {
+                    DownloadFileSize = 50,
+                },
             };
 
             var container = await BaseContainer.Create(config);
-            var plexServers = container.PlexRipperDbContext.PlexServers.ToList();
-            foreach (var plexServer in plexServers)
-            {
-                container.GetUserSettings.SetDownloadSpeedLimit(new DownloadSpeedLimitModel
-                {
-                    PlexServerId = plexServer.Id,
-                    MachineIdentifier = plexServer.MachineIdentifier,
-                    DownloadSpeedLimit = config.DownloadSpeedLimit,
-                });
-            }
+            await container.SetDownloadSpeedLimit(config);
 
-            // Setup sometimes needs a bit longer
-            await Task.Delay(1000);
+            var downloadStreams = new List<Stream>();
+            container.TestNotifier.CreatedDownloadStreams.Subscribe(stream =>
+                downloadStreams.Add(stream)
+            );
 
             var plexTvShow = await container.PlexRipperDbContext.PlexTvShows.IncludeEpisodes().FirstOrDefaultAsync(x => x.Id == 1);
-            if (plexTvShow is null)
-            {
-                var dbContext = container.PlexRipperDbContext;
-                plexTvShow.ShouldNotBeNull();
-            }
+            plexTvShow.ShouldNotBeNull();
 
             var request = new List<DownloadMediaDTO>
             {
@@ -83,11 +75,11 @@ namespace WebAPI.IntegrationTests.DownloadController
             response.IsSuccessStatusCode.ShouldBeTrue();
             result.IsSuccess.ShouldBeTrue();
 
-            // var plexServer = result.Value.First();
-            // plexServer.ShouldNotBeNull();
-            // plexServer.Downloads.Count.ShouldBe(5);
-            // plexServer.Downloads.ShouldAllBe(x => x.Children.Count == 5);
-            //container.Dispose();
+            // ** 4 streams per download client should be created
+            downloadStreams.Count.ShouldBe(config.TvShowEpisodeCount * 4);
+            var downloadTasks = await container.PlexRipperDbContext.DownloadTasks.ToListAsync();
+            downloadTasks.Count.ShouldBe(7);
+            downloadTasks.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Completed);
         }
     }
 }

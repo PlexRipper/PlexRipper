@@ -38,7 +38,8 @@ namespace PlexRipper.WebAPI
 
         #region Constructor
 
-        public Boot(IHostApplicationLifetime appLifetime, IConfigManager configManager, IFileSystem fileSystem, IFileMerger fileMerger, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
+        public Boot(IHostApplicationLifetime appLifetime, IConfigManager configManager, IFileSystem fileSystem, IFileMerger fileMerger,
+            IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
             IMigrationService migrationService, IDownloadSubscriptions downloadSubscriptions, IDownloadQueue downloadQueue)
         {
             _appLifetime = appLifetime;
@@ -85,12 +86,12 @@ namespace PlexRipper.WebAPI
 
             _downloadSubscriptions.Setup();
             _downloadQueue.Setup();
+            await _fileMerger.SetupAsync();
 
-            // Keep running the following
+            // TODO Remove this once the plexServer sync has been compatible for the integration test
             if (!EnvironmentExtensions.IsIntegrationTestMode())
             {
-                var fileMergerSetup = Task.Factory.StartNew(() => _fileMerger.SetupAsync(), TaskCreationOptions.LongRunning);
-                await Task.WhenAll(fileMergerSetup);
+
                 await _schedulerService.SetupAsync();
             }
         }

@@ -35,7 +35,7 @@ namespace WebAPI.IntegrationTests.DownloadController
                 TvShowCount = 1,
                 TvShowSeasonCount = 1,
                 TvShowEpisodeCount = 5,
-                DownloadSpeedLimit = 2000,
+                DownloadSpeedLimit = 5000,
                 MockServerConfig = new PlexMockServerConfig
                 {
                     DownloadFileSize = 50,
@@ -46,7 +46,7 @@ namespace WebAPI.IntegrationTests.DownloadController
             await container.SetDownloadSpeedLimit(config);
 
             var downloadStreams = new List<Stream>();
-            container.TestNotifier.CreatedDownloadStreams.Subscribe(stream =>
+            container.TestStreamTracker.CreatedDownloadStreams.Subscribe(stream =>
                 downloadStreams.Add(stream)
             );
 
@@ -68,18 +68,24 @@ namespace WebAPI.IntegrationTests.DownloadController
             // Act
             var response = await container.PostAsync(ApiRoutes.Download.PostDownloadMedia, request);
             var result = await response.Deserialize<ResultDTO<List<ServerDownloadProgressDTO>>>();
-            await Task.Delay(60000);
-            await container.GetDownloadTracker.DownloadProcessTask;
+
+            // ** Continue after the application has idle
+            await container.TestApplicationTracker.WaitUntilApplicationIsIdle(logStatus: true);
+            await Task.Delay(10000);
 
             // Assert
             response.IsSuccessStatusCode.ShouldBeTrue();
             result.IsSuccess.ShouldBeTrue();
 
             // ** 4 streams per download client should be created
-            downloadStreams.Count.ShouldBe(config.TvShowEpisodeCount * 4);
             var downloadTasks = await container.PlexRipperDbContext.DownloadTasks.ToListAsync();
             downloadTasks.Count.ShouldBe(7);
-            downloadTasks.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Completed);
+            foreach (var downloadTask in downloadTasks)
+            {
+                downloadTask.DownloadStatus.ShouldBe(DownloadStatus.Completed);
+            }
+
+            downloadStreams.Count.ShouldBe(config.TvShowEpisodeCount * 4);
         }
     }
 }

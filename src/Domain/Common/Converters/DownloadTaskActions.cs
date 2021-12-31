@@ -119,6 +119,11 @@ namespace PlexRipper.Domain
                 return DownloadStatus.DownloadFinished;
             }
 
+            if (downloadStatusList.Any(x => x == DownloadStatus.Queued) && downloadStatusList.Any(x => x == DownloadStatus.Queued))
+            {
+                return DownloadStatus.Queued;
+            }
+
             return DownloadStatus.Unknown;
         }
     }

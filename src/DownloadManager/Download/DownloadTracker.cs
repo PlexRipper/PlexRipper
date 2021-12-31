@@ -74,6 +74,8 @@ namespace PlexRipper.DownloadManager
 
         public Task DownloadProcessTask => Task.WhenAll(_downloadsList.Select(x => x.DownloadProcessTask ?? Task.CompletedTask));
 
+        public bool IsBusy => !DownloadProcessTask.IsCompleted || _downloadsList.Any();
+
         #endregion
 
         #region Public Methods
@@ -284,5 +286,6 @@ namespace PlexRipper.DownloadManager
         }
 
         #endregion
+
     }
 }

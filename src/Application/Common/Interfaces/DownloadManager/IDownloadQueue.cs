@@ -6,7 +6,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application
 {
-    public interface IDownloadQueue : ISetup
+    public interface IDownloadQueue : ISetup, IBusy
     {
         /// <summary>
         /// Check the DownloadQueue for downloadTasks which can be started.

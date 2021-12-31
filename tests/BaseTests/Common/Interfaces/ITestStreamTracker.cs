@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace PlexRipper.BaseTests
 {
-    public interface ITestNotifier
+    public interface ITestStreamTracker
     {
         IObservable<Stream> CreatedDownloadStreams { get; }
 

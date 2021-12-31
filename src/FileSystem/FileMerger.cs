@@ -40,6 +40,8 @@ namespace PlexRipper.FileSystem
 
         private readonly CancellationToken _token = new();
 
+        private bool _isExecutingFileTask = false;
+
         private Task<Task> _copyTask;
 
         #endregion
@@ -63,6 +65,8 @@ namespace PlexRipper.FileSystem
 
         public IObservable<FileMergeProgress> FileMergeCompletedObservable => _fileMergeCompletedSubject.AsObservable();
 
+        public bool IsBusy => _channel.Reader.Count > 0 && _isExecutingFileTask;
+
         #region Methods
 
         #region Private
@@ -74,7 +78,7 @@ namespace PlexRipper.FileSystem
             while (!_token.IsCancellationRequested)
             {
                 var fileTask = await _channel.Reader.ReadAsync(_token);
-
+                _isExecutingFileTask = true;
                 if (!fileTask.FilePaths.Any())
                 {
                     Log.Error($"File task: {fileTask.FileName} with id {fileTask.Id} did not have any file paths to merge");
@@ -156,6 +160,7 @@ namespace PlexRipper.FileSystem
                 await _mediator.Send(new DeleteFileTaskByIdCommand(fileTask.Id));
                 Log.Information($"Finished combining {fileTask.FilePaths.Count} files into {fileTask.FileName}");
                 _fileMergeCompletedSubject.OnNext(lastProgress);
+                _isExecutingFileTask = false;
             }
         }
 
@@ -225,5 +230,6 @@ namespace PlexRipper.FileSystem
         #endregion
 
         #endregion
+
     }
 }

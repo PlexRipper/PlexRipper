@@ -19,37 +19,47 @@ namespace PlexRipper.DownloadManager
     /// </summary>
     public class DownloadQueue : IDownloadQueue
     {
+        #region Fields
+
         private readonly IMediator _mediator;
+
+        private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
+
+        private readonly Subject<int> _serverCompletedDownloading = new();
+
+        private readonly Subject<DownloadTask> _startDownloadTask = new();
+
+        private readonly CancellationToken _token = new();
+
+        private readonly Subject<List<DownloadTask>> _updateDownloadTasks = new();
+
+        private Task<Task> _copyTask;
+
+        #endregion
+
+        #region Constructor
 
         public DownloadQueue(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-        #region Properties
-
-        private readonly Subject<DownloadTask> _startDownloadTask = new();
-
-        private readonly Subject<List<DownloadTask>> _updateDownloadTasks = new();
-
-        private readonly Subject<int> _serverCompletedDownloading = new();
-
-        private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
-
-        private readonly CancellationToken _token = new CancellationToken();
-
-        private Task<Task> _copyTask;
-
         #endregion
 
-        public IObservable<DownloadTask> StartDownloadTask => _startDownloadTask.AsObservable();
+        #region Properties
 
-        public IObservable<List<DownloadTask>> UpdateDownloadTasks => _updateDownloadTasks.AsObservable();
+        public bool IsBusy => _plexServersToCheckChannel.Reader.Count > 0;
 
         /// <summary>
         /// Emits the id of a <see cref="PlexServer"/> which has no more <see cref="DownloadTask">DownloadTasks</see> to process.
         /// </summary>
         public IObservable<int> ServerCompletedDownloading => _serverCompletedDownloading.AsObservable();
+
+        public IObservable<DownloadTask> StartDownloadTask => _startDownloadTask.AsObservable();
+
+        public IObservable<List<DownloadTask>> UpdateDownloadTasks => _updateDownloadTasks.AsObservable();
+
+        #endregion
 
         #region Public Methods
 
@@ -59,13 +69,40 @@ namespace PlexRipper.DownloadManager
             return _copyTask.IsFaulted ? Result.Fail("ExecuteFileTasks failed due to an error").LogError() : Result.Ok();
         }
 
-        private async Task ExecuteDownloadQueueCheck()
+        /// <summary>
+        ///  Determines the next downloadable <see cref="DownloadTask"/>.
+        /// Will only return a successful result if a queued task can be found
+        /// </summary>
+        /// <param name="downloadTasks"></param>
+        /// <returns></returns>
+        public static Result<DownloadTask> GetNextDownloadTask(ref List<DownloadTask> downloadTasks)
         {
-            while (!_token.IsCancellationRequested)
+            // Check if there is anything downloading already
+            var nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Downloading);
+            if (nextDownloadTask is not null)
             {
-                var item = await _plexServersToCheckChannel.Reader.ReadAsync();
-                await CheckDownloadQueueServer(item);
+                // Should we check deeper for any nested queued tasks inside downloading tasks
+                if (nextDownloadTask.Children is not null && nextDownloadTask.Children.Any())
+                {
+                    var children = nextDownloadTask.Children;
+                    return GetNextDownloadTask(ref children);
+                }
+
+                return Result.Fail($"DownloadTask {nextDownloadTask.Title} is already downloading").LogDebug();
             }
+
+            nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Queued);
+            if (nextDownloadTask is null)
+                return Result.Fail("There were no downloadTasks left to download.").LogDebug();
+
+            // Should we check deeper for any nested queued tasks in downloading tasks
+            if (nextDownloadTask.Children is not null && nextDownloadTask.Children.Any())
+            {
+                var children = nextDownloadTask.Children;
+                return GetNextDownloadTask(ref children);
+            }
+
+            return Result.Ok(nextDownloadTask);
         }
 
         /// <summary>
@@ -123,40 +160,21 @@ namespace PlexRipper.DownloadManager
             return Result.Ok();
         }
 
-        /// <summary>
-        ///  Determines the next downloadable <see cref="DownloadTask"/>.
-        /// Will only return a successful result if a queued task can be found
-        /// </summary>
-        /// <param name="downloadTasks"></param>
-        /// <returns></returns>
-        public static Result<DownloadTask> GetNextDownloadTask(ref List<DownloadTask> downloadTasks)
+        public List<DownloadTask> SetToCompleted(List<DownloadTask> downloadTasks)
         {
-            // Check if there is anything downloading already
-            var nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Downloading);
-            if (nextDownloadTask is not null)
+            foreach (var downloadTask in downloadTasks)
             {
-                // Should we check deeper for any nested queued tasks inside downloading tasks
-                if (nextDownloadTask.Children is not null && nextDownloadTask.Children.Any())
+                if (downloadTask.Children.Any())
                 {
-                    var children = nextDownloadTask.Children;
-                    return GetNextDownloadTask(ref children);
+                    downloadTask.Children = SetToCompleted(downloadTask.Children);
+                    if (downloadTask.Children.All(x => x.DownloadStatus is DownloadStatus.Completed))
+                    {
+                        downloadTask.DownloadStatus = DownloadStatus.Completed;
+                    }
                 }
-
-                return Result.Fail($"DownloadTask {nextDownloadTask.Title} is already downloading").LogDebug();
             }
 
-            nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Queued);
-            if (nextDownloadTask is null)
-                return Result.Fail("There were no downloadTasks left to download.").LogDebug();
-
-            // Should we check deeper for any nested queued tasks in downloading tasks
-            if (nextDownloadTask.Children is not null && nextDownloadTask.Children.Any())
-            {
-                var children = nextDownloadTask.Children;
-                return GetNextDownloadTask(ref children);
-            }
-
-            return Result.Ok(nextDownloadTask);
+            return downloadTasks;
         }
 
         public List<DownloadTask> SetToDownloading(List<DownloadTask> downloadTasks)
@@ -179,21 +197,17 @@ namespace PlexRipper.DownloadManager
             return downloadTasks;
         }
 
-        public List<DownloadTask> SetToCompleted(List<DownloadTask> downloadTasks)
-        {
-            foreach (var downloadTask in downloadTasks)
-            {
-                if (downloadTask.Children.Any())
-                {
-                    downloadTask.Children = SetToCompleted(downloadTask.Children);
-                    if (downloadTask.Children.All(x => x.DownloadStatus is DownloadStatus.Completed))
-                    {
-                        downloadTask.DownloadStatus = DownloadStatus.Completed;
-                    }
-                }
-            }
+        #endregion
 
-            return downloadTasks;
+        #region Private Methods
+
+        private async Task ExecuteDownloadQueueCheck()
+        {
+            while (!_token.IsCancellationRequested)
+            {
+                var item = await _plexServersToCheckChannel.Reader.ReadAsync();
+                await CheckDownloadQueueServer(item);
+            }
         }
 
         #endregion

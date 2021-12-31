@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AutoMapper;
 using Environment;
 using Logging;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application;
-using PlexRipper.BaseTests.MockClasses;
 using PlexRipper.Data;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
@@ -99,7 +97,9 @@ namespace PlexRipper.BaseTests
 
         public IPathProvider PathProvider => Resolve<IPathProvider>();
 
-        public ITestNotifier TestNotifier => Resolve<ITestNotifier>();
+        public ITestStreamTracker TestStreamTracker => Resolve<ITestStreamTracker>();
+
+        public ITestApplicationTracker TestApplicationTracker => Resolve<ITestApplicationTracker>();
 
         public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
 

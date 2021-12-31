@@ -62,10 +62,6 @@ namespace PlexRipper.DownloadManager
                 .DownloadTaskFinished
                 .SubscribeAsync(OnDownloadFileCompleted);
 
-            _fileMerger
-                .FileMergeProgressObservable
-                .SubscribeAsync(OnFileMergeProgress);
-
             // On big events send and extra update to front-end to minimize the delay
             Observable.Merge(new[]
             {
@@ -81,25 +77,30 @@ namespace PlexRipper.DownloadManager
                 .FileMergeStartObservable
                 .SubscribeAsync(task => _downloadProgressScheduler.FireDownloadProgressJob(task.DownloadTask.PlexServerId));
 
+            _fileMerger
+                .FileMergeProgressObservable
+                .SubscribeAsync(OnFileMergeProgress);
             return Result.Ok();
         }
 
         private async Task OnFileMergeCompleted(FileMergeProgress task)
         {
-            await _downloadProgressScheduler.FireDownloadProgressJob(task.PlexServerId);
+            Log.Debug("FileTask has completed");
 
-            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(task.Id));
-            if (downloadTask.IsFailed)
+            var rootDownloadTaskIdResult = await _mediator.Send(new GetRootDownloadTaskIdByDownloadTaskIdQuery(task.DownloadTaskId));
+            if (rootDownloadTaskIdResult.IsFailed)
             {
-                downloadTask.LogError();
+                rootDownloadTaskIdResult.LogError();
                 return;
             }
 
-            var updateResult = await _mediator.Send(new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTask.Value.RootDownloadTaskId ?? 0));
+            var updateResult = await _mediator.Send(new UpdateRootDownloadStatusOfDownloadTaskCommand(rootDownloadTaskIdResult.Value));
             if (updateResult.IsFailed)
             {
                 updateResult.LogError();
             }
+
+            await _downloadProgressScheduler.FireDownloadProgressJob(task.PlexServerId);
         }
 
         private async Task<Result> UpdateDownloadTaskAsync(DownloadTask downloadTask)

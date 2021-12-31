@@ -2,11 +2,10 @@
 using System.IO;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using PlexRipper.BaseTests.MockClasses;
 
 namespace PlexRipper.BaseTests
 {
-    public class TestNotifier : ITestNotifier
+    public class TestStreamTracker : ITestStreamTracker
     {
         #region Fields
 

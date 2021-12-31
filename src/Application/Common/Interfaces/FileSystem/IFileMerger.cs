@@ -5,7 +5,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application
 {
-    public interface IFileMerger : ISetupAsync
+    public interface IFileMerger : ISetupAsync, IBusy
     {
         IObservable<FileMergeProgress> FileMergeProgressObservable { get; }
 

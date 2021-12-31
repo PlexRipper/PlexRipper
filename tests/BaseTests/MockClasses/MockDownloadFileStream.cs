@@ -8,18 +8,18 @@ namespace PlexRipper.BaseTests
 {
     public class MockDownloadFileStream : IDownloadFileStream
     {
-        private readonly ITestNotifier _testNotifier;
+        private readonly ITestStreamTracker _testStreamTracker;
 
-        public MockDownloadFileStream(ITestNotifier testNotifier)
+        public MockDownloadFileStream(ITestStreamTracker testStreamTracker)
         {
-            _testNotifier = testNotifier;
+            _testStreamTracker = testStreamTracker;
         }
 
         public Result<Stream> CreateDownloadFileStream(string directory, string fileName, long fileSize)
         {
             Log.Debug("In memory download stream is created");
             var stream = new MemoryStream();
-            _testNotifier.AddDownloadFileStream(stream);
+            _testStreamTracker.AddDownloadFileStream(stream);
             return Result.Ok((Stream)stream);
         }
     }

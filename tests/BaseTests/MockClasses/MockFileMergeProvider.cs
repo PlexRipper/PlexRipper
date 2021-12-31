@@ -11,18 +11,18 @@ namespace PlexRipper.BaseTests
 {
     public class MockFileMergeStreamProvider : IFileMergeStreamProvider
     {
-        private readonly ITestNotifier _testNotifier;
+        private readonly ITestStreamTracker _testStreamTracker;
 
-        public MockFileMergeStreamProvider(ITestNotifier testNotifier)
+        public MockFileMergeStreamProvider(ITestStreamTracker testStreamTracker)
         {
-            _testNotifier = testNotifier;
+            _testStreamTracker = testStreamTracker;
         }
 
         public async Task<Result<Stream>> CreateMergeStream(string destinationDirectory)
         {
-            Log.Debug("In memory file merge stream is created");
+            Log.Verbose("In memory file merge stream is created");
             var stream = new MemoryStream();
-            _testNotifier.AddFileMergeStream(stream);
+            _testStreamTracker.AddFileMergeStream(stream);
             return Result.Ok((Stream)stream);
         }
 

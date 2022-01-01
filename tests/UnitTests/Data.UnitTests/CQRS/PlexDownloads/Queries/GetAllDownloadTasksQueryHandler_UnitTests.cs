@@ -78,8 +78,8 @@ namespace Data.UnitTests
             {
                 Seed = 2767,
                 TvShowDownloadTasksCount = 5,
-                TvShowSeasonCount = 5,
-                TvShowEpisodeCount = 5,
+                TvShowSeasonDownloadTasksCount = 5,
+                TvShowEpisodeDownloadTasksCount = 5,
                 LibraryType = PlexMediaType.TvShow,
             };
             await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);

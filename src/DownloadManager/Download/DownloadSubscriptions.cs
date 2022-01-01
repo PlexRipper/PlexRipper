@@ -47,10 +47,6 @@ namespace PlexRipper.DownloadManager
                 .StartDownloadTask
                 .SubscribeAsync(async downloadTask => await _downloadCommands.StartDownloadTaskAsync(downloadTask));
 
-            _downloadQueue
-                .UpdateDownloadTasks
-                .SubscribeAsync(UpdateDownloadTasksAsync);
-
             // Start sending updates to the front-end when starting a DownloadTask
             _downloadTracker
                 .DownloadTaskStart

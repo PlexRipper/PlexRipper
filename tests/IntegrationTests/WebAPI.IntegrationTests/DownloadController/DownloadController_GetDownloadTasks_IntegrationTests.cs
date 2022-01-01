@@ -45,13 +45,13 @@ namespace WebAPI.IntegrationTests.DownloadController
             result.IsSuccess.ShouldBeTrue();
             var plexServer = result.Value.First();
             plexServer.ShouldNotBeNull();
-            plexServer.Downloads.Count.ShouldBe(5);
+            plexServer.Downloads.Count.ShouldBe(config.TvShowDownloadTasksCount);
             foreach (var downloadProgressDto in plexServer.Downloads)
             {
-                downloadProgressDto.Children.Count.ShouldBe(2);
+                downloadProgressDto.Children.Count.ShouldBe(config.TvShowSeasonDownloadTasksCount);
                 foreach (var child in downloadProgressDto.Children)
                 {
-                    child.Children.Count.ShouldBe(2);
+                    child.Children.Count.ShouldBe(config.TvShowEpisodeDownloadTasksCount);
                 }
             }
         }

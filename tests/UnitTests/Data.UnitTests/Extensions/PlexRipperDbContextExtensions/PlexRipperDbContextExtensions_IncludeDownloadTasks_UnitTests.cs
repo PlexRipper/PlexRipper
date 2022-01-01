@@ -48,8 +48,8 @@ namespace Data.UnitTests.Extensions
             {
                 Seed = 3535,
                 TvShowDownloadTasksCount = 5,
-                TvShowSeasonCount = 5,
-                TvShowEpisodeCount = 5,
+                TvShowSeasonDownloadTasksCount = 5,
+                TvShowEpisodeDownloadTasksCount = 5,
             };
             await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
 
@@ -69,8 +69,8 @@ namespace Data.UnitTests.Extensions
             {
                 Seed = 3882,
                 TvShowDownloadTasksCount = 5,
-                TvShowSeasonCount = 5,
-                TvShowEpisodeCount = 5,
+                TvShowSeasonDownloadTasksCount = 5,
+                TvShowEpisodeDownloadTasksCount = 5,
             };
             await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
 

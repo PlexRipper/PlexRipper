@@ -60,8 +60,6 @@ namespace PlexRipper.DownloadManager
 
         public IObservable<DownloadTask> StartDownloadTask => _startDownloadTask.AsObservable();
 
-        public IObservable<List<DownloadTask>> UpdateDownloadTasks => _updateDownloadTasks.AsObservable();
-
         #endregion
 
         #region Public Methods
@@ -165,10 +163,7 @@ namespace PlexRipper.DownloadManager
 
             Log.Debug($"Checking {nameof(PlexServer)}: {plexServerName.Value} for the next download to start");
 
-            // Set all initialized to Queued
             var downloadTasks = downloadTasksResult.Value;
-
-           // downloadTasks = SetToCompleted(downloadTasks);
 
             var nextDownloadTask = GetNextDownloadTask(ref downloadTasks);
             if (nextDownloadTask.IsFailed)
@@ -180,49 +175,9 @@ namespace PlexRipper.DownloadManager
 
             Log.Information($"Selected download task {nextDownloadTask.Value.FullTitle} to start as the next task");
 
-           // downloadTasks = SetToDownloading(downloadTasks);
-           // _updateDownloadTasks.OnNext(downloadTasks);
-
             _startDownloadTask.OnNext(nextDownloadTask.Value);
 
             return Result.Ok();
-        }
-
-        public List<DownloadTask> SetToCompleted(List<DownloadTask> downloadTasks)
-        {
-            foreach (var downloadTask in downloadTasks)
-            {
-                if (downloadTask.Children.Any())
-                {
-                    downloadTask.Children = SetToCompleted(downloadTask.Children);
-                    if (downloadTask.Children.All(x => x.DownloadStatus is DownloadStatus.Completed))
-                    {
-                        downloadTask.DownloadStatus = DownloadStatus.Completed;
-                    }
-                }
-            }
-
-            return downloadTasks;
-        }
-
-        public List<DownloadTask> SetToDownloading(List<DownloadTask> downloadTasks)
-        {
-            foreach (var downloadTask in downloadTasks)
-            {
-                if (downloadTask.Children.Any())
-                {
-                    downloadTask.Children = SetToDownloading(downloadTask.Children);
-                }
-
-                // Only set the parent(s) of the downloadable Tasks to download
-                // because the DownloadClient decides the downloading status of downloadable tasks
-                if (!downloadTask.IsDownloadable && downloadTask.Children.Any(x => x.DownloadStatus is DownloadStatus.Downloading))
-                {
-                    downloadTask.DownloadStatus = DownloadStatus.Downloading;
-                }
-            }
-
-            return downloadTasks;
         }
 
         #endregion

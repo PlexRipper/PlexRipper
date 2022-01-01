@@ -36,17 +36,14 @@ namespace DownloadManager.UnitTests
                 .ReturnsAsync(Result.Ok(new List<PlexServer>()));
             var _sut = mock.Create<DownloadQueue>();
 
-            List<DownloadTask> updates = new();
             List<DownloadTask> startCommands = new();
 
             // Act
-            _sut.UpdateDownloadTasks.Subscribe(update => updates = update);
             _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
             _sut.Setup();
             _sut.CheckDownloadQueue(new List<int>());
 
             // Assert
-            updates.Any().ShouldBeFalse();
             startCommands.Any().ShouldBeFalse();
         }
 
@@ -65,6 +62,9 @@ namespace DownloadManager.UnitTests
             mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
                 .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
                     Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
+            mock.SetupMediator(It.IsAny<GetPlexServerNameByIdQuery>)
+                .ReturnsAsync((GetPlexServerNameByIdQuery query, CancellationToken _) =>
+                    Result.Ok(downloadTasks.FirstOrDefault(x => x.PlexServerId == query.Id).Title));
 
             List<DownloadTask> startCommands = new();
             var plexServers = await context.PlexServers
@@ -87,130 +87,35 @@ namespace DownloadManager.UnitTests
         }
 
         [Fact]
-        public async Task ShouldHaveNoDownloadTasksInitialized_WhenGivenDownloadTasksWithInitialized()
+        public async Task ShouldHaveOneDownloadTaskStarted_WhenGivenMovieDownloadTasks()
         {
             // Arrange
-            using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<DownloadQueue>();
-            int updateIndex = 1;
-            Dictionary<int, List<DownloadTask>> updates = new();
-            var config = new UnitTestDataConfig
-            {
-                MovieDownloadTasksCount = 10,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
-            var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
-            mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
-                .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
-                    Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
-
-            // Act
-            _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
-            await _sut.CheckDownloadQueueServer(1);
-
-            // Assert
-            var downloadTasksUpdate = updates[updateIndex];
-            downloadTasksUpdate.Any().ShouldBeTrue();
-            downloadTasksUpdate.All(x => x.DownloadStatus is not DownloadStatus.Queued).ShouldBeTrue();
-        }
-
-        [Fact]
-        public void ShouldHaveOneDownloadTaskStarted_WhenGivenMovieDownloadTasks()
-        {
-            // Arrange
-            using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<DownloadQueue>();
             List<DownloadTask> startCommands = new();
             var config = new UnitTestDataConfig
             {
                 Seed = 5000,
-                IncludeLibraries = true,
-                PlexLibraryCount = 1,
-                LibraryType = PlexMediaType.Movie,
-                IncludeDownloadTasks = true,
-                DownloadTasksCount = 2,
+                MovieDownloadTasksCount = 5,
             };
-            var plexServers = FakeData.GetPlexServer(config).Generate(1);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+
+            using var mock = AutoMock.GetStrict();
+            var _sut = mock.Create<DownloadQueue>();
+            var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
+            mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
+                .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
+                    Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
+            mock.SetupMediator(It.IsAny<GetPlexServerNameByIdQuery>)
+                .ReturnsAsync((GetPlexServerNameByIdQuery query, CancellationToken _) =>
+                    Result.Ok(downloadTasks.FirstOrDefault(x => x.PlexServerId == query.Id).Title));
 
             // Act
             _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-
-             _sut.CheckDownloadQueue(plexServers.Select(x => x.Id).ToList());
+            await _sut.CheckDownloadQueueServer(downloadTasks.First().PlexServerId);
 
             // Assert
-            var startedDownloadTask = plexServers[0].PlexLibraries[0].DownloadTasks[0].Children[0];
+            var startedDownloadTask = downloadTasks[0].Children[0];
             startCommands.Count.ShouldBe(1);
             startCommands[0].Id.ShouldBe(startedDownloadTask.Id);
-        }
-
-        [Fact]
-        public void ShouldHaveOneDownloadTaskDownloadingStatus_WhenGivenMovieDownloadTasks()
-        {
-            // Arrange
-            using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<DownloadQueue>();
-            int updateIndex = 1;
-            Dictionary<int, List<DownloadTask>> updates = new();
-            var config = new UnitTestDataConfig
-            {
-                Seed = 25,
-                IncludeLibraries = true,
-                PlexLibraryCount = 1,
-                LibraryType = PlexMediaType.Movie,
-                IncludeDownloadTasks = true,
-                DownloadTasksCount = 2,
-            };
-            var plexServers = FakeData.GetPlexServer(config).Generate(1);
-
-            // Act
-            _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
-
-            _sut.CheckDownloadQueue(plexServers.Select(x => x.Id).ToList());
-
-            // Assert
-
-            var downloadTasks = updates[updateIndex];
-            downloadTasks.Any().ShouldBeTrue();
-            downloadTasks[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-            downloadTasks[0].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-
-            downloadTasks[1].DownloadStatus.ShouldBe(DownloadStatus.Queued);
-            downloadTasks[1].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Queued);
-        }
-
-        [Fact]
-        public void ShouldHaveOneDownloadTaskDownloadingStatus_WhenGivenTvShowDownloadTasks()
-        {
-            // Arrange
-            using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<DownloadQueue>();
-            int updateIndex = 1;
-            Dictionary<int, List<DownloadTask>> updates = new();
-            var config = new UnitTestDataConfig
-            {
-                Seed = 67,
-                IncludeLibraries = true,
-                PlexLibraryCount = 1,
-                LibraryType = PlexMediaType.TvShow,
-                IncludeDownloadTasks = true,
-                DownloadTasksCount = 2,
-            };
-            var plexServers = FakeData.GetPlexServer(config).Generate(1);
-
-            // Act
-            _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
-
-            _sut.CheckDownloadQueue(plexServers.Select(x => x.Id).ToList());
-
-            // Assert
-
-            var downloadTasks = updates[updateIndex];
-            downloadTasks.Any().ShouldBeTrue();
-            downloadTasks[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-            downloadTasks[0].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-
-            downloadTasks[1].DownloadStatus.ShouldBe(DownloadStatus.Queued);
-            downloadTasks[1].Children.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Queued);
         }
 
         [Fact]
@@ -233,23 +138,19 @@ namespace DownloadManager.UnitTests
                 .ReturnsAsync((GetPlexServerNameByIdQuery query, CancellationToken _) =>
                     Result.Ok(downloadTasks.FirstOrDefault(x => x.PlexServerId == query.Id).Title));
 
-            int updateIndex = 0;
-            Dictionary<int, List<DownloadTask>> updates = new();
-
             // ** Set first task to Completed
             var movieDownloadTask = context.DownloadTasks.Include(x => x.Children).AsTracking().First();
             movieDownloadTask.DownloadStatus = DownloadStatus.Completed;
             movieDownloadTask.Children.ForEach(x => x.DownloadStatus = DownloadStatus.Completed);
             await context.SaveChangesAsync();
+            DownloadTask startedDownloadTask = null;
 
             // Act
-            _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
+            _sut.StartDownloadTask.Subscribe(update => startedDownloadTask = update);
             await _sut.CheckDownloadQueueServer(downloadTasks.First().PlexServerId);
 
             // Assert
-            var downloadTasksResult = updates[updateIndex];
-            downloadTasksResult.Any().ShouldBeTrue();
-            downloadTasksResult[1].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+            startedDownloadTask.ShouldNotBeNull();
         }
 
         [Fact]
@@ -260,42 +161,36 @@ namespace DownloadManager.UnitTests
             {
                 Seed = 263,
                 TvShowDownloadTasksCount = 2,
+                TvShowSeasonDownloadTasksCount = 2,
+                TvShowEpisodeDownloadTasksCount = 2,
             };
             await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DownloadQueue>();
 
-            var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
+            var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().IncludeByRoot().ToListAsync();
             mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
                 .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
                     Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
+            mock.SetupMediator(It.IsAny<GetPlexServerNameByIdQuery>)
+                .ReturnsAsync((GetPlexServerNameByIdQuery query, CancellationToken _) =>
+                    Result.Ok(downloadTasks.FirstOrDefault(x => x.PlexServerId == query.Id).Title));
 
-            int updateIndex = 0;
-            Dictionary<int, List<DownloadTask>> updates = new();
-            var plexServers = await context.PlexServers
-                .AsTracking()
-                .Include(x => x.PlexLibraries)
-                .ThenInclude(x => x.DownloadTasks)
-                .ToListAsync();
+            DownloadTask startedDownloadTask = null;
 
-            // Set first task to Completed
-            var tvShowDownloadTask = plexServers[0].PlexLibraries[0].DownloadTasks[0];
+            // ** Set first task to Completed
+            var tvShowDownloadTask = downloadTasks[0];
             tvShowDownloadTask.DownloadStatus = DownloadStatus.Completed;
             tvShowDownloadTask.Children = tvShowDownloadTask.Children.SetToCompleted();
             await context.SaveChangesAsync();
 
             // Act
-            _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
+            _sut.StartDownloadTask.Subscribe(update => startedDownloadTask = update);
             await _sut.CheckDownloadQueueServer(1);
 
             // Assert
-            var downloadTasksResult = updates[updateIndex];
-            downloadTasksResult.Any().ShouldBeTrue();
-            downloadTasksResult[1].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-            downloadTasksResult[1].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-            downloadTasksResult[1].Children[0].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-            downloadTasksResult[1].Children[0].Children[1].DownloadStatus.ShouldBe(DownloadStatus.Queued);
-            downloadTasksResult[1].Children[0].Children[0].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+            startedDownloadTask.ShouldNotBeNull();
+            startedDownloadTask.Id.ShouldBe(downloadTasks[1].Children[0].Children[0].Children[0].Id);
         }
     }
 }

@@ -15,8 +15,6 @@ namespace PlexRipper.Application
 
         IObservable<DownloadTask> StartDownloadTask { get; }
 
-        IObservable<List<DownloadTask>> UpdateDownloadTasks { get; }
-
         IObservable<int> ServerCompletedDownloading { get; }
 
         Task<Result> CheckDownloadQueueServer(int plexServerId);

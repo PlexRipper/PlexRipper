@@ -190,7 +190,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
         public void Dispose()
         {
             ClearDownloadWorkers();
-            _downloadSpeedLimitSubscription.Dispose();
+            _downloadSpeedLimitSubscription?.Dispose();
         }
 
         #endregion

@@ -23,6 +23,8 @@ namespace PlexRipper.DownloadManager
 
         private readonly IMediator _mediator;
 
+        private readonly IDownloadTaskValidator _downloadTaskValidator;
+
         private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
 
         private readonly Subject<int> _serverCompletedDownloading = new();
@@ -39,9 +41,10 @@ namespace PlexRipper.DownloadManager
 
         #region Constructor
 
-        public DownloadQueue(IMediator mediator)
+        public DownloadQueue(IMediator mediator, IDownloadTaskValidator downloadTaskValidator)
         {
             _mediator = mediator;
+            _downloadTaskValidator = downloadTaskValidator;
         }
 
         #endregion
@@ -67,6 +70,31 @@ namespace PlexRipper.DownloadManager
         {
             _copyTask = Task.Factory.StartNew(ExecuteDownloadQueueCheck, TaskCreationOptions.LongRunning);
             return _copyTask.IsFaulted ? Result.Fail("ExecuteFileTasks failed due to an error").LogError() : Result.Ok();
+        }
+
+        /// <inheritdoc/>
+        public async Task<Result> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks)
+        {
+            if (!downloadTasks.Any())
+                return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
+
+            var validateResult = _downloadTaskValidator.ValidateDownloadTasks(downloadTasks);
+            if (validateResult.IsFailed)
+            {
+                return validateResult.ToResult().LogDebug();
+            }
+
+            // Add to Database
+            var createResult = await _mediator.Send(new CreateDownloadTasksCommand(validateResult.Value));
+            if (createResult.IsFailed)
+            {
+                return createResult.ToResult().LogError();
+            }
+
+            Log.Debug($"Successfully added all {validateResult.Value.Count} DownloadTasks");
+            var uniquePlexServers = downloadTasks.Select(x => x.PlexServerId).Distinct().ToList();
+            await CheckDownloadQueue(uniquePlexServers);
+            return Result.Ok();
         }
 
         /// <summary>
@@ -140,7 +168,7 @@ namespace PlexRipper.DownloadManager
             // Set all initialized to Queued
             var downloadTasks = downloadTasksResult.Value;
 
-            //downloadTasks = SetToCompleted(downloadTasks);
+           // downloadTasks = SetToCompleted(downloadTasks);
 
             var nextDownloadTask = GetNextDownloadTask(ref downloadTasks);
             if (nextDownloadTask.IsFailed)
@@ -152,8 +180,8 @@ namespace PlexRipper.DownloadManager
 
             Log.Information($"Selected download task {nextDownloadTask.Value.FullTitle} to start as the next task");
 
-            //downloadTasks = SetToDownloading(downloadTasks);
-            _updateDownloadTasks.OnNext(downloadTasks);
+           // downloadTasks = SetToDownloading(downloadTasks);
+           // _updateDownloadTasks.OnNext(downloadTasks);
 
             _startDownloadTask.OnNext(nextDownloadTask.Value);
 

@@ -1,18 +1,20 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Autofac.Extras.Moq;
+using FluentResults;
 using Logging;
+using Moq;
 using PlexRipper.Domain;
+using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace DownloadManager.UnitTests
 {
-    public class DownloadManager_AddToDownloadQueue_UnitTests
+    public class DownloadQueue_AddToDownloadQueue_UnitTests
     {
-
-        public DownloadManager_AddToDownloadQueue_UnitTests(ITestOutputHelper output)
+        public DownloadQueue_AddToDownloadQueue_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
         }
@@ -22,7 +24,7 @@ namespace DownloadManager.UnitTests
         {
             //Arrange
             using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<PlexRipper.DownloadManager.DownloadManager>();
+            var _sut = mock.Create<DownloadQueue>();
 
             // Act
             var result = await _sut.AddToDownloadQueueAsync(new List<DownloadTask>());
@@ -36,9 +38,10 @@ namespace DownloadManager.UnitTests
         {
             //Arrange
             using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<PlexRipper.DownloadManager.DownloadManager>();
+            mock.Mock<IDownloadTaskValidator>().Setup(x => x.ValidateDownloadTasks(It.IsAny<List<DownloadTask>>())).Returns(Result.Fail(""));
 
             // Act
+            var _sut = mock.Create<DownloadQueue>();
             var result = await _sut.AddToDownloadQueueAsync(new List<DownloadTask>
             {
                 new(),
@@ -48,6 +51,5 @@ namespace DownloadManager.UnitTests
             // Assert
             result.IsFailed.ShouldBeTrue();
         }
-
     }
 }

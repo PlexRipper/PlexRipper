@@ -26,9 +26,10 @@ namespace Data.UnitTests
             // Arrange
             var config = new UnitTestDataConfig
             {
-                Seed = 2867,
-                DownloadTasksCount = 10,
-                LibraryType = PlexMediaType.Movie,
+                Seed = 2367,
+                TvShowDownloadTasksCount = 5,
+                TvShowSeasonDownloadTasksCount = 2,
+                TvShowEpisodeDownloadTasksCount = 3,
             };
             await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
 
@@ -43,7 +44,7 @@ namespace Data.UnitTests
             result.IsSuccess.ShouldBeTrue();
             var downloadTaskIds = result.Value;
             downloadTaskIds.ShouldNotBeEmpty();
-            downloadTaskIds.Count.ShouldBe(10);
+            downloadTaskIds.Count.ShouldBe(44);
             downloadTaskIds.ShouldBeUnique();
             childIds.ShouldAllBe(x => downloadTaskIds.Contains(x));
         }
@@ -55,9 +56,11 @@ namespace Data.UnitTests
             var config = new UnitTestDataConfig
             {
                 Seed = 2867,
-                DownloadTasksCount = 10,
-                LibraryType = PlexMediaType.TvShow,
+                TvShowDownloadTasksCount = 5,
+                TvShowSeasonDownloadTasksCount = 2,
+                TvShowEpisodeDownloadTasksCount = 3,
             };
+
             await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
 
             var ids = context.DownloadTasks.Where(x => x.DownloadTaskType == DownloadTaskType.TvShow).Take(5).Select(x => x.Id).ToList();
@@ -71,7 +74,7 @@ namespace Data.UnitTests
             result.IsSuccess.ShouldBeTrue();
             var downloadTaskIds = result.Value;
             downloadTaskIds.ShouldNotBeEmpty();
-            downloadTaskIds.Count.ShouldBe(530);
+            downloadTaskIds.Count.ShouldBe(75);
             downloadTaskIds.ShouldBeUnique();
             ids.ShouldAllBe(x => downloadTaskIds.Contains(x));
         }

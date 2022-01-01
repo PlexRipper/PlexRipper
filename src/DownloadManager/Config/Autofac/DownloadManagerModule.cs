@@ -12,7 +12,6 @@ namespace PlexRipper.DownloadManager
         {
             var assembly = Assembly.GetExecutingAssembly();
 
-            builder.RegisterType<DownloadManager>().As<IDownloadManager>().SingleInstance();
             builder.RegisterType<DownloadCommands>().As<IDownloadCommands>().SingleInstance();
             builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
             builder.RegisterType<DownloadTracker>().As<IDownloadTracker>().SingleInstance();

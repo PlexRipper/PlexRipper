@@ -30,9 +30,11 @@ namespace WebAPI.IntegrationTests.DownloadController
             {
                 Seed = 4564,
                 TvShowDownloadTasksCount = 5,
+                TvShowSeasonCount = 2,
+                TvShowEpisodeCount = 2,
             };
 
-            var container = await BaseContainer.Create();
+            var container = await BaseContainer.Create(config);
 
             // Act
             var response = await container.ApiClient.GetAsync(ApiRoutes.Download.GetDownloadTasks);
@@ -44,7 +46,14 @@ namespace WebAPI.IntegrationTests.DownloadController
             var plexServer = result.Value.First();
             plexServer.ShouldNotBeNull();
             plexServer.Downloads.Count.ShouldBe(5);
-            plexServer.Downloads.ShouldAllBe(x => x.Children.Count == 5);
+            foreach (var downloadProgressDto in plexServer.Downloads)
+            {
+                downloadProgressDto.Children.Count.ShouldBe(2);
+                foreach (var child in downloadProgressDto.Children)
+                {
+                    child.Children.Count.ShouldBe(2);
+                }
+            }
         }
     }
 }

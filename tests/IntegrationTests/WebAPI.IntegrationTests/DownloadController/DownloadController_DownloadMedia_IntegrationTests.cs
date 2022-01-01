@@ -26,7 +26,7 @@ namespace WebAPI.IntegrationTests.DownloadController
         }
 
         [Fact]
-        public async Task ShouldHaveAllDownloadTasksNested_WhenTasksAreAvailable()
+        public async Task ShouldDownloadAllTvShowEpisodes_WhenValidEpisodesAreAdded()
         {
             // Arrange
             var config = new UnitTestDataConfig
@@ -38,7 +38,7 @@ namespace WebAPI.IntegrationTests.DownloadController
                 DownloadSpeedLimit = 5000,
                 MockServerConfig = new PlexMockServerConfig
                 {
-                    DownloadFileSize = 50,
+                    DownloadFileSizeInMb = 50,
                 },
             };
 

@@ -11,13 +11,13 @@ namespace PlexRipper.Application
     {
         #region Fields
 
-        private readonly IDownloadManager _downloadManager;
-
         private readonly IDownloadTaskFactory _downloadTaskFactory;
 
         private readonly IDownloadCommands _downloadCommands;
 
         private readonly IMediator _mediator;
+
+        private readonly IDownloadQueue _downloadQueue;
 
         #endregion
 
@@ -32,12 +32,12 @@ namespace PlexRipper.Application
         /// <param name="downloadCommands"></param>
         public PlexDownloadService(
             IMediator mediator,
-            IDownloadManager downloadManager,
+            IDownloadQueue downloadQueue,
             IDownloadTaskFactory downloadTaskFactory,
             IDownloadCommands downloadCommands)
         {
             _mediator = mediator;
-            _downloadManager = downloadManager;
+            _downloadQueue = downloadQueue;
             _downloadTaskFactory = downloadTaskFactory;
             _downloadCommands = downloadCommands;
         }
@@ -63,7 +63,7 @@ namespace PlexRipper.Application
                 return downloadTasks.ToResult();
 
             // Sent to download manager
-            return await _downloadManager.AddToDownloadQueueAsync(downloadTasks.Value);
+            return await _downloadQueue.AddToDownloadQueueAsync(downloadTasks.Value);
         }
 
         public async Task<Result> DeleteDownloadTasksAsync(List<int> downloadTaskIds)

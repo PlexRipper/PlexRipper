@@ -21,7 +21,7 @@ namespace BaseTests.UnitTests.MockServer
             // Arrange
             var config = new PlexMockServerConfig()
             {
-                DownloadFileSize = 40,
+                DownloadFileSizeInMb = 40,
             };
             var plexMockServer = new PlexMockServer(config);
             var _httpClient = new HttpClient();
@@ -37,7 +37,7 @@ namespace BaseTests.UnitTests.MockServer
             // Assert
             response.IsSuccessStatusCode.ShouldBeTrue();
             stream.ShouldNotBeNull();
-            stream.LongLength.ShouldBe(config.DownloadFileSizeInBytes);
+            stream.LongLength.ShouldBeGreaterThan(config.DownloadFileSizeInBytes * 1000);
         }
     }
 }

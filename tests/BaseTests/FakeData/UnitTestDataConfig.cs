@@ -42,9 +42,17 @@ namespace PlexRipper.BaseTests
 
         public int TvShowEpisodeCount { get; init; } = 5;
 
+        #region DownloadTasks
+
         public int MovieDownloadTasksCount { get; init; } = 0;
 
         public int TvShowDownloadTasksCount { get; init; } = 0;
+
+        public int TvShowSeasonDownloadTasksCount { get; init; } = 2;
+
+        public int TvShowEpisodeDownloadTasksCount { get; init; } = 5;
+
+        #endregion
 
         #endregion
 

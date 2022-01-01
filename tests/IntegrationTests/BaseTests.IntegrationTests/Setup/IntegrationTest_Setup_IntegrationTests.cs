@@ -27,7 +27,6 @@ namespace BaseTests.IntegrationTests.Setup
             var container = await BaseContainer.Create();
             container.FileSystem.ShouldNotBeNull();
             container.GetDownloadCommands.ShouldNotBeNull();
-            container.GetDownloadManager.ShouldNotBeNull();
             container.GetDownloadQueue.ShouldNotBeNull();
             container.GetDownloadTaskFactory.ShouldNotBeNull();
             container.GetDownloadTaskValidator.ShouldNotBeNull();

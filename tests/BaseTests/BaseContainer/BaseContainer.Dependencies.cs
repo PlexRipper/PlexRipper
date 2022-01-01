@@ -67,8 +67,6 @@ namespace PlexRipper.BaseTests
 
         public IDownloadCommands GetDownloadCommands => Resolve<IDownloadCommands>();
 
-        public IDownloadManager GetDownloadManager => Resolve<IDownloadManager>();
-
         public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
 
         public IDownloadTaskFactory GetDownloadTaskFactory => Resolve<IDownloadTaskFactory>();

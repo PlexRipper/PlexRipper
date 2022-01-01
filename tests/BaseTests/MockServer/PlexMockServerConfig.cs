@@ -8,8 +8,8 @@ namespace PlexRipper.BaseTests
 
         public Uri ServerUri { get; set; }
 
-        public int DownloadFileSize { get; init; }
+        public int DownloadFileSizeInMb { get; init; }
 
-        public long DownloadFileSizeInBytes => DownloadFileSize * 1024;
+        public long DownloadFileSizeInBytes => DownloadFileSizeInMb * 1024;
     }
 }

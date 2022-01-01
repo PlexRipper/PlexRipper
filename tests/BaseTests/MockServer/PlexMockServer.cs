@@ -24,9 +24,9 @@ namespace PlexRipper.BaseTests
         {
             _config = config ?? new PlexMockServerConfig();
 
-            if (_config.DownloadFileSize > 0)
+            if (_config.DownloadFileSizeInMb > 0)
             {
-                _downloadFile = FakeData.GetDownloadFile(_config.DownloadFileSize);
+                _downloadFile = FakeData.GetDownloadFile(_config.DownloadFileSizeInMb);
             }
 
             Server = WireMockServer.Start();

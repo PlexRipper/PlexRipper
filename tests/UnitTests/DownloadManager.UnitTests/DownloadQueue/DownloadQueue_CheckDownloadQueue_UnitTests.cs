@@ -135,7 +135,7 @@ namespace DownloadManager.UnitTests
             // Act
             _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
 
-            // _sut.CheckDownloadQueue(plexServers);
+             _sut.CheckDownloadQueue(plexServers.Select(x => x.Id).ToList());
 
             // Assert
             var startedDownloadTask = plexServers[0].PlexLibraries[0].DownloadTasks[0].Children[0];
@@ -165,7 +165,7 @@ namespace DownloadManager.UnitTests
             // Act
             _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
 
-            // _sut.CheckDownloadQueue(plexServers);
+            _sut.CheckDownloadQueue(plexServers.Select(x => x.Id).ToList());
 
             // Assert
 
@@ -200,7 +200,7 @@ namespace DownloadManager.UnitTests
             // Act
             _sut.UpdateDownloadTasks.Subscribe(update => updates.Add(++updateIndex, update));
 
-            // _sut.CheckDownloadQueue(plexServers);
+            _sut.CheckDownloadQueue(plexServers.Select(x => x.Id).ToList());
 
             // Assert
 
@@ -229,11 +229,14 @@ namespace DownloadManager.UnitTests
             mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
                 .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
                     Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
+            mock.SetupMediator(It.IsAny<GetPlexServerNameByIdQuery>)
+                .ReturnsAsync((GetPlexServerNameByIdQuery query, CancellationToken _) =>
+                    Result.Ok(downloadTasks.FirstOrDefault(x => x.PlexServerId == query.Id).Title));
 
             int updateIndex = 0;
             Dictionary<int, List<DownloadTask>> updates = new();
 
-            // Set first task to Completed
+            // ** Set first task to Completed
             var movieDownloadTask = context.DownloadTasks.Include(x => x.Children).AsTracking().First();
             movieDownloadTask.DownloadStatus = DownloadStatus.Completed;
             movieDownloadTask.Children.ForEach(x => x.DownloadStatus = DownloadStatus.Completed);
@@ -246,7 +249,6 @@ namespace DownloadManager.UnitTests
             // Assert
             var downloadTasksResult = updates[updateIndex];
             downloadTasksResult.Any().ShouldBeTrue();
-            downloadTasksResult[1].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
             downloadTasksResult[1].Children[0].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
         }
 

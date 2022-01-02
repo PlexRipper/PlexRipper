@@ -40,7 +40,7 @@ namespace PlexRipper.FileSystem
 
         private readonly CancellationToken _token = new();
 
-        private bool _isExecutingFileTask = false;
+        private bool _isExecutingFileTask;
 
         private Task<Task> _copyTask;
 
@@ -179,7 +179,7 @@ namespace PlexRipper.FileSystem
 
             await ResumeFileTasks();
 
-            return Result.Ok(true);
+            return Result.Ok();
         }
 
         private async Task ResumeFileTasks()
@@ -199,37 +199,29 @@ namespace PlexRipper.FileSystem
         public async Task<Result> AddFileTaskFromDownloadTask(int downloadTaskId)
         {
             if (downloadTaskId == 0)
-            {
                 return ResultExtensions.IsInvalidId(nameof(downloadTaskId)).LogError();
-            }
 
             var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true));
             if (downloadTask.IsFailed)
-            {
-                return downloadTask.LogError();
-            }
+                return downloadTask.ToResult().LogError();
 
             Log.Debug($"Adding DownloadTask {downloadTask.Value.Title} to a FileTask to be merged");
             var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask.Value));
             if (result.IsFailed)
             {
-                // TODO Add notification here for front-end
-                return result.LogError();
+                return result.ToResult().LogError();
             }
 
             var fileTask = await _mediator.Send(new GetFileTaskByIdQuery(result.Value));
             if (fileTask.IsFailed)
-            {
-                return fileTask.LogError();
-            }
+                return fileTask.ToResult().LogError();
 
             await _channel.Writer.WriteAsync(fileTask.Value);
-            return Result.Ok(true);
+            return Result.Ok();
         }
 
         #endregion
 
         #endregion
-
     }
 }

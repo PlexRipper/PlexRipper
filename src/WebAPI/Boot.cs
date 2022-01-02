@@ -22,8 +22,6 @@ namespace PlexRipper.WebAPI
 
         private readonly IFileMerger _fileMerger;
 
-        private readonly IFileSystem _fileSystem;
-
         private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
 
         private readonly ISchedulerService _schedulerService;
@@ -38,13 +36,12 @@ namespace PlexRipper.WebAPI
 
         #region Constructor
 
-        public Boot(IHostApplicationLifetime appLifetime, IConfigManager configManager, IFileSystem fileSystem, IFileMerger fileMerger,
+        public Boot(IHostApplicationLifetime appLifetime, IConfigManager configManager, IFileMerger fileMerger,
             IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
             IMigrationService migrationService, IDownloadSubscriptions downloadSubscriptions, IDownloadQueue downloadQueue)
         {
             _appLifetime = appLifetime;
             _configManager = configManager;
-            _fileSystem = fileSystem;
             _fileMerger = fileMerger;
             _plexRipperDatabaseService = plexRipperDatabaseService;
             _schedulerService = schedulerService;
@@ -78,7 +75,6 @@ namespace PlexRipper.WebAPI
             ServicePointManager.DefaultConnectionLimit = 1000;
 
             // First await the finishing off all these
-            _fileSystem.Setup();
             Log.SetupLogging();
             _configManager.Setup();
             await _plexRipperDatabaseService.SetupAsync();

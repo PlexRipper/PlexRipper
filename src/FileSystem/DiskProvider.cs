@@ -145,8 +145,6 @@ namespace PlexRipper.FileSystem
 
         public List<DirectoryInfo> GetDirectoryInfos(string path)
         {
-            //Ensure.String.IsValidPath(path);
-
             var di = new DirectoryInfo(path);
 
             return di.GetDirectories().ToList();
@@ -154,8 +152,6 @@ namespace PlexRipper.FileSystem
 
         public List<FileInfo> GetFileInfos(string path)
         {
-            //Ensure.String.IsValidPath(path);
-
             var di = new DirectoryInfo(path);
 
             return di.GetFiles().ToList();

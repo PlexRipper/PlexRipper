@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using PlexRipper.Application;
-using PlexRipper.BaseTests.MockClasses;
 using PlexRipper.DownloadManager;
 using PlexRipper.FileSystem.Common;
 

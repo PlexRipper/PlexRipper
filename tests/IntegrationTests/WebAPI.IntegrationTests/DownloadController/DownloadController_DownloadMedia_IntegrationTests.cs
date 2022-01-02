@@ -71,7 +71,7 @@ namespace WebAPI.IntegrationTests.DownloadController
 
             // ** Continue after the application has idle
             await container.TestApplicationTracker.WaitUntilApplicationIsIdle(logStatus: true);
-            await Task.Delay(20000);
+            await Task.Delay(30000);
 
             // Assert
             response.IsSuccessStatusCode.ShouldBeTrue();

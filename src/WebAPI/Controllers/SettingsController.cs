@@ -4,7 +4,6 @@ using FluentResults;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
-using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -46,9 +45,7 @@ namespace PlexRipper.WebAPI.Controllers
         {
             var updateResult = _userSettings.UpdateSettings(settingsModelDto);
             if (updateResult.IsFailed)
-            {
-                return ToActionResult(updateResult);
-            }
+                return ToActionResult(updateResult.ToResult());
 
             return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok((ISettingsModel)_userSettings));
         }

@@ -19,6 +19,8 @@ namespace PlexRipper.DownloadManager
 
         private readonly IFileSystem _fileSystem;
 
+        private readonly IDirectorySystem _directorySystem;
+
         private readonly IMediator _mediator;
 
         private readonly INotificationsService _notificationsService;
@@ -38,6 +40,7 @@ namespace PlexRipper.DownloadManager
             IDownloadTracker downloadTracker,
             IDownloadQueue downloadQueue,
             IFileSystem fileSystem,
+            IDirectorySystem directorySystem,
             INotificationsService notificationsService,
             IDownloadScheduler downloadScheduler,
             IDownloadTaskFactory downloadTaskFactory,
@@ -47,6 +50,7 @@ namespace PlexRipper.DownloadManager
             _downloadTracker = downloadTracker;
             _downloadQueue = downloadQueue;
             _fileSystem = fileSystem;
+            _directorySystem = directorySystem;
             _notificationsService = notificationsService;
             _downloadScheduler = downloadScheduler;
             _downloadTaskFactory = downloadTaskFactory;
@@ -159,7 +163,7 @@ namespace PlexRipper.DownloadManager
                         await _notificationsService.SendResult(stopResult);
                     }
 
-                    var removeTempResult = _fileSystem.DeleteAllFilesFromDirectory(downloadTask.Value.DownloadDirectory);
+                    var removeTempResult = _directorySystem.DeleteAllFilesFromDirectory(downloadTask.Value.DownloadDirectory);
                     if (removeTempResult.IsFailed)
                     {
                         await _notificationsService.SendResult(removeTempResult);

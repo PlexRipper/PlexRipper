@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
-using PlexRipper.FileSystem.Common;
 
-namespace PlexRipper.FileSystem
+namespace PlexRipper.FileSystem.Common
 {
     public class FileMergeStreamProvider : IFileMergeStreamProvider
     {
@@ -17,16 +16,19 @@ namespace PlexRipper.FileSystem
 
         private readonly INotificationsService _notificationsService;
 
-        public FileMergeStreamProvider(IFileSystem fileSystem, INotificationsService notificationsService)
+        private readonly IDirectorySystem _directorySystem;
+
+        public FileMergeStreamProvider(IFileSystem fileSystem, INotificationsService notificationsService, IDirectorySystem directorySystem)
         {
             _fileSystem = fileSystem;
             _notificationsService = notificationsService;
+            _directorySystem = directorySystem;
         }
 
         public async Task<Result<Stream>> CreateMergeStream(string destinationDirectory)
         {
             // Ensure destination directory exists and is otherwise created.
-            var result = _fileSystem.CreateDirectoryFromFilePath(destinationDirectory);
+            var result = _directorySystem.CreateDirectoryFromFilePath(destinationDirectory);
             if (result.IsFailed)
             {
                 await _notificationsService.SendResult(result);

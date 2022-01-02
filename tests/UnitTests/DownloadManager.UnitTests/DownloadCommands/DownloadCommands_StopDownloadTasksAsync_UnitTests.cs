@@ -78,7 +78,7 @@ namespace DownloadManager.UnitTests
 
             mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result>())).ReturnsAsync(Result.Ok());
             mock.Mock<IDownloadTracker>().Setup(x => x.StopDownloadClient(It.IsAny<int>())).ReturnsAsync(Result.Ok());
-            mock.Mock<IFileSystem>().Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());
+            mock.Mock<IDirectorySystem>().Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());
 
             // Act
             var _sut = mock.Create<DownloadCommands>();

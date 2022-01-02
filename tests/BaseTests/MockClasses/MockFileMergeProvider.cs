@@ -4,7 +4,6 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
-using Logging;
 using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.BaseTests
@@ -18,13 +17,14 @@ namespace PlexRipper.BaseTests
             _testStreamTracker = testStreamTracker;
         }
 
+#pragma warning disable CS1998
         public async Task<Result<Stream>> CreateMergeStream(string destinationDirectory)
         {
-            Log.Verbose("In memory file merge stream is created");
             var stream = new MemoryStream();
             _testStreamTracker.AddFileMergeStream(stream);
             return Result.Ok((Stream)stream);
         }
+#pragma warning restore CS1998
 
         public async Task MergeFiles(List<string> filePaths, Stream destination, Subject<long> bytesReceivedProgress,
             CancellationToken cancellationToken = default(CancellationToken))

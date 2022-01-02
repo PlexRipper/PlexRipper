@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using FluentResults;
 using Logging;
-using PlexRipper.BaseTests.MockClasses;
 using PlexRipper.DownloadManager;
 
 namespace PlexRipper.BaseTests

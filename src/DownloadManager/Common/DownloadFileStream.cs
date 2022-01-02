@@ -9,13 +9,16 @@ namespace PlexRipper.DownloadManager
     {
         private readonly IFileSystem _fileSystem;
 
+        private readonly IDirectorySystem _directorySystem;
+
         private readonly IPathSystem _pathSystem;
 
         private readonly IDiskSystem _diskSystem;
 
-        public DownloadFileStream(IFileSystem fileSystem, IPathSystem pathSystem, IDiskSystem diskSystem)
+        public DownloadFileStream(IFileSystem fileSystem, IDirectorySystem directorySystem, IPathSystem pathSystem, IDiskSystem diskSystem)
         {
             _fileSystem = fileSystem;
+            _directorySystem = directorySystem;
             _pathSystem = pathSystem;
             _diskSystem = diskSystem;
         }
@@ -24,11 +27,9 @@ namespace PlexRipper.DownloadManager
         {
             try
             {
-                var createDirectoryResult = _fileSystem.CreateDirectory(directory);
+                var createDirectoryResult = _directorySystem.CreateDirectory(directory);
                 if (createDirectoryResult.IsFailed)
-                {
-                    return createDirectoryResult;
-                }
+                    return createDirectoryResult.ToResult();
 
                 // TODO This might need to be determined sooner, like when adding downloadTasks
                 var availableSpace = _diskSystem.GetAvailableSpaceByDirectory(directory);

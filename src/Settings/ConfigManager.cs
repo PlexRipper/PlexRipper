@@ -13,6 +13,8 @@ namespace PlexRipper.Settings
 
         private readonly IFileSystem _fileSystem;
 
+        private readonly IDirectorySystem _directorySystem;
+
         private readonly IPathProvider _pathProvider;
 
         private readonly IUserSettings _userSettings;
@@ -28,9 +30,10 @@ namespace PlexRipper.Settings
 
         #region Constructor
 
-        public ConfigManager(IFileSystem fileSystem, IPathProvider pathProvider, IUserSettings userSettings)
+        public ConfigManager(IFileSystem fileSystem, IDirectorySystem directorySystem, IPathProvider pathProvider, IUserSettings userSettings)
         {
             _fileSystem = fileSystem;
+            _directorySystem = directorySystem;
             _pathProvider = pathProvider;
             _userSettings = userSettings;
         }
@@ -43,11 +46,32 @@ namespace PlexRipper.Settings
         {
             _userSettings.SettingsUpdated.Subscribe(_ => SaveConfig());
 
-            Log.Information($"Checking if {_pathProvider.ConfigFileName} exists at {_pathProvider.ConfigDirectory}");
+            Log.Information($"Checking if \"{_pathProvider.ConfigFileName}\" exists at \"{_pathProvider.ConfigDirectory}\"");
+
+            var configDirectoryExistsResult = _directorySystem.Exists(_pathProvider.ConfigDirectory);
+            if (configDirectoryExistsResult.IsFailed)
+                return configDirectoryExistsResult.LogFatal();
+
+            if (configDirectoryExistsResult.Value)
+            {
+                Log.Information($"Config directory exists, will use \"{_pathProvider.ConfigDirectory}\"");
+            }
+            else
+            {
+                Log.Information($"Config directory does not exist, will create now at \"{_pathProvider.ConfigDirectory}\".");
+                var createResult = _directorySystem.CreateDirectory(_pathProvider.ConfigDirectory);
+                if (createResult.IsFailed)
+                {
+                    Log.Fatal($"Failed to create config directory at \"{_pathProvider.ConfigDirectory}\"");
+                    return createResult.LogFatal();
+                }
+
+                Log.Debug($"Directory: \"{_pathProvider.ConfigDirectory}\" created!");
+            }
 
             if (!ConfigFileExists())
             {
-                Log.Information($"{_pathProvider.ConfigFileName} doesn't exist, will create new one now in {_pathProvider.ConfigDirectory}");
+                Log.Information($"\"{_pathProvider.ConfigFileName}\" doesn't exist, will create new one now in \"{_pathProvider.ConfigDirectory}\"");
                 return CreateConfigFile();
             }
 
@@ -115,12 +139,6 @@ namespace PlexRipper.Settings
             return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
         }
 
-        private Result WriteToConfigFile(string jsonSettingsString)
-        {
-            var writeResult = _fileSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString);
-            return writeResult.IsFailed ? writeResult.WithError("Failed to write save settings").LogError() : Result.Ok();
-        }
-
         public virtual bool ConfigFileExists()
         {
             return _fileSystem.FileExists(_pathProvider.ConfigFileLocation);
@@ -140,6 +158,12 @@ namespace PlexRipper.Settings
 
             var writeResult = WriteToConfigFile(settingsObject.Value);
             return writeResult.IsFailed ? writeResult.LogError() : Result.Ok();
+        }
+
+        private Result WriteToConfigFile(string jsonSettingsString)
+        {
+            var writeResult = _fileSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString);
+            return writeResult.IsFailed ? writeResult.WithError("Failed to write save settings").LogError() : Result.Ok();
         }
 
         #endregion

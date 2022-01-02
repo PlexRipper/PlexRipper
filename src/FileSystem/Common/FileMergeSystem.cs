@@ -10,9 +10,12 @@ namespace PlexRipper.FileSystem.Common
     {
         private readonly IFileSystem _fileSystem;
 
-        public FileMergeSystem(IFileSystem fileSystem)
+        private readonly IDirectorySystem _directorySystem;
+
+        public FileMergeSystem(IFileSystem fileSystem, IDirectorySystem directorySystem)
         {
             _fileSystem = fileSystem;
+            _directorySystem = directorySystem;
         }
 
         public bool FileExists(string path)
@@ -22,12 +25,12 @@ namespace PlexRipper.FileSystem.Common
 
         public Result DeleteDirectoryFromFilePath(string path)
         {
-            return _fileSystem.DeleteDirectoryFromFilePath(path);
+            return _directorySystem.DeleteDirectoryFromFilePath(path);
         }
 
         public Result DeleteAllFilesFromDirectory(string directory)
         {
-            return _fileSystem.DeleteAllFilesFromDirectory(directory);
+            return _directorySystem.DeleteAllFilesFromDirectory(directory);
         }
     }
 }

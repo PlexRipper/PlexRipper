@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Abstractions;
 using FluentResults;
 using PlexRipper.Application;
-using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.FileSystem
 {
@@ -34,5 +33,17 @@ namespace PlexRipper.FileSystem
             return _path.GetPathRoot(f.FullName);
         }
 
+        /// <inheritdoc/>
+        public Result<string> GetDirectoryName(string filePath)
+        {
+            try
+            {
+                return Result.Ok(Path.GetDirectoryName(filePath));
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e)).LogError();
+            }
+        }
     }
 }

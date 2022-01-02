@@ -22,34 +22,25 @@ namespace PlexRipper.FileSystem
 
         private readonly IDiskSystem _diskSystem;
 
+        private readonly IDirectorySystem _directorySystem;
+
         #endregion
 
         #region Constructor
 
         public FileSystem(IPathProvider pathProvider, System.IO.Abstractions.IFileSystem abstractedFileSystem, IDiskProvider diskProvider,
-            IDiskSystem diskSystem)
+            IDiskSystem diskSystem, IDirectorySystem directorySystem)
         {
             _pathProvider = pathProvider;
             _abstractedFileSystem = abstractedFileSystem;
             _diskProvider = diskProvider;
             _diskSystem = diskSystem;
+            _directorySystem = directorySystem;
         }
 
         #endregion
 
         #region Public Methods
-
-        public Result CreateDirectory(string directory)
-        {
-            try
-            {
-                return Result.Ok(_abstractedFileSystem.Directory.CreateDirectory(directory));
-            }
-            catch (Exception e)
-            {
-                return Result.Fail(new ExceptionalError(e)).LogError();
-            }
-        }
 
         public bool FileExists(string path)
         {
@@ -116,77 +107,6 @@ namespace PlexRipper.FileSystem
             }
         }
 
-        public Result CreateDirectoryFromFilePath(string filePath)
-        {
-            if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
-            {
-                return Result.Fail("parameter filepath was empty");
-            }
-
-            var directoryPath = _abstractedFileSystem.Path.GetDirectoryName(filePath) ?? string.Empty;
-            if (string.IsNullOrEmpty(directoryPath))
-            {
-                return Result.Fail($"Could not determine the directory name of path: {filePath}");
-            }
-
-            _abstractedFileSystem.Directory.CreateDirectory(directoryPath);
-            return Result.Ok();
-        }
-
-        /// <inheritdoc />
-        public Result DeleteAllFilesFromDirectory(string directory)
-        {
-            if (_abstractedFileSystem.Directory.Exists(directory))
-            {
-                var di = new DirectoryInfo(directory);
-
-                foreach (FileInfo file in di.GetFiles())
-                {
-                    file.Delete();
-                }
-
-                foreach (DirectoryInfo dir in di.GetDirectories())
-                {
-                    dir.Delete(true);
-                }
-
-                return Result.Ok();
-            }
-
-            return Result.Fail($"Directory: {directory} does not exist").LogError();
-        }
-
-        /// <inheritdoc />
-        public Result DeleteDirectoryFromFilePath(string filePath)
-        {
-            if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
-            {
-                return Result.Fail("Parameter filepath was empty").LogError();
-            }
-
-            try
-            {
-                var directory = _abstractedFileSystem.Path.GetDirectoryName(filePath) ?? string.Empty;
-
-                // If the filePath is just an empty directory then delete that.
-                if (!string.IsNullOrEmpty(directory) && _abstractedFileSystem.Directory.Exists(directory) &&
-                    !_abstractedFileSystem.Directory.GetFiles(directory).Any())
-                {
-                    _abstractedFileSystem.Directory.Delete(directory);
-                }
-                else
-                {
-                    return Result.Fail($"Could not determine the directory name of path: {filePath} or the path contains files").LogError();
-                }
-            }
-            catch (Exception e)
-            {
-                return Result.Fail(new ExceptionalError(e)).LogError();
-            }
-
-            return Result.Ok();
-        }
-
         public Result DeleteFile(string filePath)
         {
             try
@@ -202,10 +122,13 @@ namespace PlexRipper.FileSystem
 
         public Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
         {
-            Log.Debug("Looking up path: {query}");
+            Log.Debug($"Looking up path: {query}");
+            var directoryExistsResult = _directorySystem.Exists(query);
+            if (directoryExistsResult.IsFailed)
+                return directoryExistsResult.ToResult();
 
             // If path is invalid return root file system
-            if (string.IsNullOrWhiteSpace(query) || !_abstractedFileSystem.Directory.Exists(query))
+            if (string.IsNullOrWhiteSpace(query) || !directoryExistsResult.Value)
             {
                 return Result.Ok(new FileSystemResult
                 {
@@ -229,50 +152,6 @@ namespace PlexRipper.FileSystem
             return Result.Ok(new FileSystemResult());
         }
 
-        public Result<Stream> SaveFile(string directory, string fileName, long fileSize)
-        {
-            try
-            {
-                var fullPath = _abstractedFileSystem.Path.Combine(directory, fileName);
-                if (_abstractedFileSystem.Directory.Exists(fullPath))
-                {
-                    Log.Warning($"Path: {fullPath} already exists, will overwrite now");
-                }
-
-                _abstractedFileSystem.Directory.CreateDirectory(directory);
-
-                var availableSpace = _diskSystem.HasDirectoryEnoughAvailableSpace(directory, fileSize);
-                if (availableSpace.IsFailed)
-                {
-                    return availableSpace.LogError();
-                }
-
-                var createResult = Create(fullPath, 4096, FileOptions.Asynchronous);
-                if (createResult.IsFailed)
-                {
-                    return createResult.ToResult().LogError();
-                }
-
-                Stream fileStream = createResult.Value;
-
-                // Pre-allocate the required file size
-                fileStream.SetLength(fileSize);
-
-                return Result.Ok(fileStream);
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-                throw;
-            }
-        }
-
-        public Result Setup()
-        {
-            Log.Information("Setting up File System Service");
-            return CreateConfigDirectory();
-        }
-
         public string ToAbsolutePath(string relativePath)
         {
             return _abstractedFileSystem.Path.GetFullPath(_abstractedFileSystem.Path.Combine(_pathProvider.RootDirectory, relativePath));
@@ -294,32 +173,6 @@ namespace PlexRipper.FileSystem
         #endregion
 
         #region Private Methods
-
-        private Result CreateConfigDirectory()
-        {
-            try
-            {
-                if (!_abstractedFileSystem.Directory.Exists(_pathProvider.ConfigDirectory))
-                {
-                    Log.Debug("Config directory doesn't exist, will create now.");
-
-                    _abstractedFileSystem.Directory.CreateDirectory(_pathProvider.ConfigDirectory);
-
-                    Log.Debug($"Directory: \"{_pathProvider.ConfigDirectory}\" created!");
-                }
-                else
-                {
-                    Log.Debug("Config directory exists!");
-                }
-
-                return Result.Ok();
-            }
-            catch (Exception e)
-            {
-                Log.Fatal(e);
-                return Result.Fail(new ExceptionalError(e));
-            }
-        }
 
         private List<FileSystemModel> GetDrives()
         {

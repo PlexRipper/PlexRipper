@@ -18,11 +18,14 @@ namespace PlexRipper.Data
 
         private readonly IFileSystem _fileSystem;
 
-        public PlexRipperDatabaseService(PlexRipperDbContext dbContext, IPathProvider pathProvider, IFileSystem fileSystem)
+        private readonly IDirectorySystem _directorySystem;
+
+        public PlexRipperDatabaseService(PlexRipperDbContext dbContext, IPathProvider pathProvider, IFileSystem fileSystem, IDirectorySystem directorySystem)
         {
             _dbContext = dbContext;
             _pathProvider = pathProvider;
             _fileSystem = fileSystem;
+            _directorySystem = directorySystem;
         }
 
         public Result BackUpDatabase()
@@ -39,7 +42,7 @@ namespace PlexRipper.Data
 
             try
             {
-                _fileSystem.CreateDirectoryFromFilePath(dbBackUpPath);
+                _directorySystem.CreateDirectoryFromFilePath(dbBackUpPath);
 
                 // Wait until the database is available.
                 StreamExtensions.WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();

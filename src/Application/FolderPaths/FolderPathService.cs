@@ -11,9 +11,12 @@ namespace PlexRipper.Application
     {
         private readonly IMediator _mediator;
 
-        public FolderPathService(IMediator mediator)
+        private readonly IDirectorySystem _directorySystem;
+
+        public FolderPathService(IMediator mediator, IDirectorySystem directorySystem)
         {
             _mediator = mediator;
+            _directorySystem = directorySystem;
         }
 
         public Task<Result<List<FolderPath>>> GetAllFolderPathsAsync()
@@ -82,7 +85,7 @@ namespace PlexRipper.Application
             if (folderPaths.IsFailed)
                 return folderPaths.ToResult();
 
-            var dict = new Dictionary<PlexMediaType, FolderPath>()
+            var dict = new Dictionary<PlexMediaType, FolderPath>
             {
                 { PlexMediaType.Movie, folderPaths.Value.FirstOrDefault(x => x.Id == 2) },
                 { PlexMediaType.TvShow, folderPaths.Value.FirstOrDefault(x => x.Id == 3) },
@@ -115,15 +118,22 @@ namespace PlexRipper.Application
             }
 
             var errors = new List<Error>();
-            folderPaths.Value.ForEach(folderPath =>
+            foreach (var folderPath in folderPaths.Value)
             {
-                if (folderPath.MediaType == mediaType && !folderPath.IsValid())
+                var folderPathExitsResult = _directorySystem.Exists(folderPath.DirectoryPath);
+                if (folderPathExitsResult.IsFailed)
                 {
-                    errors.Add(new Error($"The {folderPath.DisplayName} is not a valid directory"));
+                    errors.AddRange(folderPathExitsResult.Errors);
+                    continue;
                 }
-            });
 
-            return errors.Count > 0 ? new Result().WithErrors(errors) : Result.Ok();
+                if (folderPath.MediaType == mediaType && !folderPathExitsResult.Value)
+                {
+                    errors.Add(new Error($"The {folderPath.DisplayName} is not a valid or existing directory"));
+                }
+            }
+
+            return errors.Count > 0 ? new Result().WithErrors(errors).LogError() : Result.Ok();
         }
     }
 }

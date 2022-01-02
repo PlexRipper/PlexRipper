@@ -66,6 +66,7 @@ namespace PlexRipper.Domain
         /// <returns>If the check is successful.</returns>
         public bool IsValid()
         {
+            // TODO This is only here for the mapping to FolderPathDTO and should not be directly accessing Directory.Exists but use the DirectorySystem
             return Directory.Exists(DirectoryPath);
         }
 

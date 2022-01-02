@@ -1,17 +1,18 @@
-name: Publish Docker image on push 'dev' branch
-'on':
-  push:
-    branches:
-      - dev
+name: Publish Docker image on prerelease to 'dev' tag
+on:
+  release:
+    types: [published]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
       - name: Publish to Registry
+        pre: echo ::save-state name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
           name: plexripper/plexripper
           username: '${{ secrets.DOCKER_USERNAME }}'
           password: '${{ secrets.DOCKER_PASSWORD }}'
-          tags: "dev"
+          tags: "dev,${{ env.STATE_RELEASE_VERSION }}"

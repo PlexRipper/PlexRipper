@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Timers;
 using Logging;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
@@ -29,6 +31,8 @@ namespace WebAPI.IntegrationTests.DownloadController
         public async Task ShouldDownloadAllTvShowEpisodes_WhenValidEpisodesAreAdded()
         {
             // Arrange
+            var timer = new Stopwatch();
+            timer.Start();
             var config = new UnitTestDataConfig
             {
                 Seed = 4564,
@@ -78,6 +82,8 @@ namespace WebAPI.IntegrationTests.DownloadController
             result.IsSuccess.ShouldBeTrue();
 
             // ** 4 streams per download client should be created
+            timer.Stop();
+            Log.Information($"Test took: {timer.Elapsed}");
             var downloadTasks = await container.PlexRipperDbContext.DownloadTasks.ToListAsync();
             downloadTasks.Count.ShouldBe(7);
             foreach (var downloadTask in downloadTasks)

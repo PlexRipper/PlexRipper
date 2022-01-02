@@ -1,0 +1,37 @@
+name: Create RC Release
+
+on:
+  push:
+    tags:
+      - "*-rc*"
+
+jobs:
+  # Create RC Release first
+  release:
+    name: "Creating Release"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+  # Build Docker Image
+  build:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Publish to Docker with version tag
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: plexripper/plexripper
+          username: "${{ secrets.DOCKER_USERNAME }}"
+          password: "${{ secrets.DOCKER_PASSWORD }}"
+          tag_names: true
+      - name: Publish to Registry with dev tag
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: plexripper/plexripper
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          tags: "dev"

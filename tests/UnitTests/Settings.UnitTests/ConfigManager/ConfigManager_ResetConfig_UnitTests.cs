@@ -29,6 +29,7 @@ namespace Settings.UnitTests
             var sut = new Mock<ConfigManager>(
                 MockBehavior.Strict,
                 mock.Container.Resolve<IFileSystem>(),
+                mock.Container.Resolve<IDirectorySystem>(),
                 mock.Container.Resolve<IPathProvider>(),
                 mock.Container.Resolve<IUserSettings>());
             sut.Setup(x => x.SaveConfig()).Returns(Result.Ok);

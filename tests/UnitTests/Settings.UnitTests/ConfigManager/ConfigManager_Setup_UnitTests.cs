@@ -29,11 +29,12 @@ namespace Settings.UnitTests
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/TEST_PlexRipperSettings.json");
-
+            mock.Mock<IDirectorySystem>().Setup(x => x.Exists(It.IsAny<string>())).Returns(Result.Ok(true));
 
             var sut = new Mock<ConfigManager>(
                 MockBehavior.Strict,
                 mock.Container.Resolve<IFileSystem>(),
+                mock.Container.Resolve<IDirectorySystem>(),
                 mock.Container.Resolve<IPathProvider>(),
                 mock.Container.Resolve<IUserSettings>());
             sut.Setup(x => x.ConfigFileExists()).Returns(true);
@@ -59,11 +60,13 @@ namespace Settings.UnitTests
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_PlexRipperSettings.json");
             mock.Mock<IUserSettings>().Setup(x => x.GetJsonSettingsObject()).Returns(Result.Ok());
             mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok);
-
+            mock.Mock<IDirectorySystem>().Setup(x => x.Exists(It.IsAny<string>())).Returns(Result.Ok(false));
+            mock.Mock<IDirectorySystem>().Setup(x => x.CreateDirectory(It.IsAny<string>())).Returns(Result.Ok());
 
             var sut = new Mock<ConfigManager>(
                 MockBehavior.Strict,
                 mock.Container.Resolve<IFileSystem>(),
+                mock.Container.Resolve<IDirectorySystem>(),
                 mock.Container.Resolve<IPathProvider>(),
                 mock.Container.Resolve<IUserSettings>());
             sut.Setup(x => x.ConfigFileExists()).Returns(false);

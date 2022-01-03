@@ -85,7 +85,7 @@ namespace PlexRipper.DownloadManager
             var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true));
             if (downloadTaskResult.IsFailed)
             {
-                return downloadTaskResult.ToResult();
+                return downloadTaskResult.ToResult().LogError();
             }
 
             return await CreateDownloadClient(downloadTaskResult.Value);
@@ -97,7 +97,7 @@ namespace PlexRipper.DownloadManager
                 return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
 
             if (!downloadTask.IsDownloadable)
-                return Result.Fail($"DownloadTask {downloadTask.FullTitle} is not downloadable").LogWarning();
+                return Result.Fail($"DownloadTask({downloadTask.Id}) {downloadTask.FullTitle} is not downloadable").LogWarning();
 
             Log.Debug($"Creating Download client for {downloadTask.FullTitle}");
 
@@ -228,6 +228,18 @@ namespace PlexRipper.DownloadManager
 
             return downloadClient.Value.DownloadStatus is DownloadStatus.Downloading;
         }
+
+        public Result<Task> GetDownloadProcessTask(int downloadTaskId)
+        {
+            var downloadClient = GetDownloadClient(downloadTaskId);
+            if (downloadClient.IsFailed)
+            {
+                return downloadClient.ToResult();
+            }
+
+            return Result.Ok(downloadClient.Value.DownloadProcessTask);
+        }
+
 
         #endregion
 

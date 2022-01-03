@@ -1,5 +1,6 @@
 ﻿using PlexRipper.Application;
 using PlexRipper.Domain;
+using PlexRipper.DownloadManager;
 
 namespace PlexRipper.BaseTests
 {
@@ -61,6 +62,8 @@ namespace PlexRipper.BaseTests
         #region Mocks
 
         public IFileSystem MockFileSystem { get; init; }
+
+        public IDownloadSubscriptions MockDownloadSubscriptions { get; init; }
 
         #endregion
 

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.Config;
 using PlexRipper.Data;
+using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
 
 namespace PlexRipper.BaseTests
@@ -13,12 +14,9 @@ namespace PlexRipper.BaseTests
     {
         private readonly UnitTestDataConfig _config;
 
-        private readonly PlexRipperDbContext _dbContext;
-
-        public PlexRipperWebApplicationFactory(PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
+        public PlexRipperWebApplicationFactory(UnitTestDataConfig config = null)
         {
             _config = config ?? new UnitTestDataConfig();
-            _dbContext = dbContext;
         }
 
         protected override IHostBuilder CreateHostBuilder()
@@ -51,6 +49,11 @@ namespace PlexRipper.BaseTests
             if (_config.MockFileSystem is not null)
             {
                 builder.RegisterInstance(_config.MockFileSystem).As<IFileSystem>();
+            }
+
+            if (_config.MockDownloadSubscriptions is not null)
+            {
+                builder.RegisterInstance(_config.MockDownloadSubscriptions).As<IDownloadSubscriptions>();
             }
         }
     }

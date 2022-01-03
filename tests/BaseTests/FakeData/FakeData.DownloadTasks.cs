@@ -25,8 +25,9 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.Percentage, _ => 0)
                 .RuleFor(x => x.DownloadSpeed, _ => 0)
                 .RuleFor(x => x.DownloadWorkerTasks, _ => new())
-                .RuleFor(x => x.FileName, f => f.System.FileName() + ".mp4")
-                .RuleFor(x => x.FileLocationUrl, f => f.System.FilePath())
+                .RuleFor(x => x.FileName, _ => "file.mp4")
+                .RuleFor(x => x.FileLocationUrl, _ => PlexMockServerConfig.FileUrl)
+                .RuleFor(x => x.DownloadUrl, f => config.MockServerConfig?.DownloadUri.ToString() ?? f.Internet.Url())
                 .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
                 .RuleFor(x => x.DestinationDirectory, f => f.System.FilePath())
                 .RuleFor(x => x.ParentId, _ => null)
@@ -59,7 +60,6 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.MediaType, PlexMediaType.Movie)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
                 .RuleFor(x => x.Children, _ => GetMovieDataDownloadTask(config).Generate(1))
-                .RuleFor(x => x.DownloadUrl, f => f.Internet.Url())
                 .RuleFor(x => x.DownloadFolderId, _ => 1)
                 .RuleFor(x => x.DestinationFolderId, _ => 2)
                 .FinishWith((_, downloadTask) =>
@@ -80,8 +80,7 @@ namespace PlexRipper.BaseTests
                 .ApplyBaseDownloadTask(config)
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.MediaType, PlexMediaType.Movie)
-                .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
-                .RuleFor(x => x.DownloadUrl, f => f.Internet.Url());
+                .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.MovieData);
         }
 
         #endregion
@@ -123,7 +122,7 @@ namespace PlexRipper.BaseTests
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.MediaType, PlexMediaType.Episode)
                 .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode)
-                .RuleFor(x => x.DownloadUrl, f => f.Internet.Url())
+                .RuleFor(x => x.DownloadUrl, _ => "")
                 .RuleFor(x => x.Children, _ => GetTvShowEpisodeDataDownloadTask(config).Generate(1));
         }
 
@@ -135,8 +134,7 @@ namespace PlexRipper.BaseTests
                 .ApplyBaseDownloadTask(config)
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.MediaType, PlexMediaType.Episode)
-                .RuleFor(x => x.DownloadUrl, f => f.Internet.Url())
-                .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode);
+                .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.EpisodeData);
         }
 
         #endregion
@@ -159,7 +157,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PartIndex, _ => partIndex++)
                 .RuleFor(x => x.TempDirectory, f => f.System.FilePath())
                 .RuleFor(x => x.ElapsedTime, 0)
-                .RuleFor(x => x.DownloadUrl, f => f.System.FilePath())
+                .RuleFor(x => x.DownloadUrl, f => config.MockServerConfig?.DownloadUri.ToString() ?? f.Internet.Url())
                 .RuleFor(x => x.DownloadStatus, DownloadStatus.Queued)
                 .RuleFor(x => x.DownloadTaskId, _ => 0)
                 .RuleFor(x => x.DownloadTask, _ => null)

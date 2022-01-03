@@ -9,6 +9,9 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager
 {
+    /// <summary>
+    /// Used to convert batch commands to smaller single commands for the <see cref="DownloadTracker"/>
+    /// </summary>
     public class DownloadCommands : IDownloadCommands
     {
         #region Fields
@@ -16,8 +19,6 @@ namespace PlexRipper.DownloadManager
         private readonly IDownloadQueue _downloadQueue;
 
         private readonly IDownloadTracker _downloadTracker;
-
-        private readonly IFileSystem _fileSystem;
 
         private readonly IDirectorySystem _directorySystem;
 
@@ -29,8 +30,6 @@ namespace PlexRipper.DownloadManager
 
         private readonly IDownloadTaskFactory _downloadTaskFactory;
 
-        private readonly IDownloadProgressScheduler _downloadProgressScheduler;
-
         #endregion
 
         #region Constructor
@@ -39,22 +38,18 @@ namespace PlexRipper.DownloadManager
             IMediator mediator,
             IDownloadTracker downloadTracker,
             IDownloadQueue downloadQueue,
-            IFileSystem fileSystem,
             IDirectorySystem directorySystem,
             INotificationsService notificationsService,
             IDownloadScheduler downloadScheduler,
-            IDownloadTaskFactory downloadTaskFactory,
-            IDownloadProgressScheduler downloadProgressScheduler)
+            IDownloadTaskFactory downloadTaskFactory)
         {
             _mediator = mediator;
             _downloadTracker = downloadTracker;
             _downloadQueue = downloadQueue;
-            _fileSystem = fileSystem;
             _directorySystem = directorySystem;
             _notificationsService = notificationsService;
             _downloadScheduler = downloadScheduler;
             _downloadTaskFactory = downloadTaskFactory;
-            _downloadProgressScheduler = downloadProgressScheduler;
         }
 
         #endregion

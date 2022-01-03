@@ -26,5 +26,11 @@ namespace PlexRipper.Domain
 
         [EnumMember(Value = "EpisodePart")]
         EpisodePart = 6,
+
+        [EnumMember(Value = "MovieData")]
+        MovieData = 7,
+
+        [EnumMember(Value = "EpisodeData")]
+        EpisodeData = 8,
     }
 }

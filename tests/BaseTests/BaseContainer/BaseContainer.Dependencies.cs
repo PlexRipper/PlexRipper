@@ -28,10 +28,10 @@ namespace PlexRipper.BaseTests
         /// <summary>
         /// Creates a Autofac container and sets up a test database.
         /// </summary>
-        private BaseContainer(PlexRipperDbContext dbContext, PlexMockServer mockServer = null, UnitTestDataConfig config = null)
+        private BaseContainer(PlexMockServer mockServer = null, UnitTestDataConfig config = null)
         {
             _mockServer = mockServer;
-            _factory = new PlexRipperWebApplicationFactory<Startup>(dbContext, config);
+            _factory = new PlexRipperWebApplicationFactory<Startup>(config);
             ApiClient = _factory.CreateClient();
         }
 
@@ -51,8 +51,16 @@ namespace PlexRipper.BaseTests
                 config.MockServerConfig.ServerUri = mockServer.ServerUri;
             }
 
-            var dbContext = await MockDatabase.GetMemoryDbContext(config.MemoryDbName).Setup(config);
-            return new BaseContainer(dbContext, mockServer, config);
+            // Database context can be setup once and then retrieved by its DB name.
+            await MockDatabase.GetMemoryDbContext(config.MemoryDbName).Setup(config);
+            var container = new BaseContainer(mockServer, config);
+
+            if (config.DownloadSpeedLimit > 0)
+            {
+                await container.SetDownloadSpeedLimit(config);
+            }
+
+            return container;
         }
 
         #endregion
@@ -100,6 +108,8 @@ namespace PlexRipper.BaseTests
         public ITestApplicationTracker TestApplicationTracker => Resolve<ITestApplicationTracker>();
 
         public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
+
+        public IDownloadScheduler DownloadScheduler => Resolve<IDownloadScheduler>();
 
         #endregion
 

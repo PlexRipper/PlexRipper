@@ -10,7 +10,6 @@ namespace PlexRipper.DownloadManager
     {
         private readonly IDownloadTracker _downloadTracker;
 
-
         public DownloadJob(IDownloadTracker downloadTracker)
         {
             _downloadTracker = downloadTracker;
@@ -22,6 +21,13 @@ namespace PlexRipper.DownloadManager
             var downloadTaskId = dataMap.GetIntValue("downloadTaskId");
             Log.Debug($"Executing job: {nameof(DownloadJob)} for {nameof(DownloadTask)}: {downloadTaskId}");
             await _downloadTracker.StartDownloadClient(downloadTaskId);
+
+            // while (context.CancellationToken.IsCancellationRequested == false)
+            // {
+            //     // Extension method so we catch TaskCancelled exceptions.
+            //     await TaskDelay.Wait(1000, cancellationToken);
+            //     Console.WriteLine("keep rollin, rollin, rollin...");
+            // }
         }
     }
 }

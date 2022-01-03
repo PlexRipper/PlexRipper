@@ -379,10 +379,12 @@ namespace PlexRipper.Domain
             {
                 "None" => DownloadTaskType.None,
                 "Movie" => DownloadTaskType.Movie,
+                "MovieData" => DownloadTaskType.MovieData,
                 "MoviePart" => DownloadTaskType.MoviePart,
                 "TvShow" => DownloadTaskType.TvShow,
                 "Season" => DownloadTaskType.Season,
                 "Episode" => DownloadTaskType.Episode,
+                "EpisodeData" => DownloadTaskType.EpisodeData,
                 "EpisodePart" => DownloadTaskType.EpisodePart,
                 _ => DefaultException(),
             };
@@ -406,10 +408,12 @@ namespace PlexRipper.Domain
             {
                 DownloadTaskType.None => "None",
                 DownloadTaskType.Movie => "Movie",
+                DownloadTaskType.MovieData => "MovieData",
                 DownloadTaskType.MoviePart => "MoviePart",
                 DownloadTaskType.TvShow => "TvShow",
                 DownloadTaskType.Season => "Season",
                 DownloadTaskType.Episode => "Episode",
+                DownloadTaskType.EpisodeData => "EpisodeData",
                 DownloadTaskType.EpisodePart => "EpisodePart",
                 _ => DefaultException(),
             };

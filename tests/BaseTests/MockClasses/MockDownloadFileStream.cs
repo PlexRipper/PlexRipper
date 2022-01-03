@@ -16,7 +16,6 @@ namespace PlexRipper.BaseTests
 
         public Result<Stream> CreateDownloadFileStream(string directory, string fileName, long fileSize)
         {
-            Log.Debug("In memory download stream is created");
             var stream = new MemoryStream();
             _testStreamTracker.AddDownloadFileStream(stream);
             return Result.Ok((Stream)stream);

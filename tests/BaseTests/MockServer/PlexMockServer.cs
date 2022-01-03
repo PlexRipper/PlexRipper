@@ -12,8 +12,6 @@ namespace PlexRipper.BaseTests
 
         #region Fields
 
-        public const string FileUrl = "/library/parts/65125/1193813456/file.mp4";
-
         private readonly byte[] _downloadFile = { };
 
         #endregion
@@ -31,7 +29,7 @@ namespace PlexRipper.BaseTests
 
             Server = WireMockServer.Start();
             ServerUri = new Uri(Server.Urls[0]);
-            GetDownloadUri = new Uri($"{Server.Urls[0]}{FileUrl}");
+            GetDownloadUri = new Uri($"{Server.Urls[0]}{PlexMockServerConfig.FileUrl}");
 
             Setup(config);
         }
@@ -55,7 +53,7 @@ namespace PlexRipper.BaseTests
             if (_downloadFile?.Any() ?? false)
             {
                 Server
-                    .Given(Request.Create().WithPath(FileUrl).UsingGet())
+                    .Given(Request.Create().WithPath(PlexMockServerConfig.FileUrl).UsingGet())
                     .RespondWith(
                         Response.Create()
                             .WithStatusCode(206)

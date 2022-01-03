@@ -162,16 +162,11 @@ namespace PlexRipper.Domain
         /// e.g. A episode or movie part, an episode or movie without parts.
         /// </summary>
         public bool IsDownloadable =>
-            IsDownloadTaskPart()
-            || DownloadTaskType is DownloadTaskType.Episode && !Children.Any()
-            || DownloadTaskType is DownloadTaskType.Movie && !Children.Any();
-
-        public bool IsDownloadTaskPart()
-        {
-            return DownloadTaskType
+            DownloadTaskType
                 is DownloadTaskType.EpisodePart
-                or DownloadTaskType.MoviePart;
-        }
+                or DownloadTaskType.MoviePart
+                or DownloadTaskType.EpisodeData
+                or DownloadTaskType.MovieData;
 
         /// <summary>
         /// Calculate properties such as DataReceived, DataTotal based on the nested children.

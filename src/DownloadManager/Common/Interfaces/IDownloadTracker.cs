@@ -37,5 +37,7 @@ namespace PlexRipper.DownloadManager
         Task<Result> StopDownloadClient(int downloadTaskId);
 
         #endregion
+
+        Result<Task> GetDownloadProcessTask(int downloadTaskId);
     }
 }

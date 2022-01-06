@@ -97,8 +97,6 @@ namespace PlexRipper.BaseTests
 
         public IPlexServerService GetPlexServerService => Resolve<IPlexServerService>();
 
-        public IUserSettings GetUserSettings => Resolve<IUserSettings>();
-
         public IMediator Mediator => Resolve<IMediator>();
 
         public IPathProvider PathProvider => Resolve<IPathProvider>();
@@ -110,6 +108,14 @@ namespace PlexRipper.BaseTests
         public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
 
         public IDownloadScheduler DownloadScheduler => Resolve<IDownloadScheduler>();
+
+        #region Settings
+
+        public IUserSettings GetUserSettings => Resolve<IUserSettings>();
+
+        public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
+
+        #endregion
 
         #endregion
 

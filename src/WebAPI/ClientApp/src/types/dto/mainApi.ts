@@ -532,7 +532,7 @@ export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStat
 export type ResultDTOOfSettingsModelDTO = ResultDTO & { value: SettingsModelDTO };
 
 export interface SettingsModelDTO {
-	firstTimeSetup: boolean;
+	generalSettings: IGeneralSettingsModule;
 
 	/** @format int32 */
 	activeAccountId: number;
@@ -552,6 +552,10 @@ export interface SettingsModelDTO {
 	timeZone: string;
 	showRelativeDates: boolean;
 	language: string;
+}
+
+export interface IGeneralSettingsModule {
+	firstTimeSetup?: boolean;
 }
 
 export interface DownloadSpeedLimitModel {
@@ -666,4 +670,8 @@ export interface SyncServerProgress {
 	/** @format decimal */
 	percentage: number;
 	libraryProgresses: LibraryProgress[];
+}
+
+export interface GeneralSettingsModuleDTO {
+	firstTimeSetup: boolean;
 }

@@ -5,6 +5,8 @@ using FluentResults;
 using PlexRipper.Application;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
+using PlexRipper.Settings.Models;
+using PlexRipper.Settings.Modules;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
@@ -160,7 +162,12 @@ namespace PlexRipper.WebAPI.Config
 
         private void SettingsMappings()
         {
-            CreateMap<ISettingsModel, SettingsModelDTO>(MemberList.Destination).ReverseMap();
+            CreateMap<ISettingsModel, SettingsModelDTO>(MemberList.Destination)
+                .ForMember(dto => dto.GeneralSettings, entity => entity.MapFrom(x => x.GeneralSettings));
+
+            CreateMap<SettingsModelDTO, SettingsModel>();
+            CreateMap<GeneralSettingsDTO, GeneralSettingsModule>().ReverseMap();
+            CreateMap<GeneralSettingsDTO, IGeneralSettingsModule>().ReverseMap();
         }
     }
 }

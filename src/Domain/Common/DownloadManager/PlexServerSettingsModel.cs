@@ -1,6 +1,6 @@
 ﻿namespace PlexRipper.Domain.DownloadManager
 {
-    public class DownloadSpeedLimitModel
+    public class PlexServerSettingsModel
     {
         public int PlexServerId { get; set; }
 

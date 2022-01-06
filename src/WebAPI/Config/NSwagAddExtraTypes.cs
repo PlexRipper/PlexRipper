@@ -6,6 +6,7 @@ using NSwag.Generation.Processors.Contexts;
 using PlexRipper.Application;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
+using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Config
@@ -32,6 +33,7 @@ namespace PlexRipper.WebAPI.Config
                 typeof(SyncServerProgress),
                 typeof(DownloadProgressDTO),
                 typeof(ServerDownloadProgressDTO),
+                typeof(GeneralSettingsDTO),
             };
 
             foreach (Type type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))

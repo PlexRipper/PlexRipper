@@ -6,10 +6,10 @@ using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
-    public class SettingsModelDTO : ISettingsModel
+    public class SettingsModelDTO
     {
         [JsonProperty(Required = Required.Always)]
-        public bool FirstTimeSetup { get; set; }
+        public GeneralSettingsDTO GeneralSettings { get; set; }
 
         [JsonProperty(Required = Required.Always)]
         public int ActiveAccountId { get; set; }
@@ -18,7 +18,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         public int DownloadSegments { get; set; }
 
         [JsonProperty(Required = Required.Always)]
-        public List<DownloadSpeedLimitModel> DownloadSpeedLimit { get; set; }
+        public List<PlexServerSettingsModel> DownloadSpeedLimit { get; set; }
 
         [JsonProperty(Required = Required.Always)]
         public bool AskDownloadMovieConfirmation { get; set; }

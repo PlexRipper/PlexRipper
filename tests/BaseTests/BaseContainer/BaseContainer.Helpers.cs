@@ -13,7 +13,7 @@ namespace PlexRipper.BaseTests
             var plexServers = await PlexRipperDbContext.PlexServers.ToListAsync();
             foreach (var plexServer in plexServers)
             {
-                GetUserSettings.SetDownloadSpeedLimit(new DownloadSpeedLimitModel
+                GetServerSettings.AddServerToSettings(new PlexServerSettingsModel
                 {
                     PlexServerId = plexServer.Id,
                     MachineIdentifier = plexServer.MachineIdentifier,

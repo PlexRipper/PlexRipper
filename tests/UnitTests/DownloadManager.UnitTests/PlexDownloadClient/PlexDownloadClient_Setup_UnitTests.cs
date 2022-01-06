@@ -73,7 +73,7 @@ namespace DownloadManager.UnitTests
             mock.SetupMediator(It.IsAny<AddDownloadWorkerTasksCommand>).ReturnsAsync(Result.Ok());
             mock.Mock<IUserSettings>().SetupGet(x => x.DownloadSegments).Returns(4);
             mock.Mock<IUserSettings>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<int>())).Returns(4000);
-            mock.Mock<IUserSettings>().SetupGet(x => x.DownloadSpeedLimitUpdated).Returns(new Subject<DownloadSpeedLimitModel>().AsObservable());
+            mock.Mock<IUserSettings>().SetupGet(x => x.DownloadSpeedLimitUpdated).Returns(new Subject<PlexServerSettingsModel>().AsObservable());
 
             var downloadTask = context.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
 

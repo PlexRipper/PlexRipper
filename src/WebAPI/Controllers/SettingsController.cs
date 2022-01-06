@@ -43,11 +43,28 @@ namespace PlexRipper.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
         public IActionResult UpdateSettings([FromBody] SettingsModelDTO settingsModelDto)
         {
-            var updateResult = _userSettings.UpdateSettings(settingsModelDto);
-            if (updateResult.IsFailed)
-                return ToActionResult(updateResult.ToResult());
+            // var updateResult = _userSettings.UpdateSettings(settingsModelDto);
+            // if (updateResult.IsFailed)
+            //     return ToActionResult(updateResult.ToResult());
+            //
+            return Ok();
 
-            return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok((ISettingsModel)_userSettings));
+            // return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok((ISettingsModel)_userSettings));
+        }
+
+        // PUT api/<SettingsController>/
+        [HttpPut("General")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<GeneralSettingsDTO>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+        public IActionResult UpdateGeneralSettings([FromBody] GeneralSettingsDTO settingsModelDto)
+        {
+            // var updateResult = _userSettings.UpdateSettings(settingsModelDto);
+            // if (updateResult.IsFailed)
+            //     return ToActionResult(updateResult.ToResult());
+            //
+            // return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok((ISettingsModel)_userSettings));
+            return Ok();
         }
 
         // GET api/<SettingsController>/ResetDb

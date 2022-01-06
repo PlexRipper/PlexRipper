@@ -32,7 +32,7 @@ namespace Settings.UnitTests.UserSettings
             // Assert
             updateResult.IsSuccess.ShouldBeTrue();
 
-            sut.FirstTimeSetup.ShouldBe(settingsModel.FirstTimeSetup);
+           // sut.FirstTimeSetup.ShouldBe(settingsModel.FirstTimeSetup);
             sut.ActiveAccountId.ShouldBe(settingsModel.ActiveAccountId);
             sut.DownloadSegments.ShouldBe(settingsModel.DownloadSegments);
 

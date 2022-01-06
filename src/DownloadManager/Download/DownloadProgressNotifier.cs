@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Domain.Converters;
+using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager
 {

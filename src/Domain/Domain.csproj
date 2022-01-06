@@ -26,4 +26,8 @@
     <ProjectReference Include="..\FluentResultExtensions\FluentResultExtensions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Common\AutoMapper" />
+  </ItemGroup>
+
 </Project>

@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace PlexRipper.Domain.Converters
+namespace PlexRipper.Domain
 {
     public static class HashGenerator
     {

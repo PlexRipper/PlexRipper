@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.Domain.Converters
+namespace PlexRipper.Domain
 {
     public class ViewModeConverter : JsonConverter<ViewMode>
     {

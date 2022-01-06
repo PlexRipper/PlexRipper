@@ -1,7 +1,7 @@
 ﻿using System;
 using AutoMapper;
 
-namespace PlexRipper.Domain.AutoMapper
+namespace PlexRipper.Domain.Config.AutoMapper
 {
     /// <summary>
     /// Contains all generic primitive mappings and entity mappings.

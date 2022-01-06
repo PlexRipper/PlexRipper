@@ -3,8 +3,11 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Logging;
 
-namespace PlexRipper.Domain.Converters
+namespace PlexRipper.Domain
 {
+    /// <summary>
+    /// TODO Implement this as the default converter.
+    /// </summary>
     public class FastJsonStringEnumConverter : JsonConverterFactory
     {
         private readonly JsonNamingPolicy namingPolicy;

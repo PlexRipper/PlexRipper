@@ -17,6 +17,8 @@ namespace PlexRipper.DownloadManager
 
         private readonly IFolderPathService _folderPathService;
 
+        private readonly IPathSystem _pathSystem;
+
         private readonly IMapper _mapper;
 
         private readonly IMediator _mediator;
@@ -34,13 +36,15 @@ namespace PlexRipper.DownloadManager
             IMapper mapper,
             IPlexAuthenticationService plexAuthenticationService,
             INotificationsService notificationsService,
-            IFolderPathService folderPathService)
+            IFolderPathService folderPathService,
+            IPathSystem pathSystem)
         {
             _mediator = mediator;
             _mapper = mapper;
             _plexAuthenticationService = plexAuthenticationService;
             _notificationsService = notificationsService;
             _folderPathService = folderPathService;
+            _pathSystem = pathSystem;
         }
 
         #endregion
@@ -262,6 +266,7 @@ namespace PlexRipper.DownloadManager
                     x.PlexServer = season.PlexServer;
                     x.PlexLibrary = season.PlexLibrary;
                 });
+
                 // Create episodes downloadTasks
                 var episodesIds = season.Episodes.Select(x => x.Id).ToList();
                 var seasonsResult = await GenerateTvShowEpisodesDownloadTasksAsync(episodesIds, downloadTasks, season.Episodes);
@@ -575,22 +580,7 @@ namespace PlexRipper.DownloadManager
                 return Result.Fail("DownloadTask had an invalid DownloadFolder value");
 
             var basePath = downloadTask.DownloadFolder.DirectoryPath;
-
-            var parent = downloadTask.Parent;
-            switch (downloadTask.MediaType)
-            {
-                case PlexMediaType.Movie:
-                    return Result.Ok(Path.Join(basePath, "Movies", $"{downloadTask.Title} ({downloadTask.Year})"));
-                case PlexMediaType.TvShow:
-                    return Result.Ok(Path.Join(basePath, "TvShows", $"{downloadTask.Title} ({downloadTask.Year})"));
-                case PlexMediaType.Season:
-                    return Result.Ok(Path.Join(basePath, "TvShows", $"{parent.Title} ({parent.Year})", downloadTask.Title));
-                case PlexMediaType.Episode:
-                    var grandParent = downloadTask.Parent?.Parent;
-                    return Result.Ok(Path.Join(basePath, "TvShows", $"{grandParent.Title} ({grandParent.Year})", parent.Title));
-                default:
-                    return Result.Ok(Path.Join(basePath, "Other", $"{downloadTask.Title} ({downloadTask.Year})"));
-            }
+            return GetMediaTypeDirectory(downloadTask, basePath);
         }
 
         private Result<string> GetDestinationDirectory(DownloadTask downloadTask)
@@ -599,21 +589,28 @@ namespace PlexRipper.DownloadManager
                 return Result.Fail("DownloadTask had an invalid DestinationFolder value");
 
             var basePath = downloadTask.DestinationFolder.DirectoryPath;
+            return GetMediaTypeDirectory(downloadTask, basePath);
+        }
 
+        private Result<string> GetMediaTypeDirectory(DownloadTask downloadTask, string basePath)
+        {
             var parent = downloadTask.Parent;
+            var downloadTaskTitle = _pathSystem.SanitizePath(downloadTask.Title);
+            var parentTitle = _pathSystem.SanitizePath(parent.Title);
+
             switch (downloadTask.MediaType)
             {
                 case PlexMediaType.Movie:
-                    return Result.Ok(Path.Join(basePath, "Movies", $"{downloadTask.Title} ({downloadTask.Year})"));
+                    return Result.Ok(Path.Join(basePath, "Movies", $"{downloadTaskTitle} ({downloadTask.Year})"));
                 case PlexMediaType.TvShow:
-                    return Result.Ok(Path.Join(basePath, "TvShows", $"{downloadTask.Title} ({downloadTask.Year})"));
+                    return Result.Ok(Path.Join(basePath, "TvShows", $"{downloadTaskTitle} ({downloadTask.Year})"));
                 case PlexMediaType.Season:
-                    return Result.Ok(Path.Join(basePath, "TvShows", $"{parent.Title} ({parent.Year})", downloadTask.Title));
+                    return Result.Ok(Path.Join(basePath, "TvShows", $"{parentTitle} ({parent.Year})", downloadTaskTitle));
                 case PlexMediaType.Episode:
                     var grandParent = downloadTask.Parent?.Parent;
-                    return Result.Ok(Path.Join(basePath, "TvShows", $"{grandParent.Title} ({grandParent.Year})", parent.Title));
+                    return Result.Ok(Path.Join(basePath, "TvShows", $"{grandParent.Title} ({grandParent.Year})", parentTitle));
                 default:
-                    return Result.Ok(Path.Join(basePath, "Other", $"{downloadTask.Title} ({downloadTask.Year})"));
+                    return Result.Ok(Path.Join(basePath, "Other", $"{downloadTaskTitle} ({downloadTask.Year})"));
             }
         }
 

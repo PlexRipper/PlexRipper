@@ -4,7 +4,6 @@ using AutoMapper;
 using FluentResults;
 using PlexRipper.Application;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Converters;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;

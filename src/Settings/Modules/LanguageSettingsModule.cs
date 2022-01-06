@@ -40,7 +40,7 @@ namespace PlexRipper.Settings.Modules
             Update(new LanguageSettingsModule());
         }
 
-        public Result SetFromJsonObject(JsonElement settingsJsonElement)
+        public Result SetFromJson(JsonElement settingsJsonElement)
         {
             var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
             if (jsonSettings.IsFailed)

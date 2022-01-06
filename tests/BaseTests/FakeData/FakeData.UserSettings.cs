@@ -43,7 +43,7 @@ namespace PlexRipper.BaseTests
             return new Faker<ConfirmationSettings>()
                 .StrictMode(true)
                 .UseSeed(config.Seed)
-                .RuleFor(x => x.AskDownloadEpisodeConfirmation, f => f.Random.Bool())
+                .RuleFor(x => x.AskDownloadMovieConfirmation, f => f.Random.Bool())
                 .RuleFor(x => x.AskDownloadTvShowConfirmation, f => f.Random.Bool())
                 .RuleFor(x => x.AskDownloadSeasonConfirmation, f => f.Random.Bool())
                 .RuleFor(x => x.AskDownloadEpisodeConfirmation, f => f.Random.Bool());

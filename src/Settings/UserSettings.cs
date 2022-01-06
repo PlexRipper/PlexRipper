@@ -135,13 +135,13 @@ namespace PlexRipper.Settings
         {
             var results = new List<Result>
             {
-                _confirmationSettingsModule.SetFromJsonObject(settingsJsonElement),
-                _dateTimeSettingsModule.SetFromJsonObject(settingsJsonElement),
-                _displaySettingsModule.SetFromJsonObject(settingsJsonElement),
-                _downloadManagerSettingsModule.SetFromJsonObject(settingsJsonElement),
-                _generalSettingsModule.SetFromJsonObject(settingsJsonElement),
-                _languageSettingsModule.SetFromJsonObject(settingsJsonElement),
-                _serverSettingsModule.SetFromJsonObject(settingsJsonElement),
+                _confirmationSettingsModule.SetFromJson(settingsJsonElement),
+                _dateTimeSettingsModule.SetFromJson(settingsJsonElement),
+                _displaySettingsModule.SetFromJson(settingsJsonElement),
+                _downloadManagerSettingsModule.SetFromJson(settingsJsonElement),
+                _generalSettingsModule.SetFromJson(settingsJsonElement),
+                _languageSettingsModule.SetFromJson(settingsJsonElement),
+                _serverSettingsModule.SetFromJson(settingsJsonElement),
             };
 
             if (results.Any(x => x.IsFailed))

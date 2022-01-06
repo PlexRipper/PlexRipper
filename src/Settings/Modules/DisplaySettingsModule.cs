@@ -1,18 +1,18 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using FluentResults;
 using PlexRipper.Application;
 using PlexRipper.Domain;
+using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings.Modules
 {
-    public class DisplaySettingsModule :  IDisplaySettingsModule
+    public class DisplaySettingsModule : BaseSettingsModule<IDisplaySettings>, IDisplaySettingsModule
     {
         public ViewMode TvShowViewMode { get; set; } = ViewMode.Poster;
 
         public ViewMode MovieViewMode { get; set; } = ViewMode.Poster;
 
-        public string Name => "DisplaySettings";
+        public override string Name => "DisplaySettings";
 
         public Result Update(IDisplaySettings sourceSettings)
         {
@@ -26,16 +26,37 @@ namespace PlexRipper.Settings.Modules
             Update(new DisplaySettingsModule());
         }
 
-        public Result SetFromJsonObject(JsonElement settingsJsonElement)
+        public Result SetFromJson(JsonElement settingsJsonElement)
         {
-            throw new System.NotImplementedException();
-        }
+            var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
+            if (jsonSettings.IsFailed)
+            {
+                Reset();
+                return jsonSettings;
+            }
 
-        public IObservable<IDisplaySettings> ModuleHasChanged { get; }
+            var displaySettings = jsonSettings.Value;
+
+            if (displaySettings.TryGetProperty(nameof(TvShowViewMode), out JsonElement tvShowViewMode))
+            {
+                TvShowViewMode = tvShowViewMode.GetString().ToViewMode();
+            }
+
+            if (displaySettings.TryGetProperty(nameof(MovieViewMode), out JsonElement movieViewMode))
+            {
+                MovieViewMode = movieViewMode.GetString().ToViewMode();
+            }
+
+            return Result.Ok();
+        }
 
         public IDisplaySettings GetValues()
         {
-            throw new NotImplementedException();
+            return new DisplaySettings
+            {
+                MovieViewMode = MovieViewMode,
+                TvShowViewMode = TvShowViewMode,
+            };
         }
     }
 }

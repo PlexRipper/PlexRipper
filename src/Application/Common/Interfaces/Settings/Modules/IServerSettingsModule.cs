@@ -4,7 +4,7 @@ using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.Application
 {
-    public interface IServerSettingsModule : IBaseSettingsModule<IServerSettingsModule, IServerSettings>, IServerSettings
+    public interface IServerSettingsModule : IBaseSettingsModule<IServerSettings>, IServerSettings
     {
         IObservable<PlexServerSettingsModel> ServerSettings(int plexServerId);
 
@@ -19,5 +19,7 @@ namespace PlexRipper.Application
         Result SetDownloadSpeedLimit(int plexServerId, int downloadSpeedLimit = 0);
 
         Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings);
+
+        IObservable<int> GetDownloadSpeedLimitObservable(int plexServerId);
     }
 }

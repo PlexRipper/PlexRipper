@@ -19,7 +19,20 @@ namespace PlexRipper.Settings.Modules
 
         public Result Update(IDownloadManagerSettings sourceSettings)
         {
-            throw new System.NotImplementedException();
+            var hasChanged = false;
+
+            if (DownloadSegments != sourceSettings.DownloadSegments)
+            {
+                DownloadSegments = sourceSettings.DownloadSegments;
+                hasChanged = true;
+            }
+
+            if (hasChanged)
+            {
+                EmitModuleHasChanged(GetValues());
+            }
+
+            return Result.Ok();
         }
 
         public void Reset()
@@ -28,7 +41,7 @@ namespace PlexRipper.Settings.Modules
         }
 
         /// <inheritdoc/>
-        public Result SetFromJsonObject(JsonElement settingsJsonElement)
+        public Result SetFromJson(JsonElement settingsJsonElement)
         {
             var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
             if (jsonSettings.IsFailed)

@@ -1,4 +1,4 @@
 ﻿namespace PlexRipper.Application
 {
-    public interface IConfirmationSettingsModule : IBaseSettingsModule<IConfirmationSettingsModule, IConfirmationSettings>, IConfirmationSettings { }
+    public interface IConfirmationSettingsModule : IBaseSettingsModule<IConfirmationSettings>, IConfirmationSettings { }
 }

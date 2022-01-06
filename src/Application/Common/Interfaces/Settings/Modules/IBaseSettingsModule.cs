@@ -4,7 +4,7 @@ using FluentResults;
 
 namespace PlexRipper.Application
 {
-    public interface IBaseSettingsModule<TModule, TModel>
+    public interface IBaseSettingsModule<TModel>
     {
         public string Name { get; }
 
@@ -17,7 +17,7 @@ namespace PlexRipper.Application
         /// This also works when adding new settings and ensuring old config files get used as much as possible.
         /// </summary>
         /// <param name="settingsJsonElement"></param>
-        public Result SetFromJsonObject(JsonElement settingsJsonElement);
+        public Result SetFromJson(JsonElement settingsJsonElement);
 
         public IObservable<TModel> ModuleHasChanged { get; }
 

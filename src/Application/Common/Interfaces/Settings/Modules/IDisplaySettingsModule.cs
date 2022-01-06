@@ -1,4 +1,4 @@
 ﻿namespace PlexRipper.Application
 {
-    public interface IDisplaySettingsModule : IBaseSettingsModule<IDisplaySettingsModule, IDisplaySettings>, IDisplaySettings { }
+    public interface IDisplaySettingsModule : IBaseSettingsModule<IDisplaySettings>, IDisplaySettings { }
 }

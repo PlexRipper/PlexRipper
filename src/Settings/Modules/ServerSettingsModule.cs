@@ -60,7 +60,12 @@ namespace PlexRipper.Settings.Modules
             return _serverSettingsUpdated.AsObservable().Where(x => x.PlexServerId == plexServerId);
         }
 
-        public Result SetFromJsonObject(JsonElement settingsJsonElement)
+        public IObservable<int> GetDownloadSpeedLimitObservable(int plexServerId)
+        {
+            return ServerSettings(plexServerId).Select(x => x.DownloadSpeedLimit);
+        }
+
+        public Result SetFromJson(JsonElement settingsJsonElement)
         {
             var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
             if (jsonSettings.IsFailed)

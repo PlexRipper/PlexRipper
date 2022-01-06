@@ -1,4 +1,4 @@
 namespace PlexRipper.Application
 {
-    public interface ILanguageSettingsModule : IBaseSettingsModule<ILanguageSettingsModule, ILanguageSettings>, ILanguageSettings { }
+    public interface ILanguageSettingsModule : IBaseSettingsModule<ILanguageSettings>, ILanguageSettings { }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Autofac.Extras.Moq;
 using FluentResults;
 using Logging;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using PlexRipper.Application;
@@ -71,9 +72,9 @@ namespace DownloadManager.UnitTests
 
             using var mock = AutoMock.GetStrict();
             mock.SetupMediator(It.IsAny<AddDownloadWorkerTasksCommand>).ReturnsAsync(Result.Ok());
-            mock.Mock<IUserSettings>().SetupGet(x => x.DownloadSegments).Returns(4);
-            mock.Mock<IUserSettings>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<int>())).Returns(4000);
-            mock.Mock<IUserSettings>().SetupGet(x => x.DownloadSpeedLimitUpdated).Returns(new Subject<PlexServerSettingsModel>().AsObservable());
+            mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);
+            mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<int>())).Returns(4000);
+            mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimitObservable(It.IsAny<int>())).Returns(new Subject<int>().AsObservable());
 
             var downloadTask = context.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
 

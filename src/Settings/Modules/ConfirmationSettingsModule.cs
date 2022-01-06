@@ -9,6 +9,8 @@ namespace PlexRipper.Settings.Modules
     {
         #region Properties
 
+        public override string Name => "ConfirmationSettings";
+
         public bool AskDownloadEpisodeConfirmation { get; set; } = true;
 
         public bool AskDownloadMovieConfirmation { get; set; } = true;
@@ -17,18 +19,16 @@ namespace PlexRipper.Settings.Modules
 
         public bool AskDownloadTvShowConfirmation { get; set; } = true;
 
-        public override string Name => "ConfirmationSettings";
-
         #endregion
 
         #region Public Methods
 
         public void Reset()
         {
-            Update(new ConfirmationSettings());
+            Update(new ConfirmationSettingsModule());
         }
 
-        public Result SetFromJsonObject(JsonElement settingsJsonElement)
+        public Result SetFromJson(JsonElement settingsJsonElement)
         {
             var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
             if (jsonSettings.IsFailed)

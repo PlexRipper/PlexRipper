@@ -31,7 +31,7 @@ namespace PlexRipper.Settings.Modules
         }
 
         /// <inheritdoc/>
-        public Result SetFromJsonObject(JsonElement settingsJsonElement)
+        public Result SetFromJson(JsonElement settingsJsonElement)
         {
             var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
             if (jsonSettings.IsFailed)
@@ -95,7 +95,6 @@ namespace PlexRipper.Settings.Modules
             //     }
             // }
 
-
             if (ShortDateFormat != sourceSettings.ShortDateFormat)
             {
                 ShortDateFormat = sourceSettings.ShortDateFormat;
@@ -110,32 +109,22 @@ namespace PlexRipper.Settings.Modules
 
             if (TimeFormat != sourceSettings.TimeFormat)
             {
-                ShortDateFormat = sourceSettings.ShortDateFormat;
+                TimeFormat = sourceSettings.TimeFormat;
                 hasChanged = true;
             }
 
-            if (ShortDateFormat != sourceSettings.ShortDateFormat)
+            if (TimeZone != sourceSettings.TimeZone)
             {
-                ShortDateFormat = sourceSettings.ShortDateFormat;
+                TimeZone = sourceSettings.TimeZone;
                 hasChanged = true;
             }
 
-            if (ShortDateFormat != sourceSettings.ShortDateFormat)
+            if (ShowRelativeDates != sourceSettings.ShowRelativeDates)
             {
-                ShortDateFormat = sourceSettings.ShortDateFormat;
+                ShowRelativeDates = sourceSettings.ShowRelativeDates;
                 hasChanged = true;
             }
 
-            if (ShortDateFormat != sourceSettings.ShortDateFormat)
-            {
-                ShortDateFormat = sourceSettings.ShortDateFormat;
-                hasChanged = true;
-            }
-
-            LongDateFormat = sourceSettings.LongDateFormat;
-            TimeFormat = sourceSettings.TimeFormat;
-            TimeZone = sourceSettings.TimeZone;
-            ShowRelativeDates = sourceSettings.ShowRelativeDates;
             if (hasChanged)
             {
                 EmitModuleHasChanged(GetValues());

@@ -2,10 +2,12 @@ using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Text.Json;
 using AutoMapper;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
+using PlexRipper.Domain.Config;
 using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
 
@@ -48,7 +50,7 @@ namespace PlexRipper.Settings
         {
             try
             {
-                return Result.Ok();
+                return Result.Ok(JsonSerializer.Serialize(GetJsonObject(), DefaultJsonSerializerOptions.Config));
             }
             catch (Exception e)
             {
@@ -64,6 +66,7 @@ namespace PlexRipper.Settings
             DownloadSegments = sourceSettings.DownloadSegments;
             DownloadSpeedLimit = sourceSettings.DownloadSpeedLimit;
             Language = sourceSettings.Language;
+
             AskDownloadMovieConfirmation = sourceSettings.AskDownloadMovieConfirmation;
             AskDownloadTvShowConfirmation = sourceSettings.AskDownloadTvShowConfirmation;
             AskDownloadSeasonConfirmation = sourceSettings.AskDownloadSeasonConfirmation;
@@ -88,12 +91,12 @@ namespace PlexRipper.Settings
 
         public int GetDownloadSpeedLimit(string machineIdentifier)
         {
-            return DownloadSpeedLimit.FirstOrDefault(x => x.MachineIdentifier == machineIdentifier)?.DownloadSpeedLimit ?? 0;
+            return DownloadSpeedLimit?.FirstOrDefault(x => x.MachineIdentifier == machineIdentifier)?.DownloadSpeedLimit ?? 0;
         }
 
         public int GetDownloadSpeedLimit(int plexServerId)
         {
-            return DownloadSpeedLimit.FirstOrDefault(x => x.PlexServerId == plexServerId)?.DownloadSpeedLimit ?? 0;
+            return DownloadSpeedLimit?.FirstOrDefault(x => x.PlexServerId == plexServerId)?.DownloadSpeedLimit ?? 0;
         }
 
         public void SetDownloadSpeedLimit(DownloadSpeedLimitModel downloadSpeedLimit)

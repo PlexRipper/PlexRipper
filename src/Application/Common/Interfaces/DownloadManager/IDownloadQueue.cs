@@ -25,5 +25,13 @@ namespace PlexRipper.Application
         /// <param name="downloadTasks">The list of <see cref="DownloadTask"/>s that will be checked and added.</param>
         /// <returns>Returns true if all downloadTasks were added successfully.</returns>
         Task<Result> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks);
+
+        /// <summary>
+        ///  Determines the next downloadable <see cref="DownloadTask"/>.
+        /// Will only return a successful result if a queued task can be found
+        /// </summary>
+        /// <param name="downloadTasks"></param>
+        /// <returns></returns>
+        Result<DownloadTask> GetNextDownloadTask(List<DownloadTask> downloadTasks);
     }
 }

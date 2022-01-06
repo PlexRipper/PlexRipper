@@ -95,8 +95,8 @@ export class DownloadService extends BaseService {
 
 	// region Commands
 
-	public startDownloadTasks(downloadTaskIds: number[]): void {
-		startDownloadTask(downloadTaskIds)
+	public startDownloadTasks(downloadTaskId: number): void {
+		startDownloadTask(downloadTaskId)
 			.pipe(
 				switchMap(() => this.fetchDownloadList()),
 				take(1),
@@ -104,8 +104,8 @@ export class DownloadService extends BaseService {
 			.subscribe();
 	}
 
-	public restartDownloadTasks(downloadTaskIds: number[]): void {
-		restartDownloadTasks(downloadTaskIds)
+	public restartDownloadTasks(downloadTaskId: number): void {
+		restartDownloadTasks(downloadTaskId)
 			.pipe(
 				switchMap(() => this.fetchDownloadList()),
 				take(1),
@@ -123,8 +123,8 @@ export class DownloadService extends BaseService {
 			.subscribe();
 	}
 
-	public pauseDownloadTasks(downloadTaskIds: number[]): void {
-		pauseDownloadTask(downloadTaskIds)
+	public pauseDownloadTasks(downloadTaskId: number): void {
+		pauseDownloadTask(downloadTaskId)
 			.pipe(
 				switchMap(() => this.fetchDownloadList()),
 				take(1),
@@ -132,8 +132,8 @@ export class DownloadService extends BaseService {
 			.subscribe();
 	}
 
-	public stopDownloadTasks(downloadTaskIds: number[]): void {
-		stopDownloadTasks(downloadTaskIds)
+	public stopDownloadTasks(downloadTaskId: number): void {
+		stopDownloadTasks(downloadTaskId)
 			.pipe(
 				switchMap(() => this.fetchDownloadList()),
 				take(1),

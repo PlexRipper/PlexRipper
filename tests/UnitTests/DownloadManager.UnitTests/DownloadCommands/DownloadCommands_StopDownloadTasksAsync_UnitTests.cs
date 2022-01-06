@@ -13,6 +13,7 @@ using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
+using Quartz;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -27,17 +28,15 @@ namespace DownloadManager.UnitTests
         }
 
         [Fact]
-        public async Task ShouldHaveFailedResult_WhenGivenAnEmptyList()
+        public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
         {
             // Arrange
             using var mock = AutoMock.GetStrict();
             mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
 
-            var list = new List<int>();
-
             // Act
             var _sut = mock.Create<DownloadCommands>();
-            var result = await _sut.StopDownloadTasksAsync(list);
+            var result = await _sut.StopDownloadTasksAsync(0);
 
             // Assert
             result.IsFailed.ShouldBeTrue();
@@ -49,13 +48,13 @@ namespace DownloadManager.UnitTests
             // Arrange
             using var mock = AutoMock.GetStrict();
             mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
+            mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result>())).ReturnsAsync(Result.Ok());
 
             var _sut = mock.Create<DownloadCommands>();
-            mock.SetupMediator(It.IsAny<GetAllRelatedDownloadTaskIdsQuery>).ReturnsAsync(Result.Fail(""));
-            var list = new List<int> { 1 };
+            mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>).ReturnsAsync(Result.Fail(""));
 
             // Act
-            var result = await _sut.StopDownloadTasksAsync(list);
+            var result = await _sut.StopDownloadTasksAsync(1);
 
             // Assert
             result.IsFailed.ShouldBeTrue();
@@ -71,7 +70,7 @@ namespace DownloadManager.UnitTests
             var downloadTasks = FakeData.GetMovieDownloadTask().Generate(1).Flatten(x => x.Children).ToList();
             var downloadTaskIds = downloadTasks.Select(x => x.Id).ToList();
 
-            mock.SetupMediator(It.IsAny<GetAllRelatedDownloadTaskIdsQuery>).ReturnsAsync(Result.Ok(downloadTaskIds));
+            mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>).ReturnsAsync(Result.Ok(downloadTasks.First()));
             mock.SetupMediator(It.IsAny<UpdateDownloadStatusOfDownloadTaskCommand>).ReturnsAsync(Result.Ok());
             mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>).ReturnsAsync((GetDownloadTaskByIdQuery x, CancellationToken token) =>
                 Result.Ok(downloadTasks.FirstOrDefault(y => y.Id == x.Id)));
@@ -82,7 +81,7 @@ namespace DownloadManager.UnitTests
 
             // Act
             var _sut = mock.Create<DownloadCommands>();
-            var result = await _sut.StopDownloadTasksAsync(downloadTaskIds);
+            var result = await _sut.StopDownloadTasksAsync(downloadTaskIds.First());
 
             // Assert
             result.IsSuccess.ShouldBeTrue();

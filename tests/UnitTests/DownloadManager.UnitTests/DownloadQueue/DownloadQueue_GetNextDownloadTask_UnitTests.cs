@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Autofac.Extras.Moq;
 using Logging;
+using PlexRipper.Application;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
@@ -77,7 +78,7 @@ namespace DownloadManager.UnitTests
             var downloadTasks = TestDownloadTasks(2);
 
             // Act
-            var nextDownloadTask = DownloadQueue.GetNextDownloadTask(ref downloadTasks);
+            var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
 
             // Assert
             nextDownloadTask.IsSuccess.ShouldBeTrue();
@@ -95,7 +96,7 @@ namespace DownloadManager.UnitTests
             downloadTasks[0].Children = downloadTasks[0].Children.SetToCompleted();
 
             // Act
-            var nextDownloadTask = DownloadQueue.GetNextDownloadTask(ref downloadTasks);
+            var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
 
             // Assert
             nextDownloadTask.IsSuccess.ShouldBeTrue();
@@ -112,7 +113,7 @@ namespace DownloadManager.UnitTests
             downloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
 
             // Act
-            var nextDownloadTask = DownloadQueue.GetNextDownloadTask(ref downloadTasks);
+            var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
 
             // Assert
             nextDownloadTask.IsSuccess.ShouldBeTrue();
@@ -130,7 +131,7 @@ namespace DownloadManager.UnitTests
             downloadTasks[0].Children = downloadTasks[0].Children.SetToDownloading();
 
             // Act
-            var nextDownloadTask = DownloadQueue.GetNextDownloadTask(ref downloadTasks);
+            var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
 
             // Assert
             nextDownloadTask.IsSuccess.ShouldBeFalse();

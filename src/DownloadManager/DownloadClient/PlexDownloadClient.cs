@@ -181,6 +181,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
             await Task.WhenAll(_downloadWorkers.Select(x => x.StopAsync()));
 
             DownloadTask.DownloadWorkerTasks = _downloadWorkers.Select(x => x.DownloadWorkerTask).ToList();
+            DownloadTask.DownloadStatus = DownloadStatus.Stopped;
             return Result.Ok(DownloadTask);
         }
 

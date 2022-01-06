@@ -7,15 +7,15 @@ namespace PlexRipper.Application
 {
     public interface IPlexDownloadService
     {
-        Task<Result> StopDownloadTask(List<int> downloadTaskIds);
-
-        Task<Result> RestartDownloadTask(List<int> downloadTaskIds);
-
         Task<Result> ClearCompleted(List<int> downloadTaskIds = null);
 
-        Task<Result> StartDownloadTask(List<int> downloadTaskIds);
+        Task<Result> StartDownloadTask(int downloadTaskId);
 
-        Task<Result> PauseDownloadTask(List<int> downloadTaskIds);
+        Task<Result> PauseDownloadTask(int downloadTaskId);
+
+        Task<Result> StopDownloadTask(int downloadTaskId);
+
+        Task<Result> RestartDownloadTask(int downloadTaskId);
 
         Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders);
 

@@ -394,7 +394,7 @@ namespace PlexRipper.DownloadManager
                 {
                     var part = movieData.Parts.First();
                     movieDownloadTask.MediaType = PlexMediaType.Movie;
-                    movieDownloadTask.DownloadTaskType = DownloadTaskType.Movie;
+                    movieDownloadTask.DownloadTaskType = DownloadTaskType.MovieData;
                     movieDownloadTask.DataTotal = part.Size;
                     movieDownloadTask.FileName = Path.GetFileName(part.File);
                     movieDownloadTask.FileLocationUrl = part.ObfuscatedFilePath;

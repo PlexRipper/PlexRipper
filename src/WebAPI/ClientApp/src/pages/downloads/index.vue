@@ -18,7 +18,15 @@
 					<v-expansion-panels v-model="openExpansions" multiple>
 						<v-expansion-panel v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
 							<v-expansion-panel-header>
-								<h2>{{ plexServer.name }}</h2>
+								<v-row no-gutters>
+									<v-col> </v-col>
+									<v-col cols="auto">
+										<h2>{{ plexServer.name }}</h2>
+									</v-col>
+									<v-col class="py-0">
+										<server-download-status />
+									</v-col>
+								</v-row>
 							</v-expansion-panel-header>
 							<v-expansion-panel-content>
 								<downloads-table
@@ -87,7 +95,7 @@ export default class Downloads extends Vue {
 		const ids = [item.id];
 		switch (action) {
 			case 'pause':
-				this.pauseDownloadTasks(ids);
+				this.pauseDownloadTasks(item.id);
 				break;
 			case 'clear':
 				this.clearDownloadTasks(ids);
@@ -96,13 +104,13 @@ export default class Downloads extends Vue {
 				this.deleteDownloadTasks(ids);
 				break;
 			case 'stop':
-				this.stopDownloadTasks(ids);
+				this.stopDownloadTasks(item.id);
 				break;
 			case 'restart':
-				this.restartDownloadTasks(ids);
+				this.restartDownloadTasks(item.id);
 				break;
 			case 'start':
-				this.startDownloadTasks(ids);
+				this.startDownloadTasks(item.id);
 				break;
 			case 'details':
 				this.detailsDownloadTask(item);
@@ -143,20 +151,20 @@ export default class Downloads extends Vue {
 		}
 	}
 
-	startDownloadTasks(downloadTaskIds: number[]): void {
-		DownloadService.startDownloadTasks(downloadTaskIds);
+	startDownloadTasks(downloadTaskId: number): void {
+		DownloadService.startDownloadTasks(downloadTaskId);
 	}
 
-	pauseDownloadTasks(downloadTaskIds: number[]): void {
-		DownloadService.pauseDownloadTasks(downloadTaskIds);
+	pauseDownloadTasks(downloadTaskId: number): void {
+		DownloadService.pauseDownloadTasks(downloadTaskId);
 	}
 
-	stopDownloadTasks(downloadTaskIds: number[]): void {
-		DownloadService.stopDownloadTasks(downloadTaskIds);
+	stopDownloadTasks(downloadTaskId: number): void {
+		DownloadService.stopDownloadTasks(downloadTaskId);
 	}
 
-	restartDownloadTasks(downloadTaskIds: number[]): void {
-		DownloadService.restartDownloadTasks(downloadTaskIds);
+	restartDownloadTasks(downloadTaskId: number): void {
+		DownloadService.restartDownloadTasks(downloadTaskId);
 	}
 
 	deleteDownloadTasks(downloadTaskIds: number[]): void {

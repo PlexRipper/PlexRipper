@@ -165,7 +165,9 @@ namespace PlexRipper.Domain
             DownloadTaskType
                 is DownloadTaskType.EpisodePart
                 or DownloadTaskType.MoviePart
+                or DownloadTaskType.Episode
                 or DownloadTaskType.EpisodeData
+                or DownloadTaskType.Movie
                 or DownloadTaskType.MovieData;
 
         /// <summary>

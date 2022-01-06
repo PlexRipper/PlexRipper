@@ -16,5 +16,10 @@ namespace PlexRipper.BaseTests
                     Headers = { ContentType = new MediaTypeHeaderValue("application/json") },
                 });
         }
+
+        public Task<HttpResponseMessage> GetAsync(string requestUri)
+        {
+            return ApiClient.GetAsync(requestUri);
+        }
     }
 }

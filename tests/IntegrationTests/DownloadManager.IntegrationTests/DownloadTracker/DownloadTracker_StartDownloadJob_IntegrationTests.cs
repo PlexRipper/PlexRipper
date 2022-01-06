@@ -25,7 +25,7 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
             {
                 Seed = 4564,
                 MovieDownloadTasksCount = 2,
-                DownloadSpeedLimit = 1000,
+                DownloadSpeedLimit = 2000,
                 MockServerConfig = new PlexMockServerConfig
                 {
                     DownloadFileSizeInMb = 50,
@@ -46,7 +46,7 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
 
             // Act
             var startResult = await container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
-            await Task.Delay(5000);
+            await Task.Delay(2000);
 
             // Assert
             startResult.IsSuccess.ShouldBeTrue();

@@ -128,13 +128,13 @@ namespace PlexRipper.Settings
         {
             Log.Information("Saving user config settings now.");
 
-            var jsonSettings = JsonSerializer.Serialize(_userSettings.GetJsonSettingsObject(), _jsonSerializerSettings);
+            var jsonSettings = _userSettings.GetJsonSettingsObject();
+            if (jsonSettings.IsFailed)
+                return jsonSettings;
 
-            var writeResult = WriteToConfigFile(jsonSettings);
+            var writeResult = WriteToConfigFile(jsonSettings.Value);
             if (writeResult.IsFailed)
-            {
                 return writeResult;
-            }
 
             return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
         }

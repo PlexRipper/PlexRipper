@@ -71,25 +71,25 @@ namespace PlexRipper.Application
             return await _downloadCommands.DeleteDownloadTaskClientsAsync(downloadTaskIds);
         }
 
-        public Task<Result> RestartDownloadTask(List<int> downloadTaskIds)
+        public Task<Result> RestartDownloadTask(int downloadTaskId)
         {
-            return _downloadCommands.RestartDownloadTasksAsync(downloadTaskIds);
+            return _downloadCommands.RestartDownloadTasksAsync(downloadTaskId);
         }
 
-        public async Task<Result> StopDownloadTask(List<int> downloadTaskIds)
+        public async Task<Result> StopDownloadTask(int downloadTaskId)
         {
-            var result = await _downloadCommands.StopDownloadTasksAsync(downloadTaskIds);
+            var result = await _downloadCommands.StopDownloadTasksAsync(downloadTaskId);
             return result.IsSuccess ? Result.Ok() : result.ToResult();
         }
 
-        public Task<Result> StartDownloadTask(List<int> downloadTaskIds)
+        public Task<Result> StartDownloadTask(int downloadTaskId)
         {
-            return _downloadCommands.ResumeDownloadTasksAsync(downloadTaskIds);
+            return _downloadCommands.ResumeDownloadTasksAsync(downloadTaskId);
         }
 
-        public Task<Result> PauseDownloadTask(List<int> downloadTaskIds)
+        public Task<Result> PauseDownloadTask(int downloadTaskId)
         {
-            return _downloadCommands.PauseDownload(downloadTaskIds);
+            return _downloadCommands.PauseDownload(downloadTaskId);
         }
 
         public Task<Result> ClearCompleted(List<int> downloadTaskIds)

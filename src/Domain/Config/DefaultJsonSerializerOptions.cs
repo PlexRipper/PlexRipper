@@ -10,6 +10,7 @@ namespace PlexRipper.Domain.Config
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters = { new JsonStringEnumConverter() },
+            WriteIndented = true,
         };
     }
 }

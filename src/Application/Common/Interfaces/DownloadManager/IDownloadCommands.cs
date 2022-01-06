@@ -10,32 +10,32 @@ namespace PlexRipper.Application
         /// <summary>
         /// Restart the <see cref="DownloadTask"/> by deleting the PlexDownloadClient and starting a new one.
         /// </summary>
-        /// <param name="downloadTaskIds">The ids of the <see cref="DownloadTask"/> to restart.</param>
+        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to restart.</param>
         /// <returns>Is successful.</returns>
-        Task<Result> RestartDownloadTasksAsync(List<int> downloadTaskIds);
+        Task<Result> RestartDownloadTasksAsync(int downloadTaskId);
 
         /// <summary>
         /// Starts a queued task immediately.
         /// </summary>
-        /// <param name="downloadTaskIds">The ids of the <see cref="DownloadTask"/> to start.</param>
+        /// <param name="downloadTaskId">The ids of the <see cref="DownloadTask"/> to start.</param>
         /// <returns>Is successful.</returns>
-        Task<Result> ResumeDownloadTasksAsync(List<int> downloadTaskIds);
+        Task<Result> ResumeDownloadTasksAsync(int downloadTaskId);
 
         /// <summary>
         /// Pause a currently downloading <see cref="DownloadTask"/>.
         /// </summary>
-        /// <param name="downloadTaskIds"></param>
+        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to pause.</param>
         /// <returns>Is successful.</returns>
-        Task<Result> PauseDownload(List<int> downloadTaskIds);
+        Task<Result> PauseDownload(int downloadTaskId);
 
         Task<Result> StartDownloadTaskAsync(DownloadTask downloadTask);
 
         /// <summary>
         /// Stops and disposes of the PlexDownloadClient executing the <see cref="DownloadTask"/> if it is downloading.
         /// </summary>
-        /// <param name="downloadTaskIds">The ids of the <see cref="DownloadTask"/> to stop.</param>
+        /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to stop.</param>
         /// <returns>If successful a list of the DownloadTasks that were stopped.</returns>
-        Task<Result<List<int>>> StopDownloadTasksAsync(List<int> downloadTaskIds);
+        Task<Result<List<int>>> StopDownloadTasksAsync(int downloadTaskId);
 
         /// <summary>
         /// Will clear any completed <see cref="DownloadTask"/> from the database.

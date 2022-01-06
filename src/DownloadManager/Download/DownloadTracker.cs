@@ -181,6 +181,7 @@ namespace PlexRipper.DownloadManager
             if (downloadTaskId <= 0)
                 return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
+            Log.Information($"Stopping DownloadClient for DownloadTaskId {downloadTaskId}");
             var downloadClient = GetDownloadClient(downloadTaskId);
             if (downloadClient.IsFailed)
                 return downloadClient.ToResult();
@@ -192,7 +193,7 @@ namespace PlexRipper.DownloadManager
             }
 
             _downloadTaskStopped.OnNext(downloadClient.Value.DownloadTask);
-
+            DeleteDownloadClient(downloadTaskId);
             return Result.Ok();
         }
 
@@ -211,6 +212,7 @@ namespace PlexRipper.DownloadManager
                 return pauseResult;
             }
 
+            _downloadTaskUpdate.OnNext(downloadClient.Value.DownloadTask);
             DeleteDownloadClient(downloadTaskId);
 
             return Result.Ok();
@@ -239,7 +241,6 @@ namespace PlexRipper.DownloadManager
 
             return Result.Ok(downloadClient.Value.DownloadProcessTask);
         }
-
 
         #endregion
 
@@ -287,17 +288,8 @@ namespace PlexRipper.DownloadManager
                     result.LogError();
                 }
             }
-
-            _downloadTaskUpdate.OnNext(downloadTask);
-
-            // Alert of a downloadTask that has finished
-            if (downloadTask.DownloadStatus is DownloadStatus.DownloadFinished)
-            {
-                _downloadTaskFinished.OnNext(downloadTask);
-            }
         }
 
         #endregion
-
     }
 }

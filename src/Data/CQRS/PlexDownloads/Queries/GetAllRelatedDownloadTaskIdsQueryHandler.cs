@@ -33,7 +33,14 @@ namespace PlexRipper.Data
                 .Where(x => request.DownloadTaskIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
-            var downloadTasksIds = downloadTasks.Flatten(x => x.Children).GroupBy(x => x.Id).Select(x => x.First().Id).ToList();
+            // Retrieve all nested downloadTasks and return those that are downloadable
+            var downloadTasksIds = downloadTasks
+                .Flatten(x => x.Children)
+                .Where(x => x.IsDownloadable)
+                .GroupBy(x => x.Id)
+                .Select(x => x.First().Id)
+                .Where(x => !request.DownloadTaskIds.Contains(x))
+                .ToList();
 
             return Result.Ok(downloadTasksIds);
         }

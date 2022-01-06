@@ -27,8 +27,6 @@ namespace PlexRipper.WebAPI.Common
 
             public static string PostDownloadMedia => Controller + "/download";
 
-            public static string PostStartCommand => Controller + "/start";
-
             public static string PostPauseCommand => Controller + "/pause";
 
             public static string PostDeleteCommand => Controller + "/delete";
@@ -36,6 +34,11 @@ namespace PlexRipper.WebAPI.Common
             public static string PostRestartCommand => Controller + "/restart";
 
             public static string PostStopCommand => Controller + "/stop";
+
+            public static string GetStartCommand(int id)
+            {
+                return  Controller + "/start/" + id;
+            }
         }
     }
 }

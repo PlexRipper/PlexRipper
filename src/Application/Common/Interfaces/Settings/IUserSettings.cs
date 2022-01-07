@@ -1,15 +1,13 @@
 using System;
 using System.Text.Json;
 using FluentResults;
-using PlexRipper.Domain;
-using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.Application
 {
     /// <summary>
     /// Used to store and load settings from a json file.
     /// </summary>
-    public interface IUserSettings : ISettingsModel
+    public interface IUserSettings
     {
         /// <summary>
         /// Reverts all settings to their default value.
@@ -24,23 +22,12 @@ namespace PlexRipper.Application
         /// <param name="sourceSettings">The values to be used to set this UserSettings instance.</param>
         Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings);
 
-        int GetDownloadSpeedLimit(string machineIdentifier);
-
         Result<string> GetJsonSettingsObject();
 
         IObservable<ISettingsModel> SettingsUpdated { get; }
 
-        IObservable<DownloadSpeedLimitModel> DownloadSpeedLimitUpdated { get; }
-
-        /// <summary>
-        /// Parses the Json Element from the PlexRipperSettings.json and defaults its value if nothing is found.
-        /// This also works when adding new settings and ensuring old config files get used as much as possible.
-        /// </summary>
-        /// <param name="settingsJsonElement"></param>
         Result SetFromJsonObject(JsonElement settingsJsonElement);
 
-        int GetDownloadSpeedLimit(int plexServerId);
-
-        void SetDownloadSpeedLimit(DownloadSpeedLimitModel downloadSpeedLimit);
+        ISettingsModel GetSettingsModel();
     }
 }

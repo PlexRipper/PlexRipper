@@ -532,35 +532,40 @@ export type ResultDTOOfPlexServerStatusDTO = ResultDTO & { value: PlexServerStat
 export type ResultDTOOfSettingsModelDTO = ResultDTO & { value: SettingsModelDTO };
 
 export interface SettingsModelDTO {
+	generalSettings: GeneralSettingsDTO;
+	confirmationSettings: ConfirmationSettingsDTO;
+	dateTimeSettings: DateTimeSettingsDTO;
+	displaySettings: DisplaySettingsDTO;
+	downloadManagerSettings: DownloadManagerSettingsDTO;
+	languageSettings: LanguageSettingsDTO;
+	serverSettings: ServerSettingsDTO;
+}
+
+export interface GeneralSettingsDTO {
 	firstTimeSetup: boolean;
 
 	/** @format int32 */
 	activeAccountId: number;
+}
 
-	/** @format int32 */
-	downloadSegments: number;
-	downloadSpeedLimit: DownloadSpeedLimitModel[];
+export interface ConfirmationSettingsDTO {
 	askDownloadMovieConfirmation: boolean;
 	askDownloadTvShowConfirmation: boolean;
 	askDownloadSeasonConfirmation: boolean;
 	askDownloadEpisodeConfirmation: boolean;
-	tvShowViewMode: ViewMode;
-	movieViewMode: ViewMode;
+}
+
+export interface DateTimeSettingsDTO {
 	shortDateFormat: string;
 	longDateFormat: string;
 	timeFormat: string;
 	timeZone: string;
 	showRelativeDates: boolean;
-	language: string;
 }
 
-export interface DownloadSpeedLimitModel {
-	/** @format int32 */
-	plexServerId?: number;
-	machineIdentifier?: string | null;
-
-	/** @format int32 */
-	downloadSpeedLimit?: number;
+export interface DisplaySettingsDTO {
+	tvShowViewMode: ViewMode;
+	movieViewMode: ViewMode;
 }
 
 export enum ViewMode {
@@ -568,6 +573,28 @@ export enum ViewMode {
 	Table = 'Table',
 	Poster = 'Poster',
 	Overview = 'Overview',
+}
+
+export interface DownloadManagerSettingsDTO {
+	/** @format int32 */
+	downloadSegments: number;
+}
+
+export interface LanguageSettingsDTO {
+	language: string;
+}
+
+export interface ServerSettingsDTO {
+	data: PlexServerSettingsModel[];
+}
+
+export interface PlexServerSettingsModel {
+	/** @format int32 */
+	plexServerId?: number;
+	machineIdentifier?: string | null;
+
+	/** @format int32 */
+	downloadSpeedLimit?: number;
 }
 
 export type ResultDTOOfInteger = ResultDTO & { value: number };

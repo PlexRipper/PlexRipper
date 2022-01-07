@@ -168,15 +168,15 @@ export default class DateAndTimeSection extends Vue {
 	updateSettings(index: number, state: any): void {
 		switch (index) {
 			case 0:
-				return SettingsService.updateSetting('shortDateFormat', state);
+				return SettingsService.updateDateTimeSetting('shortDateFormat', state);
 			case 1:
-				return SettingsService.updateSetting('longDateFormat', state);
+				return SettingsService.updateDateTimeSetting('longDateFormat', state);
 			case 2:
-				return SettingsService.updateSetting('timeFormat', state);
+				return SettingsService.updateDateTimeSetting('timeFormat', state);
 			case 3:
-				return SettingsService.updateSetting('timeZone', state);
+				return SettingsService.updateDateTimeSetting('timeZone', state);
 			case 4:
-				return SettingsService.updateSetting('showRelativeDates', state);
+				return SettingsService.updateDateTimeSetting('showRelativeDates', state);
 			default:
 				Log.error(`Failed to update settings with index ${index} and value ${state}`);
 		}

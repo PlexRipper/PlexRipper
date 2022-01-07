@@ -175,7 +175,6 @@ export default class MediaPoster extends Vue {
 		const downloadCommand: DownloadMediaDTO = {
 			type: this.mediaType,
 			mediaIds: [this.mediaItem.id],
-			libraryId: 0,
 			plexAccountId: 0,
 		};
 

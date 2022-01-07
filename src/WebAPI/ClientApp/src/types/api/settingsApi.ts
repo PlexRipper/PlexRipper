@@ -15,7 +15,7 @@ export function getSettings(): Observable<ResultDTO<SettingsModelDTO>> {
 }
 
 export function updateSettings(settings: SettingsModelDTO): Observable<ResultDTO<SettingsModelDTO>> {
-	preApiRequest(logText, 'updateSettings');
+	preApiRequest(logText, 'updateSettings', settings);
 	const result = Axios.put<ResultDTO<SettingsModelDTO>>(`${apiPath}`, settings);
 	return checkResponse<ResultDTO<SettingsModelDTO>>(result, logText, 'updateSettings');
 }

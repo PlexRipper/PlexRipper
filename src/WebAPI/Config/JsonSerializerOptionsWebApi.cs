@@ -7,7 +7,7 @@ namespace PlexRipper.WebAPI.Config
     {
         public static void Config(JsonOptions options)
         {
-            var config = DefaultJsonSerializerOptions.Config;
+            var config = DefaultJsonSerializerOptions.ConfigBase;
             options.JsonSerializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
             options.JsonSerializerOptions.PropertyNamingPolicy = config.PropertyNamingPolicy;
             foreach (var converter in config.Converters)

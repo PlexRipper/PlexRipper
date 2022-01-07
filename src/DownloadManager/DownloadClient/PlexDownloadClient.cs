@@ -33,7 +33,9 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
         private readonly EventLoopScheduler _timeThreadContext = new();
 
-        private readonly IUserSettings _userSettings;
+        private readonly IServerSettingsModule _serverSettings;
+
+        private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
 
         private IDisposable _downloadSpeedLimitSubscription;
 
@@ -45,15 +47,17 @@ namespace PlexRipper.DownloadManager.DownloadClient
         /// Initializes a new instance of the <see cref="PlexDownloadClient"/> class.
         /// </summary>
         /// <param name="downloadWorkerFactory"></param>
-        /// <param name="userSettings"></param>
+        /// <param name="serverSettings"></param>
         /// <param name="mediator"></param>
         public PlexDownloadClient(
             Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
-            IUserSettings userSettings,
+            IServerSettingsModule serverSettings,
+            IDownloadManagerSettingsModule downloadManagerSettings,
             IMediator mediator)
         {
             _downloadWorkerFactory = downloadWorkerFactory;
-            _userSettings = userSettings;
+            _serverSettings = serverSettings;
+            _downloadManagerSettings = downloadManagerSettings;
             _mediator = mediator;
         }
 
@@ -234,7 +238,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
 
         private async Task<Result<List<DownloadWorkerTask>>> GenerateDownloadWorkerTasks(DownloadTask downloadTask)
         {
-            int parts = _userSettings.DownloadSegments;
+            int parts = _downloadManagerSettings.DownloadSegments;
             if (parts <= 0)
                 return Result.Fail($"Parameter {nameof(parts)} was {parts}, prevented division by invalid value").LogWarning();
 
@@ -308,9 +312,8 @@ namespace PlexRipper.DownloadManager.DownloadClient
                 }
             }
 
-            SetDownloadSpeedLimit(_userSettings.GetDownloadSpeedLimit(DownloadTask.PlexServerId));
-            _downloadSpeedLimitSubscription = _userSettings.DownloadSpeedLimitUpdated
-                .Where(x => x.PlexServerId == DownloadTask.PlexServerId)
+            SetDownloadSpeedLimit(_serverSettings.GetDownloadSpeedLimit(DownloadTask.PlexServerId));
+            _downloadSpeedLimitSubscription = _serverSettings.ServerSettings(DownloadTask.PlexServerId)
                 .Subscribe(model => SetDownloadSpeedLimit(model.DownloadSpeedLimit));
         }
 

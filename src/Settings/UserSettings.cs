@@ -1,34 +1,69 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
-using AutoMapper;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
 using PlexRipper.Domain.Config;
-using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings
 {
     /// <inheritdoc cref="IUserSettings"/>
-    public class UserSettings : SettingsModel, IUserSettings
+    public class UserSettings : IUserSettings
     {
-        private readonly IMapper _mapper;
-
         #region Fields
+
+        private readonly IConfirmationSettingsModule _confirmationSettingsModule;
+
+        private readonly IDateTimeSettingsModule _dateTimeSettingsModule;
+
+        private readonly IDisplaySettingsModule _displaySettingsModule;
+
+        private readonly IDownloadManagerSettingsModule _downloadManagerSettingsModule;
+
+        private readonly IGeneralSettingsModule _generalSettingsModule;
+
+        private readonly ILanguageSettingsModule _languageSettingsModule;
+
+        private readonly IServerSettingsModule _serverSettingsModule;
 
         private readonly Subject<ISettingsModel> _settingsUpdated = new();
 
-        private readonly Subject<DownloadSpeedLimitModel> _downloadSpeedLimits = new();
-
         #endregion
 
-        public UserSettings(IMapper mapper)
+        public UserSettings(
+            IConfirmationSettingsModule confirmationSettingsModule,
+            IDateTimeSettingsModule dateTimeSettingsModule,
+            IDisplaySettingsModule displaySettingsModule,
+            IDownloadManagerSettingsModule downloadManagerSettingsModule,
+            IGeneralSettingsModule generalSettingsModule,
+            ILanguageSettingsModule languageSettingsModule,
+            IServerSettingsModule serverSettingsModule)
         {
-            _mapper = mapper;
+            _confirmationSettingsModule = confirmationSettingsModule;
+            _dateTimeSettingsModule = dateTimeSettingsModule;
+            _displaySettingsModule = displaySettingsModule;
+            _downloadManagerSettingsModule = downloadManagerSettingsModule;
+            _generalSettingsModule = generalSettingsModule;
+            _languageSettingsModule = languageSettingsModule;
+            _serverSettingsModule = serverSettingsModule;
+
+            // Alert of any module changes
+            Observable.Merge(
+                    _confirmationSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _dateTimeSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _displaySettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _downloadManagerSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _generalSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _languageSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _serverSettingsModule.ModuleHasChanged.Select(_ => 1)
+                )
+                .Throttle(TimeSpan.FromMilliseconds(500))
+                .Subscribe(_ => _settingsUpdated.OnNext(GetSettingsModel()));
         }
 
         #region Methods
@@ -37,12 +72,47 @@ namespace PlexRipper.Settings
 
         public IObservable<ISettingsModel> SettingsUpdated => _settingsUpdated.AsObservable();
 
-        public IObservable<DownloadSpeedLimitModel> DownloadSpeedLimitUpdated => _downloadSpeedLimits.AsObservable();
-
         public void Reset()
         {
             Log.Information("Resetting UserSettings");
-            UpdateSettings(new SettingsModel());
+
+            _confirmationSettingsModule.Reset();
+            _dateTimeSettingsModule.Reset();
+            _displaySettingsModule.Reset();
+            _downloadManagerSettingsModule.Reset();
+            _generalSettingsModule.Reset();
+            _languageSettingsModule.Reset();
+            _serverSettingsModule.Reset();
+        }
+
+        public Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings)
+        {
+            var settings = new SettingsModel
+            {
+                ConfirmationSettings = _confirmationSettingsModule.Update(sourceSettings.ConfirmationSettings),
+                DateTimeSettings = _dateTimeSettingsModule.Update(sourceSettings.DateTimeSettings),
+                DisplaySettings = _displaySettingsModule.Update(sourceSettings.DisplaySettings),
+                DownloadManagerSettings = _downloadManagerSettingsModule.Update(sourceSettings.DownloadManagerSettings),
+                GeneralSettings = _generalSettingsModule.Update(sourceSettings.GeneralSettings),
+                LanguageSettings = _languageSettingsModule.Update(sourceSettings.LanguageSettings),
+                ServerSettings = _serverSettingsModule.Update(sourceSettings.ServerSettings),
+            };
+
+            return Result.Ok((ISettingsModel)settings);
+        }
+
+        public ISettingsModel GetSettingsModel()
+        {
+            return new SettingsModel
+            {
+                ConfirmationSettings = _confirmationSettingsModule.GetValues(),
+                GeneralSettings = _generalSettingsModule.GetValues(),
+                DisplaySettings = _displaySettingsModule.GetValues(),
+                LanguageSettings = _languageSettingsModule.GetValues(),
+                ServerSettings = _serverSettingsModule.GetValues(),
+                DateTimeSettings = _dateTimeSettingsModule.GetValues(),
+                DownloadManagerSettings = _downloadManagerSettingsModule.GetValues(),
+            };
         }
 
         /// <inheritdoc/>
@@ -50,7 +120,7 @@ namespace PlexRipper.Settings
         {
             try
             {
-                return Result.Ok(JsonSerializer.Serialize(GetJsonObject(), DefaultJsonSerializerOptions.Config));
+                return Result.Ok(JsonSerializer.Serialize(GetSettingsModel(), DefaultJsonSerializerOptions.ConfigIndented));
             }
             catch (Exception e)
             {
@@ -58,76 +128,26 @@ namespace PlexRipper.Settings
             }
         }
 
-        /// <inheritdoc/>
-        public Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings)
+        public Result SetFromJsonObject(JsonElement settingsJsonElement)
         {
-            FirstTimeSetup = sourceSettings.FirstTimeSetup;
-            ActiveAccountId = sourceSettings.ActiveAccountId;
-            DownloadSegments = sourceSettings.DownloadSegments;
-            DownloadSpeedLimit = sourceSettings.DownloadSpeedLimit;
-            Language = sourceSettings.Language;
-
-            AskDownloadMovieConfirmation = sourceSettings.AskDownloadMovieConfirmation;
-            AskDownloadTvShowConfirmation = sourceSettings.AskDownloadTvShowConfirmation;
-            AskDownloadSeasonConfirmation = sourceSettings.AskDownloadSeasonConfirmation;
-            AskDownloadEpisodeConfirmation = sourceSettings.AskDownloadEpisodeConfirmation;
-
-            TvShowViewMode = sourceSettings.TvShowViewMode;
-            MovieViewMode = sourceSettings.MovieViewMode;
-
-            ShortDateFormat = sourceSettings.ShortDateFormat;
-            LongDateFormat = sourceSettings.LongDateFormat;
-            TimeFormat = sourceSettings.TimeFormat;
-            TimeZone = sourceSettings.TimeZone;
-            ShowRelativeDates = sourceSettings.ShowRelativeDates;
-
-            var settingsModel = _mapper.Map<ISettingsModel>(this);
-            _settingsUpdated.OnNext(settingsModel);
-
-            return Result.Ok(settingsModel);
-        }
-
-        #region Helpers
-
-        public int GetDownloadSpeedLimit(string machineIdentifier)
-        {
-            return DownloadSpeedLimit?.FirstOrDefault(x => x.MachineIdentifier == machineIdentifier)?.DownloadSpeedLimit ?? 0;
-        }
-
-        public int GetDownloadSpeedLimit(int plexServerId)
-        {
-            return DownloadSpeedLimit?.FirstOrDefault(x => x.PlexServerId == plexServerId)?.DownloadSpeedLimit ?? 0;
-        }
-
-        public void SetDownloadSpeedLimit(DownloadSpeedLimitModel downloadSpeedLimit)
-        {
-            var index = DownloadSpeedLimit
-                .FindIndex(x => x.PlexServerId == downloadSpeedLimit.PlexServerId &&
-                                x.MachineIdentifier == downloadSpeedLimit.MachineIdentifier);
-            if (index > -1)
+            var results = new List<Result>
             {
-                if (DownloadSpeedLimit[index].DownloadSpeedLimit != downloadSpeedLimit.DownloadSpeedLimit)
-                {
-                    DownloadSpeedLimit[index].DownloadSpeedLimit = downloadSpeedLimit.DownloadSpeedLimit;
-                    _downloadSpeedLimits.OnNext(DownloadSpeedLimit[index]);
-                }
-            }
-            else
+                _confirmationSettingsModule.SetFromJson(settingsJsonElement),
+                _dateTimeSettingsModule.SetFromJson(settingsJsonElement),
+                _displaySettingsModule.SetFromJson(settingsJsonElement),
+                _downloadManagerSettingsModule.SetFromJson(settingsJsonElement),
+                _generalSettingsModule.SetFromJson(settingsJsonElement),
+                _languageSettingsModule.SetFromJson(settingsJsonElement),
+                _serverSettingsModule.SetFromJson(settingsJsonElement),
+            };
+
+            if (results.Any(x => x.IsFailed))
             {
-                DownloadSpeedLimit.Add(downloadSpeedLimit);
-                _downloadSpeedLimits.OnNext(DownloadSpeedLimit.Last());
+                return Result.Fail("Failed to set from json object").AddNestedErrors(results.SelectMany(x => x.Errors).ToList());
             }
 
-            EmitSettingsUpdated();
+            return Result.Ok();
         }
-
-        private void EmitSettingsUpdated()
-        {
-            var settingsModel = _mapper.Map<ISettingsModel>(this);
-            _settingsUpdated.OnNext(settingsModel);
-        }
-
-        #endregion
 
         #endregion
 

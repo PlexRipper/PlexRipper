@@ -4,6 +4,7 @@ using Environment;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
+using PlexRipper.Domain.Config;
 
 namespace PlexRipper.Settings
 {
@@ -18,13 +19,6 @@ namespace PlexRipper.Settings
         private readonly IPathProvider _pathProvider;
 
         private readonly IUserSettings _userSettings;
-
-        private readonly JsonSerializerOptions _jsonSerializerSettings = new()
-        {
-            WriteIndented = true,
-            IncludeFields = false,
-            PropertyNameCaseInsensitive = true,
-        };
 
         #endregion
 
@@ -93,7 +87,7 @@ namespace PlexRipper.Settings
 
             try
             {
-                var loadedSettings = JsonSerializer.Deserialize<JsonElement>(readResult.Value, _jsonSerializerSettings);
+                var loadedSettings = JsonSerializer.Deserialize<JsonElement>(readResult.Value, DefaultJsonSerializerOptions.ConfigBase);
                 var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
                 if (setFromJsonResult.IsFailed)
                 {

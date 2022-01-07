@@ -169,7 +169,6 @@ export default class MediaTable extends Vue {
 					mediaIds: tvShowIds,
 					type: PlexMediaType.TvShow,
 					plexAccountId: 0,
-					libraryId: this.libraryId,
 				});
 			}
 
@@ -178,7 +177,6 @@ export default class MediaTable extends Vue {
 					mediaIds: seasonIds,
 					type: PlexMediaType.Season,
 					plexAccountId: 0,
-					libraryId: this.libraryId,
 				});
 			}
 
@@ -187,7 +185,6 @@ export default class MediaTable extends Vue {
 					mediaIds: episodesIds,
 					type: PlexMediaType.Episode,
 					plexAccountId: 0,
-					libraryId: this.libraryId,
 				});
 			}
 		}
@@ -197,7 +194,6 @@ export default class MediaTable extends Vue {
 				mediaIds: this.selected?.map((x) => +x),
 				type: PlexMediaType.Movie,
 				plexAccountId: 0,
-				libraryId: this.libraryId,
 			});
 		}
 
@@ -216,7 +212,6 @@ export default class MediaTable extends Vue {
 			type: item.type,
 			mediaIds: [],
 			plexAccountId: 0,
-			libraryId: this.libraryId,
 		};
 		switch (item.type) {
 			case PlexMediaType.Movie:

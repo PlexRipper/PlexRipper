@@ -23,11 +23,6 @@ namespace PlexRipper.Settings.Modules
 
         #region Public Methods
 
-        public void Reset()
-        {
-            Update(new ConfirmationSettingsModule());
-        }
-
         public Result SetFromJson(JsonElement settingsJsonElement)
         {
             var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
@@ -62,7 +57,7 @@ namespace PlexRipper.Settings.Modules
             return Result.Ok();
         }
 
-        public IConfirmationSettings GetValues()
+        public override IConfirmationSettings GetValues()
         {
             return new ConfirmationSettings
             {
@@ -71,41 +66,6 @@ namespace PlexRipper.Settings.Modules
                 AskDownloadSeasonConfirmation = AskDownloadSeasonConfirmation,
                 AskDownloadEpisodeConfirmation = AskDownloadEpisodeConfirmation,
             };
-        }
-
-        public Result Update(IConfirmationSettings sourceSettings)
-        {
-            var hasChanged = false;
-            if (AskDownloadMovieConfirmation != sourceSettings.AskDownloadMovieConfirmation)
-            {
-                AskDownloadMovieConfirmation = sourceSettings.AskDownloadMovieConfirmation;
-                hasChanged = true;
-            }
-
-            if (AskDownloadMovieConfirmation != sourceSettings.AskDownloadMovieConfirmation)
-            {
-                AskDownloadTvShowConfirmation = sourceSettings.AskDownloadTvShowConfirmation;
-                hasChanged = true;
-            }
-
-            if (AskDownloadMovieConfirmation != sourceSettings.AskDownloadMovieConfirmation)
-            {
-                AskDownloadSeasonConfirmation = sourceSettings.AskDownloadSeasonConfirmation;
-                hasChanged = true;
-            }
-
-            if (AskDownloadMovieConfirmation != sourceSettings.AskDownloadMovieConfirmation)
-            {
-                AskDownloadEpisodeConfirmation = sourceSettings.AskDownloadEpisodeConfirmation;
-                hasChanged = true;
-            }
-
-            if (hasChanged)
-            {
-                EmitModuleHasChanged(GetValues());
-            }
-
-            return Result.Ok();
         }
 
         #endregion

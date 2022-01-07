@@ -45,11 +45,6 @@ namespace PlexRipper.Settings.Modules
             return GetPlexServerSettings(plexServerId)?.DownloadSpeedLimit ?? 0;
         }
 
-        public Result Update(IServerSettings sourceSettings)
-        {
-            throw new NotImplementedException();
-        }
-
         public void Reset()
         {
             Update(new ServerSettingsModule());
@@ -89,7 +84,7 @@ namespace PlexRipper.Settings.Modules
             return Result.Ok();
         }
 
-        public IServerSettings GetValues()
+        public override IServerSettings GetValues()
         {
             return new ServerSettings
             {

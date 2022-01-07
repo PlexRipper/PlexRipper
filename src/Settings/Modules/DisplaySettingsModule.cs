@@ -14,13 +14,6 @@ namespace PlexRipper.Settings.Modules
 
         public override string Name => "DisplaySettings";
 
-        public Result Update(IDisplaySettings sourceSettings)
-        {
-            TvShowViewMode = sourceSettings.TvShowViewMode;
-            MovieViewMode = sourceSettings.MovieViewMode;
-            return Result.Ok();
-        }
-
         public void Reset()
         {
             Update(new DisplaySettingsModule());
@@ -50,7 +43,7 @@ namespace PlexRipper.Settings.Modules
             return Result.Ok();
         }
 
-        public IDisplaySettings GetValues()
+        public override IDisplaySettings GetValues()
         {
             return new DisplaySettings
             {

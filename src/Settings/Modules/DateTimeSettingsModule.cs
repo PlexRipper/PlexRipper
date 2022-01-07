@@ -70,7 +70,7 @@ namespace PlexRipper.Settings.Modules
             return Result.Ok();
         }
 
-        public IDateTimeSettings GetValues()
+        public override IDateTimeSettings GetValues()
         {
             return new DateTimeSettings
             {
@@ -82,57 +82,6 @@ namespace PlexRipper.Settings.Modules
             };
         }
 
-        public Result Update(IDateTimeSettings sourceSettings)
-        {
-            var hasChanged = false;
-
-            // foreach (PropertyInfo prop in typeof(IDateTimeSettings).GetProperties())
-            // {
-            //     var type = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
-            //     if (type == typeof (DateTime))
-            //     {
-            //         Console.WriteLine(prop.GetValue(car, null).ToString());
-            //     }
-            // }
-
-            if (ShortDateFormat != sourceSettings.ShortDateFormat)
-            {
-                ShortDateFormat = sourceSettings.ShortDateFormat;
-                hasChanged = true;
-            }
-
-            if (LongDateFormat != sourceSettings.LongDateFormat)
-            {
-                LongDateFormat = sourceSettings.LongDateFormat;
-                hasChanged = true;
-            }
-
-            if (TimeFormat != sourceSettings.TimeFormat)
-            {
-                TimeFormat = sourceSettings.TimeFormat;
-                hasChanged = true;
-            }
-
-            if (TimeZone != sourceSettings.TimeZone)
-            {
-                TimeZone = sourceSettings.TimeZone;
-                hasChanged = true;
-            }
-
-            if (ShowRelativeDates != sourceSettings.ShowRelativeDates)
-            {
-                ShowRelativeDates = sourceSettings.ShowRelativeDates;
-                hasChanged = true;
-            }
-
-            if (hasChanged)
-            {
-                EmitModuleHasChanged(GetValues());
-            }
-
-            return Result.Ok();
-        }
-
-        #endregion
+  #endregion
     }
 }

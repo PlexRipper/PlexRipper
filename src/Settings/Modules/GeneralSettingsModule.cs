@@ -17,26 +17,6 @@ namespace PlexRipper.Settings.Modules
             return Result.Ok();
         }
 
-        public Result Update(IGeneralSettings sourceSettings)
-        {
-            var hasChanged = false;
-            if (FirstTimeSetup != sourceSettings.FirstTimeSetup)
-            {
-                FirstTimeSetup = sourceSettings.FirstTimeSetup;
-                hasChanged = true;
-            }
-
-            if (hasChanged)
-            {
-                EmitModuleHasChanged(new GeneralSettings
-                {
-                    FirstTimeSetup = FirstTimeSetup,
-                });
-            }
-
-            return Result.Ok();
-        }
-
         public void Reset()
         {
             Update(new GeneralSettingsModule());
@@ -61,7 +41,7 @@ namespace PlexRipper.Settings.Modules
             return Result.Ok();
         }
 
-        public IGeneralSettings GetValues()
+        public override IGeneralSettings GetValues()
         {
             return new GeneralSettings
             {

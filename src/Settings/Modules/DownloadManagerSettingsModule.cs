@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using FluentResults;
 using PlexRipper.Application;
+using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings.Modules
 {
@@ -9,31 +10,6 @@ namespace PlexRipper.Settings.Modules
         public int DownloadSegments { get; set; } = 4;
 
         public override string Name => "DownloadManagerSettings";
-
-        public Result Update(IDownloadManagerSettingsModule sourceSettings)
-        {
-            DownloadSegments = sourceSettings.DownloadSegments;
-
-            return Result.Ok();
-        }
-
-        public Result Update(IDownloadManagerSettings sourceSettings)
-        {
-            var hasChanged = false;
-
-            if (DownloadSegments != sourceSettings.DownloadSegments)
-            {
-                DownloadSegments = sourceSettings.DownloadSegments;
-                hasChanged = true;
-            }
-
-            if (hasChanged)
-            {
-                EmitModuleHasChanged(GetValues());
-            }
-
-            return Result.Ok();
-        }
 
         public void Reset()
         {
@@ -60,9 +36,12 @@ namespace PlexRipper.Settings.Modules
             return Result.Ok();
         }
 
-        public IDownloadManagerSettings GetValues()
+        public override IDownloadManagerSettings GetValues()
         {
-            throw new System.NotImplementedException();
+            return new DownloadManagerSettings
+            {
+                DownloadSegments = DownloadSegments,
+            };
         }
     }
 }

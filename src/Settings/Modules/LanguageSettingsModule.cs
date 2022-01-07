@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using FluentResults;
 using PlexRipper.Application;
 using PlexRipper.Settings.Models;
@@ -17,23 +16,6 @@ namespace PlexRipper.Settings.Modules
         #endregion
 
         #region Public Methods
-
-        public Result Update(ILanguageSettings sourceSettings)
-        {
-            var hasChanged = false;
-            if (Language != sourceSettings.Language)
-            {
-                Language = sourceSettings.Language;
-                hasChanged = true;
-            }
-
-            if (hasChanged)
-            {
-                EmitModuleHasChanged(GetValues());
-            }
-
-            return Result.Ok();
-        }
 
         public void Reset()
         {
@@ -59,7 +41,7 @@ namespace PlexRipper.Settings.Modules
             return Result.Ok();
         }
 
-        public ILanguageSettings GetValues()
+        public override ILanguageSettings GetValues()
         {
             return new LanguageSettings
             {

@@ -27,5 +27,7 @@ namespace PlexRipper.Application
         IObservable<ISettingsModel> SettingsUpdated { get; }
 
         Result SetFromJsonObject(JsonElement settingsJsonElement);
+
+        ISettingsModel GetSettingsModel();
     }
 }

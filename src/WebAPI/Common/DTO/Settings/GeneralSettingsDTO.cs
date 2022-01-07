@@ -7,5 +7,8 @@ namespace PlexRipper.WebAPI.Common.DTO
     {
         [JsonProperty(Required = Required.Always)]
         public bool FirstTimeSetup { get; set; }
+
+        [JsonProperty(Required = Required.Always)]
+        public int ActiveAccountId { get; set; }
     }
 }

@@ -10,6 +10,12 @@ namespace PlexRipper.BaseTests
 {
     public static partial class FakeData
     {
+        private static readonly string[] ShortDateFormat = { "MMM dd yyyy", "dd MMM yyyy", "MM/dd/yyyy", "dd/MM/yyyy", "yyyy-MM-dd" };
+
+        private static readonly string[] LongDateFormat = { "EEEE, MMMM dd, yyyy", "EEEE, dd MMMM yyyy" };
+
+        private static readonly string[] TimeFormat = { "HH:mm:ss", "pp" };
+
         public static Faker<SettingsModel> GetSettingsModel(UnitTestDataConfig config = null)
         {
             config ??= new UnitTestDataConfig();
@@ -56,10 +62,10 @@ namespace PlexRipper.BaseTests
             return new Faker<DateTimeSettings>()
                 .StrictMode(true)
                 .UseSeed(config.Seed)
-                .RuleFor(x => x.ShortDateFormat, f => f.Random.String())
-                .RuleFor(x => x.LongDateFormat, f => f.Random.String())
-                .RuleFor(x => x.TimeFormat, f => f.Random.String())
-                .RuleFor(x => x.TimeZone, f => f.Random.String())
+                .RuleFor(x => x.ShortDateFormat, f => f.PickRandom(ShortDateFormat))
+                .RuleFor(x => x.LongDateFormat, f => f.PickRandom(LongDateFormat))
+                .RuleFor(x => x.TimeFormat, f => f.PickRandom(TimeFormat))
+                .RuleFor(x => x.TimeZone, f => f.Date.TimeZoneString())
                 .RuleFor(x => x.ShowRelativeDates, f => f.Random.Bool());
         }
 
@@ -107,7 +113,7 @@ namespace PlexRipper.BaseTests
         public static string GetSettingsModelJson(UnitTestDataConfig config = null)
         {
             var settings = GetSettingsModel(config).Generate();
-            return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigBase);
+            return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCaptialized);
         }
     }
 }

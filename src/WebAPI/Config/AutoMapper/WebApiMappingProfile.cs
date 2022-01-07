@@ -6,7 +6,6 @@ using PlexRipper.Application;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using PlexRipper.Settings.Models;
-using PlexRipper.Settings.Modules;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
@@ -162,12 +161,31 @@ namespace PlexRipper.WebAPI.Config
 
         private void SettingsMappings()
         {
-            CreateMap<ISettingsModel, SettingsModelDTO>(MemberList.Destination)
-                .ForMember(dto => dto.GeneralSettings, entity => entity.MapFrom(x => x.GeneralSettings));
+            CreateMap<SettingsModelDTO, SettingsModel>().ReverseMap();
 
-            CreateMap<SettingsModelDTO, SettingsModel>();
-            CreateMap<GeneralSettingsDTO, GeneralSettingsModule>().ReverseMap();
-            CreateMap<GeneralSettingsDTO, IGeneralSettingsModule>().ReverseMap();
+            CreateMap<GeneralSettingsDTO, GeneralSettings>().ReverseMap();
+            CreateMap<ConfirmationSettingsDTO, ConfirmationSettings>().ReverseMap();
+            CreateMap<DateTimeSettingsDTO, DateTimeSettings>().ReverseMap();
+            CreateMap<DisplaySettingsDTO, DisplaySettings>().ReverseMap();
+            CreateMap<DownloadManagerSettingsDTO, DownloadManagerSettings>().ReverseMap();
+            CreateMap<LanguageSettingsDTO, LanguageSettings>().ReverseMap();
+            CreateMap<ServerSettingsDTO, ServerSettings>().ReverseMap();
+
+            CreateMap<GeneralSettingsDTO, IGeneralSettings>().ReverseMap();
+            CreateMap<ConfirmationSettingsDTO, IConfirmationSettings>().ReverseMap();
+            CreateMap<DateTimeSettingsDTO, IDateTimeSettings>().ReverseMap();
+            CreateMap<DisplaySettingsDTO, IDisplaySettings>().ReverseMap();
+            CreateMap<DownloadManagerSettingsDTO, IDownloadManagerSettings>().ReverseMap();
+            CreateMap<LanguageSettingsDTO, ILanguageSettings>().ReverseMap();
+            CreateMap<ServerSettingsDTO, IServerSettings>().ReverseMap();
+
+            CreateMap<GeneralSettings, IGeneralSettings>().ReverseMap();
+            CreateMap<ConfirmationSettings, IConfirmationSettings>().ReverseMap();
+            CreateMap<DateTimeSettings, IDateTimeSettings>().ReverseMap();
+            CreateMap<DisplaySettings, IDisplaySettings>().ReverseMap();
+            CreateMap<DownloadManagerSettings, IDownloadManagerSettings>().ReverseMap();
+            CreateMap<LanguageSettings, ILanguageSettings>().ReverseMap();
+            CreateMap<ServerSettings, IServerSettings>().ReverseMap();
         }
     }
 }

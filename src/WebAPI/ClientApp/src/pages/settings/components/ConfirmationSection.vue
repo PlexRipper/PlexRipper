@@ -63,13 +63,13 @@ export default class ConfirmationSection extends Vue {
 	updateSettings(index: number, state: boolean): void {
 		switch (index) {
 			case 0:
-				return SettingsService.updateSetting('askDownloadMovieConfirmation', state);
+				return SettingsService.updateConfirmationSetting('askDownloadMovieConfirmation', state);
 			case 1:
-				return SettingsService.updateSetting('askDownloadTvShowConfirmation', state);
+				return SettingsService.updateConfirmationSetting('askDownloadTvShowConfirmation', state);
 			case 2:
-				return SettingsService.updateSetting('askDownloadSeasonConfirmation', state);
+				return SettingsService.updateConfirmationSetting('askDownloadSeasonConfirmation', state);
 			case 3:
-				return SettingsService.updateSetting('askDownloadEpisodeConfirmation', state);
+				return SettingsService.updateConfirmationSetting('askDownloadEpisodeConfirmation', state);
 			default:
 				Log.error(`Failed to update settings with index ${index} and value ${state}`);
 		}

@@ -9,6 +9,8 @@ namespace PlexRipper.Settings.Modules
     {
         public bool FirstTimeSetup { get; set; }
 
+        public int ActiveAccountId { get; set; }
+
         public override string Name => "GeneralSettings";
 
         public override IGeneralSettings DefaultValues => new GeneralSettings

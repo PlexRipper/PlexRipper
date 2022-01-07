@@ -54,14 +54,16 @@ namespace PlexRipper.Settings
 
             // Alert of any module changes
             Observable.Merge(
-                _confirmationSettingsModule.ModuleHasChanged.Select(_ => 1),
-                _dateTimeSettingsModule.ModuleHasChanged.Select(_ => 1),
-                _displaySettingsModule.ModuleHasChanged.Select(_ => 1),
-                _downloadManagerSettingsModule.ModuleHasChanged.Select(_ => 1),
-                _generalSettingsModule.ModuleHasChanged.Select(_ => 1),
-                _languageSettingsModule.ModuleHasChanged.Select(_ => 1),
-                _serverSettingsModule.ModuleHasChanged.Select(_ => 1)
-            ).Subscribe(_ => _settingsUpdated.OnNext(GetSettingsModel()));
+                    _confirmationSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _dateTimeSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _displaySettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _downloadManagerSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _generalSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _languageSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _serverSettingsModule.ModuleHasChanged.Select(_ => 1)
+                )
+                .Throttle(TimeSpan.FromMilliseconds(500))
+                .Subscribe(_ => _settingsUpdated.OnNext(GetSettingsModel()));
         }
 
         #region Methods
@@ -118,7 +120,7 @@ namespace PlexRipper.Settings
         {
             try
             {
-                return Result.Ok(JsonSerializer.Serialize(GetSettingsModel(), DefaultJsonSerializerOptions.ConfigBase));
+                return Result.Ok(JsonSerializer.Serialize(GetSettingsModel(), DefaultJsonSerializerOptions.ConfigIndented));
             }
             catch (Exception e)
             {

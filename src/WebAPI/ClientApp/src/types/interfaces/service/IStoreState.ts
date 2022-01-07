@@ -25,7 +25,6 @@ export default interface IStoreState extends SettingsModelDTO {
 	folderPaths: FolderPathDTO[];
 	alerts: IAlert[];
 	mediaUrls: IObjectUrl[];
-	settings: SettingsModelDTO;
 	helpIdDialog: string;
 	downloadTaskUpdateList: DownloadTaskDTO[];
 	// Progress Service

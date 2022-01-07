@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using PlexRipper.Domain;
-using PlexRipper.Domain.DownloadManager;
-
 namespace PlexRipper.Application
 {
     public interface ISettingsModel

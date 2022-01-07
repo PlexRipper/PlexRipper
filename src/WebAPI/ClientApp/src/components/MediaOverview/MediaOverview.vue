@@ -161,9 +161,9 @@ export default class MediaOverview extends Vue {
 	changeView(viewMode: ViewMode): void {
 		switch (this.mediaType) {
 			case PlexMediaType.Movie:
-				return SettingsService.updateSetting('movieViewMode', viewMode);
+				return SettingsService.updateDisplaySettings('movieViewMode', viewMode);
 			case PlexMediaType.TvShow:
-				return SettingsService.updateSetting('tvShowViewMode', viewMode);
+				return SettingsService.updateDisplaySettings('tvShowViewMode', viewMode);
 		}
 		Log.error('Could not set view mode for type' + this.mediaType);
 	}

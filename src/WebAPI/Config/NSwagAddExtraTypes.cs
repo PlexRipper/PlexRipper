@@ -33,7 +33,6 @@ namespace PlexRipper.WebAPI.Config
                 typeof(SyncServerProgress),
                 typeof(DownloadProgressDTO),
                 typeof(ServerDownloadProgressDTO),
-                typeof(GeneralSettingsDTO),
             };
 
             foreach (Type type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))

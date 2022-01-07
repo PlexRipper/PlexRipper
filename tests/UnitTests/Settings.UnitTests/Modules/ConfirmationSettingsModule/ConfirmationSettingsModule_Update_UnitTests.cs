@@ -8,9 +8,9 @@ using Xunit.Abstractions;
 
 namespace Settings.UnitTests.Modules
 {
-    public class ConfirmationSettings_Update_UnitTests
+    public class ConfirmationSettingsModule_Update_UnitTests
     {
-        public ConfirmationSettings_Update_UnitTests(ITestOutputHelper output)
+        public ConfirmationSettingsModule_Update_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
         }

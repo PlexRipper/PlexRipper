@@ -107,7 +107,7 @@ namespace PlexRipper.BaseTests
         public static string GetSettingsModelJson(UnitTestDataConfig config = null)
         {
             var settings = GetSettingsModel(config).Generate();
-            return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.Config);
+            return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigBase);
         }
     }
 }

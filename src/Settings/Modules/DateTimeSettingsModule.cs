@@ -21,7 +21,7 @@ namespace PlexRipper.Settings.Modules
 
         public string TimeZone { get; set; }
 
-        protected override IDateTimeSettings DefaultValue => new DateTimeSettings
+        public override IDateTimeSettings DefaultValues => new DateTimeSettings
         {
             TimeFormat = "HH:mm:ss",
             TimeZone = "UTC",
@@ -33,46 +33,6 @@ namespace PlexRipper.Settings.Modules
         #endregion
 
         #region Public Methods
-
-        /// <inheritdoc/>
-        public Result SetFromJson(JsonElement settingsJsonElement)
-        {
-            var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
-            if (jsonSettings.IsFailed)
-            {
-                Reset();
-                return jsonSettings;
-            }
-
-            var dateTimeSettings = jsonSettings.Value;
-
-            if (dateTimeSettings.TryGetProperty(nameof(ShortDateFormat), out JsonElement shortDateFormat))
-            {
-                ShortDateFormat = shortDateFormat.GetString();
-            }
-
-            if (dateTimeSettings.TryGetProperty(nameof(LongDateFormat), out JsonElement longDateFormat))
-            {
-                LongDateFormat = longDateFormat.GetString();
-            }
-
-            if (dateTimeSettings.TryGetProperty(nameof(TimeFormat), out JsonElement timeFormat))
-            {
-                TimeFormat = timeFormat.GetString();
-            }
-
-            if (dateTimeSettings.TryGetProperty(nameof(TimeZone), out JsonElement timeZone))
-            {
-                TimeZone = timeZone.GetString();
-            }
-
-            if (dateTimeSettings.TryGetProperty(nameof(ShowRelativeDates), out JsonElement showRelativeDates))
-            {
-                ShowRelativeDates = showRelativeDates.GetBoolean();
-            }
-
-            return Result.Ok();
-        }
 
         public override IDateTimeSettings GetValues()
         {

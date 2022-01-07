@@ -13,28 +13,67 @@ namespace PlexRipper.Settings
     {
         #region Fields
 
-        protected readonly Subject<TModel> _subject = new();
+        private readonly Subject<TModel> _moduleUpdatedSubject = new();
 
         #endregion
 
-        #region Properties
-
-        public IObservable<TModel> ModuleHasChanged => _subject.AsObservable();
-
-        public abstract string Name { get; }
-
-        protected abstract TModel DefaultValue { get; }
-
-        #endregion
+        #region Constructor
 
         protected BaseSettingsModule()
         {
             Reset();
         }
 
+        #endregion
+
+        #region Properties
+
+        public IObservable<TModel> ModuleHasChanged => _moduleUpdatedSubject.AsObservable();
+
+        public abstract string Name { get; }
+
+        public abstract TModel DefaultValues { get; }
+
+        #endregion
+
         #region Public Methods
 
         public abstract TModel GetValues();
+
+        public TModel Reset()
+        {
+            return Update(DefaultValues);
+        }
+
+        /// <inheritdoc/>
+        public virtual Result SetFromJson(JsonElement jsonElement)
+        {
+            var jsonSettings = GetJsonSettingsModule(jsonElement);
+            if (jsonSettings.IsFailed)
+            {
+                Reset();
+                return jsonSettings;
+            }
+
+            var rootSettingsModule = jsonSettings.Value;
+            foreach (PropertyInfo prop in typeof(TModel).GetProperties())
+            {
+                if (rootSettingsModule.TryGetProperty(prop.Name, out JsonElement jsonValueElement))
+                {
+                    var targetProp = GetType().GetProperty(prop.Name);
+                    var targetPropType = targetProp.PropertyType;
+                    var targetValue = targetProp.GetValue(this, null);
+
+                    var sourceValue = jsonValueElement.GetTypedValue(targetPropType);
+                    if (sourceValue != targetValue)
+                    {
+                        targetProp.SetValue(this, sourceValue);
+                    }
+                }
+            }
+
+            return Result.Ok();
+        }
 
         public TModel Update(TModel sourceSettings)
         {
@@ -61,45 +100,23 @@ namespace PlexRipper.Settings
             return GetValues();
         }
 
-        public TModel Reset()
-        {
-            return Update(DefaultValue);
-        }
-
         #endregion
 
         #region Private Methods
 
         protected void EmitModuleHasChanged(TModel module)
         {
-            _subject.OnNext(module);
+            _moduleUpdatedSubject.OnNext(module);
         }
 
-        /// <inheritdoc/>
-        public virtual Result SetFromJson(JsonElement jsonElement)
+        protected Result<JsonElement> GetJsonSettingsModule(JsonElement jsonElement)
         {
-            if (!jsonElement.TryGetProperty(Name, out JsonElement rootSettingsModule))
+            if (jsonElement.TryGetProperty(Name, out JsonElement rootSettingsModule))
             {
-                return Result.Fail($"Could not find settings module {Name} in config file").LogError();
+                return Result.Ok(rootSettingsModule);
             }
 
-            foreach (PropertyInfo prop in typeof(TModel).GetProperties())
-            {
-                if (rootSettingsModule.TryGetProperty(prop.Name, out JsonElement jsonValueElement))
-                {
-                    var targetProp = GetType().GetProperty(prop.Name);
-                    var targetPropType = targetProp.PropertyType;
-                    var targetValue = targetProp.GetValue(this, null);
-
-                    var sourceValue = jsonValueElement.GetTypedValue(targetPropType);
-                    if (sourceValue != targetValue)
-                    {
-                        targetProp.SetValue(this, sourceValue);
-                    }
-                }
-            }
-
-            return Result.Ok();
+            return Result.Fail($"Could not find settings module {Name} in config file").LogError();
         }
 
         #endregion

@@ -10,7 +10,7 @@ namespace PlexRipper.BaseTests.Extensions
         public static async Task<T> Deserialize<T>(this HttpResponseMessage response)
         {
             var jsonResponse = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(jsonResponse, DefaultJsonSerializerOptions.Config);
+            return JsonSerializer.Deserialize<T>(jsonResponse, DefaultJsonSerializerOptions.ConfigBase);
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using Autofac.Extras.Moq;
 using Logging;
+using PlexRipper.BaseTests;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Config;
 using PlexRipper.Settings.Models;
 using PlexRipper.Settings.Modules;
@@ -10,9 +12,9 @@ using Xunit.Abstractions;
 
 namespace Settings.UnitTests.Modules
 {
-    public class ConfirmationSettingsModule_SetFromJson_UnitTests
+    public class DisplaySettingsModule_SetFromJson_UnitTests
     {
-        public ConfirmationSettingsModule_SetFromJson_UnitTests(ITestOutputHelper output)
+        public DisplaySettingsModule_SetFromJson_UnitTests(ITestOutputHelper output)
         {
             Log.SetupTestLogging(output);
         }
@@ -22,19 +24,17 @@ namespace Settings.UnitTests.Modules
         {
             // Arrange
             using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<ConfirmationSettingsModule>();
+            var _sut = mock.Create<DisplaySettingsModule>();
 
             var settingsModel = new SettingsModel
             {
-                ConfirmationSettings = new ConfirmationSettings
+                DisplaySettings = new DisplaySettings
                 {
-                    AskDownloadMovieConfirmation = true,
-                    AskDownloadTvShowConfirmation = true,
-                    AskDownloadSeasonConfirmation = false,
-                    AskDownloadEpisodeConfirmation = false,
+                    MovieViewMode = ViewMode.Overview,
+                    TvShowViewMode = ViewMode.Overview,
                 },
             };
-            var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
+            var json = JsonSerializer.Serialize(settingsModel,  DefaultJsonSerializerOptions.ConfigCaptialized);
             var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);
 
             // Act
@@ -42,10 +42,8 @@ namespace Settings.UnitTests.Modules
 
             // Assert
             result.IsSuccess.ShouldBeTrue();
-            _sut.AskDownloadMovieConfirmation.ShouldBeTrue();
-            _sut.AskDownloadTvShowConfirmation.ShouldBeTrue();
-            _sut.AskDownloadSeasonConfirmation.ShouldBeFalse();
-            _sut.AskDownloadEpisodeConfirmation.ShouldBeFalse();
+            _sut.MovieViewMode.ShouldBe(ViewMode.Overview);
+            _sut.TvShowViewMode.ShouldBe(ViewMode.Overview);
         }
 
         [Fact]
@@ -53,21 +51,16 @@ namespace Settings.UnitTests.Modules
         {
             // Arrange
             using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<ConfirmationSettingsModule>();
+            var _sut = mock.Create<DisplaySettingsModule>();
 
             var settingsModel = new SettingsModel
             {
-                ConfirmationSettings = new ConfirmationSettings
-                {
-                    AskDownloadMovieConfirmation = true,
-                    AskDownloadTvShowConfirmation = true,
-                    AskDownloadSeasonConfirmation = false,
-                    AskDownloadEpisodeConfirmation = false,
-                },
+                DisplaySettings = FakeData.GetDisplaySettings(new UnitTestDataConfig(234)).Generate(),
             };
             var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
+
             // ** Remove property to make corrupted
-            json = json.Replace("AskDownloadMovieConfirmation\":true,\"", "");
+            json = json.Replace("\"TvShowViewMode\":\"Table\",", "");
             var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);
 
             // Act
@@ -75,10 +68,8 @@ namespace Settings.UnitTests.Modules
 
             // Assert
             result.IsSuccess.ShouldBeTrue();
-            _sut.AskDownloadMovieConfirmation.ShouldBeTrue();
-            _sut.AskDownloadTvShowConfirmation.ShouldBeTrue();
-            _sut.AskDownloadSeasonConfirmation.ShouldBeFalse();
-            _sut.AskDownloadEpisodeConfirmation.ShouldBeFalse();
+            _sut.MovieViewMode.ShouldBe(ViewMode.Overview);
+            _sut.TvShowViewMode.ShouldBe(_sut.DefaultValues.TvShowViewMode);
         }
     }
 }

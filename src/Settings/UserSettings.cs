@@ -118,7 +118,7 @@ namespace PlexRipper.Settings
         {
             try
             {
-                return Result.Ok(JsonSerializer.Serialize(GetSettingsModel(), DefaultJsonSerializerOptions.Config));
+                return Result.Ok(JsonSerializer.Serialize(GetSettingsModel(), DefaultJsonSerializerOptions.ConfigBase));
             }
             catch (Exception e)
             {

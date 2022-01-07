@@ -11,7 +11,7 @@ namespace PlexRipper.Settings.Modules
 
         public override string Name => "ConfirmationSettings";
 
-        protected override IConfirmationSettings DefaultValue => new ConfirmationSettings
+        public override IConfirmationSettings DefaultValues => new ConfirmationSettings
         {
             AskDownloadEpisodeConfirmation = true,
             AskDownloadMovieConfirmation = true,

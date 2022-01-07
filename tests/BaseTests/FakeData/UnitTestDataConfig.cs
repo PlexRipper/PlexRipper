@@ -6,6 +6,17 @@ namespace PlexRipper.BaseTests
 {
     public class UnitTestDataConfig
     {
+
+        public UnitTestDataConfig()
+        {
+
+        }
+
+        public UnitTestDataConfig(int seed)
+        {
+            Seed = seed;
+        }
+
         public string MemoryDbName { get; init; } = MockDatabase.GetMemoryDatabaseName();
 
         public int Seed { get; init; }

@@ -11,7 +11,7 @@ namespace PlexRipper.Settings.Modules
 
         public override string Name => "GeneralSettings";
 
-        protected override IGeneralSettings DefaultValue => new GeneralSettings
+        public override IGeneralSettings DefaultValues => new GeneralSettings
         {
             FirstTimeSetup = true,
         };

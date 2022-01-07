@@ -87,7 +87,7 @@ namespace PlexRipper.Settings
 
             try
             {
-                var loadedSettings = JsonSerializer.Deserialize<JsonElement>(readResult.Value, DefaultJsonSerializerOptions.Config);
+                var loadedSettings = JsonSerializer.Deserialize<JsonElement>(readResult.Value, DefaultJsonSerializerOptions.ConfigBase);
                 var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
                 if (setFromJsonResult.IsFailed)
                 {

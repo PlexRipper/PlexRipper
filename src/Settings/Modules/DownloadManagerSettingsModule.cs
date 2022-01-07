@@ -7,14 +7,14 @@ namespace PlexRipper.Settings.Modules
 {
     public class DownloadManagerSettingsModule : BaseSettingsModule<IDownloadManagerSettings>, IDownloadManagerSettingsModule
     {
-        public int DownloadSegments { get; set; } = 4;
+        public int DownloadSegments { get; set; }
 
         public override string Name => "DownloadManagerSettings";
 
-        public void Reset()
+        protected override IDownloadManagerSettings DefaultValue => new DownloadManagerSettings
         {
-            Update(new DownloadManagerSettingsModule());
-        }
+            DownloadSegments = 4,
+        };
 
         /// <inheritdoc/>
         public Result SetFromJson(JsonElement settingsJsonElement)

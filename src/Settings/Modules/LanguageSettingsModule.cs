@@ -9,9 +9,14 @@ namespace PlexRipper.Settings.Modules
     {
         #region Properties
 
-        public string Language { get; set; } = "en-US";
+        public string Language { get; set; }
 
         public override string Name => "LanguageSettings";
+
+        protected override ILanguageSettings DefaultValue => new LanguageSettings
+        {
+            Language = "en-US",
+        };
 
         #endregion
 

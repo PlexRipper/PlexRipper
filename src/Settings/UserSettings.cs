@@ -85,23 +85,18 @@ namespace PlexRipper.Settings
 
         public Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings)
         {
-            var results = new List<Result>
+            var settings = new SettingsModel
             {
-                _confirmationSettingsModule.Update(sourceSettings.ConfirmationSettings),
-                _dateTimeSettingsModule.Update(sourceSettings.DateTimeSettings),
-                _displaySettingsModule.Update(sourceSettings.DisplaySettings),
-                _downloadManagerSettingsModule.Update(sourceSettings.DownloadManagerSettings),
-                _generalSettingsModule.Update(sourceSettings.GeneralSettings),
-                _languageSettingsModule.Update(sourceSettings.LanguageSettings),
-                _serverSettingsModule.Update(sourceSettings.ServerSettings),
+                ConfirmationSettings = _confirmationSettingsModule.Update(sourceSettings.ConfirmationSettings),
+                DateTimeSettings = _dateTimeSettingsModule.Update(sourceSettings.DateTimeSettings),
+                DisplaySettings = _displaySettingsModule.Update(sourceSettings.DisplaySettings),
+                DownloadManagerSettings = _downloadManagerSettingsModule.Update(sourceSettings.DownloadManagerSettings),
+                GeneralSettings = _generalSettingsModule.Update(sourceSettings.GeneralSettings),
+                LanguageSettings = _languageSettingsModule.Update(sourceSettings.LanguageSettings),
+                ServerSettings = _serverSettingsModule.Update(sourceSettings.ServerSettings),
             };
 
-            if (results.Any(x => x.IsFailed))
-            {
-                return Result.Fail("Failed to update settings").AddNestedErrors(results.SelectMany(x => x.Errors).ToList());
-            }
-
-            return Result.Ok(GetSettingsModel());
+            return Result.Ok((ISettingsModel)settings);
         }
 
         public ISettingsModel GetSettingsModel()

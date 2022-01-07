@@ -16,7 +16,7 @@ namespace Settings.UnitTests.Modules
         }
 
         [Fact]
-        public void ShouldHaveNoUpdates_WhenGivenAnEmptyList()
+        public void ShouldUpdateSettingsModule_WhenGivenValidSettingsObject()
         {
             // Arrange
             using var mock = AutoMock.GetStrict();
@@ -24,16 +24,19 @@ namespace Settings.UnitTests.Modules
             var settings = new ConfirmationSettings
             {
                 AskDownloadMovieConfirmation = false,
-                AskDownloadEpisodeConfirmation = false,
-                AskDownloadSeasonConfirmation = false,
                 AskDownloadTvShowConfirmation = false,
+                AskDownloadSeasonConfirmation = false,
+                AskDownloadEpisodeConfirmation = false,
             };
 
             // Act
             var updateResult = _sut.Update(settings);
 
             // Assert
-            updateResult.IsSuccess.ShouldBeTrue();
+            updateResult.AskDownloadMovieConfirmation.ShouldBeFalse();
+            updateResult.AskDownloadTvShowConfirmation.ShouldBeFalse();
+            updateResult.AskDownloadSeasonConfirmation.ShouldBeFalse();
+            updateResult.AskDownloadEpisodeConfirmation.ShouldBeFalse();
         }
     }
 }

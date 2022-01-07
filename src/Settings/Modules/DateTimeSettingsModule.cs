@@ -11,24 +11,28 @@ namespace PlexRipper.Settings.Modules
 
         public override string Name => "DateTimeSettings";
 
-        public string LongDateFormat { get; set; } = "EEEE, dd MMMM yyyy";
+        public string LongDateFormat { get; set; }
 
-        public string ShortDateFormat { get; set; } = "dd/MM/yyyy";
+        public string ShortDateFormat { get; set; }
 
-        public bool ShowRelativeDates { get; set; } = true;
+        public bool ShowRelativeDates { get; set; }
 
-        public string TimeFormat { get; set; } = "HH:mm:ss";
+        public string TimeFormat { get; set; }
 
-        public string TimeZone { get; set; } = "UTC";
+        public string TimeZone { get; set; }
+
+        protected override IDateTimeSettings DefaultValue => new DateTimeSettings
+        {
+            TimeFormat = "HH:mm:ss",
+            TimeZone = "UTC",
+            LongDateFormat = "EEEE, dd MMMM yyyy",
+            ShortDateFormat = "dd/MM/yyyy",
+            ShowRelativeDates = true,
+        };
 
         #endregion
 
         #region Public Methods
-
-        public void Reset()
-        {
-            Update(new DateTimeSettingsModule());
-        }
 
         /// <inheritdoc/>
         public Result SetFromJson(JsonElement settingsJsonElement)
@@ -82,6 +86,6 @@ namespace PlexRipper.Settings.Modules
             };
         }
 
-  #endregion
+        #endregion
     }
 }

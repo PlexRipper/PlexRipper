@@ -8,16 +8,17 @@ namespace PlexRipper.Settings.Modules
 {
     public class DisplaySettingsModule : BaseSettingsModule<IDisplaySettings>, IDisplaySettingsModule
     {
-        public ViewMode TvShowViewMode { get; set; } = ViewMode.Poster;
+        public ViewMode TvShowViewMode { get; set; }
 
-        public ViewMode MovieViewMode { get; set; } = ViewMode.Poster;
+        public ViewMode MovieViewMode { get; set; }
 
         public override string Name => "DisplaySettings";
 
-        public void Reset()
+        protected override IDisplaySettings DefaultValue => new DisplaySettings
         {
-            Update(new DisplaySettingsModule());
-        }
+            TvShowViewMode = ViewMode.Poster,
+            MovieViewMode = ViewMode.Poster,
+        };
 
         public Result SetFromJson(JsonElement settingsJsonElement)
         {

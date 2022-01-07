@@ -7,19 +7,19 @@ namespace PlexRipper.Settings.Modules
 {
     public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGeneralSettingsModule
     {
-        public bool FirstTimeSetup { get; set; } = true;
+        public bool FirstTimeSetup { get; set; }
 
         public override string Name => "GeneralSettings";
+
+        protected override IGeneralSettings DefaultValue => new GeneralSettings
+        {
+            FirstTimeSetup = true,
+        };
 
         public Result Update(IGeneralSettingsModule sourceSettings)
         {
             FirstTimeSetup = sourceSettings.FirstTimeSetup;
             return Result.Ok();
-        }
-
-        public void Reset()
-        {
-            Update(new GeneralSettingsModule());
         }
 
         public Result SetFromJson(JsonElement settingsJsonElement)

@@ -8,9 +8,9 @@ namespace PlexRipper.Application
     {
         public string Name { get; }
 
-        public Result Update(TModel sourceSettings);
+        public TModel Update(TModel sourceSettings);
 
-        public void Reset();
+        public TModel Reset();
 
         /// <summary>
         /// Parses the Json Element from the PlexRipperSettings.json and defaults its value if nothing is found.

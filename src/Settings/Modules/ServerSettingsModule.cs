@@ -26,6 +26,11 @@ namespace PlexRipper.Settings.Modules
 
         public override string Name => "ServerSettings";
 
+        protected override IServerSettings DefaultValue => new ServerSettings
+        {
+            Data = new List<PlexServerSettingsModel>(),
+        };
+
         #endregion
 
         #region Public Methods

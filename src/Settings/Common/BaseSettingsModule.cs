@@ -4,10 +4,12 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text.Json;
 using FluentResults;
+using PlexRipper.Application;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Settings
 {
-    public abstract class BaseSettingsModule<TModel> where TModel : BaseSettingsModule<TModel>
+    public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> where TModel : class
     {
         #region Fields
 
@@ -21,13 +23,20 @@ namespace PlexRipper.Settings
 
         public abstract string Name { get; }
 
+        protected abstract TModel DefaultValue { get; }
+
         #endregion
+
+        protected BaseSettingsModule()
+        {
+            Reset();
+        }
 
         #region Public Methods
 
         public abstract TModel GetValues();
 
-        public Result Update(TModel sourceSettings)
+        public TModel Update(TModel sourceSettings)
         {
             var hasChanged = false;
 
@@ -49,12 +58,12 @@ namespace PlexRipper.Settings
                 EmitModuleHasChanged(GetValues());
             }
 
-            return Result.Ok();
+            return GetValues();
         }
 
-        public void Reset()
+        public TModel Reset()
         {
-            Update(this as TModel);
+            return Update(DefaultValue);
         }
 
         #endregion
@@ -66,14 +75,31 @@ namespace PlexRipper.Settings
             _subject.OnNext(module);
         }
 
-        protected Result<JsonElement> GetJsonSettingsModule(JsonElement jsonElement)
+        /// <inheritdoc/>
+        public virtual Result SetFromJson(JsonElement jsonElement)
         {
-            if (jsonElement.TryGetProperty(Name, out JsonElement confirmationSettings))
+            if (!jsonElement.TryGetProperty(Name, out JsonElement rootSettingsModule))
             {
-                return Result.Ok(confirmationSettings);
+                return Result.Fail($"Could not find settings module {Name} in config file").LogError();
             }
 
-            return Result.Fail($"Could not find settings module {Name} in config file").LogError();
+            foreach (PropertyInfo prop in typeof(TModel).GetProperties())
+            {
+                if (rootSettingsModule.TryGetProperty(prop.Name, out JsonElement jsonValueElement))
+                {
+                    var targetProp = GetType().GetProperty(prop.Name);
+                    var targetPropType = targetProp.PropertyType;
+                    var targetValue = targetProp.GetValue(this, null);
+
+                    var sourceValue = jsonValueElement.GetTypedValue(targetPropType);
+                    if (sourceValue != targetValue)
+                    {
+                        targetProp.SetValue(this, sourceValue);
+                    }
+                }
+            }
+
+            return Result.Ok();
         }
 
         #endregion

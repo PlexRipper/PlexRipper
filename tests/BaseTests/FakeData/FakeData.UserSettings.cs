@@ -39,7 +39,8 @@ namespace PlexRipper.BaseTests
             return new Faker<GeneralSettings>()
                 .StrictMode(true)
                 .UseSeed(config.Seed)
-                .RuleFor(x => x.FirstTimeSetup, f => f.Random.Bool());
+                .RuleFor(x => x.FirstTimeSetup, f => f.Random.Bool())
+                .RuleFor(x => x.ActiveAccountId, f => f.Random.Int(1, 10));
         }
 
         public static Faker<ConfirmationSettings> GetConfirmationSettings(UnitTestDataConfig config = null)

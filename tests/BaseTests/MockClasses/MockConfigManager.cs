@@ -19,7 +19,7 @@ namespace PlexRipper.BaseTests
         public Result Setup()
         {
             Log.Information("Setting up default user config settings in integration mode");
-            _userSettings.UpdateSettings(new SettingsModel());
+            _userSettings.Reset();
             return Result.Ok();
         }
 
@@ -30,7 +30,7 @@ namespace PlexRipper.BaseTests
 
         public Result ResetConfig()
         {
-            _userSettings.UpdateSettings(new SettingsModel());
+            _userSettings.Reset();
             return Result.Ok();
         }
 

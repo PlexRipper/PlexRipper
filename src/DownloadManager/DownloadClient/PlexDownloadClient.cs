@@ -313,8 +313,9 @@ namespace PlexRipper.DownloadManager.DownloadClient
             }
 
             SetDownloadSpeedLimit(_serverSettings.GetDownloadSpeedLimit(DownloadTask.PlexServerId));
-            _downloadSpeedLimitSubscription = _serverSettings.ServerSettings(DownloadTask.PlexServerId)
-                .Subscribe(model => SetDownloadSpeedLimit(model.DownloadSpeedLimit));
+            _downloadSpeedLimitSubscription = _serverSettings
+                .GetDownloadSpeedLimitObservable(DownloadTask.PlexServerId)
+                .Subscribe(SetDownloadSpeedLimit);
         }
 
         private void SetupSubscriptions()

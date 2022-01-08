@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 
 namespace BaseTests.IntegrationTests.Setup
 {
+    [Collection("Sequential")]
     public class IntegrationTest_Setup
     {
         public IntegrationTest_Setup(ITestOutputHelper output)

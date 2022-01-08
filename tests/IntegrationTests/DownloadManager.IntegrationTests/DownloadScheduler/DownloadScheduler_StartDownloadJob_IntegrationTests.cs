@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 
 namespace DownloadManager.IntegrationTests.DownloadScheduler
 {
+    [Collection("Sequential")]
     public class DownloadScheduler_StartDownloadJob_IntegrationTests
     {
         public DownloadScheduler_StartDownloadJob_IntegrationTests(ITestOutputHelper output)

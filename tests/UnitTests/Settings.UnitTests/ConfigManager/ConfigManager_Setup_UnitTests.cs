@@ -72,6 +72,7 @@ namespace Settings.UnitTests
                 mock.Container.Resolve<IPathProvider>(),
                 mock.Container.Resolve<IUserSettings>());
             sut.Setup(x => x.ConfigFileExists()).Returns(false);
+            sut.Setup(x => x.SaveConfig()).Returns(Result.Ok);
 
             // Act
             var resetResult = sut.Object.Setup();

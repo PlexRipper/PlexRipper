@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AutoMapper;
 using Environment;
 using Logging;
 using MediatR;
@@ -109,9 +110,9 @@ namespace PlexRipper.BaseTests
 
         public IDownloadScheduler DownloadScheduler => Resolve<IDownloadScheduler>();
 
-        #region Settings
+        public IMapper Mapper => Resolve<IMapper>();
 
-        public IUserSettings GetUserSettings => Resolve<IUserSettings>();
+        #region Settings
 
         public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
 

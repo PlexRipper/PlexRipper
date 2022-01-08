@@ -15,6 +15,7 @@ using Xunit.Abstractions;
 
 namespace WebAPI.IntegrationTests.DownloadController
 {
+    [Collection("Sequential")]
     public class DownloadController_GetDownloadTasks_IntegrationTests
     {
         public DownloadController_GetDownloadTasks_IntegrationTests(ITestOutputHelper output)

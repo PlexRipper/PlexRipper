@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 
 namespace DownloadManager.IntegrationTests.DownloadTracker
 {
+    [Collection("Sequential")]
     public class DownloadTracker_StartDownloadJob_IntegrationTests
     {
         public DownloadTracker_StartDownloadJob_IntegrationTests(ITestOutputHelper output)

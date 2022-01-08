@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
-using Autofac.Extras.Moq;
+﻿using System.Text.Json;
+using System.Threading.Tasks;
 using Logging;
-using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
+using PlexRipper.Domain.Config;
 using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 
 namespace WebAPI.IntegrationTests.SettingsController
 {
+    [Collection("Sequential")]
     public class SettingsController_Get_Settings_IntegrationTests
     {
         public SettingsController_Get_Settings_IntegrationTests(ITestOutputHelper output)
@@ -39,27 +40,11 @@ namespace WebAPI.IntegrationTests.SettingsController
             // Assert
             response.IsSuccessStatusCode.ShouldBeTrue();
             result.IsSuccess.ShouldBeTrue();
-            var responseSettings = result.Value;
-            var defaultSettings = new SettingsModel();
+            var responseSettings =
+                JsonSerializer.Serialize(container.Mapper.Map<SettingsModel>(result.Value), DefaultJsonSerializerOptions.ConfigBase);
+            var defaultSettings = JsonSerializer.Serialize(new SettingsModel(), DefaultJsonSerializerOptions.ConfigBase);
 
-            // responseSettings.FirstTimeSetup.ShouldBe(defaultSettings.FirstTimeSetup);
-            // responseSettings.ActiveAccountId.ShouldBe(defaultSettings.ActiveAccountId);
-            // responseSettings.DownloadSegments.ShouldBe(defaultSettings.DownloadSegments);
-            // responseSettings.Language.ShouldBe(defaultSettings.Language);
-            //
-            // responseSettings.AskDownloadMovieConfirmation.ShouldBe(defaultSettings.AskDownloadMovieConfirmation);
-            // responseSettings.AskDownloadTvShowConfirmation.ShouldBe(defaultSettings.AskDownloadTvShowConfirmation);
-            // responseSettings.AskDownloadSeasonConfirmation.ShouldBe(defaultSettings.AskDownloadSeasonConfirmation);
-            // responseSettings.AskDownloadEpisodeConfirmation.ShouldBe(defaultSettings.AskDownloadEpisodeConfirmation);
-            //
-            // responseSettings.TvShowViewMode.ShouldBe(defaultSettings.TvShowViewMode);
-            // responseSettings.MovieViewMode.ShouldBe(defaultSettings.MovieViewMode);
-            //
-            // responseSettings.ShortDateFormat.ShouldBe(defaultSettings.ShortDateFormat);
-            // responseSettings.LongDateFormat.ShouldBe(defaultSettings.LongDateFormat);
-            // responseSettings.TimeFormat.ShouldBe(defaultSettings.TimeFormat);
-            // responseSettings.TimeZone.ShouldBe(defaultSettings.TimeZone);
-            // responseSettings.ShowRelativeDates.ShouldBe(defaultSettings.ShowRelativeDates);
+            responseSettings.ShouldBe(defaultSettings);
         }
     }
 }

@@ -11,5 +11,6 @@ namespace PlexRipper.Settings.Models
         public bool AskDownloadSeasonConfirmation { get; set; }
 
         public bool AskDownloadEpisodeConfirmation { get; set; }
+
     }
 }

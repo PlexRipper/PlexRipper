@@ -11,6 +11,7 @@ using Xunit.Abstractions;
 
 namespace DownloadManager.IntegrationTests.DownloadTracker
 {
+    [Collection("Sequential")]
     public class DownloadTracker_StopDownloadJob_IntegrationTests
     {
         public DownloadTracker_StopDownloadJob_IntegrationTests(ITestOutputHelper output)

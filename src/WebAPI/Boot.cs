@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Environment;
@@ -87,9 +87,10 @@ namespace PlexRipper.WebAPI
             // TODO Remove this once the plexServer sync has been compatible for the integration test
             if (!EnvironmentExtensions.IsIntegrationTestMode())
             {
-
                 await _schedulerService.SetupAsync();
             }
+
+            Log.Debug("Finished Initiating boot process");
         }
 
         #endregion

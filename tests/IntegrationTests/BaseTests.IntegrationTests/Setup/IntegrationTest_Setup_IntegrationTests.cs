@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Logging;
 using PlexRipper.BaseTests;
 using Shouldly;
 using Xunit;
@@ -8,40 +7,37 @@ using Xunit.Abstractions;
 namespace BaseTests.IntegrationTests.Setup
 {
     [Collection("Sequential")]
-    public class IntegrationTest_Setup
+    public class IntegrationTest_Setup : BaseIntegrationTests
     {
-        public IntegrationTest_Setup(ITestOutputHelper output)
-        {
-            Log.SetupTestLogging(output);
-        }
+        public IntegrationTest_Setup(ITestOutputHelper output) : base(output) { }
 
         [Fact]
         public async Task ShouldHaveValidApiHttpClient_WhenStartingAnIntegrationTest()
         {
-            var container = await BaseContainer.Create();
-            container.ApiClient.ShouldNotBeNull();
+            await CreateContainer();
+            Container.ApiClient.ShouldNotBeNull();
         }
 
         [Fact]
         public async Task ShouldHaveAllResolvePropertiesValid_WhenStartingAnIntegrationTest()
         {
-            var container = await BaseContainer.Create();
-            container.FileSystem.ShouldNotBeNull();
-            container.GetDownloadCommands.ShouldNotBeNull();
-            container.GetDownloadQueue.ShouldNotBeNull();
-            container.GetDownloadTaskFactory.ShouldNotBeNull();
-            container.GetDownloadTaskValidator.ShouldNotBeNull();
-            container.GetDownloadTracker.ShouldNotBeNull();
-            container.GetFolderPathService.ShouldNotBeNull();
-            container.GetPlexAccountService.ShouldNotBeNull();
-            container.GetPlexApiService.ShouldNotBeNull();
-            container.GetPlexDownloadService.ShouldNotBeNull();
-            container.GetPlexLibraryService.ShouldNotBeNull();
-            container.GetPlexRipperHttpClient.ShouldNotBeNull();
-            container.GetPlexServerService.ShouldNotBeNull();
-            container.Mediator.ShouldNotBeNull();
-            container.PathProvider.ShouldNotBeNull();
-            container.PlexRipperDbContext.ShouldNotBeNull();
+            await CreateContainer();
+            Container.FileSystem.ShouldNotBeNull();
+            Container.GetDownloadCommands.ShouldNotBeNull();
+            Container.GetDownloadQueue.ShouldNotBeNull();
+            Container.GetDownloadTaskFactory.ShouldNotBeNull();
+            Container.GetDownloadTaskValidator.ShouldNotBeNull();
+            Container.GetDownloadTracker.ShouldNotBeNull();
+            Container.GetFolderPathService.ShouldNotBeNull();
+            Container.GetPlexAccountService.ShouldNotBeNull();
+            Container.GetPlexApiService.ShouldNotBeNull();
+            Container.GetPlexDownloadService.ShouldNotBeNull();
+            Container.GetPlexLibraryService.ShouldNotBeNull();
+            Container.GetPlexRipperHttpClient.ShouldNotBeNull();
+            Container.GetPlexServerService.ShouldNotBeNull();
+            Container.Mediator.ShouldNotBeNull();
+            Container.PathProvider.ShouldNotBeNull();
+            Container.PlexRipperDbContext.ShouldNotBeNull();
         }
 
         [Fact]
@@ -53,15 +49,30 @@ namespace BaseTests.IntegrationTests.Setup
                 Seed = 9999,
                 MemoryDbName = MockDatabase.GetMemoryDatabaseName(),
             };
-            var container = await BaseContainer.Create(config);
+            await CreateContainer(config);
 
             // Act
-            var dbContext = container.PlexRipperDbContext;
+            var dbContext = Container.PlexRipperDbContext;
 
             // Assert
-            container.ShouldNotBeNull();
+            Container.ShouldNotBeNull();
             dbContext.ShouldNotBeNull();
             dbContext.DatabaseName.ShouldBe(config.MemoryDbName);
+        }
+
+        [Fact]
+        public async Task ShouldAllowForMultipleContainersToBeCreated_WhenMultipleAreCalled()
+        {
+            // Arrange
+            await CreateContainer(new UnitTestDataConfig(3457));
+            await CreateContainer(new UnitTestDataConfig(9654));
+
+            // Act
+            var dbContext = Container.PlexRipperDbContext;
+
+            // Assert
+            Container.ShouldNotBeNull();
+            dbContext.ShouldNotBeNull();
         }
     }
 }

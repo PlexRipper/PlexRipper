@@ -110,6 +110,8 @@ namespace PlexRipper.BaseTests
 
         public IDownloadScheduler DownloadScheduler => Resolve<IDownloadScheduler>();
 
+        public IFileMerger FileMerger => Resolve<IFileMerger>();
+
         public IMapper Mapper => Resolve<IMapper>();
 
         #region Settings
@@ -135,6 +137,7 @@ namespace PlexRipper.BaseTests
         {
             _factory?.Dispose();
             ApiClient?.Dispose();
+            _mockServer?.Server?.Dispose();
         }
     }
 }

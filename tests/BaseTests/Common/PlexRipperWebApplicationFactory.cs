@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Autofac;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -41,7 +42,13 @@ namespace PlexRipper.BaseTests
                     //  autoFacBuilder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
                     //  autoFacBuilder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
                 });
-            return base.CreateHost(builder);
+
+            // Source: https://www.strathweb.com/2021/05/the-curious-case-of-asp-net-core-integration-test-deadlock/
+            var host = builder.Build();
+            Task.Run(() => host.StartAsync()).GetAwaiter().GetResult();
+            return host;
+
+            //return base.CreateHost(builder);
         }
 
         private void SetMockedDependancies(ContainerBuilder builder)

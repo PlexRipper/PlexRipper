@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Logging;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;
@@ -12,12 +11,9 @@ using Xunit.Abstractions;
 namespace DownloadManager.IntegrationTests.DownloadTracker
 {
     [Collection("Sequential")]
-    public class DownloadTracker_StopDownloadJob_IntegrationTests
+    public class DownloadTracker_StopDownloadJob_IntegrationTests : BaseIntegrationTests
     {
-        public DownloadTracker_StopDownloadJob_IntegrationTests(ITestOutputHelper output)
-        {
-            Log.SetupTestLogging(output);
-        }
+        public DownloadTracker_StopDownloadJob_IntegrationTests(ITestOutputHelper output) : base(output) { }
 
         [Fact]
         public async Task ShouldStopDownloadJobAfterStartingForMovieAndEndWithStatusStopped_WhenGivenAValidDownloadTask()
@@ -35,33 +31,33 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
                 MockDownloadSubscriptions = new MockDownloadSubscriptions(),
             };
 
-            var container = await BaseContainer.Create(config);
+            await CreateContainer(config);
             var plexMovieDownloadTask =
-                container.PlexRipperDbContext
+                Container.PlexRipperDbContext
                     .DownloadTasks
                     .FirstOrDefault(x => x.DownloadTaskType == DownloadTaskType.MovieData);
             plexMovieDownloadTask.ShouldNotBeNull();
 
             DownloadTask stoppedDownloadTask = null;
             var downloadTaskUpdates = new List<DownloadTask>();
-            var downloadTracker = container.GetDownloadTracker;
+            var downloadTracker = Container.GetDownloadTracker;
             downloadTracker.DownloadTaskStopped.Subscribe(task => stoppedDownloadTask = task);
             downloadTracker.DownloadTaskUpdate.Subscribe(task => downloadTaskUpdates.Add(task));
 
             // Act
             // ** We can't await otherwise the DownloadTask would have finished already before attempting to stop it
 #pragma warning disable CS4014
-            container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
+            Container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
 #pragma warning restore CS4014
             await Task.Delay(2000);
-            var stopResult = await container.GetDownloadTracker.StopDownloadClient(plexMovieDownloadTask.Id);
+            var stopResult = await Container.GetDownloadTracker.StopDownloadClient(plexMovieDownloadTask.Id);
 
             // Assert
             stopResult.IsSuccess.ShouldBeTrue();
             stoppedDownloadTask.ShouldNotBeNull();
             stoppedDownloadTask.Id.ShouldBe(plexMovieDownloadTask.Id);
             stoppedDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
-            container.GetDownloadTracker.IsDownloading(plexMovieDownloadTask.Id).ShouldBeFalse();
+            Container.GetDownloadTracker.IsDownloading(plexMovieDownloadTask.Id).ShouldBeFalse();
             downloadTaskUpdates.Count.ShouldBe(5);
         }
     }

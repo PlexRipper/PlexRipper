@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Logging;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;
@@ -11,12 +10,9 @@ using Xunit.Abstractions;
 namespace DownloadManager.IntegrationTests.DownloadTracker
 {
     [Collection("Sequential")]
-    public class DownloadTracker_StartDownloadJob_IntegrationTests
+    public class DownloadTracker_StartDownloadJob_IntegrationTests : BaseIntegrationTests
     {
-        public DownloadTracker_StartDownloadJob_IntegrationTests(ITestOutputHelper output)
-        {
-            Log.SetupTestLogging(output);
-        }
+        public DownloadTracker_StartDownloadJob_IntegrationTests(ITestOutputHelper output) : base(output) { }
 
         [Fact]
         public async Task ShouldStartDownloadJobForMovieAndEndWithDownloadFinished_WhenGivenAValidDownloadTask()
@@ -34,19 +30,19 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
                 MockDownloadSubscriptions = new MockDownloadSubscriptions(),
             };
 
-            var container = await BaseContainer.Create(config);
+            await CreateContainer(config);
             var plexMovieDownloadTask =
-                container.PlexRipperDbContext
+                Container.PlexRipperDbContext
                     .DownloadTasks
                     .FirstOrDefault(x => x.DownloadTaskType == DownloadTaskType.MovieData);
             plexMovieDownloadTask.ShouldNotBeNull();
 
             DownloadTask finishedDownloadTask = null;
-            var downloadTracker = container.GetDownloadTracker;
+            var downloadTracker = Container.GetDownloadTracker;
             downloadTracker.DownloadTaskFinished.Subscribe(task => finishedDownloadTask = task);
 
             // Act
-            var startResult = await container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
+            var startResult = await Container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
             await Task.Delay(2000);
 
             // Assert

@@ -594,23 +594,28 @@ namespace PlexRipper.DownloadManager
 
         private Result<string> GetMediaTypeDirectory(DownloadTask downloadTask, string basePath)
         {
-            var parent = downloadTask.Parent;
             var downloadTaskTitle = _pathSystem.SanitizePath(downloadTask.Title);
-            var parentTitle = _pathSystem.SanitizePath(parent.Title);
+            var titles = downloadTask.FullTitle.Split('/');
 
             switch (downloadTask.MediaType)
             {
                 case PlexMediaType.Movie:
                     return Result.Ok(Path.Join(basePath, "Movies", $"{downloadTaskTitle} ({downloadTask.Year})"));
                 case PlexMediaType.TvShow:
-                    return Result.Ok(Path.Join(basePath, "TvShows", $"{downloadTaskTitle} ({downloadTask.Year})"));
+                    return Result.Ok(Path.Join(basePath, "TvShows", downloadTaskTitle));
                 case PlexMediaType.Season:
-                    return Result.Ok(Path.Join(basePath, "TvShows", $"{parentTitle} ({parent.Year})", downloadTaskTitle));
+                    return Result.Ok(Path.Join(basePath,
+                        "TvShows",
+                        _pathSystem.SanitizePath(titles[0]),
+                        _pathSystem.SanitizePath(titles[1])));
                 case PlexMediaType.Episode:
-                    var grandParent = downloadTask.Parent?.Parent;
-                    return Result.Ok(Path.Join(basePath, "TvShows", $"{grandParent.Title} ({grandParent.Year})", parentTitle));
+                    return Result.Ok(Path.Join(basePath,
+                        "TvShows",
+                        _pathSystem.SanitizePath(titles[0]),
+                        _pathSystem.SanitizePath(titles[1]),
+                        _pathSystem.SanitizePath(titles[2])));
                 default:
-                    return Result.Ok(Path.Join(basePath, "Other", $"{downloadTaskTitle} ({downloadTask.Year})"));
+                    return Result.Ok(Path.Join(basePath, "Other", downloadTaskTitle));
             }
         }
 

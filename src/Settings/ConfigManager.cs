@@ -8,7 +8,7 @@ using PlexRipper.Domain.Config;
 
 namespace PlexRipper.Settings
 {
-    public class ConfigManager : IConfigManager
+    public sealed class ConfigManager : IConfigManager
     {
         #region Fields
 
@@ -66,28 +66,27 @@ namespace PlexRipper.Settings
             if (!ConfigFileExists())
             {
                 Log.Information($"\"{_pathProvider.ConfigFileName}\" doesn't exist, will create new one now in \"{_pathProvider.ConfigDirectory}\"");
-                return CreateConfigFile();
+                return SaveConfig();
             }
 
             var loadResult = LoadConfig();
             return loadResult.IsFailed ? loadResult : Result.Ok();
         }
 
-        public virtual Result LoadConfig()
+        public Result LoadConfig()
         {
             Log.Information("Loading user config settings now.");
-            var readResult = _fileSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
+            var readResult = ReadFromConfigFile();
             if (readResult.IsFailed)
             {
-                Log.Error($"Failed to read {_pathProvider.ConfigFileName} from {_pathProvider.ConfigDirectory}");
-                readResult.LogError();
                 Log.Information($"Resetting {_pathProvider.ConfigFileName} because it could not be loaded correctly");
                 return ResetConfig();
             }
 
             try
             {
-                var loadedSettings = JsonSerializer.Deserialize<JsonElement>(readResult.Value, DefaultJsonSerializerOptions.ConfigBase);
+                var cleanedJson = readResult.Value.Replace("\r\n", "");
+                var loadedSettings = JsonSerializer.Deserialize<JsonElement>(cleanedJson, DefaultJsonSerializerOptions.ConfigManagerOptions);
                 var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
                 if (setFromJsonResult.IsFailed)
                 {
@@ -100,13 +99,14 @@ namespace PlexRipper.Settings
             }
             catch (Exception e)
             {
+                Result.Fail(new ExceptionalError(e)).LogError();
                 Log.Error($"Failed to JSON parse the contents from {_pathProvider.ConfigFileName}");
                 Log.Error($"Contents: {readResult.Value}");
                 return ResetConfig();
             }
         }
 
-        public virtual Result ResetConfig()
+        public Result ResetConfig()
         {
             _userSettings.Reset();
             var saveResult = SaveConfig();
@@ -118,11 +118,11 @@ namespace PlexRipper.Settings
             return Result.Ok();
         }
 
-        public virtual Result SaveConfig()
+        public Result SaveConfig()
         {
             Log.Information("Saving user config settings now.");
 
-            var jsonSettings = _userSettings.GetJsonSettingsObject();
+            var jsonSettings = GetJsonSettingsObject();
             if (jsonSettings.IsFailed)
                 return jsonSettings;
 
@@ -133,7 +133,7 @@ namespace PlexRipper.Settings
             return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
         }
 
-        public virtual bool ConfigFileExists()
+        public bool ConfigFileExists()
         {
             return _fileSystem.FileExists(_pathProvider.ConfigFileLocation);
         }
@@ -142,22 +142,34 @@ namespace PlexRipper.Settings
 
         #region Private Methods
 
-        private Result CreateConfigFile()
-        {
-            var settingsObject = _userSettings.GetJsonSettingsObject();
-            if (settingsObject.IsFailed)
-            {
-                return settingsObject.LogError();
-            }
-
-            var writeResult = WriteToConfigFile(settingsObject.Value);
-            return writeResult.IsFailed ? writeResult.LogError() : Result.Ok();
-        }
-
         private Result WriteToConfigFile(string jsonSettingsString)
         {
             var writeResult = _fileSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString);
-            return writeResult.IsFailed ? writeResult.WithError("Failed to write save settings").LogError() : Result.Ok();
+            return writeResult.IsFailed ? writeResult.WithError("Failed to write config settings").LogError() : Result.Ok();
+        }
+
+        private Result<string> ReadFromConfigFile()
+        {
+            var readResult = _fileSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
+            if (readResult.IsFailed)
+            {
+                Log.Error($"Failed to read {_pathProvider.ConfigFileName} from {_pathProvider.ConfigDirectory}");
+                readResult.LogError();
+            }
+
+            return readResult;
+        }
+
+        private Result<string> GetJsonSettingsObject()
+        {
+            try
+            {
+                return Result.Ok(JsonSerializer.Serialize(_userSettings.GetSettingsModel(), DefaultJsonSerializerOptions.ConfigManagerOptions));
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(new ExceptionalError(e)).LogError();
+            }
         }
 
         #endregion

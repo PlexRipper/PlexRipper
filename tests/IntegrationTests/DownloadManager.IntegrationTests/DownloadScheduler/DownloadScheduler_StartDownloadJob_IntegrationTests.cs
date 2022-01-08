@@ -24,7 +24,7 @@ namespace DownloadManager.IntegrationTests.DownloadScheduler
             {
                 Seed = 4564,
                 MovieDownloadTasksCount = 5,
-                DownloadSpeedLimit = 5000,
+                DownloadSpeedLimit = 2000,
                 MockServerConfig = new PlexMockServerConfig
                 {
                     DownloadFileSizeInMb = 50,

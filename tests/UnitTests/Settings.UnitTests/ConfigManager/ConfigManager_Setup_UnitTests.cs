@@ -6,6 +6,7 @@ using FluentResults;
 using Logging;
 using Moq;
 using PlexRipper.Application;
+using PlexRipper.BaseTests;
 using PlexRipper.Settings;
 using Shouldly;
 using Xunit;
@@ -53,12 +54,13 @@ namespace Settings.UnitTests
         public void ShouldCreateConfigFile_WhenConfigFileDoesNotExists()
         {
             // Arrange
+            var settingsModel = FakeData.GetSettingsModel().Generate();
             using var mock = AutoMock.GetStrict();
             mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<ISettingsModel>());
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/");
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_PlexRipperSettings.json");
-            mock.Mock<IUserSettings>().Setup(x => x.GetJsonSettingsObject()).Returns(Result.Ok());
+            mock.Mock<IUserSettings>().Setup(x => x.GetSettingsModel()).Returns(settingsModel);
             mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok);
             mock.Mock<IDirectorySystem>().Setup(x => x.Exists(It.IsAny<string>())).Returns(Result.Ok(false));
             mock.Mock<IDirectorySystem>().Setup(x => x.CreateDirectory(It.IsAny<string>())).Returns(Result.Ok());

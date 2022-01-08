@@ -6,8 +6,10 @@ using FluentResults;
 using Logging;
 using Moq;
 using PlexRipper.Application;
+using PlexRipper.BaseTests;
 using PlexRipper.Settings;
 using Shouldly;
+using WireMock.Admin.Settings;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -24,11 +26,12 @@ namespace Settings.UnitTests
         public void ShouldLoadConfigDuringSetup_WhenConfigFileAlreadyExists()
         {
             // Arrange
+            var settingsModel = FakeData.GetSettingsModel().Generate();
             using var mock = AutoMock.GetStrict();
             mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<ISettingsModel>());
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
             mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-            mock.Mock<IUserSettings>().Setup(x => x.GetJsonSettingsObject()).Returns(Result.Ok("{}"));
+            mock.Mock<IUserSettings>().Setup(x => x.GetSettingsModel()).Returns(settingsModel);
             mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok);
 
             var sut = new Mock<ConfigManager>(

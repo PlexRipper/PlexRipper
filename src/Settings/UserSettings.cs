@@ -7,7 +7,6 @@ using System.Text.Json;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
-using PlexRipper.Domain.Config;
 using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings
@@ -113,19 +112,6 @@ namespace PlexRipper.Settings
                 DateTimeSettings = _dateTimeSettingsModule.GetValues(),
                 DownloadManagerSettings = _downloadManagerSettingsModule.GetValues(),
             };
-        }
-
-        /// <inheritdoc/>
-        public Result<string> GetJsonSettingsObject()
-        {
-            try
-            {
-                return Result.Ok(JsonSerializer.Serialize(GetSettingsModel(), DefaultJsonSerializerOptions.ConfigIndented));
-            }
-            catch (Exception e)
-            {
-                return Result.Fail(new ExceptionalError(e)).LogError();
-            }
         }
 
         public Result SetFromJsonObject(JsonElement settingsJsonElement)

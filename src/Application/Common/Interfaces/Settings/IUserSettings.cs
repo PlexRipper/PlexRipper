@@ -22,8 +22,6 @@ namespace PlexRipper.Application
         /// <param name="sourceSettings">The values to be used to set this UserSettings instance.</param>
         Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings);
 
-        Result<string> GetJsonSettingsObject();
-
         IObservable<ISettingsModel> SettingsUpdated { get; }
 
         Result SetFromJsonObject(JsonElement settingsJsonElement);

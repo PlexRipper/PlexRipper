@@ -7,6 +7,7 @@ using System.Text.Json;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
+using PlexRipper.Domain.Config;
 using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
 
@@ -50,11 +51,6 @@ namespace PlexRipper.Settings.Modules
             return GetPlexServerSettings(plexServerId)?.DownloadSpeedLimit ?? 0;
         }
 
-        public void Reset()
-        {
-            Update(new ServerSettingsModule());
-        }
-
         public IObservable<PlexServerSettingsModel> ServerSettings(int plexServerId)
         {
             return _serverSettingsUpdated.AsObservable().Where(x => x.PlexServerId == plexServerId);
@@ -65,7 +61,7 @@ namespace PlexRipper.Settings.Modules
             return ServerSettings(plexServerId).Select(x => x.DownloadSpeedLimit);
         }
 
-        public Result SetFromJson(JsonElement settingsJsonElement)
+        public override Result SetFromJson(JsonElement settingsJsonElement)
         {
             var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
             if (jsonSettings.IsFailed)
@@ -74,15 +70,22 @@ namespace PlexRipper.Settings.Modules
                 return jsonSettings;
             }
 
-            var serverSettings = jsonSettings.Value;
+            if (!jsonSettings.Value.TryGetProperty(nameof(IServerSettings.Data), out JsonElement jsonValueElement))
+            {
+                Log.Error($"Failed to read property {nameof(IServerSettings.Data)} from {Name}");
+                Reset();
+            }
+
+            var serverSettings = jsonValueElement.GetRawText();
 
             try
             {
-                Data = JsonSerializer.Deserialize<List<PlexServerSettingsModel>>(serverSettings.GetRawText());
+                Data = JsonSerializer.Deserialize<List<PlexServerSettingsModel>>(serverSettings, DefaultJsonSerializerOptions.ConfigManagerOptions);
             }
             catch (Exception e)
             {
-                Log.Error(e);
+                Result.Fail(new ExceptionalError(e)).LogError();
+                Log.Error($"Failed to read {Name}, will reset config now");
                 Reset();
             }
 

@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using FluentResults;
 
-namespace PlexRipper.DownloadManager
+namespace PlexRipper.Application
 {
-    public interface IDownloadScheduler
+    public interface IDownloadScheduler : IBaseScheduler
     {
         Task<Result> StartDownloadJob(int downloadTaskId);
     }

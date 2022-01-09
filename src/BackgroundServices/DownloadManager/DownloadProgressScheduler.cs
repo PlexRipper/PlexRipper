@@ -4,10 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 using Quartz;
 
-namespace PlexRipper.DownloadManager
+namespace BackgroundServices.DownloadManager
 {
     public class DownloadProgressScheduler : IDownloadProgressScheduler
     {
@@ -134,5 +135,15 @@ namespace PlexRipper.DownloadManager
         }
 
         #endregion
+
+        public async Task<Result> SetupAsync()
+        {
+            return Result.Ok();
+        }
+
+        public async Task<Result> StopAsync(bool gracefully = true)
+        {
+            return Result.Ok();
+        }
     }
 }

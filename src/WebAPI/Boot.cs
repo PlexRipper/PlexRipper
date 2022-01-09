@@ -63,10 +63,10 @@ namespace PlexRipper.WebAPI
             return Task.CompletedTask;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             Log.Information("Shutting down the container");
-            return Task.CompletedTask;
+            await _schedulerService.StopAsync();
         }
 
         public async Task WaitForStartAsync(CancellationToken cancellationToken)
@@ -90,7 +90,7 @@ namespace PlexRipper.WebAPI
                 await _schedulerService.SetupAsync();
             }
 
-            Log.Debug("Finished Initiating boot process");
+            Log.Information("Finished Initiating boot process");
         }
 
         #endregion

@@ -1,10 +1,12 @@
 ﻿using System.Threading.Tasks;
 using FluentResults;
 using Logging;
+using PlexRipper.Application;
 using PlexRipper.Domain;
+using PlexRipper.DownloadManager;
 using Quartz;
 
-namespace PlexRipper.DownloadManager
+namespace BackgroundServices.DownloadManager
 {
     public class DownloadProgressJob : IJob
     {

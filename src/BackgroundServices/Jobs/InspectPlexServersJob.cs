@@ -1,8 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Logging;
+using PlexRipper.Application;
 using Quartz;
 
-namespace PlexRipper.Application
+namespace BackgroundServices
 {
     public class InspectPlexServersJob : IJob
     {

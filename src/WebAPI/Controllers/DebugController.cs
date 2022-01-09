@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using AutoMapper;
+using BackgroundServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
-using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers

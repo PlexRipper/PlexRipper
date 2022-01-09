@@ -10,15 +10,11 @@ namespace PlexRipper.DownloadManager
     {
         protected override void Load(ContainerBuilder builder)
         {
-            var assembly = Assembly.GetExecutingAssembly();
-
             builder.RegisterType<DownloadCommands>().As<IDownloadCommands>().SingleInstance();
             builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
             builder.RegisterType<DownloadTracker>().As<IDownloadTracker>().SingleInstance();
             builder.RegisterType<DownloadTaskValidator>().As<IDownloadTaskValidator>().SingleInstance();
-            builder.RegisterType<DownloadScheduler>().As<IDownloadScheduler>().SingleInstance();
             builder.RegisterType<DownloadSubscriptions>().As<IDownloadSubscriptions>().SingleInstance();
-            builder.RegisterType<DownloadProgressScheduler>().As<IDownloadProgressScheduler>().SingleInstance();
             builder.RegisterType<DownloadTaskFactory>().As<IDownloadTaskFactory>().SingleInstance();
             builder.RegisterType<DownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
 

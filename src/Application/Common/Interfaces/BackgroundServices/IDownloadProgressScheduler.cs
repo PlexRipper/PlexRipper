@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using FluentResults;
 
-namespace PlexRipper.DownloadManager
+namespace PlexRipper.Application
 {
-    public interface IDownloadProgressScheduler
+    public interface IDownloadProgressScheduler : IBaseScheduler
     {
         Task<Result> StartDownloadProgressJob(int plexServerId);
 

@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 using Quartz;
 
-namespace PlexRipper.DownloadManager
+namespace BackgroundServices.DownloadManager
 {
     public class DownloadScheduler : IDownloadScheduler
     {
@@ -26,6 +26,7 @@ namespace PlexRipper.DownloadManager
         {
             if (downloadTaskId < 0)
                 return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
+
             try
             {
                 var jobKey = CreateDownloadJobKey(downloadTaskId);
@@ -58,10 +59,18 @@ namespace PlexRipper.DownloadManager
             if (downloadTaskId <= 0)
                 ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
-
-
             var isSuccess = await _scheduler.DeleteJob(CreateDownloadJobKey(downloadTaskId));
             return isSuccess ? Result.Ok() : Result.Fail($"Failed to delete {nameof(DownloadJob)} with DownloadTaskId {downloadTaskId}");
+        }
+
+        public async Task<Result> SetupAsync()
+        {
+            return Result.Ok();
+        }
+
+        public async Task<Result> StopAsync(bool gracefully = true)
+        {
+            return Result.Ok();
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
 using Logging;
 using PlexRipper.Domain;
+using PlexRipper.DownloadManager;
 using Quartz;
 
-namespace PlexRipper.DownloadManager
+namespace BackgroundServices.DownloadManager
 {
     [DisallowConcurrentExecution]
     public class DownloadJob : IJob

@@ -34,6 +34,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\BackgroundServices\BackgroundServices.csproj" />
         <ProjectReference Include="..\HttpClient\HttpClient.csproj" />
         <ProjectReference Include="..\Application\Application.csproj" />
         <ProjectReference Include="..\Data\Data.csproj" />

@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using AutoMapper;
+using BackgroundServices;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
@@ -28,12 +29,12 @@ namespace PlexRipper.WebAPI.Config
             builder.RegisterModule<PlexApiModule>();
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<HttpClientModule>();
+            builder.RegisterModule<BackgroundServicesModule>();
 
             // Presentation
             builder.RegisterModule<WebApiModule>();
 
             // Packages
-            builder.RegisterModule<QuartzModule>();
             builder.RegisterModule<MediatrModule>();
 
             // Auto Mapper

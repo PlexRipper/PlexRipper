@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentResults;
+using Logging;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 using Quartz;
 
-namespace PlexRipper.Application
+namespace BackgroundServices
 {
     public class SchedulerService : ISchedulerService
     {
@@ -61,11 +62,25 @@ namespace PlexRipper.Application
 
         public async Task<Result> SetupAsync()
         {
-            await _scheduler.Start();
+            if (!_scheduler.IsStarted)
+            {
+                Log.Information("Starting Quartz Scheduler");
+                await _scheduler.Start();
+            }
 
             await SetupSyncPlexServersJob();
 
             return _scheduler.IsStarted ? Result.Ok() : Result.Fail("Could not start Sync Server Scheduler").LogError();
+        }
+
+        public async Task<Result> StopAsync(bool graceFully = true)
+        {
+            if (!_scheduler.IsShutdown)
+            {
+                await _scheduler.Shutdown(graceFully);
+            }
+
+            return _scheduler.IsStarted ? Result.Ok() : Result.Fail("Could not shutdown Scheduler").LogError();
         }
     }
 }

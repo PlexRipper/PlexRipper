@@ -5,7 +5,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application
 {
-    public interface ISchedulerService : ISetupAsync
+    public interface ISchedulerService : IBaseScheduler
     {
         Task<Result> TriggerSyncPlexServersJob();
 

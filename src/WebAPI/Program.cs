@@ -1,5 +1,4 @@
 using System;
-using Environment;
 using FluentResults;
 using Logging;
 using Microsoft.Extensions.Hosting;
@@ -16,9 +15,6 @@ namespace PlexRipper.WebAPI
 
             try
             {
-                Log.Information("Starting up");
-                Log.Information($"Currently running on {OsInfo.CurrentOS}");
-
                 PlexRipperHost.Setup().Build().Run();
             }
             catch (Exception e)

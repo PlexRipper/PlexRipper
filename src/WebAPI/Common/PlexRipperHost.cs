@@ -1,6 +1,7 @@
 using System.IO;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Environment;
 using Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,9 @@ namespace PlexRipper.WebAPI.Common
     {
         public static IHostBuilder Setup()
         {
+            Log.Information("Starting up");
+            Log.Information($"Currently running on {OsInfo.CurrentOS}");
+
             return Host.CreateDefaultBuilder()
                 .ConfigureWebHostDefaults(webHostBuilder =>
                 {

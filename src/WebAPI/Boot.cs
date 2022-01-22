@@ -12,7 +12,7 @@ namespace PlexRipper.WebAPI
     /// <summary>
     /// The Boot class is used to sequentially start various processes needed to start PlexRipper.
     /// </summary>
-    internal class Boot : IHostLifetime, IHostedService
+    public class Boot : IBoot
     {
         #region Fields
 
@@ -32,13 +32,21 @@ namespace PlexRipper.WebAPI
 
         private readonly IDownloadQueue _downloadQueue;
 
+        private readonly IDownloadTracker _downloadTracker;
+
         #endregion
 
         #region Constructor
 
-        public Boot(IHostApplicationLifetime appLifetime, IConfigManager configManager, IFileMerger fileMerger,
-            IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
-            IMigrationService migrationService, IDownloadSubscriptions downloadSubscriptions, IDownloadQueue downloadQueue)
+        public Boot(IHostApplicationLifetime appLifetime,
+            IConfigManager configManager,
+            IFileMerger fileMerger,
+            IPlexRipperDatabaseService plexRipperDatabaseService,
+            ISchedulerService schedulerService,
+            IMigrationService migrationService,
+            IDownloadSubscriptions downloadSubscriptions,
+            IDownloadQueue downloadQueue,
+            IDownloadTracker downloadTracker)
         {
             _appLifetime = appLifetime;
             _configManager = configManager;
@@ -48,25 +56,18 @@ namespace PlexRipper.WebAPI
             _migrationService = migrationService;
             _downloadSubscriptions = downloadSubscriptions;
             _downloadQueue = downloadQueue;
+            _downloadTracker = downloadTracker;
         }
 
         #endregion
 
         #region Public Methods
 
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            _appLifetime.ApplicationStarted.Register(OnStarted);
-            _appLifetime.ApplicationStopping.Register(OnStopping);
-            _appLifetime.ApplicationStopped.Register(OnStopped);
-
-            return Task.CompletedTask;
-        }
-
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             Log.Information("Shutting down the container");
             await _schedulerService.StopAsync();
+            await _downloadTracker.StopAsync();
         }
 
         public async Task WaitForStartAsync(CancellationToken cancellationToken)
@@ -89,6 +90,11 @@ namespace PlexRipper.WebAPI
             {
                 await _schedulerService.SetupAsync();
             }
+
+
+            _appLifetime.ApplicationStarted.Register(OnStarted);
+            _appLifetime.ApplicationStopping.Register(OnStopping);
+            _appLifetime.ApplicationStopped.Register(OnStopped);
 
             Log.Information("Finished Initiating boot process");
         }

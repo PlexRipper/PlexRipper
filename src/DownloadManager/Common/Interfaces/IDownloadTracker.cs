@@ -5,7 +5,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager
 {
-    public interface IDownloadTracker : IBusy
+    public interface IDownloadTracker : IBusy, IStopAsync
     {
         #region Properties
 

@@ -194,6 +194,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
         /// </summary>
         public void Dispose()
         {
+            _timeThreadContext.Dispose();
             ClearDownloadWorkers();
             _downloadSpeedLimitSubscription?.Dispose();
         }

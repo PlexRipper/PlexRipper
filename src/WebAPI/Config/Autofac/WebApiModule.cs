@@ -11,12 +11,12 @@ namespace PlexRipper.WebAPI.Config
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<Boot>()
-                .As<IHostedService>()
-                .InstancePerDependency();
+                .As<IBoot>()
+                .SingleInstance();
 
-            builder.RegisterType<Boot>()
-                .As<IHostLifetime>()
-                .InstancePerDependency();
+            // builder.RegisterType<Boot>()
+            //     .As<IHostLifetime>()
+            //     .SingleInstance();
 
             // SignalR
             builder.RegisterType<SignalRService>().As<ISignalRService>();

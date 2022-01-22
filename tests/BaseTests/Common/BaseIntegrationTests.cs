@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Logging;
 using Xunit;
 using Xunit.Abstractions;
@@ -27,8 +28,9 @@ namespace PlexRipper.BaseTests
 
         public async Task DisposeAsync()
         {
-            // Log.Fatal("Container disposed");
-            // Container.Dispose();
+            Log.Fatal("Container disposed");
+            await Container.Boot.StopAsync(CancellationToken.None);
+            Container?.Dispose();
 
         }
     }

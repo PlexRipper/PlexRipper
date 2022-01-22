@@ -25,8 +25,8 @@ namespace WebAPI.IntegrationTests.DownloadController
             {
                 Seed = 4564,
                 TvShowDownloadTasksCount = 5,
-                TvShowSeasonCount = 2,
-                TvShowEpisodeCount = 2,
+                TvShowSeasonDownloadTasksCount = 2,
+                TvShowEpisodeDownloadTasksCount = 2,
             };
 
             await CreateContainer(config);

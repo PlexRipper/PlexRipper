@@ -44,7 +44,7 @@ namespace BackgroundServices
             //builder.RegisterType<DownloadScheduler>().As<IDownloadScheduler>().SingleInstance();
             //builder.RegisterType<DownloadProgressScheduler>().As<IDownloadProgressScheduler>().SingleInstance();
 
-            // register all I*Services
+            // register all I*Scheduler
             builder.RegisterAssemblyTypes(assembly)
                 .Where(t => t.Name.EndsWith("Scheduler"))
                 .AsImplementedInterfaces()

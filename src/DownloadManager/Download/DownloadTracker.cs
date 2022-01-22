@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
@@ -22,6 +23,10 @@ namespace PlexRipper.DownloadManager
         /// Currently loaded and active <see cref="PlexDownloadClient"/>s.
         /// </summary>
         private readonly List<PlexDownloadClient> _downloadsList = new();
+
+        private readonly Dictionary<int, List<IDisposable>> _clientSubscriptions = new();
+
+        private readonly CancellationTokenSource _tokenSource = new();
 
         #region Subjects
 
@@ -82,7 +87,7 @@ namespace PlexRipper.DownloadManager
 
         private async Task<Result<PlexDownloadClient>> CreateDownloadClient(int downloadTaskId)
         {
-            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true));
+            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true), _tokenSource.Token);
             if (downloadTaskResult.IsFailed)
             {
                 return downloadTaskResult.ToResult().LogError();
@@ -127,6 +132,12 @@ namespace PlexRipper.DownloadManager
 
             if (_downloadsList[index] is not null)
             {
+                // Clean-up any subscriptions
+                foreach (var disposable in _clientSubscriptions[downloadTaskId])
+                {
+                    disposable.Dispose();
+                }
+
                 _downloadsList[index].Dispose();
                 _downloadsList.RemoveAt(index);
             }
@@ -248,21 +259,25 @@ namespace PlexRipper.DownloadManager
 
         private void SetupSubscriptions(PlexDownloadClient newClient)
         {
-            newClient
+            var subscriptions = new List<IDisposable>();
+
+            subscriptions.Add(newClient
                 .DownloadTaskUpdate
-                .SubscribeAsync(OnDownloadTaskUpdate);
+                .SubscribeAsync(OnDownloadTaskUpdate));
 
             // Download Worker Log subscription
-            newClient.DownloadWorkerLog
+            subscriptions.Add(newClient.DownloadWorkerLog
                 .Buffer(TimeSpan.FromSeconds(1))
-                .SubscribeAsync(logs => _mediator.Send(new AddDownloadWorkerLogsCommand(logs)));
+                .SubscribeAsync(logs => _mediator.Send(new AddDownloadWorkerLogsCommand(logs), _tokenSource.Token)));
+
+            _clientSubscriptions.Add(newClient.DownloadTaskId, subscriptions);
         }
 
         private async Task OnDownloadTaskUpdate(DownloadTask downloadTask)
         {
             // Ensure the database has the latest update
             Log.Debug(downloadTask.ToString());
-            var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { downloadTask }));
+            var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { downloadTask }), _tokenSource.Token);
             if (updateResult.IsFailed)
             {
                 updateResult.LogError();
@@ -282,7 +297,8 @@ namespace PlexRipper.DownloadManager
             if (downloadTask.RootDownloadTaskId is not null)
             {
                 // Update the download status of parent download tasks when a child changed
-                var result = await _mediator.Send(new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTask.RootDownloadTaskId ?? 0));
+                var result = await _mediator.Send(new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTask.RootDownloadTaskId ?? 0),
+                    _tokenSource.Token);
                 if (result.IsFailed)
                 {
                     result.LogError();
@@ -291,5 +307,24 @@ namespace PlexRipper.DownloadManager
         }
 
         #endregion
+
+        public async Task<Result> StopAsync(bool gracefully = true)
+        {
+            foreach ((_, List<IDisposable> value) in _clientSubscriptions)
+            {
+                foreach (var disposable in value)
+                {
+                    disposable.Dispose();
+                }
+            }
+
+            if (!_tokenSource.IsCancellationRequested)
+            {
+                _tokenSource.Cancel(false);
+                return Result.Ok();
+            }
+
+            return Result.Fail("Cancellation was already requested");
+        }
     }
 }

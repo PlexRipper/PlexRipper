@@ -1,15 +1,11 @@
-using System.Threading.Tasks;
 using Autofac;
-using Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.Config;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Config;
 
 namespace PlexRipper.BaseTests
 {
@@ -24,29 +20,15 @@ namespace PlexRipper.BaseTests
 
         protected override IHostBuilder CreateHostBuilder()
         {
-            return PlexRipperHost.Setup().ConfigureWebHost(builder => builder.UseEnvironment("Integration Testing"));
+            return PlexRipperHost.Setup(true);
         }
 
-        // protected override IWebHostBuilder CreateWebHostBuilder()
-        // {
-        //     return base.CreateWebHostBuilder().ConfigureTestContainer<ContainerBuilder>(autoFacBuilder =>
-        //     {
-        //         Log.Debug("Setting up Autofac Containers");
-        //         ContainerConfig.ConfigureContainer(autoFacBuilder);
-        //
-        //         autoFacBuilder
-        //             .Register((_, _) => MockDatabase.GetMemoryDbContext(_config.MemoryDbName))
-        //             .InstancePerDependency();
-        //
-        //         autoFacBuilder.RegisterModule<TestModule>();
-        //
-        //         SetMockedDependancies(autoFacBuilder);
-        //
-        //         //  SignalR requires the default ILogger
-        //         //  autoFacBuilder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
-        //         //  autoFacBuilder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
-        //     });
-        // }
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder
+                .UseEnvironment("Integration Testing")
+                .UseStartup<TestStartup>();
+        }
 
         protected override IHost CreateHost(IHostBuilder builder)
         {
@@ -77,6 +59,8 @@ namespace PlexRipper.BaseTests
 
         private void SetMockedDependancies(ContainerBuilder builder)
         {
+            builder.RegisterType<MockSignalRService>().As<ISignalRService>();
+
             if (_config.MockFileSystem is not null)
             {
                 builder.RegisterInstance(_config.MockFileSystem).As<IFileSystem>();

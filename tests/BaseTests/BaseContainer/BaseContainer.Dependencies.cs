@@ -26,7 +26,7 @@ namespace PlexRipper.BaseTests
 
         private readonly IServiceScope _serviceScope;
 
-        private IServiceProvider _services;
+        private readonly IServiceProvider _services;
 
         #endregion
 

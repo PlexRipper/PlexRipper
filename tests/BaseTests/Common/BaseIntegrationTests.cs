@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Logging;
 using Xunit;
@@ -6,8 +7,7 @@ using Xunit.Abstractions;
 
 namespace PlexRipper.BaseTests
 {
-    [Collection("Sequential")]
-    public class BaseIntegrationTests : IAsyncLifetime
+    public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
     {
         protected BaseContainer Container;
 
@@ -26,12 +26,13 @@ namespace PlexRipper.BaseTests
             Log.Information("Initialize Integration Test");
         }
 
-        public async Task DisposeAsync()
+        public async Task DisposeAsync() { }
+
+        async ValueTask IAsyncDisposable.DisposeAsync()
         {
             Log.Fatal("Container disposed");
             await Container.Boot.StopAsync(CancellationToken.None);
             Container?.Dispose();
-
         }
     }
 }

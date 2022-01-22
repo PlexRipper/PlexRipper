@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,10 +35,19 @@ namespace PlexRipper.WebAPI.Common.Extensions
             }
         }
 
-        public static void SetupTestConfigure(IApplicationBuilder app)
+        public static void SetupTestConfigure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseRouting();
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+
+            app.UseCors(CORSConfiguration);
+
+            app.UseAuthorization();
+
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

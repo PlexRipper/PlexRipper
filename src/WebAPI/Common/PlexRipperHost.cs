@@ -13,24 +13,19 @@ namespace PlexRipper.WebAPI.Common
 {
     public static class PlexRipperHost
     {
-        public static IHostBuilder Setup(bool inIntegrationTestMode = false)
+        public static IHostBuilder Setup()
         {
             Log.Information("Starting up");
             Log.Information($"Currently running on {OsInfo.CurrentOS}");
 
-            var builder = Host.CreateDefaultBuilder();
-
-            if (!inIntegrationTestMode)
-            {
-                builder.ConfigureWebHostDefaults(webHostBuilder =>
+            return Host.CreateDefaultBuilder()
+                .ConfigureWebHostDefaults(webHostBuilder =>
                 {
                     webHostBuilder
                         .UseContentRoot(Directory.GetCurrentDirectory())
                         .UseStartup<Startup>();
-                });
-            }
-
-            builder.ConfigureLogging(config =>
+                })
+                .ConfigureLogging(config =>
                 {
                     config.ClearProviders();
                     config.AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
@@ -41,8 +36,6 @@ namespace PlexRipper.WebAPI.Common
                     ContainerConfig.ConfigureContainer(containerBuilder);
                 })
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory());
-
-            return builder;
         }
     }
 }

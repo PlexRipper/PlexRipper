@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using FluentValidation;
@@ -23,9 +23,8 @@ namespace PlexRipper.WebAPI.Common.Extensions
         {
             services.SetupCors();
 
-            services.AddHttpContextAccessor();
-
             services.SetupControllers();
+
             services.SetupFrontEnd(env);
             services.SetupQuartz();
 
@@ -35,7 +34,7 @@ namespace PlexRipper.WebAPI.Common.Extensions
             services.AddOptions();
         }
 
-        public static void SetupTestConfigureServices(IServiceCollection services)
+        public static void SetupTestConfigureServices(IServiceCollection services, IWebHostEnvironment env)
         {
             services.SetupCors();
             services.SetupControllers();
@@ -85,6 +84,9 @@ namespace PlexRipper.WebAPI.Common.Extensions
                 .AddControllers()
                 .AddJsonOptions(JsonSerializerOptionsWebApi.Config);
 
+            // Customise default API behaviour
+            services.AddHttpContextAccessor();
+
             // Fluent Validator
             services.AddMvc(options => { options.Filters.Add<ValidateFilter>(); })
                 .AddFluentValidation(fv =>
@@ -98,6 +100,7 @@ namespace PlexRipper.WebAPI.Common.Extensions
                 .AddControllersAsServices();
 
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+            services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
         }
 
         public static void SetupQuartz(this IServiceCollection services)
@@ -118,8 +121,6 @@ namespace PlexRipper.WebAPI.Common.Extensions
 
         public static void SetupOpenApiDocumentation(this IServiceCollection services)
         {
-            // Customise default API behaviour
-            services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
             services.AddOpenApiDocument(configure =>
             {
                 configure.GenerateEnumMappingDescription = true;
@@ -129,7 +130,7 @@ namespace PlexRipper.WebAPI.Common.Extensions
                     Type = OpenApiSecuritySchemeType.ApiKey,
                     Name = "Authorization",
                     In = OpenApiSecurityApiKeyLocation.Header,
-                    Description = "Type into the textbox: Bearer {your JWT token}.",
+                    Description = "Type into the text box: Bearer {your JWT token}.",
                 });
                 configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
                 configure.DocumentProcessors.Add(new NSwagAddExtraTypes());

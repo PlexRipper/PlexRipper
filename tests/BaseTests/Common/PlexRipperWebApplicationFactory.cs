@@ -1,5 +1,4 @@
 using Autofac;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
@@ -20,14 +19,7 @@ namespace PlexRipper.BaseTests
 
         protected override IHostBuilder CreateHostBuilder()
         {
-            return PlexRipperHost.Setup(true);
-        }
-
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            builder
-                .UseEnvironment("Integration Testing")
-                .UseStartup<TestStartup>();
+            return PlexRipperHost.Setup();
         }
 
         protected override IHost CreateHost(IHostBuilder builder)

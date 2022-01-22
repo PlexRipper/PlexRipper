@@ -1,7 +1,7 @@
+using Environment;
 using Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.WebAPI.Common.Extensions;
 
@@ -30,7 +30,13 @@ namespace PlexRipper.WebAPI
         /// <param name="services"></param>
         public virtual void ConfigureServices(IServiceCollection services)
         {
-            StartupExtensions.SetupConfigureServices(services, CurrentEnvironment);
+            if (!EnvironmentExtensions.IsIntegrationTestMode())
+            {
+                StartupExtensions.SetupConfigureServices(services, CurrentEnvironment);
+                return;
+            }
+
+            StartupExtensions.SetupTestConfigureServices(services, CurrentEnvironment);
         }
 
         /// <summary>
@@ -39,7 +45,13 @@ namespace PlexRipper.WebAPI
         /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
         public virtual void Configure(IApplicationBuilder app)
         {
-            StartupExtensions.SetupConfigure(app, CurrentEnvironment);
+            if (!EnvironmentExtensions.IsIntegrationTestMode())
+            {
+                StartupExtensions.SetupConfigure(app, CurrentEnvironment);
+                return;
+            }
+
+            StartupExtensions.SetupTestConfigure(app, CurrentEnvironment);
         }
     }
 }

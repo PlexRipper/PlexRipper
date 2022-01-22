@@ -6,7 +6,7 @@ namespace Environment
     {
         #region Fields
 
-        private static string _integrationTestModeKey = "IntegrationTestMode";
+        public static string IntegrationTestModeKey = "IntegrationTestMode";
 
         private static readonly string _trueValue = Convert.ToString(true);
 
@@ -18,7 +18,7 @@ namespace Environment
 
         public static bool IsIntegrationTestMode()
         {
-            return System.Environment.GetEnvironmentVariable(_integrationTestModeKey) == _trueValue;
+            return System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == _trueValue;
         }
 
         #endregion
@@ -27,7 +27,7 @@ namespace Environment
 
         public static void SetIntegrationTestMode(bool state = false)
         {
-            System.Environment.SetEnvironmentVariable(_integrationTestModeKey, state.ToString());
+            System.Environment.SetEnvironmentVariable(IntegrationTestModeKey, state.ToString());
         }
 
         #endregion

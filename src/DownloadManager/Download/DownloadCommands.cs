@@ -26,8 +26,6 @@ namespace PlexRipper.DownloadManager
 
         private readonly INotificationsService _notificationsService;
 
-        private readonly IDownloadScheduler _downloadScheduler;
-
         private readonly IDownloadTaskFactory _downloadTaskFactory;
 
         #endregion
@@ -40,7 +38,6 @@ namespace PlexRipper.DownloadManager
             IDownloadQueue downloadQueue,
             IDirectorySystem directorySystem,
             INotificationsService notificationsService,
-            IDownloadScheduler downloadScheduler,
             IDownloadTaskFactory downloadTaskFactory)
         {
             _mediator = mediator;
@@ -48,7 +45,6 @@ namespace PlexRipper.DownloadManager
             _downloadQueue = downloadQueue;
             _directorySystem = directorySystem;
             _notificationsService = notificationsService;
-            _downloadScheduler = downloadScheduler;
             _downloadTaskFactory = downloadTaskFactory;
         }
 
@@ -113,7 +109,7 @@ namespace PlexRipper.DownloadManager
                 return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
 
             if (downloadTask.IsDownloadable)
-                return await _downloadScheduler.StartDownloadJob(downloadTask.Id);
+                return await _downloadTracker.StartDownloadClient(downloadTask.Id);
 
             return Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable.");
         }
@@ -139,20 +135,17 @@ namespace PlexRipper.DownloadManager
 
             Log.Information($"Stopping {downloadTask.Value.FullTitle} from downloading");
 
-            if (!downloadTask.Value.IsDownloadable)
+            // Check if currently downloading
+            var stopResult = await _downloadTracker.StopDownloadClient(downloadTaskId);
+            if (stopResult.IsFailed)
             {
-                // Check if currently downloading
-                var stopResult = await _downloadTracker.StopDownloadClient(downloadTaskId);
-                if (stopResult.IsFailed)
-                {
-                    await _notificationsService.SendResult(stopResult);
-                }
+                await _notificationsService.SendResult(stopResult);
+            }
 
-                var removeTempResult = _directorySystem.DeleteAllFilesFromDirectory(downloadTask.Value.DownloadDirectory);
-                if (removeTempResult.IsFailed)
-                {
-                    await _notificationsService.SendResult(removeTempResult);
-                }
+            var removeTempResult = _directorySystem.DeleteAllFilesFromDirectory(downloadTask.Value.DownloadDirectory);
+            if (removeTempResult.IsFailed)
+            {
+                await _notificationsService.SendResult(removeTempResult);
             }
 
             stoppedDownloadTaskIds.Add(downloadTask.Value.Id);

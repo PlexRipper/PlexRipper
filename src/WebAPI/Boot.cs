@@ -67,7 +67,6 @@ namespace PlexRipper.WebAPI
         {
             Log.Information("Shutting down the container");
             await _schedulerService.StopAsync();
-            await _downloadTracker.StopAsync();
         }
 
         public async Task WaitForStartAsync(CancellationToken cancellationToken)
@@ -83,6 +82,7 @@ namespace PlexRipper.WebAPI
 
             _downloadSubscriptions.Setup();
             _downloadQueue.Setup();
+            _downloadTracker.Setup();
             await _fileMerger.SetupAsync();
 
             // TODO Remove this once the plexServer sync has been compatible for the integration test
@@ -90,7 +90,6 @@ namespace PlexRipper.WebAPI
             {
                 await _schedulerService.SetupAsync();
             }
-
 
             _appLifetime.ApplicationStarted.Register(OnStarted);
             _appLifetime.ApplicationStopping.Register(OnStopping);

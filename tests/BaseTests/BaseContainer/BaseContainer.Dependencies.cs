@@ -50,7 +50,7 @@ namespace PlexRipper.BaseTests
         {
             config ??= new UnitTestDataConfig();
 
-            Log.Debug($"Setting up BaseContainer with database: {config.MemoryDbName}");
+            Log.Information($"Setting up BaseContainer with database: {config.MemoryDbName}");
 
             EnvironmentExtensions.SetIntegrationTestMode(true);
 
@@ -117,8 +117,6 @@ namespace PlexRipper.BaseTests
         public ITestApplicationTracker TestApplicationTracker => Resolve<ITestApplicationTracker>();
 
         public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
-
-        public IDownloadScheduler DownloadScheduler => Resolve<IDownloadScheduler>();
 
         public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 

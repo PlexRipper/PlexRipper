@@ -14,9 +14,10 @@ namespace PlexRipper.WebAPI.Config
                 .As<IBoot>()
                 .SingleInstance();
 
-            // builder.RegisterType<Boot>()
-            //     .As<IHostLifetime>()
-            //     .SingleInstance();
+            // This needs to be registered in order to fire Boot on Application startup
+            builder.RegisterType<Boot>()
+                .As<IHostLifetime>()
+                .SingleInstance();
 
             // SignalR
             builder.RegisterType<SignalRService>().As<ISignalRService>();

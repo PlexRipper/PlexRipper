@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
@@ -22,11 +23,13 @@ namespace PlexRipper.DownloadManager
         /// <summary>
         /// Currently loaded and active <see cref="PlexDownloadClient"/>s.
         /// </summary>
-        private readonly List<PlexDownloadClient> _downloadsList = new();
+        private readonly List<PlexDownloadClient> _downloadClientList = new();
 
         private readonly Dictionary<int, List<IDisposable>> _clientSubscriptions = new();
 
         private readonly CancellationTokenSource _tokenSource = new();
+
+        private readonly Channel<int> _startQueue = Channel.CreateUnbounded<int>();
 
         #region Subjects
 
@@ -45,6 +48,8 @@ namespace PlexRipper.DownloadManager
         private readonly INotificationsService _notificationsService;
 
         private readonly Func<PlexDownloadClient> _plexDownloadClientFactory;
+
+        private Task _executeDownloadTask;
 
         #endregion
 
@@ -75,44 +80,52 @@ namespace PlexRipper.DownloadManager
         /// <inheritdoc/>
         public IObservable<DownloadTask> DownloadTaskFinished => _downloadTaskFinished.AsObservable();
 
-        public int ActiveDownloadClients => _downloadsList.Count;
+        public int ActiveDownloadClients => _downloadClientList.Count;
 
-        public Task DownloadProcessTask => Task.WhenAll(_downloadsList.Select(x => x.DownloadProcessTask ?? Task.CompletedTask));
+        public Task DownloadProcessTask => Task.WhenAll(_downloadClientList.Select(x => x.DownloadProcessTask ?? Task.CompletedTask));
 
-        public bool IsBusy => !DownloadProcessTask.IsCompleted || _downloadsList.Any();
+        public bool IsBusy => !DownloadProcessTask.IsCompleted || _downloadClientList.Any();
 
         #endregion
 
         #region Public Methods
 
-        private async Task<Result<PlexDownloadClient>> CreateDownloadClient(int downloadTaskId)
+        public Result Setup()
         {
-            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true), _tokenSource.Token);
-            if (downloadTaskResult.IsFailed)
-            {
-                return downloadTaskResult.ToResult().LogError();
-            }
-
-            return await CreateDownloadClient(downloadTaskResult.Value);
+            Log.Information("Starting DownloadTrackerService");
+            _executeDownloadTask = Task.Factory.StartNew(() => ExecuteDownloadTask(CancellationToken.None), TaskCreationOptions.LongRunning);
+            return Result.Ok();
         }
 
-        public async Task<Result<PlexDownloadClient>> CreateDownloadClient(DownloadTask downloadTask)
+        public async Task ExecuteDownloadTask(CancellationToken cancellationToken)
         {
-            if (downloadTask is null)
-                return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var downloadTaskId = await _startQueue.Reader.ReadAsync(cancellationToken);
+                var createResult = await CreateDownloadClientAsync(downloadTaskId, cancellationToken);
+                if (createResult.IsFailed)
+                    continue;
 
-            if (!downloadTask.IsDownloadable)
-                return Result.Fail($"DownloadTask({downloadTask.Id}) {downloadTask.FullTitle} is not downloadable").LogWarning();
+                createResult.Value.Start();
+                _downloadTaskStart.OnNext(createResult.Value.DownloadTask);
+            }
+        }
 
-            Log.Debug($"Creating Download client for {downloadTask.FullTitle}");
+        private async Task<Result<PlexDownloadClient>> CreateDownloadClientAsync(int downloadTaskId, CancellationToken cancellationToken)
+        {
+            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true), cancellationToken);
+            if (downloadTaskResult.IsFailed)
+                return downloadTaskResult.ToResult().LogError();
+
+            Log.Debug($"Creating Download client for {downloadTaskResult.Value.FullTitle}");
 
             // Create download client
-            var newClient = await _plexDownloadClientFactory().Setup(downloadTask);
+            var newClient = await _plexDownloadClientFactory().Setup(downloadTaskResult.Value);
             if (newClient.IsFailed)
                 return newClient.ToResult().LogError();
 
             SetupSubscriptions(newClient.Value);
-            _downloadsList.Add(newClient.Value);
+            _downloadClientList.Add(newClient.Value);
             return Result.Ok(newClient.Value);
         }
 
@@ -123,14 +136,14 @@ namespace PlexRipper.DownloadManager
         private void DeleteDownloadClient(int downloadTaskId)
         {
             Log.Debug($"Cleaning-up downloadClient with id {downloadTaskId}");
-            var index = _downloadsList.FindIndex(x => x.DownloadTaskId == downloadTaskId);
+            var index = _downloadClientList.FindIndex(x => x.DownloadTaskId == downloadTaskId);
             if (index == -1)
             {
                 Log.Debug($"Could not find downloadClient with downloadTaskId {downloadTaskId} to clean-up.");
                 return;
             }
 
-            if (_downloadsList[index] is not null)
+            if (_downloadClientList[index] is not null)
             {
                 // Clean-up any subscriptions
                 foreach (var disposable in _clientSubscriptions[downloadTaskId])
@@ -138,8 +151,8 @@ namespace PlexRipper.DownloadManager
                     disposable.Dispose();
                 }
 
-                _downloadsList[index].Dispose();
-                _downloadsList.RemoveAt(index);
+                _downloadClientList[index].Dispose();
+                _downloadClientList.RemoveAt(index);
             }
 
             Log.Debug($"Cleaned-up PlexDownloadClient with id {downloadTaskId} from the DownloadManager");
@@ -152,7 +165,7 @@ namespace PlexRipper.DownloadManager
         /// <returns>Returns the <see cref="PlexDownloadClient"/> if found and fails otherwise.</returns>
         private Result<PlexDownloadClient> GetDownloadClient(int downloadTaskId)
         {
-            var downloadClient = _downloadsList.Find(x => x.DownloadTaskId == downloadTaskId);
+            var downloadClient = _downloadClientList.Find(x => x.DownloadTaskId == downloadTaskId);
             if (downloadClient is null)
                 return ResultExtensions
                     .Create404NotFoundResult($"There is no DownloadClient currently working on a downloadTask with Id {downloadTaskId}");
@@ -162,29 +175,16 @@ namespace PlexRipper.DownloadManager
 
         #region Commands
 
-        /// <summary>
-        /// Will find, or create, a <see cref="PlexDownloadClient"/> and start the download process.
-        /// Note: This <see cref="Task"/> only completed once the download process is done
-        /// </summary>
-        /// <param name="downloadTaskId"></param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public async Task<Result> StartDownloadClient(int downloadTaskId)
         {
-            var downloadClient = GetDownloadClient(downloadTaskId);
-            if (downloadClient.IsFailed)
+            if (!_downloadClientList.Select(x => x.DownloadTask.Id).Contains(downloadTaskId))
             {
-                downloadClient = await CreateDownloadClient(downloadTaskId);
-                if (downloadClient.IsFailed)
-                {
-                    await _notificationsService.SendResult(downloadClient);
-                    return downloadClient.ToResult().LogError();
-                }
+                await _startQueue.Writer.WriteAsync(downloadTaskId);
+                return Result.Ok();
             }
 
-            downloadClient.Value.Start();
-            _downloadTaskStart.OnNext(downloadClient.Value.DownloadTask);
-            await downloadClient.Value.DownloadProcessTask;
-            return Result.Ok();
+            return Result.Fail($"The downloadTracker already has a DownloadClient with DownloadTask id {downloadTaskId}").LogError();
         }
 
         public async Task<Result> StopDownloadClient(int downloadTaskId)
@@ -308,7 +308,7 @@ namespace PlexRipper.DownloadManager
 
         #endregion
 
-        public async Task<Result> StopAsync(bool gracefully = true)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             foreach ((_, List<IDisposable> value) in _clientSubscriptions)
             {
@@ -318,13 +318,17 @@ namespace PlexRipper.DownloadManager
                 }
             }
 
-            if (!_tokenSource.IsCancellationRequested)
+            foreach (var client in _downloadClientList)
             {
-                _tokenSource.Cancel(false);
-                return Result.Ok();
-            }
+                if (client.DownloadStatus is DownloadStatus.Downloading)
+                {
+                    await client.PauseAsync();
+                }
 
-            return Result.Fail("Cancellation was already requested");
+                client.Dispose();
+            }
         }
+
+
     }
 }

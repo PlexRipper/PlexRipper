@@ -39,7 +39,7 @@ namespace WebAPI.IntegrationTests
             // Act
             var startedDownloadTaskId = 0;
             Container.GetDownloadTracker.DownloadTaskStart.Subscribe(task => startedDownloadTaskId = task.Id);
-            var startResult = await Container.DownloadScheduler.StartDownloadJob(plexMovieDownloadTask.Id);
+            var startResult = await Container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
 
             // while (startedDownloadTaskId == 0)
             // {

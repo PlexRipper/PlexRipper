@@ -9,8 +9,4 @@
       <ProjectReference Include="..\DownloadManager\DownloadManager.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Common\Interfaces\DownloadManager" />
-    </ItemGroup>
-
 </Project>

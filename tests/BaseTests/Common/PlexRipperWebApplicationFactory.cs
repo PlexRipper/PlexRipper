@@ -1,11 +1,8 @@
-using System.Threading.Tasks;
 using Autofac;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.Config;
-using PlexRipper.Data;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
 
@@ -22,11 +19,12 @@ namespace PlexRipper.BaseTests
 
         protected override IHostBuilder CreateHostBuilder()
         {
-            return PlexRipperHost.Setup().ConfigureWebHost(builder => builder.UseEnvironment("Integration Testing"));
+            return PlexRipperHost.Setup();
         }
 
         protected override IHost CreateHost(IHostBuilder builder)
         {
+            // source: https://github.com/autofac/Autofac/issues/1207#issuecomment-850405602
             builder
                 .ConfigureContainer<ContainerBuilder>(autoFacBuilder =>
                 {
@@ -44,15 +42,17 @@ namespace PlexRipper.BaseTests
                 });
 
             // Source: https://www.strathweb.com/2021/05/the-curious-case-of-asp-net-core-integration-test-deadlock/
-            var host = builder.Build();
-            Task.Run(() => host.StartAsync()).GetAwaiter().GetResult();
-            return host;
+            // var host = builder.Build();
+            // Task.Run(() => host.StartAsync()).GetAwaiter().GetResult();
+            // return host;
 
-            //return base.CreateHost(builder);
+            return base.CreateHost(builder);
         }
 
         private void SetMockedDependancies(ContainerBuilder builder)
         {
+            builder.RegisterType<MockSignalRService>().As<ISignalRService>();
+
             if (_config.MockFileSystem is not null)
             {
                 builder.RegisterInstance(_config.MockFileSystem).As<IFileSystem>();

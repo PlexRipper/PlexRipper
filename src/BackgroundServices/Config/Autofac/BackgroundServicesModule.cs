@@ -3,8 +3,10 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
 using BackgroundServices.DownloadManager;
+using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.Domain.Autofac;
+using PlexRipper.DownloadManager;
 using Module = Autofac.Module;
 
 namespace BackgroundServices
@@ -23,6 +25,7 @@ namespace BackgroundServices
             builder.Register(_ => new ScopedDependency("global"))
                 .AsImplementedInterfaces()
                 .SingleInstance();
+
 
             // Register Quartz dependancies
             builder.RegisterModule(new QuartzAutofacFactoryModule
@@ -44,7 +47,7 @@ namespace BackgroundServices
             //builder.RegisterType<DownloadScheduler>().As<IDownloadScheduler>().SingleInstance();
             //builder.RegisterType<DownloadProgressScheduler>().As<IDownloadProgressScheduler>().SingleInstance();
 
-            // register all I*Services
+            // register all I*Scheduler
             builder.RegisterAssemblyTypes(assembly)
                 .Where(t => t.Name.EndsWith("Scheduler"))
                 .AsImplementedInterfaces()

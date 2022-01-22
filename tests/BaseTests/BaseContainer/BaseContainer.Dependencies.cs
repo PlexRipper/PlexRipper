@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using Environment;
 using Logging;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Domain;
@@ -22,6 +24,10 @@ namespace PlexRipper.BaseTests
 
         private readonly PlexMockServer _mockServer;
 
+        private readonly IServiceScope _serviceScope;
+
+        private readonly IServiceProvider _services;
+
         #endregion
 
         #region Constructor
@@ -34,13 +40,17 @@ namespace PlexRipper.BaseTests
             _mockServer = mockServer;
             _factory = new PlexRipperWebApplicationFactory<Startup>(config);
             ApiClient = _factory.CreateClient();
+
+            // Create a separate scope as not to interfere with tests running in parallel
+            _services = _factory.Services;
+            _serviceScope = _factory.Services.CreateScope();
         }
 
         public static async Task<BaseContainer> Create(UnitTestDataConfig config = null)
         {
             config ??= new UnitTestDataConfig();
 
-            Log.Debug($"Setting up BaseContainer with database: {config.MemoryDbName}");
+            Log.Information($"Setting up BaseContainer with database: {config.MemoryDbName}");
 
             EnvironmentExtensions.SetIntegrationTestMode(true);
 
@@ -108,11 +118,13 @@ namespace PlexRipper.BaseTests
 
         public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
 
-        public IDownloadScheduler DownloadScheduler => Resolve<IDownloadScheduler>();
+        public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 
         public IFileMerger FileMerger => Resolve<IFileMerger>();
 
         public IMapper Mapper => Resolve<IMapper>();
+
+        public IHostLifetime Boot => Resolve<IHostLifetime>();
 
         #region Settings
 
@@ -128,13 +140,15 @@ namespace PlexRipper.BaseTests
 
         private T Resolve<T>()
         {
-            return _factory.Server.Services.GetRequiredService<T>();
+            return _services.GetRequiredService<T>();
         }
 
         #endregion
 
         public void Dispose()
         {
+            PlexRipperDbContext.Database.EnsureDeleted();
+            _services.GetAutofacRoot().Dispose();
             _factory?.Dispose();
             ApiClient?.Dispose();
             _mockServer?.Server?.Dispose();

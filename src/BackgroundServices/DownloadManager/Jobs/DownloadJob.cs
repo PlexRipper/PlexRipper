@@ -4,9 +4,8 @@ using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using Quartz;
 
-namespace BackgroundServices.DownloadManager
+namespace BackgroundServices.DownloadManager.Jobs
 {
-    [DisallowConcurrentExecution]
     public class DownloadJob : IJob
     {
         private readonly IDownloadTracker _downloadTracker;

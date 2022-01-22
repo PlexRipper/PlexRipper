@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentResults;
+using Microsoft.Extensions.Hosting;
 using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager
 {
-    public interface IDownloadTracker : IBusy
+    public interface IDownloadTracker : IBusy, ISetup
     {
         #region Properties
 
@@ -32,6 +33,12 @@ namespace PlexRipper.DownloadManager
 
         Task<Result> PauseDownloadClient(int downloadTaskId);
 
+        /// <summary>
+        /// Will start the download of a <see cref="DownloadTask"/> by it's id.
+        /// Will return once it has started
+        /// </summary>
+        /// <param name="downloadTaskId"></param>
+        /// <returns></returns>
         Task<Result> StartDownloadClient(int downloadTaskId);
 
         Task<Result> StopDownloadClient(int downloadTaskId);

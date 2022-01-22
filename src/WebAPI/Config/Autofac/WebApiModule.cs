@@ -11,12 +11,13 @@ namespace PlexRipper.WebAPI.Config
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<Boot>()
-                .As<IHostedService>()
-                .InstancePerDependency();
+                .As<IBoot>()
+                .SingleInstance();
 
+            // This needs to be registered in order to fire Boot on Application startup
             builder.RegisterType<Boot>()
                 .As<IHostLifetime>()
-                .InstancePerDependency();
+                .SingleInstance();
 
             // SignalR
             builder.RegisterType<SignalRService>().As<ISignalRService>();

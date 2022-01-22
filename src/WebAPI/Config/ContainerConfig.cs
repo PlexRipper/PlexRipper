@@ -14,7 +14,8 @@ namespace PlexRipper.WebAPI.Config
     public static class ContainerConfig
     {
         /// <summary>
-        /// Autofac container builder, Serilog registration is left out due to being context dependent. Integration tests have a different configuration than the application.
+        /// Autofac container builder, Serilog registration is left out due to being context dependent.
+        /// Integration tests have a different configuration than the application.
         /// </summary>
         /// <param name="builder">The builder through which components can be registered.</param>
         public static void ConfigureContainer(ContainerBuilder builder)

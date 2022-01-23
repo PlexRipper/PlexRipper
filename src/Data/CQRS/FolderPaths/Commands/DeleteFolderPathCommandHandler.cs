@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
 using FluentResults;
 using FluentValidation;
 using Logging;
@@ -10,7 +9,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.FolderPaths
+namespace PlexRipper.Data.FolderPaths
 {
     public class DeleteFolderPathValidator : AbstractValidator<DeleteFolderPathCommand>
     {

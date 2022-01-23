@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using Autofac;
-using Microsoft.Extensions.Hosting;
+﻿using Autofac;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager.DownloadClient;
 using Module = Autofac.Module;

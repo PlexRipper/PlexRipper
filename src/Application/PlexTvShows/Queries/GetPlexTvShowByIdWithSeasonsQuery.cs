@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using FluentResults;
+﻿using FluentResults;
 using MediatR;
 using PlexRipper.Domain;
 

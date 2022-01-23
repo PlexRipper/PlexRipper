@@ -3,10 +3,10 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
 using BackgroundServices.DownloadManager;
-using Microsoft.Extensions.Hosting;
+using BackgroundServices.DownloadManager.Jobs;
+using BackgroundServices.Jobs;
 using PlexRipper.Application;
 using PlexRipper.Domain.Autofac;
-using PlexRipper.DownloadManager;
 using Module = Autofac.Module;
 
 namespace BackgroundServices

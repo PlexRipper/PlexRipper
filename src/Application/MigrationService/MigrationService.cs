@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using PlexRipper.Application.PlexAccounts;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Application.MigrationService
 {

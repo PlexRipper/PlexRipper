@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Environment;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 

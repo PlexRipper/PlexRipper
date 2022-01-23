@@ -5,7 +5,7 @@ using PlexRipper.Domain;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
 using PlexRipper.PlexApi.Models;
 
-namespace PlexRipper.PlexApi.Config.Mappings
+namespace PlexRipper.PlexApi.Mappings
 {
     public class PlexApiMappingProfile : Profile
     {

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Linq;
 using AutoMapper;
-using FluentResultExtensions.lib;
 using Logging;
 using PlexRipper.Domain;
 using PlexRipper.PlexApi.Models;
 
-namespace PlexRipper.PlexApi.Config.Mappings
+namespace PlexRipper.PlexApi.Mappings
 {
     public class PlexMediaMetaDataDTOPlexMediaMetaData : ITypeConverter<PlexMediaContainerDTO, PlexMediaMetaData>
     {

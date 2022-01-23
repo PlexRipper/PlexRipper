@@ -5,8 +5,8 @@ using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
 using PlexRipper.FileSystem.Config;
-using PlexRipper.HttpClient.Config;
-using PlexRipper.PlexApi.Config;
+using PlexRipper.HttpClient;
+using PlexRipper.PlexApi;
 using PlexRipper.Settings.Config;
 
 namespace PlexRipper.WebAPI.Config

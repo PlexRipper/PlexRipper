@@ -6,7 +6,7 @@ using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using Quartz;
 
-namespace BackgroundServices.DownloadManager
+namespace BackgroundServices.DownloadManager.Jobs
 {
     public class DownloadProgressJob : IJob
     {

@@ -3,7 +3,7 @@ using Logging;
 using PlexRipper.Application;
 using Quartz;
 
-namespace BackgroundServices
+namespace BackgroundServices.Jobs
 {
     public class InspectPlexServersJob : IJob
     {

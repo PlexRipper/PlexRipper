@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using PlexRipper.PlexApi.Config.Converters;
+using PlexRipper.PlexApi.Converters;
 
 namespace PlexRipper.PlexApi.Models
 {

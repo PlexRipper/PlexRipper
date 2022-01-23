@@ -1,9 +1,6 @@
-﻿using System;
-using Environment;
-using FluentResults;
+﻿using FluentResults;
 using Logging;
 using PlexRipper.Application;
-using PlexRipper.Settings.Models;
 
 namespace PlexRipper.BaseTests
 {

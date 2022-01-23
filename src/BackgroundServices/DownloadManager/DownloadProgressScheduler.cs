@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BackgroundServices.DownloadManager.Jobs;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;

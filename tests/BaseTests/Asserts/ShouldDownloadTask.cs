@@ -120,7 +120,6 @@ namespace PlexRipper.BaseTests.Asserts
 
                     for (int l = 0; l < plexMediaDataParts.Count; l++)
                     {
-                        var tvShowEpisodeDataPart = tvShowEpisodeData.Parts[l];
                         var episodeDataPartDownloadTask = source.Children[m + l];
 
                         episodeDataPartDownloadTask.DownloadTaskType.ShouldBe(DownloadTaskType.EpisodePart);

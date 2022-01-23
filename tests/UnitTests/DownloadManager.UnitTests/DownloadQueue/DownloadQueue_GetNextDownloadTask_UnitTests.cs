@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Autofac.Extras.Moq;
 using Logging;
-using PlexRipper.Application;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;

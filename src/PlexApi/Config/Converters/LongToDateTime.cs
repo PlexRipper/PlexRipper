@@ -4,7 +4,7 @@ using System.Buffers.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.PlexApi.Config.Converters
+namespace PlexRipper.PlexApi.Converters
 {
     public class LongToDateTime : JsonConverter<DateTime>
     {

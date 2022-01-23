@@ -6,7 +6,6 @@ using Logging;
 using MediatR;
 using Moq;
 using PlexRipper.Application.PlexAccounts;
-using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;
 using Xunit;

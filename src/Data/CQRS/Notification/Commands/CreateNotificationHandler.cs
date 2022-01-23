@@ -8,7 +8,7 @@ using PlexRipper.Application.Notifications;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS
+namespace PlexRipper.Data
 {
     public class CreateNotificationValidator : AbstractValidator<CreateNotificationCommand>
     {

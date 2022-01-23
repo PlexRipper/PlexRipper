@@ -10,7 +10,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexMovies
+namespace PlexRipper.Data.PlexMovies
 {
     public class GetPlexMoviesByPlexLibraryIdValidator : AbstractValidator<GetPlexMoviesByPlexLibraryId>
     {

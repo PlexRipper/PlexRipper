@@ -9,7 +9,7 @@ using PlexRipper.Application.FileManager.Queries;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.FileManager
+namespace PlexRipper.Data.FileManager
 {
     public class GetAllFileTasksQueryValidator : AbstractValidator<GetAllFileTasksQuery> { }
 

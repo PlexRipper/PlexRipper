@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using FluentResults;
 using FluentValidation;
-using Logging;
 using MediatR;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;

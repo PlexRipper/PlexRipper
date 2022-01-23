@@ -3,7 +3,7 @@ using PlexRipper.Application;
 using PlexRipper.PlexApi.Services;
 using RestSharp;
 
-namespace PlexRipper.PlexApi.Config
+namespace PlexRipper.PlexApi
 {
     public class PlexApiModule : Module
     {

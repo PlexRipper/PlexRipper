@@ -15,9 +15,9 @@ namespace PlexRipper.BaseTests
         {
         }
 
-        public async Task SendDownloadTaskCreationProgressUpdate(int current, int total)
+        public Task SendDownloadTaskCreationProgressUpdate(int current, int total)
         {
-
+            return Task.CompletedTask;
         }
 
         public void SendDownloadTaskUpdate(DownloadTask downloadTask)
@@ -28,20 +28,23 @@ namespace PlexRipper.BaseTests
         {
         }
 
-        public async Task SendNotification(Notification notification)
+        public Task SendNotification(Notification notification)
         {
+            return Task.CompletedTask;
         }
 
-        public async Task SendServerInspectStatusProgress(InspectServerProgress progress)
+        public Task SendServerInspectStatusProgress(InspectServerProgress progress)
         {
+            return Task.CompletedTask;
         }
 
         public void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress)
         {
         }
 
-        public async Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks)
+        public Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks)
         {
+            return Task.CompletedTask;
         }
     }
 }

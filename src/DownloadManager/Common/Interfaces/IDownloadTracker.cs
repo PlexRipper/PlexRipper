@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentResults;
-using Microsoft.Extensions.Hosting;
 using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager

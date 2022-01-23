@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.CQRS.PlexServers
+namespace PlexRipper.Data.PlexServers
 {
     public class TrimPlexServerStatusCommandHandlerValidator : AbstractValidator<TrimPlexServerStatusCommand> { }
 

@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Autofac;
+﻿using Autofac;
 using FluentValidation;
 using MediatR;
 using MediatR.Extensions.Autofac.DependencyInjection;

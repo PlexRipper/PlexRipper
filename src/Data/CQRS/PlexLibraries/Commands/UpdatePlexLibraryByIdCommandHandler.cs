@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
 using FluentResults;
 using FluentValidation;
 using Logging;
@@ -11,7 +10,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexLibraries
+namespace PlexRipper.Data.PlexLibraries
 {
     public class UpdatePlexLibraryByIdCommandValidator : AbstractValidator<UpdatePlexLibraryByIdCommand>
     {

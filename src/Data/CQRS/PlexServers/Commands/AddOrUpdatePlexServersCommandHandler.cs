@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
 using FluentResults;
 using FluentValidation;
 using Logging;
@@ -13,7 +12,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexServers
+namespace PlexRipper.Data.PlexServers
 {
     public class AddOrUpdatePlexServersValidator : AbstractValidator<AddOrUpdatePlexServersCommand>
     {

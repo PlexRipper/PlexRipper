@@ -2,7 +2,6 @@
 using System.Linq;
 using FluentResults;
 using Logging;
-using PlexRipper.BaseTests;
 using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 using Shouldly;

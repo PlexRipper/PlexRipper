@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.CQRS.PlexLibraries
+namespace PlexRipper.Data.PlexLibraries
 {
     public class UpdatePlexLibraryDefaultDestinationByIdCommandHandlerValidator : AbstractValidator<UpdatePlexLibraryDefaultDestinationByIdCommand>
     {

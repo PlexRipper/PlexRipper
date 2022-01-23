@@ -8,7 +8,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexServers
+namespace PlexRipper.Data.PlexServers
 {
     public class GetPlexServerStatusByIdQueryValidator : AbstractValidator<GetPlexServerStatusByIdQuery>
     {

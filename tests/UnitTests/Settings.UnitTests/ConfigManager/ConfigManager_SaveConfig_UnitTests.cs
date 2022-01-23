@@ -9,7 +9,6 @@ using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.Settings;
 using Shouldly;
-using WireMock.Admin.Settings;
 using Xunit;
 using Xunit.Abstractions;
 

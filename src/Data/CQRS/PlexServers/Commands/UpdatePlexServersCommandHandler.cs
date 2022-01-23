@@ -6,7 +6,7 @@ using MediatR;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.CQRS.PlexServers
+namespace PlexRipper.Data.PlexServers
 {
     public class UpdatePlexServersCommandHandlerValidator : AbstractValidator<UpdatePlexServersCommand>
     {

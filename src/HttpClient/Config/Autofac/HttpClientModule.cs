@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using PlexRipper.Domain;
 
-namespace PlexRipper.HttpClient.Config
+namespace PlexRipper.HttpClient
 {
     public class HttpClientModule : Module
     {

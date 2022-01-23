@@ -2,7 +2,7 @@
 using PlexRipper.Application;
 using Quartz;
 
-namespace BackgroundServices
+namespace BackgroundServices.Jobs
 {
     public class SyncServerJob : IJob
     {

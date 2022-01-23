@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;

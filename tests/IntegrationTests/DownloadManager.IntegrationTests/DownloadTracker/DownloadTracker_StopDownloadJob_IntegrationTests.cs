@@ -39,10 +39,8 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
             plexMovieDownloadTask.ShouldNotBeNull();
 
             DownloadTask stoppedDownloadTask = null;
-            var downloadTaskUpdates = new List<DownloadTask>();
             var downloadTracker = Container.GetDownloadTracker;
             downloadTracker.DownloadTaskStopped.Subscribe(task => stoppedDownloadTask = task);
-            downloadTracker.DownloadTaskUpdate.Subscribe(task => downloadTaskUpdates.Add(task));
 
             // Act
             // ** We can't await otherwise the DownloadTask would have finished already before attempting to stop it
@@ -58,7 +56,6 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
             stoppedDownloadTask.Id.ShouldBe(plexMovieDownloadTask.Id);
             stoppedDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
             Container.GetDownloadTracker.IsDownloading(plexMovieDownloadTask.Id).ShouldBeFalse();
-            downloadTaskUpdates.Count.ShouldBe(5);
         }
     }
 }

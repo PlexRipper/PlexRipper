@@ -15,7 +15,7 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
         public DownloadTracker_StartDownloadJob_IntegrationTests(ITestOutputHelper output) : base(output) { }
 
         [Fact]
-        public async Task ShouldStartDownloadJobForMovieAndEndWithDownloadFinished_WhenGivenAValidDownloadTask()
+        public async Task ShouldExecuteDownloadTaskForMovieAndEndWithDownloadFinished_WhenGivenAValidDownloadTask()
         {
             // Arrange
             var config = new UnitTestDataConfig
@@ -42,7 +42,9 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
             downloadTracker.DownloadTaskFinished.Subscribe(task => finishedDownloadTask = task);
 
             // Act
-            var startResult = await Container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
+            var startResult = await downloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
+            await Task.Delay(2000);
+            await downloadTracker.DownloadProcessTask;
             await Task.Delay(2000);
 
             // Assert

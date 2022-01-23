@@ -82,7 +82,7 @@ namespace PlexRipper.DownloadManager
 
         public int ActiveDownloadClients => _downloadClientList.Count;
 
-        public Task DownloadProcessTask => Task.WhenAll(_downloadClientList.Select(x => x.DownloadProcessTask ?? Task.CompletedTask));
+        public Task DownloadProcessTask => Task.WhenAll(_downloadClientList.Select(x => x.DownloadProcessTask));
 
         public bool IsBusy => !DownloadProcessTask.IsCompleted || _downloadClientList.Any();
 
@@ -288,6 +288,7 @@ namespace PlexRipper.DownloadManager
             // Alert of a downloadTask that has finished
             if (downloadTask.DownloadStatus is DownloadStatus.DownloadFinished)
             {
+                Log.Information($"DownloadTask {downloadTask.FullTitle} has finished downloading!");
                 _downloadTaskFinished.OnNext(downloadTask);
             }
         }

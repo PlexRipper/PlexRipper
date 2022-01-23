@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -177,9 +177,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
         private async Task<Result> DownloadProcessAsync(Stream destinationStream)
         {
             if (destinationStream is null)
-            {
-                return Result.Fail(new Error("Parameter \"destinationStream\" was null.")).LogError();
-            }
+                return ResultExtensions.IsNull(nameof(destinationStream)).LogWarning();
 
             try
             {

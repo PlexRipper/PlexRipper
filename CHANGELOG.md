@@ -1,3 +1,10 @@
+## [0.9.0]
+
+### Added
+ - Per server configurable downloadspeed limit (See server settings > Server Configuration)
+
+
+
 ## [0.8.7]
 
 ### Added

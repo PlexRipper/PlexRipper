@@ -7,6 +7,8 @@ import {
 	DownloadManagerSettingsDTO,
 	GeneralSettingsDTO,
 	LanguageSettingsDTO,
+	PlexServerSettingsModel,
+	ServerSettingsDTO,
 	SettingsModelDTO,
 	ViewMode,
 } from '@dto/mainApi';
@@ -319,6 +321,28 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+	// endregion
+
+	// region ServerSettings
+
+	public updateServerSettings(value: PlexServerSettingsModel): void {
+		const data = this.getSettingsModule('serverSettings').data as PlexServerSettingsModel[];
+		const settings: ServerSettingsDTO = {
+			data: [...data.filter((x) => x.plexServerId !== value.plexServerId), value],
+		};
+
+		this.setState({ serverSettings: settings }, `Update ServerSettings for server id: ${value.plexServerId}`);
+		this.sendSettingsToApi();
+	}
+
+	public getServerSettings(plexServerId: number): Observable<PlexServerSettingsModel> {
+		return this.stateChanged.pipe(
+			map((x) => x?.serverSettings.data.find((y) => y.plexServerId === plexServerId)),
+			filter((x) => !!x),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
 	// endregion
 }
 

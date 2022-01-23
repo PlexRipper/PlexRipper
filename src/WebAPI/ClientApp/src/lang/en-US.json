@@ -370,6 +370,10 @@
 				"server-commands": {
 					"header": "Server Commands",
 					"re-sync-server": "Re-sync Library media"
+				},
+				"server-config": {
+					"header": "Server Configuration",
+					"download-speed-limit": "Download Speed Limit"
 				}
 			}
 		},

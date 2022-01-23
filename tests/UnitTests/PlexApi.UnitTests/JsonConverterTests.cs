@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Logging;
-using PlexRipper.BaseTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;

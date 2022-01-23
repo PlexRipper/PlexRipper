@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using FluentResultExtensions.lib;
 using Logging;
 using Serilog.Events;
 
@@ -48,7 +47,7 @@ namespace FluentResults
             string memberName = "",
             string sourceFilePath = "")
         {
-            LogReasons(result, logLevel, e, memberName, sourceFilePath);
+            LogReasons(result.ToResult(), logLevel, e, memberName, sourceFilePath);
 
             return result;
         }

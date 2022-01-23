@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -7,15 +6,15 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
+using Environment;
 using FluentResults;
 using Logging;
 using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.FileManager.Command;
 using PlexRipper.Application.FileManager.Queries;
 using PlexRipper.Domain;
+using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.FileSystem
 {
@@ -23,34 +22,50 @@ namespace PlexRipper.FileSystem
     {
         private readonly IMediator _mediator;
 
-        private readonly IFileSystem _fileSystem;
+        private readonly IFileMergeSystem _fileMergeSystem;
 
         private readonly INotificationsService _notificationsService;
+
+        private readonly IFileMergeStreamProvider _fileMergeStreamProvider;
 
         #region Fields
 
         private readonly Channel<DownloadFileTask> _channel = Channel.CreateUnbounded<DownloadFileTask>();
 
-        private readonly Subject<FileMergeProgress> _fileMergeProgressSubject = new Subject<FileMergeProgress>();
+        private readonly Subject<FileMergeProgress> _fileMergeProgressSubject = new();
 
-        private readonly CancellationToken _token = new CancellationToken();
+        private readonly Subject<DownloadFileTask> _fileMergeStartSubject = new();
 
-        private Task<Task> _copytask;
+        private readonly Subject<FileMergeProgress> _fileMergeCompletedSubject = new();
+
+        private readonly CancellationToken _token = new();
+
+        private bool _isExecutingFileTask;
+
+        private Task<Task> _copyTask;
 
         #endregion
 
         #region Constructors
 
-        public FileMerger(IMediator mediator, IFileSystem fileSystem, INotificationsService notificationsService)
+        public FileMerger(IMediator mediator, IFileMergeSystem fileMergeSystem, INotificationsService notificationsService,
+            IFileMergeStreamProvider fileMergeStreamProvider)
         {
             _mediator = mediator;
-            _fileSystem = fileSystem;
+            _fileMergeSystem = fileMergeSystem;
             _notificationsService = notificationsService;
+            _fileMergeStreamProvider = fileMergeStreamProvider;
         }
 
         #endregion
 
+        public IObservable<DownloadFileTask> FileMergeStartObservable => _fileMergeStartSubject.AsObservable();
+
         public IObservable<FileMergeProgress> FileMergeProgressObservable => _fileMergeProgressSubject.AsObservable();
+
+        public IObservable<FileMergeProgress> FileMergeCompletedObservable => _fileMergeCompletedSubject.AsObservable();
+
+        public bool IsBusy => _channel.Reader.Count > 0 && _isExecutingFileTask;
 
         #region Methods
 
@@ -63,19 +78,23 @@ namespace PlexRipper.FileSystem
             while (!_token.IsCancellationRequested)
             {
                 var fileTask = await _channel.Reader.ReadAsync(_token);
-
+                _isExecutingFileTask = true;
                 if (!fileTask.FilePaths.Any())
                 {
                     Log.Error($"File task: {fileTask.FileName} with id {fileTask.Id} did not have any file paths to merge");
                     return;
                 }
 
-                Log.Debug($"Executing FileTask {fileTask.Id}");
+                Log.Information($"Executing FileTask {fileTask.FileName} with id {fileTask.Id}");
+
+                _fileMergeStartSubject.OnNext(fileTask);
+
                 foreach (var path in fileTask.FilePaths)
                 {
-                    if (!File.Exists(path))
+                    if (!_fileMergeSystem.FileExists(path))
                     {
-                        Log.Error($"Filepath: {path} does not exist!");
+                        var result = Result.Fail($"Filepath: {path} does not exist and cannot be used to merge/move the file!").LogError();
+                        await _notificationsService.SendResult(result);
                         return;
                     }
                 }
@@ -83,6 +102,7 @@ namespace PlexRipper.FileSystem
                 var transferStarted = DateTime.UtcNow;
                 var _timeContext = new EventLoopScheduler();
                 Subject<long> _bytesReceivedProgress = new Subject<long>();
+                var lastProgress = new FileMergeProgress();
 
                 // Create FileMergeProgress from bytes received progress
                 _bytesReceivedProgress
@@ -91,8 +111,7 @@ namespace PlexRipper.FileSystem
                     .Select(dataTransferred =>
                     {
                         TimeSpan ElapsedTime = DateTime.UtcNow.Subtract(transferStarted);
-
-                        return new FileMergeProgress
+                        lastProgress = new FileMergeProgress
                         {
                             Id = fileTask.Id,
                             DataTransferred = dataTransferred,
@@ -102,27 +121,33 @@ namespace PlexRipper.FileSystem
                             PlexServerId = fileTask.DownloadTask.PlexServerId,
                             TransferSpeed = DataFormat.GetTransferSpeed(dataTransferred, ElapsedTime.TotalSeconds),
                         };
+                        return lastProgress;
                     })
                     .Subscribe(data => _fileMergeProgressSubject.OnNext(data), () => { _timeContext.Dispose(); });
 
                 try
                 {
-                    // Ensure destination directory exists and is otherwise created.
-                    var result = _fileSystem.CreateDirectoryFromFilePath(fileTask.DownloadTask.DestinationFilePath);
-                    if (result.IsFailed)
+                    var streamResult = await _fileMergeStreamProvider.CreateMergeStream(fileTask.DownloadTask.DestinationDirectory);
+                    if (streamResult.IsFailed)
                     {
-                        // TODO do something here with the error
-                        result.LogError();
+                        streamResult.LogError();
                         continue;
                     }
 
                     // Merge files
-                    await using (var outputStream = File.Create(fileTask.DownloadTask.DestinationFilePath, 4096, FileOptions.SequentialScan))
+                    var outputStream = streamResult.Value;
+                    if (EnvironmentExtensions.IsIntegrationTestMode())
                     {
-                        Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
-                        await StreamExtensions.CopyMultipleToAsync(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
-                        _fileSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
+                        outputStream = new ThrottledStream(streamResult.Value, 5000);
                     }
+
+                    Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
+
+                    // TODO Make merge able to be canceled with token
+                    await _fileMergeStreamProvider.MergeFiles(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
+
+                    _fileMergeSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
+                    await outputStream.DisposeAsync();
                 }
                 catch (Exception e)
                 {
@@ -134,6 +159,8 @@ namespace PlexRipper.FileSystem
                 _bytesReceivedProgress.Dispose();
                 await _mediator.Send(new DeleteFileTaskByIdCommand(fileTask.Id));
                 Log.Information($"Finished combining {fileTask.FilePaths.Count} files into {fileTask.FileName}");
+                _fileMergeCompletedSubject.OnNext(lastProgress);
+                _isExecutingFileTask = false;
             }
         }
 
@@ -143,16 +170,16 @@ namespace PlexRipper.FileSystem
 
         public async Task<Result> SetupAsync()
         {
-            _copytask = Task.Factory.StartNew(ExecuteFileTasks, TaskCreationOptions.LongRunning);
+            _copyTask = Task.Factory.StartNew(ExecuteFileTasks, TaskCreationOptions.LongRunning);
 
-            if (_copytask.IsFaulted)
+            if (_copyTask.IsFaulted)
             {
-                return Result.Fail("ExecuteFileTasks failed due to an error");
+                return Result.Fail("ExecuteFileTasks failed due to an error").LogError();
             }
 
             await ResumeFileTasks();
 
-            return Result.Ok(true);
+            return Result.Ok();
         }
 
         private async Task ResumeFileTasks()
@@ -172,33 +199,25 @@ namespace PlexRipper.FileSystem
         public async Task<Result> AddFileTaskFromDownloadTask(int downloadTaskId)
         {
             if (downloadTaskId == 0)
-            {
                 return ResultExtensions.IsInvalidId(nameof(downloadTaskId)).LogError();
-            }
 
-            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true, true));
+            var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true));
             if (downloadTask.IsFailed)
-            {
-                return downloadTask.LogError();
-            }
-
+                return downloadTask.ToResult().LogError();
 
             Log.Debug($"Adding DownloadTask {downloadTask.Value.Title} to a FileTask to be merged");
             var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask.Value));
             if (result.IsFailed)
             {
-                // TODO Add notification here for front-end
-                return result.LogError();
+                return result.ToResult().LogError();
             }
 
             var fileTask = await _mediator.Send(new GetFileTaskByIdQuery(result.Value));
             if (fileTask.IsFailed)
-            {
-                return fileTask.LogError();
-            }
+                return fileTask.ToResult().LogError();
 
             await _channel.Writer.WriteAsync(fileTask.Value);
-            return Result.Ok(true);
+            return Result.Ok();
         }
 
         #endregion

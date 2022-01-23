@@ -8,7 +8,7 @@ using PlexRipper.Application.FileManager.Command;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.FileManager
+namespace PlexRipper.Data.FileManager
 {
     public class DeleteFileTaskByIdValidator : AbstractValidator<DeleteFileTaskByIdCommand>
     {

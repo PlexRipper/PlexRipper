@@ -4,17 +4,16 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
-using FluentResultExtensions.lib;
 using FluentResults;
 using FluentValidation;
 using Logging;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexTvShows;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexTvShows
+namespace PlexRipper.Data.PlexTvShows
 {
     public class CreateUpdateOrDeletePlexTvShowsCommandValidator : AbstractValidator<CreateUpdateOrDeletePlexTvShowsCommand>
     {

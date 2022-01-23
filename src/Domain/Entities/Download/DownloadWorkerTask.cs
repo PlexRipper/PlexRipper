@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
@@ -21,17 +21,17 @@ namespace PlexRipper.Domain
         /// <param name="endPosition"></param>
         public DownloadWorkerTask(DownloadTask downloadTask, int partIndex, long startPosition, long endPosition)
         {
-            FileName = downloadTask.FileName;
-            TempDirectory = downloadTask.DownloadPath;
-            DownloadTask = downloadTask;
+            TempDirectory = downloadTask.DownloadDirectory;
+            DownloadUrl = downloadTask.DownloadUrl;
             DownloadTaskId = downloadTask.Id;
-
             PartIndex = partIndex;
             StartByte = startPosition;
             EndByte = endPosition;
+            PlexServerId = downloadTask.PlexServerId;
+            FileName = $"{Path.GetFileNameWithoutExtension(downloadTask.FileName)}.part{partIndex}{Path.GetExtension(downloadTask.FileName)}";
         }
 
-        private DownloadWorkerTask() { }
+        public DownloadWorkerTask() { }
 
         #endregion
 
@@ -44,19 +44,16 @@ namespace PlexRipper.Domain
         public string FileName { get; internal set; }
 
         [Column(Order = 2)]
-        public string FilePath { get; set; }
-
-        [Column(Order = 3)]
         public int PartIndex { get; set; }
 
-        [Column(Order = 4)]
+        [Column(Order = 3)]
         public long StartByte { get; set; }
 
-        [Column(Order = 5)]
+        [Column(Order = 4)]
         public long EndByte { get; set; }
 
-        [Column(Order = 6)]
-        public DownloadStatus DownloadStatus { get; set; }
+        [Column(Order = 5)]
+        public DownloadStatus DownloadStatus { get; set; } = DownloadStatus.Queued;
 
         /// <summary>
         /// Gets the total bytes received so far.
@@ -76,6 +73,9 @@ namespace PlexRipper.Domain
         [Column(Order = 9)]
         public long ElapsedTime { get; set; }
 
+        [Column(Order = 10)]
+        public string DownloadUrl { get; set; }
+
         #endregion
 
         #region Relationships
@@ -84,6 +84,10 @@ namespace PlexRipper.Domain
 
         public int DownloadTaskId { get; set; }
 
+        public PlexServer PlexServer { get; set; }
+
+        public int PlexServerId { get; set; }
+
         public ICollection<DownloadWorkerLog> DownloadWorkerTaskLogs { get; set; }
 
         #endregion
@@ -91,16 +95,10 @@ namespace PlexRipper.Domain
         #region Helpers
 
         [NotMapped]
-        public string TempFileName => $"{Path.GetFileNameWithoutExtension(FileName)}.part{PartIndex}{Path.GetExtension(FileName)}";
+        public string TempFilePath => Path.Combine(TempDirectory, FileName);
 
         [NotMapped]
-        public string TempFilePath => Path.Combine(TempDirectory, TempFileName);
-
-        [NotMapped]
-        public string Url => DownloadTask.DownloadUrl;
-
-        [NotMapped]
-        public Uri Uri => new Uri(Url);
+        public Uri Uri => new(DownloadUrl);
 
         [NotMapped]
         public long DataTotal => EndByte - StartByte;
@@ -129,14 +127,12 @@ namespace PlexRipper.Domain
         /// <summary>
         /// The time remaining in seconds for this DownloadWorker to finish.
         /// </summary>
-
         [NotMapped]
         public long TimeRemaining => DataFormat.GetTimeRemaining(DataRemaining, DownloadSpeed);
 
         /// <summary>
         /// The time elapsed of this DownloadWorker.
         /// </summary>
-
         [NotMapped]
         public bool IsCompleted => BytesReceived == DataTotal;
 

@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using PlexRipper.Domain;
@@ -36,6 +35,8 @@ namespace PlexRipper.Data.Common
 
         protected IQueryable<PlexServer> PlexServerQueryable => _dbContext.PlexServers.AsQueryable();
 
+        protected IQueryable<DownloadTask> DownloadTasksQueryable => _dbContext.DownloadTasks.AsQueryable();
+
         protected IQueryable<PlexLibrary> PlexLibraryQueryable => _dbContext.PlexLibraries.AsQueryable();
 
         /// <summary>
@@ -58,7 +59,6 @@ namespace PlexRipper.Data.Common
         /// </summary>
         protected IQueryable<PlexTvShowEpisode> PlexTvShowEpisodesQueryable => _dbContext.PlexTvShowEpisodes.AsQueryable();
 
-
         #endregion
 
         #region Methods
@@ -78,7 +78,7 @@ namespace PlexRipper.Data.Common
 
             if (includeServer)
             {
-                plexLibraryQuery = plexLibraryQuery.IncludeServer();
+                plexLibraryQuery = plexLibraryQuery.IncludePlexServer();
             }
 
             if (includeMedia)
@@ -106,11 +106,11 @@ namespace PlexRipper.Data.Common
             return Result.Fail(new Error($"Could not find an entity of {typeof(T)} with an id of {id}"));
         }
 
-        protected Result<List<T>> ReturnResult<T>(List<T> value)
+        protected Result<List<T>> ReturnResult<T>(List<T> value, int id = 0)
         {
             if (value != null && value.Any()) return Result.Ok(value);
 
-            return Result.Fail(new Error($"Could not find entities of {typeof(T)}"));
+            return Result.Fail(new Error($"Could not find entities of {typeof(T)} with an id of {id}"));
         }
 
         protected async Task SaveChangesAsync()

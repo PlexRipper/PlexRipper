@@ -1,19 +1,22 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.FolderPaths
+namespace PlexRipper.Application
 {
     public class FolderPathService : IFolderPathService
     {
         private readonly IMediator _mediator;
 
-        public FolderPathService(IMediator mediator)
+        private readonly IDirectorySystem _directorySystem;
+
+        public FolderPathService(IMediator mediator, IDirectorySystem directorySystem)
         {
             _mediator = mediator;
+            _directorySystem = directorySystem;
         }
 
         public Task<Result<List<FolderPath>>> GetAllFolderPathsAsync()
@@ -75,6 +78,32 @@ namespace PlexRipper.Application.FolderPaths
             }
         }
 
+        /// <inheritdoc/>
+        public async Task<Result<Dictionary<PlexMediaType, FolderPath>>> GetDefaultDestinationFolderDictionary()
+        {
+            var folderPaths = await _mediator.Send(new GetAllFolderPathsQuery());
+            if (folderPaths.IsFailed)
+                return folderPaths.ToResult();
+
+            var dict = new Dictionary<PlexMediaType, FolderPath>
+            {
+                { PlexMediaType.Movie, folderPaths.Value.FirstOrDefault(x => x.Id == 2) },
+                { PlexMediaType.TvShow, folderPaths.Value.FirstOrDefault(x => x.Id == 3) },
+                { PlexMediaType.Season, folderPaths.Value.FirstOrDefault(x => x.Id == 3) },
+                { PlexMediaType.Episode, folderPaths.Value.FirstOrDefault(x => x.Id == 3) },
+                { PlexMediaType.Music, folderPaths.Value.FirstOrDefault(x => x.Id == 4) },
+                { PlexMediaType.Album, folderPaths.Value.FirstOrDefault(x => x.Id == 4) },
+                { PlexMediaType.Song, folderPaths.Value.FirstOrDefault(x => x.Id == 4) },
+                { PlexMediaType.Photos, folderPaths.Value.FirstOrDefault(x => x.Id == 5) },
+                { PlexMediaType.OtherVideos, folderPaths.Value.FirstOrDefault(x => x.Id == 6) },
+                { PlexMediaType.Games, folderPaths.Value.FirstOrDefault(x => x.Id == 7) },
+                { PlexMediaType.None, folderPaths.Value.FirstOrDefault(x => x.Id == 1) },
+                { PlexMediaType.Unknown, folderPaths.Value.FirstOrDefault(x => x.Id == 1) },
+            };
+
+            return Result.Ok(dict);
+        }
+
         public async Task<Result> CheckIfFolderPathsAreValid(PlexMediaType mediaType = PlexMediaType.None)
         {
             var folderPaths = await GetAllFolderPathsAsync();
@@ -89,15 +118,22 @@ namespace PlexRipper.Application.FolderPaths
             }
 
             var errors = new List<Error>();
-            folderPaths.Value.ForEach(folderPath =>
+            foreach (var folderPath in folderPaths.Value)
             {
-                if (folderPath.MediaType == mediaType && !folderPath.IsValid())
+                var folderPathExitsResult = _directorySystem.Exists(folderPath.DirectoryPath);
+                if (folderPathExitsResult.IsFailed)
                 {
-                    errors.Add(new Error($"The {folderPath.DisplayName} is not a valid directory"));
+                    errors.AddRange(folderPathExitsResult.Errors);
+                    continue;
                 }
-            });
 
-            return errors.Count > 0 ? new Result().WithErrors(errors) : Result.Ok();
+                if (folderPath.MediaType == mediaType && !folderPathExitsResult.Value)
+                {
+                    errors.Add(new Error($"The {folderPath.DisplayName} is not a valid or existing directory"));
+                }
+            }
+
+            return errors.Count > 0 ? new Result().WithErrors(errors).LogError() : Result.Ok();
         }
     }
 }

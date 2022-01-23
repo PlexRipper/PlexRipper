@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common.WebApi
+namespace PlexRipper.Application
 {
     public class DownloadMediaDTO
     {
@@ -11,9 +11,6 @@ namespace PlexRipper.Application.Common.WebApi
 
         [JsonProperty("type", Required = Required.Always)]
         public PlexMediaType Type { get; set; }
-
-        [JsonProperty("libraryId", Required = Required.Always)]
-        public int LibraryId { get; set; }
 
         [JsonProperty("plexAccountId", Required = Required.Always)]
         public int PlexAccountId { get; set; }

@@ -4,11 +4,11 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.FolderPaths;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.FolderPaths
+namespace PlexRipper.Data.FolderPaths
 {
     public class UpdateFolderPathCommandValidator : AbstractValidator<UpdateFolderPathCommand>
     {

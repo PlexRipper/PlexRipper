@@ -4,35 +4,34 @@ namespace Environment
 {
     public static class EnvironmentExtensions
     {
-        private static string _integrationTestModeKey = "IntegrationTestMode";
+        #region Fields
 
-        private static string _resetDbKey = "ResetDB";
+        public static string IntegrationTestModeKey = "IntegrationTestMode";
 
-        private static string _memoryDbKey = "ResetDB";
+        private static readonly string _trueValue = Convert.ToString(true);
+
+        #endregion
+
+        #region Public Methods
+
+        #region Get
 
         public static bool IsIntegrationTestMode()
         {
-            return System.Environment.GetEnvironmentVariable(_integrationTestModeKey) is "true";
+            return System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == _trueValue;
         }
 
-        public static void SetIntegrationTestMode()
+        #endregion
+
+        #region Set
+
+        public static void SetIntegrationTestMode(bool state = false)
         {
-            System.Environment.SetEnvironmentVariable(_integrationTestModeKey, "true");
+            System.Environment.SetEnvironmentVariable(IntegrationTestModeKey, state.ToString());
         }
 
-        public static bool IsResetDatabase()
-        {
-            return System.Environment.GetEnvironmentVariable(_resetDbKey) is "true";
-        }
+        #endregion
 
-        public static void SetResetDatabase()
-        {
-            System.Environment.SetEnvironmentVariable(_resetDbKey, "true");
-        }
-
-        public static void SetInMemoryDatabase(bool state = true)
-        {
-            System.Environment.SetEnvironmentVariable(_memoryDbKey, state.ToString());
-        }
+        #endregion
     }
 }

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain
 {
-    public class PlexTvShowEpisode : PlexMedia, IToDownloadTask
+    public class PlexTvShowEpisode : PlexMedia
     {
         /// <summary>
         /// The PlexKey of the <see cref="PlexTvShowSeason"/> this belongs too.
@@ -25,30 +25,11 @@ namespace PlexRipper.Domain
         #region Helpers
 
         [NotMapped]
-        public List<PlexMediaData> EpisodeData => MediaData.MediaData;
+        public List<PlexMediaData> EpisodeData => MediaData.MediaData ?? new List<PlexMediaData>();
 
         [NotMapped]
         public override PlexMediaType Type => PlexMediaType.Episode;
 
         #endregion
-
-        public List<DownloadTask> CreateDownloadTasks()
-        {
-            var downloadTask = CreateBaseDownloadTask();
-            downloadTask.MediaType = Type;
-            downloadTask.MetaData.TvShowTitle = TvShowSeason?.TvShow?.Title ?? string.Empty;
-            downloadTask.MetaData.TvShowSeasonTitle = TvShowSeason?.Title ?? string.Empty;
-            downloadTask.MetaData.TvShowEpisodeTitle = Title;
-            downloadTask.MetaData.MediaData = EpisodeData;
-
-            downloadTask.MetaData.TvShowKey = TvShowSeason?.TvShow?.Key ?? 0;
-            downloadTask.MetaData.TvShowSeasonKey = ParentKey;
-            downloadTask.MetaData.TvShowEpisodeKey = Key;
-
-            return new List<DownloadTask>
-            {
-                downloadTask,
-            };
-        }
     }
 }

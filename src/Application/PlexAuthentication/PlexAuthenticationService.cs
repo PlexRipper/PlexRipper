@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using MediatR;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.PlexAuthentication.Queries;
 using PlexRipper.Domain;
 
@@ -40,6 +38,7 @@ namespace PlexRipper.Application.PlexAuthentication
                 }
 
                 Log.Information("Plex AuthToken has expired, refreshing Plex AuthToken now.");
+
                 // TODO Account for 2FA
                 return await _plexApiService.RefreshPlexAuthTokenAsync(plexAccount);
             }
@@ -58,15 +57,11 @@ namespace PlexRipper.Application.PlexAuthentication
         public async Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId = 0)
         {
             if (string.IsNullOrEmpty(serverUrl))
-            {
-                return ResultExtensions.IsNull(nameof(serverUrl));
-            }
+                return ResultExtensions.IsNull(nameof(serverUrl)).LogWarning();
 
             var token = await GetPlexServerTokenAsync(plexServerId, plexAccountId);
             if (token.IsFailed)
-            {
-                return token;
-            }
+                return token.ToResult();
 
             // TODO verify that download=1 is not needed.
             return Result.Ok($"{serverUrl}?X-Plex-Token={token.Value}");

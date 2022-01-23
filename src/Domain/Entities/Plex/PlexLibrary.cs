@@ -62,13 +62,14 @@ namespace PlexRipper.Domain
         public Guid Uuid { get; set; }
 
         /// <summary>
-        /// Gets or sets this is the relative path Id of the Library location.
+        /// Gets or sets this relative path Id of the Library location.
         /// </summary>
         [Column(Order = 8)]
         public int LibraryLocationId { get; set; }
 
         /// <summary>
-        /// Gets or sets the relative path of the Library location, e.g: /AnimeSeries.
+        /// Gets or sets the relative path of the Library location on the hosted PlexServer,
+        /// E.g: /AnimeSeries, Q:\[T.V SHOWS].
         /// </summary>
         [Column(Order = 9)]
         public string LibraryLocationPath { get; set; }
@@ -104,13 +105,13 @@ namespace PlexRipper.Domain
         /// </summary>
         public int? DefaultDestinationId { get; set; }
 
-        public List<PlexMovie> Movies { get; set; }
+        public List<PlexMovie> Movies { get; set; } = new();
 
-        public List<PlexTvShow> TvShows { get; set; }
+        public List<PlexTvShow> TvShows { get; set; } = new();
 
-        public List<PlexAccountLibrary> PlexAccountLibraries { get; set; }
+        public List<PlexAccountLibrary> PlexAccountLibraries { get; set; } = new();
 
-        public List<DownloadTask> DownloadTasks { get; set; }
+        public List<DownloadTask> DownloadTasks { get; set; } = new();
 
         #endregion
 

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.IO;
 using System.Linq;
 using System.Text;
-using FluentResults;
 
 namespace PlexRipper.Domain
 {
@@ -14,33 +12,95 @@ namespace PlexRipper.Domain
     /// </summary>
     public class DownloadTask : BaseEntity
     {
-        public PlexMediaType MediaType { get; set; }
-
-        public DownloadStatus DownloadStatus { get; set; }
-
-        public DateTime Created { get; set; }
-
         /// <summary>
-        /// The unique identifier used by the Plex Api to keep track of media.
+        /// Gets or sets the unique identifier used by the Plex Api to keep track of media.
         /// This is only unique on that specific server.
         /// </summary>
+        [Column(Order = 1)]
         public int Key { get; set; }
 
         /// <summary>
-        /// The download priority, the higher the more important.
+        /// Gets or sets the media display title.
+        /// </summary>
+        [Column(Order = 2)]
+        public string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the release year of the media.
+        /// </summary>
+        [Column(Order = 3)]
+        public int Year { get; set; }
+
+        [Column(Order = 4)]
+        public decimal Percentage { get; set; }
+
+        [Column(Order = 5)]
+        public long DataReceived { get; set; }
+
+        [Column(Order = 6)]
+        public long DataTotal { get; set; }
+
+        [Column(Order = 7)]
+        public PlexMediaType MediaType { get; set; }
+
+        [Column(Order = 8)]
+        public DownloadStatus DownloadStatus { get; set; }
+
+        [Column(Order = 9)]
+        public DownloadTaskType DownloadTaskType { get; set; }
+
+        [Column(Order = 10)]
+        public DateTime Created { get; set; }
+
+        [Column(Order = 11)]
+        public string FileName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the relative obfuscated URL of the media to be downloaded,
+        /// e.g: /library/parts/47660/156234666/file.mkv.
+        /// </summary>
+        [Column(Order = 12)]
+        public string FileLocationUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets the full download url including the <see cref="PlexServer"/> token of the media to be downloaded.
+        /// This is only set if <see cref="DownloadTask"/> is downloadable.
+        /// </summary>
+        [Column(Order = 13)]
+        public string DownloadUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
+        /// E.g. "TvShow/Season/Episode".
+        /// </summary>
+        [Column(Order = 14)]
+        public string FullTitle { get; set; }
+
+        /// <summary>
+        /// Gets or sets get or sets the media quality of this <see cref="DownloadTask"/>.
+        /// </summary>
+        [Column(Order = 15)]
+        public string Quality { get; set; }
+
+        /// <summary>
+        /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
+        /// </summary>
+        [Column(Order = 16)]
+        public string DownloadDirectory { get; set; }
+
+        /// <summary>
+        /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
+        /// </summary>
+        [Column(Order = 17)]
+        public string DestinationDirectory { get; set; }
+
+        [Column(Order = 18)]
+        public int DownloadSpeed { get; set; }
+
+        /// <summary>
+        /// Gets or sets the download priority, the higher the more important.
         /// </summary>
         public long Priority { get; set; }
-
-        /// <summary>
-        /// Used to authenticate download request with the server.
-        /// </summary>
-        public string ServerToken { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="DownloadTaskMetaData"/>, this is a JSON field that contains a collection
-        /// of various values that dont warrant their own database column.
-        /// </summary>
-        public DownloadTaskMetaData MetaData { get; set; }
 
         #region Relationships
 
@@ -60,140 +120,30 @@ namespace PlexRipper.Domain
 
         public int DownloadFolderId { get; set; }
 
-        public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new List<DownloadWorkerTask>();
+        public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new();
+
+        public int? ParentId { get; set; }
+
+        public DownloadTask Parent { get; set; }
+
+        public int? RootDownloadTaskId { get; set; }
+
+        public DownloadTask RootDownloadTask { get; set; }
+
+        public List<DownloadTask> Children { get; set; }
 
         #endregion
 
         #region Helpers
 
         [NotMapped]
-        public long DataTotal => MetaData?.MediaData?.First()?.Parts?.First()?.Size ?? 0;
-
-        [NotMapped]
-        public long DataReceived => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.Sum(x => x.BytesReceived) : 0;
-
-        [NotMapped]
-        public decimal Percentage => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.Average(x => x.Percentage) : 0;
-
-        /// <summary>
-        /// The release year of the media.
-        /// </summary>
-        [NotMapped]
-        public int ReleaseYear => MetaData?.ReleaseYear ?? -1;
-
-        [NotMapped]
         public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
-
-        public string Title
-        {
-            get
-            {
-                return MediaType switch
-                {
-                    PlexMediaType.Movie => TitleMovie,
-                    PlexMediaType.TvShow => TitleTvShow,
-                    PlexMediaType.Season => TitleTvShowSeason,
-                    PlexMediaType.Episode => TitleTvShowEpisode,
-                    _ => "TitleNotFound",
-                };
-            }
-        }
-
-        /// <summary>
-        /// The full formatted media title, based on the <see cref="PlexMediaType"/>.
-        /// E.g. "TvShow/Season/Episode".
-        /// </summary>
-        [NotMapped]
-        public string TitlePath
-        {
-            get
-            {
-                return MediaType switch
-                {
-                    PlexMediaType.Movie => TitleMovie,
-                    PlexMediaType.TvShow => TitleTvShow,
-                    PlexMediaType.Season => $"{TitleTvShow}/{TitleTvShowSeason}",
-                    PlexMediaType.Episode => $"{TitleTvShow}/{TitleTvShowSeason}/{TitleTvShowEpisode}",
-                    _ => "TitleNotFound",
-                };
-            }
-        }
-
-        [NotMapped]
-        public string TitleMovie => MetaData?.MovieTitle ?? string.Empty;
-
-        /// <summary>
-        /// If the type is an TvShow, Season or Episode, then this will be the title of that TvShow.
-        /// </summary>
-        [NotMapped]
-        public string TitleTvShow => MetaData?.TvShowTitle ?? string.Empty;
-
-        /// <summary>
-        /// If the type is an TvShow, Season or Episode, then this will be the title of that TvShow season.
-        /// </summary>
-        [NotMapped]
-        public string TitleTvShowSeason => MetaData?.TvShowSeasonTitle ?? string.Empty;
-
-        /// <summary>
-        /// If the type is an TvShow, Season or Episode, then this will be the title of that TvShow episode.
-        /// </summary>
-        [NotMapped]
-        public string TitleTvShowEpisode => MetaData?.TvShowEpisodeTitle ?? string.Empty;
-
-        [NotMapped]
-        public string FileName => Path.GetFileName(MetaData?.MediaData?.First()?.Parts?.First()?.File ?? string.Empty);
-
-        /// <summary>
-        /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
-        /// </summary>
-        [NotMapped]
-        public string FileLocationUrl => MetaData?.MediaData?.First()?.Parts?.First()?.ObfuscatedFilePath ?? string.Empty;
-
-        [NotMapped]
-        public string DownloadUrl => PlexServer != null ? $"{PlexServer?.ServerUrl}{FileLocationUrl}?X-Plex-Token={ServerToken}" : string.Empty;
 
         [NotMapped]
         public Uri DownloadUri => !string.IsNullOrWhiteSpace(DownloadUrl) ? new Uri(DownloadUrl, UriKind.Absolute) : null;
 
         [NotMapped]
-        public string FileNameWithoutExtention => !string.IsNullOrWhiteSpace(FileName) ? Path.GetFileNameWithoutExtension(FileName) : string.Empty;
-
-        /// <summary>
-        /// Gets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
-        /// </summary>
-        [NotMapped]
-        public string DownloadPath
-        {
-            get
-            {
-                if (DownloadFolder is null)
-                {
-                    return string.Empty;
-                }
-
-                switch (MediaType)
-                {
-                    case PlexMediaType.Movie:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "Movies", $"{FileNameWithoutExtention}".SanitizeFolderName());
-                    case PlexMediaType.Episode:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "TvShows", $"{FileNameWithoutExtention}".SanitizeFolderName());
-                    default:
-                        return Path.Combine(DownloadFolder.DirectoryPath, "Other", $"{FileNameWithoutExtention}".SanitizeFolderName());
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
-        /// </summary>
-        [NotMapped]
-        public string DestinationFilePath => DestinationFolder != null ? Path.Combine(DestinationFolder.DirectoryPath, MediaPath, FileName) : string.Empty;
-
-        [NotMapped]
         public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
-
-        [NotMapped]
-        public int DownloadSpeed => DownloadWorkerTasks.Any() ? DownloadWorkerTasks.AsQueryable().Sum(x => x.DownloadSpeed) : 0;
 
         [NotMapped]
         public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, DownloadSpeed);
@@ -202,34 +152,40 @@ namespace PlexRipper.Domain
         public long BytesRemaining => DataTotal - DataReceived;
 
         /// <summary>
-        /// Gets the sanitized sub-path based on the <see cref="PlexMediaType"/>, e.g: [TvShow]/[Season]/ or [Movie] [ReleaseYear]/.
+        /// Gets a joined string of temp file paths of the <see cref="DownloadWorkerTasks"/> delimited by ";".
         /// </summary>
         [NotMapped]
-        public string MediaPath
+        public string GetFilePathsCompressed => string.Join(';', DownloadWorkerTasks.Select(x => x.TempFilePath).ToArray());
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="DownloadTask"/> is downloadable.
+        /// e.g. A episode or movie part, an episode or movie without parts.
+        /// </summary>
+        public bool IsDownloadable =>
+            DownloadTaskType
+                is DownloadTaskType.EpisodePart
+                or DownloadTaskType.MoviePart
+                or DownloadTaskType.Episode
+                or DownloadTaskType.EpisodeData
+                or DownloadTaskType.Movie
+                or DownloadTaskType.MovieData;
+
+        /// <summary>
+        /// Calculate properties such as DataReceived, DataTotal based on the nested children.
+        /// </summary>
+        public void Calculate()
         {
-            get
+            if (Children.Any())
             {
-                switch (MediaType)
+                foreach (var downloadTask in Children)
                 {
-                    case PlexMediaType.Movie:
-                        return Path.Combine($"{Title}" + (ReleaseYear > 0 ? $" ({ReleaseYear})" : string.Empty).SanitizeFolderName());
-                    case PlexMediaType.Episode:
-                        // If the same, than it will most likely be an anime type of tvShow which can have no seasons.
-                        if (TitleTvShow == TitleTvShowSeason)
-                        {
-                            return Path.Combine(TitleTvShow.SanitizeFolderName());
-                        }
-
-                        return Path.Combine(TitleTvShow.SanitizeFolderName(), TitleTvShowSeason.SanitizeFolderName());
-                    default:
-                        return Path.Combine($"{FileNameWithoutExtention.SanitizeFolderName()}");
+                    downloadTask.Calculate();
                 }
-            }
-        }
 
-        public Result IsValid()
-        {
-            return new DownloadTaskValidator().Validate(this).ToFluentResult();
+                DataReceived = Children.Select(x => x.DataReceived).Sum();
+                DataTotal = Children.Select(x => x.DataTotal).Sum();
+                Percentage = DataFormat.GetPercentage(DataReceived, DataTotal);
+            }
         }
 
         /// <inheritdoc/>
@@ -252,6 +208,25 @@ namespace PlexRipper.Domain
             builder.Append($" = ({DownloadSpeedFormatted} - {TimeRemaining})");
 
             return builder.ToString();
+        }
+
+        #endregion
+
+        #region Compare
+
+        public bool Equals(PlexTvShow tvShow)
+        {
+            return tvShow is not null && PlexServerId == tvShow.PlexServerId && MediaType == tvShow.Type && Key == tvShow.Key;
+        }
+
+        public bool Equals(PlexTvShowSeason season)
+        {
+            return season is not null && PlexServerId == season.PlexServerId && MediaType == season.Type && Key == season.Key;
+        }
+
+        public bool Equals(PlexTvShowEpisode episode)
+        {
+            return episode is not null && PlexServerId == episode.PlexServerId && MediaType == episode.Type && Key == episode.Key;
         }
 
         #endregion

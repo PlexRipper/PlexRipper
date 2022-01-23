@@ -10,7 +10,7 @@ using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS
+namespace PlexRipper.Data
 {
     public class GetAccountByUsernameValidator : AbstractValidator<GetPlexAccountByUsernameQuery>
     {

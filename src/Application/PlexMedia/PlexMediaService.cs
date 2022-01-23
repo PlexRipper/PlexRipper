@@ -1,12 +1,9 @@
 ﻿using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.PlexMovies;
-using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexMedia
+namespace PlexRipper.Application
 {
     public class PlexMediaService : IPlexMediaService
     {
@@ -50,7 +47,7 @@ namespace PlexRipper.Application.PlexMedia
                 }
                 case PlexMediaType.TvShow:
                 {
-                    var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, includeServer: true));
+                    var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, true));
                     if (tvShowResult.IsFailed)
                     {
                         return tvShowResult.ToResult();
@@ -104,7 +101,7 @@ namespace PlexRipper.Application.PlexMedia
                 }
                 case PlexMediaType.TvShow:
                 {
-                    var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, includeServer: true));
+                    var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, true));
                     if (tvShowResult.IsFailed)
                     {
                         return tvShowResult.ToResult();

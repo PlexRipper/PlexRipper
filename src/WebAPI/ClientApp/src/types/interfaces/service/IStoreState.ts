@@ -11,6 +11,7 @@ import {
 	SyncServerProgress,
 	LibraryProgress,
 	DownloadTaskCreationProgress,
+	ServerDownloadProgressDTO,
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
 import IAlert from '@interfaces/IAlert';
@@ -19,12 +20,11 @@ export default interface IStoreState extends SettingsModelDTO {
 	accounts: PlexAccountDTO[];
 	servers: PlexServerDTO[];
 	libraries: PlexLibraryDTO[];
-	downloads: DownloadTaskDTO[];
+	serverDownloads: ServerDownloadProgressDTO[];
 	notifications: NotificationDTO[];
 	folderPaths: FolderPathDTO[];
 	alerts: IAlert[];
 	mediaUrls: IObjectUrl[];
-	settings: SettingsModelDTO;
 	helpIdDialog: string;
 	downloadTaskUpdateList: DownloadTaskDTO[];
 	// Progress Service

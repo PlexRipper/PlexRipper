@@ -6,10 +6,6 @@ namespace PlexRipper.Application.PlexAuthentication.Queries
 {
     public class GetPlexServerTokenQuery : IRequest<Result<string>>
     {
-        public int PlexAccountId { get; }
-
-        public int PlexServerId { get; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="GetPlexServerTokenQuery"/> class.
         /// Retrieves an <see cref="PlexServer"/> authentication token associated with a <see cref="PlexAccount"/>.
@@ -22,5 +18,9 @@ namespace PlexRipper.Application.PlexAuthentication.Queries
             PlexServerId = plexServerId;
             PlexAccountId = plexAccountId;
         }
+
+        public int PlexAccountId { get; }
+
+        public int PlexServerId { get; }
     }
 }

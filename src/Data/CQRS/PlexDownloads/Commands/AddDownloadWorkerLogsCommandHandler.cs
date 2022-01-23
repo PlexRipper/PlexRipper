@@ -6,7 +6,7 @@ using MediatR;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.CQRS.PlexDownloads
+namespace PlexRipper.Data
 {
     public class AddDownloadWorkerLogsValidator : AbstractValidator<AddDownloadWorkerLogsCommand> { }
 

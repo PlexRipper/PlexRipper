@@ -2,7 +2,7 @@
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexServers
+namespace PlexRipper.Application
 {
     public class CreatePlexServerStatusCommand : IRequest<Result<int>>
     {

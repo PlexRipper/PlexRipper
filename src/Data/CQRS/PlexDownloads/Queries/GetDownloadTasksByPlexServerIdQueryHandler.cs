@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
@@ -9,7 +10,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexDownloads
+namespace PlexRipper.Data
 {
     public class GetDownloadTasksByPlexServerIdQueryValidator : AbstractValidator<GetDownloadTasksByPlexServerIdQuery>
     {
@@ -20,40 +21,19 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
     }
 
     public class GetDownloadTasksByPlexServerIdQueryHandler : BaseHandler,
-        IRequestHandler<GetDownloadTasksByPlexServerIdQuery, Result<PlexServer>>
+        IRequestHandler<GetDownloadTasksByPlexServerIdQuery, Result<List<DownloadTask>>>
     {
         public GetDownloadTasksByPlexServerIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<PlexServer>> Handle(GetDownloadTasksByPlexServerIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<DownloadTask>>> Handle(GetDownloadTasksByPlexServerIdQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<PlexServer> query = _dbContext.PlexServers
-                .Include(x => x.PlexLibraries)
-                .ThenInclude(x => x.DownloadTasks)
-                .ThenInclude(x => x.PlexServer);
+            var downloadTasks = await PlexServerQueryable
+                .AsTracking()
+                .IncludeDownloadTasks()
+                .FirstOrDefaultAsync(x => x.Id == request.PlexServerId, cancellationToken);
 
-            if (request.IncludeServerStatus)
-            {
-                query = query.Include(x => x.ServerStatus);
-            }
-
-            var server = await query
-
-                // Include DownloadWorkerTasks
-                .Include(x => x.PlexLibraries)
-                .ThenInclude(x => x.DownloadTasks)
-                .ThenInclude(x => x.DownloadWorkerTasks)
-
-                // Include DownloadFolder
-                .Include(x => x.PlexLibraries)
-                .ThenInclude(x => x.DownloadTasks)
-                .ThenInclude(x => x.DownloadFolder)
-
-                // Include DestinationFolder
-                .Include(x => x.PlexLibraries)
-                .ThenInclude(x => x.DownloadTasks)
-                .ThenInclude(x => x.DestinationFolder)
-                .FirstOrDefaultAsync(x => x.Id == request.PlexServerId);
-            return Result.Ok(server);
+            return Result.Ok(downloadTasks.DownloadTasks.Where(x => x.ParentId == null).ToList());
         }
     }
+
 }

@@ -1,11 +1,9 @@
 ﻿using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.PlexMedia;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexTvShows
+namespace PlexRipper.Application
 {
     public class PlexTvShowService : PlexMediaService, IPlexTvShowService
     {

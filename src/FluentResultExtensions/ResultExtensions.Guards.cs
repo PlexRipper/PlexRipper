@@ -62,7 +62,7 @@ namespace FluentResults
 
         public static Result IsInvalidId(string parameterName, int value = 0)
         {
-            return Create400BadRequestResult($"The {parameterName} parameter contained an invalid id of {value}");
+            return Create400BadRequestResult($"The {parameterName} parameter was an invalid id of {value}");
         }
 
         /// <summary>

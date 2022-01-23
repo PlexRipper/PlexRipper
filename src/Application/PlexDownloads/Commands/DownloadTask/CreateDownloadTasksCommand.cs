@@ -5,7 +5,7 @@ using PlexRipper.Domain;
 
 namespace PlexRipper.Application
 {
-    public class CreateDownloadTasksCommand : IRequest<Result<List<int>>>
+    public class CreateDownloadTasksCommand : IRequest<Result>
     {
         public List<DownloadTask> DownloadTasks { get; }
 

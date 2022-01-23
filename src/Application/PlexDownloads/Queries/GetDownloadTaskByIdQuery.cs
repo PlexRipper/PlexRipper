@@ -6,17 +6,14 @@ namespace PlexRipper.Application
 {
     public class GetDownloadTaskByIdQuery : IRequest<Result<DownloadTask>>
     {
-        public GetDownloadTaskByIdQuery(int id, bool includeServer = false, bool includePlexLibrary = false)
+        public GetDownloadTaskByIdQuery(int id, bool includeChildren = false)
         {
             Id = id;
-            IncludeServer = includeServer;
-            IncludePlexLibrary = includePlexLibrary;
+            IncludeChildren = includeChildren;
         }
 
         public int Id { get; }
 
-        public bool IncludeServer { get; }
-
-        public bool IncludePlexLibrary { get; }
+        public bool IncludeChildren { get; }
     }
 }

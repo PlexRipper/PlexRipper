@@ -14,10 +14,10 @@ namespace PlexRipper.Domain
         Unknown = 0,
 
         /// <summary>
-        /// Download Task is created and set to default values.
+        /// There was an error during download.
         /// </summary>
-        [EnumMember(Value = "Initialized")]
-        Initialized = 1,
+        [EnumMember(Value = "Error")]
+        Error = 1,
 
         /// <summary>
         /// Download is added to the queue.
@@ -32,6 +32,12 @@ namespace PlexRipper.Domain
         Downloading = 3,
 
         /// <summary>
+        /// Download Task is downloading data from the server.
+        /// </summary>
+        [EnumMember(Value = "DownloadFinished")]
+        DownloadFinished = 4,
+
+        /// <summary>
         /// Download is paused.
         /// </summary>
         [EnumMember(Value = "Paused")]
@@ -41,36 +47,30 @@ namespace PlexRipper.Domain
         /// Download is paused.
         /// </summary>
         [EnumMember(Value = "Stopped")]
-        Stopped = 7,
+        Stopped = 6,
 
         /// <summary>
         /// Download is deleted.
         /// </summary>
         [EnumMember(Value = "Deleted")]
-        Deleted = 10,
+        Deleted = 7,
 
         /// <summary>
         /// Download segments are being merged into 1 media file.
         /// </summary>
         [EnumMember(Value = "Merging")]
-        Merging = 11,
+        Merging = 8,
 
         /// <summary>
         /// Download file is being moved.
         /// </summary>
         [EnumMember(Value = "Moving")]
-        Moving = 12,
+        Moving = 9,
 
         /// <summary>
         /// Download is completed.
         /// </summary>
         [EnumMember(Value = "Completed")]
-        Completed = 13,
-
-        /// <summary>
-        /// There was an error during download.
-        /// </summary>
-        [EnumMember(Value = "Error")]
-        Error = 14,
+        Completed = 10,
     }
 }

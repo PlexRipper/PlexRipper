@@ -22,89 +22,95 @@ namespace PlexRipper.Domain
         public string Title { get; set; }
 
         [Column(Order = 3)]
+        public string SortTitle { get; set; }
+
+        [Column(Order = 4)]
         public int Year { get; set; }
 
         /// <summary>
         /// Gets or sets the duration in seconds of the (nested) media.
         /// </summary>
-        [Column(Order = 4)]
+        [Column(Order = 5)]
         public int Duration { get; set; }
 
         /// <summary>
         /// Gets or sets the total filesize of the nested media.
         /// </summary>
-        [Column(Order = 5)]
+        [Column(Order = 6)]
         public long MediaSize { get; set; }
 
         /// <summary>
         /// Gets or sets the key used to retrieve thumbnails, art or banners.
         /// E.g. /library/metadata/[Key]/art/[MetadataKey] =>  /library/metadata/529367/art/1593898227.
         /// </summary>
-        [Column(Order = 6)]
+        [Column(Order = 7)]
         public int MetaDataKey { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="PlexMedia"/> has a thumbnail.
         /// </summary>
-        [Column(Order = 7)]
+        [Column(Order = 8)]
         public bool HasThumb { get; set; }
 
         /// <summary>
         /// Gets or sets whether this <see cref="PlexMedia"/> has art.
         /// </summary>
-        [Column(Order = 8)]
+        [Column(Order = 9)]
         public bool HasArt { get; set; }
 
         /// <summary>
         /// Gets or sets whether this <see cref="PlexMedia"/> has a banner.
         /// </summary>
-        [Column(Order = 9)]
+        [Column(Order = 10)]
         public bool HasBanner { get; set; }
 
         /// <summary>
         /// Gets or sets whether this <see cref="PlexMedia"/> has a theme.
         /// </summary>
-        [Column(Order = 10)]
+        [Column(Order = 1)]
         public bool HasTheme { get; set; }
 
-        [Column(Order = 11)]
+        [Column(Order = 12)]
         public int Index { get; set; }
 
-        [Column(Order = 12)]
+        [Column(Order = 13)]
         public string Studio { get; set; }
 
-        [Column(Order = 13)]
+        [Column(Order = 14)]
         public string Summary { get; set; }
 
-        [Column(Order = 14)]
+        [Column(Order = 15)]
         public string ContentRating { get; set; }
 
-        [Column(Order = 15)]
+        [Column(Order = 16)]
         public double Rating { get; set; }
+
+        [Column(Order = 17)]
+        public string FullTitle { get; set; }
 
         /// <summary>
         /// Gets or sets the number of direct children
         /// E.G. if the type is tvShow, then this number would be the season count, if season then this would be the episode count.
         /// </summary>
-        [Column(Order = 16)]
+        [Column(Order = 17)]
         public int ChildCount { get; set; }
 
         /// <summary>
         /// Gets or sets when this media was added to the Plex library.
         /// </summary>
-        [Column(Order = 17)]
+        [Column(Order = 18)]
         public DateTime AddedAt { get; set; }
 
         /// <summary>
         /// Gets or sets when this media was last updated in the Plex library.
         /// </summary>
-        [Column(Order = 18)]
+        [Column(Order = 19)]
         public DateTime UpdatedAt { get; set; }
 
         /// <summary>
         /// Gets or sets when this media was released/aired to the public.
         /// </summary>
-        [Column(Order = 19)]
+        [Column(Order = 20)]
         public DateTime? OriginallyAvailableAt { get; set; }
 
         public PlexMediaContainer MediaData { get; set; } = new PlexMediaContainer();
@@ -142,29 +148,6 @@ namespace PlexRipper.Domain
 
         [NotMapped]
         public string ThemeUrl => HasTheme ? $"{MetaDataUrl}/theme/{MetaDataKey}" : string.Empty;
-
-        /// <summary>
-        /// The base <see cref="DownloadTask"/> used as a template to create DownloadTasks in child classes.
-        /// </summary>
-        /// <returns>The base <see cref="DownloadTask"/>.</returns>
-        protected DownloadTask CreateBaseDownloadTask()
-        {
-            return new DownloadTask
-            {
-                MetaData = new DownloadTaskMetaData
-                {
-                    MediaData = MediaData.MediaData,
-                    ReleaseYear = Year,
-                },
-                PlexLibrary = PlexLibrary,
-                PlexLibraryId = PlexLibraryId,
-                PlexServer = PlexServer,
-                PlexServerId = PlexServerId,
-                Created = DateTime.Now,
-                DownloadStatus = DownloadStatus.Initialized,
-                Key = Key,
-            };
-        }
 
         #endregion
     }

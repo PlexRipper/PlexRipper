@@ -5,7 +5,18 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { ObservableStore } from '@codewithdan/observable-store';
-import { DownloadTaskCreationProgress, SettingsModelDTO, ViewMode } from '@dto/mainApi';
+import {
+	ConfirmationSettingsDTO,
+	DateTimeSettingsDTO,
+	DisplaySettingsDTO,
+	DownloadManagerSettingsDTO,
+	DownloadTaskCreationProgress,
+	GeneralSettingsDTO,
+	LanguageSettingsDTO,
+	ServerSettingsDTO,
+	SettingsModelDTO,
+	ViewMode,
+} from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import * as Service from '@service';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
@@ -16,14 +27,12 @@ export class GlobalService extends Service.BaseService {
 	private _defaultStore: IStoreState = {
 		accounts: [],
 		servers: [],
-		downloads: [],
 		libraries: [],
 		mediaUrls: [],
 		notifications: [],
 		folderPaths: [],
 		alerts: [],
 		helpIdDialog: '',
-		settings: {} as SettingsModelDTO,
 		downloadTaskUpdateList: [],
 		// Progress Service
 		fileMergeProgressList: [],
@@ -31,22 +40,15 @@ export class GlobalService extends Service.BaseService {
 		syncServerProgress: [],
 		libraryProgress: [],
 		downloadTaskCreationProgress: {} as DownloadTaskCreationProgress,
-		// Settings
-		activeAccountId: 0,
-		firstTimeSetup: true,
-		downloadSegments: 4,
-		askDownloadMovieConfirmation: true,
-		askDownloadTvShowConfirmation: true,
-		askDownloadSeasonConfirmation: true,
-		askDownloadEpisodeConfirmation: true,
-		tvShowViewMode: ViewMode.Poster,
-		movieViewMode: ViewMode.Poster,
-		shortDateFormat: 'dd/MM/yyyy',
-		longDateFormat: 'EEEE, dd MMMM yyyy',
-		timeFormat: 'HH:MM:ss',
-		timeZone: 'UTC',
-		showRelativeDates: true,
-		language: 'en-US',
+		serverDownloads: [],
+		// Settings Modules
+		dateTimeSettings: {} as DateTimeSettingsDTO,
+		downloadManagerSettings: {} as DownloadManagerSettingsDTO,
+		generalSettings: {} as GeneralSettingsDTO,
+		languageSettings: {} as LanguageSettingsDTO,
+		displaySettings: {} as DisplaySettingsDTO,
+		confirmationSettings: {} as ConfirmationSettingsDTO,
+		serverSettings: {} as ServerSettingsDTO,
 	};
 
 	constructor() {

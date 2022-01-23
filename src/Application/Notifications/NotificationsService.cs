@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
-using PlexRipper.Application.Common;
 using PlexRipper.Application.Notifications.Queries;
 using PlexRipper.Domain;
 

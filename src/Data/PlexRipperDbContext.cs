@@ -1,20 +1,18 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using Environment;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Common;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {
-    public class PlexRipperDbContext : DbContext, ISetupAsync
+    public sealed class PlexRipperDbContext : DbContext, ISetupAsync
     {
-        private readonly IPathSystem _pathSystem;
+        private readonly IPathProvider _pathProvider;
 
         #region Properties
 
@@ -86,15 +84,22 @@ namespace PlexRipper.Data
 
         public PlexRipperDbContext() { }
 
-        public PlexRipperDbContext(IPathSystem pathSystem)
+        public PlexRipperDbContext(IPathProvider pathProvider)
         {
-            _pathSystem = pathSystem;
-            DatabaseName = _pathSystem.DatabaseName;
-            DatabasePath = _pathSystem.DatabasePath;
-            ConfigDirectory = _pathSystem.ConfigDirectory;
+            _pathProvider = pathProvider;
+            DatabaseName = _pathProvider.DatabaseName;
+            DatabasePath = _pathProvider.DatabasePath;
+            ConfigDirectory = _pathProvider.ConfigDirectory;
         }
 
-        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options) : base(options) { }
+        public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName = "") : base(options)
+        {
+            // This is to add tables when created in memory
+            // https://stackoverflow.com/a/60497822/8205497
+            Database.OpenConnection();
+            Database.EnsureCreated();
+            DatabaseName = databaseName;
+        }
 
         #endregion Constructors
 
@@ -102,23 +107,11 @@ namespace PlexRipper.Data
 
         public async Task<Result> SetupAsync()
         {
-            // Should the Database be deleted and re-created
-            if (EnvironmentExtensions.IsResetDatabase())
-            {
-                Log.Warning("ResetDB command is true, database will be deleted and re-created.");
-                await Database.EnsureDeletedAsync();
-            }
-
-            if (EnvironmentExtensions.IsIntegrationTestMode())
-            {
-                Log.Warning("Database will be setup in TestMode");
-                Log.Warning($"Database created at: {DatabasePath}");
-                await Database.EnsureCreatedAsync();
-            }
-
             try
             {
-                if (!EnvironmentExtensions.IsIntegrationTestMode())
+                // Don't migrate when running in memory, this causes error:
+                // "Relational-specific methods can only be used when the context is using a relational database provider."
+                if (!Database.IsInMemory() && !EnvironmentExtensions.IsIntegrationTestMode())
                 {
                     Log.Information("Attempting to migrate database");
                     await Database.MigrateAsync();
@@ -134,8 +127,12 @@ namespace PlexRipper.Data
             var exist = await Database.CanConnectAsync();
             if (exist)
             {
-                Log.Information("Database was successfully connected!");
-                Log.Information($"Database connected at: {DatabasePath}");
+                if (!EnvironmentExtensions.IsIntegrationTestMode())
+                {
+                    Log.Information("Database was successfully connected!");
+                    Log.Information($"Database connected at: {DatabasePath}");
+                }
+
                 return Result.Ok();
             }
 
@@ -147,10 +144,8 @@ namespace PlexRipper.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // optionsBuilder.UseLazyLoadingProxies();
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.EnableDetailedErrors();
-                optionsBuilder.EnableSensitiveDataLogging();
                 optionsBuilder
                     .UseSqlite(
                         $"Data Source={DatabasePath}",

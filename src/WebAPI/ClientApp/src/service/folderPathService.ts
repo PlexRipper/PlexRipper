@@ -10,6 +10,7 @@ import Log from 'consola';
 export class FolderPathService extends BaseService {
 	public constructor() {
 		super({
+			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
 					folderPaths: state.folderPaths,

@@ -4,17 +4,16 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
-using FluentResultExtensions.lib;
 using FluentResults;
 using FluentValidation;
 using Logging;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexMovies;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexMovies.Commands
+namespace PlexRipper.Data.PlexMovies.Commands
 {
     public class CreateUpdateOrDeletePlexMoviesValidator : AbstractValidator<CreateUpdateOrDeletePlexMoviesCommand>
     {

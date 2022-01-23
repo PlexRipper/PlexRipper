@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.WebApi;
 
-namespace PlexRipper.Application.Config
+namespace PlexRipper.Application
 {
     public class ApplicationMappingProfile : Profile
     {

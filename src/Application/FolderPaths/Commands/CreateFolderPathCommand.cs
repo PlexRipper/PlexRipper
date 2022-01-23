@@ -2,7 +2,7 @@
 using MediatR;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.FolderPaths
+namespace PlexRipper.Application
 {
     public class CreateFolderPathCommand: IRequest<Result<int>>
     {

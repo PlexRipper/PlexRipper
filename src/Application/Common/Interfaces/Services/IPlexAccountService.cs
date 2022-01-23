@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common
+namespace PlexRipper.Application
 {
     public interface IPlexAccountService
     {

@@ -10,7 +10,7 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexDownloads
+namespace PlexRipper.Data
 {
     public class GetAllDownloadTasksInPlexServersQueryValidator : AbstractValidator<GetAllDownloadTasksInPlexServersQuery> { }
 
@@ -21,10 +21,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
 
         public async Task<Result<List<PlexServer>>> Handle(GetAllDownloadTasksInPlexServersQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<PlexServer> query = _dbContext.PlexServers
-                .Include(x => x.PlexLibraries)
-                .ThenInclude(x => x.DownloadTasks)
-                .ThenInclude(x => x.PlexServer);
+            var query = PlexServerQueryable.AsTracking().IncludeDownloadTasks();
 
             if (request.IncludeServerStatus)
             {
@@ -32,21 +29,6 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
             }
 
             var serverList = await query
-
-                // Include DownloadWorkerTasks
-                .Include(x => x.PlexLibraries)
-                .ThenInclude(x => x.DownloadTasks)
-                .ThenInclude(x => x.DownloadWorkerTasks)
-
-                // Include DownloadFolder
-                .Include(x => x.PlexLibraries)
-                .ThenInclude(x => x.DownloadTasks)
-                .ThenInclude(x => x.DownloadFolder)
-
-                // Include DestinationFolder
-                .Include(x => x.PlexLibraries)
-                .ThenInclude(x => x.DownloadTasks)
-                .ThenInclude(x => x.DestinationFolder)
                 .Where(x => x.PlexLibraries.Any(y => y.DownloadTasks.Any()))
                 .ToListAsync(cancellationToken);
             return Result.Ok(serverList);

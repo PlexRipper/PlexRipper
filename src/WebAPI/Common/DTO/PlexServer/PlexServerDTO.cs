@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using PlexRipper.DownloadManager;
 
 namespace PlexRipper.WebAPI.Common.DTO
 {
@@ -47,6 +48,9 @@ namespace PlexRipper.WebAPI.Common.DTO
 
         [JsonProperty("plexLibraries", Required = Required.Always)]
         public List<PlexLibraryDTO> PlexLibraries { get; set; }
+
+        [JsonProperty("downloadTasks", Required = Required.Always)]
+        public List<DownloadProgressDTO> DownloadTasks { get; set; }
 
         [JsonProperty("status", Required = Required.Always)]
         public PlexServerStatusDTO Status { get; set; }

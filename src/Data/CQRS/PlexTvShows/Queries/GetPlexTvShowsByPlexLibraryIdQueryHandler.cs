@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using FluentResults;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexTvShows;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexTvShows
+namespace PlexRipper.Data.PlexTvShows
 {
     public class GetPlexTvShowsByPlexLibraryIdQueryHandler : BaseHandler,
         IRequestHandler<GetPlexTvShowsByPlexLibraryIdQuery, Result<List<PlexTvShow>>>

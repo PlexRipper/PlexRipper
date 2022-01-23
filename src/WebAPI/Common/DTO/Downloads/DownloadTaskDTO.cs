@@ -39,6 +39,9 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("mediaType", Required = Required.Always)]
         public PlexMediaType MediaType { get; set; }
 
+        [JsonProperty("downloadTaskType", Required = Required.Always)]
+        public DownloadTaskType DownloadTaskType { get; set; }
+
         /// <summary>
         /// The identifier used by Plex to keep track of media.
         /// </summary>
@@ -46,7 +49,7 @@ namespace PlexRipper.WebAPI.Common.DTO
         public int Key { get; set; }
 
         [JsonProperty("downloadSpeed", Required = Required.Always)]
-        public int DownloadSpeed { get; set;}
+        public int DownloadSpeed { get; set; }
 
         [JsonProperty("dataReceived", Required = Required.Always)]
         public long DataReceived { get; set; }
@@ -57,11 +60,19 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("percentage", Required = Required.Always)]
         public decimal Percentage { get; set; }
 
+        [JsonProperty("downloadDirectory", Required = Required.Always)]
+        public string DownloadDirectory { get; set; }
+
+        [JsonProperty("destinationDirectory", Required = Required.Always)]
+        public string DestinationDirectory { get; set; }
+
         /// <summary>
         /// The download priority, the higher the more important.
         /// </summary>
         [JsonProperty("priority", Required = Required.Always)]
         public int Priority { get; set; }
+
+        #region Relationships
 
         [JsonProperty("plexServerId", Required = Required.Always)]
         public int PlexServerId { get; set; }
@@ -69,17 +80,19 @@ namespace PlexRipper.WebAPI.Common.DTO
         [JsonProperty("plexLibraryId", Required = Required.Always)]
         public int PlexLibraryId { get; set; }
 
+        [JsonProperty("parentId", Required = Required.Always)]
+        public int? ParentId { get; set; }
+
+        #endregion
+
         [JsonProperty("timeRemaining", Required = Required.Always)]
         public long TimeRemaining { get; set; }
 
-        [JsonProperty("destinationFilePath", Required = Required.Always)]
-        public string DestinationFilePath { get; set; }
-
-        [JsonProperty("downloadPath", Required = Required.Always)]
-        public string DownloadPath { get; set; }
-
         [JsonProperty("downloadUrl", Required = Required.Always)]
         public string DownloadUrl { get; set; }
+
+        [JsonProperty("quality", Required = Required.Always)]
+        public string Quality { get; set; }
 
         /// <summary>
         /// The nested <see cref="DownloadTask"/> used for seasons and episodes.

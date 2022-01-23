@@ -5,11 +5,11 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexLibraries;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexLibraries
+namespace PlexRipper.Data.PlexLibraries
 {
     public class GetAllPlexLibrariesQueryValidator : AbstractValidator<GetAllPlexLibrariesQuery>
     {
@@ -29,7 +29,7 @@ namespace PlexRipper.Data.CQRS.PlexLibraries
 
             if (request.IncludePlexServer)
             {
-                query = query.IncludeServer();
+                query = query.IncludePlexServer();
             }
 
             var plexLibraries = await query.ToListAsync(cancellationToken);

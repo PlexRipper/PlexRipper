@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Environment;
 using FluentResults;
 using Logging;
-using PlexRipper.Application.Common;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data
@@ -14,37 +14,44 @@ namespace PlexRipper.Data
     {
         private readonly PlexRipperDbContext _dbContext;
 
-        private readonly IPathSystem _pathSystem;
+        private readonly IPathProvider _pathProvider;
 
         private readonly IFileSystem _fileSystem;
 
-        public PlexRipperDatabaseService(PlexRipperDbContext dbContext, IPathSystem pathSystem, IFileSystem fileSystem)
+        private readonly IDirectorySystem _directorySystem;
+
+        public PlexRipperDatabaseService(PlexRipperDbContext dbContext, IPathProvider pathProvider, IFileSystem fileSystem, IDirectorySystem directorySystem)
         {
             _dbContext = dbContext;
-            _pathSystem = pathSystem;
+            _pathProvider = pathProvider;
             _fileSystem = fileSystem;
+            _directorySystem = directorySystem;
         }
 
         public Result BackUpDatabase()
         {
             Log.Information("Attempting to back-up the PlexRipper database");
-            if (!File.Exists(_pathSystem.DatabasePath))
+            if (!_fileSystem.FileExists(_pathProvider.DatabasePath))
             {
-                return Result.Fail($"Could not find Database at path: {_pathSystem.DatabasePath}").LogError();
+                return Result.Fail($"Could not find Database at path: {_pathProvider.DatabasePath}").LogError();
             }
 
-            var dbBackupName = $"BackUp_{_pathSystem.DatabaseName.Replace(".db", "")}_" +
+            var dbBackupName = $"BackUp_{_pathProvider.DatabaseName.Replace(".db", "")}_" +
                                $"{DateTime.Now.ToString("dd-MM-yyyy_hh-mm", CultureInfo.InvariantCulture)}.db";
-            var dbBackUpPath = Path.Combine(_pathSystem.DatabaseBackupDirectory, dbBackupName);
+            var dbBackUpPath = Path.Combine(_pathProvider.DatabaseBackupDirectory, dbBackupName);
 
             try
             {
-                _fileSystem.CreateDirectoryFromFilePath(dbBackUpPath);
+                _directorySystem.CreateDirectoryFromFilePath(dbBackUpPath);
 
                 // Wait until the database is available.
-                StreamExtensions.WaitForFile(_pathSystem.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
+                StreamExtensions.WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
 
-                File.Move(_pathSystem.DatabasePath, dbBackUpPath);
+                var moveResult = _fileSystem.FileMove(_pathProvider.DatabasePath, dbBackUpPath);
+                if (moveResult.IsFailed)
+                {
+                    return moveResult;
+                }
             }
             catch (Exception e)
             {

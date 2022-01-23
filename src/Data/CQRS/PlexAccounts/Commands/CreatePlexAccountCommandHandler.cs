@@ -1,15 +1,13 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
 using FluentResults;
 using FluentValidation;
 using Logging;
 using MediatR;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS
+namespace PlexRipper.Data
 {
     public class CreatePlexAccountCommandValidator : AbstractValidator<CreatePlexAccountCommand>
     {

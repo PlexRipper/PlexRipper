@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.BaseTests
+namespace PlexRipper.BaseTests.DTO
 {
     public class TestCredentialsDTO
     {

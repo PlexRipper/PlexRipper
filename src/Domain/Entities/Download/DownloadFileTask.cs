@@ -14,6 +14,8 @@ namespace PlexRipper.Domain
 
         public DateTime CreatedAt { get; set; }
 
+        public string FilePathsCompressed { get; set; }
+
         #region Relationships
 
         public DownloadTask DownloadTask { get; set; }
@@ -30,8 +32,11 @@ namespace PlexRipper.Domain
         [NotMapped]
         public long FileSize => DownloadTask?.DataTotal ?? -1L;
 
+        /// <summary>
+        /// Gets a list of file paths that need to be merged and/or moved.
+        /// </summary>
         [NotMapped]
-        public List<string> FilePaths => DownloadTask?.DownloadWorkerTasks?.Select(x => x.TempFilePath)?.ToList() ?? new List<string>();
+        public List<string> FilePaths => FilePathsCompressed?.Split(';').ToList() ?? new List<string>();
 
         #endregion
 

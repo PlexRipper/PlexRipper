@@ -37,5 +37,7 @@ namespace PlexRipper.Domain
         public bool Selected { get; set; }
 
         public List<PlexMediaDataPart> Parts { get; set; }
+
+        public bool IsMultiPart => Parts.Count > 1;
     }
 }

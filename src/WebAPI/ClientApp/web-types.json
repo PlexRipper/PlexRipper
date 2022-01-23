@@ -49,6 +49,14 @@
                 "type": "boolean"
               },
               "default": "false"
+            },
+            {
+              "name": "newAccount",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
             }
           ],
           "events": [
@@ -58,6 +66,32 @@
           ],
           "source": {
             "module": "./src/components/overviews/AccountOverview/AccountDialog.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "AccountForm",
+          "description": "",
+          "attributes": [
+            {
+              "name": "value",
+              "required": false,
+              "value": {
+                "kind": "expression",
+                "type": "union"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "input"
+            },
+            {
+              "name": "is-valid"
+            }
+          ],
+          "source": {
+            "module": "./src/components/overviews/AccountOverview/AccountForm.vue",
             "symbol": "default"
           }
         },
@@ -103,7 +137,23 @@
                 "kind": "expression",
                 "type": "boolean"
               },
-              "default": "true"
+              "default": "false"
+            },
+            {
+              "name": "errors",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "Array"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "close"
+            },
+            {
+              "name": "submit"
             }
           ],
           "source": {
@@ -1732,14 +1782,6 @@
           ],
           "source": {
             "module": "./src/components/General/ValidIcon.vue",
-            "symbol": "default"
-          }
-        },
-        {
-          "name": "VerificationInput",
-          "description": "",
-          "source": {
-            "module": "./src/components/General/VerificationInput.vue",
             "symbol": "default"
           }
         },

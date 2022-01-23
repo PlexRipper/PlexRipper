@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
+using Logging;
 using MediatR;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Application
@@ -13,15 +12,13 @@ namespace PlexRipper.Application
     {
         #region Fields
 
-        private readonly IDownloadManager _downloadManager;
+        private readonly IDownloadTaskFactory _downloadTaskFactory;
 
-        private readonly INotificationsService _notificationsService;
-
-        private readonly IPlexDownloadTaskFactory _plexDownloadTaskFactory;
+        private readonly IDownloadCommands _downloadCommands;
 
         private readonly IMediator _mediator;
 
-        private readonly ISignalRService _signalRService;
+        private readonly IDownloadQueue _downloadQueue;
 
         #endregion
 
@@ -31,22 +28,19 @@ namespace PlexRipper.Application
         /// Initializes a new instance of the <see cref="PlexDownloadService"/> class.
         /// </summary>
         /// <param name="mediator"></param>
-        /// <param name="downloadManager"></param>
-        /// <param name="signalRService"></param>
-        /// <param name="notificationsService"></param>
-        /// <param name="plexDownloadTaskFactory"></param>
+        /// <param name="downloadQueue"></param>
+        /// <param name="downloadTaskFactory"></param>
+        /// <param name="downloadCommands"></param>
         public PlexDownloadService(
             IMediator mediator,
-            IDownloadManager downloadManager,
-            ISignalRService signalRService,
-            INotificationsService notificationsService,
-            IPlexDownloadTaskFactory plexDownloadTaskFactory)
+            IDownloadQueue downloadQueue,
+            IDownloadTaskFactory downloadTaskFactory,
+            IDownloadCommands downloadCommands)
         {
             _mediator = mediator;
-            _downloadManager = downloadManager;
-            _signalRService = signalRService;
-            _notificationsService = notificationsService;
-            _plexDownloadTaskFactory = plexDownloadTaskFactory;
+            _downloadQueue = downloadQueue;
+            _downloadTaskFactory = downloadTaskFactory;
+            _downloadCommands = downloadCommands;
         }
 
         #endregion
@@ -60,94 +54,56 @@ namespace PlexRipper.Application
             return await _mediator.Send(new GetAllDownloadTasksQuery());
         }
 
+        public async Task<Result<DownloadTask>> GetDownloadTaskDetailAsync(int downloadTaskId, CancellationToken cancellationToken)
+        {
+            return await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true),cancellationToken);
+        }
+
         #region Commands
 
-        public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadMedias)
+        public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders)
         {
-            int mediaCount = downloadMedias.Select(x => x.MediaIds.Count).Sum();
-            await _signalRService.SendDownloadTaskCreationProgressUpdate(1, mediaCount);
-            int count = 0;
-
-            List<DownloadTask> downloadTasks = new();
-
-            foreach (var downloadMedia in downloadMedias)
-            {
-                var result = await _plexDownloadTaskFactory.GenerateAsync(downloadMedia.MediaIds, downloadMedia.Type);
-
-                if (result.IsFailed)
-                {
-                    await _notificationsService.SendResult(result);
-                }
-                else
-                {
-                    downloadTasks.AddRange(result.Value);
-                }
-
-                count += downloadMedia.MediaIds.Count;
-                await _signalRService.SendDownloadTaskCreationProgressUpdate(count, mediaCount);
-            }
-
-            await _signalRService.SendDownloadTaskCreationProgressUpdate(mediaCount, mediaCount);
+            Log.Debug($"Attempting to add download task orders: {downloadTaskOrders}");
+            var downloadTasks = await _downloadTaskFactory.GenerateAsync(downloadTaskOrders);
+            if (downloadTasks.IsFailed)
+                return downloadTasks.ToResult();
 
             // Sent to download manager
-            return await _downloadManager.AddToDownloadQueueAsync(downloadTasks);
+            return await _downloadQueue.AddToDownloadQueueAsync(downloadTasks.Value);
         }
 
         public async Task<Result> DeleteDownloadTasksAsync(List<int> downloadTaskIds)
         {
-            return await _downloadManager.DeleteDownloadTaskClientsAsync(downloadTaskIds);
+            return await _downloadCommands.DeleteDownloadTaskClientsAsync(downloadTaskIds);
         }
 
-        public Task<Result> RestartDownloadTask(List<int> downloadTaskIds)
+        public Task<Result> RestartDownloadTask(int downloadTaskId)
         {
-            return _downloadManager.RestartDownloadTasksAsync(downloadTaskIds);
+            return _downloadCommands.RestartDownloadTasksAsync(downloadTaskId);
         }
 
-        public async Task<Result> StopDownloadTask(List<int> downloadTaskIds)
+        public async Task<Result> StopDownloadTask(int downloadTaskId)
         {
-            var result = await _downloadManager.StopDownloadTasksAsync(downloadTaskIds);
+            var result = await _downloadCommands.StopDownloadTasksAsync(downloadTaskId);
             return result.IsSuccess ? Result.Ok() : result.ToResult();
         }
 
-        public Task<Result> StartDownloadTask(List<int> downloadTaskIds)
+        public Task<Result> StartDownloadTask(int downloadTaskId)
         {
-            return _downloadManager.ResumeDownloadTasksAsync(downloadTaskIds);
+            return _downloadCommands.ResumeDownloadTasksAsync(downloadTaskId);
         }
 
-        public Task<Result> PauseDownloadTask(List<int> downloadTaskIds)
+        public Task<Result> PauseDownloadTask(int downloadTaskId)
         {
-            return _downloadManager.PauseDownload(downloadTaskIds);
+            return _downloadCommands.PauseDownload(downloadTaskId);
         }
 
         public Task<Result> ClearCompleted(List<int> downloadTaskIds)
         {
-            return _downloadManager.ClearCompletedAsync(downloadTaskIds);
+            return _downloadCommands.ClearCompletedAsync(downloadTaskIds);
         }
 
         #endregion
-
-        #endregion
-
-        #region Private
-
-        private Result<DownloadTask> PrioritizeDownloadTask(DownloadTask downloadTask)
-        {
-            // TODO This is intended to change the order of downloads, not finished
-            downloadTask.Priority = DataFormat.GetPriority();
-            return Result.Ok(downloadTask);
-        }
-
-        private Result<List<DownloadTask>> PrioritizeDownloadTasks(List<DownloadTask> downloadTasks)
-        {
-            // TODO This is intended to change the order of downloads, not finished
-            var priorities = DataFormat.GetPriority(downloadTasks.Count);
-            for (int i = 0; i < downloadTasks.Count; i++)
-            {
-                downloadTasks[i].Priority = priorities[i];
-            }
-
-            return Result.Ok(downloadTasks);
-        }
 
         #endregion
 

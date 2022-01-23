@@ -9,7 +9,7 @@ using PlexRipper.Application.Notifications.Queries;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.Queries
+namespace PlexRipper.Data.Queries
 {
     public class GetNotificationsValidator : AbstractValidator<GetNotificationsQuery> { }
 

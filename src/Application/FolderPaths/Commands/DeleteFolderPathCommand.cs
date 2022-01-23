@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace PlexRipper.Application.FolderPaths
+namespace PlexRipper.Application
 {
     public class DeleteFolderPathCommand : IRequest<Result>
     {

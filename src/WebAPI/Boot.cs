@@ -1,32 +1,26 @@
-﻿using System.Net;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Environment;
-using FluentResultExtensions.lib;
 using Logging;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
-using PlexRipper.Application.Common;
-using PlexRipper.Data;
-using PlexRipper.Domain;
-using PlexRipper.FileSystem;
+using PlexRipper.DownloadManager;
 
 namespace PlexRipper.WebAPI
 {
     /// <summary>
     /// The Boot class is used to sequentially start various processes needed to start PlexRipper.
     /// </summary>
-    internal class Boot : IHostLifetime, IHostedService
+    public class Boot : IBoot
     {
         #region Fields
 
         private readonly IHostApplicationLifetime _appLifetime;
 
-        private readonly IDownloadManager _downloadManager;
+        private readonly IConfigManager _configManager;
 
         private readonly IFileMerger _fileMerger;
-
-        private readonly IFileSystem _fileSystem;
 
         private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
 
@@ -34,43 +28,45 @@ namespace PlexRipper.WebAPI
 
         private readonly IMigrationService _migrationService;
 
-        private readonly IUserSettings _userSettings;
+        private readonly IDownloadSubscriptions _downloadSubscriptions;
+
+        private readonly IDownloadQueue _downloadQueue;
+
+        private readonly IDownloadTracker _downloadTracker;
 
         #endregion
 
         #region Constructor
 
-        public Boot(IHostApplicationLifetime appLifetime, IUserSettings userSettings, IFileSystem fileSystem, IFileMerger fileMerger,
-            IDownloadManager downloadManager, IPlexRipperDatabaseService plexRipperDatabaseService, ISchedulerService schedulerService,
-            IMigrationService migrationService)
+        public Boot(IHostApplicationLifetime appLifetime,
+            IConfigManager configManager,
+            IFileMerger fileMerger,
+            IPlexRipperDatabaseService plexRipperDatabaseService,
+            ISchedulerService schedulerService,
+            IMigrationService migrationService,
+            IDownloadSubscriptions downloadSubscriptions,
+            IDownloadQueue downloadQueue,
+            IDownloadTracker downloadTracker)
         {
             _appLifetime = appLifetime;
-            _userSettings = userSettings;
-            _fileSystem = fileSystem;
+            _configManager = configManager;
             _fileMerger = fileMerger;
-            _downloadManager = downloadManager;
             _plexRipperDatabaseService = plexRipperDatabaseService;
             _schedulerService = schedulerService;
             _migrationService = migrationService;
+            _downloadSubscriptions = downloadSubscriptions;
+            _downloadQueue = downloadQueue;
+            _downloadTracker = downloadTracker;
         }
 
         #endregion
 
         #region Public Methods
 
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            _appLifetime.ApplicationStarted.Register(OnStarted);
-            _appLifetime.ApplicationStopping.Register(OnStopping);
-            _appLifetime.ApplicationStopped.Register(OnStopped);
-
-            return Task.CompletedTask;
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             Log.Information("Shutting down the container");
-            return Task.CompletedTask;
+            await _schedulerService.StopAsync();
         }
 
         public async Task WaitForStartAsync(CancellationToken cancellationToken)
@@ -79,19 +75,27 @@ namespace PlexRipper.WebAPI
             ServicePointManager.DefaultConnectionLimit = 1000;
 
             // First await the finishing off all these
-            _fileSystem.Setup();
             Log.SetupLogging();
-            _userSettings.Setup();
+            _configManager.Setup();
             await _plexRipperDatabaseService.SetupAsync();
             await _migrationService.SetupAsync();
 
-            // Keep running the following
+            _downloadSubscriptions.Setup();
+            _downloadQueue.Setup();
+            _downloadTracker.Setup();
+            await _fileMerger.SetupAsync();
+
+            // TODO Remove this once the plexServer sync has been compatible for the integration test
             if (!EnvironmentExtensions.IsIntegrationTestMode())
             {
-                var fileMergerSetup = Task.Factory.StartNew(() => _fileMerger.SetupAsync(), TaskCreationOptions.LongRunning);
-                await Task.WhenAll(fileMergerSetup);
                 await _schedulerService.SetupAsync();
             }
+
+            _appLifetime.ApplicationStarted.Register(OnStarted);
+            _appLifetime.ApplicationStopping.Register(OnStopping);
+            _appLifetime.ApplicationStopped.Register(OnStopped);
+
+            Log.Information("Finished Initiating boot process");
         }
 
         #endregion

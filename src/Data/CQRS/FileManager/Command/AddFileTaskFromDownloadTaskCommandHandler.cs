@@ -8,7 +8,7 @@ using PlexRipper.Application.FileManager.Command;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.FileManager
+namespace PlexRipper.Data.FileManager
 {
     public class AddFileTaskFromDownloadTaskCommandValidator : AbstractValidator<AddFileTaskFromDownloadTaskCommand>
     {
@@ -29,10 +29,11 @@ namespace PlexRipper.Data.CQRS.FileManager
 
         public async Task<Result<int>> Handle(AddFileTaskFromDownloadTaskCommand command, CancellationToken cancellationToken)
         {
-            var fileTask = new DownloadFileTask()
+            var fileTask = new DownloadFileTask
             {
                 DownloadTaskId = command.DownloadTask.Id,
                 CreatedAt = DateTime.UtcNow,
+                FilePathsCompressed = command.DownloadTask.GetFilePathsCompressed,
             };
 
             await _dbContext.FileTasks.AddAsync(fileTask);

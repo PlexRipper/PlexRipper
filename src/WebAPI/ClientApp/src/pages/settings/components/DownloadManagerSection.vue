@@ -34,7 +34,7 @@ export default class DownloadManagerSection extends Vue {
 				debounce(() => timer(1000)),
 				distinctUntilChanged(),
 			),
-			(value) => SettingsService.updateSetting('downloadSegments', value),
+			(value) => SettingsService.updateDownloadManagerSetting('downloadSegments', value),
 		);
 
 		this.$subscribeTo(SettingsService.getDownloadSegments(), (downloadSegments) => {

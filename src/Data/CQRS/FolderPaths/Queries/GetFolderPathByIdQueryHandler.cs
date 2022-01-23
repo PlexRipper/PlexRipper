@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
 using MediatR;
-using PlexRipper.Application.FolderPaths;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.FolderPaths
+namespace PlexRipper.Data.FolderPaths
 {
     public class GetFolderPathByIdQueryValidator : AbstractValidator<GetFolderPathByIdQuery>
     {

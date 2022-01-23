@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using PlexRipper.Application.Common.WebApi;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common
+namespace PlexRipper.Application
 {
     public interface ISignalRService
     {
@@ -25,5 +25,7 @@ namespace PlexRipper.Application.Common
         Task SendServerInspectStatusProgress(InspectServerProgress progress);
 
         void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress);
+
+        Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks);
     }
 }

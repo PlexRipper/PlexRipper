@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using FluentResultExtensions.lib;
-using Logging;
 
 namespace PlexRipper.Domain
 {

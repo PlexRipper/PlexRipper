@@ -1,13 +1,12 @@
 ﻿using Autofac;
 using AutoMapper;
-using PlexRipper.Application.Config;
-using PlexRipper.Data.Config;
-using PlexRipper.Domain.AutoMapper;
-using PlexRipper.DownloadManager.Common.Autofac;
+using BackgroundServices;
+using PlexRipper.Application;
+using PlexRipper.Data;
+using PlexRipper.DownloadManager;
 using PlexRipper.FileSystem.Config;
-using PlexRipper.HttpClient.Config;
-using PlexRipper.PlexApi.Config;
-using PlexRipper.PlexApi.Config.Mappings;
+using PlexRipper.HttpClient;
+using PlexRipper.PlexApi;
 using PlexRipper.Settings.Config;
 
 namespace PlexRipper.WebAPI.Config
@@ -15,7 +14,8 @@ namespace PlexRipper.WebAPI.Config
     public static class ContainerConfig
     {
         /// <summary>
-        /// Autofac container builder, Serilog registration is left out due to being context dependent. Integration tests have a different configuration than the application.
+        /// Autofac container builder, Serilog registration is left out due to being context dependent.
+        /// Integration tests have a different configuration than the application.
         /// </summary>
         /// <param name="builder">The builder through which components can be registered.</param>
         public static void ConfigureContainer(ContainerBuilder builder)
@@ -30,20 +30,18 @@ namespace PlexRipper.WebAPI.Config
             builder.RegisterModule<PlexApiModule>();
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<HttpClientModule>();
+            builder.RegisterModule<BackgroundServicesModule>();
 
             // Presentation
             builder.RegisterModule<WebApiModule>();
 
+            // Packages
+            builder.RegisterModule<MediatrModule>();
+
             // Auto Mapper
-            builder.Register(ctx =>
+            builder.Register(_ =>
             {
-                var config = new MapperConfiguration(cfg =>
-                {
-                    cfg.AddProfile(new DomainMappingProfile());
-                    cfg.AddProfile(new ApplicationMappingProfile());
-                    cfg.AddProfile(new PlexApiMappingProfile());
-                    cfg.AddProfile(new WebApiMappingProfile());
-                });
+                var config = MapperSetup.Configuration;
                 config.AssertConfigurationIsValid();
                 return config;
             });

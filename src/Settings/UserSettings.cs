@@ -1,137 +1,138 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text.Json;
-using Environment;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
-using PlexRipper.Application.Common;
-using PlexRipper.Domain;
+using PlexRipper.Application;
 using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings
 {
     /// <inheritdoc cref="IUserSettings"/>
-    public class UserSettings : SettingsModel, IUserSettings
+    public class UserSettings : IUserSettings
     {
-        private readonly IPathSystem _pathSystem;
-
-        private readonly IFileSystem _fileSystem;
-
         #region Fields
 
-        private readonly JsonSerializerOptions _jsonSerializerSettings = new()
-        {
-            WriteIndented = true,
-            IncludeFields = false,
-            PropertyNameCaseInsensitive = true,
-        };
+        private readonly IConfirmationSettingsModule _confirmationSettingsModule;
+
+        private readonly IDateTimeSettingsModule _dateTimeSettingsModule;
+
+        private readonly IDisplaySettingsModule _displaySettingsModule;
+
+        private readonly IDownloadManagerSettingsModule _downloadManagerSettingsModule;
+
+        private readonly IGeneralSettingsModule _generalSettingsModule;
+
+        private readonly ILanguageSettingsModule _languageSettingsModule;
+
+        private readonly IServerSettingsModule _serverSettingsModule;
+
+        private readonly Subject<ISettingsModel> _settingsUpdated = new();
 
         #endregion
 
-        public UserSettings(IPathSystem pathSystem, IFileSystem fileSystem)
+        public UserSettings(
+            IConfirmationSettingsModule confirmationSettingsModule,
+            IDateTimeSettingsModule dateTimeSettingsModule,
+            IDisplaySettingsModule displaySettingsModule,
+            IDownloadManagerSettingsModule downloadManagerSettingsModule,
+            IGeneralSettingsModule generalSettingsModule,
+            ILanguageSettingsModule languageSettingsModule,
+            IServerSettingsModule serverSettingsModule)
         {
-            _pathSystem = pathSystem;
-            _fileSystem = fileSystem;
+            _confirmationSettingsModule = confirmationSettingsModule;
+            _dateTimeSettingsModule = dateTimeSettingsModule;
+            _displaySettingsModule = displaySettingsModule;
+            _downloadManagerSettingsModule = downloadManagerSettingsModule;
+            _generalSettingsModule = generalSettingsModule;
+            _languageSettingsModule = languageSettingsModule;
+            _serverSettingsModule = serverSettingsModule;
+
+            // Alert of any module changes
+            Observable.Merge(
+                    _confirmationSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _dateTimeSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _displaySettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _downloadManagerSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _generalSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _languageSettingsModule.ModuleHasChanged.Select(_ => 1),
+                    _serverSettingsModule.ModuleHasChanged.Select(_ => 1)
+                )
+                .Throttle(TimeSpan.FromMilliseconds(500))
+                .Subscribe(_ => _settingsUpdated.OnNext(GetSettingsModel()));
         }
 
         #region Methods
 
         #region Public
 
-        public Result Setup()
-        {
-            Log.Information("Setting up UserSettings");
+        public IObservable<ISettingsModel> SettingsUpdated => _settingsUpdated.AsObservable();
 
-            var fileExistResult = _fileSystem.FileExists(_pathSystem.ConfigFileLocation);
-            if (fileExistResult.IsFailed)
-            {
-                return fileExistResult;
-            }
-
-            if (!fileExistResult.Value)
-            {
-                Log.Information($"{_pathSystem.ConfigFileName} doesn't exist, will create new one now in {_pathSystem.ConfigDirectory}");
-                return Save();
-            }
-
-            return Load();
-        }
-
-        public Result Load()
-        {
-            Log.Information("Loading UserSettings now.");
-
-            try
-            {
-                var readResult = _fileSystem.FileReadAllText(_pathSystem.ConfigFileLocation);
-                if (readResult.IsFailed)
-                {
-                    return readResult;
-                }
-
-                var loadedSettings = JsonSerializer.Deserialize<dynamic>(readResult.Value, _jsonSerializerSettings);
-                Result result = SetFromJsonObject(loadedSettings);
-                if (result.IsFailed)
-                {
-                    Log.Warning("Certain properties were missing or had missing or invalid values. Will correct those and re-save now!");
-                    result.LogWarning();
-                    Save();
-                }
-            }
-            catch (Exception e)
-            {
-                Reset();
-                return Result.Fail(new ExceptionalError("Failed to load the UserSettings to json file. Resetting now!", e)).LogError();
-            }
-
-            return Result.Ok().WithSuccess("UserSettings were loaded successfully!").LogInformation();
-        }
-
-        public Result Reset()
+        public void Reset()
         {
             Log.Information("Resetting UserSettings");
 
-            return UpdateSettings(new SettingsModel());
+            _confirmationSettingsModule.Reset();
+            _dateTimeSettingsModule.Reset();
+            _displaySettingsModule.Reset();
+            _downloadManagerSettingsModule.Reset();
+            _generalSettingsModule.Reset();
+            _languageSettingsModule.Reset();
+            _serverSettingsModule.Reset();
         }
 
-        /// <inheritdoc/>
-        public Result Save()
+        public Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings)
         {
-            Log.Information("Saving UserSettings now.");
-
-            string jsonString = JsonSerializer.Serialize(GetJsonObject(), _jsonSerializerSettings);
-            var writeResult = _fileSystem.FileWriteAllText(_pathSystem.ConfigFileLocation, jsonString);
-            if (writeResult.IsFailed)
+            var settings = new SettingsModel
             {
-                return writeResult.WithError("Failed to write save settings").LogError();
+                ConfirmationSettings = _confirmationSettingsModule.Update(sourceSettings.ConfirmationSettings),
+                DateTimeSettings = _dateTimeSettingsModule.Update(sourceSettings.DateTimeSettings),
+                DisplaySettings = _displaySettingsModule.Update(sourceSettings.DisplaySettings),
+                DownloadManagerSettings = _downloadManagerSettingsModule.Update(sourceSettings.DownloadManagerSettings),
+                GeneralSettings = _generalSettingsModule.Update(sourceSettings.GeneralSettings),
+                LanguageSettings = _languageSettingsModule.Update(sourceSettings.LanguageSettings),
+                ServerSettings = _serverSettingsModule.Update(sourceSettings.ServerSettings),
+            };
+
+            return Result.Ok((ISettingsModel)settings);
+        }
+
+        public ISettingsModel GetSettingsModel()
+        {
+            return new SettingsModel
+            {
+                ConfirmationSettings = _confirmationSettingsModule.GetValues(),
+                GeneralSettings = _generalSettingsModule.GetValues(),
+                DisplaySettings = _displaySettingsModule.GetValues(),
+                LanguageSettings = _languageSettingsModule.GetValues(),
+                ServerSettings = _serverSettingsModule.GetValues(),
+                DateTimeSettings = _dateTimeSettingsModule.GetValues(),
+                DownloadManagerSettings = _downloadManagerSettingsModule.GetValues(),
+            };
+        }
+
+        public Result SetFromJsonObject(JsonElement settingsJsonElement)
+        {
+            var results = new List<Result>
+            {
+                _confirmationSettingsModule.SetFromJson(settingsJsonElement),
+                _dateTimeSettingsModule.SetFromJson(settingsJsonElement),
+                _displaySettingsModule.SetFromJson(settingsJsonElement),
+                _downloadManagerSettingsModule.SetFromJson(settingsJsonElement),
+                _generalSettingsModule.SetFromJson(settingsJsonElement),
+                _languageSettingsModule.SetFromJson(settingsJsonElement),
+                _serverSettingsModule.SetFromJson(settingsJsonElement),
+            };
+
+            if (results.Any(x => x.IsFailed))
+            {
+                return Result.Fail("Failed to set from json object").AddNestedErrors(results.SelectMany(x => x.Errors).ToList());
             }
 
-            return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
-        }
-
-        /// <inheritdoc/>
-        public Result UpdateSettings(ISettingsModel sourceSettings)
-        {
-            FirstTimeSetup = sourceSettings.FirstTimeSetup;
-            ActiveAccountId = sourceSettings.ActiveAccountId;
-            DownloadSegments = sourceSettings.DownloadSegments;
-
-            Language = sourceSettings.Language;
-            AskDownloadMovieConfirmation = sourceSettings.AskDownloadMovieConfirmation;
-            AskDownloadTvShowConfirmation = sourceSettings.AskDownloadTvShowConfirmation;
-            AskDownloadSeasonConfirmation = sourceSettings.AskDownloadSeasonConfirmation;
-            AskDownloadEpisodeConfirmation = sourceSettings.AskDownloadEpisodeConfirmation;
-
-            TvShowViewMode = sourceSettings.TvShowViewMode;
-            MovieViewMode = sourceSettings.MovieViewMode;
-
-            ShortDateFormat = sourceSettings.ShortDateFormat;
-            LongDateFormat = sourceSettings.LongDateFormat;
-            TimeFormat = sourceSettings.TimeFormat;
-            TimeZone = sourceSettings.TimeZone;
-            ShowRelativeDates = sourceSettings.ShowRelativeDates;
-
-            return Save();
+            return Result.Ok();
         }
 
         #endregion

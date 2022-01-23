@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Configurations
@@ -16,6 +15,18 @@ namespace PlexRipper.Data.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder
+                .HasMany(x => x.Children)
+                .WithOne(x => x.Parent)
+                .HasForeignKey(x => x.ParentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder
+                .Property(e => e.DownloadTaskType)
+                .HasMaxLength(50)
+                .HasConversion(x => x.ToDownloadTaskString(), x => x.ToDownloadTaskType())
+                .IsUnicode(false);
+
+            builder
                 .Property(b => b.MediaType)
                 .HasMaxLength(20)
                 .HasConversion(x => x.ToPlexMediaTypeString(), x => x.ToPlexMediaType())
@@ -26,10 +37,6 @@ namespace PlexRipper.Data.Configurations
                 .HasMaxLength(20)
                 .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())
                 .IsUnicode(false);
-
-            builder
-                .Property(x => x.MetaData)
-                .HasJsonValueConversion();
         }
     }
 }

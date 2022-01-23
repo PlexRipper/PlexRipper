@@ -6,11 +6,11 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexMovies;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexMovies
+namespace PlexRipper.Data.PlexMovies
 {
     public class GetMultiplePlexMoviesByIdsQueryHandlerValidator : AbstractValidator<GetMultiplePlexMoviesByIdsQuery>
     {
@@ -35,10 +35,10 @@ namespace PlexRipper.Data.CQRS.PlexMovies
 
             if ( request.IncludeServer)
             {
-                query = query.IncludeServer();
+                query = query.IncludePlexServer();
             }
 
-            var plexMovies = await query.Where(x => request.Ids.Contains(x.Id) ).ToListAsync(cancellationToken);
+            var plexMovies = await query.Where(x => request.Ids.Contains(x.Id)).ToListAsync(cancellationToken);
 
             return Result.Ok(plexMovies);
         }

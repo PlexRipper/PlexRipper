@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace PlexRipper.Application.PlexLibraries
+namespace PlexRipper.Application
 {
     public class DeleteMediaFromPlexLibraryCommand : IRequest<Result<bool>>
     {

@@ -3,7 +3,7 @@
 namespace PlexRipper.Domain
 {
     // From: https://github.com/postworthy/OrderByNatural/blob/master/OrderByNatural/EnumerableComparer.cs
-    //A special thanks for this class goes to: https://www.interact-sw.co.uk/iangblog/2007/12/13/natural-sorting
+    // A special thanks for this class goes to: https://www.interact-sw.co.uk/iangblog/2007/12/13/natural-sorting
     internal class EnumerableComparer<T> : IComparer<IEnumerable<T>>
     {
         public EnumerableComparer()

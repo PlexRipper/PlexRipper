@@ -6,7 +6,7 @@ using MediatR;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.CQRS.PlexDownloads
+namespace PlexRipper.Data
 {
     public class AddDownloadWorkerTasksCommandValidator : AbstractValidator<AddDownloadWorkerTasksCommand>
     {
@@ -17,7 +17,7 @@ namespace PlexRipper.Data.CQRS.PlexDownloads
                 task.RuleFor(x => x.Id).Equal(0);
                 task.RuleFor(x => x.DownloadTaskId).GreaterThan(0);
                 task.RuleFor(x => x.FileName).NotEmpty();
-                task.RuleFor(x => x.Url).NotEmpty();
+                task.RuleFor(x => x.DownloadUrl).NotEmpty();
                 task.RuleFor(x => x.TempDirectory).NotEmpty();
             });
         }

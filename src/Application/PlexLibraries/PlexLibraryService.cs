@@ -3,17 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using MediatR;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.WebApi;
-using PlexRipper.Application.PlexMovies;
-using PlexRipper.Application.PlexTvShows;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.PlexLibraries
+namespace PlexRipper.Application
 {
     public class PlexLibraryService : IPlexLibraryService
     {

@@ -1,16 +1,14 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Notifications;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS
+namespace PlexRipper.Data
 {
     public class ClearAllNotificationsValidator : AbstractValidator<ClearAllNotificationsCommand>
     {

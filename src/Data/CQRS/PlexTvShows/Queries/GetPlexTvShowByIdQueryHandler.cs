@@ -1,15 +1,14 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexTvShows;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexTvShows
+namespace PlexRipper.Data.PlexTvShows
 {
     public class GetPlexTvShowByIdQueryValidator : AbstractValidator<GetPlexTvShowByIdQuery>
     {
@@ -25,20 +24,19 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
         public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<PlexTvShow> query = PlexTvShowsQueryable;
+            var query = PlexTvShowsQueryable;
 
-            if (request.IncludeLibrary)
+            if (request.IncludePlexLibrary)
             {
                 query = query.IncludePlexLibrary();
             }
 
-            if (request.IncludeServer)
+            if (request.IncludePlexServer)
             {
-                query = query.IncludeServer();
+                query = query.IncludePlexServer();
             }
 
             var plexTvShow = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
             if (plexTvShow == null)
             {
                 return ResultExtensions.EntityNotFound(nameof(PlexTvShow), request.Id);

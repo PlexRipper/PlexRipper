@@ -1,11 +1,11 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
-using FluentResultExtensions.lib;
 using Logging;
 using Microsoft.AspNetCore.SignalR;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.WebApi;
+using PlexRipper.Application;
 using PlexRipper.Domain;
+using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
 using PlexRipper.WebAPI.SignalR.Hubs;
@@ -92,6 +92,28 @@ namespace PlexRipper.WebAPI.SignalR
             Task.Run(() => _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", downloadTaskDTO));
         }
 
+        #region DownloadProgress
+
+        public async Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks)
+        {
+            if (_progressHub?.Clients?.All == null)
+            {
+                Log.Warning("No Clients connected to ProgressHub");
+                return;
+            }
+
+            var downloadTasksDTO = _mapper.Map<List<DownloadProgressDTO>>(downloadTasks);
+            var update = new ServerDownloadProgressDTO
+            {
+                Id = plexServerId,
+                Downloads = downloadTasksDTO,
+            };
+
+            await _progressHub.Clients.All.SendAsync("ServerDownloadProgress", update);
+        }
+
+        #endregion
+
         public async Task SendServerInspectStatusProgress(InspectServerProgress progress)
         {
             if (_progressHub?.Clients?.All == null)
@@ -101,7 +123,6 @@ namespace PlexRipper.WebAPI.SignalR
             }
 
             Log.Debug($"{nameof(InspectServerProgress)} => {progress}");
-
             await _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progress);
         }
 

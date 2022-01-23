@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PlexRipper.Application.Common
+namespace PlexRipper.Application
 {
     public class MountOptions
     {

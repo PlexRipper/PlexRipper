@@ -5,11 +5,11 @@ using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexTvShows;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexTvShows
+namespace PlexRipper.Data.PlexTvShows
 {
     public class GetPlexTvShowByIdWithEpisodesQueryValidator : AbstractValidator<GetPlexTvShowByIdWithEpisodesQuery>
     {
@@ -25,29 +25,19 @@ namespace PlexRipper.Data.CQRS.PlexTvShows
 
         public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdWithEpisodesQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<PlexTvShow> query = PlexTvShowsQueryable;
-
-            if (!request.IncludeData)
-            {
-                query = query.Include(x => x.Seasons)
-                    .ThenInclude(x => x.Episodes);
-            }
-            else
-            {
-                query = query.Include(x => x.Seasons)
-                    .ThenInclude(x => x.Episodes);
-            }
+            IQueryable<PlexTvShow> query = PlexTvShowsQueryable.IncludeEpisodes();
 
             if (request.IncludeLibrary)
             {
-                query = query
-                    .Include(x => x.PlexLibrary)
-                    .ThenInclude(x => x.PlexServer);
+                query = query.IncludePlexLibrary();
             }
 
-            var plexTvShow = await query
-                .OrderBy(x => x.Key)
-                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            if (request.IncludePlexServer)
+            {
+                query = query.IncludePlexServer();
+            }
+
+            var plexTvShow = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (plexTvShow == null)
             {

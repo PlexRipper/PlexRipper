@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Net.Mime;
 using AutoMapper;
-using FluentResultExtensions.lib;
 using FluentResults;
 using Logging;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using PlexRipper.Application.Common;
-using PlexRipper.Domain;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers

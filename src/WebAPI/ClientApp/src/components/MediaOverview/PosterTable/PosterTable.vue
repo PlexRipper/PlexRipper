@@ -47,7 +47,6 @@ export default class PosterTable extends Vue {
 
 	downloadMedia(downloadMediaCommands: DownloadMediaDTO[]): void {
 		downloadMediaCommands.forEach((x) => {
-			x.libraryId = this.libraryId;
 			x.plexAccountId = this.activeAccountId;
 		});
 		this.$emit('download', downloadMediaCommands);

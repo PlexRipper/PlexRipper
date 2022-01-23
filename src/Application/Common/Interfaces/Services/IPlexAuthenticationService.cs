@@ -2,7 +2,7 @@
 using FluentResults;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common
+namespace PlexRipper.Application
 {
     public interface IPlexAuthenticationService
     {
@@ -17,6 +17,6 @@ namespace PlexRipper.Application.Common
         /// <returns>The authentication token.</returns>
         Task<Result<string>> GetPlexServerTokenAsync(int plexServerId, int plexAccountId = 0);
 
-        Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId);
+        Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId = 0);
     }
 }

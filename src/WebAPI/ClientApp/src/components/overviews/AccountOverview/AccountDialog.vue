@@ -131,7 +131,6 @@ export default class AccountDialog extends Vue {
 			uuid: '',
 			hasPassword: false,
 			validatedAt: '0001-01-01T00:00:00Z',
-			joinedAt: '0001-01-01T00:00:00Z',
 			is2Fa: false,
 			title: '',
 			plexId: 0,

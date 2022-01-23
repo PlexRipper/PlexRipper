@@ -1,27 +1,29 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
-using PlexRipper.Application.Common.WebApi;
 using PlexRipper.Domain;
 
-namespace PlexRipper.Application.Common
+namespace PlexRipper.Application
 {
     public interface IPlexDownloadService
     {
-        Task<Result> StopDownloadTask(List<int> downloadTaskIds);
-
-        Task<Result> RestartDownloadTask(List<int> downloadTaskIds);
-
         Task<Result> ClearCompleted(List<int> downloadTaskIds = null);
 
-        Task<Result> StartDownloadTask(List<int> downloadTaskIds);
+        Task<Result> StartDownloadTask(int downloadTaskId);
 
-        Task<Result> PauseDownloadTask(List<int> downloadTaskIds);
+        Task<Result> PauseDownloadTask(int downloadTaskId);
 
-        Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadMedias);
+        Task<Result> StopDownloadTask(int downloadTaskId);
+
+        Task<Result> RestartDownloadTask(int downloadTaskId);
+
+        Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders);
 
         Task<Result> DeleteDownloadTasksAsync(List<int> downloadTaskIds);
 
         Task<Result<List<DownloadTask>>> GetDownloadTasksAsync();
+
+        Task<Result<DownloadTask>> GetDownloadTaskDetailAsync(int downloadTaskId, CancellationToken cancellationToken);
     }
 }

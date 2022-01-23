@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using FluentResults;
 using PlexRipper.Domain;
 using Polly;
 using Polly.Extensions.Http;
@@ -38,7 +39,15 @@ namespace PlexRipper.HttpClient
 
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption)
         {
-            return await _policy.ExecuteAsync(async () => await _httpClient.SendAsync(request, completionOption));
+            try
+            {
+                return await _policy.ExecuteAsync(async () => await _httpClient.SendAsync(request, completionOption));
+            }
+            catch (Exception e)
+            {
+                Result.Fail(new ExceptionalError(e)).LogError();
+                throw;
+            }
         }
     }
 }

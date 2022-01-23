@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentResults;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
 using PlexRipper.Domain;
+using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
 
@@ -118,6 +120,21 @@ namespace PlexRipper.WebAPI.Controllers
             }
 
             return ToActionResult(await _plexDownloadService.DeleteDownloadTasksAsync(downloadTaskIds));
+        }
+
+        // GET: api/(DownloadController)/detail/{id:int}
+        [HttpGet("detail/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+        public async Task<IActionResult> GetDetail(int id, CancellationToken token)
+        {
+            if (id <= 0)
+            {
+                return BadRequestInvalidId();
+            }
+
+            var downloadTaskResult = await _plexDownloadService.GetDownloadTaskDetailAsync(id, token);
+            return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);
         }
 
         #endregion

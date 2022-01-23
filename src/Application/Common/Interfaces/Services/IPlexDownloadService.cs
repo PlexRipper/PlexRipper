@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PlexRipper.Domain;
@@ -22,5 +23,7 @@ namespace PlexRipper.Application
         Task<Result> DeleteDownloadTasksAsync(List<int> downloadTaskIds);
 
         Task<Result<List<DownloadTask>>> GetDownloadTasksAsync();
+
+        Task<Result<DownloadTask>> GetDownloadTaskDetailAsync(int downloadTaskId, CancellationToken cancellationToken);
     }
 }

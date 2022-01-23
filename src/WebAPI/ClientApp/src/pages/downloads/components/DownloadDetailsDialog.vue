@@ -24,11 +24,11 @@
 									</tr>
 									<tr>
 										<td>{{ $t('components.download-details-dialog.overview.download-path') }} :</td>
-										<td>{{ downloadTask.downloadPath }}</td>
+										<td>{{ downloadTask.downloadDirectory }}</td>
 									</tr>
 									<tr>
 										<td>{{ $t('components.download-details-dialog.overview.destination-path') }} :</td>
-										<td>{{ downloadTask.destinationFilePath }}</td>
+										<td>{{ downloadTask.destinationDirectory }}</td>
 									</tr>
 									<tr>
 										<td>{{ $t('components.download-details-dialog.overview.download-url') }} :</td>

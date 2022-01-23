@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using Logging;
@@ -27,7 +28,7 @@ namespace PlexRipper.Application
         /// Initializes a new instance of the <see cref="PlexDownloadService"/> class.
         /// </summary>
         /// <param name="mediator"></param>
-        /// <param name="downloadManager"></param>
+        /// <param name="downloadQueue"></param>
         /// <param name="downloadTaskFactory"></param>
         /// <param name="downloadCommands"></param>
         public PlexDownloadService(
@@ -51,6 +52,11 @@ namespace PlexRipper.Application
         public async Task<Result<List<DownloadTask>>> GetDownloadTasksAsync()
         {
             return await _mediator.Send(new GetAllDownloadTasksQuery());
+        }
+
+        public async Task<Result<DownloadTask>> GetDownloadTaskDetailAsync(int downloadTaskId, CancellationToken cancellationToken)
+        {
+            return await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true),cancellationToken);
         }
 
         #region Commands

@@ -56,7 +56,7 @@ import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
 import { DownloadService, ServerService } from '@service';
 import { DownloadTaskDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
-
+import { detailDownloadTask } from '@api/plexDownloadApi';
 declare interface ISelection {
 	plexServerId: number;
 	downloadTaskIds: number[];
@@ -121,8 +121,12 @@ export default class Downloads extends Vue {
 	}
 
 	detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
-		this.downloadTaskDetail = downloadTask;
 		this.dialog = true;
+		detailDownloadTask(downloadTask.id).subscribe((downloadTaskDetail) => {
+			if (downloadTaskDetail.isSuccess && downloadTaskDetail.value) {
+				this.downloadTaskDetail = downloadTaskDetail.value;
+			}
+		});
 	}
 
 	updateSelected(plexServerId: number, downloadTaskIds: number[]) {

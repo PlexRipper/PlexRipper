@@ -1,6 +1,6 @@
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
-import { DownloadMediaDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
+import { DownloadMediaDTO, DownloadTaskDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 import { checkResponse, preApiRequest } from './baseApi';
 
@@ -54,5 +54,11 @@ export function pauseDownloadTask(downloadTaskId: number): Observable<ResultDTO<
 	preApiRequest(logText, 'pauseDownloadTask', downloadTaskId);
 	const result = Axios.get(`${apiPath}/pause/${downloadTaskId}`);
 	return checkResponse<ResultDTO<boolean>>(result, logText, 'pauseDownloadTask');
+}
+
+export function detailDownloadTask(downloadTaskId: number): Observable<ResultDTO<DownloadTaskDTO>> {
+	preApiRequest(logText, 'detailDownloadTask', downloadTaskId);
+	const result = Axios.get(`${apiPath}/detail/${downloadTaskId}`);
+	return checkResponse<ResultDTO<DownloadTaskDTO>>(result, logText, 'detailDownloadTask');
 }
 // endregion

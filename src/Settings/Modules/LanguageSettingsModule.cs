@@ -13,10 +13,13 @@ namespace PlexRipper.Settings.Modules
 
         public override string Name => "LanguageSettings";
 
-        public override ILanguageSettings DefaultValues => new LanguageSettings
+        public override ILanguageSettings DefaultValues()
         {
-            Language = "en-US",
-        };
+            return new LanguageSettings
+            {
+                Language = "en-US",
+            };
+        }
 
         #endregion
 

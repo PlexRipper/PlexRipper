@@ -69,7 +69,7 @@ namespace Settings.UnitTests.Modules
             var targetSettings = settingsModel.DateTimeSettings;
             updateResult.IsSuccess.ShouldBeTrue();
 
-            sut.TimeFormat.ShouldBe(sut.DefaultValues.TimeFormat);
+            sut.TimeFormat.ShouldBe(sut.DefaultValues().TimeFormat);
 
             sut.TimeZone.ShouldBe(targetSettings.TimeZone);
             sut.ShortDateFormat.ShouldBe(targetSettings.ShortDateFormat);

@@ -21,6 +21,8 @@ namespace PlexRipper.Application
 
         private readonly ISignalRService _signalRService;
 
+        private readonly IServerSettingsModule _serverSettingsModule;
+
         private readonly IPlexApiService _plexServiceApi;
 
         private readonly IPlexAuthenticationService _plexAuthenticationService;
@@ -33,12 +35,14 @@ namespace PlexRipper.Application
             IPlexApiService plexServiceApi,
             IPlexAuthenticationService plexAuthenticationService,
             IPlexLibraryService plexLibraryService,
-            ISignalRService signalRService)
+            ISignalRService signalRService,
+            IServerSettingsModule serverSettingsModule)
         {
             _mapper = mapper;
             _mediator = mediator;
             _plexLibraryService = plexLibraryService;
             _signalRService = signalRService;
+            _serverSettingsModule = serverSettingsModule;
             _plexServiceApi = plexServiceApi;
             _plexAuthenticationService = plexAuthenticationService;
         }
@@ -87,6 +91,8 @@ namespace PlexRipper.Application
             {
                 return updateResult;
             }
+
+            _serverSettingsModule.EnsureAllServersHaveASettingsEntry();
 
             return await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccount.Id));
         }
@@ -149,7 +155,7 @@ namespace PlexRipper.Application
                 ? plexServer.PlexLibraries
                 : plexServer.PlexLibraries.FindAll(
                     x => x.Outdated
-                         && (x.Type is PlexMediaType.Movie or PlexMediaType.TvShow));
+                         && x.Type is PlexMediaType.Movie or PlexMediaType.TvShow);
 
             if (!plexLibraries.Any())
             {
@@ -357,7 +363,9 @@ namespace PlexRipper.Application
 
         public Task<Result> RemoveInaccessibleServers()
         {
-            return _mediator.Send(new RemoveInaccessibleServersCommand());
+            var result = _mediator.Send(new RemoveInaccessibleServersCommand());
+            _serverSettingsModule.EnsureAllServersHaveASettingsEntry();
+            return result;
         }
 
         #region CRUD

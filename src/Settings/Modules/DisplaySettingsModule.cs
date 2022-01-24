@@ -14,11 +14,14 @@ namespace PlexRipper.Settings.Modules
 
         public override string Name => "DisplaySettings";
 
-        public override IDisplaySettings DefaultValues => new DisplaySettings
+        public override IDisplaySettings DefaultValues()
         {
-            TvShowViewMode = ViewMode.Poster,
-            MovieViewMode = ViewMode.Poster,
-        };
+            return new DisplaySettings
+            {
+                TvShowViewMode = ViewMode.Poster,
+                MovieViewMode = ViewMode.Poster,
+            };
+        }
 
         public override Result SetFromJson(JsonElement jsonElement)
         {

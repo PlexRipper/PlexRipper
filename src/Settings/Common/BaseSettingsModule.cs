@@ -32,7 +32,8 @@ namespace PlexRipper.Settings
 
         public abstract string Name { get; }
 
-        public abstract TModel DefaultValues { get; }
+        public abstract TModel DefaultValues();
+
 
         #endregion
 
@@ -42,7 +43,7 @@ namespace PlexRipper.Settings
 
         public TModel Reset()
         {
-            return Update(DefaultValues);
+            return Update(DefaultValues());
         }
 
         /// <inheritdoc/>

@@ -69,7 +69,7 @@ namespace Settings.UnitTests.Modules
             // Assert
             result.IsSuccess.ShouldBeTrue();
             _sut.MovieViewMode.ShouldBe(ViewMode.Overview);
-            _sut.TvShowViewMode.ShouldBe(_sut.DefaultValues.TvShowViewMode);
+            _sut.TvShowViewMode.ShouldBe(_sut.DefaultValues().TvShowViewMode);
         }
     }
 }

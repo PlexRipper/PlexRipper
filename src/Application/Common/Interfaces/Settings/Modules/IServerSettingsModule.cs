@@ -21,5 +21,7 @@ namespace PlexRipper.Application
         Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings);
 
         IObservable<int> GetDownloadSpeedLimitObservable(int plexServerId);
+
+        void EnsureAllServersHaveASettingsEntry();
     }
 }

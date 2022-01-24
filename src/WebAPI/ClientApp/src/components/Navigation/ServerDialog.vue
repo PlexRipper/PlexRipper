@@ -4,7 +4,7 @@
 			<v-card-title class="headline">{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }} </v-card-title>
 
 			<v-card-text>
-				<v-tabs vertical>
+				<v-tabs v-model="tabIndex" vertical>
 					<!--	Server Data	Tab Header-->
 					<v-tab>
 						<v-icon left> mdi-server </v-icon>
@@ -69,7 +69,7 @@ export default class ServerDialog extends Vue {
 	readonly serverId!: number;
 
 	show: boolean = false;
-
+	tabIndex: number | null = null;
 	plexServer: PlexServerDTO | null = null;
 	folderPaths: FolderPathDTO[] = [];
 	plexLibraries: PlexLibraryDTO[] = [];
@@ -80,6 +80,7 @@ export default class ServerDialog extends Vue {
 
 	close(): void {
 		this.$emit('close');
+		this.tabIndex = null;
 	}
 
 	mounted(): void {

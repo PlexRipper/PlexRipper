@@ -3,7 +3,11 @@
 ### Added
  - Per server configurable downloadspeed limit (See server settings > Server Configuration)
 
+### Changed
 
+
+### Fixed
+ - Fixed the opening of the server settings not defaulting back to its first tab
 
 ## [0.8.7]
 

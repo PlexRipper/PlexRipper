@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using FluentResults;
+using PlexRipper.Domain;
 using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.Application
@@ -22,6 +24,6 @@ namespace PlexRipper.Application
 
         IObservable<int> GetDownloadSpeedLimitObservable(int plexServerId);
 
-        void EnsureAllServersHaveASettingsEntry();
+        void EnsureAllServersHaveASettingsEntry(List<PlexServer> plexServers);
     }
 }

@@ -6,8 +6,8 @@ using System.Reactive.Subjects;
 using System.Text.Json;
 using FluentResults;
 using Logging;
-using MediatR;
 using PlexRipper.Application;
+using PlexRipper.Domain;
 using PlexRipper.Domain.Config;
 using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
@@ -18,20 +18,7 @@ namespace PlexRipper.Settings.Modules
     {
         #region Fields
 
-        private readonly IMediator _mediator;
-
         private readonly Subject<PlexServerSettingsModel> _serverSettingsUpdated = new();
-
-        #endregion
-
-        #region Constructor
-
-        public ServerSettingsModule() { }
-
-        public ServerSettingsModule(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
 
         #endregion
 
@@ -74,7 +61,7 @@ namespace PlexRipper.Settings.Modules
         {
             return new ServerSettings
             {
-                Data = CreateServerSettingsFromDb(),
+                Data = CreateServerSettingsFromDb(new List<PlexServer>()),
             };
         }
 
@@ -183,9 +170,9 @@ namespace PlexRipper.Settings.Modules
             return Result.Ok();
         }
 
-        public void EnsureAllServersHaveASettingsEntry()
+        public void EnsureAllServersHaveASettingsEntry(List<PlexServer> plexServers)
         {
-            Data = CreateServerSettingsFromDb();
+            Data = CreateServerSettingsFromDb(plexServers);
             EmitModuleHasChanged(GetValues());
         }
 
@@ -193,17 +180,10 @@ namespace PlexRipper.Settings.Modules
 
         #region Private Methods
 
-        private List<PlexServerSettingsModel> CreateServerSettingsFromDb()
+        private List<PlexServerSettingsModel> CreateServerSettingsFromDb(List<PlexServer> plexServers)
         {
-            var plexServers = _mediator.Send(new GetAllPlexServersQuery()).Result;
-            if (plexServers.IsFailed)
-            {
-                plexServers.LogError();
-                return new List<PlexServerSettingsModel>();
-            }
-
             var newList = new List<PlexServerSettingsModel>();
-            foreach (var plexServer in plexServers.Value)
+            foreach (var plexServer in plexServers)
             {
                 var index = Data.FindIndex(x => x.MachineIdentifier == plexServer.MachineIdentifier);
                 if (index == -1)

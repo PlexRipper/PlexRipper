@@ -21,7 +21,6 @@ namespace PlexRipper.Settings
 
         protected BaseSettingsModule()
         {
-            Reset();
         }
 
         #endregion

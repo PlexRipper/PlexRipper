@@ -92,7 +92,7 @@ namespace PlexRipper.Application
                 return updateResult;
             }
 
-            _serverSettingsModule.EnsureAllServersHaveASettingsEntry();
+            _serverSettingsModule.EnsureAllServersHaveASettingsEntry(serverList);
 
             return await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccount.Id));
         }
@@ -364,7 +364,6 @@ namespace PlexRipper.Application
         public Task<Result> RemoveInaccessibleServers()
         {
             var result = _mediator.Send(new RemoveInaccessibleServersCommand());
-            _serverSettingsModule.EnsureAllServersHaveASettingsEntry();
             return result;
         }
 

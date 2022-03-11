@@ -34,11 +34,11 @@ namespace Settings.UnitTests.Modules
             updateResult.LongDateFormat.ShouldBe(settings.LongDateFormat);
             updateResult.ShowRelativeDates.ShouldBe(settings.ShowRelativeDates);
 
-            resetResult.TimeFormat.ShouldBe(_sut.DefaultValues.TimeFormat);
-            resetResult.TimeZone.ShouldBe(_sut.DefaultValues.TimeZone);
-            resetResult.ShortDateFormat.ShouldBe(_sut.DefaultValues.ShortDateFormat);
-            resetResult.LongDateFormat.ShouldBe(_sut.DefaultValues.LongDateFormat);
-            resetResult.ShowRelativeDates.ShouldBe(_sut.DefaultValues.ShowRelativeDates);
+            resetResult.TimeFormat.ShouldBe(_sut.DefaultValues().TimeFormat);
+            resetResult.TimeZone.ShouldBe(_sut.DefaultValues().TimeZone);
+            resetResult.ShortDateFormat.ShouldBe(_sut.DefaultValues().ShortDateFormat);
+            resetResult.LongDateFormat.ShouldBe(_sut.DefaultValues().LongDateFormat);
+            resetResult.ShowRelativeDates.ShouldBe(_sut.DefaultValues().ShowRelativeDates);
         }
     }
 }

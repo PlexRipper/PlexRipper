@@ -6,10 +6,11 @@ import { getFolderPaths, createFolderPath, updateFolderPath, deleteFolderPath } 
 import IStoreState from '@interfaces/service/IStoreState';
 import { Context } from '@nuxt/types';
 import Log from 'consola';
+import ISetup from '@interfaces/ISetup';
 
-export class FolderPathService extends BaseService {
+export class FolderPathService extends BaseService implements ISetup {
 	public constructor() {
-		super({
+		super('FolderPathService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -19,12 +20,12 @@ export class FolderPathService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
 
 		GlobalService.getAxiosReady()
 			.pipe(finalize(() => this.fetchFolderPaths()))
-			.subscribe();
+			.subscribe(() => callBack(this._name));
 	}
 
 	public fetchFolderPaths(): void {

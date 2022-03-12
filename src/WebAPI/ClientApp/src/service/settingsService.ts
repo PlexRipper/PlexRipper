@@ -22,7 +22,7 @@ import IStoreState from '@interfaces/service/IStoreState';
 export class SettingsService extends BaseService {
 	// region Constructor and Setup
 	public constructor() {
-		super({
+		super('SettingsService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -38,8 +38,8 @@ export class SettingsService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
 
 		// On app load, request the settings once
 		GlobalService.getAxiosReady()
@@ -48,7 +48,7 @@ export class SettingsService extends BaseService {
 				switchMap(() => this.fetchSettings()),
 				take(1),
 			)
-			.subscribe();
+			.subscribe(() => callBack(this._name));
 
 		this.getFirstTimeSetup().subscribe((state) => {
 			if (state === null) {

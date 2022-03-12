@@ -6,13 +6,15 @@ import { ObservableStoreSettings } from '@codewithdan/observable-store/interface
 
 export default abstract class BaseService extends ObservableStore<IStoreState> {
 	protected _nuxtContext!: Context;
+	protected _name: string;
 
-	protected constructor(settings: ObservableStoreSettings) {
+	protected constructor(serviceName: string, settings: ObservableStoreSettings) {
 		settings.trackStateHistory = true;
 		super(settings);
+		this._name = serviceName;
 	}
 
-	public setup(nuxtContext: Context): void {
+	protected setNuxtContext(nuxtContext: Context): void {
 		this._nuxtContext = nuxtContext;
 	}
 

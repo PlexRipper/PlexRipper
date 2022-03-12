@@ -2,26 +2,28 @@
 	<!--	Instead of multiple layouts we merge into one default layout to prevent full
 				page change (flashing white background) during transitions.	-->
 	<v-app :class="[isSetupPage ? 'no-background' : 'background']">
-		<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
-		<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert" />
-		<!--	Use for setup-layout	-->
-		<template v-if="isSetupPage">
-			<vue-scroll>
+		<page-load-overlay>
+			<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
+			<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert" />
+			<!--	Use for setup-layout	-->
+			<template v-if="isSetupPage">
+				<vue-scroll>
+					<v-main class="no-background">
+						<nuxt />
+					</v-main>
+				</vue-scroll>
+			</template>
+			<!--	Use for everything else	-->
+			<template v-else>
+				<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
+				<navigation-drawer :show-drawer="showNavigationDrawerState" />
+				<notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
 				<v-main class="no-background">
 					<nuxt />
 				</v-main>
-			</vue-scroll>
-		</template>
-		<!--	Use for everything else	-->
-		<template v-else>
-			<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
-			<navigation-drawer :show-drawer="showNavigationDrawerState" />
-			<notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
-			<v-main class="no-background">
-				<nuxt />
-			</v-main>
-			<footer />
-		</template>
+				<footer />
+			</template>
+		</page-load-overlay>
 		<background />
 	</v-app>
 </template>
@@ -31,9 +33,10 @@ import { Component, Vue } from 'vue-property-decorator';
 import { HelpService, AlertService } from '@service';
 import IAlert from '@interfaces/IAlert';
 import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
+import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
 
 @Component({
-	components: { NotificationsDrawer },
+	components: { NotificationsDrawer, PageLoadOverlay },
 	loading: false,
 })
 export default class Default extends Vue {

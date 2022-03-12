@@ -3,14 +3,16 @@ import { combineLatest, of } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
 import { DownloadStatus, DownloadTaskDTO } from '@dto/mainApi';
 import { BaseService, SignalrService } from '@service';
+import ISetup from '@interfaces/ISetup';
 
-export class ProgressService extends BaseService {
+export class ProgressService extends BaseService implements ISetup {
 	public constructor() {
-		super({});
+		super('ProgressService', {});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
+		callBack(this._name);
 	}
 
 	/**

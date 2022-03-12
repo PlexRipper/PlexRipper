@@ -14,16 +14,16 @@ import {
 	GeneralSettingsDTO,
 	LanguageSettingsDTO,
 	ServerSettingsDTO,
-	SettingsModelDTO,
-	ViewMode,
 } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import * as Service from '@service';
+import ISetup from '@interfaces/ISetup';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
 
 export class GlobalService extends Service.BaseService {
 	private _axiosReady: ReplaySubject<void> = new ReplaySubject();
 	private _configReady: ReplaySubject<AppConfig> = new ReplaySubject();
+	private _pageSetupReady: ReplaySubject<void> = new ReplaySubject();
 	private _defaultStore: IStoreState = {
 		accounts: [],
 		servers: [],
@@ -51,8 +51,11 @@ export class GlobalService extends Service.BaseService {
 		serverSettings: {} as ServerSettingsDTO,
 	};
 
+	private _serviceKeys: string[] = [];
+	private _doneServiceKeys: string[] = [];
+
 	constructor() {
-		super({} as ObservableStoreSettings);
+		super('GlobalService', {} as ObservableStoreSettings);
 	}
 
 	public setAxiosReady(): void {
@@ -61,16 +64,25 @@ export class GlobalService extends Service.BaseService {
 	}
 
 	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+		super.setNuxtContext(nuxtContext);
 
 		ObservableStore.initializeState(this._defaultStore);
+		// Call setup() on every service and await callback to determine if it has finished setting up
+		this._serviceKeys = Object.keys(Service).filter((key) => key !== 'BaseService' && key !== 'GlobalService');
+		for (const key of this._serviceKeys) {
+			const service = Service[key] as ISetup;
+			if (service && typeof service.setup === 'function') {
+				service.setup(nuxtContext, (name) => {
+					this._doneServiceKeys.push(name);
 
-		for (const key of Object.keys(Service)) {
-			if (key === 'BaseService' || key === 'GlobalService') {
-				continue;
-			}
-			if (Service[key] && typeof Service[key].setup === 'function') {
-				Service[key].setup(nuxtContext);
+					const notDoneServices = this._serviceKeys.filter((x) => !this._doneServiceKeys.includes(x));
+					if (notDoneServices.length > 0) {
+						// Log.debug(`The following services are not done yet:`, notDoneServices);
+					} else {
+						Log.info('Page Setup has finished');
+						this._pageSetupReady.next();
+					}
+				});
 			}
 		}
 	}
@@ -93,6 +105,10 @@ export class GlobalService extends Service.BaseService {
 	}
 
 	public getConfigReady(): Observable<AppConfig> {
+		return this._configReady.pipe(take(1));
+	}
+
+	public getPageSetupReady(): Observable<AppConfig> {
 		return this._configReady.pipe(take(1));
 	}
 }

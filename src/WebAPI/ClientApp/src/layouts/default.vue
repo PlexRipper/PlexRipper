@@ -1,8 +1,9 @@
 <template>
 	<!--	Instead of multiple layouts we merge into one default layout to prevent full
 				page change (flashing white background) during transitions.	-->
-	<v-app :class="[isSetupPage ? 'no-background' : 'background']">
-		<page-load-overlay>
+	<v-app :class="[isNoBackground ? 'no-background' : 'background']">
+		<page-load-overlay v-if="isLoading" :value="isLoading" />
+		<template v-else>
 			<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
 			<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert" />
 			<!--	Use for setup-layout	-->
@@ -23,7 +24,7 @@
 				</v-main>
 				<footer />
 			</template>
-		</page-load-overlay>
+		</template>
 		<background />
 	</v-app>
 </template>
@@ -34,12 +35,15 @@ import { HelpService, AlertService } from '@service';
 import IAlert from '@interfaces/IAlert';
 import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
 import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
+import { merge, timer } from 'rxjs';
+import globalService from '~/service/globalService';
 
-@Component({
+@Component<Default>({
 	components: { NotificationsDrawer, PageLoadOverlay },
 	loading: false,
 })
 export default class Default extends Vue {
+	isLoading: boolean = true;
 	helpDialogState: boolean = false;
 	helpId: string = '';
 	alerts: IAlert[] = [];
@@ -48,6 +52,13 @@ export default class Default extends Vue {
 
 	get isSetupPage(): boolean {
 		return this.$route.fullPath.includes('setup');
+	}
+
+	get isNoBackground(): boolean {
+		if (this.isLoading) {
+			return true;
+		}
+		return this.isSetupPage;
 	}
 
 	closeAlert(alert: IAlert): void {
@@ -63,6 +74,10 @@ export default class Default extends Vue {
 	}
 
 	mounted(): void {
+		this.$subscribeTo(merge([timer(10000), globalService.getPageSetupReady()]), () => {
+			this.isLoading = false;
+		});
+
 		this.$subscribeTo(HelpService.getHelpDialog(), (helpId) => {
 			if (helpId) {
 				this.helpId = helpId;

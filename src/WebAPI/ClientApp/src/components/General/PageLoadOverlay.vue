@@ -1,30 +1,18 @@
 <template>
-	<div>
-		<v-overlay v-if="overlayState" :value="overlayState" :opacity="0">
-			<div class="logo-square">
-				<logo :size="256" @click="overlayState = false" />
-			</div>
-		</v-overlay>
-		<slot v-else></slot>
-	</div>
+	<v-overlay :value="value" :opacity="0">
+		<div class="logo-square">
+			<logo :size="256" />
+		</div>
+	</v-overlay>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { merge, timer } from 'rxjs';
-import globalService from '~/service/globalService';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 
-@Component<PageLoadOverlay>({
-	components: {},
-})
+@Component<PageLoadOverlay>({})
 export default class PageLoadOverlay extends Vue {
-	overlayState: boolean = true;
-
-	mounted() {
-		this.$subscribeTo(merge([timer(5000), globalService.getPageSetupReady()]), () => {
-			this.overlayState = false;
-		});
-	}
+	@Prop({ required: true, type: Boolean })
+	readonly value!: boolean;
 }
 </script>
 <style>

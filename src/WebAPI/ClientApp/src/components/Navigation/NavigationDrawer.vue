@@ -67,7 +67,7 @@ interface INavItem {
 	children?: INavItem[];
 }
 
-@Component
+@Component<NavigationDrawer>({})
 export default class NavigationDrawer extends Vue {
 	items: object[] = [];
 	downloadTaskCount = 0;

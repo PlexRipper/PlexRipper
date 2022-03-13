@@ -47,13 +47,19 @@ export class SignalrService extends BaseService implements ISetup {
 		GlobalService.getConfigReady().subscribe((config) => {
 			Log.debug('Setting up SignalR Service');
 			const options: IHttpConnectionOptions = {
-				logger: LogLevel.Warning,
+				logger: LogLevel.Information,
 			};
 
 			// Setup Connections
 			const baseUrl = config.baseURL;
-			this._progressHubConnection = new HubConnectionBuilder().withUrl(`${baseUrl}/progress`, options).build();
-			this._notificationHubConnection = new HubConnectionBuilder().withUrl(`${baseUrl}/notifications`, options).build();
+			this._progressHubConnection = new HubConnectionBuilder()
+				.withUrl(`${baseUrl}/progress`, options)
+				.withAutomaticReconnect()
+				.build();
+			this._notificationHubConnection = new HubConnectionBuilder()
+				.withUrl(`${baseUrl}/notifications`, options)
+				.withAutomaticReconnect()
+				.build();
 
 			this.setupSubscriptions();
 			callBack(this._name);

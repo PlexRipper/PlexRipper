@@ -8,6 +8,7 @@
 
 ### Fixed
  - Fixed the opening of the server settings not defaulting back to its first tab
+ - Fixed the download progress not updating after a while due to SignalR disconnects
 
 ## [0.8.7]
 

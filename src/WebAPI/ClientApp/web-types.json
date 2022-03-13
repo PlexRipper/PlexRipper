@@ -1468,9 +1468,14 @@
         {
           "name": "PageLoadOverlay",
           "description": "",
-          "slots": [
+          "attributes": [
             {
-              "name": "default"
+              "name": "value",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
             }
           ],
           "source": {

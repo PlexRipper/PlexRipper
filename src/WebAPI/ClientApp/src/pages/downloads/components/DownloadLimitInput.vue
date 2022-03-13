@@ -20,9 +20,7 @@ import { SettingsService } from '@service';
 import { map, switchMap } from 'rxjs/operators';
 import { PlexServerSettingsModel } from '@dto/mainApi';
 
-@Component<DownloadLimitInput>({
-	components: {},
-})
+@Component<DownloadLimitInput>({})
 export default class DownloadLimitInput extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly plexServerId!: number;

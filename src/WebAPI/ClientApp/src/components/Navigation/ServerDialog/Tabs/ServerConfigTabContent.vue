@@ -4,7 +4,9 @@
 			<tbody>
 				<tr>
 					<td style="width: 40%">{{ $t('components.server-dialog.tabs.server-config.download-speed-limit') }}:</td>
-					<td><download-limit-input :plex-server-id="plexServer.id" /></td>
+					<td>
+						<download-limit-input :plex-server-id="plexServer.id" />
+					</td>
 				</tr>
 			</tbody>
 		</v-simple-table>

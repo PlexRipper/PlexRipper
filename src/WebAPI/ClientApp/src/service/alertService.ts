@@ -4,10 +4,11 @@ import { BaseService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
 import { Context } from '@nuxt/types';
 import IAlert from '@interfaces/IAlert';
+import ISetup from '@interfaces/ISetup';
 
-export class AlertService extends BaseService {
+export class AlertService extends BaseService implements ISetup {
 	public constructor() {
-		super({
+		super('AlertService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -17,8 +18,9 @@ export class AlertService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
+		callBack(this._name);
 	}
 
 	// region Alerts

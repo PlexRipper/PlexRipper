@@ -2,10 +2,12 @@ import { Observable, of } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
 import { switchMap } from 'rxjs/operators';
 import { BaseService } from '@service';
+import ISetup from '@interfaces/ISetup';
+import { Context } from '@nuxt/types';
 
-export class HelpService extends BaseService {
+export class HelpService extends BaseService implements ISetup {
 	public constructor() {
-		super({
+		super('HelpService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -13,6 +15,11 @@ export class HelpService extends BaseService {
 				};
 			},
 		});
+	}
+
+	setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
+		callBack(this._name);
 	}
 
 	public getHelpDialog(): Observable<string> {

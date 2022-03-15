@@ -5,7 +5,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
-@Component
+@Component<Logo>({})
 export default class Logo extends Vue {
 	@Prop({ required: true, type: Number, default: 128 })
 	readonly size!: number;

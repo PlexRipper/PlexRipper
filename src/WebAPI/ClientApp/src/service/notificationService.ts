@@ -9,7 +9,7 @@ import { Context } from '@nuxt/types';
 
 export class NotificationService extends BaseService {
 	public constructor() {
-		super({
+		super('NotificationService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -19,8 +19,8 @@ export class NotificationService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
 
 		GlobalService.getAxiosReady()
 			.pipe(
@@ -31,6 +31,7 @@ export class NotificationService extends BaseService {
 				if (result.isSuccess) {
 					this.setState({ notifications: result.value }, 'Set Notifications');
 				}
+				callBack(this._name);
 			});
 	}
 

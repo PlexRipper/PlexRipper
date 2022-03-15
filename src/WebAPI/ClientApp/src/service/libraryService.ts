@@ -6,12 +6,13 @@ import IStoreState from '@interfaces/service/IStoreState';
 import { distinctUntilChanged, filter, finalize, map, switchMap, take } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, refreshPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
+import ISetup from '@interfaces/ISetup';
 
-export class LibraryService extends BaseService {
+export class LibraryService extends BaseService implements ISetup {
 	// region Constructor and Setup
 
 	public constructor() {
-		super({
+		super('LibraryService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -21,12 +22,12 @@ export class LibraryService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
 
 		GlobalService.getAxiosReady()
 			.pipe(finalize(() => this.fetchLibraries()))
-			.subscribe();
+			.subscribe(() => callBack(this._name));
 	}
 
 	// endregion

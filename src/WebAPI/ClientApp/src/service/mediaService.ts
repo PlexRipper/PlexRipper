@@ -4,10 +4,12 @@ import { PlexMediaType } from '@dto/mainApi';
 import { Observable, of } from 'rxjs';
 import { getThumbnail } from '@api/mediaApi';
 import { map } from 'rxjs/operators';
+import ISetup from '@interfaces/ISetup';
+import { Context } from '@nuxt/types';
 
-export class MediaService extends BaseService {
+export class MediaService extends BaseService implements ISetup {
 	public constructor() {
-		super({
+		super('MediaService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -15,6 +17,11 @@ export class MediaService extends BaseService {
 				};
 			},
 		});
+	}
+
+	setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
+		callBack(this._name);
 	}
 
 	public getThumbnail(mediaId: number, mediaType: PlexMediaType, width: number = 0, height: number = 0): Observable<string> {

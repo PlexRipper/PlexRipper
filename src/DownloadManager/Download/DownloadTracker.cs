@@ -25,8 +25,6 @@ namespace PlexRipper.DownloadManager
         /// </summary>
         private readonly List<PlexDownloadClient> _downloadClientList = new();
 
-        private readonly Dictionary<int, List<IDisposable>> _clientSubscriptions = new();
-
         private readonly CancellationTokenSource _tokenSource = new();
 
         private readonly Channel<int> _startQueue = Channel.CreateUnbounded<int>();
@@ -145,12 +143,6 @@ namespace PlexRipper.DownloadManager
 
             if (_downloadClientList[index] is not null)
             {
-                // Clean-up any subscriptions
-                foreach (var disposable in _clientSubscriptions[downloadTaskId])
-                {
-                    disposable.Dispose();
-                }
-
                 _downloadClientList[index].Dispose();
                 _downloadClientList.RemoveAt(index);
             }
@@ -259,18 +251,15 @@ namespace PlexRipper.DownloadManager
 
         private void SetupSubscriptions(PlexDownloadClient newClient)
         {
-            var subscriptions = new List<IDisposable>();
-
-            subscriptions.Add(newClient
+            newClient
                 .DownloadTaskUpdate
-                .SubscribeAsync(OnDownloadTaskUpdate));
+                .TakeUntil(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
+                .SubscribeAsync(OnDownloadTaskUpdate);
 
             // Download Worker Log subscription
-            subscriptions.Add(newClient.DownloadWorkerLog
+            newClient.DownloadWorkerLog
                 .Buffer(TimeSpan.FromSeconds(1))
-                .SubscribeAsync(logs => _mediator.Send(new AddDownloadWorkerLogsCommand(logs), _tokenSource.Token)));
-
-            _clientSubscriptions.Add(newClient.DownloadTaskId, subscriptions);
+                .SubscribeAsync(logs => _mediator.Send(new AddDownloadWorkerLogsCommand(logs), _tokenSource.Token));
         }
 
         private async Task OnDownloadTaskUpdate(DownloadTask downloadTask)
@@ -311,14 +300,6 @@ namespace PlexRipper.DownloadManager
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            foreach ((_, List<IDisposable> value) in _clientSubscriptions)
-            {
-                foreach (var disposable in value)
-                {
-                    disposable.Dispose();
-                }
-            }
-
             foreach (var client in _downloadClientList)
             {
                 if (client.DownloadStatus is DownloadStatus.Downloading)
@@ -329,7 +310,5 @@ namespace PlexRipper.DownloadManager
                 client.Dispose();
             }
         }
-
-
     }
 }

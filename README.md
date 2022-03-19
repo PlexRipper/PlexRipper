@@ -126,6 +126,8 @@ Make PlexRipper easier to use for everyone by translating it to your native lang
 An absolute massive thank you to the following people!
 
 - [Starnakin](https://github.com/starnakin) for his awesome work on translating PlexRipper to French!
+- 
+- [Padso4tw](https://github.com/padso4tw) for his awesome work on translating PlexRipper to German!
 
 - [Ninthwalker](https://github.com/ninthwalker) for his great work on [Saverr](https://github.com/ninthwalker/saverr), which showed me the method of downloading media from Plex!
 

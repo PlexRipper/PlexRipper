@@ -1,3 +1,5 @@
+// noinspection AllyPlainJsInspection
+
 import Log from 'consola';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
@@ -117,12 +119,6 @@ const config: NuxtConfig = {
 			});
 		},
 	},
-	generate: {
-		// Don't create paths for the components folders in the pages directory
-		// eslint-disable-next-line prefer-regex-literals
-		exclude: [new RegExp('components')],
-		devtools: true,
-	},
 	i18n: {
 		lazy: true,
 		langDir: 'lang/',
@@ -130,6 +126,7 @@ const config: NuxtConfig = {
 		locales: [
 			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
 			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
+			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', file: 'de-DE.json' },
 		],
 		vueI18n: {
 			fallbackLocale: 'en-US',

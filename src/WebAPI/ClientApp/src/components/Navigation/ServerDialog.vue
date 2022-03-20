@@ -1,5 +1,5 @@
 <template>
-	<v-dialog :value="serverId > 0" max-width="1200" @click:outside="close">
+	<v-dialog :value="serverId > 0" :width="1200" :max-width="1200" @click:outside="close">
 		<v-card v-if="plexServer">
 			<v-card-title class="headline">{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }} </v-card-title>
 
@@ -36,7 +36,7 @@
 
 					<!--	Server Configuration Tab Content	-->
 					<v-tab-item>
-						<server-config-tab-content :plex-server="plexServer" />
+						<server-config-tab-content :plex-server="plexServer" :plex-server-settings="plexServerSettings" />
 					</v-tab-item>
 
 					<!--	Library Download Destinations	Tab Content -->
@@ -56,14 +56,12 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
-import { FolderPathService, LibraryService, ServerService } from '@service';
-import { map, switchMap } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel, PlexServerStatusDTO } from '@dto/mainApi';
+import { FolderPathService, LibraryService, ServerService, SettingsService } from '@service';
 
-@Component<ServerDialog>({
-	components: {},
-})
+@Component<ServerDialog>({})
 export default class ServerDialog extends Vue {
 	@Prop({ required: true, type: Number, default: 0 })
 	readonly serverId!: number;
@@ -73,6 +71,7 @@ export default class ServerDialog extends Vue {
 	plexServer: PlexServerDTO | null = null;
 	folderPaths: FolderPathDTO[] = [];
 	plexLibraries: PlexLibraryDTO[] = [];
+	plexServerSettings: PlexServerSettingsModel | null = null;
 
 	get serverStatus(): PlexServerStatusDTO | null {
 		return this.plexServer?.status ?? null;
@@ -87,23 +86,35 @@ export default class ServerDialog extends Vue {
 		this.$subscribeTo(
 			this.$watchAsObservable('serverId').pipe(
 				map((x: { oldValue: number; newValue: number }) => x.newValue),
-				switchMap((value) =>
+				switchMap((plexServerId) =>
 					combineLatest([
-						ServerService.getServer(value),
-						LibraryService.getLibrariesByServerId(value),
+						ServerService.getServer(plexServerId),
+						LibraryService.getLibrariesByServerId(plexServerId),
 						FolderPathService.getFolderPaths(),
+						SettingsService.getServerSettings(plexServerId),
 					]),
 				),
 			),
-			([plexServer, plexLibraries, folderPaths]: [PlexServerDTO | null, PlexLibraryDTO[], FolderPathDTO[]]) => {
+			([plexServer, plexLibraries, folderPaths, plexServerSettings]: [
+				PlexServerDTO | null,
+				PlexLibraryDTO[],
+				FolderPathDTO[],
+				PlexServerSettingsModel,
+			]) => {
 				if (plexServer) {
 					this.plexServer = plexServer;
 				}
+
 				if (plexLibraries) {
 					this.plexLibraries = plexLibraries;
 				}
+
 				if (folderPaths) {
 					this.folderPaths = folderPaths;
+				}
+
+				if (plexServerSettings) {
+					this.plexServerSettings = plexServerSettings;
 				}
 			},
 		);

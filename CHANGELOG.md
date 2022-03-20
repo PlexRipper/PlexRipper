@@ -2,9 +2,10 @@
 
 ### Added
  - Per server configurable downloadspeed limit (See server settings > Server Configuration)
+ - German UI language (Thanks to (Padso4tw)[https://github.com/padso4tw])
 
 ### Changed
-
+ - Removed batch commands from the download page, these were not working and overcomplicated things too much.
 
 ### Fixed
  - Fixed the opening of the server settings not defaulting back to its first tab

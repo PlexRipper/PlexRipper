@@ -78,10 +78,6 @@
                     "header": "Server Befehle",
                     "re-sync-server": "Re-sync Mediathekdaten"
                 },
-                "server-config": {
-                    "download-speed-limit": "Geschwindigkeitsbegrenzung herunterladen",
-                    "header": ""
-                },
                 "server-data": {
                     "created-on": "erstellt am",
                     "current-status": "aktueller Status",
@@ -91,6 +87,10 @@
                     "machine-id": "Machine Identifizierer",
                     "plex-version": "Plex Version",
                     "server-url": "Server URL"
+                },
+                "server-config": {
+                    "download-speed-limit": "Geschwindigkeitsbegrenzung herunterladen",
+                    "header": ""
                 }
             }
         },
@@ -283,6 +283,15 @@
                         "text": "",
                         "title": ""
                     }
+                }
+            }
+        },
+        "server-dialog": {
+            "server-config": {
+                "download-speed-limit": {
+                    "label": "",
+                    "text": "",
+                    "title": ""
                 }
             }
         }

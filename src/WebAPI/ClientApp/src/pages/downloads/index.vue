@@ -22,7 +22,6 @@
 									<!-- Download Server Settings -->
 									<v-col>
 										<server-download-status />
-										<download-limit-input :plex-server-id="plexServer.id" />
 									</v-col>
 									<!-- Download Server Title -->
 									<v-col cols="auto">

@@ -293,7 +293,7 @@
           "name": "ConfirmationSection",
           "description": "",
           "source": {
-            "module": "./src/pages/settings/components/ConfirmationSection.vue",
+            "module": "./src/components/Views/Settings/ConfirmationSection.vue",
             "symbol": "default"
           }
         },
@@ -309,7 +309,7 @@
           "name": "DatabaseSection",
           "description": "",
           "source": {
-            "module": "./src/pages/settings/components/DatabaseSection.vue",
+            "module": "./src/components/Views/Settings/DatabaseSection.vue",
             "symbol": "default"
           }
         },
@@ -317,7 +317,7 @@
           "name": "DateAndTimeSection",
           "description": "",
           "source": {
-            "module": "./src/pages/settings/components/DateAndTimeSection.vue",
+            "module": "./src/components/Views/Settings/DateAndTimeSection.vue",
             "symbol": "default"
           }
         },
@@ -371,7 +371,7 @@
           "name": "DebugSection",
           "description": "",
           "source": {
-            "module": "./src/pages/settings/components/DebugSection.vue",
+            "module": "./src/components/Views/Settings/DebugSection.vue",
             "symbol": "default"
           }
         },
@@ -485,7 +485,7 @@
             }
           ],
           "source": {
-            "module": "./src/pages/downloads/components/DownloadBar.vue",
+            "module": "./src/components/Views/Downloads/DownloadBar.vue",
             "symbol": "default"
           }
         },
@@ -548,7 +548,7 @@
             }
           ],
           "source": {
-            "module": "./src/pages/downloads/components/DownloadDetailsDialog.vue",
+            "module": "./src/components/Views/Downloads/DownloadDetailsDialog.vue",
             "symbol": "default"
           }
         },
@@ -563,10 +563,23 @@
                 "kind": "expression",
                 "type": "number"
               }
+            },
+            {
+              "name": "downloadSpeedLimit",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "change"
             }
           ],
           "source": {
-            "module": "./src/pages/downloads/components/DownloadLimitInput.vue",
+            "module": "./src/components/Form/DownloadLimitInput.vue",
             "symbol": "default"
           }
         },
@@ -574,7 +587,7 @@
           "name": "DownloadManagerSection",
           "description": "",
           "source": {
-            "module": "./src/pages/settings/components/DownloadManagerSection.vue",
+            "module": "./src/components/Views/Settings/DownloadManagerSection.vue",
             "symbol": "default"
           }
         },
@@ -623,7 +636,7 @@
             }
           ],
           "source": {
-            "module": "./src/pages/downloads/components/DownloadsTable.vue",
+            "module": "./src/components/Views/Downloads/DownloadsTable.vue",
             "symbol": "default"
           }
         },
@@ -793,7 +806,7 @@
           "name": "LanguageSection",
           "description": "",
           "source": {
-            "module": "./src/pages/settings/components/LanguageSection.vue",
+            "module": "./src/components/Views/Settings/LanguageSection.vue",
             "symbol": "default"
           }
         },
@@ -812,7 +825,7 @@
             }
           ],
           "source": {
-            "module": "./src/components/LoadingSpinner.vue",
+            "module": "./src/components/General/LoadingSpinner.vue",
             "symbol": "default"
           }
         },
@@ -1092,7 +1105,7 @@
             }
           ],
           "source": {
-            "module": "./src/pages/setup/components/NavigationBar.vue",
+            "module": "./src/components/Views/Setup/NavigationBar.vue",
             "symbol": "default"
           }
         },
@@ -1678,6 +1691,14 @@
                 "kind": "expression",
                 "type": "PlexServerDTO"
               }
+            },
+            {
+              "name": "plexServerSettings",
+              "required": true,
+              "value": {
+                "kind": "expression",
+                "type": "PlexServerSettingsModel"
+              }
             }
           ],
           "source": {
@@ -1739,7 +1760,7 @@
           "name": "ServerDownloadStatus",
           "description": "",
           "source": {
-            "module": "./src/pages/downloads/components/ServerDownloadStatus.vue",
+            "module": "./src/components/Views/Downloads/ServerDownloadStatus.vue",
             "symbol": "default"
           }
         },
@@ -1781,7 +1802,7 @@
           "name": "SetupSection",
           "description": "",
           "source": {
-            "module": "./src/pages/settings/components/SetupSection.vue",
+            "module": "./src/components/Views/Settings/SetupSection.vue",
             "symbol": "default"
           }
         },

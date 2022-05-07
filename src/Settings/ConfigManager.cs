@@ -8,7 +8,7 @@ using PlexRipper.Domain.Config;
 
 namespace PlexRipper.Settings
 {
-    public class ConfigManager : IConfigManager
+    public sealed class ConfigManager : IConfigManager
     {
         #region Fields
 
@@ -73,7 +73,7 @@ namespace PlexRipper.Settings
             return loadResult.IsFailed ? loadResult : Result.Ok();
         }
 
-        public virtual Result LoadConfig()
+        public Result LoadConfig()
         {
             Log.Information("Loading user config settings now.");
             var readResult = ReadFromConfigFile();
@@ -106,7 +106,7 @@ namespace PlexRipper.Settings
             }
         }
 
-        public virtual Result ResetConfig()
+        public Result ResetConfig()
         {
             _userSettings.Reset();
             var saveResult = SaveConfig();
@@ -118,7 +118,7 @@ namespace PlexRipper.Settings
             return Result.Ok();
         }
 
-        public virtual Result SaveConfig()
+        public Result SaveConfig()
         {
             Log.Information("Saving user config settings now.");
 
@@ -133,7 +133,7 @@ namespace PlexRipper.Settings
             return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
         }
 
-        public virtual bool ConfigFileExists()
+        public bool ConfigFileExists()
         {
             return _fileSystem.FileExists(_pathProvider.ConfigFileLocation);
         }

@@ -25,6 +25,12 @@ namespace Environment
         {
             get
             {
+                var devRootPath = EnvironmentExtensions.GetDevelopmentRootPath();
+                if (devRootPath is not null)
+                {
+                    return devRootPath;
+                }
+
                 switch (OsInfo.CurrentOS)
                 {
                     case OperatingSystemPlatform.Linux:

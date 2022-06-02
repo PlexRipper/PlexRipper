@@ -40,7 +40,7 @@
 		"date-fns": "^2.23.0",
 		"lodash": "^4.17.21",
 		"material-design-icons-iconfont": "latest",
-		"npm": "^7.24.0",
+		"npm": "^8.11.0",
 		"nuxt": "^2.15.8",
 		"object-path": "^0.11.5",
 		"rxjs": "^7.2.0",

@@ -19,9 +19,7 @@ namespace PlexRipper.Settings
 
         #region Constructor
 
-        protected BaseSettingsModule()
-        {
-        }
+        protected BaseSettingsModule() { }
 
         #endregion
 
@@ -32,7 +30,6 @@ namespace PlexRipper.Settings
         public abstract string Name { get; }
 
         public abstract TModel DefaultValues();
-
 
         #endregion
 
@@ -55,19 +52,29 @@ namespace PlexRipper.Settings
                 return jsonSettings;
             }
 
-            var rootSettingsModule = jsonSettings.Value;
+            TModel defaultValues = DefaultValues();
+            JsonElement rootSettingsModule = jsonSettings.Value;
             foreach (PropertyInfo prop in typeof(TModel).GetProperties())
             {
+                PropertyInfo targetProp = GetType().GetProperty(prop.Name);
+                Type targetPropType = targetProp.PropertyType;
+                var targetValue = targetProp.GetValue(this, null);
+
+                // Is settings value available in JSON? Else revert to default value
                 if (rootSettingsModule.TryGetProperty(prop.Name, out JsonElement jsonValueElement))
                 {
-                    var targetProp = GetType().GetProperty(prop.Name);
-                    var targetPropType = targetProp.PropertyType;
-                    var targetValue = targetProp.GetValue(this, null);
-
                     var sourceValue = jsonValueElement.GetTypedValue(targetPropType);
                     if (sourceValue != targetValue)
                     {
                         targetProp.SetValue(this, sourceValue);
+                    }
+                }
+                else
+                {
+                    var defaultValue = defaultValues.GetType().GetProperty(prop.Name).GetValue(defaultValues, null);
+                    if (defaultValue != targetValue)
+                    {
+                        targetProp.SetValue(this, defaultValue);
                     }
                 }
             }
@@ -81,9 +88,9 @@ namespace PlexRipper.Settings
 
             foreach (PropertyInfo prop in typeof(TModel).GetProperties())
             {
-                var sourceProp = sourceSettings.GetType().GetProperty(prop.Name);
+                PropertyInfo sourceProp = sourceSettings.GetType().GetProperty(prop.Name);
                 var sourceValue = sourceProp.GetValue(sourceSettings, null);
-                var targetProp = GetType().GetProperty(prop.Name);
+                PropertyInfo targetProp = GetType().GetProperty(prop.Name);
                 var targetValue = targetProp.GetValue(this, null);
                 if (sourceValue != targetValue)
                 {

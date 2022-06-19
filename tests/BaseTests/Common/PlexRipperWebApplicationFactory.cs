@@ -34,7 +34,7 @@ namespace PlexRipper.BaseTests
 
                     autoFacBuilder.RegisterModule<TestModule>();
 
-                    SetMockedDependancies(autoFacBuilder);
+                    SetMockedDependencies(autoFacBuilder);
 
                     //  SignalR requires the default ILogger
                     //  autoFacBuilder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
@@ -49,7 +49,7 @@ namespace PlexRipper.BaseTests
             return base.CreateHost(builder);
         }
 
-        private void SetMockedDependancies(ContainerBuilder builder)
+        private void SetMockedDependencies(ContainerBuilder builder)
         {
             builder.RegisterType<MockSignalRService>().As<ISignalRService>();
 
@@ -61,6 +61,11 @@ namespace PlexRipper.BaseTests
             if (_config.MockDownloadSubscriptions is not null)
             {
                 builder.RegisterInstance(_config.MockDownloadSubscriptions).As<IDownloadSubscriptions>();
+            }
+
+            if (_config.MockConfigManager is not null)
+            {
+                builder.RegisterInstance(_config.MockConfigManager).As<IConfigManager>();
             }
         }
     }

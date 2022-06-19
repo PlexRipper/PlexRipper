@@ -130,6 +130,8 @@ namespace PlexRipper.BaseTests
 
         public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
 
+        public IConfigManager ConfigManager => Resolve<IConfigManager>();
+
         #endregion
 
         #endregion

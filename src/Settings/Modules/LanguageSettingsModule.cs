@@ -25,30 +25,6 @@ namespace PlexRipper.Settings.Modules
 
         #region Public Methods
 
-        public void Reset()
-        {
-            Update(new LanguageSettingsModule());
-        }
-
-        public Result SetFromJson(JsonElement settingsJsonElement)
-        {
-            var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
-            if (jsonSettings.IsFailed)
-            {
-                Reset();
-                return jsonSettings;
-            }
-
-            var languageSettings = jsonSettings.Value;
-
-            if (languageSettings.TryGetProperty(nameof(Language), out JsonElement language))
-            {
-                Language = language.GetString();
-            }
-
-            return Result.Ok();
-        }
-
         public override ILanguageSettings GetValues()
         {
             return new LanguageSettings

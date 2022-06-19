@@ -34,6 +34,16 @@ namespace PlexRipper.Settings
 
         #endregion
 
+        /// <summary>
+        /// The <see cref="UserSettings"/> class is a wrapper class for the individual SettingsModules.
+        /// </summary>
+        /// <param name="confirmationSettingsModule"></param>
+        /// <param name="dateTimeSettingsModule"></param>
+        /// <param name="displaySettingsModule"></param>
+        /// <param name="downloadManagerSettingsModule"></param>
+        /// <param name="generalSettingsModule"></param>
+        /// <param name="languageSettingsModule"></param>
+        /// <param name="serverSettingsModule"></param>
         public UserSettings(
             IConfirmationSettingsModule confirmationSettingsModule,
             IDateTimeSettingsModule dateTimeSettingsModule,

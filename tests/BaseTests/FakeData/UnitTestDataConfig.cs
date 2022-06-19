@@ -6,11 +6,7 @@ namespace PlexRipper.BaseTests
 {
     public class UnitTestDataConfig
     {
-
-        public UnitTestDataConfig()
-        {
-
-        }
+        public UnitTestDataConfig() { }
 
         public UnitTestDataConfig(int seed)
         {
@@ -75,6 +71,8 @@ namespace PlexRipper.BaseTests
         public IFileSystem MockFileSystem { get; init; }
 
         public IDownloadSubscriptions MockDownloadSubscriptions { get; init; }
+
+        public IConfigManager MockConfigManager { get; init; }
 
         #endregion
 

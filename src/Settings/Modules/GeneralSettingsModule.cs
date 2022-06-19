@@ -18,31 +18,13 @@ namespace PlexRipper.Settings.Modules
             return new GeneralSettings
             {
                 FirstTimeSetup = true,
+                ActiveAccountId = 0,
             };
         }
 
         public Result Update(IGeneralSettingsModule sourceSettings)
         {
             FirstTimeSetup = sourceSettings.FirstTimeSetup;
-            return Result.Ok();
-        }
-
-        public Result SetFromJson(JsonElement settingsJsonElement)
-        {
-            var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
-            if (jsonSettings.IsFailed)
-            {
-                Reset();
-                return jsonSettings;
-            }
-
-            var generalSettings = jsonSettings.Value;
-
-            if (generalSettings.TryGetProperty(nameof(FirstTimeSetup), out JsonElement firstTimeSetup))
-            {
-                FirstTimeSetup = firstTimeSetup.GetBoolean();
-            }
-
             return Result.Ok();
         }
 

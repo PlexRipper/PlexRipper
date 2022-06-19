@@ -23,30 +23,6 @@ namespace PlexRipper.Settings.Modules
             };
         }
 
-        public override Result SetFromJson(JsonElement jsonElement)
-        {
-            var jsonSettings = GetJsonSettingsModule(jsonElement);
-            if (jsonSettings.IsFailed)
-            {
-                Reset();
-                return jsonSettings;
-            }
-
-            var displaySettings = jsonSettings.Value;
-
-            if (displaySettings.TryGetProperty(nameof(TvShowViewMode), out JsonElement tvShowViewMode))
-            {
-                TvShowViewMode = tvShowViewMode.GetString().ToViewMode();
-            }
-
-            if (displaySettings.TryGetProperty(nameof(MovieViewMode), out JsonElement movieViewMode))
-            {
-                MovieViewMode = movieViewMode.GetString().ToViewMode();
-            }
-
-            return Result.Ok();
-        }
-
         public override IDisplaySettings GetValues()
         {
             return new DisplaySettings

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentResults;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
+using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -18,19 +20,17 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
         public async Task ShouldStopDownloadJobAfterStartingForMovieAndEndWithStatusStopped_WhenGivenAValidDownloadTask()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await CreateContainer(config =>
             {
-                Seed = 4564,
-                MovieDownloadTasksCount = 2,
-                DownloadSpeedLimit = 1000,
-                MockServerConfig = new PlexMockServerConfig
+                config.Seed = 4564;
+                config.MovieDownloadTasksCount = 2;
+                config.DownloadSpeedLimit = 1000;
+                config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
+                config.MockServerConfig = new PlexMockServerConfig
                 {
                     DownloadFileSizeInMb = 50,
-                },
-                MockDownloadSubscriptions = new MockDownloadSubscriptions(),
-            };
-
-            await CreateContainer(config);
+                };
+            });
             var plexMovieDownloadTask =
                 Container.PlexRipperDbContext
                     .DownloadTasks

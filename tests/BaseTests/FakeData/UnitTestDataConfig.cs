@@ -1,10 +1,12 @@
-﻿using PlexRipper.Application;
+﻿using System;
+using JetBrains.Annotations;
+using PlexRipper.Application;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 
 namespace PlexRipper.BaseTests
 {
-    public class UnitTestDataConfig
+    public class UnitTestDataConfig : IDisposable
     {
         public UnitTestDataConfig() { }
 
@@ -13,52 +15,52 @@ namespace PlexRipper.BaseTests
             Seed = seed;
         }
 
-        public string MemoryDbName { get; init; } = MockDatabase.GetMemoryDatabaseName();
+        public string MemoryDbName { get; set; } = MockDatabase.GetMemoryDatabaseName();
 
-        public int Seed { get; init; }
+        public int Seed { get; set; }
 
         /// <summary>
-        /// If none, a random will be picked
+        ///     If none, a random will be picked
         /// </summary>
-        public PlexMediaType LibraryType { get; init; } = PlexMediaType.None;
+        public PlexMediaType LibraryType { get; set; } = PlexMediaType.None;
 
         #region Include
 
-        public bool IncludeLibraries { get; init; } = true;
+        public bool IncludeLibraries { get; set; } = true;
 
-        public bool IncludeDownloadTasks { get; init; }
+        public bool IncludeDownloadTasks { get; set; }
 
-        public bool IncludeMultiPartMovies { get; init; }
+        public bool IncludeMultiPartMovies { get; set; }
 
         #endregion
 
         #region Count
 
-        public int PlexServerCount { get; init; } = 1;
+        public int PlexServerCount { get; set; } = 1;
 
-        public int PlexLibraryCount { get; init; } = 0;
+        public int PlexLibraryCount { get; set; } = 0;
 
-        public int DownloadTasksCount { get; init; } = 10;
+        public int DownloadTasksCount { get; set; } = 10;
 
         #region Opt-in
 
-        public int MovieCount { get; init; } = 0;
+        public int MovieCount { get; set; } = 0;
 
-        public int TvShowCount { get; init; } = 0;
+        public int TvShowCount { get; set; } = 0;
 
-        public int TvShowSeasonCount { get; init; } = 2;
+        public int TvShowSeasonCount { get; set; } = 2;
 
-        public int TvShowEpisodeCount { get; init; } = 5;
+        public int TvShowEpisodeCount { get; set; } = 5;
 
         #region DownloadTasks
 
-        public int MovieDownloadTasksCount { get; init; } = 0;
+        public int MovieDownloadTasksCount { get; set; } = 0;
 
-        public int TvShowDownloadTasksCount { get; init; } = 0;
+        public int TvShowDownloadTasksCount { get; set; } = 0;
 
-        public int TvShowSeasonDownloadTasksCount { get; init; } = 2;
+        public int TvShowSeasonDownloadTasksCount { get; set; } = 2;
 
-        public int TvShowEpisodeDownloadTasksCount { get; init; } = 5;
+        public int TvShowEpisodeDownloadTasksCount { get; set; } = 5;
 
         #endregion
 
@@ -68,26 +70,50 @@ namespace PlexRipper.BaseTests
 
         #region Mocks
 
-        public IFileSystem MockFileSystem { get; init; }
+        public IFileSystem MockFileSystem { get; set; }
 
-        public IDownloadSubscriptions MockDownloadSubscriptions { get; init; }
+        public IDownloadSubscriptions MockDownloadSubscriptions { get; set; }
 
-        public IConfigManager MockConfigManager { get; init; }
+        public IConfigManager MockConfigManager { get; set; }
 
         #endregion
 
         #region MockServer
 
-        public PlexMockServerConfig MockServerConfig { get; init; }
+        public PlexMockServer MockServer { get; private set; }
+
+        public PlexMockServerConfig MockServerConfig { get; set; }
+
+        public void SetupMockServer([CanBeNull] Action<PlexMockServerConfig> options = null)
+        {
+            var config = new PlexMockServerConfig();
+            options?.Invoke(config);
+
+            MockServer = new PlexMockServer(config);
+        }
 
         #endregion
 
         #region UserSettings
 
-        public ISettingsModel UserSettings { get; init; }
+        public ISettingsModel UserSettings { get; set; }
 
-        public int DownloadSpeedLimit { get; init; }
+        public int DownloadSpeedLimit { get; set; } = 0;
+
+        public int PlexServerSettingsCount { get; set; } = 5;
 
         #endregion
+
+        public static UnitTestDataConfig FromOptions(Action<UnitTestDataConfig> action = null)
+        {
+            var config = new UnitTestDataConfig();
+            action?.Invoke(config);
+            return config;
+        }
+
+        public void Dispose()
+        {
+            MockServer?.Dispose();
+        }
     }
 }

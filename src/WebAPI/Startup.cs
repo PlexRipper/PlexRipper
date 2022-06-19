@@ -10,7 +10,7 @@ namespace PlexRipper.WebAPI
     /// <summary>
     /// The application startUp class.
     /// </summary>
-    public class Startup
+    public sealed class Startup
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Startup"/> class.
@@ -22,13 +22,13 @@ namespace PlexRipper.WebAPI
             Log.Information($"PlexRipper running in {CurrentEnvironment.EnvironmentName ?? "Unknown"} mode.");
         }
 
-        protected IWebHostEnvironment CurrentEnvironment { get; }
+        private IWebHostEnvironment CurrentEnvironment { get; }
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
         /// </summary>
         /// <param name="services"></param>
-        public virtual void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             if (!EnvironmentExtensions.IsIntegrationTestMode())
             {
@@ -43,7 +43,7 @@ namespace PlexRipper.WebAPI
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
-        public virtual void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app)
         {
             if (!EnvironmentExtensions.IsIntegrationTestMode())
             {

@@ -1,8 +1,11 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using Environment;
+using JetBrains.Annotations;
 using Logging;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -14,6 +17,8 @@ using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI;
 
+#endregion
+
 namespace PlexRipper.BaseTests
 {
     public partial class BaseContainer : IDisposable
@@ -21,8 +26,6 @@ namespace PlexRipper.BaseTests
         #region Fields
 
         private readonly WebApplicationFactory<Startup> _factory;
-
-        private readonly PlexMockServer _mockServer;
 
         private readonly IServiceScope _serviceScope;
 
@@ -33,11 +36,12 @@ namespace PlexRipper.BaseTests
         #region Constructor
 
         /// <summary>
-        /// Creates a Autofac container and sets up a test database.
+        ///     Creates a Autofac container and sets up a test database.
         /// </summary>
-        private BaseContainer(PlexMockServer mockServer = null, UnitTestDataConfig config = null)
+        private BaseContainer([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            _mockServer = mockServer;
+            var config = UnitTestDataConfig.FromOptions(options);
+
             _factory = new PlexRipperWebApplicationFactory<Startup>(config);
             ApiClient = _factory.CreateClient();
 
@@ -46,29 +50,21 @@ namespace PlexRipper.BaseTests
             _serviceScope = _factory.Services.CreateScope();
         }
 
-        public static async Task<BaseContainer> Create(UnitTestDataConfig config = null)
+        public static async Task<BaseContainer> Create([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
             Log.Information($"Setting up BaseContainer with database: {config.MemoryDbName}");
 
             EnvironmentExtensions.SetIntegrationTestMode(true);
 
-            PlexMockServer mockServer = null;
-            if (config.MockServerConfig is not null)
-            {
-                mockServer = new PlexMockServer(config.MockServerConfig);
-                config.MockServerConfig.DownloadUri = mockServer.GetDownloadUri;
-                config.MockServerConfig.ServerUri = mockServer.ServerUri;
-            }
-
             // Database context can be setup once and then retrieved by its DB name.
-            await MockDatabase.GetMemoryDbContext(config.MemoryDbName).Setup(config);
-            var container = new BaseContainer(mockServer, config);
+            await MockDatabase.GetMemoryDbContext(config.MemoryDbName).Setup(options);
+            var container = new BaseContainer(options);
 
             if (config.DownloadSpeedLimit > 0)
             {
-                await container.SetDownloadSpeedLimit(config);
+                await container.SetDownloadSpeedLimit(options);
             }
 
             return container;
@@ -153,7 +149,6 @@ namespace PlexRipper.BaseTests
             _services.GetAutofacRoot().Dispose();
             _factory?.Dispose();
             ApiClient?.Dispose();
-            _mockServer?.Server?.Dispose();
         }
     }
 }

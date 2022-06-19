@@ -11,6 +11,7 @@ using Moq;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
+using PlexRipper.Data;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
@@ -48,12 +49,11 @@ namespace DownloadManager.UnitTests
         public async Task ShouldHaveValidSingleNestedDownloadTasks_WhenPlexMoviesAreValid()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
             {
-                Seed = 324,
-                MovieCount = 5,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+                config.Seed = 324;
+                config.MovieCount = 5;
+            });
             using var mock = AutoMock.GetStrict().AddMapper();
             var _sut = mock.Create<DownloadTaskFactory>();
             var movies = context.PlexMovies.IncludePlexLibrary().IncludePlexServer().ToList();

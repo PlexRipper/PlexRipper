@@ -4,6 +4,7 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text.Json;
 using FluentResults;
+using Logging;
 using PlexRipper.Application;
 using PlexRipper.Domain;
 
@@ -71,6 +72,9 @@ namespace PlexRipper.Settings
                 }
                 else
                 {
+                    Log.Warning(
+                        $"The userSettings, in module \"{Name}\", was missing property \"{prop.Name}\". " +
+                        $"Will revert to default value now, this is normal if you just updated PlexRipper as new settings might have been added.");
                     var defaultValue = defaultValues.GetType().GetProperty(prop.Name).GetValue(defaultValues, null);
                     if (defaultValue != targetValue)
                     {

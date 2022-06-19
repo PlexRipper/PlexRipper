@@ -10,7 +10,9 @@ using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Asserts;
 using PlexRipper.BaseTests.Extensions;
+using PlexRipper.Data;
 using PlexRipper.Data.Common;
+using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;
@@ -44,11 +46,7 @@ namespace DownloadManager.UnitTests
         public async Task ShouldGenerateValidTvShowDownloadTaskWithAllEpisodesDownloadTask_WhenNoDownloadTasksExist()
         {
             // Arrange
-            var config = new UnitTestDataConfig
-            {
-                TvShowCount = 1,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+            await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.TvShowCount = 1; });
             var tvShows = context.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().ToList();
 
             using var mock = AutoMock.GetStrict().AddMapper();

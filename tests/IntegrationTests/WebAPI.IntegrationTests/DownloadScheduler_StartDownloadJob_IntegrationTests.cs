@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentResults;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;
@@ -18,18 +19,16 @@ namespace WebAPI.IntegrationTests
         public async Task ShouldStartDownloadJobForMovie_WhenGivenAValidDownloadTask()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await CreateContainer(config =>
             {
-                Seed = 4564,
-                MovieDownloadTasksCount = 5,
-                DownloadSpeedLimit = 2000,
-                MockServerConfig = new PlexMockServerConfig
+                config.Seed = 4564;
+                config.MovieDownloadTasksCount = 5;
+                config.DownloadSpeedLimit = 2000;
+                config.MockServerConfig = new PlexMockServerConfig
                 {
                     DownloadFileSizeInMb = 50,
-                },
-            };
-
-            await CreateContainer(config);
+                };
+            });
             var plexMovieDownloadTask =
                 Container.PlexRipperDbContext
                     .DownloadTasks
@@ -41,6 +40,7 @@ namespace WebAPI.IntegrationTests
             Container.GetDownloadTracker.DownloadTaskStart.Subscribe(task => startedDownloadTaskId = task.Id);
             var startResult = await Container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
 
+            // TODO Check if this test is needed
             // while (startedDownloadTaskId == 0)
             // {
             //     await Task.Delay(2000);

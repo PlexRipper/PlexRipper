@@ -1,14 +1,18 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Domain;
 using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.BaseTests
 {
     public partial class BaseContainer
     {
-        public async Task SetDownloadSpeedLimit(UnitTestDataConfig config = null)
+        public async Task SetDownloadSpeedLimit([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = new UnitTestDataConfig();
+            options?.Invoke(config);
 
             var plexServers = await PlexRipperDbContext.PlexServers.ToListAsync();
             foreach (var plexServer in plexServers)

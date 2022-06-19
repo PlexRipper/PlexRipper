@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Logging;
 using Microsoft.EntityFrameworkCore;
@@ -31,19 +32,19 @@ namespace WebAPI.IntegrationTests.DownloadController
             // Arrange
             var timer = new Stopwatch();
             timer.Start();
-            var config = new UnitTestDataConfig
+            var tvShowEpisodeCount = 3;
+            var config = new Action<UnitTestDataConfig>(config =>
             {
-                Seed = 4564,
-                TvShowCount = 1,
-                TvShowSeasonCount = 1,
-                TvShowEpisodeCount = 3,
-                DownloadSpeedLimit = 5000,
-                MockServerConfig = new PlexMockServerConfig
+                config.Seed = 4564;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = tvShowEpisodeCount;
+                config.DownloadSpeedLimit = 5000;
+                config.MockServerConfig = new PlexMockServerConfig
                 {
                     DownloadFileSizeInMb = 50,
-                },
-            };
-
+                };
+            });
             await CreateContainer(config);
             await Container.SetDownloadSpeedLimit(config);
 
@@ -74,7 +75,7 @@ namespace WebAPI.IntegrationTests.DownloadController
             var result = await response.Deserialize<ResultDTO<List<ServerDownloadProgressDTO>>>();
 
             // ** Continue until after the application is idle
-            while (finishedDownloadTaskIds.Count < config.TvShowEpisodeCount || finishedFileMergeTasksIds.Count < config.TvShowEpisodeCount)
+            while (finishedDownloadTaskIds.Count < tvShowEpisodeCount || finishedFileMergeTasksIds.Count < tvShowEpisodeCount)
             {
                 await Task.Delay(3000);
                 Log.Debug($"Number of {nameof(finishedDownloadTaskIds)} is {finishedDownloadTaskIds.Count}" +
@@ -89,13 +90,13 @@ namespace WebAPI.IntegrationTests.DownloadController
 
             // ** 4 streams per download client should be created
             var downloadTasks = await Container.PlexRipperDbContext.DownloadTasks.ToListAsync();
-            downloadTasks.Count.ShouldBe(config.TvShowEpisodeCount + 2);
-            foreach (var downloadTask in downloadTasks)
+            downloadTasks.Count.ShouldBe(tvShowEpisodeCount + 2);
+            foreach (DownloadTask downloadTask in downloadTasks)
             {
                 downloadTask.DownloadStatus.ShouldBe(DownloadStatus.Completed);
             }
 
-            downloadStreams.Count.ShouldBe(config.TvShowEpisodeCount * 4);
+            downloadStreams.Count.ShouldBe(tvShowEpisodeCount * 4);
 
             timer.Stop();
             Log.Information($"Test took: {timer.Elapsed}");

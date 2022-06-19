@@ -6,7 +6,7 @@ using WireMock.Server;
 
 namespace PlexRipper.BaseTests
 {
-    public class PlexMockServer
+    public class PlexMockServer : IDisposable
     {
         private readonly PlexMockServerConfig _config;
 
@@ -65,5 +65,10 @@ namespace PlexRipper.BaseTests
         }
 
         #endregion
+
+        public void Dispose()
+        {
+            Server?.Dispose();
+        }
     }
 }

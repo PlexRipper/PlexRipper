@@ -1,8 +1,11 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
+using JetBrains.Annotations;
 using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +14,8 @@ using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
 using PlexRipper.Domain;
 using Shouldly;
+
+#endregion
 
 namespace PlexRipper.BaseTests
 {
@@ -28,7 +33,7 @@ namespace PlexRipper.BaseTests
         /// </summary>
         /// <param name="dbName">leave empty to generate a random one</param>
         /// <param name="disableForeignKeyCheck">By default, don't enforce foreign key check for handling database data.</param>
-        /// <returns>A <see cref="PlexRipperDbContext"/> in memory instance.</returns>
+        /// <returns>A <see cref="PlexRipperDbContext" /> in memory instance.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static PlexRipperDbContext GetMemoryDbContext(string dbName = "", bool disableForeignKeyCheck = false)
         {
@@ -54,8 +59,16 @@ namespace PlexRipper.BaseTests
             return new PlexRipperDbContext(optionsBuilder.Options, dbName);
         }
 
-        public static async Task<PlexRipperDbContext> Setup(this PlexRipperDbContext context, UnitTestDataConfig config)
+        public static Task<PlexRipperDbContext> Setup(this PlexRipperDbContext context, int seed)
         {
+            return context.Setup(config => { config.Seed = seed; });
+        }
+
+        public static async Task<PlexRipperDbContext> Setup(this PlexRipperDbContext context, [CanBeNull] Action<UnitTestDataConfig> options = null)
+        {
+            var config = new UnitTestDataConfig();
+            options?.Invoke(config);
+
             // PlexServers and Libraries added
             Log.Debug($"Setting up {nameof(PlexRipperDbContext)} for {config.MemoryDbName}");
 
@@ -82,7 +95,6 @@ namespace PlexRipper.BaseTests
             {
                 context = await context.AddTvShowDownloadTasks(config);
             }
-
 
             return context;
         }
@@ -129,7 +141,9 @@ namespace PlexRipper.BaseTests
                 {
                     plexLibrary.PlexServerId = plexServer.Id;
                     if (plexLibrary.Type == PlexMediaType.None)
+                    {
                         plexLibrary.Type = PlexMediaType.Movie;
+                    }
                 }
 
                 plexLibrariesToDb.AddRange(plexLibraries);

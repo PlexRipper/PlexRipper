@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using Bogus;
 using PlexRipper.Domain;
@@ -30,6 +31,18 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.DownloadManagerSettings, f => GetDownloadManagerSettings(config).Generate())
                 .RuleFor(x => x.LanguageSettings, f => GetLanguageSettings(config).Generate())
                 .RuleFor(x => x.ServerSettings, f => GetServerSettings(config).Generate());
+        }
+
+        public static string GetSettingsModelJson(UnitTestDataConfig config = null)
+        {
+            SettingsModel settings = GetSettingsModel(config).Generate();
+            return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCaptialized);
+        }
+
+        public static JsonElement GetSettingsModelJsonElement(UnitTestDataConfig config = null)
+        {
+            var settingsJson = GetSettingsModelJson(config);
+            return JsonSerializer.Deserialize<JsonElement>(settingsJson, DefaultJsonSerializerOptions.ConfigCaptialized);
         }
 
         public static Faker<GeneralSettings> GetGeneralSettings(UnitTestDataConfig config = null)
@@ -108,13 +121,19 @@ namespace PlexRipper.BaseTests
             return new Faker<ServerSettings>()
                 .StrictMode(true)
                 .UseSeed(config.Seed)
-                .RuleFor(x => x.Data, _ => new List<PlexServerSettingsModel>());
+                .RuleFor(x => x.Data, _ => GetPlexServerSettingsModel(config).Generate(config.PlexServerSettingsCount));
         }
 
-        public static string GetSettingsModelJson(UnitTestDataConfig config = null)
+        public static Faker<PlexServerSettingsModel> GetPlexServerSettingsModel(UnitTestDataConfig config = null)
         {
-            var settings = GetSettingsModel(config).Generate();
-            return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCaptialized);
+            config ??= new UnitTestDataConfig();
+
+            return new Faker<PlexServerSettingsModel>()
+                .StrictMode(true)
+                .UseSeed(config.Seed)
+                .RuleFor(x => x.PlexServerId, f => f.Random.Number(int.MaxValue))
+                .RuleFor(x => x.DownloadSpeedLimit, _ => config.DownloadSpeedLimit)
+                .RuleFor(x => x.MachineIdentifier, f => f.Finance.BitcoinAddress());
         }
     }
 }

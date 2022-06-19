@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Logging;
 using PlexRipper.BaseTests;
+using PlexRipper.Data;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 using Shouldly;
@@ -22,11 +23,10 @@ namespace Data.UnitTests.Extensions
         public async Task ShouldHaveAllMovieDownloadTaskChildrenIncluded_WhenDbContainsNestedDownloadTasks()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
             {
-                MovieDownloadTasksCount = 5,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+                config.MovieDownloadTasksCount = 5;
+            });
 
             // Act
             var downloadTasks = context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();
@@ -44,14 +44,13 @@ namespace Data.UnitTests.Extensions
         public async Task ShouldHaveAllTvShowDownloadTaskChildrenIncluded_WhenDbContainsNestedDownloadTasks()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config =>
             {
-                Seed = 3535,
-                TvShowDownloadTasksCount = 5,
-                TvShowSeasonDownloadTasksCount = 5,
-                TvShowEpisodeDownloadTasksCount = 5,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+                config.Seed = 3535;
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            });
 
             // Act
             var downloadTasksDb = context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();
@@ -65,14 +64,13 @@ namespace Data.UnitTests.Extensions
         public async Task ShouldHaveAllNestedRelationshipsIncluded_WhenGivenTvShowDownloadTasks()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config =>
             {
-                Seed = 3882,
-                TvShowDownloadTasksCount = 5,
-                TvShowSeasonDownloadTasksCount = 5,
-                TvShowEpisodeDownloadTasksCount = 5,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+                config.Seed = 3882;
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            });
 
             // Act
             var downloadTasksDb = context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();

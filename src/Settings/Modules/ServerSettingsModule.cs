@@ -1,14 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Text.Json;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
 using PlexRipper.Domain;
-using PlexRipper.Domain.Config;
 using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
 
@@ -112,37 +110,6 @@ namespace PlexRipper.Settings.Modules
             }
 
             return Result.Fail($"PlexServerId {plexServerId} has no entry in the {nameof(ServerSettings)}");
-        }
-
-        public override Result SetFromJson(JsonElement settingsJsonElement)
-        {
-            var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
-            if (jsonSettings.IsFailed)
-            {
-                Reset();
-                return jsonSettings;
-            }
-
-            if (!jsonSettings.Value.TryGetProperty(nameof(IServerSettings.Data), out JsonElement jsonValueElement))
-            {
-                Log.Error($"Failed to read property {nameof(IServerSettings.Data)} from {Name}");
-                Reset();
-            }
-
-            var serverSettings = jsonValueElement.GetRawText();
-
-            try
-            {
-                Data = JsonSerializer.Deserialize<List<PlexServerSettingsModel>>(serverSettings, DefaultJsonSerializerOptions.ConfigManagerOptions);
-            }
-            catch (Exception e)
-            {
-                Result.Fail(new ExceptionalError(e)).LogError();
-                Log.Error($"Failed to read {Name}, will reset config now");
-                Reset();
-            }
-
-            return Result.Ok();
         }
 
         public void SetServerSettings(PlexServerSettingsModel plexServerSettings)

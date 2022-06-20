@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Logging;
 using Microsoft.EntityFrameworkCore;
@@ -40,10 +39,7 @@ namespace WebAPI.IntegrationTests.DownloadController
                 config.TvShowSeasonCount = 1;
                 config.TvShowEpisodeCount = tvShowEpisodeCount;
                 config.DownloadSpeedLimit = 5000;
-                config.MockServerConfig = new PlexMockServerConfig
-                {
-                    DownloadFileSizeInMb = 50,
-                };
+                config.SetupMockServer();
             });
             await CreateContainer(config);
             await Container.SetDownloadSpeedLimit(config);

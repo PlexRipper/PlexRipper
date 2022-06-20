@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Bogus;
+using JetBrains.Annotations;
 using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests
 {
     public partial class FakeData
     {
-        public static Faker<PlexAccount> GetPlexAccount(UnitTestDataConfig config = null)
+        public static Faker<PlexAccount> GetPlexAccount([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
             return new Faker<PlexAccount>()
                 .StrictMode(true)

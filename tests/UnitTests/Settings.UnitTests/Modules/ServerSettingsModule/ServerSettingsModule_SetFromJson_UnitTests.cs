@@ -1,8 +1,4 @@
-using System.Text.Json;
-using FluentResults;
 using PlexRipper.BaseTests;
-using PlexRipper.Domain.DownloadManager;
-using PlexRipper.Settings.Models;
 using PlexRipper.Settings.Modules;
 using Shouldly;
 using Xunit;
@@ -18,8 +14,8 @@ namespace Settings.UnitTests.Modules
         public void ShouldParseServerSettingsCorrectly_WhenGivenValidServerSettingsJson()
         {
             // Arrange
-            var settingsModel = FakeData.GetSettingsModel(new UnitTestDataConfig(34)).Generate();
-            var settingsModelJsonElement = FakeData.GetSettingsModelJsonElement(new UnitTestDataConfig(34));
+            var settingsModel = FakeData.GetSettingsModel(config => { config.Seed = 34; }).Generate();
+            var settingsModelJsonElement = FakeData.GetSettingsModelJsonElement(config => { config.Seed = 34; });
 
             // Act
             var result = _sut.SetFromJson(settingsModelJsonElement);

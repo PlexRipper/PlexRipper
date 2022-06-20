@@ -4,18 +4,15 @@ using PlexRipper.Application;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 
+// ReSharper disable RedundantDefaultMemberInitializer
+
 namespace PlexRipper.BaseTests
 {
     public class UnitTestDataConfig : IDisposable
     {
         public UnitTestDataConfig() { }
 
-        public UnitTestDataConfig(int seed)
-        {
-            Seed = seed;
-        }
-
-        public string MemoryDbName { get; set; } = MockDatabase.GetMemoryDatabaseName();
+        public string MemoryDbName { get; set; }
 
         public int Seed { get; set; }
 
@@ -82,14 +79,9 @@ namespace PlexRipper.BaseTests
 
         public PlexMockServer MockServer { get; private set; }
 
-        public PlexMockServerConfig MockServerConfig { get; set; }
-
         public void SetupMockServer([CanBeNull] Action<PlexMockServerConfig> options = null)
         {
-            var config = new PlexMockServerConfig();
-            options?.Invoke(config);
-
-            MockServer = new PlexMockServer(config);
+            MockServer = new PlexMockServer(options);
         }
 
         #endregion
@@ -104,9 +96,9 @@ namespace PlexRipper.BaseTests
 
         #endregion
 
-        public static UnitTestDataConfig FromOptions(Action<UnitTestDataConfig> action = null)
+        public static UnitTestDataConfig FromOptions(Action<UnitTestDataConfig> action = null, UnitTestDataConfig defaultValue = null)
         {
-            var config = new UnitTestDataConfig();
+            var config = defaultValue ?? new UnitTestDataConfig();
             action?.Invoke(config);
             return config;
         }

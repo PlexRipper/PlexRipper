@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentResults;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
-using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,16 +18,14 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
         public async Task ShouldExecuteDownloadTaskForMovieAndEndWithDownloadFinished_WhenGivenAValidDownloadTask()
         {
             // Arrange
+            var memoryDbName = MockDatabase.GetMemoryDatabaseName();
             await CreateContainer(config =>
             {
                 config.Seed = 4564;
                 config.MovieDownloadTasksCount = 2;
                 config.DownloadSpeedLimit = 2000;
                 config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
-                config.MockServerConfig = new PlexMockServerConfig
-                {
-                    DownloadFileSizeInMb = 50,
-                };
+                config.SetupMockServer(serverConfig => { serverConfig.DownloadFileSizeInMb = 50; });
             });
             var plexMovieDownloadTask =
                 Container.PlexRipperDbContext

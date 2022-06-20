@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.BaseTests;
@@ -18,7 +17,7 @@ namespace WebAPI.IntegrationTests.DownloadController
         public DownloadController_StartCommand_IntegrationTests(ITestOutputHelper output) : base(output) { }
 
         [Fact]
-        public async Task ShouldStartQueuedDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
+        public async Task ShouldStartQueuedMoviewDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
         {
             // Arrange
             await CreateContainer(config =>
@@ -26,10 +25,7 @@ namespace WebAPI.IntegrationTests.DownloadController
                 config.Seed = 4564;
                 config.MovieDownloadTasksCount = 5;
                 config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
-                config.MockServerConfig = new PlexMockServerConfig
-                {
-                    DownloadFileSizeInMb = 50,
-                };
+                config.SetupMockServer();
             });
             var downloadTasks = await Container.PlexRipperDbContext.DownloadTasks.ToListAsync();
             downloadTasks.Count.ShouldBe(10);

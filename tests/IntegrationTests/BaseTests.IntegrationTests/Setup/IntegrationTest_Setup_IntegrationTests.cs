@@ -45,12 +45,7 @@ namespace BaseTests.IntegrationTests.Setup
         public async Task ShouldHaveUniqueInMemoryDatabase_WhenConfigFileIsGivenToContainer()
         {
             // Arrange
-            var dbName = MockDatabase.GetMemoryDatabaseName();
-            await CreateContainer(config =>
-            {
-                config.Seed = 9999;
-                config.MemoryDbName = dbName;
-            });
+            await CreateContainer(9999);
 
             // Act
             var dbContext = Container.PlexRipperDbContext;
@@ -58,7 +53,8 @@ namespace BaseTests.IntegrationTests.Setup
             // Assert
             Container.ShouldNotBeNull();
             dbContext.ShouldNotBeNull();
-            dbContext.DatabaseName.ShouldBe(dbName);
+            dbContext.DatabaseName.ShouldNotBeEmpty();
+            dbContext.DatabaseName.ShouldContain("memory_database");
         }
 
         [Fact]

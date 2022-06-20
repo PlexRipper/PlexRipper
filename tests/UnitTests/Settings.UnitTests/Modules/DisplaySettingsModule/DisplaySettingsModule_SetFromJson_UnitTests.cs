@@ -34,7 +34,7 @@ namespace Settings.UnitTests.Modules
                     TvShowViewMode = ViewMode.Overview,
                 },
             };
-            var json = JsonSerializer.Serialize(settingsModel,  DefaultJsonSerializerOptions.ConfigCaptialized);
+            var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
             var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);
 
             // Act
@@ -55,7 +55,7 @@ namespace Settings.UnitTests.Modules
 
             var settingsModel = new SettingsModel
             {
-                DisplaySettings = FakeData.GetDisplaySettings(new UnitTestDataConfig(234)).Generate(),
+                DisplaySettings = FakeData.GetDisplaySettings(config => { config.Seed = 234; }).Generate(),
             };
             var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
 

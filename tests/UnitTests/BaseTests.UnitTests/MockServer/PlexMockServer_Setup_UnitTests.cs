@@ -19,17 +19,16 @@ namespace BaseTests.UnitTests.MockServer
         public async Task ShouldDownloadFileFromMemory_WhenGivenByteArrayFileInMemory()
         {
             // Arrange
-            var config = new PlexMockServerConfig()
+            var plexMockServer = new PlexMockServer(config =>
             {
-                DownloadFileSizeInMb = 40,
-            };
-            var plexMockServer = new PlexMockServer(config);
+                config.DownloadFileSizeInMb = 40;
+            });
             var _httpClient = new HttpClient();
 
             // Act
             using var response = await _httpClient.SendAsync(new HttpRequestMessage
             {
-                RequestUri = plexMockServer.GetDownloadUri,
+                RequestUri = plexMockServer.DownloadUri,
                 Method = HttpMethod.Get,
             }, HttpCompletionOption.ResponseHeadersRead);
             var stream = await response.Content.ReadAsByteArrayAsync();
@@ -37,7 +36,7 @@ namespace BaseTests.UnitTests.MockServer
             // Assert
             response.IsSuccessStatusCode.ShouldBeTrue();
             stream.ShouldNotBeNull();
-            stream.LongLength.ShouldBeGreaterThan(config.DownloadFileSizeInBytes * 1000);
+            stream.LongLength.ShouldBeGreaterThan(plexMockServer.DownloadFileSizeInBytes * 1000);
         }
     }
 }

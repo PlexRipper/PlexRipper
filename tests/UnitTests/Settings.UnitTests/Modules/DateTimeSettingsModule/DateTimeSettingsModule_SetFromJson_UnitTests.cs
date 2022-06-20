@@ -27,9 +27,9 @@ namespace Settings.UnitTests.Modules
 
             var settingsModel = new SettingsModel
             {
-                DateTimeSettings = FakeData.GetDateTimeSettings(new UnitTestDataConfig(3246)).Generate(),
+                DateTimeSettings = FakeData.GetDateTimeSettings(config => { config.Seed = 3246; }).Generate(),
             };
-            var json = JsonSerializer.Serialize(settingsModel,  DefaultJsonSerializerOptions.ConfigCaptialized);
+            var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
             var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);
 
             // Act
@@ -54,7 +54,7 @@ namespace Settings.UnitTests.Modules
 
             var settingsModel = new SettingsModel
             {
-                DateTimeSettings = FakeData.GetDateTimeSettings(new UnitTestDataConfig(234)).Generate(),
+                DateTimeSettings = FakeData.GetDateTimeSettings(config => { config.Seed = 234; }).Generate(),
             };
             var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
 

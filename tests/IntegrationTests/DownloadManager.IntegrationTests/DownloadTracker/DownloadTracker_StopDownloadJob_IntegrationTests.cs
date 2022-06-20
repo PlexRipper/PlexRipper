@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentResults;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
-using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -26,10 +24,7 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
                 config.MovieDownloadTasksCount = 2;
                 config.DownloadSpeedLimit = 1000;
                 config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
-                config.MockServerConfig = new PlexMockServerConfig
-                {
-                    DownloadFileSizeInMb = 50,
-                };
+                config.SetupMockServer();
             });
             var plexMovieDownloadTask =
                 Container.PlexRipperDbContext

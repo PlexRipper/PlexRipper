@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentResults;
+using Logging;
 using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;
@@ -24,10 +24,7 @@ namespace WebAPI.IntegrationTests
                 config.Seed = 4564;
                 config.MovieDownloadTasksCount = 5;
                 config.DownloadSpeedLimit = 2000;
-                config.MockServerConfig = new PlexMockServerConfig
-                {
-                    DownloadFileSizeInMb = 50,
-                };
+                config.SetupMockServer();
             });
             var plexMovieDownloadTask =
                 Container.PlexRipperDbContext
@@ -41,14 +38,15 @@ namespace WebAPI.IntegrationTests
             var startResult = await Container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
 
             // TODO Check if this test is needed
-            // while (startedDownloadTaskId == 0)
-            // {
-            //     await Task.Delay(2000);
-            //     Log.Debug($"{nameof(startedDownloadTaskId)} is still 0, continue waiting");
-            // }
+            while (startedDownloadTaskId == 0)
+            {
+                await Task.Delay(2000);
+                Log.Debug($"{nameof(startedDownloadTaskId)} is still 0, continue waiting");
+            }
 
             // Assert
             startResult.IsSuccess.ShouldBeTrue();
+            startedDownloadTaskId.ShouldBeGreaterThan(0);
         }
     }
 }

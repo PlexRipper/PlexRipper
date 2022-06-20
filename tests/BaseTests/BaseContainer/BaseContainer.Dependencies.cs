@@ -36,13 +36,11 @@ namespace PlexRipper.BaseTests
         #region Constructor
 
         /// <summary>
-        ///     Creates a Autofac container and sets up a test database.
+        /// Creates a Autofac container and sets up a test database.
         /// </summary>
-        private BaseContainer([CanBeNull] Action<UnitTestDataConfig> options = null)
+        private BaseContainer(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            var config = UnitTestDataConfig.FromOptions(options);
-
-            _factory = new PlexRipperWebApplicationFactory<Startup>(config);
+            _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options);
             ApiClient = _factory.CreateClient();
 
             // Create a separate scope as not to interfere with tests running in parallel
@@ -53,14 +51,15 @@ namespace PlexRipper.BaseTests
         public static async Task<BaseContainer> Create([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
             var config = UnitTestDataConfig.FromOptions(options);
+            var memoryDbName = MockDatabase.GetMemoryDatabaseName();
 
-            Log.Information($"Setting up BaseContainer with database: {config.MemoryDbName}");
+            Log.Information($"Setting up BaseContainer with database: {memoryDbName}");
 
             EnvironmentExtensions.SetIntegrationTestMode(true);
 
             // Database context can be setup once and then retrieved by its DB name.
-            await MockDatabase.GetMemoryDbContext(config.MemoryDbName).Setup(options);
-            var container = new BaseContainer(options);
+            await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(options);
+            var container = new BaseContainer(memoryDbName, options);
 
             if (config.DownloadSpeedLimit > 0)
             {

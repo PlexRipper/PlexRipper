@@ -21,7 +21,7 @@ namespace Settings.UnitTests.Modules
             // Arrange
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DateTimeSettingsModule>();
-            var settings = FakeData.GetDateTimeSettings(new UnitTestDataConfig(6223)).Generate();
+            var settings = FakeData.GetDateTimeSettings(config => { config.Seed = 6223; }).Generate();
 
             // Act
             var updateResult = _sut.Update(settings);

@@ -1,4 +1,6 @@
+using System;
 using Autofac;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
@@ -10,11 +12,14 @@ namespace PlexRipper.BaseTests
 {
     public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
     {
+        private readonly string _memoryDbName;
+
         private readonly UnitTestDataConfig _config;
 
-        public PlexRipperWebApplicationFactory(UnitTestDataConfig config = null)
+        public PlexRipperWebApplicationFactory(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            _config = config ?? new UnitTestDataConfig();
+            _memoryDbName = memoryDbName;
+            _config = UnitTestDataConfig.FromOptions(options);
         }
 
         protected override IHostBuilder CreateHostBuilder()
@@ -29,7 +34,7 @@ namespace PlexRipper.BaseTests
                 .ConfigureContainer<ContainerBuilder>(autoFacBuilder =>
                 {
                     autoFacBuilder
-                        .Register((_, _) => MockDatabase.GetMemoryDbContext(_config.MemoryDbName))
+                        .Register((_, _) => MockDatabase.GetMemoryDbContext(_memoryDbName))
                         .InstancePerDependency();
 
                     autoFacBuilder.RegisterModule<TestModule>();

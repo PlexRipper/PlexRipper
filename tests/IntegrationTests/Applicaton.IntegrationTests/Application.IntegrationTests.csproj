@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <RootNamespace>PlexRipper.Application.IntegrationTests</RootNamespace>
         <AssemblyName>PlexRipper.Application.IntegrationTests</AssemblyName>
 

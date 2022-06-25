@@ -39,6 +39,11 @@ namespace PlexRipper.Application.Notifications
             return await _mediator.Send(new HideNotificationCommand(id));
         }
 
+        public Task<Result> SendResult<T>(Result<T> result)
+        {
+            return SendResult(result.ToResult());
+        }
+
         public async Task<Result> ClearAllNotifications()
         {
             return await _mediator.Send(new ClearAllNotificationsCommand());
@@ -54,7 +59,7 @@ namespace PlexRipper.Application.Notifications
                     var notificationId = await CreateNotification(notification);
                     if (notificationId.IsFailed)
                     {
-                        return notificationId;
+                        return notificationId.ToResult();
                     }
 
                     notification.Id = notificationId.Value;

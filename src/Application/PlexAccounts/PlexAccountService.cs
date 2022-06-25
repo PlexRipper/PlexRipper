@@ -107,7 +107,7 @@ namespace PlexRipper.Application.PlexAccounts
                     var result = await SetupAccountAsync(plexAccount.Id);
                     if (result.IsFailed)
                     {
-                        return result;
+                        return result.ToResult();
                     }
                 }
             }

@@ -74,7 +74,7 @@ namespace PlexRipper.Application
             var result = await _mediator.Send(new GetPlexLibraryByIdWithServerQuery(plexLibrary.Id));
             if (result.IsFailed)
             {
-                return result;
+                return result.ToResult();
             }
 
             // Request seasons and episodes for every tv show

@@ -20,11 +20,11 @@ namespace PlexRipper.Data
     }
 
     public class DeleteDownloadWorkerTasksByDownloadTaskIdCommandHandler : BaseHandler,
-        IRequestHandler<DeleteDownloadWorkerTasksByDownloadTaskIdCommand, Result<bool>>
+        IRequestHandler<DeleteDownloadWorkerTasksByDownloadTaskIdCommand, Result>
     {
         public DeleteDownloadWorkerTasksByDownloadTaskIdCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<bool>> Handle(DeleteDownloadWorkerTasksByDownloadTaskIdCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(DeleteDownloadWorkerTasksByDownloadTaskIdCommand command, CancellationToken cancellationToken)
         {
             var downloadWorkerTasks = await _dbContext.DownloadWorkerTasks.AsTracking().Where(x => x.DownloadTaskId == command.DownloadTaskId)
                 .ToListAsync(cancellationToken);
@@ -38,7 +38,7 @@ namespace PlexRipper.Data
             _dbContext.DownloadWorkerTasks.RemoveRange(downloadWorkerTasks);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return Result.Ok(true);
+            return Result.Ok();
         }
     }
 }

@@ -72,7 +72,7 @@ namespace PlexRipper.Application
             return await _downloadQueue.AddToDownloadQueueAsync(downloadTasks.Value);
         }
 
-        public async Task<Result> DeleteDownloadTasksAsync(List<int> downloadTaskIds)
+        public async Task<Result<bool>> DeleteDownloadTasksAsync(List<int> downloadTaskIds)
         {
             return await _downloadCommands.DeleteDownloadTaskClientsAsync(downloadTaskIds);
         }

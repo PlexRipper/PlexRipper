@@ -274,7 +274,7 @@ namespace FluentResultExtensionTests.Logging
                 var result = Result.Fail("Test Error #1");
 
                 result.AddNestedErrors(
-                    new List<Error>
+                    new List<IError>
                     {
                         new Error("Error #1"),
                         new Error("Error #2"),

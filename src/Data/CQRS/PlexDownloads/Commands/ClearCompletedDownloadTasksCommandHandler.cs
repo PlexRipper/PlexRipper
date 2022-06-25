@@ -14,11 +14,11 @@ namespace PlexRipper.Data
     public class ClearCompletedDownloadTasksCommandValidator : AbstractValidator<ClearCompletedDownloadTasksCommand> { }
 
     public class ClearCompletedDownloadTasksHandler : BaseHandler,
-        IRequestHandler<ClearCompletedDownloadTasksCommand, Result<bool>>
+        IRequestHandler<ClearCompletedDownloadTasksCommand, Result>
     {
         public ClearCompletedDownloadTasksHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<bool>> Handle(ClearCompletedDownloadTasksCommand command,
+        public async Task<Result> Handle(ClearCompletedDownloadTasksCommand command,
             CancellationToken cancellationToken)
         {
             if (command.DownloadTaskIds != null && command.DownloadTaskIds.Any())
@@ -36,7 +36,7 @@ namespace PlexRipper.Data
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return Result.Ok(true);
+            return Result.Ok();
         }
     }
 }

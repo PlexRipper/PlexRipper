@@ -5,7 +5,6 @@
       <UserSecretsId>dotnet-DownloadManager-16C3225A-ED7F-4F82-B8FA-04EA6CE86447</UserSecretsId>
     <RootNamespace>PlexRipper.DownloadManager</RootNamespace>
     <AssemblyName>PlexRipper.DownloadManager</AssemblyName>
-    <CodeAnalysisRuleSet>StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
     <OutputType>Library</OutputType>
   </PropertyGroup>
 
@@ -20,17 +19,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="stylecop.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.Extensions.Http, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
-      <HintPath>C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\5.0.0\ref\net5.0\Microsoft.Extensions.Http.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    
 </Project>

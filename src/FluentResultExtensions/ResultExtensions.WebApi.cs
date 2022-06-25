@@ -18,7 +18,7 @@ namespace FluentResults
                 return false;
             }
 
-            foreach (Reason reason in result.Reasons)
+            foreach (var reason in result.Reasons)
             {
                 foreach (var (key, metaData) in reason.Metadata)
                 {
@@ -82,7 +82,7 @@ namespace FluentResults
                 return 0;
             }
 
-            foreach (Reason reason in result.Reasons)
+            foreach (var reason in result.Reasons)
             {
                 foreach (var (key, metaData) in reason.Metadata)
                 {

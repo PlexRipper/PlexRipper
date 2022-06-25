@@ -192,7 +192,7 @@ namespace PlexRipper.DownloadManager
             var stopResult = await downloadClient.Value.StopAsync();
             if (stopResult.IsFailed)
             {
-                return stopResult;
+                return stopResult.ToResult();
             }
 
             _downloadTaskStopped.OnNext(downloadClient.Value.DownloadTask);
@@ -212,7 +212,7 @@ namespace PlexRipper.DownloadManager
             var pauseResult = await downloadClient.Value.PauseAsync();
             if (pauseResult.IsFailed)
             {
-                return pauseResult;
+                return pauseResult.ToResult();
             }
 
             _downloadTaskUpdate.OnNext(downloadClient.Value.DownloadTask);

@@ -40,14 +40,19 @@ namespace PlexRipper.Domain
 
         #region Properties
 
+        /// <inheritdoc/>
         public override bool CanRead => _inputStream.CanRead;
 
+        /// <inheritdoc/>
         public override bool CanSeek => _inputStream.CanSeek;
 
+        /// <inheritdoc/>
         public override bool CanWrite => false;
 
+        /// <inheritdoc/>
         public override long Length => _inputStream.Length;
 
+        /// <inheritdoc/>
         public override long Position
         {
             get => _inputStream.Position;
@@ -58,8 +63,10 @@ namespace PlexRipper.Domain
 
         #region Public Methods
 
+        /// <inheritdoc/>
         public override void Flush() { }
 
+        /// <inheritdoc/>
         public override int Read(byte[] buffer, int offset, int count)
         {
             var newCount = GetBytesToReturn(count);
@@ -68,11 +75,13 @@ namespace PlexRipper.Domain
             return read;
         }
 
+        /// <inheritdoc/>
         public override long Seek(long offset, SeekOrigin origin)
         {
             return _inputStream.Seek(offset, origin);
         }
 
+        /// <inheritdoc/>
         public override void SetLength(long value) { }
 
         public void SetThrottleSpeed(int throttleKb)
@@ -80,13 +89,14 @@ namespace PlexRipper.Domain
             _throttle = throttleKb * 1024;
         }
 
+        /// <inheritdoc/>
         public override void Write(byte[] buffer, int offset, int count) { }
 
         #endregion
 
         #region Private Methods
 
-        int GetBytesToReturn(int count)
+        private int GetBytesToReturn(int count)
         {
             return GetBytesToReturnAsync(count).Result;
         }

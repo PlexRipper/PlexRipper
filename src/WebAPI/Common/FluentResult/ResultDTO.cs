@@ -13,13 +13,13 @@ namespace PlexRipper.WebAPI.Common.FluentResult
         public bool IsSuccess { get; set; }
 
         [JsonProperty("reasons", Required = Required.Always)]
-        public IList<Reason> Reasons { get; set; } = new List<Reason>();
+        public IList<IReason> Reasons { get; set; } = new List<IReason>();
 
         [JsonProperty("errors", Required = Required.Always)]
-        public IList<Error> Errors { get; set; } = new List<Error>();
+        public IList<IError> Errors { get; set; } = new List<IError>();
 
         [JsonProperty("successes", Required = Required.Always)]
-        public IList<Success> Successes { get; set; } = new List<Success>();
+        public IList<ISuccess> Successes { get; set; } = new List<ISuccess>();
     }
 
     public class ResultDTO<T> : ResultDTO

@@ -102,7 +102,7 @@ namespace PlexRipper.Application
             var plexServersResult = await GetAllPlexServersAsync(false);
             if (plexServersResult.IsFailed)
             {
-                return plexServersResult;
+                return plexServersResult.ToResult();
             }
 
             return await SyncPlexServers(plexServersResult.Value.Select(x => x.Id).ToList());
@@ -136,7 +136,7 @@ namespace PlexRipper.Application
         {
             if (_currentSyncingPlexServers.Contains(plexServerId))
             {
-                return Result.Ok($"PlexServer with id {plexServerId} is already syncing").LogWarning();
+                return Result.Ok($"PlexServer with id {plexServerId} is already syncing").LogWarning().ToResult();
             }
 
             _currentSyncingPlexServers.Add(plexServerId);
@@ -145,7 +145,7 @@ namespace PlexRipper.Application
             if (plexServerResult.IsFailed)
             {
                 _currentSyncingPlexServers.Remove(plexServerId);
-                return plexServerResult;
+                return plexServerResult.ToResult();
             }
 
             var plexServer = plexServerResult.Value;
@@ -191,7 +191,7 @@ namespace PlexRipper.Application
                 var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id, progress);
                 if (result.IsFailed)
                 {
-                    results.Add(result);
+                    results.Add(result.ToResult());
                 }
             }
 
@@ -200,7 +200,7 @@ namespace PlexRipper.Application
                 var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id, progress);
                 if (result.IsFailed)
                 {
-                    results.Add(result);
+                    results.Add(result.ToResult());
                 }
             }
 

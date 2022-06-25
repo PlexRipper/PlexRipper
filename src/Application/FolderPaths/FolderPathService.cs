@@ -117,7 +117,7 @@ namespace PlexRipper.Application
                 return folderPaths.ToResult();
             }
 
-            var errors = new List<Error>();
+            var errors = new List<IError>();
             foreach (var folderPath in folderPaths.Value)
             {
                 var folderPathExitsResult = _directorySystem.Exists(folderPath.DirectoryPath);

@@ -10,7 +10,7 @@ namespace PlexRipper.Domain
 
         public Notification() { }
 
-        public Notification(Error error)
+        public Notification(IError error)
         {
             Level = NotificationLevel.Error;
             CreatedAt = DateTime.Now;

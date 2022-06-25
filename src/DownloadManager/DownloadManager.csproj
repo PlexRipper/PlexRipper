@@ -5,7 +5,6 @@
       <UserSecretsId>dotnet-DownloadManager-16C3225A-ED7F-4F82-B8FA-04EA6CE86447</UserSecretsId>
     <RootNamespace>PlexRipper.DownloadManager</RootNamespace>
     <AssemblyName>PlexRipper.DownloadManager</AssemblyName>
-    <CodeAnalysisRuleSet>StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
     <OutputType>Library</OutputType>
   </PropertyGroup>
 

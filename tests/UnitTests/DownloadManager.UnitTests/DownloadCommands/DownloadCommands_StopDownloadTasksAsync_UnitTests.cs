@@ -49,6 +49,7 @@ namespace DownloadManager.UnitTests
             using var mock = AutoMock.GetStrict();
             mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
             mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result>())).ReturnsAsync(Result.Ok());
+            mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result<DownloadTask>>())).ReturnsAsync(Result.Ok());
 
             var _sut = mock.Create<DownloadCommands>();
             mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>).ReturnsAsync(Result.Fail(""));

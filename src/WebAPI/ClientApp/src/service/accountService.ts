@@ -12,7 +12,7 @@ export class AccountService extends BaseService {
 	// region Constructor and Setup
 
 	public constructor() {
-		super({
+		super('AccountService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -22,12 +22,12 @@ export class AccountService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
 
 		GlobalService.getAxiosReady()
 			.pipe(switchMap(() => this.fetchAccounts()))
-			.subscribe();
+			.subscribe(() => callBack('AccountService'));
 	}
 
 	// endregion

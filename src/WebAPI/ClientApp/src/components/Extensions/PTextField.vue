@@ -2,7 +2,7 @@
 import { Component, Prop } from 'vue-property-decorator';
 import { VTextField } from 'vuetify/lib';
 
-@Component
+@Component<PTextField>({})
 export default class PTextField extends VTextField {
 	@Prop({ required: false, type: Number, default: 50 })
 	readonly height!: number;

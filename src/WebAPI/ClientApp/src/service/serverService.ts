@@ -1,16 +1,17 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { finalize, switchMap } from 'rxjs/operators';
+import { finalize, switchMap, take } from 'rxjs/operators';
 import { PlexServerDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, GlobalService } from '@service';
+import ISetup from '@interfaces/ISetup';
 
-export class ServerService extends BaseService {
+export class ServerService extends BaseService implements ISetup {
 	// region Constructor and Setup
 	public constructor() {
-		super({
+		super('ServerService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -20,12 +21,16 @@ export class ServerService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
 		GlobalService.getAxiosReady()
-			.pipe(finalize(() => this.fetchServers()))
-			.subscribe();
+			.pipe(
+				finalize(() => this.fetchServers()),
+				take(1),
+			)
+			.subscribe(() => callBack(this._name));
 	}
+
 	// endregion
 
 	// region Fetch

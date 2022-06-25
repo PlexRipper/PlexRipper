@@ -19,13 +19,15 @@
 						<v-expansion-panel v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
 							<v-expansion-panel-header>
 								<v-row no-gutters>
-									<v-col> </v-col>
+									<!-- Download Server Settings -->
+									<v-col>
+										<server-download-status />
+									</v-col>
+									<!-- Download Server Title -->
 									<v-col cols="auto">
 										<h2>{{ plexServer.name }}</h2>
 									</v-col>
-									<v-col class="py-0">
-										<server-download-status />
-									</v-col>
+									<v-col class="py-0"> </v-col>
 								</v-row>
 							</v-expansion-panel-header>
 							<v-expansion-panel-content>
@@ -62,7 +64,9 @@ declare interface ISelection {
 	downloadTaskIds: number[];
 }
 
-@Component
+@Component({
+	components: {},
+})
 export default class Downloads extends Vue {
 	plexServers: PlexServerDTO[] = [];
 	serverDownloads: ServerDownloadProgressDTO[] = [];

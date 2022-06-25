@@ -11,6 +11,7 @@ using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Asserts;
 using PlexRipper.BaseTests.Extensions;
+using PlexRipper.Data;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
@@ -47,11 +48,7 @@ namespace DownloadManager.UnitTests
         public async Task ShouldGenerateValidTvShowDownloadTaskWithEpisodeDownloadTask_WhenNoDownloadTasksExist()
         {
             // Arrange
-            var config = new UnitTestDataConfig
-            {
-                TvShowCount = 5,
-            };
-            var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+            PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.TvShowCount = 5; });
             var tvShows = await context.PlexTvShows.IncludeAll().ToListAsync();
 
             using var mock = AutoMock.GetStrict().AddMapper();
@@ -84,11 +81,8 @@ namespace DownloadManager.UnitTests
         public async Task ShouldGenerateValidEpisodeDownloadTask_WhenTvShowParentDownloadTaskAlreadyExist()
         {
             // Arrange
-            var config = new UnitTestDataConfig
-            {
-                TvShowCount = 5,
-            };
-            var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+            var context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.TvShowCount = 5; });
+
             var tvShows = await context.PlexTvShows.IncludeAll().ToListAsync();
             var tvShowDb = tvShows.Last();
             var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };

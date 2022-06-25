@@ -21,7 +21,7 @@ namespace Settings.UnitTests.Modules
             // Arrange
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DateTimeSettingsModule>();
-            var settings = FakeData.GetDateTimeSettings(new UnitTestDataConfig(6223)).Generate();
+            var settings = FakeData.GetDateTimeSettings(config => { config.Seed = 6223; }).Generate();
 
             // Act
             var updateResult = _sut.Update(settings);
@@ -34,11 +34,11 @@ namespace Settings.UnitTests.Modules
             updateResult.LongDateFormat.ShouldBe(settings.LongDateFormat);
             updateResult.ShowRelativeDates.ShouldBe(settings.ShowRelativeDates);
 
-            resetResult.TimeFormat.ShouldBe(_sut.DefaultValues.TimeFormat);
-            resetResult.TimeZone.ShouldBe(_sut.DefaultValues.TimeZone);
-            resetResult.ShortDateFormat.ShouldBe(_sut.DefaultValues.ShortDateFormat);
-            resetResult.LongDateFormat.ShouldBe(_sut.DefaultValues.LongDateFormat);
-            resetResult.ShowRelativeDates.ShouldBe(_sut.DefaultValues.ShowRelativeDates);
+            resetResult.TimeFormat.ShouldBe(_sut.DefaultValues().TimeFormat);
+            resetResult.TimeZone.ShouldBe(_sut.DefaultValues().TimeZone);
+            resetResult.ShortDateFormat.ShouldBe(_sut.DefaultValues().ShortDateFormat);
+            resetResult.LongDateFormat.ShouldBe(_sut.DefaultValues().LongDateFormat);
+            resetResult.ShowRelativeDates.ShouldBe(_sut.DefaultValues().ShowRelativeDates);
         }
     }
 }

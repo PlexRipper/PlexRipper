@@ -9,10 +9,13 @@ namespace PlexRipper.Settings.Modules
 
         public override string Name => "DownloadManagerSettings";
 
-        public override IDownloadManagerSettings DefaultValues => new DownloadManagerSettings
+        public override IDownloadManagerSettings DefaultValues()
         {
-            DownloadSegments = 4,
-        };
+            return new DownloadManagerSettings
+            {
+                DownloadSegments = 4,
+            };
+        }
 
         public override IDownloadManagerSettings GetValues()
         {

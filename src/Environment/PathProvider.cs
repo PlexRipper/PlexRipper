@@ -7,7 +7,11 @@ namespace Environment
     {
         #region Properties
 
-        public static string ConfigDirectory => Path.Combine(RootDirectory, "config");
+        private static string _configFolder = "Config";
+
+        private static string _logsFolder = "Logs";
+
+        public static string ConfigDirectory => Path.Combine(RootDirectory, _configFolder);
 
         public static string ConfigFileLocation => Path.Join(ConfigDirectory, ConfigFileName);
 
@@ -19,12 +23,18 @@ namespace Environment
 
         public static string DatabasePath => Path.Combine(ConfigDirectory, DatabaseName);
 
-        public static string LogsDirectory => Path.Combine(RootDirectory, "config", "logs");
+        public static string LogsDirectory => Path.Combine(RootDirectory, _configFolder, _logsFolder);
 
         public static string RootDirectory
         {
             get
             {
+                var devRootPath = EnvironmentExtensions.GetDevelopmentRootPath();
+                if (devRootPath is not null)
+                {
+                    return devRootPath;
+                }
+
                 switch (OsInfo.CurrentOS)
                 {
                     case OperatingSystemPlatform.Linux:

@@ -24,11 +24,7 @@ namespace Data.UnitTests
         public async Task ShouldReturnNoDownloadTasks_WhenNoDownloadTasksAreInDb()
         {
             // Arrange
-            var config = new UnitTestDataConfig
-            {
-                Seed = 2867,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(2867);
             var handle = new GetAllDownloadTasksQueryHandler(context);
 
             var request = new GetAllDownloadTasksQuery();
@@ -45,12 +41,11 @@ namespace Data.UnitTests
         public async Task ShouldReturnMovieDownloadTasks_WhenMovieDownloadTasksAreInDB()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config =>
             {
-                Seed = 21467,
-                MovieDownloadTasksCount = 10,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+                config.Seed = 21467;
+                config.MovieDownloadTasksCount = 10;
+            });
             var handle = new GetAllDownloadTasksQueryHandler(context);
             var request = new GetAllDownloadTasksQuery();
 
@@ -74,15 +69,14 @@ namespace Data.UnitTests
         public async Task ShouldAllTvShowDownloadTasksWithAllIncludes_WhenTvShowDownloadTasksAreInDB()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
             {
-                Seed = 2767,
-                TvShowDownloadTasksCount = 5,
-                TvShowSeasonDownloadTasksCount = 5,
-                TvShowEpisodeDownloadTasksCount = 5,
-                LibraryType = PlexMediaType.TvShow,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+                config.Seed = 2767;
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+                config.LibraryType = PlexMediaType.TvShow;
+            });
             var handle = new GetAllDownloadTasksQueryHandler(context);
             var request = new GetAllDownloadTasksQuery();
 

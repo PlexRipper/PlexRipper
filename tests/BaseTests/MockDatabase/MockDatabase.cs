@@ -1,8 +1,11 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
+using JetBrains.Annotations;
 using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +14,8 @@ using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
 using PlexRipper.Domain;
 using Shouldly;
+
+#endregion
 
 namespace PlexRipper.BaseTests
 {
@@ -28,7 +33,7 @@ namespace PlexRipper.BaseTests
         /// </summary>
         /// <param name="dbName">leave empty to generate a random one</param>
         /// <param name="disableForeignKeyCheck">By default, don't enforce foreign key check for handling database data.</param>
-        /// <returns>A <see cref="PlexRipperDbContext"/> in memory instance.</returns>
+        /// <returns>A <see cref="PlexRipperDbContext" /> in memory instance.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static PlexRipperDbContext GetMemoryDbContext(string dbName = "", bool disableForeignKeyCheck = false)
         {
@@ -54,59 +59,68 @@ namespace PlexRipper.BaseTests
             return new PlexRipperDbContext(optionsBuilder.Options, dbName);
         }
 
-        public static async Task<PlexRipperDbContext> Setup(this PlexRipperDbContext context, UnitTestDataConfig config)
+        public static Task<PlexRipperDbContext> Setup(this PlexRipperDbContext context, int seed)
         {
-            // PlexServers and Libraries added
-            Log.Debug($"Setting up {nameof(PlexRipperDbContext)} for {config.MemoryDbName}");
+            return context.Setup(config => { config.Seed = seed; });
+        }
 
-            context = await context.AddPlexServers(config);
-            context = await context.AddPlexLibraries(config);
-            context = await context.AddPlexAccount(config);
+        public static async Task<PlexRipperDbContext> Setup(this PlexRipperDbContext context, [CanBeNull] Action<UnitTestDataConfig> options = null)
+        {
+            var config = UnitTestDataConfig.FromOptions(options);
+
+            // PlexServers and Libraries added
+            Log.Debug($"Setting up {nameof(PlexRipperDbContext)} for {context.DatabaseName}");
+
+            context = await context.AddPlexServers(options);
+            context = await context.AddPlexLibraries(options);
+            context = await context.AddPlexAccount(options);
 
             if (config.MovieCount > 0)
             {
-                context = await context.AddPlexMovies(config);
+                context = await context.AddPlexMovies(options);
             }
 
             if (config.TvShowCount > 0)
             {
-                context = await context.AddPlexTvShows(config);
+                context = await context.AddPlexTvShows(options);
             }
 
             if (config.MovieDownloadTasksCount > 0)
             {
-                context = await context.AddMovieDownloadTasks(config);
+                context = await context.AddMovieDownloadTasks(options);
             }
 
             if (config.TvShowDownloadTasksCount > 0)
             {
-                context = await context.AddTvShowDownloadTasks(config);
+                context = await context.AddTvShowDownloadTasks(options);
             }
-
 
             return context;
         }
 
-        public static async Task<PlexRipperDbContext> AddPlexServers(this PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
+        public static async Task<PlexRipperDbContext> AddPlexServers(this PlexRipperDbContext context,
+            [CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
-            var plexServers = FakeData.GetPlexServer(config).Generate(config.PlexServerCount);
+            var plexServers = FakeData.GetPlexServer(options).Generate(config.PlexServerCount);
 
-            await dbContext.PlexServers.AddRangeAsync(plexServers);
+            await context.PlexServers.AddRangeAsync(plexServers);
 
-            await dbContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
-            Log.Debug($"Added {config.PlexServerCount} {nameof(PlexServer)}s to {nameof(PlexRipperDbContext)}: {config.MemoryDbName}");
-            return dbContext;
+            Log.Debug($"Added {config.PlexServerCount} {nameof(PlexServer)}s to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
+            return context;
         }
 
-        private static async Task<PlexRipperDbContext> AddPlexLibraries(this PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
+        private static async Task<PlexRipperDbContext> AddPlexLibraries(this PlexRipperDbContext context,
+            [CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            var plexServers = await dbContext.PlexServers.ToListAsync();
+            var plexServers = await context.PlexServers.ToListAsync();
             plexServers.ShouldNotBeEmpty();
 
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
+
             var plexLibrariesToDb = new List<PlexLibrary>();
 
             foreach (var plexServer in plexServers)
@@ -129,26 +143,29 @@ namespace PlexRipper.BaseTests
                 {
                     plexLibrary.PlexServerId = plexServer.Id;
                     if (plexLibrary.Type == PlexMediaType.None)
+                    {
                         plexLibrary.Type = PlexMediaType.Movie;
+                    }
                 }
 
                 plexLibrariesToDb.AddRange(plexLibraries);
             }
 
-            await dbContext.BulkInsertAsync(plexLibrariesToDb);
-            return dbContext;
+            await context.BulkInsertAsync(plexLibrariesToDb);
+            return context;
         }
 
-        public static async Task<PlexRipperDbContext> AddPlexAccount(this PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
+        public static async Task<PlexRipperDbContext> AddPlexAccount(this PlexRipperDbContext context,
+            [CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
-            var plexServers = dbContext.PlexServers.Include(x => x.PlexLibraries).ToList();
+            var config = UnitTestDataConfig.FromOptions(options);
+            var plexServers = context.PlexServers.Include(x => x.PlexLibraries).ToList();
 
-            var plexAccount = FakeData.GetPlexAccount(config).Generate();
+            var plexAccount = FakeData.GetPlexAccount(options).Generate();
 
-            await dbContext.PlexAccounts.AddAsync(plexAccount);
-            await dbContext.SaveChangesAsync();
-            Log.Debug($"Added 1 {nameof(PlexAccount)}: {plexAccount.Title} to {nameof(PlexRipperDbContext)}: {config.MemoryDbName}");
+            await context.PlexAccounts.AddAsync(plexAccount);
+            await context.SaveChangesAsync();
+            Log.Debug($"Added 1 {nameof(PlexAccount)}: {plexAccount.Title} to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
 
             var plexAccountServer = plexServers.Select(x => new PlexAccountServer
             {
@@ -160,8 +177,8 @@ namespace PlexRipper.BaseTests
             });
 
             // Add account -> server relation
-            dbContext.PlexAccountServers.AddRange(plexAccountServer);
-            await dbContext.SaveChangesAsync();
+            context.PlexAccountServers.AddRange(plexAccountServer);
+            await context.SaveChangesAsync();
 
             // Add account -> library relation
             var plexAccountLibraries = plexServers.SelectMany(x => x.PlexLibraries).Select(x => new PlexAccountLibrary
@@ -170,63 +187,72 @@ namespace PlexRipper.BaseTests
                 PlexServerId = x.PlexServerId,
                 PlexLibraryId = x.Id,
             });
-            dbContext.PlexAccountLibraries.AddRange(plexAccountLibraries);
-            await dbContext.SaveChangesAsync();
+            context.PlexAccountLibraries.AddRange(plexAccountLibraries);
+            await context.SaveChangesAsync();
 
-            return dbContext;
+            return context;
         }
 
         #region Add DownloadTasks
 
-        public static async Task<PlexRipperDbContext> AddMovieDownloadTasks(this PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
+        public static async Task<PlexRipperDbContext> AddMovieDownloadTasks(this PlexRipperDbContext context,
+            [CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
-            var downloadTasks = FakeData.GetMovieDownloadTask(config).Generate(config.MovieDownloadTasksCount);
-            var plexLibrary = dbContext.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.Movie);
+            var downloadTasks = FakeData.GetMovieDownloadTask(options).Generate(config.MovieDownloadTasksCount);
+            var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.Movie);
             plexLibrary.ShouldNotBeNull();
 
             downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id);
 
-            dbContext.DownloadTasks.AddRange(downloadTasks);
-            await dbContext.SaveChangesAsync();
+            context.DownloadTasks.AddRange(downloadTasks);
+            await context.SaveChangesAsync();
 
-            return dbContext;
+            Log.Debug(
+                $"Added {config.MovieDownloadTasksCount} Movie {nameof(DownloadTask)}s to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
+
+            return context;
         }
 
-        public static async Task<PlexRipperDbContext> AddTvShowDownloadTasks(this PlexRipperDbContext dbContext, UnitTestDataConfig config = null)
+        public static async Task<PlexRipperDbContext> AddTvShowDownloadTasks(this PlexRipperDbContext context,
+            [CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
-            var downloadTasks = FakeData.GetTvShowDownloadTask(config).Generate(config.TvShowDownloadTasksCount);
-            var plexLibrary = dbContext.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.TvShow);
+            var downloadTasks = FakeData.GetTvShowDownloadTask(options).Generate(config.TvShowDownloadTasksCount);
+            var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.TvShow);
             plexLibrary.ShouldNotBeNull();
 
             downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id);
 
-            dbContext.DownloadTasks.AddRange(downloadTasks);
-            await dbContext.SaveChangesAsync();
+            context.DownloadTasks.AddRange(downloadTasks);
+            await context.SaveChangesAsync();
 
-            return dbContext;
+            Log.Debug(
+                $"Added {config.TvShowDownloadTasksCount} TvShow {nameof(DownloadTask)}s to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
+
+            return context;
         }
 
         #endregion
 
         #region Add Media
 
-        private static async Task<PlexRipperDbContext> AddPlexMovies(this PlexRipperDbContext context, UnitTestDataConfig config = null)
+        private static async Task<PlexRipperDbContext> AddPlexMovies(this PlexRipperDbContext context,
+            [CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig
+            var config = UnitTestDataConfig.FromOptions(options, new UnitTestDataConfig
             {
                 IncludeLibraries = true,
-            };
+            });
 
             var plexLibraries = context.PlexLibraries.Where(x => x.Type == PlexMediaType.Movie).ToList();
             plexLibraries.ShouldNotBeNull().ShouldNotBeEmpty();
 
             foreach (var plexLibrary in plexLibraries)
             {
-                var movies = FakeData.GetPlexMovies(config).Generate(config.MovieCount);
+                var movies = FakeData.GetPlexMovies(options).Generate(config.MovieCount);
 
                 foreach (var movie in movies)
                 {
@@ -239,22 +265,25 @@ namespace PlexRipper.BaseTests
 
             await context.SaveChangesAsync();
 
+            Log.Debug($"Added {config.MovieCount} {nameof(PlexMovie)}s to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
+
             return context;
         }
 
-        private static async Task<PlexRipperDbContext> AddPlexTvShows(this PlexRipperDbContext context, UnitTestDataConfig config = null)
+        private static async Task<PlexRipperDbContext> AddPlexTvShows(this PlexRipperDbContext context,
+            [CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig
+            var config = UnitTestDataConfig.FromOptions(options, new UnitTestDataConfig
             {
                 IncludeLibraries = true,
-            };
+            });
 
             var plexLibraries = context.PlexLibraries.Where(x => x.Type == PlexMediaType.TvShow).ToList();
             plexLibraries.ShouldNotBeNull().ShouldNotBeEmpty();
 
             foreach (var plexLibrary in plexLibraries)
             {
-                var tvShows = FakeData.GetPlexTvShows(config).Generate(config.TvShowCount);
+                var tvShows = FakeData.GetPlexTvShows(options).Generate(config.TvShowCount);
 
                 foreach (var tvShow in tvShows)
                 {
@@ -281,6 +310,8 @@ namespace PlexRipper.BaseTests
             }
 
             await context.SaveChangesAsync();
+
+            Log.Debug($"Added {config.TvShowCount} {nameof(PlexTvShow)}s to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
 
             return context;
         }

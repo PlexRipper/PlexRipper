@@ -18,19 +18,14 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
         public async Task ShouldStopDownloadJobAfterStartingForMovieAndEndWithStatusStopped_WhenGivenAValidDownloadTask()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await CreateContainer(config =>
             {
-                Seed = 4564,
-                MovieDownloadTasksCount = 2,
-                DownloadSpeedLimit = 1000,
-                MockServerConfig = new PlexMockServerConfig
-                {
-                    DownloadFileSizeInMb = 50,
-                },
-                MockDownloadSubscriptions = new MockDownloadSubscriptions(),
-            };
-
-            await CreateContainer(config);
+                config.Seed = 4564;
+                config.MovieDownloadTasksCount = 2;
+                config.DownloadSpeedLimit = 1000;
+                config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
+                config.SetupMockServer();
+            });
             var plexMovieDownloadTask =
                 Container.PlexRipperDbContext
                     .DownloadTasks

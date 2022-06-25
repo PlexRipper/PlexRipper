@@ -36,8 +36,8 @@ namespace Settings.UnitTests.Modules
             updateResult.MovieViewMode.ShouldBe(ViewMode.Table);
             updateResult.TvShowViewMode.ShouldBe(ViewMode.Table);
 
-            resetResult.MovieViewMode.ShouldBe(_sut.DefaultValues.MovieViewMode);
-            resetResult.TvShowViewMode.ShouldBe(_sut.DefaultValues.TvShowViewMode);
+            resetResult.MovieViewMode.ShouldBe(_sut.DefaultValues().MovieViewMode);
+            resetResult.TvShowViewMode.ShouldBe(_sut.DefaultValues().TvShowViewMode);
         }
     }
 }

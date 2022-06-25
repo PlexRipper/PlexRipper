@@ -1,5 +1,5 @@
 import Log from 'consola';
-import { Observable, of} from 'rxjs';
+import { Observable, of } from 'rxjs';
 import {
 	clearDownloadTasks,
 	deleteDownloadTasks,
@@ -15,10 +15,11 @@ import { DownloadMediaDTO, DownloadProgressDTO, DownloadStatus, PlexMediaType, S
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, GlobalService, SignalrService } from '@service';
 import { Context } from '@nuxt/types';
+import ISetup from '@interfaces/ISetup';
 
-export class DownloadService extends BaseService {
+export class DownloadService extends BaseService implements ISetup {
 	public constructor() {
-		super({
+		super('DownloadService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -28,8 +29,8 @@ export class DownloadService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
 
 		GlobalService.getAxiosReady()
 			.pipe(
@@ -40,6 +41,7 @@ export class DownloadService extends BaseService {
 				if (downloads.isSuccess) {
 					this.setState({ serverDownloads: downloads.value }, 'Initial DownloadTask Data');
 				}
+				callBack(this._name);
 			});
 
 		SignalrService.GetServerDownloadProgress().subscribe((data: ServerDownloadProgressDTO) => {

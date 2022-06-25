@@ -11,6 +11,7 @@ using Moq;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
+using PlexRipper.Data;
 using PlexRipper.Data.Common;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
@@ -28,7 +29,7 @@ namespace DownloadManager.UnitTests
         }
 
         [Fact]
-        public void ShouldHaveNoUpdates_WhenGivenAnEmptyList()
+        public async Task ShouldHaveNoUpdates_WhenGivenAnEmptyList()
         {
             // Arrange
             using var mock = AutoMock.GetStrict();
@@ -41,7 +42,7 @@ namespace DownloadManager.UnitTests
             // Act
             _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
             _sut.Setup();
-            _sut.CheckDownloadQueue(new List<int>());
+            await _sut.CheckDownloadQueue(new List<int>());
 
             // Assert
             startCommands.Any().ShouldBeFalse();
@@ -53,11 +54,11 @@ namespace DownloadManager.UnitTests
             // Arrange
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DownloadQueue>();
-            var config = new UnitTestDataConfig
+            await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
             {
-                MovieDownloadTasksCount = 5,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+                config.MovieDownloadTasksCount = 5;
+            });
+
             var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
             mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
                 .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
@@ -91,12 +92,11 @@ namespace DownloadManager.UnitTests
         {
             // Arrange
             List<DownloadTask> startCommands = new();
-            var config = new UnitTestDataConfig
+            await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
             {
-                Seed = 5000,
-                MovieDownloadTasksCount = 5,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+                config.Seed = 5000;
+                config.MovieDownloadTasksCount = 5;
+            });
 
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DownloadQueue>();
@@ -122,13 +122,12 @@ namespace DownloadManager.UnitTests
         public async Task ShouldHaveNextQueuedDownloadTask_WhenGivenAMovieDownloadTasksWithCompleted()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
             {
-                Seed = 67,
-                MovieDownloadTasksCount = 5,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
-            using var mock = AutoMock.GetStrict();
+                config.Seed = 67;
+                config.MovieDownloadTasksCount = 5;
+            });
+            using AutoMock mock = AutoMock.GetStrict();
             var _sut = mock.Create<DownloadQueue>();
             var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
             mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
@@ -157,14 +156,13 @@ namespace DownloadManager.UnitTests
         public async Task ShouldHaveNextQueuedDownloadTask_WhenGivenATvShowsDownloadTasksWithCompleted()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
             {
-                Seed = 263,
-                TvShowDownloadTasksCount = 2,
-                TvShowSeasonDownloadTasksCount = 2,
-                TvShowEpisodeDownloadTasksCount = 2,
-            };
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+                config.Seed = 263;
+                config.TvShowDownloadTasksCount = 2;
+                config.TvShowSeasonDownloadTasksCount = 2;
+                config.TvShowEpisodeDownloadTasksCount = 2;
+            });
             using var mock = AutoMock.GetStrict();
             var _sut = mock.Create<DownloadQueue>();
 

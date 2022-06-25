@@ -1,12 +1,17 @@
 version: '3.4'
 services:
-    plexripper:
-        container_name: PlexRipper
-        image: plexripper/plexripper
-        build:
-            context: .
-            dockerfile: ./Dockerfile
-        ports:
-            # Web UI & Web API
-            - '7000:7000'
-        restart: unless-stopped
+  plexripper:
+    container_name: PlexRipper
+    image: plexripper/plexripper
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      # Web UI & Web API
+      - '7000:7000'
+    restart: unless-stopped
+    volumes:
+      - /mnt/PROJECTS/PlexRipperCache/Config:/config
+      - /mnt/PROJECTS/PlexRipperCache/Downloads:/downloads
+      - /mnt/PROJECTS/PlexRipperCache/Movies:/movies
+      - /mnt/PROJECTS/PlexRipperCache/TvShows:/tvshows

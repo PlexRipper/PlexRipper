@@ -1,13 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Text.Json;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
-using PlexRipper.Domain.Config;
+using PlexRipper.Domain;
 using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
 
@@ -23,82 +22,13 @@ namespace PlexRipper.Settings.Modules
 
         #region Properties
 
-        public List<PlexServerSettingsModel> Data { get; set; } = new();
-
         public override string Name => "ServerSettings";
 
-        public override IServerSettings DefaultValues => new ServerSettings
-        {
-            Data = new List<PlexServerSettingsModel>(),
-        };
+        public List<PlexServerSettingsModel> Data { get; set; } = new();
 
         #endregion
 
         #region Public Methods
-
-        public PlexServerSettingsModel GetPlexServerSettings(string machineIdentifier)
-        {
-            return Data?.FirstOrDefault(x => x.MachineIdentifier == machineIdentifier);
-        }
-
-        public PlexServerSettingsModel GetPlexServerSettings(int plexServerId)
-        {
-            return Data?.FirstOrDefault(x => x.PlexServerId == plexServerId);
-        }
-
-        public int GetDownloadSpeedLimit(int plexServerId)
-        {
-            return GetPlexServerSettings(plexServerId)?.DownloadSpeedLimit ?? 0;
-        }
-
-        public IObservable<PlexServerSettingsModel> ServerSettings(int plexServerId)
-        {
-            return _serverSettingsUpdated.AsObservable().Where(x => x.PlexServerId == plexServerId);
-        }
-
-        public IObservable<int> GetDownloadSpeedLimitObservable(int plexServerId)
-        {
-            return ServerSettings(plexServerId).Select(x => x.DownloadSpeedLimit);
-        }
-
-        public override Result SetFromJson(JsonElement settingsJsonElement)
-        {
-            var jsonSettings = GetJsonSettingsModule(settingsJsonElement);
-            if (jsonSettings.IsFailed)
-            {
-                Reset();
-                return jsonSettings;
-            }
-
-            if (!jsonSettings.Value.TryGetProperty(nameof(IServerSettings.Data), out JsonElement jsonValueElement))
-            {
-                Log.Error($"Failed to read property {nameof(IServerSettings.Data)} from {Name}");
-                Reset();
-            }
-
-            var serverSettings = jsonValueElement.GetRawText();
-
-            try
-            {
-                Data = JsonSerializer.Deserialize<List<PlexServerSettingsModel>>(serverSettings, DefaultJsonSerializerOptions.ConfigManagerOptions);
-            }
-            catch (Exception e)
-            {
-                Result.Fail(new ExceptionalError(e)).LogError();
-                Log.Error($"Failed to read {Name}, will reset config now");
-                Reset();
-            }
-
-            return Result.Ok();
-        }
-
-        public override IServerSettings GetValues()
-        {
-            return new ServerSettings
-            {
-                Data = Data,
-            };
-        }
 
         public Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings)
         {
@@ -125,6 +55,63 @@ namespace PlexRipper.Settings.Modules
             return Result.Ok(settings);
         }
 
+        public override IServerSettings DefaultValues()
+        {
+            return new ServerSettings
+            {
+                Data = CreateServerSettingsFromDb(new List<PlexServer>()),
+            };
+        }
+
+        public int GetDownloadSpeedLimit(int plexServerId)
+        {
+            return GetPlexServerSettings(plexServerId)?.DownloadSpeedLimit ?? 0;
+        }
+
+        public IObservable<int> GetDownloadSpeedLimitObservable(int plexServerId)
+        {
+            return ServerSettings(plexServerId).Select(x => x.DownloadSpeedLimit);
+        }
+
+        public PlexServerSettingsModel GetPlexServerSettings(string machineIdentifier)
+        {
+            return Data?.FirstOrDefault(x => x.MachineIdentifier == machineIdentifier);
+        }
+
+        public PlexServerSettingsModel GetPlexServerSettings(int plexServerId)
+        {
+            return Data?.FirstOrDefault(x => x.PlexServerId == plexServerId);
+        }
+
+        public override IServerSettings GetValues()
+        {
+            return new ServerSettings
+            {
+                Data = Data,
+            };
+        }
+
+        public IObservable<PlexServerSettingsModel> ServerSettings(int plexServerId)
+        {
+            return _serverSettingsUpdated.AsObservable().Where(x => x.PlexServerId == plexServerId);
+        }
+
+        public Result SetDownloadSpeedLimit(int plexServerId, int downloadSpeedLimit = 0)
+        {
+            var index = Data.FindIndex(x => x.PlexServerId == plexServerId);
+            if (index > -1)
+            {
+                if (Data[index].DownloadSpeedLimit != downloadSpeedLimit)
+                {
+                    Data[index].DownloadSpeedLimit = downloadSpeedLimit;
+                    EmitModuleHasChanged(GetValues());
+                    return Result.Ok();
+                }
+            }
+
+            return Result.Fail($"PlexServerId {plexServerId} has no entry in the {nameof(ServerSettings)}");
+        }
+
         public void SetServerSettings(PlexServerSettingsModel plexServerSettings)
         {
             var index = Data.FindIndex(x => x.PlexServerId == plexServerSettings.PlexServerId &&
@@ -144,26 +131,40 @@ namespace PlexRipper.Settings.Modules
             }
         }
 
-        public Result SetDownloadSpeedLimit(int plexServerId, int downloadSpeedLimit = 0)
-        {
-            var index = Data.FindIndex(x => x.PlexServerId == plexServerId);
-            if (index > -1)
-            {
-                if (Data[index].DownloadSpeedLimit != downloadSpeedLimit)
-                {
-                    Data[index].DownloadSpeedLimit = downloadSpeedLimit;
-                    EmitModuleHasChanged(GetValues());
-                    return Result.Ok();
-                }
-            }
-
-            return Result.Fail($"PlexServerId {plexServerId} has no entry in the {nameof(ServerSettings)}");
-        }
-
         public Result Update(IServerSettingsModule sourceSettings)
         {
             Data = sourceSettings.Data;
             return Result.Ok();
+        }
+
+        public void EnsureAllServersHaveASettingsEntry(List<PlexServer> plexServers)
+        {
+            Data = CreateServerSettingsFromDb(plexServers);
+            EmitModuleHasChanged(GetValues());
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private List<PlexServerSettingsModel> CreateServerSettingsFromDb(List<PlexServer> plexServers)
+        {
+            var newList = new List<PlexServerSettingsModel>();
+            foreach (var plexServer in plexServers)
+            {
+                var index = Data.FindIndex(x => x.MachineIdentifier == plexServer.MachineIdentifier);
+                if (index == -1)
+                {
+                    newList.Add(new PlexServerSettingsModel
+                    {
+                        MachineIdentifier = plexServer.MachineIdentifier,
+                        DownloadSpeedLimit = 0,
+                        PlexServerId = plexServer.Id,
+                    });
+                }
+            }
+
+            return newList.Concat(Data).ToList();
         }
 
         #endregion

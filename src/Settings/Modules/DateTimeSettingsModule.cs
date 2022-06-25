@@ -19,14 +19,17 @@ namespace PlexRipper.Settings.Modules
 
         public string TimeZone { get; set; }
 
-        public override IDateTimeSettings DefaultValues => new DateTimeSettings
+        public override IDateTimeSettings DefaultValues()
         {
-            TimeFormat = "HH:mm:ss",
-            TimeZone = "UTC",
-            LongDateFormat = "EEEE, dd MMMM yyyy",
-            ShortDateFormat = "dd/MM/yyyy",
-            ShowRelativeDates = true,
-        };
+            return new DateTimeSettings
+            {
+                TimeFormat = "HH:mm:ss",
+                TimeZone = "UTC",
+                LongDateFormat = "EEEE, dd MMMM yyyy",
+                ShortDateFormat = "dd/MM/yyyy",
+                ShowRelativeDates = true,
+            };
+        }
 
         #endregion
 

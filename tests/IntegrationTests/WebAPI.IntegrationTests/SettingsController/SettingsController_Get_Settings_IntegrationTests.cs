@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
@@ -22,12 +23,7 @@ namespace WebAPI.IntegrationTests.SettingsController
         public async Task ShouldHaveDefaultSettings_OnFirstTimeBoot()
         {
             // Arrange
-            var config = new UnitTestDataConfig
-            {
-                Seed = 4564,
-            };
-
-            await CreateContainer(config);
+            await CreateContainer(4564);
 
             // Act
             var response = await Container.ApiClient.GetAsync(ApiRoutes.Settings.GetSettings);

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
+using JetBrains.Annotations;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 
 namespace PlexRipper.BaseTests
 {
-    public class PlexMockServer
+    public class PlexMockServer : IDisposable
     {
         private readonly PlexMockServerConfig _config;
 
@@ -18,9 +19,9 @@ namespace PlexRipper.BaseTests
 
         #region Constructor
 
-        public PlexMockServer(PlexMockServerConfig config = null)
+        public PlexMockServer([CanBeNull] Action<PlexMockServerConfig> options = null)
         {
-            _config = config ?? new PlexMockServerConfig();
+            _config = PlexMockServerConfig.FromOptions(options);
 
             if (_config.DownloadFileSizeInMb > 0)
             {
@@ -29,9 +30,9 @@ namespace PlexRipper.BaseTests
 
             Server = WireMockServer.Start();
             ServerUri = new Uri(Server.Urls[0]);
-            GetDownloadUri = new Uri($"{Server.Urls[0]}{PlexMockServerConfig.FileUrl}");
+            DownloadUri = new Uri($"{Server.Urls[0]}{PlexMockServerConfig.FileUrl}");
 
-            Setup(config);
+            Setup(_config);
         }
 
         #endregion
@@ -40,9 +41,11 @@ namespace PlexRipper.BaseTests
 
         public WireMockServer Server { get; }
 
-        public Uri GetDownloadUri { get; }
+        public Uri DownloadUri { get; }
 
         public Uri ServerUri { get; }
+
+        public long DownloadFileSizeInBytes => _config.DownloadFileSizeInMb * 1024;
 
         #endregion
 
@@ -65,5 +68,10 @@ namespace PlexRipper.BaseTests
         }
 
         #endregion
+
+        public void Dispose()
+        {
+            Server?.Dispose();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Logging;
 using Xunit;
 using Xunit.Abstractions;
@@ -16,9 +17,14 @@ namespace PlexRipper.BaseTests
             Log.SetupTestLogging(output);
         }
 
-        protected async Task CreateContainer(UnitTestDataConfig config = null)
+        protected async Task CreateContainer(int seed)
         {
-            Container = await BaseContainer.Create(config);
+            await CreateContainer(config => { config.Seed = seed; });
+        }
+
+        protected async Task CreateContainer([CanBeNull] Action<UnitTestDataConfig> options = null)
+        {
+            Container = await BaseContainer.Create(options);
         }
 
         public async Task InitializeAsync()

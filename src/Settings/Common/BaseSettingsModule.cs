@@ -4,6 +4,7 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text.Json;
 using FluentResults;
+using Logging;
 using PlexRipper.Application;
 using PlexRipper.Domain;
 
@@ -21,6 +22,7 @@ namespace PlexRipper.Settings
 
         protected BaseSettingsModule()
         {
+            // Initialize with the default values
             Reset();
         }
 
@@ -32,7 +34,7 @@ namespace PlexRipper.Settings
 
         public abstract string Name { get; }
 
-        public abstract TModel DefaultValues { get; }
+        public abstract TModel DefaultValues();
 
         #endregion
 
@@ -42,7 +44,7 @@ namespace PlexRipper.Settings
 
         public TModel Reset()
         {
-            return Update(DefaultValues);
+            return Update(DefaultValues());
         }
 
         /// <inheritdoc/>
@@ -55,19 +57,32 @@ namespace PlexRipper.Settings
                 return jsonSettings;
             }
 
-            var rootSettingsModule = jsonSettings.Value;
+            TModel defaultValues = DefaultValues();
+            JsonElement rootSettingsModule = jsonSettings.Value;
             foreach (PropertyInfo prop in typeof(TModel).GetProperties())
             {
+                PropertyInfo targetProp = GetType().GetProperty(prop.Name);
+                Type targetPropType = targetProp.PropertyType;
+                var targetValue = targetProp.GetValue(this, null);
+
+                // Is settings value available in JSON? Else revert to default value
                 if (rootSettingsModule.TryGetProperty(prop.Name, out JsonElement jsonValueElement))
                 {
-                    var targetProp = GetType().GetProperty(prop.Name);
-                    var targetPropType = targetProp.PropertyType;
-                    var targetValue = targetProp.GetValue(this, null);
-
                     var sourceValue = jsonValueElement.GetTypedValue(targetPropType);
                     if (sourceValue != targetValue)
                     {
                         targetProp.SetValue(this, sourceValue);
+                    }
+                }
+                else
+                {
+                    Log.Warning(
+                        $"The userSettings, in module \"{Name}\", was missing property \"{prop.Name}\". " +
+                        $"Will revert to default value now, this is normal if you just updated PlexRipper as new settings might have been added.");
+                    var defaultValue = defaultValues.GetType().GetProperty(prop.Name).GetValue(defaultValues, null);
+                    if (defaultValue != targetValue)
+                    {
+                        targetProp.SetValue(this, defaultValue);
                     }
                 }
             }
@@ -81,9 +96,9 @@ namespace PlexRipper.Settings
 
             foreach (PropertyInfo prop in typeof(TModel).GetProperties())
             {
-                var sourceProp = sourceSettings.GetType().GetProperty(prop.Name);
+                PropertyInfo sourceProp = sourceSettings.GetType().GetProperty(prop.Name);
                 var sourceValue = sourceProp.GetValue(sourceSettings, null);
-                var targetProp = GetType().GetProperty(prop.Name);
+                PropertyInfo targetProp = GetType().GetProperty(prop.Name);
                 var targetValue = targetProp.GetValue(this, null);
                 if (sourceValue != targetValue)
                 {

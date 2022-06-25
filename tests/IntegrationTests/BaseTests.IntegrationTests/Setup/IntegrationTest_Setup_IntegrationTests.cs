@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using PlexRipper.BaseTests;
+using PlexRipper.Data;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -44,12 +45,7 @@ namespace BaseTests.IntegrationTests.Setup
         public async Task ShouldHaveUniqueInMemoryDatabase_WhenConfigFileIsGivenToContainer()
         {
             // Arrange
-            var config = new UnitTestDataConfig
-            {
-                Seed = 9999,
-                MemoryDbName = MockDatabase.GetMemoryDatabaseName(),
-            };
-            await CreateContainer(config);
+            await CreateContainer(9999);
 
             // Act
             var dbContext = Container.PlexRipperDbContext;
@@ -57,18 +53,19 @@ namespace BaseTests.IntegrationTests.Setup
             // Assert
             Container.ShouldNotBeNull();
             dbContext.ShouldNotBeNull();
-            dbContext.DatabaseName.ShouldBe(config.MemoryDbName);
+            dbContext.DatabaseName.ShouldNotBeEmpty();
+            dbContext.DatabaseName.ShouldContain("memory_database");
         }
 
         [Fact]
         public async Task ShouldAllowForMultipleContainersToBeCreated_WhenMultipleAreCalled()
         {
             // Arrange
-            await CreateContainer(new UnitTestDataConfig(3457));
-            await CreateContainer(new UnitTestDataConfig(9654));
+            await CreateContainer(3457);
+            await CreateContainer(9654);
 
             // Act
-            var dbContext = Container.PlexRipperDbContext;
+            PlexRipperDbContext dbContext = Container.PlexRipperDbContext;
 
             // Assert
             Container.ShouldNotBeNull();

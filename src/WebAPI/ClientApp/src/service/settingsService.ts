@@ -7,6 +7,8 @@ import {
 	DownloadManagerSettingsDTO,
 	GeneralSettingsDTO,
 	LanguageSettingsDTO,
+	PlexServerSettingsModel,
+	ServerSettingsDTO,
 	SettingsModelDTO,
 	ViewMode,
 } from '@dto/mainApi';
@@ -20,7 +22,7 @@ import IStoreState from '@interfaces/service/IStoreState';
 export class SettingsService extends BaseService {
 	// region Constructor and Setup
 	public constructor() {
-		super({
+		super('SettingsService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -36,8 +38,8 @@ export class SettingsService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
 
 		// On app load, request the settings once
 		GlobalService.getAxiosReady()
@@ -46,7 +48,7 @@ export class SettingsService extends BaseService {
 				switchMap(() => this.fetchSettings()),
 				take(1),
 			)
-			.subscribe();
+			.subscribe(() => callBack(this._name));
 
 		this.getFirstTimeSetup().subscribe((state) => {
 			if (state === null) {
@@ -319,6 +321,28 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+	// endregion
+
+	// region ServerSettings
+
+	public updateServerSettings(value: PlexServerSettingsModel): void {
+		const data = this.getSettingsModule('serverSettings').data as PlexServerSettingsModel[];
+		const settings: ServerSettingsDTO = {
+			data: [...data.filter((x) => x.plexServerId !== value.plexServerId), value],
+		};
+
+		this.setState({ serverSettings: settings }, `Update ServerSettings for server id: ${value.plexServerId}`);
+		this.sendSettingsToApi();
+	}
+
+	public getServerSettings(plexServerId: number): Observable<PlexServerSettingsModel> {
+		return this.stateChanged.pipe(
+			map((x) => x?.serverSettings.data.find((y) => y.plexServerId === plexServerId)),
+			filter((x) => !!x),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
 	// endregion
 }
 

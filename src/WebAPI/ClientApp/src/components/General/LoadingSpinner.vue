@@ -5,7 +5,7 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
 
-@Component
+@Component<LoadingSpinner>({})
 export default class LoadingSpinner extends Vue {
 	@Prop({ required: false, type: Number, default: 32 })
 	readonly size!: number;

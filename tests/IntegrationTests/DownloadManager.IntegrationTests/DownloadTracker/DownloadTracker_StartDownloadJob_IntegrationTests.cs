@@ -18,19 +18,15 @@ namespace DownloadManager.IntegrationTests.DownloadTracker
         public async Task ShouldExecuteDownloadTaskForMovieAndEndWithDownloadFinished_WhenGivenAValidDownloadTask()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            var memoryDbName = MockDatabase.GetMemoryDatabaseName();
+            await CreateContainer(config =>
             {
-                Seed = 4564,
-                MovieDownloadTasksCount = 2,
-                DownloadSpeedLimit = 2000,
-                MockServerConfig = new PlexMockServerConfig
-                {
-                    DownloadFileSizeInMb = 50,
-                },
-                MockDownloadSubscriptions = new MockDownloadSubscriptions(),
-            };
-
-            await CreateContainer(config);
+                config.Seed = 4564;
+                config.MovieDownloadTasksCount = 2;
+                config.DownloadSpeedLimit = 2000;
+                config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
+                config.SetupMockServer(serverConfig => { serverConfig.DownloadFileSizeInMb = 50; });
+            });
             var plexMovieDownloadTask =
                 Container.PlexRipperDbContext
                     .DownloadTasks

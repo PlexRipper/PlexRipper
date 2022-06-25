@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Bogus;
+using JetBrains.Annotations;
 using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests
@@ -9,11 +10,11 @@ namespace PlexRipper.BaseTests
     {
         private static readonly Random _random = new();
 
-        public static Faker<PlexServer> GetPlexServer(UnitTestDataConfig config = null)
+        public static Faker<PlexServer> GetPlexServer([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
-            var uri = config.MockServerConfig?.ServerUri ?? new Uri("https://test-server.com");
+            var uri = config.MockServer?.ServerUri ?? new Uri("https://test-server.com");
 
             return new Faker<PlexServer>()
                 .StrictMode(true)
@@ -37,12 +38,12 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>());
         }
 
-        public static Faker<PlexLibrary> GetPlexLibrary(UnitTestDataConfig config = null)
+        public static Faker<PlexLibrary> GetPlexLibrary([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig
+            var config = UnitTestDataConfig.FromOptions(options, new UnitTestDataConfig
             {
                 LibraryType = PlexMediaType.Movie,
-            };
+            });
 
             return new Faker<PlexLibrary>()
                 .StrictMode(true)
@@ -69,9 +70,9 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.DownloadTasks, _ => new List<DownloadTask>());
         }
 
-        public static Faker<FolderPath> GetFolderPaths(UnitTestDataConfig config = null)
+        public static Faker<FolderPath> GetFolderPaths([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
             var ids = 0;
             return new Faker<FolderPath>()
@@ -85,8 +86,10 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>());
         }
 
-        private static int GetUniqueId(List<int> alreadyGenerated, UnitTestDataConfig config = null)
+        private static int GetUniqueId(List<int> alreadyGenerated, [CanBeNull] Action<UnitTestDataConfig> options = null)
         {
+            var config = UnitTestDataConfig.FromOptions(options);
+
             var rnd = new Random(config.Seed);
             while (true)
             {

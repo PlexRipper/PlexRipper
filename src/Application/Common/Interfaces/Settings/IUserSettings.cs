@@ -27,5 +27,7 @@ namespace PlexRipper.Application
         Result SetFromJsonObject(JsonElement settingsJsonElement);
 
         ISettingsModel GetSettingsModel();
+
+        ISettingsModel GetDefaultSettingsModel();
     }
 }

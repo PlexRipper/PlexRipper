@@ -34,6 +34,16 @@ namespace PlexRipper.Settings
 
         #endregion
 
+        /// <summary>
+        /// The <see cref="UserSettings"/> class is a wrapper class for the individual SettingsModules.
+        /// </summary>
+        /// <param name="confirmationSettingsModule"></param>
+        /// <param name="dateTimeSettingsModule"></param>
+        /// <param name="displaySettingsModule"></param>
+        /// <param name="downloadManagerSettingsModule"></param>
+        /// <param name="generalSettingsModule"></param>
+        /// <param name="languageSettingsModule"></param>
+        /// <param name="serverSettingsModule"></param>
         public UserSettings(
             IConfirmationSettingsModule confirmationSettingsModule,
             IDateTimeSettingsModule dateTimeSettingsModule,
@@ -100,6 +110,10 @@ namespace PlexRipper.Settings
             return Result.Ok((ISettingsModel)settings);
         }
 
+        /// <summary>
+        /// Creates a <see cref="SettingsModel"/> with all the current set values.
+        /// </summary>
+        /// <returns></returns>
         public ISettingsModel GetSettingsModel()
         {
             return new SettingsModel
@@ -111,6 +125,24 @@ namespace PlexRipper.Settings
                 ServerSettings = _serverSettingsModule.GetValues(),
                 DateTimeSettings = _dateTimeSettingsModule.GetValues(),
                 DownloadManagerSettings = _downloadManagerSettingsModule.GetValues(),
+            };
+        }
+
+        /// <summary>
+        /// Creates a <see cref="SettingsModel"/> with all the default values.
+        /// </summary>
+        /// <returns></returns>
+        public ISettingsModel GetDefaultSettingsModel()
+        {
+            return new SettingsModel
+            {
+                ConfirmationSettings = _confirmationSettingsModule.DefaultValues(),
+                GeneralSettings = _generalSettingsModule.DefaultValues(),
+                DisplaySettings = _displaySettingsModule.DefaultValues(),
+                LanguageSettings = _languageSettingsModule.DefaultValues(),
+                ServerSettings = _serverSettingsModule.DefaultValues(),
+                DateTimeSettings = _dateTimeSettingsModule.DefaultValues(),
+                DownloadManagerSettings = _downloadManagerSettingsModule.DefaultValues(),
             };
         }
 

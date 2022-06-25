@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace PlexRipper.Domain
 {
-public class FolderTypeConverter: JsonConverter<FolderType>
+public class FolderTypeConverter : JsonConverter<FolderType>
 {
     public override FolderType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

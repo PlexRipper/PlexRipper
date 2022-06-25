@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text.Json;
 using Environment;
 using FluentResults;
@@ -44,7 +45,9 @@ namespace PlexRipper.Settings
 
             var configDirectoryExistsResult = _directorySystem.Exists(_pathProvider.ConfigDirectory);
             if (configDirectoryExistsResult.IsFailed)
+            {
                 return configDirectoryExistsResult.LogFatal();
+            }
 
             if (configDirectoryExistsResult.Value)
             {
@@ -69,7 +72,7 @@ namespace PlexRipper.Settings
                 return SaveConfig();
             }
 
-            var loadResult = LoadConfig();
+            Result loadResult = LoadConfig();
             return loadResult.IsFailed ? loadResult : Result.Ok();
         }
 
@@ -87,7 +90,7 @@ namespace PlexRipper.Settings
             {
                 var cleanedJson = readResult.Value.Replace("\r\n", "");
                 var loadedSettings = JsonSerializer.Deserialize<JsonElement>(cleanedJson, DefaultJsonSerializerOptions.ConfigManagerOptions);
-                var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
+                Result setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
                 if (setFromJsonResult.IsFailed)
                 {
                     Log.Warning("Certain properties were missing or had missing or invalid values. Will correct those and re-save now!");
@@ -109,7 +112,7 @@ namespace PlexRipper.Settings
         public virtual Result ResetConfig()
         {
             _userSettings.Reset();
-            var saveResult = SaveConfig();
+            Result saveResult = SaveConfig();
             if (saveResult.IsFailed)
             {
                 saveResult.WithError(new Error("Failed to save a new config after resetting")).LogError();
@@ -124,11 +127,15 @@ namespace PlexRipper.Settings
 
             var jsonSettings = GetJsonSettingsObject();
             if (jsonSettings.IsFailed)
+            {
                 return jsonSettings;
+            }
 
-            var writeResult = WriteToConfigFile(jsonSettings.Value);
+            Result writeResult = WriteToConfigFile(jsonSettings.Value);
             if (writeResult.IsFailed)
+            {
                 return writeResult;
+            }
 
             return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
         }
@@ -144,7 +151,7 @@ namespace PlexRipper.Settings
 
         private Result WriteToConfigFile(string jsonSettingsString)
         {
-            var writeResult = _fileSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString);
+            Result writeResult = _fileSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString);
             return writeResult.IsFailed ? writeResult.WithError("Failed to write config settings").LogError() : Result.Ok();
         }
 

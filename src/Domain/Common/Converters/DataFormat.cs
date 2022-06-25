@@ -7,7 +7,7 @@ namespace PlexRipper.Domain
 {
     public static class DataFormat
     {
-        private static readonly NumberFormatInfo numberFormat = NumberFormatInfo.InvariantInfo;
+        private static readonly NumberFormatInfo NumberFormat = NumberFormatInfo.InvariantInfo;
 
         /// <summary>
         /// Format file size or downloaded size string.
@@ -20,13 +20,13 @@ namespace PlexRipper.Domain
             double megaByteSize = kiloByteSize / 1024D;
             double gigaByteSize = megaByteSize / 1024D;
             if (byteSize < 1024)
-                return string.Format(numberFormat, "{0} B", byteSize);
+                return string.Format(NumberFormat, "{0} B", byteSize);
             if (byteSize < 1048576)
-                return string.Format(numberFormat, "{0:0.00} kB", kiloByteSize);
+                return string.Format(NumberFormat, "{0:0.00} kB", kiloByteSize);
             if (byteSize < 1073741824)
-                return string.Format(numberFormat, "{0:0.00} MB", megaByteSize);
+                return string.Format(NumberFormat, "{0:0.00} MB", megaByteSize);
 
-            return string.Format(numberFormat, "{0:0.00} GB", gigaByteSize);
+            return string.Format(NumberFormat, "{0:0.00} GB", gigaByteSize);
         }
 
         /// <summary>
@@ -43,9 +43,9 @@ namespace PlexRipper.Domain
             if (speed < 1024)
                 return speed + " B/s";
             if (speed < 1048576)
-                return kbSpeed.ToString("#.00", numberFormat) + " kB/s";
+                return kbSpeed.ToString("#.00", NumberFormat) + " kB/s";
 
-            return mbSpeed.ToString("#.00", numberFormat) + " MB/s";
+            return mbSpeed.ToString("#.00", NumberFormat) + " MB/s";
         }
 
         /// <summary>

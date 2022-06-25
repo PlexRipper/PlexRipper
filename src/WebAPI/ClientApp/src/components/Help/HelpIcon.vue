@@ -4,7 +4,7 @@
 			<v-subheader class="form-label text-no-wrap">{{ getLabel }}</v-subheader>
 		</v-col>
 		<v-col v-if="hasHelpPage" cols="auto">
-			<v-btn style="margin: 8px" icon @click="openDialog">
+			<v-btn style="margin: 6px" icon @click="openDialog">
 				<v-icon :size="24"> mdi-help-circle-outline </v-icon>
 			</v-btn>
 		</v-col>
@@ -26,7 +26,7 @@ export default class HelpIcon extends Vue {
 	@Prop({ required: false, type: String, default: '' })
 	readonly labelId!: string;
 
-	@Prop({ required: false, type: String, default: '' })
+	@Prop({ required: true, type: String, default: '' })
 	readonly helpId!: string;
 
 	get getLabel(): string {

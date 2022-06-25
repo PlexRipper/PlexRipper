@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Bogus;
 using Bogus.Extensions;
+using JetBrains.Annotations;
 using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests
@@ -10,9 +12,9 @@ namespace PlexRipper.BaseTests
     {
         #region Base
 
-        private static Faker<T> ApplyBasePlexMedia<T>(this Faker<T> faker, UnitTestDataConfig config = null) where T : PlexMedia
+        private static Faker<T> ApplyBasePlexMedia<T>(this Faker<T> faker, [CanBeNull] Action<UnitTestDataConfig> options = null) where T : PlexMedia
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
             return faker
                 .StrictMode(true)
@@ -45,13 +47,13 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.PlexLibrary, _ => null)
                 .RuleFor(x => x.MediaData, _ => new PlexMediaContainer
                 {
-                    MediaData = GetPlexMediaData(config).Generate(1),
+                    MediaData = GetPlexMediaData(options).Generate(1),
                 });
         }
 
-        public static Faker<PlexMediaData> GetPlexMediaData(UnitTestDataConfig config = null)
+        public static Faker<PlexMediaData> GetPlexMediaData([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
             return new Faker<PlexMediaData>()
                 .StrictMode(true)
@@ -75,9 +77,9 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.Parts, f => GetPlexMediaPart().GenerateBetween(1, config.IncludeMultiPartMovies ? 2 : 1));
         }
 
-        public static Faker<PlexMediaDataPart> GetPlexMediaPart(UnitTestDataConfig config = null)
+        public static Faker<PlexMediaDataPart> GetPlexMediaPart([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
             return new Faker<PlexMediaDataPart>()
                 .StrictMode(true)
@@ -88,7 +90,7 @@ namespace PlexRipper.BaseTests
                 .RuleFor(x => x.HasThumbnail, f => f.Random.Int(0, 1).ToString())
                 .RuleFor(x => x.HasChapterTextStream, f => f.Random.Bool())
                 .RuleFor(x => x.File, f => "/fake_download.mp4")
-                .RuleFor(x => x.Size, f => config.MockServerConfig?.DownloadFileSizeInBytes ?? 50 * 1024)
+                .RuleFor(x => x.Size, f => config.MockServer?.DownloadFileSizeInBytes ?? 50 * 1024)
                 .RuleFor(x => x.Container, f => f.System.FileExt("video/mp4"))
                 .RuleFor(x => x.VideoProfile, f => f.Random.Words(2))
                 .RuleFor(x => x.Indexes, f => f.Random.Word());
@@ -98,15 +100,15 @@ namespace PlexRipper.BaseTests
 
         #region PlexMovies
 
-        public static Faker<PlexMovie> GetPlexMovies(UnitTestDataConfig config = null)
+        public static Faker<PlexMovie> GetPlexMovies([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
             var movieIds = new List<int>();
             var movieKeys = new List<int>();
 
             return new Faker<PlexMovie>()
-                .ApplyBasePlexMedia(config)
+                .ApplyBasePlexMedia(options)
                 .StrictMode(true)
                 .UseSeed(config.Seed)
                 .RuleFor(x => x.PlexMovieGenres, _ => new List<PlexMovieGenre>())
@@ -124,19 +126,19 @@ namespace PlexRipper.BaseTests
 
         #region PlexTvShows
 
-        public static Faker<PlexTvShow> GetPlexTvShows(UnitTestDataConfig config = null)
+        public static Faker<PlexTvShow> GetPlexTvShows([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
             var tvShowKeys = new List<int>();
 
             return new Faker<PlexTvShow>()
                 .StrictMode(true)
                 .UseSeed(config.Seed)
-                .ApplyBasePlexMedia(config)
+                .ApplyBasePlexMedia(options)
                 .RuleFor(x => x.PlexTvShowGenres, _ => new List<PlexTvShowGenre>())
                 .RuleFor(x => x.PlexTvShowRoles, _ => new List<PlexTvShowRole>())
-                .RuleFor(x => x.Seasons, f => GetPlexTvShowSeason(config).Generate(config.TvShowSeasonCount))
+                .RuleFor(x => x.Seasons, f => GetPlexTvShowSeason(options).Generate(config.TvShowSeasonCount))
                 .FinishWith((_, tvShow) =>
                 {
                     for (int seasonIndex = 0; seasonIndex < tvShow.Seasons.Count; seasonIndex++)
@@ -159,34 +161,34 @@ namespace PlexRipper.BaseTests
                 });
         }
 
-        public static Faker<PlexTvShowSeason> GetPlexTvShowSeason(UnitTestDataConfig config = null)
+        public static Faker<PlexTvShowSeason> GetPlexTvShowSeason([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
             var seasonKeys = new List<int>();
             return new Faker<PlexTvShowSeason>()
                 .StrictMode(true)
                 .UseSeed(config.Seed)
-                .ApplyBasePlexMedia(config)
+                .ApplyBasePlexMedia(options)
                 .RuleFor(x => x.Title, _ => "Season")
-                .RuleFor(x => x.ParentKey, _ => GetUniqueId(seasonKeys, config))
+                .RuleFor(x => x.ParentKey, _ => GetUniqueId(seasonKeys, options))
                 .RuleFor(x => x.TvShowId, _ => 0)
                 .RuleFor(x => x.TvShow, _ => null)
-                .RuleFor(x => x.Episodes, f => GetPlexTvShowEpisode(config).Generate(config.TvShowEpisodeCount))
+                .RuleFor(x => x.Episodes, f => GetPlexTvShowEpisode(options).Generate(config.TvShowEpisodeCount))
                 .FinishWith((f, tvShowSeason) => { tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum(); });
         }
 
-        public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(UnitTestDataConfig config = null)
+        public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode([CanBeNull] Action<UnitTestDataConfig> options = null)
         {
-            config ??= new UnitTestDataConfig();
+            var config = UnitTestDataConfig.FromOptions(options);
 
             var episodeKeys = new List<int>();
             return new Faker<PlexTvShowEpisode>()
                 .StrictMode(true)
                 .UseSeed(config.Seed)
-                .ApplyBasePlexMedia(config)
+                .ApplyBasePlexMedia(options)
                 .RuleFor(x => x.Id, _ => 0)
-                .RuleFor(x => x.ParentKey, _ => GetUniqueId(episodeKeys, config))
+                .RuleFor(x => x.ParentKey, _ => GetUniqueId(episodeKeys, options))
                 .RuleFor(x => x.Key, f => f.Random.Int(1, 10000000))
                 .RuleFor(x => x.TvShowId, _ => 0)
                 .RuleFor(x => x.TvShow, _ => null)

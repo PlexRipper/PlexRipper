@@ -11,6 +11,7 @@ using Moq;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
+using PlexRipper.Data;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using Shouldly;
@@ -65,13 +66,12 @@ namespace DownloadManager.UnitTests
             // Arrange
             using var mock = AutoMock.GetStrict();
             mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
-            var config = new UnitTestDataConfig
-            {
-                Seed = 9999,
-                MovieDownloadTasksCount = 2,
-            };
 
-            await using var context = await MockDatabase.GetMemoryDbContext().Setup(config);
+            await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
+            {
+                config.Seed = 9999;
+                config.MovieDownloadTasksCount = 2;
+            });
             var downloadTasks = await context.DownloadTasks.ToListAsync();
             downloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
             var downloadTaskIds = downloadTasks.Select(x => x.Id).ToList();

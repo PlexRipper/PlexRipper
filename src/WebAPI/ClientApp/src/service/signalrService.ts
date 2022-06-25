@@ -17,15 +17,16 @@ import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import IStoreState from '@interfaces/service/IStoreState';
 import { isEqual } from 'lodash';
+import ISetup from '@interfaces/ISetup';
 
-export class SignalrService extends BaseService {
+export class SignalrService extends BaseService implements ISetup {
 	private _progressHubConnection: HubConnection | null = null;
 	private _notificationHubConnection: HubConnection | null = null;
 
 	private _serverDownloadProgress = new Subject<ServerDownloadProgressDTO>();
 
 	public constructor() {
-		super({
+		super('SignalrService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
@@ -40,21 +41,28 @@ export class SignalrService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setup(nuxtContext);
+	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+		super.setNuxtContext(nuxtContext);
 
 		GlobalService.getConfigReady().subscribe((config) => {
 			Log.debug('Setting up SignalR Service');
 			const options: IHttpConnectionOptions = {
-				logger: LogLevel.Warning,
+				logger: LogLevel.Information,
 			};
 
 			// Setup Connections
 			const baseUrl = config.baseURL;
-			this._progressHubConnection = new HubConnectionBuilder().withUrl(`${baseUrl}/progress`, options).build();
-			this._notificationHubConnection = new HubConnectionBuilder().withUrl(`${baseUrl}/notifications`, options).build();
+			this._progressHubConnection = new HubConnectionBuilder()
+				.withUrl(`${baseUrl}/progress`, options)
+				.withAutomaticReconnect()
+				.build();
+			this._notificationHubConnection = new HubConnectionBuilder()
+				.withUrl(`${baseUrl}/notifications`, options)
+				.withAutomaticReconnect()
+				.build();
 
 			this.setupSubscriptions();
+			callBack(this._name);
 		});
 	}
 

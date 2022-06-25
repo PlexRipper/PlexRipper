@@ -17,21 +17,16 @@ namespace WebAPI.IntegrationTests.DownloadController
         public DownloadController_StartCommand_IntegrationTests(ITestOutputHelper output) : base(output) { }
 
         [Fact]
-        public async Task ShouldStartQueuedDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
+        public async Task ShouldStartQueuedMoviewDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
         {
             // Arrange
-            var config = new UnitTestDataConfig
+            await CreateContainer(config =>
             {
-                Seed = 4564,
-                MovieDownloadTasksCount = 5,
-                MockServerConfig = new PlexMockServerConfig
-                {
-                    DownloadFileSizeInMb = 50,
-                },
-                MockDownloadSubscriptions = new MockDownloadSubscriptions(),
-            };
-
-            await CreateContainer(config);
+                config.Seed = 4564;
+                config.MovieDownloadTasksCount = 5;
+                config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
+                config.SetupMockServer();
+            });
             var downloadTasks = await Container.PlexRipperDbContext.DownloadTasks.ToListAsync();
             downloadTasks.Count.ShouldBe(10);
 

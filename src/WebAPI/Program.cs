@@ -1,31 +1,31 @@
+﻿// This application entry point is based on ASP.NET Core new project templates and is included
+// as a starting point for app host configuration.
+// This file may need updated according to the specific scenario of the application being upgraded.
+// For more information on ASP.NET Core hosting, see https://docs.microsoft.com/aspnet/core/fundamentals/host/web-host
+
 using System;
-using FluentResults;
-using Logging;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using PlexRipper.WebAPI.Common;
-using Serilog.Events;
+using Microsoft.Extensions.Logging;
 
 namespace PlexRipper.WebAPI
 {
     public class Program
     {
-        public static void Main()
+        public static void Main(string[] args)
         {
-            Log.SetupLogging(LogEventLevel.Verbose);
-
-            try
-            {
-                PlexRipperHost.Setup().Build().Run();
-            }
-            catch (Exception e)
-            {
-                Result.Fail(new ExceptionalError(e)).LogFatal();
-            }
-            finally
-            {
-                // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
-                Log.CloseAndFlush();
-            }
+            CreateHostBuilder(args).Build().Run();
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }

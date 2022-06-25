@@ -3,9 +3,9 @@ using PlexRipper.WebAPI.Common.Extensions;
 
 namespace PlexRipper.WebAPI.Common
 {
-    public class ValidateFilter : IActionFilter
+    public class ValidateFilter : Microsoft.AspNetCore.Mvc.Filters.IActionFilter
     {
-        public void OnActionExecuting(ActionExecutingContext context)
+        public void OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext context)
         {
             if (!context.ModelState.IsValid)
             {
@@ -13,6 +13,6 @@ namespace PlexRipper.WebAPI.Common
             }
         }
 
-        public void OnActionExecuted(ActionExecutedContext context) { }
+        public void OnActionExecuted(Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext context) { }
 }
     }

@@ -6,12 +6,13 @@ using Environment;
 using FluentResults;
 using Moq;
 using PlexRipper.Application;
+using PlexRipper.BaseTests;
+using PlexRipper.Settings;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using PlexRipper.BaseTests;
-using Shouldly;
 
-namespace Settings.IntegrationProject.ConfigManager
+namespace Settings.IntegrationProject
 {
     [Collection("Sequential")]
     public class ConfigManager_Setup_IntegrationTests : BaseIntegrationTests
@@ -32,7 +33,7 @@ namespace Settings.IntegrationProject.ConfigManager
             mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
             mock.Mock<IFileSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(false);
 
-            var sut = mock.Create<PlexRipper.Settings.ConfigManager>();
+            var sut = mock.Create<ConfigManager>();
 
             // Act
             await CreateContainer(config =>
@@ -42,12 +43,11 @@ namespace Settings.IntegrationProject.ConfigManager
             });
 
             Container.ConfigManager.Setup();
-
-            // Assert
-
             await Container.Boot.WaitForStartAsync(CancellationToken.None);
 
-            Container.ApiClient.ShouldNotBeNull();
+            // Assert
+            // TODO Improve this
+            Container.ConfigManager.ConfigFileExists().ShouldBeTrue();
         }
     }
 }

@@ -20,7 +20,11 @@ namespace PlexRipper.Settings
 
         #region Constructor
 
-        protected BaseSettingsModule() { }
+        protected BaseSettingsModule()
+        {
+            // Initialize with the default values
+            Reset();
+        }
 
         #endregion
 

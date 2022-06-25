@@ -48,7 +48,9 @@ namespace PlexRipper.FileSystem
 
             var directoryPathResult = _pathSystem.GetDirectoryName(filePath);
             if (directoryPathResult.IsFailed)
+            {
                 return directoryPathResult.ToResult();
+            }
 
             if (string.IsNullOrEmpty(directoryPathResult.Value))
             {
@@ -63,7 +65,9 @@ namespace PlexRipper.FileSystem
         {
             var directoryExistsResult = Exists(directory);
             if (directoryExistsResult.IsFailed)
+            {
                 return directoryExistsResult.ToResult();
+            }
 
             if (directoryExistsResult.Value)
             {
@@ -122,15 +126,21 @@ namespace PlexRipper.FileSystem
             {
                 var directoryResult = _pathSystem.GetDirectoryName(filePath);
                 if (directoryResult.IsFailed)
+                {
                     return directoryResult.ToResult();
+                }
 
                 var directoryExistsResult = Exists(filePath);
                 if (directoryExistsResult.IsFailed)
+                {
                     return directoryExistsResult.ToResult();
+                }
 
                 var directoryHasFiles = GetFiles(directoryResult.Value);
                 if (directoryHasFiles.IsFailed)
+                {
                     return directoryHasFiles.ToResult();
+                }
 
                 // If the filePath is just an empty directory then delete that.
                 if (!string.IsNullOrEmpty(directoryResult.Value) && directoryExistsResult.Value && !directoryHasFiles.Value.Any())

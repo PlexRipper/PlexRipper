@@ -4,7 +4,7 @@ using FluentResults;
 
 namespace PlexRipper.Application
 {
-    public interface IBaseSettingsModule<TModel>
+    public interface IBaseSettingsModule<TModel> where TModel : class
     {
         public string Name { get; }
 
@@ -22,5 +22,7 @@ namespace PlexRipper.Application
         public IObservable<TModel> ModuleHasChanged { get; }
 
         public TModel GetValues();
+
+        public TModel DefaultValues();
     }
 }

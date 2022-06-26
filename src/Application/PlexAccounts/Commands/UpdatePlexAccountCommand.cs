@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application.PlexAccounts
-{
-    public class UpdatePlexAccountCommand : IRequest<Result>
-    {
-        public PlexAccount PlexAccount { get; }
+﻿namespace PlexRipper.Application.PlexAccounts;
 
-        public UpdatePlexAccountCommand(PlexAccount plexAccount)
-        {
-            PlexAccount = plexAccount;
-        }
+public class UpdatePlexAccountCommand : IRequest<Result>
+{
+    public PlexAccount PlexAccount { get; }
+
+    public UpdatePlexAccountCommand(PlexAccount plexAccount)
+    {
+        PlexAccount = plexAccount;
     }
 }

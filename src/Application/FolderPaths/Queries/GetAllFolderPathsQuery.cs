@@ -1,4 +1,3 @@
-﻿namespace PlexRipper.Application
-{
-    public class GetAllFolderPathsQuery : IRequest<Result<List<FolderPath>>> { }
-}
+﻿namespace PlexRipper.Application;
+
+public class GetAllFolderPathsQuery : IRequest<Result<List<FolderPath>>> { }

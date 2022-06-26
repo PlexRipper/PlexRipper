@@ -1,20 +1,19 @@
 ﻿using PlexRipper.Application;
 using Quartz;
 
-namespace BackgroundServices.Jobs
+namespace BackgroundServices.Jobs;
+
+public class SyncServerJob : IJob
 {
-    public class SyncServerJob : IJob
+    private readonly IPlexServerService _plexServerService;
+
+    public SyncServerJob(IPlexServerService plexServerService)
     {
-        private readonly IPlexServerService _plexServerService;
+        _plexServerService = plexServerService;
+    }
 
-        public SyncServerJob(IPlexServerService plexServerService)
-        {
-            _plexServerService = plexServerService;
-        }
-
-        public async Task Execute(IJobExecutionContext context)
-        {
-            await _plexServerService.SyncPlexServers();
-        }
+    public async Task Execute(IJobExecutionContext context)
+    {
+        await _plexServerService.SyncPlexServers();
     }
 }

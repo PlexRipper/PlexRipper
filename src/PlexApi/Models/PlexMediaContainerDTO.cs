@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PlexRipper.PlexApi.Models
+namespace PlexRipper.PlexApi.Models;
+
+public class PlexMediaContainerDTO
 {
-    public class PlexMediaContainerDTO
-    {
-        [JsonPropertyName("MediaContainer")]
-        public MediaContainer MediaContainer { get; set; }
-    }
+    [JsonPropertyName("MediaContainer")]
+    public MediaContainer MediaContainer { get; set; }
 }

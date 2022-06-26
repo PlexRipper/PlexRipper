@@ -1,13 +1,12 @@
 ﻿using Autofac;
 
-namespace PlexRipper.HttpClient
+namespace PlexRipper.HttpClient;
+
+public class HttpClientModule : Module
 {
-    public class HttpClientModule : Module
+    protected override void Load(ContainerBuilder builder)
     {
-        protected override void Load(ContainerBuilder builder)
-        {
-            builder.RegisterType<System.Net.Http.HttpClient>().SingleInstance();
-            builder.RegisterType<PlexRipperHttpClient>().As<IPlexRipperHttpClient>().SingleInstance();
-        }
+        builder.RegisterType<System.Net.Http.HttpClient>().SingleInstance();
+        builder.RegisterType<PlexRipperHttpClient>().As<IPlexRipperHttpClient>().SingleInstance();
     }
 }

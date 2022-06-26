@@ -2,29 +2,28 @@
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.FolderPaths
+namespace PlexRipper.Data.FolderPaths;
+
+public class GetFolderPathByIdQueryValidator : AbstractValidator<GetFolderPathByIdQuery>
 {
-    public class GetFolderPathByIdQueryValidator : AbstractValidator<GetFolderPathByIdQuery>
+    public GetFolderPathByIdQueryValidator()
     {
-        public GetFolderPathByIdQueryValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
+        RuleFor(x => x.Id).GreaterThan(0);
     }
+}
 
-    public class GetFolderPathByIdQueryHandler : BaseHandler, IRequestHandler<GetFolderPathByIdQuery, Result<FolderPath>>
+public class GetFolderPathByIdQueryHandler : BaseHandler, IRequestHandler<GetFolderPathByIdQuery, Result<FolderPath>>
+{
+    public GetFolderPathByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<FolderPath>> Handle(GetFolderPathByIdQuery request, CancellationToken cancellationToken)
     {
-        public GetFolderPathByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
-
-        public async Task<Result<FolderPath>> Handle(GetFolderPathByIdQuery request, CancellationToken cancellationToken)
+        var folderPath = await _dbContext.FolderPaths.FindAsync(request.Id);
+        if (folderPath == null)
         {
-            var folderPath = await _dbContext.FolderPaths.FindAsync(request.Id);
-            if (folderPath == null)
-            {
-                return ResultExtensions.EntityNotFound(nameof(FolderPath), request.Id);
-            }
-
-            return Result.Ok(folderPath);
+            return ResultExtensions.EntityNotFound(nameof(FolderPath), request.Id);
         }
+
+        return Result.Ok(folderPath);
     }
 }

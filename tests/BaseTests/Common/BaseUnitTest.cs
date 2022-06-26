@@ -1,20 +1,19 @@
-namespace PlexRipper.BaseTests
+namespace PlexRipper.BaseTests;
+
+public class BaseUnitTest<TUnitTestClass> : IDisposable where TUnitTestClass : class
 {
-    public class BaseUnitTest<TUnitTestClass> : IDisposable where TUnitTestClass : class
+    protected readonly TUnitTestClass _sut;
+
+    protected readonly AutoMock mock = AutoMock.GetStrict();
+
+    protected BaseUnitTest(ITestOutputHelper output)
     {
-        protected readonly TUnitTestClass _sut;
+        Log.SetupTestLogging(output);
+        _sut = mock.Create<TUnitTestClass>();
+    }
 
-        protected readonly AutoMock mock = AutoMock.GetStrict();
-
-        protected BaseUnitTest(ITestOutputHelper output)
-        {
-            Log.SetupTestLogging(output);
-            _sut = mock.Create<TUnitTestClass>();
-        }
-
-        public void Dispose()
-        {
-            mock.Dispose();
-        }
+    public void Dispose()
+    {
+        mock.Dispose();
     }
 }

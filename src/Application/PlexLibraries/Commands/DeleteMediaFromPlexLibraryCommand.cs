@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class DeleteMediaFromPlexLibraryCommand : IRequest<Result<bool>>
-    {
-        public DeleteMediaFromPlexLibraryCommand(int plexLibraryId)
-        {
-            PlexLibraryId = plexLibraryId;
-        }
+﻿namespace PlexRipper.Application;
 
-        public int PlexLibraryId { get; }
+public class DeleteMediaFromPlexLibraryCommand : IRequest<Result<bool>>
+{
+    public DeleteMediaFromPlexLibraryCommand(int plexLibraryId)
+    {
+        PlexLibraryId = plexLibraryId;
     }
+
+    public int PlexLibraryId { get; }
 }

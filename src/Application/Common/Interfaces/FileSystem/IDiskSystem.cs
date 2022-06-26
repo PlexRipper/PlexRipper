@@ -1,9 +1,8 @@
-﻿namespace PlexRipper.Application
-{
-    public interface IDiskSystem
-    {
-        Result<long> GetAvailableSpaceByDirectory(string directory);
+﻿namespace PlexRipper.Application;
 
-        Result HasDirectoryEnoughAvailableSpace(string directory, long fileSize);
-    }
+public interface IDiskSystem
+{
+    Result<long> GetAvailableSpaceByDirectory(string directory);
+
+    Result HasDirectoryEnoughAvailableSpace(string directory, long fileSize);
 }

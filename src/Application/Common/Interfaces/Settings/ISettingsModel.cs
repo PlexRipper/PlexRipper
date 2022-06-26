@@ -1,19 +1,18 @@
-namespace PlexRipper.Application
+namespace PlexRipper.Application;
+
+public interface ISettingsModel
 {
-    public interface ISettingsModel
-    {
-        IGeneralSettings GeneralSettings { get; set; }
+    IGeneralSettings GeneralSettings { get; set; }
 
-        IConfirmationSettings ConfirmationSettings { get; set; }
+    IConfirmationSettings ConfirmationSettings { get; set; }
 
-        IDateTimeSettings DateTimeSettings { get; set; }
+    IDateTimeSettings DateTimeSettings { get; set; }
 
-        IDisplaySettings DisplaySettings { get; set; }
+    IDisplaySettings DisplaySettings { get; set; }
 
-        IDownloadManagerSettings DownloadManagerSettings { get; set; }
+    IDownloadManagerSettings DownloadManagerSettings { get; set; }
 
-        ILanguageSettings LanguageSettings { get; set; }
+    ILanguageSettings LanguageSettings { get; set; }
 
-        IServerSettings ServerSettings { get; set; }
-    }
+    IServerSettings ServerSettings { get; set; }
 }

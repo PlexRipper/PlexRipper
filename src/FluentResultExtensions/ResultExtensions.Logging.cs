@@ -3,349 +3,348 @@ using Logging;
 using Serilog.Events;
 
 // ReSharper disable once CheckNamespace
-namespace FluentResults
+namespace FluentResults;
+
+/// <summary>
+/// Part of the <see cref="ResultExtensions"/> class - Logging related functionality.
+/// </summary>
+public static partial class ResultExtensions
 {
-    /// <summary>
-    /// Part of the <see cref="ResultExtensions"/> class - Logging related functionality.
-    /// </summary>
-    public static partial class ResultExtensions
+    #region Implementations
+
+    private static void LogByType(LogEventLevel logLevel, string message, Exception e = null, string memberName = "", string sourceFilePath = "")
     {
-        #region Implementations
-
-        private static void LogByType(LogEventLevel logLevel, string message, Exception e = null, string memberName = "", string sourceFilePath = "")
+        switch (logLevel)
         {
-            switch (logLevel)
+            case LogEventLevel.Verbose:
+                Log.Verbose(message, e, memberName, sourceFilePath);
+                break;
+            case LogEventLevel.Debug:
+                Log.Debug(message, e, memberName, sourceFilePath);
+                break;
+            case LogEventLevel.Information:
+                Log.Information(message, e, memberName, sourceFilePath);
+                break;
+            case LogEventLevel.Warning:
+                Log.Warning(message, e, memberName, sourceFilePath);
+                break;
+            case LogEventLevel.Error:
+                Log.Error(message, e, memberName, sourceFilePath);
+                break;
+            case LogEventLevel.Fatal:
+                Log.Fatal(message, e, memberName, sourceFilePath);
+                break;
+        }
+    }
+
+    private static Result<T> LogResult<T>(
+        this Result<T> result,
+        LogEventLevel logLevel,
+        Exception e = null,
+        string memberName = "",
+        string sourceFilePath = "")
+    {
+        LogReasons(result.ToResult(), logLevel, e, memberName, sourceFilePath);
+
+        return result;
+    }
+
+    private static Result LogResult(
+        this Result result,
+        LogEventLevel logLevel,
+        Exception e = null,
+        string memberName = "",
+        string sourceFilePath = "")
+    {
+        LogReasons(result, logLevel, e, memberName, sourceFilePath);
+
+        return result;
+    }
+
+    private static void LogReasons(
+        this Result result,
+        LogEventLevel logLevel,
+        Exception e = null,
+        string memberName = "",
+        string sourceFilePath = "")
+    {
+        foreach (var success in result.Successes)
+        {
+            LogByType(logLevel, success.Message, null, memberName, sourceFilePath);
+
+            if (success.Metadata.Any())
             {
-                case LogEventLevel.Verbose:
-                    Log.Verbose(message, e, memberName, sourceFilePath);
-                    break;
-                case LogEventLevel.Debug:
-                    Log.Debug(message, e, memberName, sourceFilePath);
-                    break;
-                case LogEventLevel.Information:
-                    Log.Information(message, e, memberName, sourceFilePath);
-                    break;
-                case LogEventLevel.Warning:
-                    Log.Warning(message, e, memberName, sourceFilePath);
-                    break;
-                case LogEventLevel.Error:
-                    Log.Error(message, e, memberName, sourceFilePath);
-                    break;
-                case LogEventLevel.Fatal:
-                    Log.Fatal(message, e, memberName, sourceFilePath);
-                    break;
+                foreach (KeyValuePair<string, object> entry in success.Metadata)
+                {
+                    LogByType(logLevel, $"{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
+                }
             }
         }
 
-        private static Result<T> LogResult<T>(
-            this Result<T> result,
-            LogEventLevel logLevel,
-            Exception e = null,
-            string memberName = "",
-            string sourceFilePath = "")
+        foreach (var error in result.Errors)
         {
-            LogReasons(result.ToResult(), logLevel, e, memberName, sourceFilePath);
+            LogByType(logLevel, error.Message, null, memberName, sourceFilePath);
 
-            return result;
-        }
-
-        private static Result LogResult(
-            this Result result,
-            LogEventLevel logLevel,
-            Exception e = null,
-            string memberName = "",
-            string sourceFilePath = "")
-        {
-            LogReasons(result, logLevel, e, memberName, sourceFilePath);
-
-            return result;
-        }
-
-        private static void LogReasons(
-            this Result result,
-            LogEventLevel logLevel,
-            Exception e = null,
-            string memberName = "",
-            string sourceFilePath = "")
-        {
-            foreach (var success in result.Successes)
+            if (error.Metadata.Any())
             {
-                LogByType(logLevel, success.Message, null, memberName, sourceFilePath);
-
-                if (success.Metadata.Any())
+                foreach (KeyValuePair<string, object> entry in error.Metadata)
                 {
-                    foreach (KeyValuePair<string, object> entry in success.Metadata)
-                    {
-                        LogByType(logLevel, $"{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-                    }
+                    LogByType(logLevel, $"{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
                 }
             }
 
-            foreach (var error in result.Errors)
+            foreach (var errorReason in error.Reasons)
             {
-                LogByType(logLevel, error.Message, null, memberName, sourceFilePath);
-
-                if (error.Metadata.Any())
+                LogByType(logLevel, "--" + errorReason.Message, null, memberName, sourceFilePath);
+                if (errorReason.Metadata.Any())
                 {
-                    foreach (KeyValuePair<string, object> entry in error.Metadata)
+                    foreach (KeyValuePair<string, object> entry in errorReason.Metadata)
                     {
-                        LogByType(logLevel, $"{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
+                        LogByType(logLevel, $"--{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
                     }
                 }
 
-                foreach (var errorReason in error.Reasons)
+                foreach (var childErrorReason in errorReason.Reasons)
                 {
-                    LogByType(logLevel, "--" + errorReason.Message, null, memberName, sourceFilePath);
-                    if (errorReason.Metadata.Any())
+                    LogByType(logLevel, "----" + childErrorReason.Message, null, memberName, sourceFilePath);
+                    if (childErrorReason.Metadata.Any())
                     {
-                        foreach (KeyValuePair<string, object> entry in errorReason.Metadata)
+                        foreach (KeyValuePair<string, object> entry in childErrorReason.Metadata)
                         {
-                            LogByType(logLevel, $"--{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-                        }
-                    }
-
-                    foreach (var childErrorReason in errorReason.Reasons)
-                    {
-                        LogByType(logLevel, "----" + childErrorReason.Message, null, memberName, sourceFilePath);
-                        if (childErrorReason.Metadata.Any())
-                        {
-                            foreach (KeyValuePair<string, object> entry in childErrorReason.Metadata)
-                            {
-                                LogByType(logLevel, $"----MetaData: {entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-                            }
+                            LogByType(logLevel, $"----MetaData: {entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
                         }
                     }
                 }
+            }
 
-                if (error is ExceptionalError exceptional)
+            if (error is ExceptionalError exceptional)
+            {
+                var exception = exceptional.Exception;
+                LogByType(logLevel, "Exception", null, memberName, sourceFilePath);
+                LogByType(logLevel, $"--{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
+                if (exception.InnerException is not null)
                 {
-                    var exception = exceptional.Exception;
-                    LogByType(logLevel, "Exception", null, memberName, sourceFilePath);
-                    LogByType(logLevel, $"--{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
+                    exception = exception.InnerException;
+                    LogByType(logLevel, $"----{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
                     if (exception.InnerException is not null)
                     {
-                        exception = exception.InnerException;
-                        LogByType(logLevel, $"----{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
-                        if (exception.InnerException is not null)
+                        exception = exception.InnerException.InnerException;
+                        if (exception is not null)
                         {
-                            exception = exception.InnerException.InnerException;
-                            if (exception is not null)
-                            {
-                                LogByType(logLevel, $"-------{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
-                            }
+                            LogByType(logLevel, $"-------{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
                         }
                     }
                 }
             }
-
-            if (e != null)
-            {
-                LogByType(logLevel, string.Empty, e, memberName, sourceFilePath);
-            }
         }
 
-        #endregion
-
-        #region Result Signatures
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Verbose().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <returns>The result unchanged.</returns>
-        public static Result LogVerbose(
-            this Result result,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
+        if (e != null)
         {
-            return LogResult(result, LogEventLevel.Verbose, null, memberName, sourceFilePath);
+            LogByType(logLevel, string.Empty, e, memberName, sourceFilePath);
         }
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Debug().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <returns>The result unchanged.</returns>
-        public static Result LogDebug(
-            this Result result,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Debug, null, memberName, sourceFilePath);
-        }
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Information().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <returns>The result unchanged.</returns>
-        public static Result LogInformation(
-            this Result result,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Information, null, memberName, sourceFilePath);
-        }
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Warning().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <returns>The result unchanged.</returns>
-        public static Result LogWarning(
-            this Result result,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Warning, null, memberName, sourceFilePath);
-        }
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Error().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="e">The optional exception which can be passed to Log.Error().</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <returns>The result unchanged.</returns>
-        public static Result LogError(
-            this Result result,
-            Exception e = null,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath);
-        }
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Fatal().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="e">The optional exception which can be passed to Log.Error().</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <returns>The result unchanged.</returns>
-        public static Result LogFatal(
-            this Result result,
-            Exception e = null,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath);
-        }
-
-        #endregion
-
-        #region Result<T> Signatures
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Verbose().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <typeparam name="T">The result type.</typeparam>
-        /// <returns>The result unchanged.</returns>
-        public static Result<T> LogVerbose<T>(
-            this Result<T> result,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Verbose, null, memberName, sourceFilePath);
-        }
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Debug().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <typeparam name="T">The result type.</typeparam>
-        /// <returns>The result unchanged.</returns>
-        public static Result<T> LogDebug<T>(
-            this Result<T> result,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Debug, null, memberName, sourceFilePath);
-        }
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Information().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <typeparam name="T">The result type.</typeparam>
-        /// <returns>The result unchanged.</returns>
-        public static Result<T> LogInformation<T>(
-            this Result<T> result,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Information, null, memberName, sourceFilePath);
-        }
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Warning().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <typeparam name="T">The result type.</typeparam>
-        /// <returns>The result unchanged.</returns>
-        public static Result<T> LogWarning<T>(
-            this Result<T> result,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Warning, null, memberName, sourceFilePath);
-        }
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Error().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="e">The optional exception which can be passed to Log.Error().</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <typeparam name="T">The result type.</typeparam>
-        /// <returns>The result unchanged.</returns>
-        public static Result LogError<T>(
-            this Result<T> result,
-            Exception e = null,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath).ToResult();
-        }
-
-        /// <summary>
-        /// Logs all nested reasons and metadata on Log.Fatal().
-        /// </summary>
-        /// <param name="result">The result to use for logging.</param>
-        /// <param name="e">The optional exception which can be passed to Log.Error().</param>
-        /// <param name="memberName">The function name where the result happened.</param>
-        /// <param name="sourceFilePath">The path to the source.</param>
-        /// <typeparam name="T">The result type.</typeparam>
-        /// <returns>The result unchanged.</returns>
-        public static Result LogFatal<T>(
-            this Result<T> result,
-            Exception e = null,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "")
-        {
-            return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath).ToResult();
-        }
-
-        #endregion
     }
+
+    #endregion
+
+    #region Result Signatures
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Verbose().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <returns>The result unchanged.</returns>
+    public static Result LogVerbose(
+        this Result result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Verbose, null, memberName, sourceFilePath);
+    }
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Debug().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <returns>The result unchanged.</returns>
+    public static Result LogDebug(
+        this Result result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Debug, null, memberName, sourceFilePath);
+    }
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Information().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <returns>The result unchanged.</returns>
+    public static Result LogInformation(
+        this Result result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Information, null, memberName, sourceFilePath);
+    }
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Warning().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <returns>The result unchanged.</returns>
+    public static Result LogWarning(
+        this Result result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Warning, null, memberName, sourceFilePath);
+    }
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Error().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="e">The optional exception which can be passed to Log.Error().</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <returns>The result unchanged.</returns>
+    public static Result LogError(
+        this Result result,
+        Exception e = null,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath);
+    }
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Fatal().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="e">The optional exception which can be passed to Log.Error().</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <returns>The result unchanged.</returns>
+    public static Result LogFatal(
+        this Result result,
+        Exception e = null,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath);
+    }
+
+    #endregion
+
+    #region Result<T> Signatures
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Verbose().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <typeparam name="T">The result type.</typeparam>
+    /// <returns>The result unchanged.</returns>
+    public static Result<T> LogVerbose<T>(
+        this Result<T> result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Verbose, null, memberName, sourceFilePath);
+    }
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Debug().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <typeparam name="T">The result type.</typeparam>
+    /// <returns>The result unchanged.</returns>
+    public static Result<T> LogDebug<T>(
+        this Result<T> result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Debug, null, memberName, sourceFilePath);
+    }
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Information().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <typeparam name="T">The result type.</typeparam>
+    /// <returns>The result unchanged.</returns>
+    public static Result<T> LogInformation<T>(
+        this Result<T> result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Information, null, memberName, sourceFilePath);
+    }
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Warning().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <typeparam name="T">The result type.</typeparam>
+    /// <returns>The result unchanged.</returns>
+    public static Result<T> LogWarning<T>(
+        this Result<T> result,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Warning, null, memberName, sourceFilePath);
+    }
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Error().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="e">The optional exception which can be passed to Log.Error().</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <typeparam name="T">The result type.</typeparam>
+    /// <returns>The result unchanged.</returns>
+    public static Result LogError<T>(
+        this Result<T> result,
+        Exception e = null,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath).ToResult();
+    }
+
+    /// <summary>
+    /// Logs all nested reasons and metadata on Log.Fatal().
+    /// </summary>
+    /// <param name="result">The result to use for logging.</param>
+    /// <param name="e">The optional exception which can be passed to Log.Error().</param>
+    /// <param name="memberName">The function name where the result happened.</param>
+    /// <param name="sourceFilePath">The path to the source.</param>
+    /// <typeparam name="T">The result type.</typeparam>
+    /// <returns>The result unchanged.</returns>
+    public static Result LogFatal<T>(
+        this Result<T> result,
+        Exception e = null,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "")
+    {
+        return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath).ToResult();
+    }
+
+    #endregion
 }

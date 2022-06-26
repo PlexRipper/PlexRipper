@@ -1,44 +1,43 @@
-﻿namespace PlexRipper.DownloadManager
+﻿namespace PlexRipper.DownloadManager;
+
+public interface IDownloadTracker : IBusy, ISetup
 {
-    public interface IDownloadTracker : IBusy, ISetup
-    {
-        #region Properties
+    #region Properties
 
-        int ActiveDownloadClients { get; }
+    int ActiveDownloadClients { get; }
 
-        /// <summary>
-        /// Gets the observable which fires once a <see cref="DownloadTask"/> has finished downloading.
-        /// </summary>
-        IObservable<DownloadTask> DownloadTaskFinished { get; }
+    /// <summary>
+    /// Gets the observable which fires once a <see cref="DownloadTask"/> has finished downloading.
+    /// </summary>
+    IObservable<DownloadTask> DownloadTaskFinished { get; }
 
-        IObservable<DownloadTask> DownloadTaskStart { get; }
+    IObservable<DownloadTask> DownloadTaskStart { get; }
 
-        IObservable<DownloadTask> DownloadTaskUpdate { get; }
+    IObservable<DownloadTask> DownloadTaskUpdate { get; }
 
-        IObservable<DownloadTask> DownloadTaskStopped { get; }
+    IObservable<DownloadTask> DownloadTaskStopped { get; }
 
-        Task DownloadProcessTask { get; }
+    Task DownloadProcessTask { get; }
 
-        #endregion
+    #endregion
 
-        #region Public Methods
+    #region Public Methods
 
-        bool IsDownloading(int downloadTaskId);
+    bool IsDownloading(int downloadTaskId);
 
-        Task<Result> PauseDownloadClient(int downloadTaskId);
+    Task<Result> PauseDownloadClient(int downloadTaskId);
 
-        /// <summary>
-        /// Will start the download of a <see cref="DownloadTask"/> by it's id.
-        /// Will return once it has started
-        /// </summary>
-        /// <param name="downloadTaskId"></param>
-        /// <returns></returns>
-        Task<Result> StartDownloadClient(int downloadTaskId);
+    /// <summary>
+    /// Will start the download of a <see cref="DownloadTask"/> by it's id.
+    /// Will return once it has started
+    /// </summary>
+    /// <param name="downloadTaskId"></param>
+    /// <returns></returns>
+    Task<Result> StartDownloadClient(int downloadTaskId);
 
-        Task<Result> StopDownloadClient(int downloadTaskId);
+    Task<Result> StopDownloadClient(int downloadTaskId);
 
-        #endregion
+    #endregion
 
-        Result<Task> GetDownloadProcessTask(int downloadTaskId);
-    }
+    Result<Task> GetDownloadProcessTask(int downloadTaskId);
 }

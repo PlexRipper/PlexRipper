@@ -3,37 +3,36 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.PlexServers
+namespace PlexRipper.Data.PlexServers;
+
+public class GetPlexServersByIdsQueryValidator : AbstractValidator<GetPlexServersByIdsQuery>
 {
-    public class GetPlexServersByIdsQueryValidator : AbstractValidator<GetPlexServersByIdsQuery>
+    public GetPlexServersByIdsQueryValidator()
     {
-        public GetPlexServersByIdsQueryValidator()
-        {
-            RuleFor(x => x.Ids.Any()).Equal(true);
-        }
+        RuleFor(x => x.Ids.Any()).Equal(true);
     }
+}
 
-    public class GetPlexServersByIdsQueryHandler : BaseHandler,
-        IRequestHandler<GetPlexServersByIdsQuery, Result<List<PlexServer>>>
+public class GetPlexServersByIdsQueryHandler : BaseHandler,
+    IRequestHandler<GetPlexServersByIdsQuery, Result<List<PlexServer>>>
+{
+    public GetPlexServersByIdsQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<List<PlexServer>>> Handle(GetPlexServersByIdsQuery request, CancellationToken cancellationToken)
     {
-        public GetPlexServersByIdsQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var query =  PlexServerQueryable
+            .Include(x => x.ServerStatus)
+            .AsQueryable();
 
-        public async Task<Result<List<PlexServer>>> Handle(GetPlexServersByIdsQuery request, CancellationToken cancellationToken)
+        if (request.IncludeLibraries)
         {
-            var query =  PlexServerQueryable
-                .Include(x => x.ServerStatus)
-                .AsQueryable();
-
-            if (request.IncludeLibraries)
-            {
-                query = query.Include(x => x.PlexLibraries);
-            }
-
-            var plexServers = await query
-                .Where(x => request.Ids.Contains(x.Id))
-                .ToListAsync(cancellationToken);
-
-            return Result.Ok(plexServers);
+            query = query.Include(x => x.PlexLibraries);
         }
+
+        var plexServers = await query
+            .Where(x => request.Ids.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        return Result.Ok(plexServers);
     }
 }

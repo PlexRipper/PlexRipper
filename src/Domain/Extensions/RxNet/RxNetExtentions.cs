@@ -1,21 +1,20 @@
-﻿using System.Reactive;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
+using Unit = System.Reactive.Unit;
 
-namespace PlexRipper.Domain.RxNet
+namespace PlexRipper.Domain.RxNet;
+
+public static class RxNetExtentions
 {
-    public static class RxNetExtentions
+    public static IDisposable SubscribeAsync<T>(this IObservable<T> source, Func<T, Task> asyncAction, Action<Exception> handler = null)
     {
-        public static IDisposable SubscribeAsync<T>(this IObservable<T> source, Func<T, Task> asyncAction, Action<Exception> handler = null)
+        Func<T, Task<Unit>> wrapped = async t =>
         {
-            Func<T, Task<Unit>> wrapped = async t =>
-            {
-                await asyncAction(t);
-                return Unit.Default;
-            };
-            if (handler == null)
-                return source.SelectMany(wrapped).Subscribe(_ => { });
+            await asyncAction(t);
+            return Unit.Default;
+        };
+        if (handler == null)
+            return source.SelectMany(wrapped).Subscribe(_ => { });
 
-            return source.SelectMany(wrapped).Subscribe(_ => { }, handler);
-        }
+        return source.SelectMany(wrapped).Subscribe(_ => { }, handler);
     }
 }

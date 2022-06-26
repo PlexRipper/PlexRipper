@@ -1,9 +1,8 @@
 ﻿using PlexRipper.Application;
 
-namespace PlexRipper.Settings.Models
+namespace PlexRipper.Settings.Models;
+
+public class DownloadManagerSettings : IDownloadManagerSettings
 {
-    public class DownloadManagerSettings : IDownloadManagerSettings
-    {
-        public int DownloadSegments { get; set; }
-    }
+    public int DownloadSegments { get; set; }
 }

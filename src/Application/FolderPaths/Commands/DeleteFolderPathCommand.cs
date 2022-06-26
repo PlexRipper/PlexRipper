@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class DeleteFolderPathCommand : IRequest<Result>
-    {
-        public int Id { get; }
+﻿namespace PlexRipper.Application;
 
-        public DeleteFolderPathCommand(int id)
-        {
-            Id = id;
-        }
+public class DeleteFolderPathCommand : IRequest<Result>
+{
+    public int Id { get; }
+
+    public DeleteFolderPathCommand(int id)
+    {
+        Id = id;
     }
 }

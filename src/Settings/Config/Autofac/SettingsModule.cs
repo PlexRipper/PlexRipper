@@ -3,22 +3,21 @@ using Autofac;
 using PlexRipper.Application;
 using Module = Autofac.Module;
 
-namespace PlexRipper.Settings.Config
+namespace PlexRipper.Settings.Config;
+
+public class SettingsModule : Module
 {
-    public class SettingsModule : Module
+    protected override void Load(ContainerBuilder builder)
     {
-        protected override void Load(ContainerBuilder builder)
-        {
-            builder.RegisterType<UserSettings>().As<IUserSettings>().SingleInstance();
-            builder.RegisterType<ConfigManager>().As<IConfigManager>().SingleInstance();
+        builder.RegisterType<UserSettings>().As<IUserSettings>().SingleInstance();
+        builder.RegisterType<ConfigManager>().As<IConfigManager>().SingleInstance();
 
-            var assembly = Assembly.GetExecutingAssembly();
+        var assembly = Assembly.GetExecutingAssembly();
 
-            // register all I*SettingsModule
-            builder.RegisterAssemblyTypes(assembly)
-                .Where(t => t.Name.EndsWith("SettingsModule"))
-                .AsImplementedInterfaces()
-                .SingleInstance();
-        }
+        // register all I*SettingsModule
+        builder.RegisterAssemblyTypes(assembly)
+            .Where(t => t.Name.EndsWith("SettingsModule"))
+            .AsImplementedInterfaces()
+            .SingleInstance();
     }
 }

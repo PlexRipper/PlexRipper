@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class UpdateRootDownloadStatusOfDownloadTaskCommand : IRequest<Result>
-    {
-        public int RootDownloadTaskId { get; }
+﻿namespace PlexRipper.Application;
 
-        public UpdateRootDownloadStatusOfDownloadTaskCommand(int rootDownloadTaskId)
-        {
-            RootDownloadTaskId = rootDownloadTaskId;
-        }
+public class UpdateRootDownloadStatusOfDownloadTaskCommand : IRequest<Result>
+{
+    public int RootDownloadTaskId { get; }
+
+    public UpdateRootDownloadStatusOfDownloadTaskCommand(int rootDownloadTaskId)
+    {
+        RootDownloadTaskId = rootDownloadTaskId;
     }
 }

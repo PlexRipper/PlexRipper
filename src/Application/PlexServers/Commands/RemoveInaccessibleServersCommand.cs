@@ -1,4 +1,3 @@
-﻿namespace PlexRipper.Application
-{
-    public class RemoveInaccessibleServersCommand : IRequest<Result> { }
-}
+﻿namespace PlexRipper.Application;
+
+public class RemoveInaccessibleServersCommand : IRequest<Result> { }

@@ -1,4 +1,3 @@
-﻿namespace PlexRipper.WebAPI
-{
-    public interface IBoot : IHostLifetime { }
-}
+﻿namespace PlexRipper.WebAPI;
+
+public interface IBoot : IHostLifetime { }

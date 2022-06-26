@@ -1,7 +1,6 @@
-﻿namespace PlexRipper.Application
-{
-    public interface IBaseScheduler : ISetupAsync, IStopAsync
-    {
+﻿namespace PlexRipper.Application;
 
-    }
+public interface IBaseScheduler : ISetupAsync, IStopAsync
+{
+
 }

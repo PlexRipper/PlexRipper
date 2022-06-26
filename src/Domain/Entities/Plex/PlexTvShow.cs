@@ -1,17 +1,16 @@
-﻿namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain;
+
+public class PlexTvShow : PlexMedia
 {
-    public class PlexTvShow : PlexMedia
-    {
-        public override PlexMediaType Type => PlexMediaType.TvShow;
+    public override PlexMediaType Type => PlexMediaType.TvShow;
 
-        #region Relationships
+    #region Relationships
 
-        public List<PlexTvShowGenre> PlexTvShowGenres { get; set; }
+    public List<PlexTvShowGenre> PlexTvShowGenres { get; set; }
 
-        public List<PlexTvShowRole> PlexTvShowRoles { get; set; }
+    public List<PlexTvShowRole> PlexTvShowRoles { get; set; }
 
-        public List<PlexTvShowSeason> Seasons { get; set; }
+    public List<PlexTvShowSeason> Seasons { get; set; }
 
-        #endregion
-    }
+    #endregion
 }

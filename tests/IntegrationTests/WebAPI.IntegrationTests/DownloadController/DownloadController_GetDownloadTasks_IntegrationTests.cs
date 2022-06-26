@@ -2,46 +2,45 @@
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
 
-namespace WebAPI.IntegrationTests.DownloadController
+namespace WebAPI.IntegrationTests.DownloadController;
+
+[Collection("Sequential")]
+public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrationTests
 {
-    [Collection("Sequential")]
-    public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrationTests
+    public DownloadController_GetDownloadTasks_IntegrationTests(ITestOutputHelper output) : base(output) { }
+
+    [Fact]
+    public async Task ShouldHaveAllDownloadTasksNested_WhenTasksAreAvailable()
     {
-        public DownloadController_GetDownloadTasks_IntegrationTests(ITestOutputHelper output) : base(output) { }
+        // Arrange
+        var tvShowDownloadTasksCount = 5;
+        var tvShowSeasonDownloadTasksCount = 2;
+        var tvShowEpisodeDownloadTasksCount = 3;
 
-        [Fact]
-        public async Task ShouldHaveAllDownloadTasksNested_WhenTasksAreAvailable()
+        await CreateContainer(config =>
         {
-            // Arrange
-            var tvShowDownloadTasksCount = 5;
-            var tvShowSeasonDownloadTasksCount = 2;
-            var tvShowEpisodeDownloadTasksCount = 3;
+            config.Seed = 4564;
+            config.TvShowDownloadTasksCount = tvShowDownloadTasksCount;
+            config.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
+            config.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
+        });
 
-            await CreateContainer(config =>
+        // Act
+        var response = await Container.ApiClient.GetAsync(ApiRoutes.Download.GetDownloadTasks);
+        var result = await response.Deserialize<ResultDTO<List<ServerDownloadProgressDTO>>>();
+
+        // Assert
+        response.IsSuccessStatusCode.ShouldBeTrue();
+        result.IsSuccess.ShouldBeTrue();
+        var plexServer = result.Value.First();
+        plexServer.ShouldNotBeNull();
+        plexServer.Downloads.Count.ShouldBe(tvShowDownloadTasksCount);
+        foreach (var downloadProgressDto in plexServer.Downloads)
+        {
+            downloadProgressDto.Children.Count.ShouldBe(tvShowSeasonDownloadTasksCount);
+            foreach (var child in downloadProgressDto.Children)
             {
-                config.Seed = 4564;
-                config.TvShowDownloadTasksCount = tvShowDownloadTasksCount;
-                config.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
-                config.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
-            });
-
-            // Act
-            var response = await Container.ApiClient.GetAsync(ApiRoutes.Download.GetDownloadTasks);
-            var result = await response.Deserialize<ResultDTO<List<ServerDownloadProgressDTO>>>();
-
-            // Assert
-            response.IsSuccessStatusCode.ShouldBeTrue();
-            result.IsSuccess.ShouldBeTrue();
-            var plexServer = result.Value.First();
-            plexServer.ShouldNotBeNull();
-            plexServer.Downloads.Count.ShouldBe(tvShowDownloadTasksCount);
-            foreach (var downloadProgressDto in plexServer.Downloads)
-            {
-                downloadProgressDto.Children.Count.ShouldBe(tvShowSeasonDownloadTasksCount);
-                foreach (var child in downloadProgressDto.Children)
-                {
-                    child.Children.Count.ShouldBe(tvShowEpisodeDownloadTasksCount);
-                }
+                child.Children.Count.ShouldBe(tvShowEpisodeDownloadTasksCount);
             }
         }
     }

@@ -1,21 +1,20 @@
 ﻿using PlexRipper.DownloadManager;
 
-namespace PlexRipper.BaseTests
+namespace PlexRipper.BaseTests;
+
+public class MockDownloadFileStream : IDownloadFileStream
 {
-    public class MockDownloadFileStream : IDownloadFileStream
+    private readonly ITestStreamTracker _testStreamTracker;
+
+    public MockDownloadFileStream(ITestStreamTracker testStreamTracker)
     {
-        private readonly ITestStreamTracker _testStreamTracker;
+        _testStreamTracker = testStreamTracker;
+    }
 
-        public MockDownloadFileStream(ITestStreamTracker testStreamTracker)
-        {
-            _testStreamTracker = testStreamTracker;
-        }
-
-        public Result<Stream> CreateDownloadFileStream(string directory, string fileName, long fileSize)
-        {
-            var stream = new MemoryStream();
-            _testStreamTracker.AddDownloadFileStream(stream);
-            return Result.Ok((Stream)stream);
-        }
+    public Result<Stream> CreateDownloadFileStream(string directory, string fileName, long fileSize)
+    {
+        var stream = new MemoryStream();
+        _testStreamTracker.AddDownloadFileStream(stream);
+        return Result.Ok((Stream)stream);
     }
 }

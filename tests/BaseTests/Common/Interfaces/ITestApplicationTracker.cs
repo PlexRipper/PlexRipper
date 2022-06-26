@@ -1,7 +1,6 @@
-﻿namespace PlexRipper.BaseTests
+﻿namespace PlexRipper.BaseTests;
+
+public interface ITestApplicationTracker
 {
-    public interface ITestApplicationTracker
-    {
-        Task WaitUntilApplicationIsIdle(int checkInterval = 4000, bool logStatus = false);
-    }
+    Task WaitUntilApplicationIsIdle(int checkInterval = 4000, bool logStatus = false);
 }

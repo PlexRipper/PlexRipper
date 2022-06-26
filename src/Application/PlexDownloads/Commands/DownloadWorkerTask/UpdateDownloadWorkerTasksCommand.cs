@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class UpdateDownloadWorkerTasksCommand : IRequest<Result<bool>>
-    {
-        public UpdateDownloadWorkerTasksCommand(IList<DownloadWorkerTask> downloadTasks)
-        {
-            DownloadTasks = downloadTasks;
-        }
+﻿namespace PlexRipper.Application;
 
-        public IList<DownloadWorkerTask> DownloadTasks { get; }
+public class UpdateDownloadWorkerTasksCommand : IRequest<Result<bool>>
+{
+    public UpdateDownloadWorkerTasksCommand(IList<DownloadWorkerTask> downloadTasks)
+    {
+        DownloadTasks = downloadTasks;
     }
+
+    public IList<DownloadWorkerTask> DownloadTasks { get; }
 }

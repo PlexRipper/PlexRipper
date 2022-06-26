@@ -1,62 +1,61 @@
 ﻿using PlexRipper.Application;
 
-namespace PlexRipper.FileSystem.Common
+namespace PlexRipper.FileSystem.Common;
+
+public class DriveInfoMount : IMount
 {
-    public class DriveInfoMount : IMount
+    private readonly DriveInfo _driveInfo;
+
+    private readonly DriveType _driveType;
+
+    public DriveInfoMount(DriveInfo driveInfo, DriveType driveType = DriveType.Unknown, MountOptions mountOptions = null)
     {
-        private readonly DriveInfo _driveInfo;
+        _driveInfo = driveInfo;
+        _driveType = driveType;
+        MountOptions = mountOptions;
+    }
 
-        private readonly DriveType _driveType;
+    public long AvailableFreeSpace => _driveInfo.AvailableFreeSpace;
 
-        public DriveInfoMount(DriveInfo driveInfo, DriveType driveType = DriveType.Unknown, MountOptions mountOptions = null)
+    public string DriveFormat => _driveInfo.DriveFormat;
+
+    public DriveType DriveType
+    {
+        get
         {
-            _driveInfo = driveInfo;
-            _driveType = driveType;
-            MountOptions = mountOptions;
-        }
-
-        public long AvailableFreeSpace => _driveInfo.AvailableFreeSpace;
-
-        public string DriveFormat => _driveInfo.DriveFormat;
-
-        public DriveType DriveType
-        {
-            get
+            if (_driveType != DriveType.Unknown)
             {
-                if (_driveType != DriveType.Unknown)
-                {
-                    return _driveType;
-                }
-
-                return _driveInfo.DriveType;
+                return _driveType;
             }
+
+            return _driveInfo.DriveType;
         }
+    }
 
-        public bool IsReady => _driveInfo.IsReady;
+    public bool IsReady => _driveInfo.IsReady;
 
-        public MountOptions MountOptions { get; private set; }
+    public MountOptions MountOptions { get; private set; }
 
-        public string Name => _driveInfo.Name;
+    public string Name => _driveInfo.Name;
 
-        public string RootDirectory => _driveInfo.RootDirectory.FullName;
+    public string RootDirectory => _driveInfo.RootDirectory.FullName;
 
-        public long TotalFreeSpace => _driveInfo.TotalFreeSpace;
+    public long TotalFreeSpace => _driveInfo.TotalFreeSpace;
 
-        public long TotalSize => _driveInfo.TotalSize;
+    public long TotalSize => _driveInfo.TotalSize;
 
-        public string VolumeLabel => _driveInfo.VolumeLabel;
+    public string VolumeLabel => _driveInfo.VolumeLabel;
 
-        public string VolumeName
+    public string VolumeName
+    {
+        get
         {
-            get
+            if (string.IsNullOrWhiteSpace(VolumeLabel) || VolumeLabel.StartsWith("UUID=") || Name == VolumeLabel)
             {
-                if (string.IsNullOrWhiteSpace(VolumeLabel) || VolumeLabel.StartsWith("UUID=") || Name == VolumeLabel)
-                {
-                    return Name;
-                }
-
-                return $"{Name} ({VolumeLabel})";
+                return Name;
             }
+
+            return $"{Name} ({VolumeLabel})";
         }
     }
 }

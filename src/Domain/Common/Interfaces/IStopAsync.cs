@@ -1,7 +1,6 @@
-﻿namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain;
+
+public interface IStopAsync
 {
-    public interface IStopAsync
-    {
-        public Task<Result> StopAsync(bool gracefully = true);
-    }
+    public Task<Result> StopAsync(bool gracefully = true);
 }

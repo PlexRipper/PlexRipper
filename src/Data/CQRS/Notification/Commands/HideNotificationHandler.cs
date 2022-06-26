@@ -3,31 +3,30 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Notifications;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data
+namespace PlexRipper.Data;
+
+public class HideNotificationValidator : AbstractValidator<HideNotificationCommand>
 {
-    public class HideNotificationValidator : AbstractValidator<HideNotificationCommand>
+    public HideNotificationValidator()
     {
-        public HideNotificationValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
+        RuleFor(x => x.Id).GreaterThan(0);
     }
+}
 
-    public class HideNotificationHandler : BaseHandler, IRequestHandler<HideNotificationCommand, Result>
+public class HideNotificationHandler : BaseHandler, IRequestHandler<HideNotificationCommand, Result>
+{
+    public HideNotificationHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result> Handle(HideNotificationCommand command, CancellationToken cancellationToken)
     {
-        public HideNotificationHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
-
-        public async Task<Result> Handle(HideNotificationCommand command, CancellationToken cancellationToken)
+        var notification = _dbContext.Notifications.AsTracking().FirstOrDefault(x => x.Id == command.Id);
+        if (notification == null)
         {
-            var notification = _dbContext.Notifications.AsTracking().FirstOrDefault(x => x.Id == command.Id);
-            if (notification == null)
-            {
-                return ResultExtensions.EntityNotFound(nameof(Notification), command.Id);
-            }
-
-            notification.Hidden = true;
-            await SaveChangesAsync();
-            return Result.Ok();
+            return ResultExtensions.EntityNotFound(nameof(Notification), command.Id);
         }
+
+        notification.Hidden = true;
+        await SaveChangesAsync();
+        return Result.Ok();
     }
 }

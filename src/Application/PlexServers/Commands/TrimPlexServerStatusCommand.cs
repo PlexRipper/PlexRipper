@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class TrimPlexServerStatusCommand : IRequest<Result<bool>>
-    {
-        public int PlexServerId { get; }
+﻿namespace PlexRipper.Application;
 
-        public TrimPlexServerStatusCommand(int plexServerId = 0)
-        {
-            PlexServerId = plexServerId;
-        }
+public class TrimPlexServerStatusCommand : IRequest<Result<bool>>
+{
+    public int PlexServerId { get; }
+
+    public TrimPlexServerStatusCommand(int plexServerId = 0)
+    {
+        PlexServerId = plexServerId;
     }
 }

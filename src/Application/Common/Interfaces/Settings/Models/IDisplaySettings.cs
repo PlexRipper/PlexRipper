@@ -1,9 +1,8 @@
-﻿namespace PlexRipper.Application
-{
-    public interface IDisplaySettings
-    {
-        ViewMode TvShowViewMode { get; set; }
+﻿namespace PlexRipper.Application;
 
-        ViewMode MovieViewMode { get; set; }
-    }
+public interface IDisplaySettings
+{
+    ViewMode TvShowViewMode { get; set; }
+
+    ViewMode MovieViewMode { get; set; }
 }

@@ -1,21 +1,20 @@
-﻿namespace PlexRipper.Application
+﻿namespace PlexRipper.Application;
+
+public interface IDiskProvider
 {
-    public interface IDiskProvider
-    {
-        FileSystemResult GetResult(string path, bool includeFiles);
+    FileSystemResult GetResult(string path, bool includeFiles);
 
-        string GetParent(string path);
+    string GetParent(string path);
 
-        List<FileSystemModel> GetFiles(string path);
+    List<FileSystemModel> GetFiles(string path);
 
-        List<FileSystemModel> GetDirectories(string path);
+    List<FileSystemModel> GetDirectories(string path);
 
-        string GetDirectoryPath(string path);
+    string GetDirectoryPath(string path);
 
-        List<DirectoryInfo> GetDirectoryInfos(string path);
+    List<DirectoryInfo> GetDirectoryInfos(string path);
 
-        List<IMount> GetMounts();
+    List<IMount> GetMounts();
 
-        string GetVolumeName(IMount mountInfo);
-    }
+    string GetVolumeName(IMount mountInfo);
 }

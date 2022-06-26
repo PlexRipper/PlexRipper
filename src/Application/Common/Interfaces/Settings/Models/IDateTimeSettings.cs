@@ -1,15 +1,14 @@
-﻿namespace PlexRipper.Application
+﻿namespace PlexRipper.Application;
+
+public interface IDateTimeSettings
 {
-    public interface IDateTimeSettings
-    {
-        string ShortDateFormat { get; set; }
+    string ShortDateFormat { get; set; }
 
-        string LongDateFormat { get; set; }
+    string LongDateFormat { get; set; }
 
-        string TimeFormat { get; set; }
+    string TimeFormat { get; set; }
 
-        string TimeZone { get; set; }
+    string TimeZone { get; set; }
 
-        bool ShowRelativeDates { get; set; }
-    }
+    bool ShowRelativeDates { get; set; }
 }

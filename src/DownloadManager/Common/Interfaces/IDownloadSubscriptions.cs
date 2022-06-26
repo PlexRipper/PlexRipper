@@ -1,4 +1,3 @@
-﻿namespace PlexRipper.DownloadManager
-{
-    public interface IDownloadSubscriptions : ISetup { }
-}
+﻿namespace PlexRipper.DownloadManager;
+
+public interface IDownloadSubscriptions : ISetup { }

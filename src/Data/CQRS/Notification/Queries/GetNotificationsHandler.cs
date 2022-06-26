@@ -3,18 +3,17 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Notifications.Queries;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.Queries
+namespace PlexRipper.Data.Queries;
+
+public class GetNotificationsValidator : AbstractValidator<GetNotificationsQuery> { }
+
+public class GetNotificationsHandler : BaseHandler, IRequestHandler<GetNotificationsQuery, Result<List<Notification>>>
 {
-    public class GetNotificationsValidator : AbstractValidator<GetNotificationsQuery> { }
+    public GetNotificationsHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public class GetNotificationsHandler : BaseHandler, IRequestHandler<GetNotificationsQuery, Result<List<Notification>>>
+    public async Task<Result<List<Notification>>> Handle(GetNotificationsQuery request, CancellationToken cancellationToken)
     {
-        public GetNotificationsHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
-
-        public async Task<Result<List<Notification>>> Handle(GetNotificationsQuery request, CancellationToken cancellationToken)
-        {
-            var list = await _dbContext.Notifications.ToListAsync();
-            return Result.Ok(list);
-        }
+        var list = await _dbContext.Notifications.ToListAsync();
+        return Result.Ok(list);
     }
 }

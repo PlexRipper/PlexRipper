@@ -3,81 +3,80 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.PlexMedia
+namespace PlexRipper.Data.PlexMedia;
+
+public class GetPlexMediaByDownloadTaskQueryValidator : AbstractValidator<GetPlexMediaIdByKeyQuery>
 {
-    public class GetPlexMediaByDownloadTaskQueryValidator : AbstractValidator<GetPlexMediaIdByKeyQuery>
+    public GetPlexMediaByDownloadTaskQueryValidator()
     {
-        public GetPlexMediaByDownloadTaskQueryValidator()
-        {
-            RuleFor(x => x.DownloadTask).NotNull();
-            RuleFor(x => x.DownloadTask.Key).GreaterThan(0);
-            RuleFor(x => x.DownloadTask.MediaType).NotEqual(PlexMediaType.Unknown);
-            RuleFor(x => x.DownloadTask.MediaType).NotEqual(PlexMediaType.None);
-            RuleFor(x => x.DownloadTask.PlexServerId).GreaterThan(0);
-        }
+        RuleFor(x => x.DownloadTask).NotNull();
+        RuleFor(x => x.DownloadTask.Key).GreaterThan(0);
+        RuleFor(x => x.DownloadTask.MediaType).NotEqual(PlexMediaType.Unknown);
+        RuleFor(x => x.DownloadTask.MediaType).NotEqual(PlexMediaType.None);
+        RuleFor(x => x.DownloadTask.PlexServerId).GreaterThan(0);
     }
+}
 
-    public class GetPlexMediaByDownloadTaskQueryHandler : BaseHandler, IRequestHandler<GetPlexMediaIdByKeyQuery, Result<int>>
+public class GetPlexMediaByDownloadTaskQueryHandler : BaseHandler, IRequestHandler<GetPlexMediaIdByKeyQuery, Result<int>>
+{
+    public GetPlexMediaByDownloadTaskQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<int>> Handle(GetPlexMediaIdByKeyQuery request, CancellationToken cancellationToken)
     {
-        public GetPlexMediaByDownloadTaskQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var key = request.DownloadTask.Key;
+        var plexServerId = request.DownloadTask.PlexServerId;
+        var mediaType = request.DownloadTask.MediaType;
 
-        public async Task<Result<int>> Handle(GetPlexMediaIdByKeyQuery request, CancellationToken cancellationToken)
+        switch (mediaType)
         {
-            var key = request.DownloadTask.Key;
-            var plexServerId = request.DownloadTask.PlexServerId;
-            var mediaType = request.DownloadTask.MediaType;
-
-            switch (mediaType)
+            case PlexMediaType.Movie:
             {
-                case PlexMediaType.Movie:
+                var entity = await _dbContext.PlexMovies
+                    .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
+                if (entity is not null)
                 {
-                    var entity = await _dbContext.PlexMovies
-                        .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
-                    if (entity is not null)
-                    {
-                        return Result.Ok(entity.Id);
-                    }
-
-                    break;
+                    return Result.Ok(entity.Id);
                 }
-                case PlexMediaType.TvShow:
-                {
-                    var entity = await _dbContext.PlexTvShows
-                        .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
-                    if (entity is not null)
-                    {
-                        return Result.Ok(entity.Id);
-                    }
 
-                    break;
-                }
-                case PlexMediaType.Season:
-                {
-                    var entity = await _dbContext.PlexTvShowSeason
-                        .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
-                    if (entity is not null)
-                    {
-                        return Result.Ok(entity.Id);
-                    }
-
-                    break;
-                }
-                case PlexMediaType.Episode:
-                {
-                    var entity = await _dbContext.PlexTvShowEpisodes
-                        .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
-                    if (entity is not null)
-                    {
-                        return Result.Ok(entity.Id);
-                    }
-
-                    break;
-                }
-                default:
-                    return Result.Fail($"Type {mediaType} is not supported for retrieving the plexMediaId by key");
+                break;
             }
+            case PlexMediaType.TvShow:
+            {
+                var entity = await _dbContext.PlexTvShows
+                    .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
+                if (entity is not null)
+                {
+                    return Result.Ok(entity.Id);
+                }
 
-            return Result.Fail($"Couldn't find a plexMediaId with key {key}, plexServerId {plexServerId} with type {mediaType}");
+                break;
+            }
+            case PlexMediaType.Season:
+            {
+                var entity = await _dbContext.PlexTvShowSeason
+                    .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
+                if (entity is not null)
+                {
+                    return Result.Ok(entity.Id);
+                }
+
+                break;
+            }
+            case PlexMediaType.Episode:
+            {
+                var entity = await _dbContext.PlexTvShowEpisodes
+                    .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
+                if (entity is not null)
+                {
+                    return Result.Ok(entity.Id);
+                }
+
+                break;
+            }
+            default:
+                return Result.Fail($"Type {mediaType} is not supported for retrieving the plexMediaId by key");
         }
+
+        return Result.Fail($"Couldn't find a plexMediaId with key {key}, plexServerId {plexServerId} with type {mediaType}");
     }
 }

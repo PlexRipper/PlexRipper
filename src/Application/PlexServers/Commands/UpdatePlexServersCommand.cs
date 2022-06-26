@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class UpdatePlexServersCommand : IRequest<Result>
-    {
-        public UpdatePlexServersCommand(List<PlexServer> plexServers)
-        {
-            PlexServers = plexServers;
-        }
+﻿namespace PlexRipper.Application;
 
-        public List<PlexServer> PlexServers { get; }
+public class UpdatePlexServersCommand : IRequest<Result>
+{
+    public UpdatePlexServersCommand(List<PlexServer> plexServers)
+    {
+        PlexServers = plexServers;
     }
+
+    public List<PlexServer> PlexServers { get; }
 }

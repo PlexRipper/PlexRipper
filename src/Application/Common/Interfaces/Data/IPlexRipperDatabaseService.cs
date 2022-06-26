@@ -1,9 +1,8 @@
-﻿namespace PlexRipper.Application
-{
-    public interface IPlexRipperDatabaseService : ISetupAsync
-    {
-        Result BackUpDatabase();
+﻿namespace PlexRipper.Application;
 
-        Task<Result> ResetDatabase();
-    }
+public interface IPlexRipperDatabaseService : ISetupAsync
+{
+    Result BackUpDatabase();
+
+    Task<Result> ResetDatabase();
 }

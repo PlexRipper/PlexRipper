@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class ClearCompletedDownloadTasksCommand : IRequest<Result>
-    {
-        public List<int> DownloadTaskIds { get; }
+﻿namespace PlexRipper.Application;
 
-        public ClearCompletedDownloadTasksCommand(List<int> downloadTaskIds = null)
-        {
-            DownloadTaskIds = downloadTaskIds;
-        }
+public class ClearCompletedDownloadTasksCommand : IRequest<Result>
+{
+    public List<int> DownloadTaskIds { get; }
+
+    public ClearCompletedDownloadTasksCommand(List<int> downloadTaskIds = null)
+    {
+        DownloadTaskIds = downloadTaskIds;
     }
 }

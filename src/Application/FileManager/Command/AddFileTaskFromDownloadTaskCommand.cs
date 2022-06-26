@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application.FileManager.Command
-{
-    public class AddFileTaskFromDownloadTaskCommand : IRequest<Result<int>>
-    {
-        public AddFileTaskFromDownloadTaskCommand(DownloadTask downloadTask)
-        {
-            DownloadTask = downloadTask;
-        }
+﻿namespace PlexRipper.Application.FileManager.Command;
 
-        public DownloadTask DownloadTask { get; }
+public class AddFileTaskFromDownloadTaskCommand : IRequest<Result<int>>
+{
+    public AddFileTaskFromDownloadTaskCommand(DownloadTask downloadTask)
+    {
+        DownloadTask = downloadTask;
     }
+
+    public DownloadTask DownloadTask { get; }
 }

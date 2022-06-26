@@ -2,30 +2,29 @@
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.FolderPaths
+namespace PlexRipper.Data.FolderPaths;
+
+public class CreateFolderPathValidator : AbstractValidator<CreateFolderPathCommand>
 {
-    public class CreateFolderPathValidator : AbstractValidator<CreateFolderPathCommand>
+    public CreateFolderPathValidator()
     {
-        public CreateFolderPathValidator()
-        {
-            RuleFor(x => x.FolderPath).NotNull();
-            RuleFor(x => x.FolderPath.DisplayName).NotEmpty();
-            RuleFor(x => x.FolderPath.FolderType).NotEqual(FolderType.None);
-            RuleFor(x => x.FolderPath.FolderType).NotEqual(FolderType.Unknown);
-            RuleFor(x => x.FolderPath.MediaType).NotEqual(PlexMediaType.None);
-            RuleFor(x => x.FolderPath.MediaType).NotEqual(PlexMediaType.Unknown);
-        }
+        RuleFor(x => x.FolderPath).NotNull();
+        RuleFor(x => x.FolderPath.DisplayName).NotEmpty();
+        RuleFor(x => x.FolderPath.FolderType).NotEqual(FolderType.None);
+        RuleFor(x => x.FolderPath.FolderType).NotEqual(FolderType.Unknown);
+        RuleFor(x => x.FolderPath.MediaType).NotEqual(PlexMediaType.None);
+        RuleFor(x => x.FolderPath.MediaType).NotEqual(PlexMediaType.Unknown);
     }
+}
 
-    public class CreateFolderPathCommandHandler : BaseHandler, IRequestHandler<CreateFolderPathCommand, Result<int>>
+public class CreateFolderPathCommandHandler : BaseHandler, IRequestHandler<CreateFolderPathCommand, Result<int>>
+{
+    public CreateFolderPathCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<int>> Handle(CreateFolderPathCommand command, CancellationToken cancellationToken)
     {
-        public CreateFolderPathCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
-
-        public async Task<Result<int>> Handle(CreateFolderPathCommand command, CancellationToken cancellationToken)
-        {
-            await _dbContext.FolderPaths.AddAsync(command.FolderPath);
-            await _dbContext.SaveChangesAsync();
-            return Result.Ok(command.FolderPath.Id);
-        }
+        await _dbContext.FolderPaths.AddAsync(command.FolderPath);
+        await _dbContext.SaveChangesAsync();
+        return Result.Ok(command.FolderPath.Id);
     }
 }

@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class UpdatePlexLibraryByIdCommand : IRequest<Result<bool>>
-    {
-        public UpdatePlexLibraryByIdCommand(PlexLibrary plexLibrary)
-        {
-            PlexLibrary = plexLibrary;
-        }
+﻿namespace PlexRipper.Application;
 
-        public PlexLibrary PlexLibrary { get; }
+public class UpdatePlexLibraryByIdCommand : IRequest<Result<bool>>
+{
+    public UpdatePlexLibraryByIdCommand(PlexLibrary plexLibrary)
+    {
+        PlexLibrary = plexLibrary;
     }
+
+    public PlexLibrary PlexLibrary { get; }
 }

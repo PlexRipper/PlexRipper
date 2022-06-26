@@ -1,9 +1,8 @@
-﻿namespace PlexRipper.Application
-{
-    public interface ISchedulerService : IBaseScheduler
-    {
-        Task<Result> TriggerSyncPlexServersJob();
+﻿namespace PlexRipper.Application;
 
-        Task InspectPlexServersAsyncJob(int plexAccountId);
-    }
+public interface ISchedulerService : IBaseScheduler
+{
+    Task<Result> TriggerSyncPlexServersJob();
+
+    Task InspectPlexServersAsyncJob(int plexAccountId);
 }

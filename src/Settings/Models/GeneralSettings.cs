@@ -1,11 +1,10 @@
 ﻿using PlexRipper.Application;
 
-namespace PlexRipper.Settings.Models
-{
-    public class GeneralSettings : IGeneralSettings
-    {
-        public bool FirstTimeSetup { get; set; }
+namespace PlexRipper.Settings.Models;
 
-        public int ActiveAccountId { get; set; }
-    }
+public class GeneralSettings : IGeneralSettings
+{
+    public bool FirstTimeSetup { get; set; }
+
+    public int ActiveAccountId { get; set; }
 }

@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application.FileManager.Queries
-{
-    public class GetFileTaskByIdQuery : IRequest<Result<DownloadFileTask>>
-    {
-        public GetFileTaskByIdQuery(int id)
-        {
-            Id = id;
-        }
+﻿namespace PlexRipper.Application.FileManager.Queries;
 
-        public int Id { get; }
+public class GetFileTaskByIdQuery : IRequest<Result<DownloadFileTask>>
+{
+    public GetFileTaskByIdQuery(int id)
+    {
+        Id = id;
     }
+
+    public int Id { get; }
 }

@@ -1,10 +1,9 @@
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.PlexApi.Models
+namespace PlexRipper.PlexApi.Models;
+
+public class UserRole
 {
-    public class UserRole
-    {
-        [JsonPropertyName("Roles")]
-        public List<string> Roles { get; set; }
-    }
+    [JsonPropertyName("Roles")]
+    public List<string> Roles { get; set; }
 }

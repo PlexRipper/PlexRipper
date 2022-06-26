@@ -1,32 +1,31 @@
 ﻿using PlexRipper.Application;
 using PlexRipper.Settings.Models;
 
-namespace PlexRipper.Settings.Modules
+namespace PlexRipper.Settings.Modules;
+
+public class DisplaySettingsModule : BaseSettingsModule<IDisplaySettings>, IDisplaySettingsModule
 {
-    public class DisplaySettingsModule : BaseSettingsModule<IDisplaySettings>, IDisplaySettingsModule
+    public ViewMode TvShowViewMode { get; set; }
+
+    public ViewMode MovieViewMode { get; set; }
+
+    public override string Name => "DisplaySettings";
+
+    public override IDisplaySettings DefaultValues()
     {
-        public ViewMode TvShowViewMode { get; set; }
-
-        public ViewMode MovieViewMode { get; set; }
-
-        public override string Name => "DisplaySettings";
-
-        public override IDisplaySettings DefaultValues()
+        return new DisplaySettings
         {
-            return new DisplaySettings
-            {
-                TvShowViewMode = ViewMode.Poster,
-                MovieViewMode = ViewMode.Poster,
-            };
-        }
+            TvShowViewMode = ViewMode.Poster,
+            MovieViewMode = ViewMode.Poster,
+        };
+    }
 
-        public override IDisplaySettings GetValues()
+    public override IDisplaySettings GetValues()
+    {
+        return new DisplaySettings
         {
-            return new DisplaySettings
-            {
-                MovieViewMode = MovieViewMode,
-                TvShowViewMode = TvShowViewMode,
-            };
-        }
+            MovieViewMode = MovieViewMode,
+            TvShowViewMode = TvShowViewMode,
+        };
     }
 }

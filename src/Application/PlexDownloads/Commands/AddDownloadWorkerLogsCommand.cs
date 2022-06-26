@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class AddDownloadWorkerLogsCommand : IRequest<Result>
-    {
-        public IList<DownloadWorkerLog> DownloadWorkerLogs { get; }
+﻿namespace PlexRipper.Application;
 
-        public AddDownloadWorkerLogsCommand(IList<DownloadWorkerLog> downloadWorkerLogs)
-        {
-            DownloadWorkerLogs = downloadWorkerLogs;
-        }
+public class AddDownloadWorkerLogsCommand : IRequest<Result>
+{
+    public IList<DownloadWorkerLog> DownloadWorkerLogs { get; }
+
+    public AddDownloadWorkerLogsCommand(IList<DownloadWorkerLog> downloadWorkerLogs)
+    {
+        DownloadWorkerLogs = downloadWorkerLogs;
     }
 }

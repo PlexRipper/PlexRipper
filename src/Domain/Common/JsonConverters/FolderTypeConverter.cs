@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.Domain
-{
+namespace PlexRipper.Domain;
+
 public class FolderTypeConverter : JsonConverter<FolderType>
 {
     public override FolderType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -14,5 +14,4 @@ public class FolderTypeConverter : JsonConverter<FolderType>
     {
         writer.WriteStringValue(value.ToFolderTypeString());
     }
-}
 }

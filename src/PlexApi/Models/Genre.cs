@@ -1,10 +1,9 @@
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.PlexApi.Models
+namespace PlexRipper.PlexApi.Models;
+
+public class Genre
 {
-    public class Genre
-    {
-        [JsonPropertyName("tag")]
-        public string Tag { get; set; }
-    }
+    [JsonPropertyName("tag")]
+    public string Tag { get; set; }
 }

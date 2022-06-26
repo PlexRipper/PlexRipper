@@ -3,43 +3,42 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.PlexTvShows
+namespace PlexRipper.Data.PlexTvShows;
+
+public class GetPlexTvShowByIdWithSeasonsQueryValidator : AbstractValidator<GetPlexTvShowByIdWithSeasonsQuery>
 {
-    public class GetPlexTvShowByIdWithSeasonsQueryValidator : AbstractValidator<GetPlexTvShowByIdWithSeasonsQuery>
+    public GetPlexTvShowByIdWithSeasonsQueryValidator()
     {
-        public GetPlexTvShowByIdWithSeasonsQueryValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
+        RuleFor(x => x.Id).GreaterThan(0);
     }
+}
 
-    public class GetPlexTvShowByIdWithSeasonsQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowByIdWithSeasonsQuery, Result<PlexTvShow>>
+public class GetPlexTvShowByIdWithSeasonsQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowByIdWithSeasonsQuery, Result<PlexTvShow>>
+{
+    public GetPlexTvShowByIdWithSeasonsQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdWithSeasonsQuery request, CancellationToken cancellationToken)
     {
-        public GetPlexTvShowByIdWithSeasonsQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-        public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdWithSeasonsQuery request, CancellationToken cancellationToken)
+        var query = PlexTvShowsQueryable.IncludeSeasons();
+
+        if (request.IncludePlexLibrary)
         {
-
-            var query = PlexTvShowsQueryable.IncludeSeasons();
-
-            if (request.IncludePlexLibrary)
-            {
-                query = query.IncludePlexLibrary();
-            }
-
-            if (request.IncludePlexServer)
-            {
-                query = query.IncludePlexServer();
-            }
-
-            var plexTvShow = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
-            if (plexTvShow == null)
-            {
-                return ResultExtensions.EntityNotFound(nameof(PlexTvShow), request.Id);
-            }
-
-            return Result.Ok(plexTvShow);
+            query = query.IncludePlexLibrary();
         }
+
+        if (request.IncludePlexServer)
+        {
+            query = query.IncludePlexServer();
+        }
+
+        var plexTvShow = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+
+        if (plexTvShow == null)
+        {
+            return ResultExtensions.EntityNotFound(nameof(PlexTvShow), request.Id);
+        }
+
+        return Result.Ok(plexTvShow);
     }
 }

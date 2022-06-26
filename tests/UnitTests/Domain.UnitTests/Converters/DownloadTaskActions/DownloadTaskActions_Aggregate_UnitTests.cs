@@ -1,86 +1,85 @@
-﻿namespace Domain.UnitTests.Converters
+﻿namespace Domain.UnitTests.Converters;
+
+public class DownloadTaskActions_Aggregate_UnitTests
 {
-    public class DownloadTaskActions_Aggregate_UnitTests
+    public DownloadTaskActions_Aggregate_UnitTests(ITestOutputHelper output)
     {
-        public DownloadTaskActions_Aggregate_UnitTests(ITestOutputHelper output)
+        Log.SetupTestLogging(output);
+    }
+
+    [Fact]
+    public void ShouldBeStatusDownloading_WhenSomeAreDownloadFinished()
+    {
+        // Arrange
+        var downloadStatusList = new List<DownloadStatus>
         {
-            Log.SetupTestLogging(output);
-        }
+            DownloadStatus.Downloading,
+            DownloadStatus.Downloading,
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.DownloadFinished,
+        };
 
-        [Fact]
-        public void ShouldBeStatusDownloading_WhenSomeAreDownloadFinished()
+        // Act
+        var status = DownloadTaskActions.Aggregate(downloadStatusList);
+
+        // Assert
+        status.ShouldBe(DownloadStatus.Downloading);
+    }
+
+    [Fact]
+    public void ShouldBeStatusDownloadingFinished_WhenAllAreDownloadFinished()
+    {
+        // Arrange
+        var downloadStatusList = new List<DownloadStatus>
         {
-            // Arrange
-            var downloadStatusList = new List<DownloadStatus>
-            {
-                DownloadStatus.Downloading,
-                DownloadStatus.Downloading,
-                DownloadStatus.DownloadFinished,
-                DownloadStatus.DownloadFinished,
-            };
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.DownloadFinished,
+        };
 
-            // Act
-            var status = DownloadTaskActions.Aggregate(downloadStatusList);
+        // Act
+        var status = DownloadTaskActions.Aggregate(downloadStatusList);
 
-            // Assert
-            status.ShouldBe(DownloadStatus.Downloading);
-        }
+        // Assert
+        status.ShouldBe(DownloadStatus.DownloadFinished);
+    }
 
-        [Fact]
-        public void ShouldBeStatusDownloadingFinished_WhenAllAreDownloadFinished()
+    [Fact]
+    public void ShouldBeStatusDownloading_WhenSomeAreDownloadFinishedAndQueued()
+    {
+        // Arrange
+        var downloadStatusList = new List<DownloadStatus>
         {
-            // Arrange
-            var downloadStatusList = new List<DownloadStatus>
-            {
-                DownloadStatus.DownloadFinished,
-                DownloadStatus.DownloadFinished,
-                DownloadStatus.DownloadFinished,
-                DownloadStatus.DownloadFinished,
-            };
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.Queued,
+            DownloadStatus.Queued,
+        };
 
-            // Act
-            var status = DownloadTaskActions.Aggregate(downloadStatusList);
+        // Act
+        var status = DownloadTaskActions.Aggregate(downloadStatusList);
 
-            // Assert
-            status.ShouldBe(DownloadStatus.DownloadFinished);
-        }
+        // Assert
+        status.ShouldBe(DownloadStatus.Downloading);
+    }
 
-        [Fact]
-        public void ShouldBeStatusDownloading_WhenSomeAreDownloadFinishedAndQueued()
+    [Fact]
+    public void ShouldBeStatusDownloadingFinished_WhenSomeAreCompletedAndDownloadFinished()
+    {
+        // Arrange
+        var downloadStatusList = new List<DownloadStatus>
         {
-            // Arrange
-            var downloadStatusList = new List<DownloadStatus>
-            {
-                DownloadStatus.DownloadFinished,
-                DownloadStatus.DownloadFinished,
-                DownloadStatus.Queued,
-                DownloadStatus.Queued,
-            };
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.Completed,
+            DownloadStatus.Completed,
+        };
 
-            // Act
-            var status = DownloadTaskActions.Aggregate(downloadStatusList);
+        // Act
+        var status = DownloadTaskActions.Aggregate(downloadStatusList);
 
-            // Assert
-            status.ShouldBe(DownloadStatus.Downloading);
-        }
-
-        [Fact]
-        public void ShouldBeStatusDownloadingFinished_WhenSomeAreCompletedAndDownloadFinished()
-        {
-            // Arrange
-            var downloadStatusList = new List<DownloadStatus>
-            {
-                DownloadStatus.DownloadFinished,
-                DownloadStatus.DownloadFinished,
-                DownloadStatus.Completed,
-                DownloadStatus.Completed,
-            };
-
-            // Act
-            var status = DownloadTaskActions.Aggregate(downloadStatusList);
-
-            // Assert
-            status.ShouldBe(DownloadStatus.DownloadFinished);
-        }
+        // Assert
+        status.ShouldBe(DownloadStatus.DownloadFinished);
     }
 }

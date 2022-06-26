@@ -3,40 +3,39 @@ using Environment;
 using PlexRipper.Application;
 using PlexRipper.Settings;
 
-namespace Settings.UnitTests
+namespace Settings.UnitTests;
+
+public class ConfigManager_ResetConfig_UnitTests
 {
-    public class ConfigManager_ResetConfig_UnitTests
+    public ConfigManager_ResetConfig_UnitTests(ITestOutputHelper output)
     {
-        public ConfigManager_ResetConfig_UnitTests(ITestOutputHelper output)
-        {
-            Log.SetupTestLogging(output);
-        }
+        Log.SetupTestLogging(output);
+    }
 
-        [Fact]
-        public void ShouldReturnOkResult_WhenSettingsAreReset()
-        {
-            // Arrange
-            using var mock = AutoMock.GetStrict();
-            mock.Mock<IUserSettings>().Setup(x => x.Reset());
+    [Fact]
+    public void ShouldReturnOkResult_WhenSettingsAreReset()
+    {
+        // Arrange
+        using var mock = AutoMock.GetStrict();
+        mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
-            var sut = new Mock<ConfigManager>(
-                MockBehavior.Strict,
-                mock.Container.Resolve<IFileSystem>(),
-                mock.Container.Resolve<IDirectorySystem>(),
-                mock.Container.Resolve<IPathProvider>(),
-                mock.Container.Resolve<IUserSettings>());
-            sut.Setup(x => x.SaveConfig()).Returns(Result.Ok);
+        var sut = new Mock<ConfigManager>(
+            MockBehavior.Strict,
+            mock.Container.Resolve<IFileSystem>(),
+            mock.Container.Resolve<IDirectorySystem>(),
+            mock.Container.Resolve<IPathProvider>(),
+            mock.Container.Resolve<IUserSettings>());
+        sut.Setup(x => x.SaveConfig()).Returns(Result.Ok);
 
-            // Since ResetConfig is virtual we need to callBase here
-            sut.Setup(x => x.ResetConfig()).CallBase();
+        // Since ResetConfig is virtual we need to callBase here
+        sut.Setup(x => x.ResetConfig()).CallBase();
 
-            // Act
-            var resetResult = sut.Object.ResetConfig();
+        // Act
+        var resetResult = sut.Object.ResetConfig();
 
-            // Assert
-            resetResult.IsSuccess.ShouldBeTrue();
-            sut.Verify(x => x.SaveConfig(), Times.Once);
-            mock.Mock<IUserSettings>().Verify(x => x.Reset(), Times.Once);
-        }
+        // Assert
+        resetResult.IsSuccess.ShouldBeTrue();
+        sut.Verify(x => x.SaveConfig(), Times.Once);
+        mock.Mock<IUserSettings>().Verify(x => x.Reset(), Times.Once);
     }
 }

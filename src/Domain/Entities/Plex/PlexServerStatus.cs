@@ -1,25 +1,24 @@
-﻿namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain;
+
+public class PlexServerStatus : BaseEntity
 {
-    public class PlexServerStatus : BaseEntity
-    {
-        #region Properties
+    #region Properties
 
-        public int StatusCode { get; set; }
+    public int StatusCode { get; set; }
 
-        public bool IsSuccessful { get; set; }
+    public bool IsSuccessful { get; set; }
 
-        public string StatusMessage { get; set; }
+    public string StatusMessage { get; set; }
 
-        public DateTime LastChecked { get; set; }
+    public DateTime LastChecked { get; set; }
 
-        #endregion
+    #endregion
 
-        #region Relationships
+    #region Relationships
 
-        public PlexServer PlexServer { get; set; }
+    public PlexServer PlexServer { get; set; }
 
-        public int PlexServerId { get; set; }
+    public int PlexServerId { get; set; }
 
-        #endregion
-    }
+    #endregion
 }

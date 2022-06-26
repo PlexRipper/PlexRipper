@@ -3,32 +3,31 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.PlexLibraries
+namespace PlexRipper.Data.PlexLibraries;
+
+public class GetAllPlexLibrariesQueryValidator : AbstractValidator<GetAllPlexLibrariesQuery>
 {
-    public class GetAllPlexLibrariesQueryValidator : AbstractValidator<GetAllPlexLibrariesQuery>
+    public GetAllPlexLibrariesQueryValidator()
     {
-        public GetAllPlexLibrariesQueryValidator()
-        {
-        }
     }
+}
 
-    public class GetAllPlexLibrariesQueryHandler : BaseHandler, IRequestHandler<GetAllPlexLibrariesQuery, Result<List<PlexLibrary>>>
+public class GetAllPlexLibrariesQueryHandler : BaseHandler, IRequestHandler<GetAllPlexLibrariesQuery, Result<List<PlexLibrary>>>
+{
+    public GetAllPlexLibrariesQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<List<PlexLibrary>>> Handle(GetAllPlexLibrariesQuery request, CancellationToken cancellationToken)
     {
-        public GetAllPlexLibrariesQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var query = PlexLibraryQueryable;
 
-        public async Task<Result<List<PlexLibrary>>> Handle(GetAllPlexLibrariesQuery request, CancellationToken cancellationToken)
+
+        if (request.IncludePlexServer)
         {
-            var query = PlexLibraryQueryable;
-
-
-            if (request.IncludePlexServer)
-            {
-                query = query.IncludePlexServer();
-            }
-
-            var plexLibraries = await query.ToListAsync(cancellationToken);
-
-            return Result.Ok(plexLibraries);
+            query = query.IncludePlexServer();
         }
+
+        var plexLibraries = await query.ToListAsync(cancellationToken);
+
+        return Result.Ok(plexLibraries);
     }
 }

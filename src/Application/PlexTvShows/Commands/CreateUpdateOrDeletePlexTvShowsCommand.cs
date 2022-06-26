@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class CreateUpdateOrDeletePlexTvShowsCommand : IRequest<Result<bool>>
-    {
-        public CreateUpdateOrDeletePlexTvShowsCommand(PlexLibrary plexLibrary)
-        {
-            PlexLibrary = plexLibrary;
-        }
+﻿namespace PlexRipper.Application;
 
-        public PlexLibrary PlexLibrary { get; }
+public class CreateUpdateOrDeletePlexTvShowsCommand : IRequest<Result<bool>>
+{
+    public CreateUpdateOrDeletePlexTvShowsCommand(PlexLibrary plexLibrary)
+    {
+        PlexLibrary = plexLibrary;
     }
+
+    public PlexLibrary PlexLibrary { get; }
 }

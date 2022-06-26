@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class GetRootDownloadTaskIdByDownloadTaskIdQuery : IRequest<Result<int>>
-    {
-        public GetRootDownloadTaskIdByDownloadTaskIdQuery(int id)
-        {
-            Id = id;
-        }
+﻿namespace PlexRipper.Application;
 
-        public int Id { get; }
+public class GetRootDownloadTaskIdByDownloadTaskIdQuery : IRequest<Result<int>>
+{
+    public GetRootDownloadTaskIdByDownloadTaskIdQuery(int id)
+    {
+        Id = id;
     }
+
+    public int Id { get; }
 }

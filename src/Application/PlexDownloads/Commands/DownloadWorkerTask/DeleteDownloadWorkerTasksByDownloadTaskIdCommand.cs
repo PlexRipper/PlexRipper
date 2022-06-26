@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class DeleteDownloadWorkerTasksByDownloadTaskIdCommand : IRequest<Result>
-    {
-        public int DownloadTaskId { get; }
+﻿namespace PlexRipper.Application;
 
-        public DeleteDownloadWorkerTasksByDownloadTaskIdCommand(int downloadTaskId)
-        {
-            DownloadTaskId = downloadTaskId;
-        }
+public class DeleteDownloadWorkerTasksByDownloadTaskIdCommand : IRequest<Result>
+{
+    public int DownloadTaskId { get; }
+
+    public DeleteDownloadWorkerTasksByDownloadTaskIdCommand(int downloadTaskId)
+    {
+        DownloadTaskId = downloadTaskId;
     }
 }

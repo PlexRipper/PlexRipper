@@ -1,7 +1,6 @@
-﻿namespace PlexRipper.Application.Notifications
+﻿namespace PlexRipper.Application.Notifications;
+
+public class ClearAllNotificationsCommand : IRequest<Result>
 {
-    public class ClearAllNotificationsCommand : IRequest<Result>
-    {
-        public ClearAllNotificationsCommand() { }
-    }
+    public ClearAllNotificationsCommand() { }
 }

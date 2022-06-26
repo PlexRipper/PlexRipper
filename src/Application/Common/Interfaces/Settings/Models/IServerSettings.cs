@@ -1,9 +1,8 @@
 ﻿using PlexRipper.Domain.DownloadManager;
 
-namespace PlexRipper.Application
+namespace PlexRipper.Application;
+
+public interface IServerSettings
 {
-    public interface IServerSettings
-    {
-        List<PlexServerSettingsModel> Data { get; set; }
-    }
+    List<PlexServerSettingsModel> Data { get; set; }
 }

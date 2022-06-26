@@ -1,29 +1,28 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PlexRipper.Domain
+namespace PlexRipper.Domain;
+
+public class PlexTvShowSeason : PlexMedia
 {
-    public class PlexTvShowSeason : PlexMedia
-    {
-        /// <summary>
-        /// The PlexKey of the tvShow this belongs too.
-        /// </summary>
-        public int ParentKey { get; set; }
+    /// <summary>
+    /// The PlexKey of the tvShow this belongs too.
+    /// </summary>
+    public int ParentKey { get; set; }
 
-        #region Relationships
+    #region Relationships
 
-        public PlexTvShow TvShow { get; set; }
+    public PlexTvShow TvShow { get; set; }
 
-        public int TvShowId { get; set; }
+    public int TvShowId { get; set; }
 
-        public List<PlexTvShowEpisode> Episodes { get; set; }
+    public List<PlexTvShowEpisode> Episodes { get; set; }
 
-        #endregion
+    #endregion
 
-        #region Helpers
+    #region Helpers
 
-        [NotMapped]
-        public override PlexMediaType Type => PlexMediaType.Season;
+    [NotMapped]
+    public override PlexMediaType Type => PlexMediaType.Season;
 
-        #endregion
-    }
+    #endregion
 }

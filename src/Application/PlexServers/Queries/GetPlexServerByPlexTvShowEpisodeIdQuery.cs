@@ -1,12 +1,11 @@
-﻿namespace PlexRipper.Application
-{
-    public class GetPlexServerByPlexTvShowEpisodeIdQuery : IRequest<Result<PlexServer>>
-    {
-        public GetPlexServerByPlexTvShowEpisodeIdQuery(int id)
-        {
-            Id = id;
-        }
+﻿namespace PlexRipper.Application;
 
-        public int Id { get; }
+public class GetPlexServerByPlexTvShowEpisodeIdQuery : IRequest<Result<PlexServer>>
+{
+    public GetPlexServerByPlexTvShowEpisodeIdQuery(int id)
+    {
+        Id = id;
     }
+
+    public int Id { get; }
 }

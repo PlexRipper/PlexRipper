@@ -3,34 +3,33 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.FolderPaths
+namespace PlexRipper.Data.FolderPaths;
+
+public class DeleteFolderPathValidator : AbstractValidator<DeleteFolderPathCommand>
 {
-    public class DeleteFolderPathValidator : AbstractValidator<DeleteFolderPathCommand>
+    public DeleteFolderPathValidator()
     {
-        public DeleteFolderPathValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
+        RuleFor(x => x.Id).GreaterThan(0);
     }
+}
 
-    public class DeleteFolderPathHandler : BaseHandler, IRequestHandler<DeleteFolderPathCommand, Result>
+public class DeleteFolderPathHandler : BaseHandler, IRequestHandler<DeleteFolderPathCommand, Result>
+{
+    public DeleteFolderPathHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result> Handle(DeleteFolderPathCommand command, CancellationToken cancellationToken)
     {
-        public DeleteFolderPathHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var folderPath = await _dbContext.FolderPaths.AsTracking().FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
 
-        public async Task<Result> Handle(DeleteFolderPathCommand command, CancellationToken cancellationToken)
+        if (folderPath == null)
         {
-            var folderPath = await _dbContext.FolderPaths.AsTracking().FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
-
-            if (folderPath == null)
-            {
-                return ResultExtensions.EntityNotFound(nameof(FolderPath), command.Id);
-            }
-
-            _dbContext.FolderPaths.Remove(folderPath);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            Log.Debug($"Deleted {nameof(FolderPath)} with Id: {command.Id} from the database");
-
-            return Result.Ok();
+            return ResultExtensions.EntityNotFound(nameof(FolderPath), command.Id);
         }
+
+        _dbContext.FolderPaths.Remove(folderPath);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        Log.Debug($"Deleted {nameof(FolderPath)} with Id: {command.Id} from the database");
+
+        return Result.Ok();
     }
 }

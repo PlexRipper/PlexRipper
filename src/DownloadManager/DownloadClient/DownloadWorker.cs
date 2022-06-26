@@ -103,7 +103,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
                 _downloadFileSystem.CreateDownloadFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
             if (_fileStreamResult.IsFailed)
             {
-                SendDownloadWorkerError(_fileStreamResult);
+                SendDownloadWorkerError(_fileStreamResult.ToResult());
                 return _fileStreamResult.ToResult();
             }
 

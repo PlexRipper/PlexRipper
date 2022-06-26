@@ -85,7 +85,7 @@ namespace PlexRipper.DownloadManager
 
             var downloadTasksResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true));
             if (downloadTasksResult.IsFailed)
-                return downloadTasksResult;
+                return downloadTasksResult.ToResult();
 
             if (_downloadTracker.IsDownloading(downloadTaskId))
             {
@@ -170,7 +170,7 @@ namespace PlexRipper.DownloadManager
                 return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
             var failedTasks = new List<int>();
-            var errors = new List<Error>();
+            var errors = new List<IError>();
 
             // The paused downloading state will be send through an subscription to the database.
             var pauseResult = await _downloadTracker.PauseDownloadClient(downloadTaskId);
@@ -194,7 +194,7 @@ namespace PlexRipper.DownloadManager
         }
 
         /// <inheritdoc/>
-        public async Task<Result> DeleteDownloadTaskClientsAsync(List<int> downloadTaskIds)
+        public async Task<Result<bool>> DeleteDownloadTaskClientsAsync(List<int> downloadTaskIds)
         {
             if (downloadTaskIds is null || !downloadTaskIds.Any())
             {

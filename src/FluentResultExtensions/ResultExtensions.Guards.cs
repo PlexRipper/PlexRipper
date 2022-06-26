@@ -15,7 +15,7 @@ namespace FluentResults
         /// <param name="result"></param>
         /// <param name="errors"></param>
         /// <returns></returns>
-        public static Result AddNestedErrors(this Result result, List<Error> errors)
+        public static Result AddNestedErrors(this Result result, List<IError> errors)
         {
             if (result.Errors.Any())
             {

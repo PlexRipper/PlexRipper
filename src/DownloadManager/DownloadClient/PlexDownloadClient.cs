@@ -170,9 +170,7 @@ namespace PlexRipper.DownloadManager.DownloadClient
             }
             catch (Exception e)
             {
-                return Result.Fail(new ExceptionalError(e)
-                        .WithMessage($"Could not download {DownloadTask.FileName}"))
-                    .LogError();
+                return Result.Fail(new ExceptionalError($"Could not download {DownloadTask.FileName}", e)).LogError();
             }
 
             return Result.Ok();

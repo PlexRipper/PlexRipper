@@ -214,7 +214,7 @@ namespace PlexRipper.PlexApi
             }
             catch (Exception)
             {
-                return result.WithError(new Error("Failed to deserialize").WithMessage(jsonString));
+                return result.WithError(new Error($"Failed to deserialize: {jsonString}"));
             }
 
             return result;

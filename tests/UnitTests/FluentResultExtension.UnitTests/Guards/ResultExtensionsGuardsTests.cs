@@ -16,7 +16,7 @@ namespace FluentResultExtensionTests.Guards
             // Arrange
             var result = Result.Fail("Main Error");
 
-            var errors = new List<Error>
+            var errors = new List<IError>
             {
                 new Error("Error #1"),
                 new Error("Error #2"),

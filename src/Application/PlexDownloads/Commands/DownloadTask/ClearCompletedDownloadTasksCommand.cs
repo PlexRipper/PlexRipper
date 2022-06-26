@@ -4,7 +4,7 @@ using MediatR;
 
 namespace PlexRipper.Application
 {
-    public class ClearCompletedDownloadTasksCommand : IRequest<Result<bool>>
+    public class ClearCompletedDownloadTasksCommand : IRequest<Result>
     {
         public List<int> DownloadTaskIds { get; }
 

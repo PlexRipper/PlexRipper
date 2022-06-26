@@ -54,7 +54,7 @@ namespace PlexRipper.Settings
             if (jsonSettings.IsFailed)
             {
                 Reset();
-                return jsonSettings;
+                return jsonSettings.ToResult();
             }
 
             TModel defaultValues = DefaultValues();

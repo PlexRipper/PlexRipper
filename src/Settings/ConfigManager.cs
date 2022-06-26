@@ -128,7 +128,7 @@ namespace PlexRipper.Settings
             var jsonSettings = GetJsonSettingsObject();
             if (jsonSettings.IsFailed)
             {
-                return jsonSettings;
+                return jsonSettings.ToResult();
             }
 
             Result writeResult = WriteToConfigFile(jsonSettings.Value);

@@ -95,7 +95,7 @@ namespace PlexRipper.DownloadManager
                 var validationResult = validator.Validate(downloadTask).ToFluentResult();
                 if (validationResult.IsFailed)
                 {
-                    validationResult.Errors.ForEach(x => x.WithMetadata("downloadTask Title", downloadTask.FullTitle));
+                    validationResult.Errors.ForEach(x => x.Metadata.Add("downloadTask Title", downloadTask.FullTitle));
                     validationResult.LogError();
                     failedList.Add(downloadTask);
                     result.AddNestedErrors(validationResult.Errors);

@@ -322,13 +322,13 @@ namespace FluentResults
         /// <param name="sourceFilePath">The path to the source.</param>
         /// <typeparam name="T">The result type.</typeparam>
         /// <returns>The result unchanged.</returns>
-        public static Result<T> LogError<T>(
+        public static Result LogError<T>(
             this Result<T> result,
             Exception e = null,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath);
+            return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath).ToResult();
         }
 
         /// <summary>
@@ -340,13 +340,13 @@ namespace FluentResults
         /// <param name="sourceFilePath">The path to the source.</param>
         /// <typeparam name="T">The result type.</typeparam>
         /// <returns>The result unchanged.</returns>
-        public static Result<T> LogFatal<T>(
+        public static Result LogFatal<T>(
             this Result<T> result,
             Exception e = null,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "")
         {
-            return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath);
+            return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath).ToResult();
         }
 
         #endregion

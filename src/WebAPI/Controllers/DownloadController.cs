@@ -119,7 +119,8 @@ namespace PlexRipper.WebAPI.Controllers
                 return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
             }
 
-            return ToActionResult(await _plexDownloadService.DeleteDownloadTasksAsync(downloadTaskIds));
+            var result = await _plexDownloadService.DeleteDownloadTasksAsync(downloadTaskIds);
+            return ToActionResult(result.ToResult());
         }
 
         // GET: api/(DownloadController)/detail/{id:int}

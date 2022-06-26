@@ -49,6 +49,6 @@ namespace PlexRipper.Application
         /// </summary>
         /// <param name="downloadTaskIds">The list of <see cref="DownloadTask"/> to delete.</param>
         /// <returns><see cref="Result"/> fails on error.</returns>
-        Task<Result> DeleteDownloadTaskClientsAsync(List<int> downloadTaskIds);
+        Task<Result<bool>> DeleteDownloadTaskClientsAsync(List<int> downloadTaskIds);
     }
 }

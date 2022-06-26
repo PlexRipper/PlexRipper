@@ -1,20 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-      <TargetFramework>net6.0</TargetFramework>
-      <RootNamespace>PlexRipper.Application</RootNamespace>
-    <AssemblyName>PlexRipper.Application</AssemblyName>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>10</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>PlexRipper.Application</RootNamespace>
+        <AssemblyName>PlexRipper.Application</AssemblyName>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.3.0" />
-    <PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0"/>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.3.0"/>
+        <PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="7.0.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Domain\Domain.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Domain\Domain.csproj"/>
+    </ItemGroup>
 
 </Project>

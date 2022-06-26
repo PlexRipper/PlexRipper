@@ -4,6 +4,7 @@ using AutoMapper;
 using PlexRipper.Domain;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
 using PlexRipper.PlexApi.Models;
+using Directory = PlexRipper.PlexApi.Models.Directory;
 
 namespace PlexRipper.PlexApi.Mappings
 {

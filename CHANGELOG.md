@@ -6,7 +6,7 @@
 
 ### Changed
  - Removed batch commands from the download page, these were not working and overcomplicated things too much.
-
+ - Migrated projected to .NET 6, brings many performance improvements
 ### Fixed
  - Fixed the opening of the server settings not defaulting back to its first tab
  - Fixed the download progress not updating after a while due to SignalR disconnects
@@ -48,7 +48,7 @@
 - Added an improved Notification sidebar
 - Added all text as translations keys to the language file to ensure everything can get translated.
 - Added Language switcher under Settings => UI, only supported English and the to be translated French.
-  
+
 ### Changed
 
 - Notifications can now be cleared with a click of a button

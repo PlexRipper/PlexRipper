@@ -1,7 +1,6 @@
-namespace PlexRipper.Application
+namespace PlexRipper.Application;
+
+public interface ILanguageSettings
 {
-    public interface ILanguageSettings
-    {
-        string Language { get; set; }
-    }
+    string Language { get; set; }
 }

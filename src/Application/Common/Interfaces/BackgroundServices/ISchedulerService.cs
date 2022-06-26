@@ -1,12 +1,8 @@
-﻿using System.Threading.Tasks;
-using FluentResults;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public interface ISchedulerService : IBaseScheduler
 {
-    public interface ISchedulerService : IBaseScheduler
-    {
-        Task<Result> TriggerSyncPlexServersJob();
+    Task<Result> TriggerSyncPlexServersJob();
 
-        Task InspectPlexServersAsyncJob(int plexAccountId);
-    }
+    Task InspectPlexServersAsyncJob(int plexAccountId);
 }

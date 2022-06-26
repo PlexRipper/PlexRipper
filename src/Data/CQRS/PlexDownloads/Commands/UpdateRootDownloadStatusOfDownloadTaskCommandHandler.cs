@@ -1,52 +1,45 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data
+namespace PlexRipper.Data;
+
+public class UpdateRootDownloadStatusOfDownloadTaskCommandHandlerValidator : AbstractValidator<UpdateRootDownloadStatusOfDownloadTaskCommand>
 {
-    public class UpdateRootDownloadStatusOfDownloadTaskCommandHandlerValidator : AbstractValidator<UpdateRootDownloadStatusOfDownloadTaskCommand>
+    public UpdateRootDownloadStatusOfDownloadTaskCommandHandlerValidator()
     {
-        public UpdateRootDownloadStatusOfDownloadTaskCommandHandlerValidator()
-        {
-            RuleFor(x => x.RootDownloadTaskId).GreaterThan(0);
-        }
+        RuleFor(x => x.RootDownloadTaskId).GreaterThan(0);
     }
+}
 
-    public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
-        IRequestHandler<UpdateRootDownloadStatusOfDownloadTaskCommand, Result>
+public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
+    IRequestHandler<UpdateRootDownloadStatusOfDownloadTaskCommand, Result>
+{
+    public UpdateRootDownloadStatusOfDownloadTaskCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result> Handle(UpdateRootDownloadStatusOfDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        public UpdateRootDownloadStatusOfDownloadTaskCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var downloadTaskDb = await DownloadTasksQueryable
+            .IncludeDownloadTasks()
+            .FirstOrDefaultAsync(x => x.Id == command.RootDownloadTaskId, cancellationToken);
 
-        public async Task<Result> Handle(UpdateRootDownloadStatusOfDownloadTaskCommand command, CancellationToken cancellationToken)
+        void SetDownloadStatus(DownloadTask downloadTask)
         {
-            var downloadTaskDb = await DownloadTasksQueryable
-                .IncludeDownloadTasks()
-                .FirstOrDefaultAsync(x => x.Id == command.RootDownloadTaskId, cancellationToken);
+            if (downloadTask.Children is null || !downloadTask.Children.Any())
+                return;
 
-            void SetDownloadStatus(DownloadTask downloadTask)
+            foreach (var downloadTaskChild in downloadTask.Children)
             {
-                if (downloadTask.Children is null || !downloadTask.Children.Any())
-                    return;
-
-                foreach (var downloadTaskChild in downloadTask.Children)
-                {
-                    SetDownloadStatus(downloadTaskChild);
-                }
-
-                downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(downloadTask.Children.Select(x => x.DownloadStatus).ToList());
+                SetDownloadStatus(downloadTaskChild);
             }
 
-            SetDownloadStatus(downloadTaskDb);
-
-            await _dbContext.SaveChangesAsync();
-            return Result.Ok();
+            downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(downloadTask.Children.Select(x => x.DownloadStatus).ToList());
         }
+
+        SetDownloadStatus(downloadTaskDb);
+
+        await _dbContext.SaveChangesAsync();
+        return Result.Ok();
     }
 }

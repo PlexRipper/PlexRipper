@@ -1,18 +1,16 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 
-namespace PlexRipper.Domain.AutoMapper.ValueConverters
+namespace PlexRipper.Domain.AutoMapper.ValueConverters;
+
+public class StringToDateTimeUtc : IValueConverter<string, DateTime?>
 {
-    public class StringToDateTimeUtc : IValueConverter<string, DateTime?>
+    public DateTime? Convert(string sourceMember, ResolutionContext context)
     {
-        public DateTime? Convert(string sourceMember, ResolutionContext context)
+        if (DateTime.TryParse(sourceMember, out DateTime dateTimeResult))
         {
-            if (DateTime.TryParse(sourceMember, out DateTime dateTimeResult))
-            {
-                return dateTimeResult;
-            }
-
-            return null;
+            return dateTimeResult;
         }
+
+        return null;
     }
 }

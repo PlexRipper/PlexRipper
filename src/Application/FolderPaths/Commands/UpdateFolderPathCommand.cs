@@ -1,16 +1,11 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class UpdateFolderPathCommand : IRequest<Result<FolderPath>>
 {
-    public class UpdateFolderPathCommand : IRequest<Result<FolderPath>>
-    {
-        public FolderPath FolderPath { get; }
+    public FolderPath FolderPath { get; }
 
-        public UpdateFolderPathCommand(FolderPath folderPath)
-        {
-            FolderPath = folderPath;
-        }
+    public UpdateFolderPathCommand(FolderPath folderPath)
+    {
+        FolderPath = folderPath;
     }
 }

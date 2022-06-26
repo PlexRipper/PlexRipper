@@ -5,28 +5,27 @@ using PlexRipper.DownloadManager.AutoMapper;
 using PlexRipper.PlexApi.Mappings;
 using PlexRipper.Settings.Config;
 
-namespace PlexRipper.WebAPI.Config
+namespace PlexRipper.WebAPI.Config;
+
+public static class MapperSetup
 {
-    public static class MapperSetup
+    public static MapperConfiguration Configuration => new (cfg =>
     {
-        public static MapperConfiguration Configuration => new (cfg =>
-        {
-            // Application
-            cfg.AddProfile(new DomainMappingProfile());
-            cfg.AddProfile(new ApplicationMappingProfile());
+        // Application
+        cfg.AddProfile(new DomainMappingProfile());
+        cfg.AddProfile(new ApplicationMappingProfile());
 
-            // Infrastructure
-            cfg.AddProfile(new PlexApiMappingProfile());
-            cfg.AddProfile(new DownloadManagerMappingProfile());
-            cfg.AddProfile(new SettingsMappingProfile());
+        // Infrastructure
+        cfg.AddProfile(new PlexApiMappingProfile());
+        cfg.AddProfile(new DownloadManagerMappingProfile());
+        cfg.AddProfile(new SettingsMappingProfile());
 
-            // Presentation
-            cfg.AddProfile(new WebApiMappingProfile());
-        });
+        // Presentation
+        cfg.AddProfile(new WebApiMappingProfile());
+    });
 
-        public static IMapper CreateMapper()
-        {
-            return Configuration.CreateMapper();
-        }
+    public static IMapper CreateMapper()
+    {
+        return Configuration.CreateMapper();
     }
 }

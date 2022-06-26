@@ -1,9 +1,8 @@
 ﻿using PlexRipper.Application;
 
-namespace PlexRipper.Settings.Models
+namespace PlexRipper.Settings.Models;
+
+public class LanguageSettings : ILanguageSettings
 {
-    public class LanguageSettings : ILanguageSettings
-    {
-        public string Language { get; set; }
-    }
+    public string Language { get; set; }
 }

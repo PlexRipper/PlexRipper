@@ -1,44 +1,41 @@
-﻿using FluentResults;
-using Logging;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 
-namespace PlexRipper.BaseTests
+namespace PlexRipper.BaseTests;
+
+public class MockConfigManager : IConfigManager
 {
-    public class MockConfigManager : IConfigManager
+    private readonly IUserSettings _userSettings;
+
+    public MockConfigManager(IUserSettings userSettings)
     {
-        private readonly IUserSettings _userSettings;
+        _userSettings = userSettings;
+    }
 
-        public MockConfigManager(IUserSettings userSettings)
-        {
-            _userSettings = userSettings;
-        }
+    public Result Setup()
+    {
+        Log.Information("Setting up default user config settings in integration mode");
+        _userSettings.Reset();
+        return Result.Ok();
+    }
 
-        public Result Setup()
-        {
-            Log.Information("Setting up default user config settings in integration mode");
-            _userSettings.Reset();
-            return Result.Ok();
-        }
+    public Result SaveConfig()
+    {
+        return Result.Ok();
+    }
 
-        public Result SaveConfig()
-        {
-            return Result.Ok();
-        }
+    public Result ResetConfig()
+    {
+        _userSettings.Reset();
+        return Result.Ok();
+    }
 
-        public Result ResetConfig()
-        {
-            _userSettings.Reset();
-            return Result.Ok();
-        }
+    public Result LoadConfig()
+    {
+        return Result.Ok();
+    }
 
-        public Result LoadConfig()
-        {
-            return Result.Ok();
-        }
-
-        public bool ConfigFileExists()
-        {
-            return false;
-        }
+    public bool ConfigFileExists()
+    {
+        return false;
     }
 }

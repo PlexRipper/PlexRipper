@@ -1,24 +1,19 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data
+namespace PlexRipper.Data;
+
+public class AddDownloadWorkerLogsValidator : AbstractValidator<AddDownloadWorkerLogsCommand> { }
+
+public class AddDownloadWorkerLogsHandler : BaseHandler, IRequestHandler<AddDownloadWorkerLogsCommand, Result>
 {
-    public class AddDownloadWorkerLogsValidator : AbstractValidator<AddDownloadWorkerLogsCommand> { }
+    public AddDownloadWorkerLogsHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public class AddDownloadWorkerLogsHandler : BaseHandler, IRequestHandler<AddDownloadWorkerLogsCommand, Result>
+    public async Task<Result> Handle(AddDownloadWorkerLogsCommand command, CancellationToken cancellationToken)
     {
-        public AddDownloadWorkerLogsHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
-
-        public async Task<Result> Handle(AddDownloadWorkerLogsCommand command, CancellationToken cancellationToken)
-        {
-            await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(command.DownloadWorkerLogs, cancellationToken);
-            await SaveChangesAsync();
-            return Result.Ok();
-        }
+        await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(command.DownloadWorkerLogs, cancellationToken);
+        await SaveChangesAsync();
+        return Result.Ok();
     }
 }

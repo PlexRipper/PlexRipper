@@ -1,31 +1,28 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PlexRipper.Domain
+namespace PlexRipper.Domain;
+
+[Table("PlexMovie")]
+public class PlexMovie : PlexMedia
 {
-    [Table("PlexMovie")]
-    public class PlexMovie : PlexMedia
-    {
-        #region Relationships
+    #region Relationships
 
-        public List<PlexMovieGenre> PlexMovieGenres { get; set; }
+    public List<PlexMovieGenre> PlexMovieGenres { get; set; }
 
-        public List<PlexMovieRole> PlexMovieRoles { get; set; }
+    public List<PlexMovieRole> PlexMovieRoles { get; set; }
 
-        #endregion
+    #endregion
 
-        #region Helpers
+    #region Helpers
 
-        [NotMapped]
-        public List<PlexMediaDataPart> MovieParts => MovieData.SelectMany(x => x.Parts).ToList();
+    [NotMapped]
+    public List<PlexMediaDataPart> MovieParts => MovieData.SelectMany(x => x.Parts).ToList();
 
-        [NotMapped]
-        public List<PlexMediaData> MovieData => MediaData.MediaData ?? new List<PlexMediaData>();
+    [NotMapped]
+    public List<PlexMediaData> MovieData => MediaData.MediaData ?? new List<PlexMediaData>();
 
-        [NotMapped]
-        public override PlexMediaType Type => PlexMediaType.Movie;
+    [NotMapped]
+    public override PlexMediaType Type => PlexMediaType.Movie;
 
-        #endregion
-    }
+    #endregion
 }

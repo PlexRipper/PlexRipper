@@ -2,18 +2,24 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>10</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
         <AssemblyName>PlexRipper.HttpClient</AssemblyName>
         <RootNamespace>PlexRipper.HttpClient</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Polly" Version="7.2.3" />
-      <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
+        <PackageReference Include="Polly" Version="7.2.3"/>
+        <PackageReference Include="Polly.Extensions.Http" Version="3.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Application\Application.csproj" />
-      <ProjectReference Include="..\Domain\Domain.csproj" />
+        <ProjectReference Include="..\Application\Application.csproj"/>
+        <ProjectReference Include="..\Domain\Domain.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs"/>
     </ItemGroup>
 
 </Project>

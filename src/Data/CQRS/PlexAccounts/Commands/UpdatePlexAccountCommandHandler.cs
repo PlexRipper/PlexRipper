@@ -1,52 +1,46 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data
+namespace PlexRipper.Data;
+
+public class UpdatePlexAccountValidator : AbstractValidator<UpdatePlexAccountCommand>
 {
-    public class UpdatePlexAccountValidator : AbstractValidator<UpdatePlexAccountCommand>
+    public UpdatePlexAccountValidator()
     {
-        public UpdatePlexAccountValidator()
-        {
-            RuleFor(x => x.PlexAccount).NotNull();
-            RuleFor(x => x.PlexAccount.Id).GreaterThan(0);
-            RuleFor(x => x.PlexAccount.DisplayName).NotEmpty();
-            RuleFor(x => x.PlexAccount.Username).NotEmpty().MinimumLength(5);
-            RuleFor(x => x.PlexAccount.Password).NotEmpty().MinimumLength(5);
-            RuleFor(x => x.PlexAccount.IsValidated).NotNull();
-            RuleFor(x => x.PlexAccount.PlexId).GreaterThan(0);
-            RuleFor(x => x.PlexAccount.Uuid).NotEmpty().MinimumLength(5);
-            RuleFor(x => x.PlexAccount.Title).NotEmpty().MinimumLength(5);
-            RuleFor(x => x.PlexAccount.AuthenticationToken).NotEmpty().MinimumLength(10);
-        }
+        RuleFor(x => x.PlexAccount).NotNull();
+        RuleFor(x => x.PlexAccount.Id).GreaterThan(0);
+        RuleFor(x => x.PlexAccount.DisplayName).NotEmpty();
+        RuleFor(x => x.PlexAccount.Username).NotEmpty().MinimumLength(5);
+        RuleFor(x => x.PlexAccount.Password).NotEmpty().MinimumLength(5);
+        RuleFor(x => x.PlexAccount.IsValidated).NotNull();
+        RuleFor(x => x.PlexAccount.PlexId).GreaterThan(0);
+        RuleFor(x => x.PlexAccount.Uuid).NotEmpty().MinimumLength(5);
+        RuleFor(x => x.PlexAccount.Title).NotEmpty().MinimumLength(5);
+        RuleFor(x => x.PlexAccount.AuthenticationToken).NotEmpty().MinimumLength(10);
     }
+}
 
-    public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexAccountCommand, Result>
+public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexAccountCommand, Result>
+{
+    public UpdatePlexAccountHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
     {
-        public UpdatePlexAccountHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var plexAccount = command.PlexAccount;
+        var accountInDb = await _dbContext.PlexAccounts
+            .Include(x => x.PlexAccountServers)
+            .ThenInclude(x => x.PlexServer)
+            .AsTracking().FirstOrDefaultAsync(x => x.Id == plexAccount.Id, cancellationToken);
 
-        public async Task<Result> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
+        if (accountInDb == null)
         {
-            var plexAccount = command.PlexAccount;
-            var accountInDb = await _dbContext.PlexAccounts
-                .Include(x => x.PlexAccountServers)
-                .ThenInclude(x => x.PlexServer)
-                .AsTracking().FirstOrDefaultAsync(x => x.Id == plexAccount.Id, cancellationToken);
-
-            if (accountInDb == null)
-            {
-                return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccount.Id);
-            }
-
-            _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            return Result.Ok();
+            return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccount.Id);
         }
+
+        _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return Result.Ok();
     }
 }

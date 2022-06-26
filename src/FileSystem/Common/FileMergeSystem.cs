@@ -1,36 +1,34 @@
-﻿using FluentResults;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 
-namespace PlexRipper.FileSystem.Common
+namespace PlexRipper.FileSystem.Common;
+
+/// <summary>
+/// This is used to mock all I/O dependancies for the <see cref="FileMerger"/> class.
+/// </summary>
+public class FileMergeSystem : IFileMergeSystem
 {
-    /// <summary>
-    /// This is used to mock all I/O dependancies for the <see cref="FileMerger"/> class.
-    /// </summary>
-    public class FileMergeSystem : IFileMergeSystem
+    private readonly IFileSystem _fileSystem;
+
+    private readonly IDirectorySystem _directorySystem;
+
+    public FileMergeSystem(IFileSystem fileSystem, IDirectorySystem directorySystem)
     {
-        private readonly IFileSystem _fileSystem;
+        _fileSystem = fileSystem;
+        _directorySystem = directorySystem;
+    }
 
-        private readonly IDirectorySystem _directorySystem;
+    public bool FileExists(string path)
+    {
+        return _fileSystem.FileExists(path);
+    }
 
-        public FileMergeSystem(IFileSystem fileSystem, IDirectorySystem directorySystem)
-        {
-            _fileSystem = fileSystem;
-            _directorySystem = directorySystem;
-        }
+    public Result DeleteDirectoryFromFilePath(string path)
+    {
+        return _directorySystem.DeleteDirectoryFromFilePath(path);
+    }
 
-        public bool FileExists(string path)
-        {
-            return _fileSystem.FileExists(path);
-        }
-
-        public Result DeleteDirectoryFromFilePath(string path)
-        {
-            return _directorySystem.DeleteDirectoryFromFilePath(path);
-        }
-
-        public Result DeleteAllFilesFromDirectory(string directory)
-        {
-            return _directorySystem.DeleteAllFilesFromDirectory(directory);
-        }
+    public Result DeleteAllFilesFromDirectory(string directory)
+    {
+        return _directorySystem.DeleteAllFilesFromDirectory(directory);
     }
 }

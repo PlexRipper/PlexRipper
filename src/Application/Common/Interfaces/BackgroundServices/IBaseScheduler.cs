@@ -1,9 +1,6 @@
-﻿using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public interface IBaseScheduler : ISetupAsync, IStopAsync
 {
-    public interface IBaseScheduler : ISetupAsync, IStopAsync
-    {
 
-    }
 }

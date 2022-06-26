@@ -1,28 +1,27 @@
 ﻿using PlexRipper.Application;
 using PlexRipper.Settings.Models;
 
-namespace PlexRipper.Settings.Modules
+namespace PlexRipper.Settings.Modules;
+
+public class DownloadManagerSettingsModule : BaseSettingsModule<IDownloadManagerSettings>, IDownloadManagerSettingsModule
 {
-    public class DownloadManagerSettingsModule : BaseSettingsModule<IDownloadManagerSettings>, IDownloadManagerSettingsModule
+    public int DownloadSegments { get; set; }
+
+    public override string Name => "DownloadManagerSettings";
+
+    public override IDownloadManagerSettings DefaultValues()
     {
-        public int DownloadSegments { get; set; }
-
-        public override string Name => "DownloadManagerSettings";
-
-        public override IDownloadManagerSettings DefaultValues()
+        return new DownloadManagerSettings
         {
-            return new DownloadManagerSettings
-            {
-                DownloadSegments = 4,
-            };
-        }
+            DownloadSegments = 4,
+        };
+    }
 
-        public override IDownloadManagerSettings GetValues()
+    public override IDownloadManagerSettings GetValues()
+    {
+        return new DownloadManagerSettings
         {
-            return new DownloadManagerSettings
-            {
-                DownloadSegments = DownloadSegments,
-            };
-        }
+            DownloadSegments = DownloadSegments,
+        };
     }
 }

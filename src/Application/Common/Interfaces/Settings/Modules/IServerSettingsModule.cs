@@ -1,29 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using FluentResults;
-using PlexRipper.Domain;
-using PlexRipper.Domain.DownloadManager;
+﻿using PlexRipper.Domain.DownloadManager;
 
-namespace PlexRipper.Application
+namespace PlexRipper.Application;
+
+public interface IServerSettingsModule : IBaseSettingsModule<IServerSettings>, IServerSettings
 {
-    public interface IServerSettingsModule : IBaseSettingsModule<IServerSettings>, IServerSettings
-    {
-        IObservable<PlexServerSettingsModel> ServerSettings(int plexServerId);
+    IObservable<PlexServerSettingsModel> ServerSettings(int plexServerId);
 
-        void SetServerSettings(PlexServerSettingsModel plexServerSettings);
+    void SetServerSettings(PlexServerSettingsModel plexServerSettings);
 
-        PlexServerSettingsModel GetPlexServerSettings(string machineIdentifier);
+    PlexServerSettingsModel GetPlexServerSettings(string machineIdentifier);
 
-        PlexServerSettingsModel GetPlexServerSettings(int plexServerId);
+    PlexServerSettingsModel GetPlexServerSettings(int plexServerId);
 
-        int GetDownloadSpeedLimit(int plexServerId);
+    int GetDownloadSpeedLimit(int plexServerId);
 
-        Result SetDownloadSpeedLimit(int plexServerId, int downloadSpeedLimit = 0);
+    Result SetDownloadSpeedLimit(int plexServerId, int downloadSpeedLimit = 0);
 
-        Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings);
+    Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings);
 
-        IObservable<int> GetDownloadSpeedLimitObservable(int plexServerId);
+    IObservable<int> GetDownloadSpeedLimitObservable(int plexServerId);
 
-        void EnsureAllServersHaveASettingsEntry(List<PlexServer> plexServers);
-    }
+    void EnsureAllServersHaveASettingsEntry(List<PlexServer> plexServers);
 }

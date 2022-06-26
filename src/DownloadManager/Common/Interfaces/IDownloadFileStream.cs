@@ -1,10 +1,6 @@
-﻿using System.IO;
-using FluentResults;
+﻿namespace PlexRipper.DownloadManager;
 
-namespace PlexRipper.DownloadManager
+public interface IDownloadFileStream
 {
-    public interface IDownloadFileStream
-    {
-        Result<Stream> CreateDownloadFileStream(string directory, string fileName, long fileSize);
-    }
+    Result<Stream> CreateDownloadFileStream(string directory, string fileName, long fileSize);
 }

@@ -1,14 +1,11 @@
-﻿using System;
+﻿namespace PlexRipper.Domain.Autofac;
 
-namespace PlexRipper.Domain.Autofac
+public class ScopedDependency : IScopedDependency
 {
-    public class ScopedDependency : IScopedDependency
+    public ScopedDependency(string scope)
     {
-        public ScopedDependency(string scope)
-        {
-            Scope = scope ?? throw new ArgumentNullException(nameof(scope));
-        }
-
-        public string Scope { get; }
+        Scope = scope ?? throw new ArgumentNullException(nameof(scope));
     }
+
+    public string Scope { get; }
 }

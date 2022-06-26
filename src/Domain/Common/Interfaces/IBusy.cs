@@ -1,7 +1,6 @@
-﻿namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain;
+
+public interface IBusy
 {
-    public interface IBusy
-    {
-        public bool IsBusy { get; }
-    }
+    public bool IsBusy { get; }
 }

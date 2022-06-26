@@ -1,16 +1,12 @@
-﻿using System;
-using System.IO;
+﻿namespace PlexRipper.BaseTests;
 
-namespace PlexRipper.BaseTests
+public interface ITestStreamTracker
 {
-    public interface ITestStreamTracker
-    {
-        IObservable<Stream> CreatedDownloadStreams { get; }
+    IObservable<Stream> CreatedDownloadStreams { get; }
 
-        IObservable<Stream> CreatedFileMergeStreams { get; }
+    IObservable<Stream> CreatedFileMergeStreams { get; }
 
-        void AddDownloadFileStream(Stream stream);
+    void AddDownloadFileStream(Stream stream);
 
-        void AddFileMergeStream(Stream stream);
-    }
+    void AddFileMergeStream(Stream stream);
 }

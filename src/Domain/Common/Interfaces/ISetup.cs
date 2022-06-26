@@ -1,9 +1,6 @@
-﻿using FluentResults;
+﻿namespace PlexRipper.Domain;
 
-namespace PlexRipper.Domain
+public interface ISetup
 {
-    public interface ISetup
-    {
-        public Result Setup();
-    }
+    public Result Setup();
 }

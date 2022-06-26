@@ -1,6 +1,3 @@
-﻿using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
-{
-    public interface IMigrationService : ISetupAsync { }
-}
+public interface IMigrationService : ISetupAsync { }

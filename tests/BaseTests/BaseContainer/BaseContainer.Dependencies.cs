@@ -1,153 +1,146 @@
 ﻿#region
 
-using System;
-using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using Environment;
-using JetBrains.Annotations;
-using Logging;
-using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.Data;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI;
 
 #endregion
 
-namespace PlexRipper.BaseTests
+namespace PlexRipper.BaseTests;
+
+public partial class BaseContainer : IDisposable
 {
-    public partial class BaseContainer : IDisposable
+    #region Fields
+
+    private readonly WebApplicationFactory<Startup> _factory;
+
+    private readonly IServiceScope _serviceScope;
+
+    private readonly IServiceProvider _services;
+
+    #endregion
+
+    #region Constructor
+
+    /// <summary>
+    /// Creates a Autofac container and sets up a test database.
+    /// </summary>
+    private BaseContainer(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null)
     {
-        #region Fields
+        _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options);
+        ApiClient = _factory.CreateClient();
 
-        private readonly WebApplicationFactory<Startup> _factory;
+        // Create a separate scope as not to interfere with tests running in parallel
+        _services = _factory.Services;
+        _serviceScope = _factory.Services.CreateScope();
+    }
 
-        private readonly IServiceScope _serviceScope;
+    public static async Task<BaseContainer> Create([CanBeNull] Action<UnitTestDataConfig> options = null)
+    {
+        var config = UnitTestDataConfig.FromOptions(options);
+        var memoryDbName = MockDatabase.GetMemoryDatabaseName();
 
-        private readonly IServiceProvider _services;
+        Log.Information($"Setting up BaseContainer with database: {memoryDbName}");
 
-        #endregion
+        EnvironmentExtensions.SetIntegrationTestMode(true);
 
-        #region Constructor
+        // Database context can be setup once and then retrieved by its DB name.
+        await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(options);
+        var container = new BaseContainer(memoryDbName, options);
 
-        /// <summary>
-        /// Creates a Autofac container and sets up a test database.
-        /// </summary>
-        private BaseContainer(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null)
+        if (config.DownloadSpeedLimit > 0)
         {
-            _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options);
-            ApiClient = _factory.CreateClient();
-
-            // Create a separate scope as not to interfere with tests running in parallel
-            _services = _factory.Services;
-            _serviceScope = _factory.Services.CreateScope();
+            await container.SetDownloadSpeedLimit(options);
         }
 
-        public static async Task<BaseContainer> Create([CanBeNull] Action<UnitTestDataConfig> options = null)
-        {
-            var config = UnitTestDataConfig.FromOptions(options);
-            var memoryDbName = MockDatabase.GetMemoryDatabaseName();
+        return container;
+    }
 
-            Log.Information($"Setting up BaseContainer with database: {memoryDbName}");
+    #endregion
 
-            EnvironmentExtensions.SetIntegrationTestMode(true);
+    #region Properties
 
-            // Database context can be setup once and then retrieved by its DB name.
-            await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(options);
-            var container = new BaseContainer(memoryDbName, options);
+    public System.Net.Http.HttpClient ApiClient { get; }
 
-            if (config.DownloadSpeedLimit > 0)
-            {
-                await container.SetDownloadSpeedLimit(options);
-            }
+    #region Autofac Resolve
 
-            return container;
-        }
+    public IFileSystem FileSystem => Resolve<IFileSystem>();
 
-        #endregion
+    public IDownloadCommands GetDownloadCommands => Resolve<IDownloadCommands>();
 
-        #region Properties
+    public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
 
-        public System.Net.Http.HttpClient ApiClient { get; }
+    public IDownloadTaskFactory GetDownloadTaskFactory => Resolve<IDownloadTaskFactory>();
 
-        #region Autofac Resolve
+    public IDownloadTaskValidator GetDownloadTaskValidator => Resolve<IDownloadTaskValidator>();
 
-        public IFileSystem FileSystem => Resolve<IFileSystem>();
+    public IDownloadTracker GetDownloadTracker => Resolve<IDownloadTracker>();
 
-        public IDownloadCommands GetDownloadCommands => Resolve<IDownloadCommands>();
+    public IFolderPathService GetFolderPathService => Resolve<IFolderPathService>();
 
-        public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
+    public IPlexAccountService GetPlexAccountService => Resolve<IPlexAccountService>();
 
-        public IDownloadTaskFactory GetDownloadTaskFactory => Resolve<IDownloadTaskFactory>();
+    public IPlexApiService GetPlexApiService => Resolve<IPlexApiService>();
 
-        public IDownloadTaskValidator GetDownloadTaskValidator => Resolve<IDownloadTaskValidator>();
+    public IPlexDownloadService GetPlexDownloadService => Resolve<IPlexDownloadService>();
 
-        public IDownloadTracker GetDownloadTracker => Resolve<IDownloadTracker>();
+    public IPlexLibraryService GetPlexLibraryService => Resolve<IPlexLibraryService>();
 
-        public IFolderPathService GetFolderPathService => Resolve<IFolderPathService>();
+    public IPlexRipperHttpClient GetPlexRipperHttpClient => Resolve<IPlexRipperHttpClient>();
 
-        public IPlexAccountService GetPlexAccountService => Resolve<IPlexAccountService>();
+    public IPlexServerService GetPlexServerService => Resolve<IPlexServerService>();
 
-        public IPlexApiService GetPlexApiService => Resolve<IPlexApiService>();
+    public IMediator Mediator => Resolve<IMediator>();
 
-        public IPlexDownloadService GetPlexDownloadService => Resolve<IPlexDownloadService>();
+    public IPathProvider PathProvider => Resolve<IPathProvider>();
 
-        public IPlexLibraryService GetPlexLibraryService => Resolve<IPlexLibraryService>();
+    public ITestStreamTracker TestStreamTracker => Resolve<ITestStreamTracker>();
 
-        public IPlexRipperHttpClient GetPlexRipperHttpClient => Resolve<IPlexRipperHttpClient>();
+    public ITestApplicationTracker TestApplicationTracker => Resolve<ITestApplicationTracker>();
 
-        public IPlexServerService GetPlexServerService => Resolve<IPlexServerService>();
+    public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
 
-        public IMediator Mediator => Resolve<IMediator>();
+    public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 
-        public IPathProvider PathProvider => Resolve<IPathProvider>();
+    public IFileMerger FileMerger => Resolve<IFileMerger>();
 
-        public ITestStreamTracker TestStreamTracker => Resolve<ITestStreamTracker>();
+    public IMapper Mapper => Resolve<IMapper>();
 
-        public ITestApplicationTracker TestApplicationTracker => Resolve<ITestApplicationTracker>();
+    public IHostLifetime Boot => Resolve<IHostLifetime>();
 
-        public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
+    #region Settings
 
-        public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
+    public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
 
-        public IFileMerger FileMerger => Resolve<IFileMerger>();
+    public IConfigManager ConfigManager => Resolve<IConfigManager>();
 
-        public IMapper Mapper => Resolve<IMapper>();
+    #endregion
 
-        public IHostLifetime Boot => Resolve<IHostLifetime>();
+    #endregion
 
-        #region Settings
+    #endregion
 
-        public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
+    #region Public Methods
 
-        public IConfigManager ConfigManager => Resolve<IConfigManager>();
+    private T Resolve<T>()
+    {
+        return _services.GetRequiredService<T>();
+    }
 
-        #endregion
+    #endregion
 
-        #endregion
-
-        #endregion
-
-        #region Public Methods
-
-        private T Resolve<T>()
-        {
-            return _services.GetRequiredService<T>();
-        }
-
-        #endregion
-
-        public void Dispose()
-        {
-            PlexRipperDbContext.Database.EnsureDeleted();
-            _services.GetAutofacRoot().Dispose();
-            _factory?.Dispose();
-            ApiClient?.Dispose();
-        }
+    public void Dispose()
+    {
+        PlexRipperDbContext.Database.EnsureDeleted();
+        _services.GetAutofacRoot().Dispose();
+        _factory?.Dispose();
+        ApiClient?.Dispose();
     }
 }

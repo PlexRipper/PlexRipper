@@ -1,15 +1,11 @@
-﻿using FluentResults;
-using MediatR;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class UpdateRootDownloadStatusOfDownloadTaskCommand : IRequest<Result>
 {
-    public class UpdateRootDownloadStatusOfDownloadTaskCommand : IRequest<Result>
-    {
-        public int RootDownloadTaskId { get; }
+    public int RootDownloadTaskId { get; }
 
-        public UpdateRootDownloadStatusOfDownloadTaskCommand(int rootDownloadTaskId)
-        {
-            RootDownloadTaskId = rootDownloadTaskId;
-        }
+    public UpdateRootDownloadStatusOfDownloadTaskCommand(int rootDownloadTaskId)
+    {
+        RootDownloadTaskId = rootDownloadTaskId;
     }
 }

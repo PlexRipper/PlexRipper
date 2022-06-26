@@ -1,7 +1,6 @@
-﻿namespace PlexRipper.Domain.Autofac
+﻿namespace PlexRipper.Domain.Autofac;
+
+public interface IScopedDependency
 {
-    public interface IScopedDependency
-    {
-        string Scope { get; }
-    }
+    string Scope { get; }
 }

@@ -1,4 +1,3 @@
-﻿namespace PlexRipper.Application
-{
-    public interface IDownloadManagerSettingsModule : IBaseSettingsModule<IDownloadManagerSettings>, IDownloadManagerSettings { }
-}
+﻿namespace PlexRipper.Application;
+
+public interface IDownloadManagerSettingsModule : IBaseSettingsModule<IDownloadManagerSettings>, IDownloadManagerSettings { }

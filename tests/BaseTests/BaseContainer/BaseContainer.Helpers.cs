@@ -1,29 +1,24 @@
-﻿using System;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain;
+﻿using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain.DownloadManager;
 
-namespace PlexRipper.BaseTests
-{
-    public partial class BaseContainer
-    {
-        public async Task SetDownloadSpeedLimit([CanBeNull] Action<UnitTestDataConfig> options = null)
-        {
-            var config = new UnitTestDataConfig();
-            options?.Invoke(config);
+namespace PlexRipper.BaseTests;
 
-            var plexServers = await PlexRipperDbContext.PlexServers.ToListAsync();
-            foreach (var plexServer in plexServers)
+public partial class BaseContainer
+{
+    public async Task SetDownloadSpeedLimit([CanBeNull] Action<UnitTestDataConfig> options = null)
+    {
+        var config = new UnitTestDataConfig();
+        options?.Invoke(config);
+
+        var plexServers = await PlexRipperDbContext.PlexServers.ToListAsync();
+        foreach (var plexServer in plexServers)
+        {
+            GetServerSettings.AddServerToSettings(new PlexServerSettingsModel
             {
-                GetServerSettings.AddServerToSettings(new PlexServerSettingsModel
-                {
-                    PlexServerId = plexServer.Id,
-                    MachineIdentifier = plexServer.MachineIdentifier,
-                    DownloadSpeedLimit = config.DownloadSpeedLimit,
-                });
-            }
+                PlexServerId = plexServer.Id,
+                MachineIdentifier = plexServer.MachineIdentifier,
+                DownloadSpeedLimit = config.DownloadSpeedLimit,
+            });
         }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 using PlexRipper.PlexApi.Helpers;
 
-namespace PlexApi.UnitTests
+namespace PlexApi.UnitTests;
+
+public class TestDTO
 {
-    public class TestDTO
-    {
-        [JsonPropertyName("contentChangedAt")]
-        [JsonConverter(typeof(LongValueConverter))]
-        public long ContentChangedAt { get; set; }
-    }
+    [JsonPropertyName("contentChangedAt")]
+    [JsonConverter(typeof(LongValueConverter))]
+    public long ContentChangedAt { get; set; }
 }

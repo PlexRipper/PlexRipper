@@ -1,50 +1,43 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data.PlexServers
+namespace PlexRipper.Data.PlexServers;
+
+public class GetPlexServerByIdQueryValidator : AbstractValidator<GetPlexServerByIdQuery>
 {
-    public class GetPlexServerByIdQueryValidator : AbstractValidator<GetPlexServerByIdQuery>
+    public GetPlexServerByIdQueryValidator()
     {
-        public GetPlexServerByIdQueryValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
+        RuleFor(x => x.Id).GreaterThan(0);
     }
+}
 
-    public class GetPlexServerByIdQueryHandler : BaseHandler,
-        IRequestHandler<GetPlexServerByIdQuery, Result<PlexServer>>
+public class GetPlexServerByIdQueryHandler : BaseHandler,
+    IRequestHandler<GetPlexServerByIdQuery, Result<PlexServer>>
+{
+    public GetPlexServerByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<PlexServer>> Handle(GetPlexServerByIdQuery request,
+        CancellationToken cancellationToken)
     {
-        public GetPlexServerByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var query = PlexServerQueryable
+            .Include(x => x.ServerStatus)
+            .AsQueryable();
 
-        public async Task<Result<PlexServer>> Handle(GetPlexServerByIdQuery request,
-            CancellationToken cancellationToken)
+        if (request.IncludeLibraries)
         {
-            var query = PlexServerQueryable
-                .Include(x => x.ServerStatus)
-                .AsQueryable();
-
-            if (request.IncludeLibraries)
-            {
-                query = query.Include(x => x.PlexLibraries);
-            }
-
-            var plexServer = await query
-                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
-            if (plexServer == null)
-            {
-                return ResultExtensions.EntityNotFound(nameof(PlexServer), request.Id);
-            }
-
-            return Result.Ok(plexServer);
+            query = query.Include(x => x.PlexLibraries);
         }
+
+        var plexServer = await query
+            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+
+        if (plexServer == null)
+        {
+            return ResultExtensions.EntityNotFound(nameof(PlexServer), request.Id);
+        }
+
+        return Result.Ok(plexServer);
     }
 }

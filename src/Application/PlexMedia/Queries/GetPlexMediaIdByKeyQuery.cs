@@ -1,16 +1,11 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class GetPlexMediaIdByKeyQuery : IRequest<Result<int>>
 {
-    public class GetPlexMediaIdByKeyQuery : IRequest<Result<int>>
-    {
-        public DownloadTask DownloadTask { get; }
+    public DownloadTask DownloadTask { get; }
 
-        public GetPlexMediaIdByKeyQuery(DownloadTask downloadTask)
-        {
-            DownloadTask = downloadTask;
-        }
+    public GetPlexMediaIdByKeyQuery(DownloadTask downloadTask)
+    {
+        DownloadTask = downloadTask;
     }
 }

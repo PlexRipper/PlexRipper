@@ -1,13 +1,10 @@
-﻿using FluentResults;
+﻿namespace PlexRipper.FileSystem.Common;
 
-namespace PlexRipper.FileSystem.Common
+public interface IFileMergeSystem
 {
-    public interface IFileMergeSystem
-    {
-        bool FileExists(string path);
+    bool FileExists(string path);
 
-        Result DeleteDirectoryFromFilePath(string path);
+    Result DeleteDirectoryFromFilePath(string path);
 
-        Result DeleteAllFilesFromDirectory(string directory);
-    }
+    Result DeleteAllFilesFromDirectory(string directory);
 }

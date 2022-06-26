@@ -1,72 +1,57 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Autofac.Extras.Moq;
-using FluentResults;
-using Logging;
-using Moq;
-using PlexRipper.Application;
-using PlexRipper.BaseTests;
+﻿using PlexRipper.Application;
 using PlexRipper.BaseTests.Asserts;
-using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace DownloadManager.UnitTests
+namespace DownloadManager.UnitTests;
+
+public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests
 {
-    public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests
+    public DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests(ITestOutputHelper output)
     {
-        public DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests(ITestOutputHelper output)
-        {
-            Log.SetupTestLogging(output);
-        }
+        Log.SetupTestLogging(output);
+    }
 
-        [Fact]
-        public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
-        {
-            // Arrange
-            using var mock = AutoMock.GetStrict();
-            var _sut = mock.Create<DownloadTaskFactory>();
-            var tvShowIds = new List<int>();
+    [Fact]
+    public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
+    {
+        // Arrange
+        using var mock = AutoMock.GetStrict();
+        var _sut = mock.Create<DownloadTaskFactory>();
+        var tvShowIds = new List<int>();
 
-            // Act
-            var result = await _sut.GenerateTvShowDownloadTasksAsync(tvShowIds);
+        // Act
+        var result = await _sut.GenerateTvShowDownloadTasksAsync(tvShowIds);
 
-            // Assert
-            result.IsFailed.ShouldBeTrue();
-        }
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+    }
 
-        [Fact]
-        public async Task ShouldGenerateValidTvShowDownloadTaskWithAllEpisodesDownloadTask_WhenNoDownloadTasksExist()
-        {
-            // Arrange
-            await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.TvShowCount = 1; });
-            var tvShows = context.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().ToList();
+    [Fact]
+    public async Task ShouldGenerateValidTvShowDownloadTaskWithAllEpisodesDownloadTask_WhenNoDownloadTasksExist()
+    {
+        // Arrange
+        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.TvShowCount = 1; });
+        var tvShows = context.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().ToList();
 
-            using var mock = AutoMock.GetStrict().AddMapper();
-            mock.SetupMediator(It.IsAny<GetPlexTvShowByIdWithEpisodesQuery>)
-                .ReturnsAsync((GetPlexTvShowByIdWithEpisodesQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.Id)));
-            mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>)
-                .ReturnsAsync(Result.Fail(""));
-            var _sut = mock.Create<DownloadTaskFactory>();
+        using var mock = AutoMock.GetStrict().AddMapper();
+        mock.SetupMediator(It.IsAny<GetPlexTvShowByIdWithEpisodesQuery>)
+            .ReturnsAsync((GetPlexTvShowByIdWithEpisodesQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.Id)));
+        mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>)
+            .ReturnsAsync(Result.Fail(""));
+        var _sut = mock.Create<DownloadTaskFactory>();
 
-            var tvShowIds = new List<int> { 1 };
+        var tvShowIds = new List<int> { 1 };
 
-            // Act
-            var result = await _sut.GenerateTvShowDownloadTasksAsync(tvShowIds);
+        // Act
+        var result = await _sut.GenerateTvShowDownloadTasksAsync(tvShowIds);
 
-            // Assert
-            result.IsSuccess.ShouldBeTrue();
-            result.Value.Count.ShouldBe(tvShowIds.Count);
-            var tvShowDownloadTask = result.Value.First();
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(tvShowIds.Count);
+        var tvShowDownloadTask = result.Value.First();
 
-            ShouldDownloadTask.ShouldTvShow(tvShowDownloadTask, tvShows[0]);
-        }
+        ShouldDownloadTask.ShouldTvShow(tvShowDownloadTask, tvShows[0]);
     }
 }

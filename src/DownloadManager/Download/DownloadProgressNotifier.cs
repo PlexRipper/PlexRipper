@@ -1,49 +1,43 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using FluentResults;
-using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 
-namespace PlexRipper.DownloadManager
+namespace PlexRipper.DownloadManager;
+
+public class DownloadProgressNotifier : IDownloadProgressNotifier
 {
-    public class DownloadProgressNotifier : IDownloadProgressNotifier
+    private readonly IMediator _mediator;
+
+    private readonly ISignalRService _signalRService;
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
-        private readonly IMediator _mediator;
+        ReferenceHandler = ReferenceHandler.Preserve,
+    };
 
-        private readonly ISignalRService _signalRService;
+    public DownloadProgressNotifier(IMediator mediator, ISignalRService signalRService)
+    {
+        _mediator = mediator;
+        _signalRService = signalRService;
+    }
 
-        private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    public async Task<Result<string>> SendDownloadProgress(int plexServerId)
+    {
+        var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId));
+        if (downloadTasksResult.IsSuccess)
         {
-            ReferenceHandler = ReferenceHandler.Preserve,
-        };
-
-        public DownloadProgressNotifier(IMediator mediator, ISignalRService signalRService)
-        {
-            _mediator = mediator;
-            _signalRService = signalRService;
+            await _signalRService.SendDownloadProgressUpdate(plexServerId, downloadTasksResult.Value);
         }
 
-        public async Task<Result<string>> SendDownloadProgress(int plexServerId)
+        try
         {
-            var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId));
-            if (downloadTasksResult.IsSuccess)
-            {
-                await _signalRService.SendDownloadProgressUpdate(plexServerId, downloadTasksResult.Value);
-            }
-
-            try
-            {
-                // Create hash to see if there are any changes in the updates
-                var jsonString = JsonSerializer.Serialize(downloadTasksResult.Value, _jsonSerializerOptions);
-                return Result.Ok(HashGenerator.CreateMD5(jsonString));
-            }
-            catch (Exception e)
-            {
-                return Result.Fail(new ExceptionalError(e)).LogError();
-            }
+            // Create hash to see if there are any changes in the updates
+            var jsonString = JsonSerializer.Serialize(downloadTasksResult.Value, _jsonSerializerOptions);
+            return Result.Ok(HashGenerator.CreateMD5(jsonString));
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
         }
     }
 }

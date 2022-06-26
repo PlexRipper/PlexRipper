@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using FluentResults;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain;
 

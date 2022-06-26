@@ -1,19 +1,14 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class GetPlexServerByPlexLibraryIdQuery : IRequest<Result<PlexServer>>
 {
-    public class GetPlexServerByPlexLibraryIdQuery : IRequest<Result<PlexServer>>
+    public GetPlexServerByPlexLibraryIdQuery(int id, bool includePlexLibraries = false)
     {
-        public GetPlexServerByPlexLibraryIdQuery(int id, bool includePlexLibraries = false)
-        {
-            Id = id;
-            IncludePlexLibraries = includePlexLibraries;
-        }
-
-        public int Id { get; }
-
-        public bool IncludePlexLibraries { get; }
+        Id = id;
+        IncludePlexLibraries = includePlexLibraries;
     }
+
+    public int Id { get; }
+
+    public bool IncludePlexLibraries { get; }
 }

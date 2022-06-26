@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using PlexRipper.Domain.DownloadManager;
+﻿using PlexRipper.Domain.DownloadManager;
 
-namespace PlexRipper.Application
+namespace PlexRipper.Application;
+
+public interface IServerSettings
 {
-    public interface IServerSettings
-    {
-        List<PlexServerSettingsModel> Data { get; set; }
-    }
+    List<PlexServerSettingsModel> Data { get; set; }
 }

@@ -2,17 +2,16 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-
+        <LangVersion>10</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
-
         <AssemblyName>BaseTests.IntegrationTests</AssemblyName>
-
         <RootNamespace>BaseTests.IntegrationTests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
-        <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0"/>
+        <PackageReference Include="xunit" Version="2.4.1"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
@@ -24,13 +23,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
+        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="xunit.runner.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="xunit.runner.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
+        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs"/>
     </ItemGroup>
 
 </Project>

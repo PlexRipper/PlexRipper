@@ -1,81 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using Logging;
+﻿using System.Reactive.Subjects;
 using PlexRipper.Application;
 
-namespace PlexRipper.FileSystem.Common
+namespace PlexRipper.FileSystem.Common;
+
+public class FileMergeStreamProvider : IFileMergeStreamProvider
 {
-    public class FileMergeStreamProvider : IFileMergeStreamProvider
+    private readonly IFileSystem _fileSystem;
+
+    private readonly INotificationsService _notificationsService;
+
+    private readonly IDirectorySystem _directorySystem;
+
+    public FileMergeStreamProvider(IFileSystem fileSystem, INotificationsService notificationsService, IDirectorySystem directorySystem)
     {
-        private readonly IFileSystem _fileSystem;
+        _fileSystem = fileSystem;
+        _notificationsService = notificationsService;
+        _directorySystem = directorySystem;
+    }
 
-        private readonly INotificationsService _notificationsService;
-
-        private readonly IDirectorySystem _directorySystem;
-
-        public FileMergeStreamProvider(IFileSystem fileSystem, INotificationsService notificationsService, IDirectorySystem directorySystem)
+    public async Task<Result<Stream>> CreateMergeStream(string destinationDirectory)
+    {
+        // Ensure destination directory exists and is otherwise created.
+        var result = _directorySystem.CreateDirectoryFromFilePath(destinationDirectory);
+        if (result.IsFailed)
         {
-            _fileSystem = fileSystem;
-            _notificationsService = notificationsService;
-            _directorySystem = directorySystem;
+            await _notificationsService.SendResult(result);
+            result.LogError();
         }
 
-        public async Task<Result<Stream>> CreateMergeStream(string destinationDirectory)
-        {
-            // Ensure destination directory exists and is otherwise created.
-            var result = _directorySystem.CreateDirectoryFromFilePath(destinationDirectory);
-            if (result.IsFailed)
-            {
-                await _notificationsService.SendResult(result);
-                result.LogError();
-            }
+        return _fileSystem.Create(destinationDirectory, 4096, FileOptions.SequentialScan);
+    }
 
-            return _fileSystem.Create(destinationDirectory, 4096, FileOptions.SequentialScan);
-        }
-
-        public async Task MergeFiles(List<string> filePaths, Stream destination, Subject<long> bytesReceivedProgress,
-            CancellationToken cancellationToken = default(CancellationToken))
+    public async Task MergeFiles(List<string> filePaths, Stream destination, Subject<long> bytesReceivedProgress,
+        CancellationToken cancellationToken = default(CancellationToken))
+    {
+        long totalRead = 0;
+        foreach (var filePath in filePaths)
         {
-            long totalRead = 0;
-            foreach (var filePath in filePaths)
+            await using (var inputStream = File.OpenRead(filePath))
             {
-                await using (var inputStream = File.OpenRead(filePath))
+                try
                 {
-                    try
+                    var buffer = new byte[0x1000];
+                    int bytesRead;
+                    while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
                     {
-                        var buffer = new byte[0x1000];
-                        int bytesRead;
-                        while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
-                        {
-                            await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken);
-                            cancellationToken.ThrowIfCancellationRequested();
-                            totalRead += bytesRead;
-                            bytesReceivedProgress.OnNext(totalRead);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("Exception during downloading of ", ex);
-                        throw;
+                        await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken);
+                        cancellationToken.ThrowIfCancellationRequested();
+                        totalRead += bytesRead;
+                        bytesReceivedProgress.OnNext(totalRead);
                     }
                 }
-
-                Log.Debug($"The file at {filePath} has been combined into");
-                Delete(filePath);
+                catch (Exception ex)
+                {
+                    Log.Error("Exception during downloading of ", ex);
+                    throw;
+                }
             }
 
-            bytesReceivedProgress.OnNext(totalRead);
+            Log.Debug($"The file at {filePath} has been combined into");
+            Delete(filePath);
         }
 
-        public Result Delete(string filePath)
-        {
-            Log.Debug($"Deleting file {filePath} since it has been merged already");
-            return _fileSystem.DeleteFile(filePath);
-        }
+        bytesReceivedProgress.OnNext(totalRead);
+    }
+
+    public Result Delete(string filePath)
+    {
+        Log.Debug($"Deleting file {filePath} since it has been merged already");
+        return _fileSystem.DeleteFile(filePath);
     }
 }

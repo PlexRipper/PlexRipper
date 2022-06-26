@@ -1,7 +1,6 @@
-﻿namespace PlexRipper.Application
+﻿namespace PlexRipper.Application;
+
+public interface IDownloadManagerSettings
 {
-    public interface IDownloadManagerSettings
-    {
-        int DownloadSegments { get; set; }
-    }
+    int DownloadSegments { get; set; }
 }

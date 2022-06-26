@@ -1,15 +1,11 @@
-﻿using FluentResults;
-using MediatR;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class GetPlexServerNameByIdQuery : IRequest<Result<string>>
 {
-    public class GetPlexServerNameByIdQuery : IRequest<Result<string>>
+    public GetPlexServerNameByIdQuery(int id)
     {
-        public GetPlexServerNameByIdQuery(int id)
-        {
-            Id = id;
-        }
-
-        public int Id { get; }
+        Id = id;
     }
+
+    public int Id { get; }
 }

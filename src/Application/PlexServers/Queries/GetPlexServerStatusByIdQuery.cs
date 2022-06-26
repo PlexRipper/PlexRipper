@@ -1,19 +1,14 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class GetPlexServerStatusByIdQuery : IRequest<Result<PlexServerStatus>>
 {
-    public class GetPlexServerStatusByIdQuery : IRequest<Result<PlexServerStatus>>
+    public GetPlexServerStatusByIdQuery(int id, bool includePlexServer = false)
     {
-        public GetPlexServerStatusByIdQuery(int id, bool includePlexServer = false)
-        {
-            Id = id;
-            IncludePlexServer = includePlexServer;
-        }
-
-        public int Id { get; }
-
-        public bool IncludePlexServer { get; }
+        Id = id;
+        IncludePlexServer = includePlexServer;
     }
+
+    public int Id { get; }
+
+    public bool IncludePlexServer { get; }
 }

@@ -3,18 +3,17 @@ using PlexRipper.Application;
 using PlexRipper.PlexApi.Services;
 using RestSharp;
 
-namespace PlexRipper.PlexApi
+namespace PlexRipper.PlexApi;
+
+public class PlexApiModule : Module
 {
-    public class PlexApiModule : Module
+    protected override void Load(ContainerBuilder builder)
     {
-        protected override void Load(ContainerBuilder builder)
-        {
-            builder.RegisterType<PlexApiService>().As<IPlexApiService>();
+        builder.RegisterType<PlexApiService>().As<IPlexApiService>();
 
-            builder.RegisterType<Api.PlexApi>();
+        builder.RegisterType<Api.PlexApi>();
 
-            builder.RegisterType<PlexApiClient>().SingleInstance();
-            builder.RegisterType<RestClient>().As<IRestClient>().SingleInstance();
-        }
+        builder.RegisterType<PlexApiClient>().SingleInstance();
+        builder.RegisterType<RestClient>().As<IRestClient>().SingleInstance();
     }
 }

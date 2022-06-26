@@ -1,13 +1,11 @@
-﻿using FluentResults;
-using PlexRipper.DownloadManager;
+﻿using PlexRipper.DownloadManager;
 
-namespace PlexRipper.BaseTests
+namespace PlexRipper.BaseTests;
+
+public class MockDownloadSubscriptions : IDownloadSubscriptions
 {
-    public class MockDownloadSubscriptions : IDownloadSubscriptions
+    public Result Setup()
     {
-        public Result Setup()
-        {
-            return Result.Ok();
-        }
+        return Result.Ok();
     }
 }

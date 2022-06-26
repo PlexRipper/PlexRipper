@@ -1,6 +1,3 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿namespace PlexRipper.WebAPI;
 
-namespace PlexRipper.WebAPI
-{
-    public interface IBoot : IHostLifetime { }
-}
+public interface IBoot : IHostLifetime { }

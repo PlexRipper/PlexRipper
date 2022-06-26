@@ -1,15 +1,11 @@
-﻿using FluentResults;
-using MediatR;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class DeleteDownloadWorkerTasksByDownloadTaskIdCommand : IRequest<Result>
 {
-    public class DeleteDownloadWorkerTasksByDownloadTaskIdCommand : IRequest<Result>
-    {
-        public int DownloadTaskId { get; }
+    public int DownloadTaskId { get; }
 
-        public DeleteDownloadWorkerTasksByDownloadTaskIdCommand(int downloadTaskId)
-        {
-            DownloadTaskId = downloadTaskId;
-        }
+    public DeleteDownloadWorkerTasksByDownloadTaskIdCommand(int downloadTaskId)
+    {
+        DownloadTaskId = downloadTaskId;
     }
 }

@@ -1,94 +1,88 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data
+namespace PlexRipper.Data;
+
+public class GetDownloadTaskByIdQueryValidator : AbstractValidator<GetDownloadTaskByIdQuery>
 {
-    public class GetDownloadTaskByIdQueryValidator : AbstractValidator<GetDownloadTaskByIdQuery>
+    public GetDownloadTaskByIdQueryValidator()
     {
-        public GetDownloadTaskByIdQueryValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
+        RuleFor(x => x.Id).GreaterThan(0);
     }
+}
 
-    public class GetDownloadTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetDownloadTaskByIdQuery, Result<DownloadTask>>
+public class GetDownloadTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetDownloadTaskByIdQuery, Result<DownloadTask>>
+{
+    public GetDownloadTaskByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
     {
-        public GetDownloadTaskByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var query = DownloadTasksQueryable;
 
-        public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
+        if (request.IncludeChildren)
         {
-            var query = DownloadTasksQueryable;
+            query = query.AsTracking()
+                .Include(x => x.PlexServer)
+                .Include(x => x.PlexLibrary)
+                .Include(x => x.DestinationFolder)
+                .Include(x => x.DownloadFolder)
+                .Include(x => x.DownloadWorkerTasks)
+                .Include(x => x.Children)
 
-            if (request.IncludeChildren)
-            {
-                query = query.AsTracking()
-                        .Include(x => x.PlexServer)
-                        .Include(x => x.PlexLibrary)
-                        .Include(x => x.DestinationFolder)
-                        .Include(x => x.DownloadFolder)
-                        .Include(x => x.DownloadWorkerTasks)
-                        .Include(x => x.Children)
+                // Level 1
+                .Include(x => x.Children).ThenInclude(x => x.PlexServer)
+                .Include(x => x.Children).ThenInclude(x => x.PlexLibrary)
+                .Include(x => x.Children).ThenInclude(x => x.DestinationFolder)
+                .Include(x => x.Children).ThenInclude(x => x.DownloadFolder)
+                .Include(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks)
 
-                        // Level 1
-                        .Include(x => x.Children).ThenInclude(x => x.PlexServer)
-                        .Include(x => x.Children).ThenInclude(x => x.PlexLibrary)
-                        .Include(x => x.Children).ThenInclude(x => x.DestinationFolder)
-                        .Include(x => x.Children).ThenInclude(x => x.DownloadFolder)
-                        .Include(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks)
+                // Level 2
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexServer)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexLibrary)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DestinationFolder)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DownloadFolder)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks)
 
-                        // Level 2
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexServer)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexLibrary)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DestinationFolder)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DownloadFolder)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks)
+                // Level 3
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexServer)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexLibrary)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DestinationFolder)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DownloadFolder)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks)
 
-                        // Level 3
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexServer)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexLibrary)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DestinationFolder)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DownloadFolder)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks)
+                // Level 4
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .ThenInclude(x => x.PlexServer)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .ThenInclude(x => x.PlexLibrary)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .ThenInclude(x => x.DestinationFolder)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .ThenInclude(x => x.DownloadFolder)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .ThenInclude(x => x.DownloadWorkerTasks)
 
-                        // Level 4
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.PlexServer)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.PlexLibrary)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.DestinationFolder)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.DownloadFolder)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.DownloadWorkerTasks)
-
-                        // Level 5
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.Children).ThenInclude(x => x.PlexServer)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.Children).ThenInclude(x => x.PlexLibrary)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.Children).ThenInclude(x => x.DestinationFolder)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.Children).ThenInclude(x => x.DownloadFolder)
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks);
+                // Level 5
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .ThenInclude(x => x.Children).ThenInclude(x => x.PlexServer)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .ThenInclude(x => x.Children).ThenInclude(x => x.PlexLibrary)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .ThenInclude(x => x.Children).ThenInclude(x => x.DestinationFolder)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .ThenInclude(x => x.Children).ThenInclude(x => x.DownloadFolder)
+                .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
+                .ThenInclude(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks);
 
 
-            }
-
-            var downloadTask = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
-            return ReturnResult(downloadTask, request.Id);
         }
+
+        var downloadTask = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+
+        return ReturnResult(downloadTask, request.Id);
     }
 }

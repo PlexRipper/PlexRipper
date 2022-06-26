@@ -1,18 +1,14 @@
-﻿using FluentResults;
-using MediatR;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class UpdatePlexLibraryDefaultDestinationByIdCommand : IRequest<Result>
 {
-    public class UpdatePlexLibraryDefaultDestinationByIdCommand : IRequest<Result>
+    public int PlexLibraryId { get; }
+
+    public int FolderPathId { get; }
+
+    public UpdatePlexLibraryDefaultDestinationByIdCommand(int plexLibraryId, int folderPathId)
     {
-        public int PlexLibraryId { get; }
-
-        public int FolderPathId { get; }
-
-        public UpdatePlexLibraryDefaultDestinationByIdCommand(int plexLibraryId, int folderPathId)
-        {
-            PlexLibraryId = plexLibraryId;
-            FolderPathId = folderPathId;
-        }
+        PlexLibraryId = plexLibraryId;
+        FolderPathId = folderPathId;
     }
 }

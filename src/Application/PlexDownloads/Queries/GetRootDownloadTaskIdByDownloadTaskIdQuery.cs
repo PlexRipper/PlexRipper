@@ -1,15 +1,11 @@
-﻿using FluentResults;
-using MediatR;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class GetRootDownloadTaskIdByDownloadTaskIdQuery : IRequest<Result<int>>
 {
-    public class GetRootDownloadTaskIdByDownloadTaskIdQuery : IRequest<Result<int>>
+    public GetRootDownloadTaskIdByDownloadTaskIdQuery(int id)
     {
-        public GetRootDownloadTaskIdByDownloadTaskIdQuery(int id)
-        {
-            Id = id;
-        }
-
-        public int Id { get; }
+        Id = id;
     }
+
+    public int Id { get; }
 }

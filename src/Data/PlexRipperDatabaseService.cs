@@ -1,90 +1,83 @@
-﻿using System;
-using System.Globalization;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using Environment;
-using FluentResults;
-using Logging;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data
+namespace PlexRipper.Data;
+
+public class PlexRipperDatabaseService : IPlexRipperDatabaseService
 {
-    public class PlexRipperDatabaseService : IPlexRipperDatabaseService
+    private readonly PlexRipperDbContext _dbContext;
+
+    private readonly IPathProvider _pathProvider;
+
+    private readonly IFileSystem _fileSystem;
+
+    private readonly IDirectorySystem _directorySystem;
+
+    public PlexRipperDatabaseService(PlexRipperDbContext dbContext, IPathProvider pathProvider, IFileSystem fileSystem, IDirectorySystem directorySystem)
     {
-        private readonly PlexRipperDbContext _dbContext;
+        _dbContext = dbContext;
+        _pathProvider = pathProvider;
+        _fileSystem = fileSystem;
+        _directorySystem = directorySystem;
+    }
 
-        private readonly IPathProvider _pathProvider;
-
-        private readonly IFileSystem _fileSystem;
-
-        private readonly IDirectorySystem _directorySystem;
-
-        public PlexRipperDatabaseService(PlexRipperDbContext dbContext, IPathProvider pathProvider, IFileSystem fileSystem, IDirectorySystem directorySystem)
+    public Result BackUpDatabase()
+    {
+        Log.Information("Attempting to back-up the PlexRipper database");
+        if (!_fileSystem.FileExists(_pathProvider.DatabasePath))
         {
-            _dbContext = dbContext;
-            _pathProvider = pathProvider;
-            _fileSystem = fileSystem;
-            _directorySystem = directorySystem;
+            return Result.Fail($"Could not find Database at path: {_pathProvider.DatabasePath}").LogError();
         }
 
-        public Result BackUpDatabase()
+        var dbBackupName = $"BackUp_{_pathProvider.DatabaseName.Replace(".db", "")}_" +
+                           $"{DateTime.Now.ToString("dd-MM-yyyy_hh-mm", CultureInfo.InvariantCulture)}.db";
+        var dbBackUpPath = Path.Combine(_pathProvider.DatabaseBackupDirectory, dbBackupName);
+
+        try
         {
-            Log.Information("Attempting to back-up the PlexRipper database");
-            if (!_fileSystem.FileExists(_pathProvider.DatabasePath))
+            _directorySystem.CreateDirectoryFromFilePath(dbBackUpPath);
+
+            // Wait until the database is available.
+            StreamExtensions.WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
+
+            var moveResult = _fileSystem.FileMove(_pathProvider.DatabasePath, dbBackUpPath);
+            if (moveResult.IsFailed)
             {
-                return Result.Fail($"Could not find Database at path: {_pathProvider.DatabasePath}").LogError();
+                return moveResult;
             }
-
-            var dbBackupName = $"BackUp_{_pathProvider.DatabaseName.Replace(".db", "")}_" +
-                               $"{DateTime.Now.ToString("dd-MM-yyyy_hh-mm", CultureInfo.InvariantCulture)}.db";
-            var dbBackUpPath = Path.Combine(_pathProvider.DatabaseBackupDirectory, dbBackupName);
-
-            try
-            {
-                _directorySystem.CreateDirectoryFromFilePath(dbBackUpPath);
-
-                // Wait until the database is available.
-                StreamExtensions.WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
-
-                var moveResult = _fileSystem.FileMove(_pathProvider.DatabasePath, dbBackUpPath);
-                if (moveResult.IsFailed)
-                {
-                    return moveResult;
-                }
-            }
-            catch (Exception e)
-            {
-                return Result.Fail(new ExceptionalError(e)).LogError();
-            }
-
-            Log.Information($"Successfully backed-up the database to {dbBackUpPath}");
-            return Result.Ok();
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
         }
 
-        public async Task<Result> ResetDatabase()
-        {
-            Log.Information("Resetting PlexRipper database");
-            var backupResult = BackUpDatabase();
-            if (backupResult.IsFailed)
-            {
-                return backupResult;
-            }
+        Log.Information($"Successfully backed-up the database to {dbBackUpPath}");
+        return Result.Ok();
+    }
 
-            return await _dbContext.SetupAsync();
+    public async Task<Result> ResetDatabase()
+    {
+        Log.Information("Resetting PlexRipper database");
+        var backupResult = BackUpDatabase();
+        if (backupResult.IsFailed)
+        {
+            return backupResult;
         }
 
-        public async Task<Result> SetupAsync()
-        {
-            Log.Information("Setting up the PlexRipper database");
-            var setupResult = await _dbContext.SetupAsync();
-            if (setupResult.IsSuccess)
-            {
-                return setupResult;
-            }
+        return await _dbContext.SetupAsync();
+    }
 
-            Log.Warning("Failed to setup the database, will back-up and reset now.");
-            return await ResetDatabase();
+    public async Task<Result> SetupAsync()
+    {
+        Log.Information("Setting up the PlexRipper database");
+        var setupResult = await _dbContext.SetupAsync();
+        if (setupResult.IsSuccess)
+        {
+            return setupResult;
         }
+
+        Log.Warning("Failed to setup the database, will back-up and reset now.");
+        return await ResetDatabase();
     }
 }

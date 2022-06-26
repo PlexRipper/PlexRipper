@@ -1,62 +1,58 @@
-﻿using System;
-using System.IO;
-using System.IO.Abstractions;
-using FluentResults;
+﻿using System.IO.Abstractions;
 using PlexRipper.Application;
 
-namespace PlexRipper.FileSystem
+namespace PlexRipper.FileSystem;
+
+public class PathSystem : IPathSystem
 {
-    public class PathSystem : IPathSystem
+    private readonly IPath _path;
+
+    public PathSystem(IPath path)
     {
-        private readonly IPath _path;
+        _path = path;
+    }
 
-        public PathSystem(IPath path)
+    public Result<string> Combine(params string[] paths)
+    {
+        try
         {
-            _path = path;
+            return Result.Ok(_path.Combine(paths));
         }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
+    }
 
-        public Result<string> Combine(params string[] paths)
-        {
-            try
-            {
-                return Result.Ok(_path.Combine(paths));
-            }
-            catch (Exception e)
-            {
-                return Result.Fail(new ExceptionalError(e)).LogError();
-            }
-        }
+    public string GetPathRoot(string directory)
+    {
+        var f = new FileInfo(directory);
+        return _path.GetPathRoot(f.FullName);
+    }
 
-        public string GetPathRoot(string directory)
+    /// <inheritdoc/>
+    public Result<string> GetDirectoryName(string filePath)
+    {
+        try
         {
-            var f = new FileInfo(directory);
-            return _path.GetPathRoot(f.FullName);
+            return Result.Ok(Path.GetDirectoryName(filePath));
         }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
+    }
 
-        /// <inheritdoc/>
-        public Result<string> GetDirectoryName(string filePath)
-        {
-            try
-            {
-                return Result.Ok(Path.GetDirectoryName(filePath));
-            }
-            catch (Exception e)
-            {
-                return Result.Fail(new ExceptionalError(e)).LogError();
-            }
-        }
-
-        /// <summary>
-        /// Replaces invalid characters from a file or folder name
-        /// Source: https://stackoverflow.com/a/13617375/8205497
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public string SanitizePath(string name)
-        {
-            var invalids = Path.GetInvalidFileNameChars();
-            name = name.Replace(@"·", "-").Replace(": ", " ");
-            return string.Join(" ", name.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
-        }
+    /// <summary>
+    /// Replaces invalid characters from a file or folder name
+    /// Source: https://stackoverflow.com/a/13617375/8205497
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public string SanitizePath(string name)
+    {
+        var invalids = Path.GetInvalidFileNameChars();
+        name = name.Replace(@"·", "-").Replace(": ", " ");
+        return string.Join(" ", name.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
     }
 }

@@ -1,6 +1,3 @@
-﻿using PlexRipper.Domain;
+﻿namespace PlexRipper.DownloadManager;
 
-namespace PlexRipper.DownloadManager
-{
-    public interface IDownloadSubscriptions : ISetup { }
-}
+public interface IDownloadSubscriptions : ISetup { }

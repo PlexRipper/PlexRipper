@@ -1,46 +1,38 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data.PlexMovies
+namespace PlexRipper.Data.PlexMovies;
+
+public class GetMultiplePlexMoviesByIdsQueryHandlerValidator : AbstractValidator<GetMultiplePlexMoviesByIdsQuery>
 {
-    public class GetMultiplePlexMoviesByIdsQueryHandlerValidator : AbstractValidator<GetMultiplePlexMoviesByIdsQuery>
+    public GetMultiplePlexMoviesByIdsQueryHandlerValidator()
     {
-        public GetMultiplePlexMoviesByIdsQueryHandlerValidator()
-        {
-            RuleFor(x => x.Ids.Count).GreaterThan(0);
-        }
+        RuleFor(x => x.Ids.Count).GreaterThan(0);
     }
+}
 
-    public class GetMultiplePlexMoviesByIdsQueryHandlerHandler : BaseHandler, IRequestHandler<GetMultiplePlexMoviesByIdsQuery, Result<List<PlexMovie>>>
+public class GetMultiplePlexMoviesByIdsQueryHandlerHandler : BaseHandler, IRequestHandler<GetMultiplePlexMoviesByIdsQuery, Result<List<PlexMovie>>>
+{
+    public GetMultiplePlexMoviesByIdsQueryHandlerHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<List<PlexMovie>>> Handle(GetMultiplePlexMoviesByIdsQuery request, CancellationToken cancellationToken)
     {
-        public GetMultiplePlexMoviesByIdsQueryHandlerHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var query = PlexMoviesQueryable;
 
-        public async Task<Result<List<PlexMovie>>> Handle(GetMultiplePlexMoviesByIdsQuery request, CancellationToken cancellationToken)
+        if (request.IncludeLibrary)
         {
-            var query = PlexMoviesQueryable;
-
-            if (request.IncludeLibrary)
-            {
-                query = query.IncludePlexLibrary();
-            }
-
-            if ( request.IncludeServer)
-            {
-                query = query.IncludePlexServer();
-            }
-
-            var plexMovies = await query.Where(x => request.Ids.Contains(x.Id)).ToListAsync(cancellationToken);
-
-            return Result.Ok(plexMovies);
+            query = query.IncludePlexLibrary();
         }
+
+        if ( request.IncludeServer)
+        {
+            query = query.IncludePlexServer();
+        }
+
+        var plexMovies = await query.Where(x => request.Ids.Contains(x.Id)).ToListAsync(cancellationToken);
+
+        return Result.Ok(plexMovies);
     }
 }

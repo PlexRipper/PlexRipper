@@ -1,44 +1,35 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
-using Logging;
-using Xunit;
-using Xunit.Abstractions;
+﻿namespace PlexRipper.BaseTests;
 
-namespace PlexRipper.BaseTests
+public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
 {
-    public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
+    protected BaseContainer Container;
+
+    protected BaseIntegrationTests(ITestOutputHelper output)
     {
-        protected BaseContainer Container;
+        Log.SetupTestLogging(output);
+    }
 
-        protected BaseIntegrationTests(ITestOutputHelper output)
-        {
-            Log.SetupTestLogging(output);
-        }
+    protected async Task CreateContainer(int seed)
+    {
+        await CreateContainer(config => { config.Seed = seed; });
+    }
 
-        protected async Task CreateContainer(int seed)
-        {
-            await CreateContainer(config => { config.Seed = seed; });
-        }
+    protected async Task CreateContainer([CanBeNull] Action<UnitTestDataConfig> options = null)
+    {
+        Container = await BaseContainer.Create(options);
+    }
 
-        protected async Task CreateContainer([CanBeNull] Action<UnitTestDataConfig> options = null)
-        {
-            Container = await BaseContainer.Create(options);
-        }
+    public async Task InitializeAsync()
+    {
+        Log.Information("Initialize Integration Test");
+    }
 
-        public async Task InitializeAsync()
-        {
-            Log.Information("Initialize Integration Test");
-        }
+    public async Task DisposeAsync() { }
 
-        public async Task DisposeAsync() { }
-
-        async ValueTask IAsyncDisposable.DisposeAsync()
-        {
-            Log.Fatal("Container disposed");
-            await Container.Boot.StopAsync(CancellationToken.None);
-            Container?.Dispose();
-        }
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        Log.Fatal("Container disposed");
+        await Container.Boot.StopAsync(CancellationToken.None);
+        Container?.Dispose();
     }
 }

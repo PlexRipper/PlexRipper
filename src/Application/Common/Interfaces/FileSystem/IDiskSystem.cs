@@ -1,11 +1,8 @@
-﻿using FluentResults;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public interface IDiskSystem
 {
-    public interface IDiskSystem
-    {
-        Result<long> GetAvailableSpaceByDirectory(string directory);
+    Result<long> GetAvailableSpaceByDirectory(string directory);
 
-        Result HasDirectoryEnoughAvailableSpace(string directory, long fileSize);
-    }
+    Result HasDirectoryEnoughAvailableSpace(string directory, long fileSize);
 }

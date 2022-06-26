@@ -1,45 +1,38 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data
+namespace PlexRipper.Data;
+
+public class UpdateDownloadStatusOfDownloadTaskCommandValidator : AbstractValidator<UpdateDownloadStatusOfDownloadTaskCommand>
 {
-    public class UpdateDownloadStatusOfDownloadTaskCommandValidator : AbstractValidator<UpdateDownloadStatusOfDownloadTaskCommand>
+    public UpdateDownloadStatusOfDownloadTaskCommandValidator()
     {
-        public UpdateDownloadStatusOfDownloadTaskCommandValidator()
-        {
-            RuleForEach(x => x.DownloadTaskIds).ChildRules(x => x.RuleFor(y => y).GreaterThan(0));
-            RuleFor(x => x.DownloadStatus).NotEqual(DownloadStatus.Unknown);
-        }
+        RuleForEach(x => x.DownloadTaskIds).ChildRules(x => x.RuleFor(y => y).GreaterThan(0));
+        RuleFor(x => x.DownloadStatus).NotEqual(DownloadStatus.Unknown);
     }
+}
 
-    public class UpdateDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
-        IRequestHandler<UpdateDownloadStatusOfDownloadTaskCommand, Result>
+public class UpdateDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
+    IRequestHandler<UpdateDownloadStatusOfDownloadTaskCommand, Result>
+{
+    public UpdateDownloadStatusOfDownloadTaskCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result> Handle(UpdateDownloadStatusOfDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        public UpdateDownloadStatusOfDownloadTaskCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var downloadTasks = await DownloadTasksQueryable
+            .AsTracking()
+            .Where(x => command.DownloadTaskIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
 
-        public async Task<Result> Handle(UpdateDownloadStatusOfDownloadTaskCommand command, CancellationToken cancellationToken)
+        foreach (var downloadTask in downloadTasks)
         {
-            var downloadTasks = await DownloadTasksQueryable
-                .AsTracking()
-                .Where(x => command.DownloadTaskIds.Contains(x.Id))
-                .ToListAsync(cancellationToken);
-
-            foreach (var downloadTask in downloadTasks)
-            {
-                downloadTask.DownloadStatus = command.DownloadStatus;
-            }
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return Result.Ok();
+            downloadTask.DownloadStatus = command.DownloadStatus;
         }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Ok();
     }
 }

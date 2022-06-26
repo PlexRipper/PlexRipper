@@ -1,56 +1,62 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>PlexRipper.WebAPI</RootNamespace>
-    <AssemblyName>PlexRipper.WebAPI</AssemblyName>
-    <UserSecretsId>0732cfe0-5874-40d5-99f7-8794dfabd959</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
-    <IsPackable>false</IsPackable>
-    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
-    <DockerfileFile>..\..\Dockerfile</DockerfileFile>
-    <DockerfileContext>.</DockerfileContext>
-    <SpaRoot>ClientApp\</SpaRoot>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
-  </PropertyGroup>
-  <ItemGroup>
-      <InternalsVisibleTo Include="FluentResultExtension.UnitTests" />
-      <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="9.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="6.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.6" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1" />
-    <PackageReference Include="NSwag.AspNetCore" Version="13.16.1" />
-    <PackageReference Include="NSwag.MSBuild" Version="13.16.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.3.2" />
-    <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.330701">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.6" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BackgroundServices\BackgroundServices.csproj" />
-    <ProjectReference Include="..\HttpClient\HttpClient.csproj" />
-    <ProjectReference Include="..\Application\Application.csproj" />
-    <ProjectReference Include="..\Data\Data.csproj" />
-    <ProjectReference Include="..\DownloadManager\DownloadManager.csproj" />
-    <ProjectReference Include="..\FileSystem\FileSystem.csproj" />
-    <ProjectReference Include="..\PlexApi\PlexApi.csproj" />
-    <ProjectReference Include="..\Settings\Settings.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Remove="nswag.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="WebAPI.csproj.DotSettings" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>10</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>PlexRipper.WebAPI</RootNamespace>
+        <AssemblyName>PlexRipper.WebAPI</AssemblyName>
+        <UserSecretsId>0732cfe0-5874-40d5-99f7-8794dfabd959</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+        <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+        <IsPackable>false</IsPackable>
+        <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
+        <DockerfileFile>..\..\Dockerfile</DockerfileFile>
+        <DockerfileContext>.</DockerfileContext>
+        <SpaRoot>ClientApp\</SpaRoot>
+        <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
+    </PropertyGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="FluentResultExtension.UnitTests"/>
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0"/>
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0"/>
+        <PackageReference Include="FluentValidation.AspNetCore" Version="9.3.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="6.0.6"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.6"/>
+        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1"/>
+        <PackageReference Include="NSwag.AspNetCore" Version="13.16.1"/>
+        <PackageReference Include="NSwag.MSBuild" Version="13.16.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.3.2"/>
+        <PackageReference Include="Serilog.AspNetCore" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.330701">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.6"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\BackgroundServices\BackgroundServices.csproj"/>
+        <ProjectReference Include="..\HttpClient\HttpClient.csproj"/>
+        <ProjectReference Include="..\Application\Application.csproj"/>
+        <ProjectReference Include="..\Data\Data.csproj"/>
+        <ProjectReference Include="..\DownloadManager\DownloadManager.csproj"/>
+        <ProjectReference Include="..\FileSystem\FileSystem.csproj"/>
+        <ProjectReference Include="..\PlexApi\PlexApi.csproj"/>
+        <ProjectReference Include="..\Settings\Settings.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Remove="nswag.json"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Remove="WebAPI.csproj.DotSettings"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Properties\"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
+
 </Project>

@@ -1,17 +1,11 @@
-﻿using System.Collections.Generic;
-using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class UpdateDownloadTasksByIdCommand : IRequest<Result>
 {
-    public class UpdateDownloadTasksByIdCommand : IRequest<Result>
-    {
-        public List<DownloadTask> DownloadTasks { get; }
+    public List<DownloadTask> DownloadTasks { get; }
 
-        public UpdateDownloadTasksByIdCommand(List<DownloadTask> downloadTasks)
-        {
-            DownloadTasks = downloadTasks;
-        }
+    public UpdateDownloadTasksByIdCommand(List<DownloadTask> downloadTasks)
+    {
+        DownloadTasks = downloadTasks;
     }
 }

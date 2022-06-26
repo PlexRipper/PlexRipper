@@ -1,53 +1,48 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using PlexRipper.WebAPI.SignalR.Hubs;
 
-namespace PlexRipper.WebAPI.Common.Extensions
+namespace PlexRipper.WebAPI.Common.Extensions;
+
+public static partial class StartupExtensions
 {
-    public static partial class StartupExtensions
+    public static void SetupConfigure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        public static void SetupConfigure(IApplicationBuilder app, IWebHostEnvironment env)
+        app.UseRouting();
+
+        app.UseCors(CORSConfiguration);
+
+        app.UseAuthorization();
+
+        app.UseOpenApi(); // serve OpenAPI/Swagger documents
+        app.UseSwaggerUi3(); // serve Swagger UI
+        app.UseEndpoints(endpoints =>
         {
-            app.UseRouting();
+            endpoints.MapControllers();
 
-            app.UseCors(CORSConfiguration);
+            // SignalR configuration
+            endpoints.MapHub<ProgressHub>("/progress");
+            endpoints.MapHub<NotificationHub>("/notifications");
+        });
 
-            app.UseAuthorization();
-
-            app.UseOpenApi(); // serve OpenAPI/Swagger documents
-            app.UseSwaggerUi3(); // serve Swagger UI
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-
-                // SignalR configuration
-                endpoints.MapHub<ProgressHub>("/progress");
-                endpoints.MapHub<NotificationHub>("/notifications");
-            });
-
-            // Used to deploy the front-end Nuxt client
-            if (env.IsProduction())
-            {
-                app.UseSpaStaticFiles();
-                app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
-            }
-        }
-
-        public static void SetupTestConfigure(IApplicationBuilder app, IWebHostEnvironment env)
+        // Used to deploy the front-end Nuxt client
+        if (env.IsProduction())
         {
-            app.UseRouting();
-
-            app.UseCors(CORSConfiguration);
-
-            app.UseAuthorization();
-
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseSpaStaticFiles();
+            app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
         }
+    }
+
+    public static void SetupTestConfigure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        app.UseRouting();
+
+        app.UseCors(CORSConfiguration);
+
+        app.UseAuthorization();
+
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
     }
 }

@@ -47,5 +47,8 @@
     <ItemGroup>
         <Folder Include="DownloadScheduler"/>
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
 
 </Project>

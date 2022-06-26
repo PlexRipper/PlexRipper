@@ -17,6 +17,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
+        <Compile Include="..\Domain\GlobalUsings.cs"/> 
     </ItemGroup>
 
     <ItemGroup>

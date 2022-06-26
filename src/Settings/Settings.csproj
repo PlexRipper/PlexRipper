@@ -20,4 +20,8 @@
         <Folder Include="Common\Interfaces"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
+
 </Project>

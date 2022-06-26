@@ -22,4 +22,7 @@
         <ProjectReference Include="..\Application\Application.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
 </Project>

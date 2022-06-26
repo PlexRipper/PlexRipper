@@ -11,4 +11,8 @@
         <ProjectReference Include="..\DownloadManager\DownloadManager.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
+
 </Project>

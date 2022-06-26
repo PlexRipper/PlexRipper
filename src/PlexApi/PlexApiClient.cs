@@ -1,5 +1,5 @@
-using System.Net;
 using System.Text.Json;
+using System.Net;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;

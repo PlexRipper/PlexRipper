@@ -24,5 +24,8 @@
         <ProjectReference Include="..\..\..\src\DownloadManager\DownloadManager.csproj"/>
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj"/>
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
 
 </Project>

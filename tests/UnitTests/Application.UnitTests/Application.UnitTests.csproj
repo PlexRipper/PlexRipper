@@ -23,5 +23,8 @@
         <ProjectReference Include="..\..\IntegrationTests\Applicaton.IntegrationTests\Application.IntegrationTests.csproj"/>
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj"/>
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
 
 </Project>

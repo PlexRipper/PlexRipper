@@ -32,4 +32,8 @@
         <Folder Include="CQRS\PlexAuthentication\Commands"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
+
 </Project>

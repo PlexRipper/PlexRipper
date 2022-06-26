@@ -26,4 +26,8 @@
         <None Remove="MockData\ValidJsonSettings.json"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
+
 </Project>

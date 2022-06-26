@@ -28,5 +28,8 @@
     <ItemGroup>
         <Folder Include="CQRS\PlexTvShows\Queries"/>
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
 
 </Project>

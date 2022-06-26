@@ -1,7 +1,4 @@
 ﻿using EFCore.BulkExtensions;
-using FluentResults;
-using Logging;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Common
 {

@@ -1,6 +1,4 @@
-﻿using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 
 namespace PlexRipper.Domain.Behavior.Pipelines
 {

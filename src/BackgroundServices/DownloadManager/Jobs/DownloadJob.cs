@@ -1,6 +1,4 @@
-﻿using Logging;
-using PlexRipper.Domain;
-using PlexRipper.DownloadManager;
+﻿using PlexRipper.DownloadManager;
 using Quartz;
 
 namespace BackgroundServices.DownloadManager.Jobs

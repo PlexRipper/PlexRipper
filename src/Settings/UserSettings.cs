@@ -1,8 +1,6 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
-using FluentResults;
-using Logging;
 using PlexRipper.Application;
 using PlexRipper.Settings.Models;
 

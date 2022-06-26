@@ -1,4 +1,3 @@
-using Logging;
 using PlexRipper.Settings;
 using PlexRipper.Settings.Models;
 using PlexRipper.Settings.Modules;

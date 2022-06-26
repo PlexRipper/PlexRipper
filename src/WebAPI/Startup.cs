@@ -1,5 +1,4 @@
 using Environment;
-using Logging;
 using PlexRipper.WebAPI.Common.Extensions;
 
 namespace PlexRipper.WebAPI

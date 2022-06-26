@@ -1,5 +1,4 @@
 ﻿using Autofac.Extras.Moq;
-using Logging;
 using PlexRipper.FileSystem;
 using Shouldly;
 using Xunit;

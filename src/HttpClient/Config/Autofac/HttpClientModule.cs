@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using PlexRipper.Domain;
 
 namespace PlexRipper.HttpClient
 {

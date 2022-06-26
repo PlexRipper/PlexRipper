@@ -1,5 +1,4 @@
-﻿using FluentResults;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 
 namespace PlexRipper.FileSystem
 {

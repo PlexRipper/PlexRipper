@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Data.Configurations
 {

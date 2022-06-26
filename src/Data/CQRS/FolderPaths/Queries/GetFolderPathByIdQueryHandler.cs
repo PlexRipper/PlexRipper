@@ -1,9 +1,6 @@
-﻿using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Data.FolderPaths
 {

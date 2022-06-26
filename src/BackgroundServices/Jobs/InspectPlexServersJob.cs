@@ -1,5 +1,4 @@
-﻿using Logging;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 using Quartz;
 
 namespace BackgroundServices.Jobs

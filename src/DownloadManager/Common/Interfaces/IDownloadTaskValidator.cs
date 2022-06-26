@@ -1,7 +1,4 @@
-﻿using FluentResults;
-using PlexRipper.Domain;
-
-namespace PlexRipper.DownloadManager
+﻿namespace PlexRipper.DownloadManager
 {
     public interface IDownloadTaskValidator
     {

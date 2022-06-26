@@ -1,11 +1,7 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Channels;
-using FluentResults;
-using Logging;
-using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager
 {

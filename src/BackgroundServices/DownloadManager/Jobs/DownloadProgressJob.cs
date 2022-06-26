@@ -1,7 +1,4 @@
-﻿using FluentResults;
-using Logging;
-using PlexRipper.Application;
-using PlexRipper.Domain;
+﻿using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using Quartz;
 

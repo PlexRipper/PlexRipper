@@ -1,11 +1,9 @@
 ﻿using EFCore.BulkExtensions;
-using Logging;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.Data;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;

@@ -1,6 +1,5 @@
 using System.Net;
 using Environment;
-using Logging;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 

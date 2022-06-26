@@ -1,8 +1,4 @@
-﻿using PlexRipper.Domain;
-
-// ReSharper disable InconsistentNaming
-
-namespace PlexRipper.Data.Common.Constants
+﻿namespace PlexRipper.Data.Common.Constants
 {
     public static class IncludePath
     {

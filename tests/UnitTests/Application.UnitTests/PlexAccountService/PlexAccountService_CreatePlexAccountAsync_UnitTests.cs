@@ -1,9 +1,5 @@
-﻿using FluentResults;
-using Logging;
-using MediatR;
-using Moq;
+﻿using Moq;
 using PlexRipper.Application.PlexAccounts;
-using PlexRipper.Domain;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;

@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using Logging;
 
 namespace PlexRipper.Domain
 {

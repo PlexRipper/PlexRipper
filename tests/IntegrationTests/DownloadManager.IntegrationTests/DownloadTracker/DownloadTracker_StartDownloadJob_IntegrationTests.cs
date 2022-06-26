@@ -1,5 +1,4 @@
 ﻿using PlexRipper.BaseTests;
-using PlexRipper.Domain;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;

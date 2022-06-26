@@ -1,5 +1,4 @@
 using FluentResultExtensions.lib;
-using FluentResults;
 using Shouldly;
 using Xunit;
 

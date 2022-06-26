@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Subjects;
-using FluentResults;
 
 namespace PlexRipper.FileSystem.Common
 {

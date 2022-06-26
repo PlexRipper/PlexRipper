@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Domain;
 
 namespace PlexRipper.WebAPI.SignalR.Common
 {

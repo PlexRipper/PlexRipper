@@ -3,13 +3,9 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Channels;
 using Environment;
-using FluentResults;
-using Logging;
-using MediatR;
 using PlexRipper.Application;
 using PlexRipper.Application.FileManager.Command;
 using PlexRipper.Application.FileManager.Queries;
-using PlexRipper.Domain;
 using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.FileSystem

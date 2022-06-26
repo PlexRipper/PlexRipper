@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
-using FluentResults;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common.DTO;

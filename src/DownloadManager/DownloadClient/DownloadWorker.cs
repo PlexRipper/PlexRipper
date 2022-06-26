@@ -1,9 +1,6 @@
 using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using FluentResults;
-using Logging;
-using PlexRipper.Domain;
 using Timer = System.Timers.Timer;
 
 namespace PlexRipper.DownloadManager.DownloadClient

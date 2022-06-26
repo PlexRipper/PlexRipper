@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using FluentResults;
-using Logging;
 using PlexRipper.Application;
 using PlexRipper.PlexApi.Models;
 

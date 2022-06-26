@@ -1,9 +1,5 @@
 using AutoMapper;
-using FluentResults;
-using Logging;
-using MediatR;
 using PlexRipper.Application.PlexAccounts;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Application
 {

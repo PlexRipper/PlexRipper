@@ -1,8 +1,6 @@
 ﻿using Autofac;
 using Autofac.Extras.Moq;
 using Environment;
-using FluentResults;
-using Logging;
 using Moq;
 using PlexRipper.Application;
 using PlexRipper.Settings;

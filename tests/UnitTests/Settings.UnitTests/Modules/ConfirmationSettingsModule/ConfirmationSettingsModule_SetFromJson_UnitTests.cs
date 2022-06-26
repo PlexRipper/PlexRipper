@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Autofac.Extras.Moq;
-using Logging;
 using PlexRipper.Domain.Config;
 using PlexRipper.Settings.Models;
 using PlexRipper.Settings.Modules;

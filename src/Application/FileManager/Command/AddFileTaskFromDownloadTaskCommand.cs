@@ -1,8 +1,4 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
-
-namespace PlexRipper.Application.FileManager.Command
+﻿namespace PlexRipper.Application.FileManager.Command
 {
     public class AddFileTaskFromDownloadTaskCommand : IRequest<Result<int>>
     {

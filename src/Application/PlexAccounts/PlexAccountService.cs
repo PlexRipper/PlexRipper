@@ -1,8 +1,3 @@
-using FluentResults;
-using Logging;
-using MediatR;
-using PlexRipper.Domain;
-
 namespace PlexRipper.Application.PlexAccounts
 {
     public class PlexAccountService : IPlexAccountService

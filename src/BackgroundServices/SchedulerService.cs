@@ -1,8 +1,5 @@
 ﻿using BackgroundServices.Jobs;
-using FluentResults;
-using Logging;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 using Quartz;
 
 namespace BackgroundServices

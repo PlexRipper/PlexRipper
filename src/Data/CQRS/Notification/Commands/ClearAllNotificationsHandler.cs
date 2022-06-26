@@ -1,10 +1,7 @@
 ﻿using EFCore.BulkExtensions;
-using FluentResults;
 using FluentValidation;
-using MediatR;
 using PlexRipper.Application.Notifications;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {

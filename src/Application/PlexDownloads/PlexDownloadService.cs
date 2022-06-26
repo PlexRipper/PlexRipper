@@ -1,9 +1,4 @@
-﻿using FluentResults;
-using Logging;
-using MediatR;
-using PlexRipper.Domain;
-
-namespace PlexRipper.Application
+﻿namespace PlexRipper.Application
 {
     public class PlexDownloadService : IPlexDownloadService
     {

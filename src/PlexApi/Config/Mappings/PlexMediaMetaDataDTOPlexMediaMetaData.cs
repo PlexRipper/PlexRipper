@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Logging;
 using PlexRipper.PlexApi.Models;
 
 namespace PlexRipper.PlexApi.Mappings

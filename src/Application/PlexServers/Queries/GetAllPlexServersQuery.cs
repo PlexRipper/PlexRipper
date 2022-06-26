@@ -1,8 +1,4 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
-
-namespace PlexRipper.Application
+﻿namespace PlexRipper.Application
 {
     public class GetAllPlexServersQuery : IRequest<Result<List<PlexServer>>>
     {

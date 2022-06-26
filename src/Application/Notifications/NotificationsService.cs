@@ -1,7 +1,4 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Application.Notifications.Queries;
-using PlexRipper.Domain;
+﻿using PlexRipper.Application.Notifications.Queries;
 
 namespace PlexRipper.Application.Notifications
 {

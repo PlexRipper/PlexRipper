@@ -1,8 +1,4 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
-
-namespace PlexRipper.Application.FileManager.Queries
+﻿namespace PlexRipper.Application.FileManager.Queries
 {
     public class GetFileTaskByIdQuery : IRequest<Result<DownloadFileTask>>
     {

@@ -1,6 +1,3 @@
-using FluentResults;
-using PlexRipper.Domain;
-
 namespace PlexRipper.Application
 {
     public interface IPlexAccountService

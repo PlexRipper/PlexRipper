@@ -1,5 +1,4 @@
 ﻿using Autofac.Extras.Moq;
-using Logging;
 using PlexRipper.Settings.Models;
 using PlexRipper.Settings.Modules;
 using Shouldly;

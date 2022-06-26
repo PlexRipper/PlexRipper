@@ -1,6 +1,4 @@
-﻿using FluentResults;
-
-namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain
 {
     public interface ISetupAsync
     {

@@ -1,6 +1,4 @@
-﻿using FluentResults;
-using Logging;
-using Serilog.Events;
+﻿using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 using Shouldly;
 using Xunit;

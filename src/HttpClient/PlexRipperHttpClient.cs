@@ -1,6 +1,4 @@
 ﻿using System.Net;
-using FluentResults;
-using PlexRipper.Domain;
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Retry;

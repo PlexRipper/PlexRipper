@@ -1,5 +1,4 @@
-﻿using FluentResults;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace PlexRipper.WebAPI.Common.FluentResult
 {

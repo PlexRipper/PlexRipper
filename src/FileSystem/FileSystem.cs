@@ -1,8 +1,5 @@
 ﻿using Environment;
-using FluentResults;
-using Logging;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 
 namespace PlexRipper.FileSystem
 {

@@ -1,6 +1,4 @@
-﻿using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.PlexAuthentication.Queries;
 using PlexRipper.Data.Common;

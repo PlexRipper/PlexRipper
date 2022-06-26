@@ -1,8 +1,4 @@
-﻿using FluentResults;
-using Logging;
-using MediatR;
-using PlexRipper.Application;
-using PlexRipper.Domain;
+﻿using PlexRipper.Application;
 
 namespace PlexRipper.DownloadManager
 {

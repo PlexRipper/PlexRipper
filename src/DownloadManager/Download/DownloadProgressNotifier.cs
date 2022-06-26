@@ -1,9 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using FluentResults;
-using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager
 {

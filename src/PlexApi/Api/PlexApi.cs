@@ -1,6 +1,4 @@
 ﻿using System.Dynamic;
-using FluentResults;
-using Logging;
 using PlexRipper.Application;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;

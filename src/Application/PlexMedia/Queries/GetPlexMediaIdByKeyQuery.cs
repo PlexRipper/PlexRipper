@@ -1,8 +1,4 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
-
-namespace PlexRipper.Application
+﻿namespace PlexRipper.Application
 {
     public class GetPlexMediaIdByKeyQuery : IRequest<Result<int>>
     {

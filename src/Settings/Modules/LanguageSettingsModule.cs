@@ -1,5 +1,4 @@
-﻿using FluentResults;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 using PlexRipper.Settings.Models;
 
 namespace PlexRipper.Settings.Modules

@@ -1,8 +1,4 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
-
-namespace PlexRipper.Application.PlexAccounts
+﻿namespace PlexRipper.Application.PlexAccounts
 {
     /// <summary>
     ///     Returns the <see cref="PlexAccount" /> by its id without any includes.

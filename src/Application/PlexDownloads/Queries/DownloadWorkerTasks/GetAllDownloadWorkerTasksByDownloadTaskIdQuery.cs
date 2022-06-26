@@ -1,8 +1,4 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
-
-namespace PlexRipper.Application.DownloadWorkerTasks
+﻿namespace PlexRipper.Application.DownloadWorkerTasks
 {
     public class GetAllDownloadWorkerTasksByDownloadTaskIdQuery : IRequest<Result<List<DownloadWorkerTask>>>
     {

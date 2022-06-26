@@ -1,8 +1,6 @@
-using Logging;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.Data;
-using PlexRipper.Domain;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;

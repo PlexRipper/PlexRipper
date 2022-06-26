@@ -1,11 +1,8 @@
 using System.Reflection;
 using Environment;
-using FluentResults;
-using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Data
 {

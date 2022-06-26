@@ -1,6 +1,4 @@
-﻿using FluentResults;
-
-namespace PlexRipper.DownloadManager
+﻿namespace PlexRipper.DownloadManager
 {
     public interface IDownloadFileStream
     {

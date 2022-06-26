@@ -1,6 +1,4 @@
-﻿using Logging;
-
-namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain
 {
     public static class EnumExtensions
     {

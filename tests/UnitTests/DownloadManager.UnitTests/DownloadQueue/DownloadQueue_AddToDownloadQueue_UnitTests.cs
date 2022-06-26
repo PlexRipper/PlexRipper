@@ -1,8 +1,5 @@
 using Autofac.Extras.Moq;
-using FluentResults;
-using Logging;
 using Moq;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;

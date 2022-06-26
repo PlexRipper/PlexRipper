@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 
 namespace PlexRipper.WebAPI.Common.DTO

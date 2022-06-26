@@ -1,13 +1,9 @@
 ﻿using System.Diagnostics;
 using EFCore.BulkExtensions;
-using FluentResults;
 using FluentValidation;
-using Logging;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Data.PlexTvShows
 {

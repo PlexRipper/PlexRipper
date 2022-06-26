@@ -1,7 +1,6 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Environment;
-using Logging;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.WebAPI.Config;
 

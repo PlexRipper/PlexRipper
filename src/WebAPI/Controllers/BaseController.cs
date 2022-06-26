@@ -1,7 +1,5 @@
 ﻿using System.Net.Mime;
 using AutoMapper;
-using FluentResults;
-using Logging;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;

@@ -1,15 +1,11 @@
 ﻿using System.Reactive.Subjects;
 using Autofac.Extras.Moq;
-using FluentResults;
-using Logging;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;

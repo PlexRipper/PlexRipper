@@ -1,7 +1,4 @@
-﻿using FluentResults;
-using FluentValidation;
-using Logging;
-using MediatR;
+﻿using FluentValidation;
 using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Data.Common;
 

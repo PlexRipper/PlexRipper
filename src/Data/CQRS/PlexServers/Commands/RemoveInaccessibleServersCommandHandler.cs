@@ -1,8 +1,5 @@
 ﻿using System.Diagnostics;
-using FluentResults;
 using FluentValidation;
-using Logging;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;

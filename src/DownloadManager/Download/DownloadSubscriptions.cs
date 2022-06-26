@@ -1,9 +1,5 @@
 ﻿using System.Reactive.Linq;
-using FluentResults;
-using Logging;
-using MediatR;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 using PlexRipper.Domain.RxNet;
 
 namespace PlexRipper.DownloadManager

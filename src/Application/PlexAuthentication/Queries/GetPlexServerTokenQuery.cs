@@ -1,8 +1,4 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
-
-namespace PlexRipper.Application.PlexAuthentication.Queries
+﻿namespace PlexRipper.Application.PlexAuthentication.Queries
 {
     public class GetPlexServerTokenQuery : IRequest<Result<string>>
     {

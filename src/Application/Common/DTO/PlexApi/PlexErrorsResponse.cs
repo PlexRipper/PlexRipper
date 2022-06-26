@@ -1,4 +1,3 @@
-using FluentResults;
 using Newtonsoft.Json;
 
 namespace PlexRipper.Application

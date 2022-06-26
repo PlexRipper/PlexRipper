@@ -1,6 +1,4 @@
-﻿using FluentResults;
-using PlexRipper.Domain;
-using PlexRipper.Domain.DownloadManager;
+﻿using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.Application
 {

@@ -2,10 +2,7 @@
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text.Json;
-using FluentResults;
-using Logging;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Settings
 {

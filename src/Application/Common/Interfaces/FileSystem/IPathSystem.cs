@@ -1,6 +1,4 @@
-﻿using FluentResults;
-
-namespace PlexRipper.Application
+﻿namespace PlexRipper.Application
 {
     public interface IPathSystem
     {

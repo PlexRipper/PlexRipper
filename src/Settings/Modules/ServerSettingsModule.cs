@@ -1,9 +1,6 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using FluentResults;
-using Logging;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
 

@@ -1,8 +1,4 @@
 using System.Diagnostics;
-using FluentResults;
-using Logging;
-using MediatR;
-using PlexRipper.Domain;
 
 namespace PlexRipper.Application
 {

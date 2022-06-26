@@ -1,7 +1,5 @@
 using System.Text.Json;
 using System.Net;
-using FluentResults;
-using Logging;
 using PlexRipper.Application;
 using PlexRipper.PlexApi.Converters;
 using Polly;

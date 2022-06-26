@@ -1,5 +1,4 @@
-﻿using FluentResults;
-using Shouldly;
+﻿using Shouldly;
 using Xunit;
 
 namespace FluentResultExtensionTests

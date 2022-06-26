@@ -1,8 +1,6 @@
 using AutoMapper;
-using Logging;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;

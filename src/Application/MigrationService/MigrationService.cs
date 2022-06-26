@@ -1,6 +1,4 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Application.PlexAccounts;
+﻿using PlexRipper.Application.PlexAccounts;
 
 namespace PlexRipper.Application.MigrationService
 {

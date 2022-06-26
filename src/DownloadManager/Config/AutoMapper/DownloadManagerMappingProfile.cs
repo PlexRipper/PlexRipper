@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using PlexRipper.Domain;
 
 namespace PlexRipper.DownloadManager.AutoMapper
 {

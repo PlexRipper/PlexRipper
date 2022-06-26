@@ -1,7 +1,6 @@
 ﻿using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.SignalR.Common;
 

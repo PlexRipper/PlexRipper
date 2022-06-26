@@ -1,5 +1,3 @@
-using FluentResults;
-using Logging;
 using PlexRipper.WebAPI.Common;
 using Serilog.Events;
 

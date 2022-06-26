@@ -1,6 +1,4 @@
 ﻿using Autofac.Extras.Moq;
-using FluentResults;
-using Logging;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using PlexRipper.Application;
@@ -9,7 +7,6 @@ using PlexRipper.BaseTests.Asserts;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Config;
 using Shouldly;

@@ -25,6 +25,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
+        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs"/>
     </ItemGroup>
 
 </Project>

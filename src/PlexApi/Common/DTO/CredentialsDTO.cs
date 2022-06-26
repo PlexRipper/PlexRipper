@@ -9,4 +9,10 @@ public class CredentialsDTO
 
     [JsonPropertyName("password")]
     public string Password { get; set; }
+
+    [JsonPropertyName("rememberMe")]
+    public bool RememberMe { get; set; }
+
+    [JsonPropertyName("verificationCode")]
+    public string VerificationCode { get; set; }
 }

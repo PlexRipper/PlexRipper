@@ -1,17 +1,17 @@
-using System.Text.Json;
 using System.Net;
+using System.Text.Json;
 using PlexRipper.Application;
 using PlexRipper.PlexApi.Converters;
 using Polly;
 using RestSharp;
-using RestSharp.Serialization.Xml;
-using RestSharp.Serializers.SystemTextJson;
+using RestSharp.Serializers.Json;
+using RestSharp.Serializers.Xml;
 
 namespace PlexRipper.PlexApi;
 
 public class PlexApiClient
 {
-    private readonly IRestClient _client;
+    private readonly RestClient _client;
 
     public static JsonSerializerOptions SerializerOptions =>
         new()
@@ -34,25 +34,28 @@ public class PlexApiClient
         HttpStatusCode.ServiceUnavailable,
     };
 
-    public PlexApiClient(IRestClient client)
+    public PlexApiClient(HttpClient httpClient)
     {
-        _client = client;
+        var options = new RestClientOptions()
+        {
+            MaxTimeout = 10000,
+            ThrowOnAnyError = true,
+        };
+        _client = new RestClient(httpClient, options);
         _client.UseSystemTextJson(SerializerOptions);
         _client.UseDotNetXmlSerializer();
-        _client.Timeout = 10000;
-        _client.ThrowOnAnyError = true;
     }
 
     public async Task<Result<T>> SendRequestAsync<T>(RestRequest request, int retryCount = 2, Action<PlexApiClientProgress> action = null)
     {
         Log.Verbose($"Sending request: {request.Resource}");
 
-        IRestResponse<T> response = new RestResponse<T>();
+        RestResponse<T> response = new RestResponse<T>();
         var policyResult = await Policy
             .Handle<WebException>()
             .OrInner<InvalidOperationException>()
             .OrInner<HttpRequestException>()
-            .OrResult<IRestResponse<T>>(x => invalidStatusCodes.Contains(x.StatusCode) || x.StatusCode == 0)
+            .OrResult<RestResponse<T>>(x => invalidStatusCodes.Contains(x.StatusCode) || x.StatusCode == 0)
             .WaitAndRetryAsync(retryCount, retryAttempt =>
                 {
                     var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
@@ -71,9 +74,23 @@ public class PlexApiClient
                         });
                     }
 
-                    var result = outcome.Result;
-                    Log.Error($"Error Response URI: {result.ResponseUri} - ({(int)result.StatusCode}){result.StatusDescription}");
 
+
+
+                    if (outcome.Exception is not null)
+                    {
+                        Result.Fail(new ExceptionalError(outcome.Exception)).LogError();
+                        return;
+                    }
+
+                    var result = outcome.Result;
+                    if (result is null)
+                    {
+                        Log.Error($"Error Response to {request.Resource} but Result with crash data was null");
+                        return;
+                    }
+
+                    Log.Error($"Error Response URI: {request.Resource} - ({(int)result.StatusCode}){result.StatusDescription}");
                     if (!string.IsNullOrEmpty(result.ErrorMessage))
                     {
                         Log.Error($"Error Message: {result.ErrorMessage}");
@@ -149,7 +166,7 @@ public class PlexApiClient
         }
     }
 
-    private Result<T> GenerateResult<T>(IRestResponse<T> response, Action<PlexApiClientProgress> action = null)
+    private Result<T> GenerateResult<T>(RestResponse<T> response, Action<PlexApiClientProgress> action = null)
     {
         Result<T> result;
         if (response.IsSuccessful)

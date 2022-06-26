@@ -22,6 +22,8 @@ public static class PlexApiExtensions
     /// <param name="clientId">The unique ClientId belonging to a <see cref="PlexAccount"/></param>
     public static RestRequest AddPlexHeaders(this RestRequest request, string clientId)
     {
+        // TODO Add seed to database PlexAccount and use that to generate the below values
+
         request.AddQueryParameter("X-Plex-Product", "Plex Web");
         request.AddQueryParameter("X-Plex-Client-Identifier", clientId);
         request.AddQueryParameter("X-Plex-Platform", "Chrome");

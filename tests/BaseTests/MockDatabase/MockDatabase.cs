@@ -1,15 +1,10 @@
 #region
 
 using EFCore.BulkExtensions;
-using JetBrains.Annotations;
-using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
-using PlexRipper.Domain;
-using Shouldly;
 
 #endregion
 

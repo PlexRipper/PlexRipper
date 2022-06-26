@@ -1,8 +1,4 @@
-﻿using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace Domain.UnitTests.Converters
+﻿namespace Domain.UnitTests.Converters
 {
     public class DownloadTaskActions_Aggregate_UnitTests
     {

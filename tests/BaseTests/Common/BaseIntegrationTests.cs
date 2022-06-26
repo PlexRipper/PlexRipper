@@ -1,9 +1,4 @@
-﻿using JetBrains.Annotations;
-using Logging;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace PlexRipper.BaseTests
+﻿namespace PlexRipper.BaseTests
 {
     public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
     {

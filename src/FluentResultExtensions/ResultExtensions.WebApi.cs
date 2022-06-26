@@ -1,4 +1,4 @@
-﻿using FluentResultExtensions.lib;
+﻿using FluentResultExtensions;
 
 // ReSharper disable once CheckNamespace
 namespace FluentResults

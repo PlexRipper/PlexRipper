@@ -1,6 +1,4 @@
-﻿using FluentResults;
-using Logging;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 
 namespace PlexRipper.BaseTests
 {

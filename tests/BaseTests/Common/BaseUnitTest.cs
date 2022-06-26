@@ -1,7 +1,3 @@
-using Autofac.Extras.Moq;
-using Logging;
-using Xunit.Abstractions;
-
 namespace PlexRipper.BaseTests
 {
     public class BaseUnitTest<TUnitTestClass> : IDisposable where TUnitTestClass : class

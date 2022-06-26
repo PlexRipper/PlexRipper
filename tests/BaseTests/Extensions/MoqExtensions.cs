@@ -1,12 +1,9 @@
 ﻿using Autofac;
-using Autofac.Extras.Moq;
 using AutoMapper;
-using MediatR;
-using Moq;
 using Moq.Language.Flow;
 using PlexRipper.WebAPI.Config;
 
-namespace PlexRipper.BaseTests.Extensions
+namespace PlexRipper.BaseTests
 {
     public static class MoqExtensions
     {

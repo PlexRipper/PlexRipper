@@ -1,7 +1,4 @@
-﻿using Shouldly;
-using Xunit;
-
-namespace FluentResultExtensionTests.Guards
+﻿namespace FluentResultExtensionTests.Guards
 {
     public class ResultExtensionsGuardsTests
     {

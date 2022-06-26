@@ -1,9 +1,4 @@
-﻿using PlexRipper.BaseTests;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace BaseTests.UnitTests.MockServer
+﻿namespace BaseTests.UnitTests.MockServer
 {
     public class PlexMockServer_Setup_UnitTests
     {

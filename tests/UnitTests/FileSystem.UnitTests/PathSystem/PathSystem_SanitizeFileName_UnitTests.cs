@@ -1,8 +1,4 @@
-﻿using Autofac.Extras.Moq;
-using PlexRipper.FileSystem;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
+﻿using PlexRipper.FileSystem;
 
 namespace FileSystem.UnitTests
 {

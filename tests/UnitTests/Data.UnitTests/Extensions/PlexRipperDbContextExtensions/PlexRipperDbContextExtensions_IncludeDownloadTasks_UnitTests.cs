@@ -1,9 +1,5 @@
-﻿using PlexRipper.BaseTests;
-using PlexRipper.Data;
+﻿using PlexRipper.Data;
 using PlexRipper.Data.Common;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Data.UnitTests.Extensions
 {

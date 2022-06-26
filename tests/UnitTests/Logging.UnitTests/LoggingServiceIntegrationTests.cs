@@ -1,8 +1,5 @@
 ﻿using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Logging.UnitTests
 {

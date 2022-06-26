@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-using PlexRipper.Application;
-using PlexRipper.Domain;
+﻿using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 
 // ReSharper disable RedundantDefaultMemberInitializer

@@ -1,8 +1,5 @@
-using PlexRipper.BaseTests;
 using PlexRipper.Settings;
 using PlexRipper.Settings.Modules;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Settings.IntegrationProject
 {

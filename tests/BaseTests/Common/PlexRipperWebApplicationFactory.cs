@@ -1,5 +1,4 @@
 using Autofac;
-using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;

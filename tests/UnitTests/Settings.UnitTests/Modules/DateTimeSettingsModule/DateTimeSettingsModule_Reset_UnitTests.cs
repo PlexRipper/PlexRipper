@@ -1,9 +1,4 @@
-﻿using Autofac.Extras.Moq;
-using PlexRipper.BaseTests;
-using PlexRipper.Settings.Modules;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
+﻿using PlexRipper.Settings.Modules;
 
 namespace Settings.UnitTests.Modules
 {

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using PlexRipper.Domain.Config;
 
-namespace PlexRipper.BaseTests.Extensions
+namespace PlexRipper.BaseTests
 {
     public static class HttpResponseMessageExtensions
     {

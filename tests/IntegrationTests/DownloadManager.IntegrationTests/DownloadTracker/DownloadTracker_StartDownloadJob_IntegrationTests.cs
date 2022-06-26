@@ -1,9 +1,4 @@
-﻿using PlexRipper.BaseTests;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace DownloadManager.IntegrationTests.DownloadTracker
+﻿namespace DownloadManager.IntegrationTests.DownloadTracker
 {
     [Collection("Sequential")]
     public class DownloadTracker_StartDownloadJob_IntegrationTests : BaseIntegrationTests

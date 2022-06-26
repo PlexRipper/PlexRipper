@@ -1,5 +1,4 @@
-﻿using FluentResults;
-using PlexRipper.DownloadManager;
+﻿using PlexRipper.DownloadManager;
 
 namespace PlexRipper.BaseTests
 {

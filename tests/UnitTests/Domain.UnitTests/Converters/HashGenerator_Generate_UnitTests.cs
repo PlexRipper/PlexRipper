@@ -1,9 +1,4 @@
-﻿using PlexRipper.BaseTests;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace Domain.UnitTests.Converters
+﻿namespace Domain.UnitTests.Converters
 {
     public class HashGenerator_Generate_UnitTests
     {

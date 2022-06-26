@@ -1,17 +1,10 @@
-﻿using Autofac.Extras.Moq;
-using Microsoft.EntityFrameworkCore;
-using Moq;
+﻿using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
-using PlexRipper.BaseTests;
 using PlexRipper.BaseTests.Asserts;
-using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Config;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace DownloadManager.UnitTests
 {

@@ -1,4 +1,4 @@
-﻿namespace FluentResultExtensions.lib
+﻿namespace FluentResultExtensions
 {
     // Status Codes listed at http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
     // These status codes are copied here from Microsoft.AspNetCore.Http package to avoid a large dependency

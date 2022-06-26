@@ -1,15 +1,8 @@
-﻿using Autofac.Extras.Moq;
-using Moq;
-using PlexRipper.Application;
-using PlexRipper.BaseTests;
+﻿using PlexRipper.Application;
 using PlexRipper.BaseTests.Asserts;
-using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace DownloadManager.UnitTests
 {

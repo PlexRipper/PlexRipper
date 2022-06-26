@@ -1,7 +1,4 @@
 ﻿using System.Text.Json;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace PlexApi.UnitTests
 {

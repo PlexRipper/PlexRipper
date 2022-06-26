@@ -1,8 +1,4 @@
-﻿using PlexRipper.BaseTests;
-using PlexRipper.Data;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
+﻿using PlexRipper.Data;
 
 namespace BaseTests.IntegrationTests.Setup
 {

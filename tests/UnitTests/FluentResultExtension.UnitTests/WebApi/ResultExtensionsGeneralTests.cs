@@ -1,7 +1,4 @@
-﻿using Shouldly;
-using Xunit;
-
-namespace FluentResultExtensionTests
+﻿namespace FluentResultExtensionTests
 {
     public class ResultExtensionsGeneral
     {

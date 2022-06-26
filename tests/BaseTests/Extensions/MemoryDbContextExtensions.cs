@@ -1,6 +1,4 @@
-﻿using PlexRipper.Domain;
-
-namespace PlexRipper.BaseTests.Extensions
+﻿namespace PlexRipper.BaseTests
 {
     public static class MemoryDbContextExtensions
     {

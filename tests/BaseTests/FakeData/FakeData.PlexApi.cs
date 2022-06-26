@@ -1,6 +1,4 @@
 ﻿using Bogus;
-using JetBrains.Annotations;
-using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests
 {

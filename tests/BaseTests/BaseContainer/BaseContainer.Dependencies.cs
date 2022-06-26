@@ -3,15 +3,11 @@
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using Environment;
-using JetBrains.Annotations;
-using Logging;
-using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.Data;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI;
 

@@ -1,7 +1,4 @@
-﻿using PlexRipper.Domain;
-using Shouldly;
-
-namespace PlexRipper.BaseTests.Asserts
+﻿namespace PlexRipper.BaseTests.Asserts
 {
     public static class ShouldDownloadTask
     {

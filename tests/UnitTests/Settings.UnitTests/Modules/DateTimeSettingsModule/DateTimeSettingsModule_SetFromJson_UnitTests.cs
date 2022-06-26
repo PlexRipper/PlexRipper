@@ -1,12 +1,7 @@
 ﻿using System.Text.Json;
-using Autofac.Extras.Moq;
-using PlexRipper.BaseTests;
 using PlexRipper.Domain.Config;
 using PlexRipper.Settings.Models;
 using PlexRipper.Settings.Modules;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Settings.UnitTests.Modules
 {

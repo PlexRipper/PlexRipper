@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Logging;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.FileSystem;

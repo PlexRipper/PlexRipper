@@ -1,14 +1,9 @@
 ﻿using System.Text.Json;
-using PlexRipper.BaseTests;
-using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain.Config;
 using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace WebAPI.IntegrationTests.SettingsController
 {

@@ -1,7 +1,5 @@
 ﻿using System.Text.Json;
 using Bogus;
-using JetBrains.Annotations;
-using PlexRipper.Domain;
 using PlexRipper.Domain.Config;
 using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;

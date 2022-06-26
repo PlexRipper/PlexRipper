@@ -1,8 +1,4 @@
-﻿using Moq;
-using PlexRipper.Application.PlexAccounts;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
+﻿using PlexRipper.Application.PlexAccounts;
 
 namespace PlexRipper.Application.UnitTests
 {

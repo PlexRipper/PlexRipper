@@ -1,15 +1,10 @@
 ﻿using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
-using PlexRipper.BaseTests;
-using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace WebAPI.IntegrationTests.DownloadController
 {

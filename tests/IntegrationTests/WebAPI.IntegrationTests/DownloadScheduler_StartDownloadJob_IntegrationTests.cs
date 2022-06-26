@@ -1,9 +1,4 @@
-﻿using PlexRipper.BaseTests;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace WebAPI.IntegrationTests
+﻿namespace WebAPI.IntegrationTests
 {
     [Collection("Sequential")]
     public class DownloadScheduler_StartDownloadJob_IntegrationTests : BaseIntegrationTests

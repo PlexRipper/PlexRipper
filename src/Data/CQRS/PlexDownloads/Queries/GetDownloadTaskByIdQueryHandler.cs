@@ -29,7 +29,6 @@ namespace PlexRipper.Data
             if (request.IncludeChildren)
             {
                 query = query.AsTracking()
-                        .Include(x => x.Parent)
                         .Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
                         .Include(x => x.DestinationFolder)
@@ -38,7 +37,6 @@ namespace PlexRipper.Data
                         .Include(x => x.Children)
 
                         // Level 1
-                        .Include(x => x.Children).ThenInclude(x => x.Parent)
                         .Include(x => x.Children).ThenInclude(x => x.PlexServer)
                         .Include(x => x.Children).ThenInclude(x => x.PlexLibrary)
                         .Include(x => x.Children).ThenInclude(x => x.DestinationFolder)
@@ -46,7 +44,6 @@ namespace PlexRipper.Data
                         .Include(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks)
 
                         // Level 2
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Parent)
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexServer)
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexLibrary)
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DestinationFolder)
@@ -54,7 +51,6 @@ namespace PlexRipper.Data
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks)
 
                         // Level 3
-                        .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Parent)
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexServer)
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.PlexLibrary)
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.DestinationFolder)
@@ -63,7 +59,6 @@ namespace PlexRipper.Data
 
                         // Level 4
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.Parent)
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
                         .ThenInclude(x => x.PlexServer)
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
@@ -77,7 +72,6 @@ namespace PlexRipper.Data
 
                         // Level 5
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.Children).ThenInclude(x => x.Parent)
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
                         .ThenInclude(x => x.Children).ThenInclude(x => x.PlexServer)
                         .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)

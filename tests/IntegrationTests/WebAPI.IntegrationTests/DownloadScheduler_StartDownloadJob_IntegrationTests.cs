@@ -38,10 +38,12 @@ namespace WebAPI.IntegrationTests
             var startResult = await Container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
 
             // TODO Check if this test is needed
-            while (startedDownloadTaskId == 0)
+            var loop = 0;
+            while (startedDownloadTaskId == 0 && loop < 20)
             {
                 await Task.Delay(2000);
                 Log.Debug($"{nameof(startedDownloadTaskId)} is still 0, continue waiting");
+                loop++;
             }
 
             // Assert

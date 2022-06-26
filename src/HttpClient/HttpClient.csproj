@@ -1,14 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>PlexRipper.HttpClient</AssemblyName>
         <RootNamespace>PlexRipper.HttpClient</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Autofac" Version="6.2.0" />
-      <PackageReference Include="Polly" Version="7.2.1" />
+      <PackageReference Include="Polly" Version="7.2.3" />
       <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
     </ItemGroup>
 

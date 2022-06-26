@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-      <TargetFramework>net5.0</TargetFramework>
+      <TargetFramework>net6.0</TargetFramework>
       <AssemblyName>PlexRipper.FileSystem</AssemblyName>
     <RootNamespace>PlexRipper.FileSystem</RootNamespace>
   </PropertyGroup>
@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.IO.Abstractions" Version="16.0.1" />
+    <PackageReference Include="System.IO.Abstractions" Version="17.0.18" />
   </ItemGroup>
 
 </Project>

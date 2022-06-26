@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common.Constants;
 using PlexRipper.Domain;
@@ -86,7 +86,6 @@ namespace PlexRipper.Data.Common
                 .Include(IncludePath.PlexTvShow_Seasons_PlexLibrary)
                 .Include(IncludePath.PlexTvShow_Seasons_Episodes)
                 .Include(IncludePath.PlexTvShow_Seasons_Episodes_TvShow)
-                .Include(IncludePath.PlexTvShow_Seasons_Episodes_Season)
                 .Include(IncludePath.PlexTvShow_Seasons_Episodes_PlexServer)
                 .Include(IncludePath.PlexTvShow_Seasons_Episodes_PlexLibrary);
         }
@@ -139,7 +138,6 @@ namespace PlexRipper.Data.Common
             return plexTvShowEpisodes
                 .Include(IncludePath.PlexTvShowEpisode_PlexServer)
                 .Include(IncludePath.PlexTvShowEpisode_PlexLibrary)
-                .Include(IncludePath.PlexTvShowEpisode_TvShowSeason)
                 .Include(IncludePath.PlexTvShowEpisode_TvShowSeason_PlexServer)
                 .Include(IncludePath.PlexTvShowEpisode_TvShowSeason_PlexLibrary)
                 .Include(IncludePath.PlexTvShowEpisode_TvShow_PlexServer)

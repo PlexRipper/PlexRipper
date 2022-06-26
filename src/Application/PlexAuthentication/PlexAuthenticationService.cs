@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using FluentResults;
+﻿using FluentResults;
 using Logging;
 using MediatR;
 using PlexRipper.Application.PlexAuthentication.Queries;

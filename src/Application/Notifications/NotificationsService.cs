@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using FluentResults;
+﻿using FluentResults;
 using MediatR;
 using PlexRipper.Application.Notifications.Queries;
 using PlexRipper.Domain;

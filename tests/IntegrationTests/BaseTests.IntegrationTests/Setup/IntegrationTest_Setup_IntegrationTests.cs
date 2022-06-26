@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using PlexRipper.BaseTests;
+﻿using PlexRipper.BaseTests;
 using PlexRipper.Data;
 using Shouldly;
 using Xunit;

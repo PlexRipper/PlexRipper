@@ -1,5 +1,4 @@
-﻿using System.IO;
-using FluentResults;
+﻿using FluentResults;
 using PlexRipper.Application;
 using PlexRipper.Domain;
 

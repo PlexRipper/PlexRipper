@@ -2,7 +2,6 @@
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
 using RestSharp;

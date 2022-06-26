@@ -1,6 +1,4 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using Logging;
+﻿using Logging;
 using PlexRipper.BaseTests;
 using Shouldly;
 using Xunit;

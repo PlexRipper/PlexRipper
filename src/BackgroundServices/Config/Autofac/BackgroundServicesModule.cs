@@ -1,8 +1,6 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
-using BackgroundServices.DownloadManager;
 using BackgroundServices.DownloadManager.Jobs;
 using BackgroundServices.Jobs;
 using PlexRipper.Application;

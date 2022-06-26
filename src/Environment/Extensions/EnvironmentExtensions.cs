@@ -1,6 +1,4 @@
 ﻿#nullable enable
-using System;
-
 namespace Environment
 {
     public static class EnvironmentExtensions

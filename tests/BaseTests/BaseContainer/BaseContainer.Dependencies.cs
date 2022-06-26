@@ -1,7 +1,5 @@
 ﻿#region
 
-using System;
-using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using Environment;

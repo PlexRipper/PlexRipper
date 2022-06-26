@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 using Quartz;
 
 namespace BackgroundServices.Jobs

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain
 {
     public class PlexMediaData
     {

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain
 {
     public static class EnumerableExtensions
     {

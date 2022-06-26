@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 using PlexRipper.Domain;
 using PlexRipper.FileSystem.Common;
 

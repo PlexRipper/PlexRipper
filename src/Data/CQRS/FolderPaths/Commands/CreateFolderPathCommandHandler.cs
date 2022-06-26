@@ -1,6 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
+﻿using FluentResults;
 using FluentValidation;
 using MediatR;
 using PlexRipper.Application;

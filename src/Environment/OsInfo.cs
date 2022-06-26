@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace Environment
+﻿namespace Environment
 {
     public static class OsInfo
     {

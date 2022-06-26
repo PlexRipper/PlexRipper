@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;
-using PlexRipper.Domain;
 using PlexRipper.PlexApi.Models;
 
 namespace PlexRipper.PlexApi.Services

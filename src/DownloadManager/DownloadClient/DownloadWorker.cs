@@ -1,12 +1,6 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentResults;
 using Logging;
 using PlexRipper.Domain;

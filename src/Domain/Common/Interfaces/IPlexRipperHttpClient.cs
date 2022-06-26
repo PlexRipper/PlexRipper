@@ -1,8 +1,4 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-
-namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain
 {
     public interface IPlexRipperHttpClient
     {

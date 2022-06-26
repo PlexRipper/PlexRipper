@@ -1,4 +1,3 @@
-using System;
 using System.Xml.Serialization;
 using PlexRipper.PlexApi.Helpers;
 

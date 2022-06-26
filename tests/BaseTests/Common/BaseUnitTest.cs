@@ -1,4 +1,3 @@
-using System;
 using Autofac.Extras.Moq;
 using Logging;
 using Xunit.Abstractions;

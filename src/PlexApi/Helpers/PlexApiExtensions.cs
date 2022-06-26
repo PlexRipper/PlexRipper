@@ -1,5 +1,4 @@
-﻿using PlexRipper.Domain;
-using RestSharp;
+﻿using RestSharp;
 
 namespace PlexRipper.PlexApi.Helpers
 {

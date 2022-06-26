@@ -1,5 +1,4 @@
-﻿using System.IO;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 
 namespace PlexRipper.FileSystem.Common
 {

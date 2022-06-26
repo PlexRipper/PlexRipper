@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using EFCore.BulkExtensions;
+﻿using EFCore.BulkExtensions;
 using FluentResults;
 using Logging;
 using PlexRipper.Domain;

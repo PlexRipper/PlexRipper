@@ -1,4 +1,3 @@
-using System.Linq;
 using FluentResultExtensions.lib;
 using FluentResults;
 using Shouldly;

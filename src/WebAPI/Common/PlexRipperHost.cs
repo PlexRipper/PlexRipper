@@ -1,12 +1,8 @@
-using System.IO;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Environment;
 using Logging;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using PlexRipper.WebAPI.Config;
 
 namespace PlexRipper.WebAPI.Common

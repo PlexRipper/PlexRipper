@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using FluentResults;
+﻿using FluentResults;
 
 namespace PlexRipper.DownloadManager
 {

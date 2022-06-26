@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Autofac.Extras.Moq;
+﻿using Autofac.Extras.Moq;
 using FluentResults;
 using Logging;
 using Moq;
@@ -12,7 +8,6 @@ using PlexRipper.BaseTests.Asserts;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Data;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using Shouldly;
 using Xunit;

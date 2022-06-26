@@ -1,8 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain;
 using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.BaseTests

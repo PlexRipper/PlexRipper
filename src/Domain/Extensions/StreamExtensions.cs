@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Threading;
-
-namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain
 {
     public static class StreamExtensions
     {

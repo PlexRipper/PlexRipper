@@ -1,8 +1,5 @@
-﻿using System;
-using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
 using Logging;
-using PlexRipper.Domain;
 using PlexRipper.PlexApi.Models;
 
 namespace PlexRipper.PlexApi.Mappings

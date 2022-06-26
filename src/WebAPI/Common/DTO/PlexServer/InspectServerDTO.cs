@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using FluentValidation;
+﻿using FluentValidation;
 using Newtonsoft.Json;
 
 namespace PlexRipper.WebAPI.Common.DTO

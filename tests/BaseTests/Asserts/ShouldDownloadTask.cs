@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using PlexRipper.Domain;
+﻿using PlexRipper.Domain;
 using Shouldly;
 
 namespace PlexRipper.BaseTests.Asserts

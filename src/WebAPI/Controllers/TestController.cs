@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using FluentResults;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
 using PlexRipper.Domain;

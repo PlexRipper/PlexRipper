@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace PlexRipper.Application
+﻿namespace PlexRipper.Application
 {
     public interface IMount
     {

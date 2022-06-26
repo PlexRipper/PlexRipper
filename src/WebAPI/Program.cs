@@ -1,7 +1,5 @@
-using System;
 using FluentResults;
 using Logging;
-using Microsoft.Extensions.Hosting;
 using PlexRipper.WebAPI.Common;
 using Serilog.Events;
 

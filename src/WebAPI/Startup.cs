@@ -1,8 +1,5 @@
 using Environment;
 using Logging;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.WebAPI.Common.Extensions;
 
 namespace PlexRipper.WebAPI

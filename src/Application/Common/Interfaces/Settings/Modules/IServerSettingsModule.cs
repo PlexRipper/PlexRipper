@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using FluentResults;
+﻿using FluentResults;
 using PlexRipper.Domain;
 using PlexRipper.Domain.DownloadManager;
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain
 {
     public class PlexServerStatus : BaseEntity
     {

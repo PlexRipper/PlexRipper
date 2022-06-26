@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
 using FluentResults;
 using PlexRipper.Application;
 using PlexRipper.Domain;

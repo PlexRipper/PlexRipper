@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-using Autofac.Extras.Moq;
+﻿using Autofac.Extras.Moq;
 using Logging;
 using PlexRipper.FileSystem;
 using Shouldly;

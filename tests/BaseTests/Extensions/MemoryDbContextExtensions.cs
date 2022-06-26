@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using PlexRipper.Domain;
+﻿using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests.Extensions
 {

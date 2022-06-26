@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 namespace PlexRipper.BaseTests

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using BackgroundServices.Jobs;
+﻿using BackgroundServices.Jobs;
 using FluentResults;
 using Logging;
 using PlexRipper.Application;

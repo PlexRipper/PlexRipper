@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using EFCore.BulkExtensions;
+﻿using EFCore.BulkExtensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;

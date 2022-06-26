@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using FluentResults;
+﻿using FluentResults;
 using PlexRipper.Application;
 
 namespace PlexRipper.FileSystem

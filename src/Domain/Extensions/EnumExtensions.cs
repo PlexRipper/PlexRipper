@@ -1,5 +1,4 @@
-﻿using System;
-using Logging;
+﻿using Logging;
 
 namespace PlexRipper.Domain
 {

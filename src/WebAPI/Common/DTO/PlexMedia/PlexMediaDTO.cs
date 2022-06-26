@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using PlexRipper.Domain;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 

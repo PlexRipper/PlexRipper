@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace PlexRipper.Domain
+﻿namespace PlexRipper.Domain
 {
     public static class DownloadTaskActions
     {

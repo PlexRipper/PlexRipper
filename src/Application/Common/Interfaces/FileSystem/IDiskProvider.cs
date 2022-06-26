@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using PlexRipper.Domain;
+﻿using PlexRipper.Domain;
 
 namespace PlexRipper.Application
 {

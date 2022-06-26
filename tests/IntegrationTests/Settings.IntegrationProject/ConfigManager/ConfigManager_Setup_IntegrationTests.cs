@@ -1,15 +1,6 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Autofac.Extras.Moq;
-using Environment;
-using FluentResults;
-using Moq;
-using PlexRipper.Application;
 using PlexRipper.BaseTests;
 using PlexRipper.Settings;
 using PlexRipper.Settings.Modules;
-using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 

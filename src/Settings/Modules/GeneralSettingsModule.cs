@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using FluentResults;
+﻿using FluentResults;
 using PlexRipper.Application;
 using PlexRipper.Settings.Models;
 

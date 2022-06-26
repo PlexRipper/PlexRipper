@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using AutoMapper;
-using PlexRipper.Domain;
+﻿using AutoMapper;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
 using PlexRipper.PlexApi.Models;
 using Directory = PlexRipper.PlexApi.Models.Directory;

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using FluentResults;
+﻿using FluentResults;
 using Logging;
 using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;

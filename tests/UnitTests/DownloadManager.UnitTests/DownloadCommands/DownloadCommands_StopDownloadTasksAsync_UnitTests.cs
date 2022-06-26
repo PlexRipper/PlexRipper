@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Reactive.Subjects;
 using Autofac.Extras.Moq;
 using FluentResults;
 using Logging;

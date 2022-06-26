@@ -1,4 +1,3 @@
-using System;
 using Autofac;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.Testing;

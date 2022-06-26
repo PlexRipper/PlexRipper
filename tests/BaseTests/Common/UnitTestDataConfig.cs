@@ -1,5 +1,4 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using PlexRipper.Application;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;

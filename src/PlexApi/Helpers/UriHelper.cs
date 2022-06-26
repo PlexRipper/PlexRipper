@@ -1,4 +1,3 @@
-using System;
 using PlexRipper.PlexApi.Models;
 
 namespace PlexRipper.PlexApi.Helpers

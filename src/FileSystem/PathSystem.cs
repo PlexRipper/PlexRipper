@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using FluentResults;
 using PlexRipper.Application;
 

@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Reactive.Subjects;
 using FluentResults;
 using PlexRipper.FileSystem.Common;
 

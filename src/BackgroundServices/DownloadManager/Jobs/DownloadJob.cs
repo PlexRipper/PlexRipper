@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Logging;
+﻿using Logging;
 using PlexRipper.Domain;
 using PlexRipper.DownloadManager;
 using Quartz;

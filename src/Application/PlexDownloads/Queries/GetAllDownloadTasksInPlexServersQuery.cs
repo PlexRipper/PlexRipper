@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using FluentResults;
 using MediatR;
 using PlexRipper.Domain;

@@ -1,8 +1,4 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using Logging;
+﻿using Logging;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.BaseTests;

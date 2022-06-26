@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 using PlexRipper.Domain;
 
 namespace PlexRipper.BaseTests

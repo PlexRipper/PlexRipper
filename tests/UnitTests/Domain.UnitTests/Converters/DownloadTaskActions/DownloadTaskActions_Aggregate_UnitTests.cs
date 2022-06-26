@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Logging;
+﻿using Logging;
 using PlexRipper.Domain;
 using Shouldly;
 using Xunit;

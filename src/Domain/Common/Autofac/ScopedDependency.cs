@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PlexRipper.Domain.Autofac
+﻿namespace PlexRipper.Domain.Autofac
 {
     public class ScopedDependency : IScopedDependency
     {

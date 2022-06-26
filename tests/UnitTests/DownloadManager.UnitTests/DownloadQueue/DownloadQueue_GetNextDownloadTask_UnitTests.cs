@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Autofac.Extras.Moq;
+﻿using Autofac.Extras.Moq;
 using Logging;
 using PlexRipper.BaseTests.Extensions;
 using PlexRipper.Domain;

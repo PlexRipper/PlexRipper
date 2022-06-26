@@ -1,9 +1,6 @@
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 using Environment;
 using Logging;
-using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 

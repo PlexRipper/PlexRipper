@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PlexRipper.BaseTests
+﻿namespace PlexRipper.BaseTests
 {
     public class PlexMockServerConfig
     {

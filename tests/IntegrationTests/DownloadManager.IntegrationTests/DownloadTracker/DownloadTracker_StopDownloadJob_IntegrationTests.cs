@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using PlexRipper.BaseTests;
+﻿using PlexRipper.BaseTests;
 using PlexRipper.Domain;
 using Shouldly;
 using Xunit;

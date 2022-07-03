@@ -1,6 +1,7 @@
 ﻿using FluentValidation.Results;
 
 // ReSharper disable once CheckNamespace
+// Needs to be in the same namespace as the FluentResults package
 namespace FluentResults;
 
 public static partial class ResultExtensions

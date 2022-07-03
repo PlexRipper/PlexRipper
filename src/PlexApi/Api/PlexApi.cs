@@ -72,38 +72,26 @@ public class PlexApi
         var request = new RestRequest(new Uri($"{serverBaseUrl}/identity"));
 
         request.AddToken(authToken);
-
+        Log.Debug($"Requesting PlexServerStatus for {serverBaseUrl}");
         var response = await _client.SendRequestAsync<RestResponse>(request, 1, action);
-        return ConvertToPlexServerStatus(response);
-    }
 
-    private PlexServerStatus ConvertToPlexServerStatus(Result<RestResponse> response)
-    {
-        if (response.IsFailed)
+        var statusCodeReason = response.GetStatusCodeReason();
+        var statusCode = statusCodeReason?.StatusCode() ?? 0;
+        var statusMessage = statusCodeReason?.ErrorMessage() ?? "";
+        switch (statusCode)
         {
-            var error = response.Errors.First();
-            var statusCode = error.HasMetadataKey("StatusCode") ? Convert.ToInt32(error.Metadata["StatusCode"]) : 0;
-            var errorMsg = error.HasMetadataKey("ErrorMessage") ? error.Metadata["ErrorMessage"]?.ToString() : "Message not found";
-            return new PlexServerStatus
-            {
-                StatusCode = statusCode,
-                StatusMessage = errorMsg,
-                LastChecked = DateTime.Now.ToUniversalTime(),
-                IsSuccessful = false,
-            };
+            case 408:
+                statusMessage = $"The PlexServer could not be reached, most likely it's offline.";
+                break;
         }
-        else
+
+        return new PlexServerStatus
         {
-            var reason = response.Reasons.First();
-            var statusCode = reason.HasMetadataKey("StatusCode") ? Convert.ToInt32(reason.Metadata["StatusCode"]) : 0;
-            return new PlexServerStatus
-            {
-                StatusCode = statusCode,
-                IsSuccessful = response.IsSuccess,
-                StatusMessage = reason.Message,
-                LastChecked = DateTime.Now.ToUniversalTime(),
-            };
-        }
+            StatusCode = statusCode,
+            StatusMessage = statusMessage,
+            LastChecked = DateTime.Now.ToUniversalTime(),
+            IsSuccessful = response.IsSuccess,
+        };
     }
 
     public async Task<PlexAccountDTO> GetAccountAsync(string authToken)
@@ -211,6 +199,8 @@ public class PlexApi
     /// <param name="authToken">The authentication token.</param>
     /// <param name="plexFullHost"></param>
     /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary"/>.</param>
+    /// <param name="from">The start range from which to request.</param>
+    /// <param name="to">The end range to request for.</param>
     /// <returns></returns>
     public async Task<PlexMediaContainerDTO> GetAllEpisodesAsync(string authToken, string plexFullHost, string plexLibraryKey, int from, int to)
     {

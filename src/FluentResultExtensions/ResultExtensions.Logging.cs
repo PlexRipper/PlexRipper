@@ -3,6 +3,7 @@ using Logging;
 using Serilog.Events;
 
 // ReSharper disable once CheckNamespace
+// Needs to be in the same namespace as the FluentResults package
 namespace FluentResults;
 
 /// <summary>

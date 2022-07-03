@@ -1,11 +1,14 @@
 ﻿using FluentResultExtensions;
 
 // ReSharper disable once CheckNamespace
+// Needs to be in the same namespace as the FluentResults package
 namespace FluentResults;
 
 public static partial class ResultExtensions
 {
     public static string StatusCodeName => "StatusCode";
+
+    public static string ErrorMessageName => "ErrorMessage";
 
     #region Implementation
 
@@ -39,35 +42,49 @@ public static partial class ResultExtensions
 
     #endregion
 
+    #region GetStatusCodeError
+
+    public static IReason GetStatusCodeReason(this Result result)
+    {
+        return result.Reasons.Find(x => x.HasMetadataKey(StatusCodeName));
+    }
+
+    public static IReason GetStatusCodeReason<T>(this Result<T> result)
+    {
+        return result.Reasons.Find(x => x.HasMetadataKey(StatusCodeName));
+    }
+
+    #endregion
+
     #region AddStatusCode
 
-    public static Result AddStatusCode(this Result result, int statusCode)
+    public static Result AddStatusCode(this Result result, int statusCode, string msg = "")
     {
         return statusCode switch
         {
-            200 => result.Add200OkRequestSuccess(),
-            201 => result.Add201CreatedRequestSuccess(),
-            400 => result.Add400BadRequestError(),
-            401 => result.Add401UnauthorizedError(),
-            404 => result.Add404NotFoundError(),
-            408 => result.Add408RequestTimeoutError(),
-            502 => result.Add502BadGatewayError(),
-            _ => result.AddStatusCodeError(statusCode),
+            200 => result.Add200OkRequestSuccess(msg),
+            201 => result.Add201CreatedRequestSuccess(msg),
+            400 => result.Add400BadRequestError(msg),
+            401 => result.Add401UnauthorizedError(msg),
+            404 => result.Add404NotFoundError(msg),
+            408 => result.Add408RequestTimeoutError(msg),
+            502 => result.Add502BadGatewayError(msg),
+            _ => result.AddStatusCodeError(statusCode, msg),
         };
     }
 
-    public static Result<T> AddStatusCode<T>(this Result<T> result, int statusCode)
+    public static Result<T> AddStatusCode<T>(this Result<T> result, int statusCode, string msg = "")
     {
         return statusCode switch
         {
-            200 => result.Add200OkRequestSuccess(),
-            201 => result.Add201CreatedRequestSuccess(),
-            400 => result.Add400BadRequestError(),
-            401 => result.Add401UnauthorizedError(),
-            404 => result.Add404NotFoundError(),
-            408 => result.Add408RequestTimeoutError(),
-            502 => result.Add502BadGatewayError(),
-            _ => result.AddStatusCodeError(statusCode),
+            200 => result.Add200OkRequestSuccess(msg),
+            201 => result.Add201CreatedRequestSuccess(msg),
+            400 => result.Add400BadRequestError(msg),
+            401 => result.Add401UnauthorizedError(msg),
+            404 => result.Add404NotFoundError(msg),
+            408 => result.Add408RequestTimeoutError(msg),
+            502 => result.Add502BadGatewayError(msg),
+            _ => result.AddStatusCodeError(statusCode, msg),
         };
     }
 
@@ -103,9 +120,19 @@ public static partial class ResultExtensions
 
     #endregion
 
+    private static Result AddErrorMessageToResult(this Result result, string errorMessage)
+    {
+        if (result.Errors.Any())
+        {
+            result.Errors[0].Metadata.Add(ErrorMessageName, errorMessage);
+        }
+
+        return result;
+    }
+
     private static Result CreateErrorStatusCodeResult(int statusCode, string message = "")
     {
-        return Result.Fail(GetStatusCodeError(statusCode, message));
+        return Result.Fail(GetStatusCodeReason(statusCode, message));
     }
 
     private static Result CreateSuccessStatusCodeResult(int statusCode, string message = "")
@@ -120,7 +147,7 @@ public static partial class ResultExtensions
 
     #region CreateStatusCodeReasons
 
-    private static Error GetStatusCodeError(int statusCode, string message = "")
+    private static Error GetStatusCodeReason(int statusCode, string message = "")
     {
         return new Error(message).WithMetadata(StatusCodeName, statusCode);
     }
@@ -136,17 +163,21 @@ public static partial class ResultExtensions
 
     private static Result AddStatusCodeError(this Result result, int statusCode, string message = "")
     {
-        return result.AddStatusCodeError(GetStatusCodeError(statusCode, message));
-    }
+        if (result.Errors.Any())
+        {
+            result.Errors[0].Metadata.Add(StatusCodeName, statusCode);
+            if (!string.IsNullOrEmpty(message))
+            {
+                result.Errors[0].Metadata.Add(ErrorMessageName, message);
+            }
+        }
 
-    private static Result AddStatusCodeError(this Result result, Error error)
-    {
-        return result.WithError(error);
+        return result;
     }
 
     private static Result<T> AddStatusCodeError<T>(this Result<T> result, int statusCode, string message = "")
     {
-        return result.AddStatusCodeError(GetStatusCodeError(statusCode, message));
+        return result.AddStatusCodeError(GetStatusCodeReason(statusCode, message));
     }
 
     private static Result<T> AddStatusCodeError<T>(this Result<T> result, Error error)
@@ -183,6 +214,15 @@ public static partial class ResultExtensions
     #endregion
 
     #region Result Signatures
+
+    #region General
+
+    public static Result AddErrorMessage(this Result result, string message)
+    {
+        return result.AddErrorMessageToResult(message);
+    }
+
+    #endregion
 
     #region 200
 

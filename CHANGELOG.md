@@ -10,7 +10,7 @@
 ### Fixed
  - Fixed the opening of the server settings not defaulting back to its first tab
  - Fixed the download progress not updating after a while due to SignalR disconnects
-
+ - Fixed the retrieval of the ServerStatus not working when a timeout happens.
 ## [0.8.7]
 
 ### Added

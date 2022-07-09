@@ -163,14 +163,18 @@ public static partial class ResultExtensions
 
     private static Result AddStatusCodeError(this Result result, int statusCode, string message = "")
     {
-        if (result.Errors.Any())
+        if (string.IsNullOrEmpty(message))
         {
-            result.Errors[0].Metadata.Add(StatusCodeName, statusCode);
-            if (!string.IsNullOrEmpty(message))
-            {
-                result.Errors[0].Metadata.Add(ErrorMessageName, message);
-            }
+            message = "No error message found";
         }
+
+        if (!result.Errors.Any())
+        {
+            result.WithError(new Error($"Status code: ({statusCode}) - {message}"));
+        }
+
+        result.Errors[0].Metadata.Add(StatusCodeName, statusCode);
+        result.Errors[0].Metadata.Add(ErrorMessageName, message);
 
         return result;
     }

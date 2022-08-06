@@ -7,6 +7,8 @@
 ### Changed
  - Removed batch commands from the download page, these were not working and overcomplicated things too much.
  - Migrated projected to .NET 6, brings many performance improvements
+ - Added a loading icon to the button when checking the server status in the server configuration
+
 ### Fixed
  - Fixed the opening of the server settings not defaulting back to its first tab
  - Fixed the download progress not updating after a while due to SignalR disconnects

@@ -80,8 +80,11 @@ public class PlexApi
         var statusMessage = statusCodeReason?.ErrorMessage() ?? "";
         switch (statusCode)
         {
+            case 200:
+                statusMessage = $"The Plex server is online!";
+                break;
             case 408:
-                statusMessage = $"The PlexServer could not be reached, most likely it's offline.";
+                statusMessage = $"The Plex server could not be reached, most likely it's offline.";
                 break;
         }
 

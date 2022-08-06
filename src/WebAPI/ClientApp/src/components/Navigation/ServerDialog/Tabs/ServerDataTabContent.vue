@@ -41,7 +41,7 @@
 		<!--	Check Server Action	-->
 		<v-card-actions>
 			<v-spacer></v-spacer>
-			<p-btn text-id="check-server-status" @click="checkServer" />
+			<p-btn text-id="check-server-status" :loading="checkServerStatusLoading" @click="checkServer" />
 		</v-card-actions>
 	</div>
 </template>
@@ -61,8 +61,13 @@ export default class ServerDataTabContent extends Vue {
 	@Prop({ required: true, type: Object as () => PlexServerStatusDTO })
 	readonly serverStatus!: PlexServerStatusDTO;
 
+	checkServerStatusLoading: boolean = false;
+
 	checkServer(): void {
-		ServerService.checkServer(this.plexServer.id);
+		this.checkServerStatusLoading = true;
+		ServerService.checkServer(this.plexServer.id).subscribe(() => {
+			this.checkServerStatusLoading = false;
+		});
 	}
 }
 </script>

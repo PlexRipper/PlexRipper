@@ -161,6 +161,7 @@ public class DownloadTracker : IDownloadTracker
             }
 
             downloadTask.DownloadWorkerTasks = getResult.Value;
+            Log.Debug($"Generated DownloadWorkerTasks for {downloadTask.FullTitle}");
         }
 
         // Create download client

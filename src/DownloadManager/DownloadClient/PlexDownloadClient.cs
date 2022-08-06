@@ -75,8 +75,9 @@ public class PlexDownloadClient : IDisposable
     #region Public Methods
 
     /// <summary>
-    /// Setup this <see cref="PlexDownloadClient"/> to start execute work.
+    /// Setup this <see cref="PlexDownloadClient"/> to prepare for the download process.
     /// This needs to be called before any other action can be taken.
+    /// Note: adding this in the constructor prevents us from returning a <see cref="Result"/>.
     /// </summary>
     /// <param name="downloadTask">The <see cref="DownloadTask"/> to start executing.</param>
     /// <returns></returns>
@@ -84,20 +85,19 @@ public class PlexDownloadClient : IDisposable
     {
         if (downloadTask is null)
         {
-            return ResultExtensions.IsNull(nameof(downloadTask));
+            return ResultExtensions.IsNull(nameof(downloadTask)).LogError();
         }
 
         if (!downloadTask.DownloadWorkerTasks.Any())
         {
-            return ResultExtensions.IsEmpty(nameof(downloadTask.DownloadWorkerTasks));
+            return ResultExtensions.IsEmpty(nameof(downloadTask.DownloadWorkerTasks)).LogError();
         }
 
-        if (DownloadTask.PlexServer is null)
+        if (downloadTask.PlexServer is null)
         {
-            return ResultExtensions.IsNull($"{nameof(DownloadTask)}.{nameof(DownloadTask.PlexServer)}");
+            return ResultExtensions.IsNull($"{nameof(downloadTask)}.{nameof(downloadTask.PlexServer)}").LogError();
         }
 
-        DownloadTask = downloadTask;
 
         var createResult = CreateDownloadWorkers(downloadTask);
         if (createResult.IsFailed)
@@ -105,11 +105,10 @@ public class PlexDownloadClient : IDisposable
             return createResult.ToResult().LogError();
         }
 
-        SetupDownloadLimitWatcher();
+        SetupDownloadLimitWatcher(downloadTask);
         SetupSubscriptions();
 
-        _downloadTaskUpdate.OnNext(DownloadTask);
-
+        DownloadTask = downloadTask;
         return Result.Ok(this);
     }
 
@@ -217,10 +216,8 @@ public class PlexDownloadClient : IDisposable
             return ResultExtensions.IsEmpty($"{nameof(downloadTask)}.{nameof(downloadTask.DownloadWorkerTasks)}").LogWarning();
         }
 
-        foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
-        {
-            _downloadWorkers.Add(_downloadWorkerFactory(downloadWorkerTask));
-        }
+        _downloadWorkers.AddRange(downloadTask.DownloadWorkerTasks
+                .Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask)));
 
         return Result.Ok();
     }
@@ -257,7 +254,7 @@ public class PlexDownloadClient : IDisposable
         }
     }
 
-    private void SetupDownloadLimitWatcher()
+    private void SetupDownloadLimitWatcher(DownloadTask downloadTask)
     {
         void SetDownloadSpeedLimit(int downloadSpeedLimitInKb)
         {
@@ -267,9 +264,9 @@ public class PlexDownloadClient : IDisposable
             }
         }
 
-        SetDownloadSpeedLimit(_serverSettings.GetDownloadSpeedLimit(DownloadTask.PlexServerId));
+        SetDownloadSpeedLimit(_serverSettings.GetDownloadSpeedLimit(downloadTask.PlexServerId));
         _downloadSpeedLimitSubscription = _serverSettings
-            .GetDownloadSpeedLimitObservable(DownloadTask.PlexServerId)
+            .GetDownloadSpeedLimitObservable(downloadTask.PlexServerId)
             .Subscribe(SetDownloadSpeedLimit);
     }
 

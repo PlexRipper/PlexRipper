@@ -40,6 +40,7 @@ public class PlexDownloadClient : IDisposable
     /// </summary>
     /// <param name="downloadWorkerFactory"></param>
     /// <param name="serverSettings"></param>
+    /// <param name="downloadManagerSettings"></param>
     /// <param name="mediator"></param>
     public PlexDownloadClient(
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
@@ -107,12 +108,16 @@ public class PlexDownloadClient : IDisposable
     public async Task<Result<PlexDownloadClient>> Setup(DownloadTask downloadTask)
     {
         if (downloadTask is null)
+        {
             return ResultExtensions.IsNull(nameof(downloadTask));
+        }
 
         DownloadTask = downloadTask;
 
         if (DownloadTask.PlexServer is null)
+        {
             return ResultExtensions.IsNull($"{nameof(DownloadTask)}.{nameof(DownloadTask.PlexServer)}");
+        }
 
         if (!DownloadTask.DownloadWorkerTasks.Any())
         {
@@ -146,7 +151,9 @@ public class PlexDownloadClient : IDisposable
     public Result Start()
     {
         if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
-            return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogError();
+        {
+            return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
+        }
 
         Log.Debug($"Start downloading {DownloadTask.FileName}");
         try
@@ -214,10 +221,14 @@ public class PlexDownloadClient : IDisposable
     private Result<List<DownloadWorkerTask>> CreateDownloadWorkers(DownloadTask downloadTask)
     {
         if (downloadTask is null)
+        {
             return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
+        }
 
         if (!downloadTask.DownloadWorkerTasks.Any())
+        {
             return ResultExtensions.IsEmpty($"{nameof(downloadTask)}.{nameof(downloadTask.DownloadWorkerTasks)}").LogWarning();
+        }
 
         foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
         {
@@ -231,7 +242,9 @@ public class PlexDownloadClient : IDisposable
     {
         int parts = _downloadManagerSettings.DownloadSegments;
         if (parts <= 0)
+        {
             return Result.Fail($"Parameter {nameof(parts)} was {parts}, prevented division by invalid value").LogWarning();
+        }
 
         // Create download worker tasks/segments/ranges
         var totalBytesToReceive = downloadTask.DataTotal;
@@ -256,7 +269,9 @@ public class PlexDownloadClient : IDisposable
         downloadTask.DownloadWorkerTasks = downloadWorkerTasks;
         var addResult = await _mediator.Send(new AddDownloadWorkerTasksCommand(downloadTask.DownloadWorkerTasks));
         if (addResult.IsFailed)
+        {
             return addResult.ToResult();
+        }
 
         return Result.Ok(downloadWorkerTasks);
     }

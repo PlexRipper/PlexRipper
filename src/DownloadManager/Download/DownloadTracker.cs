@@ -86,17 +86,35 @@ public class DownloadTracker : IDownloadTracker
         return Result.Ok();
     }
 
+    /// <summary>
+    /// Constantly checks for incoming requests to start executing a download task
+    /// </summary>
+    /// <param name="cancellationToken"></param>
     public async Task ExecuteDownloadTask(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
         {
             var downloadTaskId = await _startQueue.Reader.ReadAsync(cancellationToken);
-            var createResult = await CreateDownloadClientAsync(downloadTaskId, cancellationToken);
-            if (createResult.IsFailed)
-                continue;
+            var downloadClient = GetDownloadClient(downloadTaskId);
+            if (downloadClient is null)
+            {
+                var createResult = await CreateDownloadClientAsync(downloadTaskId, cancellationToken);
+                if (createResult.IsFailed)
+                {
+                    createResult.LogError();
+                    continue;
+                }
 
-            createResult.Value.Start();
-            _downloadTaskStart.OnNext(createResult.Value.DownloadTask);
+                downloadClient = createResult.Value;
+            }
+
+            var startResult = downloadClient.Start();
+            if (startResult.IsFailed)
+            {
+                await _notificationsService.SendResult(startResult);
+            }
+
+            _downloadTaskStart.OnNext(downloadClient.DownloadTask);
         }
     }
 
@@ -104,14 +122,18 @@ public class DownloadTracker : IDownloadTracker
     {
         var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true), cancellationToken);
         if (downloadTaskResult.IsFailed)
+        {
             return downloadTaskResult.ToResult().LogError();
+        }
 
         Log.Debug($"Creating Download client for {downloadTaskResult.Value.FullTitle}");
 
         // Create download client
         var newClient = await _plexDownloadClientFactory().Setup(downloadTaskResult.Value);
         if (newClient.IsFailed)
+        {
             return newClient.ToResult().LogError();
+        }
 
         SetupSubscriptions(newClient.Value);
         _downloadClientList.Add(newClient.Value);
@@ -142,18 +164,13 @@ public class DownloadTracker : IDownloadTracker
     }
 
     /// <summary>
-    /// Check if a <see cref="PlexDownloadClient"/> has already been assigned to this <see cref="DownloadTask"/>.
+    /// Retrieves the <see cref="PlexDownloadClient"/> that might have been assigned to this <see cref="DownloadTask"/>.
     /// </summary>
-    /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/>.</param>
-    /// <returns>Returns the <see cref="PlexDownloadClient"/> if found and fails otherwise.</returns>
-    private Result<PlexDownloadClient> GetDownloadClient(int downloadTaskId)
+    /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to find.</param>
+    /// <returns>Returns the <see cref="PlexDownloadClient"/> if found and null otherwise.</returns>
+    private PlexDownloadClient GetDownloadClient(int downloadTaskId)
     {
-        var downloadClient = _downloadClientList.Find(x => x.DownloadTaskId == downloadTaskId);
-        if (downloadClient is null)
-            return ResultExtensions
-                .Create404NotFoundResult($"There is no DownloadClient currently working on a downloadTask with Id {downloadTaskId}");
-
-        return Result.Ok(downloadClient);
+        return downloadTaskId > 0 ? _downloadClientList.Find(x => x.DownloadTaskId == downloadTaskId) : null;
     }
 
     #region Commands
@@ -161,32 +178,36 @@ public class DownloadTracker : IDownloadTracker
     /// <inheritdoc/>
     public async Task<Result> StartDownloadClient(int downloadTaskId)
     {
-        if (!_downloadClientList.Select(x => x.DownloadTask.Id).Contains(downloadTaskId))
+        if (downloadTaskId <= 0)
         {
-            await _startQueue.Writer.WriteAsync(downloadTaskId);
-            return Result.Ok();
+            return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId);
         }
 
-        return Result.Fail($"The downloadTracker already has a DownloadClient with DownloadTask id {downloadTaskId}").LogError();
+        await _startQueue.Writer.WriteAsync(downloadTaskId);
+        return Result.Ok();
     }
 
     public async Task<Result> StopDownloadClient(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
+        {
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
+        }
 
         Log.Information($"Stopping DownloadClient for DownloadTaskId {downloadTaskId}");
         var downloadClient = GetDownloadClient(downloadTaskId);
-        if (downloadClient.IsFailed)
-            return downloadClient.ToResult();
+        if (downloadClient is null)
+        {
+            return Result.Fail($"Could not find an active DownloadClient for DownloadTaskId {downloadTaskId}");
+        }
 
-        var stopResult = await downloadClient.Value.StopAsync();
+        var stopResult = await downloadClient.StopAsync();
         if (stopResult.IsFailed)
         {
             return stopResult.ToResult();
         }
 
-        _downloadTaskStopped.OnNext(downloadClient.Value.DownloadTask);
+        _downloadTaskStopped.OnNext(downloadClient.DownloadTask);
         DeleteDownloadClient(downloadTaskId);
         return Result.Ok();
     }
@@ -194,19 +215,23 @@ public class DownloadTracker : IDownloadTracker
     public async Task<Result> PauseDownloadClient(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
+        {
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
+        }
 
         var downloadClient = GetDownloadClient(downloadTaskId);
-        if (downloadClient.IsFailed)
-            return downloadClient.ToResult();
+        if (downloadClient is null)
+        {
+            return Result.Fail($"Could not find an active DownloadClient for DownloadTaskId {downloadTaskId}");
+        }
 
-        var pauseResult = await downloadClient.Value.PauseAsync();
+        var pauseResult = await downloadClient.PauseAsync();
         if (pauseResult.IsFailed)
         {
             return pauseResult.ToResult();
         }
 
-        _downloadTaskUpdate.OnNext(downloadClient.Value.DownloadTask);
+        _downloadTaskUpdate.OnNext(downloadClient.DownloadTask);
         DeleteDownloadClient(downloadTaskId);
 
         return Result.Ok();
@@ -217,23 +242,18 @@ public class DownloadTracker : IDownloadTracker
     public bool IsDownloading(int downloadTaskId)
     {
         var downloadClient = GetDownloadClient(downloadTaskId);
-        if (downloadClient.IsFailed)
-        {
-            return false;
-        }
-
-        return downloadClient.Value.DownloadStatus is DownloadStatus.Downloading;
+        return downloadClient?.DownloadStatus is DownloadStatus.Downloading;
     }
 
     public Result<Task> GetDownloadProcessTask(int downloadTaskId)
     {
         var downloadClient = GetDownloadClient(downloadTaskId);
-        if (downloadClient.IsFailed)
+        if (downloadClient is null)
         {
-            return downloadClient.ToResult();
+            return Result.Fail($"Could not find an active DownloadClient for DownloadTaskId {downloadTaskId}");
         }
 
-        return Result.Ok(downloadClient.Value.DownloadProcessTask);
+        return Result.Ok(downloadClient.DownloadProcessTask);
     }
 
     #endregion

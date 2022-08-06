@@ -496,11 +496,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
         }
 
-        if (!downloadTask.DownloadWorkerTasks.Any())
-        {
-            return ResultExtensions.IsEmpty($"{nameof(downloadTask)}.{nameof(downloadTask.DownloadWorkerTasks)}").LogWarning();
-        }
-
         int parts = _downloadManagerSettings.DownloadSegments;
         if (parts <= 0)
         {

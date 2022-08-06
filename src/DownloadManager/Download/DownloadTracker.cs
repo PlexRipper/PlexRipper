@@ -2,6 +2,7 @@
 using System.Reactive.Subjects;
 using System.Threading.Channels;
 using PlexRipper.Application;
+using PlexRipper.Application.DownloadWorkerTasks;
 using PlexRipper.Domain.RxNet;
 using PlexRipper.DownloadManager.DownloadClient;
 
@@ -36,6 +37,8 @@ public class DownloadTracker : IDownloadTracker
 
     private readonly INotificationsService _notificationsService;
 
+    private readonly IDownloadTaskFactory _downloadTaskFactory;
+
     private readonly Func<PlexDownloadClient> _plexDownloadClientFactory;
 
     private Task _executeDownloadTask;
@@ -44,10 +47,15 @@ public class DownloadTracker : IDownloadTracker
 
     #region Constructor
 
-    public DownloadTracker(IMediator mediator, INotificationsService notificationsService, Func<PlexDownloadClient> plexDownloadClientFactory)
+    public DownloadTracker(
+        IMediator mediator,
+        INotificationsService notificationsService,
+        IDownloadTaskFactory downloadTaskFactory,
+        Func<PlexDownloadClient> plexDownloadClientFactory)
     {
         _mediator = mediator;
         _notificationsService = notificationsService;
+        _downloadTaskFactory = downloadTaskFactory;
         _plexDownloadClientFactory = plexDownloadClientFactory;
 
         // Delete client once it has finished downloading
@@ -128,8 +136,35 @@ public class DownloadTracker : IDownloadTracker
 
         Log.Debug($"Creating Download client for {downloadTaskResult.Value.FullTitle}");
 
+        // Create the multiple download worker tasks which will split up the work
+        var downloadTask = downloadTaskResult.Value;
+        if (!downloadTaskResult.Value.DownloadWorkerTasks.Any())
+        {
+            var downloadWorkerTasksResult = _downloadTaskFactory.GenerateDownloadWorkerTasks(downloadTask);
+            if (downloadWorkerTasksResult.IsFailed)
+            {
+                return downloadWorkerTasksResult.ToResult();
+            }
+
+            downloadTask.DownloadWorkerTasks = downloadWorkerTasksResult.Value;
+
+            var addResult = await _mediator.Send(new AddDownloadWorkerTasksCommand(downloadWorkerTasksResult.Value), cancellationToken);
+            if (addResult.IsFailed)
+            {
+                return addResult.ToResult();
+            }
+
+            var getResult = await _mediator.Send(new GetAllDownloadWorkerTasksByDownloadTaskIdQuery(downloadTask.Id), cancellationToken);
+            if (getResult.IsFailed)
+            {
+                return getResult.ToResult();
+            }
+
+            downloadTask.DownloadWorkerTasks = getResult.Value;
+        }
+
         // Create download client
-        var newClient = await _plexDownloadClientFactory().Setup(downloadTaskResult.Value);
+        var newClient = _plexDownloadClientFactory().Setup(downloadTask);
         if (newClient.IsFailed)
         {
             return newClient.ToResult().LogError();

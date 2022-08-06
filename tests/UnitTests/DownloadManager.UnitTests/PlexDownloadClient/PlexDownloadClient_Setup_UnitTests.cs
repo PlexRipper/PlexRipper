@@ -3,27 +3,23 @@ using System.Reactive.Subjects;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data;
+using PlexRipper.DownloadManager;
 using PlexRipper.DownloadManager.DownloadClient;
 
 namespace DownloadManager.UnitTests;
 
-public class PlexDownloadClient_Setup_UnitTests
+public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClient>
 {
-    public PlexDownloadClient_Setup_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public PlexDownloadClient_Setup_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
-    public async Task ShouldReturnFailedResult_WhenNullDownloadTaskIsGiven()
+    public void ShouldReturnFailedResult_WhenNullDownloadTaskIsGiven()
     {
         //Arrange
-        using var mock = AutoMock.GetStrict();
         mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
-        var _sut = mock.Create<PlexDownloadClient>();
 
         // Act
-        var result = await _sut.Setup(null);
+        var result = _sut.Setup(null);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -31,16 +27,14 @@ public class PlexDownloadClient_Setup_UnitTests
     }
 
     [Fact]
-    public async Task ShouldReturnFailedResult_WhenDownloadTaskPlexServerIsNull()
+    public void ShouldReturnFailedResult_WhenDownloadTaskPlexServerIsNull()
     {
         //Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<PlexDownloadClient>();
         var downloadTask = FakeData.GetMovieDownloadTask().Generate();
         downloadTask.PlexServer = null;
 
         // Act
-        var result = await _sut.Setup(downloadTask);
+        var result = _sut.Setup(downloadTask);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -51,12 +45,8 @@ public class PlexDownloadClient_Setup_UnitTests
     public async Task ShouldGenerateDownloadWorkerTasks_WhenDownloadTaskHasNoDownloadWorkerTasks()
     {
         //Arrange
-        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
-        {
-            config.MovieDownloadTasksCount = 1;
-        });
+        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.MovieDownloadTasksCount = 1; });
 
-        using var mock = AutoMock.GetStrict();
         mock.SetupMediator(It.IsAny<AddDownloadWorkerTasksCommand>).ReturnsAsync(Result.Ok());
         mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);
         mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<int>())).Returns(4000);
@@ -66,10 +56,39 @@ public class PlexDownloadClient_Setup_UnitTests
         var downloadTask = context.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
 
         // Act
-        var result = await mock.Create<PlexDownloadClient>().Setup(downloadTask);
+        var result = mock.Create<PlexDownloadClient>().Setup(downloadTask);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.DownloadTask.DownloadWorkerTasks.Count.ShouldBe(4);
+    }
+
+    [Fact]
+    public async Task ShouldSendDownloadTaskUpdate_WhenDownloadTaskWorkerHasAnUpdate()
+    {
+        //Arrange
+        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.MovieDownloadTasksCount = 1; });
+
+        mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);
+        mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<int>())).Returns(4000);
+        mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimitObservable(It.IsAny<int>()))
+            .Returns(new Subject<int>().AsObservable());
+        mock.Mock<IDownloadFileStream>().Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
+            .Returns(Result.Fail("Error"));
+
+        var downloadTask = context.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
+        var downloadTaskUpdates = new List<DownloadTask>();
+
+        // Act
+        _sut.DownloadTaskUpdate.Subscribe(task => downloadTaskUpdates.Add(task));
+        _sut.Setup(downloadTask);
+        _sut.Start();
+
+        await Task.Delay(5000);
+
+        // Assert
+        downloadTaskUpdates.Count.ShouldBe(2);
+        downloadTaskUpdates[0].DownloadStatus.ShouldBe(DownloadStatus.Queued);
+        downloadTaskUpdates[1].DownloadStatus.ShouldBe(DownloadStatus.Error);
     }
 }

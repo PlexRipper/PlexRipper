@@ -21,13 +21,9 @@ public class PlexDownloadClient : IDisposable
 
     private readonly List<DownloadWorker> _downloadWorkers = new();
 
-    private readonly IMediator _mediator;
-
     private readonly EventLoopScheduler _timeThreadContext = new();
 
     private readonly IServerSettingsModule _serverSettings;
-
-    private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
 
     private IDisposable _downloadSpeedLimitSubscription;
 
@@ -40,17 +36,12 @@ public class PlexDownloadClient : IDisposable
     /// </summary>
     /// <param name="downloadWorkerFactory"></param>
     /// <param name="serverSettings"></param>
-    /// <param name="mediator"></param>
     public PlexDownloadClient(
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
-        IServerSettingsModule serverSettings,
-        IDownloadManagerSettingsModule downloadManagerSettings,
-        IMediator mediator)
+        IServerSettingsModule serverSettings)
     {
         _downloadWorkerFactory = downloadWorkerFactory;
         _serverSettings = serverSettings;
-        _downloadManagerSettings = downloadManagerSettings;
-        _mediator = mediator;
     }
 
     #endregion
@@ -83,6 +74,44 @@ public class PlexDownloadClient : IDisposable
 
     #region Public Methods
 
+    /// <summary>
+    /// Setup this <see cref="PlexDownloadClient"/> to prepare for the download process.
+    /// This needs to be called before any other action can be taken.
+    /// Note: adding this in the constructor prevents us from returning a <see cref="Result"/>.
+    /// </summary>
+    /// <param name="downloadTask">The <see cref="DownloadTask"/> to start executing.</param>
+    /// <returns></returns>
+    public Result<PlexDownloadClient> Setup(DownloadTask downloadTask)
+    {
+        if (downloadTask is null)
+        {
+            return ResultExtensions.IsNull(nameof(downloadTask)).LogError();
+        }
+
+        if (!downloadTask.DownloadWorkerTasks.Any())
+        {
+            return ResultExtensions.IsEmpty(nameof(downloadTask.DownloadWorkerTasks)).LogError();
+        }
+
+        if (downloadTask.PlexServer is null)
+        {
+            return ResultExtensions.IsNull($"{nameof(downloadTask)}.{nameof(downloadTask.PlexServer)}").LogError();
+        }
+
+
+        var createResult = CreateDownloadWorkers(downloadTask);
+        if (createResult.IsFailed)
+        {
+            return createResult.ToResult().LogError();
+        }
+
+        SetupDownloadLimitWatcher(downloadTask);
+        SetupSubscriptions();
+
+        DownloadTask = downloadTask;
+        return Result.Ok(this);
+    }
+
     public async Task<Result<DownloadTask>> PauseAsync()
     {
         if (DownloadStatus != DownloadStatus.Downloading)
@@ -99,73 +128,37 @@ public class PlexDownloadClient : IDisposable
     }
 
     /// <summary>
-    /// Setup this <see cref="PlexDownloadClient"/> to start execute work.
-    /// This needs to be called before any other action can be taken.
-    /// </summary>
-    /// <param name="downloadTask">The <see cref="DownloadTask"/> to start executing.</param>
-    /// <returns></returns>
-    public async Task<Result<PlexDownloadClient>> Setup(DownloadTask downloadTask)
-    {
-        if (downloadTask is null)
-            return ResultExtensions.IsNull(nameof(downloadTask));
-
-        DownloadTask = downloadTask;
-
-        if (DownloadTask.PlexServer is null)
-            return ResultExtensions.IsNull($"{nameof(DownloadTask)}.{nameof(DownloadTask.PlexServer)}");
-
-        if (!DownloadTask.DownloadWorkerTasks.Any())
-        {
-            var downloadWorkerTasks = await GenerateDownloadWorkerTasks(DownloadTask);
-            if (downloadWorkerTasks.IsFailed)
-            {
-                return downloadWorkerTasks.ToResult();
-            }
-
-            DownloadTask.DownloadWorkerTasks = downloadWorkerTasks.Value;
-        }
-
-        var createResult = CreateDownloadWorkers(downloadTask);
-        if (createResult.IsFailed)
-        {
-            return createResult.ToResult().LogError();
-        }
-
-        // TODO Re-enable when implementing downloadSpeedLimit
-        //SetDownloadSpeedLimit(_userSettings.GetDownloadSpeedLimit(DownloadTask.PlexServer.MachineIdentifier));
-        SetupDownloadLimitWatcher();
-        SetupSubscriptions();
-
-        return Result.Ok(this);
-    }
-
-    /// <summary>
     /// Starts the download workers for the <see cref="DownloadTask"/> given during setup.
     /// </summary>
     /// <returns>Is successful.</returns>
     public Result Start()
     {
         if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
-            return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogError();
+        {
+            return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
+        }
 
         Log.Debug($"Start downloading {DownloadTask.FileName}");
         try
         {
+            List<Result> results = new List<Result>();
             foreach (var downloadWorker in _downloadWorkers)
             {
                 var startResult = downloadWorker.Start();
                 if (startResult.IsFailed)
                 {
-                    return startResult.LogError();
+                    startResult.LogError();
                 }
+
+                results.Add(startResult);
             }
+
+            return results.Merge();
         }
         catch (Exception e)
         {
             return Result.Fail(new ExceptionalError($"Could not download {DownloadTask.FileName}", e)).LogError();
         }
-
-        return Result.Ok();
     }
 
     public async Task<Result<DownloadTask>> StopAsync()
@@ -214,51 +207,19 @@ public class PlexDownloadClient : IDisposable
     private Result<List<DownloadWorkerTask>> CreateDownloadWorkers(DownloadTask downloadTask)
     {
         if (downloadTask is null)
+        {
             return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
+        }
 
         if (!downloadTask.DownloadWorkerTasks.Any())
-            return ResultExtensions.IsEmpty($"{nameof(downloadTask)}.{nameof(downloadTask.DownloadWorkerTasks)}").LogWarning();
-
-        foreach (var downloadWorkerTask in downloadTask.DownloadWorkerTasks)
         {
-            _downloadWorkers.Add(_downloadWorkerFactory(downloadWorkerTask));
+            return ResultExtensions.IsEmpty($"{nameof(downloadTask)}.{nameof(downloadTask.DownloadWorkerTasks)}").LogWarning();
         }
+
+        _downloadWorkers.AddRange(downloadTask.DownloadWorkerTasks
+                .Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask)));
 
         return Result.Ok();
-    }
-
-    private async Task<Result<List<DownloadWorkerTask>>> GenerateDownloadWorkerTasks(DownloadTask downloadTask)
-    {
-        int parts = _downloadManagerSettings.DownloadSegments;
-        if (parts <= 0)
-            return Result.Fail($"Parameter {nameof(parts)} was {parts}, prevented division by invalid value").LogWarning();
-
-        // Create download worker tasks/segments/ranges
-        var totalBytesToReceive = downloadTask.DataTotal;
-        var partSize = totalBytesToReceive / parts;
-        var remainder = totalBytesToReceive - partSize * parts;
-
-        var downloadWorkerTasks = new List<DownloadWorkerTask>();
-
-        for (var i = 0; i < parts; i++)
-        {
-            var start = partSize * i;
-            var end = start + partSize;
-            if (i == parts - 1 && remainder > 0)
-            {
-                // Add the remainder to the last download range
-                end += remainder;
-            }
-
-            downloadWorkerTasks.Add(new DownloadWorkerTask(downloadTask, i + 1, start, end));
-        }
-
-        downloadTask.DownloadWorkerTasks = downloadWorkerTasks;
-        var addResult = await _mediator.Send(new AddDownloadWorkerTasksCommand(downloadTask.DownloadWorkerTasks));
-        if (addResult.IsFailed)
-            return addResult.ToResult();
-
-        return Result.Ok(downloadWorkerTasks);
     }
 
     private void OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates)
@@ -293,7 +254,7 @@ public class PlexDownloadClient : IDisposable
         }
     }
 
-    private void SetupDownloadLimitWatcher()
+    private void SetupDownloadLimitWatcher(DownloadTask downloadTask)
     {
         void SetDownloadSpeedLimit(int downloadSpeedLimitInKb)
         {
@@ -303,9 +264,9 @@ public class PlexDownloadClient : IDisposable
             }
         }
 
-        SetDownloadSpeedLimit(_serverSettings.GetDownloadSpeedLimit(DownloadTask.PlexServerId));
+        SetDownloadSpeedLimit(_serverSettings.GetDownloadSpeedLimit(downloadTask.PlexServerId));
         _downloadSpeedLimitSubscription = _serverSettings
-            .GetDownloadSpeedLimitObservable(DownloadTask.PlexServerId)
+            .GetDownloadSpeedLimitObservable(downloadTask.PlexServerId)
             .Subscribe(SetDownloadSpeedLimit);
     }
 

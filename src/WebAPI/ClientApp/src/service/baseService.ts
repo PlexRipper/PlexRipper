@@ -22,6 +22,14 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		Log.warn('history', this.stateHistory);
 	}
 
+	/**
+	 * Updates the store property to with the newObject based on its id
+	 * Note: Only use this if the store property is an array
+	 * @param propertyName
+	 * @param newObject
+	 * @param idName
+	 * @protected
+	 */
 	protected updateStore(propertyName: keyof IStoreState, newObject: any, idName: string = 'id'): void {
 		const x = this.getState()[propertyName.toString()];
 		if (!x) {

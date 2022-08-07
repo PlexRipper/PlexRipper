@@ -1,23 +1,24 @@
 import Log from 'consola';
 import { BaseService, GlobalService } from '@service';
 // eslint-disable-next-line import/named
-import { LogLevel, HubConnectionBuilder, IHttpConnectionOptions, HubConnection, HubConnectionState } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
 import {
-	LibraryProgress,
 	DownloadTaskCreationProgress,
-	FileMergeProgress,
-	NotificationDTO,
 	DownloadTaskDTO,
+	FileMergeProgress,
 	InspectServerProgress,
-	SyncServerProgress,
+	LibraryProgress,
+	NotificationDTO,
 	ServerDownloadProgressDTO,
+	SyncServerProgress,
 } from '@dto/mainApi';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import IStoreState from '@interfaces/service/IStoreState';
 import { isEqual } from 'lodash';
 import ISetup from '@interfaces/ISetup';
+import notificationService from '~/service/notificationService';
 
 export class SignalrService extends BaseService implements ISetup {
 	private _progressHubConnection: HubConnection | null = null;
@@ -97,7 +98,8 @@ export class SignalrService extends BaseService implements ISetup {
 		});
 
 		this._notificationHubConnection?.on('Notification', (data: NotificationDTO) => {
-			this.updateStore('notifications', data);
+			// Notification slice is only updated in the notificationService.ts, we send it there.
+			notificationService.setNotification(data);
 		});
 
 		GlobalService.getAxiosReady().subscribe(() => {
@@ -139,11 +141,8 @@ export class SignalrService extends BaseService implements ISetup {
 			});
 		}
 	}
-	// endregion
 
-	public GetServerDownloadProgress() {
-		return this._serverDownloadProgress.asObservable();
-	}
+	// endregion
 
 	// region Array Progress
 	public getAllDownloadTaskUpdate(): Observable<DownloadTaskDTO[]> {
@@ -198,6 +197,10 @@ export class SignalrService extends BaseService implements ISetup {
 	// endregion
 
 	// region Single Progress
+
+	public GetServerDownloadProgress() {
+		return this._serverDownloadProgress.asObservable();
+	}
 
 	public getFileMergeProgress(id: number): Observable<FileMergeProgress | null> {
 		return this.getAllFileMergeProgress().pipe(

@@ -1,21 +1,24 @@
 ## [0.9.0]
 
 ### Added
- - Per server configurable downloadspeed limit (See server settings > Server Configuration)
+ - Per server configurable download speed limit (See server settings > Server Configuration)
  - German UI language (Thanks to (Padso4tw)[https://github.com/padso4tw])
 
 ### Changed
  - Removed batch commands from the download page, these were not working and overcomplicated things too much.
  - Migrated projected to .NET 6, brings many performance improvements
+ - Added a loading icon to the button when checking the server status in the server configuration
+
 ### Fixed
  - Fixed the opening of the server settings not defaulting back to its first tab
  - Fixed the download progress not updating after a while due to SignalR disconnects
  - Fixed the retrieval of the ServerStatus not working when a timeout happens.
+ - Fixed the notifications not always being shown and updated correctly when an error happens.
 ## [0.8.7]
 
 ### Added
 
-- Added two-factor authentication compatiblity, meaning PlexRipper now works with two-factor authentication protected Plex accounts.
+- Added two-factor authentication compatibility, meaning PlexRipper now works with two-factor authentication protected Plex accounts.
 - Added the awesome French translation from @starnakin, thank you so much!
 - Added a progress window showing the individual servers being connected to when setting up an PlexAccount.
 - Added a warning that deleting an plexAccount might take a long time due to the amount of data which has to be deleted.
@@ -35,7 +38,7 @@
 - Fixed the "New device connected" spam that Plex server owners would get due to a randomly generated ClientId's being used per request by PlexRipper. This is now unique and consistent for every PlexAccount.
 - Fixed the delete button missing from the Plex account update window.
 - Fixed the confirmation window prevented from being closed.
-- Fixed the menu titles now being translateable.
+- Fixed the menu titles now being translatable.
 - Fixed the DateTime settings not being translatable.
 - Fixed the browser client not updating its store after resetting the database.
 - Fixed the error window having a very wide window due to unwrapped text.

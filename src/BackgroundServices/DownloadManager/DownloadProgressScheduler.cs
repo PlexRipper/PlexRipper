@@ -1,4 +1,5 @@
-﻿using BackgroundServices.DownloadManager.Jobs;
+﻿using System.Collections.Concurrent;
+using BackgroundServices.DownloadManager.Jobs;
 using PlexRipper.Application;
 using Quartz;
 
@@ -12,7 +13,7 @@ public class DownloadProgressScheduler : IDownloadProgressScheduler
 
     private readonly IScheduler _scheduler;
 
-    private readonly Dictionary<int, List<string>> _trackDictionary = new();
+    private readonly ConcurrentDictionary<int, List<string>> _trackDictionary = new();
 
     private readonly int _numberOfSameUpdates = 20;
 
@@ -82,7 +83,7 @@ public class DownloadProgressScheduler : IDownloadProgressScheduler
         var isSuccess = await _scheduler.DeleteJob(CreateDownloadProgressJobKey(plexServerId));
         if (isSuccess)
         {
-            _trackDictionary.Remove(plexServerId);
+            _trackDictionary.TryRemove(plexServerId, out var _) ;
             Log.Information($"{nameof(DownloadProgressJob)} for {nameof(PlexServer)} {plexServerId} was stopped");
             return Result.Ok();
         }
@@ -100,7 +101,7 @@ public class DownloadProgressScheduler : IDownloadProgressScheduler
 
         if (!_trackDictionary.ContainsKey(plexServerId))
         {
-            _trackDictionary.Add(plexServerId, new List<string> { hashCode });
+            _trackDictionary.GetOrAdd(plexServerId, new List<string> { hashCode });
         }
 
         _trackDictionary[plexServerId].Add(hashCode);

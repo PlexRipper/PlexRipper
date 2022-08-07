@@ -37,6 +37,10 @@ export class NotificationService extends BaseService {
 
 	// region Notifications
 
+	public setNotification(notification: NotificationDTO): void {
+		this.updateStore('notifications', notification);
+	}
+
 	public getNotifications(): Observable<NotificationDTO[]> {
 		return this.stateChanged.pipe(map((state: IStoreState) => state?.notifications ?? []));
 	}

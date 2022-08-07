@@ -168,7 +168,9 @@ public class DownloadWorker
     private async Task<Result> DownloadProcessAsync(Stream destinationStream)
     {
         if (destinationStream is null)
+        {
             return ResultExtensions.IsNull(nameof(destinationStream)).LogWarning();
+        }
 
         try
         {
@@ -237,9 +239,9 @@ public class DownloadWorker
 
     private void SendDownloadWorkerError(Result errorResult)
     {
-        if (errorResult.Errors.Any())
+        if (errorResult.Errors.Any() && !errorResult.Errors[0].Metadata.ContainsKey(nameof(DownloadWorker) + "Id"))
         {
-            errorResult.Errors.First().Metadata.Add(nameof(DownloadWorker) + "Id", Id);
+            errorResult.Errors[0].Metadata.Add(nameof(DownloadWorker) + "Id", Id);
         }
 
         Log.Error($"Download worker {Id} with {FileName} had an error!");

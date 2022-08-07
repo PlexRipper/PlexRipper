@@ -6,10 +6,13 @@ public class BaseUnitTest<TUnitTestClass> : IDisposable where TUnitTestClass : c
 
     protected readonly AutoMock mock = AutoMock.GetStrict();
 
-    protected BaseUnitTest(ITestOutputHelper output)
+    protected BaseUnitTest(ITestOutputHelper output, bool disableMockCreate = false)
     {
         Log.SetupTestLogging(output);
-        _sut = mock.Create<TUnitTestClass>();
+        if (!disableMockCreate)
+        {
+            _sut = mock.Create<TUnitTestClass>();
+        }
     }
 
     public void Dispose()

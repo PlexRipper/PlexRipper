@@ -18,4 +18,6 @@ public interface IDownloadTaskFactory
     /// <param name="downloadTaskIds"></param>
     /// <returns>A list of newly generated <see cref="DownloadTask">DownloadTasks</see></returns>
     Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<int> downloadTaskIds);
+
+    Result<List<DownloadWorkerTask>> GenerateDownloadWorkerTasks(DownloadTask downloadTask);
 }

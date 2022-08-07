@@ -1,8 +1,8 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { finalize, switchMap, take } from 'rxjs/operators';
-import { PlexServerDTO } from '@dto/mainApi';
+import { finalize, map, switchMap, take } from 'rxjs/operators';
+import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, GlobalService } from '@service';
@@ -58,22 +58,23 @@ export class ServerService extends BaseService implements ISetup {
 		return this.getServers().pipe(switchMap((servers: PlexServerDTO[]) => of(servers.find((x) => x.id === serverId) ?? null)));
 	}
 
-	public checkServer(plexServerId: number): void {
-		if (plexServerId > 0) {
-			checkPlexServer(plexServerId).subscribe((serverStatus) => {
+	public checkServer(plexServerId: number): Observable<PlexServerStatusDTO | null> {
+		return checkPlexServer(plexServerId).pipe(
+			map((serverStatus) => {
 				if (serverStatus.isSuccess && serverStatus.value) {
 					const servers = this.getState().servers;
 					const index = servers.findIndex((x) => x.id === serverStatus.value?.plexServerId);
 					if (index === -1) {
-						return;
+						return serverStatus?.value ?? null;
 					}
 					const server = servers[index];
 					server.status = serverStatus.value;
 					servers.splice(index, 1, server);
 					this.setState({ servers }, 'Update server status for ' + plexServerId);
 				}
-			});
-		}
+				return serverStatus?.value ?? null;
+			}),
+		);
 	}
 }
 

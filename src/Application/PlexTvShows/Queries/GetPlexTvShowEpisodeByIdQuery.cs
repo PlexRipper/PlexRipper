@@ -8,5 +8,4 @@ public class GetPlexTvShowEpisodeByIdQuery : IRequest<Result<PlexTvShowEpisode>>
     }
 
     public int Id { get; }
-
 }

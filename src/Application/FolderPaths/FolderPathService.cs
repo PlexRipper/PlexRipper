@@ -21,9 +21,7 @@ public class FolderPathService : IFolderPathService
     {
         var folderPathId = await _mediator.Send(new CreateFolderPathCommand(folderPath));
         if (folderPathId.IsFailed)
-        {
             return folderPathId.ToResult();
-        }
 
         return await _mediator.Send(new GetFolderPathByIdQuery(folderPathId.Value));
     }
@@ -91,7 +89,7 @@ public class FolderPathService : IFolderPathService
             { PlexMediaType.OtherVideos, folderPaths.Value.FirstOrDefault(x => x.Id == 6) },
             { PlexMediaType.Games, folderPaths.Value.FirstOrDefault(x => x.Id == 7) },
             { PlexMediaType.None, folderPaths.Value.FirstOrDefault(x => x.Id == 1) },
-            { PlexMediaType.Unknown, folderPaths.Value.FirstOrDefault(x => x.Id == 1) },
+            { PlexMediaType.Unknown, folderPaths.Value.FirstOrDefault(x => x.Id == 1) }
         };
 
         return Result.Ok(dict);
@@ -101,14 +99,10 @@ public class FolderPathService : IFolderPathService
     {
         var folderPaths = await GetAllFolderPathsAsync();
         if (folderPaths.IsFailed)
-        {
             return folderPaths.ToResult();
-        }
 
         if (mediaType is PlexMediaType.None or PlexMediaType.Unknown)
-        {
             return folderPaths.ToResult();
-        }
 
         var errors = new List<IError>();
         foreach (var folderPath in folderPaths.Value)
@@ -121,9 +115,7 @@ public class FolderPathService : IFolderPathService
             }
 
             if (folderPath.MediaType == mediaType && !folderPathExitsResult.Value)
-            {
                 errors.Add(new Error($"The {folderPath.DisplayName} is not a valid or existing directory"));
-            }
         }
 
         return errors.Count > 0 ? new Result().WithErrors(errors).LogError() : Result.Ok();

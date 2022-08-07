@@ -15,7 +15,7 @@ public class StringToPlexMediaTypeConverter : IValueConverter<string, PlexMediaT
             "episode" => PlexMediaType.Episode,
             "music" => PlexMediaType.Music,
             "album" => PlexMediaType.Album,
-            _ => PlexMediaType.Unknown,
+            _ => PlexMediaType.Unknown
         };
     }
 }

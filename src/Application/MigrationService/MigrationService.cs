@@ -24,24 +24,18 @@ public class MigrationService : IMigrationService
         var plexAccounts = await _mediator.Send(new GetAllPlexAccountsQuery());
 
         if (plexAccounts.IsFailed)
-        {
             return plexAccounts.LogError();
-        }
 
         var invalidAccounts = plexAccounts.Value.FindAll(x => string.IsNullOrEmpty(x.ClientId));
         if (!invalidAccounts.Any())
-        {
             return Result.Ok();
-        }
 
         foreach (var plexAccount in invalidAccounts)
         {
             plexAccount.ClientId = _plexAccountService.GeneratePlexAccountClientId();
             var result = await _mediator.Send(new UpdatePlexAccountCommand(plexAccount));
             if (result.IsFailed)
-            {
                 result.LogError();
-            }
         }
 
         return Result.Ok();

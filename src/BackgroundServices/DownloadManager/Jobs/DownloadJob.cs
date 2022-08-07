@@ -14,7 +14,7 @@ public class DownloadJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        JobDataMap dataMap = context.JobDetail.JobDataMap;
+        var dataMap = context.JobDetail.JobDataMap;
         var downloadTaskId = dataMap.GetIntValue("downloadTaskId");
         Log.Debug($"Executing job: {nameof(DownloadJob)} for {nameof(DownloadTask)}: {downloadTaskId}");
         await _downloadTracker.StartDownloadClient(downloadTaskId);

@@ -6,5 +6,5 @@ public enum OperatingSystemPlatform
 
     Linux,
 
-    Osx,
+    Osx
 }

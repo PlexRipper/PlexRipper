@@ -12,7 +12,7 @@ public static class HashGenerator
             downloadTask.Key,
             downloadTask.PlexLibrary,
             downloadTask.PlexServerId,
-            downloadTask.DownloadTaskType,
+            downloadTask.DownloadTaskType
         };
 
         return CreateMD5(copy.ToString());
@@ -26,16 +26,14 @@ public static class HashGenerator
     public static string CreateMD5(string input)
     {
         // Use input string to calculate MD5 hash
-        using MD5 md5 = MD5.Create();
+        using var md5 = MD5.Create();
         var inputBytes = Encoding.ASCII.GetBytes(input);
         var hashBytes = md5.ComputeHash(inputBytes);
 
         // Convert the byte array to hexadecimal string
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         foreach (var bytes in hashBytes)
-        {
             sb.Append(bytes.ToString("X2"));
-        }
 
         return sb.ToString();
     }

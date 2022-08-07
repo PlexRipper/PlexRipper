@@ -1,6 +1,6 @@
 ﻿namespace PlexRipper.Application;
 
-public class CreateFolderPathCommand: IRequest<Result<int>>
+public class CreateFolderPathCommand : IRequest<Result<int>>
 {
     public FolderPath FolderPath { get; }
 

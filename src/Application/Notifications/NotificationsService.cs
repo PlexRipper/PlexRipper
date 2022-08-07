@@ -53,9 +53,7 @@ public class NotificationsService : INotificationsService
                 var notification = new Notification(error);
                 var notificationId = await CreateNotification(notification);
                 if (notificationId.IsFailed)
-                {
                     return notificationId.ToResult();
-                }
 
                 notification.Id = notificationId.Value;
                 await _signalRService.SendNotification(notification);

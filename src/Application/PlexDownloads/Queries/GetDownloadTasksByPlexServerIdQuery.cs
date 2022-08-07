@@ -1,6 +1,6 @@
 ﻿namespace PlexRipper.Application;
 
-public class GetDownloadTasksByPlexServerIdQuery: IRequest<Result<List<DownloadTask>>>
+public class GetDownloadTasksByPlexServerIdQuery : IRequest<Result<List<DownloadTask>>>
 {
     public int PlexServerId { get; }
 

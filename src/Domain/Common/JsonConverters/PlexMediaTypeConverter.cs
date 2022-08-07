@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace PlexRipper.Domain;
 
-public class PlexMediaTypeConverter: JsonConverter<PlexMediaType>
+public class PlexMediaTypeConverter : JsonConverter<PlexMediaType>
 {
     public override PlexMediaType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

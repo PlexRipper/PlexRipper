@@ -14,7 +14,7 @@ public static class PlexRipperDBContextSeed
                 DisplayName = "Download Path",
                 DirectoryPath = "/downloads",
                 FolderType = FolderType.DownloadFolder,
-                MediaType = PlexMediaType.None,
+                MediaType = PlexMediaType.None
             },
 
             new()
@@ -23,7 +23,7 @@ public static class PlexRipperDBContextSeed
                 DisplayName = "Movie Destination Path",
                 DirectoryPath = "/movies",
                 FolderType = FolderType.MovieFolder,
-                MediaType = PlexMediaType.Movie,
+                MediaType = PlexMediaType.Movie
             },
 
             new()
@@ -32,7 +32,7 @@ public static class PlexRipperDBContextSeed
                 DisplayName = "Tv Show Destination Path",
                 DirectoryPath = "/tvshows",
                 FolderType = FolderType.TvShowFolder,
-                MediaType = PlexMediaType.TvShow,
+                MediaType = PlexMediaType.TvShow
             },
 
             new()
@@ -41,7 +41,7 @@ public static class PlexRipperDBContextSeed
                 DisplayName = "Music Destination Path",
                 DirectoryPath = "/music",
                 FolderType = FolderType.MusicFolder,
-                MediaType = PlexMediaType.Music,
+                MediaType = PlexMediaType.Music
             },
 
             new()
@@ -50,7 +50,7 @@ public static class PlexRipperDBContextSeed
                 DisplayName = "Photos Destination Path",
                 DirectoryPath = "/photos",
                 FolderType = FolderType.PhotosFolder,
-                MediaType = PlexMediaType.Photos,
+                MediaType = PlexMediaType.Photos
             },
 
             new()
@@ -59,7 +59,7 @@ public static class PlexRipperDBContextSeed
                 DisplayName = "Other Videos Destination Path",
                 DirectoryPath = "/other",
                 FolderType = FolderType.OtherVideosFolder,
-                MediaType = PlexMediaType.OtherVideos,
+                MediaType = PlexMediaType.OtherVideos
             },
 
             new()
@@ -68,7 +68,7 @@ public static class PlexRipperDBContextSeed
                 DisplayName = "Games Videos Destination Path",
                 DirectoryPath = "/games",
                 FolderType = FolderType.GamesVideosFolder,
-                MediaType = PlexMediaType.Games,
+                MediaType = PlexMediaType.Games
             },
 
             new()
@@ -77,7 +77,7 @@ public static class PlexRipperDBContextSeed
                 DisplayName = "Reserved #1 Destination Path",
                 DirectoryPath = "/",
                 FolderType = FolderType.None,
-                MediaType = PlexMediaType.None,
+                MediaType = PlexMediaType.None
             },
 
             new()
@@ -86,7 +86,7 @@ public static class PlexRipperDBContextSeed
                 DisplayName = "Reserved #2 Destination Path",
                 DirectoryPath = "/",
                 FolderType = FolderType.None,
-                MediaType = PlexMediaType.None,
+                MediaType = PlexMediaType.None
             },
 
             new()
@@ -95,14 +95,12 @@ public static class PlexRipperDBContextSeed
                 DisplayName = "Reserved #3 Destination Path",
                 DirectoryPath = "/",
                 FolderType = FolderType.None,
-                MediaType = PlexMediaType.None,
-            },
+                MediaType = PlexMediaType.None
+            }
         };
 
         foreach (var folderPath in list)
-        {
             builder.Entity<FolderPath>().HasData(folderPath);
-        }
 
         return builder;
     }

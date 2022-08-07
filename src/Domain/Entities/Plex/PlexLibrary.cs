@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain;
 
@@ -128,7 +128,7 @@ public class PlexLibrary : BaseEntity
             {
                 PlexMediaType.Movie => MovieCount,
                 PlexMediaType.TvShow => TvShowCount,
-                _ => -1,
+                _ => -1
             };
         }
     }
@@ -203,30 +203,24 @@ public class PlexLibrary : BaseEntity
     {
         // Sort Movies
         if (Movies?.Count > 0)
-        {
             Movies = Movies.OrderByNatural(x => x.Title).ToList();
-        }
 
         // Sort TvShows
         if (TvShows?.Count > 0)
         {
             TvShows = TvShows.OrderBy(x => x.Title).ThenBy(y => y.Key).ToList();
-            for (int i = 0; i < TvShows.Count; i++)
-            {
+            for (var i = 0; i < TvShows.Count; i++)
                 if (TvShows[i].Seasons?.Count > 0)
                 {
                     TvShows[i].Seasons = TvShows[i].Seasons.OrderByNatural(x => x.Title).ToList();
 
-                    for (int j = 0; j < TvShows[i].Seasons.Count; j++)
-                    {
+                    for (var j = 0; j < TvShows[i].Seasons.Count; j++)
                         if (TvShows[i].Seasons[j].Episodes?.Count > 0)
                         {
                             TvShows[i].Seasons[j].Episodes =
                                 TvShows[i].Seasons[j].Episodes.OrderBy(x => x.Key).ToList();
                         }
-                    }
                 }
-            }
         }
 
         // TODO Add here for other media types once supported

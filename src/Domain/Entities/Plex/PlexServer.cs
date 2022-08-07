@@ -107,9 +107,7 @@ public class PlexServer : BaseEntity
         get
         {
             if (ServerStatus.Any())
-            {
                 return ServerStatus.Last();
-            }
 
             // TODO Add initial server status when server is added to DB. Meaning there is always one.
             return new PlexServerStatus
@@ -119,7 +117,7 @@ public class PlexServer : BaseEntity
                 PlexServer = this,
                 StatusMessage = "Not checked yet",
                 PlexServerId = Id,
-                StatusCode = 0,
+                StatusCode = 0
             };
         }
     }

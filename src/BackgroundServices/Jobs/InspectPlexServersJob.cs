@@ -14,7 +14,7 @@ public class InspectPlexServersJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        JobDataMap dataMap = context.JobDetail.JobDataMap;
+        var dataMap = context.JobDetail.JobDataMap;
         var plexAccountId = dataMap.GetIntValue("plexAccountId");
         Log.Debug($"Executing job: {nameof(InspectPlexServersJob)} for plexAccountId: {plexAccountId}");
         await _plexServerService.InspectPlexServers(plexAccountId);

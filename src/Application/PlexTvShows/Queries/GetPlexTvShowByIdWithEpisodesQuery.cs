@@ -2,7 +2,7 @@
 
 public class GetPlexTvShowByIdWithEpisodesQuery : IRequest<Result<PlexTvShow>>
 {
-    public GetPlexTvShowByIdWithEpisodesQuery(int id,  bool includePlexServer = false, bool includeLibrary = false)
+    public GetPlexTvShowByIdWithEpisodesQuery(int id, bool includePlexServer = false, bool includeLibrary = false)
     {
         Id = id;
         IncludeLibrary = includeLibrary;

@@ -18,8 +18,7 @@ public class GetPlexServersByAccountIdQueryHandler : BaseHandler,
 {
     public GetPlexServersByAccountIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Result<List<PlexServer>>> Handle(GetPlexServersByPlexAccountIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<List<PlexServer>>> Handle(GetPlexServersByPlexAccountIdQuery request, CancellationToken cancellationToken)
     {
         var plexServers = await _dbContext.PlexServers
             .Include(x => x.ServerStatus)

@@ -20,6 +20,7 @@ public class GetDownloadTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetD
     public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
     {
         var query = DownloadTasksQueryable;
+
 // @formatter:off
         if (request.IncludeChildren)
         {

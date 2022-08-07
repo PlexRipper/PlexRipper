@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
@@ -13,13 +13,11 @@ public class GetPlexServerByPlexTvShowEpisodeIdQueryValidator : AbstractValidato
     }
 }
 
-public class GetPlexServerByPlexTvShowEpisodeIdQueryHandler : BaseHandler,
-    IRequestHandler<GetPlexServerByPlexTvShowEpisodeIdQuery, Result<PlexServer>>
+public class GetPlexServerByPlexTvShowEpisodeIdQueryHandler : BaseHandler, IRequestHandler<GetPlexServerByPlexTvShowEpisodeIdQuery, Result<PlexServer>>
 {
     public GetPlexServerByPlexTvShowEpisodeIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Result<PlexServer>> Handle(GetPlexServerByPlexTvShowEpisodeIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<PlexServer>> Handle(GetPlexServerByPlexTvShowEpisodeIdQuery request, CancellationToken cancellationToken)
     {
         var plexTvShowEpisode = await _dbContext.PlexTvShowEpisodes
             .Include(x => x.TvShowSeason)

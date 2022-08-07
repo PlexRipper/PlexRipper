@@ -43,11 +43,9 @@ public interface IPlexApiService
 
     #endregion
 
-    Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(string serverAuthToken, string plexFullHost, string
-        plexLibraryKey);
+    Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(string serverAuthToken, string plexFullHost, string plexLibraryKey);
 
-    Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(string serverAuthToken, string plexFullHost,
-        string plexLibraryKey);
+    Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(string serverAuthToken, string plexFullHost, string plexLibraryKey);
 
     Task<Result<AuthPin>> Get2FAPin(string clientId);
 

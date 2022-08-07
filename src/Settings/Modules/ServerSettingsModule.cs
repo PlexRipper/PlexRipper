@@ -29,10 +29,8 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
         if (string.IsNullOrEmpty(plexServerSettings.MachineIdentifier))
             return ResultExtensions.IsEmpty(nameof(plexServerSettings.MachineIdentifier));
 
-
         if (plexServerSettings.PlexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(PlexServerSettingsModel.PlexServerId), plexServerSettings.PlexServerId);
-
 
         var settings = GetPlexServerSettings(plexServerSettings.MachineIdentifier);
         if (settings is not null)

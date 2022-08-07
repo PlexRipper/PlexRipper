@@ -55,7 +55,7 @@ public static class MockDatabase
         return context.Setup(config => { config.Seed = seed; });
     }
 
-    public static async Task<PlexRipperDbContext> Setup(this PlexRipperDbContext context, [CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static async Task<PlexRipperDbContext> Setup(this PlexRipperDbContext context, Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -67,30 +67,21 @@ public static class MockDatabase
         context = await context.AddPlexAccount(options);
 
         if (config.MovieCount > 0)
-        {
             context = await context.AddPlexMovies(options);
-        }
 
         if (config.TvShowCount > 0)
-        {
             context = await context.AddPlexTvShows(options);
-        }
 
         if (config.MovieDownloadTasksCount > 0)
-        {
             context = await context.AddMovieDownloadTasks(options);
-        }
 
         if (config.TvShowDownloadTasksCount > 0)
-        {
             context = await context.AddTvShowDownloadTasks(options);
-        }
 
         return context;
     }
 
-    public static async Task<PlexRipperDbContext> AddPlexServers(this PlexRipperDbContext context,
-        [CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static async Task<PlexRipperDbContext> AddPlexServers(this PlexRipperDbContext context, Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -104,8 +95,7 @@ public static class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexLibraries(this PlexRipperDbContext context,
-        [CanBeNull] Action<UnitTestDataConfig> options = null)
+    private static async Task<PlexRipperDbContext> AddPlexLibraries(this PlexRipperDbContext context, Action<UnitTestDataConfig> options = null)
     {
         var plexServers = await context.PlexServers.ToListAsync();
         plexServers.ShouldNotBeEmpty();
@@ -134,9 +124,7 @@ public static class MockDatabase
             {
                 plexLibrary.PlexServerId = plexServer.Id;
                 if (plexLibrary.Type == PlexMediaType.None)
-                {
                     plexLibrary.Type = PlexMediaType.Movie;
-                }
             }
 
             plexLibrariesToDb.AddRange(plexLibraries);
@@ -146,8 +134,7 @@ public static class MockDatabase
         return context;
     }
 
-    public static async Task<PlexRipperDbContext> AddPlexAccount(this PlexRipperDbContext context,
-        [CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static async Task<PlexRipperDbContext> AddPlexAccount(this PlexRipperDbContext context, Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
         var plexServers = context.PlexServers.Include(x => x.PlexLibraries).ToList();
@@ -172,12 +159,13 @@ public static class MockDatabase
         await context.SaveChangesAsync();
 
         // Add account -> library relation
-        var plexAccountLibraries = plexServers.SelectMany(x => x.PlexLibraries).Select(x => new PlexAccountLibrary
-        {
-            PlexAccountId = plexAccount.Id,
-            PlexServerId = x.PlexServerId,
-            PlexLibraryId = x.Id,
-        });
+        var plexAccountLibraries = plexServers.SelectMany(x => x.PlexLibraries)
+            .Select(x => new PlexAccountLibrary
+            {
+                PlexAccountId = plexAccount.Id,
+                PlexServerId = x.PlexServerId,
+                PlexLibraryId = x.Id,
+            });
         context.PlexAccountLibraries.AddRange(plexAccountLibraries);
         await context.SaveChangesAsync();
 
@@ -186,8 +174,7 @@ public static class MockDatabase
 
     #region Add DownloadTasks
 
-    public static async Task<PlexRipperDbContext> AddMovieDownloadTasks(this PlexRipperDbContext context,
-        [CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static async Task<PlexRipperDbContext> AddMovieDownloadTasks(this PlexRipperDbContext context, Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -206,8 +193,7 @@ public static class MockDatabase
         return context;
     }
 
-    public static async Task<PlexRipperDbContext> AddTvShowDownloadTasks(this PlexRipperDbContext context,
-        [CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static async Task<PlexRipperDbContext> AddTvShowDownloadTasks(this PlexRipperDbContext context, Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -230,8 +216,7 @@ public static class MockDatabase
 
     #region Add Media
 
-    private static async Task<PlexRipperDbContext> AddPlexMovies(this PlexRipperDbContext context,
-        [CanBeNull] Action<UnitTestDataConfig> options = null)
+    private static async Task<PlexRipperDbContext> AddPlexMovies(this PlexRipperDbContext context, Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options, new UnitTestDataConfig
         {
@@ -261,8 +246,7 @@ public static class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexTvShows(this PlexRipperDbContext context,
-        [CanBeNull] Action<UnitTestDataConfig> options = null)
+    private static async Task<PlexRipperDbContext> AddPlexTvShows(this PlexRipperDbContext context, Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options, new UnitTestDataConfig
         {

@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
@@ -13,13 +13,11 @@ public class GetPlexServerByIdQueryValidator : AbstractValidator<GetPlexServerBy
     }
 }
 
-public class GetPlexServerByIdQueryHandler : BaseHandler,
-    IRequestHandler<GetPlexServerByIdQuery, Result<PlexServer>>
+public class GetPlexServerByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexServerByIdQuery, Result<PlexServer>>
 {
     public GetPlexServerByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Result<PlexServer>> Handle(GetPlexServerByIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<PlexServer>> Handle(GetPlexServerByIdQuery request, CancellationToken cancellationToken)
     {
         var query = PlexServerQueryable
             .Include(x => x.ServerStatus)

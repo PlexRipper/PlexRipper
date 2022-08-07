@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
@@ -24,11 +24,10 @@ public class AddDownloadWorkerTasksCommandHandler : BaseHandler, IRequestHandler
 {
     public AddDownloadWorkerTasksCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Result<bool>> Handle(AddDownloadWorkerTasksCommand command,
-        CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(AddDownloadWorkerTasksCommand command, CancellationToken cancellationToken)
     {
         command.DownloadWorkerTasks.ForEach(x => x.DownloadTask = null);
-        await _dbContext.DownloadWorkerTasks.AddRangeAsync(command.DownloadWorkerTasks);
+        await _dbContext.DownloadWorkerTasks.AddRangeAsync(command.DownloadWorkerTasks, cancellationToken);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 

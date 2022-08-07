@@ -66,7 +66,8 @@ public static class Log
 
     #endregion
 
-    public static void DbContextLogger(string message,
+    public static void DbContextLogger(
+        string message,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "")
     {
@@ -197,7 +198,8 @@ public static class Log
 
     #region Warning
 
-    public static void Warning(string message,
+    public static void Warning(
+        string message,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "")
     {

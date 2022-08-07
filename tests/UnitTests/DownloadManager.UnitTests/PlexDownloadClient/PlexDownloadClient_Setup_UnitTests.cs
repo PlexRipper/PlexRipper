@@ -42,28 +42,6 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
     }
 
     [Fact]
-    public async Task ShouldGenerateDownloadWorkerTasks_WhenDownloadTaskHasNoDownloadWorkerTasks()
-    {
-        //Arrange
-        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.MovieDownloadTasksCount = 1; });
-
-        mock.SetupMediator(It.IsAny<AddDownloadWorkerTasksCommand>).ReturnsAsync(Result.Ok());
-        mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);
-        mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<int>())).Returns(4000);
-        mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimitObservable(It.IsAny<int>()))
-            .Returns(new Subject<int>().AsObservable());
-
-        var downloadTask = context.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
-
-        // Act
-        var result = mock.Create<PlexDownloadClient>().Setup(downloadTask);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.DownloadTask.DownloadWorkerTasks.Count.ShouldBe(4);
-    }
-
-    [Fact]
     public async Task ShouldSendDownloadTaskUpdate_WhenDownloadTaskWorkerHasAnUpdate()
     {
         //Arrange
@@ -77,6 +55,13 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
             .Returns(Result.Fail("Error"));
 
         var downloadTask = context.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
+        downloadTask.DownloadWorkerTasks = new List<DownloadWorkerTask>()
+        {
+            new(downloadTask, 0, 0, 10),
+            new(downloadTask, 1, 11, 20),
+            new(downloadTask, 2, 21, 30),
+            new(downloadTask, 3, 31, 40),
+        };
         var downloadTaskUpdates = new List<DownloadTask>();
 
         // Act
@@ -87,8 +72,7 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
         await Task.Delay(5000);
 
         // Assert
-        downloadTaskUpdates.Count.ShouldBe(2);
-        downloadTaskUpdates[0].DownloadStatus.ShouldBe(DownloadStatus.Queued);
-        downloadTaskUpdates[1].DownloadStatus.ShouldBe(DownloadStatus.Error);
+        downloadTaskUpdates.Count.ShouldBe(1);
+        downloadTaskUpdates[0].DownloadStatus.ShouldBe(DownloadStatus.Error);
     }
 }

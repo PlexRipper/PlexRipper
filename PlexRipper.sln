@@ -48,6 +48,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		README.md = README.md
 		CHANGELOG.md = CHANGELOG.md
+		.github\workflows\dev-release.yml = .github\workflows\dev-release.yml
+		.github\workflows\master.yml = .github\workflows\master.yml
+		.github\workflows\dev-test.yml = .github\workflows\dev-test.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpClient", "src\HttpClient\HttpClient.csproj", "{DDBB6CA7-3686-4CAD-B525-EBD965E6A05C}"

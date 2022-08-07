@@ -1,5 +1,8 @@
 ## [0.9.0]
 
+This has been a major refactoring with many unit and integration tests added to ensure stability.
+This means you will have to empty the config folder before installing to ensure proper workings.
+
 ### Added
  - Per server configurable download speed limit (See server settings > Server Configuration)
  - German UI language (Thanks to (Padso4tw)[https://github.com/padso4tw])
@@ -14,6 +17,9 @@
  - Fixed the download progress not updating after a while due to SignalR disconnects
  - Fixed the retrieval of the ServerStatus not working when a timeout happens.
  - Fixed the notifications not always being shown and updated correctly when an error happens.
+ - Fixed the download confirmation window not hiding after clicking confirm #122
+
+
 ## [0.8.7]
 
 ### Added

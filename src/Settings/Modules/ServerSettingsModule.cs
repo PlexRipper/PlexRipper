@@ -27,12 +27,12 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
     public Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings)
     {
         if (string.IsNullOrEmpty(plexServerSettings.MachineIdentifier))
-            return Result.Fail(
-                $"Could not add server to settings because the {nameof(PlexServerSettingsModel.MachineIdentifier)} was invalid: {plexServerSettings.MachineIdentifier}");
+            return ResultExtensions.IsEmpty(nameof(plexServerSettings.MachineIdentifier));
+
 
         if (plexServerSettings.PlexServerId <= 0)
-            return Result.Fail(
-                $"Could not add server to settings because the {nameof(PlexServerSettingsModel.PlexServerId)} was invalid: {plexServerSettings.PlexServerId}");
+            return ResultExtensions.IsInvalidId(nameof(PlexServerSettingsModel.PlexServerId), plexServerSettings.PlexServerId);
+
 
         var settings = GetPlexServerSettings(plexServerSettings.MachineIdentifier);
         if (settings is not null)

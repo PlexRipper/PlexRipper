@@ -12,7 +12,7 @@ public static class HashGenerator
             downloadTask.Key,
             downloadTask.PlexLibrary,
             downloadTask.PlexServerId,
-            downloadTask.DownloadTaskType
+            downloadTask.DownloadTaskType,
         };
 
         return CreateMD5(copy.ToString());

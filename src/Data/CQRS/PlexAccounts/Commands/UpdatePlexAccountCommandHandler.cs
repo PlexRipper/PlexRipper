@@ -32,12 +32,11 @@ public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexA
         var accountInDb = await _dbContext.PlexAccounts
             .Include(x => x.PlexAccountServers)
             .ThenInclude(x => x.PlexServer)
-            .AsTracking().FirstOrDefaultAsync(x => x.Id == plexAccount.Id, cancellationToken);
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.Id == plexAccount.Id, cancellationToken);
 
         if (accountInDb == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccount.Id);
-        }
 
         _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
         await _dbContext.SaveChangesAsync(cancellationToken);

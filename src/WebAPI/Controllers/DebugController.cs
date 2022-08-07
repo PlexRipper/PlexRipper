@@ -11,7 +11,9 @@ public class DebugController : BaseController
 {
     private readonly IDownloadProgressScheduler _downloadProgressScheduler;
 
-    public DebugController(IDownloadProgressScheduler downloadProgressScheduler, IMapper mapper,
+    public DebugController(
+        IDownloadProgressScheduler downloadProgressScheduler,
+        IMapper mapper,
         INotificationsService notificationsService) : base(mapper,
         notificationsService)
     {

@@ -3,7 +3,6 @@ using FluentValidation;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using PlexRipper.Data;
 using PlexRipper.Domain.Behavior.Pipelines;
-using Module = Autofac.Module;
 
 namespace PlexRipper.WebAPI.Config;
 

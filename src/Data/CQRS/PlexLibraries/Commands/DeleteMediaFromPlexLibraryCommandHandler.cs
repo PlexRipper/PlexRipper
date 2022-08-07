@@ -24,9 +24,7 @@ public class DeleteMediaFromPlexLibraryCommandHandler : BaseHandler, IRequestHan
             // First retrieve only the plexLibrary to determine the media type.
             var entity = await _dbContext.PlexLibraries.AsNoTracking().FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
             if (entity == null)
-            {
                 return ResultExtensions.EntityNotFound(nameof(PlexLibrary), command.PlexLibraryId);
-            }
 
             // Then construct the database query,
             // this improves performance such as not to check the tables which will return no result anyway.

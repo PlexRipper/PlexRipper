@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
@@ -8,14 +8,15 @@ public class AddDownloadWorkerTasksCommandValidator : AbstractValidator<AddDownl
 {
     public AddDownloadWorkerTasksCommandValidator()
     {
-        RuleForEach(x => x.DownloadWorkerTasks).ChildRules(task =>
-        {
-            task.RuleFor(x => x.Id).Equal(0);
-            task.RuleFor(x => x.DownloadTaskId).GreaterThan(0);
-            task.RuleFor(x => x.FileName).NotEmpty();
-            task.RuleFor(x => x.DownloadUrl).NotEmpty();
-            task.RuleFor(x => x.TempDirectory).NotEmpty();
-        });
+        RuleForEach(x => x.DownloadWorkerTasks)
+            .ChildRules(task =>
+            {
+                task.RuleFor(x => x.Id).Equal(0);
+                task.RuleFor(x => x.DownloadTaskId).GreaterThan(0);
+                task.RuleFor(x => x.FileName).NotEmpty();
+                task.RuleFor(x => x.DownloadUrl).NotEmpty();
+                task.RuleFor(x => x.TempDirectory).NotEmpty();
+            });
     }
 }
 

@@ -1,6 +1,4 @@
-﻿using PlexRipper.Data;
-
-namespace BaseTests.IntegrationTests.Setup;
+﻿namespace BaseTests.IntegrationTests.Setup;
 
 [Collection("Sequential")]
 public class IntegrationTest_Setup : BaseIntegrationTests
@@ -60,7 +58,7 @@ public class IntegrationTest_Setup : BaseIntegrationTests
         await CreateContainer(9654);
 
         // Act
-        PlexRipperDbContext dbContext = Container.PlexRipperDbContext;
+        var dbContext = Container.PlexRipperDbContext;
 
         // Assert
         Container.ShouldNotBeNull();

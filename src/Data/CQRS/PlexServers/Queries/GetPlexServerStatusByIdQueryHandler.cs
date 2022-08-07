@@ -29,9 +29,7 @@ public class GetPlexServerStatusByIdQueryHandler : BaseHandler, IRequestHandler<
 
         var status = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         if (status == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexServerStatus), request.Id);
-        }
 
         return Result.Ok(status);
     }

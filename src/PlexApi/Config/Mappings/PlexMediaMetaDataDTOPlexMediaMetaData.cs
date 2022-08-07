@@ -10,9 +10,7 @@ public class PlexMediaMetaDataDTOPlexMediaMetaData : ITypeConverter<PlexMediaCon
         try
         {
             if (source?.MediaContainer == null || !source.MediaContainer.Metadata.Any() || !source.MediaContainer.Metadata.First().Media.Any())
-            {
                 return null;
-            }
 
             var metaData = source?.MediaContainer?.Metadata?.First();
             var medium = metaData.Media.First();
@@ -38,7 +36,7 @@ public class PlexMediaMetaDataDTOPlexMediaMetaData : ITypeConverter<PlexMediaCon
                 ObfuscatedFilePath = part != null ? part.Key : "",
                 TitleTvShow = metaData.GrandparentTitle,
                 TitleTvShowSeason = metaData.ParentTitle,
-                RatingKey = int.TryParse(metaData.RatingKey, out int result) ? result : 0,
+                RatingKey = int.TryParse(metaData.RatingKey, out var result) ? result : 0,
             };
         }
         catch (Exception e)

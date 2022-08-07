@@ -11,8 +11,6 @@ public static class JsonSerializerOptionsWebApi
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
         options.JsonSerializerOptions.PropertyNamingPolicy = config.PropertyNamingPolicy;
         foreach (var converter in config.Converters)
-        {
             options.JsonSerializerOptions.Converters.Add(converter);
-        }
     }
 }

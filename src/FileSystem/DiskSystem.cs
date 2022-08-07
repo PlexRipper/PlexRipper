@@ -29,9 +29,7 @@ public class DiskSystem : IDiskSystem
     {
         var availableSpaceResult = GetAvailableSpaceByDirectory(directory);
         if (availableSpaceResult.IsFailed)
-        {
             return availableSpaceResult.ToResult().LogError();
-        }
 
         if (availableSpaceResult.Value < fileSize)
         {

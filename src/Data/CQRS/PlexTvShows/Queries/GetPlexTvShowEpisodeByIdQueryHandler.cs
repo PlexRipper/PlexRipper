@@ -23,9 +23,7 @@ public class GetPlexTvShowEpisodeByIdQueryHandler : BaseHandler, IRequestHandler
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexTvShowEpisode == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexTvShowEpisode), request.Id);
-        }
 
         return Result.Ok(plexTvShowEpisode);
     }

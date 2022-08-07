@@ -11,7 +11,7 @@ public abstract class BaseHandler
     private protected readonly BulkConfig _bulkConfig = new()
     {
         SetOutputIdentity = true,
-        PreserveInsertOrder = true
+        PreserveInsertOrder = true,
     };
 
     #endregion

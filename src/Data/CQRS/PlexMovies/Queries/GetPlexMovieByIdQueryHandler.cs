@@ -22,21 +22,15 @@ public class GetPlexMovieByIdQueryHandler : BaseHandler, IRequestHandler<GetPlex
         var query = PlexMoviesQueryable;
 
         if (request.IncludeLibrary)
-        {
             query = query.IncludePlexLibrary();
-        }
 
-        if ( request.IncludeServer)
-        {
+        if (request.IncludeServer)
             query = query.IncludePlexServer();
-        }
 
         var plexMovie = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexMovie == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexMovie), request.Id);
-        }
 
         return Result.Ok(plexMovie);
     }

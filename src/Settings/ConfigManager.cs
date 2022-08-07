@@ -41,14 +41,10 @@ public class ConfigManager : IConfigManager
 
         var configDirectoryExistsResult = _directorySystem.Exists(_pathProvider.ConfigDirectory);
         if (configDirectoryExistsResult.IsFailed)
-        {
             return configDirectoryExistsResult.LogFatal();
-        }
 
         if (configDirectoryExistsResult.Value)
-        {
             Log.Information($"Config directory exists, will use \"{_pathProvider.ConfigDirectory}\"");
-        }
         else
         {
             Log.Information($"Config directory does not exist, will create now at \"{_pathProvider.ConfigDirectory}\".");
@@ -68,7 +64,7 @@ public class ConfigManager : IConfigManager
             return SaveConfig();
         }
 
-        Result loadResult = LoadConfig();
+        var loadResult = LoadConfig();
         return loadResult.IsFailed ? loadResult : Result.Ok();
     }
 
@@ -86,7 +82,7 @@ public class ConfigManager : IConfigManager
         {
             var cleanedJson = readResult.Value.Replace("\r\n", "");
             var loadedSettings = JsonSerializer.Deserialize<JsonElement>(cleanedJson, DefaultJsonSerializerOptions.ConfigManagerOptions);
-            Result setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
+            var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
             if (setFromJsonResult.IsFailed)
             {
                 Log.Warning("Certain properties were missing or had missing or invalid values. Will correct those and re-save now!");
@@ -108,11 +104,9 @@ public class ConfigManager : IConfigManager
     public virtual Result ResetConfig()
     {
         _userSettings.Reset();
-        Result saveResult = SaveConfig();
+        var saveResult = SaveConfig();
         if (saveResult.IsFailed)
-        {
             saveResult.WithError(new Error("Failed to save a new config after resetting")).LogError();
-        }
 
         return Result.Ok();
     }
@@ -123,15 +117,11 @@ public class ConfigManager : IConfigManager
 
         var jsonSettings = GetJsonSettingsObject();
         if (jsonSettings.IsFailed)
-        {
             return jsonSettings.ToResult();
-        }
 
-        Result writeResult = WriteToConfigFile(jsonSettings.Value);
+        var writeResult = WriteToConfigFile(jsonSettings.Value);
         if (writeResult.IsFailed)
-        {
             return writeResult;
-        }
 
         return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
     }
@@ -147,7 +137,7 @@ public class ConfigManager : IConfigManager
 
     private Result WriteToConfigFile(string jsonSettingsString)
     {
-        Result writeResult = _fileSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString);
+        var writeResult = _fileSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString);
         return writeResult.IsFailed ? writeResult.WithError("Failed to write config settings").LogError() : Result.Ok();
     }
 

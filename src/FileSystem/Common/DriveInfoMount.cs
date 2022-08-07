@@ -24,9 +24,7 @@ public class DriveInfoMount : IMount
         get
         {
             if (_driveType != DriveType.Unknown)
-            {
                 return _driveType;
-            }
 
             return _driveInfo.DriveType;
         }
@@ -34,7 +32,7 @@ public class DriveInfoMount : IMount
 
     public bool IsReady => _driveInfo.IsReady;
 
-    public MountOptions MountOptions { get; private set; }
+    public MountOptions MountOptions { get; }
 
     public string Name => _driveInfo.Name;
 
@@ -51,9 +49,7 @@ public class DriveInfoMount : IMount
         get
         {
             if (string.IsNullOrWhiteSpace(VolumeLabel) || VolumeLabel.StartsWith("UUID=") || Name == VolumeLabel)
-            {
                 return Name;
-            }
 
             return $"{Name} ({VolumeLabel})";
         }

@@ -40,9 +40,7 @@ public class PlexApi
         };
 
         if (plexAccount.Is2Fa)
-        {
             credentials.VerificationCode = plexAccount.VerificationCode;
-        }
 
         var request = new RestRequest(new Uri(_signInUrl), Method.Post)
             .AddPlexHeaders(plexAccount.ClientId)

@@ -23,17 +23,13 @@ public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<G
 
         var result = await query.FirstOrDefaultAsync(x => x.Id == request.Id);
         if (result == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), request.Id);
-        }
 
         var plexLibrary = await GetPlexLibraryQueryableByType(result.Type, request.IncludePlexServer, request.IncludeMedia, request.TopLevelMediaOnly)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexLibrary == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), request.Id);
-        }
 
         return Result.Ok(plexLibrary.SortMedia());
     }

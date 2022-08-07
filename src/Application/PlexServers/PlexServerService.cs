@@ -230,7 +230,7 @@ public class PlexServerService : IPlexServerService
                 await SendServerProgress(new InspectServerProgress
                 {
                     AttemptingApplyDNSFix = true,
-                    Message = dnsFixMsg
+                    Message = dnsFixMsg,
                 });
 
                 plexServer.ServerFixApplyDNSFix = true;
@@ -246,7 +246,7 @@ public class PlexServerService : IPlexServerService
                         Message = dnsFixMsg,
                         Completed = true,
                         ConnectionSuccessful = true,
-                        AttemptingApplyDNSFix = true
+                        AttemptingApplyDNSFix = true,
                     });
                 }
 
@@ -257,7 +257,7 @@ public class PlexServerService : IPlexServerService
                 {
                     AttemptingApplyDNSFix = true,
                     Completed = true,
-                    Message = dnsFixMsg
+                    Message = dnsFixMsg,
                 });
 
                 plexServer.ServerFixApplyDNSFix = false;

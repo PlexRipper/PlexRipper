@@ -6,6 +6,9 @@ public interface IFileMergeStreamProvider
 {
     Task<Result<Stream>> CreateMergeStream(string destinationDirectory);
 
-    Task MergeFiles(List<string> filePaths, Stream destination, Subject<long> bytesReceivedProgress,
-        CancellationToken cancellationToken = default(CancellationToken));
+    Task MergeFiles(
+        List<string> filePaths,
+        Stream destination,
+        Subject<long> bytesReceivedProgress,
+        CancellationToken cancellationToken = default);
 }

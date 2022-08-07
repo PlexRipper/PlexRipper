@@ -9,37 +9,39 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
 {
     public CreateDownloadTasksCommandValidator()
     {
-        RuleForEach(x => x.DownloadTasks).ChildRules(x =>
-        {
-            x.RuleFor(y => y).NotNull();
-            x.RuleFor(y => y.DataReceived).Equal(0);
-            x.RuleFor(y => y.DataTotal).GreaterThan(0);
-            x.RuleFor(y => y.Key).GreaterThan(0);
-            x.RuleFor(y => y.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
-            x.RuleFor(y => y.Title).NotEmpty();
-            x.RuleFor(y => y.DownloadDirectory).NotEmpty();
-            x.RuleFor(y => y.DestinationDirectory).NotEmpty();
-            x.RuleFor(y => y.FullTitle).NotEmpty();
-            x.RuleFor(y => y.PlexServerId).GreaterThan(0);
-            x.RuleFor(y => y.PlexLibraryId).GreaterThan(0);
-            x.RuleFor(y => y.DownloadFolderId).GreaterThan(0);
-            x.RuleFor(y => y.DestinationFolderId).GreaterThan(0);
-            x.When(c => c.IsDownloadable, () =>
+        RuleForEach(x => x.DownloadTasks)
+            .ChildRules(x =>
             {
-                x.RuleFor(y => y.ParentId).GreaterThan(0);
+                x.RuleFor(y => y).NotNull();
+                x.RuleFor(y => y.DataReceived).Equal(0);
+                x.RuleFor(y => y.DataTotal).GreaterThan(0);
+                x.RuleFor(y => y.Key).GreaterThan(0);
+                x.RuleFor(y => y.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
+                x.RuleFor(y => y.Title).NotEmpty();
+                x.RuleFor(y => y.DownloadDirectory).NotEmpty();
+                x.RuleFor(y => y.DestinationDirectory).NotEmpty();
+                x.RuleFor(y => y.FullTitle).NotEmpty();
+                x.RuleFor(y => y.PlexServerId).GreaterThan(0);
+                x.RuleFor(y => y.PlexLibraryId).GreaterThan(0);
+                x.RuleFor(y => y.DownloadFolderId).GreaterThan(0);
+                x.RuleFor(y => y.DestinationFolderId).GreaterThan(0);
+                x.When(c => c.IsDownloadable, () =>
+                {
+                    x.RuleFor(y => y.ParentId).GreaterThan(0);
 
-                x.RuleFor(y => y.FileName).NotEmpty();
+                    x.RuleFor(y => y.FileName).NotEmpty();
 
-                x.RuleFor(y => y.FileLocationUrl).NotEmpty();
-                x.RuleFor(y => y.DownloadUrl).NotEmpty();
-                x.RuleFor(y => y.DownloadUri).NotNull();
-                x.RuleFor(y => y.DownloadUri.IsAbsoluteUri).NotNull().When(y => y.DownloadUri != null);
+                    x.RuleFor(y => y.FileLocationUrl).NotEmpty();
+                    x.RuleFor(y => y.DownloadUrl).NotEmpty();
+                    x.RuleFor(y => y.DownloadUri).NotNull();
+                    x.RuleFor(y => y.DownloadUri.IsAbsoluteUri).NotNull().When(y => y.DownloadUri != null);
 
-                x.RuleFor(y => Uri.IsWellFormedUriString(y.DownloadUri.AbsoluteUri, UriKind.Absolute)).NotEqual(false)
-                    .When(y => y.DownloadUri != null);
-                x.RuleFor(y => y.Created).NotEqual(DateTime.MinValue);
+                    x.RuleFor(y => Uri.IsWellFormedUriString(y.DownloadUri.AbsoluteUri, UriKind.Absolute))
+                        .NotEqual(false)
+                        .When(y => y.DownloadUri != null);
+                    x.RuleFor(y => y.Created).NotEqual(DateTime.MinValue);
+                });
             });
-        });
     }
 }
 
@@ -103,7 +105,6 @@ public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<Cr
         _dbContext.BulkInsert(downloadTasks.FindAll(x => x.Id == 0), _bulkConfig);
 
         foreach (var downloadTask in downloadTasks)
-        {
             if (downloadTask.Children.Any())
             {
                 foreach (var downloadTaskChild in downloadTask.Children)
@@ -114,6 +115,5 @@ public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<Cr
 
                 InsertDownloadTasks(downloadTask.Children);
             }
-        }
     }
 }

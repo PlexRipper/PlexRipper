@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
@@ -31,14 +31,10 @@ public class GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryHandler : BaseHan
         }
 
         if (request.IncludeLibrary)
-        {
             query = query.IncludePlexLibrary();
-        }
 
         if (request.IncludeServer)
-        {
             query = query.IncludePlexServer();
-        }
 
         var plexTvShowSeason = await query
             .Where(x => request.Ids.Contains(x.Id))

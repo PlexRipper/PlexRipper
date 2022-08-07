@@ -128,7 +128,7 @@ public class PlexLibrary : BaseEntity
             {
                 PlexMediaType.Movie => MovieCount,
                 PlexMediaType.TvShow => TvShowCount,
-                _ => -1
+                _ => -1,
             };
         }
     }

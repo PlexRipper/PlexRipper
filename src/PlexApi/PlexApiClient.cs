@@ -14,14 +14,13 @@ public class PlexApiClient
 {
     private readonly RestClient _client;
 
-    public static JsonSerializerOptions SerializerOptions =>
-        new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true,
-            WriteIndented = true,
-            Converters = { new LongToDateTime() },
-        };
+    public static JsonSerializerOptions SerializerOptions => new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        WriteIndented = true,
+        Converters = { new LongToDateTime() },
+    };
 
     public PlexApiClient(HttpClient httpClient)
     {
@@ -41,7 +40,7 @@ public class PlexApiClient
 
         var result = await _client.SendRequestWithPolly<T>(request, retryCount);
 
-       return GenerateResponseResult(result, action);
+        return GenerateResponseResult(result, action);
     }
 
     public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)
@@ -56,7 +55,8 @@ public class PlexApiClient
                         Log.Warning($"Waiting {timeToWait.TotalSeconds} seconds before retrying again.");
                         return timeToWait;
                     }
-                ).ExecuteAsync(async () =>
+                )
+                .ExecuteAsync(async () =>
                 {
                     try
                     {
@@ -72,9 +72,7 @@ public class PlexApiClient
                 });
 
             if (response == null || response.Length < 200)
-            {
                 return Result.Fail(new Error($"Image response was empty - Url: {request.Resource}")).LogError();
-            }
 
             return Result.Ok(response);
         }
@@ -82,9 +80,7 @@ public class PlexApiClient
         {
             var result = Result.Fail(new ExceptionalError(e));
             if (e.Message.Contains("The operation has timed out"))
-            {
                 return result.Add408RequestTimeoutError().LogError();
-            }
 
             return result;
         }
@@ -93,9 +89,7 @@ public class PlexApiClient
     private Result<T> GenerateResponseResult<T>(Result<RestResponse<T>> responseResult, Action<PlexApiClientProgress> action = null)
     {
         if (responseResult.IsFailed)
-        {
             return Result.Fail(responseResult.Errors);
-        }
 
         var value = responseResult.Value;
         Log.Verbose($"Response was: {value.Content}");
@@ -135,9 +129,7 @@ public class PlexApiClient
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {
                 if (response.ErrorMessage.Contains("Timeout"))
-                {
                     result.Add408RequestTimeoutError(response.ErrorMessage);
-                }
 
                 return result;
             }
@@ -147,9 +139,7 @@ public class PlexApiClient
             {
                 var errorsResponse = JsonSerializer.Deserialize<PlexErrorsResponse>(content, SerializerOptions) ?? new PlexErrorsResponse();
                 if (errorsResponse.Errors.Any())
-                {
                     result.WithErrors(errorsResponse.Errors);
-                }
             }
         }
         catch (Exception)

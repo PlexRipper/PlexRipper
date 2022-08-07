@@ -56,9 +56,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     {
         var resultFolderPath = await _folderPathService.CheckIfFolderPathsAreValid();
         if (resultFolderPath.IsFailed)
-        {
             return resultFolderPath.LogError();
-        }
 
         var downloadTasks = new List<DownloadTask>();
 
@@ -71,60 +69,42 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         {
             var result = await GenerateTvShowDownloadTasksAsync(plexTvShowIds, downloadTasks);
             if (result.IsSuccess)
-            {
                 downloadTasks = result.Value;
-            }
             else
-            {
                 result.LogError();
-            }
         }
 
         if (plexTvShowSeasonIds.Any())
         {
             var result = await GenerateTvShowSeasonDownloadTasksAsync(plexTvShowSeasonIds, downloadTasks);
             if (result.IsSuccess)
-            {
                 downloadTasks = result.Value;
-            }
             else
-            {
                 result.LogError();
-            }
         }
 
         if (plexTvShowEpisodeIds.Any())
         {
             var result = await GenerateTvShowEpisodesDownloadTasksAsync(plexTvShowEpisodeIds, downloadTasks);
             if (result.IsSuccess)
-            {
                 downloadTasks = result.Value;
-            }
             else
-            {
                 result.LogError();
-            }
         }
 
         if (plexMovieIds.Any())
         {
             var result = await GenerateMovieDownloadTasksAsync(plexMovieIds);
             if (result.IsSuccess)
-            {
                 downloadTasks.AddRange(result.Value);
-            }
             else
-            {
                 result.LogError();
-            }
         }
 
         // Add the final property values
         var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks);
         if (finalizeDownloadTasksResult.IsFailed)
-        {
             return finalizeDownloadTasksResult.ToResult().LogError();
-        }
 
         return Result.Ok(finalizeDownloadTasksResult.Value);
     }
@@ -164,13 +144,12 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         return episodeDownloadTask;
     }
 
-    public async Task<Result<List<DownloadTask>>> GenerateTvShowDownloadTasksAsync(List<int> plexTvShowIds,
+    public async Task<Result<List<DownloadTask>>> GenerateTvShowDownloadTasksAsync(
+        List<int> plexTvShowIds,
         List<DownloadTask> downloadTasks = null)
     {
         if (!plexTvShowIds.Any())
-        {
             return ResultExtensions.IsEmpty(nameof(plexTvShowIds)).LogWarning();
-        }
 
         downloadTasks ??= new List<DownloadTask>();
 
@@ -225,9 +204,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         List<PlexTvShowSeason> seasons = null)
     {
         if (!plexTvShowSeasonIds.Any())
-        {
             return ResultExtensions.IsEmpty(nameof(plexTvShowSeasonIds)).LogWarning();
-        }
 
         downloadTasks ??= new List<DownloadTask>();
 
@@ -297,9 +274,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         List<PlexTvShowEpisode> episodes = null)
     {
         if (!plexTvShowEpisodeIds.Any())
-        {
             return ResultExtensions.IsEmpty(nameof(plexTvShowEpisodeIds)).LogWarning();
-        }
 
         downloadTasks ??= new List<DownloadTask>();
 
@@ -366,17 +341,13 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     public async Task<Result<List<DownloadTask>>> GenerateMovieDownloadTasksAsync(List<int> plexMovieIds)
     {
         if (!plexMovieIds.Any())
-        {
             return ResultExtensions.IsEmpty(nameof(plexMovieIds)).LogWarning();
-        }
 
         Log.Debug($"Creating {plexMovieIds.Count} movie download tasks.");
         var plexMoviesResult = await _mediator.Send(new GetMultiplePlexMoviesByIdsQuery(plexMovieIds, true, true));
 
         if (plexMoviesResult.IsFailed)
-        {
             return plexMoviesResult.ToResult();
-        }
 
         // Create downloadTasks
         var downloadTasks = new List<DownloadTask>();
@@ -428,9 +399,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     public async Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<int> downloadTaskIds)
     {
         if (!downloadTaskIds.Any())
-        {
             return ResultExtensions.IsEmpty(nameof(downloadTaskIds)).LogWarning();
-        }
 
         Log.Debug($"Regenerating {downloadTaskIds.Count} download tasks.");
 
@@ -440,9 +409,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         {
             var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
             if (downloadTaskResult.IsFailed)
-            {
                 continue;
-            }
 
             var downloadTask = downloadTaskResult.Value;
 
@@ -482,9 +449,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
         Log.Debug($"Successfully regenerated {freshDownloadTasks.Count} out of {downloadTaskIds.Count} download tasks.");
         if (downloadTaskIds.Count - freshDownloadTasks.Count > 0)
-        {
             Log.Error("Failed to generate");
-        }
 
         return Result.Ok(freshDownloadTasks);
     }
@@ -492,15 +457,11 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     public Result<List<DownloadWorkerTask>> GenerateDownloadWorkerTasks(DownloadTask downloadTask)
     {
         if (downloadTask is null)
-        {
             return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
-        }
 
-        int parts = _downloadManagerSettings.DownloadSegments;
+        var parts = _downloadManagerSettings.DownloadSegments;
         if (parts <= 0)
-        {
             return Result.Fail($"Parameter {nameof(parts)} was {parts}, prevented division by invalid value").LogWarning();
-        }
 
         // Create download worker tasks/segments/ranges
         var totalBytesToReceive = downloadTask.DataTotal;
@@ -532,37 +493,27 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     private async Task<Result<List<DownloadTask>>> FinalizeDownloadTasks(List<DownloadTask> downloadTasks)
     {
         if (!downloadTasks.Any())
-        {
             return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
-        }
 
         // Get the download folder
         var downloadFolder = await _folderPathService.GetDownloadFolderAsync();
         if (downloadFolder.IsFailed)
-        {
             return downloadFolder.ToResult();
-        }
 
         // Get Plex libraries
         var plexLibraries = await _mediator.Send(new GetAllPlexLibrariesQuery(true));
         if (plexLibraries.IsFailed)
-        {
             return plexLibraries.ToResult();
-        }
 
         // Get Plex libraries
         var folderPaths = await _mediator.Send(new GetAllFolderPathsQuery());
         if (folderPaths.IsFailed)
-        {
             return folderPaths.ToResult();
-        }
 
         // Default destination dictionary
         var defaultDestinationDict = await _folderPathService.GetDefaultDestinationFolderDictionary();
         if (defaultDestinationDict.IsFailed)
-        {
             return defaultDestinationDict.ToResult();
-        }
 
         async Task<Result<List<DownloadTask>>> FillDownloadTasks(List<DownloadTask> tasks)
         {
@@ -601,33 +552,25 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 // Determine download directory
                 var downloadDir = GetDownloadDirectory(downloadTask);
                 if (downloadDir.IsFailed)
-                {
                     return downloadDir.ToResult();
-                }
 
                 downloadTask.DownloadDirectory = downloadDir.Value;
 
                 // Determine destination directory
                 var destinationDir = GetDestinationDirectory(downloadTask);
                 if (destinationDir.IsFailed)
-                {
                     return destinationDir.ToResult();
-                }
 
                 downloadTask.DestinationDirectory = destinationDir.Value;
 
                 if (downloadTask.Children.Any())
                 {
                     foreach (var childTask in downloadTask.Children)
-                    {
                         childTask.Parent = downloadTask;
-                    }
 
                     var result = await FillDownloadTasks(downloadTask.Children);
                     if (result.IsFailed)
-                    {
                         return result.ToResult();
-                    }
 
                     downloadTask.Children = result.Value;
                 }
@@ -642,9 +585,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     private Result<string> GetDownloadDirectory(DownloadTask downloadTask)
     {
         if (downloadTask?.DownloadFolder is null)
-        {
             return Result.Fail("DownloadTask had an invalid DownloadFolder value");
-        }
 
         var basePath = downloadTask.DownloadFolder.DirectoryPath;
         return GetMediaTypeDirectory(downloadTask, basePath);
@@ -653,9 +594,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     private Result<string> GetDestinationDirectory(DownloadTask downloadTask)
     {
         if (downloadTask?.DestinationFolder is null)
-        {
             return Result.Fail("DownloadTask had an invalid DestinationFolder value");
-        }
 
         var basePath = downloadTask.DestinationFolder.DirectoryPath;
         return GetMediaTypeDirectory(downloadTask, basePath);

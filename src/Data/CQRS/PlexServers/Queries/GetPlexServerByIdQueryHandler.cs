@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
@@ -26,17 +26,13 @@ public class GetPlexServerByIdQueryHandler : BaseHandler,
             .AsQueryable();
 
         if (request.IncludeLibraries)
-        {
             query = query.Include(x => x.PlexLibraries);
-        }
 
         var plexServer = await query
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexServer == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexServer), request.Id);
-        }
 
         return Result.Ok(plexServer);
     }

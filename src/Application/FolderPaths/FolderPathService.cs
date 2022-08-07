@@ -89,7 +89,7 @@ public class FolderPathService : IFolderPathService
             { PlexMediaType.OtherVideos, folderPaths.Value.FirstOrDefault(x => x.Id == 6) },
             { PlexMediaType.Games, folderPaths.Value.FirstOrDefault(x => x.Id == 7) },
             { PlexMediaType.None, folderPaths.Value.FirstOrDefault(x => x.Id == 1) },
-            { PlexMediaType.Unknown, folderPaths.Value.FirstOrDefault(x => x.Id == 1) }
+            { PlexMediaType.Unknown, folderPaths.Value.FirstOrDefault(x => x.Id == 1) },
         };
 
         return Result.Ok(dict);

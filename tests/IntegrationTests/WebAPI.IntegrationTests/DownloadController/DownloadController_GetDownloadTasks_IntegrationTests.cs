@@ -39,9 +39,7 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
         {
             downloadProgressDto.Children.Count.ShouldBe(tvShowSeasonDownloadTasksCount);
             foreach (var child in downloadProgressDto.Children)
-            {
                 child.Children.Count.ShouldBe(tvShowEpisodeDownloadTasksCount);
-            }
         }
     }
 }

@@ -27,9 +27,7 @@ public class UpdateDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
             .ToListAsync(cancellationToken);
 
         foreach (var downloadTask in downloadTasks)
-        {
             downloadTask.DownloadStatus = command.DownloadStatus;
-        }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 

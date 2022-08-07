@@ -37,7 +37,7 @@ public static class ApiRoutes
 
         public static string GetStartCommand(int id)
         {
-            return  Controller + "/start/" + id;
+            return Controller + "/start/" + id;
         }
     }
 }

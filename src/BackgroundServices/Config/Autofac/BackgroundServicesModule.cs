@@ -33,7 +33,7 @@ public class BackgroundServicesModule : Module
                 cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
                     .AsImplementedInterfaces()
                     .InstancePerMatchingLifetimeScope(tag);
-            }
+            },
         });
 
         builder.RegisterModule(new QuartzAutofacJobsModule(typeof(SyncServerJob).Assembly));

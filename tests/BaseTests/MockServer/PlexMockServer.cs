@@ -21,9 +21,7 @@ public class PlexMockServer : IDisposable
         _config = PlexMockServerConfig.FromOptions(options);
 
         if (_config.DownloadFileSizeInMb > 0)
-        {
             _downloadFile = FakeData.GetDownloadFile(_config.DownloadFileSizeInMb);
-        }
 
         Server = WireMockServer.Start();
         ServerUri = new Uri(Server.Urls[0]);

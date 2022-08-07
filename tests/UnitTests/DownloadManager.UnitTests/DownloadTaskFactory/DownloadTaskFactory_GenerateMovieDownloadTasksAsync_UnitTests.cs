@@ -1,5 +1,4 @@
 ﻿using PlexRipper.Application;
-using PlexRipper.Data;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
 
@@ -33,18 +32,20 @@ public class DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests
     public async Task ShouldHaveValidSingleNestedDownloadTasks_WhenPlexMoviesAreValid()
     {
         // Arrange
-        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
-        {
-            config.Seed = 324;
-            config.MovieCount = 5;
-        });
+        await using var context = await MockDatabase.GetMemoryDbContext()
+            .Setup(config =>
+            {
+                config.Seed = 324;
+                config.MovieCount = 5;
+            });
         using var mock = AutoMock.GetStrict().AddMapper();
         var _sut = mock.Create<DownloadTaskFactory>();
         var movies = context.PlexMovies.IncludePlexLibrary().IncludePlexServer().ToList();
 
-        mock.SetupMediator(It.IsAny<GetMultiplePlexMoviesByIdsQuery>).ReturnsAsync(
-            (GetMultiplePlexMoviesByIdsQuery query, CancellationToken _) => Result.Ok(movies.Where(x => query.Ids.Contains(x.Id)).ToList())
-        );
+        mock.SetupMediator(It.IsAny<GetMultiplePlexMoviesByIdsQuery>)
+            .ReturnsAsync(
+                (GetMultiplePlexMoviesByIdsQuery query, CancellationToken _) => Result.Ok(movies.Where(x => query.Ids.Contains(x.Id)).ToList())
+            );
 
         // Act
         var result = await _sut.GenerateMovieDownloadTasksAsync(movies.Select(x => x.Id).ToList());

@@ -30,9 +30,7 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             typeof(ServerDownloadProgressDTO),
         };
 
-        foreach (Type type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))
-        {
+        foreach (var type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))
             context.SchemaGenerator.Generate(type, context.SchemaResolver);
-        }
     }
 }

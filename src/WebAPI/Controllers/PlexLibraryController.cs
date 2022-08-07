@@ -34,9 +34,7 @@ public class PlexLibraryController : BaseController
     public async Task<IActionResult> GetPlexLibrary(int id, [FromQuery] bool allMedia = false)
     {
         if (id <= 0)
-        {
             return BadRequest(id, nameof(id));
-        }
 
         return ToActionResult<PlexLibrary, PlexLibraryDTO>(await _plexLibraryService.GetPlexLibraryAsync(id, !allMedia));
     }
@@ -49,9 +47,7 @@ public class PlexLibraryController : BaseController
     public async Task<IActionResult> GetPlexLibraryInServer(int id)
     {
         if (id <= 0)
-        {
             return BadRequest(id, nameof(id));
-        }
 
         return ToActionResult<PlexServer, PlexServerDTO>(await _plexLibraryService.GetPlexLibraryInServerAsync(id, true));
     }
@@ -64,9 +60,7 @@ public class PlexLibraryController : BaseController
     public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibraryDTO refreshPlexLibraryDto)
     {
         if (refreshPlexLibraryDto is null)
-        {
             return BadRequest();
-        }
 
         return ToActionResult<PlexLibrary, PlexLibraryDTO>(await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId));
     }
@@ -78,9 +72,7 @@ public class PlexLibraryController : BaseController
     public async Task<IActionResult> UpdateDefaultDestination([FromBody] UpdateDefaultDestinationDTO payload)
     {
         if (payload is null)
-        {
             return BadRequest();
-        }
 
         return ToActionResult(await _plexLibraryService.UpdateDefaultDestinationLibrary(payload.LibraryId, payload.FolderPathId));
     }

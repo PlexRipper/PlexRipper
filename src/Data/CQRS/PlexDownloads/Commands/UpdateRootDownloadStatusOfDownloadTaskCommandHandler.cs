@@ -30,9 +30,7 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
                 return;
 
             foreach (var downloadTaskChild in downloadTask.Children)
-            {
                 SetDownloadStatus(downloadTaskChild);
-            }
 
             downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(downloadTask.Children.Select(x => x.DownloadStatus).ToList());
         }

@@ -22,20 +22,14 @@ public class GetPlexTvShowByIdQueryHandler : BaseHandler, IRequestHandler<GetPle
         var query = PlexTvShowsQueryable;
 
         if (request.IncludePlexLibrary)
-        {
             query = query.IncludePlexLibrary();
-        }
 
         if (request.IncludePlexServer)
-        {
             query = query.IncludePlexServer();
-        }
 
         var plexTvShow = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         if (plexTvShow == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexTvShow), request.Id);
-        }
 
         return Result.Ok(plexTvShow);
     }

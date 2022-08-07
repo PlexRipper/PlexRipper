@@ -1,7 +1,6 @@
 ﻿using System.Reactive.Subjects;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
-using PlexRipper.Data;
 using PlexRipper.DownloadManager;
 
 namespace DownloadManager.UnitTests;
@@ -54,19 +53,21 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests
         using var mock = AutoMock.GetStrict();
         mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
 
-        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
-        {
-            config.Seed = 9999;
-            config.MovieDownloadTasksCount = 2;
-        });
+        await using var context = await MockDatabase.GetMemoryDbContext()
+            .Setup(config =>
+            {
+                config.Seed = 9999;
+                config.MovieDownloadTasksCount = 2;
+            });
         var downloadTasks = await context.DownloadTasks.ToListAsync();
         downloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
         var downloadTaskIds = downloadTasks.Select(x => x.Id).ToList();
 
         mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>).ReturnsAsync(Result.Ok(downloadTasks.First()));
         mock.SetupMediator(It.IsAny<UpdateDownloadStatusOfDownloadTaskCommand>).ReturnsAsync(Result.Ok());
-        mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>).ReturnsAsync((GetDownloadTaskByIdQuery x, CancellationToken _) =>
-            Result.Ok(downloadTasks.FirstOrDefault(y => y.Id == x.Id)));
+        mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>)
+            .ReturnsAsync((GetDownloadTaskByIdQuery x, CancellationToken _) =>
+                Result.Ok(downloadTasks.FirstOrDefault(y => y.Id == x.Id)));
 
         mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result>())).ReturnsAsync(Result.Ok());
         mock.Mock<IDownloadTracker>().Setup(x => x.StopDownloadClient(It.IsAny<int>())).ReturnsAsync(Result.Ok());
@@ -80,9 +81,10 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeSubsetOf(downloadTaskIds);
 
-        mock.Mock<IMediator>().Verify(
-            x => x.Send(
-                It.IsAny<UpdateDownloadStatusOfDownloadTaskCommand>(),
-                It.IsAny<CancellationToken>()), Times.Once);
+        mock.Mock<IMediator>()
+            .Verify(
+                x => x.Send(
+                    It.IsAny<UpdateDownloadStatusOfDownloadTaskCommand>(),
+                    It.IsAny<CancellationToken>()), Times.Once);
     }
 }

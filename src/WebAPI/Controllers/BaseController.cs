@@ -27,7 +27,7 @@ public abstract class BaseController : ControllerBase
     [NonAction]
     protected IActionResult InternalServerError(Exception e)
     {
-        string msg = $"Internal server error: {e.Message}";
+        var msg = $"Internal server error: {e.Message}";
         Log.Error(e);
         var resultDTO = _mapper.Map<ResultDTO>(Result.Fail(msg));
         return StatusCode(StatusCodes.Status500InternalServerError, resultDTO);
@@ -49,9 +49,7 @@ public abstract class BaseController : ControllerBase
         var error = new Error($"The Id: {id} was 0 or lower");
 
         if (nameOf != string.Empty)
-        {
             error = new Error($"The Id parameter \"{nameOf}\" has an invalid id of {id}");
-        }
 
         return BadRequest(Result.Fail(error));
     }
@@ -90,9 +88,7 @@ public abstract class BaseController : ControllerBase
         }
 
         if (result.IsSuccess)
-        {
             return new OkObjectResult(resultDTO);
-        }
 
         // No Status Code found
         Log.Warning($"Invalid ResultDTO had no status code assigned, defaulting to 500 error: {resultDTO}");
@@ -123,14 +119,10 @@ public abstract class BaseController : ControllerBase
 
         var failedResult = _mapper.Map<ResultDTO>(result);
         if (result.Has400BadRequestError())
-        {
             return new BadRequestObjectResult(failedResult);
-        }
 
         if (result.Has404NotFoundError())
-        {
             return new NotFoundObjectResult(failedResult);
-        }
 
         // Status Code 500
         return new ObjectResult(failedResult)
@@ -143,10 +135,8 @@ public abstract class BaseController : ControllerBase
     {
         var result = Result.Fail("Bad request error:");
 
-        foreach (KeyValuePair<string, ModelStateEntry> keyValuePair in dictionary)
-        {
+        foreach (var keyValuePair in dictionary)
             result = result.WithError(new Error($"{keyValuePair.Key} - {keyValuePair.Value.RawValue}"));
-        }
 
         var resultDTO = _mapper.Map<ResultDTO>(result);
         return new BadRequestObjectResult(resultDTO);

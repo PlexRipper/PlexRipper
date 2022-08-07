@@ -136,13 +136,13 @@ public static partial class FakeData
             .RuleFor(x => x.Seasons, f => GetPlexTvShowSeason(options).Generate(config.TvShowSeasonCount))
             .FinishWith((_, tvShow) =>
             {
-                for (int seasonIndex = 0; seasonIndex < tvShow.Seasons.Count; seasonIndex++)
+                for (var seasonIndex = 0; seasonIndex < tvShow.Seasons.Count; seasonIndex++)
                 {
                     tvShow.Seasons[seasonIndex].Title = $"{tvShow.Title} {seasonIndex + 1:D2}";
                     tvShow.Seasons[seasonIndex].ParentKey = tvShow.Key;
                     tvShow.Seasons[seasonIndex].FullTitle = $"{tvShow.Title}/{tvShow.Seasons[seasonIndex].Title}";
 
-                    for (int episodeIndex = 0; episodeIndex < tvShow.Seasons[seasonIndex].Episodes.Count; episodeIndex++)
+                    for (var episodeIndex = 0; episodeIndex < tvShow.Seasons[seasonIndex].Episodes.Count; episodeIndex++)
                     {
                         var title = tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title;
                         tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title = $"S{seasonIndex + 1:D2}E{episodeIndex + 1:D2} - {title}";
@@ -192,12 +192,8 @@ public static partial class FakeData
             .FinishWith((f, tvShowEpisode) =>
             {
                 foreach (var mediaData in tvShowEpisode.EpisodeData)
-                {
-                    foreach (var mediaDataPart in mediaData.Parts)
-                    {
-                        mediaDataPart.File = $"{tvShowEpisode.Title}";
-                    }
-                }
+                foreach (var mediaDataPart in mediaData.Parts)
+                    mediaDataPart.File = $"{tvShowEpisode.Title}";
 
                 tvShowEpisode.MediaSize = tvShowEpisode.EpisodeData.SelectMany(x => x.Parts.Select(y => y.Size)).Sum();
             });

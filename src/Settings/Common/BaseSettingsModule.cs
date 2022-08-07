@@ -1,6 +1,5 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reflection;
 using System.Text.Json;
 using PlexRipper.Application;
 
@@ -53,22 +52,20 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> w
             return jsonSettings.ToResult();
         }
 
-        TModel defaultValues = DefaultValues();
-        JsonElement rootSettingsModule = jsonSettings.Value;
-        foreach (PropertyInfo prop in typeof(TModel).GetProperties())
+        var defaultValues = DefaultValues();
+        var rootSettingsModule = jsonSettings.Value;
+        foreach (var prop in typeof(TModel).GetProperties())
         {
-            PropertyInfo targetProp = GetType().GetProperty(prop.Name);
-            Type targetPropType = targetProp.PropertyType;
+            var targetProp = GetType().GetProperty(prop.Name);
+            var targetPropType = targetProp.PropertyType;
             var targetValue = targetProp.GetValue(this, null);
 
             // Is settings value available in JSON? Else revert to default value
-            if (rootSettingsModule.TryGetProperty(prop.Name, out JsonElement jsonValueElement))
+            if (rootSettingsModule.TryGetProperty(prop.Name, out var jsonValueElement))
             {
                 var sourceValue = jsonValueElement.GetTypedValue(targetPropType);
                 if (sourceValue != targetValue)
-                {
                     targetProp.SetValue(this, sourceValue);
-                }
             }
             else
             {
@@ -77,9 +74,7 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> w
                     $"Will revert to default value now, this is normal if you just updated PlexRipper as new settings might have been added.");
                 var defaultValue = defaultValues.GetType().GetProperty(prop.Name).GetValue(defaultValues, null);
                 if (defaultValue != targetValue)
-                {
                     targetProp.SetValue(this, defaultValue);
-                }
             }
         }
 
@@ -90,11 +85,11 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> w
     {
         var hasChanged = false;
 
-        foreach (PropertyInfo prop in typeof(TModel).GetProperties())
+        foreach (var prop in typeof(TModel).GetProperties())
         {
-            PropertyInfo sourceProp = sourceSettings.GetType().GetProperty(prop.Name);
+            var sourceProp = sourceSettings.GetType().GetProperty(prop.Name);
             var sourceValue = sourceProp.GetValue(sourceSettings, null);
-            PropertyInfo targetProp = GetType().GetProperty(prop.Name);
+            var targetProp = GetType().GetProperty(prop.Name);
             var targetValue = targetProp.GetValue(this, null);
             if (sourceValue != targetValue)
             {
@@ -104,9 +99,7 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> w
         }
 
         if (hasChanged)
-        {
             EmitModuleHasChanged(GetValues());
-        }
 
         return GetValues();
     }
@@ -122,10 +115,8 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> w
 
     protected Result<JsonElement> GetJsonSettingsModule(JsonElement jsonElement)
     {
-        if (jsonElement.TryGetProperty(Name, out JsonElement rootSettingsModule))
-        {
+        if (jsonElement.TryGetProperty(Name, out var rootSettingsModule))
             return Result.Ok(rootSettingsModule);
-        }
 
         return Result.Fail($"Could not find settings module {Name} in config file").LogError();
     }

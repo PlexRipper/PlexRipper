@@ -22,14 +22,10 @@ public class GetPlexTvShowSeasonByIdQueryHandler : BaseHandler, IRequestHandler<
         var query = PlexTvShowSeasonsQueryable;
 
         if (request.IncludeLibrary)
-        {
             query = query.IncludePlexLibrary();
-        }
 
         if (request.IncludeServer)
-        {
             query = query.IncludePlexServer();
-        }
 
         var plexTvShowSeason = await query
             .Include(x => x.TvShow)
@@ -37,9 +33,7 @@ public class GetPlexTvShowSeasonByIdQueryHandler : BaseHandler, IRequestHandler<
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexTvShowSeason == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexTvShowSeason), request.Id);
-        }
 
         return Result.Ok(plexTvShowSeason);
     }

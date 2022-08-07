@@ -29,9 +29,7 @@ public class NotificationController : BaseController
     public async Task<IActionResult> HideNotification(int id)
     {
         if (id <= 0)
-        {
             return BadRequestInvalidId();
-        }
 
         return ToActionResult<List<Notification>, List<NotificationDTO>>(await _notificationsService.HideNotification(id));
     }

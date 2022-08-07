@@ -36,9 +36,7 @@ public class PlexServerController : BaseController
     public async Task<IActionResult> GetById(int id)
     {
         if (id <= 0)
-        {
             return BadRequestInvalidId();
-        }
 
         return ToActionResult<PlexServer, PlexServerDTO>(await _plexServerService.GetServerAsync(id));
     }
@@ -51,9 +49,7 @@ public class PlexServerController : BaseController
     public async Task<IActionResult> CheckStatus(int id, [FromQuery] int plexAccountId = 0)
     {
         if (id <= 0)
-        {
             return BadRequestInvalidId();
-        }
 
         return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(await _plexServerService.CheckPlexServerStatusAsync(id, plexAccountId));
     }

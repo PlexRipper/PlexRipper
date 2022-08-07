@@ -19,24 +19,18 @@ public class GetPlexTvShowByIdWithEpisodesQueryHandler : BaseHandler, IRequestHa
 
     public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdWithEpisodesQuery request, CancellationToken cancellationToken)
     {
-        IQueryable<PlexTvShow> query = PlexTvShowsQueryable.IncludeEpisodes();
+        var query = PlexTvShowsQueryable.IncludeEpisodes();
 
         if (request.IncludeLibrary)
-        {
             query = query.IncludePlexLibrary();
-        }
 
         if (request.IncludePlexServer)
-        {
             query = query.IncludePlexServer();
-        }
 
         var plexTvShow = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexTvShow == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexTvShow), request.Id);
-        }
 
         plexTvShow.Seasons = plexTvShow.Seasons.OrderBy(x => x.Title).ToList();
 

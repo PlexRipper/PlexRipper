@@ -75,10 +75,8 @@ public static partial class ResultExtensions
 
             if (success.Metadata.Any())
             {
-                foreach (KeyValuePair<string, object> entry in success.Metadata)
-                {
+                foreach (var entry in success.Metadata)
                     LogByType(logLevel, $"{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-                }
             }
         }
 
@@ -88,10 +86,8 @@ public static partial class ResultExtensions
 
             if (error.Metadata.Any())
             {
-                foreach (KeyValuePair<string, object> entry in error.Metadata)
-                {
+                foreach (var entry in error.Metadata)
                     LogByType(logLevel, $"{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-                }
             }
 
             foreach (var errorReason in error.Reasons)
@@ -99,10 +95,8 @@ public static partial class ResultExtensions
                 LogByType(logLevel, "--" + errorReason.Message, null, memberName, sourceFilePath);
                 if (errorReason.Metadata.Any())
                 {
-                    foreach (KeyValuePair<string, object> entry in errorReason.Metadata)
-                    {
+                    foreach (var entry in errorReason.Metadata)
                         LogByType(logLevel, $"--{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-                    }
                 }
 
                 foreach (var childErrorReason in errorReason.Reasons)
@@ -110,10 +104,8 @@ public static partial class ResultExtensions
                     LogByType(logLevel, "----" + childErrorReason.Message, null, memberName, sourceFilePath);
                     if (childErrorReason.Metadata.Any())
                     {
-                        foreach (KeyValuePair<string, object> entry in childErrorReason.Metadata)
-                        {
+                        foreach (var entry in childErrorReason.Metadata)
                             LogByType(logLevel, $"----MetaData: {entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-                        }
                     }
                 }
             }
@@ -131,18 +123,14 @@ public static partial class ResultExtensions
                     {
                         exception = exception.InnerException.InnerException;
                         if (exception is not null)
-                        {
                             LogByType(logLevel, $"-------{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
-                        }
                     }
                 }
             }
         }
 
         if (e != null)
-        {
             LogByType(logLevel, string.Empty, e, memberName, sourceFilePath);
-        }
     }
 
     #endregion

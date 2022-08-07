@@ -14,9 +14,7 @@ public static class ListDownloadTaskExtensions
                 downloadTask.PlexLibraryId = plexLibraryId;
                 downloadTask.PlexServerId = plexServerId;
                 if (downloadTask.Children is not null && downloadTask.Children.Any())
-                {
                     SetIdsOnDownloadTasks(downloadTask.Children);
-                }
             }
 
             return childDownloadTasks;
@@ -31,9 +29,7 @@ public static class ListDownloadTaskExtensions
         {
             downloadTask.DownloadStatus = DownloadStatus.Completed;
             if (downloadTask.Children is not null && downloadTask.Children.Any())
-            {
                 downloadTask.Children = SetToCompleted(downloadTask.Children);
-            }
         }
 
         return downloadTasks;
@@ -45,9 +41,7 @@ public static class ListDownloadTaskExtensions
         {
             downloadTask.DownloadStatus = DownloadStatus.Completed;
             if (downloadTask.Children is not null && downloadTask.Children.Any())
-            {
                 downloadTask.Children = SetToDownloading(downloadTask.Children);
-            }
         }
 
         return downloadTasks;

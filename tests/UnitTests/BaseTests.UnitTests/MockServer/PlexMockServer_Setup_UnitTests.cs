@@ -11,10 +11,7 @@ public class PlexMockServer_Setup_UnitTests
     public async Task ShouldDownloadFileFromMemory_WhenGivenByteArrayFileInMemory()
     {
         // Arrange
-        var plexMockServer = new PlexMockServer(config =>
-        {
-            config.DownloadFileSizeInMb = 40;
-        });
+        var plexMockServer = new PlexMockServer(config => config.DownloadFileSizeInMb = 40);
         var _httpClient = new HttpClient();
 
         // Act

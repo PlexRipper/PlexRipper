@@ -16,11 +16,12 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler_UnitTests
     public async Task ShouldAllBeQueuedDownloadTasks_WhenAllChildrenAreQueuedStatus()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true).Setup(config =>
-        {
-            config.Seed = 9679;
-            config.TvShowDownloadTasksCount = 1;
-        });
+        await using var context = await MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true)
+            .Setup(config =>
+            {
+                config.Seed = 9679;
+                config.TvShowDownloadTasksCount = 1;
+            });
         var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().IncludeByRoot().ToListAsync();
         var request = new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTasks.First().Id);
         var handler = new UpdateRootDownloadStatusOfDownloadTaskCommandHandler(context);
@@ -40,19 +41,16 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler_UnitTests
     public async Task ShouldAllBeCompletedDownloadTasks_WhenOnlyAllChildrenAreCompletedStatus()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true).Setup(config =>
-        {
-            config.Seed = 9999;
-            config.TvShowDownloadTasksCount = 1;
-        });
+        await using var context = await MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true)
+            .Setup(config =>
+            {
+                config.Seed = 9999;
+                config.TvShowDownloadTasksCount = 1;
+            });
         var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().IncludeByRoot().ToListAsync();
         foreach (var seasonDownloadTask in downloadTasks[0].Children)
-        {
-            foreach (var episodeDownloadTask in seasonDownloadTask.Children)
-            {
-                episodeDownloadTask.Children = episodeDownloadTask.Children.SetToCompleted();
-            }
-        }
+        foreach (var episodeDownloadTask in seasonDownloadTask.Children)
+            episodeDownloadTask.Children = episodeDownloadTask.Children.SetToCompleted();
 
         var request = new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTasks.First().Id);
         var handler = new UpdateRootDownloadStatusOfDownloadTaskCommandHandler(context);
@@ -72,11 +70,12 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler_UnitTests
     public async Task ShouldBeInErrorStatus_WhenOneChildHasErrorStatus()
     {
         // Arrange
-        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true).Setup(config =>
-        {
-            config.Seed = 9999;
-            config.TvShowDownloadTasksCount = 1;
-        });
+        await using var context = await MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true)
+            .Setup(config =>
+            {
+                config.Seed = 9999;
+                config.TvShowDownloadTasksCount = 1;
+            });
         var downloadTasks = await context.DownloadTasks.IncludeDownloadTasks().IncludeByRoot().ToListAsync();
         downloadTasks[0].Children[0].Children[0].Children[0].DownloadStatus = DownloadStatus.Error;
 

@@ -17,9 +17,7 @@ public class GetAllDownloadTasksInPlexServersQueryHandler : BaseHandler,
         var query = PlexServerQueryable.AsTracking().IncludeDownloadTasks();
 
         if (request.IncludeServerStatus)
-        {
             query = query.Include(x => x.ServerStatus);
-        }
 
         var serverList = await query
             .Where(x => x.PlexLibraries.Any(y => y.DownloadTasks.Any()))

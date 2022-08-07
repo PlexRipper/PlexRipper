@@ -26,9 +26,7 @@ public class UpdateFolderPathCommandHandler : BaseHandler, IRequestHandler<Updat
         var folderPath = await _dbContext.FolderPaths.AsTracking().FirstOrDefaultAsync(x => x.Id == command.FolderPath.Id, cancellationToken);
 
         if (folderPath == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(FolderPath), command.FolderPath.Id);
-        }
 
         _dbContext.Entry(folderPath).CurrentValues.SetValues(command.FolderPath);
         await _dbContext.SaveChangesAsync(cancellationToken);

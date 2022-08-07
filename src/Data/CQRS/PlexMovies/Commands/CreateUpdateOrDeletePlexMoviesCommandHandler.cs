@@ -16,10 +16,7 @@ public class CreateUpdateOrDeletePlexMoviesValidator : AbstractValidator<CreateU
         RuleFor(x => x.PlexLibrary.Title).NotEmpty();
         RuleFor(x => x.PlexLibrary.Movies).NotEmpty();
 
-        RuleForEach(x => x.PlexLibrary.Movies).ChildRules(plexMovie =>
-        {
-            plexMovie.RuleFor(x => x.Key).GreaterThan(0);
-        });
+        RuleForEach(x => x.PlexLibrary.Movies).ChildRules(plexMovie => { plexMovie.RuleFor(x => x.Key).GreaterThan(0); });
     }
 }
 
@@ -54,7 +51,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandle
             return Result.Ok(true);
         }
 
-        Dictionary<int, PlexMovie> plexMoviesDbDict = new Dictionary<int, PlexMovie>();
+        var plexMoviesDbDict = new Dictionary<int, PlexMovie>();
         plexMoviesInDb.ForEach(x => plexMoviesDbDict.Add(x.Key, x));
 
         // Create dictionaries on how to update the database.
@@ -69,9 +66,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandle
             var plexMovieDb = plexMoviesDbDict[keyValuePair.Key];
             keyValuePair.Value.Id = plexMovieDb.Id;
             if (keyValuePair.Value.UpdatedAt <= plexMovieDb.UpdatedAt)
-            {
                 updateDict.Remove(keyValuePair.Key);
-            }
         }
 
         // Update database
@@ -89,9 +84,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandle
     private void BulkInsert(List<PlexMovie> plexMovies)
     {
         if (!plexMovies.Any())
-        {
             return;
-        }
 
         _dbContext.BulkInsert(plexMovies, _bulkConfig);
     }
@@ -99,9 +92,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandle
     private void BulkUpdate(List<PlexMovie> plexMovies)
     {
         if (!plexMovies.Any())
-        {
             return;
-        }
 
         _dbContext.BulkUpdate(plexMovies);
     }

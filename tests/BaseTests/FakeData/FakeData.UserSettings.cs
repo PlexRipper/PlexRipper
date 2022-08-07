@@ -32,7 +32,7 @@ public static partial class FakeData
 
     public static string GetSettingsModelJson([CanBeNull] Action<UnitTestDataConfig> options = null)
     {
-        SettingsModel settings = GetSettingsModel(options).Generate();
+        var settings = GetSettingsModel(options).Generate();
         return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCaptialized);
     }
 

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
@@ -30,9 +30,7 @@ public class GetPlexServerByPlexTvShowEpisodeIdQueryHandler : BaseHandler,
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexTvShowEpisode == null)
-        {
             return ResultExtensions.Create404NotFoundResult();
-        }
 
         var plexServer = plexTvShowEpisode?.TvShowSeason?.TvShow?.PlexLibrary?.PlexServer;
         if (plexServer == null)

@@ -22,14 +22,10 @@ public class GetMultiplePlexMoviesByIdsQueryHandlerHandler : BaseHandler, IReque
         var query = PlexMoviesQueryable;
 
         if (request.IncludeLibrary)
-        {
             query = query.IncludePlexLibrary();
-        }
 
-        if ( request.IncludeServer)
-        {
+        if (request.IncludeServer)
             query = query.IncludePlexServer();
-        }
 
         var plexMovies = await query.Where(x => request.Ids.Contains(x.Id)).ToListAsync(cancellationToken);
 

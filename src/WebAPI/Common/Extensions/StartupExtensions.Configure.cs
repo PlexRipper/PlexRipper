@@ -39,10 +39,6 @@ public static partial class StartupExtensions
 
         app.UseAuthorization();
 
-
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
-        });
+        app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
 }

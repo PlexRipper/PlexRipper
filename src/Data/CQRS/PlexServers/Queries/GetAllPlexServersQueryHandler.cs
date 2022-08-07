@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
@@ -20,9 +20,7 @@ public class GetAllPlexServersQueryHandler : BaseHandler,
             var query = PlexServerQueryable.Include(x => x.ServerStatus).AsQueryable();
 
             if (request.IncludeLibraries)
-            {
                 query = query.Include(x => x.PlexLibraries);
-            }
 
             var plexServers = await query.ToListAsync(cancellationToken);
 
@@ -32,12 +30,11 @@ public class GetAllPlexServersQueryHandler : BaseHandler,
         else
         {
             var query = _dbContext.PlexAccountServers
-                .Include(x => x.PlexServer).AsQueryable();
+                .Include(x => x.PlexServer)
+                .AsQueryable();
 
             if (request.IncludeLibraries)
-            {
                 query = query.Include(x => x.PlexServer).ThenInclude(x => x.PlexLibraries);
-            }
 
             var plexServers = await query.Where(x => x.PlexAccountId == request.PlexAccountId)
                 .ToListAsync();

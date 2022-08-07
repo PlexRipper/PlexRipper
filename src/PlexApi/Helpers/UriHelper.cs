@@ -20,8 +20,8 @@ public static class UriHelper
         {
             UriBuilder uri;
 
-            int port = int.Parse(server.Port);
-            bool ssl = string.Equals(server.Scheme, Https, StringComparison.OrdinalIgnoreCase);
+            var port = int.Parse(server.Port);
+            var ssl = string.Equals(server.Scheme, Https, StringComparison.OrdinalIgnoreCase);
 
             if (val.StartsWith("http://", StringComparison.Ordinal))
             {
@@ -36,13 +36,9 @@ public static class UriHelper
                     : new UriBuilder(Https, split[2], port);
             }
             else if (ssl)
-            {
                 uri = new UriBuilder(Https, val, port);
-            }
             else
-            {
                 uri = new UriBuilder(Http, val, port);
-            }
 
             return uri.Uri;
         }

@@ -2,7 +2,6 @@
 using System.Reactive.Subjects;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
-using PlexRipper.Data;
 using PlexRipper.DownloadManager;
 using PlexRipper.DownloadManager.DownloadClient;
 
@@ -45,13 +44,15 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
     public async Task ShouldSendDownloadTaskUpdate_WhenDownloadTaskWorkerHasAnUpdate()
     {
         //Arrange
-        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.MovieDownloadTasksCount = 1; });
+        await using var context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.MovieDownloadTasksCount = 1; });
 
         mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);
         mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<int>())).Returns(4000);
-        mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimitObservable(It.IsAny<int>()))
+        mock.Mock<IServerSettingsModule>()
+            .Setup(x => x.GetDownloadSpeedLimitObservable(It.IsAny<int>()))
             .Returns(new Subject<int>().AsObservable());
-        mock.Mock<IDownloadFileStream>().Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
+        mock.Mock<IDownloadFileStream>()
+            .Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
             .Returns(Result.Fail("Error"));
 
         var downloadTask = context.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);

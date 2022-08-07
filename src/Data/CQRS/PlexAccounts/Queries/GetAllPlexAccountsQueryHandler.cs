@@ -11,7 +11,8 @@ public class GetAllPlexAccountsQueryHandler : BaseHandler, IRequestHandler<GetAl
 {
     public GetAllPlexAccountsQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Result<List<PlexAccount>>> Handle(GetAllPlexAccountsQuery request,
+    public async Task<Result<List<PlexAccount>>> Handle(
+        GetAllPlexAccountsQuery request,
         CancellationToken cancellationToken)
     {
         var query = _dbContext.PlexAccounts.AsQueryable();
@@ -34,18 +35,12 @@ public class GetAllPlexAccountsQueryHandler : BaseHandler, IRequestHandler<GetAl
 
         List<PlexAccount> plexAccounts;
         if (request.OnlyEnabled)
-        {
             plexAccounts = await query.Where(x => x.IsEnabled).ToListAsync(cancellationToken);
-        }
         else
-        {
             plexAccounts = await query.ToListAsync(cancellationToken);
-        }
 
         if (!request.IncludePlexServers && !request.IncludePlexLibraries)
-        {
             return Result.Ok(plexAccounts);
-        }
 
         // Remove any PlexLibraries the plexAccount has no access to
         // TODO This might be improved further since now all PlexLibraries will be retrieved from the database.
@@ -53,22 +48,17 @@ public class GetAllPlexAccountsQueryHandler : BaseHandler, IRequestHandler<GetAl
         {
             var plexServers = plexAccount.PlexAccountServers.Select(x => x.PlexServer).ToList();
             foreach (var plexServer in plexServers)
-            {
+
                 // Remove inaccessible PlexLibraries
-                for (int i = plexServer.PlexLibraries.Count - 1; i >= 0; i--)
+                for (var i = plexServer.PlexLibraries.Count - 1; i >= 0; i--)
                 {
                     if (!plexServer.PlexLibraries.Any())
-                    {
                         continue;
-                    }
 
                     var x = plexServer.PlexLibraries[i].PlexAccountLibraries.Select(y => y.PlexAccountId).ToList();
                     if (!x.Contains(plexAccount.Id))
-                    {
                         plexServer.PlexLibraries.RemoveAt(i);
-                    }
                 }
-            }
         }
 
         return Result.Ok(plexAccounts);

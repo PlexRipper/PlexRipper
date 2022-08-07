@@ -117,7 +117,7 @@ public class PlexServer : BaseEntity
                 PlexServer = this,
                 StatusMessage = "Not checked yet",
                 PlexServerId = Id,
-                StatusCode = 0
+                StatusCode = 0,
             };
         }
     }

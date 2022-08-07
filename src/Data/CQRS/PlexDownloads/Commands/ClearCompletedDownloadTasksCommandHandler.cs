@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
@@ -17,7 +17,9 @@ public class ClearCompletedDownloadTasksHandler : BaseHandler,
     {
         if (command.DownloadTaskIds != null && command.DownloadTaskIds.Any())
         {
-            var downloadTasks = await _dbContext.DownloadTasks.Where(x => command.DownloadTaskIds.Contains(x.Id) && x.DownloadStatus == DownloadStatus.Completed).ToListAsync();
+            var downloadTasks = await _dbContext.DownloadTasks
+                .Where(x => command.DownloadTaskIds.Contains(x.Id) && x.DownloadStatus == DownloadStatus.Completed)
+                .ToListAsync();
             _dbContext.DownloadTasks.RemoveRange(downloadTasks);
         }
         else

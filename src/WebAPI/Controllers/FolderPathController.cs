@@ -16,7 +16,10 @@ public class FolderPathController : BaseController
 
     private readonly IFileSystem _fileSystem;
 
-    public FolderPathController(IFolderPathService folderPathService, IFileSystem fileSystem, IMapper mapper,
+    public FolderPathController(
+        IFolderPathService folderPathService,
+        IFileSystem fileSystem,
+        IMapper mapper,
         INotificationsService notificationsService) : base(mapper, notificationsService)
     {
         _folderPathService = folderPathService;
@@ -66,9 +69,7 @@ public class FolderPathController : BaseController
     public async Task<IActionResult> Delete(int id)
     {
         if (id <= 0)
-        {
             return BadRequestInvalidId();
-        }
 
         return ToActionResult(await _folderPathService.DeleteFolderPathAsync(id));
     }

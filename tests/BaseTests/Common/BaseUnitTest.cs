@@ -10,9 +10,7 @@ public class BaseUnitTest<TUnitTestClass> : IDisposable where TUnitTestClass : c
     {
         Log.SetupTestLogging(output);
         if (!disableMockCreate)
-        {
             _sut = mock.Create<TUnitTestClass>();
-        }
     }
 
     public void Dispose()

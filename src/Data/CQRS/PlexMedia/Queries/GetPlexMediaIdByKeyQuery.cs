@@ -34,9 +34,7 @@ public class GetPlexMediaByDownloadTaskQueryHandler : BaseHandler, IRequestHandl
                 var entity = await _dbContext.PlexMovies
                     .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
                 if (entity is not null)
-                {
                     return Result.Ok(entity.Id);
-                }
 
                 break;
             }
@@ -45,9 +43,7 @@ public class GetPlexMediaByDownloadTaskQueryHandler : BaseHandler, IRequestHandl
                 var entity = await _dbContext.PlexTvShows
                     .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
                 if (entity is not null)
-                {
                     return Result.Ok(entity.Id);
-                }
 
                 break;
             }
@@ -56,9 +52,7 @@ public class GetPlexMediaByDownloadTaskQueryHandler : BaseHandler, IRequestHandl
                 var entity = await _dbContext.PlexTvShowSeason
                     .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
                 if (entity is not null)
-                {
                     return Result.Ok(entity.Id);
-                }
 
                 break;
             }
@@ -67,9 +61,7 @@ public class GetPlexMediaByDownloadTaskQueryHandler : BaseHandler, IRequestHandl
                 var entity = await _dbContext.PlexTvShowEpisodes
                     .FirstOrDefaultAsync(x => x.Key == key && x.PlexServerId == plexServerId, cancellationToken);
                 if (entity is not null)
-                {
                     return Result.Ok(entity.Id);
-                }
 
                 break;
             }

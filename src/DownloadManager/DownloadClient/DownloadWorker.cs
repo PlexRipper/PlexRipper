@@ -69,10 +69,9 @@ public class DownloadWorker
     /// </summary>
     public DownloadWorkerTask DownloadWorkerTask { get; }
 
-    public IObservable<DownloadWorkerTask> DownloadWorkerTaskUpdate =>
-        _downloadWorkerUpdate
-            .Sample(TimeSpan.FromMilliseconds(100))
-            .AsObservable();
+    public IObservable<DownloadWorkerTask> DownloadWorkerTaskUpdate => _downloadWorkerUpdate
+        .Sample(TimeSpan.FromMilliseconds(100))
+        .AsObservable();
 
     public string FileName => DownloadWorkerTask.FileName;
 
@@ -121,9 +120,7 @@ public class DownloadWorker
 
         // Wait for it to gracefully end.
         if (DownloadProcessTask is not null)
-        {
             await DownloadProcessTask;
-        }
 
         _timer.Stop();
         SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
@@ -141,9 +138,7 @@ public class DownloadWorker
 
         // Wait for it to gracefully end.
         if (DownloadProcessTask is not null)
-        {
             await DownloadProcessTask;
-        }
 
         _timer.Stop();
         SetDownloadWorkerTaskChanged(DownloadStatus.Paused);
@@ -168,9 +163,7 @@ public class DownloadWorker
     private async Task<Result> DownloadProcessAsync(Stream destinationStream)
     {
         if (destinationStream is null)
-        {
             return ResultExtensions.IsNull(nameof(destinationStream)).LogWarning();
-        }
 
         try
         {
@@ -190,23 +183,21 @@ public class DownloadWorker
                 },
             }, HttpCompletionOption.ResponseHeadersRead);
 
-            await using Stream responseStream = await response.Content.ReadAsStreamAsync();
+            await using var responseStream = await response.Content.ReadAsStreamAsync();
 
             // Throttle the stream to enable download speed limiting
             var throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
 
-            byte[] buffer = new byte[4096];
+            var buffer = new byte[4096];
 
             _timer.Start();
 
             while (_isDownloading)
             {
                 throttledStream.SetThrottleSpeed(_downloadSpeedLimit);
-                int bytesRead = await throttledStream.ReadAsync(buffer, 0, buffer.Length, _cancellationToken.Token);
+                var bytesRead = await throttledStream.ReadAsync(buffer, 0, buffer.Length, _cancellationToken.Token);
                 if (bytesRead > 0)
-                {
                     bytesRead = (int)Math.Min(DownloadWorkerTask.DataRemaining, bytesRead);
-                }
 
                 if (bytesRead <= 0)
                 {
@@ -240,9 +231,7 @@ public class DownloadWorker
     private void SendDownloadWorkerError(Result errorResult)
     {
         if (errorResult.Errors.Any() && !errorResult.Errors[0].Metadata.ContainsKey(nameof(DownloadWorker) + "Id"))
-        {
             errorResult.Errors[0].Metadata.Add(nameof(DownloadWorker) + "Id", Id);
-        }
 
         Log.Error($"Download worker {Id} with {FileName} had an error!");
         DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
@@ -270,9 +259,7 @@ public class DownloadWorker
     private void SetDownloadWorkerTaskChanged(DownloadStatus status)
     {
         if (DownloadWorkerTask.DownloadStatus == status)
-        {
             return;
-        }
 
         var log = $"Download worker {Id} with {FileName} changed status to {status}";
         Log.Debug(log);

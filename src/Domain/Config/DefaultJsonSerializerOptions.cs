@@ -10,21 +10,21 @@ public static class DefaultJsonSerializerOptions
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters = { new JsonStringEnumConverter() },
-        IgnoreNullValues = true
+        IgnoreNullValues = true,
     };
 
     public static JsonSerializerOptions ConfigCaptialized { get; } = new()
     {
         PropertyNameCaseInsensitive = true,
         Converters = { new JsonStringEnumConverter() },
-        IgnoreNullValues = true
+        IgnoreNullValues = true,
     };
 
     public static JsonSerializerOptions ConfigIndented { get; } = new()
     {
         PropertyNameCaseInsensitive = true,
         Converters = { new JsonStringEnumConverter() },
-        WriteIndented = true
+        WriteIndented = true,
     };
 
     public static JsonSerializerOptions ConfigManagerOptions => ConfigIndented;

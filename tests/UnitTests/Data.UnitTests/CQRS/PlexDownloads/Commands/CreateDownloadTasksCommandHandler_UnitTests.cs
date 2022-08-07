@@ -74,9 +74,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests
             {
                 downloadTask.RootDownloadTaskId.ShouldBe(1);
                 if (downloadTask.Children.Any())
-                {
                     HasRootDownloadTaskId(downloadTask.Children);
-                }
             }
         }
 

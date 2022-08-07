@@ -118,9 +118,7 @@ public class DownloadTracker : IDownloadTracker
 
             var startResult = downloadClient.Start();
             if (startResult.IsFailed)
-            {
                 await _notificationsService.SendResult(startResult);
-            }
 
             _downloadTaskStart.OnNext(downloadClient.DownloadTask);
         }
@@ -130,9 +128,7 @@ public class DownloadTracker : IDownloadTracker
     {
         var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true), cancellationToken);
         if (downloadTaskResult.IsFailed)
-        {
             return downloadTaskResult.ToResult().LogError();
-        }
 
         Log.Debug($"Creating Download client for {downloadTaskResult.Value.FullTitle}");
 
@@ -142,23 +138,17 @@ public class DownloadTracker : IDownloadTracker
         {
             var downloadWorkerTasksResult = _downloadTaskFactory.GenerateDownloadWorkerTasks(downloadTask);
             if (downloadWorkerTasksResult.IsFailed)
-            {
                 return downloadWorkerTasksResult.ToResult();
-            }
 
             downloadTask.DownloadWorkerTasks = downloadWorkerTasksResult.Value;
 
             var addResult = await _mediator.Send(new AddDownloadWorkerTasksCommand(downloadWorkerTasksResult.Value), cancellationToken);
             if (addResult.IsFailed)
-            {
                 return addResult.ToResult();
-            }
 
             var getResult = await _mediator.Send(new GetAllDownloadWorkerTasksByDownloadTaskIdQuery(downloadTask.Id), cancellationToken);
             if (getResult.IsFailed)
-            {
                 return getResult.ToResult();
-            }
 
             downloadTask.DownloadWorkerTasks = getResult.Value;
             Log.Debug($"Generated DownloadWorkerTasks for {downloadTask.FullTitle}");
@@ -167,9 +157,7 @@ public class DownloadTracker : IDownloadTracker
         // Create download client
         var newClient = _plexDownloadClientFactory().Setup(downloadTask);
         if (newClient.IsFailed)
-        {
             return newClient.ToResult().LogError();
-        }
 
         SetupSubscriptions(newClient.Value);
         _downloadClientList.Add(newClient.Value);
@@ -215,9 +203,7 @@ public class DownloadTracker : IDownloadTracker
     public async Task<Result> StartDownloadClient(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
-        {
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId);
-        }
 
         await _startQueue.Writer.WriteAsync(downloadTaskId);
         return Result.Ok();
@@ -226,22 +212,16 @@ public class DownloadTracker : IDownloadTracker
     public async Task<Result> StopDownloadClient(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
-        {
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
-        }
 
         Log.Information($"Stopping DownloadClient for DownloadTaskId {downloadTaskId}");
         var downloadClient = GetDownloadClient(downloadTaskId);
         if (downloadClient is null)
-        {
             return Result.Fail($"Could not find an active DownloadClient for DownloadTaskId {downloadTaskId}");
-        }
 
         var stopResult = await downloadClient.StopAsync();
         if (stopResult.IsFailed)
-        {
             return stopResult.ToResult();
-        }
 
         _downloadTaskStopped.OnNext(downloadClient.DownloadTask);
         DeleteDownloadClient(downloadTaskId);
@@ -251,21 +231,15 @@ public class DownloadTracker : IDownloadTracker
     public async Task<Result> PauseDownloadClient(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
-        {
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
-        }
 
         var downloadClient = GetDownloadClient(downloadTaskId);
         if (downloadClient is null)
-        {
             return Result.Fail($"Could not find an active DownloadClient for DownloadTaskId {downloadTaskId}");
-        }
 
         var pauseResult = await downloadClient.PauseAsync();
         if (pauseResult.IsFailed)
-        {
             return pauseResult.ToResult();
-        }
 
         _downloadTaskUpdate.OnNext(downloadClient.DownloadTask);
         DeleteDownloadClient(downloadTaskId);
@@ -285,9 +259,7 @@ public class DownloadTracker : IDownloadTracker
     {
         var downloadClient = GetDownloadClient(downloadTaskId);
         if (downloadClient is null)
-        {
             return Result.Fail($"Could not find an active DownloadClient for DownloadTaskId {downloadTaskId}");
-        }
 
         return Result.Ok(downloadClient.DownloadProcessTask);
     }
@@ -315,9 +287,7 @@ public class DownloadTracker : IDownloadTracker
         Log.Debug(downloadTask.ToString());
         var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { downloadTask }), _tokenSource.Token);
         if (updateResult.IsFailed)
-        {
             updateResult.LogError();
-        }
 
         _downloadTaskUpdate.OnNext(downloadTask);
 
@@ -337,9 +307,7 @@ public class DownloadTracker : IDownloadTracker
             var result = await _mediator.Send(new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTask.RootDownloadTaskId ?? 0),
                 _tokenSource.Token);
             if (result.IsFailed)
-            {
                 result.LogError();
-            }
         }
     }
 
@@ -350,9 +318,7 @@ public class DownloadTracker : IDownloadTracker
         foreach (var client in _downloadClientList)
         {
             if (client.DownloadStatus is DownloadStatus.Downloading)
-            {
                 await client.PauseAsync();
-            }
 
             client.Dispose();
         }

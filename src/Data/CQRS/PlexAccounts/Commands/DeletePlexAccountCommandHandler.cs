@@ -22,9 +22,7 @@ public class DeletePlexAccountHandler : BaseHandler, IRequestHandler<DeletePlexA
         var plexAccount = await _dbContext.PlexAccounts.AsTracking().FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
 
         if (plexAccount == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), command.Id);
-        }
 
         _dbContext.PlexAccounts.Remove(plexAccount);
         await _dbContext.SaveChangesAsync(cancellationToken);

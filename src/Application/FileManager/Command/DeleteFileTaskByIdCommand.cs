@@ -1,6 +1,6 @@
 ﻿namespace PlexRipper.Application.FileManager.Command;
 
-public class DeleteFileTaskByIdCommand: IRequest<Result>
+public class DeleteFileTaskByIdCommand : IRequest<Result>
 {
     public int Id { get; }
 

@@ -34,9 +34,7 @@ public static class RestSharpExtensions
                 });
 
             if (policyResult.Outcome == OutcomeType.Successful)
-            {
                 return Result.Ok(policyResult.Result as RestResponse<T>);
-            }
 
             return Result.Ok(policyResult.FinalHandledResult as RestResponse<T>);
         }

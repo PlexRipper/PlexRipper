@@ -21,8 +21,12 @@ public class FileSystem : IFileSystem
 
     #region Constructor
 
-    public FileSystem(IPathProvider pathProvider, System.IO.Abstractions.IFileSystem abstractedFileSystem, IDiskProvider diskProvider,
-        IDiskSystem diskSystem, IDirectorySystem directorySystem)
+    public FileSystem(
+        IPathProvider pathProvider,
+        System.IO.Abstractions.IFileSystem abstractedFileSystem,
+        IDiskProvider diskProvider,
+        IDiskSystem diskSystem,
+        IDirectorySystem directorySystem)
     {
         _pathProvider = pathProvider;
         _abstractedFileSystem = abstractedFileSystem;
@@ -67,9 +71,7 @@ public class FileSystem : IFileSystem
     public Result<string> FileReadAllText(string path)
     {
         if (string.IsNullOrEmpty(path))
-        {
             return Result.Fail($"path is empty: \"{path}\"");
-        }
 
         try
         {
@@ -85,9 +87,7 @@ public class FileSystem : IFileSystem
     public Result FileWriteAllText(string path, string text)
     {
         if (string.IsNullOrEmpty(path))
-        {
             return Result.Fail($"path is empty: \"{path}\"");
-        }
 
         try
         {
@@ -130,17 +130,13 @@ public class FileSystem : IFileSystem
         }
 
         if (allowFoldersWithoutTrailingSlashes)
-        {
             return Result.Ok(GetResult(query, includeFiles));
-        }
 
         var lastSeparatorIndex = query.LastIndexOf(_abstractedFileSystem.Path.DirectorySeparatorChar);
         var path = query.Substring(0, lastSeparatorIndex + 1);
 
         if (lastSeparatorIndex != -1)
-        {
             return Result.Ok(GetResult(path, includeFiles));
-        }
 
         return Result.Ok(new FileSystemResult());
     }
@@ -190,9 +186,7 @@ public class FileSystem : IFileSystem
             result.Directories = _diskProvider.GetDirectories(path);
 
             if (includeFiles)
-            {
                 result.Files = _diskProvider.GetFiles(path);
-            }
         }
         catch (DirectoryNotFoundException)
         {

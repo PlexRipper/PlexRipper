@@ -9,9 +9,9 @@ public static class ResourceUtils
 {
     public static Stream GetResourceStream(this Assembly assembly, string resourceFolder, string resourceFileName)
     {
-        string[] nameParts = assembly.FullName.Split(',');
+        var nameParts = assembly.FullName.Split(',');
 
-        string resourceName = nameParts[0] + "." + resourceFolder + "." + resourceFileName;
+        var resourceName = nameParts[0] + "." + resourceFolder + "." + resourceFileName;
 
         var resources = new List<string>(assembly.GetManifestResourceNames());
         if (resources.Contains(resourceName))
@@ -23,7 +23,7 @@ public static class ResourceUtils
     public static string GetResourceAsString(this Assembly assembly, string folder, string fileName)
     {
         string fileContent;
-        using (StreamReader sr = new StreamReader(GetResourceStream(assembly, folder, fileName)))
+        using (var sr = new StreamReader(GetResourceStream(assembly, folder, fileName)))
         {
             fileContent = sr.ReadToEnd();
         }

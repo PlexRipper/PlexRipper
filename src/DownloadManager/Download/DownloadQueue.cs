@@ -67,16 +67,12 @@ public class DownloadQueue : IDownloadQueue
 
         var validateResult = _downloadTaskValidator.ValidateDownloadTasks(downloadTasks);
         if (validateResult.IsFailed)
-        {
             return validateResult.ToResult().LogDebug();
-        }
 
         // Add to Database
         var createResult = await _mediator.Send(new CreateDownloadTasksCommand(validateResult.Value));
         if (createResult.IsFailed)
-        {
             return createResult.ToResult().LogError();
-        }
 
         Log.Debug($"Successfully added all {validateResult.Value.Count} DownloadTasks");
         var uniquePlexServers = downloadTasks.Select(x => x.PlexServerId).Distinct().ToList();
@@ -94,9 +90,7 @@ public class DownloadQueue : IDownloadQueue
 
         Log.Information($"Adding {plexServerIds.Count} {nameof(PlexServer)}s to the DownloadQueue to check for the next download.");
         foreach (var plexServerId in plexServerIds)
-        {
             await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId);
-        }
 
         return Result.Ok();
     }

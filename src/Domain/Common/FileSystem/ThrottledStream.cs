@@ -66,7 +66,7 @@ public class ThrottledStream : Stream
     public override int Read(byte[] buffer, int offset, int count)
     {
         var newCount = GetBytesToReturn(count);
-        int read = _inputStream.Read(buffer, offset, newCount);
+        var read = _inputStream.Read(buffer, offset, newCount);
         Interlocked.Add(ref _totalBytesRead, read);
         return read;
     }
@@ -97,14 +97,14 @@ public class ThrottledStream : Stream
         return GetBytesToReturnAsync(count).Result;
     }
 
-    async Task<int> GetBytesToReturnAsync(int count)
+    private async Task<int> GetBytesToReturnAsync(int count)
     {
         if (_throttle <= 0)
             return count;
 
-        long canSend = (long)(_watch.ElapsedMilliseconds * (_throttle / 1000.0));
+        var canSend = (long)(_watch.ElapsedMilliseconds * (_throttle / 1000.0));
 
-        int diff = (int)(canSend - _totalBytesRead);
+        var diff = (int)(canSend - _totalBytesRead);
 
         if (diff <= 0)
         {

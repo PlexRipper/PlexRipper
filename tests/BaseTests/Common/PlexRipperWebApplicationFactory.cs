@@ -57,18 +57,12 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
         builder.RegisterType<MockSignalRService>().As<ISignalRService>();
 
         if (_config.MockFileSystem is not null)
-        {
             builder.RegisterInstance(_config.MockFileSystem).As<IFileSystem>();
-        }
 
         if (_config.MockDownloadSubscriptions is not null)
-        {
             builder.RegisterInstance(_config.MockDownloadSubscriptions).As<IDownloadSubscriptions>();
-        }
 
         if (_config.MockConfigManager is not null)
-        {
             builder.RegisterInstance(_config.MockConfigManager).As<IConfigManager>();
-        }
     }
 }

@@ -87,5 +87,5 @@ public class PlexMediaDTO
     public List<PlexMediaDataDTO> MediaData { get; set; }
 
     [JsonProperty("children", Required = Required.Always)]
-    public List<PlexMediaDTO> Children { get; set; } = new List<PlexMediaDTO>();
+    public List<PlexMediaDTO> Children { get; set; } = new();
 }

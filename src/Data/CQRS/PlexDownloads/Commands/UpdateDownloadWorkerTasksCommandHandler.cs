@@ -10,12 +10,13 @@ public class UpdateDownloadWorkerTasksCommandValidator : AbstractValidator<Updat
     {
         RuleFor(x => x.DownloadTasks).NotNull();
         RuleFor(x => x.DownloadTasks.Count).GreaterThan(0);
-        RuleForEach(x => x.DownloadTasks).ChildRules(downloadTask =>
-        {
-            downloadTask.RuleFor(x => x.Id).GreaterThan(0);
-            downloadTask.RuleFor(x => x.BytesReceived).GreaterThan(0);
-            downloadTask.RuleFor(x => x.DownloadTaskId).GreaterThan(0);
-        });
+        RuleForEach(x => x.DownloadTasks)
+            .ChildRules(downloadTask =>
+            {
+                downloadTask.RuleFor(x => x.Id).GreaterThan(0);
+                downloadTask.RuleFor(x => x.BytesReceived).GreaterThan(0);
+                downloadTask.RuleFor(x => x.DownloadTaskId).GreaterThan(0);
+            });
     }
 }
 

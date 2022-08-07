@@ -63,14 +63,10 @@ public static partial class StartupExtensions
     {
         // Used to deploy the front-end Nuxt client
         if (env.IsProduction())
-        {
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "wwwroot"; });
-        }
 
         if (env.IsDevelopment())
-        {
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp"; });
-        }
     }
 
     public static void SetupControllers(this IServiceCollection services)

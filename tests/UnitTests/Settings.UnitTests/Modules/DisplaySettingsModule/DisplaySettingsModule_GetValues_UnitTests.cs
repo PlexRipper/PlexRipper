@@ -1,5 +1,4 @@
-﻿using PlexRipper.Application;
-using PlexRipper.Settings.Modules;
+﻿using PlexRipper.Settings.Modules;
 
 namespace Settings.UnitTests.Modules;
 
@@ -17,7 +16,7 @@ public class DisplaySettingsModule_GetValues_UnitTests
         var displaySettingsModule = new DisplaySettingsModule();
 
         // Act
-        IDisplaySettings getValuesResult = displaySettingsModule.GetValues();
+        var getValuesResult = displaySettingsModule.GetValues();
 
         // Assert
         getValuesResult.ShouldNotBeNull();

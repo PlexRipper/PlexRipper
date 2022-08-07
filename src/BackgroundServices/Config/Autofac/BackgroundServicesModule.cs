@@ -24,7 +24,6 @@ public class BackgroundServicesModule : Module
             .AsImplementedInterfaces()
             .SingleInstance();
 
-
         // Register Quartz dependancies
         builder.RegisterModule(new QuartzAutofacFactoryModule
         {

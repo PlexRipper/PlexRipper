@@ -25,9 +25,7 @@ public class DownloadProgressNotifier : IDownloadProgressNotifier
     {
         var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId));
         if (downloadTasksResult.IsSuccess)
-        {
             await _signalRService.SendDownloadProgressUpdate(plexServerId, downloadTasksResult.Value);
-        }
 
         try
         {

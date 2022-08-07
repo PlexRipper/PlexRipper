@@ -9,7 +9,7 @@ public static class OrderByNaturalExtensions
     {
         object Convert(string str)
         {
-            int x = 0;
+            var x = 0;
             if (int.TryParse(str, out x)) return x;
 
             return str;

@@ -1,5 +1,4 @@
-﻿
-namespace Environment;
+﻿namespace Environment;
 
 public interface IPathProvider
 {

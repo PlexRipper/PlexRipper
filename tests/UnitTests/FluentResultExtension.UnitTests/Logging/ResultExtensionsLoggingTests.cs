@@ -250,7 +250,7 @@ public class ResultExtensionsLoggingTests
             // Assert
             var logContext = TestCorrelator.GetLogEventsFromCurrentContext().ToList();
 
-            for (int i = 0; i < logContext.Count; i++)
+            for (var i = 0; i < logContext.Count; i++)
             {
                 logContext[i].Level.ShouldBe(LogEventLevel.Error);
                 logContext[i].MessageTemplate.Text.ShouldContain($"Test Error #{i + 1}");
@@ -285,7 +285,7 @@ public class ResultExtensionsLoggingTests
             logContext.First().Level.ShouldBe(LogEventLevel.Error);
             logContext.First().MessageTemplate.Text.ShouldContain("Test Error #1");
 
-            for (int i = 1; i < logContext.Count; i++)
+            for (var i = 1; i < logContext.Count; i++)
             {
                 logContext[i].Level.ShouldBe(LogEventLevel.Error);
                 logContext[i].MessageTemplate.Text.ShouldContain($"--Error #{i}");

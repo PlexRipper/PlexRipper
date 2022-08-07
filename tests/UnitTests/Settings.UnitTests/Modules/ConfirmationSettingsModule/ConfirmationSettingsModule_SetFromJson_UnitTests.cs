@@ -61,6 +61,7 @@ public class ConfirmationSettingsModule_SetFromJson_UnitTests
             },
         };
         var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
+
         // ** Remove property to make corrupted
         json = json.Replace("AskDownloadMovieConfirmation\":true,\"", "");
         var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);

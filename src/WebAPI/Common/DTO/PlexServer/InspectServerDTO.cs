@@ -20,6 +20,7 @@ public class InspectServerDTOValidator : AbstractValidator<InspectServerDTO>
         RuleFor(x => x.PlexAccountId).NotNull().GreaterThan(0);
         RuleFor(x => x.PlexServerIds).NotNull().NotEmpty();
         RuleFor(x => x.PlexServerIds.First())
-            .NotEqual(0).When(x => x.PlexServerIds is { Count: > 0 });
+            .NotEqual(0)
+            .When(x => x.PlexServerIds is { Count: > 0 });
     }
 }

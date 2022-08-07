@@ -42,6 +42,4 @@ public class ConfigManager_SaveConfig_UnitTests
         resetResult.IsSuccess.ShouldBeTrue();
         mock.Mock<IFileSystem>().Verify(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
-
-
 }

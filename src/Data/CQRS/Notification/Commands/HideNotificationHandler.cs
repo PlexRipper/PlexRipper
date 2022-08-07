@@ -21,9 +21,7 @@ public class HideNotificationHandler : BaseHandler, IRequestHandler<HideNotifica
     {
         var notification = _dbContext.Notifications.AsTracking().FirstOrDefault(x => x.Id == command.Id);
         if (notification == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(Notification), command.Id);
-        }
 
         notification.Hidden = true;
         await SaveChangesAsync();

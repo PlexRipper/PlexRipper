@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using BackgroundServices.DownloadManager.Jobs;
 using PlexRipper.Application;
 using Quartz;
@@ -37,9 +37,7 @@ public class DownloadProgressScheduler : IDownloadProgressScheduler
 
         var jobKey = CreateDownloadProgressJobKey(plexServerId);
         if (await _scheduler.CheckExists(jobKey))
-        {
             return Result.Fail($"Job with {jobKey} already exists").LogWarning();
-        }
 
         var job = JobBuilder.Create<DownloadProgressJob>()
             .UsingJobData(nameof(plexServerId), plexServerId)
@@ -83,7 +81,7 @@ public class DownloadProgressScheduler : IDownloadProgressScheduler
         var isSuccess = await _scheduler.DeleteJob(CreateDownloadProgressJobKey(plexServerId));
         if (isSuccess)
         {
-            _trackDictionary.TryRemove(plexServerId, out var _) ;
+            _trackDictionary.TryRemove(plexServerId, out var _);
             Log.Information($"{nameof(DownloadProgressJob)} for {nameof(PlexServer)} {plexServerId} was stopped");
             return Result.Ok();
         }
@@ -100,18 +98,15 @@ public class DownloadProgressScheduler : IDownloadProgressScheduler
             return ResultExtensions.IsEmpty(nameof(hashCode)).LogWarning();
 
         if (!_trackDictionary.ContainsKey(plexServerId))
-        {
             _trackDictionary.GetOrAdd(plexServerId, new List<string> { hashCode });
-        }
 
         _trackDictionary[plexServerId].Add(hashCode);
 
         if (_trackDictionary[plexServerId].Count > _numberOfSameUpdates)
-        {
             _trackDictionary[plexServerId].RemoveAt(0);
-        }
 
-        if (_trackDictionary[plexServerId].Count >= _numberOfSameUpdates && _trackDictionary[plexServerId].All(x => x == hashCode))
+        if (_trackDictionary[plexServerId].Count >= _numberOfSameUpdates &&
+            _trackDictionary[plexServerId].All(x => x == hashCode))
         {
             Log.Debug($"Download progress job has been sending out the same {_numberOfSameUpdates} updates, will stop now.");
             await StopDownloadProgressJob(plexServerId);

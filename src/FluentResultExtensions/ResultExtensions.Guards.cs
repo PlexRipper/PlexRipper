@@ -17,9 +17,7 @@ public static partial class ResultExtensions
     public static Result AddNestedErrors(this Result result, List<IError> errors)
     {
         if (result.Errors.Any())
-        {
             result.Errors.First().Reasons.AddRange(errors);
-        }
 
         return result;
     }
@@ -27,20 +25,14 @@ public static partial class ResultExtensions
     public static Result ToFluentResult(this ValidationResult validationResult)
     {
         if (validationResult is null)
-        {
             return Result.Fail("Validation result was null");
-        }
 
         if (validationResult.IsValid)
-        {
             return Result.Ok();
-        }
 
         var error = new Error("Validation Error");
         foreach (var validationError in validationResult.Errors)
-        {
             error.Reasons.Add(new Error(validationError.ErrorMessage).WithMetadata(validationError.ErrorCode, validationError));
-        }
 
         return Result.Fail(error);
     }

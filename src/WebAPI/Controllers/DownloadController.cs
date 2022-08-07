@@ -27,9 +27,7 @@ public class DownloadController : BaseController
     {
         var result = await _plexDownloadService.GetDownloadTasksAsync();
         if (result.IsFailed)
-        {
             return InternalServerError(result.ToResult());
-        }
 
         return ToActionResult<List<DownloadTask>, List<ServerDownloadProgressDTO>>(result);
     }
@@ -108,9 +106,7 @@ public class DownloadController : BaseController
     public async Task<IActionResult> DeleteCommand([FromBody] List<int> downloadTaskIds)
     {
         if (!downloadTaskIds.Any())
-        {
             return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
-        }
 
         var result = await _plexDownloadService.DeleteDownloadTasksAsync(downloadTaskIds);
         return ToActionResult(result.ToResult());
@@ -123,9 +119,7 @@ public class DownloadController : BaseController
     public async Task<IActionResult> GetDetail(int id, CancellationToken token)
     {
         if (id <= 0)
-        {
             return BadRequestInvalidId();
-        }
 
         var downloadTaskResult = await _plexDownloadService.GetDownloadTaskDetailAsync(id, token);
         return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);

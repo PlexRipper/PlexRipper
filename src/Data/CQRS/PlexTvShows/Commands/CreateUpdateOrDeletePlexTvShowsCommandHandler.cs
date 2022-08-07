@@ -16,20 +16,18 @@ public class CreateUpdateOrDeletePlexTvShowsCommandValidator : AbstractValidator
         RuleFor(x => x.PlexLibrary.Title).NotEmpty();
         RuleFor(x => x.PlexLibrary.TvShows).NotEmpty();
 
-        RuleForEach(x => x.PlexLibrary.TvShows).ChildRules(plexTvShow =>
-        {
-            plexTvShow.RuleFor(x => x.Key).GreaterThan(0);
-            plexTvShow.RuleForEach(x => x.Seasons).ChildRules(plexTvShowSeason =>
+        RuleForEach(x => x.PlexLibrary.TvShows)
+            .ChildRules(plexTvShow =>
             {
-                plexTvShowSeason.RuleFor(x => x.Key).GreaterThan(0);
+                plexTvShow.RuleFor(x => x.Key).GreaterThan(0);
+                plexTvShow.RuleForEach(x => x.Seasons).ChildRules(plexTvShowSeason => { plexTvShowSeason.RuleFor(x => x.Key).GreaterThan(0); });
             });
-        });
     }
 }
 
 public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IRequestHandler<CreateUpdateOrDeletePlexTvShowsCommand, Result<bool>>
 {
-    private readonly BulkConfig _config = new BulkConfig
+    private readonly BulkConfig _config = new()
     {
         SetOutputIdentity = true,
         PreserveInsertOrder = true,
@@ -104,7 +102,7 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
         deleteSeasonDict.SelectMany(x => x.Value.Episodes).ToList().ForEach(x => deleteEpisodeDict.Add(x.Key, x));
 
         // Further filter down what should be updated
-        foreach (KeyValuePair<int, PlexTvShow> keyValuePair in updateTvShowDict)
+        foreach (var keyValuePair in updateTvShowDict)
         {
             var plexTvShowDb = PlexTvShowDbDict[keyValuePair.Key];
             var newPlexTvShow = keyValuePair.Value;
@@ -190,8 +188,11 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
         return Result.Ok(true);
     }
 
-    private async Task BulkInsertTvShows(Dictionary<int, PlexTvShow> tvShowDict, Dictionary<int, PlexTvShowSeason> seasonDict,
-        Dictionary<int, PlexTvShowEpisode> episodeDict, CancellationToken token)
+    private async Task BulkInsertTvShows(
+        Dictionary<int, PlexTvShow> tvShowDict,
+        Dictionary<int, PlexTvShowSeason> seasonDict,
+        Dictionary<int, PlexTvShowEpisode> episodeDict,
+        CancellationToken token)
     {
         // Add tvShows to DB.
         var tvShowAddList = tvShowDict.Select(x => x.Value).ToList();

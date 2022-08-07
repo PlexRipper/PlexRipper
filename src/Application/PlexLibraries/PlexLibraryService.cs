@@ -52,9 +52,11 @@ public class PlexLibraryService : IPlexLibraryService
             return Result.Fail("PlexLibrary is not of type TvShow").LogError();
 
         if (plexLibrary.TvShows.Count == 0)
+        {
             return Result.Fail(
                     $"PlexLibrary {plexLibrary.Name} with id {plexLibrary.Id} does not contain any TvShows and thus cannot request the corresponding media")
                 .LogError();
+        }
 
         // Send progress
         void SendProgress(int index, int count)
@@ -65,9 +67,7 @@ public class PlexLibraryService : IPlexLibraryService
 
         var result = await _mediator.Send(new GetPlexLibraryByIdWithServerQuery(plexLibrary.Id));
         if (result.IsFailed)
-        {
             return result.ToResult();
-        }
 
         // Request seasons and episodes for every tv show
         var plexLibraryDb = result.Value;
@@ -79,18 +79,14 @@ public class PlexLibraryService : IPlexLibraryService
 
         var rawSeasonDataResult = await _plexServiceApi.GetAllSeasonsAsync(authToken, serverUrl, plexLibrary.Key);
         if (rawSeasonDataResult.IsFailed)
-        {
             return rawSeasonDataResult.ToResult();
-        }
 
         // Phase 1 of 4: Season data was retrieved successfully.
         SendProgress(1, 4);
 
         var rawEpisodesDataResult = await _plexServiceApi.GetAllEpisodesAsync(authToken, serverUrl, plexLibrary.Key);
         if (rawEpisodesDataResult.IsFailed)
-        {
             return rawEpisodesDataResult.ToResult();
-        }
 
         // Phase 2 of 4: Episode data was retrieved successfully.
         SendProgress(2, 4);
@@ -110,9 +106,7 @@ public class PlexLibraryService : IPlexLibraryService
 
                 // Assume the season started on the year of the first episode
                 if (plexTvShowSeason.Year == 0 && plexTvShowSeason.Episodes.Any())
-                {
                     plexTvShowSeason.Year = plexTvShowSeason.Episodes.First().Year;
-                }
 
                 // Set libraryId in each episode
                 plexTvShowSeason.Episodes.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
@@ -130,21 +124,15 @@ public class PlexLibraryService : IPlexLibraryService
         // Update the MetaData of this library
         var updateMetaDataResult = plexLibrary.UpdateMetaData();
         if (updateMetaDataResult.IsFailed)
-        {
             return updateMetaDataResult;
-        }
 
         var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
         if (updateResult.IsFailed)
-        {
             return updateResult.ToResult();
-        }
 
         var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
         if (createResult.IsFailed)
-        {
             return createResult.ToResult();
-        }
 
         Log.Debug($"Finished updating all media in the database for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds}");
 
@@ -162,9 +150,7 @@ public class PlexLibraryService : IPlexLibraryService
     private async Task<Result> RefreshPlexMovieLibrary(PlexLibrary plexLibrary, Action<LibraryProgress> progressAction = null)
     {
         if (plexLibrary == null)
-        {
             return ResultExtensions.IsNull(nameof(plexLibrary));
-        }
 
         // Send progress
         void SendProgress(int index, int count)
@@ -178,25 +164,19 @@ public class PlexLibraryService : IPlexLibraryService
         // Update the MetaData of this library
         var updateMetaDataResult = plexLibrary.UpdateMetaData();
         if (updateMetaDataResult.IsFailed)
-        {
             return updateMetaDataResult;
-        }
 
         SendProgress(1, 3);
 
         var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
         if (updateResult.IsFailed)
-        {
             return updateResult.ToResult();
-        }
 
         SendProgress(2, 3);
 
         var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
         if (createResult.IsFailed)
-        {
             return createResult.ToResult();
-        }
 
         SendProgress(3, 3);
         return Result.Ok();
@@ -212,9 +192,7 @@ public class PlexLibraryService : IPlexLibraryService
         var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
 
         if (libraryDB.IsFailed)
-        {
             return libraryDB;
-        }
 
         if (!libraryDB.Value.HasMedia)
         {
@@ -222,9 +200,7 @@ public class PlexLibraryService : IPlexLibraryService
 
             var refreshResult = await RefreshLibraryMediaAsync(libraryId);
             if (refreshResult.IsFailed)
-            {
                 return refreshResult.ToResult();
-            }
         }
 
         return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true, topLevelMediaOnly));
@@ -240,9 +216,7 @@ public class PlexLibraryService : IPlexLibraryService
     {
         var plexLibrary = await GetPlexLibraryAsync(libraryId, topLevelMediaOnly);
         if (plexLibrary.IsFailed)
-        {
             return plexLibrary.ToResult();
-        }
 
         var plexServer = plexLibrary.Value.PlexServer;
         plexServer.PlexLibraries.Clear();
@@ -261,28 +235,22 @@ public class PlexLibraryService : IPlexLibraryService
     public async Task<Result> RetrieveAccessibleLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer)
     {
         if (plexServer == null)
-        {
             return Result.Fail("plexServer was null").LogWarning();
-        }
 
         Log.Debug($"Refreshing PlexLibraries for plexServer: {plexServer.Name}");
 
         var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id);
 
         if (authToken.IsFailed)
-        {
             return Result.Fail(new Error("Failed to retrieve the server auth token"));
-        }
 
         var libraries = await _plexServiceApi.GetLibrarySectionsAsync(authToken.Value, plexServer.ServerUrl);
         if (libraries.IsFailed)
-        {
             return libraries.ToResult();
-        }
 
         if (!libraries.Value.Any())
         {
-            string msg = $"plexLibraries returned for server {plexServer.Name} - {plexServer.ServerUrl} was empty";
+            var msg = $"plexLibraries returned for server {plexServer.Name} - {plexServer.ServerUrl} was empty";
             return Result.Fail(msg).LogWarning();
         }
 
@@ -294,9 +262,7 @@ public class PlexLibraryService : IPlexLibraryService
     {
         var plexLibraryResult = await _mediator.Send(new GetPlexLibraryByIdQuery(plexLibraryId, true));
         if (plexLibraryResult.IsFailed)
-        {
             return plexLibraryResult;
-        }
 
         var plexLibrary = plexLibraryResult.Value;
 
@@ -309,16 +275,12 @@ public class PlexLibraryService : IPlexLibraryService
         // Get plexServer authToken
         var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexLibrary.PlexServer.Id);
         if (authToken.IsFailed)
-        {
             return authToken.ToResult();
-        }
 
         // Retrieve overview of all media belonging to this PlexLibrary
         var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value);
         if (newPlexLibraryResult.IsFailed)
-        {
             return newPlexLibraryResult;
-        }
 
         var newPlexLibrary = newPlexLibraryResult.Value;
 

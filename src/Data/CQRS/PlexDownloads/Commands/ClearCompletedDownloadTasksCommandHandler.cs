@@ -12,12 +12,13 @@ public class ClearCompletedDownloadTasksHandler : BaseHandler,
 {
     public ClearCompletedDownloadTasksHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Result> Handle(ClearCompletedDownloadTasksCommand command,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(ClearCompletedDownloadTasksCommand command, CancellationToken cancellationToken)
     {
         if (command.DownloadTaskIds != null && command.DownloadTaskIds.Any())
         {
-            var downloadTasks = await _dbContext.DownloadTasks.Where(x => command.DownloadTaskIds.Contains(x.Id) && x.DownloadStatus == DownloadStatus.Completed).ToListAsync();
+            var downloadTasks = await _dbContext.DownloadTasks
+                .Where(x => command.DownloadTaskIds.Contains(x.Id) && x.DownloadStatus == DownloadStatus.Completed)
+                .ToListAsync(cancellationToken);
             _dbContext.DownloadTasks.RemoveRange(downloadTasks);
         }
         else

@@ -41,9 +41,7 @@ public class GetAccountByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexAc
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexAccount == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), request.Id);
-        }
 
         if (request.IncludePlexServers && request.IncludePlexLibraries)
         {
@@ -51,17 +49,14 @@ public class GetAccountByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexAc
             // TODO This might be improved further since now all PlexLibraries will be retrieved from the database.
             var plexServers = plexAccount.PlexAccountServers.Select(x => x.PlexServer).ToList();
             foreach (var plexServer in plexServers)
-            {
+
                 // Remove inaccessible PlexLibraries
-                for (int i = plexServer.PlexLibraries.Count - 1; i >= 0; i--)
+                for (var i = plexServer.PlexLibraries.Count - 1; i >= 0; i--)
                 {
                     var x = plexServer?.PlexLibraries[i].PlexAccountLibraries.Select(y => y.PlexAccountId).ToList();
                     if (!x.Contains(plexAccount.Id))
-                    {
                         plexServer.PlexLibraries.RemoveAt(i);
-                    }
                 }
-            }
         }
 
         return Result.Ok(plexAccount);

@@ -8,7 +8,9 @@ public class PlexMediaService : IPlexMediaService
 
     protected readonly IPlexApiService _plexServiceApi;
 
-    public PlexMediaService(IMediator mediator, IPlexAuthenticationService plexAuthenticationService,
+    public PlexMediaService(
+        IMediator mediator,
+        IPlexAuthenticationService plexAuthenticationService,
         IPlexApiService plexServiceApi)
     {
         _mediator = mediator;
@@ -27,14 +29,10 @@ public class PlexMediaService : IPlexMediaService
             {
                 var movieResult = await _mediator.Send(new GetPlexMovieByIdQuery(mediaId, includeServer: true));
                 if (movieResult.IsFailed)
-                {
                     return movieResult.ToResult();
-                }
 
                 if (!movieResult.Value.HasThumb)
-                {
                     return Result.Fail($"Movie: {movieResult.Value.Title} has no thumbnail.");
-                }
 
                 thumbPath = movieResult.Value.ThumbUrl;
                 plexServer = movieResult.Value.PlexServer;
@@ -44,14 +42,10 @@ public class PlexMediaService : IPlexMediaService
             {
                 var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, true));
                 if (tvShowResult.IsFailed)
-                {
                     return tvShowResult.ToResult();
-                }
 
                 if (!tvShowResult.Value.HasThumb)
-                {
                     return Result.Fail($"TvShow: {tvShowResult.Value.Title} has no thumbnail.");
-                }
 
                 thumbPath = tvShowResult.Value.ThumbUrl;
                 plexServer = tvShowResult.Value.PlexServer;
@@ -63,9 +57,7 @@ public class PlexMediaService : IPlexMediaService
 
         var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id);
         if (token.IsFailed)
-        {
             return token.ToResult();
-        }
 
         return await _plexServiceApi.GetPlexMediaImageAsync(plexServer.ServerUrl + thumbPath, token.Value, width, height);
     }
@@ -81,14 +73,10 @@ public class PlexMediaService : IPlexMediaService
             {
                 var movieResult = await _mediator.Send(new GetPlexMovieByIdQuery(mediaId, includeServer: true));
                 if (movieResult.IsFailed)
-                {
                     return movieResult.ToResult();
-                }
 
                 if (!movieResult.Value.HasBanner)
-                {
                     return Result.Fail($"Movie: {movieResult.Value.Title} has no banner.");
-                }
 
                 bannerPath = movieResult.Value.ThumbUrl;
                 plexServer = movieResult.Value.PlexServer;
@@ -98,14 +86,10 @@ public class PlexMediaService : IPlexMediaService
             {
                 var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, true));
                 if (tvShowResult.IsFailed)
-                {
                     return tvShowResult.ToResult();
-                }
 
                 if (!tvShowResult.Value.HasBanner)
-                {
                     return Result.Fail($"TvShow: {tvShowResult.Value.Title} has no banner.");
-                }
 
                 bannerPath = tvShowResult.Value.ThumbUrl;
                 plexServer = tvShowResult.Value.PlexServer;
@@ -117,9 +101,7 @@ public class PlexMediaService : IPlexMediaService
 
         var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id);
         if (token.IsFailed)
-        {
             return token.ToResult();
-        }
 
         return await _plexServiceApi.GetPlexMediaImageAsync(plexServer.ServerUrl + bannerPath, token.Value, width, height);
     }

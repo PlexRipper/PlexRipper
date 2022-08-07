@@ -91,35 +91,24 @@ public static class DownloadTaskActions
     public static DownloadStatus Aggregate(List<DownloadStatus> downloadStatusList)
     {
         foreach (var status in AnyStatuses)
-        {
             if (downloadStatusList.Any(x => x == status))
-            {
                 return status;
-            }
-        }
 
         foreach (var status in AllStatuses)
-        {
             if (downloadStatusList.All(x => x == status))
-            {
                 return status;
-            }
-        }
 
-        if (downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished) && downloadStatusList.Any(x => x == DownloadStatus.Queued))
-        {
+        if (downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished) &&
+            downloadStatusList.Any(x => x == DownloadStatus.Queued))
             return DownloadStatus.Downloading;
-        }
 
-        if (downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished) && downloadStatusList.Any(x => x == DownloadStatus.Completed))
-        {
+        if (downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished) &&
+            downloadStatusList.Any(x => x == DownloadStatus.Completed))
             return DownloadStatus.DownloadFinished;
-        }
 
-        if (downloadStatusList.Any(x => x == DownloadStatus.Queued) && downloadStatusList.Any(x => x == DownloadStatus.Queued))
-        {
+        if (downloadStatusList.Any(x => x == DownloadStatus.Queued) &&
+            downloadStatusList.Any(x => x == DownloadStatus.Queued))
             return DownloadStatus.Queued;
-        }
 
         return DownloadStatus.Unknown;
     }

@@ -18,8 +18,7 @@ public class GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryHandler : BaseHan
 {
     public GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Result<List<PlexTvShowSeason>>> Handle(GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<List<PlexTvShowSeason>>> Handle(GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery request, CancellationToken cancellationToken)
     {
         var query = PlexTvShowSeasonsQueryable;
 
@@ -31,14 +30,10 @@ public class GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryHandler : BaseHan
         }
 
         if (request.IncludeLibrary)
-        {
             query = query.IncludePlexLibrary();
-        }
 
         if (request.IncludeServer)
-        {
             query = query.IncludePlexServer();
-        }
 
         var plexTvShowSeason = await query
             .Where(x => request.Ids.Contains(x.Id))

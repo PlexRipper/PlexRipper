@@ -25,19 +25,17 @@ public class PlexAccountController : BaseController
     {
         var result = await _plexAccountService.GetAllPlexAccountsAsync(enabledOnly);
         if (result.IsFailed)
-        {
             return BadRequest(result.ToResult());
-        }
 
         var mapResult = _mapper.Map<List<PlexAccountDTO>>(result.Value);
         if (!mapResult.Any() && enabledOnly)
         {
-            string msg = "Could not find any enabled accounts";
+            var msg = "Could not find any enabled accounts";
             Log.Warning(msg);
             return NotFound(Result.Fail(msg));
         }
 
-        string msg2 = $"Returned {mapResult.Count} accounts";
+        var msg2 = $"Returned {mapResult.Count} accounts";
         Log.Debug(msg2);
         return Ok(Result.Ok(mapResult).WithSuccess(msg2));
     }
@@ -51,9 +49,7 @@ public class PlexAccountController : BaseController
     public async Task<IActionResult> GetAccount(int id)
     {
         if (id <= 0)
-        {
             return BadRequestInvalidId();
-        }
 
         return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.GetPlexAccountAsync(id));
     }
@@ -67,9 +63,7 @@ public class PlexAccountController : BaseController
     public async Task<IActionResult> Put(int id, [FromBody] PlexAccountDTO updatedAccount, [FromQuery] bool inspect = false)
     {
         if (id <= 0)
-        {
             return BadRequestInvalidId();
-        }
 
         var mapResult = _mapper.Map<PlexAccount>(updatedAccount);
         return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.UpdatePlexAccountAsync(mapResult, inspect));
@@ -83,9 +77,7 @@ public class PlexAccountController : BaseController
     public async Task<IActionResult> CreateAccount([FromBody] PlexAccountDTO newAccount)
     {
         if (newAccount is null)
-        {
             return BadRequest("The new account was null");
-        }
 
         var mapResult = _mapper.Map<PlexAccount>(newAccount);
         var createResult = await _plexAccountService.CreatePlexAccountAsync(mapResult);
@@ -101,9 +93,7 @@ public class PlexAccountController : BaseController
     public async Task<IActionResult> DeleteAccount(int id)
     {
         if (id <= 0)
-        {
             return BadRequestInvalidId();
-        }
 
         var deleteResult = await _plexAccountService.DeletePlexAccountAsync(id);
         return ToActionResult(deleteResult);
@@ -127,28 +117,24 @@ public class PlexAccountController : BaseController
     public async Task<IActionResult> CheckUsername(string username)
     {
         if (string.IsNullOrEmpty(username) || username.Length < 5)
-        {
             return BadRequest(Result.Fail("Invalid username"));
-        }
 
         try
         {
             var result = await _plexAccountService.CheckIfUsernameIsAvailableAsync(username);
 
             if (result.IsFailed)
-            {
                 return BadRequest(result.ToResult());
-            }
 
             if (result.Value)
             {
-                string msg = $"Username: {username} is available";
+                var msg = $"Username: {username} is available";
                 Log.Debug(msg);
                 return Ok(Result.Ok(true).WithSuccess(msg));
             }
             else
             {
-                string msg = $"Account with username: \"{username}\" already exists!";
+                var msg = $"Account with username: \"{username}\" already exists!";
                 Log.Warning(msg);
                 return Ok(Result.Ok(false).WithError(msg));
             }
@@ -184,19 +170,13 @@ public class PlexAccountController : BaseController
     public async Task<IActionResult> GetAndCheck2FaPin([FromQuery] string clientId, [FromQuery] int authPinId = 0)
     {
         if (string.IsNullOrEmpty(clientId))
-        {
             return ToActionResult(Result.Fail("Plex Account Client id was empty").Add400BadRequestError());
-        }
 
         Result<AuthPin> authPinResult;
         if (authPinId == 0)
-        {
             authPinResult = await _plexAccountService.Get2FAPin(clientId);
-        }
         else
-        {
             authPinResult = await _plexAccountService.Check2FAPin(authPinId, clientId);
-        }
 
         return ToActionResult<AuthPin, AuthPin>(authPinResult);
     }

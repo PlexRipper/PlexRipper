@@ -12,13 +12,11 @@ public class LongToDateTime : JsonConverter<DateTime>
         if (reader.TokenType == JsonTokenType.Number)
         {
             // try to parse number directly from bytes
-            ReadOnlySpan<byte> span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-            if (Utf8Parser.TryParse(span, out long number, out int bytesConsumed) && span.Length == bytesConsumed)
+            var span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
+            if (Utf8Parser.TryParse(span, out long number, out var bytesConsumed) && span.Length == bytesConsumed)
             {
                 if (number >= -62135596800 && number <= 253402300799)
-                {
                     return DateTimeOffset.FromUnixTimeSeconds(number).DateTime.ToUniversalTime();
-                }
             }
 
             return DateTime.MinValue;

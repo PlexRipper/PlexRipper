@@ -20,7 +20,8 @@ public class DeleteDownloadWorkerTasksByDownloadTaskIdCommandHandler : BaseHandl
 
     public async Task<Result> Handle(DeleteDownloadWorkerTasksByDownloadTaskIdCommand command, CancellationToken cancellationToken)
     {
-        var downloadWorkerTasks = await _dbContext.DownloadWorkerTasks.AsTracking().Where(x => x.DownloadTaskId == command.DownloadTaskId)
+        var downloadWorkerTasks = await _dbContext.DownloadWorkerTasks.AsTracking()
+            .Where(x => x.DownloadTaskId == command.DownloadTaskId)
             .ToListAsync(cancellationToken);
         if (!downloadWorkerTasks.Any())
         {

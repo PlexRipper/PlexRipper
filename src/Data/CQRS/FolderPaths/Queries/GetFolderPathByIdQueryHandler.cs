@@ -20,9 +20,7 @@ public class GetFolderPathByIdQueryHandler : BaseHandler, IRequestHandler<GetFol
     {
         var folderPath = await _dbContext.FolderPaths.FindAsync(request.Id);
         if (folderPath == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(FolderPath), request.Id);
-        }
 
         return Result.Ok(folderPath);
     }

@@ -21,17 +21,18 @@ public class MockFileMergeStreamProvider : IFileMergeStreamProvider
     }
 #pragma warning restore CS1998
 
-    public async Task MergeFiles(List<string> filePaths, Stream destination, Subject<long> bytesReceivedProgress,
-        CancellationToken cancellationToken = default(CancellationToken))
+    public async Task MergeFiles(
+        List<string> filePaths,
+        Stream destination,
+        Subject<long> bytesReceivedProgress,
+        CancellationToken cancellationToken = default)
     {
         var bytesDone = 1000 * 1024;
         foreach (var _ in filePaths)
-        {
             for (var i = 0; i < 2; i++)
             {
                 bytesReceivedProgress.OnNext(bytesDone += 1000 * 1024);
                 await Task.Delay(1000);
             }
-        }
     }
 }

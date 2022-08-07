@@ -53,15 +53,11 @@ public class DownloadCommands : IDownloadCommands
 
         var stopDownloadTasksResult = await StopDownloadTasksAsync(downloadTaskId);
         if (stopDownloadTasksResult.IsFailed)
-        {
             return stopDownloadTasksResult.ToResult().LogError();
-        }
 
         var regeneratedDownloadTasks = await _downloadTaskFactory.RegenerateDownloadTask(stopDownloadTasksResult.Value);
         if (regeneratedDownloadTasks.IsFailed)
-        {
             return regeneratedDownloadTasks.LogError();
-        }
 
         await _mediator.Send(new UpdateDownloadTasksByIdCommand(regeneratedDownloadTasks.Value));
 
@@ -131,23 +127,17 @@ public class DownloadCommands : IDownloadCommands
         // Check if currently downloading
         var stopResult = await _downloadTracker.StopDownloadClient(downloadTaskId);
         if (stopResult.IsFailed)
-        {
             await _notificationsService.SendResult(stopResult);
-        }
 
         var removeTempResult = _directorySystem.DeleteAllFilesFromDirectory(downloadTask.Value.DownloadDirectory);
         if (removeTempResult.IsFailed)
-        {
             await _notificationsService.SendResult(removeTempResult);
-        }
 
         stoppedDownloadTaskIds.Add(downloadTask.Value.Id);
 
         var updateResult = await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(stoppedDownloadTaskIds, DownloadStatus.Stopped));
         if (updateResult.IsFailed)
-        {
             return updateResult;
-        }
 
         return Result.Ok(stoppedDownloadTaskIds);
     }
@@ -190,17 +180,11 @@ public class DownloadCommands : IDownloadCommands
     public async Task<Result<bool>> DeleteDownloadTaskClientsAsync(List<int> downloadTaskIds)
     {
         if (downloadTaskIds is null || !downloadTaskIds.Any())
-        {
             return Result.Fail("Parameter downloadTaskIds was empty or null").LogError();
-        }
 
         foreach (var downloadTaskId in downloadTaskIds)
-        {
             if (_downloadTracker.IsDownloading(downloadTaskId))
-            {
                 await StopDownloadTasksAsync(downloadTaskId);
-            }
-        }
 
         return await _mediator.Send(new DeleteDownloadTasksByIdCommand(downloadTaskIds));
     }

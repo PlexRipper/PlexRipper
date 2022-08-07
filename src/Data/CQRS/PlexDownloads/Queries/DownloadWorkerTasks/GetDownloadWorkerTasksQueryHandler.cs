@@ -18,8 +18,7 @@ public class GetDownloadWorkerTasksByDownloadTaskIdQueryHandler : BaseHandler,
 {
     public GetDownloadWorkerTasksByDownloadTaskIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Result<List<DownloadWorkerTask>>> Handle(GetAllDownloadWorkerTasksByDownloadTaskIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<List<DownloadWorkerTask>>> Handle(GetAllDownloadWorkerTasksByDownloadTaskIdQuery request, CancellationToken cancellationToken)
     {
         var downloadWorkerTasks = await _dbContext.DownloadWorkerTasks
             .Where(x => x.DownloadTaskId == request.DownloadTaskId)

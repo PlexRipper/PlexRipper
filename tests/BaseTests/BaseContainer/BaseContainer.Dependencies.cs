@@ -56,9 +56,7 @@ public partial class BaseContainer : IDisposable
         var container = new BaseContainer(memoryDbName, options);
 
         if (config.DownloadSpeedLimit > 0)
-        {
             await container.SetDownloadSpeedLimit(options);
-        }
 
         return container;
     }

@@ -100,9 +100,7 @@ public static class PlexRipperDBContextSeed
         };
 
         foreach (var folderPath in list)
-        {
             builder.Entity<FolderPath>().HasData(folderPath);
-        }
 
         return builder;
     }

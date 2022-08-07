@@ -15,8 +15,7 @@ public class GetAllPlexServersByPlexAccountIdQueryValidator : AbstractValidator<
     }
 }
 
-public class GetAllPlexServersByPlexAccountIdQueryHandler : BaseHandler,
-    IRequestHandler<GetAllPlexServersByPlexAccountIdQuery, Result<List<PlexServer>>>
+public class GetAllPlexServersByPlexAccountIdQueryHandler : BaseHandler, IRequestHandler<GetAllPlexServersByPlexAccountIdQuery, Result<List<PlexServer>>>
 {
     private readonly IMapper _mapper;
 
@@ -25,8 +24,7 @@ public class GetAllPlexServersByPlexAccountIdQueryHandler : BaseHandler,
         _mapper = mapper;
     }
 
-    public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersByPlexAccountIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersByPlexAccountIdQuery request, CancellationToken cancellationToken)
     {
         var serverList = await _dbContext
             .PlexAccountServers

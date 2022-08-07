@@ -76,10 +76,8 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         // ** 4 streams per download client should be created
         var downloadTasks = await Container.PlexRipperDbContext.DownloadTasks.ToListAsync();
         downloadTasks.Count.ShouldBe(tvShowEpisodeCount + 2);
-        foreach (DownloadTask downloadTask in downloadTasks)
-        {
+        foreach (var downloadTask in downloadTasks)
             downloadTask.DownloadStatus.ShouldBe(DownloadStatus.Completed);
-        }
 
         downloadStreams.Count.ShouldBe(tvShowEpisodeCount * 4);
 

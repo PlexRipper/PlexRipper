@@ -34,7 +34,8 @@ public class Boot : IBoot
 
     #region Constructor
 
-    public Boot(IHostApplicationLifetime appLifetime,
+    public Boot(
+        IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
         IFileMerger fileMerger,
         IPlexRipperDatabaseService plexRipperDatabaseService,
@@ -83,9 +84,7 @@ public class Boot : IBoot
 
         // TODO Remove this once the plexServer sync has been compatible for the integration test
         if (!EnvironmentExtensions.IsIntegrationTestMode())
-        {
             await _schedulerService.SetupAsync();
-        }
 
         _appLifetime.ApplicationStarted.Register(OnStarted);
         _appLifetime.ApplicationStopping.Register(OnStopping);

@@ -89,7 +89,6 @@ public class ConfigManager_LoadConfig_UnitTests
         // Assert
         loadResult.IsSuccess.ShouldBeTrue();
         sut.Verify(x => x.ResetConfig(), Times.Once);
-
     }
 
     [Fact]
@@ -117,6 +116,5 @@ public class ConfigManager_LoadConfig_UnitTests
         // Assert
         loadResult.IsSuccess.ShouldBeTrue();
         sut.Verify(x => x.ResetConfig(), Times.Once);
-
     }
 }

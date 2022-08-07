@@ -29,9 +29,7 @@ public class GetFileTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetFileT
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (fileTask == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(DownloadFileTask), request.Id);
-        }
 
         return Result.Ok(fileTask);
     }

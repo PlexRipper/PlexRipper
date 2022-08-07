@@ -101,13 +101,13 @@ public class PlexApiMappingProfile : Profile
         // Metadata -> PlexTvShowSeason
         CreateMap<Metadata, PlexTvShowSeason>(MemberList.None)
             .IncludeBase<Metadata, PlexMedia>()
-            .ForMember(dest => dest.FullTitle, opt => opt.MapFrom(x =>  $"{x.ParentTitle}/{x.Title}" ))
+            .ForMember(dest => dest.FullTitle, opt => opt.MapFrom(x => $"{x.ParentTitle}/{x.Title}"))
             .ForMember(dest => dest.ParentKey, opt => opt.MapFrom(x => x.ParentRatingKey));
 
         // Metadata -> PlexTvShowEpisode
         CreateMap<Metadata, PlexTvShowEpisode>(MemberList.None)
             .IncludeBase<Metadata, PlexMedia>()
-            .ForMember(dest => dest.FullTitle, opt => opt.MapFrom(x =>  $"{x.GrandparentTitle}/{x.ParentTitle}/{x.Title}" ))
+            .ForMember(dest => dest.FullTitle, opt => opt.MapFrom(x => $"{x.GrandparentTitle}/{x.ParentTitle}/{x.Title}"))
             .ForMember(dest => dest.ParentKey, opt => opt.MapFrom(x => x.ParentRatingKey))
             .ForMember(dest => dest.EpisodeData, opt => opt.MapFrom(x => x.Media));
     }
@@ -129,7 +129,6 @@ public class PlexApiMappingProfile : Profile
         };
 
         foreach (var entry in list)
-        {
             if (!string.IsNullOrEmpty(entry))
             {
                 // We want the last number
@@ -137,13 +136,10 @@ public class PlexApiMappingProfile : Profile
                 var splitStrings = entry.Split('/').ToList();
                 if (splitStrings.Count > 2)
                 {
-                    if (int.TryParse(splitStrings.Last(), out int result))
-                    {
+                    if (int.TryParse(splitStrings.Last(), out var result))
                         return result;
-                    }
                 }
             }
-        }
 
         return 0;
     }

@@ -7,9 +7,7 @@ namespace PlexRipper.Data.PlexLibraries;
 
 public class GetAllPlexLibrariesQueryValidator : AbstractValidator<GetAllPlexLibrariesQuery>
 {
-    public GetAllPlexLibrariesQueryValidator()
-    {
-    }
+    public GetAllPlexLibrariesQueryValidator() { }
 }
 
 public class GetAllPlexLibrariesQueryHandler : BaseHandler, IRequestHandler<GetAllPlexLibrariesQuery, Result<List<PlexLibrary>>>
@@ -20,11 +18,8 @@ public class GetAllPlexLibrariesQueryHandler : BaseHandler, IRequestHandler<GetA
     {
         var query = PlexLibraryQueryable;
 
-
         if (request.IncludePlexServer)
-        {
             query = query.IncludePlexServer();
-        }
 
         var plexLibraries = await query.ToListAsync(cancellationToken);
 

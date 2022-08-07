@@ -84,26 +84,17 @@ public class PlexDownloadClient : IDisposable
     public Result<PlexDownloadClient> Setup(DownloadTask downloadTask)
     {
         if (downloadTask is null)
-        {
             return ResultExtensions.IsNull(nameof(downloadTask)).LogError();
-        }
 
         if (!downloadTask.DownloadWorkerTasks.Any())
-        {
             return ResultExtensions.IsEmpty(nameof(downloadTask.DownloadWorkerTasks)).LogError();
-        }
 
         if (downloadTask.PlexServer is null)
-        {
             return ResultExtensions.IsNull($"{nameof(downloadTask)}.{nameof(downloadTask.PlexServer)}").LogError();
-        }
-
 
         var createResult = CreateDownloadWorkers(downloadTask);
         if (createResult.IsFailed)
-        {
             return createResult.ToResult().LogError();
-        }
 
         SetupDownloadLimitWatcher(downloadTask);
         SetupSubscriptions();
@@ -115,9 +106,7 @@ public class PlexDownloadClient : IDisposable
     public async Task<Result<DownloadTask>> PauseAsync()
     {
         if (DownloadStatus != DownloadStatus.Downloading)
-        {
             Log.Warning($"DownloadClient with {DownloadTask.FileName} is currently not downloading and cannot be paused.");
-        }
 
         Log.Information($"Pause downloading of {DownloadTask.FileName}");
 
@@ -134,21 +123,17 @@ public class PlexDownloadClient : IDisposable
     public Result Start()
     {
         if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
-        {
             return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
-        }
 
         Log.Debug($"Start downloading {DownloadTask.FileName}");
         try
         {
-            List<Result> results = new List<Result>();
+            var results = new List<Result>();
             foreach (var downloadWorker in _downloadWorkers)
             {
                 var startResult = downloadWorker.Start();
                 if (startResult.IsFailed)
-                {
                     startResult.LogError();
-                }
 
                 results.Add(startResult);
             }
@@ -199,25 +184,19 @@ public class PlexDownloadClient : IDisposable
         }
 
         if (DownloadTask is not null)
-        {
             Log.Debug($"DownloadWorkers have been disposed for {DownloadTask.FullTitle}");
-        }
     }
 
     private Result<List<DownloadWorkerTask>> CreateDownloadWorkers(DownloadTask downloadTask)
     {
         if (downloadTask is null)
-        {
             return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
-        }
 
         if (!downloadTask.DownloadWorkerTasks.Any())
-        {
             return ResultExtensions.IsEmpty($"{nameof(downloadTask)}.{nameof(downloadTask.DownloadWorkerTasks)}").LogWarning();
-        }
 
         _downloadWorkers.AddRange(downloadTask.DownloadWorkerTasks
-                .Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask)));
+            .Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask)));
 
         return Result.Ok();
     }
@@ -225,18 +204,14 @@ public class PlexDownloadClient : IDisposable
     private void OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates)
     {
         if (_downloadTaskUpdate.IsDisposed || !downloadWorkerUpdates.Any())
-        {
             return;
-        }
 
         // Update every DownloadWorkerTask with the updated progress
         foreach (var downloadWorkerTask in downloadWorkerUpdates)
         {
             var i = DownloadTask.DownloadWorkerTasks.FindIndex(x => x.Id == downloadWorkerTask.Id);
             if (i > -1)
-            {
                 DownloadTask.DownloadWorkerTasks[i] = downloadWorkerTask;
-            }
         }
 
         DownloadTask.DataReceived = DownloadTask.DownloadWorkerTasks.Sum(x => x.BytesReceived);
@@ -259,9 +234,7 @@ public class PlexDownloadClient : IDisposable
         void SetDownloadSpeedLimit(int downloadSpeedLimitInKb)
         {
             foreach (var downloadWorker in _downloadWorkers)
-            {
                 downloadWorker.SetDownloadSpeedLimit(downloadSpeedLimitInKb / _downloadWorkers.Count);
-            }
         }
 
         SetDownloadSpeedLimit(_serverSettings.GetDownloadSpeedLimit(downloadTask.PlexServerId));

@@ -8,9 +8,7 @@ public class ValidateFilter : IActionFilter
     public void OnActionExecuting(ActionExecutingContext context)
     {
         if (!context.ModelState.IsValid)
-        {
             context.Result = context.ModelState.ToBadRequestResult();
-        }
     }
 
     public void OnActionExecuted(ActionExecutedContext context) { }

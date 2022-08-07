@@ -30,9 +30,7 @@ public class PathProvider : IPathProvider
         {
             var devRootPath = EnvironmentExtensions.GetDevelopmentRootPath();
             if (devRootPath is not null)
-            {
                 return devRootPath;
-            }
 
             switch (OsInfo.CurrentOS)
             {

@@ -24,9 +24,7 @@ public static class EnumerableExtensions
             if (children == null) continue;
 
             foreach (var child in children.Flatten(selectChildren))
-            {
                 yield return child;
-            }
         }
     }
 }

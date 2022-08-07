@@ -26,9 +26,7 @@ public class PlexRipperDatabaseService : IPlexRipperDatabaseService
     {
         Log.Information("Attempting to back-up the PlexRipper database");
         if (!_fileSystem.FileExists(_pathProvider.DatabasePath))
-        {
             return Result.Fail($"Could not find Database at path: {_pathProvider.DatabasePath}").LogError();
-        }
 
         var dbBackupName = $"BackUp_{_pathProvider.DatabaseName.Replace(".db", "")}_" +
                            $"{DateTime.Now.ToString("dd-MM-yyyy_hh-mm", CultureInfo.InvariantCulture)}.db";
@@ -43,9 +41,7 @@ public class PlexRipperDatabaseService : IPlexRipperDatabaseService
 
             var moveResult = _fileSystem.FileMove(_pathProvider.DatabasePath, dbBackUpPath);
             if (moveResult.IsFailed)
-            {
                 return moveResult;
-            }
         }
         catch (Exception e)
         {
@@ -61,9 +57,7 @@ public class PlexRipperDatabaseService : IPlexRipperDatabaseService
         Log.Information("Resetting PlexRipper database");
         var backupResult = BackUpDatabase();
         if (backupResult.IsFailed)
-        {
             return backupResult;
-        }
 
         return await _dbContext.SetupAsync();
     }
@@ -73,9 +67,7 @@ public class PlexRipperDatabaseService : IPlexRipperDatabaseService
         Log.Information("Setting up the PlexRipper database");
         var setupResult = await _dbContext.SetupAsync();
         if (setupResult.IsSuccess)
-        {
             return setupResult;
-        }
 
         Log.Warning("Failed to setup the database, will back-up and reset now.");
         return await ResetDatabase();

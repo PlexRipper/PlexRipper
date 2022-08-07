@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using PlexRipper.Application;
-using PlexRipper.PlexApi.Models;
 
 namespace PlexRipper.PlexApi.Services;
 
@@ -40,26 +39,24 @@ public class PlexApiService : IPlexApiService
 
     public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(string serverAuthToken, string plexFullHost, string plexLibraryKey)
     {
-        int stepSize = 5000;
+        var stepSize = 5000;
         var result = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexLibraryKey, 0, stepSize);
         if (result != null)
         {
-            List<Metadata> metaData = result.MediaContainer.Metadata;
-            int totalSize = result.MediaContainer.TotalSize;
+            var metaData = result.MediaContainer.Metadata;
+            var totalSize = result.MediaContainer.TotalSize;
             if (totalSize > stepSize)
             {
-                int loops = (int)Math.Ceiling(totalSize / (double)stepSize);
+                var loops = (int)Math.Ceiling(totalSize / (double)stepSize);
 
-                for (int i = 1; i < loops; i++)
+                for (var i = 1; i < loops; i++)
                 {
                     var rangeResult = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexLibraryKey, i * stepSize, stepSize);
                     if (rangeResult?.MediaContainer?.Metadata?.Count > 0)
-                    {
                         metaData.AddRange(rangeResult.MediaContainer.Metadata);
-                    }
                 }
 
-                bool success = metaData.Count == totalSize;
+                var success = metaData.Count == totalSize;
             }
 
             return Result.Ok(_mapper.Map<List<PlexTvShowEpisode>>(metaData));
@@ -68,14 +65,14 @@ public class PlexApiService : IPlexApiService
         return Result.Fail($"Failed to retrieve episodes for library with key {plexLibraryKey}");
     }
 
-    public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(string serverAuthToken, string plexFullHost,
+    public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
+        string serverAuthToken,
+        string plexFullHost,
         string plexLibraryKey)
     {
         var result = await _plexApi.GetAllSeasonsAsync(serverAuthToken, plexFullHost, plexLibraryKey);
         if (result != null)
-        {
             return Result.Ok(_mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata));
-        }
 
         return Result.Fail($"Failed to retrieve seasons for library with key {plexLibraryKey}");
     }
@@ -93,9 +90,7 @@ public class PlexApiService : IPlexApiService
         var plexLibraries = await GetLibrarySectionsAsync(authToken, plexLibrary.ServerUrl);
 
         if (plexLibraries.IsFailed)
-        {
             return plexLibraries.ToResult();
-        }
 
         var updatedPlexLibrary = plexLibraries.Value.Find(x => x.Key == plexLibrary.Key);
         updatedPlexLibrary.Id = plexLibrary.Id;
@@ -106,9 +101,7 @@ public class PlexApiService : IPlexApiService
         var result = await _plexApi.GetMetadataForLibraryAsync(authToken, plexLibrary.ServerUrl, plexLibrary.Key);
 
         if (result == null)
-        {
             return null;
-        }
 
         var mediaList = result.MediaContainer.Metadata;
 
@@ -174,9 +167,7 @@ public class PlexApiService : IPlexApiService
     {
         var result = await _plexApi.GetServerAsync(plexAccountToken);
         if (result != null)
-        {
             return _mapper.Map<List<PlexServer>>(result);
-        }
 
         Log.Warning("Failed to retrieve PlexServers");
         return new List<PlexServer>();

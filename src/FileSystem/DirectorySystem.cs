@@ -38,20 +38,14 @@ public class DirectorySystem : IDirectorySystem
     public Result CreateDirectoryFromFilePath(string filePath)
     {
         if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
-        {
             return Result.Fail("parameter filepath was empty");
-        }
 
         var directoryPathResult = _pathSystem.GetDirectoryName(filePath);
         if (directoryPathResult.IsFailed)
-        {
             return directoryPathResult.ToResult();
-        }
 
         if (string.IsNullOrEmpty(directoryPathResult.Value))
-        {
             return Result.Fail($"Could not determine the directory name of path: {filePath}");
-        }
 
         return Result.Ok(Directory.CreateDirectory(directoryPathResult.Value)).ToResult();
     }
@@ -61,23 +55,17 @@ public class DirectorySystem : IDirectorySystem
     {
         var directoryExistsResult = Exists(directory);
         if (directoryExistsResult.IsFailed)
-        {
             return directoryExistsResult.ToResult();
-        }
 
         if (directoryExistsResult.Value)
         {
             var di = new DirectoryInfo(directory);
 
-            foreach (FileInfo file in di.GetFiles())
-            {
+            foreach (var file in di.GetFiles())
                 file.Delete();
-            }
 
-            foreach (DirectoryInfo dir in di.GetDirectories())
-            {
+            foreach (var dir in di.GetDirectories())
                 dir.Delete(true);
-            }
 
             return Result.Ok();
         }
@@ -114,39 +102,27 @@ public class DirectorySystem : IDirectorySystem
     public Result DeleteDirectoryFromFilePath(string filePath)
     {
         if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
-        {
             return Result.Fail("Parameter filepath was empty").LogError();
-        }
 
         try
         {
             var directoryResult = _pathSystem.GetDirectoryName(filePath);
             if (directoryResult.IsFailed)
-            {
                 return directoryResult.ToResult();
-            }
 
             var directoryExistsResult = Exists(filePath);
             if (directoryExistsResult.IsFailed)
-            {
                 return directoryExistsResult.ToResult();
-            }
 
             var directoryHasFiles = GetFiles(directoryResult.Value);
             if (directoryHasFiles.IsFailed)
-            {
                 return directoryHasFiles.ToResult();
-            }
 
             // If the filePath is just an empty directory then delete that.
             if (!string.IsNullOrEmpty(directoryResult.Value) && directoryExistsResult.Value && !directoryHasFiles.Value.Any())
-            {
                 Delete(directoryResult.Value);
-            }
             else
-            {
                 return Result.Fail($"Could not determine the directory name of path: {filePath} or the path contains files").LogError();
-            }
         }
         catch (Exception e)
         {

@@ -15,24 +15,20 @@ public class LongValueConverter : JsonConverter<long>
             var value = -62135596800;
 
             // try to parse number directly from bytes
-            ReadOnlySpan<byte> span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
+            var span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
 
             // span.Length
-            if (Utf8Parser.TryParse(span, out long number, out int bytesConsumed) && span.Length == bytesConsumed)
+            if (Utf8Parser.TryParse(span, out long number, out var bytesConsumed) && span.Length == bytesConsumed)
             {
                 if (value >= -62135596800 && value <= 253402300799)
-                {
                     return number;
-                }
             }
 
             // try to parse from a string if the above failed, this covers cases with other escaped/UTF characters
             if (long.TryParse(reader.GetString(), out number))
             {
                 if (value >= -62135596800 && value <= 253402300799)
-                {
                     return number;
-                }
             }
         }
 
@@ -53,17 +49,13 @@ public class DoubleValueConverter : JsonConverter<double>
         if (reader.TokenType == JsonTokenType.String)
         {
             // try to parse number directly from bytes
-            ReadOnlySpan<byte> span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-            if (Utf8Parser.TryParse(span, out double number, out int bytesConsumed) && span.Length == bytesConsumed)
-            {
+            var span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
+            if (Utf8Parser.TryParse(span, out double number, out var bytesConsumed) && span.Length == bytesConsumed)
                 return number;
-            }
 
             // try to parse from a string if the above failed, this covers cases with other escaped/UTF characters
             if (double.TryParse(reader.GetString(), out number))
-            {
                 return number;
-            }
         }
 
         // fallback to default handling
@@ -83,17 +75,13 @@ public class IntValueConverter : JsonConverter<int>
         if (reader.TokenType == JsonTokenType.String)
         {
             // try to parse number directly from bytes
-            ReadOnlySpan<byte> span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-            if (Utf8Parser.TryParse(span, out int number, out int bytesConsumed) && span.Length == bytesConsumed)
-            {
+            var span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
+            if (Utf8Parser.TryParse(span, out int number, out var bytesConsumed) && span.Length == bytesConsumed)
                 return number;
-            }
 
             // try to parse from a string if the above failed, this covers cases with other escaped/UTF characters
             if (int.TryParse(reader.GetString(), out number))
-            {
                 return number;
-            }
         }
 
         // fallback to default handling
@@ -114,22 +102,16 @@ public class BooleanValueConverter : JsonConverter<bool>
         {
             if (string.Equals("1", reader.GetString(), StringComparison.OrdinalIgnoreCase) ||
                 string.Equals("0", reader.GetString(), StringComparison.OrdinalIgnoreCase))
-            {
                 return Convert.ToBoolean(Convert.ToInt16(reader.GetString()));
-            }
 
             // try to parse number directly from bytes
-            ReadOnlySpan<byte> span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-            if (Utf8Parser.TryParse(span, out bool boolean, out int bytesConsumed) && span.Length == bytesConsumed)
-            {
+            var span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
+            if (Utf8Parser.TryParse(span, out bool boolean, out var bytesConsumed) && span.Length == bytesConsumed)
                 return boolean;
-            }
 
             // try to parse from a string if the above failed, this covers cases with other escaped/UTF characters
             if (bool.TryParse(reader.GetString(), out boolean))
-            {
                 return boolean;
-            }
         }
 
         // fallback to default handling

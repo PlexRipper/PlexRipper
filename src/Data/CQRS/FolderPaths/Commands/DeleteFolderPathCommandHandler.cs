@@ -22,9 +22,7 @@ public class DeleteFolderPathHandler : BaseHandler, IRequestHandler<DeleteFolder
         var folderPath = await _dbContext.FolderPaths.AsTracking().FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
 
         if (folderPath == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(FolderPath), command.Id);
-        }
 
         _dbContext.FolderPaths.Remove(folderPath);
         await _dbContext.SaveChangesAsync(cancellationToken);

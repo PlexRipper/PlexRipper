@@ -54,10 +54,11 @@ public class DownloadSubscriptions : IDownloadSubscriptions
 
         // On big events send and extra update to front-end to minimize the delay
         Observable.Merge(new[]
-        {
-            _downloadTracker.DownloadTaskStart,
-            _downloadTracker.DownloadTaskFinished,
-        }).SubscribeAsync(downloadTask => _downloadProgressScheduler.FireDownloadProgressJob(downloadTask.PlexServerId));
+            {
+                _downloadTracker.DownloadTaskStart,
+                _downloadTracker.DownloadTaskFinished,
+            })
+            .SubscribeAsync(downloadTask => _downloadProgressScheduler.FireDownloadProgressJob(downloadTask.PlexServerId));
 
         _fileMerger
             .FileMergeCompletedObservable
@@ -86,9 +87,7 @@ public class DownloadSubscriptions : IDownloadSubscriptions
 
         var updateResult = await _mediator.Send(new UpdateRootDownloadStatusOfDownloadTaskCommand(rootDownloadTaskIdResult.Value));
         if (updateResult.IsFailed)
-        {
             updateResult.LogError();
-        }
 
         await _downloadProgressScheduler.FireDownloadProgressJob(task.PlexServerId);
     }
@@ -97,9 +96,7 @@ public class DownloadSubscriptions : IDownloadSubscriptions
     {
         var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { downloadTask }));
         if (updateResult.IsFailed)
-        {
             updateResult.LogError();
-        }
 
         return updateResult;
     }
@@ -108,9 +105,7 @@ public class DownloadSubscriptions : IDownloadSubscriptions
     {
         var updateResult = await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasks));
         if (updateResult.IsFailed)
-        {
             updateResult.LogError();
-        }
     }
 
     private async Task OnFileMergeProgress(FileMergeProgress progress)
@@ -131,9 +126,7 @@ public class DownloadSubscriptions : IDownloadSubscriptions
         downloadTask.DownloadSpeed = progress.TransferSpeed;
 
         if (progress.Percentage >= 100)
-        {
             downloadTask.DownloadStatus = DownloadStatus.Completed;
-        }
 
         await UpdateDownloadTaskAsync(downloadTask);
     }
@@ -155,9 +148,7 @@ public class DownloadSubscriptions : IDownloadSubscriptions
         await UpdateDownloadTaskAsync(downloadTask);
         var addFileTaskResult = await _fileMerger.AddFileTaskFromDownloadTask(downloadTask.Id);
         if (addFileTaskResult.IsFailed)
-        {
             addFileTaskResult.LogError();
-        }
 
         Log.Information($"The download of {downloadTask.Title} has finished!");
         await _downloadQueue.CheckDownloadQueue(new List<int> { downloadTask.PlexServerId });

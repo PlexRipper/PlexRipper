@@ -89,7 +89,7 @@ public static partial class FakeData
         var rnd = new Random(config.Seed);
         while (true)
         {
-            int value = rnd.Next(1, 10000000);
+            var value = rnd.Next(1, 10000000);
             if (!alreadyGenerated.Contains(value))
             {
                 alreadyGenerated.Add(value);

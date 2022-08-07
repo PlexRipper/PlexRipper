@@ -43,46 +43,34 @@ public class PlexServerService : IPlexServerService
     public async Task<Result<List<PlexServer>>> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount)
     {
         if (plexAccount == null)
-        {
             return Result.Fail("plexAccount was null").LogWarning();
-        }
 
         Log.Debug($"Refreshing Plex servers for PlexAccount: {plexAccount.Id}");
 
         var token = await _plexAuthenticationService.GetPlexApiTokenAsync(plexAccount);
 
         if (string.IsNullOrEmpty(token))
-        {
             return Result.Fail("Token was empty").LogWarning();
-        }
 
         var serverList = await _plexServiceApi.GetServersAsync(token);
 
         if (!serverList.Any())
-        {
             return Result.Ok();
-        }
 
         // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
         serverList.ForEach(plexServer =>
         {
             if (plexServer.OwnerId == 0)
-            {
                 plexServer.OwnerId = plexAccount.PlexId;
-            }
 
             if (plexServer.Port == 443 && plexServer.Scheme == "http")
-            {
                 plexServer.Scheme = "https";
-            }
         });
 
         // Add initial entry for the plex servers
         var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(plexAccount, serverList));
         if (updateResult.IsFailed)
-        {
             return updateResult;
-        }
 
         _serverSettingsModule.EnsureAllServersHaveASettingsEntry(serverList);
 
@@ -93,9 +81,7 @@ public class PlexServerService : IPlexServerService
     {
         var plexServersResult = await GetAllPlexServersAsync(false);
         if (plexServersResult.IsFailed)
-        {
             return plexServersResult.ToResult();
-        }
 
         return await SyncPlexServers(plexServersResult.Value.Select(x => x.Id).ToList());
     }
@@ -108,9 +94,7 @@ public class PlexServerService : IPlexServerService
         {
             var result = await SyncPlexServer(plexServerId, forceSync);
             if (result.IsFailed)
-            {
                 results.Add(result);
-            }
         }
 
         if (results.Any())
@@ -127,9 +111,7 @@ public class PlexServerService : IPlexServerService
     public async Task<Result> SyncPlexServer(int plexServerId, bool forceSync = false)
     {
         if (_currentSyncingPlexServers.Contains(plexServerId))
-        {
             return Result.Ok($"PlexServer with id {plexServerId} is already syncing").LogWarning().ToResult();
-        }
 
         _currentSyncingPlexServers.Add(plexServerId);
 
@@ -152,7 +134,8 @@ public class PlexServerService : IPlexServerService
         if (!plexLibraries.Any())
         {
             _currentSyncingPlexServers.Remove(plexServerId);
-            return Result.Ok().WithReason(new Success($"PlexServer {plexServer.Name} with id {plexServer.Id} has no libraries to sync"))
+            return Result.Ok()
+                .WithReason(new Success($"PlexServer {plexServer.Name} with id {plexServer.Id} has no libraries to sync"))
                 .LogInformation();
         }
 
@@ -166,13 +149,9 @@ public class PlexServerService : IPlexServerService
         {
             var i = progressList.FindIndex(x => x.Id == libraryProgress.Id);
             if (i != -1)
-            {
                 progressList[i] = libraryProgress;
-            }
             else
-            {
                 progressList.Add(libraryProgress);
-            }
 
             _signalRService.SendServerSyncProgressUpdate(new SyncServerProgress(plexServerId, progressList));
         });
@@ -182,18 +161,14 @@ public class PlexServerService : IPlexServerService
         {
             var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id, progress);
             if (result.IsFailed)
-            {
                 results.Add(result.ToResult());
-            }
         }
 
         foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.TvShow))
         {
             var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id, progress);
             if (result.IsFailed)
-            {
                 results.Add(result.ToResult());
-            }
         }
 
         if (results.Any())
@@ -218,9 +193,7 @@ public class PlexServerService : IPlexServerService
     {
         var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId, true));
         if (plexAccountResult.IsFailed)
-        {
             return plexAccountResult.WithError($"Could not retrieve any PlexAccount from database with id {plexAccountId}.").LogError();
-        }
 
         var plexServers = plexAccountResult.Value.PlexServers;
 
@@ -311,22 +284,21 @@ public class PlexServerService : IPlexServerService
         // Get plexServer entity
         var plexServer = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId));
         if (plexServer.IsFailed)
-        {
             return plexServer.ToResult();
-        }
 
         return await CheckPlexServerStatusAsync(plexServer.Value, plexAccountId, trimEntries);
     }
 
-    public async Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(PlexServer plexServer, int plexAccountId = 0, bool trimEntries = true,
+    public async Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(
+        PlexServer plexServer,
+        int plexAccountId = 0,
+        bool trimEntries = true,
         Action<PlexApiClientProgress> progressAction = null)
     {
         // Get plexServer authToken
         var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id, plexAccountId);
         if (authToken.IsFailed)
-        {
             return authToken.ToResult();
-        }
 
         // Request status
         var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.ServerUrl, progressAction);
@@ -336,18 +308,14 @@ public class PlexServerService : IPlexServerService
         // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
         var result = await _mediator.Send(new CreatePlexServerStatusCommand(serverStatus));
         if (result.IsFailed)
-        {
             return result.ToResult();
-        }
 
         if (trimEntries)
         {
             // Ensure that there are not too many PlexServerStatuses stored.
             var trimResult = await _mediator.Send(new TrimPlexServerStatusCommand(plexServer.Id));
             if (trimResult.IsFailed)
-            {
                 return trimResult.ToResult();
-            }
         }
 
         return await _mediator.Send(new GetPlexServerStatusByIdQuery(result.Value));

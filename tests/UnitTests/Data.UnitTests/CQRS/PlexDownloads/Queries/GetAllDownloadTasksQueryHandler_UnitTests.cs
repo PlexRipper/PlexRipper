@@ -31,11 +31,12 @@ public class GetAllDownloadTasksQueryHandler_UnitTests
     public async Task ShouldReturnMovieDownloadTasks_WhenMovieDownloadTasksAreInDB()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext().Setup(config =>
-        {
-            config.Seed = 21467;
-            config.MovieDownloadTasksCount = 10;
-        });
+        await using var context = await MockDatabase.GetMemoryDbContext()
+            .Setup(config =>
+            {
+                config.Seed = 21467;
+                config.MovieDownloadTasksCount = 10;
+            });
         var handle = new GetAllDownloadTasksQueryHandler(context);
         var request = new GetAllDownloadTasksQuery();
 
@@ -59,14 +60,15 @@ public class GetAllDownloadTasksQueryHandler_UnitTests
     public async Task ShouldAllTvShowDownloadTasksWithAllIncludes_WhenTvShowDownloadTasksAreInDB()
     {
         // Arrange
-        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
-        {
-            config.Seed = 2767;
-            config.TvShowDownloadTasksCount = 5;
-            config.TvShowSeasonDownloadTasksCount = 5;
-            config.TvShowEpisodeDownloadTasksCount = 5;
-            config.LibraryType = PlexMediaType.TvShow;
-        });
+        await using var context = await MockDatabase.GetMemoryDbContext()
+            .Setup(config =>
+            {
+                config.Seed = 2767;
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+                config.LibraryType = PlexMediaType.TvShow;
+            });
         var handle = new GetAllDownloadTasksQueryHandler(context);
         var request = new GetAllDownloadTasksQuery();
 
@@ -88,9 +90,7 @@ public class GetAllDownloadTasksQueryHandler_UnitTests
                 downloadTask.DownloadFolder.ShouldNotBeNull();
                 downloadTask.DestinationFolder.ShouldNotBeNull();
                 if (downloadTask.Children.Any())
-                {
                     ValidateDownloadTasks(downloadTask.Children);
-                }
             }
         }
 

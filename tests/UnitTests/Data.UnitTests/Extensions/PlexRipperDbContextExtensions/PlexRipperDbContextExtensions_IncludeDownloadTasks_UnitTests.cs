@@ -1,5 +1,4 @@
-﻿using PlexRipper.Data;
-using PlexRipper.Data.Common;
+﻿using PlexRipper.Data.Common;
 
 namespace Data.UnitTests.Extensions;
 
@@ -14,10 +13,7 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests
     public async Task ShouldHaveAllMovieDownloadTaskChildrenIncluded_WhenDbContainsNestedDownloadTasks()
     {
         // Arrange
-        await using PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config =>
-        {
-            config.MovieDownloadTasksCount = 5;
-        });
+        await using var context = await MockDatabase.GetMemoryDbContext().Setup(config => config.MovieDownloadTasksCount = 5);
 
         // Act
         var downloadTasks = context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();
@@ -35,13 +31,14 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests
     public async Task ShouldHaveAllTvShowDownloadTaskChildrenIncluded_WhenDbContainsNestedDownloadTasks()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext().Setup(config =>
-        {
-            config.Seed = 3535;
-            config.TvShowDownloadTasksCount = 5;
-            config.TvShowSeasonDownloadTasksCount = 5;
-            config.TvShowEpisodeDownloadTasksCount = 5;
-        });
+        await using var context = await MockDatabase.GetMemoryDbContext()
+            .Setup(config =>
+            {
+                config.Seed = 3535;
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            });
 
         // Act
         var downloadTasksDb = context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();
@@ -55,13 +52,14 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests
     public async Task ShouldHaveAllNestedRelationshipsIncluded_WhenGivenTvShowDownloadTasks()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext().Setup(config =>
-        {
-            config.Seed = 3882;
-            config.TvShowDownloadTasksCount = 5;
-            config.TvShowSeasonDownloadTasksCount = 5;
-            config.TvShowEpisodeDownloadTasksCount = 5;
-        });
+        await using var context = await MockDatabase.GetMemoryDbContext()
+            .Setup(config =>
+            {
+                config.Seed = 3882;
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            });
 
         // Act
         var downloadTasksDb = context.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();
@@ -93,9 +91,7 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests
                 downloadTask.DownloadFolder.ShouldNotBeNull();
                 downloadTask.DestinationFolder.ShouldNotBeNull();
                 if (downloadTask.Children.Any())
-                {
                     CheckChildren(downloadTask.Children);
-                }
             }
         }
 

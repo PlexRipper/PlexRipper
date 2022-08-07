@@ -27,17 +27,13 @@ public class GetPlexServerTokenHandler : BaseHandler, IRequestHandler<GetPlexSer
 
             // Check if we have access with a non-main account
             if (nonMainServerToken != null)
-            {
                 return Result.Ok(nonMainServerToken.AuthToken);
-            }
 
             // Fallback to a main-account access
             var mainServerToken = await _dbContext.PlexAccountServers.Include(x => x.PlexAccount)
                 .FirstOrDefaultAsync(x => x.PlexServerId == request.PlexServerId);
             if (mainServerToken != null)
-            {
                 return Result.Ok(mainServerToken.AuthToken);
-            }
 
             return Result.Fail($"Could not find any authenticationToken for PlexServer with id: {request.PlexServerId}").LogError();
         }
@@ -46,9 +42,7 @@ public class GetPlexServerTokenHandler : BaseHandler, IRequestHandler<GetPlexSer
             x => x.PlexAccountId == request.PlexAccountId && x.PlexServerId == request.PlexServerId, cancellationToken);
 
         if (authToken != null)
-        {
             return Result.Ok(authToken.AuthToken);
-        }
 
         return Result.Fail(new Error(
             $"Could not find an authenticationToken for PlexAccount with id: {request.PlexAccountId} and PlexServer with id: {request.PlexServerId}"));

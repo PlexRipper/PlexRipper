@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.Asserts;
-using PlexRipper.Data;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Config;
@@ -34,7 +33,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
     public async Task ShouldGenerateValidTvShowDownloadTaskWithEpisodeDownloadTask_WhenNoDownloadTasksExist()
     {
         // Arrange
-        PlexRipperDbContext context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.TvShowCount = 5; });
+        var context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.TvShowCount = 5; });
         var tvShows = await context.PlexTvShows.IncludeAll().ToListAsync();
 
         using var mock = AutoMock.GetStrict().AddMapper();
@@ -81,18 +80,19 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>
                 Result.Ok(context.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
 
-        mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>).ReturnsAsync((GetDownloadTaskByMediaKeyQuery query, CancellationToken _) =>
-        {
-            // We create the downloadTask tvShow to pretend the parent already exists and the episode and season need to be created.
-            if (query.MediaKey == tvShowDb.Key)
+        mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>)
+            .ReturnsAsync((GetDownloadTaskByMediaKeyQuery query, CancellationToken _) =>
             {
-                var result = MapperSetup.CreateMapper().Map<DownloadTask>(tvShowDb);
-                result.Id = 999;
-                return Result.Ok(result);
-            }
+                // We create the downloadTask tvShow to pretend the parent already exists and the episode and season need to be created.
+                if (query.MediaKey == tvShowDb.Key)
+                {
+                    var result = MapperSetup.CreateMapper().Map<DownloadTask>(tvShowDb);
+                    result.Id = 999;
+                    return Result.Ok(result);
+                }
 
-            return Result.Fail("");
-        });
+                return Result.Fail("");
+            });
 
         // Act
         var _sut = mock.Create<DownloadTaskFactory>();

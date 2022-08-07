@@ -40,7 +40,10 @@ public class FileMerger : IFileMerger
 
     #region Constructors
 
-    public FileMerger(IMediator mediator, IFileMergeSystem fileMergeSystem, INotificationsService notificationsService,
+    public FileMerger(
+        IMediator mediator,
+        IFileMergeSystem fileMergeSystem,
+        INotificationsService notificationsService,
         IFileMergeStreamProvider fileMergeStreamProvider)
     {
         _mediator = mediator;
@@ -82,18 +85,16 @@ public class FileMerger : IFileMerger
             _fileMergeStartSubject.OnNext(fileTask);
 
             foreach (var path in fileTask.FilePaths)
-            {
                 if (!_fileMergeSystem.FileExists(path))
                 {
                     var result = Result.Fail($"Filepath: {path} does not exist and cannot be used to merge/move the file!").LogError();
                     await _notificationsService.SendResult(result);
                     return;
                 }
-            }
 
             var transferStarted = DateTime.UtcNow;
             var _timeContext = new EventLoopScheduler();
-            Subject<long> _bytesReceivedProgress = new Subject<long>();
+            var _bytesReceivedProgress = new Subject<long>();
             var lastProgress = new FileMergeProgress();
 
             // Create FileMergeProgress from bytes received progress
@@ -102,7 +103,7 @@ public class FileMerger : IFileMerger
                 .Sample(TimeSpan.FromSeconds(1), _timeContext)
                 .Select(dataTransferred =>
                 {
-                    TimeSpan ElapsedTime = DateTime.UtcNow.Subtract(transferStarted);
+                    var ElapsedTime = DateTime.UtcNow.Subtract(transferStarted);
                     lastProgress = new FileMergeProgress
                     {
                         Id = fileTask.Id,
@@ -129,9 +130,7 @@ public class FileMerger : IFileMerger
                 // Merge files
                 var outputStream = streamResult.Value;
                 if (EnvironmentExtensions.IsIntegrationTestMode())
-                {
                     outputStream = new ThrottledStream(streamResult.Value, 5000);
-                }
 
                 Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
 
@@ -165,9 +164,7 @@ public class FileMerger : IFileMerger
         _copyTask = Task.Factory.StartNew(ExecuteFileTasks, TaskCreationOptions.LongRunning);
 
         if (_copyTask.IsFaulted)
-        {
             return Result.Fail("ExecuteFileTasks failed due to an error").LogError();
-        }
 
         await ResumeFileTasks();
 
@@ -179,9 +176,7 @@ public class FileMerger : IFileMerger
         var fileTasksResult = await _mediator.Send(new GetAllFileTasksQuery());
 
         foreach (var downloadFileTask in fileTasksResult.Value)
-        {
             await _channel.Writer.WriteAsync(downloadFileTask);
-        }
     }
 
     /// <summary>
@@ -200,9 +195,7 @@ public class FileMerger : IFileMerger
         Log.Debug($"Adding DownloadTask {downloadTask.Value.Title} to a FileTask to be merged");
         var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask.Value));
         if (result.IsFailed)
-        {
             return result.ToResult().LogError();
-        }
 
         var fileTask = await _mediator.Send(new GetFileTaskByIdQuery(result.Value));
         if (fileTask.IsFailed)

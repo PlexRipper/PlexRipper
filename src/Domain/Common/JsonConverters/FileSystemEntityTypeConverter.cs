@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace PlexRipper.Domain;
 
-public class FileSystemEntityTypeConverter: JsonConverter<FileSystemEntityType>
+public class FileSystemEntityTypeConverter : JsonConverter<FileSystemEntityType>
 {
     public override FileSystemEntityType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

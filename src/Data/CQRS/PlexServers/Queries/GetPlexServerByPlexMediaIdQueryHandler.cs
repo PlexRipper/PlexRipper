@@ -58,9 +58,7 @@ public class GetPlexServerByPlexMediaIdQueryHandler : BaseHandler, IRequestHandl
         }
 
         if (plexServer != null)
-        {
             return Result.Ok(plexServer);
-        }
 
         return Result.Fail($"Could not retrieve the PlexServer for mediaId {request.MediaId} with type {request.PlexMediaType}");
     }

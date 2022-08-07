@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager.DownloadClient;
-using Module = Autofac.Module;
 
 namespace PlexRipper.DownloadManager;
 

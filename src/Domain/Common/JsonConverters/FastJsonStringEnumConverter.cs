@@ -27,32 +27,21 @@ public class FastJsonStringEnumConverter : JsonConverterFactory
     public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
         if (typeToConvert == typeof(DownloadStatus))
-        {
             return new DownloadStatusConverter();
-        }
         else if (typeToConvert == typeof(FileSystemEntityType))
-        {
             return new FileSystemEntityTypeConverter();
-        }
         else if (typeToConvert == typeof(FolderType))
-        {
             return new FolderTypeConverter();
-        }
         else if (typeToConvert == typeof(NotificationLevel))
-        {
             return new NotificationLevelConverter();
-        }
         else if (typeToConvert == typeof(PlexMediaType))
-        {
             return new PlexMediaTypeConverter();
-        }
         else if (typeToConvert == typeof(ViewMode))
-        {
             return new ViewModeConverter();
-        }
         else
         {
-            var ex = new NotSupportedException("CreateConverter got called on type that this converter factory doesn't support");
+            var ex = new NotSupportedException(
+                "CreateConverter got called on type that this converter factory doesn't support");
             Log.Error(ex);
             throw ex;
         }

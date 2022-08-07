@@ -12,7 +12,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests
     private List<DownloadTask> TestDownloadTasks(int count)
     {
         var downloadTasks = new List<DownloadTask>();
-        int index = 1;
+        var index = 1;
         for (var i = 0; i < count; i++)
         {
             var downloadTask_i = new DownloadTask

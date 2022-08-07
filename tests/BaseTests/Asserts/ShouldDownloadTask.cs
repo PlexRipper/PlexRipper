@@ -109,11 +109,11 @@ public static class ShouldDownloadTask
         if (plexMediaDataParts.Count > 1)
         {
             source.Children.Count.ShouldBeGreaterThan(0);
-            for (int m = 0; m < target.EpisodeData.Count; m++)
+            for (var m = 0; m < target.EpisodeData.Count; m++)
             {
                 var tvShowEpisodeData = target.EpisodeData[m];
 
-                for (int l = 0; l < plexMediaDataParts.Count; l++)
+                for (var l = 0; l < plexMediaDataParts.Count; l++)
                 {
                     var episodeDataPartDownloadTask = source.Children[m + l];
 

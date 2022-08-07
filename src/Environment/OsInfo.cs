@@ -31,13 +31,9 @@ public static class OsInfo
                 if (Directory.Exists("/System/Library/CoreServices/") &&
                     (File.Exists("/System/Library/CoreServices/SystemVersion.plist") ||
                      File.Exists("/System/Library/CoreServices/ServerVersion.plist")))
-                {
                     CurrentOS = OperatingSystemPlatform.Osx;
-                }
                 else
-                {
                     CurrentOS = OperatingSystemPlatform.Linux;
-                }
 
                 break;
             }

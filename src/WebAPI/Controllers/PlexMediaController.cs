@@ -16,8 +16,12 @@ public class PlexMediaController : BaseController
 
     private readonly IPlexMediaService _plexMediaService;
 
-    public PlexMediaController(IMapper mapper, INotificationsService notificationsService, IPlexTvShowService plexTvShowService,
-        IPlexMovieService plexMovieService, IPlexMediaService plexMediaService) : base(
+    public PlexMediaController(
+        IMapper mapper,
+        INotificationsService notificationsService,
+        IPlexTvShowService plexTvShowService,
+        IPlexMovieService plexMovieService,
+        IPlexMediaService plexMediaService) : base(
         mapper, notificationsService)
     {
         _plexTvShowService = plexTvShowService;
@@ -34,9 +38,7 @@ public class PlexMediaController : BaseController
     public async Task<IActionResult> GetTvShow(int id)
     {
         if (id <= 0)
-        {
             return BadRequest(id, nameof(id));
-        }
 
         var data = await _plexTvShowService.GetTvShow(id);
         return ToActionResult<PlexTvShow, PlexMediaDTO>(data);
@@ -51,18 +53,14 @@ public class PlexMediaController : BaseController
     public async Task<IActionResult> GetThumb(int plexMediaId, PlexMediaType plexMediaType, int width, int height)
     {
         if (plexMediaId == 0)
-        {
             return BadRequestInvalidId();
-        }
 
         var result = await _plexMediaService.GetThumbnailImage(plexMediaId, plexMediaType, width, height);
 
         if (result.IsSuccess)
         {
             if (result.Value.Any())
-            {
                 return File(result.Value, "image/jpeg");
-            }
 
             return NoContent();
         }
@@ -78,18 +76,14 @@ public class PlexMediaController : BaseController
     public async Task<IActionResult> GetBanner(int plexMediaId, PlexMediaType plexMediaType, int width, int height)
     {
         if (plexMediaId == 0)
-        {
             return BadRequestInvalidId();
-        }
 
         var result = await _plexMediaService.GetBannerImage(plexMediaId, plexMediaType, width, height);
 
         if (result.IsSuccess)
         {
             if (result.Value.Any())
-            {
                 return File(result.Value, "image/jpeg");
-            }
 
             return NoContent();
         }

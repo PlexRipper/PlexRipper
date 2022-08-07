@@ -6,10 +6,8 @@ public class StringToDateTimeUtc : IValueConverter<string, DateTime?>
 {
     public DateTime? Convert(string sourceMember, ResolutionContext context)
     {
-        if (DateTime.TryParse(sourceMember, out DateTime dateTimeResult))
-        {
+        if (DateTime.TryParse(sourceMember, out var dateTimeResult))
             return dateTimeResult;
-        }
 
         return null;
     }

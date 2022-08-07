@@ -38,18 +38,14 @@ public class DownloadFileStream : IDownloadFileStream
 
             var filePath = _pathSystem.Combine(directory, fileName);
             if (filePath.IsFailed)
-            {
                 return filePath.ToResult();
-            }
 
             Stream fileStream;
             if (_fileSystem.FileExists(filePath.Value))
             {
                 var openResult = _fileSystem.Open(filePath.Value, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete);
                 if (openResult.IsFailed)
-                {
                     return openResult.ToResult().LogError();
-                }
 
                 fileStream = openResult.Value;
             }
@@ -57,9 +53,7 @@ public class DownloadFileStream : IDownloadFileStream
             {
                 var createResult = _fileSystem.Create(filePath.Value, 2048, FileOptions.Asynchronous);
                 if (createResult.IsFailed)
-                {
                     return createResult.ToResult().LogError();
-                }
 
                 fileStream = createResult.Value;
             }

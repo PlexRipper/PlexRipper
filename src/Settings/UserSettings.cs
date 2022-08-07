@@ -155,9 +155,7 @@ public class UserSettings : IUserSettings
         };
 
         if (results.Any(x => x.IsFailed))
-        {
             return Result.Fail("Failed to set from json object").AddNestedErrors(results.SelectMany(x => x.Errors).ToList());
-        }
 
         return Result.Ok();
     }

@@ -32,6 +32,6 @@ public class DomainMappingProfile : Profile
 
     private static int ToInt(string stringInt)
     {
-        return int.TryParse(stringInt, out int x) ? x : 0;
+        return int.TryParse(stringInt, out var x) ? x : 0;
     }
 }

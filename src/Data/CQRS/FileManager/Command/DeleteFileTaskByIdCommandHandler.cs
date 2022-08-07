@@ -19,12 +19,11 @@ public class DeleteFileTaskByIdHandler : BaseHandler, IRequestHandler<DeleteFile
 
     public async Task<Result> Handle(DeleteFileTaskByIdCommand command, CancellationToken cancellationToken)
     {
-        var downloadFileTask = await _dbContext.FileTasks.AsTracking().FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
+        var downloadFileTask = await _dbContext.FileTasks.AsTracking()
+            .FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
 
         if (downloadFileTask == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(DownloadFileTask), command.Id);
-        }
 
         _dbContext.FileTasks.Remove(downloadFileTask);
         await _dbContext.SaveChangesAsync(cancellationToken);

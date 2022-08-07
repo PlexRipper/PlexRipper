@@ -11,5 +11,4 @@ public class ConfirmationSettings : IConfirmationSettings
     public bool AskDownloadSeasonConfirmation { get; set; }
 
     public bool AskDownloadEpisodeConfirmation { get; set; }
-
 }

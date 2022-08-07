@@ -2,7 +2,9 @@
 
 public class PlexTvShowService : PlexMediaService, IPlexTvShowService
 {
-    public PlexTvShowService(IMediator mediator, IPlexAuthenticationService plexAuthenticationService,
+    public PlexTvShowService(
+        IMediator mediator,
+        IPlexAuthenticationService plexAuthenticationService,
         IPlexApiService plexServiceApi) : base(mediator, plexAuthenticationService, plexServiceApi) { }
 
     public async Task<Result<PlexTvShow>> GetTvShow(int id)

@@ -31,8 +31,11 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
         return _fileSystem.Create(destinationDirectory, 4096, FileOptions.SequentialScan);
     }
 
-    public async Task MergeFiles(List<string> filePaths, Stream destination, Subject<long> bytesReceivedProgress,
-        CancellationToken cancellationToken = default(CancellationToken))
+    public async Task MergeFiles(
+        List<string> filePaths,
+        Stream destination,
+        Subject<long> bytesReceivedProgress,
+        CancellationToken cancellationToken = default)
     {
         long totalRead = 0;
         foreach (var filePath in filePaths)

@@ -26,9 +26,7 @@ public class ValidationPipeline<TRequest, TResponse> : IPipelineBehavior<TReques
             var result = new TResponse();
             var error = ResultExtensions.Create400BadRequestResult("Fluent Validation Pipeline Failed.").Errors.First();
             foreach (var reason in fluentValidationResult.Errors)
-            {
                 error.Reasons.Add(new Error(reason.ErrorMessage));
-            }
 
             result.Reasons.Add(error);
             return result;

@@ -1,9 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using Environment;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using Xunit.Abstractions;
+// ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
 namespace Logging;
 
@@ -66,7 +67,8 @@ public static class Log
 
     #endregion
 
-    public static void DbContextLogger(string message,
+    public static void DbContextLogger(
+        string message,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "")
     {
@@ -197,7 +199,8 @@ public static class Log
 
     #region Warning
 
-    public static void Warning(string message,
+    public static void Warning(
+        string message,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "")
     {

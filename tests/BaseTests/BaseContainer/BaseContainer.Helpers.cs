@@ -12,13 +12,11 @@ public partial class BaseContainer
 
         var plexServers = await PlexRipperDbContext.PlexServers.ToListAsync();
         foreach (var plexServer in plexServers)
-        {
             GetServerSettings.AddServerToSettings(new PlexServerSettingsModel
             {
                 PlexServerId = plexServer.Id,
                 MachineIdentifier = plexServer.MachineIdentifier,
                 DownloadSpeedLimit = config.DownloadSpeedLimit,
             });
-        }
     }
 }

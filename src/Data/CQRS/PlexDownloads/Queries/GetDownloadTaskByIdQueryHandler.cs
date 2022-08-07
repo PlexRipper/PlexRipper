@@ -21,6 +21,7 @@ public class GetDownloadTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetD
     {
         var query = DownloadTasksQueryable;
 
+// @formatter:off
         if (request.IncludeChildren)
         {
             query = query.AsTracking()
@@ -77,9 +78,8 @@ public class GetDownloadTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetD
                 .ThenInclude(x => x.Children).ThenInclude(x => x.DownloadFolder)
                 .Include(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children).ThenInclude(x => x.Children)
                 .ThenInclude(x => x.Children).ThenInclude(x => x.DownloadWorkerTasks);
-
-
         }
+// @formatter:on
 
         var downloadTask = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 

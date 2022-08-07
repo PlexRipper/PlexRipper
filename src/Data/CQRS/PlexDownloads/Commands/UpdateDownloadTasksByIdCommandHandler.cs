@@ -30,7 +30,8 @@ public class UpdateDownloadTasksByIdCommandValidator : AbstractValidator<UpdateD
 
                 x.RuleFor(y => y.DownloadFolderId).GreaterThan(0);
                 x.RuleFor(y => y.DestinationFolderId).GreaterThan(0);
-            }).OverridePropertyName("Children");
+            })
+            .OverridePropertyName("Children");
     }
 }
 

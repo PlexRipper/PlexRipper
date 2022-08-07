@@ -5,7 +5,7 @@ namespace PlexRipper.FileSystem;
 
 public class DiskProvider : IDiskProvider
 {
-    private readonly HashSet<string> _setToRemove = new HashSet<string>
+    private readonly HashSet<string> _setToRemove = new()
     {
         // Windows
         "boot",
@@ -45,9 +45,7 @@ public class DiskProvider : IDiskProvider
             result.Directories = GetDirectories(path);
 
             if (includeFiles)
-            {
                 result.Files = GetFiles(path);
-            }
         }
 
         catch (DirectoryNotFoundException)
@@ -79,17 +77,13 @@ public class DiskProvider : IDiskProvider
             var parent = di.Parent.FullName;
 
             if (parent.Last() != Path.DirectorySeparatorChar)
-            {
                 parent += Path.DirectorySeparatorChar;
-            }
 
             return parent;
         }
 
         if (!path.Equals("/"))
-        {
             return string.Empty;
-        }
 
         return null;
     }
@@ -131,9 +125,7 @@ public class DiskProvider : IDiskProvider
     public string GetDirectoryPath(string path)
     {
         if (path.Last() != Path.DirectorySeparatorChar)
-        {
             path += Path.DirectorySeparatorChar;
-        }
 
         return path;
     }
@@ -164,7 +156,8 @@ public class DiskProvider : IDiskProvider
 
     protected virtual List<IMount> GetAllMounts()
     {
-        return GetDriveInfoMounts().Where(d =>
+        return GetDriveInfoMounts()
+            .Where(d =>
                 d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Network || d.DriveType == DriveType.Removable)
             .Select(d => new DriveInfoMount(d))
             .Cast<IMount>()
@@ -181,9 +174,7 @@ public class DiskProvider : IDiskProvider
     public string GetVolumeName(IMount mountInfo)
     {
         if (string.IsNullOrWhiteSpace(mountInfo.VolumeLabel))
-        {
             return mountInfo.Name;
-        }
 
         return $"{mountInfo.Name} ({mountInfo.VolumeLabel})";
     }

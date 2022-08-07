@@ -17,20 +17,12 @@ public static partial class ResultExtensions
     public static bool HasStatusCode(this Result result, int statusCode = 0)
     {
         if (result is null)
-        {
             return false;
-        }
 
         foreach (var reason in result.Reasons)
-        {
-            foreach (var (key, metaData) in reason.Metadata)
-            {
-                if (key == StatusCodeName && (statusCode == 0 || (int)metaData == statusCode))
-                {
-                    return true;
-                }
-            }
-        }
+        foreach (var (key, metaData) in reason.Metadata)
+            if (key == StatusCodeName && (statusCode == 0 || (int)metaData == statusCode))
+                return true;
 
         return false;
     }
@@ -95,20 +87,12 @@ public static partial class ResultExtensions
     public static int FindStatusCode(this Result result)
     {
         if (result is null)
-        {
             return 0;
-        }
 
         foreach (var reason in result.Reasons)
-        {
-            foreach (var (key, metaData) in reason.Metadata)
-            {
-                if (key == StatusCodeName)
-                {
-                    return (int)metaData;
-                }
-            }
-        }
+        foreach (var (key, metaData) in reason.Metadata)
+            if (key == StatusCodeName)
+                return (int)metaData;
 
         return 0;
     }
@@ -123,9 +107,7 @@ public static partial class ResultExtensions
     private static Result AddErrorMessageToResult(this Result result, string errorMessage)
     {
         if (result.Errors.Any())
-        {
             result.Errors[0].Metadata.Add(ErrorMessageName, errorMessage);
-        }
 
         return result;
     }
@@ -164,14 +146,10 @@ public static partial class ResultExtensions
     private static Result AddStatusCodeError(this Result result, int statusCode, string message = "")
     {
         if (string.IsNullOrEmpty(message))
-        {
             message = "No error message found";
-        }
 
         if (!result.Errors.Any())
-        {
             result.WithError(new Error($"Status code: ({statusCode}) - {message}"));
-        }
 
         result.Errors[0].Metadata.Add(StatusCodeName, statusCode);
         result.Errors[0].Metadata.Add(ErrorMessageName, message);

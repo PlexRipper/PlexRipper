@@ -90,23 +90,22 @@ public class AddOrUpdatePlexServersHandler : BaseHandler, IRequestHandler<AddOrU
         Log.Information("Removing PlexAccount associations with PlexServers now that are not accessible anymore");
 
         // The list of all past and current serverId's the plexAccount has access too
-        List<int> currentList = await _dbContext.PlexAccountServers
+        var currentList = await _dbContext.PlexAccountServers
             .Where(x => x.PlexAccountId == plexAccount.Id)
-            .Select(x => x.PlexServerId).ToListAsync(cancellationToken);
+            .Select(x => x.PlexServerId)
+            .ToListAsync(cancellationToken);
 
         // The list which contains the serverId's the plexAccount has access too after the update.
-        List<int> newList = plexServers.Select(x => x.Id).ToList();
+        var newList = plexServers.Select(x => x.Id).ToList();
 
         // Remove plexServer associations which the PlexAccount has no longer access too.
-        List<int> removalList = currentList.Except(newList).ToList();
-        foreach (int serverId in removalList)
+        var removalList = currentList.Except(newList).ToList();
+        foreach (var serverId in removalList)
         {
             var entity = await _dbContext.PlexAccountServers.AsTracking()
                 .FirstOrDefaultAsync(x => x.PlexAccountId == plexAccount.Id && x.PlexServerId == serverId, cancellationToken);
             if (entity != null)
-            {
                 _dbContext.PlexAccountServers.Remove(entity);
-            }
         }
 
         return Result.Ok();

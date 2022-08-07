@@ -18,21 +18,17 @@ public class DownloadProgressJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        JobDataMap dataMap = context.JobDetail.JobDataMap;
+        var dataMap = context.JobDetail.JobDataMap;
         var plexServerId = dataMap.GetIntValue("plexServerId");
 
         var hashCodeResult = await _downloadProgressNotifier.SendDownloadProgress(plexServerId);
         if (hashCodeResult.IsFailed)
-        {
             hashCodeResult.LogError();
-        }
 
         Log.Verbose($"Executed job: {nameof(DownloadProgressJob)} for {nameof(PlexServer)}: {plexServerId} => {hashCodeResult.Value}");
 
         var trackResult = await _downloadProgressScheduler.TrackDownloadProgress(plexServerId, hashCodeResult.Value);
         if (trackResult.IsFailed)
-        {
             trackResult.LogError();
-        }
     }
 }

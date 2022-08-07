@@ -9,7 +9,7 @@ namespace PlexRipper.WebAPI.Config;
 
 public static class MapperSetup
 {
-    public static MapperConfiguration Configuration => new (cfg =>
+    public static MapperConfiguration Configuration => new(cfg =>
     {
         // Application
         cfg.AddProfile(new DomainMappingProfile());

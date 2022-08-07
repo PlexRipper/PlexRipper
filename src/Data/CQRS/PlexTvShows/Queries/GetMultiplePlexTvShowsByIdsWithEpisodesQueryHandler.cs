@@ -20,17 +20,13 @@ public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler : BaseHandler,
 
     public async Task<Result<List<PlexTvShow>>> Handle(GetMultiplePlexTvShowsByIdsWithEpisodesQuery request, CancellationToken cancellationToken)
     {
-        IQueryable<PlexTvShow> query = PlexTvShowsQueryable;
+        var query = PlexTvShowsQueryable;
 
         if (request.IncludeLibrary)
-        {
             query = query.IncludePlexLibrary();
-        }
 
         if (request.IncludeServer)
-        {
             query = query.IncludePlexServer();
-        }
 
         if (request.IncludeData)
         {

@@ -4,7 +4,7 @@ public static class StreamExtensions
 {
     public static FileStream WaitForFile(string fullPath, FileMode mode, FileAccess access, FileShare share)
     {
-        for (int numTries = 0; numTries < 10; numTries++)
+        for (var numTries = 0; numTries < 10; numTries++)
         {
             FileStream fs = null;
             try
@@ -15,9 +15,7 @@ public static class StreamExtensions
             catch (IOException)
             {
                 if (fs != null)
-                {
                     fs.Dispose();
-                }
 
                 Thread.Sleep(50);
             }

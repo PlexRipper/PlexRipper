@@ -32,15 +32,12 @@ public class DownloadTaskValidator : IDownloadTaskValidator
 
         var downloadTasksDb = await _mediator.Send(new GetAllDownloadTasksQuery());
         if (downloadTasksDb.IsFailed)
-        {
             return downloadTasksDb.ToResult();
-        }
 
         var existingDownloadTasks = new List<DownloadTask>();
         var flattenedDownloadTaskDb = downloadTasksDb.Value.Flatten(x => x.Children).ToList();
         var errors = new List<Error>();
         foreach (var downloadTask in downloadTasks)
-        {
             if (flattenedDownloadTaskDb.Any(x =>
                     x.PlexServerId == downloadTask.PlexServerId &&
                     x.PlexLibraryId == downloadTask.PlexLibraryId &&
@@ -49,13 +46,10 @@ public class DownloadTaskValidator : IDownloadTaskValidator
                 existingDownloadTasks.Add(downloadTask);
                 errors.Add(new Error($"DownloadTask {downloadTask.FullTitle} is already added to the download list"));
             }
-        }
 
         // All download tasks are already added
         if (existingDownloadTasks.Count == downloadTasks.Count)
-        {
             return Result.Fail("All downloadTasks already exist and cannot be added again").LogError();
-        }
 
         // Some failed, alert front-end of some failing
         if (existingDownloadTasks.Any())
@@ -78,7 +72,7 @@ public class DownloadTaskValidator : IDownloadTaskValidator
         var failedList = new List<DownloadTask>();
         var result = Result.Fail("Failed to add the following DownloadTasks");
 
-        for (int i = 0; i < downloadTasks.Count; i++)
+        for (var i = 0; i < downloadTasks.Count; i++)
         {
             var downloadTask = downloadTasks[i];
 
@@ -93,16 +87,12 @@ public class DownloadTaskValidator : IDownloadTaskValidator
                 result.AddNestedErrors(validationResult.Errors);
             }
             else
-            {
                 Log.Information($"DownloadTask {i + 1} of {downloadTasks.Count} with title {downloadTask.FullTitle} was valid");
-            }
         }
 
         // All download tasks failed validation
         if (failedList.Count == downloadTasks.Count)
-        {
             return result;
-        }
 
         // Some failed, alert front-end of some failing
         if (failedList.Any())
@@ -183,10 +173,12 @@ public class DownloadTaskValidator : IDownloadTaskValidator
                 RuleFor(y => y.FileLocationUrl).NotEmpty();
                 RuleFor(y => y.DownloadUrl).NotEmpty();
                 RuleFor(y => y.DownloadUri).NotNull();
-                RuleFor(y => y.DownloadUri.IsAbsoluteUri).NotNull()
+                RuleFor(y => y.DownloadUri.IsAbsoluteUri)
+                    .NotNull()
                     .When(y => y.DownloadUri != null);
 
-                RuleFor(x => Uri.IsWellFormedUriString(x.DownloadUri.AbsoluteUri, UriKind.Absolute)).NotEqual(false)
+                RuleFor(x => Uri.IsWellFormedUriString(x.DownloadUri.AbsoluteUri, UriKind.Absolute))
+                    .NotEqual(false)
                     .When(y => y.DownloadUri != null);
                 RuleFor(y => y.Created).NotEqual(DateTime.MinValue);
             });

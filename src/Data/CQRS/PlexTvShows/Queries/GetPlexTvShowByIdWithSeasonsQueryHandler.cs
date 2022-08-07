@@ -19,25 +19,18 @@ public class GetPlexTvShowByIdWithSeasonsQueryHandler : BaseHandler, IRequestHan
 
     public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdWithSeasonsQuery request, CancellationToken cancellationToken)
     {
-
         var query = PlexTvShowsQueryable.IncludeSeasons();
 
         if (request.IncludePlexLibrary)
-        {
             query = query.IncludePlexLibrary();
-        }
 
         if (request.IncludePlexServer)
-        {
             query = query.IncludePlexServer();
-        }
 
         var plexTvShow = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexTvShow == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(PlexTvShow), request.Id);
-        }
 
         return Result.Ok(plexTvShow);
     }

@@ -31,34 +31,15 @@ dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggest
 # ReSharper properties
 resharper_autodetect_indent_settings = true
 resharper_blank_lines_after_control_transfer_statements = 1
-resharper_blank_lines_after_start_comment = 0
-resharper_blank_lines_around_single_line_auto_property = 1
-resharper_braces_for_for = required
-resharper_braces_for_foreach = required
+resharper_blank_lines_before_single_line_comment = 1
 resharper_braces_for_ifelse = required_for_multiline
-resharper_braces_for_using = not_required
-resharper_csharp_blank_lines_around_single_line_field = 1
 resharper_csharp_empty_block_style = together_same_line
-resharper_csharp_max_line_length = 214
-resharper_csharp_wrap_extends_list_style = chop_if_long
-resharper_default_value_when_type_evident = default_expression
-resharper_instance_members_qualify_declared_in =
-resharper_keep_existing_embedded_block_arrangement = true
-resharper_parentheses_redundancy_style = remove
+resharper_csharp_keep_blank_lines_in_code = 1
+resharper_csharp_max_line_length = 120
 resharper_place_accessorholder_attribute_on_same_line = false
-resharper_place_expr_accessor_on_single_line = true
-resharper_place_field_attribute_on_same_line = false
-resharper_place_simple_anonymousmethod_on_single_line = false
-resharper_place_simple_embedded_statement_on_same_line = false
-resharper_place_simple_initializer_on_single_line = false
 resharper_prefer_explicit_discard_declaration = true
-resharper_remove_blank_lines_near_braces_in_code = false
 resharper_show_autodetect_configure_formatting_tip = false
-resharper_trailing_comma_in_multiline_lists = true
 resharper_use_indent_from_vs = false
-resharper_wrap_array_initializer_style = chop_if_long
-resharper_wrap_chained_binary_patterns = chop_if_long
-resharper_wrap_object_and_collection_initializer_style = chop_always
 
 # ReSharper inspection severities
 resharper_arrange_redundant_parentheses_highlighting = hint
@@ -83,3 +64,97 @@ resharper_unused_member_global_highlighting = hint
 resharper_web_config_module_not_resolved_highlighting = warning
 resharper_web_config_type_not_resolved_highlighting = warning
 resharper_web_config_wrong_module_highlighting = warning
+
+[*]
+charset = utf-8
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = false
+indent_style = space
+indent_size = 4
+
+# Microsoft .NET properties
+csharp_new_line_before_members_in_object_initializers = false
+csharp_preferred_modifier_order = public, private, protected, internal, new, static, abstract, virtual, sealed, readonly, override, extern, unsafe, volatile, async, required:suggestion
+csharp_style_var_elsewhere = true:suggestion
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+dotnet_naming_rule.private_constants_rule.import_to_resharper = as_predefined
+dotnet_naming_rule.private_constants_rule.severity = suggestion
+dotnet_naming_rule.private_constants_rule.style = status_upper_camel_case_style
+dotnet_naming_rule.private_constants_rule.symbols = private_constants_symbols
+dotnet_naming_style.status_upper_camel_case_style.capitalization = pascal_case
+dotnet_naming_style.status_upper_camel_case_style.required_prefix = Status
+dotnet_naming_symbols.private_constants_symbols.applicable_accessibilities = private
+dotnet_naming_symbols.private_constants_symbols.applicable_kinds = field
+dotnet_naming_symbols.private_constants_symbols.required_modifiers = const
+dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:none
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:none
+dotnet_style_parentheses_in_relational_binary_operators = never_if_unnecessary:none
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_predefined_type_for_member_access = true:suggestion
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
+
+# ReSharper properties
+resharper_autodetect_indent_settings = true
+resharper_blank_lines_after_control_transfer_statements = 1
+resharper_blank_lines_before_single_line_comment = 1
+resharper_braces_for_ifelse = required_for_multiline
+resharper_csharp_empty_block_style = together_same_line
+resharper_csharp_keep_blank_lines_in_code = 1
+resharper_csharp_wrap_after_declaration_lpar = true
+resharper_csharp_wrap_parameters_style = chop_if_long
+resharper_enforce_line_ending_style = true
+resharper_max_formal_parameters_on_line = 4
+resharper_place_accessorholder_attribute_on_same_line = false
+resharper_prefer_explicit_discard_declaration = true
+resharper_show_autodetect_configure_formatting_tip = false
+resharper_use_indent_from_vs = false
+
+# ReSharper inspection severities
+resharper_arrange_redundant_parentheses_highlighting = hint
+resharper_arrange_this_qualifier_highlighting = none
+resharper_arrange_type_member_modifiers_highlighting = hint
+resharper_arrange_type_modifiers_highlighting = hint
+resharper_built_in_type_reference_style_for_member_access_highlighting = hint
+resharper_built_in_type_reference_style_highlighting = hint
+resharper_class_never_instantiated_global_highlighting = hint
+resharper_cognitive_complexity_highlighting = hint
+resharper_convert_if_statement_to_conditional_ternary_expression_highlighting = hint
+resharper_convert_to_using_declaration_highlighting = hint
+resharper_enforce_if_statement_braces_highlighting = suggestion
+resharper_explicit_caller_info_argument_highlighting = none
+resharper_inconsistent_naming_highlighting = hint
+resharper_invert_if_highlighting = none
+resharper_localizable_element_highlighting = hint
+resharper_member_can_be_private_global_highlighting = hint
+resharper_possible_invalid_operation_exception_highlighting = hint
+resharper_possible_null_reference_exception_highlighting = hint
+resharper_unused_member_global_highlighting = hint
+resharper_web_config_module_not_resolved_highlighting = warning
+resharper_web_config_type_not_resolved_highlighting = warning
+resharper_web_config_wrong_module_highlighting = warning
+
+[{*.har,*.json}]
+indent_style = space
+indent_size = 2
+
+[{*.ant,*.appxmanifest,*.axml,*.cscfg,*.csdef,*.disco,*.filelayout,*.fxml,*.jhm,*.jnlp,*.jrxml,*.manifest,*.myapp,*.nuspec,*.rng,*.stylecop,*.svcmap,*.tld,*.tps,*.wadcfgx,*.webref,*.wsdl,*.xml,*.xsd,*.xsl,*.xslt,*.xul,StyleCop.Cache}]
+indent_style = tab
+tab_width = 4
+
+[{*.androidproj,*.ccproj,*.csproj}]
+indent_style = tab
+tab_width = 4
+
+[*.svg]
+indent_style = tab
+tab_width = 4
+
+[{*.yaml,*.yml}]
+indent_style = space
+indent_size = 2
+
+[*.dcproj]
+indent_style = tab
+tab_width = 4

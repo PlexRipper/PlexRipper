@@ -6,18 +6,8 @@ on:
       - "*-rc*"
 
 jobs:
-  # Create RC Release first
-  release:
-    name: "Creating Release"
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: true
   # Build Docker Image
   build:
-    needs: release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master

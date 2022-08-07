@@ -48,7 +48,7 @@ public class PlexDownloadService : IPlexDownloadService
 
     public async Task<Result<DownloadTask>> GetDownloadTaskDetailAsync(int downloadTaskId, CancellationToken cancellationToken)
     {
-        return await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true),cancellationToken);
+        return await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true), cancellationToken);
     }
 
     #region Commands

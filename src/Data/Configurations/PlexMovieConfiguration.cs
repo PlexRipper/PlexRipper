@@ -13,5 +13,4 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
         //     .Property(x => x.MediaData)
         //     .HasJsonValueConversion();
     }
-
 }

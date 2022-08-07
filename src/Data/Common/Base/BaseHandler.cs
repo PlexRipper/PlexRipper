@@ -8,10 +8,10 @@ public abstract class BaseHandler
 
     private protected readonly PlexRipperDbContext _dbContext;
 
-    private protected readonly BulkConfig _bulkConfig = new BulkConfig
+    private protected readonly BulkConfig _bulkConfig = new()
     {
         SetOutputIdentity = true,
-        PreserveInsertOrder = true,
+        PreserveInsertOrder = true
     };
 
     #endregion
@@ -65,15 +65,16 @@ public abstract class BaseHandler
     /// <param name="includeMedia"></param>
     /// <param name="topLevelMediaOnly"></param>
     /// <returns>The <see cref="IQueryable"/> of <see cref="PlexLibrary"/>.</returns>
-    protected IQueryable<PlexLibrary> GetPlexLibraryQueryableByType(PlexMediaType type, bool includeServer = false, bool includeMedia = false,
+    protected IQueryable<PlexLibrary> GetPlexLibraryQueryableByType(
+        PlexMediaType type,
+        bool includeServer = false,
+        bool includeMedia = false,
         bool topLevelMediaOnly = false)
     {
         var plexLibraryQuery = PlexLibraryQueryable;
 
         if (includeServer)
-        {
             plexLibraryQuery = plexLibraryQuery.IncludePlexServer();
-        }
 
         if (includeMedia)
         {

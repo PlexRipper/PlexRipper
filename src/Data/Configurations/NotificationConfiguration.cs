@@ -12,6 +12,5 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
             .HasMaxLength(20)
             .HasConversion(x => x.ToNotificationLevelString(), x => x.ToNotificationLevel())
             .IsUnicode(false);
-
     }
 }

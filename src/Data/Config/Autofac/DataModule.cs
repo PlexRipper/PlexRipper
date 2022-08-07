@@ -10,7 +10,8 @@ public class DataModule : Module
         builder.RegisterType<PlexRipperDbContext>()
             .InstancePerDependency();
 
-        builder.RegisterType<PlexRipperDatabaseService>().As<IPlexRipperDatabaseService>()
+        builder.RegisterType<PlexRipperDatabaseService>()
+            .As<IPlexRipperDatabaseService>()
             .InstancePerDependency();
     }
 }

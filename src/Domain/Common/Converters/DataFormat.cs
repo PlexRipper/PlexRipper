@@ -13,9 +13,9 @@ public static class DataFormat
     /// <returns></returns>
     public static string FormatSizeString(long byteSize)
     {
-        double kiloByteSize = byteSize / 1024D;
-        double megaByteSize = kiloByteSize / 1024D;
-        double gigaByteSize = megaByteSize / 1024D;
+        var kiloByteSize = byteSize / 1024D;
+        var megaByteSize = kiloByteSize / 1024D;
+        var gigaByteSize = megaByteSize / 1024D;
         if (byteSize < 1024)
             return string.Format(NumberFormat, "{0} B", byteSize);
         if (byteSize < 1048576)
@@ -33,8 +33,8 @@ public static class DataFormat
     /// <returns></returns>
     public static string FormatSpeedString(int speed)
     {
-        float kbSpeed = speed / 1024F;
-        float mbSpeed = kbSpeed / 1024F;
+        var kbSpeed = speed / 1024F;
+        var mbSpeed = kbSpeed / 1024F;
         if (speed <= 0)
             return string.Empty;
         if (speed < 1024)
@@ -52,9 +52,9 @@ public static class DataFormat
     /// <returns></returns>
     public static string FormatTimeSpanString(TimeSpan span)
     {
-        string hours = ((int)span.TotalHours).ToString();
-        string minutes = span.Minutes.ToString();
-        string seconds = span.Seconds.ToString();
+        var hours = ((int)span.TotalHours).ToString();
+        var minutes = span.Minutes.ToString();
+        var seconds = span.Seconds.ToString();
         if ((int)span.TotalHours < 10)
             hours = "0" + hours;
         if (span.Minutes < 10)
@@ -67,9 +67,7 @@ public static class DataFormat
     public static decimal GetPercentage(long bytesReceived, long totalBytes)
     {
         if (totalBytes == 0)
-        {
             return 0;
-        }
 
         try
         {
@@ -85,9 +83,7 @@ public static class DataFormat
     public static decimal GetPercentage(int current, int total)
     {
         if (total == 0)
-        {
             return 0;
-        }
 
         try
         {
@@ -114,9 +110,7 @@ public static class DataFormat
     public static long GetTimeRemaining(long BytesRemaining, double downloadSpeed)
     {
         if (downloadSpeed <= 0)
-        {
             return 0;
-        }
 
         return Convert.ToInt64(Math.Floor(BytesRemaining / downloadSpeed));
     }
@@ -137,10 +131,8 @@ public static class DataFormat
     public static List<long> GetPriority(int count)
     {
         var list = new List<long>();
-        for (int i = 0; i < count; i++)
-        {
+        for (var i = 0; i < count; i++)
             list.Add(Convert.ToInt64((DateTime.Now - DateTime.UnixEpoch).TotalSeconds) + i);
-        }
 
         return list;
     }

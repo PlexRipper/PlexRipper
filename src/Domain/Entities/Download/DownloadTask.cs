@@ -158,14 +158,13 @@ public class DownloadTask : BaseEntity
     /// Gets a value indicating whether this <see cref="DownloadTask"/> is downloadable.
     /// e.g. A episode or movie part, an episode or movie without parts.
     /// </summary>
-    public bool IsDownloadable =>
-        DownloadTaskType
-            is DownloadTaskType.EpisodePart
-            or DownloadTaskType.MoviePart
-            or DownloadTaskType.Episode
-            or DownloadTaskType.EpisodeData
-            or DownloadTaskType.Movie
-            or DownloadTaskType.MovieData;
+    public bool IsDownloadable => DownloadTaskType
+        is DownloadTaskType.EpisodePart
+        or DownloadTaskType.MoviePart
+        or DownloadTaskType.Episode
+        or DownloadTaskType.EpisodeData
+        or DownloadTaskType.Movie
+        or DownloadTaskType.MovieData;
 
     /// <summary>
     /// Calculate properties such as DataReceived, DataTotal based on the nested children.
@@ -175,9 +174,7 @@ public class DownloadTask : BaseEntity
         if (Children.Any())
         {
             foreach (var downloadTask in Children)
-            {
                 downloadTask.Calculate();
-            }
 
             DataReceived = Children.Select(x => x.DataReceived).Sum();
             DataTotal = Children.Select(x => x.DataTotal).Sum();
@@ -189,18 +186,14 @@ public class DownloadTask : BaseEntity
     public override string ToString()
     {
         var orderedList = DownloadWorkerTasks?.OrderBy(x => x.Id).ToList();
-        StringBuilder builder = new StringBuilder();
+        var builder = new StringBuilder();
         builder.Append($"[Status: {DownloadStatus}] - ");
         foreach (var progress in orderedList)
-        {
             builder.Append($"({progress.Id} - {progress.Percentage} {progress.DownloadSpeedFormatted}) + ");
-        }
 
         // Remove the last " + "
         if (builder.Length > 3)
-        {
             builder.Length -= 3;
-        }
 
         builder.Append($" = ({DownloadSpeedFormatted} - {TimeRemaining})");
 

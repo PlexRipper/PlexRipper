@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain;
 
@@ -239,9 +239,7 @@ public class PlexLibrary : BaseEntity
                 MetaData.MovieCount = Movies.Count;
             }
             else
-            {
                 return Result.Fail("The PlexLibrary is of type Movie but has no Movies included to update the MetaData.");
-            }
         }
 
         if (Type == PlexMediaType.TvShow)
@@ -254,9 +252,7 @@ public class PlexLibrary : BaseEntity
                 MetaData.TvShowEpisodeCount = TvShows.Sum(x => x.Seasons.Sum(y => y.Episodes.Count));
             }
             else
-            {
                 return Result.Fail("The PlexLibrary is of type TvShow but has no TvShows included to update the MetaData.");
-            }
         }
 
         return Result.Ok();

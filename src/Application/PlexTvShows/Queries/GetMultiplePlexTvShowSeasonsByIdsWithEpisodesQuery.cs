@@ -2,7 +2,7 @@
 
 public class GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery : IRequest<Result<List<PlexTvShowSeason>>>
 {
-    public GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery(List<int> ids, bool includeData = false,  bool includeLibrary = false, bool includeServer = false)
+    public GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery(List<int> ids, bool includeData = false, bool includeLibrary = false, bool includeServer = false)
     {
         Ids = ids;
         IncludeData = includeData;

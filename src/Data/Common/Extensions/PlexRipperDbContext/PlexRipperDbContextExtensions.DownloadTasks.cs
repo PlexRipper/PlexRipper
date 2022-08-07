@@ -27,16 +27,14 @@ public static partial class PlexRipperDbContextExtensions
     private static IQueryable<T> IncludeDownloadTasks<T>(this IQueryable<T> query, string prefix = "") where T : class
     {
         if (!string.IsNullOrEmpty(prefix))
-        {
             query = query.Include(prefix.TrimEnd('.'));
-        }
 
         // The Include path 'Children->Parent' results in a cycle.
         // Cycles are not allowed in no-tracking queries; either use a tracking query or remove the cycle
         query = query.AsTracking();
 
         // Include downloadTask children up to 5 levels deep
-        for (int i = 1; i <= 5; i++)
+        for (var i = 1; i <= 5; i++)
         {
             var childPath = prefix + string.Concat(Enumerable.Repeat($"{nameof(DownloadTask.Children)}.", i));
 

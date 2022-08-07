@@ -10,7 +10,10 @@ public class PlexAccountService : IPlexAccountService
 
     private readonly ISchedulerService _schedulerService;
 
-    public PlexAccountService(IMediator mediator, IPlexServerService plexServerService, IPlexApiService plexApiService,
+    public PlexAccountService(
+        IMediator mediator,
+        IPlexServerService plexServerService,
+        IPlexApiService plexApiService,
         ISchedulerService schedulerService)
     {
         _mediator = mediator;
@@ -22,9 +25,7 @@ public class PlexAccountService : IPlexAccountService
     public virtual async Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount)
     {
         if (plexAccount.Username == string.Empty || plexAccount.Password == string.Empty || plexAccount.ClientId == string.Empty)
-        {
             return Result.Fail("Either the username or password were empty").LogWarning();
-        }
 
         var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount);
         if (plexSignInResult.IsFailed)
@@ -32,7 +33,7 @@ public class PlexAccountService : IPlexAccountService
             // Check if 2FA might be enabled
             if (plexSignInResult.HasError<PlexError>())
             {
-                List<PlexError> errors = plexSignInResult.Errors.OfType<PlexError>().ToList();
+                var errors = plexSignInResult.Errors.OfType<PlexError>().ToList();
 
                 // If the message is "Please enter the verification code" then 2FA is enabled.
                 var has2Fa = errors.Any(x => x.Code == 1029);
@@ -60,23 +61,19 @@ public class PlexAccountService : IPlexAccountService
 
         var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
         if (plexAccountResult.IsFailed)
-        {
             return plexAccountResult.ToResult();
-        }
 
         var plexAccount = plexAccountResult.Value;
 
         // Retrieve and store servers
         var plexServerList = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
         if (plexServerList.IsFailed)
-        {
             return plexServerList.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
-        }
 
         // Retrieve libraries for the plexAccount
         await _schedulerService.InspectPlexServersAsyncJob(plexAccount.Id);
 
-        string msg = !plexServerList.Value.Any()
+        var msg = !plexServerList.Value.Any()
             ? "Account was setup successfully, but did not have access to any servers!"
             : "Account was setup successfully!";
 
@@ -90,26 +87,20 @@ public class PlexAccountService : IPlexAccountService
         {
             var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(onlyEnabled: true));
             if (enabledAccounts.IsFailed)
-            {
                 return enabledAccounts.ToResult();
-            }
 
             foreach (var plexAccount in enabledAccounts.Value)
             {
                 var result = await SetupAccountAsync(plexAccount.Id);
                 if (result.IsFailed)
-                {
                     return result.ToResult();
-                }
             }
         }
         else
         {
             var result = await SetupAccountAsync(plexAccountId);
             if (result.IsFailed)
-            {
                 return result.ToResult();
-            }
         }
 
         return Result.Ok();
@@ -125,14 +116,10 @@ public class PlexAccountService : IPlexAccountService
         var result = await _mediator.Send(new GetPlexAccountByUsernameQuery(username));
 
         if (result.Has404NotFoundError())
-        {
             return Result.Ok(true);
-        }
 
         if (result.IsFailed)
-        {
             return result.ToResult();
-        }
 
         if (result.Value != null)
         {
@@ -176,9 +163,7 @@ public class PlexAccountService : IPlexAccountService
         var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId, true, true));
 
         if (result.IsFailed)
-        {
             return result;
-        }
 
         if (result.Value != null)
         {
@@ -213,13 +198,11 @@ public class PlexAccountService : IPlexAccountService
 
         // Fail on validation errors
         if (result.IsFailed)
-        {
             return result.ToResult();
-        }
 
         if (!result.Value)
         {
-            string msg =
+            var msg =
                 $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
             return result.ToResult().WithError(msg).LogWarning();
         }
@@ -227,15 +210,11 @@ public class PlexAccountService : IPlexAccountService
         // Create PlexAccount
         var createResult = await _mediator.Send(new CreatePlexAccountCommand(plexAccount));
         if (createResult.IsFailed)
-        {
             return createResult.ToResult();
-        }
 
         var setupAccountResult = await SetupAccountAsync(createResult.Value);
         if (setupAccountResult.IsFailed)
-        {
             return setupAccountResult.ToResult();
-        }
 
         return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
     }
@@ -245,16 +224,14 @@ public class PlexAccountService : IPlexAccountService
         var result = await _mediator.Send(new UpdatePlexAccountCommand(plexAccount));
         if (result.IsFailed)
         {
-            string msg = "Failed to validate the PlexAccount that will be updated";
+            var msg = "Failed to validate the PlexAccount that will be updated";
             result.Errors.Add(new Error(msg));
             return result.LogError();
         }
 
         var plexAccountDb = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccount.Id));
         if (plexAccountDb.IsFailed)
-        {
             return plexAccountDb;
-        }
 
         // Re-validate if the credentials changed
         if (inspectServers || plexAccountDb.Value.Username != plexAccount.Username || plexAccountDb.Value.Password != plexAccount.Password)
@@ -275,9 +252,7 @@ public class PlexAccountService : IPlexAccountService
     {
         var deleteAccountResult = await _mediator.Send(new DeletePlexAccountCommand(plexAccountId));
         if (deleteAccountResult.IsFailed)
-        {
             return deleteAccountResult;
-        }
 
         return await _plexServerService.RemoveInaccessibleServers();
     }

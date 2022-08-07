@@ -4,7 +4,7 @@
 			<!-- Render All Notifications	-->
 			<template v-if="notifications.length > 0">
 				<v-alert
-					v-for="notification in notifications"
+					v-for="notification in getVisibleNotifications"
 					:key="notification.id"
 					:min-width="200"
 					:max-width="450"
@@ -56,6 +56,7 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { NotificationService } from '@service';
 import { NotificationDTO } from '@dto/mainApi';
+import notificationService from '~/service/notificationService';
 
 @Component<NotificationsDrawer>({})
 export default class NotificationsDrawer extends Vue {
@@ -78,8 +79,8 @@ export default class NotificationsDrawer extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(NotificationService.getNotifications(), (value) => {
-			this.notifications = value ?? [];
+		this.$subscribeTo(notificationService.getNotifications(), (value) => {
+			this.notifications = value;
 		});
 	}
 }

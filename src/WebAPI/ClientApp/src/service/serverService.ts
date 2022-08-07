@@ -1,8 +1,8 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { finalize, map, switchMap, take } from "rxjs/operators";
-import { PlexServerDTO, PlexServerStatusDTO } from "@dto/mainApi";
+import { finalize, map, switchMap, take } from 'rxjs/operators';
+import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, GlobalService } from '@service';

@@ -1,6 +1,6 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-buster-slim AS base
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS base
 WORKDIR /app
 
 ## Setup Nuxt front-end
@@ -14,13 +14,13 @@ ENV NUXT_ENV_BASE_URL="TEST IF BASE URL CAME THROUGH"
 COPY ./src/WebAPI/ClientApp/package*.json ./
 COPY ./src/WebAPI/ClientApp/tsconfig.json ./
 COPY ./src/WebAPI/ClientApp/nuxt.config.ts ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 ## Copy the rest of the project files
 COPY ./src/WebAPI/ClientApp/ ./
 RUN npm run generate --fail-on-error
 
 ## Setup .NET Core back-end
-FROM mcr.microsoft.com/dotnet/sdk:6.0-buster-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
 ## Domain Projects

@@ -220,10 +220,10 @@ export default class AccountDialog extends Vue {
 						return;
 					}
 					this.isValidated = 'OK';
-					this.validateLoading = false;
 				} else {
 					Log.error('Validating account failed:', data);
 				}
+				this.validateLoading = false;
 			}),
 		);
 	}

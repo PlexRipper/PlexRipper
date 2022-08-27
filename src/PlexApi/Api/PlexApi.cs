@@ -32,9 +32,10 @@ public class PlexApi
     /// <returns></returns>
     public async Task<Result<PlexAccountDTO>> PlexSignInAsync(PlexAccount plexAccount)
     {
+        Log.Debug($"Requesting PlexToken for account {plexAccount.Username}");
         var credentials = new CredentialsDTO
         {
-            Username = plexAccount.Username,
+            Login = plexAccount.Username,
             Password = plexAccount.Password,
             RememberMe = false,
         };

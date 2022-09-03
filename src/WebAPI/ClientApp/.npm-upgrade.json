@@ -1,12 +1,16 @@
 {
 	"ignore": {
 		"three": {
-			"versions": "0.143.0",
+			"versions": ">0.123.0",
 			"reason": "Incompatible with Vanta"
 		},
 		"vue": {
-			"versions": "3.2.37",
-			"reason": "Nuxt not compatible yet"
+			"versions": "3.2.38",
+			"reason": "Incompatible with NuxtV2"
+		},
+		"@vue/test-utils": {
+			"versions": ">2.0.2",
+			"reason": " V2 has a hard dependency on Vue3"
 		}
 	}
 }

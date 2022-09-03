@@ -17,11 +17,15 @@
 				</tr>
 				<tr>
 					<td>{{ $t('components.server-dialog.tabs.server-data.created-on') }}:</td>
-					<td><date-time short-date :text="plexServer.createdAt" /></td>
+					<td>
+						<date-time short-date :text="plexServer.createdAt" />
+					</td>
 				</tr>
 				<tr>
 					<td>{{ $t('components.server-dialog.tabs.server-data.last-updated-on') }}:</td>
-					<td><date-time short-date :text="plexServer.updatedAt" /></td>
+					<td>
+						<date-time short-date :text="plexServer.updatedAt" />
+					</td>
 				</tr>
 				<tr v-if="serverStatus">
 					<td>{{ $t('components.server-dialog.tabs.server-data.current-status') }}:</td>
@@ -34,7 +38,9 @@
 				<!--	Server Status	-->
 				<tr v-if="serverStatus">
 					<td>{{ $t('components.server-dialog.tabs.server-data.last-checked-on') }}:</td>
-					<td><date-time short-date :text="serverStatus.lastChecked" /></td>
+					<td>
+						<date-time short-date :text="serverStatus.lastChecked" />
+					</td>
 				</tr>
 			</tbody>
 		</v-simple-table>
@@ -47,7 +53,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import type { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { ServerService } from '@service';
 
@@ -61,11 +67,14 @@ export default class ServerDataTabContent extends Vue {
 	@Prop({ required: true, type: Object as () => PlexServerStatusDTO })
 	readonly serverStatus!: PlexServerStatusDTO;
 
+	@Prop({ required: true, type: Boolean })
+	readonly show!: boolean;
+
 	checkServerStatusLoading: boolean = false;
 
 	checkServer(): void {
 		this.checkServerStatusLoading = true;
-		ServerService.checkServer(this.plexServer.id).subscribe(() => {
+		this.$subscribeTo(ServerService.checkServer(this.plexServer.id), () => {
 			this.checkServerStatusLoading = false;
 		});
 	}

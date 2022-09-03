@@ -1,3 +1,4 @@
+using FluentResultExtensions;
 using PlexRipper.Application;
 using Polly;
 using RestSharp;
@@ -51,16 +52,25 @@ public static class RestSharpExtensions
     private static Result<T> GenerateResponseResult<T>(PolicyResult<RestResponse> response, Action<PlexApiClientProgress> action = null) where T : class
     {
         RestResponse<T> responseResult = null;
+        var statusCode = 0;
+        var statusDescription = "";
+        var errorMessage = "";
+
         var isSuccessful = response.Outcome == OutcomeType.Successful;
         if (isSuccessful)
+        {
             responseResult = response.Result as RestResponse<T>;
+            statusCode = (int)responseResult.StatusCode;
+            statusDescription = responseResult.StatusDescription;
+            if (statusCode == 0 && statusDescription.Contains("Timeout"))
+                statusCode = HttpCodes.Status504GatewayTimeout;
+        }
         else
+        {
             responseResult = response.FinalHandledResult as RestResponse<T>;
-
-        var statusCode = (int)responseResult.StatusCode;
-        var statusDescription = responseResult.StatusDescription;
-        var requestUrl = responseResult.Request.Resource;
-        var errorMessage = responseResult.Content;
+            statusDescription = responseResult.ErrorMessage;
+            errorMessage = responseResult.Content;
+        }
 
         if (action is not null)
         {
@@ -74,8 +84,9 @@ public static class RestSharpExtensions
         }
 
         if (isSuccessful)
-            return Result.Ok(responseResult.Data).LogDebug();
+            return Result.Ok(responseResult.Data).AddStatusCode(statusCode, statusDescription).LogDebug();
 
+        var requestUrl = responseResult.Request.Resource;
         return Result
             .Fail($"Request to {requestUrl} failed with status code: {statusCode} - {statusDescription}")
             .AddStatusCode(statusCode, statusDescription)

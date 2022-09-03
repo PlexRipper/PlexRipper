@@ -7,7 +7,10 @@
 					<v-expansion-panel-header>
 						<v-row align="center" no-gutters class="flex-nowrap">
 							<v-col cols="auto">
-								<div class="server-name"><status :value="server.status.isSuccessful" /> {{ server.name }}</div>
+								<div class="server-name">
+									<status :value="server.status.isSuccessful" />
+									{{ server.name }}
+								</div>
 							</v-col>
 							<v-spacer></v-spacer>
 							<!--	Open Server Settings	-->
@@ -23,7 +26,11 @@
 							<v-list-item-group color="primary">
 								<!-- Render libraries -->
 								<template v-if="filterLibraries(server.id).length > 0">
-									<v-list-item v-for="(library, y) in filterLibraries(server.id)" :key="y" @click="openMediaPage(library)">
+									<v-list-item
+										v-for="(library, y) in filterLibraries(server.id)"
+										:key="y"
+										@click="openMediaPage(library)"
+									>
 										<v-list-item-icon>
 											<media-type-icon :media-type="library.type" />
 										</v-list-item-icon>
@@ -39,7 +46,9 @@
 											<media-type-icon media-type="" />
 										</v-list-item-icon>
 										<v-list-item-content>
-											<v-list-item-title>{{ $t('components.server-drawer.no-libraries') }} </v-list-item-title>
+											<v-list-item-title>{{
+												$t('components.server-drawer.no-libraries')
+											}}</v-list-item-title>
 										</v-list-item-content>
 									</v-list-item>
 								</template>
@@ -58,15 +67,17 @@
 				</v-expansion-panel>
 			</template>
 		</v-expansion-panels>
-		<server-dialog :server-id="selectedServerId" @close="closeDialog" />
+		<server-dialog ref="serverDialog" />
 	</vue-scroll>
 </template>
 
 <script lang="ts">
 import Log from 'consola';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Ref, Vue } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
 import { LibraryService, ServerService } from '@service';
 import { PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import ServerDialog from '@components/Navigation/ServerDialog.vue';
 
 interface INavItem {
 	title: string;
@@ -80,8 +91,6 @@ export default class ServerDrawer extends Vue {
 	plexServers: PlexServerDTO[] = [];
 	plexLibraries: PlexLibraryDTO[] = [];
 
-	selectedServerId: number = 0;
-
 	get getNavItems(): INavItem[] {
 		return [
 			{
@@ -92,12 +101,15 @@ export default class ServerDrawer extends Vue {
 		];
 	}
 
+	@Ref('serverDialog')
+	readonly serverDialogRef!: ServerDialog;
+
 	filterLibraries(plexServerId: number): PlexLibraryDTO[] {
 		return this.plexLibraries.filter((x) => x.plexServerId === plexServerId);
 	}
 
 	openServerSettings(serverId: number): void {
-		this.selectedServerId = serverId;
+		this.serverDialogRef.open(serverId);
 	}
 
 	openMediaPage(library: PlexLibraryDTO): void {
@@ -116,18 +128,18 @@ export default class ServerDrawer extends Vue {
 		}
 	}
 
-	closeDialog(): void {
-		this.selectedServerId = 0;
-	}
-
 	mounted(): void {
-		this.$subscribeTo(ServerService.getServers(), (data: PlexServerDTO[]) => {
-			this.plexServers = data;
-		});
+		useSubscription(
+			ServerService.getServers().subscribe((data: PlexServerDTO[]) => {
+				this.plexServers = data;
+			}),
+		);
 
-		this.$subscribeTo(LibraryService.getLibraries(), (data: PlexLibraryDTO[]) => {
-			this.plexLibraries = data;
-		});
+		useSubscription(
+			LibraryService.getLibraries().subscribe((data: PlexLibraryDTO[]) => {
+				this.plexLibraries = data;
+			}),
+		);
 	}
 }
 </script>

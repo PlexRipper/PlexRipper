@@ -54,6 +54,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
 import { NotificationService } from '@service';
 import { NotificationDTO } from '@dto/mainApi';
 import notificationService from '~/service/notificationService';
@@ -79,9 +80,11 @@ export default class NotificationsDrawer extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(notificationService.getNotifications(), (value) => {
-			this.notifications = value;
-		});
+		useSubscription(
+			notificationService.getNotifications().subscribe((value) => {
+				this.notifications = value;
+			}),
+		);
 	}
 }
 </script>

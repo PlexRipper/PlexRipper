@@ -1,8 +1,12 @@
 import Log from 'consola';
-import { BaseService, GlobalService } from '@service';
 // eslint-disable-next-line import/named
 import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
+import { isEqual } from 'lodash-es';
+import IStoreState from '@interfaces/service/IStoreState';
+import { BaseService, GlobalService } from '@service';
 import {
 	DownloadTaskCreationProgress,
 	DownloadTaskDTO,
@@ -13,10 +17,6 @@ import {
 	ServerDownloadProgressDTO,
 	SyncServerProgress,
 } from '@dto/mainApi';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
-import { Context } from '@nuxt/types';
-import IStoreState from '@interfaces/service/IStoreState';
-import { isEqual } from 'lodash';
 import ISetup from '@interfaces/ISetup';
 import notificationService from '~/service/notificationService';
 
@@ -237,6 +237,7 @@ export class SignalrService extends BaseService implements ISetup {
 	public getLibraryProgress(libraryId: number): Observable<LibraryProgress> {
 		return this.getAllLibraryProgress().pipe(
 			map((x) => x?.find((x) => x.id === libraryId) ?? null),
+			// @ts-ignore
 			filter((progress) => !!progress),
 			distinctUntilChanged(isEqual),
 		);

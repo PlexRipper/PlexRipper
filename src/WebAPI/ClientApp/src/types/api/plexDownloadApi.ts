@@ -1,8 +1,8 @@
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
+import { checkResponse, preApiRequest } from './baseApi';
 import { DownloadMediaDTO, DownloadTaskDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
-import { checkResponse, preApiRequest } from './baseApi';
 
 const logText = 'From PlexDownloadApi => ';
 const apiPath = '/download';

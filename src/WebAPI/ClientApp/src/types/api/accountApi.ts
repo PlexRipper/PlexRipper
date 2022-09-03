@@ -1,8 +1,8 @@
-import { AuthPin, PlexAccountDTO } from '@dto/mainApi';
 import { Observable } from 'rxjs';
 import Axios from 'axios-observable';
-import ResultDTO from '@dto/ResultDTO';
 import { checkResponse, preApiRequest } from './baseApi';
+import ResultDTO from '@dto/ResultDTO';
+import { AuthPin, PlexAccountDTO } from '@dto/mainApi';
 
 const logText = 'From AccountAPI => ';
 const apiPath = '/plexaccount';

@@ -1,31 +1,33 @@
 <template>
-	<v-dialog :value="serverId > 0" :width="1200" :max-width="1200" @click:outside="close">
+	<v-dialog :max-width="1200" :value="plexServerId > 0" :width="1200" @click:outside="close">
 		<v-card v-if="plexServer">
-			<v-card-title class="headline">{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }} </v-card-title>
+			<v-card-title class="headline"
+				>{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }}
+			</v-card-title>
 
 			<v-card-text>
 				<v-tabs v-model="tabIndex" vertical>
 					<!--	Server Data	Tab Header-->
 					<v-tab>
-						<v-icon left> mdi-server </v-icon>
+						<v-icon left> mdi-server</v-icon>
 						{{ $t('components.server-dialog.tabs.server-data.header') }}
 					</v-tab>
 
 					<!--	Server Configuration Tab Header	-->
 					<v-tab>
-						<v-icon left> mdi-cog-box </v-icon>
+						<v-icon left> mdi-cog-box</v-icon>
 						{{ $t('components.server-dialog.tabs.server-config.header') }}
 					</v-tab>
 
 					<!--	Library Destinations Tab Header	-->
 					<v-tab>
-						<v-icon left> mdi-folder-edit-outline </v-icon>
+						<v-icon left> mdi-folder-edit-outline</v-icon>
 						{{ $t('components.server-dialog.tabs.download-destinations.header') }}
 					</v-tab>
 
 					<!--	Server Commands Tab Header	-->
 					<v-tab>
-						<v-icon left> mdi-console </v-icon>
+						<v-icon left> mdi-console</v-icon>
 						{{ $t('components.server-dialog.tabs.server-commands.header') }}
 					</v-tab>
 
@@ -55,69 +57,48 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { combineLatest } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { useSubscription } from '@vueuse/rxjs';
 import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel, PlexServerStatusDTO } from '@dto/mainApi';
 import { FolderPathService, LibraryService, ServerService, SettingsService } from '@service';
 
 @Component<ServerDialog>({})
 export default class ServerDialog extends Vue {
-	@Prop({ required: true, type: Number, default: 0 })
-	readonly serverId!: number;
-
 	show: boolean = false;
 	tabIndex: number | null = null;
 	plexServer: PlexServerDTO | null = null;
 	folderPaths: FolderPathDTO[] = [];
 	plexLibraries: PlexLibraryDTO[] = [];
 	plexServerSettings: PlexServerSettingsModel | null = null;
+	plexServerId: number = 0;
 
 	get serverStatus(): PlexServerStatusDTO | null {
 		return this.plexServer?.status ?? null;
 	}
 
-	close(): void {
-		this.$emit('close');
-		this.tabIndex = null;
+	open(plexServerId: number): void {
+		this.plexServerId = plexServerId;
+		this.show = true;
+		useSubscription(
+			combineLatest([
+				ServerService.getServer(plexServerId),
+				LibraryService.getLibrariesByServerId(plexServerId),
+				FolderPathService.getFolderPaths(),
+				SettingsService.getServerSettings(plexServerId),
+			]).subscribe(([plexServer, plexLibraries, folderPaths, plexServerSettings]) => {
+				this.plexServer = plexServer;
+				this.plexLibraries = plexLibraries;
+				this.folderPaths = folderPaths;
+				this.plexServerSettings = plexServerSettings;
+			}),
+		);
 	}
 
-	mounted(): void {
-		this.$subscribeTo(
-			this.$watchAsObservable('serverId').pipe(
-				map((x: { oldValue: number; newValue: number }) => x.newValue),
-				switchMap((plexServerId) =>
-					combineLatest([
-						ServerService.getServer(plexServerId),
-						LibraryService.getLibrariesByServerId(plexServerId),
-						FolderPathService.getFolderPaths(),
-						SettingsService.getServerSettings(plexServerId),
-					]),
-				),
-			),
-			([plexServer, plexLibraries, folderPaths, plexServerSettings]: [
-				PlexServerDTO | null,
-				PlexLibraryDTO[],
-				FolderPathDTO[],
-				PlexServerSettingsModel,
-			]) => {
-				if (plexServer) {
-					this.plexServer = plexServer;
-				}
-
-				if (plexLibraries) {
-					this.plexLibraries = plexLibraries;
-				}
-
-				if (folderPaths) {
-					this.folderPaths = folderPaths;
-				}
-
-				if (plexServerSettings) {
-					this.plexServerSettings = plexServerSettings;
-				}
-			},
-		);
+	close(): void {
+		this.show = false;
+		this.plexServerId = 0;
+		this.tabIndex = null;
 	}
 }
 </script>

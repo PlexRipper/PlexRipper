@@ -44,18 +44,20 @@
 		<!--	Add Path Button	-->
 		<v-row justify="center">
 			<v-col cols="1">
-				<p-btn :button-type="addBtn" block :disabled="!allowEditing" :height="60" icon-size="40px" @click="addFolderPath" />
+				<p-btn
+					:button-type="addBtn"
+					block
+					:disabled="!allowEditing"
+					:height="60"
+					icon-size="40px"
+					@click="addFolderPath"
+				/>
 			</v-col>
 		</v-row>
 		<!--	Directory Browser	-->
-		<v-row v-if="selectedFolderPath && allowEditing">
+		<v-row>
 			<v-col>
-				<directory-browser
-					:open="isDirectoryBrowserOpen"
-					:path="selectedFolderPath"
-					@confirm="confirmDirectoryBrowser"
-					@cancel="cancelDirectoryBrowser"
-				/>
+				<directory-browser ref="directoryBrowser" @confirm="confirmDirectoryBrowser" />
 			</v-col>
 		</v-row>
 	</v-container>
@@ -63,10 +65,12 @@
 
 <script lang="ts">
 import Log from 'consola';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
 import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import { DownloadService, FolderPathService } from '@service';
+import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
 
 @Component
 export default class PathsCustomOverview extends Vue {
@@ -75,14 +79,13 @@ export default class PathsCustomOverview extends Vue {
 
 	folderPaths: FolderPathDTO[] = [];
 
-	isDirectoryBrowserOpen: boolean = false;
-
-	selectedFolderPath: FolderPathDTO | null = null;
-
 	addBtn: ButtonType = ButtonType.Add;
 	deleteBtn: ButtonType = ButtonType.Delete;
 
 	allowEditing: boolean = true;
+
+	@Ref('directoryBrowser')
+	readonly directoryBrowserRef!: DirectoryBrowser;
 
 	get getFolderPaths(): FolderPathDTO[] {
 		return this.folderPaths.filter((x) => x.folderType === this.folderType && x.id >= 4);
@@ -111,22 +114,15 @@ export default class PathsCustomOverview extends Vue {
 	}
 
 	openDirectoryBrowser(path: FolderPathDTO): void {
-		this.selectedFolderPath = path;
-		this.isDirectoryBrowserOpen = true;
+		this.directoryBrowserRef.open(path);
 	}
 
 	confirmDirectoryBrowser(path: FolderPathDTO): void {
-		this.isDirectoryBrowserOpen = false;
-		this.selectedFolderPath = null;
 		const i = this.folderPaths.findIndex((x) => x.id === path.id);
 		if (i > -1) {
 			const folderPath = { ...this.folderPaths[i], directory: path.directory };
 			FolderPathService.updateFolderPath(folderPath);
 		}
-	}
-
-	cancelDirectoryBrowser(): void {
-		this.isDirectoryBrowserOpen = false;
 	}
 
 	addFolderPath(): void {
@@ -153,14 +149,18 @@ export default class PathsCustomOverview extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(FolderPathService.getFolderPaths(), (data) => {
-			this.folderPaths = data ?? [];
-		});
+		useSubscription(
+			FolderPathService.getFolderPaths().subscribe((data) => {
+				this.folderPaths = data ?? [];
+			}),
+		);
 
 		// Ensure there are no active downloads before being allowed to change.
-		this.$subscribeTo(DownloadService.getActiveDownloadList(), (data) => {
-			this.allowEditing = data?.length === 0 ?? false;
-		});
+		useSubscription(
+			DownloadService.getActiveDownloadList().subscribe((data) => {
+				this.allowEditing = data?.length === 0 ?? false;
+			}),
+		);
 	}
 }
 </script>

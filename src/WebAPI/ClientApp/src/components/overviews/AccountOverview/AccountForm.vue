@@ -91,8 +91,8 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import { PlexAccountDTO } from '@dto/mainApi';
 import VForm from 'vuetify/lib/components/VForm/VForm.js';
+import { PlexAccountDTO } from '@dto/mainApi';
 
 @Component<AccountForm>({})
 export default class AccountForm extends Vue {

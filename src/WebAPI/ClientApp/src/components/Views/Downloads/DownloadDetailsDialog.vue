@@ -15,7 +15,9 @@
 							<v-simple-table class="section-table">
 								<tbody>
 									<tr>
-										<td style="width: 25%">{{ $t('components.download-details-dialog.overview.status') }}:</td>
+										<td style="width: 25%">
+											{{ $t('components.download-details-dialog.overview.status') }}:
+										</td>
 										<td>{{ downloadTask.status }}</td>
 									</tr>
 									<tr>

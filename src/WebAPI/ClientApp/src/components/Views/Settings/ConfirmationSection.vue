@@ -1,6 +1,6 @@
 <template>
 	<p-section>
-		<template #header> {{ $t('pages.settings.ui.confirmation-settings.header') }} </template>
+		<template #header> {{ $t('pages.settings.ui.confirmation-settings.header') }}</template>
 		<v-row no-gutters>
 			<v-col>
 				<v-simple-table class="section-table">
@@ -50,8 +50,9 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { SettingsService } from '@service';
 import Log from 'consola';
+import { useSubscription } from '@vueuse/rxjs';
+import { SettingsService } from '@service';
 
 @Component
 export default class ConfirmationSection extends Vue {
@@ -76,18 +77,26 @@ export default class ConfirmationSection extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SettingsService.getAskDownloadMovieConfirmation(), (value) => {
-			this.askDownloadMovieConfirmation = value;
-		});
-		this.$subscribeTo(SettingsService.getAskDownloadTvShowConfirmation(), (value) => {
-			this.askDownloadTvShowConfirmation = value;
-		});
-		this.$subscribeTo(SettingsService.getAskDownloadSeasonConfirmation(), (value) => {
-			this.askDownloadSeasonConfirmation = value;
-		});
-		this.$subscribeTo(SettingsService.getAskDownloadEpisodeConfirmation(), (value) => {
-			this.askDownloadEpisodeConfirmation = value;
-		});
+		useSubscription(
+			SettingsService.getAskDownloadMovieConfirmation().subscribe((value) => {
+				this.askDownloadMovieConfirmation = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getAskDownloadTvShowConfirmation().subscribe((value) => {
+				this.askDownloadTvShowConfirmation = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getAskDownloadSeasonConfirmation().subscribe((value) => {
+				this.askDownloadSeasonConfirmation = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getAskDownloadEpisodeConfirmation().subscribe((value) => {
+				this.askDownloadEpisodeConfirmation = value;
+			}),
+		);
 	}
 }
 </script>

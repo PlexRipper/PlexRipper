@@ -1,6 +1,6 @@
 <template>
 	<p-section>
-		<template #header> {{ $t('pages.settings.advanced.database.header') }} </template>
+		<template #header> {{ $t('pages.settings.advanced.database.header') }}</template>
 		<!--	Reset Database	-->
 		<v-row>
 			<v-col cols="4" align-self="center">
@@ -22,9 +22,10 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import Log from 'consola';
+import { useSubscription } from '@vueuse/rxjs';
 import ButtonType from '@enums/buttonType';
 import { resetDatabase } from '@api/settingsApi';
-import Log from 'consola';
 import { GlobalService } from '@service';
 
 @Component
@@ -33,13 +34,15 @@ export default class DatabaseSection extends Vue {
 	confirmationDialog: boolean = false;
 
 	resetDatabaseCommand(): void {
-		this.$subscribeTo(resetDatabase(), (value) => {
-			GlobalService.resetStore();
-			Log.debug('reset db', value);
-			if (value.isSuccess) {
-				this.$router.push('/setup');
-			}
-		});
+		useSubscription(
+			resetDatabase().subscribe((value) => {
+				GlobalService.resetStore();
+				Log.debug('reset db', value);
+				if (value.isSuccess) {
+					this.$router.push('/setup');
+				}
+			}),
+		);
 	}
 }
 </script>

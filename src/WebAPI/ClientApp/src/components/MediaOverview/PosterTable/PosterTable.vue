@@ -24,9 +24,9 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import VueScroll from 'vuescroll';
 import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import VueScroll from 'vuescroll';
 
 @Component
 export default class PosterTable extends Vue {

@@ -1,9 +1,9 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, filter, finalize, map, switchMap, take } from 'rxjs/operators';
 import { BaseService, GlobalService, ServerService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
-import { distinctUntilChanged, filter, finalize, map, switchMap, take } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, refreshPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
 import ISetup from '@interfaces/ISetup';
@@ -62,7 +62,9 @@ export class LibraryService extends BaseService implements ISetup {
 
 	public getLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
 		this.fetchLibrary(libraryId);
-		return this.getLibraries().pipe(map((libraries): PlexLibraryDTO | null => libraries.find((y) => y.id === libraryId) ?? null));
+		return this.getLibraries().pipe(
+			map((libraries): PlexLibraryDTO | null => libraries.find((y) => y.id === libraryId) ?? null),
+		);
 	}
 
 	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | null> {
@@ -95,7 +97,10 @@ export class LibraryService extends BaseService implements ISetup {
 				const libraryIndex = libraries.findIndex((x) => x.id === libraryId);
 				if (libraryIndex > -1) {
 					libraries[libraryIndex].defaultDestinationId = folderPathId;
-					this.setState({ libraries }, `Updated library default destination with libraryId: ${libraryId} to ${folderPathId}`);
+					this.setState(
+						{ libraries },
+						`Updated library default destination with libraryId: ${libraryId} to ${folderPathId}`,
+					);
 				}
 			}
 		});

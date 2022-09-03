@@ -1,10 +1,10 @@
 import Log from 'consola';
 import { Observable, of } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
 import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
-import { map, switchMap, tap } from 'rxjs/operators';
 import { BaseService, GlobalService } from '@service';
-import { Context } from '@nuxt/types';
 import IStoreState from '@interfaces/service/IStoreState';
 import ResultDTO from '@dto/ResultDTO';
 

@@ -28,7 +28,10 @@ const config: NuxtConfig = {
 		title: process.env.npm_package_name || '',
 		meta: [
 			{ charset: 'utf-8' },
-			{ name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui' },
+			{
+				name: 'viewport',
+				content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui',
+			},
 			{
 				hid: 'description',
 				name: 'description',
@@ -82,6 +85,10 @@ const config: NuxtConfig = {
 		'@nuxt/components',
 		// Doc: https://github.com/fumeapp/nuxt-storm
 		['nuxt-storm', { alias: true }],
+		// Doc: https://vueuse.org/guide/index.html#installation
+		'@vueuse/nuxt',
+		// Doc: https://github.com/nuxt/postcss8#readme
+		'@nuxt/postcss8',
 	],
 	/*
 	 ** Auto-import components
@@ -156,6 +163,14 @@ const config: NuxtConfig = {
 			if (isDev) {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
 			}
+
+			// Fix for many errors with "Can't import the named export 'bypassFilter' from non EcmaScript module (only default export is available)"
+			// Link: https://github.com/vueuse/vueuse/issues/718#issuecomment-913319680
+			config?.module?.rules.push({
+				test: /\.mjs$/,
+				include: /node_modules/,
+				type: 'javascript/auto',
+			});
 
 			// Doc: https://github.com/dividab/tsconfig-paths-webpack-plugin
 			if (config.resolve?.plugins) {

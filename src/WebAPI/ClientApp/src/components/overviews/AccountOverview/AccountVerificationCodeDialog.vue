@@ -7,12 +7,20 @@
 				<!--	Verification Code input	-->
 				<v-row justify="center">
 					<v-col cols="auto">
-						<CodeInput :loading="false" class="input" @change="onChange" @complete="onComplete" @keyup.enter="onEnter" />
+						<CodeInput
+							:loading="false"
+							class="input"
+							@change="onChange"
+							@complete="onComplete"
+							@keyup.enter="onEnter"
+						/>
 					</v-col>
 				</v-row>
 				<v-row v-if="errors.length > 0" justify="center">
 					<v-col cols="auto">
-						<span style="color: red; font-weight: bold">{{ $t('components.account-verification-code-dialog.error') }}</span>
+						<span style="color: red; font-weight: bold">{{
+							$t('components.account-verification-code-dialog.error')
+						}}</span>
 					</v-col>
 				</v-row>
 			</v-card-text>
@@ -34,11 +42,10 @@
 
 <script lang="ts">
 import Log from 'consola';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import CodeInput from 'vue-verification-code-input';
 import ButtonType from '@enums/buttonType';
 import { Error } from '@dto/mainApi';
-import { map } from 'rxjs/operators';
 
 @Component<AccountVerificationCodeDialog>({ components: { CodeInput } })
 export default class AccountVerificationCodeDialog extends Vue {
@@ -47,6 +54,14 @@ export default class AccountVerificationCodeDialog extends Vue {
 
 	@Prop({ required: true, type: Array as () => Error[] })
 	readonly errors!: Error[];
+
+	@Watch('errors')
+	onChildChanged(val: string) {
+		// If an error appears, then clear the code
+		if (val.length > 0) {
+			this.code = '0';
+		}
+	}
 
 	code: string = '0';
 
@@ -77,21 +92,12 @@ export default class AccountVerificationCodeDialog extends Vue {
 	onEnter() {
 		Log.info('Enter pressed');
 	}
-
-	mounted() {
-		// If an error appears, then clear the code
-		this.$subscribeTo(this.$watchAsObservable('errors').pipe(map((x) => x.newValue)), (value) => {
-			if (value.length > 0) {
-				this.code = '0';
-			}
-		});
-	}
 }
 </script>
 
 <style>
 .react-code-input > input[data-v-e1087700]:focus {
-	border: 1px solid #ff0000 !important;
-	caret-color: #ff0000 !important;
+	border: 1px solid #f00 !important;
+	caret-color: #f00 !important;
 }
 </style>

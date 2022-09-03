@@ -30,14 +30,9 @@
 			</v-col>
 		</v-row>
 		<!--	Directory Browser	-->
-		<v-row v-if="selectedFolderPath && allowEditing">
+		<v-row>
 			<v-col>
-				<directory-browser
-					:open="isDirectoryBrowserOpen"
-					:path="selectedFolderPath"
-					@confirm="confirmDirectoryBrowser"
-					@cancel="cancelDirectoryBrowser"
-				/>
+				<directory-browser ref="directoryBrowser" @confirm="confirmDirectoryBrowser" />
 			</v-col>
 		</v-row>
 	</v-container>
@@ -45,18 +40,18 @@
 
 <script lang="ts">
 import Log from 'consola';
-import { Vue, Component } from 'vue-property-decorator';
+import { Component, Ref, Vue } from 'vue-property-decorator';
+import { kebabCase } from 'lodash-es';
+import { useSubscription } from '@vueuse/rxjs';
 import { FolderPathDTO } from '@dto/mainApi';
 import { updateFolderPath } from '@api/pathApi';
-import { kebabCase } from 'lodash';
 import ButtonType from '@enums/buttonType';
 import { DownloadService, FolderPathService } from '@service';
+import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
 
 @Component
 export default class PathsDefaultOverview extends Vue {
 	folderPaths: FolderPathDTO[] = [];
-
-	isDirectoryBrowserOpen: boolean = false;
 
 	selectedFolderPath: FolderPathDTO | null = null;
 
@@ -65,6 +60,9 @@ export default class PathsDefaultOverview extends Vue {
 
 	allowEditing: boolean = true;
 
+	@Ref('directoryBrowser')
+	readonly directoryBrowserRef!: DirectoryBrowser;
+
 	get getFolderPaths(): FolderPathDTO[] {
 		// The first 3 folderPaths are always the default ones.
 		return this.folderPaths.filter((x) => x.id === 1 || x.id === 2 || x.id === 3);
@@ -72,26 +70,23 @@ export default class PathsDefaultOverview extends Vue {
 
 	openDirectoryBrowser(path: FolderPathDTO): void {
 		this.selectedFolderPath = path;
-		this.isDirectoryBrowserOpen = true;
+		this.directoryBrowserRef.open(path);
 	}
 
 	confirmDirectoryBrowser(path: FolderPathDTO): void {
 		this.selectedFolderPath = path;
-		this.isDirectoryBrowserOpen = false;
 
-		this.$subscribeTo(updateFolderPath(path), (data) => {
-			if (data.isSuccess && data.value) {
-				Log.debug(`Successfully updated folder path ${path.displayName}`, data.value);
-				const i = this.folderPaths.findIndex((x) => x.id === data.value?.id);
-				if (i > -1) {
-					this.folderPaths.splice(i, 1, data.value);
+		useSubscription(
+			updateFolderPath(path).subscribe((data) => {
+				if (data.isSuccess && data.value) {
+					Log.debug(`Successfully updated folder path ${path.displayName}`, data.value);
+					const i = this.folderPaths.findIndex((x) => x.id === data.value?.id);
+					if (i > -1) {
+						this.folderPaths.splice(i, 1, data.value);
+					}
 				}
-			}
-		});
-	}
-
-	cancelDirectoryBrowser(): void {
-		this.isDirectoryBrowserOpen = false;
+			}),
+		);
 	}
 
 	toTranslation(type: string): string {
@@ -99,15 +94,19 @@ export default class PathsDefaultOverview extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(FolderPathService.getFolderPaths(), (data) => {
-			this.folderPaths = data ?? [];
-		});
+		useSubscription(
+			FolderPathService.getFolderPaths().subscribe((data) => {
+				this.folderPaths = data ?? [];
+			}),
+		);
 
 		// Ensure there are no active downloads before being allowed to change.
-		this.$subscribeTo(DownloadService.getActiveDownloadList(), (data) => {
-			Log.debug('data', data);
-			this.allowEditing = data?.length === 0 ?? false;
-		});
+		useSubscription(
+			DownloadService.getActiveDownloadList().subscribe((data) => {
+				Log.debug('data', data);
+				this.allowEditing = data?.length === 0 ?? false;
+			}),
+		);
 	}
 }
 </script>

@@ -17,11 +17,7 @@
 								<template #prepend="{ item }">
 									<media-type-icon :media-type="item.type" />
 								</template>
-								<template #append="{ item }">
-									(
-									<file-size :size="item.mediaSize" />
-									)
-								</template>
+								<template #append="{ item }"> (<file-size :size="item.mediaSize" />) </template>
 							</v-treeview>
 						</v-col>
 					</vue-scroll>

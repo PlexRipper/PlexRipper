@@ -35,7 +35,7 @@
 											<media-type-icon :media-type="library.type" />
 										</v-list-item-icon>
 										<v-list-item-content>
-											<v-list-item-title v-text="library.title"></v-list-item-title>
+											<v-list-item-title> {{ library.title }}</v-list-item-title>
 										</v-list-item-content>
 									</v-list-item>
 								</template>
@@ -46,9 +46,9 @@
 											<media-type-icon media-type="" />
 										</v-list-item-icon>
 										<v-list-item-content>
-											<v-list-item-title>{{
-												$t('components.server-drawer.no-libraries')
-											}}</v-list-item-title>
+											<v-list-item-title>
+												{{ $t('components.server-drawer.no-libraries') }}
+											</v-list-item-title>
 										</v-list-item-content>
 									</v-list-item>
 								</template>

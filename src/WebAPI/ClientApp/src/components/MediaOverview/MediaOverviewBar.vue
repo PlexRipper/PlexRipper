@@ -17,9 +17,9 @@
 								<media-type-icon class="mx-3" :size="36" :media-type="library.type" />
 							</v-list-item-avatar>
 							<v-list-item-content>
-								<v-list-item-title
-									>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</v-list-item-title
-								>
+								<v-list-item-title>
+									{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}
+								</v-list-item-title>
 								<v-list-item-subtitle v-if="library">
 									{{ detailMode ? mediaCountFormatted : libraryCountFormatted }} -
 									<file-size :size="mediaSize" />

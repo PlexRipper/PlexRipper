@@ -74,9 +74,12 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
+// eslint-disable-next-line import/no-duplicates
 import { format } from 'date-fns';
+// eslint-disable-next-line import/no-duplicates
 import { enUS, fr } from 'date-fns/locale';
 
+import { useSubscription } from '@vueuse/rxjs';
 import { SettingsService } from '@service';
 
 interface ISelectItem {
@@ -183,21 +186,31 @@ export default class DateAndTimeSection extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SettingsService.getShortDateFormat(), (value) => {
-			this.shortDateFormat = value;
-		});
-		this.$subscribeTo(SettingsService.getLongDateFormat(), (value) => {
-			this.longDateFormat = value;
-		});
-		this.$subscribeTo(SettingsService.getTimeFormat(), (value) => {
-			this.timeFormat = value;
-		});
-		this.$subscribeTo(SettingsService.getTimeZone(), (value) => {
-			this.timeZone = value;
-		});
-		this.$subscribeTo(SettingsService.getShowRelativeDates(), (value) => {
-			this.showRelativeDates = value;
-		});
+		useSubscription(
+			SettingsService.getShortDateFormat().subscribe((value) => {
+				this.shortDateFormat = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getLongDateFormat().subscribe((value) => {
+				this.longDateFormat = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getTimeFormat().subscribe((value) => {
+				this.timeFormat = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getTimeZone().subscribe((value) => {
+				this.timeZone = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getShowRelativeDates().subscribe((value) => {
+				this.showRelativeDates = value;
+			}),
+		);
 	}
 }
 </script>

@@ -1,5 +1,7 @@
 import Log from 'consola';
 import { Observable, of } from 'rxjs';
+import { map, switchMap, take } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
 import {
 	clearDownloadTasks,
 	deleteDownloadTasks,
@@ -10,11 +12,9 @@ import {
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { map, switchMap, take } from 'rxjs/operators';
 import { DownloadMediaDTO, DownloadProgressDTO, DownloadStatus, PlexMediaType, ServerDownloadProgressDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, GlobalService, SignalrService } from '@service';
-import { Context } from '@nuxt/types';
 import ISetup from '@interfaces/ISetup';
 
 export class DownloadService extends BaseService implements ISetup {

@@ -8,6 +8,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
 import { NotificationDTO } from '@dto/mainApi';
 import notificationService from '~/service/notificationService';
 
@@ -24,9 +25,11 @@ export default class NotificationButton extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(notificationService.getNotifications(), (value) => {
-			this.notifications = value;
-		});
+		useSubscription(
+			notificationService.getNotifications().subscribe((value) => {
+				this.notifications = value;
+			}),
+		);
 	}
 }
 </script>

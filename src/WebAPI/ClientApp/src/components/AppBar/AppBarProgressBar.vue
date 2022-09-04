@@ -15,6 +15,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
 import { ServerService, SignalrService } from '@service';
 import { PlexServerDTO, SyncServerProgress } from '@dto/mainApi';
 
@@ -38,13 +39,17 @@ export default class AppBarProgressBar extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SignalrService.getAllSyncServerProgress(), (progress) => {
-			this.progressList = progress;
-		});
+		useSubscription(
+			SignalrService.getAllSyncServerProgress().subscribe((progress) => {
+				this.progressList = progress;
+			}),
+		);
 
-		this.$subscribeTo(ServerService.getServers(), (servers) => {
-			this.servers = servers;
-		});
+		useSubscription(
+			ServerService.getServers().subscribe((servers) => {
+				this.servers = servers;
+			}),
+		);
 	}
 }
 </script>

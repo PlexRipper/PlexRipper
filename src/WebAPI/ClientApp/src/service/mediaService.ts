@@ -1,11 +1,11 @@
+import { map } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
+import { Observable, of } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
 import { PlexMediaType } from '@dto/mainApi';
-import { Observable, of } from 'rxjs';
 import { getThumbnail } from '@api/mediaApi';
-import { map } from 'rxjs/operators';
 import ISetup from '@interfaces/ISetup';
-import { Context } from '@nuxt/types';
 
 export class MediaService extends BaseService implements ISetup {
 	public constructor() {

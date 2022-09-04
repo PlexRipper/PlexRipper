@@ -6,3 +6,6 @@ obj/
 node_modules/
 static/
 .vscode
+/package-lock.json
+!/src/lang/
+!/web-types-config.json

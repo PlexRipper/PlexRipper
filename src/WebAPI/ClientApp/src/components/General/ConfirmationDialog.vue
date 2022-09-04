@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import IText from '@interfaces/IText';
 import ButtonType from '@enums/buttonType';
 
@@ -68,6 +68,11 @@ export default class ConfirmationDialog extends Vue {
 		return ButtonType.Confirm;
 	}
 
+	@Watch('dialog')
+	onDialogChanged() {
+		this.loading = false;
+	}
+
 	cancel(): void {
 		this.$emit('cancel');
 	}
@@ -77,12 +82,6 @@ export default class ConfirmationDialog extends Vue {
 		if (this.confirmLoading) {
 			this.loading = true;
 		}
-	}
-
-	mounted() {
-		this.$watchAsObservable('dialog').subscribe(() => {
-			this.loading = false;
-		});
 	}
 }
 </script>

@@ -89,8 +89,9 @@
 </template>
 
 <script lang="ts">
-import _ from 'lodash';
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
+import { clamp } from 'lodash-es';
 import { SignalrService } from '@service';
 import type { InspectServerProgress, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
@@ -144,13 +145,15 @@ export default class AccountSetupProgress extends Vue {
 	}
 
 	get getTotalPercentage(): number {
-		return _.clamp((this.getCompletedCount / this.plexServers.length) * 100, 0, 100);
+		return clamp((this.getCompletedCount / this.plexServers.length) * 100, 0, 100);
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SignalrService.getAllInspectServerProgress(), (data) => {
-			this.inspectServerProgresses = data;
-		});
+		useSubscription(
+			SignalrService.getAllInspectServerProgress().subscribe((data) => {
+				this.inspectServerProgresses = data;
+			}),
+		);
 	}
 }
 </script>

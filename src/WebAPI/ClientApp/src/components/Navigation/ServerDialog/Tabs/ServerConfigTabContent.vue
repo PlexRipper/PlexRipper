@@ -19,8 +19,8 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import type { PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
 import Log from 'consola';
+import type { PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
 import { SettingsService } from '@service';
 
 @Component<ServerConfigTabContent>({})

@@ -5,6 +5,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { format } from 'date-fns';
+import { useSubscription } from '@vueuse/rxjs';
 import { SettingsService } from '@service';
 
 @Component
@@ -53,15 +54,21 @@ export default class DateTime extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SettingsService.getShortDateFormat(), (value) => {
-			this.shortDateFormat = value;
-		});
-		this.$subscribeTo(SettingsService.getLongDateFormat(), (value) => {
-			this.longDateFormat = value;
-		});
-		this.$subscribeTo(SettingsService.getTimeFormat(), (value) => {
-			this.timeFormat = value;
-		});
+		useSubscription(
+			SettingsService.getShortDateFormat().subscribe((value) => {
+				this.shortDateFormat = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getLongDateFormat().subscribe((value) => {
+				this.longDateFormat = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getTimeFormat().subscribe((value) => {
+				this.timeFormat = value;
+			}),
+		);
 	}
 }
 </script>

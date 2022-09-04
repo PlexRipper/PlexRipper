@@ -1,5 +1,8 @@
 import Log from 'consola';
 import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
+import { isEqual } from 'lodash';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
@@ -12,11 +15,8 @@ import {
 	SettingsModelDTO,
 	ViewMode,
 } from '@dto/mainApi';
-import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, GlobalService } from '@service';
 import { getSettings, updateSettings } from '@api/settingsApi';
-import { Context } from '@nuxt/types';
-import { isEqual } from 'lodash';
 import IStoreState from '@interfaces/service/IStoreState';
 
 export class SettingsService extends BaseService {

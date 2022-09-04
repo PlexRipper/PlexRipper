@@ -19,7 +19,13 @@
 										<v-row class="my-2 no-wrap" align="center">
 											<v-col cols="auto">
 												<v-icon v-if="item.icon">{{ item.icon }}</v-icon>
-												<v-img v-if="item.img" :src="item.img" :height="50" :max-width="80" :alt="item.text" />
+												<v-img
+													v-if="item.img"
+													:src="item.img"
+													:height="50"
+													:max-width="80"
+													:alt="item.text"
+												/>
 											</v-col>
 											<v-col cols="10">
 												<span class="pa-2">
@@ -41,6 +47,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
 import { SettingsService } from '@service';
 
 interface ILanguageOption {
@@ -61,10 +68,12 @@ export default class LanguageSection extends Vue {
 	}
 
 	mounted() {
-		this.$subscribeTo(SettingsService.getLanguage(), (language) => {
-			this.language = language;
-			this.$nuxt.$i18n.setLocale(language);
-		});
+		useSubscription(
+			SettingsService.getLanguage().subscribe((language) => {
+				this.language = language;
+				this.$nuxt.$i18n.setLocale(language);
+			}),
+		);
 
 		const locals = this.$nuxt.$i18n.locales as any[];
 		for (const localsKey of locals) {

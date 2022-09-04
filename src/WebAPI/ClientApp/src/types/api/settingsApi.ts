@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
+import { checkResponse, preApiRequest } from './baseApi';
 import { SettingsModelDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
-import { checkResponse, preApiRequest } from './baseApi';
 
 const logText = 'From SettingsAPI => ';
 const apiPath = '/settings';

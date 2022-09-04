@@ -1,10 +1,10 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
-import AppConfig from '@class/AppConfig';
 import { ReplaySubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { ObservableStore } from '@codewithdan/observable-store';
+import AppConfig from '@class/AppConfig';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,

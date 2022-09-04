@@ -57,7 +57,9 @@
 						<v-card-text>
 							<v-row no-gutters>
 								<v-col cols="12">
-									<span>{{ $t('components.details-overview.duration') }} <duration :value="mediaItem.duration" /> </span>
+									<span
+										>{{ $t('components.details-overview.duration') }} <duration :value="mediaItem.duration" />
+									</span>
 								</v-col>
 								<v-col cols="12">
 									<span>{{ $t('components.details-overview.database-id') }} {{ mediaItem.id }}</span>
@@ -138,13 +140,15 @@ export default class DetailsOverview extends Vue {
 	@Watch('mediaItem')
 	mediaItemIsDone(newMediaItem: ITreeViewItem | null): void {
 		if (newMediaItem) {
-			MediaService.getThumbnail(newMediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe((imageUrl) => {
-				if (!imageUrl) {
-					this.defaultImage = true;
-					return;
-				}
-				this.imageUrl = imageUrl;
-			});
+			MediaService.getThumbnail(newMediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe(
+				(imageUrl) => {
+					if (!imageUrl) {
+						this.defaultImage = true;
+						return;
+					}
+					this.imageUrl = imageUrl;
+				},
+			);
 		}
 	}
 

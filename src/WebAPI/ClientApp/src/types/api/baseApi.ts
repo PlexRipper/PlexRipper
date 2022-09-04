@@ -2,9 +2,9 @@ import Log from 'consola';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { AxiosResponse } from 'axios';
+import { AxiosObservable } from 'axios-observable/dist/axios-observable.interface';
 import { AlertService } from '@service';
 import ResultDTO from '@dto/ResultDTO';
-import { AxiosObservable } from 'axios-observable/dist/axios-observable.interface';
 
 export function preApiRequest(logText: string, fnName: string, data: any | string = 'none'): void {
 	Log.debug(`${logText} ${fnName} => sending request:`, data);

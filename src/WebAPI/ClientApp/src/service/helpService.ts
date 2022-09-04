@@ -1,9 +1,9 @@
 import { Observable, of } from 'rxjs';
-import IStoreState from '@interfaces/service/IStoreState';
 import { switchMap } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
+import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
 import ISetup from '@interfaces/ISetup';
-import { Context } from '@nuxt/types';
 
 export class HelpService extends BaseService implements ISetup {
 	public constructor() {

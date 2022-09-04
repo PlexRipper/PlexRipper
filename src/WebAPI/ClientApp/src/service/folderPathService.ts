@@ -1,11 +1,11 @@
 import { Observable } from 'rxjs';
-import { FolderPathDTO } from '@dto/mainApi';
 import { finalize, map, take } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
+import Log from 'consola';
+import { FolderPathDTO } from '@dto/mainApi';
 import { BaseService, GlobalService } from '@service';
 import { getFolderPaths, createFolderPath, updateFolderPath, deleteFolderPath } from '@api/pathApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { Context } from '@nuxt/types';
-import Log from 'consola';
 import ISetup from '@interfaces/ISetup';
 
 export class FolderPathService extends BaseService implements ISetup {

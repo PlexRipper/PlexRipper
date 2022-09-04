@@ -31,11 +31,12 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { HelpService, AlertService } from '@service';
+import { merge, timer } from 'rxjs';
+import { useSubscription } from '@vueuse/rxjs';
+import { AlertService, HelpService } from '@service';
 import IAlert from '@interfaces/IAlert';
 import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
 import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
-import { merge, timer } from 'rxjs';
 import globalService from '~/service/globalService';
 
 @Component<Default>({
@@ -74,22 +75,28 @@ export default class Default extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(merge([timer(10000), globalService.getPageSetupReady()]), () => {
-			this.isLoading = false;
-		});
+		useSubscription(
+			merge([timer(10000), globalService.getPageSetupReady()]).subscribe(() => {
+				this.isLoading = false;
+			}),
+		);
 
-		this.$subscribeTo(HelpService.getHelpDialog(), (helpId) => {
-			if (helpId) {
-				this.helpId = helpId;
-				this.helpDialogState = true;
-			}
-		});
+		useSubscription(
+			HelpService.getHelpDialog().subscribe((helpId) => {
+				if (helpId) {
+					this.helpId = helpId;
+					this.helpDialogState = true;
+				}
+			}),
+		);
 
-		this.$subscribeTo(AlertService.getAlerts(), (alerts) => {
-			if (alerts) {
-				this.alerts = alerts;
-			}
-		});
+		useSubscription(
+			AlertService.getAlerts().subscribe((alerts) => {
+				if (alerts) {
+					this.alerts = alerts;
+				}
+			}),
+		);
 	}
 }
 </script>

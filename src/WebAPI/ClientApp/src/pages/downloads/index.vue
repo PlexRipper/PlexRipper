@@ -27,7 +27,7 @@
 									<v-col cols="auto">
 										<h2>{{ plexServer.name }}</h2>
 									</v-col>
-									<v-col class="py-0"> </v-col>
+									<v-col class="py-0"></v-col>
 								</v-row>
 							</v-expansion-panel-header>
 							<v-expansion-panel-content>
@@ -56,9 +56,11 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Vue } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
 import { DownloadService, ServerService } from '@service';
 import { DownloadTaskDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
 import { detailDownloadTask } from '@api/plexDownloadApi';
+
 declare interface ISelection {
 	plexServerId: number;
 	downloadTaskIds: number[];
@@ -187,14 +189,18 @@ export default class Downloads extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(ServerService.getServers(), (servers) => {
-			this.plexServers = servers;
-			this.openExpansions = [...Array(servers?.length).keys()] ?? [];
-		});
+		useSubscription(
+			ServerService.getServers().subscribe((servers) => {
+				this.plexServers = servers;
+				this.openExpansions = [...Array(servers?.length).keys()] ?? [];
+			}),
+		);
 
-		this.$subscribeTo(DownloadService.getServerDownloadList(), (downloads) => {
-			this.serverDownloads = downloads;
-		});
+		useSubscription(
+			DownloadService.getServerDownloadList().subscribe((downloads) => {
+				this.serverDownloads = downloads;
+			}),
+		);
 	}
 }
 </script>

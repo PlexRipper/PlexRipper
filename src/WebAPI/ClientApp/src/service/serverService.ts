@@ -55,7 +55,9 @@ export class ServerService extends BaseService implements ISetup {
 	}
 
 	public getServer(serverId: number): Observable<PlexServerDTO | null> {
-		return this.getServers().pipe(switchMap((servers: PlexServerDTO[]) => of(servers.find((x) => x.id === serverId) ?? null)));
+		return this.getServers().pipe(
+			switchMap((servers: PlexServerDTO[]) => of(servers.find((x) => x.id === serverId) ?? null)),
+		);
 	}
 
 	public checkServer(plexServerId: number): Observable<PlexServerStatusDTO | null> {

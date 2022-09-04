@@ -1,6 +1,6 @@
 <template>
 	<p-section>
-		<template #header> {{ $t('pages.settings.advanced.download-manager.header') }} </template>
+		<template #header> {{ $t('pages.settings.advanced.download-manager.header') }}</template>
 		<!--	Max segmented downloads	-->
 		<v-row>
 			<v-col cols="4" align-self="center">
@@ -19,27 +19,30 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { timer } from 'rxjs';
-import { debounce, distinctUntilChanged, map } from 'rxjs/operators';
+import { useSubscription } from '@vueuse/rxjs';
+import { ref, Ref } from 'vue';
+// eslint-disable-next-line import/named
+import { watchDebounced } from '@vueuse/core';
 import { SettingsService } from '@service';
 
 @Component
 export default class DownloadManagerSection extends Vue {
-	downloadSegments: number = 0;
+	downloadSegments: Ref<number> = ref(0);
 
 	mounted(): void {
-		this.$subscribeTo(
-			this.$watchAsObservable('downloadSegments').pipe(
-				map((x: { oldValue: number; newValue: number }) => x.newValue),
-				debounce(() => timer(1000)),
-				distinctUntilChanged(),
-			),
-			(value) => SettingsService.updateDownloadManagerSetting('downloadSegments', value),
+		watchDebounced(
+			this.downloadSegments,
+			(value) => {
+				SettingsService.updateDownloadManagerSetting('downloadSegments', value);
+			},
+			{ debounce: 1000, maxWait: 5000 },
 		);
 
-		this.$subscribeTo(SettingsService.getDownloadSegments(), (downloadSegments) => {
-			this.downloadSegments = downloadSegments;
-		});
+		useSubscription(
+			SettingsService.getDownloadSegments().subscribe((downloadSegments) => {
+				this.downloadSegments.value = downloadSegments;
+			}),
+		);
 	}
 }
 </script>

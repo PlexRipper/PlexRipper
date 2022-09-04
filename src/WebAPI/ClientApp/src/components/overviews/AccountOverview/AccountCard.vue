@@ -1,6 +1,8 @@
 <template>
 	<v-card hover outlined max-height="130" class="glass-background" @click="openDialog()">
-		<v-card-title v-if="!isNew">{{ account ? account.displayName : $t('components.account-card.no-account-name') }}</v-card-title>
+		<v-card-title v-if="!isNew">{{
+			account ? account.displayName : $t('components.account-card.no-account-name')
+		}}</v-card-title>
 		<!-- Add new account -->
 		<v-card-text v-if="isNew" class="text-center">
 			<v-icon style="font-size: 100px">mdi-plus-box-outline</v-icon>

@@ -32,9 +32,10 @@ public class PlexApi
     /// <returns></returns>
     public async Task<Result<PlexAccountDTO>> PlexSignInAsync(PlexAccount plexAccount)
     {
+        Log.Debug($"Requesting PlexToken for account {plexAccount.Username}");
         var credentials = new CredentialsDTO
         {
-            Username = plexAccount.Username,
+            Login = plexAccount.Username,
             Password = plexAccount.Password,
             RememberMe = false,
         };
@@ -70,8 +71,9 @@ public class PlexApi
         var request = new RestRequest(new Uri($"{serverBaseUrl}/identity"));
 
         request.AddToken(authToken);
+
         Log.Debug($"Requesting PlexServerStatus for {serverBaseUrl}");
-        var response = await _client.SendRequestAsync<RestResponse>(request, 1, action);
+        var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 1, action);
 
         var statusCodeReason = response.GetStatusCodeReason();
         var statusCode = statusCodeReason?.StatusCode() ?? 0;

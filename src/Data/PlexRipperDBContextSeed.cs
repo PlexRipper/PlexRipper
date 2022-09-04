@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Environment;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Data;
 
@@ -12,7 +13,7 @@ public static class PlexRipperDBContextSeed
             {
                 Id = 1,
                 DisplayName = "Download Path",
-                DirectoryPath = "/downloads",
+                DirectoryPath = $"/{PathProvider.DefaultDownloadsDestinationFolder}",
                 FolderType = FolderType.DownloadFolder,
                 MediaType = PlexMediaType.None,
             },
@@ -21,7 +22,7 @@ public static class PlexRipperDBContextSeed
             {
                 Id = 2,
                 DisplayName = "Movie Destination Path",
-                DirectoryPath = "/movies",
+                DirectoryPath = $"/{PathProvider.DefaultMovieDestinationFolder}",
                 FolderType = FolderType.MovieFolder,
                 MediaType = PlexMediaType.Movie,
             },
@@ -30,7 +31,7 @@ public static class PlexRipperDBContextSeed
             {
                 Id = 3,
                 DisplayName = "Tv Show Destination Path",
-                DirectoryPath = "/tvshows",
+                DirectoryPath = $"/{PathProvider.DefaultTvShowsDestinationFolder}",
                 FolderType = FolderType.TvShowFolder,
                 MediaType = PlexMediaType.TvShow,
             },
@@ -39,7 +40,7 @@ public static class PlexRipperDBContextSeed
             {
                 Id = 4,
                 DisplayName = "Music Destination Path",
-                DirectoryPath = "/music",
+                DirectoryPath = $"/{PathProvider.DefaultMusicDestinationFolder}",
                 FolderType = FolderType.MusicFolder,
                 MediaType = PlexMediaType.Music,
             },
@@ -48,7 +49,7 @@ public static class PlexRipperDBContextSeed
             {
                 Id = 5,
                 DisplayName = "Photos Destination Path",
-                DirectoryPath = "/photos",
+                DirectoryPath = $"/{PathProvider.DefaultPhotosDestinationFolder}",
                 FolderType = FolderType.PhotosFolder,
                 MediaType = PlexMediaType.Photos,
             },
@@ -57,7 +58,7 @@ public static class PlexRipperDBContextSeed
             {
                 Id = 6,
                 DisplayName = "Other Videos Destination Path",
-                DirectoryPath = "/other",
+                DirectoryPath = $"/{PathProvider.DefaultOtherDestinationFolder}",
                 FolderType = FolderType.OtherVideosFolder,
                 MediaType = PlexMediaType.OtherVideos,
             },
@@ -66,7 +67,7 @@ public static class PlexRipperDBContextSeed
             {
                 Id = 7,
                 DisplayName = "Games Videos Destination Path",
-                DirectoryPath = "/games",
+                DirectoryPath = $"/{PathProvider.DefaultGamesDestinationFolder}",
                 FolderType = FolderType.GamesVideosFolder,
                 MediaType = PlexMediaType.Games,
             },

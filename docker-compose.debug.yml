@@ -16,10 +16,10 @@ services:
       # Web UI & Web API
       - '5000:5000'
     volumes:
-      - /mnt/PROJECTS/PlexRipperCache/Config:/config
-      - /mnt/PROJECTS/PlexRipperCache/Downloads:/downloads
-      - /mnt/PROJECTS/PlexRipperCache/Movies:/movies
-      - /mnt/PROJECTS/PlexRipperCache/TvShows:/tvshows
+      - /mnt/PROJECTS/PlexRipperCache/Config:/Config
+      - /mnt/PROJECTS/PlexRipperCache/Downloads:/Downloads
+      - /mnt/PROJECTS/PlexRipperCache/Movies:/Movies
+      - /mnt/PROJECTS/PlexRipperCache/TvShows:/TvShows
 
 
 

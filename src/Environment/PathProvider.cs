@@ -6,19 +6,41 @@ public class PathProvider : IPathProvider
 {
     #region Properties
 
-    private static string _configFolder = "Config";
+    #region DirectoryNames
 
-    private static string _logsFolder = "Logs";
+    private static readonly string _configFolder = "Config";
+
+    private static readonly string _logsFolder = "Logs";
+
+    public static string DefaultMovieDestinationFolder => "Movies";
+
+    public static string DefaultDownloadsDestinationFolder => "Downloads";
+
+    public static string DefaultTvShowsDestinationFolder => "TvShows";
+
+    public static string DefaultMusicDestinationFolder => "Music";
+
+    public static string DefaultPhotosDestinationFolder => "Photos";
+
+    public static string DefaultOtherDestinationFolder => "Other";
+
+    public static string DefaultGamesDestinationFolder => "Games";
+
+    #endregion
+
+    #region FileNames
+
+    public static string ConfigFileName => "PlexRipperSettings.json";
+
+    public static string DatabaseName => "PlexRipperDB.db";
+
+    #endregion
 
     public static string ConfigDirectory => Path.Combine(RootDirectory, _configFolder);
 
     public static string ConfigFileLocation => Path.Join(ConfigDirectory, ConfigFileName);
 
-    public static string ConfigFileName => "PlexRipperSettings.json";
-
     public static string DatabaseBackupDirectory => Path.Combine(ConfigDirectory, "Database BackUp");
-
-    public static string DatabaseName => "PlexRipperDB.db";
 
     public static string DatabasePath => Path.Combine(ConfigDirectory, DatabaseName);
 

@@ -265,5 +265,6 @@ Global
 	EndGlobalSection
 	GlobalSection(RiderSharedRunConfigurations) = postSolution
 		File = src\WebAPI\ClientApp\.run\Nuxt Debug JavaScript.run.xml
+		File = src\.run\PlexRipper Back-End Development.run.xml
 	EndGlobalSection
 EndGlobal

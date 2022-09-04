@@ -5,12 +5,12 @@
 			"reason": "Incompatible with Vanta"
 		},
 		"vue": {
-			"versions": "3.2.38",
+			"versions": ">3.0.0",
 			"reason": "Incompatible with NuxtV2"
 		},
 		"@vue/test-utils": {
-			"versions": "2.0.2",
-			"reason": " V2 has a hard dependency on Vue3"
+			"versions": ">2.0.0",
+			"reason": "V2 has a hard dependency on Vue3"
 		}
 	}
 }

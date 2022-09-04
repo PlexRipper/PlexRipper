@@ -34,13 +34,11 @@ public class PlexApiClient
         _client.UseDotNetXmlSerializer();
     }
 
-    public async Task<Result<T>> SendRequestAsync<T>(RestRequest request, int retryCount = 2, Action<PlexApiClientProgress> action = null)
+    public async Task<Result<T>> SendRequestAsync<T>(RestRequest request, int retryCount = 2, Action<PlexApiClientProgress> action = null) where T : class
     {
-        Log.Verbose($"Sending request: {request.Resource}");
+        Log.Debug($"Sending request to: {request.Resource}");
 
-        var result = await _client.SendRequestWithPolly<T>(request, retryCount);
-
-        return GenerateResponseResult(result, action);
+        return await _client.SendRequestWithPolly<T>(request, retryCount);
     }
 
     public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)
@@ -83,42 +81,6 @@ public class PlexApiClient
                 return result.Add408RequestTimeoutError().LogError();
 
             return result;
-        }
-    }
-
-    private Result<T> GenerateResponseResult<T>(Result<RestResponse<T>> responseResult, Action<PlexApiClientProgress> action = null)
-    {
-        if (responseResult.IsFailed)
-            return Result.Fail(responseResult.Errors);
-
-        var value = responseResult.Value;
-        Log.Verbose($"Response was: {value.Content}");
-
-        if (action is not null)
-        {
-            action(new PlexApiClientProgress
-            {
-                StatusCode = (int)value.StatusCode,
-                Message = value.IsSuccessful ? "Request successful!" : value.ErrorMessage,
-                ConnectionSuccessful = value.IsSuccessful,
-                Completed = true,
-            });
-        }
-
-        if (value.IsSuccessful)
-        {
-            var result = Result.Ok(value.Data);
-            result.AddStatusCode((int)value.StatusCode, $"Request to {value.ResponseUri} ({value.StatusCode}) was successful!");
-            result.LogDebug();
-            return result;
-        }
-        else
-        {
-            var request = value.Request;
-            var result = Result.Fail($"PlexApi Error: Error ({value.StatusCode}) on request to {request.Resource} - {value.ErrorMessage}");
-
-            // Plex sometimes gives some errors back
-            return ParsePlexErrors(result, value).LogError();
         }
     }
 

@@ -73,7 +73,7 @@ public class PlexAccountService : IPlexAccountService
         // Retrieve libraries for the plexAccount
         await _schedulerService.InspectPlexServersAsyncJob(plexAccount.Id);
 
-        var msg = !plexServerList.Value.Any()
+        var msg = !plexServerList.Value?.Any() ?? false
             ? "Account was setup successfully, but did not have access to any servers!"
             : "Account was setup successfully!";
 

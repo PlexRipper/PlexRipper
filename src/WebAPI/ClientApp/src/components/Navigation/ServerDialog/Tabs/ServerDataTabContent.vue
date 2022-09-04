@@ -54,6 +54,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
 import type { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { ServerService } from '@service';
 
@@ -67,16 +68,15 @@ export default class ServerDataTabContent extends Vue {
 	@Prop({ required: true, type: Object as () => PlexServerStatusDTO })
 	readonly serverStatus!: PlexServerStatusDTO;
 
-	@Prop({ required: true, type: Boolean })
-	readonly show!: boolean;
-
 	checkServerStatusLoading: boolean = false;
 
 	checkServer(): void {
 		this.checkServerStatusLoading = true;
-		this.$subscribeTo(ServerService.checkServer(this.plexServer.id), () => {
-			this.checkServerStatusLoading = false;
-		});
+		useSubscription(
+			ServerService.checkServer(this.plexServer.id).subscribe(() => {
+				this.checkServerStatusLoading = false;
+			}),
+		);
 	}
 }
 </script>

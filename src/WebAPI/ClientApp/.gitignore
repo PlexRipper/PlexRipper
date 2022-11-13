@@ -62,9 +62,6 @@ typings/
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 
-# next.js build output
-.next
-
 # nuxt.js build output
 .nuxt
 
@@ -77,9 +74,6 @@ dist
 # Serverless directories
 .serverless
 
-# IDE / Editor
-.idea
-
 # Service worker
 sw.*
 
@@ -88,3 +82,16 @@ sw.*
 
 # Vim swap files
 *.swp
+
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# AWS User-specific
+.idea/**/aws.xml
+
+# Generated files
+.idea/**/contentModel.xml

@@ -231,10 +231,7 @@ _Pvt_Extensions
 .fake/
 
 tests/Infrastructure.UnitTests/secretCredentials.json
-
 tests/Applicaton.IntegrationTests/secretCredentials.json
-
-.idea/
 
 tests/BaseTests/secretCredentials.json
 tests/MockPlexApiServer/media/movies/*

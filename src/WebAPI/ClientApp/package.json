@@ -15,7 +15,13 @@
 		"lint-staged": "lint-staged",
 		"update-web-types": "vue-docgen-web-types -c web-types-config.json",
 		"npm-upgrade-packages": "npm-upgrade",
-		"analyze": "nuxt build --analyze"
+		"analyze": "nuxt build --analyze",
+		"cypress:open": "cypress open",
+		"cypress:run": "cypress run",
+		"test-dev": "nuxt dev --port 3030",
+		"e2e": "start-server-and-test test-dev http://localhost:3030 cypress:open",
+		"pree2e:slient": "npm run build",
+		"e2e:silent": "start-server-and-test start http://localhost:3030 cypress:run"
 	},
 	"script-comments": {
 		"generate-ts": "Run this to generate typescript definitions based on the back-end Swagger API documentation, can only be run if back-end is running",
@@ -26,11 +32,6 @@
 	"lint-staged": {
 		"*.{js,vue}": "npm run lint --fix",
 		"*.{css,vue}": "stylelint"
-	},
-	"husky": {
-		"hooks": {
-			"pre-commit": "lint-staged"
-		}
 	},
 	"web-types": "./web-types.json",
 	"dependencies": {
@@ -89,6 +90,7 @@
 		"lint-staged": "^13.0.3",
 		"nuxt-storm": "^1.1.3",
 		"prettier": "^2.7.1",
+		"start-server-and-test": "^1.14.0",
 		"stylelint": "^14.11.0",
 		"stylelint-config-prettier": "^9.0.3",
 		"stylelint-config-recommended-vue": "^1.4.0",

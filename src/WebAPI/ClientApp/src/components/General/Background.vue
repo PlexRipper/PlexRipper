@@ -1,57 +1,105 @@
 <template>
-  <div id="background-effect">
-    <div style="z-index: 1">
-      <slot />
-    </div>
-  </div>
+	<div :class="backgroundEffect">
+		<div :class="backgroundOverlay">
+			<div style="z-index: 1">
+				<slot />
+			</div>
+		</div>
+	</div>
 </template>
 
 <script lang="ts">
-import Log from "consola";
-import { Component, Vue } from "vue-property-decorator";
-import * as THREE from "three";
-import WAVES from "vanta/dist/vanta.waves.min";
-import WebGL from "@class/WebGL";
+import Log from 'consola';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import * as THREE from 'three';
+import WAVES from 'vanta/dist/vanta.waves.min';
+import WebGL from '@class/WebGL';
 
 @Component
 export default class Background extends Vue {
-  vantaEffect: any;
+	vantaEffect: any;
 
-  mounted(): void {
-    if (WebGL.isWebGLAvailable()) {
-      Log.info("Wave effect created!");
-      this.vantaEffect = WAVES({
-        THREE,
-        el: "#background-effect",
-        mouseControls: true,
-        touchControls: true,
-        gyroControls: false,
-        minHeight: 200.0,
-        minWidth: 200.0,
-        scale: 1.0,
-        scaleMobile: 1.0,
-        color: 0x880000,
-        shininess: 43.0,
-        waveHeight: 4.0,
-        waveSpeed: 1.25,
-        zoom: 0.65
-      });
-    }
-  }
+	@Prop({ type: Boolean, default: false })
+	readonly hideBackground!: Boolean;
 
-  beforeDestroy(): void {
-    if (this.vantaEffect) {
-      Log.info("Wave effect destroyed!");
-      this.vantaEffect.destroy();
-    }
-  }
+	get isDark(): boolean {
+		return this.$vuetify.theme.dark;
+	}
+
+	get backgroundEffect(): any {
+		return {
+			'background-effect': true,
+			'still-background-effect': !this.vantaEffect,
+		};
+	}
+
+	get backgroundOverlay(): any {
+		if (this.hideBackground) {
+			return {
+				'background-overlay': true,
+				'no-background': true,
+			};
+		}
+		return {
+			'background-overlay': true,
+			'dark-background': this.isDark,
+			'light-background': !this.isDark,
+		};
+	}
+
+	mounted(): void {
+		if (WebGL.isWebGLAvailable()) {
+			Log.info('Wave effect created!');
+			this.vantaEffect = WAVES({
+				THREE,
+				el: '.background-effect',
+				mouseControls: true,
+				touchControls: true,
+				gyroControls: false,
+				minHeight: 200.0,
+				minWidth: 200.0,
+				scale: 1.0,
+				scaleMobile: 1.0,
+				color: 0x880000,
+				shininess: 43.0,
+				waveHeight: 4.0,
+				waveSpeed: 1.25,
+				zoom: 0.65,
+			});
+		}
+	}
+
+	beforeDestroy(): void {
+		if (this.vantaEffect) {
+			Log.info('Wave effect destroyed!');
+			this.vantaEffect.destroy();
+		}
+	}
 }
 </script>
 
 <style lang="scss">
-#background-effect {
-  width: 100%;
-  height: 100%;
-  background-image: url('~assets/img/background/background.png');
+@import 'assets/scss/_variables.scss';
+
+.background-effect,
+.background-overlay {
+	width: 100%;
+	height: 100%;
+}
+
+.background-effect {
+	&.still-background-effect {
+		background-image: url('~assets/img/background/background.png');
+	}
+}
+
+.background-overlay {
+	&.dark-background {
+		background-color: $dark-background-color;
+	}
+
+	&.light-background {
+		background-color: $light-background-color;
+	}
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
 	<!--	Instead of multiple layouts we merge into one default layout to prevent full
-				page change (flashing white background) during transitions.	-->
-	<v-app :class="[isNoBackground ? 'no-background' : 'background']">
-		<Background>
+        page change (flashing white background) during transitions.	-->
+	<v-app>
+		<Background :hide-background="isNoBackground">
 			<page-load-overlay v-if="isLoading" :value="isLoading" />
 			<template v-else>
 				<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />

@@ -27,6 +27,8 @@
 			"@service": ["./service/index.ts"],
 			"@img/*": ["./assets/img/*"],
 			"@enums/*": ["./types/enums/*"],
+			"@mock": ["./mock-data/index.ts"],
+			"@mock/*": ["./mock-data/*"],
 			"@interfaces/*": ["./types/interfaces/*"],
 			"@components/*": ["./components/*"],
 			"@overviews/*": ["./components/overviews/*"],

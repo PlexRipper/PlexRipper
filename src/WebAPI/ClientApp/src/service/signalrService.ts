@@ -46,11 +46,16 @@ export class SignalrService extends BaseService implements ISetup {
 		super.setNuxtContext(nuxtContext);
 
 		GlobalService.getConfigReady().subscribe((config) => {
+			// Ensure we don't run any SignalR functionality due to it being tricky to setup. Might revisit later
+			// TODO Re-enable when trying to test SignalR functionality
+			// @ts-ignore
+			if (window.Cypress) {
+				return;
+			}
 			Log.debug('Setting up SignalR Service');
 			const options: IHttpConnectionOptions = {
 				logger: LogLevel.Information,
 			};
-
 			// Setup Connections
 			const baseUrl = config.baseURL;
 			this._progressHubConnection = new HubConnectionBuilder()

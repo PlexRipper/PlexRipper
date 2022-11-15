@@ -53,6 +53,9 @@
 				</v-tabs>
 			</v-card-text>
 		</v-card>
+		<v-card v-else>
+			<h1>PlexServer object was invalid</h1>
+		</v-card>
 	</v-dialog>
 </template>
 

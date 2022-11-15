@@ -1,7 +1,7 @@
 <template>
 	<!--	Instead of multiple layouts we merge into one default layout to prevent full
-				page change (flashing white background) during transitions.	-->
-	<v-app :class="[isNoBackground ? 'no-background' : 'background']">
+        page change (flashing white background) during transitions.	-->
+	<v-app>
 		<page-load-overlay v-if="isLoading" :value="isLoading" />
 		<template v-else>
 			<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
@@ -19,13 +19,13 @@
 				<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
 				<navigation-drawer :show-drawer="showNavigationDrawerState" />
 				<notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
-				<v-main class="no-background">
+				<v-main>
 					<nuxt />
 				</v-main>
 				<footer />
 			</template>
 		</template>
-		<background />
+		<Background :hide-background="isNoBackground" />
 	</v-app>
 </template>
 

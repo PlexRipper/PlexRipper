@@ -20,6 +20,7 @@ module.exports = {
 		'no-use-before-define': 'off',
 		'no-extend-native': 'off',
 		'import/no-named-as-default': 'off',
+		'no-prototype-builtins': 'off',
 		'@intlify/vue-i18n/no-raw-text': [
 			'warn',
 			{

@@ -36,6 +36,7 @@
 	"web-types": "./web-types.json",
 	"dependencies": {
 		"@codewithdan/observable-store": "^2.2.14",
+		"@faker-js/faker": "^7.6.0",
 		"@mdi/font": "^7.0.96",
 		"@microsoft/signalr": "^6.0.8",
 		"@nuxt/typescript-runtime": "^2.1.0",

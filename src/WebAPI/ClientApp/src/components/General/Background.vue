@@ -1,9 +1,7 @@
 <template>
 	<div :class="backgroundEffect">
 		<div :class="backgroundOverlay">
-			<div style="z-index: 1">
-				<slot />
-			</div>
+			<slot />
 		</div>
 	</div>
 </template>
@@ -83,11 +81,18 @@ export default class Background extends Vue {
 
 .background-effect,
 .background-overlay {
+	position: fixed;
 	width: 100%;
 	height: 100%;
 }
 
 .background-effect {
+	z-index: -1 !important;
+
+	.vanta-canvas {
+		position: fixed;
+	}
+
 	&.still-background-effect {
 		background-image: url('~assets/img/background/background.png');
 	}

@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash-es';
 import { MockConfig } from './interfaces/MockConfig';
 
 export function checkConfig(config: MockConfig | null = null): MockConfig {
@@ -5,7 +6,7 @@ export function checkConfig(config: MockConfig | null = null): MockConfig {
 		return checkConfig({});
 	}
 
-	const newConfig: MockConfig = {};
+	const newConfig: MockConfig = cloneDeep(config);
 	if (!config.hasOwnProperty('plexServerCount')) {
 		newConfig.plexServerCount = 5;
 	}

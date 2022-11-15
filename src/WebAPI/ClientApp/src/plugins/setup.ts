@@ -6,7 +6,7 @@ import { GlobalService } from '@service';
 export default (ctx: Context): void => {
 	GlobalService.getConfigReady().subscribe((config) => {
 		// Setup logging
-		Vue.config.devtools = !config.isProduction;
+		Vue.config.devtools = true;
 		Vue.config.productionTip = false;
 		Log.level = config.isProduction ? 5 : 5;
 	});

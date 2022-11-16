@@ -66,25 +66,29 @@ export class AccountService extends BaseService {
 		return this.getAccounts().pipe(map((x) => x?.find((x) => x.id === accountId) ?? null));
 	}
 
-	public createPlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
+	public createPlexAccount(account: PlexAccountDTO): Observable<PlexAccountDTO | null> {
 		return createAccount(account).pipe(
+			map((accountResult): PlexAccountDTO | null => accountResult?.value ?? null),
 			tap((createdAccount) => {
-				if (createdAccount.isSuccess) {
-					return this.updateStore('accounts', createdAccount.value);
+				if (createdAccount) {
+					return this.updateStore('accounts', createdAccount);
 				}
 				Log.error(`Failed to create account ${account.displayName}`, createdAccount);
 			}),
+			switchMap((newAccount) => this.getAccount(newAccount?.id ?? 0)),
 		);
 	}
 
-	public updatePlexAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<ResultDTO<PlexAccountDTO | null>> {
+	public updatePlexAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<PlexAccountDTO | null> {
 		return updateAccount(account, inspect).pipe(
+			map((accountResult): PlexAccountDTO | null => accountResult?.value ?? null),
 			tap((updatedAccount) => {
-				if (updatedAccount.isSuccess) {
-					return this.updateStore('accounts', updatedAccount.value);
+				if (updatedAccount) {
+					return this.updateStore('accounts', updatedAccount);
 				}
 				Log.error(`Failed to update account ${account.displayName}`, updatedAccount);
 			}),
+			switchMap((newAccount) => this.getAccount(newAccount?.id ?? 0)),
 		);
 	}
 

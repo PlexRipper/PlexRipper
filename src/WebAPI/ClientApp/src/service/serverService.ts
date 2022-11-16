@@ -1,7 +1,6 @@
-import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { finalize, map, switchMap, take } from 'rxjs/operators';
+import { finalize, map, switchMap, take, tap } from 'rxjs/operators';
 import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
@@ -36,12 +35,18 @@ export class ServerService extends BaseService implements ISetup {
 	// region Fetch
 
 	public fetchServers(): void {
-		getPlexServers().subscribe((servers) => {
-			if (servers.isSuccess) {
-				Log.debug(`ServerService => Fetch Servers`, servers.value);
-				this.setState({ servers: servers.value ?? [] }, 'Fetch Server Data');
-			}
-		});
+		this.refreshPlexServers().subscribe();
+	}
+
+	public refreshPlexServers(): Observable<PlexServerDTO[]> {
+		return getPlexServers().pipe(
+			map((response): PlexServerDTO[] => response?.value ?? []),
+			tap((plexServers) => {
+				if (plexServers) {
+					this.setStoreProperty('servers', plexServers, 'ServerService => refreshPlexServers: Servers cache updated');
+				}
+			}),
+		);
 	}
 
 	// endregion
@@ -50,8 +55,11 @@ export class ServerService extends BaseService implements ISetup {
 		return this.getState().servers;
 	}
 
-	public getServers(): Observable<PlexServerDTO[]> {
-		return this.stateChanged.pipe(switchMap((state: IStoreState) => of(state?.servers ?? [])));
+	public getServers(ids: number[] = []): Observable<PlexServerDTO[]> {
+		return this.stateChanged.pipe(
+			map((state: IStoreState) => state?.servers ?? []),
+			map((serverList) => serverList.filter((server) => !ids.length || ids.includes(server.id))),
+		);
 	}
 
 	public getServer(serverId: number): Observable<PlexServerDTO | null> {

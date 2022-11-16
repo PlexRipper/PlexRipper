@@ -54,4 +54,15 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		stateObject[propertyName] = x;
 		this.setState(stateObject, `Update ${propertyName} with ${idName}: ${newObject[idName]}`);
 	}
+
+	protected setStoreProperty(propertyName: keyof IStoreState, newValue: any, action: string = ''): void {
+		const state = {};
+		state[propertyName] = newValue;
+
+		if (!action) {
+			action = `The property "${propertyName}" was updated in the store`;
+		}
+		Log.debug(action, newValue);
+		this.setState(state, action);
+	}
 }

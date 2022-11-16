@@ -138,7 +138,7 @@ export default class AccountDialog extends Vue {
 			isValidated: false,
 			authenticationToken: '',
 			email: '',
-			plexServers: [],
+			plexServerAccess: [],
 		};
 	}
 
@@ -269,12 +269,12 @@ export default class AccountDialog extends Vue {
 
 		if (this.isNewAccount) {
 			useSubscription(
-				AccountService.createPlexAccount(this.changedPlexAccount).subscribe((data) => {
-					if (data.isSuccess) {
-						this.changedPlexAccount.plexServers = data.value?.plexServers ?? [];
+				AccountService.createPlexAccount(this.changedPlexAccount).subscribe((account) => {
+					if (account) {
+						this.changedPlexAccount = account;
 						this.isSettingUpAccount = true;
 					} else {
-						Log.error('Result was invalid when saving a created account', data);
+						Log.error('Result was invalid when saving a created account', account);
 						this.saving = false;
 					}
 				}),
@@ -282,8 +282,8 @@ export default class AccountDialog extends Vue {
 		} else {
 			useSubscription(
 				AccountService.updatePlexAccount(this.changedPlexAccount, this.hasCredentialsChanged).subscribe((data) => {
-					if (data.isSuccess) {
-						this.changedPlexAccount.plexServers = data.value?.plexServers ?? [];
+					if (data) {
+						this.changedPlexAccount = data;
 						if (this.hasCredentialsChanged) {
 							this.isSettingUpAccount = true;
 						} else {

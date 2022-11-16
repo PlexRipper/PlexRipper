@@ -3,11 +3,11 @@
  * https://jestjs.io/docs/configuration
  */
 
-import { pathsToModuleNameMapper } from 'ts-jest/utils';
+import { JestConfigWithTsJest, pathsToModuleNameMapper } from 'ts-jest/utils';
 
 const { compilerOptions } = require('./tsconfig');
 
-const jestConfig = {
+const jestConfig: JestConfigWithTsJest = {
 	// All imported modules in your tests should be mocked automatically
 	// automock: false,
 
@@ -175,7 +175,10 @@ const jestConfig = {
 	// testLocationInResults: false,
 
 	// The glob patterns Jest uses to detect test files
-	testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
+	// testMatch: [
+	//   "**/__tests__/**/*.[jt]s?(x)",
+	//   "**/?(*.)+(spec|test).[tj]s?(x)"
+	// ],
 
 	// An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
 	// testPathIgnorePatterns: [

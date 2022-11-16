@@ -1,5 +1,4 @@
 import { Observable } from 'rxjs';
-import { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
 import { checkResponse, preApiRequest } from './baseApi';
 import { SettingsModelDTO } from '@dto/mainApi';
@@ -22,6 +21,6 @@ export function updateSettings(settings: SettingsModelDTO): Observable<ResultDTO
 
 export function resetDatabase(): Observable<ResultDTO> {
 	preApiRequest(logText, 'resetDatabase');
-	const result: Observable<AxiosResponse> = Axios.get<ResultDTO>(`${apiPath}/ResetDb`);
+	const result = Axios.get<ResultDTO>(`${apiPath}/ResetDb`);
 	return checkResponse<ResultDTO>(result, logText, 'resetDatabase');
 }

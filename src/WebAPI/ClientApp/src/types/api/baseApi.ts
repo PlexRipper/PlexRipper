@@ -1,7 +1,6 @@
 import Log from 'consola';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { AxiosResponse } from 'axios';
 import { AxiosObservable } from 'axios-observable/dist/axios-observable.interface';
 import { AlertService } from '@service';
 import ResultDTO from '@dto/ResultDTO';
@@ -39,7 +38,7 @@ export function checkResponse<T = ResultDTO>(response: AxiosObservable<T>, logTe
 				}
 			}
 		}),
-		map((res: AxiosResponse) => res?.data),
+		map((res) => res?.data),
 		tap((data) => Log.debug(`${logText}${fnName} response:`, data)),
 	);
 }

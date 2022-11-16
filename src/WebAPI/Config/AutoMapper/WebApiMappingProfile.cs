@@ -68,7 +68,20 @@ public class WebApiMappingProfile : Profile
 
         // PlexAccount -> PlexAccountDTO
         CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
-            .ForMember(dto => dto.PlexServers, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));
+            .ForMember(dto => dto.PlexServerAccess, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));
+
+        CreateMap<List<PlexServer>, List<PlexServerAccessDTO>>(MemberList.Destination)
+            .ConstructUsing((plexServers, context) =>
+            {
+                return plexServers.ConvertAll(x =>
+                {
+                    return new PlexServerAccessDTO
+                    {
+                        PlexServerId = x.Id,
+                        PlexLibraryIds = x.PlexLibraries.Select(y => y.Id).ToList(),
+                    };
+                });
+            });
     }
 
     private void DownloadTaskMappings()

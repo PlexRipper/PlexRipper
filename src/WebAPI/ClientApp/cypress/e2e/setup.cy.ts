@@ -22,9 +22,10 @@ describe('empty spec', () => {
 			plexServerCount: 5,
 		};
 
+		const plexServers = generatePlexServers(config);
 		cy.intercept('GET', PLEX_SERVER_API_URL, {
 			statusCode: 200,
-			body: generateResultDTO(null, generatePlexServers(config)),
+			body: generateResultDTO(null, plexServers),
 		});
 
 		cy.intercept('GET', DOWNLOAD_API_URL, {
@@ -44,7 +45,7 @@ describe('empty spec', () => {
 
 		cy.intercept('GET', PLEX_ACCOUNT_API_URL, {
 			statusCode: 200,
-			body: generateResultDTO(null, generatePlexAccounts(config)),
+			body: generateResultDTO(null, generatePlexAccounts(config, plexServers)),
 		});
 
 		cy.intercept('GET', SETTINGS_API_URL, {

@@ -1,16 +1,19 @@
 import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
-import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { PlexMediaDTO, PlexMediaType, ServerDownloadProgressDTO } from '@dto/mainApi';
 import { checkResponse, preApiRequest } from '@api/baseApi';
 import ResultDTO from '@dto/ResultDTO';
+import PlexRipperAxios from '@class/PlexRipperAxios';
 
 const logText = 'From plexMediaApi => ';
 const apiPath = '/PlexMedia';
 
 export function getTvShow(id: number): Observable<ResultDTO<PlexMediaDTO>> {
-	preApiRequest(logText, 'getTvShow');
-	const result = Axios.get(`${apiPath}/tvshow/${id}`);
-	return checkResponse<ResultDTO<PlexMediaDTO>>(result, logText, 'getTvShow');
+	return PlexRipperAxios.get<PlexMediaDTO>({
+		url: `${apiPath}/tvshow/${id}`,
+		apiCategory: logText,
+		apiName: getTvShow.name,
+	});
 }
 
 export function getThumbnail(

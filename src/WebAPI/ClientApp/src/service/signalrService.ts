@@ -2,7 +2,7 @@ import Log from 'consola';
 // eslint-disable-next-line import/named
 import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { isEqual } from 'lodash-es';
 import IStoreState from '@interfaces/service/IStoreState';
@@ -42,34 +42,35 @@ export class SignalrService extends BaseService implements ISetup {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+	public setup(nuxtContext: Context): Observable<any> {
 		super.setNuxtContext(nuxtContext);
 
-		GlobalService.getConfigReady().subscribe((config) => {
-			// Ensure we don't run any SignalR functionality due to it being tricky to setup. Might revisit later
-			// TODO Re-enable when trying to test SignalR functionality
-			// @ts-ignore
-			if (window.Cypress) {
-				return;
-			}
-			Log.debug('Setting up SignalR Service');
-			const options: IHttpConnectionOptions = {
-				logger: LogLevel.Information,
-			};
-			// Setup Connections
-			const baseUrl = config.baseURL;
-			this._progressHubConnection = new HubConnectionBuilder()
-				.withUrl(`${baseUrl}/progress`, options)
-				.withAutomaticReconnect()
-				.build();
-			this._notificationHubConnection = new HubConnectionBuilder()
-				.withUrl(`${baseUrl}/notifications`, options)
-				.withAutomaticReconnect()
-				.build();
+		return GlobalService.getConfigReady().pipe(
+			tap((config) => {
+				// Ensure we don't run any SignalR functionality due to it being tricky to setup. Might revisit later
+				// TODO Re-enable when trying to test SignalR functionality
+				// @ts-ignore
+				if (window.jest || window.Cypress) {
+					return;
+				}
+				Log.debug('Setting up SignalR Service');
+				const options: IHttpConnectionOptions = {
+					logger: LogLevel.Information,
+				};
+				// Setup Connections
+				const baseUrl = config.baseURL;
+				this._progressHubConnection = new HubConnectionBuilder()
+					.withUrl(`${baseUrl}/progress`, options)
+					.withAutomaticReconnect()
+					.build();
+				this._notificationHubConnection = new HubConnectionBuilder()
+					.withUrl(`${baseUrl}/notifications`, options)
+					.withAutomaticReconnect()
+					.build();
 
-			this.setupSubscriptions();
-			callBack(this._name);
-		});
+				this.setupSubscriptions();
+			}),
+		);
 	}
 
 	private setupSubscriptions(): void {

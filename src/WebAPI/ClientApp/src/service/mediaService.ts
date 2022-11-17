@@ -1,6 +1,6 @@
 import { map } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
-import { Observable, of } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
 import { PlexMediaType } from '@dto/mainApi';
@@ -19,9 +19,9 @@ export class MediaService extends BaseService implements ISetup {
 		});
 	}
 
-	setup(nuxtContext: Context, callBack: (name: string) => void): void {
+	setup(nuxtContext: Context): Observable<any> {
 		super.setNuxtContext(nuxtContext);
-		callBack(this._name);
+		return EMPTY;
 	}
 
 	public getThumbnail(mediaId: number, mediaType: PlexMediaType, width: number = 0, height: number = 0): Observable<string> {

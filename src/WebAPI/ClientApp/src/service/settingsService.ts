@@ -38,17 +38,8 @@ export class SettingsService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+	public setup(nuxtContext: Context): Observable<any> {
 		super.setNuxtContext(nuxtContext);
-
-		// On app load, request the settings once
-		GlobalService.getAxiosReady()
-			.pipe(
-				tap(() => Log.debug('Retrieving settings')),
-				switchMap(() => this.fetchSettings()),
-				take(1),
-			)
-			.subscribe(() => callBack(this._name));
 
 		this.getFirstTimeSetup().subscribe((state) => {
 			if (state === null) {
@@ -59,7 +50,10 @@ export class SettingsService extends BaseService {
 				return nuxtContext.redirect('/setup');
 			}
 		});
+		// On app load, request the settings once
+		return this.fetchSettings().pipe(take(1));
 	}
+
 	// endregion
 
 	// region Private
@@ -113,6 +107,7 @@ export class SettingsService extends BaseService {
 			}),
 		);
 	}
+
 	// endregion
 
 	// region GeneralSettings
@@ -144,6 +139,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region LanguageSettings
@@ -166,6 +162,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region ConfirmationSettings
@@ -213,6 +210,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region DateTimeSettings
@@ -268,6 +266,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region DisplaySettings
@@ -299,6 +298,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region DownloadManagerSettings
@@ -321,6 +321,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region ServerSettings

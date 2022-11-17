@@ -1,5 +1,5 @@
 import { Context } from '@nuxt/types';
-import { combineLatest, of } from 'rxjs';
+import { combineLatest, EMPTY, Observable, of } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
 import { DownloadStatus, DownloadTaskDTO } from '@dto/mainApi';
 import { BaseService, SignalrService } from '@service';
@@ -10,9 +10,9 @@ export class ProgressService extends BaseService implements ISetup {
 		super('ProgressService', {});
 	}
 
-	setup(nuxtContext: Context, callBack: (name: string) => void): void {
+	setup(nuxtContext: Context): Observable<any> {
 		super.setNuxtContext(nuxtContext);
-		callBack(this._name);
+		return EMPTY;
 	}
 
 	/**

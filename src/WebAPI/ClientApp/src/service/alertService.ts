@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { BaseService } from '@service';
@@ -18,9 +18,9 @@ export class AlertService extends BaseService implements ISetup {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+	public setup(nuxtContext: Context): Observable<any> {
 		super.setNuxtContext(nuxtContext);
-		callBack(this._name);
+		return EMPTY;
 	}
 
 	// region Alerts
@@ -38,6 +38,7 @@ export class AlertService extends BaseService implements ISetup {
 	public removeAlert(id: number): void {
 		this.setState({ alerts: this.getState().alerts.filter((x) => x.id !== id) });
 	}
+
 	// endregion
 }
 

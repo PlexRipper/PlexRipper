@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Log from 'consola';
+import Log, { LogLevel } from 'consola';
 import { Context } from '@nuxt/types';
 import { GlobalService } from '@service';
 
@@ -8,7 +8,7 @@ export default (ctx: Context): void => {
 		// Setup logging
 		Vue.config.devtools = true;
 		Vue.config.productionTip = false;
-		Log.level = config.isProduction ? 5 : 5;
+		Log.level = config.isProduction ? LogLevel.Debug : LogLevel.Debug;
 	});
 
 	// Setup Config

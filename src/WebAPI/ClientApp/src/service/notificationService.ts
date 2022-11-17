@@ -1,9 +1,8 @@
-import Log from 'consola';
 import { Observable } from 'rxjs';
-import { map, switchMap, take, tap } from 'rxjs/operators';
+import { map, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { NotificationDTO } from '@dto/mainApi';
-import { BaseService, GlobalService } from '@service';
+import { BaseService } from '@service';
 import { clearAllNotifications, getNotifications, hideNotification } from '@api/notificationApi';
 import IStoreState from '@interfaces/service/IStoreState';
 
@@ -19,20 +18,16 @@ export class NotificationService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+	public setup(nuxtContext: Context): Observable<any> {
 		super.setNuxtContext(nuxtContext);
 
-		GlobalService.getAxiosReady()
-			.pipe(
-				tap(() => Log.debug('Retrieving all notifications')),
-				switchMap(() => getNotifications()),
-			)
-			.subscribe((result) => {
-				if (result.isSuccess) {
-					this.setState({ notifications: result.value }, 'Set Notifications');
+		return getNotifications().pipe(
+			tap((notifications) => {
+				if (notifications.isSuccess) {
+					this.setStoreProperty('notifications', notifications.value);
 				}
-				callBack(this._name);
-			});
+			}),
+		);
 	}
 
 	// region Notifications
@@ -59,6 +54,7 @@ export class NotificationService extends BaseService {
 		this.setState({ notifications: [] }, 'Clear All Notifications');
 		clearAllNotifications().pipe(take(1)).subscribe();
 	}
+
 	// endregion
 }
 

@@ -2,6 +2,7 @@ import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
+import { Observable } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
 
 export default abstract class BaseService extends ObservableStore<IStoreState> {
@@ -21,6 +22,8 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 	public logHistory(): void {
 		Log.warn('history', this.stateHistory);
 	}
+
+	abstract setup(nuxtContext): Observable<any>;
 
 	/**
 	 * Updates the store property to with the newObject based on its id
@@ -62,7 +65,7 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		if (!action) {
 			action = `The property "${propertyName}" was updated in the store`;
 		}
-		Log.debug(action, newValue);
+		Log.trace(action, newValue);
 		this.setState(state, action);
 	}
 }

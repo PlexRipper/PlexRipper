@@ -1,31 +1,39 @@
 import { Observable } from 'rxjs';
-import Axios from 'axios-observable';
-import { checkResponse, preApiRequest } from '@api/baseApi';
 import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
+import PlexRipperAxios from '@class/PlexRipperAxios';
 
 const logText = 'From PlexServerAPI => ';
-const apiPath = '/PlexServer';
+export const plexServerApiPath = '/PlexServer';
 
 export function getPlexServer(serverId: number): Observable<ResultDTO<PlexServerDTO | null>> {
-	preApiRequest(logText, 'getPlexServer');
-	const result = Axios.get(`${apiPath}/${serverId}`);
-	return checkResponse<ResultDTO<PlexServerDTO>>(result, logText, 'getPlexServer');
-}
-
-export function syncPlexServer(serverId: number, forceSync: boolean = false): Observable<ResultDTO> {
-	preApiRequest(logText, 'syncPlexServer');
-	const result = Axios.get(`${apiPath}/${serverId}/sync?forceSync=${forceSync}`);
-	return checkResponse<ResultDTO>(result, logText, 'syncPlexServer');
+	return PlexRipperAxios.get<PlexServerDTO>({
+		url: `${plexServerApiPath}/${serverId}`,
+		apiCategory: logText,
+		apiName: getPlexServer.name,
+	});
 }
 
 export function getPlexServers(): Observable<ResultDTO<PlexServerDTO[]>> {
-	preApiRequest(logText, 'getPlexServers');
-	const result = Axios.get(`${apiPath}`);
-	return checkResponse<ResultDTO<PlexServerDTO[]>>(result, logText, 'getPlexServers');
+	return PlexRipperAxios.get<PlexServerDTO[]>({
+		url: plexServerApiPath,
+		apiCategory: logText,
+		apiName: getPlexServers.name,
+	});
 }
+
 export function checkPlexServer(serverId: number): Observable<ResultDTO<PlexServerStatusDTO | null>> {
-	preApiRequest(logText, 'checkPlexServer');
-	const result = Axios.get(`${apiPath}/${serverId}/check`);
-	return checkResponse<ResultDTO<PlexServerStatusDTO>>(result, logText, 'checkPlexServer');
+	return PlexRipperAxios.get<PlexServerStatusDTO>({
+		url: `${plexServerApiPath}/${serverId}/check`,
+		apiCategory: logText,
+		apiName: checkPlexServer.name,
+	});
+}
+
+export function syncPlexServer(serverId: number, forceSync: boolean = false): Observable<ResultDTO> {
+	return PlexRipperAxios.get<void>({
+		url: `${plexServerApiPath}/${serverId}/sync?forceSync=${forceSync}`,
+		apiCategory: logText,
+		apiName: syncPlexServer.name,
+	});
 }

@@ -1,14 +1,12 @@
 import { Observable } from 'rxjs';
-import { finalize, map, take } from 'rxjs/operators';
+import { finalize, map, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
-import Log from 'consola';
 import { FolderPathDTO } from '@dto/mainApi';
-import { BaseService, GlobalService } from '@service';
+import { BaseService } from '@service';
 import { getFolderPaths, createFolderPath, updateFolderPath, deleteFolderPath } from '@api/pathApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import ISetup from '@interfaces/ISetup';
 
-export class FolderPathService extends BaseService implements ISetup {
+export class FolderPathService extends BaseService {
 	public constructor() {
 		super('FolderPathService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
@@ -20,24 +18,25 @@ export class FolderPathService extends BaseService implements ISetup {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+	public setup(nuxtContext: Context): Observable<any> {
 		super.setNuxtContext(nuxtContext);
 
-		GlobalService.getAxiosReady()
-			.pipe(finalize(() => this.fetchFolderPaths()))
-			.subscribe(() => callBack(this._name));
+		return this.refreshFolderPaths().pipe(take(1));
+	}
+
+	public refreshFolderPaths(): Observable<FolderPathDTO[]> {
+		return getFolderPaths().pipe(
+			tap((folderPaths) => {
+				if (folderPaths.isSuccess) {
+					this.setStoreProperty('folderPaths', folderPaths.value);
+				}
+			}),
+			switchMap(() => this.getFolderPaths()),
+		);
 	}
 
 	public fetchFolderPaths(): void {
-		getFolderPaths()
-			.pipe(take(1))
-			.subscribe((result) => {
-				if (result.isSuccess) {
-					Log.debug(`FolderPathService => Fetch Folder Paths`, result.value);
-
-					this.setState({ folderPaths: result.value }, 'Set Folder Paths');
-				}
-			});
+		this.refreshFolderPaths().subscribe();
 	}
 
 	public getFolderPaths(): Observable<FolderPathDTO[]> {

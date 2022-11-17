@@ -1,13 +1,12 @@
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { finalize, map, switchMap, take, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService, GlobalService } from '@service';
-import ISetup from '@interfaces/ISetup';
+import { BaseService } from '@service';
 
-export class ServerService extends BaseService implements ISetup {
+export class ServerService extends BaseService {
 	// region Constructor and Setup
 	public constructor() {
 		super('ServerService', {
@@ -20,14 +19,9 @@ export class ServerService extends BaseService implements ISetup {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+	public setup(nuxtContext: Context): Observable<any> {
 		super.setNuxtContext(nuxtContext);
-		GlobalService.getAxiosReady()
-			.pipe(
-				finalize(() => this.fetchServers()),
-				take(1),
-			)
-			.subscribe(() => callBack(this._name));
+		return this.refreshPlexServers().pipe(take(1));
 	}
 
 	// endregion
@@ -40,12 +34,16 @@ export class ServerService extends BaseService implements ISetup {
 
 	public refreshPlexServers(): Observable<PlexServerDTO[]> {
 		return getPlexServers().pipe(
-			map((response): PlexServerDTO[] => response?.value ?? []),
 			tap((plexServers) => {
-				if (plexServers) {
-					this.setStoreProperty('servers', plexServers, 'ServerService => refreshPlexServers: Servers cache updated');
+				if (plexServers.isSuccess) {
+					this.setStoreProperty(
+						'servers',
+						plexServers.value,
+						'ServerService => refreshPlexServers: Servers cache updated',
+					);
 				}
 			}),
+			switchMap(() => this.getServers()),
 		);
 	}
 

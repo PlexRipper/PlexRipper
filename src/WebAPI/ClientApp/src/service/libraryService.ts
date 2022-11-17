@@ -1,14 +1,15 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { distinctUntilChanged, filter, finalize, map, switchMap, take } from 'rxjs/operators';
+import { distinctUntilChanged, filter, finalize, map, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, GlobalService, ServerService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
-import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, refreshPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
 import ISetup from '@interfaces/ISetup';
+import { getAllAccounts } from '@api/accountApi';
 
-export class LibraryService extends BaseService implements ISetup {
+export class LibraryService extends BaseService {
 	// region Constructor and Setup
 
 	public constructor() {
@@ -22,25 +23,24 @@ export class LibraryService extends BaseService implements ISetup {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+	public setup(nuxtContext: Context): Observable<any> {
 		super.setNuxtContext(nuxtContext);
-
-		GlobalService.getAxiosReady()
-			.pipe(finalize(() => this.fetchLibraries()))
-			.subscribe(() => callBack(this._name));
+		return this.refreshLibraries().pipe(take(1));
 	}
 
 	// endregion
 
 	// region Fetch
 
-	public fetchLibraries(): void {
-		getAllPlexLibraries().subscribe((libraries) => {
-			if (libraries.isSuccess) {
-				Log.debug(`LibraryService => Fetch Libraries`, libraries.value);
-				this.setState({ libraries: libraries.value }, 'Fetch Library Data');
-			}
-		});
+	public refreshLibraries(): Observable<PlexLibraryDTO[]> {
+		return getAllPlexLibraries().pipe(
+			tap((plexLibraries) => {
+				if (plexLibraries.isSuccess) {
+					this.setStoreProperty('libraries', plexLibraries.value);
+				}
+			}),
+			switchMap(() => this.getLibraries()),
+		);
 	}
 
 	public fetchLibrary(libraryId: number): void {
@@ -48,7 +48,7 @@ export class LibraryService extends BaseService implements ISetup {
 			.pipe(take(1))
 			.subscribe((library) => {
 				if (library.isSuccess && library.value) {
-					// We freeze library here as it doesnt have to be Vue reactive.
+					// We freeze library here as it doesn't have to be Vue reactive.
 					this.updateStore('libraries', Object.freeze(library.value));
 				}
 			});

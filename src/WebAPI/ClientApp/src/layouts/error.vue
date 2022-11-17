@@ -12,7 +12,7 @@
 			<v-row justify="center">
 				<v-col cols="auto">
 					<h1>
-						<NuxtLink to="/">{{ $t('pages.error.return-link') }} </NuxtLink>
+						<NuxtLink to="/">{{ $t('pages.error.return-link') }}</NuxtLink>
 					</h1>
 				</v-col>
 			</v-row>
@@ -26,7 +26,6 @@ import { Component, Vue, Prop } from 'vue-property-decorator';
 @Component
 export default class ErrorLayout extends Vue {
 	@Prop()
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	error!: any;
 
 	get errorFormatted(): string {

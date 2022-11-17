@@ -1,12 +1,12 @@
 import Log from 'consola';
 import { Observable, of } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
-import { PlexAccountDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 import { BaseService, GlobalService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
-import ResultDTO from '@dto/ResultDTO';
+import { getPlexServers } from '@api/plexServerApi';
 
 export class AccountService extends BaseService {
 	// region Constructor and Setup
@@ -22,25 +22,23 @@ export class AccountService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
+	public setup(nuxtContext: Context): Observable<any> {
 		super.setNuxtContext(nuxtContext);
-
-		GlobalService.getAxiosReady()
-			.pipe(switchMap(() => this.fetchAccounts()))
-			.subscribe(() => callBack('AccountService'));
+		return this.refreshAccounts().pipe(take(1));
 	}
 
 	// endregion
 
 	// region Fetch
 
-	public fetchAccounts(): Observable<PlexAccountDTO[]> {
+	public refreshAccounts(): Observable<PlexAccountDTO[]> {
 		return getAllAccounts().pipe(
-			switchMap((accountResult) => of(accountResult?.value ?? [])),
-			tap((accounts) => {
-				Log.debug(`AccountService => Fetch Accounts`, accounts);
-				this.setState({ accounts }, 'Fetch Accounts');
+			tap((plexAccounts) => {
+				if (plexAccounts.isSuccess) {
+					this.setStoreProperty('accounts', plexAccounts.value);
+				}
 			}),
+			switchMap(() => this.getAccounts()),
 		);
 	}
 
@@ -93,7 +91,7 @@ export class AccountService extends BaseService {
 	}
 
 	public deleteAccount(accountId: number) {
-		return deleteAccount(accountId).pipe(switchMap(() => this.fetchAccounts()));
+		return deleteAccount(accountId).pipe(switchMap(() => this.refreshAccounts()));
 	}
 }
 

@@ -1,7 +1,8 @@
 import Log from 'consola';
-import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
-import { AxiosObservable } from 'axios-observable/dist/axios-observable.interface';
+import { map, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, Observable, of } from 'rxjs';
+import Axios, { AxiosObservable } from 'axios-observable';
+import { AxiosResponse } from 'axios';
 import { AlertService } from '@service';
 import ResultDTO from '@dto/ResultDTO';
 
@@ -9,7 +10,31 @@ export function preApiRequest(logText: string, fnName: string, data: any | strin
 	Log.debug(`${logText} ${fnName} => sending request:`, data);
 }
 
-export function checkResponse<T = ResultDTO>(response: AxiosObservable<T>, logText: string, fnName: string): Observable<T> {
+export function checkForError<T = any>(
+	logText?: string,
+	fnName?: string,
+): (source$: AxiosObservable<ResultDTO<T>>) => Observable<ResultDTO<T>> {
+	return (source$) =>
+		source$.pipe(
+			catchError((error: any) => {
+				Log.fatal('FATAL NETWORK ERROR: axiosErrorToResultDTO', error);
+				// TODO Check wat the error contains incase of network failure and continue based on that
+				return of({} as AxiosResponse<ResultDTO<T>>);
+			}),
+			switchMap((response: AxiosResponse<ResultDTO<T>>): Observable<ResultDTO<T>> => {
+				return of(response?.data);
+			}),
+			tap((data) => Log.trace(`${logText}${fnName} response:`, data)),
+			// Ensure we complete any API calls after the response has been received
+			take(1),
+		);
+}
+
+export function checkResponse<T = ResultDTO | ResultDTO<void> | undefined>(
+	response: AxiosObservable<T>,
+	logText: string,
+	fnName: string,
+): Observable<T> {
 	// Pipe response
 	return response.pipe(
 		tap((res) => {
@@ -39,6 +64,6 @@ export function checkResponse<T = ResultDTO>(response: AxiosObservable<T>, logTe
 			}
 		}),
 		map((res) => res?.data),
-		tap((data) => Log.debug(`${logText}${fnName} response:`, data)),
+		tap((data) => Log.trace(`${logText}${fnName} response:`, data)),
 	);
 }

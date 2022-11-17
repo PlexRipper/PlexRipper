@@ -92,7 +92,7 @@ export default class AppBar extends Vue {
 		const index = accountId === 0 ? 0 : this.accounts.findIndex((x) => x.id === accountId);
 		this.loading.splice(index, 1, true);
 		refreshAccount(accountId).subscribe(() => {
-			AccountService.fetchAccounts();
+			AccountService.refreshAccounts();
 			ServerService.fetchServers();
 			this.loading.splice(index, 1, false);
 		});

@@ -6,6 +6,7 @@ export interface PlexRipperAxiosGet {
 	url: string;
 	apiCategory?: string;
 	apiName?: string;
+	params?: any;
 }
 
 export interface PlexRipperAxiosPut extends PlexRipperAxiosGet {
@@ -17,8 +18,8 @@ export interface PlexRipperAxiosPost extends PlexRipperAxiosGet {
 }
 
 export default class PlexRipperAxios {
-	public static get<T = any>({ url, apiCategory, apiName }: PlexRipperAxiosGet) {
-		return Axios.get<ResultDTO<T>>(url).pipe(checkForError<T>(apiCategory, apiName));
+	public static get<T = any>({ url, apiCategory, apiName, params }: PlexRipperAxiosGet) {
+		return Axios.get<ResultDTO<T>>(url, params).pipe(checkForError<T>(apiCategory, apiName));
 	}
 
 	public static put<T = any>({ url, data, apiCategory, apiName }: PlexRipperAxiosPut) {
@@ -26,7 +27,7 @@ export default class PlexRipperAxios {
 	}
 
 	public static post<T = any>({ url, data, apiCategory, apiName }: PlexRipperAxiosPost) {
-		return Axios.post(url, data).pipe(checkForError<T>(apiCategory, apiName));
+		return Axios.post<ResultDTO<T>>(url, data).pipe(checkForError<T>(apiCategory, apiName));
 	}
 
 	public static delete<T = any>({ url, apiCategory, apiName }: PlexRipperAxiosGet) {

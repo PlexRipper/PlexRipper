@@ -24,6 +24,7 @@
 			"@dto/*": ["./types/dto/*"],
 			"@api/*": ["./types/api/*"],
 			"@api-urls": ["./types/const/api-urls.ts"],
+			"@services-test-base": ["./tests/services/_base/base.ts"],
 			"@lib/*": ["./types/lib/*"],
 			"@service": ["./service/index.ts"],
 			"@img/*": ["./assets/img/*"],

@@ -17,7 +17,11 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 	}
 
 	public logHistory(): void {
-		Log.warn('history', this.stateHistory);
+		Log.trace(`Current ${this._name} state history:`, this.stateHistory);
+	}
+
+	public get name() {
+		return this._name;
 	}
 
 	protected setup(nuxtContext): Observable<ISetupResult> {
@@ -68,5 +72,6 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		}
 		Log.trace(action, newValue);
 		this.setState(state, action);
+		this.logHistory();
 	}
 }

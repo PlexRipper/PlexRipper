@@ -1,45 +1,45 @@
-import { Context } from '@nuxt/types';
-import { expect, jest, test } from '@jest/globals';
-import mockAxios from 'jest-mock-axios';
-import { GlobalService } from '@service';
-import ServerService from '~/service/serverService';
-import { generatePlexServers, generateResultDTO, PLEX_SERVER_API_URL } from '@mock';
+import { beforeAll, expect, test } from '@jest/globals';
+import { baseVars, beforeEachServiceTest, subscribeSpyTo, baseSetup, getAxiosMock } from '@services-test-base';
+import Log from 'consola';
+import { generatePlexServers, generateResultDTO } from '@mock';
+import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
+import { GlobalService, ServerService } from '@service';
 
-describe('refresh-servers()', () => {
-	const OLD_ENV = process.env;
+describe('ServerService.refresh-servers()', () => {
+	let { ctx, mock, config } = baseVars();
+
+	beforeAll(() => {
+		const result = baseSetup();
+		ctx = result.ctx;
+		mock = getAxiosMock();
+	});
 
 	beforeEach(() => {
-		jest.resetModules();
-		process.env = { ...OLD_ENV }; // Make a copy
+		mock = getAxiosMock();
+		GlobalService.initializeState();
 	});
 
-	afterAll(() => {
-		process.env = OLD_ENV; // Restore old environment
-	});
+	test('Should update the plexServers when refreshPlexServers is called', async () => {
+		// Arrange
+		config = {
+			plexServerCount: 3,
+		};
+		const servers = generatePlexServers(config);
+		mock.onGet(PLEX_SERVER_RELATIVE_PATH)
+			.replyOnce(200, [])
+			.onGet(PLEX_SERVER_RELATIVE_PATH)
+			.reply(200, generateResultDTO(servers));
+		const setup$ = ServerService.setup(ctx);
+		const refresh$ = ServerService.refreshPlexServers();
+		const getServers$ = ServerService.getServers();
 
-	test('increments counter value on click', () => {
-		const ctx: Context = {
-			$config: {
-				nodeEnv: 'TESTING',
-				version: '1.0',
-			},
-		} as Context;
-		process.env.NODE_ENV = 'dev';
-		process.client = true;
-		GlobalService.setConfigReady(ctx.$config);
-		GlobalService.setup(ctx);
-
-		mockAxios.mockResponseFor(
-			{
-				url: PLEX_SERVER_API_URL,
-				method: 'GET',
-			},
-			{ data: generateResultDTO(null, generatePlexServers()) },
-		);
-
-		ServerService.refreshPlexServers();
-		ServerService.getServers().subscribe((servers) => {
-			expect(servers.length).toBe(5);
-		});
+		// Act
+		subscribeSpyTo(getServers$);
+		const setupResult = subscribeSpyTo(setup$);
+		await setupResult.onComplete();
+		const refreshResult = subscribeSpyTo(refresh$);
+		await refreshResult.onComplete();
+		// Assert
+		expect(refreshResult.getFirstValue()).toEqual(servers);
 	});
 });

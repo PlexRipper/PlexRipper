@@ -40,22 +40,15 @@ export class ServerService extends BaseService {
 		return getPlexServers().pipe(
 			tap((plexServers) => {
 				if (plexServers.isSuccess) {
-					this.setStoreProperty(
-						'servers',
-						plexServers.value,
-						'ServerService => refreshPlexServers: Servers cache updated',
-					);
+					this.setStoreProperty('servers', plexServers.value);
 				}
 			}),
-			switchMap(() => this.getServers()),
+			map(() => this.getStoreSlice<PlexServerDTO[]>('servers')),
+			take(1),
 		);
 	}
 
 	// endregion
-
-	public get servers(): PlexServerDTO[] {
-		return this.getState().servers;
-	}
 
 	public getServers(ids: number[] = []): Observable<PlexServerDTO[]> {
 		return this.stateChanged.pipe(
@@ -65,8 +58,13 @@ export class ServerService extends BaseService {
 	}
 
 	public getServer(serverId: number): Observable<PlexServerDTO | null> {
-		return this.getServers().pipe(
-			switchMap((servers: PlexServerDTO[]) => of(servers.find((x) => x.id === serverId) ?? null)),
+		return this.getServers([serverId]).pipe(
+			map((servers) => {
+				if (servers.length > 1) {
+					return servers[0];
+				}
+				return null;
+			}),
 		);
 	}
 

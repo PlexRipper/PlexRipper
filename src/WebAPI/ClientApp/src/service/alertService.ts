@@ -1,5 +1,5 @@
-import { EMPTY, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { BaseService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
@@ -20,7 +20,7 @@ export class AlertService extends BaseService {
 
 	public setup(nuxtContext: Context): Observable<ISetupResult> {
 		super.setup(nuxtContext);
-		return EMPTY;
+		return of({ name: this._name, isSuccess: true }).pipe(take(1));
 	}
 
 	// region Alerts

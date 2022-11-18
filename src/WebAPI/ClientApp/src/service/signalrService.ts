@@ -43,7 +43,7 @@ export class SignalrService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context, appConfig: AppConfig): Observable<ISetupResult> {
+	public setup(nuxtContext: Context, appConfig: AppConfig | null = null): Observable<ISetupResult> {
 		super.setup(nuxtContext, appConfig);
 
 		return new Observable((observer) => {

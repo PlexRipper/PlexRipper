@@ -1,19 +1,15 @@
+import { MockConfig, generateResultDTO, generatePlexAccounts, generatePlexServers, generateSettings } from '@mock';
 import {
-	MockConfig,
-	generateResultDTO,
-	generatePlexAccounts,
-	generatePlexServers,
-	generateSettings,
 	DOWNLOAD_API_URL,
 	FOLDER_PATH_API_URL,
+	NOTIFICATION_API_URL,
+	NOTIFICATIONS_HUB_URL,
 	PLEX_ACCOUNT_API_URL,
 	PLEX_LIBRARY_API_URL,
 	PLEX_SERVER_API_URL,
-	SETTINGS_API_URL,
-	NOTIFICATION_API_URL,
 	PROGRESS_HUB_URL,
-	NOTIFICATIONS_HUB_URL,
-} from '@mock';
+	SETTINGS_API_URL,
+} from '@api-urls';
 
 describe('empty spec', () => {
 	it('passes', () => {

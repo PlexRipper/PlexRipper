@@ -5,6 +5,7 @@ import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class ServerService extends BaseService {
 	// region Constructor and Setup
@@ -19,9 +20,12 @@ export class ServerService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<any> {
-		super.setNuxtContext(nuxtContext);
-		return this.refreshPlexServers().pipe(take(1));
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
+		return this.refreshPlexServers().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
 	}
 
 	// endregion

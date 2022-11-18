@@ -2,8 +2,9 @@ import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export default abstract class BaseService extends ObservableStore<IStoreState> {
 	protected _nuxtContext!: Context;
@@ -15,15 +16,15 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		this._name = serviceName;
 	}
 
-	protected setNuxtContext(nuxtContext: Context): void {
-		this._nuxtContext = nuxtContext;
-	}
-
 	public logHistory(): void {
 		Log.warn('history', this.stateHistory);
 	}
 
-	abstract setup(nuxtContext): Observable<any>;
+	protected setup(nuxtContext): Observable<ISetupResult> {
+		this._nuxtContext = nuxtContext;
+		Log.debug(`Starting setup of service: ${this._name}`);
+		return EMPTY;
+	}
 
 	/**
 	 * Updates the store property to with the newObject based on its id

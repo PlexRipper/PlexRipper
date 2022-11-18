@@ -1,8 +1,8 @@
 import Log from 'consola';
 // eslint-disable-next-line import/named
 import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
-import { Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
+import { Observable, of, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { isEqual } from 'lodash-es';
 import IStoreState from '@interfaces/service/IStoreState';
@@ -17,10 +17,10 @@ import {
 	ServerDownloadProgressDTO,
 	SyncServerProgress,
 } from '@dto/mainApi';
-import ISetup from '@interfaces/ISetup';
 import notificationService from '~/service/notificationService';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
-export class SignalrService extends BaseService implements ISetup {
+export class SignalrService extends BaseService {
 	private _progressHubConnection: HubConnection | null = null;
 	private _notificationHubConnection: HubConnection | null = null;
 
@@ -42,8 +42,8 @@ export class SignalrService extends BaseService implements ISetup {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<any> {
-		super.setNuxtContext(nuxtContext);
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
 
 		return GlobalService.getConfigReady().pipe(
 			tap((config) => {
@@ -70,6 +70,8 @@ export class SignalrService extends BaseService implements ISetup {
 
 				this.setupSubscriptions();
 			}),
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
 		);
 	}
 

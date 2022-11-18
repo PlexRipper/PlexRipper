@@ -3,10 +3,10 @@ import { Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
-import { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
-import { BaseService, GlobalService } from '@service';
+import { PlexAccountDTO } from '@dto/mainApi';
+import { BaseService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
-import { getPlexServers } from '@api/plexServerApi';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class AccountService extends BaseService {
 	// region Constructor and Setup
@@ -22,9 +22,12 @@ export class AccountService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<any> {
-		super.setNuxtContext(nuxtContext);
-		return this.refreshAccounts().pipe(take(1));
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
+		return this.refreshAccounts().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
 	}
 
 	// endregion

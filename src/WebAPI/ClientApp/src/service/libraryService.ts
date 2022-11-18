@@ -1,13 +1,11 @@
-import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { distinctUntilChanged, filter, finalize, map, switchMap, take, tap } from 'rxjs/operators';
-import { BaseService, GlobalService, ServerService } from '@service';
+import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { BaseService, ServerService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
-import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, refreshPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
-import ISetup from '@interfaces/ISetup';
-import { getAllAccounts } from '@api/accountApi';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class LibraryService extends BaseService {
 	// region Constructor and Setup
@@ -23,9 +21,12 @@ export class LibraryService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<any> {
-		super.setNuxtContext(nuxtContext);
-		return this.refreshLibraries().pipe(take(1));
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
+		return this.refreshLibraries().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
 	}
 
 	// endregion

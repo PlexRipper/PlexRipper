@@ -1,13 +1,13 @@
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { EMPTY, Observable, of } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
 import { PlexMediaType } from '@dto/mainApi';
 import { getThumbnail } from '@api/mediaApi';
-import ISetup from '@interfaces/ISetup';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
-export class MediaService extends BaseService implements ISetup {
+export class MediaService extends BaseService {
 	public constructor() {
 		super('MediaService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
@@ -19,9 +19,9 @@ export class MediaService extends BaseService implements ISetup {
 		});
 	}
 
-	setup(nuxtContext: Context): Observable<any> {
-		super.setNuxtContext(nuxtContext);
-		return EMPTY;
+	setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
+		return of({ name: this._name, isSuccess: true }).pipe(take(1));
 	}
 
 	public getThumbnail(mediaId: number, mediaType: PlexMediaType, width: number = 0, height: number = 0): Observable<string> {

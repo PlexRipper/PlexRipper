@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import {
@@ -14,6 +14,7 @@ import {
 import { DownloadMediaDTO, DownloadProgressDTO, DownloadStatus, PlexMediaType, ServerDownloadProgressDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, SignalrService } from '@service';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class DownloadService extends BaseService {
 	public constructor() {
@@ -27,14 +28,17 @@ export class DownloadService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<any> {
-		super.setNuxtContext(nuxtContext);
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
 
 		SignalrService.GetServerDownloadProgress().subscribe((data: ServerDownloadProgressDTO) => {
 			this.updateStore('serverDownloads', data);
 		});
 
-		return this.fetchDownloadList().pipe(take(1));
+		return this.fetchDownloadList().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
 	}
 
 	/**

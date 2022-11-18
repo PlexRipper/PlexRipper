@@ -2,7 +2,7 @@ import Log from 'consola';
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
@@ -15,9 +15,10 @@ import {
 	SettingsModelDTO,
 	ViewMode,
 } from '@dto/mainApi';
-import { BaseService, GlobalService } from '@service';
+import { BaseService } from '@service';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import IStoreState from '@interfaces/service/IStoreState';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class SettingsService extends BaseService {
 	// region Constructor and Setup
@@ -38,8 +39,8 @@ export class SettingsService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<any> {
-		super.setNuxtContext(nuxtContext);
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
 
 		this.getFirstTimeSetup().subscribe((state) => {
 			if (state === null) {
@@ -51,7 +52,10 @@ export class SettingsService extends BaseService {
 			}
 		});
 		// On app load, request the settings once
-		return this.fetchSettings().pipe(take(1));
+		return this.fetchSettings().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
 	}
 
 	// endregion

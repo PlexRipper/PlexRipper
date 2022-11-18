@@ -4,9 +4,9 @@ import { Context } from '@nuxt/types';
 import { BaseService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
 import IAlert from '@interfaces/IAlert';
-import ISetup from '@interfaces/ISetup';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
-export class AlertService extends BaseService implements ISetup {
+export class AlertService extends BaseService {
 	public constructor() {
 		super('AlertService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
@@ -18,8 +18,8 @@ export class AlertService extends BaseService implements ISetup {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<any> {
-		super.setNuxtContext(nuxtContext);
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
 		return EMPTY;
 	}
 

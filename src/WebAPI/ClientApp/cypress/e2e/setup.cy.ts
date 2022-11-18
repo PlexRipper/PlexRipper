@@ -25,37 +25,37 @@ describe('empty spec', () => {
 		const plexServers = generatePlexServers(config);
 		cy.intercept('GET', PLEX_SERVER_API_URL, {
 			statusCode: 200,
-			body: generateResultDTO(null, plexServers),
+			body: generateResultDTO(plexServers),
 		});
 
 		cy.intercept('GET', DOWNLOAD_API_URL, {
 			statusCode: 200,
-			body: generateResultDTO(null, []),
+			body: generateResultDTO([]),
 		});
 
 		cy.intercept('GET', FOLDER_PATH_API_URL, {
 			statusCode: 200,
-			body: generateResultDTO(null, []),
+			body: generateResultDTO([]),
 		});
 
 		cy.intercept('GET', PLEX_LIBRARY_API_URL, {
 			statusCode: 200,
-			body: generateResultDTO(null, []),
+			body: generateResultDTO([]),
 		});
 
 		cy.intercept('GET', PLEX_ACCOUNT_API_URL, {
 			statusCode: 200,
-			body: generateResultDTO(null, generatePlexAccounts(config, plexServers)),
+			body: generateResultDTO(generatePlexAccounts(config, plexServers)),
 		});
 
 		cy.intercept('GET', SETTINGS_API_URL, {
 			statusCode: 200,
-			body: generateResultDTO(null, generateSettings(config)),
+			body: generateResultDTO(generateSettings(config)),
 		});
 
 		cy.intercept('GET', NOTIFICATION_API_URL, {
 			statusCode: 200,
-			body: generateResultDTO(null, []),
+			body: generateResultDTO([]),
 		});
 
 		cy.intercept('GET', PROGRESS_HUB_URL + '/*', {

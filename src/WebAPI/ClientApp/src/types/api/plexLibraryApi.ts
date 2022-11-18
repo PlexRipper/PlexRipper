@@ -2,13 +2,13 @@ import { Observable } from 'rxjs';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
+import { PLEX_LIBRARY_RELATIVE_PATH } from '@api-urls';
 
 const logText = 'From PlexLibraryAPI => ';
-const apiPath = '/plexLibrary';
 
 export function getAllPlexLibraries(): Observable<ResultDTO<PlexLibraryDTO[]>> {
 	return PlexRipperAxios.get<PlexLibraryDTO[]>({
-		url: `${apiPath}`,
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}`,
 		apiCategory: logText,
 		apiName: getAllPlexLibraries.name,
 	});
@@ -16,7 +16,7 @@ export function getAllPlexLibraries(): Observable<ResultDTO<PlexLibraryDTO[]>> {
 
 export function getPlexLibrary(libraryId: number, plexAccountId: number): Observable<ResultDTO<PlexLibraryDTO>> {
 	return PlexRipperAxios.get<PlexLibraryDTO>({
-		url: `${apiPath}/${libraryId}?plexAccountId=${plexAccountId}`,
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}/${libraryId}?plexAccountId=${plexAccountId}`,
 		apiCategory: logText,
 		apiName: getPlexLibrary.name,
 	});
@@ -24,7 +24,7 @@ export function getPlexLibrary(libraryId: number, plexAccountId: number): Observ
 
 export function getPlexLibraryInServer(libraryId: number, plexAccountId: number): Observable<ResultDTO<PlexServerDTO | null>> {
 	return PlexRipperAxios.get<PlexServerDTO | null>({
-		url: `${apiPath}/inserver/${libraryId}?plexAccountId=${plexAccountId}`,
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}/inserver/${libraryId}?plexAccountId=${plexAccountId}`,
 		apiCategory: logText,
 		apiName: getPlexLibraryInServer.name,
 	});
@@ -32,7 +32,7 @@ export function getPlexLibraryInServer(libraryId: number, plexAccountId: number)
 
 export function refreshPlexLibrary(libraryId: number): Observable<ResultDTO<PlexLibraryDTO | null>> {
 	return PlexRipperAxios.post({
-		url: `${apiPath}/refresh/`,
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}/refresh/`,
 		apiCategory: logText,
 		apiName: refreshPlexLibrary.name,
 		data: {
@@ -43,7 +43,7 @@ export function refreshPlexLibrary(libraryId: number): Observable<ResultDTO<Plex
 
 export function updateDefaultDestination(libraryId: number, folderPathId: number): Observable<ResultDTO> {
 	return PlexRipperAxios.put({
-		url: `${apiPath}/settings/default/destination`,
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}/settings/default/destination`,
 		apiCategory: logText,
 		apiName: updateDefaultDestination.name,
 		data: {

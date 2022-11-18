@@ -2,13 +2,13 @@ import { Observable } from 'rxjs';
 import ResultDTO from '@dto/ResultDTO';
 import { AuthPin, PlexAccountDTO } from '@dto/mainApi';
 import PlexRipperAxios from '@class/PlexRipperAxios';
+import { PLEX_ACCOUNT_RELATIVE_PATH } from '@api-urls';
 
 const logText = 'From AccountAPI => ';
-const apiPath = '/plexaccount';
 
 export function getAllAccounts(): Observable<ResultDTO<PlexAccountDTO[]>> {
 	return PlexRipperAxios.get<PlexAccountDTO[]>({
-		url: `${apiPath}`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}`,
 		apiCategory: logText,
 		apiName: getAllAccounts.name,
 	});
@@ -16,7 +16,7 @@ export function getAllAccounts(): Observable<ResultDTO<PlexAccountDTO[]>> {
 
 export function getAllEnabledAccounts(): Observable<ResultDTO<PlexAccountDTO[]>> {
 	return PlexRipperAxios.get<PlexAccountDTO[]>({
-		url: `${apiPath}/?enabledOnly=true`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/?enabledOnly=true`,
 		apiCategory: logText,
 		apiName: getAllEnabledAccounts.name,
 	});
@@ -24,7 +24,7 @@ export function getAllEnabledAccounts(): Observable<ResultDTO<PlexAccountDTO[]>>
 
 export function validateAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO>> {
 	return PlexRipperAxios.post<PlexAccountDTO>({
-		url: `${apiPath}/validate`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/validate`,
 		apiCategory: logText,
 		apiName: validateAccount.name,
 		data: account,
@@ -33,7 +33,7 @@ export function validateAccount(account: PlexAccountDTO): Observable<ResultDTO<P
 
 export function createAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
 	return PlexRipperAxios.post<PlexAccountDTO>({
-		url: `${apiPath}`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}`,
 		apiCategory: logText,
 		apiName: createAccount.name,
 		data: account,
@@ -42,7 +42,7 @@ export function createAccount(account: PlexAccountDTO): Observable<ResultDTO<Ple
 
 export function updateAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<ResultDTO<PlexAccountDTO | null>> {
 	return PlexRipperAxios.put<PlexAccountDTO | null>({
-		url: `${apiPath}/${account.id}?inspect=${inspect}`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/${account.id}?inspect=${inspect}`,
 		apiCategory: logText,
 		apiName: updateAccount.name,
 		data: account,
@@ -51,7 +51,7 @@ export function updateAccount(account: PlexAccountDTO, inspect: boolean = false)
 
 export function deleteAccount(accountId: Number): Observable<ResultDTO<boolean>> {
 	return PlexRipperAxios.delete<boolean>({
-		url: `${apiPath}/${accountId}`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/${accountId}`,
 		apiCategory: logText,
 		apiName: deleteAccount.name,
 	});
@@ -59,7 +59,7 @@ export function deleteAccount(accountId: Number): Observable<ResultDTO<boolean>>
 
 export function getAccount(accountId: Number): Observable<ResultDTO<PlexAccountDTO>> {
 	return PlexRipperAxios.get<PlexAccountDTO>({
-		url: `${apiPath}/${accountId}`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/${accountId}`,
 		apiCategory: logText,
 		apiName: getAccount.name,
 	});
@@ -67,7 +67,7 @@ export function getAccount(accountId: Number): Observable<ResultDTO<PlexAccountD
 
 export function refreshAccount(accountId: Number): Observable<ResultDTO> {
 	return PlexRipperAxios.get<void>({
-		url: `${apiPath}/refresh/${accountId}`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/refresh/${accountId}`,
 		apiCategory: logText,
 		apiName: refreshAccount.name,
 	});
@@ -75,7 +75,7 @@ export function refreshAccount(accountId: Number): Observable<ResultDTO> {
 
 export function GetAndCheck2FaPin(clientId: String, authPinId: number = 0): Observable<ResultDTO<AuthPin>> {
 	return PlexRipperAxios.get<AuthPin>({
-		url: `${apiPath}/authpin`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/authpin`,
 		apiCategory: logText,
 		apiName: GetAndCheck2FaPin.name,
 		params: {
@@ -87,7 +87,7 @@ export function GetAndCheck2FaPin(clientId: String, authPinId: number = 0): Obse
 
 export function checkAuthPin(clientId: String): Observable<ResultDTO<AuthPin>> {
 	return PlexRipperAxios.get<AuthPin>({
-		url: `${apiPath}/authpin/${clientId}/check`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/authpin/${clientId}/check`,
 		apiCategory: logText,
 		apiName: checkAuthPin.name,
 	});
@@ -95,7 +95,7 @@ export function checkAuthPin(clientId: String): Observable<ResultDTO<AuthPin>> {
 
 export function generateClientId(): Observable<ResultDTO<string>> {
 	return PlexRipperAxios.get<string>({
-		url: `${apiPath}/clientid`,
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/clientid`,
 		apiCategory: logText,
 		apiName: generateClientId.name,
 	});

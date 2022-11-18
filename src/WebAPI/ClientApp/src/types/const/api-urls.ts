@@ -1,5 +1,6 @@
 // region General
 
+export const DEV_APP_URL = 'http://localhost:3000/';
 export const BASE_URL = 'http://localhost:5000/';
 export const BASE_API_URL = `${BASE_URL}/api`;
 
@@ -7,20 +8,22 @@ export const BASE_API_URL = `${BASE_URL}/api`;
 
 // region Relative
 
-export const PLEX_SERVER_PATH = `/PlexServer`;
-export const DOWNLOAD_PATH = `/Download`;
-export const FOLDER_PATH_PATH = `/FolderPath`;
-export const SETTINGS_RELATIVE_PATH = `/Settings`;
-export const PLEX_LIBRARY_RELATIVE_PATH = `/PlexLibrary`;
-export const PLEX_ACCOUNT_RELATIVE_PATH = `/PlexAccount`;
-export const NOTIFICATION_RELATIVE_PATH = `/Notification`;
+export const PLEX_SERVER_RELATIVE_PATH = '/PlexServer';
+export const DOWNLOAD_RELATIVE_PATH = '/Download';
+export const FOLDER_PATH_RELATIVE_PATH = '/FolderPath';
+export const SETTINGS_RELATIVE_PATH = '/Settings';
+export const PLEX_LIBRARY_RELATIVE_PATH = '/PlexLibrary';
+export const PLEX_ACCOUNT_RELATIVE_PATH = '/PlexAccount';
+export const NOTIFICATION_RELATIVE_PATH = '/Notification';
+export const HEALTH_RELATIVE_PATH = '/Health';
+export const PLEX_MEDIA_RELATIVE_PATH = '/PlexMedia';
 
 // endregion
 
 // region Absolute
-export const PLEX_SERVER_API_URL = `${BASE_API_URL}/${PLEX_SERVER_PATH}`;
-export const DOWNLOAD_API_URL = `${BASE_API_URL}/${DOWNLOAD_PATH}`;
-export const FOLDER_PATH_API_URL = `${BASE_API_URL}/${FOLDER_PATH_PATH}`;
+export const PLEX_SERVER_API_URL = `${BASE_API_URL}/${PLEX_SERVER_RELATIVE_PATH}`;
+export const DOWNLOAD_API_URL = `${BASE_API_URL}/${DOWNLOAD_RELATIVE_PATH}`;
+export const FOLDER_PATH_API_URL = `${BASE_API_URL}/${FOLDER_PATH_RELATIVE_PATH}`;
 export const PLEX_LIBRARY_API_URL = `${BASE_API_URL}/${PLEX_LIBRARY_RELATIVE_PATH}`;
 export const PLEX_ACCOUNT_API_URL = `${BASE_API_URL}/${PLEX_ACCOUNT_RELATIVE_PATH}`;
 export const SETTINGS_API_URL = `${BASE_API_URL}/${SETTINGS_RELATIVE_PATH}`;

@@ -13,6 +13,5 @@ export default (ctx: Context): void => {
 
 	// Setup Config
 	Log.info(`Nuxt Environment: ${ctx.$config.nodeEnv}`);
-	GlobalService.setConfigReady(ctx.$config);
 	GlobalService.setup(ctx);
 };

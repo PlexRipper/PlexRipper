@@ -1,8 +1,7 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
-import { ReplaySubject, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
+import { ReplaySubject, Observable, forkJoin } from 'rxjs';
+import { take, tap } from 'rxjs/operators';
 import { ObservableStore } from '@codewithdan/observable-store';
 import AppConfig from '@class/AppConfig';
 import {
@@ -17,10 +16,10 @@ import {
 } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import * as Service from '@service';
-import ISetup from '@interfaces/ISetup';
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
-export class GlobalService extends Service.BaseService {
+export class GlobalService {
 	private _axiosReady: ReplaySubject<void> = new ReplaySubject();
 	private _configReady: ReplaySubject<AppConfig> = new ReplaySubject();
 	private _pageSetupReady: ReplaySubject<void> = new ReplaySubject();
@@ -54,44 +53,55 @@ export class GlobalService extends Service.BaseService {
 	private _serviceKeys: string[] = [];
 	private _doneServiceKeys: string[] = [];
 
-	constructor() {
-		super('GlobalService', {} as ObservableStoreSettings);
-	}
-
 	public setAxiosReady(): void {
 		Log.info('Axios is ready');
 		this._axiosReady.next();
 	}
 
-	public setup(nuxtContext: Context): void {
-		super.setNuxtContext(nuxtContext);
-
+	public initializeState() {
 		ObservableStore.initializeState(this._defaultStore);
-		// Call setup() on every service and await callback to determine if it has finished setting up
-		this._serviceKeys = Object.keys(Service).filter((key) => key !== 'BaseService' && key !== 'GlobalService');
-		for (const key of this._serviceKeys) {
-			const service = Service[key] as ISetup;
-			if (service && typeof service.setup === 'function') {
-				service.setup(nuxtContext, (name) => {
-					this._doneServiceKeys.push(name);
+	}
 
-					const notDoneServices = this._serviceKeys.filter((x) => !this._doneServiceKeys.includes(x));
-					if (notDoneServices.length > 0) {
-						// Log.debug(`The following services are not done yet:`, notDoneServices);
-					} else {
-						Log.info('Page Setup has finished');
-						this._pageSetupReady.next();
-					}
-				});
-			}
-		}
+	public setupObservable(nuxtContext: Context): Observable<ISetupResult[]> {
+		this.initializeState();
+		this.setConfigReady(nuxtContext.$config);
+		const appConfig = new AppConfig(nuxtContext.$config);
+		const sources = [
+			Service.ProgressService.setup(nuxtContext),
+			Service.DownloadService.setup(nuxtContext),
+			Service.ServerService.setup(nuxtContext),
+			Service.MediaService.setup(nuxtContext),
+			Service.SettingsService.setup(nuxtContext),
+			Service.NotificationService.setup(nuxtContext),
+			Service.FolderPathService.setup(nuxtContext),
+			Service.LibraryService.setup(nuxtContext),
+			Service.AccountService.setup(nuxtContext),
+			Service.SignalrService.setup(nuxtContext, appConfig),
+			Service.HelpService.setup(nuxtContext),
+			Service.AlertService.setup(nuxtContext),
+		];
+		return forkJoin(sources).pipe(
+			tap((results: ISetupResult[]) => {
+				const percentage = Number(((results.length / sources.length) * 100).toFixed(2));
+				Log.debug(`Setup progress: ${percentage}%`);
+			}),
+		);
+	}
+
+	public setup(nuxtContext: Context): void {
+		this.setupObservable(nuxtContext).subscribe({
+			complete: () => {
+				Log.info('Page Setup has finished');
+				this._pageSetupReady.next();
+			},
+		});
 	}
 
 	public resetStore(): void {
 		ObservableStore.resetState(this._defaultStore);
 	}
 
-	public setConfigReady(config: RuntimeConfig): void {
+	private setConfigReady(config: RuntimeConfig): void {
 		if (process.client || process.static) {
 			Log.info('Runtime Config is ready - ' + config.version, config);
 			this._configReady.next(new AppConfig(config));
@@ -108,8 +118,8 @@ export class GlobalService extends Service.BaseService {
 		return this._configReady.pipe(take(1));
 	}
 
-	public getPageSetupReady(): Observable<AppConfig> {
-		return this._configReady.pipe(take(1));
+	public getPageSetupReady(): Observable<void> {
+		return this._pageSetupReady.pipe(take(1));
 	}
 }
 

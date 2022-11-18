@@ -1,8 +1,8 @@
 import Log from 'consola';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { catchError, Observable, of } from 'rxjs';
-import Axios, { AxiosObservable } from 'axios-observable';
-import { AxiosResponse } from 'axios';
+import { AxiosObservable } from 'axios-observable';
+import { AxiosError, AxiosResponse } from 'axios';
 import { AlertService } from '@service';
 import ResultDTO from '@dto/ResultDTO';
 
@@ -16,10 +16,12 @@ export function checkForError<T = any>(
 ): (source$: AxiosObservable<ResultDTO<T>>) => Observable<ResultDTO<T>> {
 	return (source$) =>
 		source$.pipe(
-			catchError((error: any) => {
-				Log.fatal('FATAL NETWORK ERROR: axiosErrorToResultDTO', error);
-				// TODO Check wat the error contains incase of network failure and continue based on that
-				return of({} as AxiosResponse<ResultDTO<T>>);
+			catchError((error: AxiosError | any) => {
+				Log.error('FATAL NETWORK ERROR: ', error);
+				// TODO Check wat the error contains in-case, of network failure and continue based on that
+				return of({
+					data: { isSuccess: false, isFailed: true, errors: [{ message: error.message }] } as ResultDTO,
+				} as AxiosResponse<ResultDTO<T>>);
 			}),
 			switchMap((response: AxiosResponse<ResultDTO<T>>): Observable<ResultDTO<T>> => {
 				return of(response?.data);

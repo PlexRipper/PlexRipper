@@ -1,6 +1,5 @@
 import { beforeAll, expect, test } from '@jest/globals';
-import { baseVars, beforeEachServiceTest, subscribeSpyTo, baseSetup, getAxiosMock } from '@services-test-base';
-import Log from 'consola';
+import { baseVars, subscribeSpyTo, baseSetup, getAxiosMock } from '@services-test-base';
 import { generatePlexServers, generateResultDTO } from '@mock';
 import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
 import { GlobalService, ServerService } from '@service';

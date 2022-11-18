@@ -25,7 +25,7 @@ export function baseSetup(): { ctx: Context } {
 	process.env.NODE_ENV = 'dev';
 	process.client = true;
 	// Minimum LogLevel displayed
-	Log.level = LogLevel.Trace;
+	Log.level = LogLevel.Debug;
 	return {
 		ctx,
 	};

@@ -104,7 +104,6 @@ export class SettingsService extends BaseService {
 		return getSettings().pipe(
 			switchMap((settingsResult) => of(settingsResult?.value ?? null)),
 			tap((settings) => {
-				Log.debug(`SettingsService => Fetch Settings`, settings);
 				if (settings) {
 					this.setSettingsModel(settings);
 				}

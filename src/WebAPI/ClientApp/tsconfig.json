@@ -23,6 +23,7 @@
 			"@class/*": ["./types/class/*"],
 			"@dto/*": ["./types/dto/*"],
 			"@api/*": ["./types/api/*"],
+			"@api-urls": ["./types/const/api-urls.ts"],
 			"@lib/*": ["./types/lib/*"],
 			"@service": ["./service/index.ts"],
 			"@img/*": ["./assets/img/*"],

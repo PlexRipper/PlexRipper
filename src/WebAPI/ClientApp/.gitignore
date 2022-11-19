@@ -18,3 +18,6 @@ jspm_packages/
 
 # Nuxt generate
 dist
+
+# Jest Coverage
+coverage

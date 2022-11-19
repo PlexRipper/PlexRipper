@@ -38,5 +38,5 @@
 		},
 		"types": ["@types/node", "@nuxt/types", "vuetify", "@nuxtjs/vuetify", "@nuxtjs/i18n", "@types/jest"]
 	},
-	"exclude": ["node_modules", ".nuxt", "node_modules/dist", ".vscode"]
+	"exclude": ["*.config.js","node_modules", ".nuxt", "dist", ".vscode"]
 }

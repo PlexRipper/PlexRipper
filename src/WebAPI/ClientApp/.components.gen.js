@@ -3,12 +3,12 @@ import Print from '@/components/DebugTools/Print.vue'
 import AppBar from '@/components/AppBar/AppBar.vue'
 import AppBarProgressBar from '@/components/AppBar/AppBarProgressBar.vue'
 import NotificationButton from '@/components/AppBar/NotificationButton.vue'
-import AlertDialog from '@/components/Dialogs/AlertDialog.vue'
-import Footer from '@/components/Footer/Footer.vue'
 import PBtn from '@/components/Extensions/PBtn.vue'
 import PCheckbox from '@/components/Extensions/PCheckbox.vue'
 import PSelect from '@/components/Extensions/PSelect.vue'
 import PTextField from '@/components/Extensions/PTextField.vue'
+import Footer from '@/components/Footer/Footer.vue'
+import AlertDialog from '@/components/Dialogs/AlertDialog.vue'
 import DownloadLimitInput from '@/components/Form/DownloadLimitInput.vue'
 import EditableText from '@/components/Form/EditableText.vue'
 import Background from '@/components/General/Background.vue'
@@ -72,13 +72,13 @@ import Pages from '@/e'
 import Downloads from '@/e'
 import MoviesId from '@/e'
 import Movies from '@/e'
-import MusicId from '@/e'
-import Music from '@/e'
 import Accounts from '@/e'
 import Advanced from '@/e'
 import Debug from '@/e'
 import Paths from '@/e'
 import Ui from '@/e'
+import MusicId from '@/e'
+import Music from '@/e'
 import Setup from '@/e'
 import Id from '@/e'
 import Tvshows from '@/e'
@@ -91,10 +91,6 @@ Vue.component('AppBarProgressBar', AppBarProgressBar)
 Vue.component('LazyAppBarProgressBar', AppBarProgressBar)
 Vue.component('NotificationButton', NotificationButton)
 Vue.component('LazyNotificationButton', NotificationButton)
-Vue.component('AlertDialog', AlertDialog)
-Vue.component('LazyAlertDialog', AlertDialog)
-Vue.component('Footer', Footer)
-Vue.component('LazyFooter', Footer)
 Vue.component('PBtn', PBtn)
 Vue.component('LazyPBtn', PBtn)
 Vue.component('PCheckbox', PCheckbox)
@@ -103,6 +99,10 @@ Vue.component('PSelect', PSelect)
 Vue.component('LazyPSelect', PSelect)
 Vue.component('PTextField', PTextField)
 Vue.component('LazyPTextField', PTextField)
+Vue.component('Footer', Footer)
+Vue.component('LazyFooter', Footer)
+Vue.component('AlertDialog', AlertDialog)
+Vue.component('LazyAlertDialog', AlertDialog)
 Vue.component('DownloadLimitInput', DownloadLimitInput)
 Vue.component('LazyDownloadLimitInput', DownloadLimitInput)
 Vue.component('EditableText', EditableText)
@@ -229,10 +229,6 @@ Vue.component('MoviesId', MoviesId)
 Vue.component('LazyMoviesId', MoviesId)
 Vue.component('Movies', Movies)
 Vue.component('LazyMovies', Movies)
-Vue.component('MusicId', MusicId)
-Vue.component('LazyMusicId', MusicId)
-Vue.component('Music', Music)
-Vue.component('LazyMusic', Music)
 Vue.component('Accounts', Accounts)
 Vue.component('LazyAccounts', Accounts)
 Vue.component('Advanced', Advanced)
@@ -243,6 +239,10 @@ Vue.component('Paths', Paths)
 Vue.component('LazyPaths', Paths)
 Vue.component('Ui', Ui)
 Vue.component('LazyUi', Ui)
+Vue.component('MusicId', MusicId)
+Vue.component('LazyMusicId', MusicId)
+Vue.component('Music', Music)
+Vue.component('LazyMusic', Music)
 Vue.component('Setup', Setup)
 Vue.component('LazySetup', Setup)
 Vue.component('Id', Id)

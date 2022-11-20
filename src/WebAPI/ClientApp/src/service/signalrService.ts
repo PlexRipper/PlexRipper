@@ -19,7 +19,7 @@ import {
 } from '@dto/mainApi';
 import notificationService from '~/service/notificationService';
 import ISetupResult from '@interfaces/service/ISetupResult';
-import AppConfig from '@class/AppConfig';
+import IAppConfig from '@class/IAppConfig';
 
 export class SignalrService extends BaseService {
 	private _progressHubConnection: HubConnection | null = null;
@@ -43,7 +43,7 @@ export class SignalrService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context, appConfig: AppConfig | null = null): Observable<ISetupResult> {
+	public setup(nuxtContext: Context, appConfig: IAppConfig | null = null): Observable<ISetupResult> {
 		super.setup(nuxtContext, appConfig);
 
 		return new Observable((observer) => {
@@ -115,10 +115,8 @@ export class SignalrService extends BaseService {
 			notificationService.setNotification(data);
 		});
 
-		GlobalService.getAxiosReady().subscribe(() => {
-			this.startProgressHubConnection();
-			this.startNotificationHubConnection();
-		});
+		this.startProgressHubConnection();
+		this.startNotificationHubConnection();
 	}
 
 	// region Start / Stop Hub Connections

@@ -1,6 +1,6 @@
 import Log from 'consola';
 import Axios from 'axios-observable';
-import { GlobalService } from '@service';
+import IAppConfig from '@class/IAppConfig';
 
 export default (): void => {
 	// Source: https://github.com/axios/axios/issues/41#issuecomment-484546457
@@ -15,10 +15,9 @@ export default (): void => {
 			return Promise.reject(error);
 		},
 	);
-
-	GlobalService.getConfigReady().subscribe((config) => {
-		Log.info('Axios BaseApiUrl: ' + config.baseApiUrl);
-		Axios.defaults.baseURL = config.baseApiUrl;
-		GlobalService.setAxiosReady();
-	});
 };
+
+export function setConfigInAxios(config: IAppConfig) {
+	Log.info('Axios BaseApiUrl: ' + config.baseApiUrl);
+	Axios.defaults.baseURL = config.baseApiUrl;
+}

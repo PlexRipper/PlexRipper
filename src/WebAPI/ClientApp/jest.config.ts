@@ -42,11 +42,6 @@ const jestConfig = {
 
 	// A set of global variables that need to be available in all test environments
 	// NOTE: window is needed due to a check for window.cypress to check if it is running under tests
-	globals: {
-		window: {
-			jest: true,
-		},
-	},
 
 	// The test environment that will be used for testing
 	testEnvironment: 'jest-environment-node',

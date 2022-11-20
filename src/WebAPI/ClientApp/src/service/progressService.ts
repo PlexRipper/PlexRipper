@@ -1,18 +1,18 @@
 import { Context } from '@nuxt/types';
-import { combineLatest, of } from 'rxjs';
-import { startWith, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { startWith, switchMap, take } from 'rxjs/operators';
 import { DownloadStatus, DownloadTaskDTO } from '@dto/mainApi';
 import { BaseService, SignalrService } from '@service';
-import ISetup from '@interfaces/ISetup';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
-export class ProgressService extends BaseService implements ISetup {
+export class ProgressService extends BaseService {
 	public constructor() {
 		super('ProgressService', {});
 	}
 
-	setup(nuxtContext: Context, callBack: (name: string) => void): void {
-		super.setNuxtContext(nuxtContext);
-		callBack(this._name);
+	setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
+		return of({ name: this._name, isSuccess: true }).pipe(take(1));
 	}
 
 	/**

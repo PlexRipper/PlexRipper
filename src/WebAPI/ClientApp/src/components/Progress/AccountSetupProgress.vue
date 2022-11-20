@@ -91,8 +91,9 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
+import { switchMap } from 'rxjs/operators';
 import { clamp } from 'lodash-es';
-import { SignalrService } from '@service';
+import { SignalrService, ServerService } from '@service';
 import type { InspectServerProgress, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 
@@ -112,9 +113,7 @@ export default class AccountSetupProgress extends Vue {
 	hideButtonType: ButtonType = ButtonType.Hide;
 	confirmButtonType: ButtonType = ButtonType.Confirm;
 
-	get plexServers(): PlexServerDTO[] {
-		return this.account.plexServers ?? [];
-	}
+	plexServers: PlexServerDTO[] = [];
 
 	get getServerUpdates(): ServerUpdate[] {
 		const serverUpdates: ServerUpdate[] = [];
@@ -153,6 +152,13 @@ export default class AccountSetupProgress extends Vue {
 			SignalrService.getAllInspectServerProgress().subscribe((data) => {
 				this.inspectServerProgresses = data;
 			}),
+		);
+		useSubscription(
+			ServerService.refreshPlexServers()
+				.pipe(switchMap(() => ServerService.getServers(this.account.plexServerAccess.map((x) => x.plexServerId))))
+				.subscribe((servers) => {
+					this.plexServers = servers;
+				}),
 		);
 	}
 }

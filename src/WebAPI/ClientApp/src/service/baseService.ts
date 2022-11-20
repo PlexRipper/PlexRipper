@@ -2,10 +2,14 @@ import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
+import { EMPTY, Observable } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
+import ISetupResult from '@interfaces/service/ISetupResult';
+import AppConfig from '@class/AppConfig';
 
 export default abstract class BaseService extends ObservableStore<IStoreState> {
 	protected _nuxtContext!: Context;
+	protected _appConfig!: AppConfig;
 	protected _name: string;
 
 	protected constructor(serviceName: string, settings: ObservableStoreSettings) {
@@ -14,12 +18,21 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		this._name = serviceName;
 	}
 
-	protected setNuxtContext(nuxtContext: Context): void {
-		this._nuxtContext = nuxtContext;
+	public logHistory(): void {
+		Log.trace(`Current ${this._name} state history:`, this.stateHistory);
 	}
 
-	public logHistory(): void {
-		Log.warn('history', this.stateHistory);
+	public get name() {
+		return this._name;
+	}
+
+	protected setup(nuxtContext, appConfig: AppConfig | null = null): Observable<ISetupResult> {
+		this._nuxtContext = nuxtContext;
+		if (appConfig !== null) {
+			this._appConfig = appConfig;
+		}
+		Log.debug(`Starting setup of service: ${this._name}`);
+		return EMPTY;
 	}
 
 	/**
@@ -53,5 +66,21 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		const stateObject = {};
 		stateObject[propertyName] = x;
 		this.setState(stateObject, `Update ${propertyName} with ${idName}: ${newObject[idName]}`);
+	}
+
+	protected setStoreProperty(propertyName: keyof IStoreState, newValue: any, action: string = ''): void {
+		const state = {};
+		state[propertyName] = newValue;
+
+		if (!action) {
+			action = `The property "${propertyName}" was updated in the store`;
+		}
+		Log.trace(action, newValue);
+		this.setState(state, action);
+		this.logHistory();
+	}
+
+	protected getStoreSlice<T>(propertyName: keyof IStoreState): T {
+		return this.getStateSliceProperty<T>(propertyName, true);
 	}
 }

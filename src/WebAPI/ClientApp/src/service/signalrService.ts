@@ -1,8 +1,8 @@
 import Log from 'consola';
 // eslint-disable-next-line import/named
 import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
-import { Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { Observable, of, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { isEqual } from 'lodash-es';
 import IStoreState from '@interfaces/service/IStoreState';
@@ -17,10 +17,11 @@ import {
 	ServerDownloadProgressDTO,
 	SyncServerProgress,
 } from '@dto/mainApi';
-import ISetup from '@interfaces/ISetup';
 import notificationService from '~/service/notificationService';
+import ISetupResult from '@interfaces/service/ISetupResult';
+import AppConfig from '@class/AppConfig';
 
-export class SignalrService extends BaseService implements ISetup {
+export class SignalrService extends BaseService {
 	private _progressHubConnection: HubConnection | null = null;
 	private _notificationHubConnection: HubConnection | null = null;
 
@@ -42,34 +43,41 @@ export class SignalrService extends BaseService implements ISetup {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
-		super.setNuxtContext(nuxtContext);
+	public setup(nuxtContext: Context, appConfig: AppConfig | null = null): Observable<ISetupResult> {
+		super.setup(nuxtContext, appConfig);
 
-		GlobalService.getConfigReady().subscribe((config) => {
-			// Ensure we don't run any SignalR functionality due to it being tricky to setup. Might revisit later
-			// TODO Re-enable when trying to test SignalR functionality
-			// @ts-ignore
-			if (window.Cypress) {
-				return;
-			}
-			Log.debug('Setting up SignalR Service');
-			const options: IHttpConnectionOptions = {
-				logger: LogLevel.Information,
-			};
-			// Setup Connections
-			const baseUrl = config.baseURL;
-			this._progressHubConnection = new HubConnectionBuilder()
-				.withUrl(`${baseUrl}/progress`, options)
-				.withAutomaticReconnect()
-				.build();
-			this._notificationHubConnection = new HubConnectionBuilder()
-				.withUrl(`${baseUrl}/notifications`, options)
-				.withAutomaticReconnect()
-				.build();
+		return new Observable((observer) => {
+			observer.next(() => this.initializeHubs());
+			observer.complete();
+		}).pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
+	}
 
-			this.setupSubscriptions();
-			callBack(this._name);
-		});
+	private initializeHubs(): void {
+		// Ensure we don't run any SignalR functionality due to it being tricky to setup. Might revisit later
+		// TODO Re-enable when trying to test SignalR functionality
+		// @ts-ignore
+		if (window.jest || window.Cypress) {
+			return;
+		}
+		Log.debug('Setting up SignalR Service');
+		const options: IHttpConnectionOptions = {
+			logger: LogLevel.Information,
+		};
+		// Setup Connections
+		const baseUrl = this._appConfig.baseURL;
+		this._progressHubConnection = new HubConnectionBuilder()
+			.withUrl(`${baseUrl}/progress`, options)
+			.withAutomaticReconnect()
+			.build();
+		this._notificationHubConnection = new HubConnectionBuilder()
+			.withUrl(`${baseUrl}/notifications`, options)
+			.withAutomaticReconnect()
+			.build();
+
+		this.setupSubscriptions();
 	}
 
 	private setupSubscriptions(): void {

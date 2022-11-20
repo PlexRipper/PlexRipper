@@ -1,14 +1,15 @@
 import { faker } from '@faker-js/faker';
 import { MockConfig } from '@mock/interfaces/MockConfig';
 import ResultDTO from '@dto/ResultDTO';
-import { PlexAccountDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 import { checkConfig } from '@mock/mock-base';
 import { generatePlexServers } from '@mock/mock-plex-server';
 
-export function generatePlexAccounts(config: MockConfig | null = null): PlexAccountDTO[] {
+export function generatePlexAccounts(config: MockConfig | null = null, plexServers: PlexServerDTO[]): PlexAccountDTO[] {
 	config = checkConfig(config);
 
 	const plexAccounts: PlexAccountDTO[] = [];
+
 	// @ts-ignore
 	for (let i = 0; i < config.plexAccountCount; i++) {
 		plexAccounts.push({
@@ -29,7 +30,12 @@ export function generatePlexAccounts(config: MockConfig | null = null): PlexAcco
 			isMain: true,
 			is2Fa: false,
 			verificationCode: '',
-			plexServers: generatePlexServers(config),
+			plexServerAccess: plexServers.map((x) => {
+				return {
+					plexServerId: x.id,
+					plexLibraryIds: x.plexLibraries.map((y) => y.id),
+				};
+			}),
 		});
 	}
 

@@ -55,6 +55,6 @@ public class PlexAccountDTO
     [JsonProperty("is2Fa", Required = Required.Always)]
     public bool Is2Fa { get; set; }
 
-    [JsonProperty("plexServers", Required = Required.Always)]
-    public List<PlexServerDTO> PlexServers { get; set; }
+    [JsonProperty("accountAccess", Required = Required.Always)]
+    public List<PlexServerAccessDTO> PlexServerAccess { get; set; }
 }

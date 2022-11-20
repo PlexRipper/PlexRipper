@@ -83,10 +83,10 @@ const config: NuxtConfig = {
 		// Doc: https://github.com/nuxt/components
 		// Note: this is added to fix the error "render function or template not defined in component: "
 		'@nuxt/components',
-		// Doc: https://github.com/fumeapp/nuxt-storm
-		['nuxt-storm', { alias: true }],
 		// Doc: https://vueuse.org/guide/index.html#installation
 		'@vueuse/nuxt',
+		// Doc: https://github.com/fumeapp/nuxt-storm
+		['nuxt-storm', { alias: true }],
 		// Doc: https://github.com/nuxt/postcss8#readme
 		'@nuxt/postcss8',
 	],

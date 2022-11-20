@@ -6,6 +6,7 @@ This means you will have to empty the config folder before installing to ensure 
 ### Added
  - Per server configurable download speed limit (See server settings > Server Configuration)
  - German UI language (Thanks to (Padso4tw)[https://github.com/padso4tw])
+ - Jest and Cypress testing infrastructure
 
 ### Changed
  - Removed batch commands from the download page, these were not working and overcomplicated things too much.
@@ -18,7 +19,7 @@ This means you will have to empty the config folder before installing to ensure 
  - Fixed the retrieval of the ServerStatus not working when a timeout happens.
  - Fixed the notifications not always being shown and updated correctly when an error happens.
  - Fixed the download confirmation window not hiding after clicking confirm #122
-
+ - Fixed the page background effect breaking when the browser does not support WebGL. It will now show a still image of the background.
 
 ## [0.8.7]
 

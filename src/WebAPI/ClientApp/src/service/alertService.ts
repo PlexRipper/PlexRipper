@@ -1,12 +1,12 @@
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { BaseService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
 import IAlert from '@interfaces/IAlert';
-import ISetup from '@interfaces/ISetup';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
-export class AlertService extends BaseService implements ISetup {
+export class AlertService extends BaseService {
 	public constructor() {
 		super('AlertService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
@@ -18,9 +18,9 @@ export class AlertService extends BaseService implements ISetup {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
-		super.setNuxtContext(nuxtContext);
-		callBack(this._name);
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
+		return of({ name: this._name, isSuccess: true }).pipe(take(1));
 	}
 
 	// region Alerts
@@ -38,6 +38,7 @@ export class AlertService extends BaseService implements ISetup {
 	public removeAlert(id: number): void {
 		this.setState({ alerts: this.getState().alerts.filter((x) => x.id !== id) });
 	}
+
 	// endregion
 }
 

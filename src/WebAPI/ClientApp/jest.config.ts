@@ -8,14 +8,8 @@ import { pathsToModuleNameMapper } from 'ts-jest/utils';
 const { compilerOptions } = require('./tsconfig');
 
 const jestConfig = {
-	// All imported modules in your tests should be mocked automatically
-	// automock: false,
-
-	// Stop running tests after `n` failures
-	// bail: 0,
-
-	// The directory where Jest should store its cached dependency information
-	// cacheDirectory: "/tmp/jest_rs",
+	// A preset that is used as a base for Jest's configuration
+	preset: 'ts-jest',
 
 	// Automatically clear mock calls, instances, contexts and results before every test
 	clearMocks: true,
@@ -44,7 +38,7 @@ const jestConfig = {
 	// An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
 	// transformIgnorePatterns: ['/node_modules/', '\\.pnp\\.[^\\/]+$'],
 	// Source: https://stackoverflow.com/a/43197503/8205497
-	transformIgnorePatterns: ['<rootDir>/node_modules/(?!lodash-es)'],
+	transformIgnorePatterns: ['<rootDir>/node_modules/(?!lodash-es)(?!axios)'],
 
 	// A set of global variables that need to be available in all test environments
 	// NOTE: window is needed due to a check for window.cypress to check if it is running under tests
@@ -63,6 +57,15 @@ const jestConfig = {
 	// A list of paths to modules that run some code to configure or set up the testing framework before each test
 	// Source: https://github.com/hirezio/observer-spy#-configuring-jest-with-setup-auto-unsubscribejs
 	setupFilesAfterEnv: ['<rootDir>/node_modules/@hirez_io/observer-spy/dist/setup-auto-unsubscribe.js'],
+
+	// All imported modules in your tests should be mocked automatically
+	// automock: false,
+
+	// Stop running tests after `n` failures
+	// bail: 0,
+
+	// The directory where Jest should store its cached dependency information
+	// cacheDirectory: "/tmp/jest_rs",
 
 	// An array of regexp pattern strings used to skip coverage collection
 	// coveragePathIgnorePatterns: [
@@ -132,9 +135,6 @@ const jestConfig = {
 	// An enum that specifies notification mode. Requires { notify: true }
 	// notifyMode: "failure-change",
 
-	// A preset that is used as a base for Jest's configuration
-	// preset: undefined,
-
 	// Run tests from one or more projects
 	// projects: undefined,
 
@@ -175,7 +175,10 @@ const jestConfig = {
 	// testLocationInResults: false,
 
 	// The glob patterns Jest uses to detect test files
-	testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
+	// testMatch: [
+	//   "**/__tests__/**/*.[jt]s?(x)",
+	//   "**/?(*.)+(spec|test).[tj]s?(x)"
+	// ],
 
 	// An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
 	// testPathIgnorePatterns: [

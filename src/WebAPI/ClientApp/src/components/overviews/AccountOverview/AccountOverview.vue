@@ -22,6 +22,7 @@
 <script lang="ts">
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
+import { merge } from 'rxjs';
 import { AccountService, LibraryService, ServerService } from '@service';
 import { PlexAccountDTO } from '@dto/mainApi';
 import AccountDialog from '@overviews/AccountOverview/AccountDialog.vue';
@@ -44,9 +45,13 @@ export default class AccountOverview extends Vue {
 
 	closeDialog(refreshAccounts: boolean = false): void {
 		if (refreshAccounts) {
-			AccountService.fetchAccounts();
-			ServerService.fetchServers();
-			LibraryService.fetchLibraries();
+			useSubscription(
+				merge([
+					AccountService.refreshAccounts(),
+					ServerService.refreshPlexServers(),
+					LibraryService.refreshLibraries(),
+				]).subscribe(),
+			);
 		}
 	}
 

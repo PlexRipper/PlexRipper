@@ -1,38 +1,49 @@
-import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
 import { FolderPathDTO, FileSystemDTO } from '@dto/mainApi';
-import { checkResponse, preApiRequest } from '@api/baseApi';
 import ResultDTO from '@dto/ResultDTO';
+import PlexRipperAxios from '@class/PlexRipperAxios';
+import { FOLDER_PATH_RELATIVE_PATH } from '@api-urls';
 
 const logText = 'From folderPathApi => ';
-const apiPath = '/folderpath';
 
 export function getFolderPaths(): Observable<ResultDTO<FolderPathDTO[]>> {
-	preApiRequest(logText, 'getFolderPaths');
-	const result = Axios.get(`${apiPath}`);
-	return checkResponse<ResultDTO<FolderPathDTO[]>>(result, logText, 'getFolderPaths');
+	return PlexRipperAxios.get<FolderPathDTO[]>({
+		url: `${FOLDER_PATH_RELATIVE_PATH}`,
+		apiCategory: logText,
+		apiName: getFolderPaths.name,
+	});
 }
 
 export function getDirectoryPath(path: string = ''): Observable<ResultDTO<FileSystemDTO>> {
-	preApiRequest(logText, 'getDirectoryPath');
-	const result = Axios.get(`${apiPath}/directory/?path=${path}`);
-	return checkResponse<ResultDTO<FileSystemDTO>>(result, logText, 'getDirectoryPath');
+	return PlexRipperAxios.get<FileSystemDTO>({
+		url: `${FOLDER_PATH_RELATIVE_PATH}/directory/?path=${path}`,
+		apiCategory: logText,
+		apiName: getDirectoryPath.name,
+	});
 }
 
 export function updateFolderPath(folderPath: FolderPathDTO): Observable<ResultDTO<FolderPathDTO>> {
-	preApiRequest(logText, 'updateFolderPath');
-	const result = Axios.put(`${apiPath}`, folderPath);
-	return checkResponse<ResultDTO<FolderPathDTO>>(result, logText, 'updateFolderPath');
+	return PlexRipperAxios.put<FolderPathDTO>({
+		url: `${FOLDER_PATH_RELATIVE_PATH}`,
+		data: folderPath,
+		apiCategory: logText,
+		apiName: updateFolderPath.name,
+	});
 }
 
 export function createFolderPath(folderPath: FolderPathDTO): Observable<ResultDTO<FolderPathDTO>> {
-	preApiRequest(logText, 'createFolderPath');
-	const result = Axios.post(`${apiPath}`, folderPath);
-	return checkResponse<ResultDTO<FolderPathDTO>>(result, logText, 'createFolderPath');
+	return PlexRipperAxios.post<FolderPathDTO>({
+		url: `${FOLDER_PATH_RELATIVE_PATH}`,
+		data: folderPath,
+		apiCategory: logText,
+		apiName: createFolderPath.name,
+	});
 }
 
 export function deleteFolderPath(folderPathId: number): Observable<ResultDTO<FolderPathDTO>> {
-	preApiRequest(logText, 'deleteFolderPath');
-	const result = Axios.delete(`${apiPath}/${folderPathId}`);
-	return checkResponse<ResultDTO<FolderPathDTO>>(result, logText, 'deleteFolderPath');
+	return PlexRipperAxios.delete<FolderPathDTO>({
+		url: `${FOLDER_PATH_RELATIVE_PATH}/${folderPathId}`,
+		apiCategory: logText,
+		apiName: deleteFolderPath.name,
+	});
 }

@@ -1,12 +1,12 @@
 import Log from 'consola';
 import { Observable, of } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
-import { BaseService, GlobalService } from '@service';
+import { BaseService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
-import ResultDTO from '@dto/ResultDTO';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class AccountService extends BaseService {
 	// region Constructor and Setup
@@ -22,25 +22,26 @@ export class AccountService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
-		super.setNuxtContext(nuxtContext);
-
-		GlobalService.getAxiosReady()
-			.pipe(switchMap(() => this.fetchAccounts()))
-			.subscribe(() => callBack('AccountService'));
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
+		return this.refreshAccounts().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
 	}
 
 	// endregion
 
 	// region Fetch
 
-	public fetchAccounts(): Observable<PlexAccountDTO[]> {
+	public refreshAccounts(): Observable<PlexAccountDTO[]> {
 		return getAllAccounts().pipe(
-			switchMap((accountResult) => of(accountResult?.value ?? [])),
-			tap((accounts) => {
-				Log.debug(`AccountService => Fetch Accounts`, accounts);
-				this.setState({ accounts }, 'Fetch Accounts');
+			tap((plexAccounts) => {
+				if (plexAccounts.isSuccess) {
+					this.setStoreProperty('accounts', plexAccounts.value);
+				}
 			}),
+			switchMap(() => this.getAccounts()),
 		);
 	}
 
@@ -66,30 +67,34 @@ export class AccountService extends BaseService {
 		return this.getAccounts().pipe(map((x) => x?.find((x) => x.id === accountId) ?? null));
 	}
 
-	public createPlexAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
+	public createPlexAccount(account: PlexAccountDTO): Observable<PlexAccountDTO | null> {
 		return createAccount(account).pipe(
+			map((accountResult): PlexAccountDTO | null => accountResult?.value ?? null),
 			tap((createdAccount) => {
-				if (createdAccount.isSuccess) {
-					return this.updateStore('accounts', createdAccount.value);
+				if (createdAccount) {
+					return this.updateStore('accounts', createdAccount);
 				}
 				Log.error(`Failed to create account ${account.displayName}`, createdAccount);
 			}),
+			switchMap((newAccount) => this.getAccount(newAccount?.id ?? 0)),
 		);
 	}
 
-	public updatePlexAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<ResultDTO<PlexAccountDTO | null>> {
+	public updatePlexAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<PlexAccountDTO | null> {
 		return updateAccount(account, inspect).pipe(
+			map((accountResult): PlexAccountDTO | null => accountResult?.value ?? null),
 			tap((updatedAccount) => {
-				if (updatedAccount.isSuccess) {
-					return this.updateStore('accounts', updatedAccount.value);
+				if (updatedAccount) {
+					return this.updateStore('accounts', updatedAccount);
 				}
 				Log.error(`Failed to update account ${account.displayName}`, updatedAccount);
 			}),
+			switchMap((newAccount) => this.getAccount(newAccount?.id ?? 0)),
 		);
 	}
 
 	public deleteAccount(accountId: number) {
-		return deleteAccount(accountId).pipe(switchMap(() => this.fetchAccounts()));
+		return deleteAccount(accountId).pipe(switchMap(() => this.refreshAccounts()));
 	}
 }
 

@@ -2,7 +2,7 @@ import Log from 'consola';
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
@@ -15,9 +15,10 @@ import {
 	SettingsModelDTO,
 	ViewMode,
 } from '@dto/mainApi';
-import { BaseService, GlobalService } from '@service';
+import { BaseService } from '@service';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import IStoreState from '@interfaces/service/IStoreState';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class SettingsService extends BaseService {
 	// region Constructor and Setup
@@ -38,17 +39,8 @@ export class SettingsService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
-		super.setNuxtContext(nuxtContext);
-
-		// On app load, request the settings once
-		GlobalService.getAxiosReady()
-			.pipe(
-				tap(() => Log.debug('Retrieving settings')),
-				switchMap(() => this.fetchSettings()),
-				take(1),
-			)
-			.subscribe(() => callBack(this._name));
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
 
 		this.getFirstTimeSetup().subscribe((state) => {
 			if (state === null) {
@@ -59,7 +51,13 @@ export class SettingsService extends BaseService {
 				return nuxtContext.redirect('/setup');
 			}
 		});
+		// On app load, request the settings once
+		return this.fetchSettings().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
 	}
+
 	// endregion
 
 	// region Private
@@ -106,13 +104,13 @@ export class SettingsService extends BaseService {
 		return getSettings().pipe(
 			switchMap((settingsResult) => of(settingsResult?.value ?? null)),
 			tap((settings) => {
-				Log.debug(`SettingsService => Fetch Settings`, settings);
 				if (settings) {
 					this.setSettingsModel(settings);
 				}
 			}),
 		);
 	}
+
 	// endregion
 
 	// region GeneralSettings
@@ -144,6 +142,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region LanguageSettings
@@ -166,6 +165,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region ConfirmationSettings
@@ -213,6 +213,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region DateTimeSettings
@@ -268,6 +269,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region DisplaySettings
@@ -299,6 +301,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region DownloadManagerSettings
@@ -321,6 +324,7 @@ export class SettingsService extends BaseService {
 			distinctUntilChanged(isEqual),
 		);
 	}
+
 	// endregion
 
 	// region ServerSettings

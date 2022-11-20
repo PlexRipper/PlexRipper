@@ -1,6 +1,5 @@
-import Log from 'consola';
 import { Observable, of } from 'rxjs';
-import { map, switchMap, take } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import {
 	clearDownloadTasks,
@@ -14,10 +13,10 @@ import {
 } from '@api/plexDownloadApi';
 import { DownloadMediaDTO, DownloadProgressDTO, DownloadStatus, PlexMediaType, ServerDownloadProgressDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService, GlobalService, SignalrService } from '@service';
-import ISetup from '@interfaces/ISetup';
+import { BaseService, SignalrService } from '@service';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
-export class DownloadService extends BaseService implements ISetup {
+export class DownloadService extends BaseService {
 	public constructor() {
 		super('DownloadService', {
 			// Note: Each service file can only have "unique" state slices which are not also used in other service files
@@ -29,24 +28,31 @@ export class DownloadService extends BaseService implements ISetup {
 		});
 	}
 
-	public setup(nuxtContext: Context, callBack: (name: string) => void): void {
-		super.setNuxtContext(nuxtContext);
-
-		GlobalService.getAxiosReady()
-			.pipe(
-				switchMap(() => getAllDownloads()),
-				take(1),
-			)
-			.subscribe((downloads) => {
-				if (downloads.isSuccess) {
-					this.setState({ serverDownloads: downloads.value }, 'Initial DownloadTask Data');
-				}
-				callBack(this._name);
-			});
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
+		super.setup(nuxtContext);
 
 		SignalrService.GetServerDownloadProgress().subscribe((data: ServerDownloadProgressDTO) => {
 			this.updateStore('serverDownloads', data);
 		});
+
+		return this.fetchDownloadList().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
+	}
+
+	/**
+	 * Fetch the download list and signal to the observers that it is done.
+	 */
+	public fetchDownloadList(): Observable<ServerDownloadProgressDTO[]> {
+		return getAllDownloads().pipe(
+			tap((downloads) => {
+				if (downloads.isSuccess) {
+					this.setStoreProperty('serverDownloads', downloads.value);
+				}
+			}),
+			switchMap(() => this.getServerDownloadList()),
+		);
 	}
 
 	public getActiveDownloadList(serverId: number = 0): Observable<DownloadProgressDTO[]> {
@@ -72,21 +78,6 @@ export class DownloadService extends BaseService implements ISetup {
 			return this.getServerDownloadList().pipe(map((x) => x.find((y) => y.id === serverId)?.downloads ?? []));
 		}
 		return this.getServerDownloadList().pipe(map((x) => x.map((y) => y.downloads).flat() ?? []));
-	}
-
-	/**
-	 * Fetch the download list and signal to the observers that it is done.
-	 */
-	public fetchDownloadList(): Observable<ServerDownloadProgressDTO[]> {
-		return getAllDownloads().pipe(
-			switchMap((downloads) => {
-				Log.debug('Fetching download list');
-				if (downloads.isSuccess) {
-					this.setState({ serverDownloads: downloads.value });
-				}
-				return of(downloads.value ?? []);
-			}),
-		);
 	}
 
 	public downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {

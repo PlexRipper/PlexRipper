@@ -213,7 +213,8 @@
               "value": {
                 "kind": "expression",
                 "type": "Boolean"
-              }
+              },
+              "default": "false"
             }
           ],
           "slots": [

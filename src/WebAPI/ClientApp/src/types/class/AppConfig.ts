@@ -1,4 +1,5 @@
 import { RuntimeConfig } from '~/type_definitions/vueTypes';
+import { DEV_APP_URL, BASE_URL } from '@api-urls';
 
 export default class AppConfig {
 	private readonly _nodeEnv: string;
@@ -29,12 +30,12 @@ export default class AppConfig {
 	 */
 	get baseURL(): string {
 		// Are we production testing in a local development environment
-		if (this.isProduction && window.location.origin === 'http://localhost:3000') {
-			return 'http://localhost:5000';
+		if (this.isProduction && window.location.origin === DEV_APP_URL) {
+			return BASE_URL;
 		}
 
 		// Docker production environment
-		return this.isProduction ? window.location.origin : 'http://localhost:5000';
+		return this.isProduction ? window.location.origin : BASE_URL;
 	}
 
 	get baseApiUrl(): string {

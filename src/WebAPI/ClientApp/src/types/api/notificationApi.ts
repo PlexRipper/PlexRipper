@@ -1,26 +1,31 @@
-import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
 import { NotificationDTO } from '@dto/mainApi';
-import { checkResponse, preApiRequest } from '@api/baseApi';
 import ResultDTO from '@dto/ResultDTO';
+import PlexRipperAxios from '@class/PlexRipperAxios';
+import { NOTIFICATION_RELATIVE_PATH } from '@api-urls';
 
 const logText = 'From notificationApi => ';
-const apiPath = '/notification';
 
 export function getNotifications(): Observable<ResultDTO<NotificationDTO[]>> {
-	preApiRequest(logText, 'getNotifications');
-	const result = Axios.get(`${apiPath}`);
-	return checkResponse<ResultDTO<NotificationDTO[]>>(result, logText, 'getNotifications');
+	return PlexRipperAxios.get<NotificationDTO[]>({
+		url: `${NOTIFICATION_RELATIVE_PATH}`,
+		apiCategory: logText,
+		apiName: getNotifications.name,
+	});
 }
 
 export function hideNotification(id: number): Observable<ResultDTO<boolean>> {
-	preApiRequest(logText, 'hideNotification' + id);
-	const result = Axios.put(`${apiPath}/${id}`);
-	return checkResponse<ResultDTO<boolean>>(result, logText, 'hideNotification');
+	return PlexRipperAxios.put<boolean>({
+		url: `${NOTIFICATION_RELATIVE_PATH}/${id}`,
+		apiCategory: logText,
+		apiName: hideNotification.name,
+	});
 }
 
 export function clearAllNotifications(): Observable<ResultDTO> {
-	preApiRequest(logText, 'clearAllNotifications');
-	const result = Axios.post(`${apiPath}/clear`);
-	return checkResponse<ResultDTO>(result, logText, 'clearAllNotifications');
+	return PlexRipperAxios.post({
+		url: `${NOTIFICATION_RELATIVE_PATH}/clear`,
+		apiCategory: logText,
+		apiName: clearAllNotifications.name,
+	});
 }

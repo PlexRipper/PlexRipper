@@ -6,6 +6,7 @@ This means you will have to empty the config folder before installing to ensure 
 ### Added
  - Per server configurable download speed limit (See server settings > Server Configuration)
  - German UI language (Thanks to (Padso4tw)[https://github.com/padso4tw])
+ - Jest and Cypress testing infrastructure
 
 ### Changed
  - Removed batch commands from the download page, these were not working and overcomplicated things too much.

@@ -11,10 +11,6 @@ describe('SignalrService.setup()', () => {
 		ctx = result.ctx;
 	});
 
-	beforeEach(() => {
-		GlobalService.initializeState();
-	});
-
 	test('Should return success and complete when setup is run', async () => {
 		// Arrange
 		const setup$ = SignalrService.setup(ctx);

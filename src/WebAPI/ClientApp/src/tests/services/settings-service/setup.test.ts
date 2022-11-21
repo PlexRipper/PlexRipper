@@ -1,6 +1,5 @@
 import { describe, beforeAll, expect, test } from '@jest/globals';
-import { subscribeSpyTo } from '@services-test-base';
-import { baseSetup, baseVars, getAxiosMock } from '~/tests/services/_base/base';
+import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import { GlobalService, SettingsService } from '@service';
 import { generateResultDTO, generateSettings } from '@mock';
 import ISetupResult from '@interfaces/service/ISetupResult';
@@ -17,7 +16,6 @@ describe('SettingsService.setup()', () => {
 
 	beforeEach(() => {
 		mock = getAxiosMock();
-		GlobalService.initializeState();
 	});
 
 	test('Should return success and complete when setup is run', async () => {

@@ -25,10 +25,6 @@ export class GlobalService extends BaseService {
 		});
 	}
 
-	public initializeState() {
-		ObservableStore.initializeState(DefaultState);
-	}
-
 	public setupObservable(nuxtContext: Context): Observable<any> {
 		const $config = nuxtContext.$config;
 		const baseUrl = getBaseURL($config.nodeEnv === 'production');
@@ -39,7 +35,6 @@ export class GlobalService extends BaseService {
 			baseURL: baseUrl,
 			baseApiUrl: `${baseUrl}/api`,
 		} as IAppConfig).pipe(
-			tap(() => this.initializeState()),
 			tap((config) => setLogConfig(config)),
 			tap((config) => this.setConfigReady(config)),
 			tap((config) => setConfigInAxios(config)),

@@ -15,7 +15,6 @@ describe('DownloadService.setup()', () => {
 
 	beforeEach(() => {
 		mock = getAxiosMock();
-		GlobalService.initializeState();
 	});
 
 	test('Should return success and complete when setup is run', async () => {

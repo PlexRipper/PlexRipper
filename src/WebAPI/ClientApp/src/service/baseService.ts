@@ -6,13 +6,23 @@ import { EMPTY, Observable } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import IAppConfig from '@class/IAppConfig';
+import DefaultState from '@const/default-state';
 
 export default abstract class BaseService extends ObservableStore<IStoreState> {
 	protected _nuxtContext!: Context;
 	protected _appConfig!: IAppConfig;
 	protected _name: string;
 
+	public get name() {
+		return this._name;
+	}
+
 	protected constructor(serviceName: string, settings: ObservableStoreSettings) {
+		if (!ObservableStore.isStoreInitialized) {
+			ObservableStore.initializeState(DefaultState);
+			Log.debug('Observable store was initialized');
+		}
+
 		settings.trackStateHistory = true;
 		super(settings);
 		this._name = serviceName;
@@ -20,10 +30,6 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 
 	public logHistory(): void {
 		Log.trace(`Current ${this._name} state history:`, this.stateHistory);
-	}
-
-	public get name() {
-		return this._name;
 	}
 
 	protected setup(nuxtContext, appConfig: IAppConfig | null = null): Observable<ISetupResult> {

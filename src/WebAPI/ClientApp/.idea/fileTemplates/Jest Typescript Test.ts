@@ -14,7 +14,7 @@ describe('ProgressService.setup()', () => {
 		mock = getAxiosMock();
 	});
 	
-	test('Should return success and complete when setup is run', (done) => {
+	test('Should return success and complete when setup is run', async () => {
 		// Arrange
 
 		// Act

@@ -15,7 +15,6 @@ describe('ServerService.refresh-servers()', () => {
 
 	beforeEach(() => {
 		mock = getAxiosMock();
-		GlobalService.initializeState();
 	});
 
 	test('Should update the plexServers when refreshPlexServers is called', async () => {

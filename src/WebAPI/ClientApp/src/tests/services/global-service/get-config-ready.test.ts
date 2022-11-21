@@ -45,7 +45,6 @@ describe('GlobalService.getConfigReady()', () => {
 		await setupResult.onComplete();
 		// Assert
 		expect(setupResult.receivedComplete()).toBe(true);
-		const configValue = configResult.getFirstValue();
 		expect(configResult.getFirstValue()).not.toBeNaN();
 		expect(configResult.getFirstValue().version).not.toBeFalsy();
 	});

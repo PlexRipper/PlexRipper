@@ -16,12 +16,12 @@
     "update-web-types": "vue-docgen-web-types -c web-types-config.json",
     "npm-upgrade-packages": "npm-upgrade",
     "analyze": "nuxt build --analyze",
+    "cypress:e2e": "start-server-and-test test-dev http://localhost:3030 cypress:open",
+    "cypress:e2e:silent": "start-server-and-test start http://localhost:3030 cypress:run",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "test-dev": "nuxt dev --port 3030",
-    "e2e": "start-server-and-test test-dev http://localhost:3030 cypress:open",
     "pree2e:slient": "npm run build",
-    "e2e:silent": "start-server-and-test start http://localhost:3030 cypress:run",
+    "test-dev": "nuxt dev --port 3030",
     "test": "jest"
   },
   "script-comments": {
@@ -84,6 +84,7 @@
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.6.3",
     "cypress": "^11.1.0",
+    "cypress-wait-until": "^1.7.2",
     "eslint": "^8.23.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-nuxt": "^4.0.0",

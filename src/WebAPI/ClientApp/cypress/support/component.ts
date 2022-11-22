@@ -13,26 +13,67 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
+// Doc: https://docs.cypress.io/guides/component-testing/vue/examples#Replicating-the-expected-Component-Hierarchy
+import Vuetify, { VApp, VMain, VRow, VContainer, VCol } from 'vuetify/lib';
+import { mount } from 'cypress/vue2';
+import Vue, { Component, CreateElement } from 'vue';
+import Background from '../../src/components/General/Background.vue';
+import 'vuetify/dist/vuetify.min.css';
+import '../../src/assets/scss/style.scss';
+
 // Import commands.js using ES2015 syntax:
 import './commands';
+import { vuetifyConfigOptions } from '~/plugins/vuetify';
 
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
-import { mount } from 'cypress/vue2';
+Vue.use(Vuetify);
 
-// Augment the Cypress namespace to include type definitions for
-// your custom command.
-// Alternatively, can be defined in cypress/support/component.d.ts
-// with a <reference path="./component" /> at the top of your spec.
-declare global {
-	namespace Cypress {
-		interface Chainable {
-			mount: typeof mount;
-		}
-	}
-}
+// Override default command mount to use it with Vuetify
+// @ts-ignore
+Cypress.Commands.add('mount', (component: Component<any>, args: MountOptionsArgument) => {
+	const { ...props } = args;
 
-Cypress.Commands.add('mount', mount);
-
-// Example use:
-// cy.mount(MyComponent)
+	// pass event handlers to child component via `on` prop
+	// const on = Object.entries(listeners || {}).reduce((acc, [event, handler]) => {
+	// 	acc[event] = handler;
+	// 	return acc;
+	// }, {});
+	return mount({
+		vuetify: new Vuetify(vuetifyConfigOptions),
+		render: (h: CreateElement) =>
+			h(VApp, [
+				h(VMain, [
+					h(
+						VContainer,
+						{
+							class: {
+								'fill-height': true,
+							},
+						},
+						[
+							h(
+								VRow,
+								{
+									props: {
+										noGutters: true,
+										justify: 'center',
+									},
+								},
+								[
+									h(
+										VCol,
+										{
+											props: {
+												cols: 'auto',
+											},
+										},
+										[h(component, { ...props })],
+									),
+								],
+							),
+						],
+					),
+				]),
+				h(Background),
+			]),
+	});
+});

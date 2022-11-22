@@ -44,7 +44,9 @@ const jestConfig = {
 	// NOTE: window is needed due to a check for window.cypress to check if it is running under tests
 
 	// The test environment that will be used for testing
-	testEnvironment: 'jest-environment-node',
+	// Error: "ReferenceError: window is not defined" when running tests
+	// Fix: https://github.com/kulshekhar/ts-jest/discussions/2670#discussioncomment-841239
+	testEnvironment: 'jsdom',
 
 	// Indicates whether each individual test should be reported during the run
 	verbose: true,

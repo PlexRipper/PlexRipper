@@ -16,13 +16,12 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
-import { ServerService, SignalrService } from '@service';
-import { PlexServerDTO, SyncServerProgress } from '@dto/mainApi';
+import { SignalrService } from '@service';
+import { SyncServerProgress } from '@dto/mainApi';
 
 @Component
 export default class AppBarProgressBar extends Vue {
 	progressList: SyncServerProgress[] = [];
-	servers: PlexServerDTO[] = [];
 	show: boolean = false;
 
 	get getPercentage(): number {
@@ -42,12 +41,6 @@ export default class AppBarProgressBar extends Vue {
 		useSubscription(
 			SignalrService.getAllSyncServerProgress().subscribe((progress) => {
 				this.progressList = progress;
-			}),
-		);
-
-		useSubscription(
-			ServerService.getServers().subscribe((servers) => {
-				this.servers = servers;
 			}),
 		);
 	}

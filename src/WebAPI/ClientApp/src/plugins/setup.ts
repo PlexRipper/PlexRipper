@@ -5,6 +5,10 @@ import { GlobalService } from '@service';
 import IAppConfig from '@class/IAppConfig';
 
 export default (ctx: Context): void => {
+	// Set initial logging config to start logging a.s.a.p
+	Vue.config.devtools = true;
+	Vue.config.productionTip = false;
+	Log.level = LogLevel.Debug;
 	// Setup Config
 	Log.info(`Nuxt Environment: ${ctx.$config.nodeEnv}`);
 	GlobalService.setupServices(ctx);
@@ -12,7 +16,6 @@ export default (ctx: Context): void => {
 
 export function setLogConfig(config: IAppConfig) {
 	// Setup logging
-	Vue.config.devtools = true;
-	Vue.config.productionTip = false;
+	// TODO Disable debug logging in production when production is stable
 	Log.level = config.isProduction ? LogLevel.Debug : LogLevel.Debug;
 }

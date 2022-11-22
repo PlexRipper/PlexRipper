@@ -1,3 +1,4 @@
+import { firstValueFrom } from 'rxjs';
 import { MockConfig, generateResultDTO, generatePlexAccounts, generatePlexServers, generateSettings } from '@mock';
 import {
 	DOWNLOAD_API_URL,
@@ -10,8 +11,11 @@ import {
 	PROGRESS_HUB_URL,
 	SETTINGS_API_URL,
 } from '@api-urls';
+import { GlobalService } from '@service';
 
 describe('empty spec', () => {
+	beforeEach(() => {});
+
 	it('passes', () => {
 		const config: MockConfig = {
 			plexAccountCount: 2,
@@ -64,8 +68,10 @@ describe('empty spec', () => {
 			body: {},
 		});
 
-		cy.visit('/');
-
+		cy.visit('/setup').as('setupPage');
+		cy.wait(1000);
+		// cy.waitUntil(async () => await firstValueFrom(GlobalService.getPageSetupReady()));
+		cy.get('[data-cy="setup-page-next-button"]').click();
 		expect(true).to.equal(true);
 	});
 });

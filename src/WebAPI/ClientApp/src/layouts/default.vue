@@ -31,8 +31,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { merge, timer } from 'rxjs';
 import { useSubscription } from '@vueuse/rxjs';
+import Log from 'consola';
 import { AlertService, HelpService } from '@service';
 import IAlert from '@interfaces/IAlert';
 import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
@@ -76,7 +76,8 @@ export default class Default extends Vue {
 
 	mounted(): void {
 		useSubscription(
-			merge([timer(10000), globalService.getPageSetupReady()]).subscribe(() => {
+			globalService.getPageSetupReady().subscribe(() => {
+				Log.debug('Loading has finished, displaying page now');
 				this.isLoading = false;
 			}),
 		);

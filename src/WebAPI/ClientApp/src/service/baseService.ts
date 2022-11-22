@@ -5,14 +5,24 @@ import { ObservableStoreSettings } from '@codewithdan/observable-store/interface
 import { EMPTY, Observable } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
-import AppConfig from '@class/AppConfig';
+import IAppConfig from '@class/IAppConfig';
+import DefaultState from '@const/default-state';
 
 export default abstract class BaseService extends ObservableStore<IStoreState> {
 	protected _nuxtContext!: Context;
-	protected _appConfig!: AppConfig;
+	protected _appConfig!: IAppConfig;
 	protected _name: string;
 
+	public get name() {
+		return this._name;
+	}
+
 	protected constructor(serviceName: string, settings: ObservableStoreSettings) {
+		if (!ObservableStore.isStoreInitialized) {
+			ObservableStore.initializeState(DefaultState);
+			Log.debug('Observable store was initialized');
+		}
+
 		settings.trackStateHistory = true;
 		super(settings);
 		this._name = serviceName;
@@ -22,11 +32,11 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		Log.trace(`Current ${this._name} state history:`, this.stateHistory);
 	}
 
-	public get name() {
-		return this._name;
+	public logState(): void {
+		Log.debug(`Current state of ${this._name}`, this.getState(true));
 	}
 
-	protected setup(nuxtContext, appConfig: AppConfig | null = null): Observable<ISetupResult> {
+	protected setup(nuxtContext, appConfig: IAppConfig | null = null): Observable<ISetupResult> {
 		this._nuxtContext = nuxtContext;
 		if (appConfig !== null) {
 			this._appConfig = appConfig;
@@ -34,6 +44,8 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		Log.debug(`Starting setup of service: ${this._name}`);
 		return EMPTY;
 	}
+
+	// region WriteStore
 
 	/**
 	 * Updates the store property to with the newObject based on its id
@@ -80,7 +92,13 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		this.logHistory();
 	}
 
+	// endregion
+
+	// region ReadStore
+
 	protected getStoreSlice<T>(propertyName: keyof IStoreState): T {
 		return this.getStateSliceProperty<T>(propertyName, true);
 	}
+
+	// endregion
 }

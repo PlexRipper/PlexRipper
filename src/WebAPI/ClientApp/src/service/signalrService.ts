@@ -1,12 +1,12 @@
 import Log from 'consola';
 // eslint-disable-next-line import/named
 import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
-import { Observable, of, Subject } from 'rxjs';
+import { from, Observable, of, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
 import { isEqual } from 'lodash-es';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService, GlobalService } from '@service';
+import { BaseService } from '@service';
 import {
 	DownloadTaskCreationProgress,
 	DownloadTaskDTO,
@@ -19,7 +19,7 @@ import {
 } from '@dto/mainApi';
 import notificationService from '~/service/notificationService';
 import ISetupResult from '@interfaces/service/ISetupResult';
-import AppConfig from '@class/AppConfig';
+import IAppConfig from '@class/IAppConfig';
 
 export class SignalrService extends BaseService {
 	private _progressHubConnection: HubConnection | null = null;
@@ -43,24 +43,20 @@ export class SignalrService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context, appConfig: AppConfig | null = null): Observable<ISetupResult> {
+	public setup(nuxtContext: Context, appConfig: IAppConfig | null = null): Observable<ISetupResult> {
 		super.setup(nuxtContext, appConfig);
-
-		return new Observable((observer) => {
-			observer.next(() => this.initializeHubs());
-			observer.complete();
-		}).pipe(
+		return from(this.initializeHubs()).pipe(
 			switchMap(() => of({ name: this._name, isSuccess: true })),
 			take(1),
 		);
 	}
 
-	private initializeHubs(): void {
+	private async initializeHubs(): Promise<void> {
 		// Ensure we don't run any SignalR functionality due to it being tricky to setup. Might revisit later
 		// TODO Re-enable when trying to test SignalR functionality
 		// @ts-ignore
 		if (window.jest || window.Cypress) {
-			return;
+			return Promise.resolve();
 		}
 		Log.debug('Setting up SignalR Service');
 		const options: IHttpConnectionOptions = {
@@ -77,7 +73,9 @@ export class SignalrService extends BaseService {
 			.withAutomaticReconnect()
 			.build();
 
-		this.setupSubscriptions();
+		await this.setupSubscriptions();
+		await this.startProgressHubConnection();
+		await this.startNotificationHubConnection();
 	}
 
 	private setupSubscriptions(): void {
@@ -114,45 +112,44 @@ export class SignalrService extends BaseService {
 			// Notification slice is only updated in the notificationService.ts, we send it there.
 			notificationService.setNotification(data);
 		});
-
-		GlobalService.getAxiosReady().subscribe(() => {
-			this.startProgressHubConnection();
-			this.startNotificationHubConnection();
-		});
 	}
 
 	// region Start / Stop Hub Connections
 
-	public startProgressHubConnection(): void {
+	public startProgressHubConnection(): Promise<void> {
 		if (this._progressHubConnection && this._progressHubConnection.state === HubConnectionState.Disconnected) {
-			this._progressHubConnection.start().then(() => {
+			return this._progressHubConnection.start().then(() => {
 				Log.info('ProgressHub is now connected!');
 			});
 		}
+		return Promise.resolve();
 	}
 
-	public stopProgressHubConnection(): void {
+	public stopProgressHubConnection(): Promise<void> {
 		if (this._progressHubConnection && this._progressHubConnection.state !== HubConnectionState.Disconnected) {
-			this._progressHubConnection.stop().then(() => {
+			return this._progressHubConnection.stop().then(() => {
 				Log.info('ProgressHub is now disconnected!');
 			});
 		}
+		return Promise.resolve();
 	}
 
-	public startNotificationHubConnection(): void {
+	public startNotificationHubConnection(): Promise<void> {
 		if (this._notificationHubConnection && this._notificationHubConnection.state === HubConnectionState.Disconnected) {
-			this._notificationHubConnection.start().then(() => {
+			return this._notificationHubConnection.start().then(() => {
 				Log.info('NotificationHub is now connected!');
 			});
 		}
+		return Promise.resolve();
 	}
 
-	public stopNotificationHubConnection(): void {
+	public stopNotificationHubConnection(): Promise<void> {
 		if (this._notificationHubConnection && this._notificationHubConnection.state !== HubConnectionState.Disconnected) {
-			this._notificationHubConnection.stop().then(() => {
+			return this._notificationHubConnection.stop().then(() => {
 				Log.info('NotificationHub is now disconnected!');
 			});
 		}
+		return Promise.resolve();
 	}
 
 	// endregion

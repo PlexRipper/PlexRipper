@@ -61,7 +61,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { combineLatest } from 'rxjs';
 import { useSubscription } from '@vueuse/rxjs';
 import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel, PlexServerStatusDTO } from '@dto/mainApi';
 import { FolderPathService, LibraryService, ServerService, SettingsService } from '@service';
@@ -83,16 +82,24 @@ export default class ServerDialog extends Vue {
 	open(plexServerId: number): void {
 		this.plexServerId = plexServerId;
 		this.show = true;
+
 		useSubscription(
-			combineLatest([
-				ServerService.getServer(plexServerId),
-				LibraryService.getLibrariesByServerId(plexServerId),
-				FolderPathService.getFolderPaths(),
-				SettingsService.getServerSettings(plexServerId),
-			]).subscribe(([plexServer, plexLibraries, folderPaths, plexServerSettings]) => {
+			ServerService.getServer(plexServerId).subscribe((plexServer) => {
 				this.plexServer = plexServer;
+			}),
+		);
+		useSubscription(
+			LibraryService.getLibrariesByServerId(plexServerId).subscribe((plexLibraries) => {
 				this.plexLibraries = plexLibraries;
+			}),
+		);
+		useSubscription(
+			FolderPathService.getFolderPaths().subscribe((folderPaths) => {
 				this.folderPaths = folderPaths;
+			}),
+		);
+		useSubscription(
+			SettingsService.getServerSettings(plexServerId).subscribe((plexServerSettings) => {
 				this.plexServerSettings = plexServerSettings;
 			}),
 		);

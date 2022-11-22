@@ -1,125 +1,108 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
-import { ReplaySubject, Observable, forkJoin } from 'rxjs';
-import { take, tap } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
+import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { ObservableStore } from '@codewithdan/observable-store';
-import AppConfig from '@class/AppConfig';
-import {
-	ConfirmationSettingsDTO,
-	DateTimeSettingsDTO,
-	DisplaySettingsDTO,
-	DownloadManagerSettingsDTO,
-	DownloadTaskCreationProgress,
-	GeneralSettingsDTO,
-	LanguageSettingsDTO,
-	ServerSettingsDTO,
-} from '@dto/mainApi';
+import DefaultState from '@const/default-state';
+import IAppConfig from '@class/IAppConfig';
 import IStoreState from '@interfaces/service/IStoreState';
 import * as Service from '@service';
-import { RuntimeConfig } from '~/type_definitions/vueTypes';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import { setConfigInAxios } from '~/plugins/axios';
+import { setLogConfig } from '~/plugins/setup';
+import { BaseService } from '@service';
+import { getBaseURL } from '@api-urls';
 
-export class GlobalService {
-	private _axiosReady: ReplaySubject<void> = new ReplaySubject();
-	private _configReady: ReplaySubject<AppConfig> = new ReplaySubject();
-	private _pageSetupReady: ReplaySubject<void> = new ReplaySubject();
-	private _defaultStore: IStoreState = {
-		accounts: [],
-		servers: [],
-		libraries: [],
-		mediaUrls: [],
-		notifications: [],
-		folderPaths: [],
-		alerts: [],
-		helpIdDialog: '',
-		downloadTaskUpdateList: [],
-		// Progress Service
-		fileMergeProgressList: [],
-		inspectServerProgress: [],
-		syncServerProgress: [],
-		libraryProgress: [],
-		downloadTaskCreationProgress: {} as DownloadTaskCreationProgress,
-		serverDownloads: [],
-		// Settings Modules
-		dateTimeSettings: {} as DateTimeSettingsDTO,
-		downloadManagerSettings: {} as DownloadManagerSettingsDTO,
-		generalSettings: {} as GeneralSettingsDTO,
-		languageSettings: {} as LanguageSettingsDTO,
-		displaySettings: {} as DisplaySettingsDTO,
-		confirmationSettings: {} as ConfirmationSettingsDTO,
-		serverSettings: {} as ServerSettingsDTO,
-	};
-
-	private _serviceKeys: string[] = [];
-	private _doneServiceKeys: string[] = [];
-
-	public setAxiosReady(): void {
-		Log.info('Axios is ready');
-		this._axiosReady.next();
-	}
-
-	public initializeState() {
-		ObservableStore.initializeState(this._defaultStore);
-	}
-
-	public setupObservable(nuxtContext: Context): Observable<ISetupResult[]> {
-		this.initializeState();
-		this.setConfigReady(nuxtContext.$config);
-		const appConfig = new AppConfig(nuxtContext.$config);
-		const sources = [
-			Service.ProgressService.setup(nuxtContext),
-			Service.DownloadService.setup(nuxtContext),
-			Service.ServerService.setup(nuxtContext),
-			Service.MediaService.setup(nuxtContext),
-			Service.SettingsService.setup(nuxtContext),
-			Service.NotificationService.setup(nuxtContext),
-			Service.FolderPathService.setup(nuxtContext),
-			Service.LibraryService.setup(nuxtContext),
-			Service.AccountService.setup(nuxtContext),
-			Service.SignalrService.setup(nuxtContext, appConfig),
-			Service.HelpService.setup(nuxtContext),
-			Service.AlertService.setup(nuxtContext),
-		];
-		return forkJoin(sources).pipe(
-			tap((results: ISetupResult[]) => {
-				const percentage = Number(((results.length / sources.length) * 100).toFixed(2));
-				Log.debug(`Setup progress: ${percentage}%`);
-			}),
-		);
-	}
-
-	public setup(nuxtContext: Context): void {
-		this.setupObservable(nuxtContext).subscribe({
-			complete: () => {
-				Log.info('Page Setup has finished');
-				this._pageSetupReady.next();
+export class GlobalService extends BaseService {
+	public constructor() {
+		super('GlobalService', {
+			// Note: Each service file can only have "unique" state slices which are not also used in other service files
+			stateSliceSelector: (state: IStoreState) => {
+				return {
+					config: state.config,
+					pageReady: state.pageReady,
+				};
 			},
 		});
 	}
 
-	public resetStore(): void {
-		ObservableStore.resetState(this._defaultStore);
+	public setupObservable(nuxtContext: Context): Observable<any> {
+		const $config = nuxtContext.$config;
+		const baseUrl = getBaseURL($config.nodeEnv === 'production');
+		return of({
+			version: $config.version,
+			nodeEnv: $config.nodeEnv,
+			isProduction: $config.nodeEnv === 'production',
+			baseURL: baseUrl,
+			baseApiUrl: `${baseUrl}/api`,
+		} as IAppConfig).pipe(
+			tap((config) => setLogConfig(config)),
+			tap((config) => this.setConfigReady(config)),
+			tap((config) => setConfigInAxios(config)),
+			switchMap((config) =>
+				forkJoin([
+					Service.ProgressService.setup(nuxtContext),
+					Service.DownloadService.setup(nuxtContext),
+					Service.ServerService.setup(nuxtContext),
+					Service.MediaService.setup(nuxtContext),
+					Service.SettingsService.setup(nuxtContext),
+					Service.NotificationService.setup(nuxtContext),
+					Service.FolderPathService.setup(nuxtContext),
+					Service.LibraryService.setup(nuxtContext),
+					Service.AccountService.setup(nuxtContext),
+					Service.SignalrService.setup(nuxtContext, config),
+					Service.HelpService.setup(nuxtContext),
+					Service.AlertService.setup(nuxtContext),
+				]),
+			),
+			tap((results) => {
+				if (results.some((result) => !result.isSuccess)) {
+					for (const result of results) {
+						if (!result.isSuccess) {
+							Log.error(`Service ${result.name} has a failed setup process`);
+						}
+					}
+				}
+				Log.info(`Setup progress has finished successfully`);
+				this.setPageSetupReady();
+			}),
+			take(1),
+		);
 	}
 
-	private setConfigReady(config: RuntimeConfig): void {
+	public setupServices(nuxtContext: Context): void {
+		this.setupObservable(nuxtContext).subscribe();
+	}
+
+	public resetStore(): void {
+		ObservableStore.resetState(DefaultState);
+	}
+
+	private setConfigReady(appConfig: IAppConfig): void {
 		if (process.client || process.static) {
-			Log.info('Runtime Config is ready - ' + config.version, config);
-			this._configReady.next(new AppConfig(config));
+			Log.info('Runtime Config is ready - ' + appConfig.version, appConfig);
+			this.setState({ config: appConfig }, 'Set App Config on page load');
 		} else {
 			Log.error('setConfigReady => Process was neither client or static, was:', process);
 		}
 	}
 
-	public getAxiosReady(): Observable<void> {
-		return this._axiosReady.pipe(take(1));
+	private setPageSetupReady(): void {
+		Log.info('Page Setup has finished');
+		this.setState({ pageReady: true }, 'Set Page Ready Setup');
 	}
 
-	public getConfigReady(): Observable<AppConfig> {
-		return this._configReady.pipe(take(1));
+	public getConfigReady(): Observable<IAppConfig> {
+		return this.stateChanged.pipe(
+			map((value) => value.config),
+			take(1),
+		);
 	}
 
-	public getPageSetupReady(): Observable<void> {
-		return this._pageSetupReady.pipe(take(1));
+	public getPageSetupReady(): Observable<boolean> {
+		return this.stateChanged.pipe(
+			map((value) => value?.pageReady ?? false),
+			filter((pageReady) => pageReady),
+		);
 	}
 }
 

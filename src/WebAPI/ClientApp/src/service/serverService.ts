@@ -52,20 +52,13 @@ export class ServerService extends BaseService {
 
 	public getServers(ids: number[] = []): Observable<PlexServerDTO[]> {
 		return this.stateChanged.pipe(
-			map((state: IStoreState) => state?.servers ?? []),
+			map((state: IStoreState) => state.servers ?? []),
 			map((serverList) => serverList.filter((server) => !ids.length || ids.includes(server.id))),
 		);
 	}
 
 	public getServer(serverId: number): Observable<PlexServerDTO | null> {
-		return this.getServers([serverId]).pipe(
-			map((servers) => {
-				if (servers.length > 1) {
-					return servers[0];
-				}
-				return null;
-			}),
-		);
+		return this.getServers([serverId]).pipe(map((servers) => (servers.length > 0 ? servers[0] : null)));
 	}
 
 	public checkServer(plexServerId: number): Observable<PlexServerStatusDTO | null> {

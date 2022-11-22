@@ -42,14 +42,11 @@ const jestConfig = {
 
 	// A set of global variables that need to be available in all test environments
 	// NOTE: window is needed due to a check for window.cypress to check if it is running under tests
-	globals: {
-		window: {
-			jest: true,
-		},
-	},
 
 	// The test environment that will be used for testing
-	testEnvironment: 'jest-environment-node',
+	// Error: "ReferenceError: window is not defined" when running tests
+	// Fix: https://github.com/kulshekhar/ts-jest/discussions/2670#discussioncomment-841239
+	testEnvironment: 'jsdom',
 
 	// Indicates whether each individual test should be reported during the run
 	verbose: true,

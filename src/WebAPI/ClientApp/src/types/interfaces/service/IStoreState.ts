@@ -15,8 +15,11 @@ import {
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
 import IAlert from '@interfaces/IAlert';
+import IAppConfig from '@class/IAppConfig';
 
 export default interface IStoreState extends SettingsModelDTO {
+	pageReady: boolean;
+	config: IAppConfig;
 	accounts: PlexAccountDTO[];
 	servers: PlexServerDTO[];
 	libraries: PlexLibraryDTO[];

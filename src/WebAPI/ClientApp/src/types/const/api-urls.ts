@@ -31,4 +31,21 @@ export const NOTIFICATION_API_URL = `${BASE_API_URL}/${NOTIFICATION_RELATIVE_PAT
 
 export const PROGRESS_HUB_URL = `${BASE_URL}/progress`;
 export const NOTIFICATIONS_HUB_URL = `${BASE_URL}/notifications`;
+
 // endregion
+
+/**
+ * The baseURL for the application. It is assumed that front and back-end run in a docker container on the same URL when in production
+ * due to being deployed statically in the wwwroot of the .NET Core back-end. The url is retrieved dynamically as to work with different domains.
+ * When in development, the front-end runs on port 3000 and the back-end on port 5000.
+ * When in production, the front-end runs on the same port as the back-end, by default on port 7000.
+ */
+export function getBaseURL(isProduction: boolean) {
+	// Are we production testing in a local development environment
+	if (isProduction && window.location.origin === DEV_APP_URL) {
+		return BASE_URL;
+	}
+
+	// Docker production environment
+	return isProduction ? window.location.origin : BASE_URL;
+}

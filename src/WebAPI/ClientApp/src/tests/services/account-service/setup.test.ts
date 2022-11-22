@@ -1,6 +1,6 @@
 import { describe, beforeAll, expect, test } from '@jest/globals';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
-import { AccountService, GlobalService } from '@service';
+import { AccountService } from '@service';
 import { generateResultDTO } from '@mock';
 import { PLEX_ACCOUNT_RELATIVE_PATH } from '@api-urls';
 import ISetupResult from '@interfaces/service/ISetupResult';
@@ -15,7 +15,6 @@ describe('AccountService.setup()', () => {
 
 	beforeEach(() => {
 		mock = getAxiosMock();
-		GlobalService.initializeState();
 	});
 
 	test('Should return success and complete when setup is run', async () => {

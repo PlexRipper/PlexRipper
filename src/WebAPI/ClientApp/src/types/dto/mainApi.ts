@@ -468,7 +468,6 @@ export interface PlexServerDTO {
 	updatedAt: string;
 	/** @format int32 */
 	ownerId: number;
-	plexLibraries: PlexLibraryDTO[];
 	downloadTasks: DownloadProgressDTO[];
 	status: PlexServerStatusDTO;
 }

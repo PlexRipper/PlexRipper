@@ -69,11 +69,16 @@ export class LibraryService extends BaseService {
 	}
 
 	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | null> {
-		return ServerService.getServers().pipe(
-			switchMap((x: PlexServerDTO[]) => of(x.find((y) => y.plexLibraries.find((z) => z.id === libraryId)) ?? null)),
-			filter((server) => server !== null),
-			distinctUntilChanged(),
-		);
+		const libraries = this.getStoreSlice<PlexLibraryDTO[]>('libraries');
+		if (libraries.length === 0) {
+			return of(null);
+		}
+		const library = libraries.find((x) => x.id === libraryId);
+		if (!library) {
+			return of(null);
+		}
+
+		return ServerService.getServer(library.id);
 	}
 
 	public refreshLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {

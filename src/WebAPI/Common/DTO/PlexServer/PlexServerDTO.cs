@@ -44,9 +44,6 @@ public class PlexServerDTO
     [JsonProperty("ownerId", Required = Required.Always)]
     public int OwnerId { get; set; }
 
-    [JsonProperty("plexLibraries", Required = Required.Always)]
-    public List<PlexLibraryDTO> PlexLibraries { get; set; }
-
     [JsonProperty("downloadTasks", Required = Required.Always)]
     public List<DownloadProgressDTO> DownloadTasks { get; set; }
 

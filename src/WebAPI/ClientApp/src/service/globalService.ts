@@ -100,7 +100,7 @@ export class GlobalService extends BaseService {
 
 	public getPageSetupReady(): Observable<boolean> {
 		return this.stateChanged.pipe(
-			map((value) => value.pageReady),
+			map((value) => value?.pageReady ?? false),
 			filter((pageReady) => pageReady),
 		);
 	}

@@ -45,6 +45,7 @@ describe('GlobalService.getConfigReady()', () => {
 		await setupResult.onComplete();
 		// Assert
 		expect(setupResult.receivedComplete()).toBe(true);
+		expect(pageSetupResult.getValues()).toHaveLength(1);
 		expect(pageSetupResult.getFirstValue()).toEqual(true);
 	});
 });

@@ -27,7 +27,7 @@ export function generateSettings(config: MockConfig | null = null): SettingsMode
 			data: [],
 		},
 		generalSettings: {
-			firstTimeSetup: config.firstTimeSetup,
+			firstTimeSetup: !!config.firstTimeSetup,
 			activeAccountId: 0,
 		},
 		confirmationSettings: {

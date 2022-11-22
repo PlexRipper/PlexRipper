@@ -32,6 +32,10 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		Log.trace(`Current ${this._name} state history:`, this.stateHistory);
 	}
 
+	public logState(): void {
+		Log.debug(`Current state of ${this._name}`, this.getState(true));
+	}
+
 	protected setup(nuxtContext, appConfig: IAppConfig | null = null): Observable<ISetupResult> {
 		this._nuxtContext = nuxtContext;
 		if (appConfig !== null) {

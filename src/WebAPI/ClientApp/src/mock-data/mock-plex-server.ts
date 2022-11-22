@@ -1,14 +1,16 @@
 import { faker } from '@faker-js/faker';
-import { MockConfig } from './interfaces/MockConfig';
-import { checkConfig } from './mock-base';
+import { checkConfig, incrementSeed } from './mock-base';
+import { MockConfig } from '@mock/interfaces';
 import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 
 export function generatePlexServers(config: MockConfig | null = null): PlexServerDTO[] {
 	config = checkConfig(config);
 
 	const plexServers: PlexServerDTO[] = [];
+
 	// @ts-ignore
 	for (let i = 0; i < config.plexServerCount; i++) {
+		incrementSeed(i);
 		const scheme = 'http';
 		const host = faker.internet.ipv4();
 		const port = faker.internet.port();
@@ -26,7 +28,6 @@ export function generatePlexServers(config: MockConfig | null = null): PlexServe
 			machineIdentifier: faker.datatype.uuid(),
 			createdAt: faker.date.past().toUTCString(),
 			updatedAt: faker.date.recent().toUTCString(),
-			plexLibraries: [],
 			downloadTasks: [],
 			status: generatePlexServerStatus(config),
 			ownerId: faker.datatype.number(99999),

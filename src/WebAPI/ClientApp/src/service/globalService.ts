@@ -87,8 +87,8 @@ export class GlobalService extends BaseService {
 	}
 
 	private setPageSetupReady(): void {
-		this.setState({ pageReady: true }, 'Set Page Ready Setup');
 		Log.info('Page Setup has finished');
+		this.setState({ pageReady: true }, 'Set Page Ready Setup');
 	}
 
 	public getConfigReady(): Observable<IAppConfig> {

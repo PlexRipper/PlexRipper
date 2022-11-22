@@ -41,7 +41,7 @@ describe('empty spec', () => {
 
 		cy.intercept('GET', PLEX_ACCOUNT_API_URL, {
 			statusCode: 200,
-			body: generateResultDTO(generatePlexAccounts(config, plexServers)),
+			body: generateResultDTO(generatePlexAccounts(config, plexServers, [])),
 		});
 
 		cy.intercept('GET', SETTINGS_API_URL, {

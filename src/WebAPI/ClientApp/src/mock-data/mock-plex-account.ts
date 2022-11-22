@@ -1,11 +1,13 @@
 import { faker } from '@faker-js/faker';
 import { MockConfig } from '@mock/interfaces/MockConfig';
-import ResultDTO from '@dto/ResultDTO';
-import { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { checkConfig } from '@mock/mock-base';
-import { generatePlexServers } from '@mock/mock-plex-server';
 
-export function generatePlexAccounts(config: MockConfig | null = null, plexServers: PlexServerDTO[]): PlexAccountDTO[] {
+export function generatePlexAccounts(
+	config: MockConfig | null = null,
+	plexServers: PlexServerDTO[],
+	plexLibraries: PlexLibraryDTO[],
+): PlexAccountDTO[] {
 	config = checkConfig(config);
 
 	const plexAccounts: PlexAccountDTO[] = [];
@@ -33,7 +35,7 @@ export function generatePlexAccounts(config: MockConfig | null = null, plexServe
 			plexServerAccess: plexServers.map((x) => {
 				return {
 					plexServerId: x.id,
-					plexLibraryIds: x.plexLibraries.map((y) => y.id),
+					plexLibraryIds: [], // x.plexLibraries.map((y) => y.id), TODO Fix this and give meaningful libraries back
 				};
 			}),
 		});

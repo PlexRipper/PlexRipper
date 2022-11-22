@@ -1,4 +1,5 @@
 export interface MockConfig {
+	seed?: number;
 	plexServerCount?: number;
 	plexAccountCount?: number;
 	firstTimeSetup?: boolean;

@@ -37,7 +37,7 @@ describe('GlobalService.setup()', () => {
 		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(generatePlexServers(config)));
 		mock.onGet(SETTINGS_RELATIVE_PATH).reply(200, generateResultDTO(generateSettings(config)));
 
-		const setup$ = GlobalService.setupObservable(ctx);
+		const setup$ = GlobalService.setup(ctx);
 
 		// Act
 		const result = subscribeSpyTo(setup$);

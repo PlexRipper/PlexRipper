@@ -41,6 +41,8 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		return EMPTY;
 	}
 
+	// region WriteStore
+
 	/**
 	 * Updates the store property to with the newObject based on its id
 	 * Note: Only use this if the store property is an array
@@ -86,7 +88,13 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		this.logHistory();
 	}
 
+	// endregion
+
+	// region ReadStore
+
 	protected getStoreSlice<T>(propertyName: keyof IStoreState): T {
 		return this.getStateSliceProperty<T>(propertyName, true);
 	}
+
+	// endregion
 }

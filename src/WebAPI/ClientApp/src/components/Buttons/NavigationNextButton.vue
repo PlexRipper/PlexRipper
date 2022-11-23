@@ -1,6 +1,7 @@
 <script lang="ts">
 import Vue, { CreateElement, VNode } from 'vue';
 import { RenderContext } from 'vue/types/options';
+import Log from 'consola';
 import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
 import ButtonType from '@enums/buttonType';
 
@@ -25,8 +26,9 @@ export default Vue.extend({
 	},
 	render(h: CreateElement, context: RenderContext): VNode {
 		return h(BaseButton, {
+			...context.data,
 			props: {
-				disabled: context.props.disabled,
+				...context.props,
 				block: true,
 				outlined: true,
 				textId: 'next',

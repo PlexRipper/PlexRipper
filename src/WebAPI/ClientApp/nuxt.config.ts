@@ -5,6 +5,8 @@ import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
+// noinspection ES6PreferShortImport
+import { NuxtI18nConfigOptions } from './src/plugins/i18nPlugin';
 
 const config: NuxtConfig = {
 	target: 'static',
@@ -66,7 +68,7 @@ const config: NuxtConfig = {
 	 */
 	modules: [
 		// Doc: https://i18n.nuxtjs.org/
-		'@nuxtjs/i18n',
+		['@nuxtjs/i18n', NuxtI18nConfigOptions],
 	],
 	/*
 	 ** Nuxt.js dev-modules
@@ -125,20 +127,6 @@ const config: NuxtConfig = {
 				],
 			});
 		},
-	},
-	i18n: {
-		lazy: true,
-		langDir: 'lang/',
-		defaultLocale: 'en-US',
-		locales: [
-			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
-			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
-			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', file: 'de-DE.json' },
-		],
-		vueI18n: {
-			fallbackLocale: 'en-US',
-		},
-		strategy: 'no_prefix',
 	},
 	/*
 	 ** Build configuration

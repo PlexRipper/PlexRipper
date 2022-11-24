@@ -3,6 +3,8 @@
 This has been a major refactoring with many unit and integration tests added to ensure stability.
 This means you will have to empty the config folder before installing to ensure proper workings.
 
+Note: This, by a long shot, doesn't encompases all the changes and fixes that have been made in this version due to the large scope of the changes.
+
 ### Added
  - Per server configurable download speed limit (See server settings > Server Configuration)
  - German UI language (Thanks to (Padso4tw)[https://github.com/padso4tw])
@@ -12,6 +14,7 @@ This means you will have to empty the config folder before installing to ensure 
  - Removed batch commands from the download page, these were not working and overcomplicated things too much.
  - Migrated projected to .NET 6, brings many performance improvements
  - Added a loading icon to the button when checking the server status in the server configuration
+ - The server command "Re-sync Library media" now displayes a loading animation.
 
 ### Fixed
  - Fixed the opening of the server settings not defaulting back to its first tab

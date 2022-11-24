@@ -4,7 +4,7 @@
 			<tr>
 				<td>{{ $t('components.server-dialog.tabs.server-commands.re-sync-server') }}</td>
 				<td>
-					<p-btn text-id="sync-server-libraries" @click="syncServerLibraries" />
+					<BaseButton :loading="loading" text-id="sync-server-libraries" @click="syncServerLibraries" />
 				</td>
 			</tr>
 		</tbody>
@@ -23,8 +23,13 @@ export default class ServerCommandsTabContent extends Vue {
 	@Prop({ required: true, type: Object as () => PlexServerDTO })
 	readonly plexServer!: PlexServerDTO;
 
+	loading: boolean = false;
+
 	syncServerLibraries(): void {
-		syncPlexServer(this.plexServer.id, true).subscribe();
+		this.loading = true;
+		syncPlexServer(this.plexServer.id, true).subscribe(() => {
+			this.loading = false;
+		});
 	}
 }
 </script>

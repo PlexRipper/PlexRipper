@@ -100,6 +100,62 @@
           }
         },
         {
+          "name": "AccountValidationButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "loading",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "130"
+            },
+            {
+              "name": "icon",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "textId",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/AccountValidationButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "AccountVerificationCodeDialog",
           "description": "",
           "attributes": [
@@ -131,6 +187,39 @@
           ],
           "source": {
             "module": "./src/components/overviews/AccountOverview/AccountVerificationCodeDialog.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "AddIconButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "height",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "50"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/AddIconButton.vue",
             "symbol": "default"
           }
         },
@@ -224,6 +313,233 @@
           ],
           "source": {
             "module": "./src/components/General/Background.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "BaseButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "block",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "outlined",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "name": "filled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "loading",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "textId",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "'DEFAULT TEXT'"
+            },
+            {
+              "name": "tooltipId",
+              "description": "The Vue-i18n text id used for the text inside the tooltip.",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "icon",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "iconSize",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "undefined"
+            },
+            {
+              "name": "iconAlign",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "'Left'"
+            },
+            {
+              "name": "iconOnly",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "href",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "to",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "type",
+              "value": {
+                "kind": "expression",
+                "type": "ButtonType"
+              },
+              "default": "''"
+            },
+            {
+              "name": "color",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "lightColor",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "'black'"
+            },
+            {
+              "name": "darkColor",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "'white'"
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "36"
+            },
+            {
+              "name": "height",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "36"
+            },
+            {
+              "name": "size",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "'normal'"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/BaseButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "CancelButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "130"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/CancelButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "ConfirmButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "130"
+            },
+            {
+              "name": "loading",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              },
+              "default": "false"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/ConfirmButton.vue",
             "symbol": "default"
           }
         },
@@ -351,10 +667,101 @@
           }
         },
         {
+          "name": "DebugButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "textId",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/DebugButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "DebugSection",
           "description": "",
           "source": {
             "module": "./src/components/Views/Settings/DebugSection.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "DeleteButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "130"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/DeleteButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "DeleteIconButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "iconOnly",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/DeleteIconButton.vue",
             "symbol": "default"
           }
         },
@@ -624,6 +1031,39 @@
           }
         },
         {
+          "name": "EditIconButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "height",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "50"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/EditIconButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "EditableText",
           "description": "",
           "attributes": [
@@ -655,20 +1095,44 @@
           }
         },
         {
-          "name": "ExternalLink",
+          "name": "ExternalLinkButton",
           "description": "",
           "attributes": [
             {
-              "name": "href",
-              "required": true,
+              "name": "cy",
               "value": {
                 "kind": "expression",
                 "type": "string"
-              }
+              },
+              "default": "''"
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "130"
+            },
+            {
+              "name": "textId",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "href",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
             }
           ],
           "source": {
-            "module": "./src/components/General/ExternalLink.vue",
+            "module": "./src/components/Buttons/ExternalLinkButton.vue",
             "symbol": "default"
           }
         },
@@ -705,6 +1169,48 @@
           "description": "",
           "source": {
             "module": "./src/components/Footer/Footer.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "GoToButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "130"
+            },
+            {
+              "name": "textId",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "to",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/GoToButton.vue",
             "symbol": "default"
           }
         },
@@ -764,6 +1270,32 @@
           ],
           "source": {
             "module": "./src/components/Help/HelpIcon.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "HideButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "130"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/HideButton.vue",
             "symbol": "default"
           }
         },
@@ -1093,6 +1625,106 @@
           }
         },
         {
+          "name": "NavigationFinishSetupButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/NavigationFinishSetupButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "NavigationNextButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/NavigationNextButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "NavigationPreviousButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/NavigationPreviousButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "NavigationSkipSetupButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/NavigationSkipSetupButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
           "name": "NotificationButton",
           "description": "",
           "events": [
@@ -1125,203 +1757,6 @@
           ],
           "source": {
             "module": "./src/components/overviews/NotificationsDrawer.vue",
-            "symbol": "default"
-          }
-        },
-        {
-          "name": "PBtn",
-          "description": "",
-          "attributes": [
-            {
-              "name": "buttonType",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "ButtonType"
-              },
-              "default": "ButtonType.None"
-            },
-            {
-              "name": "textId",
-              "required": false,
-              "description": "The Vue-i18n text id used for the text inside the button.",
-              "value": {
-                "kind": "expression",
-                "type": "string"
-              },
-              "default": "''"
-            },
-            {
-              "name": "tooltipId",
-              "required": false,
-              "description": "The Vue-i18n text id used for the text inside the tooltip.",
-              "value": {
-                "kind": "expression",
-                "type": "string"
-              },
-              "default": "''"
-            },
-            {
-              "name": "icon",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "string"
-              },
-              "default": "''"
-            },
-            {
-              "name": "color",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "string"
-              },
-              "default": "''"
-            },
-            {
-              "name": "filled",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "name": "tile",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "name": "depressed",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "name": "iconMode",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "name": "disabled",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "name": "loading",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "name": "width",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "number"
-              },
-              "default": "36"
-            },
-            {
-              "name": "height",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "number"
-              },
-              "default": "36"
-            },
-            {
-              "name": "block",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "name": "noText",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "name": "href",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "string"
-              }
-            },
-            {
-              "name": "to",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "string"
-              }
-            },
-            {
-              "name": "iconSize",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "string"
-              }
-            },
-            {
-              "name": "xLarge",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              }
-            },
-            {
-              "name": "xSmall",
-              "required": false,
-              "value": {
-                "kind": "expression",
-                "type": "boolean"
-              }
-            }
-          ],
-          "events": [
-            {
-              "name": "click"
-            }
-          ],
-          "slots": [
-            {
-              "name": "default"
-            }
-          ],
-          "source": {
-            "module": "./src/components/Extensions/PBtn.vue",
             "symbol": "default"
           }
         },
@@ -1624,6 +2059,99 @@
           ],
           "source": {
             "module": "./src/components/Progress/ProgressComponent.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "ResetButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "130"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/ResetButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "SaveButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "130"
+            },
+            {
+              "name": "textId",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/SaveButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "SaveIconButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "disabled",
+              "value": {
+                "kind": "expression",
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "height",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "50"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/SaveIconButton.vue",
             "symbol": "default"
           }
         },
@@ -1948,6 +2476,40 @@
           ],
           "source": {
             "module": "./src/components/General/VerticalButton.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "WarningButton",
+          "description": "",
+          "attributes": [
+            {
+              "name": "cy",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            },
+            {
+              "name": "width",
+              "value": {
+                "kind": "expression",
+                "type": "number"
+              },
+              "default": "130"
+            },
+            {
+              "name": "textId",
+              "value": {
+                "kind": "expression",
+                "type": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "source": {
+            "module": "./src/components/Buttons/WarningButton.vue",
             "symbol": "default"
           }
         },

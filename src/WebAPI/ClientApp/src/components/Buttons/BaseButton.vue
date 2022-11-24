@@ -4,7 +4,6 @@ import { RenderContext } from 'vue/types/options';
 import VBtn from 'vuetify/lib/components/VBtn';
 import VTooltip from 'vuetify/lib/components/VTooltip';
 import VIcon from 'vuetify/lib/components/VIcon';
-import Log from 'consola';
 import ButtonType from '@enums/buttonType';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 
@@ -12,7 +11,6 @@ export interface IBaseButtonProps {
 	block: boolean;
 	disabled: boolean;
 	outlined: boolean;
-	filled: boolean;
 	loading: boolean;
 	textId: string;
 	type: ButtonType | String;
@@ -45,9 +43,6 @@ export default Vue.extend<IBaseButtonProps>({
 		outlined: {
 			type: Boolean,
 			default: true,
-		},
-		filled: {
-			type: Boolean,
 		},
 		loading: {
 			type: Boolean,
@@ -119,9 +114,6 @@ export default Vue.extend<IBaseButtonProps>({
 	render(h: CreateElement, context: RenderContext<IBaseButtonProps>): VNode {
 		const isDark = context.parent.$vuetify.theme.dark;
 		const props = context.props;
-		const size = getSize(props);
-		Log.info('PROPSSIZE', props.size);
-		Log.info('SIZE', size);
 		return h(
 			VTooltip,
 			{
@@ -137,9 +129,8 @@ export default Vue.extend<IBaseButtonProps>({
 										[context.data.staticClass]: true,
 									}),
 									'p-btn': true,
-									'mx-2': true,
 									'i18n-formatting': true,
-									filled: props.filled,
+									filled: false,
 									outlined: props.outlined,
 								},
 								on: {
@@ -156,6 +147,7 @@ export default Vue.extend<IBaseButtonProps>({
 									...getSize(props),
 									nuxt: true,
 									raised: true,
+									filed: false,
 									color: getColor(props, isDark),
 									textId: props.textId,
 									block: props.block,
@@ -163,6 +155,8 @@ export default Vue.extend<IBaseButtonProps>({
 									outlined: props.outlined,
 									loading: props.loading,
 									to: props.to,
+									icon: props.iconOnly,
+									href: props.href,
 									target: props.href ? '_blank' : '_self',
 									width: getWidth(props),
 									height: getHeight(props),
@@ -246,6 +240,9 @@ function getHeight(props: IBaseButtonProps) {
 }
 
 function getIconSize(props: IBaseButtonProps): number | undefined {
+	if (props.iconSize) {
+		return props.iconSize;
+	}
 	return props.iconOnly ? 32 : undefined;
 }
 

@@ -45,7 +45,6 @@ import { kebabCase } from 'lodash-es';
 import { useSubscription } from '@vueuse/rxjs';
 import { FolderPathDTO } from '@dto/mainApi';
 import { updateFolderPath } from '@api/pathApi';
-import ButtonType from '@enums/buttonType';
 import { DownloadService, FolderPathService } from '@service';
 import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
 
@@ -54,9 +53,6 @@ export default class PathsDefaultOverview extends Vue {
 	folderPaths: FolderPathDTO[] = [];
 
 	selectedFolderPath: FolderPathDTO | null = null;
-
-	addBtn: ButtonType = ButtonType.Add;
-	deleteBtn: ButtonType = ButtonType.Delete;
 
 	allowEditing: boolean = true;
 

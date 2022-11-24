@@ -4,16 +4,15 @@
 			<v-subheader v-if="!editMode" class="form-label text-no-wrap">{{ newValue }}</v-subheader>
 			<p-text-field v-else v-model="newValue" />
 		</v-col>
-		<v-col cols="3" justify="right">
-			<p-btn v-if="!editMode" :button-type="editBtn" :disabled="disabled" :height="50" @click="edit" />
-			<p-btn v-else :button-type="saveBtn" :disabled="disabled" :height="50" @click="save" />
+		<v-col justify="right">
+			<EditIconButton v-if="!editMode" :disabled="disabled" :height="50" @click="edit" />
+			<SaveIconButton v-else :disabled="disabled" :height="50" @click="save" />
 		</v-col>
 	</v-row>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import ButtonType from '@enums/buttonType';
 
 @Component
 export default class EditableText extends Vue {
@@ -23,8 +22,6 @@ export default class EditableText extends Vue {
 	@Prop({ required: false, type: Boolean })
 	readonly disabled!: boolean;
 
-	editBtn: ButtonType = ButtonType.Edit;
-	saveBtn: ButtonType = ButtonType.Save;
 	editMode: boolean = false;
 	newValue: string = this.value;
 

@@ -25,9 +25,9 @@
 				<v-divider />
 
 				<v-card-actions>
-					<p-btn :button-type="cancelButtonType" @click="showDialog = false" />
+					<CancelButton @click="showDialog = false" />
 					<v-spacer></v-spacer>
-					<p-btn :button-type="confirmButtonType" @click="confirmDownload()" />
+					<ConfirmButton @click="confirmDownload()" />
 				</v-card-actions>
 			</v-card>
 
@@ -54,7 +54,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
-import ButtonType from '@enums/buttonType';
 import { SettingsService } from '@service';
 
 @Component
@@ -90,14 +89,6 @@ export default class DownloadConfirmation extends Vue {
 			}
 		}
 		return true;
-	}
-
-	get cancelButtonType(): ButtonType {
-		return ButtonType.Cancel;
-	}
-
-	get confirmButtonType(): ButtonType {
-		return ButtonType.Confirm;
 	}
 
 	get totalSize(): number {

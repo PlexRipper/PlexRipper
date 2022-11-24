@@ -28,11 +28,11 @@
 				<!--	Submit button	-->
 				<v-row justify="center">
 					<v-col cols="auto">
-						<p-btn :button-type="getCancelButton" @click="closeDialog" />
+						<CancelButton @click="closeDialog" />
 					</v-col>
 					<v-spacer />
 					<v-col cols="auto">
-						<p-btn :button-type="getSubmitButton" :disabled="code.length < 6" @click="submitCode" />
+						<ConfirmButton :disabled="code.length < 6" @click="submitCode" />
 					</v-col>
 				</v-row>
 			</v-card-actions>
@@ -44,7 +44,6 @@
 import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import CodeInput from 'vue-verification-code-input';
-import ButtonType from '@enums/buttonType';
 import { Error } from '@dto/mainApi';
 
 @Component<AccountVerificationCodeDialog>({ components: { CodeInput } })
@@ -64,14 +63,6 @@ export default class AccountVerificationCodeDialog extends Vue {
 	}
 
 	code: string = '0';
-
-	get getCancelButton(): ButtonType {
-		return ButtonType.Cancel;
-	}
-
-	get getSubmitButton(): ButtonType {
-		return ButtonType.Confirm;
-	}
 
 	onChange(v) {
 		this.code = v;

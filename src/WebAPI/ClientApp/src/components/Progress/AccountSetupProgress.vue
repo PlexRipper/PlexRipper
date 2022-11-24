@@ -81,7 +81,7 @@
 		<v-card-actions>
 			<v-row justify="end">
 				<v-col cols="auto">
-					<p-btn :button-type="hideButtonType" @click="$emit('hide')" />
+					<HideButton @click="$emit('hide')" />
 				</v-col>
 			</v-row>
 		</v-card-actions>
@@ -95,7 +95,6 @@ import { switchMap } from 'rxjs/operators';
 import { clamp } from 'lodash-es';
 import { SignalrService, ServerService } from '@service';
 import type { InspectServerProgress, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
-import ButtonType from '@enums/buttonType';
 
 declare interface ServerUpdate {
 	id: number;
@@ -109,9 +108,6 @@ export default class AccountSetupProgress extends Vue {
 	readonly account!: PlexAccountDTO;
 
 	inspectServerProgresses: InspectServerProgress[] = [];
-
-	hideButtonType: ButtonType = ButtonType.Hide;
-	confirmButtonType: ButtonType = ButtonType.Confirm;
 
 	plexServers: PlexServerDTO[] = [];
 

@@ -5,27 +5,13 @@
 		</v-col>
 		<v-spacer />
 		<v-col v-if="!isLast" cols="2">
-			<p-btn
-				class="mx-2"
-				text-id="back"
-				:block="true"
-				:disabled="disableBack"
-				:button-type="backButtonType"
-				@click="back"
-			/>
+			<NavigationPreviousButton class="mx-2" :disabled="disableBack" cy="setup-page-previous-button" @click="back" />
 		</v-col>
 		<v-col v-if="!isLast" cols="2">
-			<p-btn
-				class="mx-2"
-				text-id="next"
-				:block="true"
-				:disabled="disableNext"
-				:button-type="forwardButtonType"
-				@click="next"
-			/>
+			<NavigationNextButton class="mx-2" :disabled="disableNext" cy="setup-page-next-button" @click="next" />
 		</v-col>
 		<v-col v-else cols="3">
-			<p-btn class="mx-2" text-id="finish-setup" :block="true" :button-type="skipButtonType" @click="finishSetup" />
+			<NavigationFinishSetupButton class="mx-2" cy="setup-page-skip-setup-button" @click="finishSetup" />
 		</v-col>
 		<v-spacer />
 	</v-row>
@@ -33,7 +19,6 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import ButtonType from '@enums/buttonType';
 
 @Component
 export default class NavigationBar extends Vue {
@@ -45,10 +30,6 @@ export default class NavigationBar extends Vue {
 
 	@Prop({ required: true, type: Boolean })
 	readonly isLast!: boolean;
-
-	forwardButtonType: ButtonType = ButtonType.Forward;
-	backButtonType: ButtonType = ButtonType.Back;
-	skipButtonType: ButtonType = ButtonType.Skip;
 
 	back(): void {
 		this.$emit('back');

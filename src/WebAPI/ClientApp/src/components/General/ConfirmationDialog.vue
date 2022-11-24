@@ -13,9 +13,9 @@
 			<v-divider></v-divider>
 
 			<v-card-actions>
-				<p-btn :button-type="getCancelButtonType" @click="cancel" />
+				<CancelButton @click="cancel" />
 				<v-spacer></v-spacer>
-				<p-btn :button-type="getConfirmationButtonType" :loading="loading" @click="confirm" />
+				<ConfirmButton :loading="loading" @click="confirm" />
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -24,7 +24,6 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import IText from '@interfaces/IText';
-import ButtonType from '@enums/buttonType';
 
 @Component<ConfirmationDialog>({})
 export default class ConfirmationDialog extends Vue {
@@ -58,14 +57,6 @@ export default class ConfirmationDialog extends Vue {
 			text: msg?.text ?? '',
 			warning: msg?.warning ?? '',
 		};
-	}
-
-	get getCancelButtonType(): ButtonType {
-		return ButtonType.Cancel;
-	}
-
-	get getConfirmationButtonType(): ButtonType {
-		return ButtonType.Confirm;
 	}
 
 	@Watch('dialog')

@@ -40,7 +40,7 @@
 													{{ downloadTask.downloadUrl }}
 												</v-col>
 												<v-col v-if="downloadTask.downloadUrl" cols="auto">
-													<external-link :href="downloadTask.downloadUrl" />
+													<ExternalLinkButton :href="downloadTask.downloadUrl" />
 												</v-col>
 											</v-row>
 										</td>

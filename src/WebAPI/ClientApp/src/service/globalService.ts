@@ -25,16 +25,19 @@ export class GlobalService extends BaseService {
 		});
 	}
 
-	public setupObservable(nuxtContext: Context): Observable<any> {
+	public setup(nuxtContext: Context): Observable<any> {
 		const $config = nuxtContext.$config;
 		const baseUrl = getBaseURL($config.nodeEnv === 'production');
-		return of({
+		const appConfig: IAppConfig = {
 			version: $config.version,
 			nodeEnv: $config.nodeEnv,
 			isProduction: $config.nodeEnv === 'production',
 			baseURL: baseUrl,
 			baseApiUrl: `${baseUrl}/api`,
-		} as IAppConfig).pipe(
+		};
+		super.setup(nuxtContext, appConfig);
+
+		return of(this._appConfig).pipe(
 			tap((config) => setLogConfig(config)),
 			tap((config) => this.setConfigReady(config)),
 			tap((config) => setConfigInAxios(config)),
@@ -70,7 +73,7 @@ export class GlobalService extends BaseService {
 	}
 
 	public setupServices(nuxtContext: Context): void {
-		this.setupObservable(nuxtContext).subscribe();
+		this.setup(nuxtContext).subscribe();
 	}
 
 	public resetStore(): void {
@@ -103,6 +106,10 @@ export class GlobalService extends BaseService {
 			map((value) => value?.pageReady ?? false),
 			filter((pageReady) => pageReady),
 		);
+	}
+
+	public translate(tag: string): string {
+		return this._nuxtContext.i18n.t(tag).toString();
 	}
 }
 

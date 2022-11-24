@@ -24,6 +24,8 @@
 			"@dto/*": ["./types/dto/*"],
 			"@api/*": ["./types/api/*"],
 			"@const/*": ["./types/const/*"],
+			"@buttons": ["./components/Buttons/index.ts"],
+			"@buttons/*": ["./components/Buttons/*"],
 			"@api-urls": ["./types/const/api-urls.ts"],
 			"@services-test-base": ["./tests/services/_base/base.ts"],
 			"@lib/*": ["./types/lib/*"],

@@ -10,7 +10,7 @@
 						@save="saveDisplayName(folderPath.id, $event)"
 					/>
 				</v-col>
-				<v-col cols>
+				<v-col cols="7">
 					<p-text-field
 						append-icon="mdi-folder-open"
 						:value="folderPath.directory"
@@ -23,13 +23,7 @@
 					<!--	Is Valid Icon -->
 					<valid-icon :valid="folderPath.isValid" :text="$t('general.alerts.invalid-directory')" />
 					<!--	Delete Button -->
-					<p-btn
-						:button-type="deleteBtn"
-						no-text
-						:disabled="!allowEditing"
-						:height="50"
-						@click="deleteFolderPath(folderPath.id)"
-					/>
+					<DeleteIconButton :disabled="!allowEditing" @click="deleteFolderPath(folderPath.id)" />
 				</v-col>
 			</v-row>
 		</template>
@@ -44,14 +38,7 @@
 		<!--	Add Path Button	-->
 		<v-row justify="center">
 			<v-col cols="1">
-				<p-btn
-					:button-type="addBtn"
-					block
-					:disabled="!allowEditing"
-					:height="60"
-					icon-size="40px"
-					@click="addFolderPath"
-				/>
+				<AddIconButton :disabled="!allowEditing" @click="addFolderPath" />
 			</v-col>
 		</v-row>
 		<!--	Directory Browser	-->
@@ -68,7 +55,6 @@ import Log from 'consola';
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
 import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
-import ButtonType from '@enums/buttonType';
 import { DownloadService, FolderPathService } from '@service';
 import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
 
@@ -78,9 +64,6 @@ export default class PathsCustomOverview extends Vue {
 	readonly folderType!: FolderType;
 
 	folderPaths: FolderPathDTO[] = [];
-
-	addBtn: ButtonType = ButtonType.Add;
-	deleteBtn: ButtonType = ButtonType.Delete;
 
 	allowEditing: boolean = true;
 

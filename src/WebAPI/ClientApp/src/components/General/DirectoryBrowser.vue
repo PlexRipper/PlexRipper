@@ -69,8 +69,8 @@
 						</template>
 					</v-card-text>
 					<v-card-actions class="justify-end" style="height: 60px">
-						<p-btn :button-type="cancelButtonType" @click="cancel()" />
-						<p-btn :button-type="confirmButtonType" @click="confirm()" />
+						<CancelButton @click="cancel()" />
+						<ConfirmButton @click="confirm()" />
 					</v-card-actions>
 				</v-card>
 			</v-dialog>

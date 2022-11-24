@@ -13,23 +13,17 @@
 			<!-- Dialog Actions	-->
 			<v-card-actions>
 				<!-- Delete account -->
-				<p-btn
-					v-if="!isNewAccount"
-					:button-type="getDeleteButtonType"
-					:width="130"
-					text-id="delete"
-					@click="confirmationDialogState = true"
-				/>
+				<DeleteButton v-if="!isNewAccount" :width="130" @click="confirmationDialogState = true" />
 
 				<!-- Reset Form -->
-				<p-btn :width="130" icon="mdi-restore" text-id="reset" @click="reset" />
+				<ResetButton :width="130" @click="reset" />
 				<v-spacer />
 
 				<!-- Cancel button -->
-				<p-btn :button-type="getCancelButtonType" :width="130" @click="cancel" />
+				<CancelButton :width="130" @click="cancel" />
 
 				<!-- Validation button -->
-				<p-btn
+				<AccountValidationButton
 					:color="validationColor"
 					:disabled="!isValid || validateLoading"
 					:icon="validationIcon"
@@ -41,8 +35,7 @@
 				/>
 
 				<!-- Save account -->
-				<p-btn
-					:button-type="getSaveButtonType"
+				<SaveButton
 					:disabled="!isAllowedToSave"
 					:text-id="isNewAccount ? 'create' : 'update'"
 					:width="130"
@@ -80,7 +73,6 @@ import { generateClientId, validateAccount } from '@api/accountApi';
 import { AccountService } from '@service';
 import AccountVerificationCodeDialog from '@overviews/AccountOverview/AccountVerificationCodeDialog.vue';
 import AccountForm from '@overviews/AccountOverview/AccountForm.vue';
-import ButtonType from '@/types/enums/buttonType';
 
 @Component({
 	components: { AccountForm, AccountVerificationCodeDialog },
@@ -154,22 +146,6 @@ export default class AccountDialog extends Vue {
 			);
 		}
 		return false;
-	}
-
-	get getDeleteButtonType(): ButtonType {
-		return ButtonType.Delete;
-	}
-
-	get getVerificationCodeButtonType(): ButtonType {
-		return ButtonType.Info;
-	}
-
-	get getCancelButtonType(): ButtonType {
-		return ButtonType.Cancel;
-	}
-
-	get getSaveButtonType(): ButtonType {
-		return ButtonType.Save;
 	}
 
 	get validationIcon(): string {

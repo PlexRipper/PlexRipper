@@ -25,9 +25,9 @@
 				<v-divider />
 
 				<v-card-actions>
-					<p-btn :button-type="cancelButtonType" @click="showDialog = false" />
+					<CancelButton @click="showDialog = false" />
 					<v-spacer></v-spacer>
-					<p-btn :button-type="confirmButtonType" @click="confirmDownload()" />
+					<ConfirmButton @click="confirmDownload()" />
 				</v-card-actions>
 			</v-card>
 

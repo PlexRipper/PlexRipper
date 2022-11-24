@@ -28,11 +28,11 @@
 				<!--	Submit button	-->
 				<v-row justify="center">
 					<v-col cols="auto">
-						<p-btn :button-type="getCancelButton" @click="closeDialog" />
+						<CancelButton @click="closeDialog" />
 					</v-col>
 					<v-spacer />
 					<v-col cols="auto">
-						<p-btn :button-type="getSubmitButton" :disabled="code.length < 6" @click="submitCode" />
+						<ConfirmButton :disabled="code.length < 6" @click="submitCode" />
 					</v-col>
 				</v-row>
 			</v-card-actions>

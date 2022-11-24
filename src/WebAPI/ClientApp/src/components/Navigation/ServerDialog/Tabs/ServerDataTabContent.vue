@@ -47,7 +47,7 @@
 		<!--	Check Server Action	-->
 		<v-card-actions>
 			<v-spacer></v-spacer>
-			<p-btn text-id="check-server-status" :loading="checkServerStatusLoading" @click="checkServer" />
+			<BaseButton text-id="check-server-status" :loading="checkServerStatusLoading" @click="checkServer" />
 		</v-card-actions>
 	</div>
 </template>

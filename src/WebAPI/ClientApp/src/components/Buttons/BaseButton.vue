@@ -4,6 +4,7 @@ import { RenderContext } from 'vue/types/options';
 import VBtn from 'vuetify/lib/components/VBtn';
 import VTooltip from 'vuetify/lib/components/VTooltip';
 import VIcon from 'vuetify/lib/components/VIcon';
+import Log from 'consola';
 import ButtonType from '@enums/buttonType';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 
@@ -12,17 +13,22 @@ export interface IBaseButtonProps {
 	disabled: boolean;
 	outlined: boolean;
 	filled: boolean;
+	loading: boolean;
 	textId: string;
 	type: ButtonType | String;
 	tooltipId: string;
 	icon: string;
-	iconSize: string;
+	iconSize: number;
 	iconAlign: 'Left' | 'Right';
+	iconOnly: boolean;
+	color: string;
 	lightColor: string;
 	darkColor: string;
 	href: string;
 	to: string;
 	width: number;
+	height: number;
+	size: 'x-small' | 'small' | 'normal' | 'large' | 'x-large';
 }
 
 export default Vue.extend<IBaseButtonProps>({
@@ -38,8 +44,12 @@ export default Vue.extend<IBaseButtonProps>({
 		},
 		outlined: {
 			type: Boolean,
+			default: true,
 		},
 		filled: {
+			type: Boolean,
+		},
+		loading: {
 			type: Boolean,
 		},
 		textId: {
@@ -59,12 +69,15 @@ export default Vue.extend<IBaseButtonProps>({
 			default: '',
 		},
 		iconSize: {
-			type: String,
-			default: '',
+			type: Number,
+			default: undefined,
 		},
 		iconAlign: {
 			type: String as PropType<'Left' | 'Right'>,
 			default: 'Left',
+		},
+		iconOnly: {
+			type: Boolean,
 		},
 		href: {
 			type: String,
@@ -76,6 +89,10 @@ export default Vue.extend<IBaseButtonProps>({
 		},
 		type: {
 			type: String as PropType<ButtonType>,
+			default: '',
+		},
+		color: {
+			type: String,
 			default: '',
 		},
 		lightColor: {
@@ -90,10 +107,21 @@ export default Vue.extend<IBaseButtonProps>({
 			type: Number,
 			default: 36,
 		},
+		height: {
+			type: Number,
+			default: 36,
+		},
+		size: {
+			type: String as PropType<'x-small' | 'small' | 'normal' | 'large' | 'x-large'>,
+			default: 'normal',
+		},
 	},
 	render(h: CreateElement, context: RenderContext<IBaseButtonProps>): VNode {
 		const isDark = context.parent.$vuetify.theme.dark;
 		const props = context.props;
+		const size = getSize(props);
+		Log.info('PROPSSIZE', props.size);
+		Log.info('SIZE', size);
 		return h(
 			VTooltip,
 			{
@@ -125,16 +153,19 @@ export default Vue.extend<IBaseButtonProps>({
 									...context.data.attrs,
 								},
 								props: {
+									...getSize(props),
 									nuxt: true,
 									raised: true,
-									color: isDark ? props.darkColor : props.lightColor,
+									color: getColor(props, isDark),
 									textId: props.textId,
 									block: props.block,
 									disabled: props.disabled,
 									outlined: props.outlined,
+									loading: props.loading,
 									to: props.to,
 									target: props.href ? '_blank' : '_self',
-									width: props.width !== 36 ? props.width : 'auto',
+									width: getWidth(props),
+									height: getHeight(props),
 								},
 							},
 							[getButtonContentsElement(h, context, isDark)],
@@ -148,14 +179,17 @@ export default Vue.extend<IBaseButtonProps>({
 });
 
 function getButtonText(context: RenderContext): string {
-	return context.props.textId ? t(context, `general.commands.${context.props.textId}`) : 'MISSING TEXT';
+	return context.props.textId ? t(context, `general.commands.${context.props.textId}`) : '';
 }
 
 function getButtonContentsElement(h: CreateElement, context: RenderContext, isDark: boolean): VNode | VNodeChildren {
 	const buttonText = getButtonText(context);
-	const elements: VNodeChildren = [h('span', {}, buttonText)];
+	const elements: VNodeChildren = [];
+	if (!context.props.iconOnly) {
+		elements.push(h('span', {}, buttonText));
+	}
 
-	const iconElement = iconSpanElement(h, context, isDark);
+	const iconElement = iconSpanElement(h, context.props as IBaseButtonProps, isDark);
 	if (!iconElement) {
 		return elements;
 	}
@@ -175,12 +209,12 @@ function toolTipSpanElement(h: CreateElement, context: RenderContext) {
 	return h('span', {}, t(context, context.props.tooltipId));
 }
 
-function iconSpanElement(h: CreateElement, context: RenderContext, isDark: boolean) {
+function iconSpanElement(h: CreateElement, props: IBaseButtonProps, isDark: boolean) {
 	let icon = '';
-	if (context.props.icon) {
-		icon = context.props.icon;
-	} else if (context.props.type) {
-		icon = Convert.buttonTypeToIcon(context.props.type as ButtonType);
+	if (props.icon) {
+		icon = props.icon;
+	} else if (props.type) {
+		icon = Convert.buttonTypeToIcon(props.type as ButtonType);
 	} else {
 		return null;
 	}
@@ -189,12 +223,46 @@ function iconSpanElement(h: CreateElement, context: RenderContext, isDark: boole
 		{
 			class: 'mx-2',
 			props: {
-				size: context.props.iconSize,
-				color: isDark ? context.props.darkColor : context.props.lightColor,
+				size: getIconSize(props),
+				color: getColor(props, isDark),
 			},
 		},
 		[h('template', { slot: 'default' }, icon)],
 	);
+}
+
+function getWidth(props: IBaseButtonProps): Number | string | undefined {
+	if (props.iconOnly) {
+		return undefined;
+	}
+	return props.width !== 36 ? props.width : 'auto';
+}
+
+function getHeight(props: IBaseButtonProps) {
+	if (props.size !== 'normal') {
+		return undefined;
+	}
+	return props.height;
+}
+
+function getIconSize(props: IBaseButtonProps): number | undefined {
+	return props.iconOnly ? 32 : undefined;
+}
+
+function getSize(props: IBaseButtonProps) {
+	return {
+		xSmall: props.size === 'x-small',
+		small: props.size === 'small',
+		large: props.size === 'large',
+		xLarge: props.size === 'x-large',
+	};
+}
+
+function getColor(props: IBaseButtonProps, isDark: boolean): string {
+	if (props.color) {
+		return props.color;
+	}
+	return isDark ? props.darkColor : props.lightColor;
 }
 
 function t(context: RenderContext, tag: string): string {

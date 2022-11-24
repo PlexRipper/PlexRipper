@@ -1,16 +1,15 @@
 <script lang="ts">
-import Vue, { VNode, CreateElement, PropType } from 'vue';
+import Vue, { VNode, CreateElement, PropType, VNodeChildren } from 'vue';
 import { RenderContext } from 'vue/types/options';
 import VBtn from 'vuetify/lib/components/VBtn';
 import VTooltip from 'vuetify/lib/components/VTooltip';
 import VIcon from 'vuetify/lib/components/VIcon';
-import Log from 'consola';
 import ButtonType from '@enums/buttonType';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 
 export interface IBaseButtonProps {
 	block: boolean;
-	disable: boolean;
+	disabled: boolean;
 	outlined: boolean;
 	filled: boolean;
 	textId: string;
@@ -18,10 +17,12 @@ export interface IBaseButtonProps {
 	tooltipId: string;
 	icon: string;
 	iconSize: string;
+	iconAlign: 'Left' | 'Right';
 	lightColor: string;
 	darkColor: string;
 	href: string;
 	to: string;
+	width: number;
 }
 
 export default Vue.extend<IBaseButtonProps>({
@@ -30,8 +31,9 @@ export default Vue.extend<IBaseButtonProps>({
 	props: {
 		block: {
 			type: Boolean,
+			default: false,
 		},
-		disable: {
+		disabled: {
 			type: Boolean,
 		},
 		outlined: {
@@ -60,6 +62,10 @@ export default Vue.extend<IBaseButtonProps>({
 			type: String,
 			default: '',
 		},
+		iconAlign: {
+			type: String as PropType<'Left' | 'Right'>,
+			default: 'Left',
+		},
 		href: {
 			type: String,
 			default: '',
@@ -80,11 +86,14 @@ export default Vue.extend<IBaseButtonProps>({
 			type: String,
 			default: 'white',
 		},
+		width: {
+			type: Number,
+			default: 36,
+		},
 	},
 	render(h: CreateElement, context: RenderContext<IBaseButtonProps>): VNode {
 		const isDark = context.parent.$vuetify.theme.dark;
-		const buttonText = getButtonText(context);
-
+		const props = context.props;
 		return h(
 			VTooltip,
 			{
@@ -102,8 +111,8 @@ export default Vue.extend<IBaseButtonProps>({
 									'p-btn': true,
 									'mx-2': true,
 									'i18n-formatting': true,
-									filled: context.props.filled,
-									outlined: context.props.outlined,
+									filled: props.filled,
+									outlined: props.outlined,
 								},
 								on: {
 									// Ensure we pass in the toolTip events
@@ -118,16 +127,17 @@ export default Vue.extend<IBaseButtonProps>({
 								props: {
 									nuxt: true,
 									raised: true,
-									color: isDark ? context.props.darkColor : context.props.lightColor,
-									textId: context.props.textId,
-									block: context.props.block,
-									disable: context.props.disable,
-									outlined: context.props.outlined,
-									to: context.props.to,
-									target: context.props.href ? '_blank' : '_self',
+									color: isDark ? props.darkColor : props.lightColor,
+									textId: props.textId,
+									block: props.block,
+									disabled: props.disabled,
+									outlined: props.outlined,
+									to: props.to,
+									target: props.href ? '_blank' : '_self',
+									width: props.width !== 36 ? props.width : 'auto',
 								},
 							},
-							[iconSpanElement(h, context, isDark), h('span', {}, buttonText)],
+							[getButtonContentsElement(h, context, isDark)],
 						);
 					},
 				},
@@ -141,6 +151,23 @@ function getButtonText(context: RenderContext): string {
 	return context.props.textId ? t(context, `general.commands.${context.props.textId}`) : 'MISSING TEXT';
 }
 
+function getButtonContentsElement(h: CreateElement, context: RenderContext, isDark: boolean): VNode | VNodeChildren {
+	const buttonText = getButtonText(context);
+	const elements: VNodeChildren = [h('span', {}, buttonText)];
+
+	const iconElement = iconSpanElement(h, context, isDark);
+	if (!iconElement) {
+		return elements;
+	}
+	if (context.props.iconAlign === 'Left') {
+		elements.unshift(iconElement);
+	}
+	if (context.props.iconAlign === 'Right') {
+		elements.push(iconElement);
+	}
+	return elements;
+}
+
 function toolTipSpanElement(h: CreateElement, context: RenderContext) {
 	if (!context.props.tooltipId) {
 		return null;
@@ -149,8 +176,12 @@ function toolTipSpanElement(h: CreateElement, context: RenderContext) {
 }
 
 function iconSpanElement(h: CreateElement, context: RenderContext, isDark: boolean) {
-	const icon = Convert.buttonTypeToIcon(context.props.type as ButtonType);
-	if (!icon) {
+	let icon = '';
+	if (context.props.icon) {
+		icon = context.props.icon;
+	} else if (context.props.type) {
+		icon = Convert.buttonTypeToIcon(context.props.type as ButtonType);
+	} else {
 		return null;
 	}
 	return h(

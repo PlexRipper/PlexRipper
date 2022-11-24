@@ -4,7 +4,7 @@ import { RenderContext } from 'vue/types/options';
 import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
 
 export default Vue.extend({
-	name: 'NavigationNextButton',
+	name: 'NavigationFinishSetupButton',
 	functional: true,
 	props: {
 		disabled: {
@@ -22,9 +22,9 @@ export default Vue.extend({
 				...context.props,
 				block: true,
 				outlined: true,
-				textId: 'next',
+				textId: 'finish-setup',
+				icon: 'mdi-check-circle-outline',
 				iconAlign: 'Right',
-				icon: 'mdi-arrow-right',
 			} as Partial<IBaseButtonProps>,
 		});
 	},

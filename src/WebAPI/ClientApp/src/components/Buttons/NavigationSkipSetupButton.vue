@@ -4,7 +4,7 @@ import { RenderContext } from 'vue/types/options';
 import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
 
 export default Vue.extend({
-	name: 'NavigationNextButton',
+	name: 'NavigationSkipSetupButton',
 	functional: true,
 	props: {
 		disabled: {
@@ -22,9 +22,10 @@ export default Vue.extend({
 				...context.props,
 				block: true,
 				outlined: true,
-				textId: 'next',
+				textId: 'skip-setup',
+				icon: 'mdi-debug-step-over',
 				iconAlign: 'Right',
-				icon: 'mdi-arrow-right',
+				width: 100,
 			} as Partial<IBaseButtonProps>,
 		});
 	},

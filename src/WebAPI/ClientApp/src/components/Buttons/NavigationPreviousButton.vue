@@ -4,7 +4,7 @@ import { RenderContext } from 'vue/types/options';
 import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
 
 export default Vue.extend({
-	name: 'NavigationNextButton',
+	name: 'NavigationPreviousButton',
 	functional: true,
 	props: {
 		disabled: {
@@ -22,9 +22,8 @@ export default Vue.extend({
 				...context.props,
 				block: true,
 				outlined: true,
-				textId: 'next',
-				iconAlign: 'Right',
-				icon: 'mdi-arrow-right',
+				textId: 'back',
+				icon: 'mdi-arrow-left',
 			} as Partial<IBaseButtonProps>,
 		});
 	},

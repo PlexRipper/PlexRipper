@@ -20,12 +20,6 @@ export default abstract class Convert {
 				return 'mdi-alert-circle';
 			case ButtonType.ExternalLink:
 				return 'mdi-open-in-new';
-			case ButtonType.Forward:
-				return 'mdi-arrow-right';
-			case ButtonType.Back:
-				return 'mdi-arrow-left';
-			case ButtonType.Skip:
-				return 'mdi-debug-step-over';
 			case ButtonType.Add:
 				return 'mdi-plus-box-outline';
 			case ButtonType.Edit:

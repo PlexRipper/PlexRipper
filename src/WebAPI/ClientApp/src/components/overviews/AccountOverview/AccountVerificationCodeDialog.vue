@@ -44,7 +44,6 @@
 import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import CodeInput from 'vue-verification-code-input';
-import ButtonType from '@enums/buttonType';
 import { Error } from '@dto/mainApi';
 
 @Component<AccountVerificationCodeDialog>({ components: { CodeInput } })
@@ -64,14 +63,6 @@ export default class AccountVerificationCodeDialog extends Vue {
 	}
 
 	code: string = '0';
-
-	get getCancelButton(): ButtonType {
-		return ButtonType.Cancel;
-	}
-
-	get getSubmitButton(): ButtonType {
-		return ButtonType.Confirm;
-	}
 
 	onChange(v) {
 		this.code = v;

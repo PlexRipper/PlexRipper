@@ -54,7 +54,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
-import ButtonType from '@enums/buttonType';
 import { SettingsService } from '@service';
 
 @Component
@@ -90,14 +89,6 @@ export default class DownloadConfirmation extends Vue {
 			}
 		}
 		return true;
-	}
-
-	get cancelButtonType(): ButtonType {
-		return ButtonType.Cancel;
-	}
-
-	get confirmButtonType(): ButtonType {
-		return ButtonType.Confirm;
 	}
 
 	get totalSize(): number {

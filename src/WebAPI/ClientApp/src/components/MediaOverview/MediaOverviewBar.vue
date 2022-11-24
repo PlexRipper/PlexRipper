@@ -6,7 +6,7 @@
 				<v-col v-if="detailMode" cols="auto">
 					<v-list two-line class="no-background">
 						<v-list-item>
-							<p-btn icon-mode icon="mdi-arrow-left" x-large @click="back" />
+							<BaseButton icon-only icon="mdi-arrow-left" size="x-large" @click="back" />
 						</v-list-item>
 					</v-list>
 				</v-col>

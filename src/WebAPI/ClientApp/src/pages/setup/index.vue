@@ -39,7 +39,7 @@
 										<ul>
 											<li>
 												{{ $t('pages.setup.intro.list.item-1') }}
-												<external-link href="https://github.com/PlexRipper/PlexRipper/issues" />
+												<ExternalLinkButton href="https://github.com/PlexRipper/PlexRipper/issues" />
 											</li>
 											<li>{{ $t('pages.setup.intro.list.item-2') }}</li>
 											<li>{{ $t('pages.setup.intro.list.item-3') }}</li>
@@ -121,7 +121,7 @@
 													</ul>
 												</v-list-item-title>
 												<v-list-item-action>
-													<external-link :href="link" />
+													<ExternalLinkButton :href="link" />
 												</v-list-item-action>
 											</v-list-item>
 										</v-list>

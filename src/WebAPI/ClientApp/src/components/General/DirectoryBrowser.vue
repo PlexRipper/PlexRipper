@@ -86,7 +86,6 @@ import { cloneDeep, debounce, DebouncedFunc } from 'lodash-es';
 import { getDirectoryPath } from '@api/pathApi';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
 import { FileSystemEntityType } from '@dto/mainApi';
-import ButtonType from '@enums/buttonType';
 
 @Component
 export default class DirectoryBrowser extends Vue {
@@ -110,14 +109,6 @@ export default class DirectoryBrowser extends Vue {
 			default:
 				return 'mdi-crosshairs-question';
 		}
-	}
-
-	get cancelButtonType(): ButtonType {
-		return ButtonType.Cancel;
-	}
-
-	get confirmButtonType(): ButtonType {
-		return ButtonType.Confirm;
 	}
 
 	open(path: FolderPathDTO): void {

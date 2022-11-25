@@ -1,6 +1,6 @@
 import { describe, beforeAll, expect, test } from '@jest/globals';
 import { subscribeSpyTo, baseSetup, baseVars } from '@services-test-base';
-import { SignalrService, GlobalService } from '@service';
+import { SignalrService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 describe('SignalrService.setup()', () => {

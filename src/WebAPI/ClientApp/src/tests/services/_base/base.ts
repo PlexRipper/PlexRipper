@@ -24,6 +24,8 @@ export function baseSetup(): { ctx: Context } {
 	} as Context;
 	process.env.NODE_ENV = 'dev';
 	process.client = true;
+	// @ts-ignore
+	window.jest = true;
 	// Minimum LogLevel displayed
 	Log.level = LogLevel.Debug;
 	return {

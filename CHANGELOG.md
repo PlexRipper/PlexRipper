@@ -15,6 +15,8 @@ Note: This, by a long shot, doesn't encompases all the changes and fixes that ha
  - Migrated projected to .NET 6, brings many performance improvements
  - Added a loading icon to the button when checking the server status in the server configuration
  - The server command "Re-sync Library media" now displayes a loading animation.
+ - Replaced every button with a more performant and consistent button construction
+ - Thumbnails displayed for movies and tvShows on the library pages in poster mode are now displayed from cache when navigating around PlexRipper. 
 
 ### Fixed
  - Fixed the opening of the server settings not defaulting back to its first tab

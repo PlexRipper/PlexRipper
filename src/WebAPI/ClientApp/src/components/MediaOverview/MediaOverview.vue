@@ -367,12 +367,12 @@ export default class MediaOverview extends Vue {
 
 		// Retrieve server data
 		useSubscription(
-			LibraryService.getServerByLibraryID(this.libraryId).subscribe((server) => {
+			LibraryService.getServerByLibraryId(this.libraryId).subscribe((server) => {
 				if (server) {
 					this.server = server;
 					return;
 				}
-				Log.warn('MediaOverview => Server was invalid:', server);
+				Log.error('MediaOverview => Server was invalid:', server);
 			}),
 		);
 

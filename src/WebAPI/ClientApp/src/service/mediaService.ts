@@ -1,6 +1,6 @@
-import { map, take } from 'rxjs/operators';
+import { map, mergeMap, take } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
-import { EMPTY, Observable, of } from 'rxjs';
+import { Observable, Observer, of } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
 import { PlexMediaType } from '@dto/mainApi';
@@ -25,25 +25,33 @@ export class MediaService extends BaseService {
 	}
 
 	public getThumbnail(mediaId: number, mediaType: PlexMediaType, width: number = 0, height: number = 0): Observable<string> {
-		const mediaUrls = this.getState().mediaUrls;
-
-		const mediaUrl = mediaUrls.find((x) => x.type === mediaType && x.id === mediaId);
-		if (mediaUrl) {
-			return of(mediaUrl.url);
-		}
-
-		return getThumbnail(mediaId, mediaType, width, height).pipe(
-			map((response) => {
-				if (response.data) {
-					// Convert imageUrl to objectUrl
-					const imageUrl: string = URL.createObjectURL(response.data);
-					if (imageUrl) {
-						this.updateStore('mediaUrls', { id: mediaId, type: mediaType, url: imageUrl });
-					}
-					return imageUrl;
-				}
-				return '';
-			}),
+		return new Observable((observer: Observer<string>) => {
+			const mediaUrls = this.getState().mediaUrls;
+			const mediaUrl = mediaUrls.find((x) => x.type === mediaType && x.id === mediaId);
+			if (mediaUrl) {
+				observer.next(mediaUrl.url);
+			}
+			observer.next('');
+		}).pipe(
+			// We use a mergeMap here as an if conditional, return the url if found and otherwise fetch
+			mergeMap((value) =>
+				value !== ''
+					? of(value)
+					: getThumbnail(mediaId, mediaType, width, height).pipe(
+							map((response) => {
+								if (response.data) {
+									// Convert imageUrl to objectUrl
+									const imageUrl: string = URL.createObjectURL(response.data);
+									if (imageUrl) {
+										this.updateStore('mediaUrls', { id: mediaId, type: mediaType, url: imageUrl });
+									}
+									return imageUrl;
+								}
+								return '';
+							}),
+					  ),
+			),
+			take(1),
 		);
 	}
 }

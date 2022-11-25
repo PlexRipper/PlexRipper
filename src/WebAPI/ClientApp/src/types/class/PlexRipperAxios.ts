@@ -1,4 +1,5 @@
 import Axios from 'axios-observable';
+import { ResponseType } from 'axios';
 import { checkForError } from '@api/baseApi';
 import ResultDTO from '@dto/ResultDTO';
 
@@ -7,6 +8,7 @@ export interface PlexRipperAxiosGet {
 	apiCategory?: string;
 	apiName?: string;
 	params?: any;
+	responseType?: ResponseType;
 }
 
 export interface PlexRipperAxiosPut extends PlexRipperAxiosGet {
@@ -19,7 +21,16 @@ export interface PlexRipperAxiosPost extends PlexRipperAxiosGet {
 
 export default class PlexRipperAxios {
 	public static get<T = any>({ url, apiCategory, apiName, params }: PlexRipperAxiosGet) {
-		return Axios.get<ResultDTO<T>>(url, params).pipe(checkForError<T>(apiCategory, apiName));
+		return Axios.get<ResultDTO<T>>(url, {
+			params,
+		}).pipe(checkForError<T>(apiCategory, apiName));
+	}
+
+	public static getImage<T = any>({ url, params, responseType }) {
+		return Axios.get<ResultDTO<T>>(url, {
+			params,
+			responseType,
+		});
 	}
 
 	public static put<T = any>({ url, data, apiCategory, apiName }: PlexRipperAxiosPut) {

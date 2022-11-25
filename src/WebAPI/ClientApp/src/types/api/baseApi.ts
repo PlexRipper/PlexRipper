@@ -6,10 +6,6 @@ import { AxiosError, AxiosResponse } from 'axios';
 import { AlertService } from '@service';
 import ResultDTO from '@dto/ResultDTO';
 
-export function preApiRequest(logText: string, fnName: string, data: any | string = 'none'): void {
-	Log.debug(`${logText} ${fnName} => sending request:`, data);
-}
-
 export function checkForError<T = any>(
 	logText?: string,
 	fnName?: string,

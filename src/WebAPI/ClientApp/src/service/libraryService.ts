@@ -1,6 +1,6 @@
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, ServerService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
@@ -68,7 +68,7 @@ export class LibraryService extends BaseService {
 		);
 	}
 
-	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | null> {
+	public getServerByLibraryId(libraryId: number): Observable<PlexServerDTO | null> {
 		const libraries = this.getStoreSlice<PlexLibraryDTO[]>('libraries');
 		if (libraries.length === 0) {
 			return of(null);
@@ -78,7 +78,7 @@ export class LibraryService extends BaseService {
 			return of(null);
 		}
 
-		return ServerService.getServer(library.id);
+		return ServerService.getServer(library.plexServerId);
 	}
 
 	public refreshLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {

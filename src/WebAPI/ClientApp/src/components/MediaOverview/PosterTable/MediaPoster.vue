@@ -159,7 +159,7 @@ export default class MediaPoster extends Vue {
 		if (this.isVisible && !this.imageUrl) {
 			useSubscription(
 				MediaService.getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe({
-					complete: () => (imageUrl) => {
+					next: (imageUrl) => {
 						if (!imageUrl) {
 							this.defaultImage = true;
 							return;

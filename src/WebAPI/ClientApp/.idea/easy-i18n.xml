@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectSettingsService">
+    <option name="localesDirectory" value="$PROJECT_DIR$/src/lang" />
+    <option name="filePattern" value="*.json" />
+    <option name="namespaceDelimiter" value="" />
+    <option name="contextDelimiter" value="" />
+    <option name="pluralDelimiter" value="" />
+    <option name="defaultNamespace" value="" />
+  </component>
+</project>

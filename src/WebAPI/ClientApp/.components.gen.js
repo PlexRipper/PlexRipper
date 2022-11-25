@@ -1,25 +1,41 @@
 import Vue from 'vue'
-import Print from '@/components/DebugTools/Print.vue'
-import PBtn from '@/components/Extensions/PBtn.vue'
-import PCheckbox from '@/components/Extensions/PCheckbox.vue'
-import PSelect from '@/components/Extensions/PSelect.vue'
-import PTextField from '@/components/Extensions/PTextField.vue'
-import Footer from '@/components/Footer/Footer.vue'
-import DownloadLimitInput from '@/components/Form/DownloadLimitInput.vue'
-import EditableText from '@/components/Form/EditableText.vue'
 import AppBar from '@/components/AppBar/AppBar.vue'
 import AppBarProgressBar from '@/components/AppBar/AppBarProgressBar.vue'
 import NotificationButton from '@/components/AppBar/NotificationButton.vue'
-import HelpDialog from '@/components/Help/HelpDialog.vue'
-import HelpIcon from '@/components/Help/HelpIcon.vue'
+import AccountValidationButton from '@/components/Buttons/AccountValidationButton.vue'
+import AddIconButton from '@/components/Buttons/AddIconButton.vue'
+import BaseButton from '@/components/Buttons/BaseButton.vue'
+import CancelButton from '@/components/Buttons/CancelButton.vue'
+import ConfirmButton from '@/components/Buttons/ConfirmButton.vue'
+import DebugButton from '@/components/Buttons/DebugButton.vue'
+import DeleteButton from '@/components/Buttons/DeleteButton.vue'
+import DeleteIconButton from '@/components/Buttons/DeleteIconButton.vue'
+import EditIconButton from '@/components/Buttons/EditIconButton.vue'
+import ExternalLinkButton from '@/components/Buttons/ExternalLinkButton.vue'
+import GoToButton from '@/components/Buttons/GoToButton.vue'
+import HideButton from '@/components/Buttons/HideButton.vue'
+import NavigationFinishSetupButton from '@/components/Buttons/NavigationFinishSetupButton.vue'
+import NavigationNextButton from '@/components/Buttons/NavigationNextButton.vue'
+import NavigationPreviousButton from '@/components/Buttons/NavigationPreviousButton.vue'
+import NavigationSkipSetupButton from '@/components/Buttons/NavigationSkipSetupButton.vue'
+import ResetButton from '@/components/Buttons/ResetButton.vue'
+import SaveButton from '@/components/Buttons/SaveButton.vue'
+import SaveIconButton from '@/components/Buttons/SaveIconButton.vue'
+import WarningButton from '@/components/Buttons/WarningButton.vue'
 import AlertDialog from '@/components/Dialogs/AlertDialog.vue'
+import PCheckbox from '@/components/Extensions/PCheckbox.vue'
+import PSelect from '@/components/Extensions/PSelect.vue'
+import PTextField from '@/components/Extensions/PTextField.vue'
+import Print from '@/components/DebugTools/Print.vue'
+import Footer from '@/components/Footer/Footer.vue'
+import DownloadLimitInput from '@/components/Form/DownloadLimitInput.vue'
+import EditableText from '@/components/Form/EditableText.vue'
 import Background from '@/components/General/Background.vue'
 import ConfirmationDialog from '@/components/General/ConfirmationDialog.vue'
 import DarkModeToggle from '@/components/General/DarkModeToggle.vue'
 import DateTime from '@/components/General/DateTime.vue'
 import DirectoryBrowser from '@/components/General/DirectoryBrowser.vue'
 import Duration from '@/components/General/Duration.vue'
-import ExternalLink from '@/components/General/ExternalLink.vue'
 import FileSize from '@/components/General/FileSize.vue'
 import LoadingSpinner from '@/components/General/LoadingSpinner.vue'
 import Logo from '@/components/General/Logo.vue'
@@ -28,6 +44,8 @@ import PageLoadOverlay from '@/components/General/PageLoadOverlay.vue'
 import Status from '@/components/General/Status.vue'
 import ValidIcon from '@/components/General/ValidIcon.vue'
 import VerticalButton from '@/components/General/VerticalButton.vue'
+import HelpDialog from '@/components/Help/HelpDialog.vue'
+import HelpIcon from '@/components/Help/HelpIcon.vue'
 import PSection from '@/components/Layout/PSection.vue'
 import PageContainer from '@/components/Layout/PageContainer.vue'
 import DetailsOverview from '@/components/MediaOverview/DetailsOverview.vue'
@@ -51,7 +69,6 @@ import DownloadBar from '@/components/Views/Downloads/DownloadBar.vue'
 import DownloadDetailsDialog from '@/components/Views/Downloads/DownloadDetailsDialog.vue'
 import DownloadsTable from '@/components/Views/Downloads/DownloadsTable.vue'
 import ServerDownloadStatus from '@/components/Views/Downloads/ServerDownloadStatus.vue'
-import NavigationBar from '@/components/Views/Setup/NavigationBar.vue'
 import ConfirmationSection from '@/components/Views/Settings/ConfirmationSection.vue'
 import DatabaseSection from '@/components/Views/Settings/DatabaseSection.vue'
 import DateAndTimeSection from '@/components/Views/Settings/DateAndTimeSection.vue'
@@ -59,6 +76,7 @@ import DebugSection from '@/components/Views/Settings/DebugSection.vue'
 import DownloadManagerSection from '@/components/Views/Settings/DownloadManagerSection.vue'
 import LanguageSection from '@/components/Views/Settings/LanguageSection.vue'
 import SetupSection from '@/components/Views/Settings/SetupSection.vue'
+import NavigationBar from '@/components/Views/Setup/NavigationBar.vue'
 import AccountCard from '@/components/overviews/AccountOverview/AccountCard.vue'
 import AccountDialog from '@/components/overviews/AccountOverview/AccountDialog.vue'
 import AccountForm from '@/components/overviews/AccountOverview/AccountForm.vue'
@@ -83,34 +101,68 @@ import Setup from '@/e'
 import Id from '@/e'
 import Tvshows from '@/e'
 
-Vue.component('Print', Print)
-Vue.component('LazyPrint', Print)
-Vue.component('PBtn', PBtn)
-Vue.component('LazyPBtn', PBtn)
-Vue.component('PCheckbox', PCheckbox)
-Vue.component('LazyPCheckbox', PCheckbox)
-Vue.component('PSelect', PSelect)
-Vue.component('LazyPSelect', PSelect)
-Vue.component('PTextField', PTextField)
-Vue.component('LazyPTextField', PTextField)
-Vue.component('Footer', Footer)
-Vue.component('LazyFooter', Footer)
-Vue.component('DownloadLimitInput', DownloadLimitInput)
-Vue.component('LazyDownloadLimitInput', DownloadLimitInput)
-Vue.component('EditableText', EditableText)
-Vue.component('LazyEditableText', EditableText)
 Vue.component('AppBar', AppBar)
 Vue.component('LazyAppBar', AppBar)
 Vue.component('AppBarProgressBar', AppBarProgressBar)
 Vue.component('LazyAppBarProgressBar', AppBarProgressBar)
 Vue.component('NotificationButton', NotificationButton)
 Vue.component('LazyNotificationButton', NotificationButton)
-Vue.component('HelpDialog', HelpDialog)
-Vue.component('LazyHelpDialog', HelpDialog)
-Vue.component('HelpIcon', HelpIcon)
-Vue.component('LazyHelpIcon', HelpIcon)
+Vue.component('AccountValidationButton', AccountValidationButton)
+Vue.component('LazyAccountValidationButton', AccountValidationButton)
+Vue.component('AddIconButton', AddIconButton)
+Vue.component('LazyAddIconButton', AddIconButton)
+Vue.component('BaseButton', BaseButton)
+Vue.component('LazyBaseButton', BaseButton)
+Vue.component('CancelButton', CancelButton)
+Vue.component('LazyCancelButton', CancelButton)
+Vue.component('ConfirmButton', ConfirmButton)
+Vue.component('LazyConfirmButton', ConfirmButton)
+Vue.component('DebugButton', DebugButton)
+Vue.component('LazyDebugButton', DebugButton)
+Vue.component('DeleteButton', DeleteButton)
+Vue.component('LazyDeleteButton', DeleteButton)
+Vue.component('DeleteIconButton', DeleteIconButton)
+Vue.component('LazyDeleteIconButton', DeleteIconButton)
+Vue.component('EditIconButton', EditIconButton)
+Vue.component('LazyEditIconButton', EditIconButton)
+Vue.component('ExternalLinkButton', ExternalLinkButton)
+Vue.component('LazyExternalLinkButton', ExternalLinkButton)
+Vue.component('GoToButton', GoToButton)
+Vue.component('LazyGoToButton', GoToButton)
+Vue.component('HideButton', HideButton)
+Vue.component('LazyHideButton', HideButton)
+Vue.component('NavigationFinishSetupButton', NavigationFinishSetupButton)
+Vue.component('LazyNavigationFinishSetupButton', NavigationFinishSetupButton)
+Vue.component('NavigationNextButton', NavigationNextButton)
+Vue.component('LazyNavigationNextButton', NavigationNextButton)
+Vue.component('NavigationPreviousButton', NavigationPreviousButton)
+Vue.component('LazyNavigationPreviousButton', NavigationPreviousButton)
+Vue.component('NavigationSkipSetupButton', NavigationSkipSetupButton)
+Vue.component('LazyNavigationSkipSetupButton', NavigationSkipSetupButton)
+Vue.component('ResetButton', ResetButton)
+Vue.component('LazyResetButton', ResetButton)
+Vue.component('SaveButton', SaveButton)
+Vue.component('LazySaveButton', SaveButton)
+Vue.component('SaveIconButton', SaveIconButton)
+Vue.component('LazySaveIconButton', SaveIconButton)
+Vue.component('WarningButton', WarningButton)
+Vue.component('LazyWarningButton', WarningButton)
 Vue.component('AlertDialog', AlertDialog)
 Vue.component('LazyAlertDialog', AlertDialog)
+Vue.component('PCheckbox', PCheckbox)
+Vue.component('LazyPCheckbox', PCheckbox)
+Vue.component('PSelect', PSelect)
+Vue.component('LazyPSelect', PSelect)
+Vue.component('PTextField', PTextField)
+Vue.component('LazyPTextField', PTextField)
+Vue.component('Print', Print)
+Vue.component('LazyPrint', Print)
+Vue.component('Footer', Footer)
+Vue.component('LazyFooter', Footer)
+Vue.component('DownloadLimitInput', DownloadLimitInput)
+Vue.component('LazyDownloadLimitInput', DownloadLimitInput)
+Vue.component('EditableText', EditableText)
+Vue.component('LazyEditableText', EditableText)
 Vue.component('Background', Background)
 Vue.component('LazyBackground', Background)
 Vue.component('ConfirmationDialog', ConfirmationDialog)
@@ -123,8 +175,6 @@ Vue.component('DirectoryBrowser', DirectoryBrowser)
 Vue.component('LazyDirectoryBrowser', DirectoryBrowser)
 Vue.component('Duration', Duration)
 Vue.component('LazyDuration', Duration)
-Vue.component('ExternalLink', ExternalLink)
-Vue.component('LazyExternalLink', ExternalLink)
 Vue.component('FileSize', FileSize)
 Vue.component('LazyFileSize', FileSize)
 Vue.component('LoadingSpinner', LoadingSpinner)
@@ -141,6 +191,10 @@ Vue.component('ValidIcon', ValidIcon)
 Vue.component('LazyValidIcon', ValidIcon)
 Vue.component('VerticalButton', VerticalButton)
 Vue.component('LazyVerticalButton', VerticalButton)
+Vue.component('HelpDialog', HelpDialog)
+Vue.component('LazyHelpDialog', HelpDialog)
+Vue.component('HelpIcon', HelpIcon)
+Vue.component('LazyHelpIcon', HelpIcon)
 Vue.component('PSection', PSection)
 Vue.component('LazyPSection', PSection)
 Vue.component('PageContainer', PageContainer)
@@ -187,8 +241,6 @@ Vue.component('DownloadsTable', DownloadsTable)
 Vue.component('LazyDownloadsTable', DownloadsTable)
 Vue.component('ServerDownloadStatus', ServerDownloadStatus)
 Vue.component('LazyServerDownloadStatus', ServerDownloadStatus)
-Vue.component('NavigationBar', NavigationBar)
-Vue.component('LazyNavigationBar', NavigationBar)
 Vue.component('ConfirmationSection', ConfirmationSection)
 Vue.component('LazyConfirmationSection', ConfirmationSection)
 Vue.component('DatabaseSection', DatabaseSection)
@@ -203,6 +255,8 @@ Vue.component('LanguageSection', LanguageSection)
 Vue.component('LazyLanguageSection', LanguageSection)
 Vue.component('SetupSection', SetupSection)
 Vue.component('LazySetupSection', SetupSection)
+Vue.component('NavigationBar', NavigationBar)
+Vue.component('LazyNavigationBar', NavigationBar)
 Vue.component('AccountCard', AccountCard)
 Vue.component('LazyAccountCard', AccountCard)
 Vue.component('AccountDialog', AccountDialog)

@@ -55,6 +55,11 @@ const jestConfig = {
 	// Source: https://github.com/hirezio/observer-spy#-configuring-jest-with-setup-auto-unsubscribejs
 	setupFilesAfterEnv: ['<rootDir>/node_modules/@hirez_io/observer-spy/dist/setup-auto-unsubscribe.js'],
 
+	// The paths to modules that run some code to configure or set up the testing environment before each test
+	// Fixes the use of Url.createObjectURL()
+	// Source: https://github.com/developit/jsdom-worker1
+	setupFiles: ['jsdom-worker'],
+
 	// All imported modules in your tests should be mocked automatically
 	// automock: false,
 
@@ -155,9 +160,6 @@ const jestConfig = {
 
 	// Allows you to use a custom runner instead of Jest's default test runner
 	// runner: "jest-runner",
-
-	// The paths to modules that run some code to configure or set up the testing environment before each test
-	// setupFiles: [],
 
 	// The number of seconds after which a test is considered as slow and reported as such in the results.
 	// slowTestThreshold: 5,

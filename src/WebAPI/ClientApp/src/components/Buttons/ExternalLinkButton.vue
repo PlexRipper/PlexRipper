@@ -30,7 +30,10 @@ export default Vue.extend({
 			props: {
 				...context.props,
 				outlined: false,
+				iconOnly: true,
 				icon: 'mdi-open-in-new',
+				iconSize: 24,
+				size: 'small',
 			} as Partial<IBaseButtonProps>,
 		});
 	},

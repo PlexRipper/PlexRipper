@@ -89,7 +89,6 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		}
 		Log.trace(action, newValue);
 		this.setState(state, action);
-		this.logHistory();
 	}
 
 	// endregion

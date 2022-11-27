@@ -141,7 +141,26 @@ namespace PlexRipper.Domain
         public string TitleTvShowEpisode => MetaData?.TvShowEpisodeTitle ?? string.Empty;
 
         [NotMapped]
-        public string FileName => Path.GetFileName(MetaData?.MediaData?.First()?.Parts?.First()?.File ?? string.Empty);
+        public string FileName {
+            get {
+                var originalFile = MetaData?.MediaData?.First()?.Parts?.First()?.File ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(originalFile)) {
+                    return string.Empty;
+                }
+
+                var fileName = Path.GetFileName(originalFile);
+                if (string.IsNullOrWhiteSpace(fileName)) {
+                    return string.Empty;
+                }
+
+                if (fileName.Equals(originalFile)) {
+                    // We could be on linux, but processing a file from a Windows host
+                    return fileName.Split("\\").Last();
+                }
+
+                return fileName;
+            }
+        }
 
         /// <summary>
         /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.

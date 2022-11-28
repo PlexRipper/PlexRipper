@@ -10,69 +10,23 @@
 				:indeterminate="plexServers.length === 0"
 			/>
 			<!--	Server Connection Details	-->
-			<v-simple-table v-if="getServerUpdates.length > 0" class="section-table">
+			<v-simple-table v-if="plexServers.length > 0" class="section-table">
 				<tbody>
-					<tr v-for="{ server, progress } in getServerUpdates" :key="server.id">
-						<!--	Server name and status	-->
-						<td style="width: 30%">
-							<status :value="progress ? progress.connectionSuccessful && progress.completed : false" />
-							{{ server.name }}
-						</td>
-						<!--	Status icon	-->
-						<td style="width: 10%">
-							<template v-if="progress">
-								<v-progress-circular v-if="!progress.completed" indeterminate color="red" />
-								<v-icon v-else-if="progress.connectionSuccessful">mdi-check</v-icon>
-								<v-icon v-else>mdi-close</v-icon>
-							</template>
-							<template v-else>
-								<v-progress-circular indeterminate color="red" />
-							</template>
-						</td>
-						<!--	Current Action	-->
-						<td style="width: 30%">
-							<template v-if="progress">
-								<template v-if="!progress.completed">
-									<span v-if="progress && progress.retryAttemptIndex > 0">
-										{{
-											$t('components.account-setup-progress.retry-connection', {
-												attemptIndex: progress.retryAttemptIndex,
-												attemptCount: progress.retryAttemptCount,
-											})
-										}}
-									</span>
-								</template>
-								<!--	Completed -->
-								<template v-else>
-									<span v-if="progress.connectionSuccessful">
-										{{ $t('components.account-setup-progress.server-connectable') }}
-									</span>
-									<span v-else>
-										{{ $t('components.account-setup-progress.server-un-connectable') }}
-									</span>
-								</template>
-							</template>
-						</td>
-						<!--	Error message	-->
-						<td style="width: 30%">
-							<template v-if="progress">
-								<span v-if="progress && progress.message">
-									{{ progress.message }}
-								</span>
-							</template>
-						</td>
-					</tr>
+					<template v-for="server in plexServers">
+						<InspectServerProgressDisplay
+							:key="server.id"
+							:plex-server-name="server.name"
+							:plex-server-id="server.id"
+							@completed="setComplete($event)"
+						/>
+					</template>
 				</tbody>
 			</v-simple-table>
 			<!-- No Server Warning	-->
 			<v-row v-else justify="center">
 				<v-col cols="auto">
 					<h2>
-						{{
-							$t('components.account-setup-progress.no-server-warning', {
-								displayName: account ? account.displayName : 'unknown',
-							})
-						}}
+						{{ noServerWarning }}
 					</h2>
 				</v-col>
 			</v-row>
@@ -92,37 +46,17 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
 import { clamp } from 'lodash-es';
 import Log from 'consola';
-import { SignalrService, ServerService } from '@service';
-import type { InspectServerProgress, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
-
-declare interface ServerUpdate {
-	id: number;
-	server: PlexServerDTO;
-	progress: InspectServerProgress | null;
-}
+import { ServerService } from '@service';
+import type { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 
 @Component
 export default class AccountSetupProgress extends Vue {
 	@Prop({ required: true, type: Object as () => PlexAccountDTO })
 	readonly account!: PlexAccountDTO;
 
-	inspectServerProgresses: InspectServerProgress[] = [];
-
 	plexServers: PlexServerDTO[] = [];
 
-	get getServerUpdates(): ServerUpdate[] {
-		const serverUpdates: ServerUpdate[] = [];
-
-		this.plexServers?.forEach((x) => {
-			serverUpdates.push({
-				id: x.id,
-				server: x,
-				progress: this.inspectServerProgresses.find((y) => x.id === y.plexServerId) ?? null,
-			});
-		});
-
-		return serverUpdates;
-	}
+	completedPlexServers: Number[] = [];
 
 	get getProgressText(): string {
 		if (this.plexServers.length === 0) {
@@ -135,21 +69,25 @@ export default class AccountSetupProgress extends Vue {
 	}
 
 	get getCompletedCount(): number {
-		return this.inspectServerProgresses.filter((x) => x.completed).length;
+		return this.completedPlexServers.length;
 	}
 
 	get getTotalPercentage(): number {
 		return clamp((this.getCompletedCount / this.plexServers.length) * 100, 0, 100);
 	}
 
+	get noServerWarning(): string {
+		return this.$t('components.account-setup-progress.no-server-warning', {
+			displayName: this.account ? this.account.displayName : this.$t('general.commands.unknown'),
+		}).toString();
+	}
+
+	setComplete(plexServerId: number) {
+		this.completedPlexServers.push(plexServerId);
+	}
+
 	mounted(): void {
 		Log.info('Mounted was fired!');
-		useSubscription(
-			SignalrService.getAllInspectServerProgress().subscribe((data) => {
-				Log.info('getAllInspectServerProgress was fired!', data);
-				this.inspectServerProgresses = data;
-			}),
-		);
 		useSubscription(
 			ServerService.getServersByPlexAccountId(this.account.id).subscribe((servers) => {
 				this.plexServers = servers;

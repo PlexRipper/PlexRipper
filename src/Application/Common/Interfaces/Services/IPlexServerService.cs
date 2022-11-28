@@ -43,4 +43,7 @@ public interface IPlexServerService
     /// <param name="forceSync">By default, the libraries which have been synced less than 6 hours ago will be skipped. </param>
     /// <returns><see cref="Result"/></returns>
     Task<Result> SyncPlexServer(int plexServerId, bool forceSync = false);
+
+    Task<Result<PlexServer>> InspectPlexServer(PlexServer plexServer, int plexAccountId = 0);
+    Task<Result<PlexServer>> InspectPlexServer(int plexServerId);
 }

@@ -202,74 +202,104 @@ public class PlexServerService : IPlexServerService
         // Create inspect tasks for all plexServers
         var tasks = plexServers.Select(async plexServer =>
         {
-            // Send server inspect status to front-end
-            async Task SendServerProgress(InspectServerProgress progress)
+            var inspectResult = await InspectPlexServer(plexServer, plexAccountId);
+            if (inspectResult.IsSuccess)
             {
-                progress.PlexServerId = plexServer.Id;
-                await _signalRService.SendServerInspectStatusProgress(progress);
+                await _plexLibraryService.RetrieveAccessibleLibrariesAsync(plexAccountResult.Value, plexServer);
+                return inspectResult.Value;
             }
 
-            // The call-back action from the httpClient
-            var action = new Action<PlexApiClientProgress>(async progress =>
-                await SendServerProgress(_mapper.Map<InspectServerProgress>(progress)));
-
-            // Start with simple status request
-            var serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false, action);
-            if (serverStatusResult.IsFailed)
-            {
-                Log.Error($"Failed to retrieve the serverStatus for {plexServer.Name} - {plexServer.ServerUrl}");
-                serverStatusResult.LogError();
-                return;
-            }
-
-            // Apply possible fixes and try again
-            if (!serverStatusResult.Value.IsSuccessful)
-            {
-                var dnsFixMsg = $"Attempting to DNS fix the connection with server {plexServer.Name}";
-                Log.Information(dnsFixMsg);
-                await SendServerProgress(new InspectServerProgress
-                {
-                    AttemptingApplyDNSFix = true,
-                    Message = dnsFixMsg,
-                });
-
-                plexServer.ServerFixApplyDNSFix = true;
-                serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false);
-
-                if (serverStatusResult.Value.IsSuccessful)
-                {
-                    // DNS fix worked
-                    dnsFixMsg = $"Server DNS Fix worked on {plexServer.Name}, connection successful!";
-                    Log.Information(dnsFixMsg);
-                    await SendServerProgress(new InspectServerProgress
-                    {
-                        Message = dnsFixMsg,
-                        Completed = true,
-                        ConnectionSuccessful = true,
-                        AttemptingApplyDNSFix = true,
-                    });
-                }
-
-                // DNS fix did not work
-                dnsFixMsg = $"Server DNS Fix did not help with server {plexServer.Name} - {plexServer.ServerUrl}";
-                Log.Warning(dnsFixMsg);
-                await SendServerProgress(new InspectServerProgress
-                {
-                    AttemptingApplyDNSFix = true,
-                    Completed = true,
-                    Message = dnsFixMsg,
-                });
-
-                plexServer.ServerFixApplyDNSFix = false;
-                return;
-            }
-
-            await _plexLibraryService.RetrieveAccessibleLibrariesAsync(plexAccountResult.Value, plexServer);
+            return plexServer;
         });
 
         await Task.WhenAll(tasks);
 
         return await _mediator.Send(new UpdatePlexServersCommand(plexServers));
+    }
+
+    public async Task<Result<PlexServer>> InspectPlexServer(PlexServer plexServer, int plexAccountId = 0)
+    {
+        // Send server inspect status to front-end
+        async Task SendServerProgress(InspectServerProgress progress)
+        {
+            progress.PlexServerId = plexServer.Id;
+            await _signalRService.SendServerInspectStatusProgress(progress);
+        }
+
+        await SendServerProgress(new InspectServerProgress
+        {
+            Message = $"Inspecting Server {plexServer.Name}",
+        });
+
+        // The call-back action from the httpClient
+        var action = new Action<PlexApiClientProgress>(async progress =>
+            await SendServerProgress(_mapper.Map<InspectServerProgress>(progress)));
+
+        // Start with simple status request
+        var serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false, action);
+        if (serverStatusResult.IsSuccess && serverStatusResult.Value.IsSuccessful)
+        {
+            await SendServerProgress(new InspectServerProgress
+            {
+                Completed = true,
+                ConnectionSuccessful = true,
+                StatusCode = serverStatusResult.Value.StatusCode,
+                Message = "Server connection was successful",
+            });
+            return Result.Ok(plexServer);
+        }
+
+        Log.Error($"Failed to retrieve the serverStatus for {plexServer.Name} - {plexServer.ServerUrl}");
+        serverStatusResult.LogError();
+
+        // Apply possible fixes and try again
+        var dnsFixMsg = $"Attempting to DNS fix the connection with server {plexServer.Name}";
+        Log.Information(dnsFixMsg);
+        await SendServerProgress(new InspectServerProgress
+        {
+            AttemptingApplyDNSFix = true,
+            Message = dnsFixMsg,
+        });
+
+        plexServer.ServerFixApplyDNSFix = true;
+        serverStatusResult = await CheckPlexServerStatusAsync(plexServer, plexAccountId, false, action);
+
+        if (serverStatusResult.IsSuccess && serverStatusResult.Value.IsSuccessful)
+        {
+            // DNS fix worked
+            dnsFixMsg = $"Server DNS Fix worked on {plexServer.Name}, connection successful!";
+            Log.Information(dnsFixMsg);
+            await SendServerProgress(new InspectServerProgress
+            {
+                Message = dnsFixMsg,
+                Completed = true,
+                ConnectionSuccessful = true,
+                AttemptingApplyDNSFix = true,
+            });
+            return Result.Ok(plexServer);
+        }
+
+        // DNS fix did not work
+        dnsFixMsg = $"Server DNS Fix did not help with server {plexServer.Name} - {plexServer.ServerUrl}";
+        Log.Warning(dnsFixMsg);
+        await SendServerProgress(new InspectServerProgress
+        {
+            AttemptingApplyDNSFix = true,
+            Completed = true,
+            Message = dnsFixMsg,
+        });
+
+        plexServer.ServerFixApplyDNSFix = false;
+        return Result.Fail(dnsFixMsg);
+    }
+
+    public async Task<Result<PlexServer>> InspectPlexServer(int plexServerId)
+    {
+        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId));
+        if (plexServerResult.IsFailed)
+            return plexServerResult.WithError($"Could not retrieve any PlexServer from database with id {plexServerId}.").LogError();
+
+        return await InspectPlexServer(plexServerResult.Value);
     }
 
     /// <summary>

@@ -1,5 +1,5 @@
 <template>
-	<v-dialog :max-width="1200" :value="plexServerId > 0" :width="1200" @click:outside="close">
+	<v-dialog :max-width="1200" :value="isVisible" :width="1200" @click:outside="close">
 		<v-card v-if="plexServer">
 			<v-card-title class="headline"
 				>{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }}
@@ -48,7 +48,7 @@
 
 					<!--	Server Commands -->
 					<v-tab-item>
-						<server-commands-tab-content :plex-server="plexServer" />
+						<server-commands-tab-content :plex-server="plexServer" :is-visible="isVisible" />
 					</v-tab-item>
 				</v-tabs>
 			</v-card-text>
@@ -77,6 +77,10 @@ export default class ServerDialog extends Vue {
 
 	get serverStatus(): PlexServerStatusDTO | null {
 		return this.plexServer?.status ?? null;
+	}
+
+	get isVisible(): boolean {
+		return this.plexServerId > 0;
 	}
 
 	open(plexServerId: number): void {

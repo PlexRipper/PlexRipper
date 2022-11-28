@@ -1,0 +1,81 @@
+<template>
+	<tr>
+		<!--	Server name and status	-->
+		<td style="width: 30%">
+			<status :value="progress ? progress.connectionSuccessful && progress.completed : false" />
+			{{ plexServerName }}
+		</td>
+		<!--	Status icon	-->
+		<td style="width: 10%">
+			<template v-if="progress">
+				<v-progress-circular v-if="!progress.completed" indeterminate color="red" />
+				<v-icon v-else-if="progress.connectionSuccessful">mdi-check</v-icon>
+				<v-icon v-else>mdi-close</v-icon>
+			</template>
+			<template v-else>
+				<v-progress-circular indeterminate color="red" />
+			</template>
+		</td>
+		<!--	Current Action	-->
+		<td style="width: 30%">
+			<template v-if="progress">
+				<template v-if="!progress.completed">
+					<span v-if="progress && progress.retryAttemptIndex > 0">
+						{{
+							$t('components.account-setup-progress.retry-connection', {
+								attemptIndex: progress.retryAttemptIndex,
+								attemptCount: progress.retryAttemptCount,
+							})
+						}}
+					</span>
+				</template>
+				<!--	Completed -->
+				<template v-else>
+					<span v-if="progress.connectionSuccessful">
+						{{ $t('components.account-setup-progress.server-connectable') }}
+					</span>
+					<span v-else>
+						{{ $t('components.account-setup-progress.server-un-connectable') }}
+					</span>
+				</template>
+			</template>
+		</td>
+		<!--	Error message	-->
+		<td style="width: 30%">
+			<template v-if="progress">
+				<span v-if="progress && progress.message">
+					{{ progress.message }}
+				</span>
+			</template>
+		</td>
+	</tr>
+</template>
+
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
+import { SignalrService } from '@service';
+import { InspectServerProgress } from '@dto/mainApi';
+
+@Component
+export default class InspectServerProgressDisplay extends Vue {
+	@Prop({ required: true, type: Number })
+	readonly plexServerId!: number;
+
+	@Prop({ required: true, type: String })
+	readonly plexServerName!: string;
+
+	progress: InspectServerProgress | null = null;
+
+	mounted(): void {
+		useSubscription(
+			SignalrService.getInspectServerProgress(this.plexServerId).subscribe((data) => {
+				this.progress = data;
+				if (data?.completed) {
+					this.$emit('completed', this.plexServerId);
+				}
+			}),
+		);
+	}
+}
+</script>

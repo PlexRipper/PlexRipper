@@ -9,6 +9,7 @@ Note: This, by a long shot, doesn't encompases all the changes and fixes that ha
  - Per server configurable download speed limit (See server settings > Server Configuration)
  - German UI language (Thanks to (Padso4tw)[https://github.com/padso4tw])
  - Jest and Cypress testing infrastructure
+ - Added a new server command in the server settings to inspect a server connection and attempt to fix it.
 
 ### Changed
  - Removed batch commands from the download page, these were not working and overcomplicated things too much.

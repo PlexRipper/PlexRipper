@@ -13,7 +13,7 @@ public class DownloadTracker_StopDownloadJob_IntegrationTests : BaseIntegrationT
         {
             config.Seed = 4564;
             config.MovieDownloadTasksCount = 2;
-            config.DownloadSpeedLimit = 1000;
+            config.DownloadSpeedLimit = 500;
             config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
             config.SetupMockServer();
         });
@@ -28,10 +28,7 @@ public class DownloadTracker_StopDownloadJob_IntegrationTests : BaseIntegrationT
         downloadTracker.DownloadTaskStopped.Subscribe(task => stoppedDownloadTask = task);
 
         // Act
-        // ** We can't await otherwise the DownloadTask would have finished already before attempting to stop it
-#pragma warning disable CS4014
-        Container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
-#pragma warning restore CS4014
+        await Container.GetDownloadTracker.StartDownloadClient(plexMovieDownloadTask.Id);
         await Task.Delay(2000);
         var stopResult = await Container.GetDownloadTracker.StopDownloadClient(plexMovieDownloadTask.Id);
 

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.BaseTests;
 
@@ -11,12 +10,8 @@ public partial class BaseContainer
         options?.Invoke(config);
 
         var plexServers = await PlexRipperDbContext.PlexServers.ToListAsync();
+        GetServerSettings.EnsureAllServersHaveASettingsEntry(plexServers);
         foreach (var plexServer in plexServers)
-            GetServerSettings.AddServerToSettings(new PlexServerSettingsModel
-            {
-                PlexServerName = plexServer.Name,
-                MachineIdentifier = plexServer.MachineIdentifier,
-                DownloadSpeedLimit = config.DownloadSpeedLimit,
-            });
+            GetServerSettings.SetDownloadSpeedLimit(plexServer.MachineIdentifier, config.DownloadSpeedLimit);
     }
 }

@@ -1,6 +1,5 @@
 using AutoMapper;
 using PlexRipper.Application;
-using PlexRipper.DownloadManager.DownloadClient;
 
 namespace PlexRipper.DownloadManager;
 
@@ -16,8 +15,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
     private readonly IMapper _mapper;
 
-    private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
-
     private readonly IMediator _mediator;
 
     private readonly INotificationsService _notificationsService;
@@ -29,7 +26,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     #region Constructor
 
     public DownloadTaskFactory(
-        Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
         IMediator mediator,
         IMapper mapper,
         IPlexAuthenticationService plexAuthenticationService,
@@ -38,7 +34,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         IPathSystem pathSystem,
         IDownloadManagerSettingsModule downloadManagerSettings)
     {
-        _downloadWorkerFactory = downloadWorkerFactory;
         _mediator = mediator;
         _mapper = mapper;
         _plexAuthenticationService = plexAuthenticationService;
@@ -333,11 +328,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         return Result.Ok(downloadTasks);
     }
 
-    /// <summary>
-    /// Creates <see cref="DownloadTask"/>s from a <see cref="PlexMovie"/> and send it to the <see cref="IDownloadManager"/>.
-    /// </summary>
-    /// <param name="plexMovieIds">The ids of the <see cref="PlexMovie"/> to create <see cref="DownloadTask"/>s from.</param>
-    /// <returns>The created <see cref="DownloadTask"/>.</returns>
+    /// <inheritdoc/>
     public async Task<Result<List<DownloadTask>>> GenerateMovieDownloadTasksAsync(List<int> plexMovieIds)
     {
         if (!plexMovieIds.Any())
@@ -521,7 +512,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             {
                 downloadTask.DownloadFolderId = downloadFolder.Value.Id;
                 downloadTask.DownloadFolder = downloadFolder.Value;
-
+                downloadTask.ServerMachineIdentifier = downloadTask.PlexServer.MachineIdentifier;
                 var plexLibrary = plexLibraries.Value.Find(x => x.Id == downloadTask.PlexLibraryId);
                 if (plexLibrary is not null)
                 {

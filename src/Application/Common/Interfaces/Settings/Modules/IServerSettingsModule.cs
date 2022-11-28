@@ -4,21 +4,19 @@ namespace PlexRipper.Application;
 
 public interface IServerSettingsModule : IBaseSettingsModule<IServerSettings>, IServerSettings
 {
-    IObservable<PlexServerSettingsModel> ServerSettings(int plexServerId);
+    IObservable<PlexServerSettingsModel> ServerSettings(string machineIdentifier);
 
     void SetServerSettings(PlexServerSettingsModel plexServerSettings);
 
     PlexServerSettingsModel GetPlexServerSettings(string machineIdentifier);
 
-    PlexServerSettingsModel GetPlexServerSettings(int plexServerId);
+    int GetDownloadSpeedLimit(string machineIdentifier);
 
-    int GetDownloadSpeedLimit(int plexServerId);
-
-    Result SetDownloadSpeedLimit(int plexServerId, int downloadSpeedLimit = 0);
+    Result SetDownloadSpeedLimit(string machineIdentifier, int downloadSpeedLimit = 0);
 
     Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings);
 
-    IObservable<int> GetDownloadSpeedLimitObservable(int plexServerId);
+    IObservable<int> GetDownloadSpeedLimitObservable(string machineIdentifier);
 
     void EnsureAllServersHaveASettingsEntry(List<PlexServer> plexServers);
 }

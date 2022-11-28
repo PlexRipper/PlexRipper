@@ -141,6 +141,10 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int?>("RootDownloadTaskId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ServerMachineIdentifier")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(19);
+
                     b.Property<string>("Title")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);

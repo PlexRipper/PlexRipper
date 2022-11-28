@@ -14,7 +14,7 @@ public partial class BaseContainer
         foreach (var plexServer in plexServers)
             GetServerSettings.AddServerToSettings(new PlexServerSettingsModel
             {
-                PlexServerId = plexServer.Id,
+                PlexServerName = plexServer.Name,
                 MachineIdentifier = plexServer.MachineIdentifier,
                 DownloadSpeedLimit = config.DownloadSpeedLimit,
             });

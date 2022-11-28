@@ -237,9 +237,9 @@ public class PlexDownloadClient : IDisposable
                 downloadWorker.SetDownloadSpeedLimit(downloadSpeedLimitInKb / _downloadWorkers.Count);
         }
 
-        SetDownloadSpeedLimit(_serverSettings.GetDownloadSpeedLimit(downloadTask.PlexServerId));
+        SetDownloadSpeedLimit(_serverSettings.GetDownloadSpeedLimit(downloadTask.ServerMachineIdentifier));
         _downloadSpeedLimitSubscription = _serverSettings
-            .GetDownloadSpeedLimitObservable(downloadTask.PlexServerId)
+            .GetDownloadSpeedLimitObservable(downloadTask.ServerMachineIdentifier)
             .Subscribe(SetDownloadSpeedLimit);
     }
 

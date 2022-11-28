@@ -41,6 +41,7 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadFolder, _ => null)
             .RuleFor(x => x.DownloadFolderId, _ => 1)
             .RuleFor(x => x.DestinationFolder, _ => null)
+            .RuleFor(x => x.ServerMachineIdentifier, f => f.Random.Hash())
             .RuleFor(x => x.DestinationFolderId, _ => 2)
             .RuleFor(x => x.RootDownloadTask, _ => null)
             .RuleFor(x => x.RootDownloadTaskId, _ => null);

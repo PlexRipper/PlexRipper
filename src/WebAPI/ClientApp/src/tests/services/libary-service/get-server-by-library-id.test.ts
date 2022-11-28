@@ -32,13 +32,13 @@ describe('LibraryService.getServerByLibraryId()', () => {
 		mock.onGet(PLEX_LIBRARY_RELATIVE_PATH).reply(200, generateResultDTO(libraries));
 		const serverSetup$ = ServerService.setup(ctx);
 		const librarySetup$ = LibraryService.setup(ctx);
-
+		const testLibrary = libraries[5];
 		// Act
 		const serverSetupResult = subscribeSpyTo(serverSetup$);
 		const librarySetupResult = subscribeSpyTo(librarySetup$);
 		await serverSetupResult.onComplete();
 		await librarySetupResult.onComplete();
-		const serverByLibraryId$ = LibraryService.getServerByLibraryId(libraries[5].id).pipe(take(1));
+		const serverByLibraryId$ = LibraryService.getServerByLibraryId(testLibrary.id).pipe(take(1));
 		const serverByLibraryIdResult = subscribeSpyTo(serverByLibraryId$);
 		await serverByLibraryIdResult.onComplete();
 
@@ -47,6 +47,6 @@ describe('LibraryService.getServerByLibraryId()', () => {
 		expect(librarySetupResult.receivedComplete()).toBe(true);
 		const values = serverByLibraryIdResult.getValues();
 		expect(values).toHaveLength(1);
-		expect(serverByLibraryIdResult.getFirstValue()?.id).toEqual(2);
+		expect(serverByLibraryIdResult.getFirstValue()?.id).toEqual(testLibrary.plexServerId);
 	});
 });

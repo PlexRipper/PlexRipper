@@ -13,14 +13,14 @@
 			<!-- Dialog Actions	-->
 			<v-card-actions>
 				<!-- Delete account -->
-				<DeleteButton v-if="!isNewAccount" :width="130" @click="confirmationDialogState = true" />
+				<DeleteButton v-if="!isNewAccount" class="mx-2" :width="130" @click="confirmationDialogState = true" />
 
 				<!-- Reset Form -->
-				<ResetButton :width="130" cy="account-dialog-reset-button" @click="reset" />
+				<ResetButton :width="130" class="mx-2" cy="account-dialog-reset-button" @click="reset" />
 				<v-spacer />
 
 				<!-- Cancel button -->
-				<CancelButton :width="130" cy="account-dialog-cancel-button" @click="cancel" />
+				<CancelButton :width="130" class="mx-2" cy="account-dialog-cancel-button" @click="cancel" />
 
 				<!-- Validation button -->
 				<AccountValidationButton
@@ -31,7 +31,7 @@
 					:text-id="!isValid ? 'validate' : ''"
 					:width="130"
 					cy="account-dialog-validate-button"
-					class="mr-4"
+					class="mx-2"
 					@click="validate"
 				/>
 
@@ -41,6 +41,7 @@
 					:text-id="isNewAccount ? 'create' : 'update'"
 					:cy="`account-dialog-${isNewAccount ? 'create' : 'update'}-button`"
 					:width="130"
+					class="mx-2"
 					@click="saveAccount"
 				/>
 			</v-card-actions>

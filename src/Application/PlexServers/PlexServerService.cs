@@ -299,7 +299,11 @@ public class PlexServerService : IPlexServerService
         if (plexServerResult.IsFailed)
             return plexServerResult.WithError($"Could not retrieve any PlexServer from database with id {plexServerId}.").LogError();
 
-        return await InspectPlexServer(plexServerResult.Value);
+        var plexServer = await InspectPlexServer(plexServerResult.Value);
+        var plexServers = new List<PlexServer>() { plexServer.Value };
+        _serverSettingsModule.EnsureAllServersHaveASettingsEntry(plexServers);
+        await _mediator.Send(new UpdatePlexServersCommand(plexServers));
+        return plexServerResult;
     }
 
     /// <summary>

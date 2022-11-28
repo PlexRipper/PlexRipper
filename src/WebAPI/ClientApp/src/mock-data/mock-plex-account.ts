@@ -5,8 +5,8 @@ import { checkConfig } from '@mock/mock-base';
 
 export function generatePlexAccounts(
 	config: MockConfig | null = null,
-	plexServers: PlexServerDTO[],
-	plexLibraries: PlexLibraryDTO[],
+	plexServers: PlexServerDTO[] = [],
+	plexLibraries: PlexLibraryDTO[] = [],
 ): PlexAccountDTO[] {
 	config = checkConfig(config);
 

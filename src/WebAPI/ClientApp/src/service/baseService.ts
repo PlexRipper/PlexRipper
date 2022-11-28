@@ -3,6 +3,7 @@ import { Context } from '@nuxt/types';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { EMPTY, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import IAppConfig from '@class/IAppConfig';
@@ -18,25 +19,24 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 	}
 
 	protected constructor(serviceName: string, settings: ObservableStoreSettings) {
-		if (!ObservableStore.isStoreInitialized) {
-			ObservableStore.initializeState(DefaultState);
-			Log.debug('Observable store was initialized');
-		}
-
 		settings.trackStateHistory = true;
 		super(settings);
 		this._name = serviceName;
 	}
 
 	public logHistory(): void {
-		Log.trace(`Current ${this._name} state history:`, this.stateHistory);
+		Log.info(`Current ${this._name} state history:`, this.stateHistory);
 	}
 
 	public logState(): void {
-		Log.debug(`Current state of ${this._name}`, this.getState(true));
+		Log.info(`Current state of ${this._name}`, this.getState(true));
 	}
 
 	protected setup(nuxtContext, appConfig: IAppConfig | null = null): Observable<ISetupResult> {
+		if (!ObservableStore.isStoreInitialized) {
+			ObservableStore.initializeState(DefaultState);
+			Log.debug('Observable store was initialized');
+		}
 		this._nuxtContext = nuxtContext;
 		if (appConfig !== null) {
 			this._appConfig = appConfig;
@@ -95,8 +95,17 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 
 	// region ReadStore
 
+	/**
+	 * A reactive store slice property getter which is a wrapper for `this.getStateSliceProperty` with IStoreState keyOf  propertyNames
+	 * @param {string} propertyName
+	 * @protected
+	 */
 	protected getStoreSlice<T>(propertyName: keyof IStoreState): T {
 		return this.getStateSliceProperty<T>(propertyName, true);
+	}
+
+	protected getStateChanged<T>(propertyName: keyof IStoreState): Observable<T> {
+		return this.stateChanged.pipe(map((x) => x[propertyName] as unknown as T));
 	}
 
 	// endregion

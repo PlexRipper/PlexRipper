@@ -1,3 +1,5 @@
+// noinspection AllyPlainJsInspection
+
 import { MockConfig } from '@mock/interfaces';
 import { SettingsModelDTO, ViewMode } from '@dto/mainApi';
 import { checkConfig } from '@mock/mock-base';

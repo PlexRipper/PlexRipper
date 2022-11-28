@@ -1,5 +1,5 @@
 <template>
-	<v-card>
+	<v-card class="account-setup-progress">
 		<v-card-text>
 			<!-- The total progress -->
 			<progress-component
@@ -21,13 +21,12 @@
 						<!--	Status icon	-->
 						<td style="width: 10%">
 							<template v-if="progress">
-								<template v-if="!progress.completed">
-									<v-progress-circular indeterminate color="red" />
-								</template>
-								<template v-else>
-									<v-icon v-if="progress.connectionSuccessful">mdi-check</v-icon>
-									<v-icon v-else>mdi-close</v-icon>
-								</template>
+								<v-progress-circular v-if="!progress.completed" indeterminate color="red" />
+								<v-icon v-else-if="progress.connectionSuccessful">mdi-check</v-icon>
+								<v-icon v-else>mdi-close</v-icon>
+							</template>
+							<template v-else>
+								<v-progress-circular indeterminate color="red" />
 							</template>
 						</td>
 						<!--	Current Action	-->
@@ -91,8 +90,8 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
-import { switchMap } from 'rxjs/operators';
 import { clamp } from 'lodash-es';
+import Log from 'consola';
 import { SignalrService, ServerService } from '@service';
 import type { InspectServerProgress, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 
@@ -144,17 +143,17 @@ export default class AccountSetupProgress extends Vue {
 	}
 
 	mounted(): void {
+		Log.info('Mounted was fired!');
 		useSubscription(
 			SignalrService.getAllInspectServerProgress().subscribe((data) => {
+				Log.info('getAllInspectServerProgress was fired!', data);
 				this.inspectServerProgresses = data;
 			}),
 		);
 		useSubscription(
-			ServerService.refreshPlexServers()
-				.pipe(switchMap(() => ServerService.getServers(this.account.plexServerAccess.map((x) => x.plexServerId))))
-				.subscribe((servers) => {
-					this.plexServers = servers;
-				}),
+			ServerService.getServersByPlexAccountId(this.account.id).subscribe((servers) => {
+				this.plexServers = servers;
+			}),
 		);
 	}
 }

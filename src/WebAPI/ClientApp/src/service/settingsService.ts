@@ -332,16 +332,19 @@ export class SettingsService extends BaseService {
 	public updateServerSettings(value: PlexServerSettingsModel): void {
 		const data = this.getSettingsModule('serverSettings').data as PlexServerSettingsModel[];
 		const settings: ServerSettingsDTO = {
-			data: [...data.filter((x) => x.plexServerId !== value.plexServerId), value],
+			data: [...data.filter((x) => x.machineIdentifier !== value.machineIdentifier), value],
 		};
 
-		this.setState({ serverSettings: settings }, `Update ServerSettings for server id: ${value.plexServerId}`);
+		this.setState(
+			{ serverSettings: settings },
+			`Update ServerSettings for server ${value.plexServerName} with machine id: ${value.machineIdentifier}`,
+		);
 		this.sendSettingsToApi();
 	}
 
-	public getServerSettings(plexServerId: number): Observable<PlexServerSettingsModel> {
+	public getServerSettings(machineIdentifier: string): Observable<PlexServerSettingsModel> {
 		return this.stateChanged.pipe(
-			map((x) => x?.serverSettings.data.find((y) => y.plexServerId === plexServerId)),
+			map((x) => x?.serverSettings.data.find((y) => y.machineIdentifier === machineIdentifier)),
 			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);

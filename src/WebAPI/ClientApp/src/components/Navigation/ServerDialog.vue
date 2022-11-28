@@ -62,6 +62,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
+import { switchMap, tap } from 'rxjs/operators';
 import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel, PlexServerStatusDTO } from '@dto/mainApi';
 import { FolderPathService, LibraryService, ServerService, SettingsService } from '@service';
 
@@ -88,9 +89,16 @@ export default class ServerDialog extends Vue {
 		this.show = true;
 
 		useSubscription(
-			ServerService.getServer(plexServerId).subscribe((plexServer) => {
-				this.plexServer = plexServer;
-			}),
+			ServerService.getServer(plexServerId)
+				.pipe(
+					tap((plexServer) => {
+						this.plexServer = plexServer;
+					}),
+					switchMap((plexServer) => SettingsService.getServerSettings(plexServer?.machineIdentifier ?? '')),
+				)
+				.subscribe((plexServerSettings) => {
+					this.plexServerSettings = plexServerSettings;
+				}),
 		);
 		useSubscription(
 			LibraryService.getLibrariesByServerId(plexServerId).subscribe((plexLibraries) => {
@@ -100,11 +108,6 @@ export default class ServerDialog extends Vue {
 		useSubscription(
 			FolderPathService.getFolderPaths().subscribe((folderPaths) => {
 				this.folderPaths = folderPaths;
-			}),
-		);
-		useSubscription(
-			SettingsService.getServerSettings(plexServerId).subscribe((plexServerSettings) => {
-				this.plexServerSettings = plexServerSettings;
 			}),
 		);
 	}

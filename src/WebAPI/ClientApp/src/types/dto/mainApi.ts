@@ -572,8 +572,7 @@ export interface ServerSettingsDTO {
 }
 
 export interface PlexServerSettingsModel {
-	/** @format int32 */
-	plexServerId?: number;
+	plexServerName?: string | null;
 	machineIdentifier?: string | null;
 	/** @format int32 */
 	downloadSpeedLimit?: number;

@@ -3,13 +3,13 @@ import { checkConfig, incrementSeed } from './mock-base';
 import { MockConfig } from '@mock/interfaces';
 import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 
-export function generatePlexServers(config: MockConfig | null = null): PlexServerDTO[] {
-	config = checkConfig(config);
+export function generatePlexServers(config: Partial<MockConfig> = {}): PlexServerDTO[] {
+	const validConfig = checkConfig(config);
 
 	const plexServers: PlexServerDTO[] = [];
 
 	// @ts-ignore
-	for (let i = 0; i < config.plexServerCount; i++) {
+	for (let i = 0; i < validConfig.plexServerCount; i++) {
 		incrementSeed(i);
 		const scheme = 'http';
 		const host = faker.internet.ipv4();
@@ -29,7 +29,7 @@ export function generatePlexServers(config: MockConfig | null = null): PlexServe
 			createdAt: faker.date.past().toUTCString(),
 			updatedAt: faker.date.recent().toUTCString(),
 			downloadTasks: [],
-			status: generatePlexServerStatus(config),
+			status: generatePlexServerStatus(validConfig),
 			ownerId: faker.datatype.number(99999),
 			serverUrl: url,
 		});
@@ -38,8 +38,8 @@ export function generatePlexServers(config: MockConfig | null = null): PlexServe
 	return plexServers;
 }
 
-export function generatePlexServerStatus(config: MockConfig | null = null): PlexServerStatusDTO {
-	config = checkConfig(config);
+export function generatePlexServerStatus(config: Partial<MockConfig> = {}): PlexServerStatusDTO {
+	const validConfig = checkConfig(config);
 
 	return {
 		id: 1,

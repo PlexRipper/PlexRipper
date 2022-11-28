@@ -2,10 +2,11 @@ import { faker } from '@faker-js/faker';
 import { MockConfig } from '@mock/interfaces';
 import { generatePlexServers } from '@mock/mock-plex-server';
 import { generatePlexLibraries } from '@mock/mock-plex-library';
-import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
-import { incrementSeed } from '@mock/mock-base';
+import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { checkConfig, incrementSeed } from '@mock/mock-base';
+import { generatePlexAccounts } from '@mock/mock-plex-account';
 
-export function generatePlexServersAndLibraries(config: MockConfig | null = null): {
+export function generatePlexServersAndLibraries(config: Partial<MockConfig> = {}): {
 	servers: PlexServerDTO[];
 	libraries: PlexLibraryDTO[];
 } {
@@ -20,5 +21,30 @@ export function generatePlexServersAndLibraries(config: MockConfig | null = null
 	return {
 		servers,
 		libraries,
+	};
+}
+
+export function generatePlexAccountServerAndLibraries(config: Partial<MockConfig> = {}): {
+	account: PlexAccountDTO;
+	servers: PlexServerDTO[];
+	libraries: PlexLibraryDTO[];
+} {
+	const validConfig = checkConfig(config);
+
+	const { servers, libraries } = generatePlexServersAndLibraries(validConfig);
+	const account = generatePlexAccounts(validConfig)[0];
+
+	for (let i = 0; i < Math.min(validConfig.plexServerAccessCount, servers.length - 1); i++) {
+		const serverId = faker.helpers.arrayElement<PlexServerDTO>(servers).id;
+		account.plexServerAccess.push({
+			plexServerId: serverId,
+			plexLibraryIds: libraries.filter((x) => x.plexServerId === serverId).map((x) => x.id),
+		});
+	}
+
+	return {
+		servers,
+		libraries,
+		account,
 	};
 }

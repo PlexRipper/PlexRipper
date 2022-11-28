@@ -3,15 +3,14 @@ import { checkConfig, incrementSeed } from './mock-base';
 import { MockConfig } from '@mock/interfaces';
 import { FolderPathDTO, PlexLibraryDTO, PlexMediaType } from '@dto/mainApi';
 
-export function generatePlexLibraries(config: MockConfig | null = null): PlexLibraryDTO[] {
-	config = checkConfig(config);
+export function generatePlexLibraries(config: Partial<MockConfig> = {}): PlexLibraryDTO[] {
+	const configValid = checkConfig(config);
 
 	const plexLibraries: PlexLibraryDTO[] = [];
 
-	// @ts-ignore
-	for (let i = 0; i < config.plexLibraryCount; i++) {
+	for (let i = 0; i < configValid.plexLibraryCount; i++) {
 		incrementSeed(i);
-		const type = faker.helpers.arrayElement<PlexMediaType>(config.plexLibraryTypes);
+		const type = faker.helpers.arrayElement<PlexMediaType>(configValid.plexLibraryTypes);
 
 		const library: PlexLibraryDTO = {
 			id: i + 1,

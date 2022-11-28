@@ -1,4 +1,4 @@
-import { MockConfig, generateResultDTO, generatePlexAccounts, generatePlexServers, generateSettings } from '@mock';
+import { generatePlexAccounts, generatePlexServers, generateResultDTO, generateSettings } from '@mock';
 import {
 	DOWNLOAD_API_URL,
 	FOLDER_PATH_API_URL,
@@ -10,10 +10,13 @@ import {
 	PROGRESS_HUB_URL,
 	SETTINGS_API_URL,
 } from '@api-urls';
+import { baseVars } from '@services-test-base';
 
-describe('empty spec', () => {
+describe('Ensure the page loads correctly', () => {
+	let { config } = baseVars();
+
 	it('passes', () => {
-		const config: MockConfig = {
+		config = {
 			plexAccountCount: 2,
 			plexServerCount: 5,
 		};

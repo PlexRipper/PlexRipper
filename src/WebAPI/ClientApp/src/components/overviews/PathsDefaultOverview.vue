@@ -99,7 +99,6 @@ export default class PathsDefaultOverview extends Vue {
 		// Ensure there are no active downloads before being allowed to change.
 		useSubscription(
 			DownloadService.getActiveDownloadList().subscribe((data) => {
-				Log.debug('data', data);
 				this.allowEditing = data?.length === 0 ?? false;
 			}),
 		);

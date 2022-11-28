@@ -13,14 +13,14 @@
 			<!-- Dialog Actions	-->
 			<v-card-actions>
 				<!-- Delete account -->
-				<DeleteButton v-if="!isNewAccount" :width="130" @click="confirmationDialogState = true" />
+				<DeleteButton v-if="!isNewAccount" class="mx-2" :width="130" @click="confirmationDialogState = true" />
 
 				<!-- Reset Form -->
-				<ResetButton :width="130" @click="reset" />
+				<ResetButton :width="130" class="mx-2" cy="account-dialog-reset-button" @click="reset" />
 				<v-spacer />
 
 				<!-- Cancel button -->
-				<CancelButton :width="130" @click="cancel" />
+				<CancelButton :width="130" class="mx-2" cy="account-dialog-cancel-button" @click="cancel" />
 
 				<!-- Validation button -->
 				<AccountValidationButton
@@ -30,7 +30,8 @@
 					:loading="validateLoading"
 					:text-id="!isValid ? 'validate' : ''"
 					:width="130"
-					class="mr-4"
+					cy="account-dialog-validate-button"
+					class="mx-2"
 					@click="validate"
 				/>
 
@@ -38,13 +39,15 @@
 				<SaveButton
 					:disabled="!isAllowedToSave"
 					:text-id="isNewAccount ? 'create' : 'update'"
+					:cy="`account-dialog-${isNewAccount ? 'create' : 'update'}-button`"
 					:width="130"
+					class="mx-2"
 					@click="saveAccount"
 				/>
 			</v-card-actions>
 		</v-card>
 		<!--	The setup account progress -->
-		<account-setup-progress v-show="isSettingUpAccount" :account="changedPlexAccount" @hide="closeDialog(true)" />
+		<account-setup-progress v-if="isSettingUpAccount" :account="changedPlexAccount" @hide="closeDialog(true)" />
 		<!--	Account Verification Code Dialog	-->
 		<account-verification-code-dialog
 			:dialog="verificationCodeDialogState"

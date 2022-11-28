@@ -23,6 +23,7 @@ export interface IBaseButtonProps {
 	lightColor: string;
 	darkColor: string;
 	href: string;
+	cy: string;
 	to: string;
 	width: number;
 	height: number;
@@ -90,6 +91,10 @@ export default Vue.extend<IBaseButtonProps>({
 			type: String,
 			default: '',
 		},
+		cy: {
+			type: String,
+			default: '',
+		},
 		lightColor: {
 			type: String,
 			default: 'black',
@@ -142,6 +147,7 @@ export default Vue.extend<IBaseButtonProps>({
 								attrs: {
 									...attrs,
 									...context.data.attrs,
+									'data-cy': props.cy,
 								},
 								props: {
 									...getSize(props),

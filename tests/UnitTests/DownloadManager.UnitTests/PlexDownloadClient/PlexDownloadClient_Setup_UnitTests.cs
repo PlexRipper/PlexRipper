@@ -47,9 +47,9 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
         await using var context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.MovieDownloadTasksCount = 1; });
 
         mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);
-        mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<int>())).Returns(4000);
+        mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<string>())).Returns(4000);
         mock.Mock<IServerSettingsModule>()
-            .Setup(x => x.GetDownloadSpeedLimitObservable(It.IsAny<int>()))
+            .Setup(x => x.GetDownloadSpeedLimitObservable(It.IsAny<string>()))
             .Returns(new Subject<int>().AsObservable());
         mock.Mock<IDownloadFileStream>()
             .Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))

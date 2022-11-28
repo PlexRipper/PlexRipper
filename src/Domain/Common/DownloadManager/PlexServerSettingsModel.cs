@@ -2,7 +2,7 @@
 
 public class PlexServerSettingsModel
 {
-    public int PlexServerId { get; set; }
+    public string PlexServerName { get; set; }
 
     public string MachineIdentifier { get; set; }
 

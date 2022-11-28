@@ -1,5 +1,5 @@
-import { firstValueFrom } from 'rxjs';
-import { MockConfig, generateResultDTO, generatePlexAccounts, generatePlexServers, generateSettings } from '@mock';
+import { baseVars } from '../../../src/tests/services/_base/base';
+import { generatePlexAccounts, generatePlexServers, generateResultDTO, generateSettings } from '@mock';
 import {
 	DOWNLOAD_API_URL,
 	FOLDER_PATH_API_URL,
@@ -11,13 +11,12 @@ import {
 	PROGRESS_HUB_URL,
 	SETTINGS_API_URL,
 } from '@api-urls';
-import { GlobalService } from '@service';
 
 describe('empty spec', () => {
-	beforeEach(() => {});
+	let { config } = baseVars();
 
 	it('passes', () => {
-		const config: MockConfig = {
+		config = {
 			plexAccountCount: 2,
 			plexServerCount: 5,
 		};

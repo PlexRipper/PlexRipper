@@ -1,11 +1,9 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
+import { beforeAll, describe, expect, test } from '@jest/globals';
 import { take } from 'rxjs/operators';
-import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
-import { GlobalService, LibraryService, ServerService } from '@service';
-import { generatePlexServers, generateResultDTO } from '@mock';
+import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
+import { LibraryService, ServerService } from '@service';
+import { generateResultDTO } from '@mock';
 import { PLEX_LIBRARY_RELATIVE_PATH, PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
-import ISetupResult from '@interfaces/service/ISetupResult';
-import { generatePlexLibraries } from '@mock/mock-plex-library';
 import { generatePlexServersAndLibraries } from '@mock/mock-combination';
 
 describe('LibraryService.getServerByLibraryId()', () => {
@@ -34,13 +32,13 @@ describe('LibraryService.getServerByLibraryId()', () => {
 		mock.onGet(PLEX_LIBRARY_RELATIVE_PATH).reply(200, generateResultDTO(libraries));
 		const serverSetup$ = ServerService.setup(ctx);
 		const librarySetup$ = LibraryService.setup(ctx);
-
+		const testLibrary = libraries[5];
 		// Act
 		const serverSetupResult = subscribeSpyTo(serverSetup$);
 		const librarySetupResult = subscribeSpyTo(librarySetup$);
 		await serverSetupResult.onComplete();
 		await librarySetupResult.onComplete();
-		const serverByLibraryId$ = LibraryService.getServerByLibraryId(libraries[5].id).pipe(take(1));
+		const serverByLibraryId$ = LibraryService.getServerByLibraryId(testLibrary.id).pipe(take(1));
 		const serverByLibraryIdResult = subscribeSpyTo(serverByLibraryId$);
 		await serverByLibraryIdResult.onComplete();
 
@@ -49,6 +47,6 @@ describe('LibraryService.getServerByLibraryId()', () => {
 		expect(librarySetupResult.receivedComplete()).toBe(true);
 		const values = serverByLibraryIdResult.getValues();
 		expect(values).toHaveLength(1);
-		expect(serverByLibraryIdResult.getFirstValue()?.id).toEqual(2);
+		expect(serverByLibraryIdResult.getFirstValue()?.id).toEqual(testLibrary.plexServerId);
 	});
 });

@@ -94,6 +94,9 @@ public class DownloadTask : BaseEntity
     [Column(Order = 18)]
     public int DownloadSpeed { get; set; }
 
+    [Column(Order = 19)]
+    public string ServerMachineIdentifier { get; set; }
+
     /// <summary>
     /// Gets or sets the download priority, the higher the more important.
     /// </summary>

@@ -37,3 +37,11 @@ export function syncPlexServer(serverId: number, forceSync: boolean = false): Ob
 		apiName: syncPlexServer.name,
 	});
 }
+
+export function inspectPlexServer(serverId: number): Observable<ResultDTO> {
+	return PlexRipperAxios.get<void>({
+		url: `${PLEX_SERVER_RELATIVE_PATH}/${serverId}/inspect`,
+		apiCategory: logText,
+		apiName: syncPlexServer.name,
+	});
+}

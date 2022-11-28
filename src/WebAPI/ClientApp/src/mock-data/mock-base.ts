@@ -3,12 +3,12 @@ import { faker } from '@faker-js/faker';
 import { MockConfig } from '@mock/interfaces';
 import { PlexMediaType } from '@dto/mainApi';
 
-export function checkConfig(config: MockConfig | null = null): MockConfig {
+export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 	if (config === null || config === undefined) {
 		return checkConfig({});
 	}
 
-	const newConfig: MockConfig = cloneDeep(config);
+	const newConfig: Partial<MockConfig> = cloneDeep(config);
 	if (!hasConfigProperty(config, 'plexServerCount')) {
 		newConfig.plexServerCount = 5;
 	}
@@ -29,13 +29,17 @@ export function checkConfig(config: MockConfig | null = null): MockConfig {
 		newConfig.plexLibraryCount = 5;
 	}
 
+	if (!hasConfigProperty(config, 'plexServerAccessCount')) {
+		newConfig.plexServerAccessCount = 3;
+	}
+
 	if (!hasConfigProperty(config, 'plexLibraryTypes')) {
 		newConfig.plexLibraryTypes = [PlexMediaType.Movie, PlexMediaType.TvShow];
 	}
 
 	faker.seed(config.seed);
 
-	return newConfig;
+	return newConfig as MockConfig;
 }
 
 export function setSeed(seed: number) {
@@ -49,6 +53,6 @@ export function incrementSeed(increment: number) {
 	setSeed(faker.seed() + increment);
 }
 
-function hasConfigProperty(config: MockConfig, key: keyof MockConfig) {
+function hasConfigProperty(config: Partial<MockConfig>, key: keyof MockConfig) {
 	return config.hasOwnProperty(key);
 }

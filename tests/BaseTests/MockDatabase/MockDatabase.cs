@@ -182,7 +182,10 @@ public static class MockDatabase
         var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.Movie);
         plexLibrary.ShouldNotBeNull();
 
-        downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id);
+        var plexServer = context.PlexServers.FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
+        plexServer.ShouldNotBeNull();
+
+        downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
 
         context.DownloadTasks.AddRange(downloadTasks);
         await context.SaveChangesAsync();
@@ -200,8 +203,10 @@ public static class MockDatabase
         var downloadTasks = FakeData.GetTvShowDownloadTask(options).Generate(config.TvShowDownloadTasksCount);
         var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.TvShow);
         plexLibrary.ShouldNotBeNull();
+        var plexServer = context.PlexServers.FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
+        plexServer.ShouldNotBeNull();
 
-        downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id);
+        downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
 
         context.DownloadTasks.AddRange(downloadTasks);
         await context.SaveChangesAsync();

@@ -1,5 +1,5 @@
 <template>
-	<v-dialog :max-width="1200" :value="plexServerId > 0" :width="1200" @click:outside="close">
+	<v-dialog :max-width="1200" :value="isVisible" :width="1200" @click:outside="close">
 		<v-card v-if="plexServer">
 			<v-card-title class="headline"
 				>{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }}
@@ -48,13 +48,13 @@
 
 					<!--	Server Commands -->
 					<v-tab-item>
-						<server-commands-tab-content :plex-server="plexServer" />
+						<server-commands-tab-content :plex-server="plexServer" :is-visible="isVisible" />
 					</v-tab-item>
 				</v-tabs>
 			</v-card-text>
 		</v-card>
 		<v-card v-else>
-			<h1>PlexServer object was invalid</h1>
+			<h1>{{ $t('components.server-dialog.no-servers-error') }}</h1>
 		</v-card>
 	</v-dialog>
 </template>
@@ -62,6 +62,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
+import { switchMap, tap } from 'rxjs/operators';
 import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel, PlexServerStatusDTO } from '@dto/mainApi';
 import { FolderPathService, LibraryService, ServerService, SettingsService } from '@service';
 
@@ -79,14 +80,25 @@ export default class ServerDialog extends Vue {
 		return this.plexServer?.status ?? null;
 	}
 
+	get isVisible(): boolean {
+		return this.plexServerId > 0;
+	}
+
 	open(plexServerId: number): void {
 		this.plexServerId = plexServerId;
 		this.show = true;
 
 		useSubscription(
-			ServerService.getServer(plexServerId).subscribe((plexServer) => {
-				this.plexServer = plexServer;
-			}),
+			ServerService.getServer(plexServerId)
+				.pipe(
+					tap((plexServer) => {
+						this.plexServer = plexServer;
+					}),
+					switchMap((plexServer) => SettingsService.getServerSettings(plexServer?.machineIdentifier ?? '')),
+				)
+				.subscribe((plexServerSettings) => {
+					this.plexServerSettings = plexServerSettings;
+				}),
 		);
 		useSubscription(
 			LibraryService.getLibrariesByServerId(plexServerId).subscribe((plexLibraries) => {
@@ -96,11 +108,6 @@ export default class ServerDialog extends Vue {
 		useSubscription(
 			FolderPathService.getFolderPaths().subscribe((folderPaths) => {
 				this.folderPaths = folderPaths;
-			}),
-		);
-		useSubscription(
-			SettingsService.getServerSettings(plexServerId).subscribe((plexServerSettings) => {
-				this.plexServerSettings = plexServerSettings;
 			}),
 		);
 	}

@@ -1,10 +1,10 @@
 import { Context } from '@nuxt/types';
-import { Observable, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
-import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService } from '@service';
+import { AccountService, BaseService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class ServerService extends BaseService {
@@ -59,6 +59,22 @@ export class ServerService extends BaseService {
 
 	public getServer(serverId: number): Observable<PlexServerDTO | null> {
 		return this.getServers([serverId]).pipe(map((servers) => (servers.length > 0 ? servers[0] : null)));
+	}
+
+	/**
+	 * Retrieves the accessible PlexServer for the given PlexAccount
+	 * @param {Number} plexAccountId
+	 */
+	public getServersByPlexAccountId(plexAccountId: number): Observable<PlexServerDTO[]> {
+		return combineLatest([this.getStateChanged<PlexServerDTO[]>('servers'), AccountService.getAccount(plexAccountId)]).pipe(
+			map(([servers, account]: [PlexServerDTO[], PlexAccountDTO | null]) => {
+				if (!account) {
+					return [];
+				}
+				const serverIds = account.plexServerAccess.map((x) => x.plexServerId);
+				return servers.filter((server) => serverIds.includes(server.id));
+			}),
+		);
 	}
 
 	public checkServer(plexServerId: number): Observable<PlexServerStatusDTO | null> {

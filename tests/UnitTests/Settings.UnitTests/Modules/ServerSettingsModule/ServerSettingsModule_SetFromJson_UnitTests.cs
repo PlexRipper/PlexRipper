@@ -21,8 +21,8 @@ public class ServerSettingsModule_SetFromJson_UnitTests : BaseUnitTest<ServerSet
         _sut.Data.Count.ShouldBe(5);
         foreach (var sourceServerSettingsModel in settingsModel.ServerSettings.Data)
         {
-            var targetServerSettingsModel = _sut.Data.Find(x => x.PlexServerId == sourceServerSettingsModel.PlexServerId);
-            targetServerSettingsModel.ShouldNotBeNull($"PlexServer with Id {sourceServerSettingsModel.PlexServerId} was not parsed correctly");
+            var targetServerSettingsModel = _sut.Data.Find(x => x.MachineIdentifier == sourceServerSettingsModel.MachineIdentifier);
+            targetServerSettingsModel.ShouldNotBeNull($"PlexServer with {sourceServerSettingsModel.MachineIdentifier} was not parsed correctly");
             targetServerSettingsModel.MachineIdentifier = sourceServerSettingsModel.MachineIdentifier;
             targetServerSettingsModel.DownloadSpeedLimit = sourceServerSettingsModel.DownloadSpeedLimit;
         }

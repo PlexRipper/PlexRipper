@@ -6,7 +6,7 @@ import { MockConfig } from '@mock';
 
 export * from '@hirez_io/observer-spy';
 
-export function baseVars(): { ctx: Context; mock: MockAdapter; config: MockConfig } {
+export function baseVars(): { ctx: Context; mock: MockAdapter; config: Partial<MockConfig> } {
 	let ctx, mock;
 	return {
 		ctx,

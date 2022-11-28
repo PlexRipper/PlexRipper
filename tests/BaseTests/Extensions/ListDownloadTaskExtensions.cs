@@ -2,7 +2,7 @@
 
 public static class ListDownloadTaskExtensions
 {
-    public static List<DownloadTask> SetIds(this List<DownloadTask> downloadTasks, int plexServerId, int plexLibraryId)
+    public static List<DownloadTask> SetIds(this List<DownloadTask> downloadTasks, int plexServerId, int plexLibraryId, string serverMachineId)
     {
         List<DownloadTask> SetIdsOnDownloadTasks(List<DownloadTask> childDownloadTasks)
         {
@@ -13,6 +13,7 @@ public static class ListDownloadTaskExtensions
             {
                 downloadTask.PlexLibraryId = plexLibraryId;
                 downloadTask.PlexServerId = plexServerId;
+                downloadTask.ServerMachineIdentifier = serverMachineId;
                 if (downloadTask.Children is not null && downloadTask.Children.Any())
                     SetIdsOnDownloadTasks(downloadTask.Children);
             }

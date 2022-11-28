@@ -100,9 +100,9 @@ export class SignalrService extends BaseService {
 			this.updateStore('libraryProgress', data);
 		});
 
-		this._progressHubConnection?.on('InspectServerProgress', (data: InspectServerProgress) => {
-			this.updateStore('inspectServerProgress', data, 'plexServerId');
-		});
+		this._progressHubConnection?.on('InspectServerProgress', (data: InspectServerProgress) =>
+			this.setInspectServerProgress(data),
+		);
 
 		this._progressHubConnection?.on('SyncServerProgress', (data: SyncServerProgress) => {
 			this.updateStore('syncServerProgress', data);
@@ -259,6 +259,13 @@ export class SignalrService extends BaseService {
 			filter((progress) => !!progress),
 			distinctUntilChanged(isEqual),
 		);
+	}
+
+	// endregion
+	// region SetUpdate
+
+	public setInspectServerProgress(data: InspectServerProgress): void {
+		this.updateStore('inspectServerProgress', data, 'plexServerId');
 	}
 
 	// endregion

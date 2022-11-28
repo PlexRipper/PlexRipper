@@ -1,7 +1,7 @@
 import { describe, beforeAll, expect, test } from '@jest/globals';
 import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
 import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '~/tests/services/_base/base';
-import { ServerService, GlobalService } from '@service';
+import { ServerService } from '@service';
 import { generatePlexServers, generateResultDTO } from '@mock';
 import ISetupResult from '@interfaces/service/ISetupResult';
 

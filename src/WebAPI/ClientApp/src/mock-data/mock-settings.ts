@@ -4,8 +4,8 @@ import { MockConfig } from '@mock/interfaces';
 import { SettingsModelDTO, ViewMode } from '@dto/mainApi';
 import { checkConfig } from '@mock/mock-base';
 
-export function generateSettings(config: MockConfig | null = null): SettingsModelDTO {
-	config = checkConfig(config);
+export function generateSettings(config: Partial<MockConfig> = {}): SettingsModelDTO {
+	const validConfig = checkConfig(config);
 
 	return <SettingsModelDTO>{
 		dateTimeSettings: {
@@ -29,7 +29,7 @@ export function generateSettings(config: MockConfig | null = null): SettingsMode
 			data: [],
 		},
 		generalSettings: {
-			firstTimeSetup: !!config.firstTimeSetup,
+			firstTimeSetup: validConfig.firstTimeSetup,
 			activeAccountId: 0,
 		},
 		confirmationSettings: {

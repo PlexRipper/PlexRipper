@@ -4,16 +4,15 @@ import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { checkConfig } from '@mock/mock-base';
 
 export function generatePlexAccounts(
-	config: MockConfig | null = null,
+	config: Partial<MockConfig> = {},
 	plexServers: PlexServerDTO[] = [],
 	plexLibraries: PlexLibraryDTO[] = [],
 ): PlexAccountDTO[] {
-	config = checkConfig(config);
+	const validConfig = checkConfig(config);
 
 	const plexAccounts: PlexAccountDTO[] = [];
 
-	// @ts-ignore
-	for (let i = 0; i < config.plexAccountCount; i++) {
+	for (let i = 0; i < validConfig.plexAccountCount; i++) {
 		plexAccounts.push({
 			id: i + 1,
 			displayName: faker.internet.email(),

@@ -1,11 +1,9 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
+import { beforeAll, describe, expect, test } from '@jest/globals';
 import { take } from 'rxjs/operators';
-import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
-import { GlobalService, LibraryService, ServerService } from '@service';
-import { generatePlexServers, generateResultDTO } from '@mock';
+import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
+import { LibraryService, ServerService } from '@service';
+import { generateResultDTO } from '@mock';
 import { PLEX_LIBRARY_RELATIVE_PATH, PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
-import ISetupResult from '@interfaces/service/ISetupResult';
-import { generatePlexLibraries } from '@mock/mock-plex-library';
 import { generatePlexServersAndLibraries } from '@mock/mock-combination';
 
 describe('LibraryService.getServerByLibraryId()', () => {

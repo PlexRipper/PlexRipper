@@ -32,24 +32,28 @@ public class UserSettings_Reset_UnitTests
         // Act
         var changedSettings = new SettingsModel
         {
-            DateTimeSettings =
+            DateTimeSettings = new DateTimeSettings()
             {
                 TimeFormat = string.Empty,
                 TimeZone = string.Empty,
                 LongDateFormat = string.Empty,
                 ShortDateFormat = string.Empty,
             },
-            ConfirmationSettings =
+            ConfirmationSettings = new ConfirmationSettings()
             {
                 AskDownloadEpisodeConfirmation = false,
                 AskDownloadMovieConfirmation = false,
                 AskDownloadSeasonConfirmation = false,
                 AskDownloadTvShowConfirmation = false,
             },
-            LanguageSettings =
+            LanguageSettings = new LanguageSettings()
             {
                 Language = string.Empty,
             },
+            DisplaySettings = new DisplaySettings(),
+            GeneralSettings = new GeneralSettings(),
+            ServerSettings = new ServerSettings(),
+            DownloadManagerSettings = new DownloadManagerSettings(),
         };
         sut.UpdateSettings(changedSettings);
         sut.Reset();

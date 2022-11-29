@@ -13,7 +13,7 @@ public class MockFileMergeStreamProvider : IFileMergeStreamProvider
     }
 
 #pragma warning disable CS1998
-    public async Task<Result<Stream>> CreateMergeStream(string destinationDirectory)
+    public async Task<Result<Stream>> OpenOrCreateMergeStream(string fileDestinationPath)
     {
         var stream = new MemoryStream();
         _testStreamTracker.AddFileMergeStream(stream);

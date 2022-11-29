@@ -114,10 +114,18 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
         }
     }
 
-    public Result Update(IServerSettingsModule sourceSettings)
+    public override IServerSettings Update(IServerSettings sourceSettings)
     {
-        Data = sourceSettings.Data;
-        return Result.Ok();
+        if (sourceSettings?.Data is null)
+        {
+            Log.Warning($"Can not update settings module {Name} with source settings null");
+            return GetValues();
+        }
+
+        foreach (var plexServerSettingsModel in sourceSettings.Data)
+            SetServerSettings(plexServerSettingsModel);
+
+        return GetValues();
     }
 
     public void EnsureAllServersHaveASettingsEntry(List<PlexServer> plexServers)

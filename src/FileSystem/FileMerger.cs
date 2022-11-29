@@ -120,7 +120,7 @@ public class FileMerger : IFileMerger
 
             try
             {
-                var streamResult = await _fileMergeStreamProvider.CreateMergeStream(fileTask.DownloadTask.DestinationDirectory);
+                var streamResult = await _fileMergeStreamProvider.OpenOrCreateMergeStream(fileTask.DestinationFilePath);
                 if (streamResult.IsFailed)
                 {
                     streamResult.LogError();
@@ -135,7 +135,7 @@ public class FileMerger : IFileMerger
                 Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
 
                 // TODO Make merge able to be canceled with token
-                await _fileMergeStreamProvider.MergeFiles(fileTask.FilePaths, outputStream, _bytesReceivedProgress);
+                await _fileMergeStreamProvider.MergeFiles(fileTask.FilePaths, outputStream, _bytesReceivedProgress, _token);
 
                 _fileMergeSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
                 await outputStream.DisposeAsync();

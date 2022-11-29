@@ -38,7 +38,7 @@ public class DirectorySystem : IDirectorySystem
     public Result CreateDirectoryFromFilePath(string filePath)
     {
         if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
-            return Result.Fail("parameter filepath was empty");
+            return Result.Fail("Parameter filepath was empty");
 
         var directoryPathResult = _pathSystem.GetDirectoryName(filePath);
         if (directoryPathResult.IsFailed)
@@ -47,7 +47,7 @@ public class DirectorySystem : IDirectorySystem
         if (string.IsNullOrEmpty(directoryPathResult.Value))
             return Result.Fail($"Could not determine the directory name of path: {filePath}");
 
-        return Result.Ok(Directory.CreateDirectory(directoryPathResult.Value)).ToResult();
+        return CreateDirectory(directoryPathResult.Value).ToResult();
     }
 
     /// <inheritdoc />
@@ -110,7 +110,7 @@ public class DirectorySystem : IDirectorySystem
             if (directoryResult.IsFailed)
                 return directoryResult.ToResult();
 
-            var directoryExistsResult = Exists(filePath);
+            var directoryExistsResult = Exists(directoryResult.Value);
             if (directoryExistsResult.IsFailed)
                 return directoryExistsResult.ToResult();
 

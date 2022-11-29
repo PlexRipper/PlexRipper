@@ -26,14 +26,17 @@ public class SettingsModel : ISettingsModel
 
     #endregion
 
-    public SettingsModel()
+    public static SettingsModel DefaultSettings()
     {
-        GeneralSettings = new GeneralSettingsModule();
-        ConfirmationSettings = new ConfirmationSettingsModule();
-        DateTimeSettings = new DateTimeSettingsModule();
-        DisplaySettings = new DisplaySettingsModule();
-        DownloadManagerSettings = new DownloadManagerSettingsModule();
-        LanguageSettings = new LanguageSettingsModule();
-        ServerSettings = new ServerSettingsModule();
+        return new SettingsModel()
+        {
+            GeneralSettings = new GeneralSettingsModule(),
+            ConfirmationSettings = new ConfirmationSettingsModule(),
+            DateTimeSettings = new DateTimeSettingsModule(),
+            DisplaySettings = new DisplaySettingsModule(),
+            DownloadManagerSettings = new DownloadManagerSettingsModule(),
+            LanguageSettings = new LanguageSettingsModule(),
+            ServerSettings = new ServerSettingsModule(),
+        };
     }
 }

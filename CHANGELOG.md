@@ -11,6 +11,7 @@ Note: This, by a long shot, doesn't encompases all the changes and fixes that ha
  - German UI language (Thanks to (Padso4tw)[https://github.com/padso4tw])
  - Jest and Cypress testing infrastructure
  - Added a new server command in the server settings to inspect a server connection and attempt to fix it.
+ - Added a loading screen with a rotating logo
 
 ### Changed
  - Removed batch commands from the download page, these were not working and overcomplicated things too much.

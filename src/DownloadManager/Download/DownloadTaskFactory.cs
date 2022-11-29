@@ -599,22 +599,16 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         switch (downloadTask.MediaType)
         {
             case PlexMediaType.Movie:
-                return Result.Ok(Path.Join(basePath, "Movies", $"{downloadTaskTitle} ({downloadTask.Year})"));
+                return Result.Ok(Path.Join(basePath, $"{downloadTaskTitle} ({downloadTask.Year})"));
             case PlexMediaType.TvShow:
-                return Result.Ok(Path.Join(basePath, "TvShows", downloadTaskTitle));
+                return Result.Ok(Path.Join(basePath, downloadTaskTitle));
             case PlexMediaType.Season:
-                return Result.Ok(Path.Join(basePath,
-                    "TvShows",
-                    _pathSystem.SanitizePath(titles[0]),
-                    _pathSystem.SanitizePath(titles[1])));
+                return Result.Ok(Path.Join(basePath, _pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1])));
             case PlexMediaType.Episode:
-                return Result.Ok(Path.Join(basePath,
-                    "TvShows",
-                    _pathSystem.SanitizePath(titles[0]),
-                    _pathSystem.SanitizePath(titles[1]),
+                return Result.Ok(Path.Join(basePath, _pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]),
                     _pathSystem.SanitizePath(titles[2])));
             default:
-                return Result.Ok(Path.Join(basePath, "Other", downloadTaskTitle));
+                return Result.Ok(Path.Join(basePath, downloadTaskTitle));
         }
     }
 

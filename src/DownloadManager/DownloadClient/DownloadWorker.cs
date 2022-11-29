@@ -188,7 +188,7 @@ public class DownloadWorker
             // Throttle the stream to enable download speed limiting
             var throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
 
-            var buffer = new byte[4096];
+            var buffer = new byte[8192];
 
             _timer.Start();
 

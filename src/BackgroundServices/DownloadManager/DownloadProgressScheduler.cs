@@ -15,7 +15,7 @@ public class DownloadProgressScheduler : IDownloadProgressScheduler
 
     private readonly ConcurrentDictionary<int, List<string>> _trackDictionary = new();
 
-    private readonly int _numberOfSameUpdates = 20;
+    private readonly int _numberOfSameUpdates = 200;
 
     #endregion
 

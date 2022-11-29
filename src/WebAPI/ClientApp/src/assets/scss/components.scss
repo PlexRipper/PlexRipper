@@ -3,75 +3,67 @@
 @import '~vuetify/src/styles/main.sass';
 
 /*
-Background.vue
-*/
-#background {
-	position: fixed;
-	width: 100%;
-	height: 100%;
-	z-index: -10;
-	.vanta-canvas {
-		position: fixed;
-		z-index: -10 !important;
-	}
-}
-
-/*
 PageContainer.vue
 */
 .page {
-	padding-top: 0;
-	position: absolute;
-	height: 100%;
-	width: 100%;
-	z-index: 0;
+  padding-top: 0;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  z-index: 0;
 }
 
 /*
 AppBar.vue
 */
 .app-bar {
-	height: $app-bar-height;
-	&.theme--dark {
-		background: rgba(255, 0, 0, 0.2) !important;
-	}
-	&.theme--light {
-		background: rgba(255, 0, 0, 1) !important;
-	}
+  height: $app-bar-height;
+
+  &.theme--dark {
+    background: rgba(255, 0, 0, 0.2) !important;
+  }
+
+  &.theme--light {
+    background: rgba(255, 0, 0, 1) !important;
+  }
 }
 
 /*
 NavigationDrawer.vue
 */
 .navigation-drawer {
-	background: transparent;
-	&.theme--dark {
-		background: rgba(0, 0, 0, 0.8);
-	}
-	&.theme--light {
-		background: rgba(255, 255, 255, 0.8);
-	}
+  background: transparent;
+
+  &.theme--dark {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  &.theme--light {
+    background: rgba(255, 255, 255, 0.8);
+  }
 }
 
 /*
 MediaPoster.vue
 */
 .poster-overlay {
-	align-items: center;
-	justify-content: center;
-	position: absolute;
-	height: 100%;
-	width: 100%;
-	background-color: rgba(0, 0, 0, 0);
-	opacity: 0;
-	transition: opacity 0.2s ease-in-out;
-	&.on-hover {
-		background-color: rgba(0, 0, 0, 0.8);
-		opacity: 0.8;
-		.v-btn {
-			opacity: 1;
-		}
-	}
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+
+  &.on-hover {
+    background-color: rgba(0, 0, 0, 0.8);
+    opacity: 0.8;
+
+    .v-btn {
+      opacity: 1;
+    }
+  }
 }
 
 /*
@@ -79,14 +71,16 @@ HelpIcon.vue
 */
 
 .form-label {
-	&.theme--dark {
-		color: white;
-	}
-	&.theme--light {
-		color: black;
-	}
-	font-size: 16px;
-	line-height: 34px;
+  &.theme--dark {
+    color: white;
+  }
+
+  &.theme--light {
+    color: black;
+  }
+
+  font-size: 16px;
+  line-height: 34px;
 }
 
 /*
@@ -95,115 +89,131 @@ P-btn.vue
 
 .p-btn,
 .navigation-btn {
-	&.filled {
-		background-color: currentColor;
-	}
-	&.outlined {
-		border: 2px solid currentColor;
-	}
-	&.theme--dark {
-		color: red;
-	}
-	&.theme--light {
-		color: darkred;
-	}
-	&:hover {
-		&::before {
-			opacity: 0.2 !important;
-		}
-	}
+  &.filled {
+    background-color: currentColor;
+  }
+
+  &.outlined {
+    border: 2px solid currentColor;
+  }
+
+  &.theme--dark {
+    color: red;
+  }
+
+  &.theme--light {
+    color: darkred;
+  }
+
+  &:hover {
+    &::before {
+      opacity: 0.2 !important;
+    }
+  }
 }
 
 /*
 MediaOverviewBar.vue
 */
 .media-overview-bar {
-	position: relative;
-	@extend .default-border;
-	@extend .pa-0;
-	@extend .no-background;
-	.v-toolbar__content {
-		@extend .pa-0;
-	}
+  position: relative;
+  @extend .default-border;
+  @extend .pa-0;
+  @extend .no-background;
+
+  .v-toolbar__content {
+    @extend .pa-0;
+  }
 }
 
 .poster-overview {
-	height: calc(100vh - 85px - 48px - 24px);
+  height: calc(100vh - 85px - 48px - 24px);
 
-	// 8% reserved for the media-overview-bar
-	// height: 92%;
+  // 8% reserved for the media-overview-bar
+  // height: 92%;
 }
+
 /*
 VTreeViewTable.vue
 */
 .v-tree-view-table {
-	@extend .no-wrap;
-	.v-tree-view-table-header {
-		height: 48px;
-		@extend .no-wrap;
+  @extend .no-wrap;
 
-		.select-all-check {
-			padding-top: 22px;
-			margin-left: 36px;
-			margin-right: 10px;
-			.v-input--selection-controls {
-				padding: 0 0 0 2px !important;
-				margin: 0 !important;
-			}
-		}
-	}
-	.title-column {
-		min-width: 100px;
-		max-width: 400px;
-		display: inline-block;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		overflow: hidden;
-	}
-	.v-tree-view-table-body {
-		&.detail-mode {
-			// In order -> viewport -> topBar -> MediaOverviewBar -> DetailsOverviewHeader -> .media-table-header -> extra
-			// height: calc(100vh - 48px - 85px - 250px - 40px - 8px);
-		}
-		.v-tree-view-table-row {
-			.v-treeview-node {
-				border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
-			}
-		}
+  .v-tree-view-table-header {
+    height: 48px;
+    @extend .no-wrap;
 
-		.v-tree-view-table-content-row {
-			@extend .ml-2;
-			@extend .flex-nowrap;
-			.v-sheet {
-				// max-height: 24px;
-			}
-		}
-	}
+    .select-all-check {
+      padding-top: 22px;
+      margin-left: 36px;
+      margin-right: 10px;
+
+      .v-input--selection-controls {
+        padding: 0 0 0 2px !important;
+        margin: 0 !important;
+      }
+    }
+  }
+
+  .title-column {
+    min-width: 100px;
+    max-width: 400px;
+    display: inline-block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .v-tree-view-table-body {
+    &.detail-mode {
+      // In order -> viewport -> topBar -> MediaOverviewBar -> DetailsOverviewHeader -> .media-table-header -> extra
+      // height: calc(100vh - 48px - 85px - 250px - 40px - 8px);
+    }
+
+    .v-tree-view-table-row {
+      .v-treeview-node {
+        border-top: 0.888889px solid rgba(255, 255, 255, 0.377);
+      }
+    }
+
+    .v-tree-view-table-content-row {
+      @extend .ml-2;
+      @extend .flex-nowrap;
+
+      .v-sheet {
+        // max-height: 24px;
+      }
+    }
+  }
 }
 
 /*
 ServerDrawer.vue
 */
 .server-name {
-	width: 190px;
-	text-overflow: ellipsis;
+  width: 190px;
+  text-overflow: ellipsis;
 }
+
 .server-panels {
-	z-index: 0;
-	&.theme--dark {
-		.v-expansion-panel {
-			background: rgba(0, 0, 0, 0.3);
-		}
-	}
-	&.theme--light {
-		.v-expansion-panel {
-			background: rgba(255, 255, 255, 0.3);
-		}
-	}
+  z-index: 0;
+
+  &.theme--dark {
+    .v-expansion-panel {
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  &.theme--light {
+    .v-expansion-panel {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
 }
+
 .ps {
-	height: 100%;
-	width: 100%;
+  height: 100%;
+  width: 100%;
 }
 
 /*
@@ -211,31 +221,32 @@ VerticalButton.vue
 */
 
 .vertical-button {
-	.vertical-button-content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		.vertical-button-label {
-			transition-duration: 0.28s;
-			height: 24px;
-		}
-	}
+  .vertical-button-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .vertical-button-label {
+      transition-duration: 0.28s;
+      height: 24px;
+    }
+  }
 }
 
 /*
 AlphabetNavigation.vue
 */
 .navigation-btn {
-	height: 32px;
-	background: transparent !important;
-	flex: 1 1 20px;
-	text-align: center;
-	font-weight: bold;
+  height: 32px;
+  background: transparent !important;
+  flex: 1 1 20px;
+  text-align: center;
+  font-weight: bold;
 }
 
 /*
 ValidIcon.vue
 */
 .valid-icon {
-	margin: 10px;
+  margin: 10px;
 }

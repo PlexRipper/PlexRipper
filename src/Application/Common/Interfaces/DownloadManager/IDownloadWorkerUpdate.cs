@@ -1,32 +1,29 @@
-﻿using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application.Common
+public interface IDownloadWorkerUpdate
 {
-    public interface IDownloadWorkerUpdate
-    {
-        int Id { get; set; }
+    int Id { get; set; }
 
-        DownloadStatus DownloadStatus { get; set; }
+    DownloadStatus DownloadStatus { get; set; }
 
-        long DataReceived { get; set; }
+    long DataReceived { get; set; }
 
-        long DataTotal { get; set; }
+    long DataTotal { get; set; }
 
-        int DownloadSpeed { get; set; }
+    int DownloadSpeed { get; set; }
 
-        int DownloadSpeedAverage { get; set; }
+    int DownloadSpeedAverage { get; set; }
 
-        string DownloadSpeedFormatted { get; }
+    string DownloadSpeedFormatted { get; }
 
-        /// <summary>
-        /// The time remaining in seconds for this DownloadWorker to finish.
-        /// </summary>
-        long TimeRemaining { get; }
+    /// <summary>
+    /// The time remaining in seconds for this DownloadWorker to finish.
+    /// </summary>
+    long TimeRemaining { get; }
 
-        long BytesRemaining { get; }
+    long BytesRemaining { get; }
 
-        bool IsCompleted { get; }
+    bool IsCompleted { get; }
 
-        decimal Percentage { get; }
-    }
+    decimal Percentage { get; }
 }

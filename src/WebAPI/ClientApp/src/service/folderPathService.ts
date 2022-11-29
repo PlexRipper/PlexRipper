@@ -1,15 +1,16 @@
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { finalize, map, switchMap, take, tap } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
 import { FolderPathDTO } from '@dto/mainApi';
-import { finalize, map, take } from 'rxjs/operators';
-import { BaseService, GlobalService } from '@service';
+import { BaseService } from '@service';
 import { getFolderPaths, createFolderPath, updateFolderPath, deleteFolderPath } from '@api/pathApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { Context } from '@nuxt/types';
-import Log from 'consola';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class FolderPathService extends BaseService {
 	public constructor() {
-		super({
+		super('FolderPathService', {
+			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
 					folderPaths: state.folderPaths,
@@ -18,24 +19,28 @@ export class FolderPathService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
 		super.setup(nuxtContext);
 
-		GlobalService.getAxiosReady()
-			.pipe(finalize(() => this.fetchFolderPaths()))
-			.subscribe();
+		return this.refreshFolderPaths().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
+	}
+
+	public refreshFolderPaths(): Observable<FolderPathDTO[]> {
+		return getFolderPaths().pipe(
+			tap((folderPaths) => {
+				if (folderPaths.isSuccess) {
+					this.setStoreProperty('folderPaths', folderPaths.value);
+				}
+			}),
+			switchMap(() => this.getFolderPaths()),
+		);
 	}
 
 	public fetchFolderPaths(): void {
-		getFolderPaths()
-			.pipe(take(1))
-			.subscribe((result) => {
-				if (result.isSuccess) {
-					Log.debug(`FolderPathService => Fetch Folder Paths`, result.value);
-
-					this.setState({ folderPaths: result.value }, 'Set Folder Paths');
-				}
-			});
+		this.refreshFolderPaths().subscribe();
 	}
 
 	public getFolderPaths(): Observable<FolderPathDTO[]> {

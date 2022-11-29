@@ -6,7 +6,7 @@
 				<v-col v-if="detailMode" cols="auto">
 					<v-list two-line class="no-background">
 						<v-list-item>
-							<p-btn icon-mode icon="mdi-arrow-left" x-large @click="back" />
+							<BaseButton icon-only icon="mdi-arrow-left" size="x-large" @click="back" />
 						</v-list-item>
 					</v-list>
 				</v-col>
@@ -17,7 +17,9 @@
 								<media-type-icon class="mx-3" :size="36" :media-type="library.type" />
 							</v-list-item-avatar>
 							<v-list-item-content>
-								<v-list-item-title>{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}</v-list-item-title>
+								<v-list-item-title>
+									{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}
+								</v-list-item-title>
 								<v-list-item-subtitle v-if="library">
 									{{ detailMode ? mediaCountFormatted : libraryCountFormatted }} -
 									<file-size :size="mediaSize" />
@@ -54,7 +56,14 @@
 		<!--	View mode	-->
 		<v-menu v-if="!detailMode" left bottom offset-y>
 			<template #activator="{ on, attrs }">
-				<vertical-button v-bind="attrs" icon="mdi-eye" label="View" :height="barHeight" :width="verticalButtonWidth" v-on="on" />
+				<vertical-button
+					v-bind="attrs"
+					icon="mdi-eye"
+					label="View"
+					:height="barHeight"
+					:width="verticalButtonWidth"
+					v-on="on"
+				/>
 			</template>
 			<!-- View mode options -->
 			<v-list>
@@ -76,10 +85,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { sum } from 'lodash-es';
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
 import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import { sum } from 'lodash';
 
 interface IViewOptions {
 	label: string;

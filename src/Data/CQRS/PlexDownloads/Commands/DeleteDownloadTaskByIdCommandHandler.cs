@@ -1,43 +1,34 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentResultExtensions.lib;
-using FluentResults;
-using FluentValidation;
-using Logging;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexDownloads
+namespace PlexRipper.Data;
+
+public class DeleteDownloadTaskByIdCommandValidator : AbstractValidator<DeleteDownloadTasksByIdCommand>
 {
-    public class DeleteDownloadTaskByIdCommandValidator : AbstractValidator<DeleteDownloadTasksByIdCommand>
+    public DeleteDownloadTaskByIdCommandValidator()
     {
-        public DeleteDownloadTaskByIdCommandValidator()
-        {
-            RuleForEach(x => x.DownloadTaskIds).GreaterThan(0);
-        }
+        RuleForEach(x => x.DownloadTaskIds).GreaterThan(0);
     }
+}
 
-    public class DeleteDownloadTaskByIDHandler : BaseHandler, IRequestHandler<DeleteDownloadTasksByIdCommand, Result<bool>>
+public class DeleteDownloadTaskByIDHandler : BaseHandler, IRequestHandler<DeleteDownloadTasksByIdCommand, Result<bool>>
+{
+    public DeleteDownloadTaskByIDHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<bool>> Handle(DeleteDownloadTasksByIdCommand command, CancellationToken cancellationToken)
     {
-        public DeleteDownloadTaskByIDHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
-
-        public async Task<Result<bool>> Handle(DeleteDownloadTasksByIdCommand command, CancellationToken cancellationToken)
+        var entities = await _dbContext.DownloadTasks.AsTracking().Where(x => command.DownloadTaskIds.Contains(x.Id)).ToListAsync(cancellationToken);
+        if (entities == null)
         {
-            var entities = await _dbContext.DownloadTasks.AsTracking().Where(x => command.DownloadTaskIds.Contains(x.Id)).ToListAsync(cancellationToken);
-            if (entities == null)
-            {
-                Log.Warning($"No downloadTasks could be found with ids from [{command.DownloadTaskIds}]");
-                return Result.Ok(false);
-            }
-
-            _dbContext.DownloadTasks.RemoveRange(entities);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return Result.Ok(true);
+            Log.Warning($"No downloadTasks could be found with ids from [{command.DownloadTaskIds}]");
+            return Result.Ok(false);
         }
+
+        _dbContext.DownloadTasks.RemoveRange(entities);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Ok(true);
     }
 }

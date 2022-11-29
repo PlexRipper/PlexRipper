@@ -1,3 +1,0 @@
-{
-	"components": ["src/components/**/[a-zA-Z]*.vue", "src/pages/**/components/**/[a-zA-Z]*.vue"]
-}

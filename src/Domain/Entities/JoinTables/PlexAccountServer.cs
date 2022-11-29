@@ -1,31 +1,29 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PlexRipper.Domain
+namespace PlexRipper.Domain;
+
+public class PlexAccountServer
 {
-    public class PlexAccountServer
-    {
-        #region Relationships
+    #region Relationships
 
-        [Column(Order = 0)]
-        public int PlexAccountId { get; set; }
+    [Column(Order = 0)]
+    public int PlexAccountId { get; set; }
 
-        public virtual PlexAccount PlexAccount { get; set; }
+    public virtual PlexAccount PlexAccount { get; set; }
 
-        [Column(Order = 1)]
-        public int PlexServerId { get; set; }
+    [Column(Order = 1)]
+    public int PlexServerId { get; set; }
 
-        public virtual PlexServer PlexServer { get; set; }
+    public virtual PlexServer PlexServer { get; set; }
 
-        #endregion
+    #endregion
 
-        [Column(Order = 2)]
-        public bool Owned { get; set; }
+    [Column(Order = 2)]
+    public bool Owned { get; set; }
 
-        [Column(Order = 3)]
-        public string AuthToken { get; set; }
+    [Column(Order = 3)]
+    public string AuthToken { get; set; }
 
-        [Column(Order = 4)]
-        public DateTime AuthTokenCreationDate { get; set; }
-    }
+    [Column(Order = 4)]
+    public DateTime AuthTokenCreationDate { get; set; }
 }

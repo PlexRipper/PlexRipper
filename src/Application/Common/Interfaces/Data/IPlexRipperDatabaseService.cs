@@ -1,13 +1,8 @@
-﻿using System.Threading.Tasks;
-using FluentResults;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application.Common
+public interface IPlexRipperDatabaseService : ISetupAsync
 {
-    public interface IPlexRipperDatabaseService : ISetupAsync
-    {
-        Result BackUpDatabase();
+    Result BackUpDatabase();
 
-        Task<Result> ResetDatabase();
-    }
+    Task<Result> ResetDatabase();
 }

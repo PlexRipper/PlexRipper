@@ -1,29 +1,26 @@
-﻿using System.IO;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application.Common
+public interface IMount
 {
-    public interface IMount
-    {
-        long AvailableFreeSpace { get; }
+    long AvailableFreeSpace { get; }
 
-        string DriveFormat { get; }
+    string DriveFormat { get; }
 
-        DriveType DriveType { get; }
+    DriveType DriveType { get; }
 
-        bool IsReady { get; }
+    bool IsReady { get; }
 
-        MountOptions MountOptions { get; }
+    MountOptions MountOptions { get; }
 
-        string Name { get; }
+    string Name { get; }
 
-        string RootDirectory { get; }
+    string RootDirectory { get; }
 
-        long TotalFreeSpace { get; }
+    long TotalFreeSpace { get; }
 
-        long TotalSize { get; }
+    long TotalSize { get; }
 
-        string VolumeLabel { get; }
+    string VolumeLabel { get; }
 
-        string VolumeName { get; }
-    }
+    string VolumeName { get; }
 }

@@ -1,16 +1,11 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application.PlexMovies
+public class CreateUpdateOrDeletePlexMoviesCommand : IRequest<Result<bool>>
 {
-    public class CreateUpdateOrDeletePlexMoviesCommand : IRequest<Result<bool>>
+    public CreateUpdateOrDeletePlexMoviesCommand(PlexLibrary plexLibrary)
     {
-        public CreateUpdateOrDeletePlexMoviesCommand(PlexLibrary plexLibrary)
-        {
-            PlexLibrary = plexLibrary;
-        }
-
-        public PlexLibrary PlexLibrary { get; }
+        PlexLibrary = plexLibrary;
     }
+
+    public PlexLibrary PlexLibrary { get; }
 }

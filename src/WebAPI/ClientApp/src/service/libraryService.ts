@@ -1,17 +1,18 @@
-import Log from 'consola';
 import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
-import { BaseService, GlobalService, ServerService } from '@service';
+import { map, switchMap, take, tap } from 'rxjs/operators';
+import { BaseService, ServerService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
-import { distinctUntilChanged, filter, finalize, map, switchMap, take } from 'rxjs/operators';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, refreshPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class LibraryService extends BaseService {
 	// region Constructor and Setup
 
 	public constructor() {
-		super({
+		super('LibraryService', {
+			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
 					libraries: state.libraries,
@@ -20,25 +21,27 @@ export class LibraryService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
 		super.setup(nuxtContext);
-
-		GlobalService.getAxiosReady()
-			.pipe(finalize(() => this.fetchLibraries()))
-			.subscribe();
+		return this.refreshLibraries().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
+		);
 	}
 
 	// endregion
 
 	// region Fetch
 
-	public fetchLibraries(): void {
-		getAllPlexLibraries().subscribe((libraries) => {
-			if (libraries.isSuccess) {
-				Log.debug(`LibraryService => Fetch Libraries`, libraries.value);
-				this.setState({ libraries: libraries.value }, 'Fetch Library Data');
-			}
-		});
+	public refreshLibraries(): Observable<PlexLibraryDTO[]> {
+		return getAllPlexLibraries().pipe(
+			tap((plexLibraries) => {
+				if (plexLibraries.isSuccess) {
+					this.setStoreProperty('libraries', plexLibraries.value);
+				}
+			}),
+			switchMap(() => this.getLibraries()),
+		);
 	}
 
 	public fetchLibrary(libraryId: number): void {
@@ -46,7 +49,7 @@ export class LibraryService extends BaseService {
 			.pipe(take(1))
 			.subscribe((library) => {
 				if (library.isSuccess && library.value) {
-					// We freeze library here as it doesnt have to be Vue reactive.
+					// We freeze library here as it doesn't have to be Vue reactive.
 					this.updateStore('libraries', Object.freeze(library.value));
 				}
 			});
@@ -60,15 +63,22 @@ export class LibraryService extends BaseService {
 
 	public getLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
 		this.fetchLibrary(libraryId);
-		return this.getLibraries().pipe(map((libraries): PlexLibraryDTO | null => libraries.find((y) => y.id === libraryId) ?? null));
+		return this.getLibraries().pipe(
+			map((libraries): PlexLibraryDTO | null => libraries.find((y) => y.id === libraryId) ?? null),
+		);
 	}
 
-	public getServerByLibraryID(libraryId: number): Observable<PlexServerDTO | null> {
-		return ServerService.getServers().pipe(
-			switchMap((x: PlexServerDTO[]) => of(x.find((y) => y.plexLibraries.find((z) => z.id === libraryId)) ?? null)),
-			filter((server) => server !== null),
-			distinctUntilChanged(),
-		);
+	public getServerByLibraryId(libraryId: number): Observable<PlexServerDTO | null> {
+		const libraries = this.getStoreSlice<PlexLibraryDTO[]>('libraries');
+		if (libraries.length === 0) {
+			return of(null);
+		}
+		const library = libraries.find((x) => x.id === libraryId);
+		if (!library) {
+			return of(null);
+		}
+
+		return ServerService.getServer(library.plexServerId);
 	}
 
 	public refreshLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
@@ -93,7 +103,10 @@ export class LibraryService extends BaseService {
 				const libraryIndex = libraries.findIndex((x) => x.id === libraryId);
 				if (libraryIndex > -1) {
 					libraries[libraryIndex].defaultDestinationId = folderPathId;
-					this.setState({ libraries }, `Updated library default destination with libraryId: ${libraryId} to ${folderPathId}`);
+					this.setState(
+						{ libraries },
+						`Updated library default destination with libraryId: ${libraryId} to ${folderPathId}`,
+					);
 				}
 			}
 		});

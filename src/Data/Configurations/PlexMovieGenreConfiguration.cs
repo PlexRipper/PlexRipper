@@ -1,15 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data.Configurations
+namespace PlexRipper.Data.Configurations;
+
+public class PlexMovieGenreConfiguration : IEntityTypeConfiguration<PlexMovieGenre>
 {
-    public class PlexMovieGenreConfiguration : IEntityTypeConfiguration<PlexMovieGenre>
+    public void Configure(EntityTypeBuilder<PlexMovieGenre> builder)
     {
-        public void Configure(EntityTypeBuilder<PlexMovieGenre> builder)
-        {
-            builder
-                .HasKey(bc => new { bc.PlexMoviesId, bc.PlexGenreId });
-        }
+        builder
+            .HasKey(bc => new { bc.PlexMoviesId, bc.PlexGenreId });
     }
 }

@@ -1,17 +1,11 @@
-﻿using System.Collections.Generic;
-using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application.PlexServers
+public class GetPlexServersByPlexAccountIdQuery : IRequest<Result<List<PlexServer>>>
 {
-    public class GetPlexServersByPlexAccountIdQuery : IRequest<Result<List<PlexServer>>>
+    public GetPlexServersByPlexAccountIdQuery(int id)
     {
-        public GetPlexServersByPlexAccountIdQuery(int id)
-        {
-            Id = id;
-        }
-
-        public int Id { get; }
+        Id = id;
     }
+
+    public int Id { get; }
 }

@@ -2,7 +2,10 @@
 	<v-app-bar class="app-bar" dense app clipped-left clipped-right>
 		<v-toolbar-title>
 			<v-app-bar-nav-icon @click.stop="showNavigationDrawer" />
-			<v-btn to="/" outlined nuxt><logo :size="24" class="mr-3" /> {{ $t('general.name-version', { version }) }}</v-btn>
+			<v-btn to="/" outlined nuxt>
+				<logo :size="24" class="mr-3" />
+				{{ $t('general.name-version', { version }) }}
+			</v-btn>
 		</v-toolbar-title>
 
 		<v-spacer></v-spacer>
@@ -56,7 +59,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { GlobalService, SettingsService, AccountService, ServerService } from '@service';
+import { useSubscription } from '@vueuse/rxjs';
+import { AccountService, GlobalService, ServerService, SettingsService } from '@service';
 import { refreshAccount } from '@api/accountApi';
 import type { PlexAccountDTO } from '@dto/mainApi';
 
@@ -81,42 +85,48 @@ export default class AppBar extends Vue {
 	}
 
 	updateActiveAccountId(accountId: number): void {
-		SettingsService.updateSetting('activeAccountId', accountId);
+		SettingsService.updateGeneralSettings('activeAccountId', accountId);
 	}
 
 	refreshAccount(accountId: number = 0): void {
 		const index = accountId === 0 ? 0 : this.accounts.findIndex((x) => x.id === accountId);
 		this.loading.splice(index, 1, true);
 		refreshAccount(accountId).subscribe(() => {
-			AccountService.fetchAccounts();
+			AccountService.refreshAccounts();
 			ServerService.fetchServers();
 			this.loading.splice(index, 1, false);
 		});
 	}
 
 	mounted(): void {
-		this.$subscribeTo(GlobalService.getConfigReady(), (config) => {
-			this.version = config.version;
-		});
+		useSubscription(
+			GlobalService.getConfigReady().subscribe((config) => {
+				this.version = config.version;
+			}),
+		);
 
-		this.$subscribeTo(AccountService.getAccounts(), (data) => {
-			this.accounts = [
-				{
-					id: 0,
-					displayName: 'All Accounts',
-				} as any,
-			];
-			data?.filter((x) => x.isEnabled).forEach((account) => this.accounts.push(account));
-			this.accounts.forEach(() => this.loading.push(false));
-		});
+		useSubscription(
+			AccountService.getAccounts().subscribe((data) => {
+				this.accounts = [
+					{
+						id: 0,
+						displayName: 'All Accounts',
+					} as any,
+				];
+				data?.filter((x) => x.isEnabled).forEach((account) => this.accounts.push(account));
+				this.accounts.forEach(() => this.loading.push(false));
+			}),
+		);
 
-		this.$subscribeTo(SettingsService.getActiveAccountId(), (activeAccountId) => {
-			if (activeAccountId || activeAccountId >= 0) {
-				this.activeAccountId = activeAccountId;
-			}
-		});
+		useSubscription(
+			SettingsService.getActiveAccountId().subscribe((activeAccountId) => {
+				if (activeAccountId || activeAccountId >= 0) {
+					this.activeAccountId = activeAccountId;
+				}
+			}),
+		);
 
-		// this.$subscribeTo(SignalrService.getPlexAccountRefreshProgress(), (data) => {
+		// useSubscription(SignalrService.getPlexAccountRefreshProgress(), (data) => {
 		// 	if (data) {
 		// 		const index = this.accountRefreshProgress.findIndex((x) => x.plexAccountId === data.plexAccountId);
 		// 		if (index > -1) {

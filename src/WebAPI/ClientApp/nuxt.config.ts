@@ -1,8 +1,12 @@
+// noinspection AllyPlainJsInspection
+
 import Log from 'consola';
 import { NuxtConfig } from '@nuxt/types/config';
 import { NuxtWebpackEnv } from '@nuxt/types/config/build';
 import { Configuration as WebpackConfiguration } from 'webpack';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
+// noinspection ES6PreferShortImport
+import { NuxtI18nConfigOptions } from './src/plugins/i18nPlugin';
 
 const config: NuxtConfig = {
 	target: 'static',
@@ -26,7 +30,10 @@ const config: NuxtConfig = {
 		title: process.env.npm_package_name || '',
 		meta: [
 			{ charset: 'utf-8' },
-			{ name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui' },
+			{
+				name: 'viewport',
+				content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui',
+			},
 			{
 				hid: 'description',
 				name: 'description',
@@ -61,7 +68,7 @@ const config: NuxtConfig = {
 	 */
 	modules: [
 		// Doc: https://i18n.nuxtjs.org/
-		'@nuxtjs/i18n',
+		['@nuxtjs/i18n', NuxtI18nConfigOptions],
 	],
 	/*
 	 ** Nuxt.js dev-modules
@@ -78,6 +85,10 @@ const config: NuxtConfig = {
 		// Doc: https://github.com/nuxt/components
 		// Note: this is added to fix the error "render function or template not defined in component: "
 		'@nuxt/components',
+		// Doc: https://vueuse.org/guide/index.html#installation
+		'@vueuse/nuxt',
+		// Doc: https://github.com/nuxt/postcss8#readme
+		'@nuxt/postcss8',
 	],
 	/*
 	 ** Auto-import components
@@ -115,25 +126,6 @@ const config: NuxtConfig = {
 			});
 		},
 	},
-	generate: {
-		// Don't create paths for the components folders in the pages directory
-		// eslint-disable-next-line prefer-regex-literals
-		exclude: [new RegExp('components')],
-		devtools: true,
-	},
-	i18n: {
-		lazy: true,
-		langDir: 'lang/',
-		defaultLocale: 'en-US',
-		locales: [
-			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
-			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
-		],
-		vueI18n: {
-			fallbackLocale: 'en-US',
-		},
-		strategy: 'no_prefix',
-	},
 	/*
 	 ** Build configuration
 	 */
@@ -157,6 +149,14 @@ const config: NuxtConfig = {
 			if (isDev) {
 				config.devtool = isClient ? 'source-map' : 'inline-source-map';
 			}
+
+			// Fix for many errors with "Can't import the named export 'bypassFilter' from non EcmaScript module (only default export is available)"
+			// Link: https://github.com/vueuse/vueuse/issues/718#issuecomment-913319680
+			config?.module?.rules.push({
+				test: /\.mjs$/,
+				include: /node_modules/,
+				type: 'javascript/auto',
+			});
 
 			// Doc: https://github.com/dividab/tsconfig-paths-webpack-plugin
 			if (config.resolve?.plugins) {

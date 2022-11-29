@@ -1,45 +1,37 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using FluentResultExtensions.lib;
-using FluentResults;
-using FluentValidation;
-using Logging;
-using MediatR;
-using PlexRipper.Application.PlexServers;
+﻿using FluentValidation;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexServers
+namespace PlexRipper.Data.PlexServers;
+
+public class CreatePlexServerStatusCommandValidator : AbstractValidator<CreatePlexServerStatusCommand>
 {
-    public class CreatePlexServerStatusCommandValidator : AbstractValidator<CreatePlexServerStatusCommand>
+    public CreatePlexServerStatusCommandValidator()
     {
-        public CreatePlexServerStatusCommandValidator()
-        {
-            RuleFor(x => x.PlexServerStatus).NotNull();
-            RuleFor(x => x.PlexServerStatus.Id).Equal(0);
-            RuleFor(x => x.PlexServerStatus.PlexServerId).GreaterThan(0);
-            RuleFor(x => x.PlexServerStatus.LastChecked).NotNull();
-            RuleFor(x => x.PlexServerStatus.StatusMessage).NotEmpty();
-            RuleFor(x => x.PlexServerStatus.PlexServer).NotNull();
-            RuleFor(x => x.PlexServerStatus.PlexServer.Id).GreaterThan(0);
-        }
+        RuleFor(x => x.PlexServerStatus).NotNull();
+        RuleFor(x => x.PlexServerStatus.Id).Equal(0);
+        RuleFor(x => x.PlexServerStatus.PlexServerId).GreaterThan(0);
+        RuleFor(x => x.PlexServerStatus.LastChecked).NotNull();
+        RuleFor(x => x.PlexServerStatus.StatusMessage).NotEmpty();
+        RuleFor(x => x.PlexServerStatus.PlexServer).NotNull();
+        RuleFor(x => x.PlexServerStatus.PlexServer.Id).GreaterThan(0);
     }
+}
 
-    public class CreatePlexServerStatusCommandHandler : BaseHandler, IRequestHandler<CreatePlexServerStatusCommand, Result<int>>
+public class CreatePlexServerStatusCommandHandler : BaseHandler, IRequestHandler<CreatePlexServerStatusCommand, Result<int>>
+{
+    public CreatePlexServerStatusCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<int>> Handle(CreatePlexServerStatusCommand command, CancellationToken cancellationToken)
     {
-        public CreatePlexServerStatusCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        Log.Debug("Creating a new PlexServerStatus in the DB");
 
-        public async Task<Result<int>> Handle(CreatePlexServerStatusCommand command, CancellationToken cancellationToken)
-        {
-            Log.Debug("Creating a new PlexServerStatus in the DB");
+        command.PlexServerStatus.PlexServer = null;
+        await _dbContext.PlexServerStatuses.AddAsync(command.PlexServerStatus, cancellationToken);
 
-            command.PlexServerStatus.PlexServer = null;
-            await _dbContext.PlexServerStatuses.AddAsync(command.PlexServerStatus, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.Entry(command.PlexServerStatus).GetDatabaseValuesAsync(cancellationToken);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            await _dbContext.Entry(command.PlexServerStatus).GetDatabaseValuesAsync(cancellationToken);
-
-            return Result.Ok(command.PlexServerStatus.Id);
-        }
+        return Result.Ok(command.PlexServerStatus.Id);
     }
 }

@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
+﻿namespace PlexRipper.Domain;
 
-namespace PlexRipper.Domain
+public class PlexRole : BaseEntity
 {
-    public class PlexRole : BaseEntity
-    {
-        public string Tag { get; set; }
+    public string Tag { get; set; }
 
-        public virtual List<PlexMovieRole> PlexMovieRoles { get; set; }
-    }
+    public virtual List<PlexMovieRole> PlexMovieRoles { get; set; }
 }

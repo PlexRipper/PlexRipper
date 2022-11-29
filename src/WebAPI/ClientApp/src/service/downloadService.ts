@@ -1,6 +1,6 @@
-import Log from 'consola';
-import _ from 'lodash';
-import { combineLatest, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map, switchMap, take, tap } from 'rxjs/operators';
+import { Context } from '@nuxt/types';
 import {
 	clearDownloadTasks,
 	deleteDownloadTasks,
@@ -11,46 +11,51 @@ import {
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { map, switchMap, take } from 'rxjs/operators';
-import { DownloadMediaDTO, DownloadStatus, DownloadTaskDTO, PlexMediaType } from '@dto/mainApi';
+import { DownloadMediaDTO, DownloadProgressDTO, DownloadStatus, PlexMediaType, ServerDownloadProgressDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { AccountService, BaseService, ProgressService } from '@service';
-import { Context } from '@nuxt/types';
-import { determineDownloadStatus } from '@lib/common';
+import { BaseService, SignalrService } from '@service';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class DownloadService extends BaseService {
 	public constructor() {
-		super({
+		super('DownloadService', {
+			// Note: Each service file can only have "unique" state slices which are not also used in other service files
 			stateSliceSelector: (state: IStoreState) => {
 				return {
-					downloads: state.downloads,
+					serverDownloads: state.serverDownloads,
 				};
 			},
 		});
 	}
 
-	public setup(nuxtContext: Context): void {
+	public setup(nuxtContext: Context): Observable<ISetupResult> {
 		super.setup(nuxtContext);
 
-		AccountService.getActiveAccount()
-			.pipe(
-				switchMap(() => getAllDownloads()),
-				take(1),
-			)
-			.subscribe((downloads) => {
-				if (downloads.isSuccess) {
-					this.setState({ downloads: downloads.value }, 'Initial DownloadTask Data');
-				}
-			});
-	}
+		SignalrService.GetServerDownloadProgress().subscribe((data: ServerDownloadProgressDTO) => {
+			this.updateStore('serverDownloads', data);
+		});
 
-	private getDownloadState(serverId: number = 0): Observable<DownloadTaskDTO[]> {
-		return this.stateChanged.pipe(
-			map((state) => state?.downloads.filter((x) => (serverId > 0 ? x.plexServerId === serverId : true)) ?? []),
+		return this.fetchDownloadList().pipe(
+			switchMap(() => of({ name: this._name, isSuccess: true })),
+			take(1),
 		);
 	}
 
-	public getActiveDownloadList(serverId: number = 0): Observable<DownloadTaskDTO[]> {
+	/**
+	 * Fetch the download list and signal to the observers that it is done.
+	 */
+	public fetchDownloadList(): Observable<ServerDownloadProgressDTO[]> {
+		return getAllDownloads().pipe(
+			tap((downloads) => {
+				if (downloads.isSuccess) {
+					this.setStoreProperty('serverDownloads', downloads.value);
+				}
+			}),
+			switchMap(() => this.getServerDownloadList()),
+		);
+	}
+
+	public getActiveDownloadList(serverId: number = 0): Observable<DownloadProgressDTO[]> {
 		return this.getDownloadList(serverId).pipe(
 			map((x) =>
 				x.filter(
@@ -64,91 +69,15 @@ export class DownloadService extends BaseService {
 		);
 	}
 
-	private mergeChildren(downloadTask: DownloadTaskDTO, downloadProgressRows: DownloadTaskDTO[]): DownloadTaskDTO {
-		const progress = downloadProgressRows.find((x) => x.id === downloadTask.id);
-		if (progress) {
-			downloadTask = {
-				...downloadTask,
-				...progress,
-				children: downloadTask.children,
-			};
-		}
-		// Check if children have progress
-		if (downloadTask.children) {
-			for (let i = 0; i < downloadTask.children.length; i++) {
-				downloadTask.children.splice(i, 1, this.mergeChildren(downloadTask.children[i], downloadProgressRows));
-			}
-		}
-
-		return downloadTask;
+	public getServerDownloadList(): Observable<ServerDownloadProgressDTO[]> {
+		return this.stateChanged.pipe(map((state) => state?.serverDownloads ?? []));
 	}
 
-	private aggregateChildren(downloadTask: DownloadTaskDTO): DownloadTaskDTO {
-		if (downloadTask.mediaType !== PlexMediaType.Season && downloadTask.mediaType !== PlexMediaType.TvShow) {
-			return downloadTask;
+	public getDownloadList(serverId: number = 0): Observable<DownloadProgressDTO[]> {
+		if (serverId > 0) {
+			return this.getServerDownloadList().pipe(map((x) => x.find((y) => y.id === serverId)?.downloads ?? []));
 		}
-		if (!downloadTask.children || downloadTask.children.length === 0) {
-			return downloadTask;
-		}
-
-		for (let i = 0; i < downloadTask.children.length; i++) {
-			downloadTask.children.splice(i, 1, this.aggregateChildren(downloadTask.children[i]));
-		}
-
-		downloadTask.percentage = _.mean(downloadTask.children?.map((x) => x.percentage)) ?? 0;
-		downloadTask.downloadSpeed = _.mean(downloadTask.children?.map((x) => x.downloadSpeed)) ?? 0;
-		downloadTask.timeRemaining = _.sum(downloadTask.children?.map((x) => x.timeRemaining)) ?? 0;
-		downloadTask.dataReceived = _.sum(downloadTask.children?.map((x) => x.dataReceived)) ?? 0;
-		downloadTask.dataTotal = _.sum(downloadTask.children?.map((x) => x.dataTotal)) ?? 0;
-
-		const statuses = downloadTask.children?.map((x) => x.status) ?? [];
-		downloadTask.status = determineDownloadStatus(statuses);
-
-		return downloadTask;
-	}
-
-	public getDownloadList(serverId: number = 0): Observable<DownloadTaskDTO[]> {
-		return combineLatest([this.getDownloadState(serverId), ProgressService.getMergedDownloadTaskProgress(serverId)]).pipe(
-			// Merge the baseDownload with the download progress and return the updated result
-			switchMap(([baseDownloadRows, downloadProgressRows]) => {
-				if (baseDownloadRows.length === 0 && downloadProgressRows.length === 0) {
-					return of([]);
-				}
-
-				if (baseDownloadRows.length > 0 && downloadProgressRows.length === 0) {
-					const mergedRows: DownloadTaskDTO[] = [];
-					for (const baseDownloadRow of baseDownloadRows) {
-						mergedRows.push(this.aggregateChildren(baseDownloadRow));
-					}
-					return of(mergedRows);
-				}
-
-				const mergedRows: DownloadTaskDTO[] = [...baseDownloadRows];
-
-				for (let i = 0; i < mergedRows.length; i++) {
-					let mergedDownloadTask = this.mergeChildren(mergedRows[i], downloadProgressRows);
-					mergedDownloadTask = this.aggregateChildren(mergedDownloadTask);
-					mergedRows.splice(i, 1, mergedDownloadTask);
-				}
-
-				return of(mergedRows);
-			}),
-		);
-	}
-
-	/**
-	 * Fetch the download list and signal to the observers that it is done.
-	 */
-	public fetchDownloadList(): Observable<DownloadTaskDTO[]> {
-		return getAllDownloads().pipe(
-			switchMap((downloads): Observable<DownloadTaskDTO[]> => {
-				Log.debug('Fetching download list');
-				if (downloads.isSuccess) {
-					this.setState({ downloads: downloads.value, downloadTaskUpdateList: [] });
-				}
-				return of(downloads.value ?? []);
-			}),
-		);
+		return this.getServerDownloadList().pipe(map((x) => x.map((y) => y.downloads).flat() ?? []));
 	}
 
 	public downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
@@ -159,8 +88,8 @@ export class DownloadService extends BaseService {
 
 	// region Commands
 
-	public startDownloadTasks(downloadTaskIds: number[]): void {
-		startDownloadTask(downloadTaskIds)
+	public startDownloadTasks(downloadTaskId: number): void {
+		startDownloadTask(downloadTaskId)
 			.pipe(
 				switchMap(() => this.fetchDownloadList()),
 				take(1),
@@ -168,8 +97,8 @@ export class DownloadService extends BaseService {
 			.subscribe();
 	}
 
-	public restartDownloadTasks(downloadTaskIds: number[]): void {
-		restartDownloadTasks(downloadTaskIds)
+	public restartDownloadTasks(downloadTaskId: number): void {
+		restartDownloadTasks(downloadTaskId)
 			.pipe(
 				switchMap(() => this.fetchDownloadList()),
 				take(1),
@@ -187,8 +116,8 @@ export class DownloadService extends BaseService {
 			.subscribe();
 	}
 
-	public pauseDownloadTasks(downloadTaskIds: number[]): void {
-		pauseDownloadTask(downloadTaskIds)
+	public pauseDownloadTasks(downloadTaskId: number): void {
+		pauseDownloadTask(downloadTaskId)
 			.pipe(
 				switchMap(() => this.fetchDownloadList()),
 				take(1),
@@ -196,8 +125,8 @@ export class DownloadService extends BaseService {
 			.subscribe();
 	}
 
-	public stopDownloadTasks(downloadTaskIds: number[]): void {
-		stopDownloadTasks(downloadTaskIds)
+	public stopDownloadTasks(downloadTaskId: number): void {
+		stopDownloadTasks(downloadTaskId)
 			.pipe(
 				switchMap(() => this.fetchDownloadList()),
 				take(1),
@@ -217,18 +146,20 @@ export class DownloadService extends BaseService {
 	// endregion
 
 	private removeDownloadTasks(downloadTaskIds: number[]): void {
-		const downloads = this.getState().downloads;
+		const downloads = this.getState().serverDownloads;
 
-		downloads.forEach((downloadTask) => {
-			if (downloadTask.mediaType === PlexMediaType.TvShow) {
-				downloadTask.children?.forEach((season) => {
-					if (downloadTask.mediaType === PlexMediaType.Season) {
-						season.children = season.children?.filter((x) => downloadTaskIds.some((y) => y !== x.id)) ?? [];
-					}
-				});
-			}
+		downloads.forEach((serverDownload) => {
+			serverDownload.downloads.forEach((downloadTask) => {
+				if (downloadTask.mediaType === PlexMediaType.TvShow) {
+					downloadTask.children?.forEach((season) => {
+						if (downloadTask.mediaType === PlexMediaType.Season) {
+							season.children = season.children?.filter((x) => downloadTaskIds.some((y) => y !== x.id)) ?? [];
+						}
+					});
+				}
+			});
 		});
-		this.setState({ downloads });
+		this.setState({ serverDownloads: downloads });
 	}
 }
 

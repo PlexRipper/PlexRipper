@@ -1,32 +1,26 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexLibraries;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexLibraries
+namespace PlexRipper.Data.PlexLibraries;
+
+public class GetPlexLibraryByIdWithServerQueryValidator : AbstractValidator<GetPlexLibraryByIdWithServerQuery>
 {
-    public class GetPlexLibraryByIdWithServerQueryValidator : AbstractValidator<GetPlexLibraryByIdWithServerQuery>
+    public GetPlexLibraryByIdWithServerQueryValidator()
     {
-        public GetPlexLibraryByIdWithServerQueryValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
+        RuleFor(x => x.Id).GreaterThan(0);
     }
+}
 
-    public class GetPlexLibraryByIdWithServerQueryHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdWithServerQuery, Result<PlexLibrary>>
+public class GetPlexLibraryByIdWithServerQueryHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdWithServerQuery, Result<PlexLibrary>>
+{
+    public GetPlexLibraryByIdWithServerQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdWithServerQuery request, CancellationToken cancellationToken)
     {
-        public GetPlexLibraryByIdWithServerQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var plexLibrary = await PlexLibraryQueryable.IncludePlexServer().FirstOrDefaultAsync(x => x.Id == request.Id);
 
-        public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdWithServerQuery request, CancellationToken cancellationToken)
-        {
-            var plexLibrary = await PlexLibraryQueryable.IncludeServer().FirstOrDefaultAsync(x => x.Id == request.Id);
-
-            return ReturnResult(plexLibrary, request.Id);
-        }
+        return ReturnResult(plexLibrary, request.Id);
     }
 }

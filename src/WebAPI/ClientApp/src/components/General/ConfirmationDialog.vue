@@ -13,18 +13,17 @@
 			<v-divider></v-divider>
 
 			<v-card-actions>
-				<p-btn :button-type="getCancelButtonType" @click="cancel" />
+				<CancelButton @click="cancel" />
 				<v-spacer></v-spacer>
-				<p-btn :button-type="getConfirmationButtonType" :loading="loading" @click="confirm" />
+				<ConfirmButton :loading="loading" @click="confirm" />
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import IText from '@interfaces/IText';
-import ButtonType from '@enums/buttonType';
 
 @Component<ConfirmationDialog>({})
 export default class ConfirmationDialog extends Vue {
@@ -60,12 +59,9 @@ export default class ConfirmationDialog extends Vue {
 		};
 	}
 
-	get getCancelButtonType(): ButtonType {
-		return ButtonType.Cancel;
-	}
-
-	get getConfirmationButtonType(): ButtonType {
-		return ButtonType.Confirm;
+	@Watch('dialog')
+	onDialogChanged() {
+		this.loading = false;
 	}
 
 	cancel(): void {
@@ -77,12 +73,6 @@ export default class ConfirmationDialog extends Vue {
 		if (this.confirmLoading) {
 			this.loading = true;
 		}
-	}
-
-	mounted() {
-		this.$watchAsObservable('dialog').subscribe(() => {
-			this.loading = false;
-		});
 	}
 }
 </script>

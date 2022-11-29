@@ -1,42 +1,50 @@
 <template>
 	<!--	Instead of multiple layouts we merge into one default layout to prevent full
-				page change (flashing white background) during transitions.	-->
-	<v-app :class="[isSetupPage ? 'no-background' : 'background']">
-		<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
-		<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert" />
-		<!--	Use for setup-layout	-->
-		<template v-if="isSetupPage">
-			<vue-scroll>
-				<v-main class="no-background">
+        page change (flashing white background) during transitions.	-->
+	<v-app>
+		<page-load-overlay v-if="isLoading" :value="isLoading" />
+		<template v-else>
+			<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
+			<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert" />
+			<!--	Use for setup-layout	-->
+			<template v-if="isSetupPage">
+				<vue-scroll>
+					<v-main class="no-background">
+						<nuxt />
+					</v-main>
+				</vue-scroll>
+			</template>
+			<!--	Use for everything else	-->
+			<template v-else>
+				<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
+				<navigation-drawer :show-drawer="showNavigationDrawerState" />
+				<notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
+				<v-main>
 					<nuxt />
 				</v-main>
-			</vue-scroll>
+				<footer />
+			</template>
 		</template>
-		<!--	Use for everything else	-->
-		<template v-else>
-			<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
-			<navigation-drawer :show-drawer="showNavigationDrawerState" />
-			<notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
-			<v-main class="no-background">
-				<nuxt />
-			</v-main>
-			<footer />
-		</template>
-		<background />
+		<Background :hide-background="isNoBackground" />
 	</v-app>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { HelpService, AlertService } from '@service';
+import { useSubscription } from '@vueuse/rxjs';
+import Log from 'consola';
+import { AlertService, HelpService } from '@service';
 import IAlert from '@interfaces/IAlert';
 import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
+import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
+import globalService from '~/service/globalService';
 
-@Component({
-	components: { NotificationsDrawer },
+@Component<Default>({
+	components: { NotificationsDrawer, PageLoadOverlay },
 	loading: false,
 })
 export default class Default extends Vue {
+	isLoading: boolean = true;
 	helpDialogState: boolean = false;
 	helpId: string = '';
 	alerts: IAlert[] = [];
@@ -45,6 +53,13 @@ export default class Default extends Vue {
 
 	get isSetupPage(): boolean {
 		return this.$route.fullPath.includes('setup');
+	}
+
+	get isNoBackground(): boolean {
+		if (this.isLoading) {
+			return true;
+		}
+		return this.isSetupPage;
 	}
 
 	closeAlert(alert: IAlert): void {
@@ -60,18 +75,29 @@ export default class Default extends Vue {
 	}
 
 	mounted(): void {
-		this.$subscribeTo(HelpService.getHelpDialog(), (helpId) => {
-			if (helpId) {
-				this.helpId = helpId;
-				this.helpDialogState = true;
-			}
-		});
+		useSubscription(
+			globalService.getPageSetupReady().subscribe(() => {
+				Log.debug('Loading has finished, displaying page now');
+				this.isLoading = false;
+			}),
+		);
 
-		this.$subscribeTo(AlertService.getAlerts(), (alerts) => {
-			if (alerts) {
-				this.alerts = alerts;
-			}
-		});
+		useSubscription(
+			HelpService.getHelpDialog().subscribe((helpId) => {
+				if (helpId) {
+					this.helpId = helpId;
+					this.helpDialogState = true;
+				}
+			}),
+		);
+
+		useSubscription(
+			AlertService.getAlerts().subscribe((alerts) => {
+				if (alerts) {
+					this.alerts = alerts;
+				}
+			}),
+		);
 	}
 }
 </script>

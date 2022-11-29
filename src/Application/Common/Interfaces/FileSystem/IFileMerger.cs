@@ -1,20 +1,18 @@
-﻿using System;
-using System.Threading.Tasks;
-using FluentResults;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application.Common
+public interface IFileMerger : ISetupAsync, IBusy
 {
-    public interface IFileMerger : ISetupAsync
-    {
-        IObservable<FileMergeProgress> FileMergeProgressObservable { get; }
+    IObservable<FileMergeProgress> FileMergeProgressObservable { get; }
 
-        /// <summary>
-        /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
-        /// </summary>
-        /// <param name="downloadTaskId"></param>
-        Task<Result> AddFileTaskFromDownloadTask(int downloadTaskId);
+    IObservable<FileMergeProgress> FileMergeCompletedObservable { get; }
 
-        Task ExecuteFileTasks();
-    }
+    IObservable<DownloadFileTask> FileMergeStartObservable { get; }
+
+    /// <summary>
+    /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
+    /// </summary>
+    /// <param name="downloadTaskId"></param>
+    Task<Result> AddFileTaskFromDownloadTask(int downloadTaskId);
+
+    Task ExecuteFileTasks();
 }

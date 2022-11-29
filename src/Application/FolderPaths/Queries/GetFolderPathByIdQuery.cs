@@ -1,16 +1,11 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application.FolderPaths
+public class GetFolderPathByIdQuery : IRequest<Result<FolderPath>>
 {
-    public class GetFolderPathByIdQuery : IRequest<Result<FolderPath>>
+    public GetFolderPathByIdQuery(int id)
     {
-        public GetFolderPathByIdQuery(int id)
-        {
-            Id = id;
-        }
-
-        public int Id { get; }
+        Id = id;
     }
+
+    public int Id { get; }
 }

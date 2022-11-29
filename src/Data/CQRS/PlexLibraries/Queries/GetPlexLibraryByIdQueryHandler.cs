@@ -1,46 +1,36 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexLibraries;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexLibraries
+namespace PlexRipper.Data.PlexLibraries;
+
+public class GetPlexLibraryByIdQueryValidator : AbstractValidator<GetPlexLibraryByIdQuery>
 {
-    public class GetPlexLibraryByIdQueryValidator : AbstractValidator<GetPlexLibraryByIdQuery>
+    public GetPlexLibraryByIdQueryValidator()
     {
-        public GetPlexLibraryByIdQueryValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
+        RuleFor(x => x.Id).GreaterThan(0);
     }
+}
 
-    public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdQuery, Result<PlexLibrary>>
+public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdQuery, Result<PlexLibrary>>
+{
+    public GetPlexLibraryByIdWithMediaHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdQuery request, CancellationToken cancellationToken)
     {
-        public GetPlexLibraryByIdWithMediaHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var query = PlexLibraryQueryable;
 
-        public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdQuery request, CancellationToken cancellationToken)
-        {
-            var query = PlexLibraryQueryable;
+        var result = await query.FirstOrDefaultAsync(x => x.Id == request.Id);
+        if (result == null)
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), request.Id);
 
-            var result = await query.FirstOrDefaultAsync(x => x.Id == request.Id);
-            if (result == null)
-            {
-                return ResultExtensions.EntityNotFound(nameof(PlexLibrary), request.Id);
-            }
+        var plexLibrary = await GetPlexLibraryQueryableByType(result.Type, request.IncludePlexServer, request.IncludeMedia, request.TopLevelMediaOnly)
+            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-            var plexLibrary = await GetPlexLibraryQueryableByType(result.Type, request.IncludePlexServer, request.IncludeMedia, request.TopLevelMediaOnly)
-                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        if (plexLibrary == null)
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), request.Id);
 
-            if (plexLibrary == null)
-            {
-                return ResultExtensions.EntityNotFound(nameof(PlexLibrary), request.Id);
-            }
-
-            return Result.Ok(plexLibrary.SortMedia());
-        }
+        return Result.Ok(plexLibrary.SortMedia());
     }
 }

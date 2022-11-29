@@ -97,11 +97,12 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
-import { finalize, map, tap } from 'rxjs/operators';
+import { finalize, tap } from 'rxjs/operators';
+import { useSubscription } from '@vueuse/rxjs';
 import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
-import { MediaTable, DetailsOverview, DownloadConfirmation } from '@mediaOverview';
+import { DetailsOverview, DownloadConfirmation, MediaTable } from '@mediaOverview';
 import { getTvShow } from '@api/mediaApi';
 
 @Component
@@ -161,9 +162,9 @@ export default class MediaOverview extends Vue {
 	changeView(viewMode: ViewMode): void {
 		switch (this.mediaType) {
 			case PlexMediaType.Movie:
-				return SettingsService.updateSetting('movieViewMode', viewMode);
+				return SettingsService.updateDisplaySettings('movieViewMode', viewMode);
 			case PlexMediaType.TvShow:
-				return SettingsService.updateSetting('tvShowViewMode', viewMode);
+				return SettingsService.updateDisplaySettings('tvShowViewMode', viewMode);
 		}
 		Log.error('Could not set view mode for type' + this.mediaType);
 	}
@@ -292,84 +293,91 @@ export default class MediaOverview extends Vue {
 		}
 	}
 
+	@Watch('isLoading', { immediate: true, deep: true })
+	onIsLoading(val: boolean) {
+		if (!val) {
+			if (this.detailsOverview) {
+				if (+this.$route.params.mediaid) {
+					this.openDetails(+this.$route.params.mediaid);
+				}
+			} else {
+				const thisRef = this;
+				this.$nextTick(() => {
+					Log.debug('mediaId', +this.$route.params.mediaid);
+					if (+this.$route.params.mediaid) {
+						thisRef?.openDetails(+this.$route.params.mediaid);
+					}
+				});
+			}
+		}
+	}
+
 	mounted(): void {
 		this.resetProgress(false);
 		this.isRefreshing = false;
 
-		this.$subscribeTo(
-			this.$watchAsObservable('isLoading').pipe(map((x: { oldValue: number; newValue: number }) => x.newValue)),
-			(isLoading) => {
-				if (!isLoading) {
-					if (this.detailsOverview) {
-						if (+this.$route.params.mediaid) {
-							this.openDetails(+this.$route.params.mediaid);
-						}
-					} else {
-						const thisRef = this;
-						this.$nextTick(() => {
-							Log.debug('mediaId', +this.$route.params.mediaid);
-							if (+this.$route.params.mediaid) {
-								thisRef?.openDetails(+this.$route.params.mediaid);
-							}
-						});
-					}
-				}
-			},
-		);
-
 		// Get Active account Id
-		this.$subscribeTo(SettingsService.getActiveAccountId(), (id) => (this.activeAccountId = id));
+		useSubscription(SettingsService.getActiveAccountId().subscribe((id) => (this.activeAccountId = id)));
 
 		// Get display settings
-		this.$subscribeTo(SettingsService.getMovieViewMode(), (value) => {
-			this.movieViewMode = value;
-		});
+		useSubscription(
+			SettingsService.getMovieViewMode().subscribe((value) => {
+				this.movieViewMode = value;
+			}),
+		);
 
-		this.$subscribeTo(SettingsService.getTvShowViewMode(), (value) => {
-			this.tvShowViewMode = value;
-		});
+		useSubscription(
+			SettingsService.getTvShowViewMode().subscribe((value) => {
+				this.tvShowViewMode = value;
+			}),
+		);
 
 		// Setup progress bar
-		this.$subscribeTo(SignalrService.getLibraryProgress(this.libraryId), (data) => {
-			if (data) {
-				this.libraryProgress = data;
-				this.isRefreshing = data.isRefreshing;
-				if (data.isComplete) {
-					Log.debug(data);
-					this.resetProgress(false);
-					LibraryService.fetchLibrary(this.libraryId);
+		useSubscription(
+			SignalrService.getLibraryProgress(this.libraryId).subscribe((data) => {
+				if (data) {
+					this.libraryProgress = data;
+					this.isRefreshing = data.isRefreshing;
+					if (data.isComplete) {
+						Log.debug(data);
+						this.resetProgress(false);
+						LibraryService.fetchLibrary(this.libraryId);
+					}
 				}
-			}
-		});
+			}),
+		);
 
 		// Show DownloadTask creation progress window
-		this.$subscribeTo(
-			SignalrService.getDownloadTaskCreationProgress().pipe(
-				tap((data) => {
-					// TODO This needs to work with id's
-					this.downloadTaskCreationProgress = data;
-				}),
-				finalize(() => {
-					setTimeout(() => {
-						this.downloadConfirmationRef?.closeDialog();
-						this.downloadTaskCreationProgress = null;
-					}, 2000);
-				}),
-			),
-			() => {},
+		useSubscription(
+			SignalrService.getDownloadTaskCreationProgress()
+				.pipe(
+					tap((data) => {
+						// TODO This needs to work with id's
+						this.downloadTaskCreationProgress = data;
+					}),
+					finalize(() => {
+						setTimeout(() => {
+							this.downloadConfirmationRef?.closeDialog();
+							this.downloadTaskCreationProgress = null;
+						}, 2000);
+					}),
+				)
+				.subscribe(() => {}),
 		);
 
 		// Retrieve server data
-		this.$subscribeTo(LibraryService.getServerByLibraryID(this.libraryId), (server) => {
-			if (server) {
-				this.server = server;
-				return;
-			}
-			Log.warn('MediaOverview => Server was invalid:', server);
-		});
+		useSubscription(
+			LibraryService.getServerByLibraryId(this.libraryId).subscribe((server) => {
+				if (server) {
+					this.server = server;
+					return;
+				}
+				Log.error('MediaOverview => Server was invalid:', server);
+			}),
+		);
 
 		// Retrieve library data
-		this.$subscribeTo(LibraryService.getLibrary(this.libraryId), (data) => this.setLibrary(data));
+		useSubscription(LibraryService.getLibrary(this.libraryId).subscribe((data) => this.setLibrary(data)));
 	}
 }
 </script>

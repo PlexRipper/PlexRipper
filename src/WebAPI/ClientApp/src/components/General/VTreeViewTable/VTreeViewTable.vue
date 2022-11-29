@@ -21,7 +21,11 @@
 					<v-row no-gutters class="no-wrap" align="center">
 						<!-- Other columns -->
 						<v-col v-for="(header, i) in headers.slice(1, headers.length)" :key="i" cols="auto">
-							<v-sheet :width="header.width" :max-width="header.maxWidth > 0 ? header.maxWidth : 500" class="no-background">
+							<v-sheet
+								:width="header.width"
+								:max-width="header.maxWidth > 0 ? header.maxWidth : 500"
+								class="no-background"
+							>
 								{{ header.text }}
 							</v-sheet>
 						</v-col>
@@ -95,7 +99,13 @@
 												</template>
 												<!-- Percentage -->
 												<template v-else-if="header.type === 'percentage'">
-													<v-progress-linear :value="item.percentage" stream striped color="red" height="25">
+													<v-progress-linear
+														:value="item.percentage"
+														stream
+														striped
+														color="red"
+														height="25"
+													>
 														<template #default="{ value }">
 															<strong>{{ Math.round(value * 100) / 100 }}%</strong>
 														</template>

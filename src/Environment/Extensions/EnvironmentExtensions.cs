@@ -1,38 +1,46 @@
-﻿using System;
+﻿#nullable enable
+namespace Environment;
 
-namespace Environment
+public static class EnvironmentExtensions
 {
-    public static class EnvironmentExtensions
+    #region Fields
+
+    public static string IntegrationTestModeKey = "IntegrationTestMode";
+
+    public static string DevelopmentRootPathKey = "DEVELOPMENT_ROOT_PATH";
+
+    private static readonly string _trueValue = Convert.ToString(true);
+
+    #endregion
+
+    #region Public Methods
+
+    #region Get
+
+    public static bool IsIntegrationTestMode()
     {
-        private static string _integrationTestModeKey = "IntegrationTestMode";
-
-        private static string _resetDbKey = "ResetDB";
-
-        private static string _memoryDbKey = "ResetDB";
-
-        public static bool IsIntegrationTestMode()
-        {
-            return System.Environment.GetEnvironmentVariable(_integrationTestModeKey) is "true";
-        }
-
-        public static void SetIntegrationTestMode()
-        {
-            System.Environment.SetEnvironmentVariable(_integrationTestModeKey, "true");
-        }
-
-        public static bool IsResetDatabase()
-        {
-            return System.Environment.GetEnvironmentVariable(_resetDbKey) is "true";
-        }
-
-        public static void SetResetDatabase()
-        {
-            System.Environment.SetEnvironmentVariable(_resetDbKey, "true");
-        }
-
-        public static void SetInMemoryDatabase(bool state = true)
-        {
-            System.Environment.SetEnvironmentVariable(_memoryDbKey, state.ToString());
-        }
+        return System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == _trueValue;
     }
+
+    /// <summary>
+    /// This is the path that is used to store the /config, /downloads, /movies and /tvshows folders required to boot PlexRipper in development mode in a non-docker environment.
+    /// </summary>
+    /// <returns></returns>
+    public static string? GetDevelopmentRootPath()
+    {
+        return System.Environment.GetEnvironmentVariable(DevelopmentRootPathKey);
+    }
+
+    #endregion
+
+    #region Set
+
+    public static void SetIntegrationTestMode(bool state = false)
+    {
+        System.Environment.SetEnvironmentVariable(IntegrationTestModeKey, state.ToString());
+    }
+
+    #endregion
+
+    #endregion
 }

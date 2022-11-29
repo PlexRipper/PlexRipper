@@ -1,15 +1,11 @@
-﻿using FluentResults;
-using MediatR;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application.PlexLibraries
+public class DeleteMediaFromPlexLibraryCommand : IRequest<Result<bool>>
 {
-    public class DeleteMediaFromPlexLibraryCommand : IRequest<Result<bool>>
+    public DeleteMediaFromPlexLibraryCommand(int plexLibraryId)
     {
-        public DeleteMediaFromPlexLibraryCommand(int plexLibraryId)
-        {
-            PlexLibraryId = plexLibraryId;
-        }
-
-        public int PlexLibraryId { get; }
+        PlexLibraryId = plexLibraryId;
     }
+
+    public int PlexLibraryId { get; }
 }

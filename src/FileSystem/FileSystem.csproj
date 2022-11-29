@@ -1,18 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-      <TargetFramework>net5.0</TargetFramework>
-      <AssemblyName>PlexRipper.FileSystem</AssemblyName>
-    <RootNamespace>PlexRipper.FileSystem</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>10</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <AssemblyName>PlexRipper.FileSystem</AssemblyName>
+        <RootNamespace>PlexRipper.FileSystem</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Application\Application.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Application\Application.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.IO.Abstractions" Version="13.2.43" />
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="System.IO.Abstractions" Version="17.0.18"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
 
 </Project>

@@ -1,16 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>10</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="FluentResults" Version="2.5.0" />
-      <PackageReference Include="FluentValidation" Version="9.3.0" />
+        <PackageReference Include="FluentResults" Version="3.7.0" />
+        <PackageReference Include="FluentValidation" Version="9.3.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Logging\Logging.csproj" />
+        <ProjectReference Include="..\Logging\Logging.csproj" />
     </ItemGroup>
 
 </Project>

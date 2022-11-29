@@ -8,6 +8,7 @@
 		"allowJs": false,
 		"sourceMap": true,
 		"strict": true,
+		"skipLibCheck": true,
 		"allowSyntheticDefaultImports": true,
 		"noImplicitAny": false,
 		"noEmit": true,
@@ -23,10 +24,17 @@
 			"@class/*": ["./types/class/*"],
 			"@dto/*": ["./types/dto/*"],
 			"@api/*": ["./types/api/*"],
+			"@const/*": ["./types/const/*"],
+			"@buttons": ["./components/Buttons/index.ts"],
+			"@buttons/*": ["./components/Buttons/*"],
+			"@api-urls": ["./types/const/api-urls.ts"],
+			"@services-test-base": ["./tests/services/_base/base.ts"],
 			"@lib/*": ["./types/lib/*"],
 			"@service": ["./service/index.ts"],
 			"@img/*": ["./assets/img/*"],
 			"@enums/*": ["./types/enums/*"],
+			"@mock": ["./mock-data/index.ts"],
+			"@mock/*": ["./mock-data/*"],
 			"@interfaces/*": ["./types/interfaces/*"],
 			"@components/*": ["./components/*"],
 			"@overviews/*": ["./components/overviews/*"],
@@ -36,5 +44,5 @@
 		},
 		"types": ["@types/node", "@nuxt/types", "vuetify", "@nuxtjs/vuetify", "@nuxtjs/i18n", "@types/jest"]
 	},
-	"exclude": ["node_modules", ".nuxt", "node_modules/dist", ".vscode"]
+	"exclude": ["*.config.js","node_modules", ".nuxt", "dist", ".vscode"]
 }

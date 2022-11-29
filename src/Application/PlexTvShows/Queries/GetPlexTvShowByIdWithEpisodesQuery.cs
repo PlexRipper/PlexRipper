@@ -1,22 +1,17 @@
-﻿using FluentResults;
-using MediatR;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application.PlexTvShows
+public class GetPlexTvShowByIdWithEpisodesQuery : IRequest<Result<PlexTvShow>>
 {
-    public class GetPlexTvShowByIdWithEpisodesQuery : IRequest<Result<PlexTvShow>>
+    public GetPlexTvShowByIdWithEpisodesQuery(int id, bool includePlexServer = false, bool includeLibrary = false)
     {
-        public GetPlexTvShowByIdWithEpisodesQuery(int id, bool includeLibrary = false, bool includeData = false)
-        {
-            Id = id;
-            IncludeLibrary = includeLibrary;
-            IncludeData = includeData;
-        }
-
-        public int Id { get; }
-
-        public bool IncludeLibrary { get; }
-
-        public bool IncludeData { get; }
+        Id = id;
+        IncludeLibrary = includeLibrary;
+        IncludePlexServer = includePlexServer;
     }
+
+    public int Id { get; }
+
+    public bool IncludeLibrary { get; }
+
+    public bool IncludePlexServer { get; }
 }

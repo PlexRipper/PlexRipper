@@ -1,20 +1,23 @@
-version: '3.4'
+version: '3.9'
 services:
   plexripper:
     container_name: PlexRipper
-    image: plexripper/plexripper
+    image: plexripper/plexripper:dev
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:5001;http://+:5000
+      - PUID=1000
+      - PGID=1000
     build:
       context: .
       dockerfile: ./Dockerfile
     # restart: always
     ports:
-     # Web UI & Web API
-     - '5000:5000'
+      # Web UI & Web API
+      - '7000:7000'
     volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - /mnt/PROJECTS/PlexRipperCache/Config:/Config
+      - /mnt/PROJECTS/PlexRipperCache/Downloads:/Downloads
+      - /mnt/PROJECTS/PlexRipperCache/Movies:/Movies
+      - /mnt/PROJECTS/PlexRipperCache/TvShows:/TvShows
+
 
 

@@ -1,39 +1,30 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Notifications;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS
+namespace PlexRipper.Data;
+
+public class HideNotificationValidator : AbstractValidator<HideNotificationCommand>
 {
-    public class HideNotificationValidator : AbstractValidator<HideNotificationCommand>
+    public HideNotificationValidator()
     {
-        public HideNotificationValidator()
-        {
-            RuleFor(x => x.Id).GreaterThan(0);
-        }
+        RuleFor(x => x.Id).GreaterThan(0);
     }
+}
 
-    public class HideNotificationHandler : BaseHandler, IRequestHandler<HideNotificationCommand, Result>
+public class HideNotificationHandler : BaseHandler, IRequestHandler<HideNotificationCommand, Result>
+{
+    public HideNotificationHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result> Handle(HideNotificationCommand command, CancellationToken cancellationToken)
     {
-        public HideNotificationHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var notification = _dbContext.Notifications.AsTracking().FirstOrDefault(x => x.Id == command.Id);
+        if (notification == null)
+            return ResultExtensions.EntityNotFound(nameof(Notification), command.Id);
 
-        public async Task<Result> Handle(HideNotificationCommand command, CancellationToken cancellationToken)
-        {
-            var notification = _dbContext.Notifications.AsTracking().FirstOrDefault(x => x.Id == command.Id);
-            if (notification == null)
-            {
-                return ResultExtensions.EntityNotFound(nameof(Notification), command.Id);
-            }
-
-            notification.Hidden = true;
-            await SaveChangesAsync();
-            return Result.Ok();
-        }
+        notification.Hidden = true;
+        await SaveChangesAsync();
+        return Result.Ok();
     }
 }

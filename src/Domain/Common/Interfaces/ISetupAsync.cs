@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
-using FluentResults;
+﻿namespace PlexRipper.Domain;
 
-namespace PlexRipper.Domain
+public interface ISetupAsync
 {
-    public interface ISetupAsync
-    {
-        public Task<Result> SetupAsync();
-    }
+    /// <summary>
+    /// Called on application startup to start, resume work or setup services.
+    /// </summary>
+    /// <returns>Result.</returns>
+    public Task<Result> SetupAsync();
 }

@@ -11,6 +11,7 @@
 					color="red"
 					class="ma-3 pt-0"
 					hide-details
+					data-cy="account-form-is-enabled"
 					@change="inputChanged({ prop: 'isEnabled', value: $event })"
 				/>
 			</v-col>
@@ -26,6 +27,7 @@
 					color="red"
 					class="ma-3 pt-0"
 					hide-details
+					data-cy="account-form-is-main"
 					@change="inputChanged({ prop: 'isMain', value: $event })"
 				/>
 			</v-col>
@@ -43,6 +45,7 @@
 					full-width
 					outlined
 					required
+					data-cy="account-form-display-name-input"
 					@input="inputChanged({ prop: 'displayName', value: $event })"
 				/>
 			</v-col>
@@ -61,6 +64,7 @@
 					full-width
 					outlined
 					required
+					data-cy="account-form-username-input"
 					@input="inputChanged({ prop: 'username', value: $event })"
 				/>
 			</v-col>
@@ -79,6 +83,7 @@
 					full-width
 					outlined
 					required
+					data-cy="account-form-password-input"
 					:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
 					:type="showPassword ? 'text' : 'password'"
 					@click:append="showPassword = !showPassword"
@@ -91,8 +96,8 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import { PlexAccountDTO } from '@dto/mainApi';
 import VForm from 'vuetify/lib/components/VForm/VForm.js';
+import { PlexAccountDTO } from '@dto/mainApi';
 
 @Component<AccountForm>({})
 export default class AccountForm extends Vue {

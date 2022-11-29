@@ -1,58 +1,85 @@
-import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
-import { DownloadMediaDTO, DownloadTaskDTO } from '@dto/mainApi';
+import { DOWNLOAD_RELATIVE_PATH } from '@api-urls';
+import { DownloadMediaDTO, DownloadTaskDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
-import { checkResponse, preApiRequest } from './baseApi';
+import PlexRipperAxios from '@class/PlexRipperAxios';
 
 const logText = 'From PlexDownloadApi => ';
-const apiPath = '/download';
 
-export function getAllDownloads(): Observable<ResultDTO<DownloadTaskDTO[]>> {
-	preApiRequest(logText, 'getAllDownloads');
-	const result = Axios.get(`${apiPath}`);
-	return checkResponse<ResultDTO<DownloadTaskDTO[]>>(result, logText, 'getAllDownloads');
+export function getAllDownloads(): Observable<ResultDTO<ServerDownloadProgressDTO[]>> {
+	return PlexRipperAxios.get<ServerDownloadProgressDTO[]>({
+		url: DOWNLOAD_RELATIVE_PATH,
+		apiCategory: logText,
+		apiName: getAllDownloads.name,
+	});
 }
 
 export function downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): Observable<ResultDTO<boolean>> {
-	preApiRequest(logText, 'downloadMedia', downloadMediaCommand);
-	const result = Axios.post(`${apiPath}/download`, downloadMediaCommand);
-	return checkResponse<ResultDTO<boolean>>(result, logText, 'downloadMedia');
+	return PlexRipperAxios.post<boolean>({
+		url: `${DOWNLOAD_RELATIVE_PATH}/download`,
+		apiCategory: logText,
+		apiName: downloadMedia.name,
+		data: downloadMediaCommand,
+	});
 }
 
 // region Commands
-export function restartDownloadTasks(downloadTaskIds: number[]): Observable<ResultDTO<boolean>> {
-	preApiRequest(logText, 'restartDownloadTasks', downloadTaskIds);
-	const result = Axios.post(`${apiPath}/restart`, downloadTaskIds);
-	return checkResponse<ResultDTO<boolean>>(result, logText, 'restartDownloadTasks');
+export function restartDownloadTasks(downloadTaskId: number): Observable<ResultDTO<boolean>> {
+	return PlexRipperAxios.get<boolean>({
+		url: `${DOWNLOAD_RELATIVE_PATH}/restart/${downloadTaskId}`,
+		apiCategory: logText,
+		apiName: restartDownloadTasks.name,
+	});
 }
 
 export function deleteDownloadTasks(downloadTaskIds: number[]): Observable<ResultDTO<boolean>> {
-	preApiRequest(logText, 'deleteDownloadTasks', downloadTaskIds);
-	const result = Axios.post(`${apiPath}/delete`, downloadTaskIds);
-	return checkResponse<ResultDTO<boolean>>(result, logText, 'deleteDownloadTask');
+	return PlexRipperAxios.post<boolean>({
+		url: `${DOWNLOAD_RELATIVE_PATH}/delete`,
+		apiCategory: logText,
+		apiName: deleteDownloadTasks.name,
+		data: downloadTaskIds,
+	});
 }
 
 export function clearDownloadTasks(downloadTaskIds: number[]): Observable<ResultDTO<boolean>> {
-	preApiRequest(logText, 'clearDownloadTasks', downloadTaskIds);
-	const result = Axios.post(`${apiPath}/clear`, downloadTaskIds);
-	return checkResponse<ResultDTO<boolean>>(result, logText, 'clearDownloadTasks');
+	return PlexRipperAxios.post<boolean>({
+		url: `${DOWNLOAD_RELATIVE_PATH}/clear`,
+		apiCategory: logText,
+		apiName: clearDownloadTasks.name,
+		data: downloadTaskIds,
+	});
 }
 
-export function stopDownloadTasks(downloadTaskIds: number[]): Observable<ResultDTO<boolean>> {
-	preApiRequest(logText, 'stopDownloadTasks', downloadTaskIds);
-	const result = Axios.post(`${apiPath}/stop`, downloadTaskIds);
-	return checkResponse<ResultDTO<boolean>>(result, logText, 'stopDownloadTasks');
+export function stopDownloadTasks(downloadTaskId: number): Observable<ResultDTO<boolean>> {
+	return PlexRipperAxios.get<boolean>({
+		url: `${DOWNLOAD_RELATIVE_PATH}/stop/${downloadTaskId}`,
+		apiCategory: logText,
+		apiName: stopDownloadTasks.name,
+	});
 }
 
-export function startDownloadTask(downloadTaskIds: number[]): Observable<ResultDTO<boolean>> {
-	preApiRequest(logText, 'startDownloadTask', downloadTaskIds);
-	const result = Axios.post(`${apiPath}/start/`, downloadTaskIds);
-	return checkResponse<ResultDTO<boolean>>(result, logText, 'startDownloadTask');
+export function startDownloadTask(downloadTaskId: number): Observable<ResultDTO<boolean>> {
+	return PlexRipperAxios.get<boolean>({
+		url: `${DOWNLOAD_RELATIVE_PATH}/start/${downloadTaskId}`,
+		apiCategory: logText,
+		apiName: startDownloadTask.name,
+	});
 }
 
-export function pauseDownloadTask(downloadTaskIds: number[]): Observable<ResultDTO<boolean>> {
-	preApiRequest(logText, 'pauseDownloadTask', downloadTaskIds);
-	const result = Axios.post(`${apiPath}/pause/`, downloadTaskIds);
-	return checkResponse<ResultDTO<boolean>>(result, logText, 'pauseDownloadTask');
+export function pauseDownloadTask(downloadTaskId: number): Observable<ResultDTO<boolean>> {
+	return PlexRipperAxios.get<boolean>({
+		url: `${DOWNLOAD_RELATIVE_PATH}/pause/${downloadTaskId}`,
+		apiCategory: logText,
+		apiName: pauseDownloadTask.name,
+	});
 }
+
+export function detailDownloadTask(downloadTaskId: number): Observable<ResultDTO<DownloadTaskDTO>> {
+	return PlexRipperAxios.get<DownloadTaskDTO>({
+		url: `${DOWNLOAD_RELATIVE_PATH}/detail/${downloadTaskId}`,
+		apiCategory: logText,
+		apiName: detailDownloadTask.name,
+	});
+}
+
 // endregion

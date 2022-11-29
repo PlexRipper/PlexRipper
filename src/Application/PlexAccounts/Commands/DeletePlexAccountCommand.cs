@@ -1,15 +1,11 @@
-﻿using FluentResults;
-using MediatR;
+﻿namespace PlexRipper.Application.PlexAccounts;
 
-namespace PlexRipper.Application.PlexAccounts
+public class DeletePlexAccountCommand : IRequest<Result>
 {
-    public class DeletePlexAccountCommand : IRequest<Result>
-    {
-        public int Id { get; }
+    public int Id { get; }
 
-        public DeletePlexAccountCommand(int Id)
-        {
-            this.Id = Id;
-        }
+    public DeletePlexAccountCommand(int Id)
+    {
+        this.Id = Id;
     }
 }

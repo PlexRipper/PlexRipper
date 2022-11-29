@@ -1,56 +1,43 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using FluentResults;
-using MediatR;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.PlexAccounts;
-using PlexRipper.Domain;
+﻿using PlexRipper.Application.PlexAccounts;
 
-namespace PlexRipper.Application.MigrationService
+namespace PlexRipper.Application.MigrationService;
+
+public class MigrationService : IMigrationService
 {
-    public class MigrationService : IMigrationService
+    private readonly IMediator _mediator;
+
+    private readonly IPlexAccountService _plexAccountService;
+
+    public MigrationService(IMediator mediator, IPlexAccountService plexAccountService)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+        _plexAccountService = plexAccountService;
+    }
 
-        private readonly IPlexAccountService _plexAccountService;
+    public async Task<Result> SetupAsync()
+    {
+        return await AddClientIdsToPlexAccounts();
+    }
 
-        public MigrationService(IMediator mediator, IPlexAccountService plexAccountService)
-        {
-            _mediator = mediator;
-            _plexAccountService = plexAccountService;
-        }
+    private async Task<Result> AddClientIdsToPlexAccounts()
+    {
+        var plexAccounts = await _mediator.Send(new GetAllPlexAccountsQuery());
 
-        public async Task<Result> SetupAsync()
-        {
-            return await AddClientIdsToPlexAccounts();
-        }
+        if (plexAccounts.IsFailed)
+            return plexAccounts.LogError();
 
-        private async Task<Result> AddClientIdsToPlexAccounts()
-        {
-            var plexAccounts = await _mediator.Send(new GetAllPlexAccountsQuery());
-
-            if (plexAccounts.IsFailed)
-            {
-                return plexAccounts.LogError();
-            }
-
-            var invalidAccounts = plexAccounts.Value.FindAll(x => string.IsNullOrEmpty(x.ClientId));
-            if (!invalidAccounts.Any())
-            {
-                return Result.Ok();
-            }
-
-            foreach (var plexAccount in invalidAccounts)
-            {
-                plexAccount.ClientId = _plexAccountService.GeneratePlexAccountClientId();
-                var result = await _mediator.Send(new UpdatePlexAccountCommand(plexAccount));
-                if (result.IsFailed)
-                {
-                    result.LogError();
-                }
-            }
-
+        var invalidAccounts = plexAccounts.Value.FindAll(x => string.IsNullOrEmpty(x.ClientId));
+        if (!invalidAccounts.Any())
             return Result.Ok();
+
+        foreach (var plexAccount in invalidAccounts)
+        {
+            plexAccount.ClientId = _plexAccountService.GeneratePlexAccountClientId();
+            var result = await _mediator.Send(new UpdatePlexAccountCommand(plexAccount));
+            if (result.IsFailed)
+                result.LogError();
         }
+
+        return Result.Ok();
     }
 }

@@ -1,16 +1,13 @@
 ﻿using AutoMapper;
-using PlexRipper.Application.Common;
-using PlexRipper.Application.Common.WebApi;
 
-namespace PlexRipper.Application.Config
+namespace PlexRipper.Application;
+
+public class ApplicationMappingProfile : Profile
 {
-    public class ApplicationMappingProfile : Profile
+    public ApplicationMappingProfile()
     {
-        public ApplicationMappingProfile()
-        {
-            // PlexApiClientProgress -> InspectServerProgress
-            CreateMap<PlexApiClientProgress, InspectServerProgress>(MemberList.None)
-                .ReverseMap();
-        }
+        // PlexApiClientProgress -> InspectServerProgress
+        CreateMap<PlexApiClientProgress, InspectServerProgress>(MemberList.None)
+            .ReverseMap();
     }
 }

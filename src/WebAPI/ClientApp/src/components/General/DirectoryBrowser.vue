@@ -1,9 +1,9 @@
 <template>
 	<v-row justify="start">
 		<v-col>
-			<v-dialog :value="open" persistent max-width="900px">
+			<v-dialog :value="showDialog" persistent max-width="900px">
 				<v-card>
-					<v-card-title>
+					<v-card-title v-if="path">
 						<v-row>
 							<v-col cols="12">
 								<label>
@@ -11,7 +11,12 @@
 								</label>
 							</v-col>
 							<v-col cols="12" style="max-height: 75px">
-								<v-text-field v-model="newDirectory" outlined color="red" placeholder="Start typing or select a path below" />
+								<v-text-field
+									v-model="path.directory"
+									outlined
+									color="red"
+									placeholder="Start typing or select a path below"
+								/>
 							</v-col>
 						</v-row>
 					</v-card-title>
@@ -45,7 +50,12 @@
 									<v-simple-table>
 										<template #default>
 											<tbody>
-												<tr v-for="(item, i) in items" :key="i" style="cursor: pointer" @click="directoryNavigate(item)">
+												<tr
+													v-for="(item, i) in items"
+													:key="i"
+													style="cursor: pointer"
+													@click="directoryNavigate(item)"
+												>
 													<td :width="100">
 														<v-icon>{{ getIcon(item.type) }}</v-icon>
 													</td>
@@ -59,8 +69,8 @@
 						</template>
 					</v-card-text>
 					<v-card-actions class="justify-end" style="height: 60px">
-						<p-btn :button-type="cancelButtonType" @click="cancel()" />
-						<p-btn :button-type="confirmButtonType" @click="confirm()" />
+						<CancelButton @click="cancel()" />
+						<ConfirmButton @click="confirm()" />
 					</v-card-actions>
 				</v-card>
 			</v-dialog>
@@ -69,42 +79,22 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { DataTableHeader } from 'vuetify';
+import Log from 'consola';
+import { Component, Vue, Watch } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
+import { cloneDeep, debounce, DebouncedFunc } from 'lodash-es';
 import { getDirectoryPath } from '@api/pathApi';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
 import { FileSystemEntityType } from '@dto/mainApi';
-import ButtonType from '@enums/buttonType';
-import { debounce, distinctUntilChanged, map } from 'rxjs/operators';
-import { timer } from 'rxjs';
 
 @Component
 export default class DirectoryBrowser extends Vue {
-	@Prop({ required: false, type: Object as () => FolderPathDTO })
-	readonly path!: FolderPathDTO;
-
-	@Prop({ required: true, type: Boolean })
-	readonly open!: boolean;
-
-	parentPath: string = '';
-	newDirectory: string = '';
-	isLoading: boolean = true;
-
-	items: FileSystemModelDTO[] = [];
-
-	headers: DataTableHeader[] = [
-		{
-			text: 'Type',
-			value: 'type',
-			width: 60,
-			class: 'directory-row',
-		},
-		{
-			text: 'Name',
-			value: 'name',
-			class: 'directory-row',
-		},
-	];
+	private path: FolderPathDTO | null = null;
+	private showDialog: boolean = false;
+	private parentPath: string = '';
+	private isLoading: boolean = true;
+	private items: FileSystemModelDTO[] = [];
+	private debouncedWatch!: DebouncedFunc<(newValue: any, oldValue: any) => void>;
 
 	getIcon(type: FileSystemEntityType): string {
 		switch (type) {
@@ -121,29 +111,29 @@ export default class DirectoryBrowser extends Vue {
 		}
 	}
 
-	@Watch('open', { immediate: true, deep: true })
-	onDialogOpen(val: boolean): void {
-		if (val) {
-			this.newDirectory = this.path?.directory ?? '';
-			this.requestDirectories(this.newDirectory);
+	open(path: FolderPathDTO): void {
+		if (!path) {
+			Log.error('parameter was null when opening DirectoryBrowser');
+			return;
 		}
+		this.path = cloneDeep(path);
+		this.requestDirectories(path.directory);
+		this.showDialog = true;
 	}
 
-	get cancelButtonType(): ButtonType {
-		return ButtonType.Cancel;
-	}
-
-	get confirmButtonType(): ButtonType {
-		return ButtonType.Confirm;
+	@Watch('newDirectory')
+	onNewDirectory(val: string, oldVal: string) {
+		this.debouncedWatch(val, oldVal);
 	}
 
 	confirm(): void {
-		this.path.directory = this.newDirectory;
 		this.$emit('confirm', this.path);
+		this.showDialog = false;
 	}
 
 	cancel(): void {
 		this.$emit('cancel');
+		this.showDialog = false;
 	}
 
 	directoryNavigate(dataRow: FileSystemModelDTO): void {
@@ -159,40 +149,40 @@ export default class DirectoryBrowser extends Vue {
 			this.isLoading = true;
 		}
 
-		this.$subscribeTo(getDirectoryPath(path), (data) => {
-			if (data.isSuccess && data.value) {
-				this.items = data.value?.directories;
+		useSubscription(
+			getDirectoryPath(path).subscribe((data) => {
+				if (data.isSuccess && data.value) {
+					this.items = data.value?.directories;
 
-				// Don't add return row if in the root folder
-				if (path !== '') {
-					this.items.unshift({
-						name: '...',
-						path: '..',
-						type: FileSystemEntityType.Parent,
-						extension: '',
-						size: 0,
-						lastModified: '',
-					});
+					// Don't add return row if in the root folder
+					if (path !== '') {
+						this.items.unshift({
+							name: '...',
+							path: '..',
+							type: FileSystemEntityType.Parent,
+							extension: '',
+							size: 0,
+							lastModified: '',
+						});
+					}
+					this.parentPath = data.value?.parent;
+					if (this.path) {
+						this.path.directory = path;
+					}
+					this.isLoading = false;
 				}
-				this.parentPath = data.value?.parent;
-				this.newDirectory = path;
-				this.isLoading = false;
-			}
-		});
+			}),
+		);
 	}
 
-	mounted(): void {
-		// On user input request the path
-		this.$subscribeTo(
-			this.$watchAsObservable('newDirectory').pipe(
-				map((x: { oldValue: string; newValue: string }) => x.newValue),
-				debounce(() => timer(1000)),
-				distinctUntilChanged(),
-			),
-			(value) => {
-				this.requestDirectories(value);
-			},
-		);
+	created(): void {
+		this.debouncedWatch = debounce((newValue) => {
+			this.requestDirectories(newValue);
+		}, 1000);
+	}
+
+	beforeUnmount() {
+		this.debouncedWatch.cancel();
 	}
 }
 </script>

@@ -1,40 +1,22 @@
-﻿using System.IO;
-using FluentResults;
-using PlexRipper.Domain;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application.Common
+public interface IFileSystem
 {
-    public interface IFileSystem : ISetup
-    {
-        Result<Stream> SaveFile(string directory, string fileName, long fileSize);
+    string ToAbsolutePath(string relativePath);
 
-        string ToAbsolutePath(string relativePath);
+    Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
 
-        Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
+    bool FileExists(string path);
 
-        Result<Stream> DownloadWorkerTempFileStream(string directory, string fileName, long fileSize);
+    Result<string> FileReadAllText(string path);
 
-        Result CreateDirectoryFromFilePath(string filePath);
+    Result FileWriteAllText(string path, string text);
 
-        /// <summary>
-        /// Deletes the last folder in the file path.
-        /// Note: if the filePath is an empty directory, then that last folder will be deleted, if empty.
-        /// </summary>
-        /// <param name="filePath">The filepath to delete the last folder in the path from.</param>
-        /// <returns></returns>
-        Result DeleteDirectoryFromFilePath(string filePath);
+    Result<Stream> Open(string path, FileMode mode, FileAccess access, FileShare share);
 
-        /// <summary>
-        /// Deletes all files recursively in a directory
-        /// </summary>
-        /// <param name="directory">The directory to delete all files from.</param>
-        /// <returns></returns>
-        Result DeleteAllFilesFromDirectory(string directory);
+    Result<Stream> Create(string path, int bufferSize, FileOptions options);
 
-        Result<bool> FileExists(string path);
+    Result FileMove(string sourceFileName, string destFileName, bool overwrite = true);
 
-        Result<string> FileReadAllText(string path);
-
-        Result FileWriteAllText(string path, string text);
-    }
+    Result DeleteFile(string filePath);
 }

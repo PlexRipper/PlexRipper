@@ -1,26 +1,25 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS base
 WORKDIR /app
 
 ## Setup Nuxt front-end
-FROM node:14.17.6-alpine AS client-build
+FROM node:16.18.1-alpine AS client-build
 WORKDIR /tmp/build/ClientApp
 
-ARG PORT=7000
-ENV PORT=$PORT
+ENV PORT=7000
 ENV NUXT_ENV_BASE_URL="TEST IF BASE URL CAME THROUGH"
 # Essential config files
 COPY ./src/WebAPI/ClientApp/package*.json ./
 COPY ./src/WebAPI/ClientApp/tsconfig.json ./
 COPY ./src/WebAPI/ClientApp/nuxt.config.ts ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 ## Copy the rest of the project files
 COPY ./src/WebAPI/ClientApp/ ./
 RUN npm run generate --fail-on-error
 
 ## Setup .NET Core back-end
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
 ## Domain Projects
@@ -67,6 +66,6 @@ LABEL company="PlexRipper"
 LABEL maintainer="plexripper@protonmail.com"
 
 EXPOSE 7000
-VOLUME /config /downloads /movies /tvshows
+VOLUME /Config /Downloads /Movies /TvShows
 
 ENTRYPOINT ["dotnet", "PlexRipper.WebAPI.dll"]

@@ -1,16 +1,15 @@
-import Axios from 'axios-observable';
 import { Observable } from 'rxjs';
 import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
-import { checkResponse, preApiRequest } from '@api/baseApi';
 import ResultDTO from '@dto/ResultDTO';
-
-const logText = 'From plexMediaApi => ';
-const apiPath = '/PlexMedia';
+import PlexRipperAxios from '@class/PlexRipperAxios';
+import { PLEX_MEDIA_RELATIVE_PATH } from '@api-urls';
 
 export function getTvShow(id: number): Observable<ResultDTO<PlexMediaDTO>> {
-	preApiRequest(logText, 'getTvShow');
-	const result = Axios.get(`${apiPath}/tvshow/${id}`);
-	return checkResponse<ResultDTO<PlexMediaDTO>>(result, logText, 'getTvShow');
+	return PlexRipperAxios.get<PlexMediaDTO>({
+		url: `${PLEX_MEDIA_RELATIVE_PATH}/tvshow/${id}`,
+		apiCategory: '',
+		apiName: getTvShow.name,
+	});
 }
 
 export function getThumbnail(
@@ -19,8 +18,8 @@ export function getThumbnail(
 	width: number = 0,
 	height: number = 0,
 ): Observable<any> {
-	preApiRequest(logText, 'getThumbnail');
-	return Axios.get<Blob>(`${apiPath}/thumb`, {
+	return PlexRipperAxios.getImage<Blob>({
+		url: `${PLEX_MEDIA_RELATIVE_PATH}/thumb`,
 		params: {
 			plexMediaId,
 			plexMediaType,

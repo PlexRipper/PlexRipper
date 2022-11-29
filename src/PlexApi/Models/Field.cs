@@ -1,13 +1,12 @@
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.PlexApi.Models
-{
-    public class Field
-    {
-        [JsonPropertyName("locked")]
-        public bool Locked { get; set; }
+namespace PlexRipper.PlexApi.Models;
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-    }
+public class Field
+{
+    [JsonPropertyName("locked")]
+    public bool Locked { get; set; }
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
 }

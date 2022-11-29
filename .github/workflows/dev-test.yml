@@ -1,23 +1,44 @@
-name: Execute Unit Tests
+name: Execute Tests
 
 on:
   workflow_dispatch:
   pull_request:
-    branches:
-      [master, dev]
-      
+    branches: [master, dev]
+
 jobs:
-  build:
+  tests-back-end:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Restore dependencies
-      run: dotnet restore PlexRipper.sln
-    - name: Build
-      run: dotnet build PlexRipper.sln --no-restore
-    - name: Test
-      run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - name: Restore dependencies
+        run: dotnet restore PlexRipper.sln
+      - name: Build
+        run: dotnet build PlexRipper.sln --no-restore
+      - name: Test
+        run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
+  tests-front-end:
+    defaults:
+      run:
+        working-directory: src/WebAPI/ClientApp/
+    strategy:
+      matrix:
+        node-version: [16.x]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+      - name: Clean install npm modules
+        run: npm ci
+      - name: Build front-end
+        run: npm run build --if-present
+      - name: Run Jest tests
+        run: npm test

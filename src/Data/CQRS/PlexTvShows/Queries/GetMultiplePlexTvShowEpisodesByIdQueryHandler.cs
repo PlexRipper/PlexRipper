@@ -1,55 +1,44 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentResults;
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexTvShows;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain;
 
-namespace PlexRipper.Data.CQRS.PlexTvShows
+namespace PlexRipper.Data.PlexTvShows;
+
+public class GetMultiplePlexTvShowEpisodesByIdQueryValidator : AbstractValidator<GetMultiplePlexTvShowEpisodesByIdQuery>
 {
-    public class GetMultiplePlexTvShowEpisodesByIdQueryValidator : AbstractValidator<GetMultiplePlexTvShowEpisodesByIdQuery>
+    public GetMultiplePlexTvShowEpisodesByIdQueryValidator()
     {
-        public GetMultiplePlexTvShowEpisodesByIdQueryValidator()
-        {
-            RuleFor(x => x.Ids.Count).GreaterThan(0);
-        }
+        RuleFor(x => x.Ids.Count).GreaterThan(0);
     }
+}
 
-    public class GetMultiplePlexTvShowEpisodesByIdQueryHandler : BaseHandler,
-        IRequestHandler<GetMultiplePlexTvShowEpisodesByIdQuery, Result<List<PlexTvShowEpisode>>>
+public class GetMultiplePlexTvShowEpisodesByIdQueryHandler : BaseHandler,
+    IRequestHandler<GetMultiplePlexTvShowEpisodesByIdQuery, Result<List<PlexTvShowEpisode>>>
+{
+    public GetMultiplePlexTvShowEpisodesByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+
+    public async Task<Result<List<PlexTvShowEpisode>>> Handle(GetMultiplePlexTvShowEpisodesByIdQuery request, CancellationToken cancellationToken)
     {
-        public GetMultiplePlexTvShowEpisodesByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+        var query = PlexTvShowEpisodesQueryable;
 
-        public async Task<Result<List<PlexTvShowEpisode>>> Handle(GetMultiplePlexTvShowEpisodesByIdQuery request, CancellationToken cancellationToken)
+        if (request.IncludeLibrary)
+            query = query.IncludePlexLibrary();
+
+        if (request.IncludeServer)
+            query = query.IncludePlexServer();
+
+        if (request.IncludeTvShowAndSeason)
         {
-            IQueryable<PlexTvShowEpisode> query = PlexTvShowEpisodesQueryable;
-
-            if (request.IncludeLibrary)
-            {
-                query = query.IncludePlexLibrary();
-            }
-
-            if (request.IncludeServer)
-            {
-                query = query.IncludeServer();
-            }
-
-            if (request.IncludeTvShowAndSeason)
-            {
-                query = query
-                    .Include(x => x.TvShowSeason)
-                    .ThenInclude(x => x.TvShow);
-            }
-
-            var plexTvShowEpisodes = await query
-                .Where(x => request.Ids.Contains(x.Id)).ToListAsync(cancellationToken);
-
-            return Result.Ok(plexTvShowEpisodes);
+            query = query
+                .Include(x => x.TvShowSeason)
+                .ThenInclude(x => x.TvShow);
         }
+
+        var plexTvShowEpisodes = await query
+            .Where(x => request.Ids.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        return Result.Ok(plexTvShowEpisodes);
     }
 }

@@ -1,11 +1,10 @@
-﻿namespace Environment
+﻿namespace Environment;
+
+public enum OperatingSystemPlatform
 {
-    public enum OperatingSystemPlatform
-    {
-        Windows,
+    Windows,
 
-        Linux,
+    Linux,
 
-        Osx,
-    }
+    Osx,
 }

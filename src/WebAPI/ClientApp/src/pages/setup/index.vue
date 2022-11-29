@@ -39,7 +39,7 @@
 										<ul>
 											<li>
 												{{ $t('pages.setup.intro.list.item-1') }}
-												<external-link href="https://github.com/PlexRipper/PlexRipper/issues" />
+												<ExternalLinkButton href="https://github.com/PlexRipper/PlexRipper/issues" />
 											</li>
 											<li>{{ $t('pages.setup.intro.list.item-2') }}</li>
 											<li>{{ $t('pages.setup.intro.list.item-3') }}</li>
@@ -121,7 +121,7 @@
 													</ul>
 												</v-list-item-title>
 												<v-list-item-action>
-													<external-link :href="link" />
+													<ExternalLinkButton :href="link" />
 												</v-list-item-action>
 											</v-list-item>
 										</v-list>
@@ -147,19 +147,12 @@
 		<!--	Skip button	-->
 		<v-row justify="center">
 			<v-col cols="3">
-				<p-btn
-					block
-					:width="100"
-					:button-type="getSkipButtonType"
-					:disabled="isNextDisabled"
-					text-id="skip-setup"
-					@click="skipDialogOpen = true"
-				/>
+				<NavigationSkipSetupButton :disabled="isNextDisabled" @click="skipDialogOpen = true" />
 				<confirmation-dialog
 					text-id="skip-setup"
 					:dialog="skipDialogOpen"
 					@confirm="finishSetup"
-					@close="skipDialogOpen = false"
+					@cancel="skipDialogOpen = false"
 				/>
 			</v-col>
 		</v-row>
@@ -169,7 +162,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { SettingsService } from '@service';
-import ButtonType from '@enums/buttonType';
 
 @Component
 export default class Setup extends Vue {
@@ -184,10 +176,6 @@ export default class Setup extends Vue {
 		'https://github.com/PlexRipper/PlexRipper/',
 	];
 
-	get getSkipButtonType(): ButtonType {
-		return ButtonType.Skip;
-	}
-
 	back(): void {
 		if (this.stepIndex > 1) {
 			this.stepIndex--;
@@ -201,9 +189,11 @@ export default class Setup extends Vue {
 	}
 
 	finishSetup(): void {
-		SettingsService.updateSetting('firstTimeSetup', false);
-		// TODO Refresh the page when we go to the home page to make sure we get all new data.
-		this.$router.push('/');
+		SettingsService.updateGeneralSettings('firstTimeSetup', false);
+		this.$router.push('/', () => {
+			// Refresh the page when we go to the home page to make sure we get all new data.
+			location.reload();
+		});
 	}
 
 	get headers(): string[] {

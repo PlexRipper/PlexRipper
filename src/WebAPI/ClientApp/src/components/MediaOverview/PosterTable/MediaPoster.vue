@@ -49,10 +49,10 @@
 								</v-col>
 								<v-col cols="auto">
 									<v-btn v-if="isMovieType" icon large @click="downloadMedia()">
-										<v-icon large> mdi-download </v-icon>
+										<v-icon large> mdi-download</v-icon>
 									</v-btn>
 									<v-btn v-if="isTvShowType" icon large @click="openDetails()">
-										<v-icon large> mdi-magnify </v-icon>
+										<v-icon large> mdi-magnify</v-icon>
 									</v-btn>
 								</v-col>
 							</v-row>
@@ -81,6 +81,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
 import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
 import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
 import { MediaService } from '@service';
@@ -99,6 +100,7 @@ export default class MediaPoster extends Vue {
 	isVisible: boolean = false;
 	imageUrl: string = '';
 	defaultImage: boolean = false;
+
 	get getLazyLoadingHeight(): number {
 		return this.thumbHeight + 40;
 	}
@@ -155,18 +157,19 @@ export default class MediaPoster extends Vue {
 		}
 
 		if (this.isVisible && !this.imageUrl) {
-			this.$subscribeTo(
-				MediaService.getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight),
-				(imageUrl) => {
-					if (!imageUrl) {
+			useSubscription(
+				MediaService.getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe({
+					next: (imageUrl) => {
+						if (!imageUrl) {
+							this.defaultImage = true;
+							return;
+						}
+						this.imageUrl = imageUrl;
+					},
+					error: () => {
 						this.defaultImage = true;
-						return;
-					}
-					this.imageUrl = imageUrl;
-				},
-				() => {
-					this.defaultImage = true;
-				},
+					},
+				}),
 			);
 		}
 	}
@@ -175,7 +178,6 @@ export default class MediaPoster extends Vue {
 		const downloadCommand: DownloadMediaDTO = {
 			type: this.mediaType,
 			mediaIds: [this.mediaItem.id],
-			libraryId: 0,
 			plexAccountId: 0,
 		};
 

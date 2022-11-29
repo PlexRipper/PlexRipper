@@ -11,20 +11,23 @@ import {
 	SyncServerProgress,
 	LibraryProgress,
 	DownloadTaskCreationProgress,
+	ServerDownloadProgressDTO,
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
 import IAlert from '@interfaces/IAlert';
+import IAppConfig from '@class/IAppConfig';
 
 export default interface IStoreState extends SettingsModelDTO {
+	pageReady: boolean;
+	config: IAppConfig;
 	accounts: PlexAccountDTO[];
 	servers: PlexServerDTO[];
 	libraries: PlexLibraryDTO[];
-	downloads: DownloadTaskDTO[];
+	serverDownloads: ServerDownloadProgressDTO[];
 	notifications: NotificationDTO[];
 	folderPaths: FolderPathDTO[];
 	alerts: IAlert[];
 	mediaUrls: IObjectUrl[];
-	settings: SettingsModelDTO;
 	helpIdDialog: string;
 	downloadTaskUpdateList: DownloadTaskDTO[];
 	// Progress Service

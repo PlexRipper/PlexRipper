@@ -1,16 +1,11 @@
-﻿using System.Collections.Generic;
-using FluentResults;
-using MediatR;
+﻿namespace PlexRipper.Application;
 
-namespace PlexRipper.Application
+public class ClearCompletedDownloadTasksCommand : IRequest<Result>
 {
-    public class ClearCompletedDownloadTasksCommand : IRequest<Result<bool>>
-    {
-        public List<int> DownloadTaskIds { get; }
+    public List<int> DownloadTaskIds { get; }
 
-        public ClearCompletedDownloadTasksCommand(List<int> downloadTaskIds = null)
-        {
-            DownloadTaskIds = downloadTaskIds;
-        }
+    public ClearCompletedDownloadTasksCommand(List<int> downloadTaskIds = null)
+    {
+        DownloadTaskIds = downloadTaskIds;
     }
 }

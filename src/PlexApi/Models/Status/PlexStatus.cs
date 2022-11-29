@@ -1,7 +1,6 @@
-﻿namespace PlexRipper.PlexApi.Models.Status
+﻿namespace PlexRipper.PlexApi.Models.Status;
+
+public class PlexStatus
 {
-    public class PlexStatus
-    {
-        public MediaContainer MediaContainer { get; set; }
-    }
+    public MediaContainer MediaContainer { get; set; }
 }

@@ -3,7 +3,7 @@
 	<v-col cols="12">
 		<v-dialog v-model="showDialog" :max-width="500" scrollable>
 			<v-card v-if="isConfirmationEnabled && progress === null">
-				<v-card-title> {{ $t('components.download-confirmation.header') }} </v-card-title>
+				<v-card-title> {{ $t('components.download-confirmation.header') }}</v-card-title>
 				<v-card-subtitle class="py-2">
 					<span>{{ $t('components.download-confirmation.description') }}</span> <br />
 					<span>{{ $t('components.download-confirmation.total-size') }}<file-size :size="totalSize" /></span>
@@ -25,16 +25,21 @@
 				<v-divider />
 
 				<v-card-actions>
-					<p-btn :button-type="cancelButtonType" @click="showDialog = false" />
+					<CancelButton @click="showDialog = false" />
 					<v-spacer></v-spacer>
-					<p-btn :button-type="confirmButtonType" @click="confirmDownload()" />
+					<ConfirmButton @click="confirmDownload()" />
 				</v-card-actions>
 			</v-card>
 
 			<!-- Download Task Creation Progressbar -->
 			<v-card v-if="progress">
 				<v-card-title class="justify-center">
-					{{ $t('components.download-confirmation.creating-tasks', { current: progress.current, total: progress.total }) }}
+					{{
+						$t('components.download-confirmation.creating-tasks', {
+							current: progress.current,
+							total: progress.total,
+						})
+					}}
 				</v-card-title>
 				<v-card-text>
 					<progress-component :percentage="progress.percentage" text="" />
@@ -46,9 +51,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
-import ButtonType from '@enums/buttonType';
 import Log from 'consola';
+import { useSubscription } from '@vueuse/rxjs';
+import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { SettingsService } from '@service';
 
 @Component
@@ -86,14 +91,6 @@ export default class DownloadConfirmation extends Vue {
 		return true;
 	}
 
-	get cancelButtonType(): ButtonType {
-		return ButtonType.Cancel;
-	}
-
-	get confirmButtonType(): ButtonType {
-		return ButtonType.Confirm;
-	}
-
 	get totalSize(): number {
 		let size = 0;
 		if (this.downloadPreview.length > 0) {
@@ -109,13 +106,17 @@ export default class DownloadConfirmation extends Vue {
 		// If statements instead of switch to avoid having to overcomplicate the variable names.
 		// Movie: Show only the movie
 		if (movieDownloadCommand) {
-			downloadPreview = downloadPreview.concat(this.items.filter((movie) => movieDownloadCommand.mediaIds.includes(movie.id)));
+			downloadPreview = downloadPreview.concat(
+				this.items.filter((movie) => movieDownloadCommand.mediaIds.includes(movie.id)),
+			);
 		}
 
 		// TvShow: Show tvShow -> with all season -> with all episodes
 		const tvShowDownloadCommand = downloadMediaCommands.find((x) => x.type === PlexMediaType.TvShow);
 		if (tvShowDownloadCommand) {
-			downloadPreview = downloadPreview.concat(this.items.filter((tvShow) => tvShowDownloadCommand.mediaIds.includes(tvShow.id)));
+			downloadPreview = downloadPreview.concat(
+				this.items.filter((tvShow) => tvShowDownloadCommand.mediaIds.includes(tvShow.id)),
+			);
 		}
 
 		// Season: Show tvShow -> season -> with all episodes
@@ -140,7 +141,9 @@ export default class DownloadConfirmation extends Vue {
 		if (tvShowEpisodeDownloadCommand) {
 			const mediaIds = tvShowEpisodeDownloadCommand.mediaIds;
 			const filterResult = this.items
-				.filter((tvShow) => tvShow.children?.some((season) => season.children?.some((episode) => mediaIds.includes(episode.id))))
+				.filter((tvShow) =>
+					tvShow.children?.some((season) => season.children?.some((episode) => mediaIds.includes(episode.id))),
+				)
 				.map((tvShow) => {
 					// Create the tvShow
 					return {
@@ -195,12 +198,17 @@ export default class DownloadConfirmation extends Vue {
 		keys = keys.concat(this.downloadPreview.map((x) => x.key.toString()));
 		keys = keys.concat(this.downloadPreview.map((x) => x.children?.map((y) => y.key.toString()) ?? [])?.flat(1) ?? []);
 		keys = keys.concat(
-			this.downloadPreview.map((x) => x.children?.map((y) => y.children?.map((z) => z.key.toString()) ?? []) ?? [])?.flat(2) ??
-				[],
+			this.downloadPreview
+				.map((x) => x.children?.map((y) => y.children?.map((z) => z.key.toString()) ?? []) ?? [])
+				?.flat(2) ?? [],
 		);
 		keys = keys.concat(
 			this.downloadPreview
-				.map((x) => x.children?.map((y) => y.children?.map((z) => z.children?.map((w) => w.key.toString()) ?? []) ?? []) ?? [])
+				.map(
+					(x) =>
+						x.children?.map((y) => y.children?.map((z) => z.children?.map((w) => w.key.toString()) ?? []) ?? []) ??
+						[],
+				)
 				?.flat(3),
 		);
 		return keys;
@@ -224,21 +232,30 @@ export default class DownloadConfirmation extends Vue {
 
 	confirmDownload(): void {
 		this.$emit('download', this.downloadMediaCommand);
+		this.showDialog = false;
 	}
 
 	mounted(): void {
-		this.$subscribeTo(SettingsService.getAskDownloadMovieConfirmation(), (value) => {
-			this.askDownloadMovieConfirmation = value;
-		});
-		this.$subscribeTo(SettingsService.getAskDownloadTvShowConfirmation(), (value) => {
-			this.askDownloadTvShowConfirmation = value;
-		});
-		this.$subscribeTo(SettingsService.getAskDownloadSeasonConfirmation(), (value) => {
-			this.askDownloadSeasonConfirmation = value;
-		});
-		this.$subscribeTo(SettingsService.getAskDownloadEpisodeConfirmation(), (value) => {
-			this.askDownloadEpisodeConfirmation = value;
-		});
+		useSubscription(
+			SettingsService.getAskDownloadMovieConfirmation().subscribe((value) => {
+				this.askDownloadMovieConfirmation = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getAskDownloadTvShowConfirmation().subscribe((value) => {
+				this.askDownloadTvShowConfirmation = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getAskDownloadSeasonConfirmation().subscribe((value) => {
+				this.askDownloadSeasonConfirmation = value;
+			}),
+		);
+		useSubscription(
+			SettingsService.getAskDownloadEpisodeConfirmation().subscribe((value) => {
+				this.askDownloadEpisodeConfirmation = value;
+			}),
+		);
 	}
 }
 </script>

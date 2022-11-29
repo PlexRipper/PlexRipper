@@ -57,8 +57,9 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import { DownloadService } from '@service';
 import VNavigationDrawer from 'vuetify/lib/components/VNavigationDrawer/VNavigationDrawer.js';
+import { useSubscription } from '@vueuse/rxjs';
+import { DownloadService } from '@service';
 
 interface INavItem {
 	title: string;
@@ -67,7 +68,7 @@ interface INavItem {
 	children?: INavItem[];
 }
 
-@Component
+@Component<NavigationDrawer>({})
 export default class NavigationDrawer extends Vue {
 	items: object[] = [];
 	downloadTaskCount = 0;
@@ -175,9 +176,11 @@ export default class NavigationDrawer extends Vue {
 	mounted(): void {
 		// this.setBorderWidth();
 		// this.setEvents();
-		this.$subscribeTo(DownloadService.getDownloadList(), (downloadTasks) => {
-			this.downloadTaskCount = downloadTasks?.length ?? -1;
-		});
+		useSubscription(
+			DownloadService.getDownloadList().subscribe((downloadTasks) => {
+				this.downloadTaskCount = downloadTasks?.length ?? -1;
+			}),
+		);
 	}
 }
 </script>

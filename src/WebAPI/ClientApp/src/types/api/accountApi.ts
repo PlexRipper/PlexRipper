@@ -1,79 +1,102 @@
-import { AuthPin, PlexAccountDTO } from '@dto/mainApi';
 import { Observable } from 'rxjs';
-import Axios from 'axios-observable';
 import ResultDTO from '@dto/ResultDTO';
-import { checkResponse, preApiRequest } from './baseApi';
+import { AuthPin, PlexAccountDTO } from '@dto/mainApi';
+import PlexRipperAxios from '@class/PlexRipperAxios';
+import { PLEX_ACCOUNT_RELATIVE_PATH } from '@api-urls';
 
 const logText = 'From AccountAPI => ';
-const apiPath = '/plexaccount';
 
 export function getAllAccounts(): Observable<ResultDTO<PlexAccountDTO[]>> {
-	preApiRequest(logText, 'getAllAccounts');
-	const result = Axios.get<ResultDTO<PlexAccountDTO[]>>(apiPath);
-	return checkResponse<ResultDTO<PlexAccountDTO[]>>(result, logText, 'getAllAccounts');
+	return PlexRipperAxios.get<PlexAccountDTO[]>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}`,
+		apiCategory: logText,
+		apiName: getAllAccounts.name,
+	});
 }
 
 export function getAllEnabledAccounts(): Observable<ResultDTO<PlexAccountDTO[]>> {
-	preApiRequest(logText, 'getAllEnabledAccounts');
-	const result = Axios.get<ResultDTO<PlexAccountDTO[]>>(`${apiPath}/?enabledOnly=true`);
-	return checkResponse<ResultDTO<PlexAccountDTO[]>>(result, logText, 'getAllEnabledAccounts');
+	return PlexRipperAxios.get<PlexAccountDTO[]>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/?enabledOnly=true`,
+		apiCategory: logText,
+		apiName: getAllEnabledAccounts.name,
+	});
 }
 
 export function validateAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO>> {
-	preApiRequest(logText, 'validateAccount');
-	const result = Axios.post<ResultDTO<PlexAccountDTO>>(`${apiPath}/validate`, account);
-	return checkResponse<ResultDTO<PlexAccountDTO>>(result, logText, 'validateAccount');
+	return PlexRipperAxios.post<PlexAccountDTO>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/validate`,
+		apiCategory: logText,
+		apiName: validateAccount.name,
+		data: account,
+	});
 }
 
 export function createAccount(account: PlexAccountDTO): Observable<ResultDTO<PlexAccountDTO | null>> {
-	preApiRequest(logText, 'createAccount');
-	const result = Axios.post<ResultDTO<PlexAccountDTO>>(apiPath, account);
-	return checkResponse<ResultDTO<PlexAccountDTO | null>>(result, logText, 'createAccount');
+	return PlexRipperAxios.post<PlexAccountDTO>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}`,
+		apiCategory: logText,
+		apiName: createAccount.name,
+		data: account,
+	});
 }
 
 export function updateAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<ResultDTO<PlexAccountDTO | null>> {
-	preApiRequest(logText, 'updateAccount');
-	const result = Axios.put<ResultDTO<PlexAccountDTO>>(`${apiPath}/${account.id}?inspect=${inspect}`, account);
-	return checkResponse<ResultDTO<PlexAccountDTO | null>>(result, logText, 'updateAccount');
+	return PlexRipperAxios.put<PlexAccountDTO | null>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/${account.id}?inspect=${inspect}`,
+		apiCategory: logText,
+		apiName: updateAccount.name,
+		data: account,
+	});
 }
 
 export function deleteAccount(accountId: Number): Observable<ResultDTO<boolean>> {
-	preApiRequest(logText, 'deleteAccount');
-	const result = Axios.delete<ResultDTO<boolean>>(`${apiPath}/${accountId}`);
-	return checkResponse<ResultDTO<boolean>>(result, logText, 'deleteAccount');
+	return PlexRipperAxios.delete<boolean>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/${accountId}`,
+		apiCategory: logText,
+		apiName: deleteAccount.name,
+	});
 }
 
 export function getAccount(accountId: Number): Observable<ResultDTO<PlexAccountDTO>> {
-	preApiRequest(logText, 'getAccount');
-	const result = Axios.get<ResultDTO<PlexAccountDTO>>(`${apiPath}/${accountId}`);
-	return checkResponse<ResultDTO<PlexAccountDTO>>(result, logText, 'getAccount');
+	return PlexRipperAxios.get<PlexAccountDTO>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/${accountId}`,
+		apiCategory: logText,
+		apiName: getAccount.name,
+	});
 }
 
 export function refreshAccount(accountId: Number): Observable<ResultDTO> {
-	preApiRequest(logText, 'refreshAccount');
-	const result = Axios.get<ResultDTO>(`${apiPath}/refresh/${accountId}`);
-	return checkResponse<ResultDTO>(result, logText, 'refreshAccount');
+	return PlexRipperAxios.get<void>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/refresh/${accountId}`,
+		apiCategory: logText,
+		apiName: refreshAccount.name,
+	});
 }
 
 export function GetAndCheck2FaPin(clientId: String, authPinId: number = 0): Observable<ResultDTO<AuthPin>> {
-	preApiRequest(logText, 'getAuthPin');
-	const result = Axios.get<ResultDTO<AuthPin>>(`${apiPath}/authpin`, {
+	return PlexRipperAxios.get<AuthPin>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/authpin`,
+		apiCategory: logText,
+		apiName: GetAndCheck2FaPin.name,
 		params: {
 			clientId,
 			authPinId,
 		},
 	});
-	return checkResponse<ResultDTO<AuthPin>>(result, logText, 'getAuthPin');
 }
 
 export function checkAuthPin(clientId: String): Observable<ResultDTO<AuthPin>> {
-	preApiRequest(logText, 'checkAuthPin');
-	const result = Axios.get<ResultDTO<AuthPin>>(`${apiPath}/authpin/${clientId}/check`);
-	return checkResponse<ResultDTO<AuthPin>>(result, logText, 'checkAuthPin');
+	return PlexRipperAxios.get<AuthPin>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/authpin/${clientId}/check`,
+		apiCategory: logText,
+		apiName: checkAuthPin.name,
+	});
 }
 
 export function generateClientId(): Observable<ResultDTO<string>> {
-	preApiRequest(logText, 'generateClientId');
-	const result = Axios.get<ResultDTO<string>>(`${apiPath}/clientid`);
-	return checkResponse<ResultDTO<string>>(result, logText, 'generateClientId');
+	return PlexRipperAxios.get<string>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/clientid`,
+		apiCategory: logText,
+		apiName: generateClientId.name,
+	});
 }

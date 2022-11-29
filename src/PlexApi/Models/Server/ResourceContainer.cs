@@ -1,12 +1,10 @@
-using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace PlexRipper.PlexApi.Models
+namespace PlexRipper.PlexApi.Models;
+
+[XmlRoot(ElementName = "MediaContainer")]
+public class ResourceContainer
 {
-    [XmlRoot(ElementName = "MediaContainer")]
-    public class ResourceContainer
-    {
-        [XmlElement(ElementName = "Device")]
-        public List<Resource> Devices { get; set; }
-    }
+    [XmlElement(ElementName = "Device")]
+    public List<Resource> Devices { get; set; }
 }

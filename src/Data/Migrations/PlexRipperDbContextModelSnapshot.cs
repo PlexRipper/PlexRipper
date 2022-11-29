@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
+#nullable disable
+
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
@@ -13,20 +15,23 @@ namespace PlexRipper.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.9");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.6");
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadFileTask", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DownloadTaskId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("FilePathsCompressed")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -39,34 +44,86 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
+
+                    b.Property<long>("DataReceived")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
+
+                    b.Property<long>("DataTotal")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(6);
+
+                    b.Property<string>("DestinationDirectory")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(17);
 
                     b.Property<int>("DestinationFolderId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("DownloadDirectory")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(16);
+
                     b.Property<int>("DownloadFolderId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<int>("DownloadSpeed")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(18);
 
                     b.Property<string>("DownloadStatus")
                         .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
+
+                    b.Property<string>("DownloadTaskType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
+
+                    b.Property<string>("DownloadUrl")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
+
+                    b.Property<string>("FileLocationUrl")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(12);
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(11);
+
+                    b.Property<string>("FullTitle")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(14);
 
                     b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("MediaType")
                         .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(7);
 
-                    b.Property<string>("MetaData")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Percentage")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
 
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER");
@@ -77,8 +134,24 @@ namespace PlexRipper.Data.Migrations
                     b.Property<long>("Priority")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ServerToken")
-                        .HasColumnType("TEXT");
+                    b.Property<string>("Quality")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(15);
+
+                    b.Property<int?>("RootDownloadTaskId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ServerMachineIdentifier")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(19);
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("Year")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
 
                     b.HasKey("Id");
 
@@ -86,9 +159,13 @@ namespace PlexRipper.Data.Migrations
 
                     b.HasIndex("DownloadFolderId");
 
+                    b.HasIndex("ParentId");
+
                     b.HasIndex("PlexLibraryId");
 
                     b.HasIndex("PlexServerId");
+
+                    b.HasIndex("RootDownloadTaskId");
 
                     b.ToTable("DownloadTasks");
                 });
@@ -97,10 +174,12 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(1);
 
                     b.Property<int>("DownloadWorkerTaskId")
                         .HasColumnType("INTEGER");
@@ -109,10 +188,12 @@ namespace PlexRipper.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(3);
 
                     b.Property<string>("Message")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
 
                     b.HasKey("Id");
 
@@ -125,44 +206,59 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<long>("BytesReceived")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(7);
 
                     b.Property<string>("DownloadStatus")
                         .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(5);
 
                     b.Property<int>("DownloadTaskId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("DownloadUrl")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
+
                     b.Property<long>("ElapsedTime")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(9);
 
                     b.Property<long>("EndByte")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(4);
 
                     b.Property<string>("FileName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FilePath")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(1);
 
                     b.Property<int>("PartIndex")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("StartByte")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
 
                     b.Property<string>("TempDirectory")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
 
                     b.HasKey("Id");
 
                     b.HasIndex("DownloadTaskId");
+
+                    b.HasIndex("PlexServerId");
 
                     b.ToTable("DownloadWorkerTasks");
                 });
@@ -171,25 +267,30 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<string>("DirectoryPath")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
 
                     b.Property<string>("DisplayName")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("FolderType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
 
                     b.Property<string>("MediaType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(3);
 
                     b.HasKey("Id");
 
@@ -199,7 +300,7 @@ namespace PlexRipper.Data.Migrations
                         new
                         {
                             Id = 1,
-                            DirectoryPath = "/downloads",
+                            DirectoryPath = "/Downloads",
                             DisplayName = "Download Path",
                             FolderType = "DownloadFolder",
                             MediaType = "None"
@@ -207,7 +308,7 @@ namespace PlexRipper.Data.Migrations
                         new
                         {
                             Id = 2,
-                            DirectoryPath = "/movies",
+                            DirectoryPath = "/Movies",
                             DisplayName = "Movie Destination Path",
                             FolderType = "MovieFolder",
                             MediaType = "Movie"
@@ -215,7 +316,7 @@ namespace PlexRipper.Data.Migrations
                         new
                         {
                             Id = 3,
-                            DirectoryPath = "/tvshows",
+                            DirectoryPath = "/TvShows",
                             DisplayName = "Tv Show Destination Path",
                             FolderType = "TvShowFolder",
                             MediaType = "TvShow"
@@ -223,7 +324,7 @@ namespace PlexRipper.Data.Migrations
                         new
                         {
                             Id = 4,
-                            DirectoryPath = "/music",
+                            DirectoryPath = "/Music",
                             DisplayName = "Music Destination Path",
                             FolderType = "MusicFolder",
                             MediaType = "Music"
@@ -231,7 +332,7 @@ namespace PlexRipper.Data.Migrations
                         new
                         {
                             Id = 5,
-                            DirectoryPath = "/photos",
+                            DirectoryPath = "/Photos",
                             DisplayName = "Photos Destination Path",
                             FolderType = "PhotosFolder",
                             MediaType = "Photos"
@@ -239,7 +340,7 @@ namespace PlexRipper.Data.Migrations
                         new
                         {
                             Id = 6,
-                            DirectoryPath = "/other",
+                            DirectoryPath = "/Other",
                             DisplayName = "Other Videos Destination Path",
                             FolderType = "OtherVideosFolder",
                             MediaType = "OtherVideos"
@@ -247,7 +348,7 @@ namespace PlexRipper.Data.Migrations
                         new
                         {
                             Id = 7,
-                            DirectoryPath = "/games",
+                            DirectoryPath = "/Games",
                             DisplayName = "Games Videos Destination Path",
                             FolderType = "GamesVideosFolder",
                             MediaType = "Games"
@@ -282,22 +383,27 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
 
                     b.Property<bool>("Hidden")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(4);
 
                     b.Property<string>("Level")
                         .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("Message")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(3);
 
                     b.HasKey("Id");
 
@@ -308,49 +414,62 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<string>("AuthenticationToken")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ClientId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
 
                     b.Property<string>("DisplayName")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("Email")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(11);
 
                     b.Property<bool>("HasPassword")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(12);
 
                     b.Property<bool>("IsEnabled")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(4);
 
                     b.Property<bool>("IsMain")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsValidated")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
 
                     b.Property<string>("Password")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(3);
 
                     b.Property<long>("PlexId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(7);
 
                     b.Property<string>("Title")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
 
                     b.Property<string>("Username")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
 
                     b.Property<string>("Uuid")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
 
                     b.Property<DateTime>("ValidatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
 
                     b.HasKey("Id");
 
@@ -380,19 +499,24 @@ namespace PlexRipper.Data.Migrations
             modelBuilder.Entity("PlexRipper.Domain.PlexAccountServer", b =>
                 {
                     b.Property<int>("PlexAccountId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<int>("PlexServerId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("AuthToken")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(3);
 
                     b.Property<DateTime>("AuthTokenCreationDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
 
                     b.Property<bool>("Owned")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
 
                     b.HasKey("PlexAccountId", "PlexServerId");
 
@@ -405,7 +529,8 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<string>("Tag")
                         .HasColumnType("TEXT");
@@ -419,49 +544,61 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(5);
 
                     b.Property<int?>("DefaultDestinationId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Key")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(3);
 
                     b.Property<int>("LibraryLocationId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(10);
 
                     b.Property<string>("LibraryLocationPath")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
 
                     b.Property<string>("MetaData")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(11);
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("ScannedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(7);
 
                     b.Property<DateTime>("SyncedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
 
                     b.Property<string>("Title")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(1);
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
 
                     b.Property<Guid>("Uuid")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
 
                     b.HasKey("Id");
 
@@ -476,49 +613,68 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<DateTime>("AddedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
 
                     b.Property<int>("ChildCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(12);
 
                     b.Property<string>("ContentRating")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
 
                     b.Property<int>("Duration")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
+
+                    b.Property<string>("FullTitle")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(21);
 
                     b.Property<bool>("HasArt")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(18);
 
                     b.Property<bool>("HasBanner")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(19);
 
                     b.Property<bool>("HasTheme")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasThumb")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
 
                     b.Property<int>("Index")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(16);
 
                     b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("MediaData")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(22);
 
                     b.Property<long>("MediaSize")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(6);
 
                     b.Property<int>("MetaDataKey")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(7);
 
                     b.Property<DateTime?>("OriginallyAvailableAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(15);
 
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER");
@@ -527,22 +683,32 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<double>("Rating")
-                        .HasColumnType("REAL");
+                        .HasColumnType("REAL")
+                        .HasColumnOrder(11);
+
+                    b.Property<string>("SortTitle")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
 
                     b.Property<string>("Studio")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
 
                     b.Property<string>("Summary")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
 
                     b.Property<string>("Title")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(14);
 
                     b.Property<int>("Year")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
 
                     b.HasKey("Id");
 
@@ -562,7 +728,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<int?>("PlexMovieId")
                         .HasColumnType("INTEGER");
@@ -585,7 +752,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<int?>("PlexMovieId")
                         .HasColumnType("INTEGER");
@@ -608,7 +776,8 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<string>("Tag")
                         .HasColumnType("TEXT");
@@ -622,34 +791,42 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<string>("Address")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(3);
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Host")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
 
                     b.Property<string>("LocalAddresses")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(7);
 
                     b.Property<string>("MachineIdentifier")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
 
                     b.Property<string>("Name")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(1);
 
                     b.Property<long>("OwnerId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Port")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(4);
 
                     b.Property<string>("Scheme")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
 
                     b.Property<bool>("ServerFixApplyDNSFix")
                         .HasColumnType("INTEGER");
@@ -658,7 +835,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Version")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(5);
 
                     b.HasKey("Id");
 
@@ -669,7 +847,8 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<bool>("IsSuccessful")
                         .HasColumnType("INTEGER");
@@ -697,49 +876,68 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<DateTime>("AddedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
 
                     b.Property<int>("ChildCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(12);
 
                     b.Property<string>("ContentRating")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
 
                     b.Property<int>("Duration")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
+
+                    b.Property<string>("FullTitle")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(21);
 
                     b.Property<bool>("HasArt")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(18);
 
                     b.Property<bool>("HasBanner")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(19);
 
                     b.Property<bool>("HasTheme")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasThumb")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
 
                     b.Property<int>("Index")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(16);
 
                     b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("MediaData")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(22);
 
                     b.Property<long>("MediaSize")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(6);
 
                     b.Property<int>("MetaDataKey")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(7);
 
                     b.Property<DateTime?>("OriginallyAvailableAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(15);
 
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER");
@@ -748,22 +946,32 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<double>("Rating")
-                        .HasColumnType("REAL");
+                        .HasColumnType("REAL")
+                        .HasColumnOrder(11);
+
+                    b.Property<string>("SortTitle")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
 
                     b.Property<string>("Studio")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
 
                     b.Property<string>("Summary")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
 
                     b.Property<string>("Title")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(14);
 
                     b.Property<int>("Year")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
 
                     b.HasKey("Id");
 
@@ -771,56 +979,75 @@ namespace PlexRipper.Data.Migrations
 
                     b.HasIndex("PlexServerId");
 
-                    b.ToTable("PlexTvShow");
+                    b.ToTable("PlexTvShows");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisode", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<DateTime>("AddedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
 
                     b.Property<int>("ChildCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(12);
 
                     b.Property<string>("ContentRating")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
 
                     b.Property<int>("Duration")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
+
+                    b.Property<string>("FullTitle")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(21);
 
                     b.Property<bool>("HasArt")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(18);
 
                     b.Property<bool>("HasBanner")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(19);
 
                     b.Property<bool>("HasTheme")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasThumb")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
 
                     b.Property<int>("Index")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(16);
 
                     b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("MediaData")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(22);
 
                     b.Property<long>("MediaSize")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(6);
 
                     b.Property<int>("MetaDataKey")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(7);
 
                     b.Property<DateTime?>("OriginallyAvailableAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(15);
 
                     b.Property<int>("ParentKey")
                         .HasColumnType("INTEGER");
@@ -832,16 +1059,24 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<double>("Rating")
-                        .HasColumnType("REAL");
+                        .HasColumnType("REAL")
+                        .HasColumnOrder(11);
+
+                    b.Property<string>("SortTitle")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
 
                     b.Property<string>("Studio")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
 
                     b.Property<string>("Summary")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
 
                     b.Property<string>("Title")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
 
                     b.Property<int>("TvShowId")
                         .HasColumnType("INTEGER");
@@ -850,10 +1085,12 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(14);
 
                     b.Property<int>("Year")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
 
                     b.HasKey("Id");
 
@@ -877,7 +1114,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.HasKey("PlexTvShowId", "PlexGenreId");
 
@@ -895,7 +1133,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.HasKey("PlexTvShowId", "PlexGenreId");
 
@@ -908,49 +1147,68 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
 
                     b.Property<DateTime>("AddedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
 
                     b.Property<int>("ChildCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(12);
 
                     b.Property<string>("ContentRating")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
 
                     b.Property<int>("Duration")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
+
+                    b.Property<string>("FullTitle")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(21);
 
                     b.Property<bool>("HasArt")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(18);
 
                     b.Property<bool>("HasBanner")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(19);
 
                     b.Property<bool>("HasTheme")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasThumb")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
 
                     b.Property<int>("Index")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(16);
 
                     b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("MediaData")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(22);
 
                     b.Property<long>("MediaSize")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(6);
 
                     b.Property<int>("MetaDataKey")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(7);
 
                     b.Property<DateTime?>("OriginallyAvailableAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(15);
 
                     b.Property<int>("ParentKey")
                         .HasColumnType("INTEGER");
@@ -962,25 +1220,35 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<double>("Rating")
-                        .HasColumnType("REAL");
+                        .HasColumnType("REAL")
+                        .HasColumnOrder(11);
+
+                    b.Property<string>("SortTitle")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
 
                     b.Property<string>("Studio")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
 
                     b.Property<string>("Summary")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
 
                     b.Property<string>("Title")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
 
                     b.Property<int>("TvShowId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(14);
 
                     b.Property<int>("Year")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
 
                     b.HasKey("Id");
 
@@ -1018,6 +1286,11 @@ namespace PlexRipper.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PlexRipper.Domain.DownloadTask", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany("DownloadTasks")
                         .HasForeignKey("PlexLibraryId")
@@ -1030,13 +1303,21 @@ namespace PlexRipper.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PlexRipper.Domain.DownloadTask", "RootDownloadTask")
+                        .WithMany()
+                        .HasForeignKey("RootDownloadTaskId");
+
                     b.Navigation("DestinationFolder");
 
                     b.Navigation("DownloadFolder");
 
+                    b.Navigation("Parent");
+
                     b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
+
+                    b.Navigation("RootDownloadTask");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerLog", b =>
@@ -1058,7 +1339,15 @@ namespace PlexRipper.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                        .WithMany()
+                        .HasForeignKey("PlexServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("DownloadTask");
+
+                    b.Navigation("PlexServer");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexAccountLibrary", b =>
@@ -1314,6 +1603,8 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadTask", b =>
                 {
+                    b.Navigation("Children");
+
                     b.Navigation("DownloadWorkerTasks");
                 });
 

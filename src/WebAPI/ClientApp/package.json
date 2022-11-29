@@ -43,6 +43,7 @@
     "@nuxt/typescript-runtime": "^2.1.0",
     "@nuxtjs/i18n": "^7.3.0",
     "@vueuse/rxjs": "^9.1.1",
+    "axios": "^1.2.0",
     "axios-observable": "^2.0.0",
     "consola": "^2.15.3",
     "date-fns": "^2.29.3",

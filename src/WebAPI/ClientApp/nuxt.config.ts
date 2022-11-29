@@ -87,8 +87,6 @@ const config: NuxtConfig = {
 		'@nuxt/components',
 		// Doc: https://vueuse.org/guide/index.html#installation
 		'@vueuse/nuxt',
-		// Doc: https://github.com/fumeapp/nuxt-storm
-		['nuxt-storm', { alias: true }],
 		// Doc: https://github.com/nuxt/postcss8#readme
 		'@nuxt/postcss8',
 	],

@@ -21,6 +21,3 @@ dist
 
 # Jest Coverage
 coverage
-
-# Temp file to help navigate components
-.components.gen.js

@@ -7,25 +7,31 @@ Note: This, by a long shot, doesn't encompases all the changes and fixes that ha
 
 ### Added
  - Per server configurable download speed limit (See server settings > Server Configuration)
+ - Per server and library configurable folder destination where media downloaded will automatically be moved too.
  - German UI language (Thanks to (Padso4tw)[https://github.com/padso4tw])
  - Jest and Cypress testing infrastructure
  - Added a new server command in the server settings to inspect a server connection and attempt to fix it.
 
 ### Changed
  - Removed batch commands from the download page, these were not working and overcomplicated things too much.
- - Migrated projected to .NET 6, brings many performance improvements
+ - Migrated project to .NET 6, which brings many performance improvements
  - Added a loading icon to the button when checking the server status in the server configuration
  - The server command "Re-sync Library media" now displayes a loading animation.
  - Replaced every button with a more performant and consistent button construction
  - Thumbnails displayed for movies and tvShows on the library pages in poster mode are now displayed from cache when navigating around PlexRipper. 
+ - Rewrote the code for the entire download process to be more stable and allow for future features
+ - Rewrote the user settings modules (PlexRipperConfig.json) which is now easy to extend and more resilliant.
+ - Many performance improvements!
 
 ### Fixed
+ - Fixed the setup of Plex accounts in PlexRipper which was failing due to a login format change on the side of Plex
+ - Fixed the slow downloads by increasing the download buffer to 4096 bytes from 2048 bytes, might need to increase it more or make it configurable based on the hardware PlexRipper is run on. 
  - Fixed the opening of the server settings not defaulting back to its first tab
  - Fixed the download progress not updating after a while due to SignalR disconnects
  - Fixed the retrieval of the ServerStatus not working when a timeout happens.
  - Fixed the notifications not always being shown and updated correctly when an error happens.
  - Fixed the download confirmation window not hiding after clicking confirm #122
- - Fixed the page background effect breaking when the browser does not support WebGL. It will now show a still image of the background.
+ - Fixed the page background effect breaking when the browser does not support WebGL. It will now display a still image of the background.
 
 ## [0.8.7]
 

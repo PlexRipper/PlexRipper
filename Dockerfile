@@ -4,11 +4,10 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS base
 WORKDIR /app
 
 ## Setup Nuxt front-end
-FROM node:14.17.6-alpine AS client-build
+FROM node:16.18.1-alpine AS client-build
 WORKDIR /tmp/build/ClientApp
 
-ARG PORT=7000
-ENV PORT=$PORT
+ENV PORT=7000
 ENV NUXT_ENV_BASE_URL="TEST IF BASE URL CAME THROUGH"
 # Essential config files
 COPY ./src/WebAPI/ClientApp/package*.json ./
@@ -67,6 +66,6 @@ LABEL company="PlexRipper"
 LABEL maintainer="plexripper@protonmail.com"
 
 EXPOSE 7000
-VOLUME /config /downloads /movies /tvshows
+VOLUME /Config /Downloads /Movies /TvShows
 
 ENTRYPOINT ["dotnet", "PlexRipper.WebAPI.dll"]

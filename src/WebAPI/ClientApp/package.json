@@ -1,6 +1,6 @@
 {
   "name": "plex-ripper-web-ui",
-  "version": "0.9.0-rc-4",
+  "version": "0.9.0",
   "description": "PlexRipper",
   "author": "JasonLandbridge",
   "private": true,
@@ -13,7 +13,6 @@
     "start-static": "nuxt generate --fail-on-error & nuxt start",
     "lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier-stylelint --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{css,scss}\" --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\"",
     "lint-staged": "lint-staged",
-    "update-web-types": "vue-docgen-web-types -c web-types-config.json",
     "npm-upgrade-packages": "npm-upgrade",
     "analyze": "nuxt build --analyze",
     "cypress:e2e": "start-server-and-test test-dev http://localhost:3030 cypress:open",
@@ -43,6 +42,7 @@
     "@nuxt/typescript-runtime": "^2.1.0",
     "@nuxtjs/i18n": "^7.3.0",
     "@vueuse/rxjs": "^9.1.1",
+    "axios": "^1.2.0",
     "axios-observable": "^2.0.0",
     "consola": "^2.15.3",
     "date-fns": "^2.29.3",

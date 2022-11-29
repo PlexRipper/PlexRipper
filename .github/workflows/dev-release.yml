@@ -1,9 +1,9 @@
-name: Create RC Release
+name: Create PlexRipper Dev Container Release
 
 on:
   push:
     tags:
-      - "*-rc*"
+      - "*"
 
 jobs:
   # Build Docker Image

@@ -83,6 +83,12 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> w
 
     public virtual TModel Update(TModel sourceSettings)
     {
+        if (sourceSettings is null)
+        {
+            Log.Warning($"Can not update settings module {Name} with source settings null");
+            return GetValues();
+        }
+
         var hasChanged = false;
 
         foreach (var prop in typeof(TModel).GetProperties())

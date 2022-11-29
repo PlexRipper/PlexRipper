@@ -110,7 +110,7 @@ public class DirectorySystem : IDirectorySystem
             if (directoryResult.IsFailed)
                 return directoryResult.ToResult();
 
-            var directoryExistsResult = Exists(filePath);
+            var directoryExistsResult = Exists(directoryResult.Value);
             if (directoryExistsResult.IsFailed)
                 return directoryExistsResult.ToResult();
 

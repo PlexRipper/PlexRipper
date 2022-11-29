@@ -3,7 +3,7 @@
 namespace PlexRipper.FileSystem.Common;
 
 /// <summary>
-/// This is used to mock all I/O dependancies for the <see cref="FileMerger"/> class.
+/// This is used to mock all I/O dependencies for the <see cref="FileMerger"/> class.
 /// </summary>
 public class FileMergeSystem : IFileMergeSystem
 {

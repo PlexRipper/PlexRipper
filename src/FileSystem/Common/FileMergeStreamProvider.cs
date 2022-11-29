@@ -64,15 +64,10 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
             }
 
             Log.Debug($"The file at {filePath} has been combined into");
-            Delete(filePath);
+            Log.Debug($"Deleting file {filePath} since it has been merged already");
+            _fileSystem.DeleteFile(filePath);
         }
 
         bytesReceivedProgress.OnNext(totalRead);
-    }
-
-    public Result Delete(string filePath)
-    {
-        Log.Debug($"Deleting file {filePath} since it has been merged already");
-        return _fileSystem.DeleteFile(filePath);
     }
 }

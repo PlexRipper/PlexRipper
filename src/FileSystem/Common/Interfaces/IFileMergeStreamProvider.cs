@@ -4,7 +4,7 @@ namespace PlexRipper.FileSystem.Common;
 
 public interface IFileMergeStreamProvider
 {
-    Task<Result<Stream>> CreateMergeStream(string destinationDirectory);
+    Task<Result<Stream>> OpenOrCreateMergeStream(string fileDestinationPath);
 
     Task MergeFiles(
         List<string> filePaths,

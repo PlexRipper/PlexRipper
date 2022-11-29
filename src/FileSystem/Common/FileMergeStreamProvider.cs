@@ -11,6 +11,8 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
 
     private readonly IDirectorySystem _directorySystem;
 
+    private const int _bufferSize = 524288;
+
     public FileMergeStreamProvider(IFileSystem fileSystem, INotificationsService notificationsService, IDirectorySystem directorySystem)
     {
         _fileSystem = fileSystem;
@@ -18,17 +20,17 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
         _directorySystem = directorySystem;
     }
 
-    public async Task<Result<Stream>> CreateMergeStream(string destinationDirectory)
+    public async Task<Result<Stream>> OpenOrCreateMergeStream(string fileDestinationPath)
     {
         // Ensure destination directory exists and is otherwise created.
-        var result = _directorySystem.CreateDirectoryFromFilePath(destinationDirectory);
+        var result = _directorySystem.CreateDirectoryFromFilePath(fileDestinationPath);
         if (result.IsFailed)
         {
             await _notificationsService.SendResult(result);
-            result.LogError();
+            return result.LogError();
         }
 
-        return _fileSystem.Create(destinationDirectory, 4096, FileOptions.SequentialScan);
+        return _fileSystem.Create(fileDestinationPath, _bufferSize, FileOptions.SequentialScan);
     }
 
     public async Task MergeFiles(
@@ -44,7 +46,7 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
             {
                 try
                 {
-                    var buffer = new byte[0x1000];
+                    var buffer = new byte[_bufferSize];
                     int bytesRead;
                     while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
                     {

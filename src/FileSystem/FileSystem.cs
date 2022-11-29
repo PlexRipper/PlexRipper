@@ -60,7 +60,8 @@ public class FileSystem : IFileSystem
     {
         try
         {
-            return Result.Ok(_abstractedFileSystem.File.Create(path, bufferSize, options));
+            var createResult = _abstractedFileSystem.File.Create(path, bufferSize, options);
+            return Result.Ok(createResult);
         }
         catch (Exception e)
         {

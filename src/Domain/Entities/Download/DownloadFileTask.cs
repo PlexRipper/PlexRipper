@@ -29,6 +29,9 @@ public class DownloadFileTask : BaseEntity
     [NotMapped]
     public long FileSize => DownloadTask?.DataTotal ?? -1L;
 
+    [NotMapped]
+    public string DestinationFilePath => Path.Join(DownloadTask.DestinationDirectory, FileName);
+
     /// <summary>
     /// Gets a list of file paths that need to be merged and/or moved.
     /// </summary>

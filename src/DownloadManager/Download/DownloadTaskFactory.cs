@@ -579,7 +579,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             return Result.Fail("DownloadTask had an invalid DownloadFolder value");
 
         var basePath = downloadTask.DownloadFolder.DirectoryPath;
-        return GetMediaTypeDirectory(downloadTask, basePath);
+        return GetMediaTypeDirectory(downloadTask, basePath, true);
     }
 
     private Result<string> GetDestinationDirectory(DownloadTask downloadTask)
@@ -591,25 +591,46 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         return GetMediaTypeDirectory(downloadTask, basePath);
     }
 
-    private Result<string> GetMediaTypeDirectory(DownloadTask downloadTask, string basePath)
+    private string GetMediaTypeDirectory(DownloadTask downloadTask, string basePath, bool forDownloadFolder = false)
     {
         var downloadTaskTitle = _pathSystem.SanitizePath(downloadTask.Title);
         var titles = downloadTask.FullTitle.Split('/');
 
+        string path;
         switch (downloadTask.MediaType)
         {
             case PlexMediaType.Movie:
-                return Result.Ok(Path.Join(basePath, $"{downloadTaskTitle} ({downloadTask.Year})"));
+                path = Path.Join($"{downloadTaskTitle} ({downloadTask.Year})");
+                break;
             case PlexMediaType.TvShow:
-                return Result.Ok(Path.Join(basePath, downloadTaskTitle));
+                path = Path.Join(downloadTaskTitle);
+                break;
             case PlexMediaType.Season:
-                return Result.Ok(Path.Join(basePath, _pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1])));
+                path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]));
+                break;
             case PlexMediaType.Episode:
-                return Result.Ok(Path.Join(basePath, _pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]),
-                    _pathSystem.SanitizePath(titles[2])));
+                path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]), _pathSystem.SanitizePath(titles[2]));
+                break;
             default:
-                return Result.Ok(Path.Join(basePath, downloadTaskTitle));
+                path = Path.Join(downloadTaskTitle);
+                break;
         }
+
+        if (forDownloadFolder)
+        {
+            var mediaTypeFolder = downloadTask.MediaType switch
+            {
+                PlexMediaType.Movie => "Movies",
+                PlexMediaType.TvShow => "TvShows",
+                PlexMediaType.Season => "TvShows",
+                PlexMediaType.Episode => "TvShows",
+                _ => "Other",
+            };
+
+            return Path.Join(basePath, mediaTypeFolder, path, "/");
+        }
+
+        return Path.Join(basePath, path, "/");
     }
 
     #endregion

@@ -6,30 +6,33 @@ on:
     branches: [master, dev]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 6.0.x
-      - name: Restore dependencies
-        run: dotnet restore PlexRipper.sln
-      - name: Build
-        run: dotnet build PlexRipper.sln --no-restore
-      - name: Test
-        run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Setup .NET
+  #       uses: actions/setup-dotnet@v1
+  #       with:
+  #         dotnet-version: 6.0.x
+  #     - name: Restore dependencies
+  #       run: dotnet restore PlexRipper.sln
+  #     - name: Build
+  #       run: dotnet build PlexRipper.sln --no-restore
+  #     - name: Test
+  #       run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Change to working path
-        uses: ./src/WebAPI/ClientApp/
       - name: Setup Node@v3
         uses: actions/setup-node@v3
+        with:
+          node-version: "16"
       - name: Install npm modules
         run: npm i
+        working-directory: /src/WebAPI/ClientApp/
       - name: Build front-end
         run: npm run build --if-present
+        working-directory: /src/WebAPI/ClientApp/
       - name: Run Jest tests
         run: npm test
+        working-directory: /src/WebAPI/ClientApp/

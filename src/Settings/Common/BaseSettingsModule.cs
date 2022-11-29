@@ -81,7 +81,7 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> w
         return Result.Ok();
     }
 
-    public TModel Update(TModel sourceSettings)
+    public virtual TModel Update(TModel sourceSettings)
     {
         var hasChanged = false;
 

@@ -1,5 +1,4 @@
 ﻿using PlexRipper.Application;
-using PlexRipper.Settings.Modules;
 
 namespace PlexRipper.Settings.Models;
 
@@ -25,15 +24,4 @@ public class SettingsModel : ISettingsModel
     public IServerSettings ServerSettings { get; set; }
 
     #endregion
-
-    public SettingsModel()
-    {
-        GeneralSettings = new GeneralSettingsModule();
-        ConfirmationSettings = new ConfirmationSettingsModule();
-        DateTimeSettings = new DateTimeSettingsModule();
-        DisplaySettings = new DisplaySettingsModule();
-        DownloadManagerSettings = new DownloadManagerSettingsModule();
-        LanguageSettings = new LanguageSettingsModule();
-        ServerSettings = new ServerSettingsModule();
-    }
 }

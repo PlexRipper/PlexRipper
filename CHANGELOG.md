@@ -8,7 +8,7 @@ Note: This, by a long shot, doesn't encompases all the changes and fixes that ha
 ### Added
  - Per server configurable download speed limit (See server settings > Server Configuration)
  - Per server and library configurable folder destination where media downloaded will automatically be moved too.
- - German UI language (Thanks to (Padso4tw)[https://github.com/padso4tw])
+ - German UI language (Thanks to [Padso4tw](https://github.com/padso4tw)!)
  - Jest and Cypress testing infrastructure
  - Added a new server command in the server settings to inspect a server connection and attempt to fix it.
  - Added a loading screen with a rotating logo
@@ -26,7 +26,7 @@ Note: This, by a long shot, doesn't encompases all the changes and fixes that ha
 
 ### Fixed
  - Fixed the setup of Plex accounts in PlexRipper which was failing due to a login format change on the side of Plex
- - Fixed the slow downloads by increasing the download buffer to 4096 bytes from 2048 bytes, might need to increase it more or make it configurable based on the hardware PlexRipper is run on. 
+ - Fixed the slow downloads by increasing the download buffer, might make it configurable based on the hardware PlexRipper is run on. (Thanks to [BakasuraRCE](https://github.com/BakasuraRCE)!)
  - Fixed the opening of the server settings not defaulting back to its first tab
  - Fixed the download progress not updating after a while due to SignalR disconnects
  - Fixed the retrieval of the ServerStatus not working when a timeout happens.

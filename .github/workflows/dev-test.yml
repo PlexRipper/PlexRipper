@@ -23,10 +23,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Node@v3
-        uses: actions/setup-node@v3
       - name: Change to working path
         uses: ./src/WebAPI/ClientApp/
+      - name: Setup Node@v3
+        uses: actions/setup-node@v3
       - name: Install npm modules
         run: npm i
       - name: Build front-end

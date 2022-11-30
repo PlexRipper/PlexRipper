@@ -1,4 +1,3 @@
-import Log from 'consola';
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
@@ -11,7 +10,6 @@ import {
 	GeneralSettingsDTO,
 	LanguageSettingsDTO,
 	PlexServerSettingsModel,
-	ServerSettingsDTO,
 	SettingsModelDTO,
 	ViewMode,
 } from '@dto/mainApi';
@@ -42,15 +40,6 @@ export class SettingsService extends BaseService {
 	public setup(nuxtContext: Context): Observable<ISetupResult> {
 		super.setup(nuxtContext);
 
-		this.getFirstTimeSetup().subscribe((state) => {
-			if (state === null) {
-				return;
-			}
-			Log.info('Redirecting to the setup page');
-			if (state && !nuxtContext.route.path.includes('setup')) {
-				return nuxtContext.redirect('/setup');
-			}
-		});
 		// On app load, request the settings once
 		return this.fetchSettings().pipe(
 			switchMap(() => of({ name: this._name, isSuccess: true })),
@@ -93,8 +82,8 @@ export class SettingsService extends BaseService {
 		return this.getStateSliceProperty(settingModule);
 	}
 
-	private sendSettingsToApi(): void {
-		updateSettings(this.getSettingsModel()).pipe(take(1)).subscribe();
+	private sendSettingsToApi(): Observable<SettingsModelDTO | null> {
+		return updateSettings(this.getSettingsModel()).pipe(map((value) => value?.value ?? null));
 	}
 
 	// endregion
@@ -115,22 +104,25 @@ export class SettingsService extends BaseService {
 
 	// region GeneralSettings
 
-	public updateGeneralSettings<T>(setting: keyof GeneralSettingsDTO, value: T): void {
-		const settings = {
-			generalSettings: {
-				...this.getSettingsModule('generalSettings'),
-				[setting]: value,
-			},
-		} as SettingsModelDTO;
-
-		this.setState(settings, `Update GeneralSettings: ${setting} with value: ${value}`);
-		this.sendSettingsToApi();
+	public updateGeneralSettings<T>(setting: keyof GeneralSettingsDTO, value: T): Observable<SettingsModelDTO | null> {
+		return new Observable<SettingsModelDTO>((observer) => {
+			const settings = {
+				generalSettings: {
+					...this.getSettingsModule('generalSettings'),
+					[setting]: value,
+				},
+			} as SettingsModelDTO;
+			observer.next(settings);
+		}).pipe(
+			tap((settings) => this.setState(settings, `Update GeneralSettings: ${setting} with value: ${value}`)),
+			switchMap(() => this.sendSettingsToApi()),
+		);
 	}
 
 	public getFirstTimeSetup(): Observable<boolean> {
 		return this.stateChanged.pipe(
-			map((x) => x?.generalSettings.firstTimeSetup),
-			filter((x) => !!x),
+			map((x) => x?.generalSettings.firstTimeSetup ?? null),
+			filter((x) => x !== null),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -146,16 +138,19 @@ export class SettingsService extends BaseService {
 	// endregion
 
 	// region LanguageSettings
-	public updateLanguageSettings<T>(setting: keyof LanguageSettingsDTO, value: T): void {
-		const settings = {
-			languageSettings: {
-				...this.getSettingsModule('languageSettings'),
-				[setting]: value,
-			},
-		} as SettingsModelDTO;
-
-		this.setState(settings, `Update LanguageSettings: ${setting} with value: ${value}`);
-		this.sendSettingsToApi();
+	public updateLanguageSettings<T>(setting: keyof LanguageSettingsDTO, value: T): Observable<SettingsModelDTO | null> {
+		return new Observable<SettingsModelDTO>((observer) => {
+			const settings = {
+				languageSettings: {
+					...this.getSettingsModule('languageSettings'),
+					[setting]: value,
+				},
+			} as SettingsModelDTO;
+			observer.next(settings);
+		}).pipe(
+			tap((settings) => this.setState(settings, `Update LanguageSettings: ${setting} with value: ${value}`)),
+			switchMap(() => this.sendSettingsToApi()),
+		);
 	}
 
 	public getLanguage(): Observable<string> {
@@ -170,16 +165,19 @@ export class SettingsService extends BaseService {
 
 	// region ConfirmationSettings
 
-	public updateConfirmationSetting<T>(setting: keyof ConfirmationSettingsDTO, value: T): void {
-		const settings = {
-			confirmationSettings: {
-				...this.getSettingsModule('confirmationSettings'),
-				[setting]: value,
-			},
-		} as SettingsModelDTO;
-
-		this.setState(settings, `Update ConfirmationSetting: ${setting} with value: ${value}`);
-		this.sendSettingsToApi();
+	public updateConfirmationSetting<T>(setting: keyof ConfirmationSettingsDTO, value: T): Observable<SettingsModelDTO | null> {
+		return new Observable<SettingsModelDTO>((observer) => {
+			const settings = {
+				confirmationSettings: {
+					...this.getSettingsModule('confirmationSettings'),
+					[setting]: value,
+				},
+			} as SettingsModelDTO;
+			observer.next(settings);
+		}).pipe(
+			tap((settings) => this.setState(settings, `Update ConfirmationSetting: ${setting} with value: ${value}`)),
+			switchMap(() => this.sendSettingsToApi()),
+		);
 	}
 
 	public getAskDownloadMovieConfirmation(): Observable<boolean> {
@@ -218,16 +216,19 @@ export class SettingsService extends BaseService {
 
 	// region DateTimeSettings
 
-	public updateDateTimeSetting<T>(setting: keyof DateTimeSettingsDTO, value: T): void {
-		const x = {
-			dateTimeSettings: {
-				...this.getSettingsModule('dateTimeSettings'),
-				[setting]: value,
-			},
-		} as SettingsModelDTO;
-
-		this.setState(x, `Update DateTimeSetting: ${setting} with value: ${value}`);
-		this.sendSettingsToApi();
+	public updateDateTimeSetting<T>(setting: keyof DateTimeSettingsDTO, value: T): Observable<SettingsModelDTO | null> {
+		return new Observable<SettingsModelDTO>((observer) => {
+			const settings = {
+				dateTimeSettings: {
+					...this.getSettingsModule('dateTimeSettings'),
+					[setting]: value,
+				},
+			} as SettingsModelDTO;
+			observer.next(settings);
+		}).pipe(
+			tap((settings) => this.setState(settings, `Update DateTimeSetting: ${setting} with value: ${value}`)),
+			switchMap(() => this.sendSettingsToApi()),
+		);
 	}
 
 	public getShortDateFormat(): Observable<string> {
@@ -274,16 +275,19 @@ export class SettingsService extends BaseService {
 
 	// region DisplaySettings
 
-	public updateDisplaySettings<T>(setting: keyof DisplaySettingsDTO, value: T): void {
-		const x = {
-			displaySettings: {
-				...this.getSettingsModule('displaySettings'),
-				[setting]: value,
-			},
-		} as SettingsModelDTO;
-
-		this.setState(x, `Update DisplaySettings: ${setting} with value: ${value}`);
-		this.sendSettingsToApi();
+	public updateDisplaySettings<T>(setting: keyof DisplaySettingsDTO, value: T): Observable<SettingsModelDTO | null> {
+		return new Observable<SettingsModelDTO>((observer) => {
+			const settings = {
+				displaySettings: {
+					...this.getSettingsModule('displaySettings'),
+					[setting]: value,
+				},
+			} as SettingsModelDTO;
+			observer.next(settings);
+		}).pipe(
+			tap((settings) => this.setState(settings, `Update DisplaySettings: ${setting} with value: ${value}`)),
+			switchMap(() => this.sendSettingsToApi()),
+		);
 	}
 
 	public getMovieViewMode(): Observable<ViewMode> {
@@ -305,16 +309,22 @@ export class SettingsService extends BaseService {
 	// endregion
 
 	// region DownloadManagerSettings
-	public updateDownloadManagerSetting<T>(setting: keyof DownloadManagerSettingsDTO, value: T): void {
-		const x = {
-			downloadManagerSettings: {
-				...this.getSettingsModule('downloadManagerSettings'),
-				[setting]: value,
-			},
-		} as unknown as SettingsModelDTO;
-
-		this.setState(x, `Update DownloadManagerSetting: ${setting} with value: ${value}`);
-		this.sendSettingsToApi();
+	public updateDownloadManagerSetting<T>(
+		setting: keyof DownloadManagerSettingsDTO,
+		value: T,
+	): Observable<SettingsModelDTO | null> {
+		return new Observable<SettingsModelDTO>((observer) => {
+			const settings = {
+				downloadManagerSettings: {
+					...this.getSettingsModule('downloadManagerSettings'),
+					[setting]: value,
+				},
+			} as SettingsModelDTO;
+			observer.next(settings);
+		}).pipe(
+			tap((settings) => this.setState(settings, `Update DownloadManagerSetting: ${setting} with value: ${value}`)),
+			switchMap(() => this.sendSettingsToApi()),
+		);
 	}
 
 	public getDownloadSegments(): Observable<number> {
@@ -329,17 +339,24 @@ export class SettingsService extends BaseService {
 
 	// region ServerSettings
 
-	public updateServerSettings(value: PlexServerSettingsModel): void {
-		const data = this.getSettingsModule('serverSettings').data as PlexServerSettingsModel[];
-		const settings: ServerSettingsDTO = {
-			data: [...data.filter((x) => x.machineIdentifier !== value.machineIdentifier), value],
-		};
-
-		this.setState(
-			{ serverSettings: settings },
-			`Update ServerSettings for server ${value.plexServerName} with machine id: ${value.machineIdentifier}`,
+	public updateServerSettings(value: PlexServerSettingsModel): Observable<SettingsModelDTO | null> {
+		return new Observable<SettingsModelDTO>((observer) => {
+			const data = this.getSettingsModule('serverSettings').data as PlexServerSettingsModel[];
+			const settings = {
+				serverSettings: {
+					data: [...data.filter((x) => x.machineIdentifier !== value.machineIdentifier), value],
+				},
+			} as SettingsModelDTO;
+			observer.next(settings);
+		}).pipe(
+			tap((settings) =>
+				this.setState(
+					settings,
+					`Update ServerSettings for server ${value.plexServerName} with machine id: ${value.machineIdentifier}`,
+				),
+			),
+			switchMap(() => this.sendSettingsToApi()),
 		);
-		this.sendSettingsToApi();
 	}
 
 	public getServerSettings(machineIdentifier: string): Observable<PlexServerSettingsModel> {

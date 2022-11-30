@@ -147,7 +147,7 @@
 		<!--	Skip button	-->
 		<v-row justify="center">
 			<v-col cols="3">
-				<NavigationSkipSetupButton :disabled="isNextDisabled" @click="skipDialogOpen = true" />
+				<NavigationSkipSetupButton :disabled="isNextDisabled" :width="100" @click="skipDialogOpen = true" />
 				<confirmation-dialog
 					text-id="skip-setup"
 					:dialog="skipDialogOpen"
@@ -161,6 +161,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { useSubscription } from '@vueuse/rxjs';
+import Log from 'consola';
 import { SettingsService } from '@service';
 
 @Component
@@ -189,11 +191,15 @@ export default class Setup extends Vue {
 	}
 
 	finishSetup(): void {
-		SettingsService.updateGeneralSettings('firstTimeSetup', false);
-		this.$router.push('/', () => {
-			// Refresh the page when we go to the home page to make sure we get all new data.
-			location.reload();
-		});
+		useSubscription(
+			SettingsService.updateGeneralSettings('firstTimeSetup', false).subscribe(() => {
+				Log.info('Setup process is finished or skipped, redirecting to home page now and refreshing the page');
+				this.$router.push('/', () => {
+					// Refresh the page when we go to the home page to make sure we get all new data.
+					location.reload();
+				});
+			}),
+		);
 	}
 
 	get headers(): string[] {

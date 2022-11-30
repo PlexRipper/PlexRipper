@@ -53,6 +53,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { SettingsService } from '@service';
+import { ConfirmationSettingsDTO } from '@dto/mainApi';
 
 @Component
 export default class ConfirmationSection extends Vue {
@@ -62,17 +63,26 @@ export default class ConfirmationSection extends Vue {
 	askDownloadEpisodeConfirmation: boolean = false;
 
 	updateSettings(index: number, state: boolean): void {
+		let key: keyof ConfirmationSettingsDTO | null = null;
 		switch (index) {
 			case 0:
-				return SettingsService.updateConfirmationSetting('askDownloadMovieConfirmation', state);
+				key = 'askDownloadMovieConfirmation';
+				break;
 			case 1:
-				return SettingsService.updateConfirmationSetting('askDownloadTvShowConfirmation', state);
+				key = 'askDownloadTvShowConfirmation';
+				break;
 			case 2:
-				return SettingsService.updateConfirmationSetting('askDownloadSeasonConfirmation', state);
+				key = 'askDownloadSeasonConfirmation';
+				break;
 			case 3:
-				return SettingsService.updateConfirmationSetting('askDownloadEpisodeConfirmation', state);
+				key = 'askDownloadEpisodeConfirmation';
+				break;
 			default:
 				Log.error(`Failed to update settings with index ${index} and value ${state}`);
+				key = null;
+		}
+		if (key) {
+			useSubscription(SettingsService.updateConfirmationSetting(key, state).subscribe());
 		}
 	}
 

@@ -72,7 +72,7 @@ public class PlexLibrary : BaseEntity
 
     /// <summary>
     /// Gets or sets the <see cref="PlexLibraryMetaData"/>, this is a JSON field that contains a collection
-    /// of various values that dont warrant their own database column.
+    /// of various values that don't warrant their own database column.
     /// </summary>
     [Column(Order = 11)]
     public PlexLibraryMetaData MetaData { get; set; }

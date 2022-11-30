@@ -7,38 +7,91 @@ public class PlexServer : BaseEntity
     [Column(Order = 1)]
     public string Name { get; set; }
 
+    /// <summary>
+    /// Gets or sets the id Plex has assigned to the PlexAccount.
+    /// </summary>
     [Column(Order = 2)]
-    public string Scheme { get; set; }
+    public long OwnerId { get; set; }
 
+    /// <summary>
+    /// Gets or sets what seems like the username of the Plex server owner.
+    /// Mapped from "sourceTitle".
+    /// </summary>
     [Column(Order = 3)]
-    public string Address { get; set; }
+    public string PlexServerOwnerUsername { get; set; }
+
 
     [Column(Order = 4)]
-    public int Port { get; set; }
+    public string Device { get; set; }
 
     [Column(Order = 5)]
-    public string Version { get; set; }
+    public string Platform { get; set; }
 
     [Column(Order = 6)]
-    public string Host { get; set; }
+    public string PlatformVersion { get; set; }
 
     [Column(Order = 7)]
-    public string LocalAddresses { get; set; }
+    public string Product { get; set; }
 
     [Column(Order = 8)]
-    public string MachineIdentifier { get; set; }
+    public string ProductVersion { get; set; }
 
+
+    /// <summary>
+    /// Gets or sets the role this <see cref="PlexServer"/> provides, seems to be mostly "server".
+    /// </summary>
+    [Column(Order = 9)]
+    public string Provides { get; set; }
+
+    [Column(Order = 10)]
     public DateTime CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    [Column(Order = 11)]
+    public DateTime LastSeenAt { get; set; }
 
-    public long OwnerId { get; set; }
+    [Column(Order = 12)]
+    public string MachineIdentifier { get; set; }
+
+    [Column(Order = 13)]
+    public string PublicAddress { get; set; }
+
+    [Column(Order = 14)]
+    public int PreferredConnection { get; set; }
+
+    [Column(Order = 15)]
+    public bool Owned { get; set; }
+
+    [Column(Order = 16)]
+    public bool Home { get; set; }
+
+    [Column(Order = 17)]
+    public bool Synced { get; set; }
+
+    [Column(Order = 18)]
+    public bool Relay { get; set; }
+
+    [Column(Order = 19)]
+    public bool Presence { get; set; }
+
+    [Column(Order = 20)]
+    public bool HttpsRequired { get; set; }
+
+    [Column(Order = 21)]
+    public bool PublicAddressMatches { get; set; }
+
+    [Column(Order = 22)]
+    public bool DnsRebindingProtection { get; set; }
+
+    [Column(Order = 23)]
+    public bool NatLoopbackSupported { get; set; }
 
     /// <summary>
     /// Certain servers have protection or are misconfigured which is why we can apply certain fixes to facilitate server communication.
     /// This will attempt to connect on port 80 of the server.
     /// </summary>
+    [Column(Order = 24)]
     public bool ServerFixApplyDNSFix { get; set; }
+
 
     #region Relationships
 
@@ -58,21 +111,7 @@ public class PlexServer : BaseEntity
     /// Gets the server url, e.g: http://112.202.10.213:32400.
     /// </summary>
     [NotMapped]
-    public string ServerUrl
-    {
-        get
-        {
-            switch (Scheme)
-            {
-                case "http":
-                    return $"{Scheme}://{Address}:{(ServerFixApplyDNSFix ? 80 : Port)}";
-                case "https":
-                    return $"{Scheme}://{Address}:{(ServerFixApplyDNSFix ? 443 : Port)}";
-                default:
-                    return $"{Scheme}://{Address}:{Port}";
-            }
-        }
-    }
+    public string ServerUrl => PlexServerConnections.First().Uri.ToString();
 
     /// <summary>
     /// Gets the library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections.

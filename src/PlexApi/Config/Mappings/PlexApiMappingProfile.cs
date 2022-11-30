@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
+using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Models;
 using Directory = PlexRipper.PlexApi.Models.Directory;
 
@@ -21,19 +22,6 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.Is2Fa, opt => opt.MapFrom(src => src.TwoFactorEnabled))
             .ForMember(dest => dest.HasPassword, opt => opt.MapFrom(src => src.HasPassword))
             .ForMember(dest => dest.Id, opt => opt.Ignore());
-
-        // Server -> PlexServer
-        CreateMap<Server, PlexServer>(MemberList.Destination)
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.PlexLibraries, opt => opt.Ignore())
-            .ForMember(dest => dest.ServerStatus, opt => opt.Ignore())
-            .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
-            .ForMember(dest => dest.ServerFixApplyDNSFix, opt => opt.Ignore())
-            .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
-            .ForMember(dest => dest.CreatedAt,
-                opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
-            .ForMember(dest => dest.UpdatedAt,
-                opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()));
 
         // MediaContainer -> PlexLibrary
         CreateMap<MediaContainer, PlexLibrary>(MemberList.None)
@@ -78,8 +66,54 @@ public class PlexApiMappingProfile : Profile
         CreateMap<Part, PlexMediaDataPart>(MemberList.Destination)
             .ForMember(dest => dest.ObfuscatedFilePath, opt => opt.MapFrom(x => x.Key));
 
+        PlexServerMappings();
         PlexMovieMappings();
         PlexTvShowMappings();
+    }
+
+    private void PlexServerMappings()
+    {
+        // Server -> PlexServer
+        CreateMap<ServerResource, PlexServer>(MemberList.Destination)
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(x => x.Name))
+            .ForMember(dest => dest.Product, opt => opt.MapFrom(x => x.Product))
+            .ForMember(dest => dest.ProductVersion, opt => opt.MapFrom(x => x.ProductVersion))
+            .ForMember(dest => dest.Platform, opt => opt.MapFrom(x => x.Platform))
+            .ForMember(dest => dest.PlatformVersion, opt => opt.MapFrom(x => x.PlatformVersion))
+            .ForMember(dest => dest.Device, opt => opt.MapFrom(x => x.Device))
+            .ForMember(dest => dest.MachineIdentifier, opt => opt.MapFrom(x => x.ClientIdentifier))
+            .ForMember(dest => dest.CreatedAt, opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
+            .ForMember(dest => dest.LastSeenAt, opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
+            .ForMember(dest => dest.Provides, opt => opt.MapFrom(x => x.Provides))
+            .ForMember(dest => dest.OwnerId, opt => opt.MapFrom(x => x.OwnerId))
+            .ForMember(dest => dest.PlexServerOwnerUsername, opt => opt.MapFrom(x => x.SourceTitle))
+            .ForMember(dest => dest.PublicAddress, opt => opt.MapFrom(x => x.PublicAddress))
+            .ForMember(dest => dest.AccessToken, opt => opt.MapFrom(x => x.AccessToken))
+
+            // Server flags
+            .ForMember(dest => dest.Owned, opt => opt.MapFrom(x => x.Owned))
+            .ForMember(dest => dest.Home, opt => opt.MapFrom(x => x.Home))
+            .ForMember(dest => dest.Synced, opt => opt.MapFrom(x => x.Synced))
+            .ForMember(dest => dest.Relay, opt => opt.MapFrom(x => x.Relay))
+            .ForMember(dest => dest.Presence, opt => opt.MapFrom(x => x.Presence))
+            .ForMember(dest => dest.HttpsRequired, opt => opt.MapFrom(x => x.HttpsRequired))
+            .ForMember(dest => dest.PublicAddressMatches, opt => opt.MapFrom(x => x.PublicAddressMatches))
+            .ForMember(dest => dest.DnsRebindingProtection, opt => opt.MapFrom(x => x.DnsRebindingProtection))
+            .ForMember(dest => dest.NatLoopbackSupported, opt => opt.MapFrom(x => x.NatLoopbackSupported))
+
+            // relations
+            .ForMember(dest => dest.PlexLibraries, opt => opt.Ignore())
+            .ForMember(dest => dest.ServerStatus, opt => opt.Ignore())
+            .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
+            .ForMember(dest => dest.ServerFixApplyDNSFix, opt => opt.Ignore())
+            .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
+            .ForMember(dest => dest.PlexServerConnections, opt => opt.MapFrom(x => x.Connections.Connection));
+
+        CreateMap<ServerConnection, PlexServerConnection>(MemberList.Destination)
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
+            .ForMember(dest => dest.PlexServerId, opt => opt.Ignore());
     }
 
     private void PlexMovieMappings()

@@ -1,4 +1,4 @@
-﻿using PlexRipper.Application;
+using PlexRipper.Application;
 using PlexRipper.PlexApi.Common.DTO;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
@@ -20,7 +20,7 @@ public class PlexApi
 
     private const string _getAccountUrl = "https://plex.tv/users/account.json";
 
-    private const string _plexServerUrl = "https://plex.tv/pms/servers.xml";
+    private const string _plexServerUrl = "https://plex.tv/api/v2/resources";
 
     private const string _plexPinUrl = "https://plex.tv/api/v2/pins";
 
@@ -107,7 +107,7 @@ public class PlexApi
         return result.ValueOrDefault;
     }
 
-    public async Task<List<Server>> GetServerAsync(string authToken)
+    public async Task<List<ServerResource>> GetServerAsync(string authToken)
     {
         var request = new RestRequest(new Uri(_plexServerUrl))
         {
@@ -115,8 +115,8 @@ public class PlexApi
         };
         request.AddToken(authToken);
 
-        var result = await _client.SendRequestAsync<ServerContainer>(request);
-        return result.ValueOrDefault?.Servers;
+        var result = await _client.SendRequestAsync<Resources>(request);
+        return result.ValueOrDefault.Resource;
     }
 
     /// <summary>

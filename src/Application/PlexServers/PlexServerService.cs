@@ -62,9 +62,6 @@ public class PlexServerService : IPlexServerService
         {
             if (plexServer.OwnerId == 0)
                 plexServer.OwnerId = plexAccount.PlexId;
-
-            if (plexServer.Port == 443 && plexServer.Scheme == "http")
-                plexServer.Scheme = "https";
         });
 
         // Add initial entry for the plex servers

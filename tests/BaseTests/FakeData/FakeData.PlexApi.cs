@@ -10,28 +10,39 @@ public static partial class FakeData
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        var uri = config.MockServer?.ServerUri ?? new Uri("https://test-server.com");
-
         return new Faker<PlexServer>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(p => p.Id, _ => 0)
             .RuleFor(x => x.Name, f => f.Company.CompanyName())
-            .RuleFor(x => x.Address, uri.Host)
-            .RuleFor(x => x.Scheme, uri.Scheme)
-            .RuleFor(x => x.Port, uri.Port)
-            .RuleFor(x => x.Host, uri.Host)
-            .RuleFor(x => x.CreatedAt, f => f.Date.Past(10, DateTime.Now))
-            .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
-            .RuleFor(x => x.Version, _ => "1.24.3.5033-757abe6b4")
-            .RuleFor(x => x.LocalAddresses, f => f.Internet.Ip())
+            .RuleFor(x => x.Product, _ => "Plex Media Server")
+            .RuleFor(x => x.ProductVersion, f => f.System.Semver())
+            .RuleFor(x => x.Platform, _ => "Linux")
+            .RuleFor(x => x.PlatformVersion, f => f.System.Semver())
+            .RuleFor(x => x.Device, f => f.Company.CompanyName())
             .RuleFor(x => x.MachineIdentifier, _ => Guid.NewGuid().ToString())
+            .RuleFor(x => x.CreatedAt, f => f.Date.Past(10, DateTime.Now))
+            .RuleFor(x => x.LastSeenAt, f => f.Date.Recent(30))
+            .RuleFor(x => x.Provides, f => f.Company.CompanyName())
             .RuleFor(x => x.OwnerId, f => f.Random.Int(1000, 100000))
-            .RuleFor(x => x.ServerFixApplyDNSFix, f => f.Random.Bool())
-            .RuleFor(x => x.PlexAccountServers, _ => new List<PlexAccountServer>())
-            .RuleFor(x => x.ServerStatus, _ => new List<PlexServerStatus>())
+            .RuleFor(x => x.PlexServerOwnerUsername, f => f.Name.LastName())
+            .RuleFor(x => x.PublicAddress, f => f.Internet.Ip())
             .RuleFor(x => x.AccessToken, _ => "DO NOT USE")
-            .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>());
+
+            // Server flags
+            .RuleFor(x => x.Owned, f => f.Random.Bool())
+            .RuleFor(x => x.Home, f => f.Random.Bool())
+            .RuleFor(x => x.Synced, f => f.Random.Bool())
+            .RuleFor(x => x.Relay, f => f.Random.Bool())
+            .RuleFor(x => x.Presence, f => f.Random.Bool())
+            .RuleFor(x => x.HttpsRequired, f => f.Random.Bool())
+            .RuleFor(x => x.PublicAddressMatches, f => f.Random.Bool())
+            .RuleFor(x => x.DnsRebindingProtection, f => f.Random.Bool())
+            .RuleFor(x => x.NatLoopbackSupported, f => f.Random.Bool())
+            .RuleFor(x => x.PlexServerConnections, GetPlexServerConnections(options).Generate(3))
+            .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>())
+            .RuleFor(x => x.ServerStatus, _ => new List<PlexServerStatus>())
+            .RuleFor(x => x.PlexAccountServers, _ => new List<PlexAccountServer>());
     }
 
     public static Faker<PlexLibrary> GetPlexLibrary([CanBeNull] Action<UnitTestDataConfig> options = null)
@@ -81,6 +92,25 @@ public static partial class FakeData
             .RuleFor(x => x.DirectoryPath, f => f.System.DirectoryPath())
             .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>());
     }
+
+    public static Faker<PlexServerConnection> GetPlexServerConnections([CanBeNull] Action<UnitTestDataConfig> options = null)
+    {
+        var config = UnitTestDataConfig.FromOptions(options);
+        var uri = config.MockServer?.ServerUri ?? new Uri("https://test-server.com");
+
+        var ids = 0;
+        return new Faker<PlexServerConnection>()
+            .StrictMode(true)
+            .UseSeed(config.Seed)
+            .RuleFor(x => x.Id, _ => ids++)
+            .RuleFor(x => x.Protocol, _ => uri.Scheme)
+            .RuleFor(x => x.Address, _ => uri.Host)
+            .RuleFor(x => x.Port, _ => uri.Port)
+            .RuleFor(x => x.Local, _ => false)
+            .RuleFor(x => x.Relay, _ => false)
+            .RuleFor(x => x.IPv6, _ => false);
+    }
+
 
     private static int GetUniqueId(List<int> alreadyGenerated, [CanBeNull] Action<UnitTestDataConfig> options = null)
     {

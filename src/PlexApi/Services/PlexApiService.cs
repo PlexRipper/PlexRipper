@@ -12,6 +12,7 @@ public class PlexApiService : IPlexApiService
     #region Fields
 
     private readonly IMapper _mapper;
+    private readonly IMediator _mediator;
 
     private readonly Api.PlexApi _plexApi;
 
@@ -19,10 +20,11 @@ public class PlexApiService : IPlexApiService
 
     #region Constructors
 
-    public PlexApiService(Api.PlexApi plexApi, IMapper mapper)
+    public PlexApiService(Api.PlexApi plexApi, IMapper mapper, IMediator mediator)
     {
         _plexApi = plexApi;
         _mapper = mapper;
+        _mediator = mediator;
     }
 
     #endregion
@@ -86,8 +88,14 @@ public class PlexApiService : IPlexApiService
     /// <returns></returns>
     public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken)
     {
+        var plexServer = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId));
+        if (plexServer.IsFailed)
+            return plexServer.ToResult();
+
+        var serverUrl = plexServer.Value.GetServerUrl();
+
         // Retrieve updated version of the PlexLibrary
-        var plexLibraries = await GetLibrarySectionsAsync(authToken, plexLibrary.ServerUrl);
+        var plexLibraries = await GetLibrarySectionsAsync(authToken, serverUrl);
 
         if (plexLibraries.IsFailed)
             return plexLibraries.ToResult();
@@ -98,7 +106,7 @@ public class PlexApiService : IPlexApiService
         updatedPlexLibrary.SyncedAt = DateTime.Now;
 
         // Retrieve the media for this library
-        var result = await _plexApi.GetMetadataForLibraryAsync(authToken, plexLibrary.ServerUrl, plexLibrary.Key);
+        var result = await _plexApi.GetMetadataForLibraryAsync(authToken, serverUrl, plexLibrary.Key);
 
         if (result == null)
             return null;

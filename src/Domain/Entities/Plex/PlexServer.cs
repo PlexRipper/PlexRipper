@@ -4,6 +4,9 @@ namespace PlexRipper.Domain;
 
 public class PlexServer : BaseEntity
 {
+    /// <summary>
+    /// Gets or sets the name of this <see cref="PlexServer"/>.
+    /// </summary>
     [Column(Order = 1)]
     public string Name { get; set; }
 
@@ -20,19 +23,33 @@ public class PlexServer : BaseEntity
     [Column(Order = 3)]
     public string PlexServerOwnerUsername { get; set; }
 
-
+    /// <summary>
+    /// Gets or sets the type of hardware operating system this <see cref="PlexServer"/> is running.
+    /// </summary>
     [Column(Order = 4)]
     public string Device { get; set; }
 
+    /// <summary>
+    /// Gets or sets the hardware operating system this <see cref="PlexServer"/> is running.
+    /// </summary>
     [Column(Order = 5)]
     public string Platform { get; set; }
 
+    /// <summary>
+    /// Gets or sets the hardware operating system version this <see cref="PlexServer"/> is running.
+    /// </summary>
     [Column(Order = 6)]
     public string PlatformVersion { get; set; }
 
+    /// <summary>
+    /// Gets or sets the Plex software this <see cref="PlexServer"/> is running.
+    /// </summary>
     [Column(Order = 7)]
     public string Product { get; set; }
 
+    /// <summary>
+    /// Gets or sets the Plex software version this <see cref="PlexServer"/> is running.
+    /// </summary>
     [Column(Order = 8)]
     public string ProductVersion { get; set; }
 
@@ -46,9 +63,15 @@ public class PlexServer : BaseEntity
     [Column(Order = 10)]
     public DateTime CreatedAt { get; set; }
 
+    /// <summary>
+    /// Gets or sets the last time this server has been online based on what Plex has seen.
+    /// </summary>
     [Column(Order = 11)]
     public DateTime LastSeenAt { get; set; }
 
+    /// <summary>
+    /// Gets or sets the unique identifier for this server. This is mapped from the new Plex clientId.
+    /// </summary>
     [Column(Order = 12)]
     public string MachineIdentifier { get; set; }
 
@@ -56,7 +79,7 @@ public class PlexServer : BaseEntity
     public string PublicAddress { get; set; }
 
     [Column(Order = 14)]
-    public int PreferredConnection { get; set; }
+    public int PreferredConnectionId { get; set; }
 
     [Column(Order = 15)]
     public bool Owned { get; set; }
@@ -108,16 +131,10 @@ public class PlexServer : BaseEntity
     #region Helpers
 
     /// <summary>
-    /// Gets the server url, e.g: http://112.202.10.213:32400.
-    /// </summary>
-    [NotMapped]
-    public string ServerUrl => PlexServerConnections.First().Uri.ToString();
-
-    /// <summary>
     /// Gets the library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections.
     /// </summary>
     [NotMapped]
-    public string LibraryUrl => $"{ServerUrl}/library/sections";
+    public string LibraryUrl => $"{GetServerUrl()}/library/sections";
 
     /// <summary>
     /// Gets or sets the temporary auth token.
@@ -164,4 +181,33 @@ public class PlexServer : BaseEntity
     }
 
     #endregion
+
+    /// <summary>
+    /// Gets the server url based on the available connections, e.g: http://112.202.10.213:32400.
+    /// </summary>
+    /// <returns>The connection url based on preference or on fallback.</returns>
+    public string GetServerUrl()
+    {
+        if (!PlexServerConnections.Any())
+            throw new Exception($"PlexServer with id {Id} and name {Name} has no connections available!");
+
+        if (PreferredConnectionId > 0)
+        {
+            var connection = PlexServerConnections.Find(x => x.Id == PreferredConnectionId);
+            if (connection is not null)
+                return connection.Url;
+
+            Log.Warning($"Could not find preferred connection with id {PreferredConnectionId} for server {Name}");
+        }
+        else
+        {
+            var connection = PlexServerConnections.Find(x => x.Address == PublicAddress);
+            if (connection is not null)
+                return connection.Url;
+
+            Log.Warning($"Could not find connection based on public address: {PublicAddress} for server {Name}");
+        }
+
+        return PlexServerConnections.First().Url;
+    }
 }

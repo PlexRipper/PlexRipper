@@ -246,7 +246,7 @@ public class PlexServerService : IPlexServerService
             return Result.Ok(plexServer);
         }
 
-        Log.Error($"Failed to retrieve the serverStatus for {plexServer.Name} - {plexServer.ServerUrl}");
+        Log.Error($"Failed to retrieve the serverStatus for {plexServer.Name} - {plexServer.GetServerUrl()}");
         serverStatusResult.LogError();
 
         // Apply possible fixes and try again
@@ -277,7 +277,7 @@ public class PlexServerService : IPlexServerService
         }
 
         // DNS fix did not work
-        dnsFixMsg = $"Server DNS Fix did not help with server {plexServer.Name} - {plexServer.ServerUrl}";
+        dnsFixMsg = $"Server DNS Fix did not help with server {plexServer.Name} - {plexServer.GetServerUrl()}";
         Log.Warning(dnsFixMsg);
         await SendServerProgress(new InspectServerProgress
         {
@@ -332,7 +332,7 @@ public class PlexServerService : IPlexServerService
             return authToken.ToResult();
 
         // Request status
-        var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.ServerUrl, progressAction);
+        var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.GetServerUrl(), progressAction);
         serverStatus.PlexServer = plexServer;
         serverStatus.PlexServerId = plexServer.Id;
 

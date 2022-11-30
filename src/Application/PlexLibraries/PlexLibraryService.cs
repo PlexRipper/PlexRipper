@@ -71,7 +71,7 @@ public class PlexLibraryService : IPlexLibraryService
 
         // Request seasons and episodes for every tv show
         var plexLibraryDb = result.Value;
-        var serverUrl = plexLibraryDb.PlexServer.ServerUrl;
+        var serverUrl = plexLibraryDb.PlexServer.GetServerUrl();
         SendProgress(0, 4);
 
         var timer = new Stopwatch();
@@ -244,13 +244,13 @@ public class PlexLibraryService : IPlexLibraryService
         if (authToken.IsFailed)
             return Result.Fail(new Error("Failed to retrieve the server auth token"));
 
-        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(authToken.Value, plexServer.ServerUrl);
+        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(authToken.Value, plexServer.GetServerUrl());
         if (libraries.IsFailed)
             return libraries.ToResult();
 
         if (!libraries.Value.Any())
         {
-            var msg = $"plexLibraries returned for server {plexServer.Name} - {plexServer.ServerUrl} was empty";
+            var msg = $"plexLibraries returned for server {plexServer.Name} - {plexServer.GetServerUrl()} was empty";
             return Result.Fail(msg).LogWarning();
         }
 

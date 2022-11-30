@@ -36,7 +36,9 @@ public class PlexServerConnection : BaseEntity
 
     #region Helpers
 
-    public Uri Uri => new($"{Protocol}://{Address}:{Port}");
+    public Uri Uri => new($"{Protocol}://{Address}:{Port}", UriKind.Absolute);
+
+    public string Url => Uri.ToString();
 
     #endregion
 }

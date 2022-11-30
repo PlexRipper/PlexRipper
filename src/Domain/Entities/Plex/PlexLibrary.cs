@@ -177,9 +177,6 @@ public class PlexLibrary : BaseEntity
     public int EpisodeCount => Type == PlexMediaType.TvShow ? MetaData?.TvShowEpisodeCount ?? -1 : -1;
 
     [NotMapped]
-    public string ServerUrl => PlexServer?.ServerUrl ?? string.Empty;
-
-    [NotMapped]
     public string Name => Title;
 
     /// <summary>

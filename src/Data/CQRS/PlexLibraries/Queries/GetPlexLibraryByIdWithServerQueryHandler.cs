@@ -19,7 +19,7 @@ public class GetPlexLibraryByIdWithServerQueryHandler : BaseHandler, IRequestHan
 
     public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdWithServerQuery request, CancellationToken cancellationToken)
     {
-        var plexLibrary = await PlexLibraryQueryable.IncludePlexServer().FirstOrDefaultAsync(x => x.Id == request.Id);
+        var plexLibrary = await PlexLibraryQueryable.IncludePlexServer().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         return ReturnResult(plexLibrary, request.Id);
     }

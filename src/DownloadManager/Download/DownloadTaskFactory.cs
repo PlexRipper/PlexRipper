@@ -530,7 +530,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 }
 
                 // Create Download URL
-                var downloadUrl = $"{downloadTask.PlexServer.ServerUrl}{downloadTask.FileLocationUrl}";
+                var downloadUrl = $"{downloadTask.PlexServer.GetServerUrl()}{downloadTask.FileLocationUrl}";
                 var serverTokenWithUrl = await _plexAuthenticationService.GetPlexServerTokenWithUrl(downloadTask.PlexServerId, downloadUrl);
                 if (serverTokenWithUrl.IsFailed)
                 {

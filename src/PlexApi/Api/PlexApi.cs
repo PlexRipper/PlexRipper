@@ -107,6 +107,11 @@ public class PlexApi
         return result.ValueOrDefault;
     }
 
+    /// <summary>
+    /// Retrieves all the accessible plex server based on the <see cref="PlexAccount"/> token
+    /// </summary>
+    /// <param name="authToken">The Plex account authentication token.</param>
+    /// <returns></returns>
     public async Task<List<ServerResource>> GetServerAsync(string authToken)
     {
         var request = new RestRequest(new Uri(_plexServerUrl))

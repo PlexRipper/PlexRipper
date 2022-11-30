@@ -59,7 +59,7 @@ public class PlexMediaService : IPlexMediaService
         if (token.IsFailed)
             return token.ToResult();
 
-        return await _plexServiceApi.GetPlexMediaImageAsync(plexServer.ServerUrl + thumbPath, token.Value, width, height);
+        return await _plexServiceApi.GetPlexMediaImageAsync(plexServer.GetServerUrl() + thumbPath, token.Value, width, height);
     }
 
     public async Task<Result<byte[]>> GetBannerImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0)
@@ -103,6 +103,6 @@ public class PlexMediaService : IPlexMediaService
         if (token.IsFailed)
             return token.ToResult();
 
-        return await _plexServiceApi.GetPlexMediaImageAsync(plexServer.ServerUrl + bannerPath, token.Value, width, height);
+        return await _plexServiceApi.GetPlexMediaImageAsync(plexServer.GetServerUrl() + bannerPath, token.Value, width, height);
     }
 }

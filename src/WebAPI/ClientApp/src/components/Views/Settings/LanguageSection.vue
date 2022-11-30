@@ -63,8 +63,7 @@ export default class LanguageSection extends Vue {
 
 	updateSettings(langCode: string): void {
 		Log.debug('Changed language to: ', langCode);
-		this.$nuxt.$i18n.setLocale(langCode);
-		SettingsService.updateLanguageSettings('language', langCode);
+		useSubscription(SettingsService.updateLanguageSettings('language', langCode).subscribe());
 	}
 
 	mounted() {

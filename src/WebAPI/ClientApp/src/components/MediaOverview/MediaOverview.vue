@@ -99,7 +99,7 @@ import Log from 'consola';
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { finalize, tap } from 'rxjs/operators';
 import { useSubscription } from '@vueuse/rxjs';
-import type { DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
+import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '@mediaOverview';
@@ -160,13 +160,21 @@ export default class MediaOverview extends Vue {
 	}
 
 	changeView(viewMode: ViewMode): void {
+		let type: keyof DisplaySettingsDTO | null = null;
 		switch (this.mediaType) {
 			case PlexMediaType.Movie:
-				return SettingsService.updateDisplaySettings('movieViewMode', viewMode);
+				type = 'movieViewMode';
+				break;
 			case PlexMediaType.TvShow:
-				return SettingsService.updateDisplaySettings('tvShowViewMode', viewMode);
+				type = 'tvShowViewMode';
+				break;
+			default:
+				type = null;
+				Log.error('Could not set view mode for type' + this.mediaType);
 		}
-		Log.error('Could not set view mode for type' + this.mediaType);
+		if (type) {
+			useSubscription(SettingsService.updateDisplaySettings(type, viewMode).subscribe());
+		}
 	}
 
 	resetProgress(isRefreshing: boolean): void {

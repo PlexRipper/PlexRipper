@@ -5,6 +5,7 @@ import IAppConfig from '@class/IAppConfig';
 export default (): void => {
 	// Source: https://github.com/axios/axios/issues/41#issuecomment-484546457
 	Axios.defaults.validateStatus = () => true;
+	// Now error resolves in catch block rather than then block.
 	// Source: https://github.com/axios/axios/issues/41#issuecomment-386762576
 	Axios.interceptors.response.use(
 		(config) => {

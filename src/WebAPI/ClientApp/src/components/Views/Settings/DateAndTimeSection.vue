@@ -81,6 +81,7 @@ import { enUS, fr } from 'date-fns/locale';
 
 import { useSubscription } from '@vueuse/rxjs';
 import { SettingsService } from '@service';
+import { DateTimeSettingsDTO } from '@dto/mainApi';
 
 interface ISelectItem {
 	text: string | number | object;
@@ -169,19 +170,29 @@ export default class DateAndTimeSection extends Vue {
 	}
 
 	updateSettings(index: number, state: any): void {
+		let key: keyof DateTimeSettingsDTO | null = null;
 		switch (index) {
 			case 0:
-				return SettingsService.updateDateTimeSetting('shortDateFormat', state);
+				key = 'shortDateFormat';
+				break;
 			case 1:
-				return SettingsService.updateDateTimeSetting('longDateFormat', state);
+				key = 'longDateFormat';
+				break;
 			case 2:
-				return SettingsService.updateDateTimeSetting('timeFormat', state);
+				key = 'timeFormat';
+				break;
 			case 3:
-				return SettingsService.updateDateTimeSetting('timeZone', state);
+				key = 'timeZone';
+				break;
 			case 4:
-				return SettingsService.updateDateTimeSetting('showRelativeDates', state);
+				key = 'showRelativeDates';
+				break;
 			default:
 				Log.error(`Failed to update settings with index ${index} and value ${state}`);
+				key = null;
+		}
+		if (key) {
+			useSubscription(SettingsService.updateDateTimeSetting(key, state).subscribe());
 		}
 	}
 

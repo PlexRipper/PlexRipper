@@ -14,18 +14,24 @@ export default Vue.extend({
 			type: String,
 			default: '',
 		},
+		width: {
+			type: Number,
+			default: 36,
+		},
+		block: {
+			type: Boolean,
+			default: true,
+		},
 	},
 	render(h: CreateElement, context: RenderContext): VNode {
 		return h(BaseButton, {
 			...context.data,
 			props: {
 				...context.props,
-				block: true,
 				outlined: true,
 				textId: 'skip-setup',
 				icon: 'mdi-debug-step-over',
 				iconAlign: 'Right',
-				width: 100,
 			} as Partial<IBaseButtonProps>,
 		});
 	},

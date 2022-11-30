@@ -23,6 +23,10 @@ export default Vue.extend({
 			type: String,
 			default: '',
 		},
+		block: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	render(h: CreateElement, context: RenderContext): VNode {
 		return h(BaseButton, {

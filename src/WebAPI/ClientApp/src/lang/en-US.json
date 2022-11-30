@@ -308,7 +308,8 @@
       "return-link": "Go back to home page"
     },
     "home": {
-      "header": "WORKING!"
+      "header": "WORKING!",
+      "setup-question": "It looks like this is you're first time using PlexRipper, would you like to set it up?"
     },
     "movies": {
       "index": {

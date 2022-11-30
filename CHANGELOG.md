@@ -1,3 +1,13 @@
+## [0.9.1]
+
+### Added
+ - Added a setup question on the home page instead of forcefully redirecting to the setup page when the setup hasn't been yet skipped or completed
+### Changed
+ - Made the updating of settings in the front-end a true observable to make it chain-able and await-able to only do stuff after it has updated the settings
+### Fixed
+ - Fixed the setup loop that happened for some users where they got redirected back to the setup screen after finishing or skipping by removing the redirect
+ - Fixed the downloadSegments setting not updating correctly when changed
+
 ## [0.9.0]
 
 This has been a major refactoring with many unit and integration tests added to ensure stability.

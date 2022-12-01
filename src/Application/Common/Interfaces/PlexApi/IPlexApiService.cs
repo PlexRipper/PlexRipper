@@ -14,12 +14,14 @@ public interface IPlexApiService
 
     Task<PlexAccount> GetAccountAsync(string authToken);
 
+
     /// <summary>
-    /// Retrieves the accessible <see cref="PlexServer"/> by this plexAccountToken by sending an API request to the PlexAPI.
+    /// Retrieves the accessible <see cref="PlexServer">PlexServers</see> by this <see cref="PlexAccount"/> server token.
     /// </summary>
-    /// <param name="plexAccountToken">The <see cref="PlexAccount"/> token to retrieve the accessible <see cref="PlexServer"/>s with.</param>
-    /// <returns>The accessible <see cref="PlexServer"/>s.</returns>
-    Task<List<PlexServer>> GetServersAsync(string plexAccountToken);
+    /// <param name="plexAccount"></param>
+    /// <returns>Returns the list of <see cref="PlexServer">PlexServers</see> this <see cref="PlexAccount"/> has access too
+    /// and a separate list of tokens this account has to use to communicate with the <see cref="PlexServer"/></returns>
+    public Task<(Result<List<PlexServer>> servers, Result<List<ServerAccessTokenDTO>> tokens)> GetServersAsync(PlexAccount plexAccount);
 
     Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl);
 

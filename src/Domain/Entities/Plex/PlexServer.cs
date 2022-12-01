@@ -124,6 +124,9 @@ public class PlexServer : BaseEntity
 
     public List<PlexServerStatus> ServerStatus { get; set; } = new();
 
+    /// <summary>
+    /// Gets or sets the different connections that can be used to communicate with the <see cref="PlexServer"/>.
+    /// </summary>
     public List<PlexServerConnection> PlexServerConnections { get; set; } = new();
 
     #endregion

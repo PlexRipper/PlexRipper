@@ -13,6 +13,7 @@ public class PlexApiService : IPlexApiService
 
     private readonly IMapper _mapper;
     private readonly IMediator _mediator;
+    private readonly IPlexAuthenticationService _plexAuthenticationService;
 
     private readonly Api.PlexApi _plexApi;
 
@@ -20,11 +21,12 @@ public class PlexApiService : IPlexApiService
 
     #region Constructors
 
-    public PlexApiService(Api.PlexApi plexApi, IMapper mapper, IMediator mediator)
+    public PlexApiService(Api.PlexApi plexApi, IMapper mapper, IMediator mediator, IPlexAuthenticationService plexAuthenticationService)
     {
         _plexApi = plexApi;
         _mapper = mapper;
         _mediator = mediator;
+        _plexAuthenticationService = plexAuthenticationService;
     }
 
     #endregion
@@ -171,14 +173,35 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc/>
-    public async Task<List<PlexServer>> GetServersAsync(string plexAccountToken)
+    public async Task<(Result<List<PlexServer>> servers, Result<List<ServerAccessTokenDTO>> tokens)> GetServersAsync(PlexAccount plexAccount)
     {
-        var result = await _plexApi.GetServerAsync(plexAccountToken);
-        if (result != null)
-            return _mapper.Map<List<PlexServer>>(result);
+        var plexAccountToken = await _plexAuthenticationService.GetPlexApiTokenAsync(plexAccount);
 
-        Log.Warning("Failed to retrieve PlexServers");
-        return new List<PlexServer>();
+        if (string.IsNullOrEmpty(plexAccountToken))
+        {
+            var tokenResult = Result.Fail("Token was empty").LogWarning();
+            return (tokenResult, tokenResult);
+        }
+
+        var result = await _plexApi.GetServerAsync(plexAccountToken);
+        if (result.IsFailed)
+        {
+            Log.Warning("Failed to retrieve PlexServers");
+            return (result.ToResult(), result.ToResult());
+        }
+
+        var mapServersResult = _mapper.Map<List<PlexServer>>(result.Value);
+        var mapAccessResult = _mapper.Map<List<ServerAccessTokenDTO>>(result.Value);
+
+        // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
+        foreach (var plexServer in mapServersResult.Where(plexServer => plexServer.OwnerId == 0))
+            plexServer.OwnerId = plexAccount.PlexId;
+
+        // Ensure every token has the PlexAccountId assigned
+        foreach (var serverAccessTokenDto in mapAccessResult)
+            serverAccessTokenDto.PlexAccountId = plexAccount.Id;
+
+        return (Result.Ok(mapServersResult), Result.Ok(mapAccessResult));
     }
 
     public async Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount)

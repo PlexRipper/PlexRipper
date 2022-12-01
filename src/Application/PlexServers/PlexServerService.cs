@@ -43,32 +43,29 @@ public class PlexServerService : IPlexServerService
     public async Task<Result<List<PlexServer>>> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount)
     {
         if (plexAccount == null)
-            return Result.Fail("plexAccount was null").LogWarning();
+            return ResultExtensions.IsNull(nameof(plexAccount)).LogWarning();
 
         Log.Debug($"Refreshing Plex servers for PlexAccount: {plexAccount.Id}");
+        var tupleResult = await _plexServiceApi.GetServersAsync(plexAccount);
+        var serversResult = tupleResult.servers;
+        var tokensResult = tupleResult.tokens;
 
-        var token = await _plexAuthenticationService.GetPlexApiTokenAsync(plexAccount);
+        if (serversResult.IsFailed || tokensResult.IsFailed)
+            return serversResult;
 
-        if (string.IsNullOrEmpty(token))
-            return Result.Fail("Token was empty").LogWarning();
-
-        var serverList = await _plexServiceApi.GetServersAsync(token);
-
-        if (!serverList.Any())
+        if (!serversResult.Value.Any())
             return Result.Ok();
 
-        // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
-        serverList.ForEach(plexServer =>
-        {
-            if (plexServer.OwnerId == 0)
-                plexServer.OwnerId = plexAccount.PlexId;
-        });
+        var serverList = serversResult.Value;
+        var serverAccessTokens = tokensResult.Value;
 
         // Add initial entry for the plex servers
-        var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(plexAccount, serverList));
+        var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(serverList));
         if (updateResult.IsFailed)
             return updateResult;
 
+        // TODO Update plex
+        await _mediator.Send(new AddOrUpdatePlexAccountServersCommand(plexAccount, serverAccessTokens));
         _serverSettingsModule.EnsureAllServersHaveASettingsEntry(serverList);
 
         return await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccount.Id));

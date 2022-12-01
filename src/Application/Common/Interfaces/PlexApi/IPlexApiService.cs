@@ -10,8 +10,6 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount);
 
-    Task<string> RefreshPlexAuthTokenAsync(PlexAccount account);
-
     Task<PlexAccount> GetAccountAsync(string authToken);
 
 
@@ -23,33 +21,62 @@ public interface IPlexApiService
     /// and a separate list of tokens this account has to use to communicate with the <see cref="PlexServer"/></returns>
     public Task<(Result<List<PlexServer>> servers, Result<List<ServerAccessTokenDTO>> tokens)> GetServersAsync(PlexAccount plexAccount);
 
-    Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl);
+    /// <summary>
+    /// Retrieves all accessible <see cref="PlexLibrary"/> from this <see cref="PlexServer"/> by this AuthToken.
+    /// </summary>
+    /// <param name="plexServer">The <see cref="PlexServer"/> to retrieve the libraries from </param>
+    /// <param name="plexAccount">The optional PlexAccount used to connect to the <see cref="PlexServer"/> </param>
+    /// <returns>List of accessible <see cref="PlexLibrary"/>.</returns>
+    Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(PlexServer plexServer, PlexAccount plexAccount);
 
     /// <summary>
-    ///     Returns and PlexLibrary container with either Movies, Series, Music or Photos depending on the type.
+    /// Fetches the PlexLibrary container with either Movies, Series, Music or Photos media depending on the type.
+    /// Id and PlexServerId are copied over from the input parameter.
     /// </summary>
     /// <param name="plexLibrary"></param>
-    /// <param name="authToken"></param>
+    /// <param name="plexAccount">The optional PlexAccount used to connect to the <see cref="PlexServer"/> </param>
     /// <returns></returns>
-    Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken);
+    Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, PlexAccount plexAccount = null);
 
     Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl);
 
     Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey);
 
-    Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl, Action<PlexApiClientProgress> action = null);
+    Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(int plexServerId, Action<PlexApiClientProgress> action = null);
 
     Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
 
-    Task<Result<byte[]>> GetPlexMediaImageAsync(string thumbUrl, string authToken, int width = 0, int height = 0);
+    /// <summary>
+    /// Retrieves the media image from the <see cref="PlexServer"/> with optional dimensions.
+    /// </summary>
+    /// <param name="plexServer">The <see cref="PlexServer"/> to request the media from.</param>
+    /// <param name="thumbPath">The relative media url</param>
+    /// <param name="width">The optional width of the image.</param>
+    /// <param name="height">The optional height of the image.</param>
+    /// <returns></returns>
+    Task<Result<byte[]>> GetPlexMediaImageAsync(PlexServer plexServer, string thumbPath, int width = 0, int height = 0);
 
     #endregion
 
-    Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(string serverAuthToken, string plexFullHost, string plexLibraryKey);
 
-    Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(string serverAuthToken, string plexFullHost, string plexLibraryKey);
+    /// <summary>
+    /// Fetches all the <see cref="PlexTvShowSeason">Plex TvShow Seasons</see> from the Plex api with the given <see cref="PlexLibrary"/>.
+    /// </summary>
+    /// <param name="plexLibrary"></param>
+    /// <returns></returns>
+    Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(PlexLibrary plexLibrary);
+
+    /// <summary>
+    /// Fetches all the <see cref="PlexTvShowEpisode">Plex TvShow Episodes</see> from the Plex api with the given <see cref="PlexLibrary"/>.
+    /// </summary>
+    /// <param name="plexLibrary"></param>
+    /// <returns></returns>
+    Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary);
 
     Task<Result<AuthPin>> Get2FAPin(string clientId);
 
     Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
+
+
+    Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId = 0);
 }

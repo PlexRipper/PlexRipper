@@ -17,15 +17,12 @@ public class PlexServerService : IPlexServerService
 
     private readonly IPlexApiService _plexServiceApi;
 
-    private readonly IPlexAuthenticationService _plexAuthenticationService;
-
     private readonly List<int> _currentSyncingPlexServers = new();
 
     public PlexServerService(
         IMapper mapper,
         IMediator mediator,
         IPlexApiService plexServiceApi,
-        IPlexAuthenticationService plexAuthenticationService,
         IPlexLibraryService plexLibraryService,
         ISignalRService signalRService,
         IServerSettingsModule serverSettingsModule)
@@ -36,7 +33,6 @@ public class PlexServerService : IPlexServerService
         _signalRService = signalRService;
         _serverSettingsModule = serverSettingsModule;
         _plexServiceApi = plexServiceApi;
-        _plexAuthenticationService = plexAuthenticationService;
     }
 
     /// <inheritdoc/>
@@ -323,18 +319,13 @@ public class PlexServerService : IPlexServerService
         bool trimEntries = true,
         Action<PlexApiClientProgress> progressAction = null)
     {
-        // Get plexServer authToken
-        var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id, plexAccountId);
-        if (authToken.IsFailed)
-            return authToken.ToResult();
-
         // Request status
-        var serverStatus = await _plexServiceApi.GetPlexServerStatusAsync(authToken.Value, plexServer.GetServerUrl(), progressAction);
-        serverStatus.PlexServer = plexServer;
-        serverStatus.PlexServerId = plexServer.Id;
+        var serverStatusResult = await _plexServiceApi.GetPlexServerStatusAsync(plexServer.Id, progressAction);
+        if (serverStatusResult.IsFailed)
+            return serverStatusResult;
 
         // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
-        var result = await _mediator.Send(new CreatePlexServerStatusCommand(serverStatus));
+        var result = await _mediator.Send(new CreatePlexServerStatusCommand(serverStatusResult.Value));
         if (result.IsFailed)
             return result.ToResult();
 

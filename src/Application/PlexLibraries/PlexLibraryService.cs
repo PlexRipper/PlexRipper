@@ -8,8 +8,6 @@ public class PlexLibraryService : IPlexLibraryService
 
     private readonly IMediator _mediator;
 
-    private readonly IPlexAuthenticationService _plexAuthenticationService;
-
     private readonly IPlexApiService _plexServiceApi;
 
     private readonly ISignalRService _signalRService;
@@ -20,12 +18,10 @@ public class PlexLibraryService : IPlexLibraryService
 
     public PlexLibraryService(
         IMediator mediator,
-        IPlexAuthenticationService plexAuthenticationService,
         IPlexApiService plexServiceApi,
         ISignalRService signalRService)
     {
         _mediator = mediator;
-        _plexAuthenticationService = plexAuthenticationService;
         _plexServiceApi = plexServiceApi;
         _signalRService = signalRService;
     }
@@ -39,14 +35,13 @@ public class PlexLibraryService : IPlexLibraryService
     /// <summary>
     /// Retrieves all TvShow, season and episode data and stores it in the database.
     /// </summary>
-    /// <param name="authToken"></param>
     /// <param name="plexLibrary"></param>
     /// <param name="progressAction"></param>
     /// <returns></returns>
-    private async Task<Result> RefreshPlexTvShowLibrary(string authToken, PlexLibrary plexLibrary, Action<LibraryProgress> progressAction = null)
+    private async Task<Result> RefreshPlexTvShowLibrary(PlexLibrary plexLibrary, Action<LibraryProgress> progressAction = null)
     {
         if (plexLibrary == null)
-            return ResultExtensions.IsNull("plexLibrary").LogError();
+            return ResultExtensions.IsNull(nameof(plexLibrary)).LogError();
 
         if (plexLibrary.Type != PlexMediaType.TvShow)
             return Result.Fail("PlexLibrary is not of type TvShow").LogError();
@@ -65,26 +60,20 @@ public class PlexLibraryService : IPlexLibraryService
             _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, index, count);
         }
 
-        var result = await _mediator.Send(new GetPlexLibraryByIdWithServerQuery(plexLibrary.Id));
-        if (result.IsFailed)
-            return result.ToResult();
-
         // Request seasons and episodes for every tv show
-        var plexLibraryDb = result.Value;
-        var serverUrl = plexLibraryDb.PlexServer.GetServerUrl();
         SendProgress(0, 4);
 
         var timer = new Stopwatch();
         timer.Start();
 
-        var rawSeasonDataResult = await _plexServiceApi.GetAllSeasonsAsync(authToken, serverUrl, plexLibrary.Key);
+        var rawSeasonDataResult = await _plexServiceApi.GetAllSeasonsAsync(plexLibrary);
         if (rawSeasonDataResult.IsFailed)
             return rawSeasonDataResult.ToResult();
 
         // Phase 1 of 4: Season data was retrieved successfully.
         SendProgress(1, 4);
 
-        var rawEpisodesDataResult = await _plexServiceApi.GetAllEpisodesAsync(authToken, serverUrl, plexLibrary.Key);
+        var rawEpisodesDataResult = await _plexServiceApi.GetAllEpisodesAsync(plexLibrary);
         if (rawEpisodesDataResult.IsFailed)
             return rawEpisodesDataResult.ToResult();
 
@@ -118,7 +107,7 @@ public class PlexLibraryService : IPlexLibraryService
 
         // Phase 3 of 4: PlexLibrary media data was parsed successfully.
         SendProgress(3, 4);
-        Log.Debug($"Finished retrieving all media for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds}");
+        Log.Debug($"Finished retrieving all media for library {plexLibrary.Title} in {timer.Elapsed.TotalSeconds}");
         timer.Restart();
 
         // Update the MetaData of this library
@@ -134,7 +123,7 @@ public class PlexLibraryService : IPlexLibraryService
         if (createResult.IsFailed)
             return createResult.ToResult();
 
-        Log.Debug($"Finished updating all media in the database for library {plexLibraryDb.Title} in {timer.Elapsed.TotalSeconds}");
+        Log.Debug($"Finished updating all media in the database for library {plexLibrary.Title} in {timer.Elapsed.TotalSeconds}");
 
         // Phase 4 of 4: Database has been successfully updated with new library data.
         SendProgress(4, 4);
@@ -235,16 +224,11 @@ public class PlexLibraryService : IPlexLibraryService
     public async Task<Result> RetrieveAccessibleLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer)
     {
         if (plexServer == null)
-            return Result.Fail("plexServer was null").LogWarning();
+            return ResultExtensions.IsNull(nameof(plexServer)).LogWarning();
 
         Log.Debug($"Refreshing PlexLibraries for plexServer: {plexServer.Name}");
 
-        var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id);
-
-        if (authToken.IsFailed)
-            return Result.Fail(new Error("Failed to retrieve the server auth token"));
-
-        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(authToken.Value, plexServer.GetServerUrl());
+        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServer, plexAccount);
         if (libraries.IsFailed)
             return libraries.ToResult();
 
@@ -272,13 +256,8 @@ public class PlexLibraryService : IPlexLibraryService
             return Result.Fail($"Library type {plexLibrary.Type} is currently not supported by PlexRipper").LogWarning();
         }
 
-        // Get plexServer authToken
-        var authToken = await _plexAuthenticationService.GetPlexServerTokenAsync(plexLibrary.PlexServer.Id);
-        if (authToken.IsFailed)
-            return authToken.ToResult();
-
         // Retrieve overview of all media belonging to this PlexLibrary
-        var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, authToken.Value);
+        var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary);
         if (newPlexLibraryResult.IsFailed)
             return newPlexLibraryResult;
 
@@ -292,7 +271,7 @@ public class PlexLibraryService : IPlexLibraryService
             case PlexMediaType.Movie:
                 return await RefreshPlexMovieLibrary(newPlexLibrary, progressAction);
             case PlexMediaType.TvShow:
-                return await RefreshPlexTvShowLibrary(authToken.Value, newPlexLibrary, progressAction);
+                return await RefreshPlexTvShowLibrary(newPlexLibrary, progressAction);
         }
 
         Log.Information($"Successfully refreshed library {newPlexLibrary.Title} with id: {newPlexLibrary.Id}");

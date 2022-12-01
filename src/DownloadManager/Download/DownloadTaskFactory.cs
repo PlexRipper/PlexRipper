@@ -10,6 +10,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     private readonly IFolderPathService _folderPathService;
 
     private readonly IPathSystem _pathSystem;
+    private readonly IPlexApiService _plexApiService;
 
     private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
 
@@ -19,8 +20,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
     private readonly INotificationsService _notificationsService;
 
-    private readonly IPlexAuthenticationService _plexAuthenticationService;
-
     #endregion
 
     #region Constructor
@@ -28,18 +27,18 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     public DownloadTaskFactory(
         IMediator mediator,
         IMapper mapper,
-        IPlexAuthenticationService plexAuthenticationService,
         INotificationsService notificationsService,
         IFolderPathService folderPathService,
         IPathSystem pathSystem,
+        IPlexApiService plexApiService,
         IDownloadManagerSettingsModule downloadManagerSettings)
     {
         _mediator = mediator;
         _mapper = mapper;
-        _plexAuthenticationService = plexAuthenticationService;
         _notificationsService = notificationsService;
         _folderPathService = folderPathService;
         _pathSystem = pathSystem;
+        _plexApiService = plexApiService;
         _downloadManagerSettings = downloadManagerSettings;
     }
 
@@ -531,7 +530,8 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
                 // Create Download URL
                 var downloadUrl = $"{downloadTask.PlexServer.GetServerUrl()}{downloadTask.FileLocationUrl}";
-                var serverTokenWithUrl = await _plexAuthenticationService.GetPlexServerTokenWithUrl(downloadTask.PlexServerId, downloadUrl);
+                // TODO Might remove this and not make the token part of the DownloadTask but retrieved on demand to make it more resilient to changes
+                var serverTokenWithUrl = await _plexApiService.GetPlexServerTokenWithUrl(downloadTask.PlexServerId, downloadUrl);
                 if (serverTokenWithUrl.IsFailed)
                 {
                     Log.Error($"Failed to retrieve server token to create DownloadUrl for PlexServer {downloadTask.PlexServer.Name}");

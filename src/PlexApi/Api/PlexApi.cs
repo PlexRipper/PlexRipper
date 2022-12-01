@@ -50,21 +50,19 @@ public class PlexApi
         return await _client.SendRequestAsync<PlexAccountDTO>(request, 0);
     }
 
-    public async Task<string> RefreshPlexAuthTokenAsync(PlexAccount plexAccount)
+    public async Task<Result<string>> RefreshPlexAuthTokenAsync(PlexAccount plexAccount)
     {
         var result = await PlexSignInAsync(plexAccount);
         if (result.IsSuccess)
         {
-            Log.Information($"Returned token was: {result.Value.AuthToken}");
+            Log.Debug($"Returned token was: {result.Value.AuthToken}");
             return result.Value.AuthToken;
         }
 
-        Log.Error("Result from RequestPlexSignInDataAsync() was null.");
-
-        return string.Empty;
+        return Result.Fail("Result from RequestPlexSignInDataAsync() was null.").LogError();
     }
 
-    public async Task<PlexServerStatus> GetServerStatusAsync(string authToken, string serverBaseUrl, Action<PlexApiClientProgress> action = null)
+    public async Task<Result<PlexServerStatus>> GetServerStatusAsync(string serverBaseUrl, string authToken, Action<PlexApiClientProgress> action = null)
     {
         // TODO Use healthCheck from here:
         // https://github.com/Arcanemagus/plex-api/wiki/Plex-Web-API-Overview
@@ -88,13 +86,13 @@ public class PlexApi
                 break;
         }
 
-        return new PlexServerStatus
+        return Result.Ok(new PlexServerStatus
         {
             StatusCode = statusCode,
             StatusMessage = statusMessage,
             LastChecked = DateTime.Now.ToUniversalTime(),
             IsSuccessful = response.IsSuccess,
-        };
+        });
     }
 
     public async Task<PlexAccountDTO> GetAccountAsync(string authToken)
@@ -186,12 +184,12 @@ public class PlexApi
     /// Gets all seasons contained within a media container.
     /// </summary>
     /// <param name="authToken">The authentication token.</param>
-    /// <param name="plexFullHost"></param>
+    /// <param name="plexServerUrl">The <see cref="PlexServer"/> url.</param>
     /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary"/>.</param>
     /// <returns></returns>
-    public async Task<PlexMediaContainerDTO> GetAllSeasonsAsync(string authToken, string plexFullHost, string plexLibraryKey)
+    public async Task<PlexMediaContainerDTO> GetAllSeasonsAsync(string authToken, string plexServerUrl, string plexLibraryKey)
     {
-        var request = new RestRequest(new Uri($"{plexFullHost}/library/sections/{plexLibraryKey}/all"));
+        var request = new RestRequest(new Uri($"{plexServerUrl}/library/sections/{plexLibraryKey}/all"));
 
         request.AddToken(authToken);
 
@@ -205,14 +203,14 @@ public class PlexApi
     /// Gets all episodes within a media container.
     /// </summary>
     /// <param name="authToken">The authentication token.</param>
-    /// <param name="plexFullHost"></param>
+    /// <param name="plexServerUrl"></param>
     /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary"/>.</param>
     /// <param name="from">The start range from which to request.</param>
     /// <param name="to">The end range to request for.</param>
     /// <returns></returns>
-    public async Task<PlexMediaContainerDTO> GetAllEpisodesAsync(string authToken, string plexFullHost, string plexLibraryKey, int from, int to)
+    public async Task<PlexMediaContainerDTO> GetAllEpisodesAsync(string authToken, string plexServerUrl, string plexLibraryKey, int from, int to)
     {
-        var request = new RestRequest(new Uri($"{plexFullHost}/library/sections/{plexLibraryKey}/all"));
+        var request = new RestRequest(new Uri($"{plexServerUrl}/library/sections/{plexLibraryKey}/all"));
 
         request.AddToken(authToken).AddLimitHeaders(from, to);
 

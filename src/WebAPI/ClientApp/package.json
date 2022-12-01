@@ -26,14 +26,12 @@
   "script-comments": {
     "generate-ts": "Run this to generate typescript definitions based on the back-end Swagger API documentation, can only be run if back-end is running",
     "lint-staged": "Automatically run by Husky to check for lint errors when commiting changes",
-    "update-web-types": "This is meant to run each time a component changes it props or new components are added, this helps with autocompletion and IDE inspections.",
     "npm-upgrade-packages": "This can be run to help upgrade packages to newer versions and track why some are not updated."
   },
   "lint-staged": {
     "*.{js,vue}": "npm run lint --fix",
     "*.{css,vue}": "stylelint"
   },
-  "web-types": "./web-types.json",
   "dependencies": {
     "@codewithdan/observable-store": "^2.2.15",
     "@faker-js/faker": "^7.6.0",

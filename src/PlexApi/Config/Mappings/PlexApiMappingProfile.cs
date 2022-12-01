@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PlexRipper.Application;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
 using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Models;
@@ -83,8 +84,8 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.PlatformVersion, opt => opt.MapFrom(x => x.PlatformVersion))
             .ForMember(dest => dest.Device, opt => opt.MapFrom(x => x.Device))
             .ForMember(dest => dest.MachineIdentifier, opt => opt.MapFrom(x => x.ClientIdentifier))
-            .ForMember(dest => dest.CreatedAt, opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
-            .ForMember(dest => dest.LastSeenAt, opt => opt.ConvertUsing(new UnixLongStringToDateTimeUTC()))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(x => x.CreatedAt))
+            .ForMember(dest => dest.LastSeenAt, opt => opt.MapFrom(x => x.LastSeenAt))
             .ForMember(dest => dest.Provides, opt => opt.MapFrom(x => x.Provides))
             .ForMember(dest => dest.OwnerId, opt => opt.MapFrom(x => x.OwnerId))
             .ForMember(dest => dest.PlexServerOwnerUsername, opt => opt.MapFrom(x => x.SourceTitle))
@@ -108,12 +109,18 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
             .ForMember(dest => dest.ServerFixApplyDNSFix, opt => opt.Ignore())
             .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
+            .ForMember(dest => dest.PreferredConnectionId, opt => opt.Ignore())
             .ForMember(dest => dest.PlexServerConnections, opt => opt.MapFrom(x => x.Connections.Connection));
 
         CreateMap<ServerConnection, PlexServerConnection>(MemberList.Destination)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
             .ForMember(dest => dest.PlexServerId, opt => opt.Ignore());
+
+        CreateMap<ServerResource, ServerAccessTokenDTO>(MemberList.Destination)
+            .ForMember(dest => dest.PlexAccountId, opt => opt.Ignore())
+            .ForMember(dest => dest.AccessToken, opt => opt.MapFrom(x => x.AccessToken))
+            .ForMember(dest => dest.MachineIdentifier, opt => opt.MapFrom(x => x.ClientIdentifier));
     }
 
     private void PlexMovieMappings()

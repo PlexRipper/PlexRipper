@@ -19,13 +19,6 @@ public class WebApiMappingProfile : Profile
         CreateMap(typeof(Result<>), typeof(ResultDTO<>), MemberList.None);
         CreateMap(typeof(Result<>), typeof(ResultDTO), MemberList.None);
 
-        // PlexServer -> PlexServerDTO
-        CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination)
-            .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.Status));
-
-        // PlexServerStatus -> PlexServerStatusDTO
-        CreateMap<PlexServerStatus, PlexServerStatusDTO>(MemberList.Destination);
-
         // PlexLibrary -> PlexLibraryDTO
         CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
             .ForMember(dto => dto.Count, entity => entity.MapFrom(x => x.MediaCount))
@@ -48,6 +41,7 @@ public class WebApiMappingProfile : Profile
             .ReverseMap();
 
         PlexAccountMappings();
+        PlexServerMappings();
         DownloadTaskMappings();
         PlexMediaMappings();
         PlexMovieMappings();
@@ -82,6 +76,20 @@ public class WebApiMappingProfile : Profile
                     };
                 });
             });
+    }
+
+    private void PlexServerMappings()
+    {
+        // PlexServer -> PlexServerDTO
+        CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination)
+            .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.Status));
+
+        // PlexServerConnection -> PlexServerConnectionDTO
+        CreateMap<PlexServerConnection, PlexServerConnectionDTO>(MemberList.Destination)
+            .ForMember(dto => dto.Url, entity => entity.MapFrom(x => x.Url));
+
+        // PlexServerStatus -> PlexServerStatusDTO
+        CreateMap<PlexServerStatus, PlexServerStatusDTO>(MemberList.Destination);
     }
 
     private void DownloadTaskMappings()

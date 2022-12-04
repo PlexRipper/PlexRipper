@@ -1,9 +1,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PlexRipper.Domain;
 
 public class PlexServer : BaseEntity
 {
+    #region Properties
+
     /// <summary>
     /// Gets or sets the name of this <see cref="PlexServer"/>.
     /// </summary>
@@ -115,6 +118,7 @@ public class PlexServer : BaseEntity
     [Column(Order = 24)]
     public bool ServerFixApplyDNSFix { get; set; }
 
+    #endregion
 
     #region Relationships
 
@@ -137,15 +141,7 @@ public class PlexServer : BaseEntity
     /// Gets the library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections.
     /// </summary>
     [NotMapped]
-    public string LibraryUrl => $"{GetServerUrl()}/library/sections";
-
-    /// <summary>
-    /// Gets or sets the temporary auth token.
-    /// Do not use this property to retrieve the needed authToken, this is only meant to transfer the incoming authToken from the plexApi to the Database.
-    /// See AddOrUpdatePlexServersHandler.
-    /// </summary>
-    [NotMapped]
-    public string AccessToken { get; set; }
+    public string LibraryUrl => $"{GetServerUrl()}library/sections";
 
     /// <summary>
     /// Gets a value indicating whether this <see cref="PlexServer"/> has any DownloadTasks in any nested <see cref="PlexLibrary"/>.
@@ -185,6 +181,20 @@ public class PlexServer : BaseEntity
 
     #endregion
 
+    #region Operators
+
+    public static bool operator ==(PlexServer left, PlexServer right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(PlexServer left, PlexServer right)
+    {
+        return !Equals(left, right);
+    }
+
+    #endregion
+
     /// <summary>
     /// Gets the server url based on the available connections, e.g: http://112.202.10.213:32400.
     /// </summary>
@@ -213,4 +223,70 @@ public class PlexServer : BaseEntity
 
         return PlexServerConnections.First().Url;
     }
+
+    #region Equality
+
+    /// <inheritdoc/>
+    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Cannot be ReadOnly due to usage in Entity Framework as Entities")]
+    public override int GetHashCode()
+    {
+        var hashCode = default(HashCode);
+        hashCode.Add(Name);
+        hashCode.Add(OwnerId);
+        hashCode.Add(PlexServerOwnerUsername);
+        hashCode.Add(Device);
+        hashCode.Add(Platform);
+        hashCode.Add(PlatformVersion);
+        hashCode.Add(Product);
+        hashCode.Add(ProductVersion);
+        hashCode.Add(Provides);
+        hashCode.Add(CreatedAt);
+        hashCode.Add(LastSeenAt);
+        hashCode.Add(MachineIdentifier);
+        hashCode.Add(PublicAddress);
+        hashCode.Add(PreferredConnectionId);
+        hashCode.Add(Owned);
+        hashCode.Add(Home);
+        hashCode.Add(Synced);
+        hashCode.Add(Relay);
+        hashCode.Add(Presence);
+        hashCode.Add(HttpsRequired);
+        hashCode.Add(PublicAddressMatches);
+        hashCode.Add(DnsRebindingProtection);
+        hashCode.Add(NatLoopbackSupported);
+        hashCode.Add(ServerFixApplyDNSFix);
+        return hashCode.ToHashCode();
+    }
+
+    /// <inheritdoc/>
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj))
+            return false;
+        if (ReferenceEquals(this, obj))
+            return true;
+        if (obj.GetType() != GetType())
+            return false;
+
+        return Equals((PlexServer)obj);
+    }
+
+    /// <summary>
+    /// Compares this <see cref="PlexServer"/> against another <see cref="PlexServer"/> without comparing the Id and navigation properties.
+    /// </summary>
+    /// <param name="other">The other <see cref="PlexServer"/> to compare against.</param>
+    /// <returns>Returns whether these <see cref="PlexServer">PlexServers</see> are equal.</returns>
+    protected bool Equals(PlexServer other)
+    {
+        return Name == other.Name && OwnerId == other.OwnerId && PlexServerOwnerUsername == other.PlexServerOwnerUsername && Device == other.Device &&
+               Platform == other.Platform && PlatformVersion == other.PlatformVersion && Product == other.Product && ProductVersion == other.ProductVersion &&
+               Provides == other.Provides && CreatedAt.Equals(other.CreatedAt) && LastSeenAt.Equals(other.LastSeenAt) &&
+               MachineIdentifier == other.MachineIdentifier && PublicAddress == other.PublicAddress && PreferredConnectionId == other.PreferredConnectionId &&
+               Owned == other.Owned && Home == other.Home && Synced == other.Synced && Relay == other.Relay && Presence == other.Presence &&
+               HttpsRequired == other.HttpsRequired && PublicAddressMatches == other.PublicAddressMatches &&
+               DnsRebindingProtection == other.DnsRebindingProtection && NatLoopbackSupported == other.NatLoopbackSupported &&
+               ServerFixApplyDNSFix == other.ServerFixApplyDNSFix;
+    }
+
+    #endregion
 }

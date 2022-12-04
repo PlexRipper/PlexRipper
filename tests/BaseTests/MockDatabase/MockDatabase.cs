@@ -21,6 +21,7 @@ public static class MockDatabase
 
     /// <summary>
     /// Creates an in-memory database only to be used for unit and integration testing.
+    /// Passing in the same dbName will create a new context for the same database
     /// </summary>
     /// <param name="dbName">leave empty to generate a random one</param>
     /// <param name="disableForeignKeyCheck">By default, don't enforce foreign key check for handling database data.</param>
@@ -46,7 +47,7 @@ public static class MockDatabase
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
-        optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Error);
+        optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Information);
         return new PlexRipperDbContext(optionsBuilder.Options, dbName);
     }
 

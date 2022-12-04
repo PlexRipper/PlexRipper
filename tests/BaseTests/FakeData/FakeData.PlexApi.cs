@@ -1,15 +1,15 @@
-﻿using Bogus;
+using Bogus;
 
 namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
 {
-    private static readonly Random _random = new();
-
     public static Faker<PlexServer> GetPlexServer([CanBeNull] Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
+        // Note: Ensure all faker values are a lambda f => x,
+        // otherwise Entity Framework will see differently generated values as the same object and mess up any database testing
         return new Faker<PlexServer>()
             .StrictMode(true)
             .UseSeed(config.Seed)
@@ -27,7 +27,6 @@ public static partial class FakeData
             .RuleFor(x => x.OwnerId, f => f.Random.Int(1000, 100000))
             .RuleFor(x => x.PlexServerOwnerUsername, f => f.Name.LastName())
             .RuleFor(x => x.PublicAddress, f => f.Internet.Ip())
-            .RuleFor(x => x.AccessToken, _ => "DO NOT USE")
 
             // Server flags
             .RuleFor(x => x.Owned, f => f.Random.Bool())
@@ -39,9 +38,11 @@ public static partial class FakeData
             .RuleFor(x => x.PublicAddressMatches, f => f.Random.Bool())
             .RuleFor(x => x.DnsRebindingProtection, f => f.Random.Bool())
             .RuleFor(x => x.NatLoopbackSupported, f => f.Random.Bool())
-            .RuleFor(x => x.PlexServerConnections, GetPlexServerConnections(options).Generate(3))
+            .RuleFor(x => x.PreferredConnectionId, _ => 0)
+            .RuleFor(x => x.PlexServerConnections, f => GetPlexServerConnections(options).Generate(f.Random.Int(1, 4)))
             .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>())
             .RuleFor(x => x.ServerStatus, _ => new List<PlexServerStatus>())
+            .RuleFor(x => x.ServerFixApplyDNSFix, _ => false)
             .RuleFor(x => x.PlexAccountServers, _ => new List<PlexAccountServer>());
     }
 
@@ -96,35 +97,19 @@ public static partial class FakeData
     public static Faker<PlexServerConnection> GetPlexServerConnections([CanBeNull] Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
-        var uri = config.MockServer?.ServerUri ?? new Uri("https://test-server.com");
+        var uri = config.MockServer?.ServerUri;
 
-        var ids = 0;
         return new Faker<PlexServerConnection>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
-            .RuleFor(x => x.Id, _ => ids++)
-            .RuleFor(x => x.Protocol, _ => uri.Scheme)
-            .RuleFor(x => x.Address, _ => uri.Host)
-            .RuleFor(x => x.Port, _ => uri.Port)
+            .UseSeed(config.GetSeed())
+            .RuleFor(x => x.Id, _ => 0)
+            .RuleFor(x => x.Protocol, f => uri?.Scheme ?? f.Internet.Protocol())
+            .RuleFor(x => x.Address, f => uri?.Host ?? f.Internet.Ip())
+            .RuleFor(x => x.Port, f => uri?.Port ?? f.Internet.Port())
             .RuleFor(x => x.Local, _ => false)
             .RuleFor(x => x.Relay, _ => false)
-            .RuleFor(x => x.IPv6, _ => false);
-    }
-
-
-    private static int GetUniqueId(List<int> alreadyGenerated, [CanBeNull] Action<UnitTestDataConfig> options = null)
-    {
-        var config = UnitTestDataConfig.FromOptions(options);
-
-        var rnd = new Random(config.Seed);
-        while (true)
-        {
-            var value = rnd.Next(1, 10000000);
-            if (!alreadyGenerated.Contains(value))
-            {
-                alreadyGenerated.Add(value);
-                return value;
-            }
-        }
+            .RuleFor(x => x.IPv6, _ => false)
+            .RuleFor(x => x.PlexServer, _ => null)
+            .RuleFor(x => x.PlexServerId, _ => 0);
     }
 }

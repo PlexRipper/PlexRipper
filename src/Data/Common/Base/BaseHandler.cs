@@ -1,9 +1,10 @@
+using Autofac.Util;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Data.Common;
 
-public abstract class BaseHandler
+public abstract class BaseHandler : IDisposable
 {
     #region Fields
 
@@ -115,4 +116,9 @@ public abstract class BaseHandler
     }
 
     #endregion
+
+    public void Dispose()
+    {
+        _dbContext?.Dispose();
+    }
 }

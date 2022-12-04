@@ -6,7 +6,7 @@ namespace Data.UnitTests.PlexServers.Commands;
 
 public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexServerCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public AddOrUpdatePlexServerCommandHandler_UnitTests(ITestOutputHelper output) : base(output, true) { }
 
     [Fact]
     public async Task ShouldAddAllServers_WhenNoneExistInTheDatabase()
@@ -16,14 +16,13 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         var request = new AddOrUpdatePlexServersCommand(expectedPlexServers);
-        await using var context = MockDatabase.GetMemoryDbContext();
-        var handler = new AddOrUpdatePlexServersCommandHandler(context);
+        var handler = new AddOrUpdatePlexServersCommandHandler(DbContext);
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
+        ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        await using var context2 = MockDatabase.GetMemoryDbContext(context.DatabaseName);
-        var plexServersDbs = context2.PlexServers
+        var plexServersDbs = DbContext.PlexServers
             .Include(x => x.PlexServerConnections)
             .ToList();
         plexServersDbs.Count.ShouldBe(5);
@@ -46,8 +45,7 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         // First Add 2
-        await using var context = MockDatabase.GetMemoryDbContext();
-        var handler = new AddOrUpdatePlexServersCommandHandler(context);
+        var handler = new AddOrUpdatePlexServersCommandHandler(DbContext);
         var request = new AddOrUpdatePlexServersCommand(plexServers);
         var addResult = await handler.Handle(request, CancellationToken.None);
 
@@ -67,16 +65,16 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
         }
 
         // Now update
-        await using var context2 = MockDatabase.GetMemoryDbContext(context.DatabaseName);
-        handler = new AddOrUpdatePlexServersCommandHandler(context2);
+        ResetDbContext();
+        handler = new AddOrUpdatePlexServersCommandHandler(DbContext);
         request = new AddOrUpdatePlexServersCommand(updatedServers);
         var updateResult = await handler.Handle(request, CancellationToken.None);
 
         // Assert
-        await using var context3 = MockDatabase.GetMemoryDbContext(context.DatabaseName);
         addResult.IsSuccess.ShouldBeTrue();
         updateResult.IsSuccess.ShouldBeTrue();
-        var plexServersDbs = context3.PlexServers
+        ResetDbContext();
+        var plexServersDbs = DbContext.PlexServers
             .Include(x => x.PlexServerConnections)
             .ToList();
         plexServersDbs.Count.ShouldBe(5);
@@ -118,23 +116,21 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         // First add the 5 servers
-        await using var context = MockDatabase.GetMemoryDbContext();
-
         var request = new AddOrUpdatePlexServersCommand(plexServers);
-        var handler = new AddOrUpdatePlexServersCommandHandler(context);
+        var handler = new AddOrUpdatePlexServersCommandHandler(DbContext);
         var addResult = await handler.Handle(request, CancellationToken.None);
 
         // Now update
-        await using var context2 = MockDatabase.GetMemoryDbContext(context.DatabaseName);
+        ResetDbContext();
         request = new AddOrUpdatePlexServersCommand(changedPlexServers);
-        handler = new AddOrUpdatePlexServersCommandHandler(context2);
+        handler = new AddOrUpdatePlexServersCommandHandler(DbContext);
         var updateResult = await handler.Handle(request, CancellationToken.None);
 
         // Assert
-        await using var context3 = MockDatabase.GetMemoryDbContext(context.DatabaseName);
+        ResetDbContext();
         addResult.IsSuccess.ShouldBeTrue();
         updateResult.IsSuccess.ShouldBeTrue();
-        var plexServersDbs = context3.PlexServers
+        var plexServersDbs = DbContext.PlexServers
             .Include(x => x.PlexServerConnections)
             .ToList();
         plexServersDbs.Count.ShouldBe(5);

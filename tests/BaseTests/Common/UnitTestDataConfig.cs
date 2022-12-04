@@ -104,4 +104,9 @@ public class UnitTestDataConfig : IDisposable
     {
         MockServer?.Dispose();
     }
+
+    public int GetSeed()
+    {
+        return ++Seed;
+    }
 }

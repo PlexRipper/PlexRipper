@@ -1,4 +1,4 @@
-﻿using EFCore.BulkExtensions;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Data.Common;
@@ -109,9 +109,9 @@ public abstract class BaseHandler
         return Result.Fail(new Error($"Could not find entities of {typeof(T)} with an id of {id}"));
     }
 
-    protected async Task SaveChangesAsync()
+    protected async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     #endregion

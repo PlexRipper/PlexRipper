@@ -1,4 +1,3 @@
-﻿using EFCore.BulkExtensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
@@ -39,28 +38,75 @@ public class AddOrUpdatePlexServersCommandHandler : BaseHandler, IRequestHandler
         foreach (var plexServer in plexServers)
         {
             var plexServerDB =
-                await _dbContext.PlexServers.FirstOrDefaultAsync(x => x.MachineIdentifier == plexServer.MachineIdentifier, cancellationToken);
+                await _dbContext.PlexServers
+                    .Include(x => x.PlexServerConnections)
+                    .AsTracking()
+                    .FirstOrDefaultAsync(x => x.MachineIdentifier == plexServer.MachineIdentifier, cancellationToken);
 
             if (plexServerDB != null)
             {
                 // PlexServer already exists
                 Log.Debug($"Updating PlexServer with id: {plexServerDB.Id} in the database.");
                 plexServer.Id = plexServerDB.Id;
-                _dbContext.PlexServers.Update(plexServer);
+
+                _dbContext.Entry(plexServerDB).CurrentValues.SetValues(plexServer);
+
+                SyncPlexServerConnections(plexServer, plexServerDB);
             }
             else
             {
                 // Create plexServer
                 Log.Debug($"Adding PlexServer with name: {plexServer.Name} to the database.");
-                await _dbContext.PlexServers.AddAsync(plexServer, cancellationToken);
+                _dbContext.PlexServers.Add(plexServer);
+                foreach (var plexServerConnection in plexServer.PlexServerConnections)
+                {
+                    Log.Debug($"Creating connection {plexServerConnection.ToString()} from {plexServer.Name} in the database.");
+                    plexServerConnection.PlexServerId = plexServer.Id;
+                }
+
+                _dbContext.PlexServerConnections.AddRange(plexServer.PlexServerConnections);
             }
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        foreach (var plexServer in plexServers)
-            await _dbContext.BulkInsertOrUpdateOrDeleteAsync(plexServer.PlexServerConnections, cancellationToken: cancellationToken);
-
         return Result.Ok();
+    }
+
+    private void SyncPlexServerConnections(PlexServer plexServer, PlexServer plexServerDB)
+    {
+        // Create or Update PlexServerConnections
+        foreach (var plexServerConnection in plexServer.PlexServerConnections)
+        {
+            plexServerConnection.PlexServerId = plexServer.Id;
+
+            var connectionDb = plexServerDB.PlexServerConnections.Find(x => x.Address == plexServerConnection.Address);
+            if (connectionDb is null)
+            {
+                // Creating Connection
+                Log.Debug($"Creating connection {plexServerConnection.ToString()} from {plexServerDB.Name} in the database.");
+                _dbContext.PlexServerConnections.Add(plexServerConnection);
+            }
+            else
+            {
+                // Updating Connection
+                Log.Debug($"Updating connection {plexServerConnection.ToString()} from {plexServerDB.Name} in the database.");
+                plexServerConnection.Id = connectionDb.Id;
+                _dbContext.Entry(connectionDb).CurrentValues.SetValues(plexServerConnection);
+            }
+        }
+
+        // Delete connections that are not given
+        for (var i = plexServerDB.PlexServerConnections.Count - 1; i >= 0; i--)
+        {
+            var plexServerConnectionDB = plexServerDB.PlexServerConnections[i];
+            var connection = plexServer.PlexServerConnections.Find(x => x.Address == plexServerConnectionDB.Address);
+            if (connection is null)
+            {
+                Log.Debug($"Removing connection {plexServerConnectionDB.ToString()} from {plexServerDB.Name} in the database.");
+
+                _dbContext.Entry(plexServerConnectionDB).State = EntityState.Deleted;
+            }
+        }
     }
 }

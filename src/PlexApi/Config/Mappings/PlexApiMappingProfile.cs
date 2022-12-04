@@ -90,7 +90,6 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.OwnerId, opt => opt.MapFrom(x => x.OwnerId))
             .ForMember(dest => dest.PlexServerOwnerUsername, opt => opt.MapFrom(x => x.SourceTitle))
             .ForMember(dest => dest.PublicAddress, opt => opt.MapFrom(x => x.PublicAddress))
-            .ForMember(dest => dest.AccessToken, opt => opt.MapFrom(x => x.AccessToken))
 
             // Server flags
             .ForMember(dest => dest.Owned, opt => opt.MapFrom(x => x.Owned))

@@ -50,9 +50,15 @@ public sealed class PlexRipperDbContext : DbContext, ISetupAsync
 
     public DbSet<PlexRole> PlexRoles { get; set; }
 
+    #region PlexServers
+
     public DbSet<PlexServer> PlexServers { get; set; }
 
+    public DbSet<PlexServerConnection> PlexServerConnections { get; set; }
+
     public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
+
+    #endregion
 
     #endregion
 

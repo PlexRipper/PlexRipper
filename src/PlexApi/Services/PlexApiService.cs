@@ -125,7 +125,7 @@ public class PlexApiService : IPlexApiService
         var updatedPlexLibrary = plexLibraries.Value.Find(x => x.Key == plexLibrary.Key);
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
-        updatedPlexLibrary.SyncedAt = DateTime.Now;
+        updatedPlexLibrary.SyncedAt = DateTime.UtcNow;
 
         // Retrieve the media for this library
         var result = await _plexApi.GetMetadataForLibraryAsync(tokenResult.Value, serverUrl, plexLibrary.Key);
@@ -266,7 +266,7 @@ public class PlexApiService : IPlexApiService
             mapResult.IsEnabled = plexAccount.IsEnabled;
             mapResult.IsMain = plexAccount.IsMain;
             mapResult.IsValidated = true;
-            mapResult.ValidatedAt = DateTime.Now;
+            mapResult.ValidatedAt = DateTime.UtcNow;
             mapResult.VerificationCode = "";
 
             Log.Information($"Successfully retrieved the PlexAccount data for user {plexAccount.DisplayName} from the PlexApi");
@@ -297,7 +297,7 @@ public class PlexApiService : IPlexApiService
         if (plexAccount.AuthenticationToken != string.Empty)
         {
             // TODO Make the token refresh limit configurable
-            if ((plexAccount.ValidatedAt - DateTime.Now).TotalDays < 30)
+            if ((plexAccount.ValidatedAt - DateTime.UtcNow).TotalDays < 30)
             {
                 Log.Information("Plex AuthToken was still valid, using from local DB.");
                 return plexAccount.AuthenticationToken;

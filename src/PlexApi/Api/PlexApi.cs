@@ -90,7 +90,7 @@ public class PlexApi
         {
             StatusCode = statusCode,
             StatusMessage = statusMessage,
-            LastChecked = DateTime.Now.ToUniversalTime(),
+            LastChecked = DateTime.UtcNow,
             IsSuccessful = response.IsSuccess,
         });
     }

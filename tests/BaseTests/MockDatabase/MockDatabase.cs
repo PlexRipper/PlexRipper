@@ -148,11 +148,10 @@ public static class MockDatabase
 
         var plexAccountServer = plexServers.Select(x => new PlexAccountServer
         {
-            AuthTokenCreationDate = DateTime.Now,
+            AuthTokenCreationDate = DateTime.UtcNow,
             PlexServerId = x.Id,
             PlexAccountId = plexAccount.Id,
             AuthToken = "FAKE_AUTH_TOKEN",
-            Owned = true,
         });
 
         // Add account -> server relation

@@ -16,7 +16,7 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
             Hidden = false,
             Level = NotificationLevel.Information,
             Message = "Test Notification",
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
         };
 
         // Act
@@ -38,7 +38,7 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
             Hidden = false,
             Level = NotificationLevel.Information,
             Message = "Test Notification",
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
         };
 
         // Act

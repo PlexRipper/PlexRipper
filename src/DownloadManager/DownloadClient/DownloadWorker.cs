@@ -247,7 +247,7 @@ public class DownloadWorker
         {
             Message = message,
             LogLevel = logLevel,
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
             DownloadWorkerTaskId = DownloadWorkerTask.Id,
         });
     }

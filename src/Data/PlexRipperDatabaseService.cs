@@ -29,7 +29,7 @@ public class PlexRipperDatabaseService : IPlexRipperDatabaseService
             return Result.Fail($"Could not find Database at path: {_pathProvider.DatabasePath}").LogError();
 
         var dbBackupName = $"BackUp_{_pathProvider.DatabaseName.Replace(".db", "")}_" +
-                           $"{DateTime.Now.ToString("dd-MM-yyyy_hh-mm", CultureInfo.InvariantCulture)}.db";
+                           $"{DateTime.UtcNow.ToString("dd-MM-yyyy_hh-mm", CultureInfo.InvariantCulture)}.db";
         var dbBackUpPath = Path.Combine(_pathProvider.DatabaseBackupDirectory, dbBackupName);
 
         try

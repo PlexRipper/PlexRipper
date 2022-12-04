@@ -121,7 +121,7 @@ public static class DataFormat
     /// <returns></returns>
     public static long GetPriority()
     {
-        return Convert.ToInt64((DateTime.Now - DateTime.UnixEpoch).TotalSeconds);
+        return Convert.ToInt64((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds);
     }
 
     /// <summary>
@@ -132,7 +132,7 @@ public static class DataFormat
     {
         var list = new List<long>();
         for (var i = 0; i < count; i++)
-            list.Add(Convert.ToInt64((DateTime.Now - DateTime.UnixEpoch).TotalSeconds) + i);
+            list.Add(Convert.ToInt64((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds) + i);
 
         return list;
     }

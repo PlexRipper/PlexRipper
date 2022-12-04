@@ -55,14 +55,17 @@ public class PlexServerService : IPlexServerService
         var serverList = serversResult.Value;
         var serverAccessTokens = tokensResult.Value;
 
-        // Add initial entry for the plex servers
+        // Add PlexServers and their PlexServerConnections
         var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(serverList));
         if (updateResult.IsFailed)
             return updateResult;
 
-        // TODO Update plex
-        await _mediator.Send(new AddOrUpdatePlexAccountServersCommand(plexAccount, serverAccessTokens));
+        // Check if every server has a settings entry
         _serverSettingsModule.EnsureAllServersHaveASettingsEntry(serverList);
+
+        var plexAccountTokensResult = await _mediator.Send(new AddOrUpdatePlexAccountServersCommand(plexAccount, serverAccessTokens));
+        if (plexAccountTokensResult.IsFailed)
+            return plexAccountTokensResult;
 
         return await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccount.Id));
     }

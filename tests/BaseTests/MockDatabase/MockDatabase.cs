@@ -47,7 +47,7 @@ public static class MockDatabase
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
-        optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Information);
+        optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Warning);
         return new PlexRipperDbContext(optionsBuilder.Options, dbName);
     }
 

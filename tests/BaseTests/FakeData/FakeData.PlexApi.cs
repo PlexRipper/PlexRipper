@@ -1,4 +1,5 @@
 using Bogus;
+using PlexRipper.Application;
 
 namespace PlexRipper.BaseTests;
 
@@ -111,5 +112,43 @@ public static partial class FakeData
             .RuleFor(x => x.IPv6, _ => false)
             .RuleFor(x => x.PlexServer, _ => null)
             .RuleFor(x => x.PlexServerId, _ => 0);
+    }
+
+
+    public static List<PlexAccountServer> GetPlexAccountServer(
+        PlexAccount plexAccount,
+        List<PlexServer> plexServers,
+        [CanBeNull] Action<UnitTestDataConfig> options = null)
+    {
+        var config = UnitTestDataConfig.FromOptions(options);
+
+        var index = 0;
+        return new Faker<PlexAccountServer>()
+            .StrictMode(true)
+            .UseSeed(config.GetSeed())
+            .RuleFor(x => x.PlexAccountId, _ => plexAccount.Id)
+            .RuleFor(x => x.PlexAccount, _ => null)
+            .RuleFor(x => x.PlexServerId, _ => plexServers[index++].Id)
+            .RuleFor(x => x.PlexServer, _ => null)
+            .RuleFor(x => x.AuthToken, f => f.Random.Uuid().ToString())
+            .RuleFor(x => x.AuthTokenCreationDate, _ => DateTime.UtcNow)
+            .Generate(plexServers.Count);
+    }
+
+    public static List<ServerAccessTokenDTO> GetServerAccessTokenDTO(
+        PlexAccount plexAccount,
+        List<PlexServer> plexServers,
+        [CanBeNull] Action<UnitTestDataConfig> options = null)
+    {
+        var config = UnitTestDataConfig.FromOptions(options);
+
+        var index = 0;
+        return new Faker<ServerAccessTokenDTO>()
+            .StrictMode(true)
+            .UseSeed(config.GetSeed())
+            .RuleFor(x => x.PlexAccountId, _ => plexAccount.Id)
+            .RuleFor(x => x.MachineIdentifier, _ => plexServers[index++].MachineIdentifier)
+            .RuleFor(x => x.AccessToken, f => f.Random.Uuid().ToString())
+            .Generate(plexServers.Count);
     }
 }

@@ -107,6 +107,45 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
 
     #region Methods
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Error);
+            optionsBuilder.EnableDetailedErrors();
+            optionsBuilder
+                .UseSqlite(
+                    $"Data Source={DatabasePath}",
+                    b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+        }
+    }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        builder.Entity<PlexMovie>()
+            .Property(x => x.MediaData)
+            .HasJsonValueConversion();
+
+        builder.Entity<PlexTvShow>()
+            .Property(x => x.MediaData)
+            .HasJsonValueConversion();
+
+        builder.Entity<PlexTvShowSeason>()
+            .Property(x => x.MediaData)
+            .HasJsonValueConversion();
+
+        builder.Entity<PlexTvShowEpisode>()
+            .Property(x => x.MediaData)
+            .HasJsonValueConversion();
+
+        builder = PlexRipperDBContextSeed.SeedDatabase(builder);
+
+        base.OnModelCreating(builder);
+    }
+
     public Result Setup()
     {
         try
@@ -162,45 +201,6 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
             Result.Fail(new ExceptionalError(e)).LogFatal();
             throw;
         }
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Information);
-            optionsBuilder.EnableDetailedErrors();
-            optionsBuilder
-                .UseSqlite(
-                    $"Data Source={DatabasePath}",
-                    b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
-        }
-    }
-
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-        builder.Entity<PlexMovie>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
-
-        builder.Entity<PlexTvShow>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
-
-        builder.Entity<PlexTvShowSeason>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
-
-        builder.Entity<PlexTvShowEpisode>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
-
-        builder = PlexRipperDBContextSeed.SeedDatabase(builder);
-
-        base.OnModelCreating(builder);
     }
 
     private Result BackUpDatabase()

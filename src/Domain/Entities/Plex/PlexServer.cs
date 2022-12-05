@@ -198,11 +198,21 @@ public class PlexServer : BaseEntity
     /// <summary>
     /// Gets the server url based on the available connections, e.g: http://112.202.10.213:32400.
     /// </summary>
+    /// <param name="plexServerConnectionId">The optional <see cref="PlexServerConnections"/> to use</param>
     /// <returns>The connection url based on preference or on fallback.</returns>
-    public string GetServerUrl()
+    public string GetServerUrl(int plexServerConnectionId = 0)
     {
         if (!PlexServerConnections.Any())
             throw new Exception($"PlexServer with id {Id} and name {Name} has no connections available!");
+
+        if (plexServerConnectionId > 0)
+        {
+            var connection = PlexServerConnections.Find(x => x.Id == plexServerConnectionId);
+            if (connection is not null)
+                return connection.Url;
+
+            Log.Warning($"Could not find parameter {nameof(plexServerConnectionId)} with id {plexServerConnectionId} for server {Name}");
+        }
 
         if (PreferredConnectionId > 0)
         {

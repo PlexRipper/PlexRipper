@@ -36,6 +36,8 @@ public class PlexServerConnection : BaseEntity
 
     public int PlexServerId { get; set; }
 
+    public List<PlexServerStatus> PlexServerStatus { get; set; }
+
     #endregion
 
     #region Helpers

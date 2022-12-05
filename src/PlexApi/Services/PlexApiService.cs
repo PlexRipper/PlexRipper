@@ -180,22 +180,22 @@ public class PlexApiService : IPlexApiService
         return _mapper.Map<PlexMediaMetaData>(result);
     }
 
-    public async Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(int plexServerId, Action<PlexApiClientProgress> action = null)
+    public async Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(int plexServerConnectionId, Action<PlexApiClientProgress> action = null)
     {
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId));
-        if (plexServerResult.IsFailed)
-            return plexServerResult.ToResult();
+        var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId));
+        if (plexServerConnectionResult.IsFailed)
+            return plexServerConnectionResult.ToResult();
 
-        var tokenResult = await GetPlexServerTokenAsync(plexServerId);
+        var tokenResult = await GetPlexServerTokenAsync(plexServerConnectionResult.Value.PlexServerId);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var serverStatusResult = await _plexApi.GetServerStatusAsync(tokenResult.Value, plexServerResult.Value.GetServerUrl(), action);
+        var serverStatusResult = await _plexApi.GetServerStatusAsync(tokenResult.Value, plexServerConnectionResult.Value.Url, action);
         if (serverStatusResult.IsFailed)
             return serverStatusResult;
 
-        serverStatusResult.Value.PlexServer = plexServerResult.Value;
-        serverStatusResult.Value.PlexServerId = plexServerResult.Value.Id;
+        serverStatusResult.Value.PlexServerId = plexServerConnectionResult.Value.PlexServerId;
+        serverStatusResult.Value.PlexServerConnectionId = plexServerConnectionResult.Value.Id;
         return serverStatusResult;
     }
 

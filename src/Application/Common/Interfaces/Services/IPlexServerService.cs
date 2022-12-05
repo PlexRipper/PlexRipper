@@ -12,8 +12,6 @@ public interface IPlexServerService
 
     Task<Result<PlexServer>> GetServerAsync(int plexServerId);
 
-    Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(int plexServerId, int plexAccountId = 0, bool trimEntries = true);
-
     Task<Result> RemoveInaccessibleServers();
 
     /// <summary>
@@ -44,6 +42,18 @@ public interface IPlexServerService
     /// <returns><see cref="Result"/></returns>
     Task<Result> SyncPlexServer(int plexServerId, bool forceSync = false);
 
-    Task<Result<PlexServer>> InspectPlexServer(PlexServer plexServer, int plexAccountId = 0);
-    Task<Result<PlexServer>> InspectPlexServer(int plexServerId);
+    Task<Result<PlexServer>> InspectPlexServerConnections(int plexServerId);
+
+    /// <summary>
+    /// Check if the <see cref="PlexServer"/> is available and log the status.
+    /// </summary>
+    /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to get the latest status for.</param>
+    /// <param name="plexServerConnectionId"></param>
+    /// <param name="trimEntries">Delete entries which are older than a certain threshold.</param>
+    /// <returns>The latest <see cref="PlexServerStatus"/>.</returns>
+    ///
+    Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(
+        int plexServerConnectionId,
+        bool trimEntries = true,
+        Action<PlexApiClientProgress> progressAction = null);
 }

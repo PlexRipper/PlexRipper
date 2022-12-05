@@ -114,7 +114,8 @@ public class PlexApiMappingProfile : Profile
         CreateMap<ServerConnection, PlexServerConnection>(MemberList.Destination)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
-            .ForMember(dest => dest.PlexServerId, opt => opt.Ignore());
+            .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
+            .ForMember(dest => dest.PlexServerStatus, opt => opt.Ignore());
 
         CreateMap<ServerResource, ServerAccessTokenDTO>(MemberList.Destination)
             .ForMember(dest => dest.PlexAccountId, opt => opt.Ignore())

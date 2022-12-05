@@ -46,12 +46,12 @@ public class PlexServerController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerStatusDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> CheckStatus(int id, [FromQuery] int plexAccountId = 0)
+    public async Task<IActionResult> CheckStatus(int id)
     {
         if (id <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(await _plexServerService.CheckPlexServerStatusAsync(id, plexAccountId));
+        return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(await _plexServerService.CheckPlexServerStatusAsync(id));
     }
 
     // GET api/<PlexServerController>/5/inspect
@@ -64,7 +64,7 @@ public class PlexServerController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexServer, PlexServerDTO>(await _plexServerService.InspectPlexServer(id));
+        return ToActionResult<PlexServer, PlexServerDTO>(await _plexServerService.InspectPlexServerConnections(id));
     }
 
     // GET api/<PlexServerController>/5/sync

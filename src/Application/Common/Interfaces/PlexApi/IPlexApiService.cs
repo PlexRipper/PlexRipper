@@ -42,7 +42,7 @@ public interface IPlexApiService
 
     Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey);
 
-    Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(int plexServerId, Action<PlexApiClientProgress> action = null);
+    Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(int plexServerConnectionId = 0, Action<PlexApiClientProgress> action = null);
 
     Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
 

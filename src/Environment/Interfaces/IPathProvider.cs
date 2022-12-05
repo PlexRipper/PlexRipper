@@ -14,7 +14,13 @@ public interface IPathProvider
 
     string DatabasePath { get; }
 
+    string Database_SHM_Path { get; }
+
+    string Database_WAL_Path { get; }
+
     string LogsDirectory { get; }
 
     string RootDirectory { get; }
+
+    List<string> DatabaseFiles { get; }
 }

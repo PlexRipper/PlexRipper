@@ -11,17 +11,13 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class SettingsController : BaseController
 {
-    private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
-
     private readonly IUserSettings _userSettings;
 
     public SettingsController(
         IMapper mapper,
-        IPlexRipperDatabaseService plexRipperDatabaseService,
         IUserSettings userSettings,
         INotificationsService notificationsService) : base(mapper, notificationsService)
     {
-        _plexRipperDatabaseService = plexRipperDatabaseService;
         _userSettings = userSettings;
     }
 
@@ -48,14 +44,5 @@ public class SettingsController : BaseController
             return ToActionResult(updateResult.ToResult());
 
         return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok(_userSettings.GetSettingsModel()));
-    }
-
-    // GET api/<SettingsController>/ResetDb
-    [HttpGet("ResetDb")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> ResetDatabase()
-    {
-        return ToActionResult(await _plexRipperDatabaseService.ResetDatabase());
     }
 }

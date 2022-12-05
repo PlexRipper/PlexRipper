@@ -18,8 +18,6 @@ public class Boot : IBoot
 
     private readonly IFileMerger _fileMerger;
 
-    private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
-
     private readonly ISchedulerService _schedulerService;
 
     private readonly IDownloadSubscriptions _downloadSubscriptions;
@@ -36,7 +34,6 @@ public class Boot : IBoot
         IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
         IFileMerger fileMerger,
-        IPlexRipperDatabaseService plexRipperDatabaseService,
         ISchedulerService schedulerService,
         IDownloadSubscriptions downloadSubscriptions,
         IDownloadQueue downloadQueue,
@@ -45,7 +42,6 @@ public class Boot : IBoot
         _appLifetime = appLifetime;
         _configManager = configManager;
         _fileMerger = fileMerger;
-        _plexRipperDatabaseService = plexRipperDatabaseService;
         _schedulerService = schedulerService;
         _downloadSubscriptions = downloadSubscriptions;
         _downloadQueue = downloadQueue;
@@ -70,8 +66,6 @@ public class Boot : IBoot
         // First await the finishing off all these
         Log.SetupLogging();
         _configManager.Setup();
-        await _plexRipperDatabaseService.SetupAsync();
-
         _downloadSubscriptions.Setup();
         _downloadQueue.Setup();
         _downloadTracker.Setup();

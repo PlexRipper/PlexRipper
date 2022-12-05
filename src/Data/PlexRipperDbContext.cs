@@ -1,12 +1,14 @@
+using System.Globalization;
 using System.Reflection;
 using Environment;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
 
-public sealed class PlexRipperDbContext : DbContext, ISetupAsync
+public sealed class PlexRipperDbContext : DbContext, ISetup
 {
     private readonly IPathProvider _pathProvider;
 
@@ -96,8 +98,6 @@ public sealed class PlexRipperDbContext : DbContext, ISetupAsync
 
     public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName = "") : base(options)
     {
-        // This is to add tables when created in memory
-        // https://stackoverflow.com/a/60497822/8205497
         Database.OpenConnection();
         Database.EnsureCreated();
         DatabaseName = databaseName;
@@ -107,26 +107,28 @@ public sealed class PlexRipperDbContext : DbContext, ISetupAsync
 
     #region Methods
 
-    public async Task<Result> SetupAsync()
+    public Result Setup()
     {
         try
         {
+            Log.Information("Setting up the PlexRipper database");
+
             // Don't migrate when running in memory, this causes error:
             // "Relational-specific methods can only be used when the context is using a relational database provider."
             if (!Database.IsInMemory() && !EnvironmentExtensions.IsIntegrationTestMode())
             {
                 Log.Information("Attempting to migrate database");
-                await Database.MigrateAsync();
+                Database.Migrate();
             }
         }
         catch (SqliteException e)
         {
-            Log.Error("Failed to migrate the database.");
-            return Result.Fail(new ExceptionalError(e)).LogError();
+            Log.Error("Failed to migrate the database or the database is corrupted.", e);
+            ResetDatabase();
         }
 
         // Check if database exists and can be connected to.
-        var exist = await Database.CanConnectAsync();
+        var exist = Database.CanConnect();
         if (exist)
         {
             if (!EnvironmentExtensions.IsIntegrationTestMode())
@@ -142,11 +144,32 @@ public sealed class PlexRipperDbContext : DbContext, ISetupAsync
         return Result.Fail($"Could not create database {DatabaseName} in {ConfigDirectory}").LogError();
     }
 
+    public Result ResetDatabase()
+    {
+        try
+        {
+            Log.Information("Resetting PlexRipper database now");
+            Database.CloseConnection();
+            BackUpDatabase();
+            Database.EnsureDeleted();
+            Database.Migrate();
+            return Result.Ok();
+        }
+        catch (Exception e)
+        {
+            Log.Fatal("Failed to reset database!");
+            Log.Fatal("TO FIX THIS: DELETE DATABASE MANUALLY FROM THE CONFIG DIRECTORY");
+            Result.Fail(new ExceptionalError(e)).LogFatal();
+            throw;
+        }
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
         {
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Information);
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder
                 .UseSqlite(
@@ -178,6 +201,52 @@ public sealed class PlexRipperDbContext : DbContext, ISetupAsync
         builder = PlexRipperDBContextSeed.SeedDatabase(builder);
 
         base.OnModelCreating(builder);
+    }
+
+    private Result BackUpDatabase()
+    {
+        Log.Information("Attempting to back-up the PlexRipper database");
+        if (!File.Exists(_pathProvider.DatabasePath))
+            return Result.Fail($"Could not find Database at path: {_pathProvider.DatabasePath}").LogError();
+
+        var dateString = DateTime.UtcNow.ToString("yy-MM-dd_hh-mm", CultureInfo.InvariantCulture);
+        var dbBackUpPath = Path.Combine(_pathProvider.DatabaseBackupDirectory, dateString);
+
+        try
+        {
+            Directory.CreateDirectory(dbBackUpPath);
+
+            // Wait until the database is available.
+            StreamExtensions.WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
+
+            foreach (var databaseFilePath in _pathProvider.DatabaseFiles)
+            {
+                if (File.Exists(databaseFilePath))
+                {
+                    var destinationPath = Path.Combine(dbBackUpPath, Path.GetFileName(databaseFilePath));
+                    try
+                    {
+                        File.Copy(databaseFilePath, destinationPath);
+                        Log.Information($"Successfully copied \"{databaseFilePath}\" to back-up location\"{destinationPath}\"");
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error($"Failed to copy {databaseFilePath} to back-up location\"{destinationPath}\"");
+                        Log.Error(e);
+                    }
+
+                    continue;
+                }
+
+                Log.Warning($"Could not find: \"{databaseFilePath}\" to backup");
+            }
+
+            return Result.Ok();
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 
     #endregion Methods

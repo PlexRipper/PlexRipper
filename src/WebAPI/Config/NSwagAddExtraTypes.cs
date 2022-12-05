@@ -2,6 +2,7 @@
 using NSwag.Generation.Processors.Contexts;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;
+using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Config;
@@ -22,7 +23,7 @@ public class NSwagAddExtraTypes : IDocumentProcessor
         {
             typeof(DownloadTaskCreationProgress),
             typeof(LibraryProgress),
-            typeof(InspectServerProgress),
+            typeof(InspectServerProgressDTO),
             typeof(FileMergeProgress),
             typeof(NotificationDTO),
             typeof(SyncServerProgress),

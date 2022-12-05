@@ -36,10 +36,6 @@ public class WebApiMappingProfile : Profile
         // FileSystemModel -> FileSystemModelDTO
         CreateMap<FileSystemModel, FileSystemModelDTO>(MemberList.Destination).ReverseMap();
 
-        // Notification <-> NotificationUpdate
-        CreateMap<Notification, NotificationDTO>(MemberList.Destination)
-            .ReverseMap();
-
         PlexAccountMappings();
         PlexServerMappings();
         DownloadTaskMappings();
@@ -47,6 +43,7 @@ public class WebApiMappingProfile : Profile
         PlexMovieMappings();
         PlexTvShowMappings();
         SettingsMappings();
+        SignalRMappings();
     }
 
     private void PlexAccountMappings()
@@ -203,5 +200,15 @@ public class WebApiMappingProfile : Profile
         CreateMap<DownloadManagerSettings, IDownloadManagerSettings>().ReverseMap();
         CreateMap<LanguageSettings, ILanguageSettings>().ReverseMap();
         CreateMap<ServerSettings, IServerSettings>().ReverseMap();
+    }
+
+    private void SignalRMappings()
+    {
+        // InspectServerProgress -> InspectServerProgressDTO
+        CreateMap<InspectServerProgress, InspectServerProgressDTO>(MemberList.Destination);
+
+        // Notification <-> NotificationUpdate
+        CreateMap<Notification, NotificationDTO>(MemberList.Destination)
+            .ReverseMap();
     }
 }

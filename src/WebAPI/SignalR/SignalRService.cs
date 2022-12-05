@@ -119,7 +119,8 @@ public class SignalRService : ISignalRService
         }
 
         Log.Debug($"{nameof(InspectServerProgress)} => {progress}");
-        await _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progress);
+        var progressDTO = _mapper.Map<InspectServerProgressDTO>(progress);
+        await _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progressDTO);
     }
 
     /// <inheritdoc/>

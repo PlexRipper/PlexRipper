@@ -22,8 +22,6 @@ public class Boot : IBoot
 
     private readonly ISchedulerService _schedulerService;
 
-    private readonly IMigrationService _migrationService;
-
     private readonly IDownloadSubscriptions _downloadSubscriptions;
 
     private readonly IDownloadQueue _downloadQueue;
@@ -40,7 +38,6 @@ public class Boot : IBoot
         IFileMerger fileMerger,
         IPlexRipperDatabaseService plexRipperDatabaseService,
         ISchedulerService schedulerService,
-        IMigrationService migrationService,
         IDownloadSubscriptions downloadSubscriptions,
         IDownloadQueue downloadQueue,
         IDownloadTracker downloadTracker)
@@ -50,7 +47,6 @@ public class Boot : IBoot
         _fileMerger = fileMerger;
         _plexRipperDatabaseService = plexRipperDatabaseService;
         _schedulerService = schedulerService;
-        _migrationService = migrationService;
         _downloadSubscriptions = downloadSubscriptions;
         _downloadQueue = downloadQueue;
         _downloadTracker = downloadTracker;
@@ -75,7 +71,6 @@ public class Boot : IBoot
         Log.SetupLogging();
         _configManager.Setup();
         await _plexRipperDatabaseService.SetupAsync();
-        await _migrationService.SetupAsync();
 
         _downloadSubscriptions.Setup();
         _downloadQueue.Setup();

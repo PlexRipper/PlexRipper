@@ -37,6 +37,10 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		newConfig.plexLibraryTypes = [PlexMediaType.Movie, PlexMediaType.TvShow];
 	}
 
+	if (!hasConfigProperty(config, 'maxServerConnections')) {
+		newConfig.maxServerConnections = 3;
+	}
+
 	faker.seed(config.seed);
 
 	return newConfig as MockConfig;

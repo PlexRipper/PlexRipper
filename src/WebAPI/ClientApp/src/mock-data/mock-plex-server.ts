@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { checkConfig, incrementSeed } from './mock-base';
 import { MockConfig } from '@mock/interfaces';
-import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { PlexServerConnectionDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 
 export function generatePlexServers(config: Partial<MockConfig> = {}): PlexServerDTO[] {
 	const validConfig = checkConfig(config);
@@ -11,27 +11,35 @@ export function generatePlexServers(config: Partial<MockConfig> = {}): PlexServe
 	// @ts-ignore
 	for (let i = 0; i < validConfig.plexServerCount; i++) {
 		incrementSeed(i);
-		const scheme = 'http';
-		const host = faker.internet.ipv4();
-		const port = faker.internet.port();
-		const url = `${scheme}://${host}:${port}`;
-
+		const plexServerId = i + 1;
 		plexServers.push({
-			id: i + 1,
+			id: plexServerId,
+			device: '',
+			dnsRebindingProtection: faker.datatype.boolean(),
+			home: faker.datatype.boolean(),
+			httpsRequired: faker.datatype.boolean(),
+			lastSeenAt: faker.date.recent().toUTCString(),
+			natLoopbackSupported: faker.datatype.boolean(),
+			owned: faker.datatype.boolean(),
+			platform: '',
+			platformVersion: faker.system.semver(),
+			plexServerOwnerUsername: '',
+			preferredConnectionId: 0,
+			presence: faker.datatype.boolean(),
+			product: '',
+			productVersion: '',
+			provides: '',
+			publicAddress: faker.internet.ip(),
+			publicAddressMatches: faker.datatype.boolean(),
+			relay: faker.datatype.boolean(),
+			synced: faker.datatype.boolean(),
 			name: faker.company.name(),
-			scheme,
-			address: faker.internet.ipv4(),
-			port,
-			version: faker.system.semver(),
-			host,
-			localAddresses: faker.internet.ip(),
 			machineIdentifier: faker.datatype.uuid(),
 			createdAt: faker.date.past().toUTCString(),
-			updatedAt: faker.date.recent().toUTCString(),
 			downloadTasks: [],
 			status: generatePlexServerStatus(validConfig),
 			ownerId: faker.datatype.number(99999),
-			serverUrl: url,
+			plexServerConnections: generatePlexServerConnection(plexServerId, config),
 		});
 	}
 
@@ -49,4 +57,30 @@ export function generatePlexServerStatus(config: Partial<MockConfig> = {}): Plex
 		isSuccessful: true,
 		lastChecked: faker.date.recent().toUTCString(),
 	};
+}
+
+export function generatePlexServerConnection(plexServerId: number, config: Partial<MockConfig> = {}): PlexServerConnectionDTO[] {
+	const validConfig = checkConfig(config);
+
+	const plexServerConnections: PlexServerConnectionDTO[] = [];
+	const scheme = 'http';
+	const host = faker.internet.ipv4();
+	const port = faker.internet.port();
+
+	for (let i = 0; i < validConfig.maxServerConnections; i++) {
+		plexServerConnections.push({
+			id: 1 + i,
+			address: host,
+			url: `${scheme}://${host}:${port}`,
+			iPv6: false,
+			local: false,
+			relay: false,
+			plexServerId,
+			port,
+			protocol: scheme,
+			plexServerStatus: [generatePlexServerStatus(validConfig)],
+		});
+	}
+
+	return plexServerConnections;
 }

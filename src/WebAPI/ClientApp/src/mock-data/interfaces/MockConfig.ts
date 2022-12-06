@@ -12,4 +12,5 @@ export interface MockConfig {
 	tvShowDownloadTask: number;
 	seasonDownloadTask: number;
 	episodeDownloadTask: number;
+	maxServerConnections: number;
 }

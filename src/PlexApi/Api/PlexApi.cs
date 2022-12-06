@@ -112,14 +112,12 @@ public class PlexApi
     /// <returns></returns>
     public async Task<Result<List<ServerResource>>> GetServerAsync(string authToken)
     {
-        var request = new RestRequest(new Uri(_plexServerUrl))
-        {
-            RequestFormat = DataFormat.Xml,
-        };
+        var request = new RestRequest(new Uri(_plexServerUrl));
         request.AddToken(authToken);
+        request.AddPlexClientIdentifier();
 
-        var result = await _client.SendRequestAsync<Resources>(request);
-        return result.IsFailed ? result.ToResult() : Result.Ok(result.Value.Resource);
+        var result = await _client.SendRequestAsync<List<ServerResource>>(request);
+        return result.IsFailed ? result.ToResult() : Result.Ok(result.Value);
     }
 
     /// <summary>

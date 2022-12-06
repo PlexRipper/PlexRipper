@@ -109,9 +109,9 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.ServerFixApplyDNSFix, opt => opt.Ignore())
             .ForMember(dest => dest.DownloadTasks, opt => opt.Ignore())
             .ForMember(dest => dest.PreferredConnectionId, opt => opt.Ignore())
-            .ForMember(dest => dest.PlexServerConnections, opt => opt.MapFrom(x => x.Connections.Connection));
+            .ForMember(dest => dest.PlexServerConnections, opt => opt.MapFrom(x => x.Connections));
 
-        CreateMap<ServerConnection, PlexServerConnection>(MemberList.Destination)
+        CreateMap<ServerResourceConnection, PlexServerConnection>(MemberList.Destination)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
             .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())

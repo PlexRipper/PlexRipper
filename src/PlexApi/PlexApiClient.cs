@@ -36,7 +36,7 @@ public class PlexApiClient
 
     public async Task<Result<T>> SendRequestAsync<T>(RestRequest request, int retryCount = 2, Action<PlexApiClientProgress> action = null) where T : class
     {
-        Log.Debug($"Sending request to: {request.Resource}");
+        Log.Debug($"Sending request to: {_client.BuildUri(request)}");
 
         return await _client.SendRequestWithPolly<T>(request, retryCount);
     }

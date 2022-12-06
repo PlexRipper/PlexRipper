@@ -3,18 +3,27 @@
 		<!--	Server Data Tab Content	-->
 		<v-simple-table class="section-table">
 			<tbody>
+				<!-- Machine Identifier -->
 				<tr>
-					<td style="width: 25%">{{ $t('components.server-dialog.tabs.server-data.server-url') }}:</td>
-					<td>{{ plexServer.serverUrl }}</td>
-				</tr>
-				<tr>
-					<td>{{ $t('components.server-dialog.tabs.server-data.machine-id') }}:</td>
+					<td style="width: 25%">{{ $t('components.server-dialog.tabs.server-data.machine-id') }}:</td>
 					<td>{{ plexServer.machineIdentifier }}</td>
 				</tr>
+				<!-- Device -->
+				<tr>
+					<td>{{ $t('components.server-dialog.tabs.server-data.device') }}:</td>
+					<td>{{ plexServer.device }}</td>
+				</tr>
+				<!-- Platform and platform version -->
+				<tr>
+					<td>{{ $t('components.server-dialog.tabs.server-data.platform') }}:</td>
+					<td>{{ plexServer.platform }} ({{ plexServer.platformVersion }})</td>
+				</tr>
+				<!-- Product and version -->
 				<tr>
 					<td>{{ $t('components.server-dialog.tabs.server-data.plex-version') }}:</td>
-					<td>{{ plexServer.version }}</td>
+					<td>{{ plexServer.product }} ({{ plexServer.productVersion }})</td>
 				</tr>
+				<!-- Created On -->
 				<tr>
 					<td>{{ $t('components.server-dialog.tabs.server-data.created-on') }}:</td>
 					<td>
@@ -24,7 +33,7 @@
 				<tr>
 					<td>{{ $t('components.server-dialog.tabs.server-data.last-updated-on') }}:</td>
 					<td>
-						<date-time short-date :text="plexServer.updatedAt" />
+						<date-time short-date :text="plexServer.lastSeenAt" />
 					</td>
 				</tr>
 				<tr v-if="serverStatus">
@@ -58,9 +67,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import type { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { ServerService } from '@service';
 
-@Component<ServerDataTabContent>({
-	components: {},
-})
+@Component<ServerDataTabContent>({})
 export default class ServerDataTabContent extends Vue {
 	@Prop({ required: true, type: Object as () => PlexServerDTO })
 	readonly plexServer!: PlexServerDTO;

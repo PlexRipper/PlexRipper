@@ -104,6 +104,7 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		return this.getStateSliceProperty<T>(propertyName, true);
 	}
 
+	// TODO Figure out how to make conditional return type based on the types in IStoreState
 	protected getStateChanged<T>(propertyName: keyof IStoreState): Observable<T> {
 		return this.stateChanged.pipe(map((x) => x[propertyName] as unknown as T));
 	}

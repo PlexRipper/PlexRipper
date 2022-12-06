@@ -33,7 +33,7 @@ public class GetPlexServerConnectionByIdQueryHandler : BaseHandler, IRequestHand
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexServerConnection == null)
-            return ResultExtensions.EntityNotFound(nameof(PlexServer), request.Id);
+            return ResultExtensions.EntityNotFound(nameof(PlexServerConnection), request.Id);
 
         return Result.Ok(plexServerConnection);
     }

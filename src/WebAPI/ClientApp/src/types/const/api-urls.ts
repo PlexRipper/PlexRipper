@@ -9,6 +9,7 @@ export const BASE_API_URL = `${BASE_URL}/api`;
 // region Relative
 
 export const PLEX_SERVER_RELATIVE_PATH = '/PlexServer';
+export const PLEX_SERVER_CONNECTION_RELATIVE_PATH = '/PlexServerConnection';
 export const DOWNLOAD_RELATIVE_PATH = '/Download';
 export const FOLDER_PATH_RELATIVE_PATH = '/FolderPath';
 export const SETTINGS_RELATIVE_PATH = '/Settings';

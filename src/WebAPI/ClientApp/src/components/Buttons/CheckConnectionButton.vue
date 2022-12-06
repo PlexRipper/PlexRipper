@@ -24,11 +24,11 @@ export default Vue.extend({
 			...context.data,
 			props: {
 				...context.props,
-				block: true,
-				outlined: true,
-				textId: 'check-connection',
 				iconAlign: 'Right',
-				icon: 'mdi-eye',
+				iconOnly: true,
+				outlined: false,
+				icon: 'mdi-cloud-search-outline',
+				tooltipId: 'general.commands.check-connection',
 			} as Partial<IBaseButtonProps>,
 		});
 	},

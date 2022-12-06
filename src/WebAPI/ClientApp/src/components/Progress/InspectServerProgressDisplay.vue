@@ -55,7 +55,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
 import { SignalrService } from '@service';
-import { InspectServerProgress } from '@dto/mainApi';
+import { InspectServerProgressDTO } from '@dto/mainApi';
 
 @Component
 export default class InspectServerProgressDisplay extends Vue {
@@ -65,7 +65,7 @@ export default class InspectServerProgressDisplay extends Vue {
 	@Prop({ required: true, type: String })
 	readonly plexServerName!: string;
 
-	progress: InspectServerProgress | null = null;
+	progress: InspectServerProgressDTO | null = null;
 
 	mounted(): void {
 		useSubscription(

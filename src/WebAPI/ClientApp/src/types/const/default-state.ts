@@ -16,6 +16,7 @@ const defaultState: IStoreState = {
 	pageReady: false,
 	accounts: [],
 	servers: [],
+	serverConnections: [],
 	libraries: [],
 	mediaUrls: [],
 	notifications: [],

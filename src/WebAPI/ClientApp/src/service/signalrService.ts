@@ -11,7 +11,7 @@ import {
 	DownloadTaskCreationProgress,
 	DownloadTaskDTO,
 	FileMergeProgress,
-	InspectServerProgress,
+	InspectServerProgressDTO,
 	LibraryProgress,
 	NotificationDTO,
 	ServerDownloadProgressDTO,
@@ -100,7 +100,7 @@ export class SignalrService extends BaseService {
 			this.updateStore('libraryProgress', data);
 		});
 
-		this._progressHubConnection?.on('InspectServerProgress', (data: InspectServerProgress) =>
+		this._progressHubConnection?.on('InspectServerProgress', (data: InspectServerProgressDTO) =>
 			this.setInspectServerProgress(data),
 		);
 
@@ -176,7 +176,7 @@ export class SignalrService extends BaseService {
 		);
 	}
 
-	public getAllInspectServerProgress(): Observable<InspectServerProgress[]> {
+	public getAllInspectServerProgress(): Observable<InspectServerProgressDTO[]> {
 		return this.stateChanged.pipe(
 			map((x) => x?.inspectServerProgress ?? []),
 			distinctUntilChanged(isEqual),
@@ -228,7 +228,7 @@ export class SignalrService extends BaseService {
 		);
 	}
 
-	public getInspectServerProgress(plexServerId: number): Observable<InspectServerProgress | null> {
+	public getInspectServerProgress(plexServerId: number): Observable<InspectServerProgressDTO | null> {
 		return this.getAllInspectServerProgress().pipe(
 			map((x) => x?.find((x) => x.plexServerId === plexServerId) ?? null),
 			filter((progress) => !!progress),
@@ -264,7 +264,7 @@ export class SignalrService extends BaseService {
 	// endregion
 	// region SetUpdate
 
-	public setInspectServerProgress(data: InspectServerProgress): void {
+	public setInspectServerProgress(data: InspectServerProgressDTO): void {
 		this.updateStore('inspectServerProgress', data, 'plexServerId');
 	}
 

@@ -1,10 +1,9 @@
-import { firstValueFrom } from 'rxjs';
-import { subscribeSpyTo } from '@hirez_io/observer-spy';
 import { basePageSetup } from '../../fixtures/baseE2E';
-import { PLEX_ACCOUNT_API_URL, PLEX_ACCOUNT_RELATIVE_PATH, PLEX_SERVER_API_URL } from '../../../src/types/const/api-urls';
-import { MockConfig, generateResultDTO, generatePlexAccounts, generatePlexServers, generateSettings } from '@mock';
-import { GlobalService, SignalrService } from '@service';
+import { PLEX_ACCOUNT_API_URL, PLEX_SERVER_API_URL } from '@api-urls';
+import { generateResultDTO, MockConfig } from '@mock';
+import { SignalrService } from '@service';
 import { generatePlexAccountServerAndLibraries } from '@mock/mock-combination';
+import { PlexServerConnectionDTO } from '@dto/mainApi';
 
 describe('empty spec', () => {
 	beforeEach(() => {});
@@ -75,8 +74,8 @@ describe('empty spec', () => {
 					connectionSuccessful: true,
 					message: '',
 					statusCode: 200,
-					attemptingApplyDNSFix: false,
 					retryAttemptCount: 0,
+					plexServerConnection: {} as PlexServerConnectionDTO,
 					retryAttemptIndex: 0,
 					timeToNextRetry: 0,
 				});

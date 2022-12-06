@@ -228,7 +228,7 @@ public class PlexLibraryService : IPlexLibraryService
 
         Log.Debug($"Refreshing PlexLibraries for plexServer: {plexServer.Name}");
 
-        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServer, plexAccount);
+        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServer.Id);
         if (libraries.IsFailed)
             return libraries.ToResult();
 

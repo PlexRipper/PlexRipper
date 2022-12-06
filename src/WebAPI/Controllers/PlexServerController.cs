@@ -41,21 +41,8 @@ public class PlexServerController : BaseController
         return ToActionResult<PlexServer, PlexServerDTO>(await _plexServerService.GetServerAsync(id));
     }
 
-    // GET api/<PlexServerController>/5/check
-    [HttpGet("{id:int}/check")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerStatusDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> CheckStatus(int id)
-    {
-        if (id <= 0)
-            return BadRequestInvalidId();
-
-        return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(await _plexServerService.CheckPlexServerStatusAsync(id));
-    }
-
     // GET api/<PlexServerController>/5/inspect
-    [HttpGet("{id:int}/inspect")]
+    [HttpGet("inspect")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]

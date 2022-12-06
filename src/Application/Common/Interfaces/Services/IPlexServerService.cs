@@ -43,17 +43,4 @@ public interface IPlexServerService
     Task<Result> SyncPlexServer(int plexServerId, bool forceSync = false);
 
     Task<Result<PlexServer>> InspectPlexServerConnections(int plexServerId);
-
-    /// <summary>
-    /// Check if the <see cref="PlexServer"/> is available and log the status.
-    /// </summary>
-    /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to get the latest status for.</param>
-    /// <param name="plexServerConnectionId"></param>
-    /// <param name="trimEntries">Delete entries which are older than a certain threshold.</param>
-    /// <returns>The latest <see cref="PlexServerStatus"/>.</returns>
-    ///
-    Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(
-        int plexServerConnectionId,
-        bool trimEntries = true,
-        Action<PlexApiClientProgress> progressAction = null);
 }

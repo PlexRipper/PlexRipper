@@ -33,5 +33,8 @@ public class PlexServerConnectionDTO
     [JsonProperty("url", Required = Required.Always)]
     public string Url { get; set; }
 
+    [JsonProperty("plexServerStatus", Required = Required.Always)]
+    public List<PlexServerStatusDTO> PlexServerStatus { get; set; }
+
     #endregion
 }

@@ -322,38 +322,6 @@ public class PlexServerService : IPlexServerService
         return plexServerResult;
     }
 
-    /// <summary>
-    /// Check if the <see cref="PlexServer"/> is available and log the status.
-    /// </summary>
-    /// <param name="plexServerConnectionId"></param>
-    /// <param name="trimEntries">Delete entries which are older than a certain threshold.</param>
-    /// <param name="progressAction">Optional callback to report progress on checking the PlexServerStatus</param>
-    /// <returns>The latest <see cref="PlexServerStatus"/>.</returns>
-    public async Task<Result<PlexServerStatus>> CheckPlexServerStatusAsync(
-        int plexServerConnectionId,
-        bool trimEntries = true,
-        Action<PlexApiClientProgress> progressAction = null)
-    {
-        // Request status
-        var serverStatusResult = await _plexServiceApi.GetPlexServerStatusAsync(plexServerConnectionId, progressAction);
-        if (serverStatusResult.IsFailed)
-            return serverStatusResult;
-
-        // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
-        var result = await _mediator.Send(new CreatePlexServerStatusCommand(serverStatusResult.Value));
-        if (result.IsFailed)
-            return result.ToResult();
-
-        if (trimEntries)
-        {
-            // Ensure that there are not too many PlexServerStatuses stored.
-            var trimResult = await _mediator.Send(new TrimPlexServerStatusCommand(serverStatusResult.Value.PlexServerId));
-            if (trimResult.IsFailed)
-                return trimResult.ToResult();
-        }
-
-        return await _mediator.Send(new GetPlexServerStatusByIdQuery(result.Value));
-    }
 
     public Task<Result> RemoveInaccessibleServers()
     {

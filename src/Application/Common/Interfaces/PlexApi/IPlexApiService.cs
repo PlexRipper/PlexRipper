@@ -24,10 +24,9 @@ public interface IPlexApiService
     /// <summary>
     /// Retrieves all accessible <see cref="PlexLibrary"/> from this <see cref="PlexServer"/> by this AuthToken.
     /// </summary>
-    /// <param name="plexServer">The <see cref="PlexServer"/> to retrieve the libraries from </param>
-    /// <param name="plexAccount">The optional PlexAccount used to connect to the <see cref="PlexServer"/> </param>
+    /// <param name="plexServerId"></param>
     /// <returns>List of accessible <see cref="PlexLibrary"/>.</returns>
-    Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(PlexServer plexServer, PlexAccount plexAccount);
+    Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId);
 
     /// <summary>
     /// Fetches the PlexLibrary container with either Movies, Series, Music or Photos media depending on the type.

@@ -24,14 +24,27 @@ public static class RestSharpExtensions
     {
         try
         {
-            RestResponse<T> response;
+            RestResponse<T> response = null;
             var policyResult = await Policy
                 .HandleResult<RestResponse>(x => !x.IsSuccessful)
                 .WaitAndRetryAsync(retryCount, retryAttempt =>
                 {
                     var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                    Log.Warning(
-                        $"Request: {request.Resource} failed, waiting {timeToWait.TotalSeconds} seconds before retrying again ({retryAttempt} of {retryCount}).");
+                    var msg =
+                        $"Request: {request.Resource} failed, waiting {timeToWait.TotalSeconds} seconds before retrying again ({retryAttempt} of {retryCount}).";
+                    Log.Warning(msg);
+                    if (action is not null)
+                    {
+                        action(new PlexApiClientProgress
+                        {
+                            StatusCode = (int)response.StatusCode,
+                            Message = msg,
+                            RetryAttemptIndex = retryAttempt,
+                            RetryAttemptCount = retryCount,
+                            TimeToNextRetry = (int)timeToWait.TotalSeconds,
+                            Completed = false,
+                        });
+                    }
                     return timeToWait;
                 })
                 .ExecuteAndCaptureAsync(async () =>

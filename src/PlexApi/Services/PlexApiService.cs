@@ -117,7 +117,7 @@ public class PlexApiService : IPlexApiService
         var serverUrl = plexServerResult.Value.GetServerUrl();
 
         // Retrieve updated version of the PlexLibrary
-        var plexLibraries = await GetLibrarySectionsAsync(plexServerResult.Value, plexAccount);
+        var plexLibraries = await GetLibrarySectionsAsync(plexServerResult.Value.Id);
 
         if (plexLibraries.IsFailed)
             return plexLibraries.ToResult();
@@ -150,16 +150,20 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(PlexServer plexServer, PlexAccount plexAccount = null)
+    public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId)
     {
-        var tokenResult = await GetPlexServerTokenAsync(plexServer.Id, plexAccount?.Id ?? 0);
+        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId));
+        if (plexServerResult.IsFailed)
+            return plexServerResult.ToResult();
+
+        var tokenResult = await GetPlexServerTokenAsync(plexServerId);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var result = await _plexApi.GetLibrarySectionsAsync(tokenResult.Value, plexServer.GetServerUrl());
+        var result = await _plexApi.GetLibrarySectionsAsync(tokenResult.Value, plexServerResult.Value.GetServerUrl());
         if (result.IsFailed)
         {
-            Log.Warning($"Plex server: {plexServer.Name} returned no libraries");
+            Log.Warning($"Plex server: {plexServerResult.Value.Name} returned no libraries");
             return result.ToResult();
         }
 
@@ -190,7 +194,7 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var serverStatusResult = await _plexApi.GetServerStatusAsync(tokenResult.Value, plexServerConnectionResult.Value.Url, action);
+        var serverStatusResult = await _plexApi.GetServerStatusAsync(plexServerConnectionResult.Value.Url, tokenResult.Value, action);
         if (serverStatusResult.IsFailed)
             return serverStatusResult;
 

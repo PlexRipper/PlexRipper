@@ -38,7 +38,7 @@ public class PlexApiClient
     {
         Log.Debug($"Sending request to: {_client.BuildUri(request)}");
 
-        return await _client.SendRequestWithPolly<T>(request, retryCount);
+        return await _client.SendRequestWithPolly<T>(request, retryCount, action);
     }
 
     public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)

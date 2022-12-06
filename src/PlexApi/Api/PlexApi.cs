@@ -71,7 +71,7 @@ public class PlexApi
         request.AddToken(authToken);
 
         Log.Debug($"Requesting PlexServerStatus for {serverBaseUrl}");
-        var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 1, action);
+        var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 2, action);
 
         var statusCodeReason = response.GetStatusCodeReason();
         var statusCode = statusCodeReason?.StatusCode() ?? 0;

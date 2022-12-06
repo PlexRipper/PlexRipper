@@ -146,7 +146,7 @@
             "finish-setup": "Finish setup",
             "go-to-setup-page": "Go To Setup Page",
             "hide": "Hide",
-            "check-connection": "Inspect Connection",
+            "check-connection": "Check Connection",
             "next": "Next",
             "not-validated": "Not validated",
             "reset": "Reset",
@@ -157,12 +157,17 @@
             "unknown": "Unknown",
             "update": "Update",
             "validate": "Validate",
-            "validated": "Validated"
+            "validated": "Validated",
+            "missing-text": ""
         },
         "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
+        },
+        "tooltip": {
+            "local-connection": "Local Connection",
+            "public-connection": "Public Connection"
         }
     },
     "help": {

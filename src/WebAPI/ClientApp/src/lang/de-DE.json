@@ -157,12 +157,17 @@
             "unknown": "unbekannt",
             "update": "aktualisieren",
             "validate": "überprüfen",
-            "validated": "überprüft"
+            "validated": "überprüft",
+            "missing-text": ""
         },
         "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
+        },
+        "tooltip": {
+            "local-connection": "Lokale Verbindung",
+            "public-connection": "Öffentliche Verbindung"
         }
     },
     "help": {

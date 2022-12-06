@@ -59,6 +59,7 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		const x = this.getState()[propertyName.toString()];
 		if (!x) {
 			Log.error(`Failed to get IStoreProperty property name: ${propertyName}`, this.getState());
+			Log.error(`Are you sure "${propertyName}" belongs to the slice of service ${this.name}?`);
 			return;
 		}
 

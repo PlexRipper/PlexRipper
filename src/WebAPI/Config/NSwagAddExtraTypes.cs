@@ -21,6 +21,7 @@ public class NSwagAddExtraTypes : IDocumentProcessor
     {
         List<Type> types = new()
         {
+            typeof(MessageTypes),
             typeof(DownloadTaskCreationProgress),
             typeof(LibraryProgress),
             typeof(InspectServerProgressDTO),
@@ -29,6 +30,7 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             typeof(SyncServerProgress),
             typeof(DownloadProgressDTO),
             typeof(ServerDownloadProgressDTO),
+            typeof(ServerConnectionCheckStatusProgressDTO),
         };
 
         foreach (var type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))

@@ -623,6 +623,18 @@ export type ResultDTOOfDownloadTaskDTO = ResultDTO & {
 	value: DownloadTaskDTO;
 };
 
+export enum MessageTypes {
+	LibraryProgress = 'LibraryProgress',
+	DownloadTaskCreationProgress = 'DownloadTaskCreationProgress',
+	DownloadTaskUpdate = 'DownloadTaskUpdate',
+	ServerDownloadProgress = 'ServerDownloadProgress',
+	InspectServerProgress = 'InspectServerProgress',
+	ServerConnectionCheckStatusProgress = 'ServerConnectionCheckStatusProgress',
+	FileMergeProgress = 'FileMergeProgress',
+	SyncServerProgress = 'SyncServerProgress',
+	Notification = 'Notification',
+}
+
 export interface DownloadTaskCreationProgress {
 	/** @format decimal */
 	percentage: number;
@@ -695,4 +707,23 @@ export interface SyncServerProgress {
 	/** @format decimal */
 	percentage: number;
 	libraryProgresses: LibraryProgress[];
+}
+
+export interface ServerConnectionCheckStatusProgressDTO {
+	/** @format int32 */
+	plexServerId: number;
+	/** @format int32 */
+	plexServerConnectionId: number;
+	/** @format int32 */
+	retryAttemptIndex: number;
+	/** @format int32 */
+	retryAttemptCount: number;
+	/** @format int32 */
+	timeToNextRetry: number;
+	/** @format int32 */
+	statusCode: number;
+	connectionSuccessful: boolean;
+	completed: boolean;
+	message: string;
+	plexServerConnection: PlexServerConnectionDTO;
 }

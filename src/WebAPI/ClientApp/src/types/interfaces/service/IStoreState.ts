@@ -10,6 +10,7 @@ import {
 	PlexLibraryDTO,
 	PlexServerConnectionDTO,
 	PlexServerDTO,
+	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
 	SettingsModelDTO,
 	SyncServerProgress,
@@ -36,6 +37,7 @@ export default interface IStoreState extends SettingsModelDTO {
 	libraryProgress: LibraryProgress[];
 	fileMergeProgressList: FileMergeProgress[];
 	inspectServerProgress: InspectServerProgressDTO[];
+	serverConnectionCheckStatusProgress: ServerConnectionCheckStatusProgressDTO[];
 	syncServerProgress: SyncServerProgress[];
 	downloadTaskCreationProgress: DownloadTaskCreationProgress;
 }

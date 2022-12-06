@@ -42,7 +42,7 @@ public class SignalRService : ISignalRService
             return;
         }
 
-        Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(LibraryProgress), libraryProgress));
+        Task.Run(() => _progressHub.Clients.All.SendAsync(MessageTypes.LibraryProgress.ToString(), libraryProgress));
     }
 
     public void SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)
@@ -72,7 +72,7 @@ public class SignalRService : ISignalRService
             IsComplete = current >= total,
         };
 
-        await _progressHub.Clients.All.SendAsync(nameof(DownloadTaskCreationProgress), progress);
+        await _progressHub.Clients.All.SendAsync(MessageTypes.DownloadTaskCreationProgress.ToString(), progress);
     }
 
     /// <inheritdoc/>
@@ -85,7 +85,7 @@ public class SignalRService : ISignalRService
         }
 
         var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
-        Task.Run(() => _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", downloadTaskDTO));
+        Task.Run(() => _progressHub.Clients.All.SendAsync(MessageTypes.DownloadTaskUpdate.ToString(), downloadTaskDTO));
     }
 
     #region DownloadProgress
@@ -105,7 +105,7 @@ public class SignalRService : ISignalRService
             Downloads = downloadTasksDTO,
         };
 
-        await _progressHub.Clients.All.SendAsync("ServerDownloadProgress", update);
+        await _progressHub.Clients.All.SendAsync(MessageTypes.ServerDownloadProgress.ToString(), update);
     }
 
     #endregion
@@ -118,9 +118,22 @@ public class SignalRService : ISignalRService
             return;
         }
 
-        Log.Debug($"{nameof(InspectServerProgress)} => {progress}");
+        Log.Debug($"{MessageTypes.InspectServerProgress.ToString()} => {progress}");
         var progressDTO = _mapper.Map<InspectServerProgressDTO>(progress);
-        await _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progressDTO);
+        await _progressHub.Clients.All.SendAsync(MessageTypes.InspectServerProgress.ToString(), progressDTO);
+    }
+
+    public async Task SendServerConnectionCheckStatusProgress(ServerConnectionCheckStatusProgress progress)
+    {
+        if (_progressHub?.Clients?.All == null)
+        {
+            Log.Warning("No Clients connected to ProgressHub");
+            return;
+        }
+
+        Log.Debug($"Sending progress: {MessageTypes.ServerConnectionCheckStatusProgress.ToString()} => {progress}");
+        var progressDTO = _mapper.Map<ServerConnectionCheckStatusProgressDTO>(progress);
+        await _progressHub.Clients.All.SendAsync(MessageTypes.ServerConnectionCheckStatusProgress.ToString(), progressDTO);
     }
 
     /// <inheritdoc/>
@@ -132,7 +145,7 @@ public class SignalRService : ISignalRService
             return;
         }
 
-        Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(FileMergeProgress), fileMergeProgress));
+        Task.Run(() => _progressHub.Clients.All.SendAsync(MessageTypes.FileMergeProgress.ToString(), fileMergeProgress));
     }
 
     public void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress)
@@ -143,7 +156,7 @@ public class SignalRService : ISignalRService
             return;
         }
 
-        Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(SyncServerProgress), syncServerProgress));
+        Task.Run(() => _progressHub.Clients.All.SendAsync(MessageTypes.SyncServerProgress.ToString(), syncServerProgress));
     }
 
     #endregion
@@ -159,7 +172,7 @@ public class SignalRService : ISignalRService
         }
 
         var notificationUpdate = _mapper.Map<NotificationDTO>(notification);
-        await _notificationHub.Clients.All.SendAsync(nameof(Notification), notificationUpdate);
+        await _notificationHub.Clients.All.SendAsync(MessageTypes.Notification.ToString(), notificationUpdate);
     }
 
     #endregion

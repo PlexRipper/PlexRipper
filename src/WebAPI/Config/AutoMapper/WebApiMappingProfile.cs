@@ -207,6 +207,9 @@ public class WebApiMappingProfile : Profile
         // InspectServerProgress -> InspectServerProgressDTO
         CreateMap<InspectServerProgress, InspectServerProgressDTO>(MemberList.Destination);
 
+        // InspectServerProgress -> InspectServerProgressDTO
+        CreateMap<ServerConnectionCheckStatusProgress, ServerConnectionCheckStatusProgressDTO>(MemberList.Destination);
+
         // Notification <-> NotificationUpdate
         CreateMap<Notification, NotificationDTO>(MemberList.Destination)
             .ReverseMap();

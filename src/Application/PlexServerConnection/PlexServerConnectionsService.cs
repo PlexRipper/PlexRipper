@@ -54,7 +54,7 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
         }
 
         // Start with simple status request
-        var serverStatusResult = await CheckPlexServerConnectionStatusAsync(plexServerConnection.Id, false, Action);
+        var serverStatusResult = await CheckPlexServerConnectionStatusAsync(plexServerConnection.Id, false);
         if (serverStatusResult.IsSuccess && serverStatusResult.Value.IsSuccessful)
         {
             await SendServerProgress(new InspectServerProgress
@@ -85,11 +85,22 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
     /// <inheritdoc/>
     public async Task<Result<PlexServerStatus>> CheckPlexServerConnectionStatusAsync(
         int plexServerConnectionId,
-        bool trimEntries = true,
-        Action<PlexApiClientProgress> progressAction = null)
+        bool trimEntries = true)
     {
+        var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId));
+        if (plexServerConnectionResult.IsFailed)
+            return plexServerConnectionResult.ToResult();
+
+        // The call-back action from the httpClient
+        async void Action(PlexApiClientProgress progress)
+        {
+            var checkStatusProgress = _mapper.Map<ServerConnectionCheckStatusProgress>(progress);
+            checkStatusProgress.PlexServerConnection = plexServerConnectionResult.Value;
+            await _signalRService.SendServerConnectionCheckStatusProgress(checkStatusProgress);
+        }
+
         // Request status
-        var serverStatusResult = await _plexApiService.GetPlexServerStatusAsync(plexServerConnectionId, progressAction);
+        var serverStatusResult = await _plexApiService.GetPlexServerStatusAsync(plexServerConnectionId, Action);
         if (serverStatusResult.IsFailed)
             return serverStatusResult;
 

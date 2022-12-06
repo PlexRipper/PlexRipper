@@ -23,4 +23,6 @@ public interface ISignalRService
     void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress);
 
     Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks);
+
+    Task SendServerConnectionCheckStatusProgress(ServerConnectionCheckStatusProgress progress);
 }

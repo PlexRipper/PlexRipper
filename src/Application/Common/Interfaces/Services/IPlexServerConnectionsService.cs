@@ -10,12 +10,10 @@ public interface IPlexServerConnectionsService
     /// </summary>
     /// <param name="plexServerConnectionId">The <see cref="PlexServerConnection"/> to check for connectivity.</param>
     /// <param name="trimEntries">Delete entries which are older than a certain threshold.</param>
-    /// <param name="progressAction">Optional callback to report progress on checking the PlexServerStatus</param>
     /// <returns>The latest <see cref="PlexServerStatus"/>.</returns>
     Task<Result<PlexServerStatus>> CheckPlexServerConnectionStatusAsync(
         int plexServerConnectionId,
-        bool trimEntries = true,
-        Action<PlexApiClientProgress> progressAction = null);
+        bool trimEntries = true);
 
     Task<Result<PlexServerConnection>> GetPlexServerConnectionAsync(int plexServerConnectionId);
 

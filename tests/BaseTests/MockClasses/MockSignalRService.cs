@@ -33,4 +33,9 @@ public class MockSignalRService : ISignalRService
     {
         return Task.CompletedTask;
     }
+
+    public Task SendServerConnectionCheckStatusProgress(ServerConnectionCheckStatusProgress progress)
+    {
+        return Task.CompletedTask;
+    }
 }

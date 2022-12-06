@@ -46,7 +46,10 @@ public class PlexServerConnection : BaseEntity
     public Uri Uri => new($"{Protocol}://{Address}:{Port}", UriKind.Absolute);
 
     [NotMapped]
-    public string Url => Uri.ToString();
+    public string Url => Uri.ToString().TrimEnd('/');
+
+    [NotMapped]
+    public string Name => $"Connection: ({Url})";
 
     #endregion
 

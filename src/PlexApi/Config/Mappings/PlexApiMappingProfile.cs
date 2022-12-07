@@ -115,6 +115,9 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
             .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
+            .ForMember(dest => dest.IPv4, opt => opt.MapFrom(x => x.Address.IsIpAddress() && !x.IPv6))
+            // The port fix is when we don't want to use the port when Address is a domain name
+            .ForMember(dest => dest.PortFix, opt => opt.MapFrom(x => !x.Address.IsIpAddress() && !x.IPv6))
             .ForMember(dest => dest.PlexServerStatus, opt => opt.Ignore());
 
         CreateMap<ServerResource, ServerAccessTokenDTO>(MemberList.Destination)

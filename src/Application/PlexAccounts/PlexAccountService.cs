@@ -4,20 +4,16 @@ public class PlexAccountService : IPlexAccountService
 {
     private readonly IMediator _mediator;
 
-    private readonly IPlexServerService _plexServerService;
-
     private readonly IPlexApiService _plexApiService;
 
     private readonly ISchedulerService _schedulerService;
 
     public PlexAccountService(
         IMediator mediator,
-        IPlexServerService plexServerService,
         IPlexApiService plexApiService,
         ISchedulerService schedulerService)
     {
         _mediator = mediator;
-        _plexServerService = plexServerService;
         _plexApiService = plexApiService;
         _schedulerService = schedulerService;
     }
@@ -55,29 +51,13 @@ public class PlexAccountService : IPlexAccountService
     public virtual async Task<Result<List<PlexServer>>> SetupAccountAsync(int plexAccountId)
     {
         if (plexAccountId <= 0)
-            return Result.Fail($"plexAccount.id was {plexAccountId}").LogWarning();
+            return ResultExtensions.IsInvalidId(nameof(plexAccountId), plexAccountId).LogWarning();
 
-        Log.Debug("Setting up new PlexAccount");
+        Log.Information("Setting up new PlexAccount");
 
-        var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
-        if (plexAccountResult.IsFailed)
-            return plexAccountResult.ToResult();
+        await _schedulerService.QueueInspectPlexServersJobAsync(plexAccountId);
 
-        var plexAccount = plexAccountResult.Value;
-
-        // Retrieve and store servers
-        var plexServerList = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
-        if (plexServerList.IsFailed)
-            return plexServerList.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
-
-        // Retrieve libraries for the plexAccount
-        await _schedulerService.InspectPlexServersAsyncJob(plexAccount.Id);
-
-        var msg = !plexServerList.Value?.Any() ?? false
-            ? "Account was setup successfully, but did not have access to any servers!"
-            : "Account was setup successfully!";
-
-        return Result.Ok(plexServerList.Value).WithSuccess(msg).LogInformation();
+        return Result.Ok();
     }
 
     /// <inheritdoc/>
@@ -160,6 +140,9 @@ public class PlexAccountService : IPlexAccountService
         return Result.Ok(true);
     }
 
+
+    #region Authentication
+
     public string GeneratePlexAccountClientId()
     {
         return StringExtensions.RandomString(24, true, true);
@@ -179,6 +162,9 @@ public class PlexAccountService : IPlexAccountService
     {
         return _plexApiService.Check2FAPin(pinId, clientId);
     }
+
+    #endregion
+
 
     #region CRUD
 
@@ -241,10 +227,6 @@ public class PlexAccountService : IPlexAccountService
         if (createResult.IsFailed)
             return createResult.ToResult();
 
-        var setupAccountResult = await SetupAccountAsync(createResult.Value);
-        if (setupAccountResult.IsFailed)
-            return setupAccountResult.ToResult();
-
         return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
     }
 
@@ -265,7 +247,6 @@ public class PlexAccountService : IPlexAccountService
         // Re-validate if the credentials changed
         if (inspectServers || plexAccountDb.Value.Username != plexAccount.Username || plexAccountDb.Value.Password != plexAccount.Password)
         {
-            await SetupAccountAsync(plexAccountDb.Value.Id);
             return await GetPlexAccountAsync(plexAccountDb.Value.Id);
         }
 
@@ -283,7 +264,8 @@ public class PlexAccountService : IPlexAccountService
         if (deleteAccountResult.IsFailed)
             return deleteAccountResult;
 
-        return await _plexServerService.RemoveInaccessibleServers();
+        // TODO Decide what to do with PlexServers that cannot be accessed anymore
+        return await _mediator.Send(new RemoveInaccessibleServersCommand());
     }
 
     #endregion

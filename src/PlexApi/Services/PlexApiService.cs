@@ -47,7 +47,7 @@ public class PlexApiService : IPlexApiService
 
     public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary)
     {
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId));
+        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId, true));
         if (plexServerResult.IsFailed)
             return plexServerResult.ToResult();
 
@@ -88,7 +88,7 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc/>
     public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(PlexLibrary plexLibrary)
     {
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId));
+        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId, true));
         if (plexServerResult.IsFailed)
             return plexServerResult.ToResult();
 
@@ -106,7 +106,7 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc/>
     public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, PlexAccount plexAccount = null)
     {
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId));
+        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId, true));
         if (plexServerResult.IsFailed)
             return plexServerResult.ToResult();
 
@@ -152,7 +152,7 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc/>
     public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId)
     {
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId));
+        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
         if (plexServerResult.IsFailed)
             return plexServerResult.ToResult();
 

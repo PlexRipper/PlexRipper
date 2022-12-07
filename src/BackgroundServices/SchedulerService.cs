@@ -6,13 +6,39 @@ namespace BackgroundServices;
 
 public class SchedulerService : ISchedulerService
 {
+    #region Fields
+
     private readonly IScheduler _scheduler;
 
     private readonly JobKey _syncServerJobKey = new("SyncServer", "SyncGroup");
 
+    #endregion
+
+    #region Constructors
+
     public SchedulerService(IScheduler scheduler)
     {
         _scheduler = scheduler;
+    }
+
+    #endregion
+
+    #region Methods
+
+    #region Private
+
+    private JobKey GetInspectServerKey(int plexAccountId)
+    {
+        return new JobKey($"{nameof(PlexAccount)}_{plexAccountId}", "InspectPlexServersJobs");
+    }
+
+    private async Task<bool> IsJobRunning(JobKey key)
+    {
+        var jobs = await _scheduler.GetCurrentlyExecutingJobs();
+        if (!jobs.Any())
+            return false;
+
+        return jobs.FirstOrDefault(executionContext => Equals(executionContext.JobDetail.Key, key)) != null;
     }
 
     private async Task<Result> SetupSyncPlexServersJob()
@@ -33,10 +59,21 @@ public class SchedulerService : ISchedulerService
         return Result.Ok();
     }
 
-    public async Task InspectPlexServersAsyncJob(int plexAccountId)
+    #endregion
+
+    #region Public
+
+    public async Task QueueInspectPlexServersJobAsync(int plexAccountId)
     {
+        var key = GetInspectServerKey(plexAccountId);
+        if (await IsJobRunning(key))
+        {
+            Log.Warning($"A InspectPlexServerJob is already running for PlexAccount {plexAccountId}");
+            return;
+        }
+
         var job = JobBuilder.Create<InspectPlexServersJob>()
-            .WithIdentity($"{nameof(PlexAccount)}_{plexAccountId}", "InspectPlexServersJobs")
+            .WithIdentity(key)
             .UsingJobData("plexAccountId", plexAccountId)
             .Build();
 
@@ -77,4 +114,8 @@ public class SchedulerService : ISchedulerService
 
         return _scheduler.IsStarted ? Result.Ok() : Result.Fail("Could not shutdown Scheduler").LogError();
     }
+
+    #endregion
+
+    #endregion
 }

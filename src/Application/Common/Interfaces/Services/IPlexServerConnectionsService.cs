@@ -2,11 +2,10 @@ namespace PlexRipper.Application;
 
 public interface IPlexServerConnectionsService
 {
-    Task<Result<PlexServerStatus>> CheckPlexServerConnection(PlexServerConnection plexServerConnectionId);
-    Task<Result<PlexServerStatus>> CheckPlexServerConnection(int plexServerConnectionId);
+    Task<Result<PlexServerStatus>> CheckPlexServerConnectionStatusAsync(PlexServerConnection plexServerConnectionId, bool trimEntries = true);
 
     /// <summary>
-    /// Checks if the <see cref="PlexServerConnection"/> is available and log the status in the database.
+    /// Checks if the <see cref="PlexServerConnection"/> is connectable and log the status in the database.
     /// </summary>
     /// <param name="plexServerConnectionId">The <see cref="PlexServerConnection"/> to check for connectivity.</param>
     /// <param name="trimEntries">Delete entries which are older than a certain threshold.</param>
@@ -14,6 +13,14 @@ public interface IPlexServerConnectionsService
     Task<Result<PlexServerStatus>> CheckPlexServerConnectionStatusAsync(
         int plexServerConnectionId,
         bool trimEntries = true);
+
+    /// <summary>
+    /// Checks every <see cref="PlexServerConnection"/> in parallel of a <see cref="PlexServer"/> whether it connects or not
+    /// and then stores that <see cref="PlexServerStatus"/> in the database.
+    /// </summary>
+    /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to check the connections for.</param>
+    /// <returns></returns>
+    Task<Result<List<PlexServerStatus>>> CheckAllPlexServerConnectionsAsync(int plexServerId);
 
     Task<Result<PlexServerConnection>> GetPlexServerConnectionAsync(int plexServerConnectionId);
 

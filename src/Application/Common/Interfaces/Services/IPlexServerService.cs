@@ -3,16 +3,13 @@
 public interface IPlexServerService
 {
     /// <summary>
-    /// Retrieves the latest <see cref="PlexServer"/> data, and the corresponding <see cref="PlexLibrary"/>,
-    /// from the PlexAPI and stores it in the Database.
+    /// Retrieves the latest <see cref="PlexServer"/> data from the PlexAPI and stores it in the Database.
     /// </summary>
     /// <param name="plexAccount">The <see cref="PlexAccount"/> used to retrieve the accessible <see cref="PlexServer">PlexServers</see>.</param>
     /// <returns>Is successful.</returns>
-    Task<Result<List<PlexServer>>> RetrieveAccessiblePlexServersAsync(PlexAccount plexAccount);
+    Task<Result<List<PlexServer>>> RefreshAccessiblePlexServersAsync(PlexAccount plexAccount);
 
     Task<Result<PlexServer>> GetServerAsync(int plexServerId);
-
-    Task<Result> RemoveInaccessibleServers();
 
     /// <summary>
     /// Retrieves all <see cref="PlexServer"/>s from the Database with the included <see cref="PlexLibrary"/>.
@@ -42,5 +39,6 @@ public interface IPlexServerService
     /// <returns><see cref="Result"/></returns>
     Task<Result> SyncPlexServer(int plexServerId, bool forceSync = false);
 
-    Task<Result<PlexServer>> InspectPlexServerConnections(int plexServerId);
+    Task<Result<PlexServer>> RefreshAccessiblePlexServerAsync(int plexServerId);
+    Task<Result<PlexServer>> InspectPlexServer(int plexServerId);
 }

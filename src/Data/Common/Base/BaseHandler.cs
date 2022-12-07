@@ -1,6 +1,4 @@
-using Autofac.Util;
 using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Data.Common;
 
@@ -29,7 +27,7 @@ public abstract class BaseHandler : IDisposable
 
     #region Properties
 
-    protected IQueryable<PlexServer> PlexServerQueryable => _dbContext.PlexServers.Include(x => x.PlexServerConnections).AsQueryable();
+    protected IQueryable<PlexServer> PlexServerQueryable => _dbContext.PlexServers.AsQueryable();
 
     protected IQueryable<DownloadTask> DownloadTasksQueryable => _dbContext.DownloadTasks.AsQueryable();
 

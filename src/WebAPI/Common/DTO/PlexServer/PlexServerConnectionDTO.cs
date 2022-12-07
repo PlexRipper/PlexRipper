@@ -24,8 +24,14 @@ public class PlexServerConnectionDTO
     [JsonProperty("relay", Required = Required.Always)]
     public bool Relay { get; set; }
 
+    [JsonProperty("ipv4", Required = Required.Always)]
+    public bool IPv4 { get; set; }
+
     [JsonProperty("ipv6", Required = Required.Always)]
     public bool IPv6 { get; set; }
+
+    [JsonProperty("portFix", Required = Required.Always)]
+    public bool PortFix { get; set; }
 
     [JsonProperty("plexServerId", Required = Required.Always)]
     public int PlexServerId { get; set; }

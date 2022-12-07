@@ -48,7 +48,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 
 @Component
 export default class CheckServerStatusProgressDisplay extends Vue {

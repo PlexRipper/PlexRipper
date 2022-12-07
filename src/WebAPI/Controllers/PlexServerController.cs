@@ -42,7 +42,7 @@ public class PlexServerController : BaseController
     }
 
     // GET api/<PlexServerController>/5/inspect
-    [HttpGet("inspect")]
+    [HttpGet("{id:int}/inspect")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
@@ -51,7 +51,7 @@ public class PlexServerController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexServer, PlexServerDTO>(await _plexServerService.InspectPlexServerConnections(id));
+        return ToActionResult<PlexServer, PlexServerDTO>(await _plexServerService.InspectPlexServer(id));
     }
 
     // GET api/<PlexServerController>/5/sync

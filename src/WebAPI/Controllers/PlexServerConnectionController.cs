@@ -45,7 +45,7 @@ public class PlexServerConnectionController : BaseController
         return ToActionResult<PlexServerConnection, PlexServerConnectionDTO>(await _plexServerConnectionsService.GetPlexServerConnectionAsync(id));
     }
 
-    // GET api/<PlexServerConnectionController>/inspect/5
+    // GET api/<PlexServerConnectionController>/check/5
     [HttpGet("check/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerStatusDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]

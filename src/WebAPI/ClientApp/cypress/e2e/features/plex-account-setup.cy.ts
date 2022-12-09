@@ -1,22 +1,21 @@
-import { basePageSetup } from '../../fixtures/baseE2E';
+import { basePageSetup } from '@fixtures/baseE2E';
+import { cy, describe, it } from 'local-cypress';
 import { PLEX_ACCOUNT_API_URL, PLEX_SERVER_API_URL } from '@api-urls';
-import { generateResultDTO, MockConfig } from '@mock';
+import { generateResultDTO } from '@mock';
 import { SignalrService } from '@service';
 import { generatePlexAccountServerAndLibraries } from '@mock/mock-combination';
 import { PlexServerConnectionDTO } from '@dto/mainApi';
 
 describe('empty spec', () => {
-	beforeEach(() => {});
-
 	it('passes', () => {
-		const config: Partial<MockConfig> = {
+		const config = {
 			seed: 26398,
 			plexAccountCount: 2,
 			plexServerCount: 5,
 		};
 		basePageSetup(config);
 
-		const { servers, libraries, account } = generatePlexAccountServerAndLibraries(config);
+		const { servers, account } = generatePlexAccountServerAndLibraries(config);
 
 		cy.intercept('POST', PLEX_ACCOUNT_API_URL + '/validate', {
 			statusCode: 200,
@@ -83,6 +82,5 @@ describe('empty spec', () => {
 			SignalrService.logState();
 			SignalrService.logHistory();
 		});
-		expect(true).to.equal(true);
 	});
 });

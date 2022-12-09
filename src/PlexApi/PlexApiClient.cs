@@ -1,6 +1,9 @@
 using System.Net;
 using System.Text.Json;
+using AutoMapper;
+using FluentResultExtensions;
 using PlexRipper.Application;
+using PlexRipper.PlexApi.Common;
 using PlexRipper.PlexApi.Converters;
 using PlexRipper.PlexApi.Extensions;
 using Polly;
@@ -12,6 +15,7 @@ namespace PlexRipper.PlexApi;
 
 public class PlexApiClient
 {
+    private readonly IMapper _mapper;
     private readonly RestClient _client;
 
     public static JsonSerializerOptions SerializerOptions => new()
@@ -22,8 +26,9 @@ public class PlexApiClient
         Converters = { new LongToDateTime() },
     };
 
-    public PlexApiClient(HttpClient httpClient)
+    public PlexApiClient(IMapper mapper, HttpClient httpClient)
     {
+        _mapper = mapper;
         var options = new RestClientOptions()
         {
             MaxTimeout = 10000,
@@ -38,7 +43,8 @@ public class PlexApiClient
     {
         Log.Debug($"Sending request to: {_client.BuildUri(request)}");
 
-        return await _client.SendRequestWithPolly<T>(request, retryCount, action);
+        var response = await _client.SendRequestWithPolly<T>(request, retryCount, action);
+        return GenerateResponseResult(response, action);
     }
 
     public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)
@@ -84,8 +90,41 @@ public class PlexApiClient
         }
     }
 
-    private static Result ParsePlexErrors(Result result, RestResponse response)
+    private static Result<T> GenerateResponseResult<T>(RestResponse<T> response, Action<PlexApiClientProgress> action = null) where T : class
     {
+        var isSuccessful = response.IsSuccessful;
+
+        var statusCode = (int)response.StatusCode;
+        var statusDescription = isSuccessful ? response.StatusDescription : response.ErrorMessage;
+        var errorMessage = !isSuccessful ? response.Content : "";
+        if (statusCode == 0 && statusDescription.Contains("Timeout"))
+            statusCode = HttpCodes.Status504GatewayTimeout;
+
+        if (action is not null)
+        {
+            action(new PlexApiClientProgress
+            {
+                StatusCode = statusCode,
+                Message = isSuccessful ? "Request successful!" : errorMessage,
+                ConnectionSuccessful = isSuccessful,
+                Completed = true,
+            });
+        }
+
+        if (isSuccessful)
+            return Result.Ok(response.Data).AddStatusCode(statusCode, statusDescription).LogDebug();
+
+        return ParsePlexErrors(response);
+    }
+
+    private static Result ParsePlexErrors(RestResponse response)
+    {
+        var requestUrl = response.Request.Resource;
+        var statusCode = (int)response.StatusCode;
+        var errorMessage = response.ErrorMessage;
+
+        var result = Result.Fail($"Request to {requestUrl} failed with status code: {statusCode} - {errorMessage}")
+            .AddStatusCode(statusCode, errorMessage);
         try
         {
             if (!string.IsNullOrEmpty(response.ErrorMessage))
@@ -99,9 +138,9 @@ public class PlexApiClient
             var content = response.Content;
             if (!string.IsNullOrEmpty(content))
             {
-                var errorsResponse = JsonSerializer.Deserialize<PlexErrorsResponse>(content, SerializerOptions) ?? new PlexErrorsResponse();
+                var errorsResponse = JsonSerializer.Deserialize<PlexErrorsResponseDTO>(content, SerializerOptions) ?? new PlexErrorsResponseDTO();
                 if (errorsResponse.Errors.Any())
-                    result.WithErrors(errorsResponse.Errors);
+                    result.WithErrors(errorsResponse.ToResultErrors());
             }
         }
         catch (Exception)
@@ -109,6 +148,6 @@ public class PlexApiClient
             return result.WithError(new Error($"Failed to deserialize: {response}"));
         }
 
-        return result;
+        return result.LogError();
     }
 }

@@ -10,6 +10,8 @@ public class PlexErrorsResponse
 
 public class PlexError : Error
 {
+    public PlexError(string message) : base(message) { }
+
     [JsonProperty(Required = Required.Always)]
     public int Code { get; set; }
 

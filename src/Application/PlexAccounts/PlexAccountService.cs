@@ -143,7 +143,7 @@ public class PlexAccountService : IPlexAccountService
 
     #region Authentication
 
-    public string GeneratePlexAccountClientId()
+    private string GeneratePlexAccountClientId()
     {
         return StringExtensions.RandomString(24, true, true);
     }
@@ -223,6 +223,7 @@ public class PlexAccountService : IPlexAccountService
         }
 
         // Create PlexAccount
+        plexAccount.ClientId = GeneratePlexAccountClientId();
         var createResult = await _mediator.Send(new CreatePlexAccountCommand(plexAccount));
         if (createResult.IsFailed)
             return createResult.ToResult();

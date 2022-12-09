@@ -1,5 +1,5 @@
 <template>
-	<v-card hover outlined max-height="130" class="glass-background" @click="openDialog()">
+	<v-card hover outlined max-height="130" class="glass-background" data-cy="account-card" @click="openDialog()">
 		<v-card-title v-if="!isNew"
 			>{{ account ? account.displayName : $t('components.account-card.no-account-name') }}
 		</v-card-title>
@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import type { PlexAccountDTO } from '@dto/mainApi';
 
 @Component

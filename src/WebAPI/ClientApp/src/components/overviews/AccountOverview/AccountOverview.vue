@@ -3,7 +3,7 @@
 		<v-row justify="center">
 			<!-- Plex Accounts -->
 			<v-col v-for="(account, index) in accounts" :key="index" cols="4" md="6" style="min-width: 395px" xs="12">
-				<account-card :account="account" @open-dialog="openDialog(false, account)" @dialog-closed="dialog = false" />
+				<account-card :account="account" @open-dialog="openDialog(false, account)" />
 			</v-col>
 			<!-- Add new Account card -->
 			<v-col cols="4" md="6" style="min-width: 395px" xs="12">

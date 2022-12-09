@@ -1,7 +1,7 @@
 <template>
-	<v-dialog :max-width="isSettingUpAccount ? 1000 : 900" :value="showDialog" persistent>
+	<v-dialog id="account-dialog" :max-width="900" :value="showDialog" persistent>
 		<!-- The account pop-up -->
-		<v-card v-show="!isSettingUpAccount">
+		<v-card data-cy="account-dialog-form">
 			<v-card-title class="headline">
 				{{ getDisplayName }}
 			</v-card-title>
@@ -38,16 +38,15 @@
 				<!-- Save account -->
 				<SaveButton
 					:disabled="!isAllowedToSave"
-					:text-id="isNewAccount ? 'create' : 'update'"
-					:cy="`account-dialog-${isNewAccount ? 'create' : 'update'}-button`"
+					:text-id="isNewAccount ? 'save' : 'update'"
+					:cy="`account-dialog-${isNewAccount ? 'save' : 'update'}-button`"
 					:width="130"
 					class="mx-2"
 					@click="saveAccount"
 				/>
 			</v-card-actions>
 		</v-card>
-		<!--	The setup account progress -->
-		<account-setup-progress v-if="isSettingUpAccount" :account="changedPlexAccount" @hide="closeDialog(true)" />
+
 		<!--	Account Verification Code Dialog	-->
 		<account-verification-code-dialog
 			:dialog="verificationCodeDialogState"
@@ -72,7 +71,7 @@ import Log from 'consola';
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
 import { Error, PlexAccountDTO } from '@dto/mainApi';
-import { generateClientId, validateAccount } from '@api/accountApi';
+import { validateAccount } from '@api/accountApi';
 import { AccountService } from '@service';
 import AccountVerificationCodeDialog from '@overviews/AccountOverview/AccountVerificationCodeDialog.vue';
 import AccountForm from '@overviews/AccountOverview/AccountForm.vue';
@@ -96,8 +95,6 @@ export default class AccountDialog extends Vue {
 	 */
 	private changedPlexAccount: PlexAccountDTO = this.getDefaultAccount;
 
-	private isSettingUpAccount: boolean = false;
-
 	private validateLoading: boolean = false;
 	private isValidated: string = '';
 	private isValid: boolean = true;
@@ -109,10 +106,6 @@ export default class AccountDialog extends Vue {
 	private confirmationDialogState: Boolean = false;
 	private verificationCodeDialogState: Boolean = false;
 	private inputHasChanged: Boolean = false;
-
-	get isFormValid(): boolean {
-		return this.isValid && this.isValidated === 'OK';
-	}
 
 	get getDefaultAccount(): PlexAccountDTO {
 		return {
@@ -251,7 +244,7 @@ export default class AccountDialog extends Vue {
 				AccountService.createPlexAccount(this.changedPlexAccount).subscribe((account) => {
 					if (account) {
 						this.changedPlexAccount = account;
-						this.isSettingUpAccount = true;
+						this.closeDialog();
 					} else {
 						Log.error('Result was invalid when saving a created account', account);
 						this.saving = false;
@@ -263,9 +256,7 @@ export default class AccountDialog extends Vue {
 				AccountService.updatePlexAccount(this.changedPlexAccount, this.hasCredentialsChanged).subscribe((data) => {
 					if (data) {
 						this.changedPlexAccount = data;
-						if (this.hasCredentialsChanged) {
-							this.isSettingUpAccount = true;
-						} else {
+						if (!this.hasCredentialsChanged) {
 							this.closeDialog(true);
 						}
 					} else {
@@ -293,22 +284,11 @@ export default class AccountDialog extends Vue {
 			this.isValidated = this.changedPlexAccount.isValidated ? 'OK' : 'ERROR';
 		}
 
-		if (newAccount) {
-			// This is a new account, generate a clientId for it
-			useSubscription(
-				generateClientId().subscribe((value) => {
-					if (value.isSuccess) {
-						this.changedPlexAccount.clientId = value.value ?? '';
-					}
-				}),
-			);
-		}
 		this.showDialog = true;
 	}
 
 	closeDialog(refreshAccounts: boolean = false): void {
 		this.showDialog = false;
-		this.isSettingUpAccount = false;
 		this.confirmationDialogState = false;
 		this.saving = false;
 		this.verificationCodeDialogState = false;

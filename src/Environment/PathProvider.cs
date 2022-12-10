@@ -73,6 +73,8 @@ public class PathProvider : IPathProvider
         }
     }
 
+    public static string DatabaseConnectionString => $"Data Source={DatabasePath}";
+
     #region Interface Implementations
 
     string IPathProvider.RootDirectory => RootDirectory;

@@ -22,7 +22,6 @@ public static partial class StartupExtensions
         services.SetupControllers();
 
         services.SetupFrontEnd(env);
-        services.SetupQuartz();
 
         services.SetupSignalR();
 
@@ -93,16 +92,6 @@ public static partial class StartupExtensions
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
-    }
-
-    public static void SetupQuartz(this IServiceCollection services)
-    {
-        // Quartz setup
-        services.AddQuartzHostedService(options =>
-        {
-            // when shutting down we want jobs to complete gracefully
-            options.WaitForJobsToComplete = true;
-        });
     }
 
     public static void SetupSignalR(this IServiceCollection services)

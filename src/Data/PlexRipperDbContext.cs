@@ -115,8 +115,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
             optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Error);
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder
-                .UseSqlite(
-                    $"Data Source={DatabasePath}",
+                .UseSqlite(PathProvider.DatabaseConnectionString,
                     b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
         }
     }

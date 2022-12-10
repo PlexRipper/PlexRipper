@@ -2,8 +2,7 @@
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
-using BackgroundServices.DownloadManager.Jobs;
-using BackgroundServices.Jobs;
+using BackgroundServices.SyncServer;
 using Environment;
 using PlexRipper.Application;
 using PlexRipper.Domain.Autofac;
@@ -32,10 +31,11 @@ public class BackgroundServicesModule : Module
             { "quartz.jobStore.lockHandler.type", "Quartz.Impl.AdoJobStore.UpdateLockRowSemaphore, Quartz" },
             { "quartz.jobStore.dataSource", "default" },
             { "quartz.jobStore.tablePrefix", QuartzDatabaseConfig.Prefix },
-            { "quartz.jobStore.useProperties", "true" },
+
+            // { "quartz.jobStore.useProperties", "true" },
             { "quartz.jobStore.driverDelegateType", "Quartz.Impl.AdoJobStore.SQLiteDelegate, Quartz" },
             { "quartz.dataSource.default.provider", "SQLite-Microsoft" },
-            { "quartz.dataSource.default.connectionString", PathProvider.DatabaseConnectionString }
+            { "quartz.dataSource.default.connectionString", PathProvider.DatabaseConnectionString },
         };
 
         // Source: https://github.com/alphacloud/Autofac.Extras.Quartz/blob/develop/src/Samples/Shared/Bootstrap.cs
@@ -57,7 +57,6 @@ public class BackgroundServicesModule : Module
         });
 
         builder.RegisterModule(new QuartzAutofacJobsModule(typeof(SyncServerJob).Assembly));
-        builder.RegisterModule(new QuartzAutofacJobsModule(typeof(DownloadProgressJob).Assembly));
 
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
 

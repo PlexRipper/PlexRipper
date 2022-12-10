@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using PlexRipper.Application;
+using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Application.PlexAuthentication.Queries;
 
 namespace PlexRipper.PlexApi.Services;
@@ -210,9 +211,13 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc/>
-    public async Task<(Result<List<PlexServer>> servers, Result<List<ServerAccessTokenDTO>> tokens)> GetServersAsync(PlexAccount plexAccount)
+    public async Task<(Result<List<PlexServer>> servers, Result<List<ServerAccessTokenDTO>> tokens)> GetServersAsync(int plexAccountId)
     {
-        var plexAccountToken = await GetPlexApiTokenAsync(plexAccount);
+        var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
+        if (plexAccountResult.IsFailed)
+            return (plexAccountResult.ToResult(), plexAccountResult.ToResult());
+
+        var plexAccountToken = await GetPlexApiTokenAsync(plexAccountResult.Value);
         if (plexAccountToken.IsFailed)
             return (plexAccountToken.ToResult(), plexAccountToken.ToResult());
 
@@ -228,11 +233,11 @@ public class PlexApiService : IPlexApiService
 
         // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
         foreach (var plexServer in mapServersResult.Where(plexServer => plexServer.OwnerId == 0))
-            plexServer.OwnerId = plexAccount.PlexId;
+            plexServer.OwnerId = plexAccountResult.Value.PlexId;
 
         // Ensure every token has the PlexAccountId assigned
         foreach (var serverAccessTokenDto in mapAccessResult)
-            serverAccessTokenDto.PlexAccountId = plexAccount.Id;
+            serverAccessTokenDto.PlexAccountId = plexAccountId;
 
         return (Result.Ok(mapServersResult), Result.Ok(mapAccessResult));
     }

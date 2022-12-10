@@ -6,21 +6,21 @@ public class PlexAccountService : IPlexAccountService
 
     private readonly IPlexApiService _plexApiService;
 
-    private readonly ISchedulerService _schedulerService;
+    private readonly IInspectServerScheduler _inspectServerScheduler;
 
     public PlexAccountService(
         IMediator mediator,
         IPlexApiService plexApiService,
-        ISchedulerService schedulerService)
+        IInspectServerScheduler inspectServerScheduler)
     {
         _mediator = mediator;
         _plexApiService = plexApiService;
-        _schedulerService = schedulerService;
+        _inspectServerScheduler = inspectServerScheduler;
     }
 
     public virtual async Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount)
     {
-        if (plexAccount.Username == string.Empty || plexAccount.Password == string.Empty || plexAccount.ClientId == string.Empty)
+        if (plexAccount.Username == string.Empty || plexAccount.Password == string.Empty)
             return Result.Fail("Either the username or password were empty").LogWarning();
 
         var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount);
@@ -228,6 +228,8 @@ public class PlexAccountService : IPlexAccountService
         if (createResult.IsFailed)
             return createResult.ToResult();
 
+        await _inspectServerScheduler.QueueInspectPlexServerByPlexAccountIdJob(createResult.Value);
+
         return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
     }
 
@@ -247,9 +249,7 @@ public class PlexAccountService : IPlexAccountService
 
         // Re-validate if the credentials changed
         if (inspectServers || plexAccountDb.Value.Username != plexAccount.Username || plexAccountDb.Value.Password != plexAccount.Password)
-        {
             return await GetPlexAccountAsync(plexAccountDb.Value.Id);
-        }
 
         return plexAccountDb;
     }

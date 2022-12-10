@@ -3,11 +3,11 @@
 public interface IPlexServerService
 {
     /// <summary>
-    /// Retrieves the latest <see cref="PlexServer"/> data from the PlexAPI and stores it in the Database.
+    /// Retrieves the latest accessible <see cref="PlexServer">PlexServers</see> for this <see cref="PlexAccount"/> from the PlexAPI and stores it in the Database.
     /// </summary>
-    /// <param name="plexAccount">The <see cref="PlexAccount"/> used to retrieve the accessible <see cref="PlexServer">PlexServers</see>.</param>
+    /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to check.</param>
     /// <returns>Is successful.</returns>
-    Task<Result<List<PlexServer>>> RefreshAccessiblePlexServersAsync(PlexAccount plexAccount);
+    Task<Result<List<PlexServer>>> RefreshAccessiblePlexServersAsync(int plexAccountId);
 
     Task<Result<PlexServer>> GetServerAsync(int plexServerId);
 

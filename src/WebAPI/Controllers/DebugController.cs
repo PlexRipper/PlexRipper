@@ -10,14 +10,17 @@ namespace PlexRipper.WebAPI.Controllers;
 public class DebugController : BaseController
 {
     private readonly IDownloadProgressScheduler _downloadProgressScheduler;
+    private readonly IInspectServerScheduler _inspectServerScheduler;
 
     public DebugController(
         IDownloadProgressScheduler downloadProgressScheduler,
         IMapper mapper,
-        INotificationsService notificationsService) : base(mapper,
+        INotificationsService notificationsService,
+        IInspectServerScheduler inspectServerScheduler) : base(mapper,
         notificationsService)
     {
         _downloadProgressScheduler = downloadProgressScheduler;
+        _inspectServerScheduler = inspectServerScheduler;
     }
 
     // GET: api/<DebugController>/StartServerDownloadProgress
@@ -37,6 +40,27 @@ public class DebugController : BaseController
     public async Task<IActionResult> StopDownloadProgressJob([FromQuery] int plexServerId)
     {
         var result = await _downloadProgressScheduler.StopDownloadProgressJob(plexServerId);
+        return ToActionResult(result);
+    }
+
+    [HttpGet("InspectServerScheduler/{plexServerId:int}")]
+    public async Task<IActionResult> InspectServerSchedulerJob(int plexServerId)
+    {
+        var result = await _inspectServerScheduler.QueueInspectPlexServerJob(plexServerId);
+        return ToActionResult(result);
+    }
+
+    [HttpGet("RefreshAccessiblePlexServersJob/{plexAccountId:int}")]
+    public async Task<IActionResult> RefreshAccessiblePlexServersJob(int plexAccountId)
+    {
+        var result = await _inspectServerScheduler.QueueRefreshAccessiblePlexServersJob(plexAccountId);
+        return ToActionResult(result);
+    }
+
+    [HttpGet("QueueInspectPlexServerByPlexAccountIdJob/{plexAccountId:int}")]
+    public async Task<IActionResult> QueueInspectPlexServerByPlexAccountIdJob(int plexAccountId)
+    {
+        var result = await _inspectServerScheduler.QueueInspectPlexServerByPlexAccountIdJob(plexAccountId);
         return ToActionResult(result);
     }
 }

@@ -123,16 +123,15 @@ public class PlexApiClient
         var statusCode = (int)response.StatusCode;
         var errorMessage = response.ErrorMessage;
 
-        var result = Result.Fail($"Request to {requestUrl} failed with status code: {statusCode} - {errorMessage}")
-            .AddStatusCode(statusCode, errorMessage);
+        var result = Result.Fail($"Request to {requestUrl} failed with status code: {statusCode} - {errorMessage}");
         try
         {
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {
                 if (response.ErrorMessage.Contains("Timeout"))
                     result.Add408RequestTimeoutError(response.ErrorMessage);
-
-                return result;
+                else
+                    result.AddStatusCode(statusCode, errorMessage);
             }
 
             var content = response.Content;

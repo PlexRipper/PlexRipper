@@ -1,3 +1,4 @@
+import { cy } from 'local-cypress';
 import {
 	DOWNLOAD_API_URL,
 	FOLDER_PATH_API_URL,

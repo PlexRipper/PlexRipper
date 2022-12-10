@@ -1,3 +1,4 @@
+import { cy, describe, it } from 'local-cypress';
 import { generatePlexAccounts, generatePlexServers, generateResultDTO, generateSettings } from '@mock';
 import {
 	DOWNLOAD_API_URL,
@@ -69,6 +70,6 @@ describe('Ensure the page loads correctly', () => {
 
 		cy.visit('/');
 
-		expect(true).to.equal(true);
+		// TODO add assertion
 	});
 });

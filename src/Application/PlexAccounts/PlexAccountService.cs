@@ -47,41 +47,30 @@ public class PlexAccountService : IPlexAccountService
         return plexSignInResult;
     }
 
-    /// <inheritdoc/>
-    public virtual async Task<Result<List<PlexServer>>> SetupAccountAsync(int plexAccountId)
-    {
-        if (plexAccountId <= 0)
-            return ResultExtensions.IsInvalidId(nameof(plexAccountId), plexAccountId).LogWarning();
-
-        Log.Information("Setting up new PlexAccount");
-
-        await _schedulerService.QueueInspectPlexServersJobAsync(plexAccountId);
-
-        return Result.Ok();
-    }
 
     /// <inheritdoc/>
     public async Task<Result> RefreshPlexAccount(int plexAccountId = 0)
     {
-        if (plexAccountId == 0)
-        {
-            var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(onlyEnabled: true));
-            if (enabledAccounts.IsFailed)
-                return enabledAccounts.ToResult();
-
-            foreach (var plexAccount in enabledAccounts.Value)
-            {
-                var result = await SetupAccountAsync(plexAccount.Id);
-                if (result.IsFailed)
-                    return result.ToResult();
-            }
-        }
-        else
-        {
-            var result = await SetupAccountAsync(plexAccountId);
-            if (result.IsFailed)
-                return result.ToResult();
-        }
+        // TODO Need to define and fix what refreshing the account means
+        // if (plexAccountId == 0)
+        // {
+        //     var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(onlyEnabled: true));
+        //     if (enabledAccounts.IsFailed)
+        //         return enabledAccounts.ToResult();
+        //
+        //     foreach (var plexAccount in enabledAccounts.Value)
+        //     {
+        //         var result = await SetupAccountAsync(plexAccount.Id);
+        //         if (result.IsFailed)
+        //             return result.ToResult();
+        //     }
+        // }
+        // else
+        // {
+        //     var result = await SetupAccountAsync(plexAccountId);
+        //     if (result.IsFailed)
+        //         return result.ToResult();
+        // }
 
         return Result.Ok();
     }

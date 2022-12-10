@@ -29,7 +29,6 @@ public class PlexAccountService_CreatePlexAccountAsync_UnitTests
 
         _sut.Setup(x => x.CheckIfUsernameIsAvailableAsync(newAccount.Username)).ReturnsAsync(Result.Ok(true));
         _sut.Setup(x => x.ValidatePlexAccountAsync(newAccount)).ReturnsAsync(Result.Ok());
-        _sut.Setup(x => x.SetupAccountAsync(It.IsAny<int>())).ReturnsAsync(Result.Ok());
         _iMediator.Setup(m => m.Send(It.IsAny<CreatePlexAccountCommand>(), CancellationToken.None)).ReturnsAsync(Result.Ok(1));
         _iMediator.Setup(m => m.Send(It.IsAny<GetPlexAccountByIdQuery>(), CancellationToken.None)).ReturnsAsync(Result.Ok(new PlexAccount()));
 
@@ -94,7 +93,6 @@ public class PlexAccountService_CreatePlexAccountAsync_UnitTests
         _sut.Setup(x => x.CheckIfUsernameIsAvailableAsync(newAccount.Username)).ReturnsAsync(Result.Ok(true));
         _sut.Setup(x => x.ValidatePlexAccountAsync(newAccount)).ReturnsAsync(Result.Ok());
         _iMediator.Setup(m => m.Send(It.IsAny<CreatePlexAccountCommand>(), CancellationToken.None)).ReturnsAsync(Result.Ok(1));
-        _sut.Setup(x => x.SetupAccountAsync(It.IsAny<int>())).ReturnsAsync(Result.Fail("Error #1"));
 
         // Act
         var result = await _sut.Object.CreatePlexAccountAsync(newAccount);

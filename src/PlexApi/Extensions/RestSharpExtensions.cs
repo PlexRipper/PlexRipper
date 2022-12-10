@@ -45,7 +45,12 @@ public static class RestSharpExtensions
 
                 return timeToWait;
             })
-            .ExecuteAndCaptureAsync(async () => await restClient.ExecuteAsync<T>(request));
+            .ExecuteAndCaptureAsync(async () =>
+            {
+                // We store the response here so we have access to the last response in the WaitAndRetryAsync() above.
+                response = await restClient.ExecuteAsync<T>(request);
+                return response;
+            });
 
         return ToResponse<T>(policyResult);
     }

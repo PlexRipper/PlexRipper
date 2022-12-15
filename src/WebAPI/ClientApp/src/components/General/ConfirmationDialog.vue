@@ -1,12 +1,12 @@
 <template>
 	<v-dialog :value="dialog" width="500" persistent @click:outside="cancel">
 		<v-card>
-			<v-card-title class="headline i18n-formatting">{{ $t(getText.title) }}</v-card-title>
+			<v-card-title class="headline i18n-formatting">{{ getText.title }}</v-card-title>
 
 			<v-card-text class="i18n-formatting">
-				<p>{{ $t(getText.text) }}</p>
+				<p>{{ getText.text }}</p>
 				<p v-if="getText.warning" class="text-center">
-					<b>{{ $t(getText.warning) }}</b>
+					<b>{{ getText.warning }}</b>
 				</p>
 			</v-card-text>
 
@@ -25,7 +25,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import IText from '@interfaces/IText';
 
-@Component<ConfirmationDialog>({})
+@Component
 export default class ConfirmationDialog extends Vue {
 	/**
 	 * The Vue-i18n text id used for the confirmation window that pops-up.

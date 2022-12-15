@@ -44,7 +44,7 @@ public class PlexApiClient
         Log.Debug($"Sending request to: {_client.BuildUri(request)}");
 
         var response = await _client.SendRequestWithPolly<T>(request, retryCount, action);
-        return GenerateResponseResult(response, action);
+        return GenerateResponseResult(response);
     }
 
     public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)
@@ -90,26 +90,14 @@ public class PlexApiClient
         }
     }
 
-    private static Result<T> GenerateResponseResult<T>(RestResponse<T> response, Action<PlexApiClientProgress> action = null) where T : class
+    private static Result<T> GenerateResponseResult<T>(RestResponse<T> response) where T : class
     {
         var isSuccessful = response.IsSuccessful;
 
         var statusCode = (int)response.StatusCode;
         var statusDescription = isSuccessful ? response.StatusDescription : response.ErrorMessage;
-        var errorMessage = !isSuccessful ? response.Content : "";
         if (statusCode == 0 && statusDescription.Contains("Timeout"))
             statusCode = HttpCodes.Status504GatewayTimeout;
-
-        if (action is not null)
-        {
-            action(new PlexApiClientProgress
-            {
-                StatusCode = statusCode,
-                Message = isSuccessful ? "Request successful!" : errorMessage,
-                ConnectionSuccessful = isSuccessful,
-                Completed = true,
-            });
-        }
 
         if (isSuccessful)
             return Result.Ok(response.Data).AddStatusCode(statusCode, statusDescription).LogDebug();

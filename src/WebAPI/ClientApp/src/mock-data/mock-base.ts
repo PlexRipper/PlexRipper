@@ -41,6 +41,10 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		newConfig.maxServerConnections = 3;
 	}
 
+	if (!hasConfigProperty(config, 'connectionHasProgress')) {
+		newConfig.connectionHasProgress = false;
+	}
+
 	faker.seed(config.seed);
 
 	return newConfig as MockConfig;
@@ -50,7 +54,7 @@ export function setSeed(seed: number) {
 	faker.seed(seed);
 }
 
-export function incrementSeed(increment: number) {
+export function incrementSeed(increment: number = 1) {
 	if (increment === 0) {
 		return;
 	}
@@ -59,4 +63,8 @@ export function incrementSeed(increment: number) {
 
 function hasConfigProperty(config: Partial<MockConfig>, key: keyof MockConfig) {
 	return config.hasOwnProperty(key);
+}
+
+export function getId(): number {
+	return faker.datatype.number({ min: 1, max: 99999999999 });
 }

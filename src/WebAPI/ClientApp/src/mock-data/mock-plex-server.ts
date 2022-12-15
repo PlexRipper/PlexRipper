@@ -1,7 +1,12 @@
 import { faker } from '@faker-js/faker';
-import { checkConfig, incrementSeed } from './mock-base';
+import { checkConfig, getId, incrementSeed } from './mock-base';
 import { MockConfig } from '@mock/interfaces';
-import { PlexServerConnectionDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import {
+	PlexServerConnectionDTO,
+	PlexServerDTO,
+	PlexServerStatusDTO,
+	ServerConnectionCheckStatusProgressDTO,
+} from '@dto/mainApi';
 
 export function generatePlexServers(config: Partial<MockConfig> = {}): PlexServerDTO[] {
 	const validConfig = checkConfig(config);
@@ -10,8 +15,8 @@ export function generatePlexServers(config: Partial<MockConfig> = {}): PlexServe
 
 	// @ts-ignore
 	for (let i = 0; i < validConfig.plexServerCount; i++) {
-		incrementSeed(i);
-		const plexServerId = i + 1;
+		incrementSeed();
+		const plexServerId = getId();
 		plexServers.push({
 			id: plexServerId,
 			device: '',
@@ -68,8 +73,11 @@ export function generatePlexServerConnection(plexServerId: number, config: Parti
 	const port = faker.internet.port();
 
 	for (let i = 0; i < validConfig.maxServerConnections; i++) {
+		incrementSeed();
+		const connectionId = getId();
+
 		plexServerConnections.push({
-			id: 1 + i,
+			id: connectionId,
 			address: host,
 			url: `${scheme}://${host}:${port}`,
 			iPv6: false,
@@ -79,8 +87,34 @@ export function generatePlexServerConnection(plexServerId: number, config: Parti
 			port,
 			protocol: scheme,
 			plexServerStatus: [generatePlexServerStatus(validConfig)],
+			iPv4: true,
+			portFix: false,
+			progress: validConfig.connectionHasProgress
+				? generateServerConnectionCheckStatusProgress(plexServerId, connectionId, config)
+				: null,
 		});
 	}
 
 	return plexServerConnections;
+}
+
+export function generateServerConnectionCheckStatusProgress(
+	plexServerId: number,
+	plexServerConnectionId: number,
+	config: Partial<MockConfig> = {},
+): ServerConnectionCheckStatusProgressDTO {
+	incrementSeed();
+
+	const completed = faker.datatype.boolean();
+	return {
+		plexServerId,
+		plexServerConnectionId,
+		completed,
+		connectionSuccessful: faker.datatype.boolean(),
+		message: completed ? 'Completed' : 'Running',
+		retryAttemptCount: 0,
+		retryAttemptIndex: 0,
+		statusCode: completed ? 200 : 408,
+		timeToNextRetry: 0,
+	};
 }

@@ -63,6 +63,7 @@ public static class RestSharpExtensions
                 RetryAttemptIndex = retryIndex,
                 RetryAttemptCount = retryCount,
                 TimeToNextRetry = 0,
+                ConnectionSuccessful = response.IsSuccessful,
                 Completed = true,
             });
         }

@@ -28,7 +28,13 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
             .WithIdentity(key)
             .Build();
 
-        await ScheduleJob(job, StartNowTrigger);
+        var trigger = TriggerBuilder.Create()
+            .WithIdentity($"{key.Name}_trigger", key.Group)
+            .ForJob(job)
+            .StartNow()
+            .Build();
+
+        await ScheduleJob(job, trigger);
 
         return Result.Ok();
     }
@@ -47,7 +53,13 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
             .WithIdentity(key)
             .Build();
 
-        await ScheduleJob(job, StartNowTrigger);
+        var trigger = TriggerBuilder.Create()
+            .WithIdentity($"{key.Name}_trigger", key.Group)
+            .ForJob(job)
+            .StartNow()
+            .Build();
+
+        await ScheduleJob(job, trigger);
 
         return Result.Ok();
     }
@@ -66,7 +78,13 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
             .WithIdentity(key)
             .Build();
 
-        await ScheduleJob(job, StartNowTrigger);
+        var trigger = TriggerBuilder.Create()
+            .WithIdentity($"{key.Name}_trigger", key.Group)
+            .ForJob(job)
+            .StartNow()
+            .Build();
+
+        await ScheduleJob(job, trigger);
 
         return Result.Ok();
     }

@@ -328,8 +328,12 @@ public class PlexServerService : IPlexServerService
     /// <inheritdoc/>
     public async Task<Result<List<PlexServer>>> GetAllPlexServersAsync(bool includeLibraries = false)
     {
-        // Retrieve all servers
         return await _mediator.Send(new GetAllPlexServersQuery(true, includeLibraries));
+    }
+
+    public async Task<Result> SetPreferredConnection(int plexServerId, int plexServerConnectionId)
+    {
+        return await _mediator.Send(new SetPreferredPlexServerConnectionCommand(plexServerId, plexServerConnectionId));
     }
 
     #endregion

@@ -55,9 +55,9 @@ public abstract class BaseController : ControllerBase
     }
 
     [NonAction]
-    protected IActionResult BadRequestInvalidId()
+    protected IActionResult BadRequestInvalidId(string parameterName = "Id")
     {
-        return BadRequest(Result.Fail("The Id was 0 or lower"));
+        return BadRequest(Result.Fail($"The {parameterName} was 0 or lower"));
     }
 
     [NonAction]

@@ -1,5 +1,10 @@
 <template>
-	<v-radio-group v-model="value" dense class="mt-0 pt-0">
+	<v-radio-group
+		:value="plexServer.preferredConnectionId"
+		dense
+		class="mt-0 pt-0"
+		@change="setPreferredPlexServerConnection($event)"
+	>
 		<v-simple-table class="section-table">
 			<thead>
 				<tr>
@@ -59,9 +64,9 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
 import type { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { ServerConnectionService, SignalrService } from '@service';
+import { ServerConnectionService, ServerService, SignalrService } from '@service';
 
-@Component<ServerConnectionsTabContent>({})
+@Component
 export default class ServerConnectionsTabContent extends Vue {
 	@Prop({ required: true, type: Object as () => PlexServerDTO })
 	readonly plexServer!: PlexServerDTO;
@@ -70,7 +75,7 @@ export default class ServerConnectionsTabContent extends Vue {
 	readonly isVisible!: boolean;
 
 	serverConnections: PlexServerConnectionDTO[] = [];
-	value: any = '';
+
 	loading: number[] = [];
 	progress: ServerConnectionCheckStatusProgressDTO[] = [];
 
@@ -102,6 +107,10 @@ export default class ServerConnectionsTabContent extends Vue {
 				this.loading = this.loading.filter((x) => x !== plexServerConnectionId);
 			}),
 		);
+	}
+
+	setPreferredPlexServerConnection(value) {
+		useSubscription(ServerService.setPreferredPlexServerConnection(this.plexServer.id, value).subscribe());
 	}
 
 	setup() {

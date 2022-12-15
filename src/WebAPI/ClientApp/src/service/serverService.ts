@@ -1,11 +1,13 @@
 import { Context } from '@nuxt/types';
 import { combineLatest, EMPTY, Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
+import Log from 'consola';
 import { PlexAccountDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
-import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
+import { checkPlexServer, getPlexServers, setPreferredPlexServerConnection } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import { AccountService, BaseService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
+import ResultDTO from '@dto/ResultDTO';
 
 export class ServerService extends BaseService {
 	// region Constructor and Setup
@@ -98,6 +100,26 @@ export class ServerService extends BaseService {
 					this.setState({ servers }, 'Update server status for ' + plexServerId);
 				}
 				return serverStatus?.value ?? null;
+			}),
+		);
+	}
+
+	public setPreferredPlexServerConnection(serverId: number, connectionId: number): Observable<ResultDTO> {
+		return setPreferredPlexServerConnection(serverId, connectionId).pipe(
+			tap((result) => {
+				if (result.isSuccess) {
+					const servers = this.getStoreSlice<PlexServerDTO[]>('servers');
+					const index = servers.findIndex((x) => x.id === serverId);
+					if (index === -1) {
+						Log.warn(`Could not find server with id ${serverId} to update the preferred plex server connection`);
+						return result;
+					}
+
+					const server = servers[index];
+					server.preferredConnectionId = connectionId;
+					servers.splice(index, 1, server);
+					this.setState({ servers }, 'Update preferred plex server connection id for ' + serverId);
+				}
 			}),
 		);
 	}

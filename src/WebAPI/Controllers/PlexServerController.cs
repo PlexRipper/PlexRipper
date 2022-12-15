@@ -12,8 +12,7 @@ public class PlexServerController : BaseController
 {
     private readonly IPlexServerService _plexServerService;
 
-    public PlexServerController(IPlexServerService plexServerService, IMapper mapper, INotificationsService notificationsService) : base(mapper,
-        notificationsService)
+    public PlexServerController(IPlexServerService plexServerService, IMapper mapper, INotificationsService notificationsService) : base(mapper, notificationsService)
     {
         _plexServerService = plexServerService;
     }
@@ -21,8 +20,6 @@ public class PlexServerController : BaseController
     // GET api/<PlexServerController>/
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerDTO>>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
     public async Task<IActionResult> GetAll()
     {
         return ToActionResult<List<PlexServer>, List<PlexServerDTO>>(await _plexServerService.GetAllPlexServersAsync(false));
@@ -55,12 +52,31 @@ public class PlexServerController : BaseController
     }
 
     // GET api/<PlexServerController>/5/sync
-    [HttpGet("{id:int}/sync")]
+    [HttpGet("{plexServerId:int}/sync")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> SyncServer(int id, [FromQuery] bool forceSync = false)
+    public async Task<IActionResult> SyncServer(int plexServerId, [FromQuery] bool forceSync = false)
     {
-        return ToActionResult(await _plexServerService.SyncPlexServer(id, forceSync));
+        if (plexServerId <= 0)
+            return BadRequestInvalidId(nameof(plexServerId));
+
+        return ToActionResult(await _plexServerService.SyncPlexServer(plexServerId, forceSync));
+    }
+
+    // PUT api/<PlexServerController>/5/sync
+    [HttpPut("{plexServerId:int}/preferred-connection/{plexServerConnectionId:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
+    public async Task<IActionResult> SetPreferredConnection(int plexServerId, int plexServerConnectionId)
+    {
+        if (plexServerId <= 0)
+            return BadRequestInvalidId(nameof(plexServerId));
+
+        if (plexServerConnectionId <= 0)
+            return BadRequestInvalidId(nameof(plexServerConnectionId));
+
+        return ToActionResult(await _plexServerService.SetPreferredConnection(plexServerId, plexServerConnectionId));
     }
 }

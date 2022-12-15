@@ -198,7 +198,7 @@ public class PlexServer : BaseEntity
     /// <summary>
     /// Gets the server url based on the available connections, e.g: http://112.202.10.213:32400.
     /// </summary>
-    /// <param name="plexServerConnectionId">The optional <see cref="PlexServerConnections"/> to use</param>
+    /// <param name="plexServerConnectionId">The optional <see cref="PlexServerConnections"/> to use.</param>
     /// <returns>The connection url based on preference or on fallback.</returns>
     public string GetServerUrl(int plexServerConnectionId = 0)
     {

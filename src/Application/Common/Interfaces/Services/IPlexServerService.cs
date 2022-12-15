@@ -40,5 +40,8 @@ public interface IPlexServerService
     Task<Result> SyncPlexServer(int plexServerId, bool forceSync = false);
 
     Task<Result<PlexServer>> RefreshAccessiblePlexServerAsync(int plexServerId);
+
     Task<Result<PlexServer>> InspectPlexServer(int plexServerId);
+
+    Task<Result> SetPreferredConnection(int plexServerId, int plexServerConnectionId);
 }

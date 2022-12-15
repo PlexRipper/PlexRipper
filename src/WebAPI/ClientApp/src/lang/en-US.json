@@ -109,6 +109,10 @@
                 "description": "Make sure that you have a Plex account registered in the settings and have selected an account with accessible plex servers in the top right account selector.",
                 "header": "There are no servers available!"
             }
+        },
+        "check-server-connections-progress": {
+            "checking": "Checking Plex servers connections",
+            "completed": "Completed inspection of {length} Plex servers!"
         }
     },
     "confirmation": {

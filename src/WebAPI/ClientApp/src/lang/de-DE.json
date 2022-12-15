@@ -109,6 +109,10 @@
                 "description": "Stellen Sie sicher, dass ihr Plex Konto registriert ist und das Sie einen Account ausgewählt haben, der verfügbare Server hat. Auswahl in der Kontoauswahl oben rechts.",
                 "header": "Keine Server verfügbar!"
             }
+        },
+        "check-server-connections-progress": {
+            "checking": "",
+            "completed": "Inspektion von {length} Plex-Servern abgeschlossen!"
         }
     },
     "confirmation": {

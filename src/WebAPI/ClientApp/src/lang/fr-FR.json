@@ -109,6 +109,10 @@
                 "description": "Vérifier que vous avez un compte Plex enregistré dans les paramètres et que ce compte a bien accès au serveur Plex en haut à droit dans le selecteur de compte.",
                 "header": "Il n'y a pas de serveur disponible!"
             }
+        },
+        "check-server-connections-progress": {
+            "checking": "",
+            "completed": "Inspection terminée de {length}  serveurs Plex!"
         }
     },
     "confirmation": {

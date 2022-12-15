@@ -3,7 +3,7 @@ import { Context } from '@nuxt/types';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { EMPTY, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import IAppConfig from '@class/IAppConfig';
@@ -107,7 +107,10 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 
 	// TODO Figure out how to make conditional return type based on the types in IStoreState
 	protected getStateChanged<T>(propertyName: keyof IStoreState): Observable<T> {
-		return this.stateChanged.pipe(map((x) => x[propertyName] as unknown as T));
+		return this.stateChanged.pipe(
+			filter((x) => !!x),
+			map((x) => x[propertyName] as unknown as T),
+		);
 	}
 
 	// endregion

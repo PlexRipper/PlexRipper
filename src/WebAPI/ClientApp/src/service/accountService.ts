@@ -1,4 +1,3 @@
-import Log from 'consola';
 import { Observable, of } from 'rxjs';
 import { map, mergeMap, switchMap, take, tap } from 'rxjs/operators';
 import { Context } from '@nuxt/types';
@@ -7,6 +6,7 @@ import { PlexAccountDTO } from '@dto/mainApi';
 import { BaseService, ServerService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
+import libraryService from '~/service/libraryService';
 
 export class AccountService extends BaseService {
 	// region Constructor and Setup
@@ -93,7 +93,11 @@ export class AccountService extends BaseService {
 	}
 
 	public deleteAccount(accountId: number) {
-		return deleteAccount(accountId).pipe(switchMap(() => this.refreshAccounts()));
+		return deleteAccount(accountId).pipe(
+			switchMap(() => this.refreshAccounts()),
+			switchMap(() => ServerService.refreshPlexServers()),
+			switchMap(() => libraryService.refreshLibraries()),
+		);
 	}
 }
 

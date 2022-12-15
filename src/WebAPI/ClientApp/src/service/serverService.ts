@@ -1,5 +1,5 @@
 import { Context } from '@nuxt/types';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, EMPTY, Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { PlexAccountDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers } from '@api/plexServerApi';
@@ -36,6 +36,9 @@ export class ServerService extends BaseService {
 		this.refreshPlexServers().subscribe();
 	}
 
+	/**
+	 * Forces a refresh of all the PlexServers currently in store by fetching it from the API.
+	 */
 	public refreshPlexServers(): Observable<PlexServerDTO[]> {
 		return getPlexServers().pipe(
 			tap((plexServers) => {
@@ -62,10 +65,13 @@ export class ServerService extends BaseService {
 	}
 
 	/**
-	 * Retrieves the accessible PlexServer for the given PlexAccount
+	 * Retrieves the accessible PlexServer for the given PlexAccount from the store
 	 * @param {Number} plexAccountId
 	 */
 	public getServersByPlexAccountId(plexAccountId: number): Observable<PlexServerDTO[]> {
+		if (plexAccountId === 0) {
+			return EMPTY;
+		}
 		return combineLatest([this.getStateChanged<PlexServerDTO[]>('servers'), AccountService.getAccount(plexAccountId)]).pipe(
 			map(([servers, account]: [PlexServerDTO[], PlexAccountDTO | null]) => {
 				if (!account) {

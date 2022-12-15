@@ -32,6 +32,7 @@ const defaultState: IStoreState = {
 	downloadTaskCreationProgress: {} as DownloadTaskCreationProgress,
 	serverDownloads: [],
 	serverConnectionCheckStatusProgress: [],
+	jobStatus: [],
 	// Settings Modules
 	dateTimeSettings: {} as DateTimeSettingsDTO,
 	downloadManagerSettings: {} as DownloadManagerSettingsDTO,

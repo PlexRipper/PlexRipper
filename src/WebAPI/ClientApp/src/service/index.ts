@@ -13,6 +13,7 @@ import SignalrService from './signalrService';
 import HelpService from './helpService';
 import AlertService from './alertService';
 import ServerConnectionService from './serverConnectionService';
+import BackgroundJobsService from './backgroundJobsService';
 
 export {
 	BaseService,
@@ -21,6 +22,7 @@ export {
 	DownloadService,
 	ServerService,
 	ServerConnectionService,
+	BackgroundJobsService,
 	MediaService,
 	SettingsService,
 	NotificationService,

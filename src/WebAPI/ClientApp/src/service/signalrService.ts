@@ -12,6 +12,7 @@ import {
 	DownloadTaskDTO,
 	FileMergeProgress,
 	InspectServerProgressDTO,
+	JobStatusUpdateDTO,
 	LibraryProgress,
 	MessageTypes,
 	NotificationDTO,
@@ -22,6 +23,7 @@ import {
 import notificationService from '~/service/notificationService';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import IAppConfig from '@class/IAppConfig';
+import backgroundJobsService from '~/service/backgroundJobsService';
 
 export class SignalrService extends BaseService {
 	private _progressHubConnection: HubConnection | null = null;
@@ -114,6 +116,10 @@ export class SignalrService extends BaseService {
 
 		this._progressHubConnection?.on(MessageTypes.SyncServerProgress, (data: SyncServerProgress) => {
 			this.updateStore('syncServerProgress', data);
+		});
+
+		this._progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data: JobStatusUpdateDTO) => {
+			backgroundJobsService.setStatusJobUpdate(data);
 		});
 
 		this._notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => {

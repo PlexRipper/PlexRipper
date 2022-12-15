@@ -8,7 +8,6 @@ export default defineConfig({
 			framework: 'nuxt',
 			bundler: 'webpack',
 		},
-		specPattern: 'src/tests/components/**/*.spec.cy.ts',
 	},
 
 	e2e: {

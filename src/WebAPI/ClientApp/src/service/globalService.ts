@@ -47,6 +47,7 @@ export class GlobalService extends BaseService {
 					Service.DownloadService.setup(nuxtContext),
 					Service.ServerService.setup(nuxtContext),
 					Service.ServerConnectionService.setup(nuxtContext),
+					Service.BackgroundJobsService.setup(nuxtContext),
 					Service.MediaService.setup(nuxtContext),
 					Service.SettingsService.setup(nuxtContext),
 					Service.NotificationService.setup(nuxtContext),

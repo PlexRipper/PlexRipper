@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -203,10 +204,6 @@ export type ResultDTOOfPlexAccountDTO = ResultDTO & {
 
 export type ResultDTOOfBoolean = ResultDTO & {
 	value: boolean;
-};
-
-export type ResultDTOOfString = ResultDTO & {
-	value: string;
 };
 
 export type ResultDTOOfAuthPin = ResultDTO & {
@@ -493,11 +490,14 @@ export interface PlexServerConnectionDTO {
 	port: number;
 	local: boolean;
 	relay: boolean;
+	iPv4: boolean;
 	iPv6: boolean;
+	portFix: boolean;
 	/** @format int32 */
 	plexServerId: number;
 	url: string;
 	plexServerStatus: PlexServerStatusDTO[];
+	progress: ServerConnectionCheckStatusProgressDTO | null;
 }
 
 export interface PlexServerStatusDTO {
@@ -511,6 +511,24 @@ export interface PlexServerStatusDTO {
 	lastChecked: string;
 	/** @format int32 */
 	plexServerId: number;
+}
+
+export interface ServerConnectionCheckStatusProgressDTO {
+	/** @format int32 */
+	plexServerId: number;
+	/** @format int32 */
+	plexServerConnectionId: number;
+	/** @format int32 */
+	retryAttemptIndex: number;
+	/** @format int32 */
+	retryAttemptCount: number;
+	/** @format int32 */
+	timeToNextRetry: number;
+	/** @format int32 */
+	statusCode: number;
+	connectionSuccessful: boolean;
+	completed: boolean;
+	message: string;
 }
 
 export interface RefreshPlexLibraryDTO {
@@ -633,6 +651,33 @@ export enum MessageTypes {
 	FileMergeProgress = 'FileMergeProgress',
 	SyncServerProgress = 'SyncServerProgress',
 	Notification = 'Notification',
+	JobStatusUpdate = 'JobStatusUpdate',
+}
+
+export enum JobTypes {
+	InspectPlexServerByPlexAccountIdJob = 'InspectPlexServerByPlexAccountIdJob',
+	InspectPlexServerJob = 'InspectPlexServerJob',
+}
+
+export enum JobStatus {
+	Started = 'Started',
+	Running = 'Running',
+	Completed = 'Completed',
+}
+
+export interface JobStatusUpdateDTO {
+	id: string;
+	jobName: string;
+	jobGroup: string;
+	jobType: JobTypes;
+	/** @format duration */
+	jobRuntime: string;
+	/** @format date-time */
+	jobStartTime: string;
+	status: JobStatus;
+	primaryKey: string;
+	/** @format int32 */
+	primaryKeyValue: number;
 }
 
 export interface DownloadTaskCreationProgress {
@@ -707,23 +752,4 @@ export interface SyncServerProgress {
 	/** @format decimal */
 	percentage: number;
 	libraryProgresses: LibraryProgress[];
-}
-
-export interface ServerConnectionCheckStatusProgressDTO {
-	/** @format int32 */
-	plexServerId: number;
-	/** @format int32 */
-	plexServerConnectionId: number;
-	/** @format int32 */
-	retryAttemptIndex: number;
-	/** @format int32 */
-	retryAttemptCount: number;
-	/** @format int32 */
-	timeToNextRetry: number;
-	/** @format int32 */
-	statusCode: number;
-	connectionSuccessful: boolean;
-	completed: boolean;
-	message: string;
-	plexServerConnection: PlexServerConnectionDTO;
 }

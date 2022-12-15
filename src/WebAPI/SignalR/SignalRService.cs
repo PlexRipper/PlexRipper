@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application;
+using PlexRipper.Application.BackgroundServices;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
@@ -171,8 +172,26 @@ public class SignalRService : ISignalRService
             return;
         }
 
-        var notificationUpdate = _mapper.Map<NotificationDTO>(notification);
-        await _notificationHub.Clients.All.SendAsync(MessageTypes.Notification.ToString(), notificationUpdate);
+        var notificationDto = _mapper.Map<NotificationDTO>(notification);
+        Log.Debug($"Sending notification: {MessageTypes.Notification.ToString()} => {notificationDto}");
+        await _notificationHub.Clients.All.SendAsync(MessageTypes.Notification.ToString(), notificationDto);
+    }
+
+    #endregion
+
+    #region JobStateNotification
+
+    public async Task SendJobStatusUpdate(JobStatusUpdate jobStatusUpdate)
+    {
+        if (_notificationHub?.Clients?.All == null)
+        {
+            Log.Warning("No Clients connected to NotificationHub");
+            return;
+        }
+
+        var jobStatusUpdateDto = _mapper.Map<JobStatusUpdateDTO>(jobStatusUpdate);
+        Log.Debug($"Sending update: {MessageTypes.JobStatusUpdate.ToString()} => {jobStatusUpdateDto}");
+        await _progressHub.Clients.All.SendAsync(MessageTypes.JobStatusUpdate.ToString(), jobStatusUpdateDto);
     }
 
     #endregion

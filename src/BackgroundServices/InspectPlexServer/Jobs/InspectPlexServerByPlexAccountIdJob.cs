@@ -3,6 +3,8 @@ using Quartz;
 
 namespace BackgroundServices.InspectPlexServer;
 
+[PersistJobDataAfterExecution]
+[DisallowConcurrentExecution]
 public class InspectPlexServerByPlexAccountIdJob : IJob
 {
     public static string PlexAccountIdParameter => "plexAccountId";
@@ -20,7 +22,8 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
         var dataMap = context.JobDetail.JobDataMap;
         var plexAccountId = dataMap.GetIntValue(PlexAccountIdParameter);
         Log.Debug($"Executing job: {nameof(InspectPlexServerByPlexAccountIdJob)} for {nameof(plexAccountId)}: {plexAccountId}");
-        await _plexServerService.InspectPlexServers(plexAccountId);
+
+        await _plexServerService.InspectPlexServers(plexAccountId, true);
     }
 
     public static JobKey GetJobKey(int id)

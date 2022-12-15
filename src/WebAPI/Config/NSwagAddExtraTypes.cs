@@ -1,7 +1,9 @@
 ﻿using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using PlexRipper.Application;
+using PlexRipper.Application.Enums;
 using PlexRipper.DownloadManager;
+using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
 
@@ -22,6 +24,9 @@ public class NSwagAddExtraTypes : IDocumentProcessor
         List<Type> types = new()
         {
             typeof(MessageTypes),
+            typeof(JobTypes),
+            typeof(JobStatus),
+            typeof(JobStatusUpdateDTO),
             typeof(DownloadTaskCreationProgress),
             typeof(LibraryProgress),
             typeof(InspectServerProgressDTO),

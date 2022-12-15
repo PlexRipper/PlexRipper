@@ -42,5 +42,11 @@ public class PlexServerConnectionDTO
     [JsonProperty("plexServerStatus", Required = Required.Always)]
     public List<PlexServerStatusDTO> PlexServerStatus { get; set; }
 
+    /// <summary>
+    /// Added as a progress container for the front-end
+    /// </summary>
+    [JsonProperty("progress", Required = Required.AllowNull)]
+    public ServerConnectionCheckStatusProgressDTO Progress { get; set; }
+
     #endregion
 }

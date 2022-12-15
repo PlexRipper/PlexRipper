@@ -1,4 +1,5 @@
 ﻿using PlexRipper.Application;
+using PlexRipper.Application.BackgroundServices;
 
 namespace PlexRipper.BaseTests;
 
@@ -35,6 +36,11 @@ public class MockSignalRService : ISignalRService
     }
 
     public Task SendServerConnectionCheckStatusProgress(ServerConnectionCheckStatusProgress progress)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task SendJobStatusUpdate(JobStatusUpdate jobStatusUpdate)
     {
         return Task.CompletedTask;
     }

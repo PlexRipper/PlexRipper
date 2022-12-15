@@ -30,7 +30,4 @@ public class ServerConnectionCheckStatusProgressDTO
 
     [JsonProperty("message", Required = Required.Always)]
     public string Message { get; set; }
-
-    [JsonProperty("plexServerConnection", Required = Required.Always)]
-    public PlexServerConnectionDTO PlexServerConnection { get; set; }
 }

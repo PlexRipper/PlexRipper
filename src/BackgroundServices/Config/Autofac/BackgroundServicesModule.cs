@@ -68,5 +68,11 @@ public class BackgroundServicesModule : Module
             .Where(t => t.Name.EndsWith("Scheduler"))
             .AsImplementedInterfaces()
             .SingleInstance();
+
+        // register all I*Scheduler
+        builder.RegisterAssemblyTypes(assembly)
+            .Where(t => t.Name.EndsWith("Listener"))
+            .AsImplementedInterfaces()
+            .SingleInstance();
     }
 }

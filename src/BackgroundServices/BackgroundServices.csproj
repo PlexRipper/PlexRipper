@@ -15,4 +15,9 @@
         <Compile Include="..\Domain\GlobalUsings.cs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Common\DTO" />
+      <Folder Include="Common\Enum" />
+    </ItemGroup>
+
 </Project>

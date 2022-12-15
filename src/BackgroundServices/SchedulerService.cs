@@ -1,5 +1,7 @@
-﻿using PlexRipper.Application;
+﻿using BackgroundServices.Listeners;
+using PlexRipper.Application;
 using Quartz;
+using Quartz.Impl.Matchers;
 
 namespace BackgroundServices;
 
@@ -8,14 +10,16 @@ public class SchedulerService : ISchedulerService
     #region Fields
 
     private readonly IScheduler _scheduler;
+    private readonly IAllJobListener _allJobListener;
 
     #endregion
 
     #region Constructors
 
-    public SchedulerService(IScheduler scheduler)
+    public SchedulerService(IScheduler scheduler, IAllJobListener allJobListener)
     {
         _scheduler = scheduler;
+        _allJobListener = allJobListener;
     }
 
     #endregion
@@ -30,6 +34,7 @@ public class SchedulerService : ISchedulerService
     /// <returns></returns>
     public async Task<Result> SetupAsync()
     {
+        SetupListeners();
         if (!_scheduler.IsStarted)
         {
             Log.Information("Starting Quartz Scheduler");
@@ -48,6 +53,13 @@ public class SchedulerService : ISchedulerService
     }
 
     #endregion
+
+    private Result SetupListeners()
+    {
+        Log.Debug("Setting up Quartz listeners");
+        _scheduler.ListenerManager.AddJobListener(_allJobListener, GroupMatcher<JobKey>.AnyGroup());
+        return Result.Ok();
+    }
 
     #endregion
 }

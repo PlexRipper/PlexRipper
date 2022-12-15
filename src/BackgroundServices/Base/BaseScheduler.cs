@@ -8,7 +8,6 @@ public abstract class BaseScheduler
 
     protected abstract JobKey DefaultJobKey { get; }
 
-    protected ITrigger StartNowTrigger { get; }
 
     protected JobKey GetJobKey(int id)
     {
@@ -28,7 +27,6 @@ public abstract class BaseScheduler
     protected BaseScheduler(IScheduler scheduler)
     {
         _scheduler = scheduler;
-        StartNowTrigger = TriggerBuilder.Create().StartNow().Build();
     }
 
     protected async Task<Result> ScheduleJob(IJobDetail jobDetail, ITrigger trigger, CancellationToken cancellationToken = default)

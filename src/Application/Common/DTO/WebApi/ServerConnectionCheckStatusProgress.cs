@@ -27,6 +27,9 @@ public class ServerConnectionCheckStatusProgress
         return $"{nameof(ServerConnectionCheckStatusProgress)}: " +
                $"ConnectionId: {PlexServerConnectionId} - " +
                $"ServerId: {PlexServerId} - " +
-               $"({RetryAttemptIndex} of {RetryAttemptCount}) - Completed: {Completed} - Status: {StatusCode}";
+               $"({RetryAttemptIndex} of {RetryAttemptCount}) -" +
+               $" Completed: {Completed} -" +
+               $" Status: {StatusCode}" +
+               $" Message: {Message}";
     }
 }

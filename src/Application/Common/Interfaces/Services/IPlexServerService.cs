@@ -15,17 +15,17 @@ public interface IPlexServerService
     /// Retrieves all <see cref="PlexServer"/>s from the Database with the included <see cref="PlexLibrary"/>.
     /// </summary>
     /// <param name="includeLibraries">Include the nested <see cref="PlexLibrary">PlexLibraries</see>.</param>
-    /// <param name="plexAccountId">Retrieve only the <see cref="PlexServer"/> which are accessible by this <see cref="PlexAccount"/>.</param>
     /// <returns>The list of <see cref="PlexServer">PlexServers</see>.</returns>
-    Task<Result<List<PlexServer>>> GetAllPlexServersAsync(bool includeLibraries, int plexAccountId = 0);
+    Task<Result<List<PlexServer>>> GetAllPlexServersAsync(bool includeLibraries = false);
 
     /// <summary>
     /// Will inspect all <see cref="PlexServer">PlexServers</see> added to this <see cref="PlexAccount"/>
     /// and checks its connectivity status and which libraries can be accessed.
     /// </summary>
     /// <param name="plexAccountId"></param>
+    /// <param name="skipRefreshAccessibleServers"></param>
     /// <returns></returns>
-    Task<Result> InspectPlexServers(int plexAccountId);
+    Task<Result> InspectPlexServers(int plexAccountId, bool skipRefreshAccessibleServers = false);
 
     Task<Result> SyncPlexServers(bool forceSync = false);
 

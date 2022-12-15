@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using PlexRipper.Application;
+using PlexRipper.Application.BackgroundServices;
 using PlexRipper.DownloadManager;
 using PlexRipper.Settings.Models;
+using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
@@ -83,6 +85,7 @@ public class WebApiMappingProfile : Profile
 
         // PlexServerConnection -> PlexServerConnectionDTO
         CreateMap<PlexServerConnection, PlexServerConnectionDTO>(MemberList.Destination)
+            .ForMember(x => x.Progress, opt => opt.Ignore())
             .ForMember(dto => dto.Url, entity => entity.MapFrom(x => x.Url));
 
         // PlexServerStatus -> PlexServerStatusDTO
@@ -213,5 +216,9 @@ public class WebApiMappingProfile : Profile
         // Notification <-> NotificationUpdate
         CreateMap<Notification, NotificationDTO>(MemberList.Destination)
             .ReverseMap();
+
+        // JobStatusUpdate -> JobStatusUpdateDTO
+        CreateMap<JobStatusUpdate, JobStatusUpdateDTO>(MemberList.Destination)
+            .ForMember(dto => dto.JobType, entity => entity.MapFrom(x => Enum.Parse<JobTypes>(x.JobGroup)));
     }
 }

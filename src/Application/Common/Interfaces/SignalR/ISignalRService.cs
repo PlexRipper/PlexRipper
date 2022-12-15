@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Application;
+﻿using PlexRipper.Application.BackgroundServices;
+
+namespace PlexRipper.Application;
 
 public interface ISignalRService
 {
@@ -25,4 +27,5 @@ public interface ISignalRService
     Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks);
 
     Task SendServerConnectionCheckStatusProgress(ServerConnectionCheckStatusProgress progress);
+    Task SendJobStatusUpdate(JobStatusUpdate jobStatusUpdate);
 }

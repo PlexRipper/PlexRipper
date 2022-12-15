@@ -6,14 +6,12 @@ public class GetAllPlexServersQuery : IRequest<Result<List<PlexServer>>>
     /// Retrieves all the  <see cref="PlexServer">PlexServers</see> currently in the database.
     /// </summary>
     /// <param name="includeLibraries">Include <see cref="PlexLibrary"/> relationship.</param>
-    /// <param name="plexAccountId">Only retrieve <see cref="PlexServer">PlexServers</see> accessible by this <see cref="PlexAccount"/>.</param>
-    public GetAllPlexServersQuery(bool includeLibraries = false, int plexAccountId = 0)
+    public GetAllPlexServersQuery(bool includeConnections = false, bool includeLibraries = false)
     {
+        IncludeConnections = includeConnections;
         IncludeLibraries = includeLibraries;
-        PlexAccountId = plexAccountId;
     }
 
+    public bool IncludeConnections { get; }
     public bool IncludeLibraries { get; }
-
-    public int PlexAccountId { get; }
 }

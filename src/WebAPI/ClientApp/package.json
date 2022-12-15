@@ -82,7 +82,7 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.6.3",
-    "cypress": "^12.0.1",
+    "cypress": "^12.1.0",
     "cypress-vue-unit-test": "^3.5.1",
     "cypress-wait-until": "^1.7.2",
     "eslint": "^8.23.0",

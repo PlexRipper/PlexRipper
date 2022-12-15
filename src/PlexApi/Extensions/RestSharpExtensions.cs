@@ -22,6 +22,7 @@ public static class RestSharpExtensions
         Action<PlexApiClientProgress> action = null) where T : class
     {
         RestResponse<T> response = null;
+        var retryIndex = 0;
         var policyResult = await Policy
             .HandleResult<RestResponse>(x => !x.IsSuccessful)
             .WaitAndRetryAsync(retryCount, retryAttempt =>
@@ -30,6 +31,7 @@ public static class RestSharpExtensions
                 var msg =
                     $"Request: {request.Resource} failed, waiting {timeToWait.TotalSeconds} seconds before retrying again ({retryAttempt} of {retryCount}).";
                 Log.Warning(msg);
+                retryIndex = retryAttempt;
                 if (action is not null)
                 {
                     action(new PlexApiClientProgress
@@ -51,6 +53,19 @@ public static class RestSharpExtensions
                 response = await restClient.ExecuteAsync<T>(request);
                 return response;
             });
+
+        if (action is not null)
+        {
+            action(new PlexApiClientProgress
+            {
+                StatusCode = (int)response.StatusCode,
+                Message = response.IsSuccessful ? "Request successful!" : $"Content: \"{response.Content}\" - ErrorMessage: \"{response.ErrorMessage}\"",
+                RetryAttemptIndex = retryIndex,
+                RetryAttemptCount = retryCount,
+                TimeToNextRetry = 0,
+                Completed = true,
+            });
+        }
 
         return ToResponse<T>(policyResult);
     }

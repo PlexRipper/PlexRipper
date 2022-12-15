@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Reflection;
+using AppAny.Quartz.EntityFrameworkCore.Migrations;
+using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using Environment;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -123,6 +125,8 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        builder.AddQuartz(x => x.UseSqlite());
 
         builder.Entity<PlexMovie>()
             .Property(x => x.MediaData)

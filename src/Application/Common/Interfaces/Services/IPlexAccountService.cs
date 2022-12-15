@@ -47,6 +47,4 @@ public interface IPlexAccountService
     Task<Result<AuthPin>> Get2FAPin(string clientId);
 
     Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
-
-    Task<Result<PlexAccount>> ChoosePlexAccountToConnect(int plexServerId);
 }

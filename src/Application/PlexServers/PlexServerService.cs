@@ -12,7 +12,6 @@ public class PlexServerService : IPlexServerService
 
     private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IPlexServerConnectionsService _plexServerConnectionsService;
-    private readonly IPlexAccountService _accountService;
 
     private readonly IPlexApiService _plexServiceApi;
 
@@ -24,15 +23,13 @@ public class PlexServerService : IPlexServerService
         IPlexLibraryService plexLibraryService,
         ISignalRService signalRService,
         IServerSettingsModule serverSettingsModule,
-        IPlexServerConnectionsService plexServerConnectionsService,
-        IPlexAccountService accountService)
+        IPlexServerConnectionsService plexServerConnectionsService)
     {
         _mediator = mediator;
         _plexLibraryService = plexLibraryService;
         _signalRService = signalRService;
         _serverSettingsModule = serverSettingsModule;
         _plexServerConnectionsService = plexServerConnectionsService;
-        _accountService = accountService;
         _plexServiceApi = plexServiceApi;
     }
 
@@ -44,8 +41,9 @@ public class PlexServerService : IPlexServerService
     /// When successfully connected, the <see cref="PlexLibrary">PlexLibraries</see> are stored in the database.
     /// </summary>
     /// <param name="plexAccountId"></param>
+    /// <param name="skipRefreshAccessibleServers"></param>
     /// <returns></returns>
-    public async Task<Result> InspectPlexServers(int plexAccountId)
+    public async Task<Result> InspectPlexServers(int plexAccountId, bool skipRefreshAccessibleServers = false)
     {
         var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId, true));
         if (plexAccountResult.IsFailed)
@@ -55,10 +53,14 @@ public class PlexServerService : IPlexServerService
         var plexServers = plexAccountResult.Value.PlexServers;
 
         Log.Information($"Inspecting {plexServers.Count} PlexServers for PlexAccount: {plexAccountResult.Value.DisplayName}");
-
-        var refreshResult = await RefreshAccessiblePlexServersAsync(plexAccount.Id);
-        if (refreshResult.IsFailed)
-            return refreshResult.ToResult();
+        if (!skipRefreshAccessibleServers)
+        {
+            var refreshResult = await RefreshAccessiblePlexServersAsync(plexAccount.Id);
+            if (refreshResult.IsFailed)
+                return refreshResult.ToResult();
+        }
+        else
+            Log.Warning($"Skipping {nameof(RefreshAccessiblePlexServersAsync)} in {nameof(InspectPlexServers)}");
 
         var checkResult = await CheckAllServersWithAllConnections(plexServers);
         if (checkResult.IsFailed)
@@ -91,7 +93,7 @@ public class PlexServerService : IPlexServerService
     public async Task<Result<PlexServer>> RefreshAccessiblePlexServerAsync(int plexServerId)
     {
         // Pick an account that has access to the PlexServer to connect with
-        var plexAccountResult = await _accountService.ChoosePlexAccountToConnect(plexServerId);
+        var plexAccountResult = await ChoosePlexAccountToConnect(plexServerId);
         if (plexAccountResult.IsFailed)
             return plexAccountResult.ToResult();
 
@@ -142,7 +144,7 @@ public class PlexServerService : IPlexServerService
             return serversResult;
 
         if (!serversResult.Value.Any())
-            return Result.Ok();
+            return Result.Ok(new List<PlexServer>());
 
         var serverList = serversResult.Value;
         var serverAccessTokens = tokensResult.Value;
@@ -172,7 +174,7 @@ public class PlexServerService : IPlexServerService
 
     public async Task<Result> SyncPlexServers(bool forceSync = false)
     {
-        var plexServersResult = await GetAllPlexServersAsync(false);
+        var plexServersResult = await GetAllPlexServersAsync();
         if (plexServersResult.IsFailed)
             return plexServersResult.ToResult();
 
@@ -288,6 +290,34 @@ public class PlexServerService : IPlexServerService
         return Result.Merge(tasksResult).ToResult();
     }
 
+    public async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(int plexServerId)
+    {
+        if (plexServerId <= 0)
+            return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId);
+
+        var plexAccountsResult = await _mediator.Send(new GetPlexAccountsWithAccessByPlexServerIdQuery(plexServerId));
+        if (plexAccountsResult.IsFailed)
+            return plexAccountsResult.ToResult();
+
+        var plexAccounts = plexAccountsResult.Value.FindAll(x => x.IsEnabled);
+        if (!plexAccounts.Any())
+            return Result.Fail($"There are no enabled accounts that can access PlexServer with id: {plexServerId}").LogError();
+
+        if (plexAccounts.Count == 1)
+            return Result.Ok(plexAccounts.First());
+
+        // Prefer to use a non-main account
+        var dummyAccount = plexAccounts.FirstOrDefault(x => !x.IsMain);
+        if (dummyAccount is not null)
+            return Result.Ok(dummyAccount);
+
+        var mainAccount = plexAccounts.FirstOrDefault(x => x.IsMain);
+        if (mainAccount is not null)
+            return Result.Ok(mainAccount);
+
+        return Result.Fail($"No account could be chosen to connect to PlexServer with id: {plexServerId}").LogError();
+    }
+
     #region CRUD
 
     public Task<Result<PlexServer>> GetServerAsync(int plexServerId)
@@ -296,10 +326,10 @@ public class PlexServerService : IPlexServerService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<List<PlexServer>>> GetAllPlexServersAsync(bool includeLibraries, int plexAccountId = 0)
+    public async Task<Result<List<PlexServer>>> GetAllPlexServersAsync(bool includeLibraries = false)
     {
         // Retrieve all servers
-        return await _mediator.Send(new GetAllPlexServersQuery(includeLibraries, plexAccountId));
+        return await _mediator.Send(new GetAllPlexServersQuery(true, includeLibraries));
     }
 
     #endregion

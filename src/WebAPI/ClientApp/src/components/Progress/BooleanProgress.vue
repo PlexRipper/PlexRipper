@@ -18,5 +18,3 @@ export default class BooleanProgress extends Vue {
 	readonly success!: boolean;
 }
 </script>
-
-<style scoped></style>

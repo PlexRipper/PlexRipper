@@ -32,5 +32,3 @@ export default class ConnectionProgressText extends Vue {
 	progress!: ServerConnectionCheckStatusProgressDTO;
 }
 </script>
-
-<style scoped></style>

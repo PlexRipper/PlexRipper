@@ -10,6 +10,7 @@
     "types": [
       "cypress",
       "node"
-    ]
+    ],
+    "baseUrl": "../src",
   },
 }

@@ -54,26 +54,21 @@ public class PlexAccountService : IPlexAccountService
     /// <inheritdoc/>
     public async Task<Result> RefreshPlexAccount(int plexAccountId = 0)
     {
-        // TODO Need to define and fix what refreshing the account means
-        // if (plexAccountId == 0)
-        // {
-        //     var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(onlyEnabled: true));
-        //     if (enabledAccounts.IsFailed)
-        //         return enabledAccounts.ToResult();
-        //
-        //     foreach (var plexAccount in enabledAccounts.Value)
-        //     {
-        //         var result = await SetupAccountAsync(plexAccount.Id);
-        //         if (result.IsFailed)
-        //             return result.ToResult();
-        //     }
-        // }
-        // else
-        // {
-        //     var result = await SetupAccountAsync(plexAccountId);
-        //     if (result.IsFailed)
-        //         return result.ToResult();
-        // }
+        var plexAccountIds = new List<int>();
+
+        if (plexAccountId == 0)
+        {
+            var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(onlyEnabled: true));
+            if (enabledAccounts.IsFailed)
+                return enabledAccounts.ToResult();
+
+            plexAccountIds.AddRange(enabledAccounts.Value.Select(x => x.Id));
+        }
+        else
+            plexAccountIds.Add(plexAccountId);
+
+        foreach (var id in plexAccountIds)
+            await _inspectServerScheduler.QueueRefreshAccessiblePlexServersJob(id);
 
         return Result.Ok();
     }

@@ -20,15 +20,23 @@ public class DownloadProgressJob : IJob
     {
         var dataMap = context.JobDetail.JobDataMap;
         var plexServerId = dataMap.GetIntValue("plexServerId");
+        // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
+        // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
+        try
+        {
+            var hashCodeResult = await _downloadProgressNotifier.SendDownloadProgress(plexServerId);
+            if (hashCodeResult.IsFailed)
+                hashCodeResult.LogError();
 
-        var hashCodeResult = await _downloadProgressNotifier.SendDownloadProgress(plexServerId);
-        if (hashCodeResult.IsFailed)
-            hashCodeResult.LogError();
+            Log.Verbose($"Executed job: {nameof(DownloadProgressJob)} for {nameof(PlexServer)}: {plexServerId} => {hashCodeResult.Value}");
 
-        Log.Verbose($"Executed job: {nameof(DownloadProgressJob)} for {nameof(PlexServer)}: {plexServerId} => {hashCodeResult.Value}");
-
-        var trackResult = await _downloadProgressScheduler.TrackDownloadProgress(plexServerId, hashCodeResult.Value);
-        if (trackResult.IsFailed)
-            trackResult.LogError();
+            var trackResult = await _downloadProgressScheduler.TrackDownloadProgress(plexServerId, hashCodeResult.Value);
+            if (trackResult.IsFailed)
+                trackResult.LogError();
+        }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
     }
 }

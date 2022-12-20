@@ -41,6 +41,9 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
 
     public async Task<Result> QueueRefreshAccessiblePlexServersJob(int plexAccountId)
     {
+        if (plexAccountId <= 0)
+            return ResultExtensions.IsInvalidId(nameof(plexAccountId), plexAccountId);
+
         var key = RefreshAccessiblePlexServersJob.GetJobKey(plexAccountId);
         if (await IsJobRunning(key))
         {
@@ -66,6 +69,9 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
 
     public async Task<Result> QueueInspectPlexServerByPlexAccountIdJob(int plexAccountId)
     {
+        if (plexAccountId <= 0)
+            return ResultExtensions.IsInvalidId(nameof(plexAccountId), plexAccountId);
+
         var key = InspectPlexServerByPlexAccountIdJob.GetJobKey(plexAccountId);
         if (await IsJobRunning(key))
         {

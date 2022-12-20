@@ -22,8 +22,16 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
         var dataMap = context.JobDetail.JobDataMap;
         var plexAccountId = dataMap.GetIntValue(PlexAccountIdParameter);
         Log.Debug($"Executing job: {nameof(InspectPlexServerByPlexAccountIdJob)} for {nameof(plexAccountId)}: {plexAccountId}");
-
-        await _plexServerService.InspectPlexServers(plexAccountId, true);
+        // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
+        // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
+        try
+        {
+            await _plexServerService.InspectPlexServers(plexAccountId, true);
+        }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
     }
 
     public static JobKey GetJobKey(int id)

@@ -17,7 +17,17 @@ public class DownloadJob : IJob
         var dataMap = context.JobDetail.JobDataMap;
         var downloadTaskId = dataMap.GetIntValue("downloadTaskId");
         Log.Debug($"Executing job: {nameof(DownloadJob)} for {nameof(DownloadTask)}: {downloadTaskId}");
-        await _downloadTracker.StartDownloadClient(downloadTaskId);
+
+        // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
+        // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
+        try
+        {
+            await _downloadTracker.StartDownloadClient(downloadTaskId);
+        }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
 
         // while (context.CancellationToken.IsCancellationRequested == false)
         // {

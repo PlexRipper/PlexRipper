@@ -80,12 +80,12 @@ public class WebApiMappingProfile : Profile
     private void PlexServerMappings()
     {
         // PlexServer -> PlexServerDTO
-        CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination)
-            .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.Status));
+        CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination);
 
         // PlexServerConnection -> PlexServerConnectionDTO
         CreateMap<PlexServerConnection, PlexServerConnectionDTO>(MemberList.Destination)
             .ForMember(x => x.Progress, opt => opt.Ignore())
+            .ForMember(dto => dto.LatestConnectionStatus, entity => entity.MapFrom(x => x.PlexServerStatus.First()))
             .ForMember(dto => dto.Url, entity => entity.MapFrom(x => x.Url));
 
         // PlexServerStatus -> PlexServerStatusDTO

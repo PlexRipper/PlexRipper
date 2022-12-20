@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -478,7 +477,6 @@ export interface PlexServerDTO {
 	natLoopbackSupported: boolean;
 	plexServerConnections: PlexServerConnectionDTO[];
 	downloadTasks: DownloadProgressDTO[];
-	status: PlexServerStatusDTO;
 }
 
 export interface PlexServerConnectionDTO {
@@ -496,7 +494,7 @@ export interface PlexServerConnectionDTO {
 	/** @format int32 */
 	plexServerId: number;
 	url: string;
-	plexServerStatus: PlexServerStatusDTO[];
+	latestConnectionStatus: PlexServerStatusDTO;
 	progress: ServerConnectionCheckStatusProgressDTO | null;
 }
 
@@ -657,6 +655,10 @@ export enum MessageTypes {
 export enum JobTypes {
 	InspectPlexServerByPlexAccountIdJob = 'InspectPlexServerByPlexAccountIdJob',
 	InspectPlexServerJob = 'InspectPlexServerJob',
+	DownloadJob = 'DownloadJob',
+	DownloadProgressJob = 'DownloadProgressJob',
+	SyncServerJob = 'SyncServerJob',
+	RefreshAccessiblePlexServersJob = 'RefreshAccessiblePlexServersJob',
 }
 
 export enum JobStatus {

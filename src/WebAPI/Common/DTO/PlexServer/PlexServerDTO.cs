@@ -82,7 +82,4 @@ public class PlexServerDTO
 
     [JsonProperty("downloadTasks", Required = Required.Always)]
     public List<DownloadProgressDTO> DownloadTasks { get; set; }
-
-    [JsonProperty("status", Required = Required.Always)]
-    public PlexServerStatusDTO Status { get; set; }
 }

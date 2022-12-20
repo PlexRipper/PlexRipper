@@ -85,6 +85,12 @@ export class ServerService extends BaseService {
 		);
 	}
 
+	public getServerStatus(plexServerId: number): Observable<boolean> {
+		return ServerConnectionService.getServerConnectionsByServerId(plexServerId).pipe(
+			switchMap((connections) => of(connections.some((x) => x.latestConnectionStatus.isSuccessful))),
+		);
+	}
+
 	public checkServer(plexServerId: number): Observable<PlexServerStatusDTO | null> {
 		return checkPlexServer(plexServerId).pipe(
 			map((serverStatus) => {

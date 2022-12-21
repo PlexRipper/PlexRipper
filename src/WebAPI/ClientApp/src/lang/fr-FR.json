@@ -162,7 +162,8 @@
             "update": "Mettre à jour",
             "validate": "Valider",
             "validated": "Validaté",
-            "missing-text": ""
+            "missing-text": "",
+            "inspect-server": "Inspecter le serveur"
         },
         "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
@@ -213,6 +214,18 @@
                     "label": "",
                     "text": "",
                     "title": ""
+                }
+            },
+            "server-commands": {
+                "inspect-server": {
+                    "text": "L'inspection du serveur vérifiera toutes les connexions et vérifiera si toutes les bibliothèques sont toujours accessibles.",
+                    "title": "Inspection du serveur Plex",
+                    "label": "Inspecter le serveur"
+                },
+                "sync-server-libraries": {
+                    "text": "",
+                    "title": "",
+                    "label": "Resyncroniser les bibliothèques"
                 }
             }
         },

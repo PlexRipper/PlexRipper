@@ -162,7 +162,8 @@
             "update": "Update",
             "validate": "Validate",
             "validated": "Validated",
-            "missing-text": ""
+            "missing-text": "",
+            "inspect-server": "Inspect Server"
         },
         "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
@@ -213,6 +214,18 @@
                     "label": "Download Speed Limit",
                     "text": "This will limit the download speed for this Plex server in kilobytes per second. Setting this value to 0 will disable the limit. ",
                     "title": "Download Speed Limit"
+                }
+            },
+            "server-commands": {
+                "inspect-server": {
+                    "text": "Inspecting the server will check all connections and check if all libraries are still accessible.",
+                    "title": "Inspecting the Plex server",
+                    "label": "Inspect Server"
+                },
+                "sync-server-libraries": {
+                    "text": "This will limit the download speed for this Plex server in kilobytes per second. Setting this value to 0 will disable the limit. ",
+                    "title": "Download Speed Limit",
+                    "label": "Re-sync Library media"
                 }
             }
         },

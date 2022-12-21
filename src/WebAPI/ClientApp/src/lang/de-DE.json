@@ -162,7 +162,8 @@
             "update": "aktualisieren",
             "validate": "überprüfen",
             "validated": "überprüft",
-            "missing-text": ""
+            "missing-text": "",
+            "inspect-server": "Server untersuchen"
         },
         "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
@@ -213,6 +214,18 @@
                     "label": "",
                     "text": "",
                     "title": ""
+                }
+            },
+            "server-commands": {
+                "inspect-server": {
+                    "text": "Bei der Überprüfung des Servers werden alle Verbindungen überprüft und überprüft, ob alle Bibliotheken noch zugänglich sind.",
+                    "title": "Überprüfung des Plex-Servers",
+                    "label": "Server untersuchen"
+                },
+                "sync-server-libraries": {
+                    "text": "",
+                    "title": "",
+                    "label": "Re-sync Mediathekdaten"
                 }
             }
         },

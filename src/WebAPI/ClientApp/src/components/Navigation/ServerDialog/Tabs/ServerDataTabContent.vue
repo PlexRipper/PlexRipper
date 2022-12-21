@@ -36,19 +36,17 @@
 						<date-time short-date :text="plexServer.lastSeenAt" />
 					</td>
 				</tr>
-				<tr v-if="serverStatus">
+				<tr>
 					<td>{{ $t('components.server-dialog.tabs.server-data.current-status') }}:</td>
 					<td>
-						<status pulse :value="serverStatus.isSuccessful" />
-						{{ serverStatus.statusCode }} -
-						{{ serverStatus.statusMessage }}
+						<status pulse :value="hasSuccessServerStatus" />
 					</td>
 				</tr>
-				<!--	Server Status	-->
-				<tr v-if="serverStatus">
+				<!-- Server Status -->
+				<tr v-if="serverConnections.length">
 					<td>{{ $t('components.server-dialog.tabs.server-data.last-checked-on') }}:</td>
 					<td>
-						<date-time short-date :text="serverStatus.lastChecked" />
+						<date-time short-date :text="getLastStatusCheck" />
 					</td>
 				</tr>
 			</tbody>
@@ -62,20 +60,37 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
-import type { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
-import { ServerService } from '@service';
+import type { PlexServerDTO } from '@dto/mainApi';
+import { PlexServerConnectionDTO } from '@dto/mainApi';
+import { ServerConnectionService, ServerService } from '@service';
 
-@Component<ServerDataTabContent>({})
+@Component
 export default class ServerDataTabContent extends Vue {
 	@Prop({ required: true, type: Object as () => PlexServerDTO })
 	readonly plexServer!: PlexServerDTO;
 
-	@Prop({ required: true, type: Object as () => PlexServerStatusDTO })
-	readonly serverStatus!: PlexServerStatusDTO;
+	@Prop({ required: true, type: Boolean })
+	readonly isVisible!: boolean;
 
 	checkServerStatusLoading: boolean = false;
+	hasSuccessServerStatus: boolean = false;
+	serverConnections: PlexServerConnectionDTO[] = [];
+
+	@Watch('isVisible')
+	onIsVisible(isVisible): void {
+		if (isVisible) {
+			this.setup();
+		}
+	}
+
+	get getLastStatusCheck(): string {
+		const y = this.serverConnections
+			.map((x) => x.latestConnectionStatus)
+			.sort((a, b) => Date.parse(b.lastChecked) - Date.parse(a.lastChecked));
+		return y[0].lastChecked;
+	}
 
 	checkServer(): void {
 		this.checkServerStatusLoading = true;
@@ -84,6 +99,23 @@ export default class ServerDataTabContent extends Vue {
 				this.checkServerStatusLoading = false;
 			}),
 		);
+	}
+
+	setup() {
+		useSubscription(
+			ServerConnectionService.getServerConnectionsByServerId(this.plexServer.id).subscribe((connections) => {
+				this.serverConnections = connections;
+			}),
+		);
+		useSubscription(
+			ServerService.getServerStatus(this.plexServer.id).subscribe((value) => {
+				this.hasSuccessServerStatus = value;
+			}),
+		);
+	}
+
+	mounted() {
+		this.setup();
 	}
 }
 </script>

@@ -55,6 +55,10 @@ export class ServerConnectionService extends BaseService {
 		);
 	}
 
+	public getServerConnections(): Observable<PlexServerConnectionDTO[]> {
+		return this.getStateChanged<PlexServerConnectionDTO[]>('serverConnections');
+	}
+
 	public getServerConnection(connectionId: number): Observable<PlexServerConnectionDTO | null> {
 		return this.stateChanged.pipe(
 			map(() => this.getStoreSlice<PlexServerConnectionDTO[]>('serverConnections')),
@@ -71,7 +75,7 @@ export class ServerConnectionService extends BaseService {
 					if (index === -1) {
 						return serverStatus.value;
 					}
-					serverConnections[index].plexServerStatus.unshift(serverStatus.value);
+					serverConnections[index].latestConnectionStatus = serverStatus.value;
 					this.setState({ serverConnections }, 'Update server status for connection ' + plexServerConnectionId);
 				}
 				return serverStatus?.value ?? null;

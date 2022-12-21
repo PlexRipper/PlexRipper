@@ -8,7 +8,7 @@
 						<v-row align="center" no-gutters class="flex-nowrap">
 							<v-col cols="auto">
 								<div class="server-name">
-									<status :value="server.status.isSuccessful" />
+									<status :value="isConnected(server)" />
 									{{ server.name }}
 								</div>
 							</v-col>
@@ -76,8 +76,9 @@ import Log from 'consola';
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
 import { LibraryService, ServerService } from '@service';
-import { PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import { PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
 import ServerDialog from '@components/Navigation/ServerDialog.vue';
+import serverConnectionService from '~/service/serverConnectionService';
 
 interface INavItem {
 	title: string;
@@ -85,11 +86,12 @@ interface INavItem {
 	link: string;
 }
 
-@Component<ServerDrawer>({})
+@Component
 export default class ServerDrawer extends Vue {
 	items: object[] = [];
 	plexServers: PlexServerDTO[] = [];
 	plexLibraries: PlexLibraryDTO[] = [];
+	connections: PlexServerConnectionDTO[] = [];
 
 	get getNavItems(): INavItem[] {
 		return [
@@ -128,10 +130,20 @@ export default class ServerDrawer extends Vue {
 		}
 	}
 
+	isConnected(server: PlexServerDTO) {
+		return this.connections.filter((x) => x.plexServerId === server.id).some((x) => x.latestConnectionStatus.isSuccessful);
+	}
+
 	mounted(): void {
 		useSubscription(
 			ServerService.getServers().subscribe((data: PlexServerDTO[]) => {
 				this.plexServers = data;
+			}),
+		);
+
+		useSubscription(
+			serverConnectionService.getServerConnections().subscribe((connections) => {
+				this.connections = connections;
 			}),
 		);
 

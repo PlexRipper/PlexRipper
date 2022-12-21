@@ -39,7 +39,7 @@
 						</td>
 						<td style="width: 25%">
 							<!-- Connection Status -->
-							<status :value="connection.plexServerStatus[0]?.isSuccessful ?? false" />
+							<status :value="connection.latestConnectionStatus.isSuccessful ?? false" />
 						</td>
 						<td>
 							<CheckConnectionButton

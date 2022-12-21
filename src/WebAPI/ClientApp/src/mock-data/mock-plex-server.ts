@@ -42,7 +42,6 @@ export function generatePlexServers(config: Partial<MockConfig> = {}): PlexServe
 			machineIdentifier: faker.datatype.uuid(),
 			createdAt: faker.date.past().toUTCString(),
 			downloadTasks: [],
-			status: generatePlexServerStatus(validConfig),
 			ownerId: faker.datatype.number(99999),
 			plexServerConnections: generatePlexServerConnection(plexServerId, config),
 		});
@@ -86,7 +85,7 @@ export function generatePlexServerConnection(plexServerId: number, config: Parti
 			plexServerId,
 			port,
 			protocol: scheme,
-			plexServerStatus: [generatePlexServerStatus(validConfig)],
+			latestConnectionStatus: generatePlexServerStatus(validConfig),
 			iPv4: true,
 			portFix: false,
 			progress: validConfig.connectionHasProgress

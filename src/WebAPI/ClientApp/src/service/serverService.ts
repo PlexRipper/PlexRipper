@@ -5,7 +5,7 @@ import Log from 'consola';
 import { PlexAccountDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkPlexServer, getPlexServers, setPreferredPlexServerConnection } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { AccountService, BaseService } from '@service';
+import { AccountService, BaseService, ServerConnectionService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import ResultDTO from '@dto/ResultDTO';
 
@@ -101,7 +101,7 @@ export class ServerService extends BaseService {
 						return serverStatus?.value ?? null;
 					}
 					const server = servers[index];
-					server.status = serverStatus.value;
+					// server.status = serverStatus.value;
 					servers.splice(index, 1, server);
 					this.setState({ servers }, 'Update server status for ' + plexServerId);
 				}

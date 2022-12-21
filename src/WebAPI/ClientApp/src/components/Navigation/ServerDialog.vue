@@ -39,7 +39,7 @@
 
 					<!--	Server Data Tab Content	-->
 					<v-tab-item>
-						<server-data-tab-content :plex-server="plexServer" :server-status="serverStatus" />
+						<server-data-tab-content :plex-server="plexServer" :is-visible="isVisible" />
 					</v-tab-item>
 
 					<!--	Server Connections Tab Content	-->
@@ -78,11 +78,10 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
 import { switchMap, tap } from 'rxjs/operators';
-import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel, PlexServerStatusDTO } from '@dto/mainApi';
+import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
 import { FolderPathService, LibraryService, ServerService, SettingsService } from '@service';
-import ServerConnectionsTabContent from '@components/Navigation/ServerDialog/Tabs/ServerConnectionsTabContent.vue';
 
-@Component<ServerDialog>({})
+@Component
 export default class ServerDialog extends Vue {
 	show: boolean = false;
 	tabIndex: number | null = null;
@@ -91,10 +90,6 @@ export default class ServerDialog extends Vue {
 	plexLibraries: PlexLibraryDTO[] = [];
 	plexServerSettings: PlexServerSettingsModel | null = null;
 	plexServerId: number = 0;
-
-	get serverStatus(): PlexServerStatusDTO | null {
-		return this.plexServer?.status ?? null;
-	}
 
 	get isVisible(): boolean {
 		return this.plexServerId > 0;

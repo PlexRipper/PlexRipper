@@ -11,12 +11,12 @@ public interface IPlexLibraryService
     Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId, Action<LibraryProgress> progressAction = null);
 
     /// <summary>
-    /// Retrieve the latest <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database.
+    /// Retrieve the accessible <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database.
     /// </summary>
-    /// <param name="plexAccount"></param>
-    /// <param name="plexServer"></param>
-    /// <returns>If successful.</returns>
-    Task<Result> RetrieveAccessibleLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer);
+    /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to retrieve the accessible <see cref="PlexLibrary">Plex Libraries</see> for.</param>
+    /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to retrieve <see cref="PlexLibrary">Plex Libraries</see> for.</param>
+    ///  <returns>If successful.</returns>
+    Task<Result> RetrieveAccessibleLibrariesAsync(int plexAccountId, int plexServerId);
 
     /// <summary>
     /// Returns the PlexLibrary by the Id, will refresh if the library has no media assigned.
@@ -31,4 +31,6 @@ public interface IPlexLibraryService
     Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync();
 
     Task<Result> UpdateDefaultDestinationLibrary(int libraryId, int folderPathId);
+    Task<Result> RetrieveAccessibleLibrariesForAllAccountsAsync(int plexServerId);
+    Task<Result> RetrieveAllAccessibleLibrariesAsync(int plexAccountId);
 }

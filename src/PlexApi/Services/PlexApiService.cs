@@ -151,13 +151,13 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId)
+    public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId, int plexAccountId = 0)
     {
         var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
         if (plexServerResult.IsFailed)
             return plexServerResult.ToResult();
 
-        var tokenResult = await GetPlexServerTokenAsync(plexServerId);
+        var tokenResult = await GetPlexServerTokenAsync(plexServerId, plexAccountId);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
@@ -170,7 +170,13 @@ public class PlexApiService : IPlexApiService
 
         var directories = result.Value.MediaContainer.Directory;
 
-        return Result.Ok(_mapper.Map<List<PlexLibrary>>(directories));
+        var mappedLibraries = _mapper.Map<List<PlexLibrary>>(directories);
+
+        // Ensure every library has the Plex server id set
+        foreach (var mappedLibrary in mappedLibraries)
+            mappedLibrary.PlexServerId = plexServerId;
+
+        return Result.Ok(mappedLibraries);
     }
 
     public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey)
@@ -185,6 +191,7 @@ public class PlexApiService : IPlexApiService
         return _mapper.Map<PlexMediaMetaData>(result);
     }
 
+    /// <inheritdoc/>
     public async Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(int plexServerConnectionId, Action<PlexApiClientProgress> action = null)
     {
         var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId));
@@ -211,7 +218,7 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc/>
-    public async Task<(Result<List<PlexServer>> servers, Result<List<ServerAccessTokenDTO>> tokens)> GetServersAsync(int plexAccountId)
+    public async Task<(Result<List<PlexServer>> servers, Result<List<ServerAccessTokenDTO>> tokens)> GetAccessiblePlexServersAsync(int plexAccountId)
     {
         var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
         if (plexAccountResult.IsFailed)

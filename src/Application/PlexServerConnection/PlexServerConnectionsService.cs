@@ -1,4 +1,5 @@
 using AutoMapper;
+using PlexRipper.Application.PlexAccounts;
 
 namespace PlexRipper.Application;
 
@@ -32,7 +33,7 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
     #endregion
 
     /// <inheritdoc />
-    public async Task<Result<List<PlexServerStatus>>> CheckAllPlexServerConnectionsAsync(int plexServerId)
+    public async Task<Result> CheckAllConnectionsOfPlexServerAsync(int plexServerId)
     {
         var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
         if (plexServerResult.IsFailed)
@@ -45,7 +46,31 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
 
         var tasksResult = await Task.WhenAll(connectionTasks);
         var x = Result.Merge(tasksResult);
-        return Result.Ok(x.Value.ToList());
+
+        if (tasksResult.Any(statusResult => statusResult.Value.IsSuccessful))
+            return Result.Ok();
+
+        return Result.Fail($"All connections to plex server with id: {plexServerId} failed to connect").LogError();
+    }
+
+    public async Task<Result> CheckAllConnectionsOfPlexServersByAccountIdAsync(int plexAccountId)
+    {
+        var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId, true));
+        if (plexAccountResult.IsFailed)
+        {
+            return plexAccountResult
+                .WithError($"Could not retrieve any PlexAccount from database with id {plexAccountId}.")
+                .LogError();
+        }
+
+        var plexServers = plexAccountResult.Value.PlexServers;
+
+        var serverTasks = plexServers.Select(async plexServer => await CheckAllConnectionsOfPlexServerAsync(plexServer.Id));
+
+        var tasksResult = await Task.WhenAll(serverTasks);
+        return Result.OkIf(tasksResult.Any(x => x.IsSuccess),
+                $"None of the servers that were checked for {nameof(PlexAccount)} with id {plexAccountId} were connectable")
+            .LogIfFailed();
     }
 
     /// <inheritdoc/>
@@ -73,7 +98,7 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
         // Request status
         var serverStatusResult = await _plexApiService.GetPlexServerStatusAsync(plexServerConnection.Id, Action);
         if (serverStatusResult.IsFailed)
-            return serverStatusResult;
+            return serverStatusResult.LogError();
 
         // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
         var result = await _mediator.Send(new CreatePlexServerStatusCommand(serverStatusResult.Value));
@@ -88,7 +113,7 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
                 return trimResult.ToResult();
         }
 
-        return await _mediator.Send(new GetPlexServerStatusByIdQuery(result.Value));
+        return serverStatusResult.Value;
     }
 
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using PlexRipper.Application.PlexAccounts;
 
 namespace PlexRipper.Application;
 
@@ -220,26 +221,62 @@ public class PlexLibraryService : IPlexLibraryService
 
     #region RefreshLibrary
 
-    /// <inheritdoc/>
-    public async Task<Result> RetrieveAccessibleLibrariesAsync(PlexAccount plexAccount, PlexServer plexServer)
+    public async Task<Result> RetrieveAccessibleLibrariesForAllAccountsAsync(int plexServerId)
     {
-        if (plexServer == null)
-            return ResultExtensions.IsNull(nameof(plexServer)).LogWarning();
+        if (plexServerId <= 0)
+            return ResultExtensions.IsInvalidId(nameof(plexServerId)).LogWarning();
 
-        Log.Debug($"Refreshing PlexLibraries for plexServer: {plexServer.Name}");
+        var accountsResult = await _mediator.Send(new GetPlexAccountsWithAccessByPlexServerIdQuery(plexServerId));
+        if (accountsResult.IsFailed)
+            return accountsResult.ToResult();
 
-        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServer.Id);
+        foreach (var plexAccount in accountsResult.Value)
+            await RetrieveAccessibleLibrariesAsync(plexAccount.Id, plexServerId);
+
+        return Result.Ok();
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result> RetrieveAccessibleLibrariesAsync(int plexAccountId, int plexServerId)
+    {
+        if (plexServerId <= 0)
+            return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
+
+        if (plexAccountId <= 0)
+            return ResultExtensions.IsInvalidId(nameof(plexAccountId), plexAccountId).LogWarning();
+
+        Log.Debug($"Retrieving accessible PlexLibraries for plexServer with id: {plexServerId} by using Plex account with id {plexAccountId}");
+
+        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServerId, plexAccountId);
         if (libraries.IsFailed)
             return libraries.ToResult();
 
         if (!libraries.Value.Any())
         {
-            var msg = $"plexLibraries returned for server {plexServer.Name} - {plexServer.GetServerUrl()} was empty";
+            var msg = $"{nameof(PlexServer)} with Id {plexServerId} returned no Plex libraries for Plex account with id {plexAccountId}";
             return Result.Fail(msg).LogWarning();
         }
 
-        return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccount, plexServer, libraries.Value));
+        return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccountId, libraries.Value));
     }
+
+    public async Task<Result> RetrieveAllAccessibleLibrariesAsync(int plexAccountId)
+    {
+        Log.Information($"Retrieving accessible Plex libraries for Plex account with id {plexAccountId}");
+        var plexServersResult = await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccountId));
+        if (plexServersResult.IsFailed)
+            return plexServersResult.ToResult().LogError();
+
+        //var onlineServers = plexServersResult.Value.FindAll(x => x.)
+
+        // Create connection check tasks for all connections
+        var retrieveTasks = plexServersResult.Value
+            .Select(async plexServer => await RetrieveAccessibleLibrariesAsync(plexAccountId, plexServer.Id));
+
+        var tasksResult = await Task.WhenAll(retrieveTasks);
+        return tasksResult.Merge();
+    }
+
 
     /// <inheritdoc/>
     public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId, Action<LibraryProgress> progressAction = null)

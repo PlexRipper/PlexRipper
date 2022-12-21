@@ -187,9 +187,6 @@ public class PlexAccountService : IPlexAccountService
         if (createResult.IsFailed)
             return createResult.ToResult();
 
-        // Before returning we must ensure the accessible plex servers are retrieved because otherwise the front-end will prematurely re-fetch the created plex account without any accessibility.
-        await _plexServerService.RefreshAccessiblePlexServersAsync(createResult.Value);
-
         await _inspectServerScheduler.QueueInspectPlexServerByPlexAccountIdJob(createResult.Value);
 
         return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));

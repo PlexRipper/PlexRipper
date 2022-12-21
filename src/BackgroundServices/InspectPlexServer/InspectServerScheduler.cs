@@ -7,11 +7,13 @@ namespace BackgroundServices.InspectPlexServer;
 public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
 {
     private readonly IMediator _mediator;
+    private readonly IPlexServerService _plexServerService;
     protected override JobKey DefaultJobKey => new($"PlexServerId_", nameof(InspectServerScheduler));
 
-    public InspectServerScheduler(IScheduler scheduler, IMediator mediator) : base(scheduler)
+    public InspectServerScheduler(IScheduler scheduler, IMediator mediator, IPlexServerService plexServerService) : base(scheduler)
     {
         _mediator = mediator;
+        _plexServerService = plexServerService;
     }
 
     public async Task<Result> QueueInspectPlexServerJob(int plexServerId)
@@ -78,6 +80,11 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
             return Result.Fail($"A {nameof(InspectPlexServerByPlexAccountIdJob)} with {nameof(plexAccountId)} {plexAccountId} is already running")
                 .LogWarning();
         }
+
+        // Before returning we must ensure the accessible plex servers are retrieved because otherwise the front-end will prematurely re-fetch the created plex account without any accessibility.
+        var plexServerResult = await _plexServerService.RefreshAccessiblePlexServersAsync(plexAccountId);
+        if (plexServerResult.IsFailed)
+            return plexServerResult.ToResult();
 
         var job = JobBuilder.Create<InspectPlexServerByPlexAccountIdJob>()
             .UsingJobData(InspectPlexServerByPlexAccountIdJob.PlexAccountIdParameter, plexAccountId)

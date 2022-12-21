@@ -6,31 +6,27 @@ public class PlexServerService : IPlexServerService
 {
     private readonly IMediator _mediator;
 
-    private readonly IPlexLibraryService _plexLibraryService;
-
-    private readonly ISignalRService _signalRService;
-
     private readonly IServerSettingsModule _serverSettingsModule;
+    private readonly ISyncServerScheduler _syncServerScheduler;
     private readonly IPlexServerConnectionsService _plexServerConnectionsService;
 
     private readonly IPlexApiService _plexServiceApi;
-
-    private readonly List<int> _currentSyncingPlexServers = new();
+    private readonly IPlexLibraryService _plexLibraryService;
 
     public PlexServerService(
         IMediator mediator,
         IPlexApiService plexServiceApi,
         IPlexLibraryService plexLibraryService,
-        ISignalRService signalRService,
         IServerSettingsModule serverSettingsModule,
+        ISyncServerScheduler syncServerScheduler,
         IPlexServerConnectionsService plexServerConnectionsService)
     {
         _mediator = mediator;
-        _plexLibraryService = plexLibraryService;
-        _signalRService = signalRService;
         _serverSettingsModule = serverSettingsModule;
+        _syncServerScheduler = syncServerScheduler;
         _plexServerConnectionsService = plexServerConnectionsService;
         _plexServiceApi = plexServiceApi;
+        _plexLibraryService = plexLibraryService;
     }
 
 
@@ -43,7 +39,7 @@ public class PlexServerService : IPlexServerService
     /// <param name="plexAccountId"></param>
     /// <param name="skipRefreshAccessibleServers"></param>
     /// <returns></returns>
-    public async Task<Result> InspectPlexServers(int plexAccountId, bool skipRefreshAccessibleServers = false)
+    public async Task<Result> InspectAllPlexServersByAccountId(int plexAccountId, bool skipRefreshAccessibleServers = false)
     {
         var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId, true));
         if (plexAccountResult.IsFailed)
@@ -58,11 +54,15 @@ public class PlexServerService : IPlexServerService
             var refreshResult = await RefreshAccessiblePlexServersAsync(plexAccount.Id);
             if (refreshResult.IsFailed)
                 return refreshResult.ToResult();
+
+// TODO needs refresh libraries accessible
+            // await _plexLibraryService.RetrieveAccessibleLibrariesAsync(plexAccountId,)
         }
         else
-            Log.Warning($"Skipping {nameof(RefreshAccessiblePlexServersAsync)} in {nameof(InspectPlexServers)}");
+            Log.Warning($"Skipping {nameof(RefreshAccessiblePlexServersAsync)} in {nameof(InspectAllPlexServersByAccountId)}");
 
-        var checkResult = await CheckAllServersWithAllConnections(plexServers);
+        // Create connection check tasks for all connections
+        var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServersByAccountIdAsync(plexAccount.Id);
         if (checkResult.IsFailed)
             return checkResult;
 
@@ -72,15 +72,17 @@ public class PlexServerService : IPlexServerService
 
     public async Task<Result<PlexServer>> InspectPlexServer(int plexServerId)
     {
-        var refreshResult = await RefreshAccessiblePlexServerAsync(plexServerId);
+        var refreshResult = await RefreshPlexServerConnectionsAsync(plexServerId);
         if (refreshResult.IsFailed)
             return refreshResult.ToResult();
 
-        var checkResult = await _plexServerConnectionsService.CheckAllPlexServerConnectionsAsync(plexServerId);
+        var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServerAsync(plexServerId);
         if (checkResult.IsFailed)
-            return checkResult.ToResult();
+            return checkResult;
 
-        //TODO Add libraries syncing here
+        await _plexLibraryService.RetrieveAccessibleLibrariesForAllAccountsAsync(plexServerId);
+
+        await _syncServerScheduler.QueueSyncPlexServerJob(plexServerId, true);
 
         Log.Information($"Successfully finished the inspection of {nameof(PlexServer)} with id {plexServerId}");
         return await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
@@ -90,7 +92,8 @@ public class PlexServerService : IPlexServerService
 
     #region RefreshPlexServers
 
-    public async Task<Result<PlexServer>> RefreshAccessiblePlexServerAsync(int plexServerId)
+    /// <inheritdoc/>
+    public async Task<Result<PlexServer>> RefreshPlexServerConnectionsAsync(int plexServerId)
     {
         // Pick an account that has access to the PlexServer to connect with
         var plexAccountResult = await ChoosePlexAccountToConnect(plexServerId);
@@ -105,7 +108,7 @@ public class PlexServerService : IPlexServerService
         var plexAccount = plexAccountResult.Value;
 
         // Retrieve the PlexApi server data
-        var tupleResult = await _plexServiceApi.GetServersAsync(plexAccount.Id);
+        var tupleResult = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccount.Id);
         var serverList = tupleResult.servers.Value
             .FindAll(x => x.MachineIdentifier == plexServer.MachineIdentifier);
 
@@ -136,7 +139,7 @@ public class PlexServerService : IPlexServerService
             return ResultExtensions.IsInvalidId(nameof(plexAccountId)).LogWarning();
 
         Log.Debug($"Refreshing Plex servers for PlexAccount: {plexAccountId}");
-        var tupleResult = await _plexServiceApi.GetServersAsync(plexAccountId);
+        var tupleResult = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccountId);
         var serversResult = tupleResult.servers;
         var tokensResult = tupleResult.tokens;
 
@@ -169,126 +172,6 @@ public class PlexServerService : IPlexServerService
     }
 
     #endregion
-
-    #region SyncServers
-
-    public async Task<Result> SyncPlexServers(bool forceSync = false)
-    {
-        var plexServersResult = await GetAllPlexServersAsync();
-        if (plexServersResult.IsFailed)
-            return plexServersResult.ToResult();
-
-        return await SyncPlexServers(plexServersResult.Value.Select(x => x.Id).ToList());
-    }
-
-    public async Task<Result> SyncPlexServers(List<int> plexServerIds, bool forceSync = false)
-    {
-        var results = new List<Result>();
-
-        foreach (var plexServerId in plexServerIds)
-        {
-            var result = await SyncPlexServer(plexServerId, forceSync);
-            if (result.IsFailed)
-                results.Add(result);
-        }
-
-        if (results.Any())
-        {
-            var failedResult = Result.Fail("Some libraries failed to sync");
-            results.ForEach(x => { failedResult.AddNestedErrors(x.Errors); });
-            return failedResult.LogError();
-        }
-
-        return Result.Ok();
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result> SyncPlexServer(int plexServerId, bool forceSync = false)
-    {
-        if (_currentSyncingPlexServers.Contains(plexServerId))
-            return Result.Ok($"PlexServer with id {plexServerId} is already syncing").LogWarning().ToResult();
-
-        _currentSyncingPlexServers.Add(plexServerId);
-
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, includeLibraries: true));
-        if (plexServerResult.IsFailed)
-        {
-            _currentSyncingPlexServers.Remove(plexServerId);
-            return plexServerResult.ToResult();
-        }
-
-        var plexServer = plexServerResult.Value;
-        var results = new List<Result>();
-
-        var plexLibraries = forceSync
-            ? plexServer.PlexLibraries
-            : plexServer.PlexLibraries.FindAll(
-                x => x.Outdated
-                     && x.Type is PlexMediaType.Movie or PlexMediaType.TvShow);
-
-        if (!plexLibraries.Any())
-        {
-            _currentSyncingPlexServers.Remove(plexServerId);
-            return Result.Ok()
-                .WithReason(new Success($"PlexServer {plexServer.Name} with id {plexServer.Id} has no libraries to sync"))
-                .LogInformation();
-        }
-
-        // Send progress on every library update
-        var progressList = new List<LibraryProgress>();
-
-        // Initialize list
-        plexLibraries.ForEach(x => progressList.Add(new LibraryProgress(x.Id, 0, x.MediaCount)));
-
-        var progress = new Action<LibraryProgress>(libraryProgress =>
-        {
-            var i = progressList.FindIndex(x => x.Id == libraryProgress.Id);
-            if (i != -1)
-                progressList[i] = libraryProgress;
-            else
-                progressList.Add(libraryProgress);
-
-            _signalRService.SendServerSyncProgressUpdate(new SyncServerProgress(plexServerId, progressList));
-        });
-
-        // Sync movie type libraries first because it is a lot quicker than TvShows.
-        foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.Movie))
-        {
-            var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id, progress);
-            if (result.IsFailed)
-                results.Add(result.ToResult());
-        }
-
-        foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.TvShow))
-        {
-            var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id, progress);
-            if (result.IsFailed)
-                results.Add(result.ToResult());
-        }
-
-        if (results.Any())
-        {
-            var failedResult = Result.Fail($"Some libraries failed to sync in PlexServer: {plexServer.Name}");
-            results.ForEach(x => { failedResult.AddNestedErrors(x.Errors); });
-            _currentSyncingPlexServers.Remove(plexServerId);
-            return failedResult.LogError();
-        }
-
-        _currentSyncingPlexServers.Remove(plexServerId);
-        return Result.Ok();
-    }
-
-    #endregion
-
-    public async Task<Result> CheckAllServersWithAllConnections(List<PlexServer> plexServers)
-    {
-        // Create connection check tasks for all connections
-        var connectionTasks = plexServers
-            .Select(async plexServer => await _plexServerConnectionsService.CheckAllPlexServerConnectionsAsync(plexServer.Id));
-
-        var tasksResult = await Task.WhenAll(connectionTasks);
-        return Result.Merge(tasksResult).ToResult();
-    }
 
     public async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(int plexServerId)
     {

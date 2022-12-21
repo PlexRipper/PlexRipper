@@ -25,21 +25,14 @@ public interface IPlexServerService
     /// <param name="plexAccountId"></param>
     /// <param name="skipRefreshAccessibleServers"></param>
     /// <returns></returns>
-    Task<Result> InspectPlexServers(int plexAccountId, bool skipRefreshAccessibleServers = false);
-
-    Task<Result> SyncPlexServers(bool forceSync = false);
-
-    Task<Result> SyncPlexServers(List<int> plexServerIds, bool forceSync = false);
+    Task<Result> InspectAllPlexServersByAccountId(int plexAccountId, bool skipRefreshAccessibleServers = false);
 
     /// <summary>
-    /// Take all <see cref="PlexLibrary">PlexLibraries.</see> and retrieve all data to then store in the database.
+    /// Refreshes the <see cref="PlexServer"/> data with connections from the Plex API
     /// </summary>
-    /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to use.</param>
-    /// <param name="forceSync">By default, the libraries which have been synced less than 6 hours ago will be skipped. </param>
-    /// <returns><see cref="Result"/></returns>
-    Task<Result> SyncPlexServer(int plexServerId, bool forceSync = false);
-
-    Task<Result<PlexServer>> RefreshAccessiblePlexServerAsync(int plexServerId);
+    /// <param name="plexServerId"></param>
+    /// <returns></returns>
+    Task<Result<PlexServer>> RefreshPlexServerConnectionsAsync(int plexServerId);
 
     Task<Result<PlexServer>> InspectPlexServer(int plexServerId);
 

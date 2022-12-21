@@ -1,4 +1,5 @@
 using BackgroundServices.Base;
+using PlexRipper.Application;
 using Quartz;
 
 namespace BackgroundServices.SyncServer;
@@ -8,8 +9,12 @@ public class SyncServerScheduler : BaseScheduler, ISyncServerScheduler
     protected override JobKey DefaultJobKey => new($"PlexServerId_", nameof(SyncServerScheduler));
     public SyncServerScheduler(IScheduler scheduler) : base(scheduler) { }
 
-    public async Task<Result> QueueSyncPlexServersJob(int plexServerId)
+    /// <inheritdoc/>
+    public async Task<Result> QueueSyncPlexServerJob(int plexServerId, bool forceSync = false)
     {
+        if (plexServerId <= 0)
+            return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId);
+
         var key = GetJobKey(plexServerId);
         if (await IsJobRunning(key))
         {
@@ -19,14 +24,15 @@ public class SyncServerScheduler : BaseScheduler, ISyncServerScheduler
 
         var job = JobBuilder.Create<SyncServerJob>()
             .UsingJobData(SyncServerJob.PlexServerIdParameter, plexServerId)
+            .UsingJobData(SyncServerJob.ForceSyncParameter, forceSync)
             .WithIdentity(key)
             .Build();
 
-        // Trigger the job to run now, and then every 40 seconds
+        // Trigger the job to run now
         var trigger = TriggerBuilder.Create()
-            .WithSimpleSchedule(x => x
-                .WithIntervalInHours(6)
-                .RepeatForever())
+            .WithIdentity($"{key.Name}_trigger", key.Group)
+            .ForJob(job)
+            .StartNow()
             .Build();
 
         await ScheduleJob(job, trigger);

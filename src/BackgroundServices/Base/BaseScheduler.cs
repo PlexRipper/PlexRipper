@@ -14,13 +14,9 @@ public abstract class BaseScheduler
         return new JobKey($"{DefaultJobKey.Name}_{id}", DefaultJobKey.Group);
     }
 
-    protected async Task<bool> IsJobRunning(JobKey key)
+    protected Task<bool> IsJobRunning(JobKey key)
     {
-        var jobs = await _scheduler.GetCurrentlyExecutingJobs();
-        if (!jobs.Any())
-            return false;
-
-        return jobs.FirstOrDefault(executionContext => Equals(executionContext.JobDetail.Key, key)) != null;
+        return _scheduler.CheckExists(key);
     }
 
 

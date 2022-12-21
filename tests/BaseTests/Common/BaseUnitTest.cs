@@ -28,7 +28,17 @@ public class BaseUnitTest : IDisposable
     /// </summary>
     protected void ResetDbContext()
     {
-        DbContext = MockDatabase.GetMemoryDbContext(DatabaseName);
+        DbContext = GetDbContext();
+    }
+
+    protected PlexRipperDbContext GetDbContext()
+    {
+        return MockDatabase.GetMemoryDbContext(DatabaseName);
+    }
+
+    protected void SaveChanges()
+    {
+        DbContext.SaveChanges();
     }
 
 

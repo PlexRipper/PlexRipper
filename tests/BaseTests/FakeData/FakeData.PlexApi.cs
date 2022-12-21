@@ -62,7 +62,7 @@ public static partial class FakeData
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.Type, _ => config.LibraryType)
             .RuleFor(x => x.PlexServerId, f => f.Random.Int(1, 10000))
-            .RuleFor(x => x.PlexServer, _ => new PlexServer())
+            .RuleFor(x => x.PlexServer, _ => null)
             .RuleFor(x => x.CreatedAt, f => f.Date.Past(4))
             .RuleFor(x => x.UpdatedAt, f => f.Date.Recent())
             .RuleFor(x => x.ScannedAt, f => f.Date.Recent())
@@ -71,12 +71,12 @@ public static partial class FakeData
             .RuleFor(x => x.LibraryLocationId, f => f.Random.Int(1, 10000))
             .RuleFor(x => x.LibraryLocationPath, f => f.System.DirectoryPath())
             .RuleFor(x => x.MetaData, _ => new PlexLibraryMetaData())
-            .RuleFor(x => x.DefaultDestination, _ => new FolderPath())
+            .RuleFor(x => x.DefaultDestination, _ => null)
             .RuleFor(x => x.DefaultDestinationId, f => f.Random.Int(1, 5))
             .RuleFor(x => x.Movies, _ => new List<PlexMovie>())
             .RuleFor(x => x.TvShows, _ => new List<PlexTvShow>())
-            .RuleFor(x => x.PlexAccountLibraries, _ => new List<PlexAccountLibrary>())
-            .RuleFor(x => x.DownloadTasks, _ => new List<DownloadTask>());
+            .RuleFor(x => x.PlexAccountLibraries, _ => null)
+            .RuleFor(x => x.DownloadTasks, _ => null);
     }
 
     public static Faker<FolderPath> GetFolderPaths([CanBeNull] Action<UnitTestDataConfig> options = null)
@@ -109,7 +109,10 @@ public static partial class FakeData
             .RuleFor(x => x.Port, f => uri?.Port ?? f.Internet.Port())
             .RuleFor(x => x.Local, _ => false)
             .RuleFor(x => x.Relay, _ => false)
+            .RuleFor(x => x.IPv4, _ => true)
             .RuleFor(x => x.IPv6, _ => false)
+            .RuleFor(x => x.PortFix, _ => false)
+            .RuleFor(x => x.PlexServerStatus, _ => new List<PlexServerStatus>())
             .RuleFor(x => x.PlexServer, _ => null)
             .RuleFor(x => x.PlexServerId, _ => 0);
     }

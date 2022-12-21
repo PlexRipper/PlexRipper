@@ -2,16 +2,13 @@
 
 public class AddOrUpdatePlexLibrariesCommand : IRequest<Result>
 {
-    public PlexAccount PlexAccount { get; }
-
-    public PlexServer PlexServer { get; }
+    public int PlexAccountId { get; }
 
     public List<PlexLibrary> PlexLibraries { get; }
 
-    public AddOrUpdatePlexLibrariesCommand(PlexAccount plexAccount, PlexServer plexServer, List<PlexLibrary> plexLibraries)
+    public AddOrUpdatePlexLibrariesCommand(int plexAccountId, List<PlexLibrary> plexLibraries)
     {
-        PlexAccount = plexAccount;
-        PlexServer = plexServer;
+        PlexAccountId = plexAccountId;
         PlexLibraries = plexLibraries;
     }
 }

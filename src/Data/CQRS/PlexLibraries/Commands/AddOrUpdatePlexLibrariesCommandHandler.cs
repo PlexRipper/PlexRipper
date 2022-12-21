@@ -9,9 +9,15 @@ public class AddOrUpdatePlexLibrariesValidator : AbstractValidator<AddOrUpdatePl
 {
     public AddOrUpdatePlexLibrariesValidator()
     {
-        RuleFor(x => x.PlexServer).NotNull();
-        RuleFor(x => x.PlexServer.Id).GreaterThan(0);
+        RuleFor(x => x.PlexAccountId).GreaterThan(0);
         RuleFor(x => x.PlexLibraries).NotEmpty();
+        RuleForEach(x => x.PlexLibraries)
+            .ChildRules(library =>
+            {
+                library.RuleFor(x => x.PlexServerId).GreaterThan(0);
+                library.RuleFor(x => x.Title).NotEmpty();
+                library.RuleFor(x => x.Uuid).NotEmpty();
+            });
     }
 }
 
@@ -21,24 +27,26 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
 
     public async Task<Result> Handle(AddOrUpdatePlexLibrariesCommand command, CancellationToken cancellationToken)
     {
-        var plexAccount = command.PlexAccount;
-        var plexServer = command.PlexServer;
         var plexLibraries = command.PlexLibraries;
+        var plexAccountId = command.PlexAccountId;
+        var plexServerId = plexLibraries[0].PlexServerId;
+
+        var plexAccount = await _dbContext.PlexAccounts.FindAsync(plexAccountId);
+        var plexServer = await _dbContext.PlexServers.FindAsync(plexServerId);
 
         // Add or update the PlexLibraries in the database
         Log.Information($"Starting the add or update process of the PlexLibraries for PlexServer: {plexServer.Name}.");
-        Log.Information("Adding or updating PlexServers now.");
+
         foreach (var plexLibrary in plexLibraries)
         {
             var plexLibraryDB = await _dbContext.PlexLibraries
-                .Include(x => x.PlexServer)
-                .FirstOrDefaultAsync(x => x.PlexServer.Id == plexServer.Id && x.Key == plexLibrary.Key, cancellationToken);
+                .FirstOrDefaultAsync(x => x.PlexServer.Id == plexLibrary.PlexServerId && x.Uuid == plexLibrary.Uuid, cancellationToken);
+
+            plexLibrary.SetNull();
 
             if (plexLibraryDB == null)
             {
-                // Create plexServer
                 Log.Debug($"Adding PlexLibrary {plexLibrary.Title} to the database.");
-                plexLibrary.PlexServerId = plexServer.Id;
                 await _dbContext.PlexLibraries.AddAsync(plexLibrary, cancellationToken);
             }
             else
@@ -46,7 +54,6 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
                 // PlexServer already exists
                 Log.Debug($"Updating PlexLibrary {plexLibrary.Title} with id: {plexLibrary.Id} in the database.");
                 plexLibrary.Id = plexLibraryDB.Id;
-                plexLibrary.PlexServerId = plexServer.Id;
                 _dbContext.PlexLibraries.Update(plexLibrary);
             }
         }
@@ -54,15 +61,15 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Add or update the PlexAccount, PlexServer and PlexLibrary relationships
-        Log.Information("Adding or updating the PlexAccount association with PlexLibraries now.");
+        Log.Information($"Adding or updating the PlexAccount ({plexAccount.DisplayName}) association with PlexLibraries now.");
         foreach (var plexLibrary in plexLibraries)
         {
             // Check if this PlexAccount has been associated with the PlexLibrary already
             var plexAccountLibrary = await _dbContext
                 .PlexAccountLibraries
-                .Where(x => x.PlexAccountId == plexAccount.Id
+                .Where(x => x.PlexAccountId == plexAccountId
                             && x.PlexLibraryId == plexLibrary.Id
-                            && x.PlexServerId == plexServer.Id)
+                            && x.PlexServerId == plexLibrary.PlexServerId)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (plexAccountLibrary == null)
@@ -73,9 +80,9 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
 
                 await _dbContext.PlexAccountLibraries.AddAsync(new PlexAccountLibrary
                 {
-                    PlexAccountId = plexAccount.Id,
+                    PlexAccountId = plexAccountId,
                     PlexLibraryId = plexLibrary.Id,
-                    PlexServerId = plexServer.Id,
+                    PlexServerId = plexServerId,
                 }, cancellationToken);
             }
             else
@@ -87,50 +94,6 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
-
-        // Remove plexLibraries the PlexAccount no longer has access to.
-        // TODO Add a separate function that cleans up the database for libraries that have no PlexAccounts which can access them
-
-        //Log.Information("Removing PlexAccount associations with PlexServers that are not accessible anymore");
-        //var currentList = new List<PlexAccountLibrary>();
-        //foreach (var plexLibrary in plexLibraries)
-        //{
-        //    var plexAccountLibrary = await _dbContext.PlexAccountLibraries.FirstOrDefaultAsync(x =>
-        //        x.PlexAccountId == plexAccount.Id
-        //        && x.PlexLibraryId == plexLibrary.Id
-        //        && x.PlexServerId == plexServer.Id);
-        //    currentList.Add(plexAccountLibrary);
-        //}
-
-        // Check if there are plexLibraries that can be deleted because there no PlexAccounts who have access to them anymore.
-        //var removalList = await _dbContext.PlexAccountLibraries.AsTracking()
-        //    .Where(x => x.PlexAccountId == plexAccount.Id && x.PlexServerId == plexServer.Id)
-        //    .ToListAsync();
-
-        //removalList = currentList.Except(removalList).ToList();
-
-        //removalList.Where(x => !currentList.Any(y => y.))
-
-        //if (removalList.Any())
-        //{
-        //    _dbContext.PlexAccountLibraries.RemoveRange(removalList);
-
-        //    foreach (var plexAccountLibrary in removalList)
-        //    {
-        //        var list = new List<PlexAccountLibrary> { plexAccountLibrary };
-        //        var foundList = await _dbContext.PlexAccountLibraries.Where(x =>
-        //            x.PlexLibraryId == plexAccountLibrary.PlexLibraryId
-        //            && x.PlexServerId == plexAccountLibrary.PlexServerId).ToListAsync();
-        //        foundList = foundList.Except(list).ToList();
-
-        //        if (foundList.Count == 0)
-        //        {
-        //            var entity = await _dbContext.PlexLibraries.FirstOrDefaultAsync(x => x.Id == plexAccountLibrary.PlexLibraryId);
-        //            _dbContext.PlexLibraries.Remove(entity);
-        //        }
-        //    }
-        //    await _dbContext.SaveChangesAsync();
-        //}
 
         return Result.Ok();
     }

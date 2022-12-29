@@ -10,7 +10,7 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
     public DownloadController_StartCommand_IntegrationTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
-    public async Task ShouldStartQueuedMoviewDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
+    public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
     {
         // Arrange
         await CreateContainer(config =>

@@ -53,7 +53,8 @@ public class BackgroundServicesModule : Module
                     .AsImplementedInterfaces()
                     .InstancePerMatchingLifetimeScope(tag);
             },
-            ConfigurationProvider = _ => quartzProps,
+            // During integration testing, we cannot use a real JobStore so we revert to default
+            ConfigurationProvider = _ => EnvironmentExtensions.IsIntegrationTestMode() ? new NameValueCollection() : quartzProps,
         });
 
         builder.RegisterModule(new QuartzAutofacJobsModule(typeof(SyncServerJob).Assembly));

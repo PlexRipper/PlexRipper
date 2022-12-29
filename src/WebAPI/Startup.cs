@@ -26,13 +26,10 @@ public sealed class Startup
     /// <param name="services"></param>
     public void ConfigureServices(IServiceCollection services)
     {
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
-        {
+        if (EnvironmentExtensions.IsIntegrationTestMode())
+            StartupExtensions.SetupTestConfigureServices(services, CurrentEnvironment);
+        else
             StartupExtensions.SetupConfigureServices(services, CurrentEnvironment);
-            return;
-        }
-
-        StartupExtensions.SetupTestConfigureServices(services, CurrentEnvironment);
     }
 
     /// <summary>
@@ -41,12 +38,9 @@ public sealed class Startup
     /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
     public void Configure(IApplicationBuilder app)
     {
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
-        {
+        if (EnvironmentExtensions.IsIntegrationTestMode())
+            StartupExtensions.SetupTestConfigure(app, CurrentEnvironment);
+        else
             StartupExtensions.SetupConfigure(app, CurrentEnvironment);
-            return;
-        }
-
-        StartupExtensions.SetupTestConfigure(app, CurrentEnvironment);
     }
 }

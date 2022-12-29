@@ -64,5 +64,13 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 
         if (_config.MockConfigManager is not null)
             builder.RegisterInstance(_config.MockConfigManager).As<IConfigManager>();
+
+        if (_config.MockPlexApi is not null)
+        {
+            builder
+                .RegisterInstance(_config.MockPlexApi.CreateClient())
+                .As<System.Net.Http.HttpClient>()
+                .SingleInstance();
+        }
     }
 }

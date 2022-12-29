@@ -117,7 +117,7 @@ public abstract class BaseController : ControllerBase
             return new OkObjectResult(resultDTO);
         }
 
-        var failedResult = _mapper.Map<ResultDTO>(result);
+        var failedResult = _mapper.Map<ResultDTO>(result.ToResult());
         if (result.Has400BadRequestError())
             return new BadRequestObjectResult(failedResult);
 

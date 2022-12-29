@@ -11,7 +11,7 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
 
     protected async Task CreateContainer(int seed)
     {
-        await CreateContainer(config => { config.Seed = seed; });
+        await CreateContainer(config => config.Seed = seed);
     }
 
     protected async Task CreateContainer([CanBeNull] Action<UnitTestDataConfig> options = null)

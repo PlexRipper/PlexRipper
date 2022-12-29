@@ -1,4 +1,6 @@
 using PlexRipper.Application;
+using PlexRipper.PlexApi.Api.Users.SignIn;
+using PlexRipper.PlexApi.Common;
 using PlexRipper.PlexApi.Common.DTO;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
@@ -16,21 +18,14 @@ public class PlexApi
 
     private PlexApiClient _client { get; }
 
-    private const string _signInUrl = "https://plex.tv/api/v2/users/signin";
-
-    private const string _getAccountUrl = "https://plex.tv/users/account.json";
-
-    private const string _plexServerUrl = "https://plex.tv/api/v2/resources";
-
-    private const string _plexPinUrl = "https://plex.tv/api/v2/pins";
-
     /// <summary>
     /// Sign into the Plex API
     /// This is for authenticating users credentials with Plex.
-    /// <para>NOTE: Plex "Managed" users do not work.</para>
+    /// <remarks>NOTE: Plex "Managed" users do not work.</remarks>
+    /// <example>URL: https://plex.tv/api/v2/users/signin?X-Plex-Client-Identifier=Chrome</example>
     /// </summary>
     /// <returns></returns>
-    public async Task<Result<PlexAccountDTO>> PlexSignInAsync(PlexAccount plexAccount)
+    public async Task<Result<SignInResponse>> PlexSignInAsync(PlexAccount plexAccount)
     {
         Log.Debug($"Requesting PlexToken for account {plexAccount.Username}");
         var credentials = new CredentialsDTO
@@ -43,11 +38,11 @@ public class PlexApi
         if (plexAccount.Is2Fa)
             credentials.VerificationCode = plexAccount.VerificationCode;
 
-        var request = new RestRequest(new Uri(_signInUrl), Method.Post)
+        var request = new RestRequest(new Uri(PlexApiPaths.SignInUrl), Method.Post)
             .AddPlexHeaders(plexAccount.ClientId)
             .AddJsonBody(credentials);
 
-        return await _client.SendRequestAsync<PlexAccountDTO>(request, 0);
+        return await _client.SendRequestAsync<SignInResponse>(request, 0);
     }
 
     public async Task<Result<string>> RefreshPlexAuthTokenAsync(PlexAccount plexAccount)
@@ -95,16 +90,6 @@ public class PlexApi
         });
     }
 
-    public async Task<PlexAccountDTO> GetAccountAsync(string authToken)
-    {
-        var request = new RestRequest(new Uri(_getAccountUrl));
-
-        request.AddToken(authToken);
-
-        var result = await _client.SendRequestAsync<PlexAccountDTO>(request);
-        return result.ValueOrDefault;
-    }
-
     /// <summary>
     /// Retrieves all the accessible plex server based on the <see cref="PlexAccount"/> token
     /// </summary>
@@ -112,7 +97,7 @@ public class PlexApi
     /// <returns></returns>
     public async Task<Result<List<ServerResource>>> GetServerAsync(string authToken)
     {
-        var request = new RestRequest(new Uri(_plexServerUrl));
+        var request = new RestRequest(new Uri(PlexApiPaths.PlexServerUrl));
         request.AddToken(authToken);
         request.AddPlexClientIdentifier();
 
@@ -253,7 +238,7 @@ public class PlexApi
 
     public async Task<Result<AuthPin>> Get2FAPin(string clientId)
     {
-        var request = new RestRequest(new Uri(_plexPinUrl), Method.Post);
+        var request = new RestRequest(new Uri(PlexApiPaths.PlexPinUrl), Method.Post);
 
         request.AddPlexHeaders(clientId);
 
@@ -262,7 +247,7 @@ public class PlexApi
 
     public async Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId)
     {
-        var request = new RestRequest(new Uri($"{_plexPinUrl}/{pinId}"))
+        var request = new RestRequest(new Uri($"{PlexApiPaths.PlexPinUrl}/{pinId}"))
         {
             RequestFormat = DataFormat.Json,
         };

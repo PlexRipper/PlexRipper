@@ -10,9 +10,6 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount);
 
-    Task<PlexAccount> GetAccountAsync(string authToken);
-
-
     /// <summary>
     /// Retrieves the accessible <see cref="PlexServer">PlexServers</see> by this <see cref="PlexAccount"/> server token.
     /// </summary>

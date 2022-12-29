@@ -2,6 +2,7 @@
 using PlexRipper.Application;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
 using PlexRipper.PlexApi.Api;
+using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Models;
 using Directory = PlexRipper.PlexApi.Models.Directory;
 
@@ -12,7 +13,7 @@ public class PlexApiMappingProfile : Profile
     public PlexApiMappingProfile()
     {
         // PlexUser -> PlexAccount
-        CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
+        CreateMap<SignInResponse, PlexAccount>(MemberList.None)
             .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
             .ForMember(dest => dest.PlexId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.AuthenticationToken, opt => opt.MapFrom(src => src.AuthToken))
@@ -116,6 +117,7 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
             .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
             .ForMember(dest => dest.IPv4, opt => opt.MapFrom(x => x.Address.IsIpAddress() && !x.IPv6))
+
             // The port fix is when we don't want to use the port when Address is a domain name
             .ForMember(dest => dest.PortFix, opt => opt.MapFrom(x => !x.Address.IsIpAddress() && !x.IPv6))
             .ForMember(dest => dest.PlexServerStatus, opt => opt.Ignore());

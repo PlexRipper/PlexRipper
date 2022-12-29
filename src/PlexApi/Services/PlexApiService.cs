@@ -35,17 +35,6 @@ public class PlexApiService : IPlexApiService
 
     #region Public
 
-    #region PlexAccount
-
-    public async Task<PlexAccount> GetAccountAsync(string authToken)
-    {
-        var result = await _plexApi.GetAccountAsync(authToken);
-        return _mapper.Map<PlexAccount>(result);
-    }
-
-    #endregion
-
-
     public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary)
     {
         var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId, true));

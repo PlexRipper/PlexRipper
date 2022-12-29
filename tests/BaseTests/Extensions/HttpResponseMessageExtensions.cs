@@ -1,13 +1,86 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
 using PlexRipper.Domain.Config;
+using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.BaseTests;
 
 public static class HttpResponseMessageExtensions
 {
-    public static async Task<T> Deserialize<T>(this HttpResponseMessage response)
+    public static async Task<ResultDTO<T>> Deserialize<T>(this HttpResponseMessage response)
     {
-        var jsonResponse = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<T>(jsonResponse, DefaultJsonSerializerOptions.ConfigBase);
+        var result = await response.Content.ReadFromJsonAsync<ResultDTO<T>>(DefaultJsonSerializerOptions.ConfigBase);
+
+        result.Reasons = result.Reasons.Select(x => new ReasonDTO
+            {
+                Message = x.Message,
+                Metadata = x.Metadata.ToTypedResultMetaData(),
+            })
+            .ToList();
+
+        result.Successes = result.Successes.Select(x => new SuccessDTO()
+            {
+                Message = x.Message,
+                Metadata = x.Metadata.ToTypedResultMetaData(),
+            })
+            .ToList();
+
+        result.Errors = result.Errors.Select(x => new ErrorDTO()
+            {
+                Message = x.Message,
+                Metadata = x.Metadata.ToTypedResultMetaData(),
+            })
+            .ToList();
+
+        return result;
+    }
+
+    /// <summary>
+    /// Deserializing to Dictionary(string, object) will make the value of the Dictionary a JsonElement
+    /// so we want to specify the type explicitly
+    /// </summary>
+    /// <param name="dict"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    private static Dictionary<string, object> ToTypedResultMetaData(this Dictionary<string, object> dict)
+    {
+        foreach (var keyValuePair in dict)
+        {
+            var value = keyValuePair.Value;
+            if (value is JsonElement element)
+            {
+                switch (element.ValueKind)
+                {
+                    case JsonValueKind.Undefined:
+                        break;
+                    case JsonValueKind.Object:
+                        value = element.GetRawText();
+                        break;
+                    case JsonValueKind.Array:
+                        break;
+                    case JsonValueKind.String:
+                        value = element.GetString();
+                        break;
+                    case JsonValueKind.Number:
+                        value = element.GetInt32();
+                        break;
+                    case JsonValueKind.True:
+                        value = true;
+                        break;
+                    case JsonValueKind.False:
+                        value = false;
+                        break;
+                    case JsonValueKind.Null:
+                        value = null;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            dict[keyValuePair.Key] = value;
+        }
+
+        return dict;
     }
 }

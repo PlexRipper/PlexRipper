@@ -27,7 +27,7 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
 
         // Act
         var response = await Container.ApiClient.GetAsync(ApiRoutes.Download.GetDownloadTasks);
-        var result = await response.Deserialize<ResultDTO<List<ServerDownloadProgressDTO>>>();
+        var result = await response.Deserialize<List<ServerDownloadProgressDTO>>();
 
         // Assert
         response.IsSuccessStatusCode.ShouldBeTrue();

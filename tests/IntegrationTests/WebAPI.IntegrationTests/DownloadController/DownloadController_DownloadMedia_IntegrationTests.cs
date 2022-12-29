@@ -57,7 +57,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
 
         // Act
         var response = await Container.PostAsync(ApiRoutes.Download.PostDownloadMedia, request);
-        var result = await response.Deserialize<ResultDTO<List<ServerDownloadProgressDTO>>>();
+        var result = await response.Deserialize<List<ServerDownloadProgressDTO>>();
 
         // ** Continue until after the application is idle
         while (finishedDownloadTaskIds.Count < tvShowEpisodeCount || finishedFileMergeTasksIds.Count < tvShowEpisodeCount)

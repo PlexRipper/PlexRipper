@@ -11,9 +11,9 @@ public class PlexAccountService : IPlexAccountService
 
     public PlexAccountService(
         IMediator mediator,
+        IPlexServerService plexServerService,
         IPlexApiService plexApiService,
-        IInspectServerScheduler inspectServerScheduler,
-        IPlexServerService plexServerService)
+        IInspectServerScheduler inspectServerScheduler)
     {
         _mediator = mediator;
         _plexApiService = plexApiService;

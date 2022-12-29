@@ -64,7 +64,9 @@ public class Boot : IBoot
         ServicePointManager.DefaultConnectionLimit = 1000;
 
         // First await the finishing off all these
-        Log.SetupLogging();
+        if (!EnvironmentExtensions.IsIntegrationTestMode())
+            Log.SetupLogging();
+
         _configManager.Setup();
         _downloadSubscriptions.Setup();
         _downloadQueue.Setup();

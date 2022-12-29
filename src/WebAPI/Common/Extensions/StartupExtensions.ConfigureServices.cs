@@ -79,7 +79,7 @@ public static partial class StartupExtensions
         services.AddHttpContextAccessor();
 
         // Fluent Validator
-        services.AddMvc(options => { options.Filters.Add<ValidateFilter>(); })
+        services.AddMvc()
             .AddFluentValidation(fv =>
             {
                 fv.RegisterValidatorsFromAssemblyContaining<WebApiModule>();

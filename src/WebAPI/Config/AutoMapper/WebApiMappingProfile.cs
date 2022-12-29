@@ -18,8 +18,15 @@ public class WebApiMappingProfile : Profile
     {
         // Result -> ResultDTO
         CreateMap<Result, ResultDTO>(MemberList.None);
-        CreateMap(typeof(Result<>), typeof(ResultDTO<>), MemberList.None);
-        CreateMap(typeof(Result<>), typeof(ResultDTO), MemberList.None);
+        CreateMap<ResultDTO, Result>(MemberList.None)
+            .ConvertUsing<ResultDTOToResult>();
+
+        // .ConvertUsing<ResultToResultDTO>();
+        CreateMap(typeof(Result<>), typeof(ResultDTO<>), MemberList.Destination).ReverseMap();
+        CreateMap(typeof(Result<>), typeof(ResultDTO), MemberList.Destination).ReverseMap();
+        CreateMap<IError, ErrorDTO>(MemberList.Destination).ReverseMap();
+        CreateMap<ISuccess, SuccessDTO>(MemberList.Destination).ReverseMap();
+        CreateMap<IReason, ReasonDTO>(MemberList.Destination).ReverseMap();
 
         // PlexLibrary -> PlexLibraryDTO
         CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)

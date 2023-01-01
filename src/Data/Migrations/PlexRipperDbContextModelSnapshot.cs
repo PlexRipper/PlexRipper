@@ -17,443 +17,443 @@ namespace PlexRipper.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.6");
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzBlobTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("TriggerName")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_name");
+                        .HasColumnName("TRIGGER_NAME");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_group");
+                        .HasColumnName("TRIGGER_GROUP");
 
                     b.Property<byte[]>("BlobData")
                         .HasColumnType("bytea")
-                        .HasColumnName("blob_data");
+                        .HasColumnName("BLOB_DATA");
 
                     b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
 
-                    b.ToTable("QRTZ_BLOB_TRIGGERS", "quartz");
+                    b.ToTable("QRTZ_BLOB_TRIGGERS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzCalendar", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCalendar", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("CalendarName")
                         .HasColumnType("text")
-                        .HasColumnName("calendar_name");
+                        .HasColumnName("CALENDAR_NAME");
 
                     b.Property<byte[]>("Calendar")
                         .IsRequired()
                         .HasColumnType("bytea")
-                        .HasColumnName("calendar");
+                        .HasColumnName("CALENDAR");
 
                     b.HasKey("SchedulerName", "CalendarName");
 
                     b.ToTable("QRTZ_CALENDARS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzCronTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCronTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("TriggerName")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_name");
+                        .HasColumnName("TRIGGER_NAME");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_group");
+                        .HasColumnName("TRIGGER_GROUP");
 
                     b.Property<string>("CronExpression")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("cron_expression");
+                        .HasColumnName("CRON_EXPRESSION");
 
                     b.Property<string>("TimeZoneId")
                         .HasColumnType("text")
-                        .HasColumnName("time_zone_id");
+                        .HasColumnName("TIME_ZONE_ID");
 
                     b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
 
                     b.ToTable("QRTZ_CRON_TRIGGERS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzFiredTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzFiredTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("EntryId")
                         .HasColumnType("text")
-                        .HasColumnName("entry_id");
+                        .HasColumnName("ENTRY_ID");
 
                     b.Property<long>("FiredTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("fired_time");
+                        .HasColumnName("FIRED_TIME");
 
                     b.Property<string>("InstanceName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("instance_name");
+                        .HasColumnName("INSTANCE_NAME");
 
                     b.Property<bool>("IsNonConcurrent")
                         .HasColumnType("bool")
-                        .HasColumnName("is_nonconcurrent");
+                        .HasColumnName("IS_NONCONCURRENT");
 
                     b.Property<string>("JobGroup")
                         .HasColumnType("text")
-                        .HasColumnName("job_group");
+                        .HasColumnName("JOB_GROUP");
 
                     b.Property<string>("JobName")
                         .HasColumnType("text")
-                        .HasColumnName("job_name");
+                        .HasColumnName("JOB_NAME");
 
                     b.Property<int>("Priority")
                         .HasColumnType("integer")
-                        .HasColumnName("priority");
+                        .HasColumnName("PRIORITY");
 
                     b.Property<bool?>("RequestsRecovery")
                         .HasColumnType("bool")
-                        .HasColumnName("requests_recovery");
+                        .HasColumnName("REQUESTS_RECOVERY");
 
                     b.Property<long>("ScheduledTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("sched_time");
+                        .HasColumnName("SCHED_TIME");
 
                     b.Property<string>("State")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("state");
+                        .HasColumnName("STATE");
 
                     b.Property<string>("TriggerGroup")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("trigger_group");
+                        .HasColumnName("TRIGGER_GROUP");
 
                     b.Property<string>("TriggerName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("trigger_name");
+                        .HasColumnName("TRIGGER_NAME");
 
                     b.HasKey("SchedulerName", "EntryId");
 
                     b.HasIndex("InstanceName")
-                        .HasDatabaseName("idx_QRTZ_ft_trig_inst_name");
+                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_INST_NAME");
 
                     b.HasIndex("JobGroup")
-                        .HasDatabaseName("idx_QRTZ_ft_job_group");
+                        .HasDatabaseName("IDX_QRTZ_FT_JOB_GROUP");
 
                     b.HasIndex("JobName")
-                        .HasDatabaseName("idx_QRTZ_ft_job_name");
+                        .HasDatabaseName("IDX_QRTZ_FT_JOB_NAME");
 
                     b.HasIndex("RequestsRecovery")
-                        .HasDatabaseName("idx_QRTZ_ft_job_req_recovery");
+                        .HasDatabaseName("IDX_QRTZ_FT_JOB_REQ_RECOVERY");
 
                     b.HasIndex("TriggerGroup")
-                        .HasDatabaseName("idx_QRTZ_ft_trig_group");
+                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_GROUP");
 
                     b.HasIndex("TriggerName")
-                        .HasDatabaseName("idx_QRTZ_ft_trig_name");
+                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_NAME");
 
                     b.HasIndex("SchedulerName", "TriggerName", "TriggerGroup")
-                        .HasDatabaseName("idx_QRTZ_ft_trig_nm_gp");
+                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_NM_GP");
 
                     b.ToTable("QRTZ_FIRED_TRIGGERS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzJobDetail", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("JobName")
                         .HasColumnType("text")
-                        .HasColumnName("job_name");
+                        .HasColumnName("JOB_NAME");
 
                     b.Property<string>("JobGroup")
                         .HasColumnType("text")
-                        .HasColumnName("job_group");
+                        .HasColumnName("JOB_GROUP");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
-                        .HasColumnName("description");
+                        .HasColumnName("DESCRIPTION");
 
                     b.Property<bool>("IsDurable")
                         .HasColumnType("bool")
-                        .HasColumnName("is_durable");
+                        .HasColumnName("IS_DURABLE");
 
                     b.Property<bool>("IsNonConcurrent")
                         .HasColumnType("bool")
-                        .HasColumnName("is_nonconcurrent");
+                        .HasColumnName("IS_NONCONCURRENT");
 
                     b.Property<bool>("IsUpdateData")
                         .HasColumnType("bool")
-                        .HasColumnName("is_update_data");
+                        .HasColumnName("IS_UPDATE_DATA");
 
                     b.Property<string>("JobClassName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("job_class_name");
+                        .HasColumnName("JOB_CLASS_NAME");
 
                     b.Property<byte[]>("JobData")
                         .HasColumnType("bytea")
-                        .HasColumnName("job_data");
+                        .HasColumnName("JOB_DATA");
 
                     b.Property<bool>("RequestsRecovery")
                         .HasColumnType("bool")
-                        .HasColumnName("requests_recovery");
+                        .HasColumnName("REQUESTS_RECOVERY");
 
                     b.HasKey("SchedulerName", "JobName", "JobGroup");
 
                     b.HasIndex("RequestsRecovery")
-                        .HasDatabaseName("idx_QRTZ_j_req_recovery");
+                        .HasDatabaseName("IDX_QRTZ_J_REQ_RECOVERY");
 
                     b.ToTable("QRTZ_JOB_DETAILS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzLock", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzLock", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("LockName")
                         .HasColumnType("text")
-                        .HasColumnName("lock_name");
+                        .HasColumnName("LOCK_NAME");
 
                     b.HasKey("SchedulerName", "LockName");
 
                     b.ToTable("QRTZ_LOCKS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzPausedTriggerGroup", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzPausedTriggerGroup", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_group");
+                        .HasColumnName("TRIGGER_GROUP");
 
                     b.HasKey("SchedulerName", "TriggerGroup");
 
                     b.ToTable("QRTZ_PAUSED_TRIGGER_GRPS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzSchedulerState", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSchedulerState", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("InstanceName")
                         .HasColumnType("text")
-                        .HasColumnName("instance_name");
+                        .HasColumnName("INSTANCE_NAME");
 
                     b.Property<long>("CheckInInterval")
                         .HasColumnType("bigint")
-                        .HasColumnName("checkin_interval");
+                        .HasColumnName("CHECKIN_INTERVAL");
 
                     b.Property<long>("LastCheckInTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("last_checkin_time");
+                        .HasColumnName("LAST_CHECKIN_TIME");
 
                     b.HasKey("SchedulerName", "InstanceName");
 
                     b.ToTable("QRTZ_SCHEDULER_STATE", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzSimplePropertyTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimplePropertyTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("TriggerName")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_name");
+                        .HasColumnName("TRIGGER_NAME");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_group");
+                        .HasColumnName("TRIGGER_GROUP");
 
                     b.Property<bool?>("BooleanProperty1")
                         .HasColumnType("bool")
-                        .HasColumnName("bool_prop_1");
+                        .HasColumnName("BOOL_PROP_1");
 
                     b.Property<bool?>("BooleanProperty2")
                         .HasColumnType("bool")
-                        .HasColumnName("bool_prop_2");
+                        .HasColumnName("BOOL_PROP_2");
 
                     b.Property<decimal?>("DecimalProperty1")
                         .HasColumnType("numeric")
-                        .HasColumnName("dec_prop_1");
+                        .HasColumnName("DEC_PROP_1");
 
                     b.Property<decimal?>("DecimalProperty2")
                         .HasColumnType("numeric")
-                        .HasColumnName("dec_prop_2");
+                        .HasColumnName("DEC_PROP_2");
 
                     b.Property<int?>("IntegerProperty1")
                         .HasColumnType("integer")
-                        .HasColumnName("int_prop_1");
+                        .HasColumnName("INT_PROP_1");
 
                     b.Property<int?>("IntegerProperty2")
                         .HasColumnType("integer")
-                        .HasColumnName("int_prop_2");
+                        .HasColumnName("INT_PROP_2");
 
                     b.Property<long?>("LongProperty1")
                         .HasColumnType("bigint")
-                        .HasColumnName("long_prop_1");
+                        .HasColumnName("LONG_PROP_1");
 
                     b.Property<long?>("LongProperty2")
                         .HasColumnType("bigint")
-                        .HasColumnName("long_prop_2");
+                        .HasColumnName("LONG_PROP_2");
 
                     b.Property<string>("StringProperty1")
                         .HasColumnType("text")
-                        .HasColumnName("str_prop_1");
+                        .HasColumnName("STR_PROP_1");
 
                     b.Property<string>("StringProperty2")
                         .HasColumnType("text")
-                        .HasColumnName("str_prop_2");
+                        .HasColumnName("STR_PROP_2");
 
                     b.Property<string>("StringProperty3")
                         .HasColumnType("text")
-                        .HasColumnName("str_prop_3");
+                        .HasColumnName("STR_PROP_3");
 
                     b.Property<string>("TimeZoneId")
                         .HasColumnType("text")
-                        .HasColumnName("time_zone_id");
+                        .HasColumnName("TIME_ZONE_ID");
 
                     b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
 
                     b.ToTable("QRTZ_SIMPROP_TRIGGERS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzSimpleTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimpleTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("TriggerName")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_name");
+                        .HasColumnName("TRIGGER_NAME");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_group");
+                        .HasColumnName("TRIGGER_GROUP");
 
                     b.Property<long>("RepeatCount")
                         .HasColumnType("bigint")
-                        .HasColumnName("repeat_count");
+                        .HasColumnName("REPEAT_COUNT");
 
                     b.Property<long>("RepeatInterval")
                         .HasColumnType("bigint")
-                        .HasColumnName("repeat_interval");
+                        .HasColumnName("REPEAT_INTERVAL");
 
                     b.Property<long>("TimesTriggered")
                         .HasColumnType("bigint")
-                        .HasColumnName("times_triggered");
+                        .HasColumnName("TIMES_TRIGGERED");
 
                     b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
 
                     b.ToTable("QRTZ_SIMPLE_TRIGGERS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("sched_name");
+                        .HasColumnName("SCHED_NAME");
 
                     b.Property<string>("TriggerName")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_name");
+                        .HasColumnName("TRIGGER_NAME");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("trigger_group");
+                        .HasColumnName("TRIGGER_GROUP");
 
                     b.Property<string>("CalendarName")
                         .HasColumnType("text")
-                        .HasColumnName("calendar_name");
+                        .HasColumnName("CALENDAR_NAME");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
-                        .HasColumnName("description");
+                        .HasColumnName("DESCRIPTION");
 
                     b.Property<long?>("EndTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("end_time");
+                        .HasColumnName("END_TIME");
 
                     b.Property<byte[]>("JobData")
                         .HasColumnType("bytea")
-                        .HasColumnName("job_data");
+                        .HasColumnName("JOB_DATA");
 
                     b.Property<string>("JobGroup")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("job_group");
+                        .HasColumnName("JOB_GROUP");
 
                     b.Property<string>("JobName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("job_name");
+                        .HasColumnName("JOB_NAME");
 
                     b.Property<short?>("MisfireInstruction")
                         .HasColumnType("smallint")
-                        .HasColumnName("misfire_instr");
+                        .HasColumnName("MISFIRE_INSTR");
 
                     b.Property<long?>("NextFireTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("next_fire_time");
+                        .HasColumnName("NEXT_FIRE_TIME");
 
                     b.Property<long?>("PreviousFireTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("prev_fire_time");
+                        .HasColumnName("PREV_FIRE_TIME");
 
                     b.Property<int?>("Priority")
                         .HasColumnType("integer")
-                        .HasColumnName("priority");
+                        .HasColumnName("PRIORITY");
 
                     b.Property<long>("StartTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("start_time");
+                        .HasColumnName("START_TIME");
 
                     b.Property<string>("TriggerState")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("trigger_state");
+                        .HasColumnName("TRIGGER_STATE");
 
                     b.Property<string>("TriggerType")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("trigger_type");
+                        .HasColumnName("TRIGGER_TYPE");
 
                     b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
 
                     b.HasIndex("NextFireTime")
-                        .HasDatabaseName("idx_QRTZ_t_next_fire_time");
+                        .HasDatabaseName("IDX_QRTZ_T_NEXT_FIRE_TIME");
 
                     b.HasIndex("TriggerState")
-                        .HasDatabaseName("idx_QRTZ_t_state");
+                        .HasDatabaseName("IDX_QRTZ_T_STATE");
 
                     b.HasIndex("NextFireTime", "TriggerState")
-                        .HasDatabaseName("idx_QRTZ_t_nft_st");
+                        .HasDatabaseName("IDX_QRTZ_T_NFT_ST");
 
                     b.HasIndex("SchedulerName", "JobName", "JobGroup");
 
@@ -1812,9 +1812,9 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowSeason");
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzBlobTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
-                    b.HasOne("PlexRipper.Data.Common.Quartz.QuartzTrigger", "Trigger")
+                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
                         .WithMany("BlobTriggers")
                         .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1823,9 +1823,9 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("Trigger");
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzCronTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCronTrigger", b =>
                 {
-                    b.HasOne("PlexRipper.Data.Common.Quartz.QuartzTrigger", "Trigger")
+                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
                         .WithMany("CronTriggers")
                         .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1834,9 +1834,9 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("Trigger");
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzSimplePropertyTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimplePropertyTrigger", b =>
                 {
-                    b.HasOne("PlexRipper.Data.Common.Quartz.QuartzTrigger", "Trigger")
+                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
                         .WithMany("SimplePropertyTriggers")
                         .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1845,9 +1845,9 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("Trigger");
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzSimpleTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimpleTrigger", b =>
                 {
-                    b.HasOne("PlexRipper.Data.Common.Quartz.QuartzTrigger", "Trigger")
+                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
                         .WithMany("SimpleTriggers")
                         .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1856,9 +1856,9 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("Trigger");
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
                 {
-                    b.HasOne("PlexRipper.Data.Common.Quartz.QuartzJobDetail", "JobDetail")
+                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", "JobDetail")
                         .WithMany("Triggers")
                         .HasForeignKey("SchedulerName", "JobName", "JobGroup")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2226,12 +2226,12 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("TvShow");
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzJobDetail", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", b =>
                 {
                     b.Navigation("Triggers");
                 });
 
-            modelBuilder.Entity("PlexRipper.Data.Common.Quartz.QuartzTrigger", b =>
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
                 {
                     b.Navigation("BlobTriggers");
 

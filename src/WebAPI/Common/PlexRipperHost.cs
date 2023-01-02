@@ -37,6 +37,9 @@ public static class PlexRipperHost
 
     public static IHostBuilder ConfigureDatabase(this IHostBuilder hostBuilder)
     {
+        if (EnvironmentExtensions.IsIntegrationTestMode())
+            return hostBuilder;
+
         var dbContext = new PlexRipperDbContext(new PathProvider());
         dbContext.Setup();
 

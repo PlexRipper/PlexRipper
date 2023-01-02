@@ -72,10 +72,7 @@ public class Boot : IBoot
         _downloadQueue.Setup();
         _downloadTracker.Setup();
         await _fileMerger.SetupAsync();
-
-        // TODO Remove this once the plexServer sync has been compatible for the integration test
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
-            await _schedulerService.SetupAsync();
+        await _schedulerService.SetupAsync();
 
         _appLifetime.ApplicationStarted.Register(OnStarted);
         _appLifetime.ApplicationStopping.Register(OnStopping);
@@ -98,7 +95,6 @@ public class Boot : IBoot
     private void OnStopped()
     {
         Log.Information("Boot.OnStopped has been called.");
-
         // Perform post-stopped activities here
     }
 

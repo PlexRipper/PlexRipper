@@ -47,7 +47,7 @@ public class SchedulerService : ISchedulerService
     public async Task<Result> StopAsync(bool graceFully = true)
     {
         if (!_scheduler.IsShutdown)
-            await _scheduler.Shutdown(graceFully);
+            await _scheduler.Shutdown(graceFully).WaitAsync(TimeSpan.FromSeconds(15));
 
         return _scheduler.IsStarted ? Result.Ok() : Result.Fail("Could not shutdown Scheduler").LogError();
     }

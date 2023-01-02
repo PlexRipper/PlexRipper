@@ -1,8 +1,12 @@
+using System.Collections.Specialized;
 using Autofac;
+using Autofac.Extras.Quartz;
+using Environment;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.Config;
+using PlexRipper.Domain.Autofac;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
 
@@ -38,6 +42,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
                 autoFacBuilder.RegisterModule<TestModule>();
 
                 SetMockedDependencies(autoFacBuilder);
+                RegisterBackgroundScheduler(autoFacBuilder);
 
                 //  SignalR requires the default ILogger
                 //  autoFacBuilder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
@@ -49,7 +54,15 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
         // Task.Run(() => host.StartAsync()).GetAwaiter().GetResult();
         // return host;
 
-        return base.CreateHost(builder);
+        try
+        {
+            return base.CreateHost(builder);
+        }
+        catch (Exception e)
+        {
+            Log.Fatal(e);
+            throw;
+        }
     }
 
     private void SetMockedDependencies(ContainerBuilder builder)
@@ -72,5 +85,42 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
                 .As<System.Net.Http.HttpClient>()
                 .SingleInstance();
         }
+    }
+
+    private void RegisterBackgroundScheduler(ContainerBuilder builder)
+    {
+        var connectionString = MockDatabase.DatabaseConnectionString(_config.MemoryDbName);
+        var testQuartzProps = new NameValueCollection
+        {
+            { "quartz.scheduler.instanceName", "PlexRipper Scheduler" },
+            { "quartz.serializer.type", "json" },
+            { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
+            { "quartz.threadPool.threadCount", "10" },
+            { "quartz.jobStore.misfireThreshold", "60000" },
+
+            // { "quartz.jobStore.type", "Quartz.Impl.AdoJobStore.JobStoreTX, Quartz" },
+            // { "quartz.jobStore.lockHandler.type", "Quartz.Impl.AdoJobStore.UpdateLockRowSemaphore, Quartz" },
+            // { "quartz.jobStore.dataSource", "default" },
+            // { "quartz.jobStore.tablePrefix", QuartzDatabaseConfig.Prefix },
+            // { "quartz.jobStore.performSchemaValidation", "false" },
+            // { "quartz.jobStore.driverDelegateType", "Quartz.Impl.AdoJobStore.SQLiteDelegate, Quartz" },
+            // { "quartz.dataSource.default.provider", "SQLite-Microsoft" },
+            // { "quartz.dataSource.default.connectionString", connectionString },
+        };
+
+        // Register Quartz dependencies
+        builder.RegisterModule(new QuartzAutofacFactoryModule
+        {
+            JobScopeConfigurator = (cb, tag) =>
+            {
+                // override dependency for job scope
+                cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
+                    .AsImplementedInterfaces()
+                    .InstancePerMatchingLifetimeScope(tag);
+            },
+
+            // During integration testing, we cannot use a real JobStore so we revert to default
+            ConfigurationProvider = _ => testQuartzProps,
+        });
     }
 }

@@ -6,13 +6,11 @@ namespace BackgroundServices.InspectPlexServer;
 
 public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
 {
-    private readonly IMediator _mediator;
     private readonly IPlexServerService _plexServerService;
     protected override JobKey DefaultJobKey => new($"PlexServerId_", nameof(InspectServerScheduler));
 
-    public InspectServerScheduler(IScheduler scheduler, IMediator mediator, IPlexServerService plexServerService) : base(scheduler)
+    public InspectServerScheduler(IScheduler scheduler, IPlexServerService plexServerService) : base(scheduler)
     {
-        _mediator = mediator;
         _plexServerService = plexServerService;
     }
 

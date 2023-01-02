@@ -168,6 +168,7 @@ public class PlexServerService : IPlexServerService
         if (plexAccountTokensResult.IsFailed)
             return plexAccountTokensResult;
 
+        Log.Information($"Successfully refreshed accessible Plex servers for account {plexAccountResult.Value.DisplayName}");
         return await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccountId));
     }
 

@@ -97,7 +97,7 @@ public class PlexApi
     /// <returns></returns>
     public async Task<Result<List<ServerResource>>> GetServerAsync(string authToken)
     {
-        var request = new RestRequest(new Uri(PlexApiPaths.PlexServerUrl));
+        var request = new RestRequest(PlexApiPaths.ServerResourcesUrl);
         request.AddToken(authToken);
         request.AddPlexClientIdentifier();
 

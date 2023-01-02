@@ -70,7 +70,7 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler_UnitTests
     public async Task ShouldBeInErrorStatus_WhenOneChildHasErrorStatus()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true)
+        await using var context = await MockDatabase.GetMemoryDbContext()
             .Setup(config =>
             {
                 config.Seed = 9999;

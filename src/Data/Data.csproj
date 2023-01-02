@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite" Version="0.3.0" />
+        <PackageReference Include="AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite" Version="0.4.0" />
         <PackageReference Include="EFCore.BulkExtensions" Version="6.5.2" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.6" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.6" />
@@ -31,6 +31,7 @@
 
     <ItemGroup>
         <Folder Include="CQRS\PlexAuthentication\Commands" />
+        <Folder Include="Migrations" />
     </ItemGroup>
 
     <ItemGroup>

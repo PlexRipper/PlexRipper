@@ -100,9 +100,9 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
 
     public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName = "") : base(options)
     {
+        DatabaseName = databaseName;
         Database.OpenConnection();
         Database.EnsureCreated();
-        DatabaseName = databaseName;
     }
 
     #endregion Constructors

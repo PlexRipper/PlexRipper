@@ -1,5 +1,4 @@
 using JustEat.HttpClientInterception;
-using PlexRipper.PlexApi.Common;
 
 namespace PlexRipper.BaseTests;
 
@@ -9,51 +8,56 @@ namespace PlexRipper.BaseTests;
 /// </summary>
 public class MockPlexApi
 {
-    private readonly MockPlexApiConfig _config;
+    #region Fields
+
     private readonly HttpClientInterceptorOptions _clientOptions;
-    private readonly HttpRequestInterceptionBuilder _builder;
+    private readonly MockPlexApiConfig _config;
+
+    #endregion
+
+    #region Constructors
 
     public MockPlexApi([CanBeNull] Action<MockPlexApiConfig> options = null)
     {
         _config = MockPlexApiConfig.FromOptions(options);
 
-        _clientOptions = new HttpClientInterceptorOptions();
-        _builder = new HttpRequestInterceptionBuilder();
+        _clientOptions = new HttpClientInterceptorOptions
+        {
+            ThrowOnMissingRegistration = true,
+        };
 
-        _clientOptions.ThrowOnMissingRegistration = true;
-
-        SetupSignIn();
+        Setup();
     }
 
+    #endregion
+
+    #region Methods
+
+    #region Private
+
+    private void Setup()
+    {
+        BaseRequest().SetupSignIn(_config).RegisterWith(_clientOptions);
+        BaseRequest().SetupServerResources(_config).RegisterWith(_clientOptions);
+    }
+
+    private static HttpRequestInterceptionBuilder BaseRequest()
+    {
+        return new HttpRequestInterceptionBuilder()
+            .Requests()
+            .ForUri(new Uri("https://plex.tv"));
+    }
+
+    #endregion
+
+    #region Public
 
     public System.Net.Http.HttpClient CreateClient()
     {
         return _clientOptions.CreateHttpClient();
     }
 
-    private void SetupSignIn()
-    {
-        var query = _builder
-            .Requests()
-            .ForPost()
-            .ForHttps()
-            .ForHost(PlexApiPaths.Host)
-            .ForPath(PlexApiPaths.SignInPath)
-            .IgnoringQuery();
+    #endregion
 
-        if (_config.SignInResponseIsValid)
-        {
-            query.Responds()
-                .WithStatus(201)
-                .WithJsonContent(FakePlexApiData.FakePlexApiData.GetPlexSignInResponse().Generate());
-        }
-        else
-        {
-            query.Responds()
-                .WithStatus(401)
-                .WithJsonContent(FakePlexApiData.FakePlexApiData.GetFailedPlexSignInResponse());
-        }
-
-        query.RegisterWith(_clientOptions);
-    }
+    #endregion
 }

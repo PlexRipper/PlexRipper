@@ -29,11 +29,24 @@ public static class MockDatabase
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public static PlexRipperDbContext GetMemoryDbContext(string dbName = "", bool disableForeignKeyCheck = false)
     {
+        // TODO Remove disableForeignKeyCheck as it is bad practice, even for unit tests
         var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
 
+        var connectionString = DatabaseConnectionString(dbName, disableForeignKeyCheck);
+
+        optionsBuilder.UseSqlite(connectionString);
+        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        optionsBuilder.EnableSensitiveDataLogging();
+        optionsBuilder.EnableDetailedErrors();
+        optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Warning);
+        return new PlexRipperDbContext(optionsBuilder.Options, dbName);
+    }
+
+    public static string DatabaseConnectionString(string dbName = "", bool disableForeignKeyCheck = false)
+    {
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
-        var connectionString = new SqliteConnectionStringBuilder
+        return new SqliteConnectionStringBuilder
         {
             Mode = SqliteOpenMode.Memory,
             ForeignKeys = !disableForeignKeyCheck,
@@ -42,13 +55,6 @@ public static class MockDatabase
             DataSource = dbName,
             Cache = SqliteCacheMode.Shared,
         }.ToString();
-
-        optionsBuilder.UseSqlite(connectionString);
-        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        optionsBuilder.EnableSensitiveDataLogging();
-        optionsBuilder.EnableDetailedErrors();
-        optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Warning);
-        return new PlexRipperDbContext(optionsBuilder.Options, dbName);
     }
 
     public static Task<PlexRipperDbContext> Setup(this PlexRipperDbContext context, int seed)

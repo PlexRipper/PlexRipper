@@ -1,4 +1,4 @@
-namespace PlexRipper.BaseTests.FakePlexApiData;
+namespace PlexRipper.BaseTests;
 
 public static partial class FakePlexApiData
 {

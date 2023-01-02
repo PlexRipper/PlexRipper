@@ -21,7 +21,7 @@ public static partial class FakeData
             .RuleFor(x => x.Platform, _ => "Linux")
             .RuleFor(x => x.PlatformVersion, f => f.System.Semver())
             .RuleFor(x => x.Device, f => f.Company.CompanyName())
-            .RuleFor(x => x.MachineIdentifier, _ => Guid.NewGuid().ToString())
+            .RuleFor(x => x.MachineIdentifier, f => f.Random.Guid().ToString())
             .RuleFor(x => x.CreatedAt, f => f.Date.Past(10, DateTime.UtcNow))
             .RuleFor(x => x.LastSeenAt, f => f.Date.Recent(30))
             .RuleFor(x => x.Provides, f => f.Company.CompanyName())

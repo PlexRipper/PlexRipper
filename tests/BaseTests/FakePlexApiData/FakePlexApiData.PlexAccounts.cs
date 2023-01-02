@@ -2,7 +2,7 @@
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Common;
 
-namespace PlexRipper.BaseTests.FakePlexApiData;
+namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {

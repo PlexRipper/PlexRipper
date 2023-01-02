@@ -59,9 +59,7 @@ public class PlexApi
 
     public async Task<Result<PlexServerStatus>> GetServerStatusAsync(string serverBaseUrl, string authToken, Action<PlexApiClientProgress> action = null)
     {
-        // TODO Use healthCheck from here:
-        // https://github.com/Arcanemagus/plex-api/wiki/Plex-Web-API-Overview
-        var request = new RestRequest(new Uri($"{serverBaseUrl}/identity"));
+        var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl));
 
         request.AddToken(authToken);
 

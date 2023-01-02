@@ -25,6 +25,8 @@ public static class PlexApiPaths
 
     public static string ServerResourcesPath => "api/v2/resources";
 
+    public static string ServerIdentityPath => "/identity";
+
     #endregion
 
     #region Absolute
@@ -40,4 +42,9 @@ public static class PlexApiPaths
     #endregion
 
     private static readonly UriBuilder PlexUrl;
+
+    public static string ServerIdentity(string serverUrl)
+    {
+        return $"{serverUrl.TrimEnd('/')}{ServerIdentityPath}";
+    }
 }

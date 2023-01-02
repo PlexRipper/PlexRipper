@@ -31,6 +31,9 @@ public static class RestSharpExtensions
                 var msg =
                     $"Request: {request.Resource} failed, waiting {timeToWait.TotalSeconds} seconds before retrying again ({retryAttempt} of {retryCount}).";
                 Log.Warning(msg);
+                if (response != null && response.ErrorMessage != string.Empty)
+                    Log.Error(response.ErrorMessage);
+
                 retryIndex = retryAttempt;
                 if (action is not null)
                 {

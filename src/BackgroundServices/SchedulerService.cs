@@ -61,5 +61,16 @@ public class SchedulerService : ISchedulerService
         return Result.Ok();
     }
 
+    public async Task AwaitScheduler(CancellationToken cancellationToken = default)
+    {
+        var isExecutingJobs = true;
+        while (isExecutingJobs)
+        {
+            await Task.Delay(500, cancellationToken);
+            var executingJobs = await _scheduler.GetCurrentlyExecutingJobs(cancellationToken);
+            isExecutingJobs = executingJobs.Count > 0;
+        }
+    }
+
     #endregion
 }

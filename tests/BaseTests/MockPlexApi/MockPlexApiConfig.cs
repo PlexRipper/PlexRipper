@@ -10,6 +10,8 @@ public class MockPlexApiConfig
 
     #region Properties
 
+    public PlexApiDataConfig FakeDataConfig { get; set; }
+
     public bool SignInResponseIsValid { get; set; } = true;
 
     public int AccessiblePlexServers { get; set; } = 3;

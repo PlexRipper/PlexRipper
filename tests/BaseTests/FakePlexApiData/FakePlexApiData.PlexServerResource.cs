@@ -46,8 +46,10 @@ public partial class FakePlexApiData
         return new Faker<ServerResourceConnection>()
             .StrictMode(true)
             .UseSeed(config.GetSeed())
-            .RuleFor(x => x.Protocol, f => f.Internet.Protocol())
-            .RuleFor(x => x.Address, _ => "test-server.net")
+            .RuleFor(x => x.Protocol, _ => "http")
+
+            // This has to be an ip otherwise the PortFix gets activated in PlexServerConnection
+            .RuleFor(x => x.Address, _ => "240.0.0.0")
             .RuleFor(x => x.Port, f => f.Internet.Port())
             .RuleFor(x => x.Uri, _ => "")
             .RuleFor(x => x.Local, _ => false)
@@ -55,7 +57,6 @@ public partial class FakePlexApiData
             .RuleFor(x => x.IPv6, _ => false)
             .FinishWith((_, connection) => { connection.Uri = new UriBuilder(connection.Protocol, connection.Address, connection.Port).ToString(); });
     }
-
 
 
     public static PlexErrorsResponseDTO GetFailedServerResourceResponse()

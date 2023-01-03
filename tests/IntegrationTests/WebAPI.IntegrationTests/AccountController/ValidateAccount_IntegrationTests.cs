@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace WebAPI.IntegrationTests.AccountController;
 
@@ -14,11 +13,9 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldValidatePlexAccount_WhenGivenValidCredentials()
     {
         // Arrange
-        await CreateContainer(config =>
-        {
-            config.Seed = 4564;
-            config.SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = true; });
-        });
+        await CreateContainer(config => { config.Seed = 4564; });
+
+        SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = true; });
 
         var plexAccount = FakeData.GetPlexAccount(config => config.Seed = 26346).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
@@ -35,11 +32,9 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldInValidatePlexAccountWithErrors_WhenGivenInValidCredentials()
     {
         // Arrange
-        await CreateContainer(config =>
-        {
-            config.Seed = 4347564;
-            config.SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = false; });
-        });
+        await CreateContainer(config => { config.Seed = 4347564; });
+
+        SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = false; });
 
         var plexAccount = FakeData.GetPlexAccount(config => config.Seed = 4347564).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);

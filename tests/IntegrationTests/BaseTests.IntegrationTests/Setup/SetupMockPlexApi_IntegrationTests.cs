@@ -51,7 +51,7 @@ public class SetupMockPlexApi_IntegrationTests : BaseIntegrationTests
     }
 
     [Fact]
-    public async Task ShouldGetServerIdentityFromFiveMockPlexServersWithPlexApi_WhenGivenDefaultSettings()
+    public async Task ShouldGetServerIdentityFromFiveMockedPlexServersWithPlexApi_WhenGivenDefaultSettings()
     {
         // Arrange
         SpinUpPlexServers(list =>
@@ -78,8 +78,5 @@ public class SetupMockPlexApi_IntegrationTests : BaseIntegrationTests
         AllMockPlexServersStarted.ShouldBeTrue();
         response.Count.ShouldBe(5);
         identityResponses.Count.ShouldBe(5);
-
-        for (var i = 0; i < 5; i++)
-            response[i].Connections[0].Uri.ShouldBe(GetPlexServerUris[i].ToString());
     }
 }

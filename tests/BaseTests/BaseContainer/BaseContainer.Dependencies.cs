@@ -32,9 +32,9 @@ public partial class BaseContainer : IDisposable
     /// <summary>
     /// Creates a Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null)
+    private BaseContainer(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
-        _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options);
+        _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options, mockPlexApi);
         ApiClient = _factory.CreateClient();
 
         // Create a separate scope as not to interfere with tests running in parallel
@@ -42,7 +42,7 @@ public partial class BaseContainer : IDisposable
         _serviceScope = _factory.Services.CreateScope();
     }
 
-    public static async Task<BaseContainer> Create([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static async Task<BaseContainer> Create(Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
@@ -53,7 +53,7 @@ public partial class BaseContainer : IDisposable
 
         // Database context can be setup once and then retrieved by its DB name.
         await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(options);
-        var container = new BaseContainer(memoryDbName, options);
+        var container = new BaseContainer(memoryDbName, options, mockPlexApi);
 
         if (config.DownloadSpeedLimit > 0)
             await container.SetDownloadSpeedLimit(options);

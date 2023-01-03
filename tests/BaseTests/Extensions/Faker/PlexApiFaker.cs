@@ -27,6 +27,12 @@ public class PlexApi : DataSet
         "PC",
     };
 
+    private static readonly string[] LibraryTypes =
+    {
+        "movie",
+        "show",
+    };
+
     private static readonly string[] PlexVersions =
     {
         "1.30.0.6486-629d58034",
@@ -46,6 +52,8 @@ public class PlexApi : DataSet
     };
 
     public string Device => _faker.Random.ArrayElement(Devices);
+
+    public string LibraryType => _faker.Random.ArrayElement(LibraryTypes);
 
     public string AccessToken => _faker.Random.Guid().ToString();
 

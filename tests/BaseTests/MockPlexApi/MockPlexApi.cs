@@ -1,20 +1,22 @@
+using System.Net;
 using JustEat.HttpClientInterception;
 using PlexRipper.PlexApi.Common;
 
 namespace PlexRipper.BaseTests;
 
 /// <summary>
-/// Used to mock the responses from the Plex API mainly account authentication.
+/// Used to mock the responses from the Plex API
 /// Source: https://github.com/justeat/httpclient-interception
 /// </summary>
 public class MockPlexApi
 {
-    private readonly List<Uri> _serverUris = new();
-
     #region Fields
 
     private readonly HttpClientInterceptorOptions _clientOptions;
     private readonly MockPlexApiConfig _config;
+    private readonly PlexApiDataConfig _fakeDataConfig;
+    private readonly List<Uri> _serverUris = new();
+    private readonly System.Net.Http.HttpClient _client = new();
 
     #endregion
 
@@ -24,13 +26,26 @@ public class MockPlexApi
     {
         _serverUris = serverUris;
         _config = MockPlexApiConfig.FromOptions(options);
+        _fakeDataConfig = _config.FakeDataConfig;
 
         _clientOptions = new HttpClientInterceptorOptions
         {
+            // TODO https://github.com/justeat/httpclient-interception/issues/510
             ThrowOnMissingRegistration = true,
+            OnMissingRegistration = message =>
+            {
+                if (message.RequestUri != null && message.RequestUri.Host == "localhost")
+                {
+                    var msg = new HttpRequestMessage(message.Method, message.RequestUri);
+                    return _client.SendAsync(msg);
+                }
+
+                return null;
+            },
         };
 
         Setup();
+        Log.Debug($"{nameof(MockPlexApi)} was set-up");
     }
 
     #endregion
@@ -41,16 +56,24 @@ public class MockPlexApi
 
     private void Setup()
     {
-        BaseRequest().SetupSignIn(_config).RegisterWith(_clientOptions);
+        SetupSignIn(_config);
         SetupServerResources(_config);
-        SetupPlexServers();
+        SetupTimeOutConnections();
     }
 
-    public void SetupServerResources(MockPlexApiConfig config)
+    private static HttpRequestInterceptionBuilder BaseRequest()
+    {
+        return new HttpRequestInterceptionBuilder()
+            .Requests()
+            .ForHttps()
+            .ForHost(PlexApiPaths.Host);
+    }
+
+    private void SetupServerResources(MockPlexApiConfig config)
     {
         var query = BaseRequest()
             .ForGet()
-            .ForPath(PlexApiPaths.ServerResourcesPath)
+            .ForPath(PlexApiPaths.ServerResourcesPath.TrimStart('/'))
             .IgnoringQuery();
 
         if (!config.UnauthorizedAccessiblePlexServers)
@@ -86,26 +109,41 @@ public class MockPlexApi
         query.RegisterWith(_clientOptions);
     }
 
-    private void SetupPlexServers()
+    private void SetupSignIn(MockPlexApiConfig config)
     {
-        new HttpRequestInterceptionBuilder()
-            .Requests()
+        var query = BaseRequest()
+            .ForPost()
+            .ForPath(PlexApiPaths.SignInPath)
+            .IgnoringQuery();
+
+        if (config.SignInResponseIsValid)
+        {
+            query.Responds()
+                .WithStatus(201) // 201 is correct here, Plex for some reason gives this back on this request
+                .WithJsonContent(FakePlexApiData.GetPlexSignInResponse().Generate());
+        }
+        else
+        {
+            query.Responds()
+                .WithStatus(401)
+                .WithJsonContent(FakePlexApiData.GetFailedPlexSignInResponse());
+        }
+
+        query.RegisterWith(_clientOptions);
+    }
+
+    private void SetupTimeOutConnections()
+    {
+        var builder = new HttpRequestInterceptionBuilder()
+            .ForGet()
             .ForHttp()
-            .ForHost("localhost")
+            .ForHost("240.0.0.0")
             .ForPort(-1)
             .IgnoringPath()
             .IgnoringQuery()
-            .Responds()
-            .WithStatus(200)
-            .WithJsonContent("{x: true}")
-            .RegisterWith(_clientOptions);
-    }
+            .WithInterceptionCallback((_) => Task.Delay(2000));
 
-    private static HttpRequestInterceptionBuilder BaseRequest()
-    {
-        return new HttpRequestInterceptionBuilder()
-            .Requests()
-            .ForUri(new Uri("https://plex.tv"));
+        _clientOptions.Register(builder);
     }
 
     #endregion

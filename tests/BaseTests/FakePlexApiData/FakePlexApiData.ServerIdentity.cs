@@ -5,7 +5,7 @@ namespace PlexRipper.BaseTests;
 
 public static partial class FakePlexApiData
 {
-    public static Faker<ServerIdentityResponse> GetPlexServerIdentityResponse([CanBeNull] Action<PlexApiDataConfig> options = null)
+    public static ServerIdentityResponse GetPlexServerIdentityResponse([CanBeNull] Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
@@ -20,6 +20,7 @@ public static partial class FakePlexApiData
         return new Faker<ServerIdentityResponse>()
             .StrictMode(true)
             .UseSeed(config.GetSeed())
-            .RuleFor(x => x.MediaContainer, _ => container.Generate());
+            .RuleFor(x => x.MediaContainer, _ => container.Generate())
+            .Generate();
     }
 }

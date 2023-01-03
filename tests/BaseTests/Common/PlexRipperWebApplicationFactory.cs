@@ -1,7 +1,6 @@
 using System.Collections.Specialized;
 using Autofac;
 using Autofac.Extras.Quartz;
-using Environment;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
@@ -15,12 +14,14 @@ namespace PlexRipper.BaseTests;
 public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
 {
     private readonly string _memoryDbName;
+    private readonly MockPlexApi _mockPlexApi;
 
     private readonly UnitTestDataConfig _config;
 
-    public PlexRipperWebApplicationFactory(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null)
+    public PlexRipperWebApplicationFactory(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
         _memoryDbName = memoryDbName;
+        _mockPlexApi = mockPlexApi;
         _config = UnitTestDataConfig.FromOptions(options);
     }
 
@@ -69,6 +70,14 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
     {
         builder.RegisterType<MockSignalRService>().As<ISignalRService>();
 
+        if (_mockPlexApi is not null)
+        {
+            builder
+                .RegisterInstance(_mockPlexApi.CreateClient())
+                .As<System.Net.Http.HttpClient>()
+                .SingleInstance();
+        }
+
         if (_config.MockFileSystem is not null)
             builder.RegisterInstance(_config.MockFileSystem).As<IFileSystem>();
 
@@ -77,14 +86,6 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 
         if (_config.MockConfigManager is not null)
             builder.RegisterInstance(_config.MockConfigManager).As<IConfigManager>();
-
-        if (_config.MockPlexApi is not null)
-        {
-            builder
-                .RegisterInstance(_config.MockPlexApi.CreateClient())
-                .As<System.Net.Http.HttpClient>()
-                .SingleInstance();
-        }
     }
 
     private void RegisterBackgroundScheduler(ContainerBuilder builder)

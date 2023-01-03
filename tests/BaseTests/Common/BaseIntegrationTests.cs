@@ -1,5 +1,6 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using PlexRipper.Domain.Config;
+using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
 
@@ -18,7 +19,7 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
 
     protected BaseIntegrationTests(ITestOutputHelper output)
     {
-        Log.SetupTestLogging(output);
+        Log.SetupTestLogging(output, LogEventLevel.Verbose);
     }
 
     #endregion
@@ -67,7 +68,7 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
 
     protected async Task CreateContainer([CanBeNull] Action<UnitTestDataConfig> options = null)
     {
-        Container = await BaseContainer.Create(options);
+        Container = await BaseContainer.Create(options, _mockPlexApi);
     }
 
     protected void SpinUpPlexServer([CanBeNull] Action<PlexMockServerConfig> options = null)

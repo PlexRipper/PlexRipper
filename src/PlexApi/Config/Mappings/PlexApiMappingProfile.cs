@@ -4,7 +4,6 @@ using PlexRipper.Domain.AutoMapper.ValueConverters;
 using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Models;
-using Directory = PlexRipper.PlexApi.Models.Directory;
 
 namespace PlexRipper.PlexApi.Mappings;
 
@@ -12,7 +11,7 @@ public class PlexApiMappingProfile : Profile
 {
     public PlexApiMappingProfile()
     {
-        // PlexUser -> PlexAccount
+        // SignInResponse -> PlexAccount
         CreateMap<SignInResponse, PlexAccount>(MemberList.None)
             .ForMember(dest => dest.PlexAccountServers, opt => opt.Ignore())
             .ForMember(dest => dest.PlexId, opt => opt.MapFrom(src => src.Id))
@@ -24,23 +23,6 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.Is2Fa, opt => opt.MapFrom(src => src.TwoFactorEnabled))
             .ForMember(dest => dest.HasPassword, opt => opt.MapFrom(src => src.HasPassword))
             .ForMember(dest => dest.Id, opt => opt.Ignore());
-
-        // MediaContainer -> PlexLibrary
-        CreateMap<MediaContainer, PlexLibrary>(MemberList.None)
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Type, opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter()))
-            .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
-
-        // Directory -> PlexLibrary
-        CreateMap<Directory, PlexLibrary>(MemberList.None)
-            .ForMember(dest => dest.Type,
-                opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter(), x => x.Type))
-            .ForMember(dest => dest.LibraryLocationId,
-                opt => opt.MapFrom(src => src.Location.First().Id))
-
-            // Location[0].Path -> LibraryLocationPath
-            .ForMember(dest => dest.LibraryLocationPath,
-                opt => opt.MapFrom(src => src.Location.First().Path));
 
         // PlexMediaContainerDTO -> PlexMediaMetaData
         CreateMap<PlexMediaContainerDTO, PlexMediaMetaData>(MemberList.Destination)
@@ -69,6 +51,7 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.ObfuscatedFilePath, opt => opt.MapFrom(x => x.Key));
 
         PlexServerMappings();
+        PlexLibraryMappings();
         PlexMovieMappings();
         PlexTvShowMappings();
     }
@@ -119,13 +102,33 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.IPv4, opt => opt.MapFrom(x => x.Address.IsIpAddress() && !x.IPv6))
 
             // The port fix is when we don't want to use the port when Address is a domain name
-            .ForMember(dest => dest.PortFix, opt => opt.MapFrom(x => !x.Address.IsIpAddress() && !x.IPv6))
+            .ForMember(dest => dest.PortFix, opt => opt.MapFrom(x => !x.Address.IsIpAddress() && !x.IPv6 && x.Address != "localhost"))
             .ForMember(dest => dest.PlexServerStatus, opt => opt.Ignore());
 
         CreateMap<ServerResource, ServerAccessTokenDTO>(MemberList.Destination)
             .ForMember(dest => dest.PlexAccountId, opt => opt.Ignore())
             .ForMember(dest => dest.AccessToken, opt => opt.MapFrom(x => x.AccessToken))
             .ForMember(dest => dest.MachineIdentifier, opt => opt.MapFrom(x => x.ClientIdentifier));
+    }
+
+    private void PlexLibraryMappings()
+    {
+        // MediaContainer -> PlexLibrary
+        CreateMap<MediaContainer, PlexLibrary>(MemberList.None)
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Type, opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter()))
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(x => x.Title1));
+
+        // LibrariesResponseDirectory -> PlexLibrary
+        CreateMap<LibrariesResponseDirectory, PlexLibrary>(MemberList.None)
+            .ForMember(dest => dest.Type,
+                opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter(), x => x.Type))
+            .ForMember(dest => dest.LibraryLocationId,
+                opt => opt.MapFrom(src => src.Location.First().Id))
+
+            // Location[0].Path -> LibraryLocationPath
+            .ForMember(dest => dest.LibraryLocationPath,
+                opt => opt.MapFrom(src => src.Location.First().Path));
     }
 
     private void PlexMovieMappings()

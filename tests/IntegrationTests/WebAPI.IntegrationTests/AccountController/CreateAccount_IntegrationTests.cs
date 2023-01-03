@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 
@@ -13,11 +12,10 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldCreateAndInspectAccessibleServers_WhenPlexAccountIsValid()
     {
         // Arrange
-        await CreateContainer(config =>
-        {
-            config.Seed = 4564;
-            config.SetupMockPlexApi();
-        });
+        SpinUpPlexServers(list => { list.Add(new PlexMockServerConfig()); });
+
+        SetupMockPlexApi(config => config.AccessiblePlexServers = 1);
+        await CreateContainer(config => { config.Seed = 4564; });
 
         var plexAccount = FakeData.GetPlexAccount(config => config.Seed = 4347564).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
@@ -26,7 +24,7 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.Account.PostCreateAccount, plexAccountDTO);
         var resultDTO = await response.Deserialize<PlexAccountDTO>();
         var result = Container.Mapper.Map<Result<PlexAccountDTO>>(resultDTO);
-        await Task.Delay(5000);
+        await Container.SchedulerService.AwaitScheduler();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

@@ -61,8 +61,6 @@ public class PlexApi
     {
         var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl));
 
-        request.AddToken(authToken);
-
         Log.Debug($"Requesting PlexServerStatus for {serverBaseUrl}");
         var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 2, action);
 
@@ -109,14 +107,14 @@ public class PlexApi
     /// <param name="plexAuthToken"></param>
     /// <param name="plexFullHost"></param>
     /// <returns></returns>
-    public async Task<Result<PlexMediaContainerDTO>> GetLibrarySectionsAsync(string plexAuthToken, string plexFullHost)
+    public async Task<Result<LibrariesResponse>> GetLibrarySectionsAsync(string plexAuthToken, string plexFullHost)
     {
-        var request = new RestRequest(new Uri($"{plexFullHost}/library/sections"));
+        var request = new RestRequest(PlexApiPaths.GetLibraries(plexFullHost));
 
         request.AddToken(plexAuthToken);
 
         Log.Debug($"GetLibrarySectionsAsync => {request.Resource}");
-        return await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
+        return await _client.SendRequestAsync<LibrariesResponse>(request);
     }
 
     public async Task<PlexMediaContainerDTO> GetMetadataForLibraryAsync(string authToken, string plexServerBaseUrl, string libraryKey)

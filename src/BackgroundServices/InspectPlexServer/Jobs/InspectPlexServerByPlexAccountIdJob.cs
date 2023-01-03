@@ -64,7 +64,7 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
 
             // Sync libraries
             foreach (var plexServer in plexServers)
-                await _syncServerScheduler.QueueSyncPlexServerJob(plexServer.Id);
+                await _syncServerScheduler.QueueSyncPlexServerJob(plexServer.Id, true);
 
             Log.Information($"Successfully finished the inspection of all plexServers related to {nameof(PlexAccount)} {plexAccountId}");
         }

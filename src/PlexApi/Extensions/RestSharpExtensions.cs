@@ -31,8 +31,12 @@ public static class RestSharpExtensions
                 var msg =
                     $"Request: {request.Resource} failed, waiting {timeToWait.TotalSeconds} seconds before retrying again ({retryAttempt} of {retryCount}).";
                 Log.Warning(msg);
+
                 if (response != null && response.ErrorMessage != string.Empty)
+                {
+                    Log.Error(response.ErrorException);
                     Log.Error(response.ErrorMessage);
+                }
 
                 retryIndex = retryAttempt;
                 if (action is not null)
@@ -79,7 +83,10 @@ public static class RestSharpExtensions
     {
         var isSuccessful = response.Outcome == OutcomeType.Successful;
         if (isSuccessful)
+        {
+            Log.Verbose("Response Content: " + response.Result.Content != string.Empty ? response.Result.Content : "Response was empty.");
             return response.Result as RestResponse<T>;
+        }
 
         return response.FinalHandledResult as RestResponse<T>;
     }

@@ -157,6 +157,12 @@ public class PlexApiService : IPlexApiService
             return result.ToResult();
         }
 
+        if (result.Value?.MediaContainer?.Directory is null)
+        {
+            Log.Error($"Plex server: {plexServerResult.Value.Name} returned an empty response when libraries were requested.");
+            return result.ToResult();
+        }
+
         var directories = result.Value.MediaContainer.Directory;
 
         var mappedLibraries = _mapper.Map<List<PlexLibrary>>(directories);

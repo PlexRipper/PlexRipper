@@ -118,6 +118,6 @@ public class PlexServerConnection : BaseEntity
     /// <inheritdoc/>
     public override string ToString()
     {
-        return $"[ServerId: {PlexServerId} - Url: {Url} - Local: {Local} - Relay: {Relay} - IPv6: {IPv6}]";
+        return $"[ServerId: {PlexServerId} - Url: {Url} - {nameof(PortFix)}: {PortFix} - Local: {Local} - Relay: {Relay} - IPv6: {IPv6}]";
     }
 }

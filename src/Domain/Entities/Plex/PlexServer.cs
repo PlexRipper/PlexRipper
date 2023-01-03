@@ -227,10 +227,10 @@ public class PlexServer : BaseEntity
             var connection = PlexServerConnections.Find(x => x.Address == PublicAddress);
             if (connection is not null)
                 return connection.Url;
-
-            Log.Warning($"Could not find connection based on public address: {PublicAddress} for server {Name}");
         }
 
+        Log.Warning($"Could not find connection based on public address: {PublicAddress} for server {Name}");
+        Log.Warning($"Trying the first connection: {PlexServerConnections.First().Url}");
         return PlexServerConnections.First().Url;
     }
 

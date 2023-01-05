@@ -2,7 +2,50 @@ namespace PlexRipper.PlexApi.Common;
 
 public static class PlexApiPaths
 {
-    #region Properties
+    #region Methods
+
+    #region Private
+
+    private static string ServerUrl(string url)
+    {
+        return url.TrimEnd('/');
+    }
+
+    #endregion
+
+    #region Public
+
+    #region Urls
+
+    public static string ServerIdentity(string serverUrl)
+    {
+        return $"{ServerUrl(serverUrl)}{ServerIdentityPath}";
+    }
+
+    public static string GetLibraries(string serverUrl)
+    {
+        return $"{ServerUrl(serverUrl)}{LibrarySectionsPath}";
+    }
+
+    public static string GetLibrariesMetadata(string serverUrl, string libraryKey)
+    {
+        return $"{ServerUrl(serverUrl)}{GetLibrariesSectionsPath(libraryKey)}";
+    }
+
+    #endregion
+
+    #region Relative
+
+    public static string GetLibrariesSectionsPath(string libraryKey)
+    {
+        return $"{LibrarySectionsPath}/{libraryKey}/all";
+    }
+
+    #endregion
+
+    #endregion
+
+    #endregion
 
     #region Base
 
@@ -35,16 +78,4 @@ public static class PlexApiPaths
     public static string PlexPinUrl => $"{PlexUrl}{AuthPinPath}";
 
     #endregion
-
-    #endregion
-
-    public static string ServerIdentity(string serverUrl)
-    {
-        return $"{serverUrl.TrimEnd('/')}{ServerIdentityPath}";
-    }
-
-    public static string GetLibraries(string serverUrl)
-    {
-        return $"{serverUrl.TrimEnd('/')}{LibrarySectionsPath}";
-    }
 }

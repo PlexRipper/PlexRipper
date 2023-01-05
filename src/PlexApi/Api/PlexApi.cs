@@ -1,4 +1,5 @@
 using PlexRipper.Application;
+using PlexRipper.PlexApi.Api.All;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Common;
 using PlexRipper.PlexApi.Common.DTO;
@@ -88,6 +89,7 @@ public class PlexApi
 
     /// <summary>
     /// Retrieves all the accessible plex server based on the <see cref="PlexAccount"/> token
+    /// <remarks>https://plex.tv/api/v2/resources?X-Plex-Token={{AUTH_TOKEN}}</remarks>
     /// </summary>
     /// <param name="authToken">The Plex account authentication token.</param>
     /// <returns></returns>
@@ -103,6 +105,7 @@ public class PlexApi
 
     /// <summary>
     /// Returns an detailed overview of the PlexLibraries in a PlexServer from the PlexAPI.
+    /// <remarks>{{SERVER_URL}}/library/sections?X-Plex-Token={{SERVER_TOKEN}}</remarks>
     /// </summary>
     /// <param name="plexAuthToken"></param>
     /// <param name="plexFullHost"></param>
@@ -117,16 +120,23 @@ public class PlexApi
         return await _client.SendRequestAsync<LibrariesResponse>(request);
     }
 
-    public async Task<PlexMediaContainerDTO> GetMetadataForLibraryAsync(string authToken, string plexServerBaseUrl, string libraryKey)
+    /// <summary>
+    /// Gets the all the root level media metadata contained in this Plex library. For movies its all movies, and for tv shows its all the shows without seasons and episodes.
+    /// <remarks>URL: {{SERVER_URL}}/library/sections/{{LIBRARY_KEY}}/all?X-Plex-Token={{SERVER_TOKEN}}</remarks>
+    /// </summary>
+    /// <param name="authToken"></param>
+    /// <param name="plexServerBaseUrl"></param>
+    /// <param name="libraryKey"></param>
+    /// <returns></returns>
+    public async Task<Result<PlexMediaContainerDTO>> GetMetadataForLibraryAsync(string authToken, string plexServerBaseUrl, string libraryKey)
     {
-        var request = new RestRequest(new Uri($"{plexServerBaseUrl}/library/sections/{libraryKey}/all"));
+        var request = new RestRequest(PlexApiPaths.GetLibrariesMetadata(plexServerBaseUrl, libraryKey));
 
         request.AddToken(authToken);
 
         request.AddQueryParameter("includeMeta", "1");
 
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
+        return await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
     }
 
     public async Task<PlexMediaContainerDTO> GetMetadataAsync(string authToken, string plexFullHost, int metadataId)

@@ -123,7 +123,7 @@ public class PlexApiClient
             if (!string.IsNullOrEmpty(content))
             {
                 var errorsResponse = JsonSerializer.Deserialize<PlexErrorsResponseDTO>(content, SerializerOptions) ?? new PlexErrorsResponseDTO();
-                if (errorsResponse.Errors.Any())
+                if (errorsResponse.Errors != null && errorsResponse.Errors.Any())
                     result.WithErrors(errorsResponse.ToResultErrors());
             }
         }

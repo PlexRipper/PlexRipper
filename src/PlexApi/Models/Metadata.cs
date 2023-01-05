@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using PlexRipper.PlexApi.Converters;
 using PlexRipper.PlexApi.Helpers;
 
 namespace PlexRipper.PlexApi.Models;
@@ -39,7 +40,10 @@ public class Metadata
     public string Summary { get; set; }
 
     [JsonPropertyName("rating")]
-    public float Rating { get; set; }
+    public double Rating { get; set; }
+
+    [JsonPropertyName("audienceRating")]
+    public double AudienceRating { get; set; }
 
     [JsonPropertyName("viewCount")]
     public int ViewCount { get; set; }
@@ -66,10 +70,12 @@ public class Metadata
     public string OriginallyAvailableAt { get; set; }
 
     [JsonPropertyName("addedAt")]
-    public long AddedAt { get; set; }
+    [JsonConverter(typeof(LongToDateTime))]
+    public DateTime AddedAt { get; set; }
 
     [JsonPropertyName("updatedAt")]
-    public long UpdatedAt { get; set; }
+    [JsonConverter(typeof(LongToDateTime))]
+    public DateTime UpdatedAt { get; set; }
 
     [JsonPropertyName("chapterSource")]
     public string ChapterSource { get; set; }
@@ -82,6 +88,12 @@ public class Metadata
 
     [JsonPropertyName("externalProviderId")]
     public string ExternalProviderId { get; set; }
+
+    [JsonPropertyName("showOrdering")]
+    public string ShowOrdering { get; set; }
+
+    [JsonPropertyName("audienceRatingImage")]
+    public string AudienceRatingImage { get; set; }
 
     #endregion
 
@@ -150,6 +162,13 @@ public class Metadata
 
     [JsonPropertyName("Theme")]
     public string Theme { get; set; }
+
+    [JsonPropertyName("flattenSeasons")]
+    [JsonConverter(typeof(StringToBool))]
+    public bool FlattenSeasons { get; set; }
+
+    [JsonPropertyName("skipCount")]
+    public int? SkipCount { get; set; }
 
     #endregion
 

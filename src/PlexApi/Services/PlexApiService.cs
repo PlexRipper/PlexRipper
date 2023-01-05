@@ -120,13 +120,13 @@ public class PlexApiService : IPlexApiService
         // Retrieve the media for this library
         var result = await _plexApi.GetMetadataForLibraryAsync(tokenResult.Value, serverUrl, plexLibrary.Key);
 
-        if (result == null)
-            return null;
+        if (result.IsFailed)
+            return result.ToResult().LogError();
 
-        var mediaList = result.MediaContainer.Metadata;
+        var mediaList = result.Value.MediaContainer.Metadata;
 
         // Determine how to map based on the Library type.
-        switch (result.MediaContainer.ViewGroup)
+        switch (result.Value.MediaContainer.ViewGroup)
         {
             case "movie":
                 updatedPlexLibrary.Movies = _mapper.Map<List<PlexMovie>>(mediaList);

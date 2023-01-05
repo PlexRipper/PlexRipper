@@ -5,7 +5,7 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static LibrariesResponse GetLibraryMediaContainer([CanBeNull] Action<PlexApiDataConfig> options = null)
+    public static LibrariesResponse GetLibraryMediaContainer(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 

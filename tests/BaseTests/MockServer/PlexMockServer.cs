@@ -1,10 +1,8 @@
 ﻿using PlexRipper.PlexApi.Common;
-using WireMock.Matchers;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 using WireMock.Settings;
-using WireMock.Types;
 
 namespace PlexRipper.BaseTests;
 
@@ -83,12 +81,29 @@ public class PlexMockServer : IDisposable
                 .WithHeader("Content-Type", "application/json")
                 .WithBodyAsJson(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig)));
 
+        // Setup the Plex libraries
+        var librarySections = FakePlexApiData.GetLibraryMediaContainer(_fakeDataConfig);
+
         Server
             .Given(Request.Create().WithPath(PlexApiPaths.LibrarySectionsPath).WithParam("X-Plex-Token").UsingGet())
             .RespondWith(Response.Create()
                 .WithStatusCode(200)
                 .WithHeader("Content-Type", "application/json")
-                .WithBodyAsJson(FakePlexApiData.GetLibraryMediaContainer(_fakeDataConfig)));
+                .WithBodyAsJson(librarySections));
+
+        // Setup the media metadata for each library
+        foreach (var librarySection in librarySections.MediaContainer.Directory)
+        {
+            var libraryData = FakePlexApiData.GetPlexLibrarySectionAllResponse(librarySection, _fakeDataConfig);
+            var url = PlexApiPaths.GetLibrariesSectionsPath(librarySection.Key);
+            Log.Debug($"Url registered: {url}");
+            Server
+                .Given(Request.Create().WithPath(url).WithParam("X-Plex-Token").UsingGet())
+                .RespondWith(Response.Create()
+                    .WithStatusCode(200)
+                    .WithHeader("Content-Type", "application/json")
+                    .WithBodyAsJson(libraryData));
+        }
 
         return Server;
     }

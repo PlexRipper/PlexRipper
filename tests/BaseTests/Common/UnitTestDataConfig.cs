@@ -76,8 +76,6 @@ public class UnitTestDataConfig : IDisposable
 
     public PlexMockServer MockServer { get; private set; }
 
-    public MockPlexApi MockPlexApi { get; set; }
-
     public void SetupMockServer([CanBeNull] Action<PlexMockServerConfig> options = null)
     {
         MockServer = new PlexMockServer(options);

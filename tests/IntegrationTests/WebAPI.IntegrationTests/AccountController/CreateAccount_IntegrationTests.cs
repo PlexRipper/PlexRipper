@@ -15,7 +15,10 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         SpinUpPlexServers(list => { list.Add(new PlexMockServerConfig()); });
 
         SetupMockPlexApi(config => config.AccessiblePlexServers = 1);
-        await CreateContainer(config => { config.Seed = 4564; });
+        await CreateContainer(config => {
+            config.Seed = 4564;
+            config.PlexServerCount = 0;
+        });
 
         var plexAccount = FakeData.GetPlexAccount(config => config.Seed = 4347564).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
@@ -28,5 +31,7 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        var db = Container.PlexRipperDbContext;
+        db.PlexServers.ToList().Count.ShouldBe(1);
     }
 }

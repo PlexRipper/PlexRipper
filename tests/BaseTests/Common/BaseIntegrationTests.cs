@@ -19,7 +19,7 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
 
     protected BaseIntegrationTests(ITestOutputHelper output)
     {
-        Log.SetupTestLogging(output, LogEventLevel.Verbose);
+        Log.SetupTestLogging(output, LogEventLevel.Debug);
     }
 
     #endregion

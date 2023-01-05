@@ -11,7 +11,12 @@
     <ItemGroup>
         <PackageReference Include="Autofac" Version="6.4.0" />
         <PackageReference Include="Autofac.Extras.Moq" Version="6.1.0" />
-        <PackageReference Include="Bogus" Version="33.0.2" />
+        <PackageReference Include="Bogus" Version="34.0.2" />
+        <PackageReference Include="Bogus.Hollywood" Version="34.0.2" />
+        <PackageReference Include="Bogus.Tools.Analyzer" Version="34.0.2">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="JustEat.HttpClientInterception" Version="4.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.6" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />

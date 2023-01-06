@@ -6,7 +6,7 @@ namespace DownloadManager.UnitTests;
 
 public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
 {
-    public DownloadWorker_Start_UnitTests(ITestOutputHelper output) : base(output, true) { }
+    public DownloadWorker_Start_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldCallDownloadWorkerTaskUpdate_WhenInErrorState()

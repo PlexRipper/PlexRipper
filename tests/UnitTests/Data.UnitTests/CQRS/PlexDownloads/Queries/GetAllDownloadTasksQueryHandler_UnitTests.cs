@@ -33,6 +33,7 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
         {
             config.PlexServerCount = 1;
             config.PlexLibraryCount = 2;
+            config.MovieCount = 20;
             config.MovieDownloadTasksCount = 10;
         });
 

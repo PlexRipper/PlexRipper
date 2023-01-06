@@ -2,9 +2,9 @@
 
 namespace Settings.UnitTests.Modules;
 
-public class DateTimeSettingsModule_Reset_UnitTests
+public class DateTimeSettingsModule_Reset_UnitTests : BaseUnitTest<DateTimeSettingsModule>
 {
-    public DateTimeSettingsModule_Reset_UnitTests(ITestOutputHelper output)
+    public DateTimeSettingsModule_Reset_UnitTests(ITestOutputHelper output) : base(output)
     {
         Log.SetupTestLogging(output);
     }
@@ -13,8 +13,6 @@ public class DateTimeSettingsModule_Reset_UnitTests
     public void ShouldUpdateAndThenResetSettingsModule_WhenCallingResetAfterUpdate()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DateTimeSettingsModule>();
         var settings = FakeData.GetDateTimeSettings(config => { config.Seed = 6223; }).Generate();
 
         // Act

@@ -3,9 +3,9 @@ using System.Text.Json;
 
 namespace PlexApi.UnitTests.Converters;
 
-public class StringToBool : BaseUnitTest<StringToBool>
+public class StringToBool : BaseUnitTest
 {
-    public StringToBool(ITestOutputHelper output) : base(output, true) { }
+    public StringToBool(ITestOutputHelper output) : base(output) { }
 
     [Theory]
     [InlineData("{\"x\": \"1\"}", true)]

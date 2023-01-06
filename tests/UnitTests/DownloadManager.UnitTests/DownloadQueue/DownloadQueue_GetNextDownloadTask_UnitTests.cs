@@ -2,12 +2,10 @@
 
 namespace DownloadManager.UnitTests;
 
-public class DownloadQueue_GetNextDownloadTask_UnitTests
+public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<DownloadQueue>
 {
-    public DownloadQueue_GetNextDownloadTask_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DownloadQueue_GetNextDownloadTask_UnitTests(ITestOutputHelper output) : base(output) { }
+
 
     private List<DownloadTask> TestDownloadTasks(int count)
     {
@@ -64,8 +62,6 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests
     public void ShouldHaveNextDownloadTask_WhenAllAreQueued()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DownloadQueue>();
         var downloadTasks = TestDownloadTasks(2);
 
         // Act
@@ -80,8 +76,6 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests
     public void ShouldHaveNextDownloadTask_WhenADownloadTaskHasBeenCompleted()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DownloadQueue>();
         var downloadTasks = TestDownloadTasks(3);
         downloadTasks[0].DownloadStatus = DownloadStatus.Completed;
         downloadTasks[0].Children = downloadTasks[0].Children.SetToCompleted();
@@ -98,8 +92,6 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests
     public void ShouldHaveNextQueuedDownloadTaskInDownloadingTask_WhenAParentDownloadTaskIsAlreadyDownloading()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DownloadQueue>();
         var downloadTasks = TestDownloadTasks(3);
         downloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
 
@@ -115,8 +107,6 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests
     public void ShouldHaveNoDownloadTask_WhenADownloadTaskIsAlreadyDownloading()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DownloadQueue>();
         var downloadTasks = TestDownloadTasks(2);
         downloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
         downloadTasks[0].Children = downloadTasks[0].Children.SetToDownloading();

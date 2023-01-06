@@ -2,20 +2,14 @@ using PlexRipper.DownloadManager;
 
 namespace DownloadManager.UnitTests;
 
-public class DownloadQueue_AddToDownloadQueue_UnitTests
+public class DownloadQueue_AddToDownloadQueue_UnitTests : BaseUnitTest<DownloadQueue>
 {
-    public DownloadQueue_AddToDownloadQueue_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DownloadQueue_AddToDownloadQueue_UnitTests(ITestOutputHelper output) : base(output) { }
+
 
     [Fact]
     public async Task AddToDownloadQueueAsync_ShouldReturnFailedResult_WhenEmptyListIsGiven()
     {
-        //Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DownloadQueue>();
-
         // Act
         var result = await _sut.AddToDownloadQueueAsync(new List<DownloadTask>());
 
@@ -27,11 +21,9 @@ public class DownloadQueue_AddToDownloadQueue_UnitTests
     public async Task AddToDownloadQueueAsync_ShouldReturnFailedResult_WhenInvalidDownloadTasksAreGiven()
     {
         //Arrange
-        using var mock = AutoMock.GetStrict();
         mock.Mock<IDownloadTaskValidator>().Setup(x => x.ValidateDownloadTasks(It.IsAny<List<DownloadTask>>())).Returns(Result.Fail(""));
 
         // Act
-        var _sut = mock.Create<DownloadQueue>();
         var result = await _sut.AddToDownloadQueueAsync(new List<DownloadTask>
         {
             new(),

@@ -91,7 +91,7 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
 {
     #region Fields
 
-    protected readonly TUnitTestClass _sut;
+    protected TUnitTestClass _sut => mock.Create<TUnitTestClass>();
 
     protected readonly AutoMock mock;
 
@@ -99,15 +99,14 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
 
     #region Constructors
 
-    protected BaseUnitTest(ITestOutputHelper output, bool disableMockCreate = false) : base(output)
+    protected BaseUnitTest(ITestOutputHelper output) : base(output)
     {
-        mock = AutoMock.GetStrict(builder => builder.RegisterInstance(MapperSetup.CreateMapper())
-            .As<IMapper>()
-            .SingleInstance());
-        ;
-
-        if (!disableMockCreate)
-            _sut = mock.Create<TUnitTestClass>();
+        mock = AutoMock.GetStrict(builder =>
+        {
+            builder.RegisterInstance(MapperSetup.CreateMapper())
+                .As<IMapper>()
+                .SingleInstance();
+        });
     }
 
     #endregion

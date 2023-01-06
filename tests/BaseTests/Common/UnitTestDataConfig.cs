@@ -40,20 +40,8 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>, IDisposable
 
     #endregion
 
-    public static UnitTestDataConfig FromOptions(Action<UnitTestDataConfig> action = null, UnitTestDataConfig defaultValue = null)
-    {
-        var config = defaultValue ?? new UnitTestDataConfig();
-        action?.Invoke(config);
-        return config;
-    }
-
     public void Dispose()
     {
         MockServer?.Dispose();
-    }
-
-    public int GetSeed()
-    {
-        return ++Seed;
     }
 }

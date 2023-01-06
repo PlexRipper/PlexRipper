@@ -32,4 +32,6 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
     public bool IncludeMultiPartMovies { get; set; }
 
     public bool AccountHasAccessToAllLibraries { get; set; }
+
+    public List<Uri> MockServerUris { get; set; } = new();
 }

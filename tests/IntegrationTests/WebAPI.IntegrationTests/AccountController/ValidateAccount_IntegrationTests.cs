@@ -12,9 +12,10 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldValidatePlexAccount_WhenGivenValidCredentials()
     {
         // Arrange
-        await CreateContainer(config => { config.Seed = 4564; });
-
+        Seed = 4564;
         SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = true; });
+
+        await CreateContainer();
 
         var plexAccount = FakeData.GetPlexAccount(26346).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
@@ -31,9 +32,9 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldInValidatePlexAccountWithErrors_WhenGivenInValidCredentials()
     {
         // Arrange
-        await CreateContainer(config => { config.Seed = 4347564; });
-
+        Seed = 4347564;
         SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = false; });
+        await CreateContainer();
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);

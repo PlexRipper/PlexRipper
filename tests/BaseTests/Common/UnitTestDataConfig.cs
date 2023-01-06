@@ -5,7 +5,7 @@ using PlexRipper.DownloadManager;
 
 namespace PlexRipper.BaseTests;
 
-public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>, IDisposable
+public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 {
     #region Mocks
 
@@ -14,19 +14,6 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>, IDisposable
     public IDownloadSubscriptions MockDownloadSubscriptions { get; set; }
 
     public IConfigManager MockConfigManager { get; set; }
-
-    #endregion
-
-    public Action<FakeDataConfig> MockDatabase { get; set; } = config => { };
-
-    #region MockServer
-
-    public PlexMockServer MockServer { get; private set; }
-
-    public void SetupMockServer(Action<PlexMockServerConfig> options = null)
-    {
-        MockServer = new PlexMockServer(options);
-    }
 
     #endregion
 
@@ -39,9 +26,4 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>, IDisposable
     public int PlexServerSettingsCount { get; set; } = 5;
 
     #endregion
-
-    public void Dispose()
-    {
-        MockServer?.Dispose();
-    }
 }

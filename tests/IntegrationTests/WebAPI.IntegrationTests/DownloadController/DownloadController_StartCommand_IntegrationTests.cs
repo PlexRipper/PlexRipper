@@ -13,14 +13,20 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
     public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
     {
         Seed = 4564;
-        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+        var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
+
+        await SetupDatabase(config =>
+        {
+            config.MockServerUris.Add(serverUri);
+            config.PlexAccountCount = 1;
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 2;
+            config.MovieCount = 10;
+            config.MovieDownloadTasksCount = 5;
+        });
 
         // Arrange
-        await CreateContainer(config =>
-        {
-            config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
-            config.SetupMockServer();
-        });
+        await CreateContainer(config => { config.MockDownloadSubscriptions = new MockDownloadSubscriptions(); });
         var downloadTasks = await Container.PlexRipperDbContext.DownloadTasks.ToListAsync();
         downloadTasks.Count.ShouldBe(10);
 

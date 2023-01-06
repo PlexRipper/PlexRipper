@@ -9,15 +9,23 @@ public class DownloadTracker_StartDownloadJob_IntegrationTests : BaseIntegration
     public async Task ShouldExecuteDownloadTaskForMovieAndEndWithDownloadFinished_WhenGivenAValidDownloadTask()
     {
         // Arrange
-        var memoryDbName = MockDatabase.GetMemoryDatabaseName();
+        Seed = 4564;
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 3;
+            config.MovieCount = 5;
+            config.MovieDownloadTasksCount = 2;
+        });
+
+        SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
+
         await CreateContainer(config =>
         {
-            config.Seed = 4564;
             config.DownloadSpeedLimit = 2000;
             config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
-            config.SetupMockServer(serverConfig => { serverConfig.DownloadFileSizeInMb = 50; });
-            config.MockDatabase = databaseConfig => { databaseConfig.MovieDownloadTasksCount = 2; };
         });
+
         var plexMovieDownloadTask =
             Container.PlexRipperDbContext
                 .DownloadTasks

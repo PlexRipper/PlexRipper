@@ -9,14 +9,21 @@ public class DownloadTracker_StopDownloadJob_IntegrationTests : BaseIntegrationT
     public async Task ShouldStopDownloadJobAfterStartingForMovieAndEndWithStatusStopped_WhenGivenAValidDownloadTask()
     {
         // Arrange
+        Seed = 4564;
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 1;
+            config.MovieCount = 5;
+            config.MovieDownloadTasksCount = 2;
+        });
+        SpinUpPlexServer();
         await CreateContainer(config =>
         {
-            config.Seed = 4564;
             config.DownloadSpeedLimit = 500;
             config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
-            config.SetupMockServer();
-            config.MockDatabase = databaseConfig => { databaseConfig.MovieDownloadTasksCount = 2; };
         });
+
         var plexMovieDownloadTask =
             Container.PlexRipperDbContext
                 .DownloadTasks

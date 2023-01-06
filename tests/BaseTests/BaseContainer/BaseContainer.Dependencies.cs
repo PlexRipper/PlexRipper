@@ -5,7 +5,6 @@ using AutoMapper;
 using Environment;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
@@ -49,11 +48,6 @@ public partial class BaseContainer : IDisposable
         Log.Information($"Setting up BaseContainer with database: {memoryDbName}");
 
         EnvironmentExtensions.SetIntegrationTestMode(true);
-
-        // Database context can be setup once and then retrieved by its DB name.
-        var db = MockDatabase.GetMemoryDbContext(memoryDbName);
-        if (!db.HasBeenSetup)
-            await db.Setup(seed, config.MockDatabase);
 
         var container = new BaseContainer(memoryDbName, options, mockPlexApi);
 
@@ -113,7 +107,7 @@ public partial class BaseContainer : IDisposable
 
     public IMapper Mapper => Resolve<IMapper>();
 
-    public IHostLifetime Boot => Resolve<IHostLifetime>();
+    public IBoot Boot => Resolve<IBoot>();
 
     #region Settings
 
@@ -142,5 +136,6 @@ public partial class BaseContainer : IDisposable
         _services.GetAutofacRoot().Dispose();
         _factory?.Dispose();
         ApiClient?.Dispose();
+        Log.Warning("Disposing Container");
     }
 }

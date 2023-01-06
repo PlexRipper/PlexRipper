@@ -15,12 +15,6 @@ public class PlexMockServer : IDisposable
     private readonly PlexMockServerConfig _config;
     private readonly Action<PlexApiDataConfig> _fakeDataConfig;
 
-    #region Fields
-
-    private readonly byte[] _downloadFile = { };
-
-    #endregion
-
     #region Constructor
 
     public PlexMockServer(Action<PlexMockServerConfig> options = null) : this(PlexMockServerConfig.FromOptions(options)) { }
@@ -28,9 +22,7 @@ public class PlexMockServer : IDisposable
     public PlexMockServer(PlexMockServerConfig options = null)
     {
         _config = options;
-        _fakeDataConfig = _config.FakeDataConfig;
-        if (_config.DownloadFileSizeInMb > 0)
-            _downloadFile = FakeData.GetDownloadFile(_config.DownloadFileSizeInMb);
+        _fakeDataConfig = _config?.FakeDataConfig;
 
         Server = WireMockServer.Start(new WireMockServerSettings()
         {
@@ -39,7 +31,7 @@ public class PlexMockServer : IDisposable
 
         ServerUri = new Uri(Server.Urls[0]);
         DownloadUri = new Uri($"{Server.Urls[0]}{PlexMockServerConfig.FileUrl}");
-        Server = Setup(_config);
+        Server = Setup();
         Log.Debug($"Created {nameof(PlexMockServer)} with url: {ServerUri}");
     }
 
@@ -61,25 +53,9 @@ public class PlexMockServer : IDisposable
 
     #region Public Methods
 
-    private WireMockServer Setup(PlexMockServerConfig config)
+    private WireMockServer Setup()
     {
-        if (_downloadFile?.Any() ?? false)
-        {
-            Server
-                .Given(Request.Create().WithPath(PlexMockServerConfig.FileUrl).UsingGet())
-                .RespondWith(
-                    Response.Create()
-                        .WithStatusCode(206)
-                        .WithBody(_downloadFile)
-                );
-        }
-
-        Server
-            .Given(Request.Create().WithPath(PlexApiPaths.ServerIdentityPath).UsingGet())
-            .RespondWith(Response.Create()
-                .WithStatusCode(200)
-                .WithHeader("Content-Type", "application/json")
-                .WithBodyAsJson(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig)));
+        SetupServerIdentity();
 
         // Setup the Plex libraries
         var librarySections = FakePlexApiData.GetLibraryMediaContainer(_fakeDataConfig);
@@ -105,7 +81,34 @@ public class PlexMockServer : IDisposable
                     .WithBodyAsJson(libraryData));
         }
 
+        SetupDownloadableFile();
         return Server;
+    }
+
+    private void SetupServerIdentity()
+    {
+        Server
+            .Given(Request.Create().WithPath(PlexApiPaths.ServerIdentityPath).UsingGet())
+            .RespondWith(Response.Create()
+                .WithStatusCode(200)
+                .WithHeader("Content-Type", "application/json")
+                .WithBodyAsJson(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig)));
+    }
+
+    private void SetupDownloadableFile()
+    {
+        if (_config.DownloadFileSizeInMb > 0)
+        {
+            var downloadFile = FakeData.GetDownloadFile(_config.DownloadFileSizeInMb);
+
+            Server
+                .Given(Request.Create().WithPath(PlexMockServerConfig.FileUrl).WithParam("X-Plex-Token").UsingGet())
+                .RespondWith(
+                    Response.Create()
+                        .WithStatusCode(206)
+                        .WithBody(downloadFile)
+                );
+        }
     }
 
     #endregion

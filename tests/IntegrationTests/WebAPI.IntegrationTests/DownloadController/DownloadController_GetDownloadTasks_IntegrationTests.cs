@@ -12,18 +12,21 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
     public async Task ShouldHaveAllDownloadTasksNested_WhenTasksAreAvailable()
     {
         // Arrange
+        Seed = 4564;
         var tvShowDownloadTasksCount = 5;
         var tvShowSeasonDownloadTasksCount = 2;
         var tvShowEpisodeDownloadTasksCount = 3;
-
         await SetupDatabase(config =>
         {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 2;
+            config.TvShowCount = 5;
             config.TvShowDownloadTasksCount = tvShowDownloadTasksCount;
             config.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
             config.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
         });
 
-        await CreateContainer(config => { config.Seed = 4564; });
+        await CreateContainer();
 
         // Act
         var response = await Container.ApiClient.GetAsync(ApiRoutes.Download.GetDownloadTasks);

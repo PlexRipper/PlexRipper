@@ -17,6 +17,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
     public async Task ShouldDownloadAllTvShowEpisodes_WhenValidEpisodesAreAdded()
     {
         // Arrange
+        SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
         var timer = new Stopwatch();
         timer.Start();
         var tvShowEpisodeCount = 3;
@@ -28,7 +29,6 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
             // config.TvShowSeasonCount = 1;
             //config.TvShowEpisodeCount = tvShowEpisodeCount;
             config.DownloadSpeedLimit = 5000;
-            config.SetupMockServer();
         });
         await CreateContainer(config);
         await Container.SetDownloadSpeedLimit(config);

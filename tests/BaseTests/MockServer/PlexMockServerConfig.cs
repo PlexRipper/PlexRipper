@@ -5,7 +5,7 @@ public class PlexMockServerConfig
     public int DownloadFileSizeInMb { get; set; } = 0;
     public Action<PlexApiDataConfig> FakeDataConfig { get; set; }
 
-    public static string FileUrl => "/library/parts/65125/1193813456/file.mp4";
+    public static string FileUrl => "/library/parts/653125/119385313456/file.mp4";
 
     public static PlexMockServerConfig FromOptions(Action<PlexMockServerConfig> action = null, PlexMockServerConfig defaultValue = null)
     {

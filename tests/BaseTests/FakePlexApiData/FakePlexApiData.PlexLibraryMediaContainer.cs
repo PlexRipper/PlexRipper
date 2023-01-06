@@ -16,7 +16,8 @@ public partial class FakePlexApiData
                 .RuleFor(x => x.Size, _ => 0)
                 .RuleFor(x => x.AllowSync, f => f.Random.Bool())
                 .RuleFor(x => x.Title1, f => f.Company.CompanyName())
-                .RuleFor(x => x.Directory, _ => GetLibrariesResponseDirectory(options).Generate(3))
+                .RuleFor(x => x.Directory, _ => GetLibrariesResponseDirectory(options)
+                    .Generate(config.LibraryCount))
                 .FinishWith((_, container) => { container.Size = container.Directory.Count; });
 
         return new Faker<LibrariesResponse>()

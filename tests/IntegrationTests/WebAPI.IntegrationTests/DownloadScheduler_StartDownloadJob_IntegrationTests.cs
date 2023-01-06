@@ -9,13 +9,24 @@ public class DownloadScheduler_StartDownloadJob_IntegrationTests : BaseIntegrati
     public async Task ShouldStartDownloadJobForMovie_WhenGivenAValidDownloadTask()
     {
         // Arrange
-        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+        Seed = 4564;
+        var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
+
+        await SetupDatabase(config =>
+        {
+            config.MockServerUris.Add(serverUri);
+            config.PlexAccountCount = 1;
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 2;
+            config.MovieCount = 10;
+            config.MovieDownloadTasksCount = 5;
+        });
+
         await CreateContainer(config =>
         {
-            config.Seed = 4564;
             config.DownloadSpeedLimit = 2000;
-            config.SetupMockServer();
         });
+
         var plexMovieDownloadTask =
             Container.PlexRipperDbContext
                 .DownloadTasks

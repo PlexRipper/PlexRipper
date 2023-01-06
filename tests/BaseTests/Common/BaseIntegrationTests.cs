@@ -4,12 +4,12 @@ using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
 
-public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
+public class BaseIntegrationTests : IAsyncLifetime
 {
     #region Fields
 
     private readonly List<PlexMockServer> _plexMockServers = new();
-    private System.Net.Http.HttpClient _client = null;
+    private System.Net.Http.HttpClient _client;
     private MockPlexApi _mockPlexApi;
     protected BaseContainer Container;
 
@@ -41,30 +41,9 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
 
     #region Methods
 
-    #region Private
+    #region Protected
 
-    async ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        _client.Dispose();
-        await Container.Boot.StopAsync(CancellationToken.None);
-        Container?.Dispose();
-        Log.Fatal("Container disposed");
-    }
-
-    #endregion
-
-    #region Public
-
-    public async Task InitializeAsync()
-    {
-        Log.Information("Initialize Integration Test");
-    }
-
-    public async Task DisposeAsync() { }
-
-    #endregion
-
-    #endregion
+    #region SetupPlexRipper
 
     protected async Task CreateContainer(int seed)
     {
@@ -76,9 +55,41 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
         Container = await BaseContainer.Create(DatabaseName, Seed, options, _mockPlexApi);
     }
 
-    protected void SpinUpPlexServer(Action<PlexMockServerConfig> options = null)
+    #endregion
+
+    #region MockPlexApi
+
+    protected void SetupMockPlexApi(Action<MockPlexApiConfig> options = null)
     {
-        _plexMockServers.Add(new PlexMockServer(options));
+        if (Container is not null)
+        {
+            const string msg = $"{nameof(CreateContainer)}() has already been called, cannot {nameof(SetupMockPlexApi)}()";
+            Log.Error(msg);
+            throw new Exception(msg);
+        }
+
+        _mockPlexApi = new MockPlexApi(options, GetPlexServerUris);
+    }
+
+    #endregion
+
+    #region SetupDatabase
+
+    protected async Task SetupDatabase(Action<FakeDataConfig> options = null)
+    {
+        // Database context can be setup once and then retrieved by its DB name.
+        await MockDatabase.GetMemoryDbContext(DatabaseName).Setup(Seed, options);
+    }
+
+    #endregion
+
+    #region MockPlexServer
+
+    protected Uri SpinUpPlexServer(Action<PlexMockServerConfig> options = null)
+    {
+        var mockServer = new PlexMockServer(options);
+        _plexMockServers.Add(mockServer);
+        return mockServer.ServerUri;
     }
 
     protected void SpinUpPlexServers(Action<List<PlexMockServerConfig>> options = null)
@@ -88,17 +99,9 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
             _plexMockServers.Add(new PlexMockServer(serverConfig));
     }
 
-    protected void SetupMockPlexApi(Action<MockPlexApiConfig> options = null)
-    {
-        _mockPlexApi = new MockPlexApi(options, GetPlexServerUris);
-    }
+    #endregion
 
-    protected async Task SetupDatabase(Action<FakeDataConfig> options = null)
-    {
-        // Database context can be setup once and then retrieved by its DB name.
-        await MockDatabase.GetMemoryDbContext(DatabaseName).Setup(Seed, options);
-    }
-
+    #region HttpClient
 
     protected async Task<T> GetAsync<T>(string requestUri)
     {
@@ -116,4 +119,40 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
             throw;
         }
     }
+
+    #endregion
+
+    #endregion
+
+    #region Public
+
+    public Task InitializeAsync()
+    {
+        Log.Information("Initialize Integration Test");
+        return Task.CompletedTask;
+    }
+
+    public async Task DisposeAsync()
+    {
+        Log.Warning("Integration Test has ended, Disposing!");
+
+        // Dispose HttpClient
+        _client?.Dispose();
+
+        // Dispose PlexMockServers
+        foreach (var plexMockServer in _plexMockServers)
+            plexMockServer.Dispose();
+
+        if (Container is not null)
+        {
+            await Container.Boot.StopAsync(CancellationToken.None);
+            Container.Dispose();
+        }
+
+        Log.Fatal("Container disposed");
+    }
+
+    #endregion
+
+    #endregion
 }

@@ -37,6 +37,8 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
             .ConfigureContainer<ContainerBuilder>(autoFacBuilder =>
             {
                 autoFacBuilder
+
+                    // Database context can be setup once and then retrieved by its DB name.
                     .Register((_, _) => MockDatabase.GetMemoryDbContext(_memoryDbName))
                     .InstancePerDependency();
 

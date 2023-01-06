@@ -25,6 +25,21 @@ public static class MockDatabase
 
         var plexServers = FakeData.GetPlexServer(_seed).Generate(config.PlexServerCount);
 
+        if (config.MockServerUris.Any())
+        {
+            config.MockServerUris.Count.ShouldBeGreaterThanOrEqualTo(plexServers.Count,
+                $"The mocked plex server count ({config.MockServerUris.Count}) was lower than the generated {nameof(config.PlexServerCount)} ({config.PlexServerCount})");
+
+            for (var i = 0; i < config.MockServerUris.Count; i++)
+            {
+                var serverUri = config.MockServerUris[i];
+                var connection = plexServers[i].PlexServerConnections[0];
+                connection.Protocol = serverUri.Scheme;
+                connection.Address = serverUri.Host;
+                connection.Port = serverUri.Port;
+            }
+        }
+
         await context.PlexServers.AddRangeAsync(plexServers);
 
         await context.SaveChangesAsync();

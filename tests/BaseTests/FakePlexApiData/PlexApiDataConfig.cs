@@ -9,6 +9,8 @@ public class PlexApiDataConfig
         return ++Seed;
     }
 
+    public int LibraryCount { get; set; } = 3;
+
     public int LibraryMetaDataCount { get; set; } = 50;
 
     public static PlexApiDataConfig FromOptions(

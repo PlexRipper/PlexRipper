@@ -91,9 +91,14 @@ public class PlexAccount : BaseEntity
     #region Relationships
 
     /// <summary>
-    /// The associated PlexAccountServers the user has access to.
+    /// The associated <see cref="PlexServer"/> this <see cref="PlexAccount"/> has access to.
     /// </summary>
     public List<PlexAccountServer> PlexAccountServers { get; set; }
+
+    /// <summary>
+    /// The associated <see cref="PlexLibrary"/> this <see cref="PlexAccount"/> has access to.
+    /// </summary>
+    public List<PlexAccountLibrary> PlexAccountLibraries { get; set; } = new();
 
     #endregion
 

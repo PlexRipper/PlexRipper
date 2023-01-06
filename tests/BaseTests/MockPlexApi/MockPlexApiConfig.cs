@@ -2,12 +2,6 @@ namespace PlexRipper.BaseTests;
 
 public class MockPlexApiConfig
 {
-    #region Constructors
-
-    public MockPlexApiConfig() { }
-
-    #endregion
-
     #region Properties
 
     public PlexApiDataConfig FakeDataConfig { get; set; }

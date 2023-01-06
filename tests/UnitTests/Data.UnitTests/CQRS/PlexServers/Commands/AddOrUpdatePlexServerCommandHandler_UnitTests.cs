@@ -6,13 +6,15 @@ namespace Data.UnitTests.PlexServers.Commands;
 
 public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexServerCommandHandler_UnitTests(ITestOutputHelper output) : base(output, true) { }
+    public AddOrUpdatePlexServerCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldAddAllServers_WhenNoneExistInTheDatabase()
     {
         // Arrange
-        var expectedPlexServers = FakeData.GetPlexServer(config => config.Seed = 456324).Generate(5);
+        Seed = 45832543;
+        await SetupDatabase();
+        var expectedPlexServers = FakeData.GetPlexServer(Seed).Generate(5);
 
         // Act
         var request = new AddOrUpdatePlexServersCommand(expectedPlexServers);
@@ -41,19 +43,16 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
     public async Task ShouldKeepTheSameServerConnectionIds_WhenOnlyTheConnectionPropertiesHaveChanged()
     {
         // Arrange
-        var plexServers = FakeData.GetPlexServer(config => config.Seed = 23724).Generate(5);
-
-        // Act
-        // First Add 2
-        var handler = new AddOrUpdatePlexServersCommandHandler(DbContext);
-        var request = new AddOrUpdatePlexServersCommand(plexServers);
-        var addResult = await handler.Handle(request, CancellationToken.None);
+        Seed = 23724;
+        await SetupDatabase(config => { config.PlexServerCount = 5; });
+        var plexServers = DbContext.PlexServers.ToList();
+        plexServers.Count.ShouldBe(5);
 
         // Update data setup
         var updatedServers = plexServers.Take(2).ToList();
 
         // Simulate the server being unchanged, and only the connections having changed except the connection
-        // address which it is matched on during updating
+        // // address which it is matched on during updating
         foreach (var updatedServer in updatedServers)
         {
             var connectionCount = updatedServer.PlexServerConnections.Count;
@@ -64,16 +63,15 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
             updatedServer.PlexServerConnections = updatedConnections;
         }
 
+        // Act
         // Now update
-        ResetDbContext();
-        handler = new AddOrUpdatePlexServersCommandHandler(DbContext);
-        request = new AddOrUpdatePlexServersCommand(updatedServers);
+        var handler = new AddOrUpdatePlexServersCommandHandler(GetDbContext());
+        var request = new AddOrUpdatePlexServersCommand(updatedServers);
         var updateResult = await handler.Handle(request, CancellationToken.None);
+        ResetDbContext();
 
         // Assert
-        addResult.IsSuccess.ShouldBeTrue();
         updateResult.IsSuccess.ShouldBeTrue();
-        ResetDbContext();
         var plexServersDbs = DbContext.PlexServers
             .Include(x => x.PlexServerConnections)
             .ToList();
@@ -98,8 +96,10 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
     public async Task ShouldUpdateSomeAndSyncServersWithConnections_WhenSomeServerConnectionsHaveChangedAndSomeExistInTheDatabase()
     {
         // Arrange
-        var plexServers = FakeData.GetPlexServer(config => config.Seed = 23724).Generate(5);
-        var changedPlexServers = FakeData.GetPlexServer(config => config.Seed = 9236).Generate(3);
+        Seed = 23724;
+        await SetupDatabase(config => { config.PlexServerCount = 5; });
+        var plexServers = DbContext.PlexServers.ToList();
+        var changedPlexServers = FakeData.GetPlexServer(9236).Generate(3);
 
         var expectedPlexServers = new List<PlexServer>()
         {

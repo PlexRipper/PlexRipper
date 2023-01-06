@@ -84,6 +84,11 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
 
     public string ConfigDirectory { get; set; }
 
+    /// <summary>
+    /// Determines if this <see cref="PlexRipperDbContext"/> has been setup already during integration or unit testing.
+    /// </summary>
+    public bool HasBeenSetup { get; set; }
+
     #endregion Properties
 
     #region Constructors

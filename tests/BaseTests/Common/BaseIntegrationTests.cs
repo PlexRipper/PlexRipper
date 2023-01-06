@@ -20,6 +20,7 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
     protected BaseIntegrationTests(ITestOutputHelper output)
     {
         Log.SetupTestLogging(output, LogEventLevel.Debug);
+        DatabaseName = MockDatabase.GetMemoryDatabaseName();
     }
 
     #endregion
@@ -31,6 +32,10 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
     protected bool AllMockPlexServersStarted => _plexMockServers.All(x => x.IsStarted);
 
     protected List<Uri> GetPlexServerUris => _plexMockServers.Select(x => x.ServerUri).ToList();
+
+    protected string DatabaseName { get; }
+
+    protected int Seed { get; set; } = 0;
 
     #endregion
 
@@ -66,26 +71,32 @@ public class BaseIntegrationTests : IAsyncLifetime, IAsyncDisposable
         await CreateContainer(config => config.Seed = seed);
     }
 
-    protected async Task CreateContainer([CanBeNull] Action<UnitTestDataConfig> options = null)
+    protected async Task CreateContainer(Action<UnitTestDataConfig> options = null)
     {
-        Container = await BaseContainer.Create(options, _mockPlexApi);
+        Container = await BaseContainer.Create(DatabaseName, Seed, options, _mockPlexApi);
     }
 
-    protected void SpinUpPlexServer([CanBeNull] Action<PlexMockServerConfig> options = null)
+    protected void SpinUpPlexServer(Action<PlexMockServerConfig> options = null)
     {
         _plexMockServers.Add(new PlexMockServer(options));
     }
 
-    protected void SpinUpPlexServers([CanBeNull] Action<List<PlexMockServerConfig>> options = null)
+    protected void SpinUpPlexServers(Action<List<PlexMockServerConfig>> options = null)
     {
         var config = PlexMockServerConfig.FromOptions(options);
         foreach (var serverConfig in config)
             _plexMockServers.Add(new PlexMockServer(serverConfig));
     }
 
-    protected void SetupMockPlexApi([CanBeNull] Action<MockPlexApiConfig> options = null)
+    protected void SetupMockPlexApi(Action<MockPlexApiConfig> options = null)
     {
         _mockPlexApi = new MockPlexApi(options, GetPlexServerUris);
+    }
+
+    protected async Task SetupDatabase(Action<FakeDataConfig> options = null)
+    {
+        // Database context can be setup once and then retrieved by its DB name.
+        await MockDatabase.GetMemoryDbContext(DatabaseName).Setup(Seed, options);
     }
 
 

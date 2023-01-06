@@ -6,19 +6,22 @@ namespace Data.UnitTests.PlexServers.Commands;
 
 public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexAccountServersCommandHandler_UnitTests(ITestOutputHelper output) : base(output, true) { }
+    public AddOrUpdatePlexAccountServersCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldAddPlexAccountServerAssociations_WhenNoneExistsYet()
     {
         // Arrange
-        void Config(UnitTestDataConfig config) => config.Seed = 45832543;
-        DbContext.PlexAccounts.Add(FakeData.GetPlexAccount(Config).Generate());
-        DbContext.PlexServers.AddRange(FakeData.GetPlexServer(Config).Generate(5));
-        await DbContext.SaveChangesAsync();
+        Seed = 45832543;
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexAccountCount = 5;
+        });
+
         var plexAccount = DbContext.PlexAccounts.FirstOrDefault();
         var plexServers = DbContext.PlexServers.ToList();
-        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Config);
+        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Seed);
 
         ResetDbContext();
 
@@ -49,21 +52,19 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
     public async Task ShouldUpdateAndDeletePlexAccountServerAssociations_WhenTheyAreNotGiven()
     {
         // Arrange
+        Seed = 194732;
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 5;
+            config.PlexAccountCount = 1;
+        });
 
-        void Config(UnitTestDataConfig config) => config.Seed = 194732;
-        DbContext.PlexAccounts.Add(FakeData.GetPlexAccount(Config).Generate());
-        DbContext.PlexServers.AddRange(FakeData.GetPlexServer(Config).Generate(5));
-        await DbContext.SaveChangesAsync();
         var plexAccount = DbContext.PlexAccounts.FirstOrDefault();
         var plexServers = DbContext.PlexServers.ToList();
-
-        var plexAccountServers = FakeData.GetPlexAccountServer(plexAccount, plexServers, Config);
-        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Config);
-
-        DbContext.PlexAccountServers.AddRange(plexAccountServers);
-        await DbContext.SaveChangesAsync();
-        plexAccount = await DbContext.PlexAccounts.FindAsync(1);
         ResetDbContext();
+
+        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Seed);
+
         serverAccessTokens.RemoveRange(1, 2);
         serverAccessTokens.ForEach(x => x.AccessToken = "######");
 

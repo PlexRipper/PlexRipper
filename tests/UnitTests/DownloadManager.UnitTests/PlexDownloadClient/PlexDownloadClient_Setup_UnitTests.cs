@@ -44,7 +44,13 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
     public async Task ShouldSendDownloadTaskUpdate_WhenDownloadTaskWorkerHasAnUpdate()
     {
         //Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.MovieDownloadTasksCount = 1; });
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 1;
+            config.MovieCount = 5;
+            config.MovieDownloadTasksCount = 1;
+        });
 
         mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);
         mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<string>())).Returns(4000);
@@ -55,7 +61,7 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
             .Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
             .Returns(Result.Fail("Error"));
 
-        var downloadTask = context.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
+        var downloadTask = DbContext.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
         downloadTask.DownloadWorkerTasks = new List<DownloadWorkerTask>()
         {
             new(downloadTask, 0, 0, 10),

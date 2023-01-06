@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
 
 namespace WebAPI.IntegrationTests.DownloadController;
@@ -24,9 +23,10 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         var config = new Action<UnitTestDataConfig>(config =>
         {
             config.Seed = 4564;
-            config.TvShowCount = 1;
-            config.TvShowSeasonCount = 1;
-            config.TvShowEpisodeCount = tvShowEpisodeCount;
+
+            // config.TvShowCount = 1;
+            // config.TvShowSeasonCount = 1;
+            //config.TvShowEpisodeCount = tvShowEpisodeCount;
             config.DownloadSpeedLimit = 5000;
             config.SetupMockServer();
         });

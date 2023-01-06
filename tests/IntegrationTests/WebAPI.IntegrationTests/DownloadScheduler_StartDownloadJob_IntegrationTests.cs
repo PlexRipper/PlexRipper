@@ -9,10 +9,10 @@ public class DownloadScheduler_StartDownloadJob_IntegrationTests : BaseIntegrati
     public async Task ShouldStartDownloadJobForMovie_WhenGivenAValidDownloadTask()
     {
         // Arrange
+        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
         await CreateContainer(config =>
         {
             config.Seed = 4564;
-            config.MovieDownloadTasksCount = 5;
             config.DownloadSpeedLimit = 2000;
             config.SetupMockServer();
         });

@@ -4,7 +4,7 @@ namespace PlexRipper.BaseTests;
 
 public partial class BaseContainer
 {
-    public async Task SetDownloadSpeedLimit([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public async Task SetDownloadSpeedLimit(Action<UnitTestDataConfig> options = null)
     {
         var config = new UnitTestDataConfig();
         options?.Invoke(config);

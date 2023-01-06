@@ -5,7 +5,7 @@ namespace PlexRipper.BaseTests;
 
 public static partial class FakePlexApiData
 {
-    public static ServerIdentityResponse GetPlexServerIdentityResponse([CanBeNull] Action<PlexApiDataConfig> options = null)
+    public static ServerIdentityResponse GetPlexServerIdentityResponse(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 

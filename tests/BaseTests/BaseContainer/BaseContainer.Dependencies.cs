@@ -32,7 +32,7 @@ public partial class BaseContainer : IDisposable
     /// <summary>
     /// Creates a Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
+    private BaseContainer(string memoryDbName, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
         _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options, mockPlexApi);
         ApiClient = _factory.CreateClient();
@@ -42,17 +42,19 @@ public partial class BaseContainer : IDisposable
         _serviceScope = _factory.Services.CreateScope();
     }
 
-    public static async Task<BaseContainer> Create(Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
+    public static async Task<BaseContainer> Create(string memoryDbName, int seed = 0, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
-        var memoryDbName = MockDatabase.GetMemoryDatabaseName();
 
         Log.Information($"Setting up BaseContainer with database: {memoryDbName}");
 
         EnvironmentExtensions.SetIntegrationTestMode(true);
 
         // Database context can be setup once and then retrieved by its DB name.
-        await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(options);
+        var db = MockDatabase.GetMemoryDbContext(memoryDbName);
+        if (!db.HasBeenSetup)
+            await db.Setup(seed, config.MockDatabase);
+
         var container = new BaseContainer(memoryDbName, options, mockPlexApi);
 
         if (config.DownloadSpeedLimit > 0)

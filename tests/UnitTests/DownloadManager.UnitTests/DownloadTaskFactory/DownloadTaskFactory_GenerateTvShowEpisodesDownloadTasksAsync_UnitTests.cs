@@ -7,19 +7,14 @@ using PlexRipper.WebAPI.Config;
 
 namespace DownloadManager.UnitTests;
 
-public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTests
+public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTests : BaseUnitTest<DownloadTaskFactory>
 {
-    public DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DownloadTaskFactory>();
         var tvShowIds = new List<int>();
 
         // Act
@@ -33,19 +28,25 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
     public async Task ShouldGenerateValidTvShowDownloadTaskWithEpisodeDownloadTask_WhenNoDownloadTasksExist()
     {
         // Arrange
-        var context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.TvShowCount = 5; });
-        var tvShows = await context.PlexTvShows.IncludeAll().ToListAsync();
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 1;
+            config.TvShowCount = 10;
+            config.TvShowDownloadTasksCount = 5;
+        });
 
-        using var mock = AutoMock.GetStrict().AddMapper();
+        var tvShows = await DbContext.PlexTvShows.IncludeAll().ToListAsync();
+
+        mock.AddMapper();
         mock.SetupMediator(It.IsAny<GetPlexTvShowByIdQuery>)
             .ReturnsAsync((GetPlexTvShowByIdQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.Id)));
 
         mock.SetupMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>)
             .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>
-                Result.Ok(context.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
+                Result.Ok(DbContext.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
 
         mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>).ReturnsAsync(Result.Fail(""));
-        var _sut = mock.Create<DownloadTaskFactory>();
 
         var tvShowDb = tvShows.Last();
         var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };
@@ -66,19 +67,25 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
     public async Task ShouldGenerateValidEpisodeDownloadTask_WhenTvShowParentDownloadTaskAlreadyExist()
     {
         // Arrange
-        var context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.TvShowCount = 5; });
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 1;
+            config.TvShowCount = 10;
+            config.TvShowDownloadTasksCount = 5;
+        });
 
-        var tvShows = await context.PlexTvShows.IncludeAll().ToListAsync();
+        var tvShows = await DbContext.PlexTvShows.IncludeAll().ToListAsync();
         var tvShowDb = tvShows.Last();
         var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };
 
-        using var mock = AutoMock.GetStrict().AddMapper();
+        mock.AddMapper();
         mock.SetupMediator(It.IsAny<GetPlexTvShowByIdQuery>)
             .ReturnsAsync((GetPlexTvShowByIdQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.Id)));
 
         mock.SetupMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>)
             .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>
-                Result.Ok(context.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
+                Result.Ok(DbContext.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
 
         mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>)
             .ReturnsAsync((GetDownloadTaskByMediaKeyQuery query, CancellationToken _) =>
@@ -95,7 +102,6 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             });
 
         // Act
-        var _sut = mock.Create<DownloadTaskFactory>();
         var result = await _sut.GenerateTvShowEpisodesDownloadTasksAsync(episodeIds);
 
         // Assert

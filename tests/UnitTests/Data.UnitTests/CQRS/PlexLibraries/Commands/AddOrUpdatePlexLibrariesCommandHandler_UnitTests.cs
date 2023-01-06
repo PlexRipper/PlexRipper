@@ -5,20 +5,23 @@ namespace Data.UnitTests.PlexLibraries;
 
 public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexLibrariesCommandHandler_UnitTests(ITestOutputHelper output) : base(output, true) { }
+    public AddOrUpdatePlexLibrariesCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldAddAllPlexLibraries_WhenNoneExistInTheDatabase()
     {
         // Arrange
-        var plexServer = FakeData.GetPlexServer(config => config.Seed = 656324).Generate();
-        var plexLibraries = FakeData.GetPlexLibrary(config => config.Seed = 656324).Generate(5);
-        var plexAccount = FakeData.GetPlexAccount(config => config.Seed = 353234).Generate();
+        Seed = 353234;
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexAccountCount = 1;
+        });
 
-        DbContext.PlexAccounts.Add(plexAccount);
-        DbContext.PlexServers.Add(plexServer);
-        SaveChanges();
+        var plexAccount = DbContext.PlexAccounts.FirstOrDefault();
+        var plexServer = DbContext.PlexServers.FirstOrDefault();
 
+        var plexLibraries = FakeData.GetPlexLibrary(656324).Generate(5);
         foreach (var plexLibrary in plexLibraries)
             plexLibrary.PlexServerId = plexServer.Id;
 
@@ -52,28 +55,18 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
     public async Task ShouldUpdatePlexLibraries_WhenTheyExistInTheDatabase()
     {
         // Arrange
-        var plexServer = FakeData.GetPlexServer(config => config.Seed = 656324).Generate();
-        var plexLibraries = FakeData.GetPlexLibrary(config => config.Seed = 656324).Generate(5);
-        var plexAccount = FakeData.GetPlexAccount(config => config.Seed = 353234).Generate();
-        var updatedTime = DateTime.Now;
-        DbContext.PlexAccounts.Add(plexAccount);
-        DbContext.PlexServers.Add(plexServer);
-        SaveChanges();
-
-        foreach (var plexLibrary in plexLibraries)
-            plexLibrary.PlexServerId = plexServer.Id;
-
-        DbContext.PlexLibraries.AddRange(plexLibraries);
-        SaveChanges();
-
-        DbContext.PlexAccountLibraries.AddRange(plexLibraries.Select(x => new PlexAccountLibrary()
+        Seed = 656324;
+        await SetupDatabase(config =>
         {
-            PlexAccountId = plexAccount.Id,
-            PlexServerId = plexServer.Id,
-            PlexLibraryId = x.Id,
-        }));
-        SaveChanges();
-        ResetDbContext();
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 5;
+            config.PlexAccountCount = 1;
+        });
+
+        var plexServer = DbContext.PlexServers.FirstOrDefault();
+        var plexLibraries = DbContext.PlexLibraries.ToList();
+        var plexAccount = DbContext.PlexAccounts.FirstOrDefault();
+        var updatedTime = DateTime.Now;
 
         // Mimic API data
         foreach (var plexLibrary in plexLibraries)

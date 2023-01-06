@@ -1,5 +1,4 @@
 using PlexRipper.Application;
-using PlexRipper.PlexApi.Api.All;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Common;
 using PlexRipper.PlexApi.Common.DTO;

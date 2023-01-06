@@ -26,7 +26,7 @@ public partial class FakePlexApiData
             .Generate();
     }
 
-    private static Faker<LibrariesResponseDirectory> GetLibrariesResponseDirectory([CanBeNull] Action<PlexApiDataConfig> options = null)
+    private static Faker<LibrariesResponseDirectory> GetLibrariesResponseDirectory(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 

@@ -14,7 +14,7 @@ public static partial class FakeData
 
     private static readonly string[] TimeFormat = { "HH:mm:ss", "pp" };
 
-    public static Faker<SettingsModel> GetSettingsModel([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<SettingsModel> GetSettingsModel(Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -30,19 +30,19 @@ public static partial class FakeData
             .RuleFor(x => x.ServerSettings, f => GetServerSettings(options).Generate());
     }
 
-    public static string GetSettingsModelJson([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static string GetSettingsModelJson(Action<UnitTestDataConfig> options = null)
     {
         var settings = GetSettingsModel(options).Generate();
         return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCaptialized);
     }
 
-    public static JsonElement GetSettingsModelJsonElement([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static JsonElement GetSettingsModelJsonElement(Action<UnitTestDataConfig> options = null)
     {
         var settingsJson = GetSettingsModelJson(options);
         return JsonSerializer.Deserialize<JsonElement>(settingsJson, DefaultJsonSerializerOptions.ConfigCaptialized);
     }
 
-    public static Faker<GeneralSettings> GetGeneralSettings([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<GeneralSettings> GetGeneralSettings(Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -53,7 +53,7 @@ public static partial class FakeData
             .RuleFor(x => x.ActiveAccountId, f => f.Random.Int(1, 10));
     }
 
-    public static Faker<ConfirmationSettings> GetConfirmationSettings([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<ConfirmationSettings> GetConfirmationSettings(Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -66,7 +66,7 @@ public static partial class FakeData
             .RuleFor(x => x.AskDownloadEpisodeConfirmation, f => f.Random.Bool());
     }
 
-    public static Faker<DateTimeSettings> GetDateTimeSettings([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<DateTimeSettings> GetDateTimeSettings(Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -80,7 +80,7 @@ public static partial class FakeData
             .RuleFor(x => x.ShowRelativeDates, f => f.Random.Bool());
     }
 
-    public static Faker<DisplaySettings> GetDisplaySettings([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<DisplaySettings> GetDisplaySettings(Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -91,7 +91,7 @@ public static partial class FakeData
             .RuleFor(x => x.TvShowViewMode, f => f.Random.Enum<ViewMode>());
     }
 
-    public static Faker<DownloadManagerSettings> GetDownloadManagerSettings([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<DownloadManagerSettings> GetDownloadManagerSettings(Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -101,7 +101,7 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadSegments, f => f.Random.Int(1, 3));
     }
 
-    public static Faker<LanguageSettings> GetLanguageSettings([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<LanguageSettings> GetLanguageSettings(Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -111,7 +111,7 @@ public static partial class FakeData
             .RuleFor(x => x.Language, f => f.Random.String(2));
     }
 
-    public static Faker<ServerSettings> GetServerSettings([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<ServerSettings> GetServerSettings(Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -121,7 +121,7 @@ public static partial class FakeData
             .RuleFor(x => x.Data, _ => GetPlexServerSettingsModel(options).Generate(config.PlexServerSettingsCount));
     }
 
-    public static Faker<PlexServerSettingsModel> GetPlexServerSettingsModel([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<PlexServerSettingsModel> GetPlexServerSettingsModel(Action<UnitTestDataConfig> options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 

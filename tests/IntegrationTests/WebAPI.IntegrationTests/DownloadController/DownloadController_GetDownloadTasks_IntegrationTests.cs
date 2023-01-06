@@ -1,5 +1,4 @@
 ﻿using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
 
 namespace WebAPI.IntegrationTests.DownloadController;
@@ -17,13 +16,14 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
         var tvShowSeasonDownloadTasksCount = 2;
         var tvShowEpisodeDownloadTasksCount = 3;
 
-        await CreateContainer(config =>
+        await SetupDatabase(config =>
         {
-            config.Seed = 4564;
             config.TvShowDownloadTasksCount = tvShowDownloadTasksCount;
             config.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
             config.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
         });
+
+        await CreateContainer(config => { config.Seed = 4564; });
 
         // Act
         var response = await Container.ApiClient.GetAsync(ApiRoutes.Download.GetDownloadTasks);

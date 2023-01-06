@@ -6,7 +6,7 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static Faker<ServerResource> GetServerResource([CanBeNull] Action<PlexApiDataConfig> options = null)
+    public static Faker<ServerResource> GetServerResource(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
@@ -39,7 +39,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Connections, f => GetPlexServerResourceConnections(options).Generate(f.Random.Int(1, 4)));
     }
 
-    public static Faker<ServerResourceConnection> GetPlexServerResourceConnections([CanBeNull] Action<PlexApiDataConfig> options = null)
+    public static Faker<ServerResourceConnection> GetPlexServerResourceConnections(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 

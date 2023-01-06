@@ -18,7 +18,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 
     private readonly UnitTestDataConfig _config;
 
-    public PlexRipperWebApplicationFactory(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
+    public PlexRipperWebApplicationFactory(string memoryDbName, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
         _memoryDbName = memoryDbName;
         _mockPlexApi = mockPlexApi;
@@ -90,7 +90,6 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 
     private void RegisterBackgroundScheduler(ContainerBuilder builder)
     {
-        var connectionString = MockDatabase.DatabaseConnectionString(_config.MemoryDbName);
         var testQuartzProps = new NameValueCollection
         {
             { "quartz.scheduler.instanceName", "PlexRipper Scheduler" },
@@ -98,15 +97,6 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
             { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
             { "quartz.threadPool.threadCount", "10" },
             { "quartz.jobStore.misfireThreshold", "60000" },
-
-            // { "quartz.jobStore.type", "Quartz.Impl.AdoJobStore.JobStoreTX, Quartz" },
-            // { "quartz.jobStore.lockHandler.type", "Quartz.Impl.AdoJobStore.UpdateLockRowSemaphore, Quartz" },
-            // { "quartz.jobStore.dataSource", "default" },
-            // { "quartz.jobStore.tablePrefix", QuartzDatabaseConfig.Prefix },
-            // { "quartz.jobStore.performSchemaValidation", "false" },
-            // { "quartz.jobStore.driverDelegateType", "Quartz.Impl.AdoJobStore.SQLiteDelegate, Quartz" },
-            // { "quartz.dataSource.default.provider", "SQLite-Microsoft" },
-            // { "quartz.dataSource.default.connectionString", connectionString },
         };
 
         // Register Quartz dependencies

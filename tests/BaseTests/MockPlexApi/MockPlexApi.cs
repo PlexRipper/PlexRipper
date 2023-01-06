@@ -1,4 +1,3 @@
-using System.Net;
 using JustEat.HttpClientInterception;
 using PlexRipper.PlexApi.Common;
 
@@ -22,7 +21,7 @@ public class MockPlexApi
 
     #region Constructors
 
-    public MockPlexApi([CanBeNull] Action<MockPlexApiConfig> options = null, List<Uri> serverUris = null)
+    public MockPlexApi(Action<MockPlexApiConfig> options = null, List<Uri> serverUris = null)
     {
         _serverUris = serverUris;
         _config = MockPlexApiConfig.FromOptions(options);

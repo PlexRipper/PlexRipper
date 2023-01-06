@@ -12,10 +12,10 @@ public class DownloadTracker_StopDownloadJob_IntegrationTests : BaseIntegrationT
         await CreateContainer(config =>
         {
             config.Seed = 4564;
-            config.MovieDownloadTasksCount = 2;
             config.DownloadSpeedLimit = 500;
             config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
             config.SetupMockServer();
+            config.MockDatabase = databaseConfig => { databaseConfig.MovieDownloadTasksCount = 2; };
         });
         var plexMovieDownloadTask =
             Container.PlexRipperDbContext

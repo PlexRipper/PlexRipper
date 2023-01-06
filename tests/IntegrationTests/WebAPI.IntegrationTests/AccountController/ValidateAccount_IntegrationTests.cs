@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 
@@ -17,7 +16,7 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
 
         SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = true; });
 
-        var plexAccount = FakeData.GetPlexAccount(config => config.Seed = 26346).Generate();
+        var plexAccount = FakeData.GetPlexAccount(26346).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
 
         // Act
@@ -36,7 +35,7 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
 
         SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = false; });
 
-        var plexAccount = FakeData.GetPlexAccount(config => config.Seed = 4347564).Generate();
+        var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
 
         // Act

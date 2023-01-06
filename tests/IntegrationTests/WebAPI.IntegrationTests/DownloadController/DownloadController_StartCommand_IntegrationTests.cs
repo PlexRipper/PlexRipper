@@ -12,11 +12,12 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
     [Fact]
     public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
     {
+        Seed = 4564;
+        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+
         // Arrange
         await CreateContainer(config =>
         {
-            config.Seed = 4564;
-            config.MovieDownloadTasksCount = 5;
             config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
             config.SetupMockServer();
         });

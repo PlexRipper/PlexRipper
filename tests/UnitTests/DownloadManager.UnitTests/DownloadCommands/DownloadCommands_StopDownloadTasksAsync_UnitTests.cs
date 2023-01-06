@@ -5,22 +5,17 @@ using PlexRipper.DownloadManager;
 
 namespace DownloadManager.UnitTests;
 
-public class DownloadCommands_StopDownloadTasksAsync_UnitTests
+public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<DownloadCommands>
 {
-    public DownloadCommands_StopDownloadTasksAsync_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DownloadCommands_StopDownloadTasksAsync_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
         mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
 
         // Act
-        var _sut = mock.Create<DownloadCommands>();
         var result = await _sut.StopDownloadTasksAsync(0);
 
         // Assert
@@ -31,12 +26,10 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests
     public async Task ShouldHaveFailedResult_WhenGetAllRelatedDownloadTaskIdsFails()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
         mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
         mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result>())).ReturnsAsync(Result.Ok());
         mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result<DownloadTask>>())).ReturnsAsync(Result.Ok());
 
-        var _sut = mock.Create<DownloadCommands>();
         mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>).ReturnsAsync(Result.Fail(""));
 
         // Act
@@ -50,16 +43,17 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests
     public async Task ShouldHaveSetDownloadTasksToStopped_WhenAtLeastOneValidIdIsGiven()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
+        Seed = 9999;
         mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 1;
+            config.MovieCount = 5;
+            config.MovieDownloadTasksCount = 2;
+        });
 
-        await using var context = await MockDatabase.GetMemoryDbContext()
-            .Setup(config =>
-            {
-                config.Seed = 9999;
-                config.MovieDownloadTasksCount = 2;
-            });
-        var downloadTasks = await context.DownloadTasks.ToListAsync();
+        var downloadTasks = await DbContext.DownloadTasks.ToListAsync();
         downloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
         var downloadTaskIds = downloadTasks.Select(x => x.Id).ToList();
 
@@ -74,7 +68,6 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests
         mock.Mock<IDirectorySystem>().Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());
 
         // Act
-        var _sut = mock.Create<DownloadCommands>();
         var result = await _sut.StopDownloadTasksAsync(downloadTaskIds.First());
 
         // Assert

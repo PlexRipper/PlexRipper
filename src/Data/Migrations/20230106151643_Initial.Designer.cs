@@ -11,7 +11,7 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    [Migration("20230101231928_Initial")]
+    [Migration("20230106151643_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1961,7 +1961,7 @@ namespace PlexRipper.Data.Migrations
             modelBuilder.Entity("PlexRipper.Domain.PlexAccountLibrary", b =>
                 {
                     b.HasOne("PlexRipper.Domain.PlexAccount", "PlexAccount")
-                        .WithMany()
+                        .WithMany("PlexAccountLibraries")
                         .HasForeignKey("PlexAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2263,6 +2263,8 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.PlexAccount", b =>
                 {
+                    b.Navigation("PlexAccountLibraries");
+
                     b.Navigation("PlexAccountServers");
                 });
 

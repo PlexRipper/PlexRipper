@@ -28,7 +28,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
             // config.TvShowCount = 1;
             // config.TvShowSeasonCount = 1;
             //config.TvShowEpisodeCount = tvShowEpisodeCount;
-            config.DownloadSpeedLimit = 5000;
+            config.DownloadSpeedLimitInKib = 5000;
         });
         await CreateContainer(config);
         await Container.SetDownloadSpeedLimit(config);

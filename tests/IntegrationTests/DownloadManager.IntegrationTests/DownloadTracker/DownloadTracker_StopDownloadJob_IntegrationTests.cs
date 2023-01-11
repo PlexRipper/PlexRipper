@@ -20,7 +20,7 @@ public class DownloadTracker_StopDownloadJob_IntegrationTests : BaseIntegrationT
         SpinUpPlexServer();
         await CreateContainer(config =>
         {
-            config.DownloadSpeedLimit = 500;
+            config.DownloadSpeedLimitInKib = 500;
             config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
         });
 

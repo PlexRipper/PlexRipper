@@ -12,6 +12,6 @@ public partial class BaseContainer
         var plexServers = await PlexRipperDbContext.PlexServers.ToListAsync();
         GetServerSettings.EnsureAllServersHaveASettingsEntry(plexServers);
         foreach (var plexServer in plexServers)
-            GetServerSettings.SetDownloadSpeedLimit(plexServer.MachineIdentifier, config.DownloadSpeedLimit);
+            GetServerSettings.SetDownloadSpeedLimit(plexServer.MachineIdentifier, config.DownloadSpeedLimitInKib);
     }
 }

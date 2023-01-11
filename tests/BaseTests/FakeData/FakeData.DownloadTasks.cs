@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using ByteSizeLib;
 
 namespace PlexRipper.BaseTests;
 
@@ -19,7 +20,9 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
             .RuleFor(x => x.Priority, _ => 0)
             .RuleFor(x => x.DataReceived, _ => 0)
-            .RuleFor(x => x.DataTotal, f => f.Random.Long(1, 10000000))
+            .RuleFor(x => x.DataTotal, f => config.DownloadFileSizeInMb > 0
+                ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
+                : f.Random.Long(1, 10000000))
             .RuleFor(x => x.Percentage, _ => 0)
             .RuleFor(x => x.DownloadSpeed, _ => 0)
             .RuleFor(x => x.DownloadWorkerTasks, _ => new List<DownloadWorkerTask>())
@@ -58,7 +61,13 @@ public static partial class FakeData
             .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.Movie)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
-            .RuleFor(x => x.Children, _ => GetMovieDataDownloadTask(seed, options).Generate(1))
+            .RuleFor(x => x.Children, _ =>
+            {
+                if (config.IncludeMultiPartMovies)
+                    return GetMoviePartDownloadTask(seed, options).Generate(2);
+
+                return GetMovieDataDownloadTask(seed, options).Generate(1);
+            })
             .RuleFor(x => x.DownloadFolderId, _ => 1)
             .RuleFor(x => x.DestinationFolderId, _ => 2)
             .FinishWith((_, downloadTask) =>
@@ -80,6 +89,17 @@ public static partial class FakeData
             .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.Movie)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.MovieData);
+    }
+
+    public static Faker<DownloadTask> GetMoviePartDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
+    {
+        var config = FakeDataConfig.FromOptions(options);
+
+        return new Faker<DownloadTask>()
+            .ApplyBaseDownloadTask(seed, options)
+            .UseSeed(seed)
+            .RuleFor(x => x.MediaType, PlexMediaType.Movie)
+            .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.MoviePart);
     }
 
     #endregion

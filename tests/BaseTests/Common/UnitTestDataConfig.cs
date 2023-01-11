@@ -19,9 +19,7 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 
     #region UserSettings
 
-    public ISettingsModel UserSettings { get; set; }
-
-    public int DownloadSpeedLimit { get; set; } = 0;
+    public int DownloadSpeedLimitInKib { get; set; } = 0;
 
     public int PlexServerSettingsCount { get; set; } = 5;
 

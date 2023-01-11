@@ -22,7 +22,7 @@ public class DownloadTracker_StartDownloadJob_IntegrationTests : BaseIntegration
 
         await CreateContainer(config =>
         {
-            config.DownloadSpeedLimit = 2000;
+            config.DownloadSpeedLimitInKib = 2000;
             config.MockDownloadSubscriptions = new MockDownloadSubscriptions();
         });
 

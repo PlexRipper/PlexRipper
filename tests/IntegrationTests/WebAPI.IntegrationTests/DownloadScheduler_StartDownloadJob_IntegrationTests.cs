@@ -22,10 +22,7 @@ public class DownloadScheduler_StartDownloadJob_IntegrationTests : BaseIntegrati
             config.MovieDownloadTasksCount = 5;
         });
 
-        await CreateContainer(config =>
-        {
-            config.DownloadSpeedLimit = 2000;
-        });
+        await CreateContainer(config => { config.DownloadSpeedLimitInKib = 2000; });
 
         var plexMovieDownloadTask =
             Container.PlexRipperDbContext

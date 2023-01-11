@@ -2,12 +2,14 @@
 
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
+using BackgroundServices.DownloadManager;
 using Environment;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
+using PlexRipper.HttpClient.Common.Interfaces;
 using PlexRipper.WebAPI;
 
 #endregion
@@ -51,7 +53,7 @@ public partial class BaseContainer : IDisposable
 
         var container = new BaseContainer(memoryDbName, options, mockPlexApi);
 
-        if (config.DownloadSpeedLimit > 0)
+        if (config.DownloadSpeedLimitInKib > 0)
             await container.SetDownloadSpeedLimit(options);
 
         return container;
@@ -97,11 +99,13 @@ public partial class BaseContainer : IDisposable
 
     public ITestStreamTracker TestStreamTracker => Resolve<ITestStreamTracker>();
 
-    public ITestApplicationTracker TestApplicationTracker => Resolve<ITestApplicationTracker>();
+    public IDownloadTaskTracker DownloadTaskTracker => Resolve<IDownloadTaskTracker>();
 
     public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
 
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
+
+    public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
 
     public IFileMerger FileMerger => Resolve<IFileMerger>();
 

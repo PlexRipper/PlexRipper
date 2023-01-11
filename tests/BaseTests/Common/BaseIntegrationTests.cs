@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using PlexRipper.Data;
 using PlexRipper.Domain.Config;
 using Serilog.Events;
 
@@ -119,6 +120,8 @@ public class BaseIntegrationTests : IAsyncLifetime
             throw;
         }
     }
+
+    protected PlexRipperDbContext DbContext => Container.PlexRipperDbContext;
 
     #endregion
 

@@ -129,7 +129,7 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.PlexServerName, f => f.Company.CompanyName())
-            .RuleFor(x => x.DownloadSpeedLimit, _ => config.DownloadSpeedLimit)
+            .RuleFor(x => x.DownloadSpeedLimit, _ => config.DownloadSpeedLimitInKib)
             .RuleFor(x => x.MachineIdentifier, f => f.Finance.BitcoinAddress());
     }
 }

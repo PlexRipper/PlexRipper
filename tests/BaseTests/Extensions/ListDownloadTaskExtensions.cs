@@ -47,4 +47,31 @@ public static class ListDownloadTaskExtensions
 
         return downloadTasks;
     }
+
+    public static List<DownloadTask> SetDownloadUrl(this List<DownloadTask> downloadTasks, PlexServerConnection plexServerConnection)
+    {
+        foreach (var downloadTask in downloadTasks)
+        {
+            if (downloadTask.DownloadTaskType
+                is DownloadTaskType.EpisodeData
+                or DownloadTaskType.EpisodePart
+                or DownloadTaskType.MovieData
+                or DownloadTaskType.MoviePart)
+            {
+                downloadTask.DownloadUrl = new UriBuilder()
+                {
+                    Scheme = plexServerConnection.Protocol,
+                    Host = plexServerConnection.Address,
+                    Port = plexServerConnection.Port,
+                    Path = PlexMockServerConfig.FileUrl,
+                    Query = "X-Plex-Token=SomeRandomToken",
+                }.ToString();
+            }
+
+            if (downloadTask.Children is not null && downloadTask.Children.Any())
+                downloadTask.Children = SetDownloadUrl(downloadTask.Children, plexServerConnection);
+        }
+
+        return downloadTasks;
+    }
 }

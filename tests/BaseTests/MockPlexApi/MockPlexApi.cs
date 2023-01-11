@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using JustEat.HttpClientInterception;
 using PlexRipper.PlexApi.Common;
 
@@ -35,10 +36,24 @@ public class MockPlexApi
             {
                 if (message.RequestUri != null && message.RequestUri.Host == "localhost")
                 {
-                    var msg = new HttpRequestMessage(message.Method, message.RequestUri);
-                    return _client.SendAsync(msg);
+                    return _client.SendAsync(new HttpRequestMessage
+                    {
+                        RequestUri = message.RequestUri,
+                        Method = message.Method,
+                        Content = message.Content,
+                        Headers =
+                        {
+                            UserAgent =
+                            {
+                                new ProductInfoHeaderValue(
+                                    new ProductHeaderValue(nameof(MockPlexApi), "1.0")),
+                            },
+                            Range = message.Headers.Range,
+                        },
+                    });
                 }
 
+                Log.Error($"OnMissingRegistration was triggered on uri: {message.RequestUri} and not handled");
                 return null;
             },
         };

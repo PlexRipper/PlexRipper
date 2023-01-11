@@ -5,6 +5,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PlexRipper.Data;
+using PlexRipper.Data.Common;
 
 #endregion
 
@@ -270,10 +271,13 @@ public static class MockDatabase
         var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.Movie);
         plexLibrary.ShouldNotBeNull();
 
-        var plexServer = context.PlexServers.FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
+        var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
         plexServer.ShouldNotBeNull();
 
         downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
+
+        // The first connection is valid if mock servers have been used
+        downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0]);
 
         context.DownloadTasks.AddRange(downloadTasks);
         await context.SaveChangesAsync();
@@ -295,6 +299,9 @@ public static class MockDatabase
         plexServer.ShouldNotBeNull();
 
         downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
+
+        // The first connection is valid if mock servers have been used
+        downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0]);
 
         context.DownloadTasks.AddRange(downloadTasks);
         await context.SaveChangesAsync();

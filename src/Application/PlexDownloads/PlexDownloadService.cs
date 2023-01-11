@@ -53,9 +53,12 @@ public class PlexDownloadService : IPlexDownloadService
 
     #region Commands
 
-    public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders)
+    public async Task<Result> DownloadMedia(List<DownloadMediaDTO> downloadTaskOrders)
     {
-        Log.Debug($"Attempting to add download task orders: {downloadTaskOrders}");
+        Log.Debug($"Attempting to add download task orders: ");
+        foreach (var downloadMediaDto in downloadTaskOrders)
+            Log.Debug($"{downloadMediaDto} ");
+
         var downloadTasks = await _downloadTaskFactory.GenerateAsync(downloadTaskOrders);
         if (downloadTasks.IsFailed)
             return downloadTasks.ToResult();

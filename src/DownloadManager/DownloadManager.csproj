@@ -20,6 +20,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
+        <ProjectReference Include="..\HttpClient\HttpClient.csproj" />
     </ItemGroup>
 
     <ItemGroup>

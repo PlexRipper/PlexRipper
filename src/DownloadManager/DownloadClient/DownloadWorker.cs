@@ -1,6 +1,10 @@
 using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using ByteSizeLib;
+using PlexRipper.HttpClient;
+using PlexRipper.HttpClient.Common.Interfaces;
+using RestSharp;
 using Timer = System.Timers.Timer;
 
 namespace PlexRipper.DownloadManager.DownloadClient;
@@ -173,23 +177,19 @@ public class DownloadWorker
             _destinationStream.Position = DownloadWorkerTask.BytesReceived;
 
             // Create download client
-            using var response = await _httpClient.SendAsync(new HttpRequestMessage
+            var request = new RestRequest(DownloadWorkerTask.Uri)
             {
-                RequestUri = DownloadWorkerTask.Uri,
-                Method = HttpMethod.Get,
-                Headers =
-                {
-                    Range = new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte),
-                },
-            }, HttpCompletionOption.ResponseHeadersRead);
+                CompletionOption = HttpCompletionOption.ResponseHeadersRead,
+            };
+            request.AddRangeHeader(new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte));
 
-            await using var responseStream = await response.Content.ReadAsStreamAsync();
+            await using var responseStream = await _httpClient.DownloadStream(request);
 
             // Throttle the stream to enable download speed limiting
             var throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
 
             // Buffer is based on: https://stackoverflow.com/a/39355385/8205497
-            var buffer = new byte[524288000];
+            var buffer = new byte[(long)ByteSize.FromMebiBytes(4).Bytes];
 
             _timer.Start();
 

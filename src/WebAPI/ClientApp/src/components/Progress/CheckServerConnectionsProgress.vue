@@ -106,7 +106,7 @@
 			<v-card-actions>
 				<v-row justify="end">
 					<v-col cols="auto">
-						<HideButton @click="$emit('hide')" />
+						<HideButton @click="visible = false" />
 					</v-col>
 				</v-row>
 			</v-card-actions>

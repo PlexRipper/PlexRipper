@@ -19,6 +19,16 @@ public abstract class BaseScheduler
         return _scheduler.CheckExists(key);
     }
 
+    protected async Task<bool> DeleteJob(JobKey key)
+    {
+        return await _scheduler.DeleteJob(key);
+    }
+
+    protected async Task TriggerJob(JobKey key, JobDataMap jobDataMap)
+    {
+        await _scheduler.TriggerJob(key, jobDataMap);
+    }
+
 
     protected BaseScheduler(IScheduler scheduler)
     {

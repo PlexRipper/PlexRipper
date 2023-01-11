@@ -16,8 +16,8 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
 
     public async Task<Result> QueueInspectPlexServerJob(int plexServerId)
     {
-        var key = InspectPlexServerJob.GetJobKey(plexServerId);
-        if (await IsJobRunning(key))
+        var jobKey = InspectPlexServerJob.GetJobKey(plexServerId);
+        if (await IsJobRunning(jobKey))
         {
             return Result.Fail($"A {nameof(InspectPlexServerJob)} with {nameof(plexServerId)} {plexServerId} is already running")
                 .LogWarning();
@@ -25,11 +25,11 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
 
         var job = JobBuilder.Create<InspectPlexServerJob>()
             .UsingJobData(InspectPlexServerJob.PlexServerIdParameter, plexServerId)
-            .WithIdentity(key)
+            .WithIdentity(jobKey)
             .Build();
 
         var trigger = TriggerBuilder.Create()
-            .WithIdentity($"{key.Name}_trigger", key.Group)
+            .WithIdentity($"{jobKey.Name}_trigger", jobKey.Group)
             .ForJob(job)
             .StartNow()
             .Build();

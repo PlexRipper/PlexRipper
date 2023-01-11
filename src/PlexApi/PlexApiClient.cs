@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text.Json;
-using AutoMapper;
 using FluentResultExtensions;
 using PlexRipper.Application;
 using PlexRipper.PlexApi.Common;
@@ -15,7 +14,6 @@ namespace PlexRipper.PlexApi;
 
 public class PlexApiClient
 {
-    private readonly IMapper _mapper;
     private readonly RestClient _client;
 
     public static JsonSerializerOptions SerializerOptions => new()
@@ -26,9 +24,8 @@ public class PlexApiClient
         Converters = { new LongToDateTime() },
     };
 
-    public PlexApiClient(IMapper mapper, HttpClient httpClient)
+    public PlexApiClient(HttpClient httpClient)
     {
-        _mapper = mapper;
         var options = new RestClientOptions()
         {
             MaxTimeout = 10000,

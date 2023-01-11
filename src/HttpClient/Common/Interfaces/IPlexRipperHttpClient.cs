@@ -1,6 +1,6 @@
 ﻿using RestSharp;
 
-namespace PlexRipper.HttpClient.Common.Interfaces;
+namespace PlexRipper.HttpClient;
 
 public interface IPlexRipperHttpClient
 {

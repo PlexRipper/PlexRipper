@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using PlexRipper.HttpClient.Common.Interfaces;
 using PlexRipper.PlexApi.Converters;
 using RestSharp;
 

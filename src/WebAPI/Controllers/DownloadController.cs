@@ -54,7 +54,7 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> DownloadMedia([FromBody] List<DownloadMediaDTO> downloadMedias)
     {
-        return ToActionResult(await _plexDownloadService.DownloadMediaAsync(downloadMedias));
+        return ToActionResult(await _plexDownloadService.DownloadMedia(downloadMedias));
     }
 
     #region BatchCommands

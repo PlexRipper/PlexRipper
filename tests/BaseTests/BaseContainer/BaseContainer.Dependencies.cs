@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
-using PlexRipper.HttpClient.Common.Interfaces;
+using PlexRipper.HttpClient;
 using PlexRipper.WebAPI;
 
 #endregion

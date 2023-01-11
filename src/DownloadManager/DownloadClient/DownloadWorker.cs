@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
 using PlexRipper.HttpClient;
-using PlexRipper.HttpClient.Common.Interfaces;
 using RestSharp;
 using Timer = System.Timers.Timer;
 

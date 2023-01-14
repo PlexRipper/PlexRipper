@@ -1,6 +1,6 @@
 using Quartz;
 
-namespace BackgroundServices.Base;
+namespace PlexRipper.Application.BackgroundServices;
 
 public abstract class BaseScheduler
 {
@@ -27,6 +27,11 @@ public abstract class BaseScheduler
     protected async Task TriggerJob(JobKey key, JobDataMap jobDataMap)
     {
         await _scheduler.TriggerJob(key, jobDataMap);
+    }
+
+    protected async Task<bool> StopJob(JobKey key)
+    {
+        return await _scheduler.Interrupt(key);
     }
 
 

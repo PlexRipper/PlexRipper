@@ -1,6 +1,6 @@
 using Quartz;
 
-namespace BackgroundServices.Base;
+namespace PlexRipper.Application.BackgroundServices;
 
 public interface IBaseJob : IJob
 {

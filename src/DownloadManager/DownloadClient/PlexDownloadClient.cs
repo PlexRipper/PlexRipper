@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using PlexRipper.Application;
+using PlexRipper.Domain.RxNet;
 
 namespace PlexRipper.DownloadManager.DownloadClient;
 
@@ -13,11 +13,8 @@ public class PlexDownloadClient : IDisposable
 {
     #region Fields
 
-    private readonly Subject<DownloadTask> _downloadTaskUpdate = new();
-
+    private readonly IMediator _mediator;
     private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
-
-    private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new();
 
     private readonly List<DownloadWorker> _downloadWorkers = new();
 
@@ -34,12 +31,15 @@ public class PlexDownloadClient : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="PlexDownloadClient"/> class.
     /// </summary>
+    /// <param name="mediator"></param>
     /// <param name="downloadWorkerFactory"></param>
     /// <param name="serverSettings"></param>
     public PlexDownloadClient(
+        IMediator mediator,
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
         IServerSettingsModule serverSettings)
     {
+        _mediator = mediator;
         _downloadWorkerFactory = downloadWorkerFactory;
         _serverSettings = serverSettings;
     }
@@ -65,10 +65,6 @@ public class PlexDownloadClient : IDisposable
     /// The ClientId/DownloadTaskId is always the same id that is assigned to the <see cref="DownloadTask"/>.
     /// </summary>
     public int DownloadTaskId => DownloadTask.Id;
-
-    public IObservable<DownloadTask> DownloadTaskUpdate => _downloadTaskUpdate.AsObservable();
-
-    public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
     #endregion
 
@@ -201,9 +197,9 @@ public class PlexDownloadClient : IDisposable
         return Result.Ok();
     }
 
-    private void OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates)
+    private async Task OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates)
     {
-        if (_downloadTaskUpdate.IsDisposed || !downloadWorkerUpdates.Any())
+        if (!downloadWorkerUpdates.Any())
             return;
 
         // Update every DownloadWorkerTask with the updated progress
@@ -218,14 +214,19 @@ public class PlexDownloadClient : IDisposable
         DownloadTask.Percentage = DownloadTask.DownloadWorkerTasks.Average(x => x.Percentage);
         DownloadTask.DownloadSpeed = DownloadTask.DownloadWorkerTasks.Sum(x => x.DownloadSpeed);
 
-        DownloadStatus = DownloadTaskActions.Aggregate(downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList());
+        var newDownloadStatus = DownloadTaskActions.Aggregate(downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList());
 
-        _downloadTaskUpdate.OnNext(DownloadTask);
+        var statusIsChanged = DownloadStatus != newDownloadStatus;
+        DownloadStatus = newDownloadStatus;
 
-        if (DownloadStatus == DownloadStatus.DownloadFinished)
+        await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { DownloadTask }));
+
+        if (statusIsChanged)
         {
-            _downloadTaskUpdate.OnCompleted();
-            _downloadWorkerLog.OnCompleted();
+            await _mediator.Publish(new DownloadStatusChanged(
+                DownloadTask.Id,
+                DownloadTask.RootDownloadTaskId,
+                DownloadStatus));
         }
     }
 
@@ -256,13 +257,14 @@ public class PlexDownloadClient : IDisposable
             .Select(x => x.DownloadWorkerTaskUpdate)
             .CombineLatest()
             .Sample(TimeSpan.FromMilliseconds(400), _timeThreadContext)
-            .Subscribe(OnDownloadWorkerTaskUpdate);
+            .SubscribeAsync(OnDownloadWorkerTaskUpdate);
 
-        // On download worker log
+        // Download Worker Log subscription
         _downloadWorkers
             .Select(x => x.DownloadWorkerLog)
             .Merge()
-            .Subscribe(downloadWorkerLog => _downloadWorkerLog.OnNext(downloadWorkerLog));
+            .Buffer(TimeSpan.FromSeconds(1))
+            .SubscribeAsync(async logs => await _mediator.Send(new AddDownloadWorkerLogsCommand(logs)));
     }
 
     #endregion

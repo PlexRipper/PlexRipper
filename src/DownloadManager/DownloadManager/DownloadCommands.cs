@@ -2,24 +2,21 @@
 
 namespace PlexRipper.DownloadManager;
 
-/// <summary>
-/// Used to convert batch commands to smaller single commands for the <see cref="DownloadTracker"/>
-/// </summary>
 public class DownloadCommands : IDownloadCommands
 {
     #region Fields
 
     private readonly IDownloadQueue _downloadQueue;
 
-    private readonly IDownloadTracker _downloadTracker;
-
     private readonly IDirectorySystem _directorySystem;
+    private readonly IDownloadTaskValidator _downloadTaskValidator;
 
     private readonly IMediator _mediator;
 
     private readonly INotificationsService _notificationsService;
 
     private readonly IDownloadTaskFactory _downloadTaskFactory;
+    private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     #endregion
 
@@ -27,18 +24,20 @@ public class DownloadCommands : IDownloadCommands
 
     public DownloadCommands(
         IMediator mediator,
-        IDownloadTracker downloadTracker,
         IDownloadQueue downloadQueue,
         IDirectorySystem directorySystem,
+        IDownloadTaskValidator downloadTaskValidator,
         INotificationsService notificationsService,
-        IDownloadTaskFactory downloadTaskFactory)
+        IDownloadTaskFactory downloadTaskFactory,
+        IDownloadTaskScheduler downloadTaskScheduler)
     {
         _mediator = mediator;
-        _downloadTracker = downloadTracker;
         _downloadQueue = downloadQueue;
         _directorySystem = directorySystem;
+        _downloadTaskValidator = downloadTaskValidator;
         _notificationsService = notificationsService;
         _downloadTaskFactory = downloadTaskFactory;
+        _downloadTaskScheduler = downloadTaskScheduler;
     }
 
     #endregion
@@ -46,12 +45,34 @@ public class DownloadCommands : IDownloadCommands
     #region Public Methods
 
     /// <inheritdoc/>
-    public async Task<Result> RestartDownloadTasksAsync(int downloadTaskId)
+    public async Task<Result> CreateDownloadTasks(List<DownloadTask> downloadTasks)
+    {
+        if (!downloadTasks.Any())
+            return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
+
+        var validateResult = _downloadTaskValidator.ValidateDownloadTasks(downloadTasks);
+        if (validateResult.IsFailed)
+            return validateResult.ToResult().LogDebug();
+
+        // Add to Database
+        var createResult = await _mediator.Send(new CreateDownloadTasksCommand(validateResult.Value));
+        if (createResult.IsFailed)
+            return createResult.ToResult().LogError();
+
+        Log.Debug($"Successfully added all {validateResult.Value.Count} DownloadTasks");
+        var uniquePlexServers = downloadTasks.Select(x => x.PlexServerId).Distinct().ToList();
+
+        await _mediator.Publish(new CheckDownloadQueue(uniquePlexServers));
+        return Result.Ok();
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result> RestartDownloadTask(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
-        var stopDownloadTasksResult = await StopDownloadTasksAsync(downloadTaskId);
+        var stopDownloadTasksResult = await StopDownloadTasks(downloadTaskId);
         if (stopDownloadTasksResult.IsFailed)
             return stopDownloadTasksResult.ToResult().LogError();
 
@@ -67,7 +88,7 @@ public class DownloadCommands : IDownloadCommands
         return Result.Ok();
     }
 
-    public async Task<Result> ResumeDownloadTasksAsync(int downloadTaskId)
+    public async Task<Result> ResumeDownloadTask(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
@@ -76,7 +97,7 @@ public class DownloadCommands : IDownloadCommands
         if (downloadTasksResult.IsFailed)
             return downloadTasksResult.ToResult();
 
-        if (_downloadTracker.IsDownloading(downloadTaskId))
+        if (await _downloadTaskScheduler.IsDownloading(downloadTaskId))
         {
             Log.Information(
                 $"PlexServer {downloadTasksResult.Value.PlexServer.Name} already has a DownloadTask downloading so another one cannot be started");
@@ -87,18 +108,18 @@ public class DownloadCommands : IDownloadCommands
         if (nextTask.IsFailed)
             return nextTask.ToResult();
 
-        return await StartDownloadTaskAsync(nextTask.Value);
+        return await StartDownloadTask(nextTask.Value);
     }
 
     #region Start
 
-    public async Task<Result> StartDownloadTaskAsync(DownloadTask downloadTask)
+    public async Task<Result> StartDownloadTask(DownloadTask downloadTask)
     {
         if (downloadTask is null)
             return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
 
         if (downloadTask.IsDownloadable)
-            return await _downloadTracker.StartDownloadClient(downloadTask.Id);
+            return await _downloadTaskScheduler.StartDownloadTaskJob(downloadTask.Id, downloadTask.PlexServerId);
 
         return Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable.");
     }
@@ -108,7 +129,7 @@ public class DownloadCommands : IDownloadCommands
     #region Stop
 
     /// <inheritdoc/>
-    public async Task<Result<List<int>>> StopDownloadTasksAsync(int downloadTaskId)
+    public async Task<Result<List<int>>> StopDownloadTasks(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
@@ -125,7 +146,7 @@ public class DownloadCommands : IDownloadCommands
         Log.Information($"Stopping {downloadTask.Value.FullTitle} from downloading");
 
         // Check if currently downloading
-        var stopResult = await _downloadTracker.StopDownloadClient(downloadTaskId);
+        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskId);
         if (stopResult.IsFailed)
             await _notificationsService.SendResult(stopResult);
 
@@ -155,8 +176,7 @@ public class DownloadCommands : IDownloadCommands
         var failedTasks = new List<int>();
         var errors = new List<IError>();
 
-        // The paused downloading state will be send through an subscription to the database.
-        var pauseResult = await _downloadTracker.PauseDownloadClient(downloadTaskId);
+        var pauseResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskId);
         if (pauseResult.IsFailed)
         {
             failedTasks.Add(downloadTaskId);
@@ -171,20 +191,20 @@ public class DownloadCommands : IDownloadCommands
     #endregion
 
     /// <inheritdoc/>
-    public async Task<Result> ClearCompletedAsync(List<int> downloadTaskIds)
+    public async Task<Result> ClearCompleted(List<int> downloadTaskIds)
     {
         return await _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
     }
 
     /// <inheritdoc/>
-    public async Task<Result<bool>> DeleteDownloadTaskClientsAsync(List<int> downloadTaskIds)
+    public async Task<Result<bool>> DeleteDownloadTaskClients(List<int> downloadTaskIds)
     {
         if (downloadTaskIds is null || !downloadTaskIds.Any())
             return Result.Fail("Parameter downloadTaskIds was empty or null").LogError();
 
         foreach (var downloadTaskId in downloadTaskIds)
-            if (_downloadTracker.IsDownloading(downloadTaskId))
-                await StopDownloadTasksAsync(downloadTaskId);
+            if (await _downloadTaskScheduler.IsDownloading(downloadTaskId))
+                await StopDownloadTasks(downloadTaskId);
 
         return await _mediator.Send(new DeleteDownloadTasksByIdCommand(downloadTaskIds));
     }

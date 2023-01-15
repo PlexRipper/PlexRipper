@@ -1,9 +1,9 @@
 using PlexRipper.Application;
 using PlexRipper.Application.BackgroundServices;
-using PlexRipper.DownloadManager.DownloadManager.Jobs;
+using PlexRipper.DownloadManager.Jobs;
 using Quartz;
 
-namespace PlexRipper.DownloadManager.DownloadManager;
+namespace PlexRipper.DownloadManager;
 
 public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
 {
@@ -21,7 +21,7 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
 
     #region Public Methods
 
-    public async Task<Result> StartDownloadTaskJob(int downloadTaskId)
+    public async Task<Result> StartDownloadTaskJob(int downloadTaskId, int plexServerId)
     {
         if (downloadTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
@@ -32,6 +32,7 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
 
         var job = JobBuilder.Create<DownloadJob>()
             .UsingJobData(DownloadJob.DownloadTaskIdParameter, downloadTaskId)
+            .UsingJobData(DownloadJob.PlexServerIdParameter, plexServerId)
             .WithIdentity(jobKey)
             .Build();
 
@@ -45,16 +46,32 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
         return Result.Ok();
     }
 
+
     public async Task<Result> StopDownloadTaskJob(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
+
+        Log.Information($"Stopping DownloadClient for DownloadTaskId {downloadTaskId}");
 
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);
         if (!await IsJobRunning(jobKey))
             return Result.Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not running").LogWarning();
 
         return Result.OkIf(await StopJob(jobKey), $"Failed to stop {nameof(DownloadTask)} with id {downloadTaskId}");
+    }
+
+
+    public async Task<bool> IsDownloading(int downloadTaskId)
+    {
+        var jobKey = DownloadJob.GetJobKey(downloadTaskId);
+        return await IsJobRunning(jobKey);
+    }
+
+    public async Task<bool> IsServerDownloading(int plexServerId)
+    {
+        var data = await GetRunningJobDataMaps(typeof(DownloadJob));
+        return data.Select(x => x.GetIntValue(DownloadJob.PlexServerIdParameter)).ToList().Contains(plexServerId);
     }
 
     #endregion

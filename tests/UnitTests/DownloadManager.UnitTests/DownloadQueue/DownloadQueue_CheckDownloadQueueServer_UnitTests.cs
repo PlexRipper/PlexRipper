@@ -16,15 +16,12 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
         mock.SetupMediator(It.IsAny<GetAllDownloadTasksInPlexServersQuery>)
             .ReturnsAsync(Result.Ok(new List<PlexServer>()));
 
-        List<DownloadTask> startCommands = new();
-
         // Act
-        _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
         _sut.Setup();
-        await _sut.CheckDownloadQueue(new List<int>());
+        var result = await _sut.CheckDownloadQueue(new List<int>());
 
         // Assert
-        startCommands.Any().ShouldBeFalse();
+        result.IsFailed.ShouldBeTrue();
     }
 
     [Fact]
@@ -47,7 +44,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
             .ReturnsAsync((GetPlexServerNameByIdQuery query, CancellationToken _) =>
                 Result.Ok(downloadTasks.FirstOrDefault(x => x.PlexServerId == query.Id).Title));
 
-        List<DownloadTask> startCommands = new();
         var plexServers = await DbContext.PlexServers
             .AsTracking()
             .Include(x => x.PlexLibraries)
@@ -60,11 +56,11 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
         await DbContext.SaveChangesAsync();
 
         // Act
-        _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-        await _sut.CheckDownloadQueueServer(1);
+        var result = await _sut.CheckDownloadQueueServer(1);
 
         // Assert
-        startCommands.Any().ShouldBeFalse();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Id.ShouldBe(startedDownloadTask.Id);
     }
 
     [Fact]
@@ -72,7 +68,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
     {
         // Arrange
         Seed = 5000;
-        List<DownloadTask> startCommands = new();
         await SetupDatabase(config =>
         {
             config.PlexServerCount = 1;
@@ -90,13 +85,12 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
                 Result.Ok(downloadTasks.FirstOrDefault(x => x.PlexServerId == query.Id).Title));
 
         // Act
-        _sut.StartDownloadTask.Subscribe(command => startCommands.Add(command));
-        await _sut.CheckDownloadQueueServer(downloadTasks.First().PlexServerId);
+        var result = await _sut.CheckDownloadQueueServer(downloadTasks.First().PlexServerId);
 
         // Assert
+        result.IsSuccess.ShouldBeTrue();
         var startedDownloadTask = downloadTasks[0].Children[0];
-        startCommands.Count.ShouldBe(1);
-        startCommands[0].Id.ShouldBe(startedDownloadTask.Id);
+        result.Value.Id.ShouldBe(startedDownloadTask.Id);
     }
 
     [Fact]
@@ -104,7 +98,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
     {
         // Arrange
         Seed = 5000;
-        List<DownloadTask> startCommands = new();
         await SetupDatabase(config =>
         {
             config.PlexServerCount = 1;
@@ -126,14 +119,15 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
         movieDownloadTask.DownloadStatus = DownloadStatus.Completed;
         movieDownloadTask.Children.ForEach(x => x.DownloadStatus = DownloadStatus.Completed);
         await DbContext.SaveChangesAsync();
-        DownloadTask startedDownloadTask = null;
 
         // Act
-        _sut.StartDownloadTask.Subscribe(update => startedDownloadTask = update);
-        await _sut.CheckDownloadQueueServer(downloadTasks.First().PlexServerId);
+        var result = await _sut.CheckDownloadQueueServer(downloadTasks.First().PlexServerId);
 
         // Assert
-        startedDownloadTask.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeTrue();
+        // TODO should verifiy by downloadTaskId here
+        //result.Value.Id.ShouldBe(startedDownloadTask.Id);
+
     }
 
     [Fact]
@@ -158,8 +152,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
             .ReturnsAsync((GetPlexServerNameByIdQuery query, CancellationToken _) =>
                 Result.Ok(downloadTasks.FirstOrDefault(x => x.PlexServerId == query.Id).Title));
 
-        DownloadTask startedDownloadTask = null;
-
         // ** Set first task to Completed
         var tvShowDownloadTask = downloadTasks[0];
         tvShowDownloadTask.DownloadStatus = DownloadStatus.Completed;
@@ -167,11 +159,10 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
         await DbContext.SaveChangesAsync();
 
         // Act
-        _sut.StartDownloadTask.Subscribe(update => startedDownloadTask = update);
-        await _sut.CheckDownloadQueueServer(1);
+        var result = await _sut.CheckDownloadQueueServer(1);
 
         // Assert
-        startedDownloadTask.ShouldNotBeNull();
-        startedDownloadTask.Id.ShouldBe(downloadTasks[1].Children[0].Children[0].Children[0].Id);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Id.ShouldBe(downloadTasks[1].Children[0].Children[0].Children[0].Id);
     }
 }

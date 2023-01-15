@@ -11,8 +11,6 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 
     public IFileSystem MockFileSystem { get; set; }
 
-    public IDownloadSubscriptions MockDownloadSubscriptions { get; set; }
-
     public IConfigManager MockConfigManager { get; set; }
 
     #endregion

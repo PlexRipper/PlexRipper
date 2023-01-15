@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using PlexRipper.Application;
 using PlexRipper.PlexApi.Services;
-using RestSharp;
 
 namespace PlexRipper.PlexApi;
 
@@ -14,6 +13,5 @@ public class PlexApiModule : Module
         builder.RegisterType<Api.PlexApi>();
 
         builder.RegisterType<PlexApiClient>().SingleInstance();
-        builder.RegisterType<RestClient>().SingleInstance();
     }
 }

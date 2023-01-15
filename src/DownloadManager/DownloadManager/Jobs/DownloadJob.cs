@@ -4,7 +4,7 @@ using PlexRipper.Application.DownloadWorkerTasks;
 using PlexRipper.DownloadManager.DownloadClient;
 using Quartz;
 
-namespace PlexRipper.DownloadManager.DownloadManager.Jobs;
+namespace PlexRipper.DownloadManager.Jobs;
 
 public class DownloadJob : IBaseJob, IDisposable
 {
@@ -39,6 +39,8 @@ public class DownloadJob : IBaseJob, IDisposable
 
     public static string DownloadTaskIdParameter => "DownloadTaskId";
 
+    public static string PlexServerIdParameter => "PlexServerId";
+
     #endregion
 
     #region Methods
@@ -55,6 +57,7 @@ public class DownloadJob : IBaseJob, IDisposable
         var token = context.CancellationToken;
         var dataMap = context.JobDetail.JobDataMap;
         var downloadTaskId = dataMap.GetIntValue(DownloadTaskIdParameter);
+        var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
         Log.Debug($"Executing job: {nameof(DownloadJob)} for {nameof(DownloadTask)}: {downloadTaskId}");
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
@@ -132,11 +135,7 @@ public class DownloadJob : IBaseJob, IDisposable
                 await Task.Delay(500);
             }
 
-            // We want to ensure all subscribed listeners had a chance to receive the latest data
-            // ReSharper disable once MethodSupportsCancellation
-            await Task.Delay(2000);
-
-            await _mediator.Publish(new DownloadTaskFinished(downloadTaskId), token);
+            await _mediator.Publish(new DownloadTaskFinished(downloadTaskId, plexServerId), token);
             Log.Debug($"Exiting {nameof(DownloadJob)} for {nameof(DownloadTask)} with id: {downloadTaskId}");
         }
         catch (Exception e)

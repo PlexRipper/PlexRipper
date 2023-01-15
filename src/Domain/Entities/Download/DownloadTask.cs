@@ -129,15 +129,19 @@ public class DownloadTask : BaseEntity
 
     public DownloadTask Parent { get; set; }
 
-    public int? RootDownloadTaskId { get; set; }
-
-    public DownloadTask RootDownloadTask { get; set; }
+    public int RootDownloadTaskId { get; set; }
 
     public List<DownloadTask> Children { get; set; }
 
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// If the Id is the same as it's RootDownloadTaskId then this is the root of the <see cref="DownloadTask"/> hierarchy.
+    /// </summary>
+    [NotMapped]
+    public bool IsRoot => Id == RootDownloadTaskId;
 
     [NotMapped]
     public int MediaParts => DownloadWorkerTasks?.Count ?? 0;

@@ -2,7 +2,6 @@
 
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
-using BackgroundServices.DownloadManager;
 using Environment;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -77,8 +76,6 @@ public partial class BaseContainer : IDisposable
 
     public IDownloadTaskValidator GetDownloadTaskValidator => Resolve<IDownloadTaskValidator>();
 
-    public IDownloadTracker GetDownloadTracker => Resolve<IDownloadTracker>();
-
     public IFolderPathService GetFolderPathService => Resolve<IFolderPathService>();
 
     public IPlexAccountService GetPlexAccountService => Resolve<IPlexAccountService>();
@@ -98,8 +95,6 @@ public partial class BaseContainer : IDisposable
     public IPathProvider PathProvider => Resolve<IPathProvider>();
 
     public ITestStreamTracker TestStreamTracker => Resolve<ITestStreamTracker>();
-
-    public IDownloadTaskTracker DownloadTaskTracker => Resolve<IDownloadTaskTracker>();
 
     public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
 

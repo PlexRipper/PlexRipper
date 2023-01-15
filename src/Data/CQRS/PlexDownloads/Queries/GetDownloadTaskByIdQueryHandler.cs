@@ -19,17 +19,18 @@ public class GetDownloadTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetD
 
     public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
     {
-        var query = DownloadTasksQueryable;
+        var query =
+            DownloadTasksQueryable.AsTracking()
+            .Include(x => x.PlexServer)
+            .Include(x => x.PlexLibrary)
+            .Include(x => x.DestinationFolder)
+            .Include(x => x.DownloadFolder)
+            .Include(x => x.DownloadWorkerTasks);
 
 // @formatter:off
         if (request.IncludeChildren)
         {
-            query = query.AsTracking()
-                .Include(x => x.PlexServer)
-                .Include(x => x.PlexLibrary)
-                .Include(x => x.DestinationFolder)
-                .Include(x => x.DownloadFolder)
-                .Include(x => x.DownloadWorkerTasks)
+            query = query
                 .Include(x => x.Children)
 
                 // Level 1

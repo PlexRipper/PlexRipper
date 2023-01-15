@@ -357,6 +357,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 {
                     var moviePartDownloadTask = _mapper.Map<DownloadTask>(plexMovie);
                     moviePartDownloadTask.FullTitle = fullTitle;
+                    moviePartDownloadTask.MediaType = PlexMediaType.Movie;
                     moviePartDownloadTask.DownloadTaskType = DownloadTaskType.MoviePart;
                     moviePartDownloadTask.FileName = Path.GetFileName(part.File);
                     moviePartDownloadTask.DataTotal = part.Size;
@@ -530,6 +531,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
                 // Create Download URL
                 var downloadUrl = $"{downloadTask.PlexServer.GetServerUrl()}{downloadTask.FileLocationUrl}";
+
                 // TODO Might remove this and not make the token part of the DownloadTask but retrieved on demand to make it more resilient to changes
                 var serverTokenWithUrl = await _plexApiService.GetPlexServerTokenWithUrl(downloadTask.PlexServerId, downloadUrl);
                 if (serverTokenWithUrl.IsFailed)

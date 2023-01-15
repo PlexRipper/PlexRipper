@@ -46,8 +46,7 @@ public static partial class FakeData
             .RuleFor(x => x.DestinationFolder, _ => null)
             .RuleFor(x => x.ServerMachineIdentifier, f => f.Random.Hash())
             .RuleFor(x => x.DestinationFolderId, _ => 2)
-            .RuleFor(x => x.RootDownloadTask, _ => null)
-            .RuleFor(x => x.RootDownloadTaskId, _ => null);
+            .RuleFor(x => x.RootDownloadTaskId, _ => 0);
     }
 
     #region Movie

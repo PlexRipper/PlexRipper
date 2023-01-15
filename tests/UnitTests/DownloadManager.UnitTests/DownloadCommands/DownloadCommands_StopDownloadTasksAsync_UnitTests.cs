@@ -13,10 +13,9 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<Do
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {
         // Arrange
-        mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
 
         // Act
-        var result = await _sut.StopDownloadTasksAsync(0);
+        var result = await _sut.StopDownloadTasks(0);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -26,14 +25,13 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<Do
     public async Task ShouldHaveFailedResult_WhenGetAllRelatedDownloadTaskIdsFails()
     {
         // Arrange
-        mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
         mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result>())).ReturnsAsync(Result.Ok());
         mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result<DownloadTask>>())).ReturnsAsync(Result.Ok());
 
         mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>).ReturnsAsync(Result.Fail(""));
 
         // Act
-        var result = await _sut.StopDownloadTasksAsync(1);
+        var result = await _sut.StopDownloadTasks(1);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -44,7 +42,6 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<Do
     {
         // Arrange
         Seed = 9999;
-        mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
         await SetupDatabase(config =>
         {
             config.PlexServerCount = 1;
@@ -64,11 +61,10 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<Do
                 Result.Ok(downloadTasks.FirstOrDefault(y => y.Id == x.Id)));
 
         mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result>())).ReturnsAsync(Result.Ok());
-        mock.Mock<IDownloadTracker>().Setup(x => x.StopDownloadClient(It.IsAny<int>())).ReturnsAsync(Result.Ok());
         mock.Mock<IDirectorySystem>().Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());
 
         // Act
-        var result = await _sut.StopDownloadTasksAsync(downloadTaskIds.First());
+        var result = await _sut.StopDownloadTasks(downloadTaskIds.First());
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

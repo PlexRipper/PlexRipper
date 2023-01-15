@@ -20,11 +20,7 @@ public class Boot : IBoot
 
     private readonly ISchedulerService _schedulerService;
 
-    private readonly IDownloadSubscriptions _downloadSubscriptions;
-
     private readonly IDownloadQueue _downloadQueue;
-
-    private readonly IDownloadTracker _downloadTracker;
 
     #endregion
 
@@ -35,17 +31,13 @@ public class Boot : IBoot
         IConfigManager configManager,
         IFileMerger fileMerger,
         ISchedulerService schedulerService,
-        IDownloadSubscriptions downloadSubscriptions,
-        IDownloadQueue downloadQueue,
-        IDownloadTracker downloadTracker)
+        IDownloadQueue downloadQueue)
     {
         _appLifetime = appLifetime;
         _configManager = configManager;
         _fileMerger = fileMerger;
         _schedulerService = schedulerService;
-        _downloadSubscriptions = downloadSubscriptions;
         _downloadQueue = downloadQueue;
-        _downloadTracker = downloadTracker;
     }
 
     #endregion
@@ -68,9 +60,7 @@ public class Boot : IBoot
             Log.SetupLogging();
 
         _configManager.Setup();
-        _downloadSubscriptions.Setup();
         _downloadQueue.Setup();
-        _downloadTracker.Setup();
         await _fileMerger.SetupAsync();
         await _schedulerService.SetupAsync();
 

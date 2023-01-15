@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.BaseTests;
+﻿namespace PlexRipper.Domain;
 
 public static class ListDownloadTaskExtensions
 {
@@ -48,7 +48,7 @@ public static class ListDownloadTaskExtensions
         return downloadTasks;
     }
 
-    public static List<DownloadTask> SetDownloadUrl(this List<DownloadTask> downloadTasks, PlexServerConnection plexServerConnection)
+    public static List<DownloadTask> SetDownloadUrl(this List<DownloadTask> downloadTasks, PlexServerConnection plexServerConnection, string fileUrl)
     {
         foreach (var downloadTask in downloadTasks)
         {
@@ -63,13 +63,27 @@ public static class ListDownloadTaskExtensions
                     Scheme = plexServerConnection.Protocol,
                     Host = plexServerConnection.Address,
                     Port = plexServerConnection.Port,
-                    Path = PlexMockServerConfig.FileUrl,
+                    Path = fileUrl,
                     Query = "X-Plex-Token=SomeRandomToken",
                 }.ToString();
             }
 
             if (downloadTask.Children is not null && downloadTask.Children.Any())
-                downloadTask.Children = SetDownloadUrl(downloadTask.Children, plexServerConnection);
+                downloadTask.Children = SetDownloadUrl(downloadTask.Children, plexServerConnection, fileUrl);
+        }
+
+        return downloadTasks;
+    }
+
+    public static List<DownloadTask> SetRootId(this List<DownloadTask> downloadTasks, int rootTaskId)
+    {
+        foreach (var downloadTask in downloadTasks)
+        {
+            downloadTask.RootDownloadTaskId = rootTaskId;
+            if (downloadTask.Children is null || !downloadTask.Children.Any())
+                continue;
+
+            downloadTask.Children = SetRootId(downloadTask.Children, rootTaskId);
         }
 
         return downloadTasks;

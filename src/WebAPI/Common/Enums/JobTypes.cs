@@ -1,5 +1,4 @@
 using System.Runtime.Serialization;
-using BackgroundServices.InspectPlexServer;
 
 namespace PlexRipper.WebAPI.Common;
 
@@ -24,4 +23,7 @@ public enum JobTypes
 
     [EnumMember(Value = nameof(RefreshAccessiblePlexServersJob))]
     RefreshAccessiblePlexServersJob = 5,
+
+    [EnumMember(Value = nameof(DownloadProgressJobs))]
+    DownloadProgressJobs = 6,
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -26,18 +27,22 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
         });
 
         // Arrange
-        await CreateContainer(config => { config.MockDownloadSubscriptions = new MockDownloadSubscriptions(); });
+        await CreateContainer();
         var downloadTasks = await Container.PlexRipperDbContext.DownloadTasks.ToListAsync();
         downloadTasks.Count.ShouldBe(10);
+        var downloadTask = downloadTasks.First();
 
         // Act
-        var response = await Container.GetAsync(ApiRoutes.Download.GetStartCommand(downloadTasks.First().Id));
+        var response = await Container.GetAsync(ApiRoutes.Download.GetStartCommand(downloadTask.Id));
         var result = await response.Deserialize<ResultDTO>();
-        await Task.Delay(5000);
+        await Container.SchedulerService.AwaitScheduler();
+        await Task.Delay(2000);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-
-        // TODO Add better success checks here
+        var downloadTaskDb = await DbContext.DownloadTasks.IncludeDownloadTasks().SingleOrDefaultAsync(x => x.Id == downloadTask.RootDownloadTaskId);
+        downloadTaskDb.ShouldNotBeNull();
+        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.DownloadFinished);
+        downloadTaskDb.Children.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.DownloadFinished);
     }
 }

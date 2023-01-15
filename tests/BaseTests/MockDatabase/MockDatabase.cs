@@ -277,9 +277,18 @@ public static class MockDatabase
         downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
 
         // The first connection is valid if mock servers have been used
-        downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0]);
+        downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0], PlexMockServerConfig.FileUrl);
 
         context.DownloadTasks.AddRange(downloadTasks);
+        await context.SaveChangesAsync();
+
+        // Ensure there is a rootId
+        foreach (var downloadTask in downloadTasks)
+        {
+            downloadTask.RootDownloadTaskId = downloadTask.Id;
+            downloadTask.Children.SetRootId(downloadTask.Id);
+        }
+
         await context.SaveChangesAsync();
 
         Log.Debug(
@@ -301,9 +310,18 @@ public static class MockDatabase
         downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
 
         // The first connection is valid if mock servers have been used
-        downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0]);
+        downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0], PlexMockServerConfig.FileUrl);
 
         context.DownloadTasks.AddRange(downloadTasks);
+        await context.SaveChangesAsync();
+
+        // Ensure there is a rootId
+        foreach (var downloadTask in downloadTasks)
+        {
+            downloadTask.RootDownloadTaskId = downloadTask.Id;
+            downloadTask.Children.SetRootId(downloadTask.Id);
+        }
+
         await context.SaveChangesAsync();
 
         Log.Debug(

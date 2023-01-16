@@ -304,12 +304,13 @@ public static class MockDatabase
         var downloadTasks = FakeData.GetTvShowDownloadTask(_seed, options).Generate(config.TvShowDownloadTasksCount);
         var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.TvShow);
         plexLibrary.ShouldNotBeNull();
-        var plexServer = context.PlexServers.FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
+        var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
         plexServer.ShouldNotBeNull();
 
-        downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
+        downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
 
         // The first connection is valid if mock servers have been used
+        plexServer.PlexServerConnections.ShouldNotBeEmpty();
         downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0], PlexMockServerConfig.FileUrl);
 
         context.DownloadTasks.AddRange(downloadTasks);

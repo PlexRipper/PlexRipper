@@ -102,8 +102,6 @@ public partial class BaseContainer : IDisposable
 
     public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
 
-    public IFileMerger FileMerger => Resolve<IFileMerger>();
-
     public IMapper Mapper => Resolve<IMapper>();
 
     public IBoot Boot => Resolve<IBoot>();
@@ -131,10 +129,10 @@ public partial class BaseContainer : IDisposable
 
     public void Dispose()
     {
+        Log.Warning("Disposing Container");
         PlexRipperDbContext.Database.EnsureDeleted();
         _services.GetAutofacRoot().Dispose();
         _factory?.Dispose();
         ApiClient?.Dispose();
-        Log.Warning("Disposing Container");
     }
 }

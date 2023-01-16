@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using DownloadManager.Contracts;
 using PlexRipper.Application;
 using PlexRipper.Domain.RxNet;
 
@@ -256,7 +257,6 @@ public class PlexDownloadClient : IDisposable
         _downloadWorkers
             .Select(x => x.DownloadWorkerTaskUpdate)
             .CombineLatest()
-            .Sample(TimeSpan.FromMilliseconds(400), _timeThreadContext)
             .SubscribeAsync(OnDownloadWorkerTaskUpdate);
 
         // Download Worker Log subscription

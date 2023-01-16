@@ -18,9 +18,9 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     #region Constructors
 
-    protected BaseIntegrationTests(ITestOutputHelper output)
+    protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
     {
-        Log.SetupTestLogging(output, LogEventLevel.Debug);
+        Log.SetupTestLogging(output, logLevel);
         DatabaseName = MockDatabase.GetMemoryDatabaseName();
     }
 
@@ -116,6 +116,23 @@ public class BaseIntegrationTests : IAsyncLifetime
         catch (Exception e)
         {
             Log.Error($"RequestURI: {requestUri}");
+            Log.Error(e);
+            throw;
+        }
+    }
+
+    protected async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage httpRequestMessage,
+        HttpCompletionOption option = HttpCompletionOption.ResponseContentRead)
+    {
+        _client = _mockPlexApi is not null ? _mockPlexApi.CreateClient() : new System.Net.Http.HttpClient();
+        try
+        {
+            return await _client.SendAsync(httpRequestMessage, option);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"RequestURI: {httpRequestMessage.RequestUri}");
             Log.Error(e);
             throw;
         }

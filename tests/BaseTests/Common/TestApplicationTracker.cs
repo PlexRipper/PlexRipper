@@ -2,7 +2,6 @@
 using System.Text;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;
-using PlexRipper.FileSystem;
 using Quartz;
 
 namespace PlexRipper.BaseTests;
@@ -11,14 +10,11 @@ public class TestApplicationTracker : ITestApplicationTracker
 {
     private readonly IScheduler _scheduler;
 
-    private readonly IFileMerger _fileMerger;
-
     private readonly IDownloadQueue _downloadQueue;
 
-    public TestApplicationTracker(IScheduler scheduler, IFileMerger fileMerger, IDownloadQueue downloadQueue)
+    public TestApplicationTracker(IScheduler scheduler, IDownloadQueue downloadQueue)
     {
         _scheduler = scheduler;
-        _fileMerger = fileMerger;
         _downloadQueue = downloadQueue;
     }
 
@@ -32,12 +28,11 @@ public class TestApplicationTracker : ITestApplicationTracker
             status.Append("Application status - ");
             status.Append($"[Thread Count: {threadCount}] ");
             status.Append($"[{nameof(DownloadQueue)}: {_downloadQueue.IsBusy}] ");
-            status.Append($"[{nameof(FileMerger)}: {_fileMerger.IsBusy}] ");
             status.Append($"[{nameof(IScheduler)}: {isSchedulerBusy}] ");
             Log.Debug(status.ToString());
         }
 
-        return threadCount < 50 && !_fileMerger.IsBusy && !_downloadQueue.IsBusy && !isSchedulerBusy;
+        return threadCount < 50 && !_downloadQueue.IsBusy && !isSchedulerBusy;
     }
 
     private async Task<bool> IsSchedulerBusy()

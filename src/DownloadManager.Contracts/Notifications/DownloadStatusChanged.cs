@@ -1,4 +1,7 @@
-namespace PlexRipper.DownloadManager;
+using MediatR;
+using PlexRipper.Domain;
+
+namespace DownloadManager.Contracts;
 
 public class DownloadStatusChanged : INotification
 {

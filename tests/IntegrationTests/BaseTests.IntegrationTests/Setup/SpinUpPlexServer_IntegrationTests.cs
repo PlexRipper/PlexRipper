@@ -1,3 +1,5 @@
+using Humanizer.Bytes;
+
 namespace BaseTests.IntegrationTests.Setup;
 
 public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
@@ -31,5 +33,33 @@ public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
         // Assert
         MockPlexServerCount.ShouldBe(5);
         AllMockPlexServersStarted.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldDownloadFileFromMemory_WhenGivenByteArrayFileInMemory()
+    {
+        // Arrange
+        var mbSize = 50;
+        var uri = SpinUpPlexServer(config => config.DownloadFileSizeInMb = mbSize);
+        var urlBuilder = new UriBuilder(uri)
+        {
+            Path = PlexMockServerConfig.FileUrl,
+            Query = "X-Plex-Token=EHRWERHAERHAERH",
+        };
+
+        var request = new HttpRequestMessage
+        {
+            RequestUri = urlBuilder.Uri,
+            Method = HttpMethod.Get,
+        };
+
+        // Act
+        using var response = await SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        var stream = await response.Content.ReadAsByteArrayAsync();
+
+        // Assert
+        response.IsSuccessStatusCode.ShouldBeTrue();
+        stream.ShouldNotBeNull();
+        stream.LongLength.ShouldBeEquivalentTo((long)ByteSize.FromMegabytes(mbSize).Bytes);
     }
 }

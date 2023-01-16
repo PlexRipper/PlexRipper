@@ -13,6 +13,7 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
     {
         // Arrange
         Seed = 4564;
+
         var tvShowDownloadTasksCount = 5;
         var tvShowSeasonDownloadTasksCount = 2;
         var tvShowEpisodeDownloadTasksCount = 3;

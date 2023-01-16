@@ -1,4 +1,6 @@
-namespace PlexRipper.DownloadManager;
+using MediatR;
+
+namespace DownloadManager.Contracts;
 
 public class CheckDownloadQueue : INotification
 {

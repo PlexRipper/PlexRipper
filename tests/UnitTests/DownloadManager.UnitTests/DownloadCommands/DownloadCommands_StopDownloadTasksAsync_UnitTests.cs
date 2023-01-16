@@ -54,6 +54,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<Do
         downloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
         var downloadTaskIds = downloadTasks.Select(x => x.Id).ToList();
 
+        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<int>())).ReturnOk();
         mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>).ReturnsAsync(Result.Ok(downloadTasks.First()));
         mock.SetupMediator(It.IsAny<UpdateDownloadStatusOfDownloadTaskCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>)

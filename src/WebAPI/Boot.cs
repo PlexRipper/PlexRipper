@@ -1,7 +1,6 @@
 using System.Net;
 using Environment;
 using PlexRipper.Application;
-using PlexRipper.DownloadManager;
 
 namespace PlexRipper.WebAPI;
 
@@ -16,8 +15,6 @@ public class Boot : IBoot
 
     private readonly IConfigManager _configManager;
 
-    private readonly IFileMerger _fileMerger;
-
     private readonly ISchedulerService _schedulerService;
 
     private readonly IDownloadQueue _downloadQueue;
@@ -29,13 +26,11 @@ public class Boot : IBoot
     public Boot(
         IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
-        IFileMerger fileMerger,
         ISchedulerService schedulerService,
         IDownloadQueue downloadQueue)
     {
         _appLifetime = appLifetime;
         _configManager = configManager;
-        _fileMerger = fileMerger;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
     }
@@ -61,7 +56,6 @@ public class Boot : IBoot
 
         _configManager.Setup();
         _downloadQueue.Setup();
-        await _fileMerger.SetupAsync();
         await _schedulerService.SetupAsync();
 
         _appLifetime.ApplicationStarted.Register(OnStarted);
@@ -85,6 +79,7 @@ public class Boot : IBoot
     private void OnStopped()
     {
         Log.Information("Boot.OnStopped has been called.");
+
         // Perform post-stopped activities here
     }
 

@@ -13,7 +13,7 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
     [Fact]
     public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
     {
-        Seed = 4564;
+        Seed = 5594564;
         var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
 
         await SetupDatabase(config =>
@@ -42,7 +42,7 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
         result.IsSuccess.ShouldBeTrue();
         var downloadTaskDb = await DbContext.DownloadTasks.IncludeDownloadTasks().SingleOrDefaultAsync(x => x.Id == downloadTask.RootDownloadTaskId);
         downloadTaskDb.ShouldNotBeNull();
-        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.DownloadFinished);
-        downloadTaskDb.Children.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.DownloadFinished);
+        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
+        downloadTaskDb.Children.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Completed);
     }
 }

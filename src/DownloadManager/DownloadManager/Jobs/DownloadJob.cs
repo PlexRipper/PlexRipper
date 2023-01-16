@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application;
+﻿using DownloadManager.Contracts;
+using PlexRipper.Application;
 using PlexRipper.Application.BackgroundServices;
 using PlexRipper.Application.DownloadWorkerTasks;
 using PlexRipper.DownloadManager.DownloadClient;

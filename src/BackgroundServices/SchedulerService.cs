@@ -63,13 +63,17 @@ public class SchedulerService : ISchedulerService
 
     public async Task AwaitScheduler(CancellationToken cancellationToken = default)
     {
+        await Task.Delay(1000, cancellationToken);
         var isExecutingJobs = true;
         while (isExecutingJobs)
         {
-            await Task.Delay(500, cancellationToken);
+            await Task.Delay(1000, cancellationToken);
             var executingJobs = await _scheduler.GetCurrentlyExecutingJobs(cancellationToken);
             isExecutingJobs = executingJobs.Count > 0;
+            Log.Verbose($"Currently number of executing jobs: {executingJobs.Count}");
         }
+
+        await Task.Delay(1000, cancellationToken);
     }
 
     #endregion

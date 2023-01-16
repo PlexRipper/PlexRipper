@@ -3,13 +3,14 @@ using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
+using Serilog.Events;
 
 namespace WebAPI.IntegrationTests.DownloadController;
 
 [Collection("Sequential")]
 public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegrationTests
 {
-    public DownloadController_DownloadMedia_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public DownloadController_DownloadMedia_IntegrationTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose) { }
 
     [Fact]
     public async Task ShouldDownloadMultipleMovieDownloadTasks_WhenDownloadTasksAreCreated()
@@ -55,9 +56,9 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         downloadTasksDb.ShouldNotBeNull();
         downloadTasksDb.ShouldNotBeEmpty();
         downloadTasksDb.Count.ShouldBe(10);
-        downloadTasksDb.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.DownloadFinished);
+        downloadTasksDb.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Completed);
 
         foreach (var downloadTaskDb in downloadTasksDb)
-            downloadTaskDb.Children.ShouldAllBe(y => y.DownloadStatus == DownloadStatus.DownloadFinished);
+            downloadTaskDb.Children.ShouldAllBe(y => y.DownloadStatus == DownloadStatus.Completed);
     }
 }

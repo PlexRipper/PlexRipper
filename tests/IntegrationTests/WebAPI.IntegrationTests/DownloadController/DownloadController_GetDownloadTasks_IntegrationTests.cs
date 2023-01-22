@@ -12,7 +12,7 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
     public async Task ShouldHaveAllDownloadTasksNested_WhenTasksAreAvailable()
     {
         // Arrange
-        Seed = 4564;
+        Seed = 45485864;
 
         var tvShowDownloadTasksCount = 5;
         var tvShowSeasonDownloadTasksCount = 2;

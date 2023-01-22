@@ -130,9 +130,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-
-        // TODO should verifiy by downloadTaskId here
-        //result.Value.Id.ShouldBe(startedDownloadTask.Id);
+        result.Value.Id.ShouldBe(7);
     }
 
     [Fact]

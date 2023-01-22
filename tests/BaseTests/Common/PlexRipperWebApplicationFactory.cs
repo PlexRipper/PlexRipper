@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.Config;
+using PlexRipper.Data;
 using PlexRipper.Domain.Autofac;
-using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
 
 namespace PlexRipper.BaseTests;
@@ -40,6 +40,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 
                     // Database context can be setup once and then retrieved by its DB name.
                     .Register((_, _) => MockDatabase.GetMemoryDbContext(_memoryDbName))
+                    .As<PlexRipperDbContext>()
                     .InstancePerDependency();
 
                 autoFacBuilder.RegisterModule<TestModule>();

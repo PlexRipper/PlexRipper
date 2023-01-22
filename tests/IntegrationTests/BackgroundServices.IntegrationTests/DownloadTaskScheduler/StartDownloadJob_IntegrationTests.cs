@@ -36,11 +36,6 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
         downloadTask.ShouldNotBeNull();
         var childDownloadTask = downloadTask.Children[0];
 
-        // TODO fix the assertion that the DownloadTaskHasFinished
-        // Container.Mediator. DownloadTaskTracker.DownloadTaskFinished.Subscribe(value =>
-        //     value.Id.ShouldBe(childDownloadTask.Id)
-        // );
-
         // Act
         var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.Id, childDownloadTask.PlexServerId);
         await Container.SchedulerService.AwaitScheduler();
@@ -51,6 +46,6 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
             .IncludeDownloadTasks()
             .FirstOrDefault(x => x.Id == childDownloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
-        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.DownloadFinished);
+        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
     }
 }

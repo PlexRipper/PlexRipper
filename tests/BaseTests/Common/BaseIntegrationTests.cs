@@ -5,6 +5,7 @@ using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
 
+[Collection("Sequential")]
 public class BaseIntegrationTests : IAsyncLifetime
 {
     #region Fields
@@ -22,6 +23,7 @@ public class BaseIntegrationTests : IAsyncLifetime
     {
         Log.SetupTestLogging(output, logLevel);
         DatabaseName = MockDatabase.GetMemoryDatabaseName();
+        Log.Information($"Initialized integration test with database name: {DatabaseName}");
     }
 
     #endregion

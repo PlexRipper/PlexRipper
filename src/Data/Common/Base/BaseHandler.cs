@@ -117,6 +117,6 @@ public abstract class BaseHandler : IDisposable
 
     public void Dispose()
     {
-        _dbContext?.Dispose();
+        // This is here as a reminder that the dbContext will be disposed by the dependency injection container
     }
 }

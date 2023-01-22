@@ -1,4 +1,4 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
+import { beforeAll, describe, expect, test } from '@jest/globals';
 import { take } from 'rxjs/operators';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
@@ -45,9 +45,10 @@ describe('ServerService.getServers()', () => {
 			plexServerCount: 6,
 		};
 		const servers = generatePlexServers(config);
+		const serverIds = servers.map((x) => x.id);
 		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(servers));
 		const setup$ = ServerService.setup(ctx);
-		const serversResult$ = ServerService.getServers([2, 3, 4]).pipe(take(1));
+		const serversResult$ = ServerService.getServers(serverIds.slice(0, 3)).pipe(take(1));
 
 		// Act
 		const setupResult = subscribeSpyTo(setup$);
@@ -59,8 +60,8 @@ describe('ServerService.getServers()', () => {
 		expect(serversResult.receivedComplete()).toBe(true);
 		const firstValue = serversResult.getFirstValue();
 		expect(firstValue.length).toEqual(3);
-		expect(firstValue[0].id).toEqual(2);
-		expect(firstValue[1].id).toEqual(3);
-		expect(firstValue[2].id).toEqual(4);
+		for (let i = 0; i < 3; i++) {
+			expect(firstValue[i].id).toEqual(serverIds[i]);
+		}
 	});
 });

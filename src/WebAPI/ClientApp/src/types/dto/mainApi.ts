@@ -205,10 +205,6 @@ export type ResultDTOOfBoolean = ResultDTO & {
 	value: boolean;
 };
 
-export type ResultDTOOfString = ResultDTO & {
-	value: string;
-};
-
 export type ResultDTOOfAuthPin = ResultDTO & {
 	value: AuthPin;
 };
@@ -453,23 +449,53 @@ export interface PlexServerDTO {
 	/** @format int32 */
 	id: number;
 	name: string;
-	address: string;
 	/** @format int32 */
-	port: number;
-	version: string;
-	scheme: string;
-	host: string;
-	localAddresses: string;
-	serverUrl: string;
-	machineIdentifier: string;
+	ownerId: number;
+	plexServerOwnerUsername: string;
+	device: string;
+	platform: string;
+	platformVersion: string;
+	product: string;
+	productVersion: string;
+	provides: string;
 	/** @format date-time */
 	createdAt: string;
 	/** @format date-time */
-	updatedAt: string;
+	lastSeenAt: string;
+	machineIdentifier: string;
+	publicAddress: string;
 	/** @format int32 */
-	ownerId: number;
+	preferredConnectionId: number;
+	owned: boolean;
+	home: boolean;
+	synced: boolean;
+	relay: boolean;
+	presence: boolean;
+	httpsRequired: boolean;
+	publicAddressMatches: boolean;
+	dnsRebindingProtection: boolean;
+	natLoopbackSupported: boolean;
+	plexServerConnections: PlexServerConnectionDTO[];
 	downloadTasks: DownloadProgressDTO[];
-	status: PlexServerStatusDTO;
+}
+
+export interface PlexServerConnectionDTO {
+	/** @format int32 */
+	id: number;
+	protocol: string;
+	address: string;
+	/** @format int32 */
+	port: number;
+	local: boolean;
+	relay: boolean;
+	iPv4: boolean;
+	iPv6: boolean;
+	portFix: boolean;
+	/** @format int32 */
+	plexServerId: number;
+	url: string;
+	latestConnectionStatus: PlexServerStatusDTO;
+	progress: ServerConnectionCheckStatusProgressDTO | null;
 }
 
 export interface PlexServerStatusDTO {
@@ -483,6 +509,24 @@ export interface PlexServerStatusDTO {
 	lastChecked: string;
 	/** @format int32 */
 	plexServerId: number;
+}
+
+export interface ServerConnectionCheckStatusProgressDTO {
+	/** @format int32 */
+	plexServerId: number;
+	/** @format int32 */
+	plexServerConnectionId: number;
+	/** @format int32 */
+	retryAttemptIndex: number;
+	/** @format int32 */
+	retryAttemptCount: number;
+	/** @format int32 */
+	timeToNextRetry: number;
+	/** @format int32 */
+	statusCode: number;
+	connectionSuccessful: boolean;
+	completed: boolean;
+	message: string;
 }
 
 export interface RefreshPlexLibraryDTO {
@@ -503,12 +547,20 @@ export type ResultDTOOfPlexMediaDTO = ResultDTO & {
 	value: PlexMediaDTO;
 };
 
-export type ResultDTOOfListOfPlexServerDTO = ResultDTO & {
-	value: PlexServerDTO[];
+export type ResultDTOOfListOfPlexServerConnectionDTO = ResultDTO & {
+	value: PlexServerConnectionDTO[];
+};
+
+export type ResultDTOOfPlexServerConnectionDTO = ResultDTO & {
+	value: PlexServerConnectionDTO;
 };
 
 export type ResultDTOOfPlexServerStatusDTO = ResultDTO & {
 	value: PlexServerStatusDTO;
+};
+
+export type ResultDTOOfListOfPlexServerDTO = ResultDTO & {
+	value: PlexServerDTO[];
 };
 
 export type ResultDTOOfSettingsModelDTO = ResultDTO & {
@@ -587,6 +639,49 @@ export type ResultDTOOfDownloadTaskDTO = ResultDTO & {
 	value: DownloadTaskDTO;
 };
 
+export enum MessageTypes {
+	LibraryProgress = 'LibraryProgress',
+	DownloadTaskCreationProgress = 'DownloadTaskCreationProgress',
+	DownloadTaskUpdate = 'DownloadTaskUpdate',
+	ServerDownloadProgress = 'ServerDownloadProgress',
+	InspectServerProgress = 'InspectServerProgress',
+	ServerConnectionCheckStatusProgress = 'ServerConnectionCheckStatusProgress',
+	FileMergeProgress = 'FileMergeProgress',
+	SyncServerProgress = 'SyncServerProgress',
+	Notification = 'Notification',
+	JobStatusUpdate = 'JobStatusUpdate',
+}
+
+export enum JobTypes {
+	InspectPlexServerByPlexAccountIdJob = 'InspectPlexServerByPlexAccountIdJob',
+	InspectPlexServerJob = 'InspectPlexServerJob',
+	DownloadJob = 'DownloadJob',
+	DownloadProgressJob = 'DownloadProgressJob',
+	SyncServerJob = 'SyncServerJob',
+	RefreshAccessiblePlexServersJob = 'RefreshAccessiblePlexServersJob',
+}
+
+export enum JobStatus {
+	Started = 'Started',
+	Running = 'Running',
+	Completed = 'Completed',
+}
+
+export interface JobStatusUpdateDTO {
+	id: string;
+	jobName: string;
+	jobGroup: string;
+	jobType: JobTypes;
+	/** @format duration */
+	jobRuntime: string;
+	/** @format date-time */
+	jobStartTime: string;
+	status: JobStatus;
+	primaryKey: string;
+	/** @format int32 */
+	primaryKeyValue: number;
+}
+
 export interface DownloadTaskCreationProgress {
 	/** @format decimal */
 	percentage: number;
@@ -612,7 +707,7 @@ export interface LibraryProgress {
 	isComplete: boolean;
 }
 
-export interface InspectServerProgress {
+export interface InspectServerProgressDTO {
 	/** @format int32 */
 	plexServerId: number;
 	/** @format int32 */
@@ -626,7 +721,7 @@ export interface InspectServerProgress {
 	connectionSuccessful: boolean;
 	completed: boolean;
 	message: string;
-	attemptingApplyDNSFix: boolean;
+	plexServerConnection: PlexServerConnectionDTO;
 }
 
 export interface FileMergeProgress {

@@ -34,6 +34,9 @@ public class DownloadTask : BaseEntity
     [Column(Order = 5)]
     public long DataReceived { get; set; }
 
+    /// <summary>
+    /// The total size of the file in bytes
+    /// </summary>
     [Column(Order = 6)]
     public long DataTotal { get; set; }
 
@@ -126,15 +129,19 @@ public class DownloadTask : BaseEntity
 
     public DownloadTask Parent { get; set; }
 
-    public int? RootDownloadTaskId { get; set; }
-
-    public DownloadTask RootDownloadTask { get; set; }
+    public int RootDownloadTaskId { get; set; }
 
     public List<DownloadTask> Children { get; set; }
 
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// If the Id is the same as it's RootDownloadTaskId then this is the root of the <see cref="DownloadTask"/> hierarchy.
+    /// </summary>
+    [NotMapped]
+    public bool IsRoot => Id == RootDownloadTaskId;
 
     [NotMapped]
     public int MediaParts => DownloadWorkerTasks?.Count ?? 0;

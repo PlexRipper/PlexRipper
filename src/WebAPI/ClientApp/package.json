@@ -1,6 +1,6 @@
 {
   "name": "plex-ripper-web-ui",
-  "version": "0.9.1",
+  "version": "0.10.0-RC-1",
   "description": "PlexRipper",
   "author": "JasonLandbridge",
   "private": true,
@@ -26,14 +26,12 @@
   "script-comments": {
     "generate-ts": "Run this to generate typescript definitions based on the back-end Swagger API documentation, can only be run if back-end is running",
     "lint-staged": "Automatically run by Husky to check for lint errors when commiting changes",
-    "update-web-types": "This is meant to run each time a component changes it props or new components are added, this helps with autocompletion and IDE inspections.",
     "npm-upgrade-packages": "This can be run to help upgrade packages to newer versions and track why some are not updated."
   },
   "lint-staged": {
     "*.{js,vue}": "npm run lint --fix",
     "*.{css,vue}": "stylelint"
   },
-  "web-types": "./web-types.json",
   "dependencies": {
     "@codewithdan/observable-store": "^2.2.15",
     "@faker-js/faker": "^7.6.0",
@@ -84,8 +82,7 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.6.3",
-    "cypress": "^11.2.0",
-    "cypress-vue-unit-test": "^3.5.1",
+    "cypress": "^12.1.0",
     "cypress-wait-until": "^1.7.2",
     "eslint": "^8.23.0",
     "eslint-config-prettier": "^8.5.0",
@@ -95,6 +92,7 @@
     "husky": "^8.0.1",
     "jest": "^26.6.3",
     "lint-staged": "^13.0.3",
+    "local-cypress": "^1.2.6",
     "prettier": "^2.7.1",
     "start-server-and-test": "^1.14.0",
     "stylelint": "^14.11.0",

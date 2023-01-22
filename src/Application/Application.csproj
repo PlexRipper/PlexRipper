@@ -9,15 +9,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0"/>
-        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.3.0"/>
-        <PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="7.0.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0"/>
+        <PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.3.0" />
+        <PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="7.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Domain\Domain.csproj"/>
-        <Compile Include="..\Domain\GlobalUsings.cs"/>
+        <ProjectReference Include="..\Domain\Domain.csproj" />
+        <Compile Include="..\Domain\GlobalUsings.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="BackgroundServices" />
     </ItemGroup>
 
 </Project>

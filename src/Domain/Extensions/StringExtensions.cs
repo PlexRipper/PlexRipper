@@ -1,4 +1,5 @@
-﻿using Environment;
+﻿using System.Net;
+using Environment;
 
 namespace PlexRipper.Domain;
 
@@ -36,6 +37,11 @@ public static class StringExtensions
             chars += "0123456789";
 
         return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    public static bool IsIpAddress(this string ipAddress)
+    {
+        return IPAddress.TryParse(ipAddress, out var parsedIp);
     }
 
     private static string GetProperCapitalization(DirectoryInfo dirInfo)

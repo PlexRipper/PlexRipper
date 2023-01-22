@@ -1,6 +1,8 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Moq.Language.Flow;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.DownloadManager.DownloadClient;
@@ -15,7 +17,6 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
     public void ShouldReturnFailedResult_WhenNullDownloadTaskIsGiven()
     {
         //Arrange
-        mock.Mock<IDownloadQueue>().SetupGet(x => x.StartDownloadTask).Returns(new Subject<DownloadTask>());
 
         // Act
         var result = _sut.Setup(null);
@@ -44,8 +45,24 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
     public async Task ShouldSendDownloadTaskUpdate_WhenDownloadTaskWorkerHasAnUpdate()
     {
         //Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.MovieDownloadTasksCount = 1; });
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 1;
+            config.MovieCount = 5;
+            config.MovieDownloadTasksCount = 1;
+        });
+        var downloadTaskUpdates = new List<DownloadTask>();
 
+        // Capture the update in the callback
+        mock.SetupMediator(It.IsAny<UpdateDownloadTasksByIdCommand>)
+            .Callback<IRequest<Result>, CancellationToken>((request, _) =>
+            {
+                downloadTaskUpdates.AddRange(((UpdateDownloadTasksByIdCommand)request).DownloadTasks);
+            })
+            .ReturnOk();
+        mock.PublishMediator(It.IsAny<DownloadStatusChanged>).Returns(Task.CompletedTask);
+        mock.SetupMediator(It.IsAny<AddDownloadWorkerLogsCommand>).ReturnOk();
         mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);
         mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<string>())).Returns(4000);
         mock.Mock<IServerSettingsModule>()
@@ -55,7 +72,7 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
             .Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
             .Returns(Result.Fail("Error"));
 
-        var downloadTask = context.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
+        var downloadTask = DbContext.DownloadTasks.Include(x => x.PlexServer).First(x => x.DownloadTaskType == DownloadTaskType.Movie);
         downloadTask.DownloadWorkerTasks = new List<DownloadWorkerTask>()
         {
             new(downloadTask, 0, 0, 10),
@@ -63,16 +80,15 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
             new(downloadTask, 2, 21, 30),
             new(downloadTask, 3, 31, 40),
         };
-        var downloadTaskUpdates = new List<DownloadTask>();
 
         // Act
-        _sut.DownloadTaskUpdate.Subscribe(task => downloadTaskUpdates.Add(task));
         _sut.Setup(downloadTask);
         _sut.Start();
 
-        await Task.Delay(5000);
-
+        await Task.Delay(1000);
         // Assert
+        mock.Mock<IMediator>().Verify(x => x.Send(It.IsAny<UpdateDownloadTasksByIdCommand>(), It.IsAny<CancellationToken>()));
+
         downloadTaskUpdates.Count.ShouldBe(1);
         downloadTaskUpdates[0].DownloadStatus.ShouldBe(DownloadStatus.Error);
     }

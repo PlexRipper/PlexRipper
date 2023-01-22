@@ -1,5 +1,5 @@
 import { expect, test } from '@jest/globals';
-import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
+import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import { GlobalService } from '@service';
 import { generatePlexServers, generateResultDTO, generateSettings } from '@mock';
 import {
@@ -8,6 +8,7 @@ import {
 	NOTIFICATION_RELATIVE_PATH,
 	PLEX_ACCOUNT_RELATIVE_PATH,
 	PLEX_LIBRARY_RELATIVE_PATH,
+	PLEX_SERVER_CONNECTION_RELATIVE_PATH,
 	PLEX_SERVER_RELATIVE_PATH,
 	SETTINGS_RELATIVE_PATH,
 } from '@api-urls';
@@ -36,6 +37,7 @@ describe('GlobalService.setup()', () => {
 		mock.onGet(NOTIFICATION_RELATIVE_PATH).reply(200, generateResultDTO([]));
 		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(generatePlexServers(config)));
 		mock.onGet(SETTINGS_RELATIVE_PATH).reply(200, generateResultDTO(generateSettings(config)));
+		mock.onGet(PLEX_SERVER_CONNECTION_RELATIVE_PATH).reply(200, generateResultDTO([]));
 
 		const setup$ = GlobalService.setup(ctx);
 

@@ -5,19 +5,14 @@ using PlexRipper.DownloadManager;
 
 namespace DownloadManager.UnitTests;
 
-public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests
+public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests : BaseUnitTest<DownloadTaskFactory>
 {
-    public DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DownloadTaskFactory>();
         var tvShowIds = new List<int>();
 
         // Act
@@ -31,15 +26,20 @@ public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests
     public async Task ShouldGenerateValidTvShowDownloadTaskWithAllEpisodesDownloadTask_WhenNoDownloadTasksExist()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext().Setup(config => { config.TvShowCount = 1; });
-        var tvShows = context.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().ToList();
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 1;
+            config.TvShowCount = 5;
+            config.TvShowDownloadTasksCount = 1;
+        });
 
-        using var mock = AutoMock.GetStrict().AddMapper();
+        var tvShows = DbContext.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().ToList();
+
         mock.SetupMediator(It.IsAny<GetPlexTvShowByIdWithEpisodesQuery>)
             .ReturnsAsync((GetPlexTvShowByIdWithEpisodesQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.Id)));
         mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>)
             .ReturnsAsync(Result.Fail(""));
-        var _sut = mock.Create<DownloadTaskFactory>();
 
         var tvShowIds = new List<int> { 1 };
 

@@ -9,7 +9,7 @@ export default (ctx: Context, inject: Inject): void => {
 	// Create a simple function to retrieve the entire translation messages object;
 	inject('messages', (): VueI18n.LocaleMessageObject => messages(ctx));
 
-	inject('ts', (path: string): string => ctx.app.i18n.t(path).toString());
+	inject('ts', (path: string, values?: VueI18n.Values): string => ctx.app.i18n.t(path, values).toString());
 
 	const objectPath = require('object-path');
 	inject('getMessage', (path: string): any => objectPath.get(messages(ctx), path));

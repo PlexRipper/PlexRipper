@@ -72,7 +72,7 @@ public class PlexLibrary : BaseEntity
 
     /// <summary>
     /// Gets or sets the <see cref="PlexLibraryMetaData"/>, this is a JSON field that contains a collection
-    /// of various values that dont warrant their own database column.
+    /// of various values that don't warrant their own database column.
     /// </summary>
     [Column(Order = 11)]
     public PlexLibraryMetaData MetaData { get; set; }
@@ -177,9 +177,6 @@ public class PlexLibrary : BaseEntity
     public int EpisodeCount => Type == PlexMediaType.TvShow ? MetaData?.TvShowEpisodeCount ?? -1 : -1;
 
     [NotMapped]
-    public string ServerUrl => PlexServer?.ServerUrl ?? string.Empty;
-
-    [NotMapped]
     public string Name => Title;
 
     /// <summary>
@@ -256,6 +253,16 @@ public class PlexLibrary : BaseEntity
         }
 
         return Result.Ok();
+    }
+
+    public override void SetNull()
+    {
+        PlexServer = null;
+        DefaultDestination = null;
+        Movies = null;
+        TvShows = null;
+        PlexAccountLibraries = null;
+        DownloadTasks = null;
     }
 
     #endregion

@@ -12,6 +12,8 @@ import NotificationService from './notificationService';
 import SignalrService from './signalrService';
 import HelpService from './helpService';
 import AlertService from './alertService';
+import ServerConnectionService from './serverConnectionService';
+import BackgroundJobsService from './backgroundJobsService';
 
 export {
 	BaseService,
@@ -19,6 +21,8 @@ export {
 	ProgressService,
 	DownloadService,
 	ServerService,
+	ServerConnectionService,
+	BackgroundJobsService,
 	MediaService,
 	SettingsService,
 	NotificationService,

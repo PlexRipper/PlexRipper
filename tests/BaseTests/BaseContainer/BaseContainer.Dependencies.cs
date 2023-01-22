@@ -5,10 +5,10 @@ using AutoMapper;
 using Environment;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
+using PlexRipper.HttpClient;
 using PlexRipper.WebAPI;
 
 #endregion
@@ -32,9 +32,9 @@ public partial class BaseContainer : IDisposable
     /// <summary>
     /// Creates a Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null)
+    private BaseContainer(string memoryDbName, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
-        _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options);
+        _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options, mockPlexApi);
         ApiClient = _factory.CreateClient();
 
         // Create a separate scope as not to interfere with tests running in parallel
@@ -42,20 +42,17 @@ public partial class BaseContainer : IDisposable
         _serviceScope = _factory.Services.CreateScope();
     }
 
-    public static async Task<BaseContainer> Create([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static async Task<BaseContainer> Create(string memoryDbName, int seed = 0, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
-        var memoryDbName = MockDatabase.GetMemoryDatabaseName();
 
         Log.Information($"Setting up BaseContainer with database: {memoryDbName}");
 
         EnvironmentExtensions.SetIntegrationTestMode(true);
 
-        // Database context can be setup once and then retrieved by its DB name.
-        await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(options);
-        var container = new BaseContainer(memoryDbName, options);
+        var container = new BaseContainer(memoryDbName, options, mockPlexApi);
 
-        if (config.DownloadSpeedLimit > 0)
+        if (config.DownloadSpeedLimitInKib > 0)
             await container.SetDownloadSpeedLimit(options);
 
         return container;
@@ -79,8 +76,6 @@ public partial class BaseContainer : IDisposable
 
     public IDownloadTaskValidator GetDownloadTaskValidator => Resolve<IDownloadTaskValidator>();
 
-    public IDownloadTracker GetDownloadTracker => Resolve<IDownloadTracker>();
-
     public IFolderPathService GetFolderPathService => Resolve<IFolderPathService>();
 
     public IPlexAccountService GetPlexAccountService => Resolve<IPlexAccountService>();
@@ -101,17 +96,15 @@ public partial class BaseContainer : IDisposable
 
     public ITestStreamTracker TestStreamTracker => Resolve<ITestStreamTracker>();
 
-    public ITestApplicationTracker TestApplicationTracker => Resolve<ITestApplicationTracker>();
-
     public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
 
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 
-    public IFileMerger FileMerger => Resolve<IFileMerger>();
+    public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
 
     public IMapper Mapper => Resolve<IMapper>();
 
-    public IHostLifetime Boot => Resolve<IHostLifetime>();
+    public IBoot Boot => Resolve<IBoot>();
 
     #region Settings
 
@@ -136,6 +129,7 @@ public partial class BaseContainer : IDisposable
 
     public void Dispose()
     {
+        Log.Warning("Disposing Container");
         PlexRipperDbContext.Database.EnsureDeleted();
         _services.GetAutofacRoot().Dispose();
         _factory?.Dispose();

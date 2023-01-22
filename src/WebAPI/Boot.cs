@@ -1,7 +1,6 @@
 using System.Net;
 using Environment;
 using PlexRipper.Application;
-using PlexRipper.DownloadManager;
 
 namespace PlexRipper.WebAPI;
 
@@ -16,19 +15,9 @@ public class Boot : IBoot
 
     private readonly IConfigManager _configManager;
 
-    private readonly IFileMerger _fileMerger;
-
-    private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
-
     private readonly ISchedulerService _schedulerService;
 
-    private readonly IMigrationService _migrationService;
-
-    private readonly IDownloadSubscriptions _downloadSubscriptions;
-
     private readonly IDownloadQueue _downloadQueue;
-
-    private readonly IDownloadTracker _downloadTracker;
 
     #endregion
 
@@ -37,23 +26,13 @@ public class Boot : IBoot
     public Boot(
         IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
-        IFileMerger fileMerger,
-        IPlexRipperDatabaseService plexRipperDatabaseService,
         ISchedulerService schedulerService,
-        IMigrationService migrationService,
-        IDownloadSubscriptions downloadSubscriptions,
-        IDownloadQueue downloadQueue,
-        IDownloadTracker downloadTracker)
+        IDownloadQueue downloadQueue)
     {
         _appLifetime = appLifetime;
         _configManager = configManager;
-        _fileMerger = fileMerger;
-        _plexRipperDatabaseService = plexRipperDatabaseService;
         _schedulerService = schedulerService;
-        _migrationService = migrationService;
-        _downloadSubscriptions = downloadSubscriptions;
         _downloadQueue = downloadQueue;
-        _downloadTracker = downloadTracker;
     }
 
     #endregion
@@ -72,19 +51,12 @@ public class Boot : IBoot
         ServicePointManager.DefaultConnectionLimit = 1000;
 
         // First await the finishing off all these
-        Log.SetupLogging();
-        _configManager.Setup();
-        await _plexRipperDatabaseService.SetupAsync();
-        await _migrationService.SetupAsync();
-
-        _downloadSubscriptions.Setup();
-        _downloadQueue.Setup();
-        _downloadTracker.Setup();
-        await _fileMerger.SetupAsync();
-
-        // TODO Remove this once the plexServer sync has been compatible for the integration test
         if (!EnvironmentExtensions.IsIntegrationTestMode())
-            await _schedulerService.SetupAsync();
+            Log.SetupLogging();
+
+        _configManager.Setup();
+        _downloadQueue.Setup();
+        await _schedulerService.SetupAsync();
 
         _appLifetime.ApplicationStarted.Register(OnStarted);
         _appLifetime.ApplicationStopping.Register(OnStopping);

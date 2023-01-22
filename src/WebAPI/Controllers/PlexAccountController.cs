@@ -154,14 +154,6 @@ public class PlexAccountController : BaseController
         return ToActionResult(await _plexAccountService.RefreshPlexAccount(id));
     }
 
-    [HttpGet("clientid")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<string>))]
-    public IActionResult GenerateClientId()
-    {
-        var result = Result.Ok(_plexAccountService.GeneratePlexAccountClientId());
-        return ToActionResult<string, string>(result);
-    }
-
     // GET api/<PlexAccountController>/authpin/
     [HttpGet("authpin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<AuthPin>))]

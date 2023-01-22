@@ -10,6 +10,12 @@ export interface MockConfig {
 	firstTimeSetup: boolean;
 	movieDownloadTask: number;
 	tvShowDownloadTask: number;
+	// region DownloadTasks
 	seasonDownloadTask: number;
+	// endregion
 	episodeDownloadTask: number;
+	// region DownloadTasks
+	connectionHasProgress: boolean;
+	// endregion
+	maxServerConnections: number;
 }

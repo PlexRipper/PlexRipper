@@ -18,5 +18,17 @@ public class PlexServerConfiguration : IEntityTypeConfiguration<PlexServer>
             .WithOne(x => x.PlexServer)
             .HasForeignKey(x => x.PlexServerId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasMany(x => x.PlexServerConnections)
+            .WithOne(x => x.PlexServer)
+            .HasForeignKey(x => x.PlexServerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasMany(x => x.PlexAccountServers)
+            .WithOne(x => x.PlexServer)
+            .HasForeignKey(x => x.PlexServerId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

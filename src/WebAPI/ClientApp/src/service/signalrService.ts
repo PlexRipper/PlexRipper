@@ -11,15 +11,19 @@ import {
 	DownloadTaskCreationProgress,
 	DownloadTaskDTO,
 	FileMergeProgress,
-	InspectServerProgress,
+	InspectServerProgressDTO,
+	JobStatusUpdateDTO,
 	LibraryProgress,
+	MessageTypes,
 	NotificationDTO,
+	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
 	SyncServerProgress,
 } from '@dto/mainApi';
 import notificationService from '~/service/notificationService';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import IAppConfig from '@class/IAppConfig';
+import backgroundJobsService from '~/service/backgroundJobsService';
 
 export class SignalrService extends BaseService {
 	private _progressHubConnection: HubConnection | null = null;
@@ -36,6 +40,7 @@ export class SignalrService extends BaseService {
 					libraryProgress: state.libraryProgress,
 					fileMergeProgressList: state.fileMergeProgressList,
 					inspectServerProgress: state.inspectServerProgress,
+					serverConnectionCheckStatusProgress: state.serverConnectionCheckStatusProgress,
 					syncServerProgress: state.syncServerProgress,
 					notifications: state.notifications,
 				};
@@ -79,36 +84,45 @@ export class SignalrService extends BaseService {
 	}
 
 	private setupSubscriptions(): void {
-		this._progressHubConnection?.on('DownloadTaskUpdate', (data: DownloadTaskDTO) => {
+		this._progressHubConnection?.on(MessageTypes.DownloadTaskUpdate, (data: DownloadTaskDTO) => {
 			this.updateStore('downloadTaskUpdateList', data);
 		});
 
-		this._progressHubConnection?.on('ServerDownloadProgress', (data: ServerDownloadProgressDTO) => {
+		this._progressHubConnection?.on(MessageTypes.ServerDownloadProgress, (data: ServerDownloadProgressDTO) => {
 			// TODO Each subscription should work like this, every subscription here should pass its values to the designated services for that type
 			this._serverDownloadProgress.next(data);
 		});
 
-		this._progressHubConnection?.on('DownloadTaskCreationProgress', (data: DownloadTaskCreationProgress) => {
+		this._progressHubConnection?.on(MessageTypes.DownloadTaskCreationProgress, (data: DownloadTaskCreationProgress) => {
 			this.updateStore('downloadTaskCreationProgress', data);
 		});
 
-		this._progressHubConnection?.on('FileMergeProgress', (data: FileMergeProgress) => {
+		this._progressHubConnection?.on(MessageTypes.FileMergeProgress, (data: FileMergeProgress) => {
 			this.updateStore('fileMergeProgressList', data);
 		});
 
-		this._progressHubConnection?.on('LibraryProgress', (data: LibraryProgress) => {
+		this._progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => {
 			this.updateStore('libraryProgress', data);
 		});
 
-		this._progressHubConnection?.on('InspectServerProgress', (data: InspectServerProgress) =>
+		this._progressHubConnection?.on(
+			MessageTypes.ServerConnectionCheckStatusProgress,
+			(data: ServerConnectionCheckStatusProgressDTO) => this.setServerConnectionCheckStatusProgress(data),
+		);
+
+		this._progressHubConnection?.on(MessageTypes.InspectServerProgress, (data: InspectServerProgressDTO) =>
 			this.setInspectServerProgress(data),
 		);
 
-		this._progressHubConnection?.on('SyncServerProgress', (data: SyncServerProgress) => {
+		this._progressHubConnection?.on(MessageTypes.SyncServerProgress, (data: SyncServerProgress) => {
 			this.updateStore('syncServerProgress', data);
 		});
 
-		this._notificationHubConnection?.on('Notification', (data: NotificationDTO) => {
+		this._progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data: JobStatusUpdateDTO) => {
+			backgroundJobsService.setStatusJobUpdate(data);
+		});
+
+		this._notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => {
 			// Notification slice is only updated in the notificationService.ts, we send it there.
 			notificationService.setNotification(data);
 		});
@@ -176,9 +190,16 @@ export class SignalrService extends BaseService {
 		);
 	}
 
-	public getAllInspectServerProgress(): Observable<InspectServerProgress[]> {
+	public getAllInspectServerProgress(): Observable<InspectServerProgressDTO[]> {
 		return this.stateChanged.pipe(
 			map((x) => x?.inspectServerProgress ?? []),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getAllServerConnectionProgress(): Observable<ServerConnectionCheckStatusProgressDTO[]> {
+		return this.stateChanged.pipe(
+			map((x) => x?.serverConnectionCheckStatusProgress ?? []),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -228,7 +249,24 @@ export class SignalrService extends BaseService {
 		);
 	}
 
-	public getInspectServerProgress(plexServerId: number): Observable<InspectServerProgress | null> {
+	public getServerConnectionProgress(
+		plexServerConnectionId: number,
+	): Observable<ServerConnectionCheckStatusProgressDTO | null> {
+		return this.getAllServerConnectionProgress().pipe(
+			map((x) => x?.find((x) => x.plexServerConnectionId === plexServerConnectionId) ?? null),
+			filter((progress) => !!progress),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getServerConnectionProgressByPlexServerId(plexServerId: number): Observable<ServerConnectionCheckStatusProgressDTO[]> {
+		return this.getAllServerConnectionProgress().pipe(
+			map((x) => x?.filter((y) => y.plexServerId === plexServerId)),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getInspectServerProgress(plexServerId: number): Observable<InspectServerProgressDTO | null> {
 		return this.getAllInspectServerProgress().pipe(
 			map((x) => x?.find((x) => x.plexServerId === plexServerId) ?? null),
 			filter((progress) => !!progress),
@@ -264,8 +302,12 @@ export class SignalrService extends BaseService {
 	// endregion
 	// region SetUpdate
 
-	public setInspectServerProgress(data: InspectServerProgress): void {
+	public setInspectServerProgress(data: InspectServerProgressDTO): void {
 		this.updateStore('inspectServerProgress', data, 'plexServerId');
+	}
+
+	public setServerConnectionCheckStatusProgress(data: ServerConnectionCheckStatusProgressDTO): void {
+		this.updateStore('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId');
 	}
 
 	// endregion

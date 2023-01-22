@@ -4,6 +4,10 @@ import { mount } from 'cypress/vue2';
 // your custom command.
 // Alternatively, can be defined in cypress/support/component.d.ts
 // with a <reference path="./component" /> at the top of your spec.
+
+type MountParams = Parameters<typeof mount>;
+type OptionsParam = MountParams[1];
+
 declare global {
 	namespace Cypress {
 		interface Chainable {

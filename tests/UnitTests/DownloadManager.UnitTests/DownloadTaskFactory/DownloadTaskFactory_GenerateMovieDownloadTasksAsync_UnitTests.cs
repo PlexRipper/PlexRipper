@@ -4,21 +4,14 @@ using PlexRipper.DownloadManager;
 
 namespace DownloadManager.UnitTests;
 
-public class DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests
+public class DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests : BaseUnitTest<DownloadTaskFactory>
 {
-    private readonly Mock<IMediator> _iMediator = new();
-
-    public DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldHaveFailedResult_WhenPlexMoviesAreEmpty()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DownloadTaskFactory>();
         var movies = new List<int>();
 
         // Act
@@ -32,15 +25,16 @@ public class DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests
     public async Task ShouldHaveValidSingleNestedDownloadTasks_WhenPlexMoviesAreValid()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext()
-            .Setup(config =>
-            {
-                config.Seed = 324;
-                config.MovieCount = 5;
-            });
-        using var mock = AutoMock.GetStrict().AddMapper();
-        var _sut = mock.Create<DownloadTaskFactory>();
-        var movies = context.PlexMovies.IncludePlexLibrary().IncludePlexServer().ToList();
+        Seed = 324;
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 1;
+            config.MovieCount = 5;
+            config.IncludeMultiPartMovies = false;
+        });
+
+        var movies = DbContext.PlexMovies.IncludePlexLibrary().IncludePlexServer().ToList();
 
         mock.SetupMediator(It.IsAny<GetMultiplePlexMoviesByIdsQuery>)
             .ReturnsAsync(

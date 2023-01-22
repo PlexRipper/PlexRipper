@@ -44,17 +44,7 @@ public interface IPlexAccountService
     /// <returns>If successful.</returns>
     Task<Result> RefreshPlexAccount(int plexAccountId = 0);
 
-    /// <summary>
-    /// This retrieves all the <see cref="PlexAccount"/> related data from the PlexApi.
-    /// It's assumed that the <see cref="PlexAccount"/> has already been created in the Database.
-    /// </summary>
-    /// <param name="plexAccountId">The is of <see cref="PlexAccount"/> to setup.</param>
-    /// <returns>The list of <see cref="PlexServer">PlexServers</see> which are accessible by this account.</returns>
-    Task<Result<List<PlexServer>>> SetupAccountAsync(int plexAccountId);
-
     Task<Result<AuthPin>> Get2FAPin(string clientId);
 
     Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
-
-    string GeneratePlexAccountClientId();
 }

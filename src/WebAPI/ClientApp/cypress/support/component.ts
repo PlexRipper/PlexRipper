@@ -14,10 +14,10 @@
 // ***********************************************************
 
 // Doc: https://docs.cypress.io/guides/component-testing/vue/examples#Replicating-the-expected-Component-Hierarchy
-import Vuetify, { VApp, VMain, VRow, VContainer, VCol } from 'vuetify/lib';
+import Vuetify, { VApp, VCol, VContainer, VMain, VRow } from 'vuetify/lib';
 import { mount } from 'cypress/vue2';
 import Vue, { Component, CreateElement } from 'vue';
-import VueI18n, { I18nOptions } from 'vue-i18n';
+import VueI18n from 'vue-i18n';
 import Background from '../../src/components/General/Background.vue';
 import 'vuetify/dist/vuetify.min.css';
 import '../../src/assets/scss/style.scss';
@@ -29,59 +29,71 @@ import { vuetifyConfigOptions } from '~/plugins/vuetify';
 
 Vue.use(Vuetify);
 Vue.use(VueI18n);
-// Override default command mount to use it with Vuetify
-// @ts-ignore
-Cypress.Commands.add('mount', (component: Component<any>, args: MountOptionsArgument) => {
-	const { ...props } = args;
 
-	// pass event handlers to child component via `on` prop
-	// const on = Object.entries(listeners || {}).reduce((acc, [event, handler]) => {
-	// 	acc[event] = handler;
-	// 	return acc;
-	// }, {});
-	return mount({
-		vuetify: new Vuetify(vuetifyConfigOptions),
-		i18n: new VueI18n({
-			locale: 'en-US', // set locale
-			messages: {
-				'en-US': enUs,
-			},
-		}),
-		render: (h: CreateElement) =>
-			h(VApp, [
-				h(VMain, [
-					h(
-						VContainer,
-						{
-							class: {
-								'fill-height': true,
-							},
-						},
-						[
-							h(
-								VRow,
-								{
-									props: {
-										noGutters: true,
-										justify: 'center',
-									},
+// Override default command mount to use it with Vuetify
+
+declare global {
+	// eslint-disable-next-line @typescript-eslint/no-namespace
+	namespace Cypress {
+		interface Chainable {
+			mount: typeof mount;
+		}
+	}
+}
+
+// @ts-ignore
+Cypress.Commands.add('mount', (component: Component<any>, ...args) => {
+	// args.global = args.global || {}
+	// args.global.plugins = args.global.plugins || []
+	// args.global.plugins.push(createPinia())
+	// args.global.plugins.push(createI18n())
+
+	return mount(
+		{
+			vuetify: new Vuetify(vuetifyConfigOptions),
+			i18n: new VueI18n({
+				locale: 'en-US', // set locale
+				messages: {
+					'en-US': enUs,
+				},
+			}),
+			render: (h: CreateElement) =>
+				h(VApp, [
+					h(VMain, [
+						h(
+							VContainer,
+							{
+								class: {
+									'fill-height': true,
 								},
-								[
-									h(
-										VCol,
-										{
-											props: {
-												cols: 'auto',
-											},
+							},
+							[
+								h(
+									VRow,
+									{
+										props: {
+											noGutters: true,
+											justify: 'center',
 										},
-										[h(component, { ...props })],
-									),
-								],
-							),
-						],
-					),
+									},
+									[
+										h(
+											VCol,
+											{
+												props: {
+													cols: 'auto',
+												},
+											},
+											[h(component)],
+										),
+									],
+								),
+							],
+						),
+					]),
+					h(Background),
 				]),
-				h(Background),
-			]),
-	});
+		},
+		...args,
+	);
 });

@@ -13,6 +13,12 @@
 						{{ $t('components.server-dialog.tabs.server-data.header') }}
 					</v-tab>
 
+					<!--	Server Connections Tab Header	-->
+					<v-tab>
+						<v-icon left> mdi-connection</v-icon>
+						{{ $t('components.server-dialog.tabs.server-connections.header') }}
+					</v-tab>
+
 					<!--	Server Configuration Tab Header	-->
 					<v-tab>
 						<v-icon left> mdi-cog-box</v-icon>
@@ -33,7 +39,16 @@
 
 					<!--	Server Data Tab Content	-->
 					<v-tab-item>
-						<server-data-tab-content :plex-server="plexServer" :server-status="serverStatus" />
+						<server-data-tab-content :plex-server="plexServer" :is-visible="isVisible" />
+					</v-tab-item>
+
+					<!--	Server Connections Tab Content	-->
+					<v-tab-item>
+						<ServerConnectionsTabContent
+							:plex-server="plexServer"
+							:plex-server-settings="plexServerSettings"
+							:is-visible="isVisible"
+						/>
 					</v-tab-item>
 
 					<!--	Server Configuration Tab Content	-->
@@ -63,10 +78,10 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
 import { switchMap, tap } from 'rxjs/operators';
-import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel, PlexServerStatusDTO } from '@dto/mainApi';
+import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
 import { FolderPathService, LibraryService, ServerService, SettingsService } from '@service';
 
-@Component<ServerDialog>({})
+@Component
 export default class ServerDialog extends Vue {
 	show: boolean = false;
 	tabIndex: number | null = null;
@@ -75,10 +90,6 @@ export default class ServerDialog extends Vue {
 	plexLibraries: PlexLibraryDTO[] = [];
 	plexServerSettings: PlexServerSettingsModel | null = null;
 	plexServerId: number = 0;
-
-	get serverStatus(): PlexServerStatusDTO | null {
-		return this.plexServer?.status ?? null;
-	}
 
 	get isVisible(): boolean {
 		return this.plexServerId > 0;

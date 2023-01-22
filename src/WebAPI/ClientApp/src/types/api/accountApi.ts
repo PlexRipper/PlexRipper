@@ -92,11 +92,3 @@ export function checkAuthPin(clientId: String): Observable<ResultDTO<AuthPin>> {
 		apiName: checkAuthPin.name,
 	});
 }
-
-export function generateClientId(): Observable<ResultDTO<string>> {
-	return PlexRipperAxios.get<string>({
-		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/clientid`,
-		apiCategory: logText,
-		apiName: generateClientId.name,
-	});
-}

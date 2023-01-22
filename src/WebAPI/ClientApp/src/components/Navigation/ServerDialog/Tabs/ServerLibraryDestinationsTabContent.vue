@@ -3,7 +3,10 @@
 		<tbody>
 			<!--	Download Destinations	-->
 			<tr v-for="library in plexLibraries" :key="library.id">
-				<td style="width: 50%"><media-type-icon :media-type="library.type" class="mx-3" />{{ library.title }}</td>
+				<td style="width: 50%">
+					<media-type-icon :media-type="library.type" class="mx-3" />
+					{{ library.title }}
+				</td>
 				<td>
 					<p-select
 						:value="library.defaultDestinationId"
@@ -19,13 +22,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { FolderPathDTO, FolderType, PlexLibraryDTO, PlexMediaType } from '@dto/mainApi';
 import { LibraryService } from '@service';
 
-@Component<ServerLibraryDestinationsTabContent>({
-	components: {},
-})
+@Component
 export default class ServerLibraryDestinationsTabContent extends Vue {
 	@Prop({ required: true, type: Array as () => PlexLibraryDTO[] })
 	readonly plexLibraries!: PlexLibraryDTO[];

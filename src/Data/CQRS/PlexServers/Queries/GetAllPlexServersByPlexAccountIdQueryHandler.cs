@@ -30,6 +30,8 @@ public class GetAllPlexServersByPlexAccountIdQueryHandler : BaseHandler, IReques
             .PlexAccountServers
             .Include(x => x.PlexServer)
             .ThenInclude(x => x.ServerStatus)
+            .Include(x => x.PlexServer)
+            .ThenInclude(x => x.PlexServerConnections)
             .Where(x => x.PlexAccountId == request.PlexAccountId)
             .ProjectTo<PlexServer>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);

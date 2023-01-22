@@ -47,7 +47,7 @@ public class UpdateDownloadTasksByIdCommandHandler : BaseHandler, IRequestHandle
         await _dbContext.BulkUpdateAsync(downloadTasks.SelectMany(x => x.DownloadWorkerTasks).ToList(),
             cancellationToken: cancellationToken);
 
-        await SaveChangesAsync();
+        await SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

@@ -4,27 +4,26 @@ public class PlexAccountService : IPlexAccountService
 {
     private readonly IMediator _mediator;
 
-    private readonly IPlexServerService _plexServerService;
-
     private readonly IPlexApiService _plexApiService;
 
-    private readonly ISchedulerService _schedulerService;
+    private readonly IInspectServerScheduler _inspectServerScheduler;
+    private readonly IPlexServerService _plexServerService;
 
     public PlexAccountService(
         IMediator mediator,
         IPlexServerService plexServerService,
         IPlexApiService plexApiService,
-        ISchedulerService schedulerService)
+        IInspectServerScheduler inspectServerScheduler)
     {
         _mediator = mediator;
-        _plexServerService = plexServerService;
         _plexApiService = plexApiService;
-        _schedulerService = schedulerService;
+        _inspectServerScheduler = inspectServerScheduler;
+        _plexServerService = plexServerService;
     }
 
     public virtual async Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount)
     {
-        if (plexAccount.Username == string.Empty || plexAccount.Password == string.Empty || plexAccount.ClientId == string.Empty)
+        if (plexAccount.Username == string.Empty || plexAccount.Password == string.Empty)
             return Result.Fail("Either the username or password were empty").LogWarning();
 
         var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount);
@@ -51,60 +50,29 @@ public class PlexAccountService : IPlexAccountService
         return plexSignInResult;
     }
 
-    /// <inheritdoc/>
-    public virtual async Task<Result<List<PlexServer>>> SetupAccountAsync(int plexAccountId)
-    {
-        if (plexAccountId <= 0)
-            return Result.Fail($"plexAccount.id was {plexAccountId}").LogWarning();
-
-        Log.Debug("Setting up new PlexAccount");
-
-        var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
-        if (plexAccountResult.IsFailed)
-            return plexAccountResult.ToResult();
-
-        var plexAccount = plexAccountResult.Value;
-
-        // Retrieve and store servers
-        var plexServerList = await _plexServerService.RetrieveAccessiblePlexServersAsync(plexAccount);
-        if (plexServerList.IsFailed)
-            return plexServerList.WithError("Failed to refresh the PlexServers when setting up the PlexAccount").LogWarning();
-
-        // Retrieve libraries for the plexAccount
-        await _schedulerService.InspectPlexServersAsyncJob(plexAccount.Id);
-
-        var msg = !plexServerList.Value?.Any() ?? false
-            ? "Account was setup successfully, but did not have access to any servers!"
-            : "Account was setup successfully!";
-
-        return Result.Ok(plexServerList.Value).WithSuccess(msg).LogInformation();
-    }
 
     /// <inheritdoc/>
     public async Task<Result> RefreshPlexAccount(int plexAccountId = 0)
     {
+        var plexAccountIds = new List<int>();
+
         if (plexAccountId == 0)
         {
             var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(onlyEnabled: true));
             if (enabledAccounts.IsFailed)
                 return enabledAccounts.ToResult();
 
-            foreach (var plexAccount in enabledAccounts.Value)
-            {
-                var result = await SetupAccountAsync(plexAccount.Id);
-                if (result.IsFailed)
-                    return result.ToResult();
-            }
+            plexAccountIds.AddRange(enabledAccounts.Value.Select(x => x.Id));
         }
         else
-        {
-            var result = await SetupAccountAsync(plexAccountId);
-            if (result.IsFailed)
-                return result.ToResult();
-        }
+            plexAccountIds.Add(plexAccountId);
+
+        foreach (var id in plexAccountIds)
+            await _inspectServerScheduler.QueueRefreshAccessiblePlexServersJob(id);
 
         return Result.Ok();
     }
+
 
     /// <summary>
     /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
@@ -131,7 +99,10 @@ public class PlexAccountService : IPlexAccountService
         return Result.Ok(true);
     }
 
-    public string GeneratePlexAccountClientId()
+
+    #region Authentication
+
+    private string GeneratePlexAccountClientId()
     {
         return StringExtensions.RandomString(24, true, true);
     }
@@ -150,6 +121,9 @@ public class PlexAccountService : IPlexAccountService
     {
         return _plexApiService.Check2FAPin(pinId, clientId);
     }
+
+    #endregion
+
 
     #region CRUD
 
@@ -208,13 +182,12 @@ public class PlexAccountService : IPlexAccountService
         }
 
         // Create PlexAccount
+        plexAccount.ClientId = GeneratePlexAccountClientId();
         var createResult = await _mediator.Send(new CreatePlexAccountCommand(plexAccount));
         if (createResult.IsFailed)
             return createResult.ToResult();
 
-        var setupAccountResult = await SetupAccountAsync(createResult.Value);
-        if (setupAccountResult.IsFailed)
-            return setupAccountResult.ToResult();
+        await _inspectServerScheduler.QueueInspectPlexServerByPlexAccountIdJob(createResult.Value);
 
         return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
     }
@@ -235,10 +208,7 @@ public class PlexAccountService : IPlexAccountService
 
         // Re-validate if the credentials changed
         if (inspectServers || plexAccountDb.Value.Username != plexAccount.Username || plexAccountDb.Value.Password != plexAccount.Password)
-        {
-            await SetupAccountAsync(plexAccountDb.Value.Id);
             return await GetPlexAccountAsync(plexAccountDb.Value.Id);
-        }
 
         return plexAccountDb;
     }
@@ -254,7 +224,8 @@ public class PlexAccountService : IPlexAccountService
         if (deleteAccountResult.IsFailed)
             return deleteAccountResult;
 
-        return await _plexServerService.RemoveInaccessibleServers();
+        // TODO Decide what to do with PlexServers that cannot be accessed anymore
+        return await _mediator.Send(new RemoveInaccessibleServersCommand());
     }
 
     #endregion

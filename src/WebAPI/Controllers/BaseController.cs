@@ -55,9 +55,9 @@ public abstract class BaseController : ControllerBase
     }
 
     [NonAction]
-    protected IActionResult BadRequestInvalidId()
+    protected IActionResult BadRequestInvalidId(string parameterName = "Id")
     {
-        return BadRequest(Result.Fail("The Id was 0 or lower"));
+        return BadRequest(Result.Fail($"The {parameterName} was 0 or lower"));
     }
 
     [NonAction]
@@ -117,7 +117,7 @@ public abstract class BaseController : ControllerBase
             return new OkObjectResult(resultDTO);
         }
 
-        var failedResult = _mapper.Map<ResultDTO>(result);
+        var failedResult = _mapper.Map<ResultDTO>(result.ToResult());
         if (result.Has400BadRequestError())
             return new BadRequestObjectResult(failedResult);
 

@@ -1,4 +1,3 @@
-using FluentResultExtensions;
 using PlexRipper.Application;
 using Polly;
 using RestSharp;
@@ -16,81 +15,79 @@ public static class RestSharpExtensions
     /// <param name="action"></param>
     /// <typeparam name="T">The parsed type of the response when successful.</typeparam>
     /// <returns>Returns Result.Ok() whether the response was successful or failed, on unhandled exception will return Result.Fail()</returns>
-    public static async Task<Result<T>> SendRequestWithPolly<T>(
+    public static async Task<RestResponse<T>> SendRequestWithPolly<T>(
         this RestClient restClient,
         RestRequest request,
         int retryCount = 2,
         Action<PlexApiClientProgress> action = null) where T : class
     {
-        try
-        {
-            RestResponse<T> response;
-            var policyResult = await Policy
-                .HandleResult<RestResponse>(x => !x.IsSuccessful)
-                .WaitAndRetryAsync(retryCount, retryAttempt =>
+        RestResponse<T> response = null;
+        var retryIndex = 0;
+        var policyResult = await Policy
+            .HandleResult<RestResponse>(x => !x.IsSuccessful)
+            .WaitAndRetryAsync(retryCount, retryAttempt =>
+            {
+                var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
+                var msg =
+                    $"Request: {request.Resource} failed, waiting {timeToWait.TotalSeconds} seconds before retrying again ({retryAttempt} of {retryCount}).";
+                Log.Warning(msg);
+
+                if (response != null && response.ErrorMessage != string.Empty)
                 {
-                    var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                    Log.Warning(
-                        $"Request: {request.Resource} failed, waiting {timeToWait.TotalSeconds} seconds before retrying again ({retryAttempt} of {retryCount}).");
-                    return timeToWait;
-                })
-                .ExecuteAndCaptureAsync(async () =>
+                    Log.Error(response.ErrorException);
+                    Log.Error(response.ErrorMessage);
+                }
+
+                retryIndex = retryAttempt;
+                if (action is not null)
                 {
-                    response = await restClient.ExecuteAsync<T>(request);
-                    return response;
-                });
+                    action(new PlexApiClientProgress
+                    {
+                        StatusCode = (int)response.StatusCode,
+                        Message = msg,
+                        RetryAttemptIndex = retryAttempt,
+                        RetryAttemptCount = retryCount,
+                        TimeToNextRetry = (int)timeToWait.TotalSeconds,
+                        Completed = false,
+                    });
+                }
 
-            return GenerateResponseResult<T>(policyResult, action);
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
-    }
-
-
-    private static Result<T> GenerateResponseResult<T>(PolicyResult<RestResponse> response, Action<PlexApiClientProgress> action = null) where T : class
-    {
-        RestResponse<T> responseResult = null;
-        var statusCode = 0;
-        var statusDescription = "";
-        var errorMessage = "";
-
-        var isSuccessful = response.Outcome == OutcomeType.Successful;
-        if (isSuccessful)
-        {
-            responseResult = response.Result as RestResponse<T>;
-            statusCode = (int)responseResult.StatusCode;
-            statusDescription = responseResult.StatusDescription;
-            if (statusCode == 0 && statusDescription.Contains("Timeout"))
-                statusCode = HttpCodes.Status504GatewayTimeout;
-        }
-        else
-        {
-            responseResult = response.FinalHandledResult as RestResponse<T>;
-            statusDescription = responseResult.ErrorMessage;
-            errorMessage = responseResult.Content;
-        }
+                return timeToWait;
+            })
+            .ExecuteAndCaptureAsync(async () =>
+            {
+                // We store the response here so we have access to the last response in the WaitAndRetryAsync() above.
+                response = await restClient.ExecuteAsync<T>(request);
+                return response;
+            });
 
         if (action is not null)
         {
             action(new PlexApiClientProgress
             {
-                StatusCode = statusCode,
-                Message = isSuccessful ? "Request successful!" : errorMessage,
-                ConnectionSuccessful = isSuccessful,
+                StatusCode = (int)response.StatusCode,
+                Message = response.IsSuccessful ? "Request successful!" : $"Content: \"{response.Content}\" - ErrorMessage: \"{response.ErrorMessage}\"",
+                RetryAttemptIndex = retryIndex,
+                RetryAttemptCount = retryCount,
+                TimeToNextRetry = 0,
+                ConnectionSuccessful = response.IsSuccessful,
                 Completed = true,
             });
         }
 
-        if (isSuccessful)
-            return Result.Ok(responseResult.Data).AddStatusCode(statusCode, statusDescription).LogDebug();
+        return ToResponse<T>(policyResult);
+    }
 
-        var requestUrl = responseResult.Request.Resource;
-        return Result
-            .Fail($"Request to {requestUrl} failed with status code: {statusCode} - {statusDescription}")
-            .AddStatusCode(statusCode, statusDescription)
-            .WithError(errorMessage)
-            .LogError();
+
+    private static RestResponse<T> ToResponse<T>(PolicyResult<RestResponse> response)
+    {
+        var isSuccessful = response.Outcome == OutcomeType.Successful;
+        if (isSuccessful)
+        {
+            Log.Verbose("Response Content: " + response.Result.Content != string.Empty ? response.Result.Content : "Response was empty.");
+            return response.Result as RestResponse<T>;
+        }
+
+        return response.FinalHandledResult as RestResponse<T>;
     }
 }

@@ -10,7 +10,6 @@ public class AddFileTaskFromDownloadTaskCommandValidator : AbstractValidator<Add
     {
         RuleFor(x => x.DownloadTask).NotNull();
         RuleFor(x => x.DownloadTask.Id).GreaterThan(0);
-        RuleFor(x => x.DownloadTask.DownloadStatus).Must(x => x is DownloadStatus.Merging or DownloadStatus.Moving);
         RuleFor(x => x.DownloadTask.DownloadWorkerTasks).NotEmpty();
         RuleFor(x => x.DownloadTask.DestinationFolder).NotNull();
         RuleFor(x => x.DownloadTask.DestinationFolderId).GreaterThan(0);
@@ -30,7 +29,7 @@ public class AddFileTaskFromDownloadTaskCommandHandler : BaseHandler, IRequestHa
             FilePathsCompressed = command.DownloadTask.GetFilePathsCompressed,
         };
 
-        await _dbContext.FileTasks.AddAsync(fileTask);
+        await _dbContext.FileTasks.AddAsync(fileTask, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
         await _dbContext.Entry(fileTask).GetDatabaseValuesAsync(cancellationToken);
 

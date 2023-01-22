@@ -68,7 +68,7 @@ public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<Cr
             if (downloadTask.Children is null || !downloadTask.Children.Any())
                 continue;
 
-            downloadTask.Children = SetRootId(downloadTask.Children, downloadTask.Id);
+            downloadTask.Children = downloadTask.Children.SetRootId(downloadTask.Id);
         }
 
         InsertDownloadTasks(command.DownloadTasks);
@@ -76,20 +76,6 @@ public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<Cr
         return Result.Ok();
     }
 
-
-    private static List<DownloadTask> SetRootId(List<DownloadTask> downloadTasks, int rootTaskId)
-    {
-        foreach (var downloadTask in downloadTasks)
-        {
-            downloadTask.RootDownloadTaskId = rootTaskId;
-            if (downloadTask.Children is null || !downloadTask.Children.Any())
-                continue;
-
-            downloadTask.Children = SetRootId(downloadTask.Children, rootTaskId);
-        }
-
-        return downloadTasks;
-    }
 
     private void InsertDownloadTasks(List<DownloadTask> downloadTasks)
     {

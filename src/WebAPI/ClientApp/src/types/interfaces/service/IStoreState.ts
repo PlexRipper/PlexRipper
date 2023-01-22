@@ -1,17 +1,20 @@
 import {
+	DownloadTaskCreationProgress,
 	DownloadTaskDTO,
 	FileMergeProgress,
 	FolderPathDTO,
+	InspectServerProgressDTO,
+	JobStatusUpdateDTO,
+	LibraryProgress,
 	NotificationDTO,
 	PlexAccountDTO,
 	PlexLibraryDTO,
+	PlexServerConnectionDTO,
 	PlexServerDTO,
-	SettingsModelDTO,
-	InspectServerProgress,
-	SyncServerProgress,
-	LibraryProgress,
-	DownloadTaskCreationProgress,
+	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
+	SettingsModelDTO,
+	SyncServerProgress,
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
 import IAlert from '@interfaces/IAlert';
@@ -22,6 +25,7 @@ export default interface IStoreState extends SettingsModelDTO {
 	config: IAppConfig;
 	accounts: PlexAccountDTO[];
 	servers: PlexServerDTO[];
+	serverConnections: PlexServerConnectionDTO[];
 	libraries: PlexLibraryDTO[];
 	serverDownloads: ServerDownloadProgressDTO[];
 	notifications: NotificationDTO[];
@@ -33,7 +37,9 @@ export default interface IStoreState extends SettingsModelDTO {
 	// Progress Service
 	libraryProgress: LibraryProgress[];
 	fileMergeProgressList: FileMergeProgress[];
-	inspectServerProgress: InspectServerProgress[];
+	inspectServerProgress: InspectServerProgressDTO[];
+	serverConnectionCheckStatusProgress: ServerConnectionCheckStatusProgressDTO[];
 	syncServerProgress: SyncServerProgress[];
 	downloadTaskCreationProgress: DownloadTaskCreationProgress;
+	jobStatus: JobStatusUpdateDTO[];
 }

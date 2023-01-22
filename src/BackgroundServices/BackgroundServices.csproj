@@ -7,12 +7,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Application\Application.csproj"/>
-        <ProjectReference Include="..\DownloadManager\DownloadManager.csproj"/>
+        <ProjectReference Include="..\Application\Application.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\Domain\GlobalUsings.cs"/>
+        <Compile Include="..\Domain\GlobalUsings.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Common\DTO" />
+      <Folder Include="Common\Enum" />
     </ItemGroup>
 
 </Project>

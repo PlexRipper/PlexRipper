@@ -1,5 +1,5 @@
 <script lang="ts">
-import Vue, { VNode, CreateElement, PropType, VNodeChildren } from 'vue';
+import Vue, { CreateElement, PropType, VNode, VNodeChildren } from 'vue';
 import { RenderContext } from 'vue/types/options';
 import VBtn from 'vuetify/lib/components/VBtn';
 import VTooltip from 'vuetify/lib/components/VTooltip';
@@ -50,7 +50,7 @@ export default Vue.extend<IBaseButtonProps>({
 		},
 		textId: {
 			type: String,
-			default: 'DEFAULT TEXT',
+			default: 'missing-text',
 		},
 		/**
 		 * The Vue-i18n text id used for the text inside the tooltip.

@@ -1,7 +1,7 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
+import { beforeAll, describe, expect, test } from '@jest/globals';
 import { take } from 'rxjs/operators';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
+import { PLEX_SERVER_CONNECTION_RELATIVE_PATH, PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
 import { generatePlexServers, generateResultDTO } from '@mock';
 import { ServerService } from '@service';
 
@@ -25,6 +25,7 @@ describe('ServerService.getServers()', () => {
 		};
 		const servers = generatePlexServers(config);
 		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(servers));
+		mock.onGet(PLEX_SERVER_CONNECTION_RELATIVE_PATH).reply(200, generateResultDTO([]));
 		const setup$ = ServerService.setup(ctx);
 		const serverResult$ = ServerService.getServer(servers[2].id).pipe(take(1));
 
@@ -38,7 +39,7 @@ describe('ServerService.getServers()', () => {
 		expect(serverResult.receivedComplete()).toBe(true);
 		const firstValue = serverResult.getFirstValue();
 		expect(firstValue).not.toBeNaN();
-		expect(firstValue?.id).toEqual(3);
+		expect(firstValue?.id).toEqual(servers[2].id);
 		expect(firstValue).toEqual(servers[2]);
 	});
 });

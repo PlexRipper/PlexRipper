@@ -18,12 +18,13 @@ public class PlexAccountServer
 
     #endregion
 
-    [Column(Order = 2)]
-    public bool Owned { get; set; }
+    #region Properties
 
-    [Column(Order = 3)]
+    [Column(Order = 2)]
     public string AuthToken { get; set; }
 
-    [Column(Order = 4)]
+    [Column(Order = 3)]
     public DateTime AuthTokenCreationDate { get; set; }
+
+    #endregion
 }

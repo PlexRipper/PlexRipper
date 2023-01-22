@@ -7,7 +7,7 @@ on:
 
 jobs:
   # Build Docker Image
-  build:
+  CreateDockerDevRelease:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master

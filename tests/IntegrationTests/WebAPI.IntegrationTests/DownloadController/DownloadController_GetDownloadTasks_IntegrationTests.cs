@@ -1,5 +1,4 @@
 ﻿using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
 
 namespace WebAPI.IntegrationTests.DownloadController;
@@ -13,21 +12,26 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
     public async Task ShouldHaveAllDownloadTasksNested_WhenTasksAreAvailable()
     {
         // Arrange
+        Seed = 45485864;
+
         var tvShowDownloadTasksCount = 5;
         var tvShowSeasonDownloadTasksCount = 2;
         var tvShowEpisodeDownloadTasksCount = 3;
-
-        await CreateContainer(config =>
+        await SetupDatabase(config =>
         {
-            config.Seed = 4564;
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 2;
+            config.TvShowCount = 5;
             config.TvShowDownloadTasksCount = tvShowDownloadTasksCount;
             config.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
             config.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
         });
 
+        await CreateContainer();
+
         // Act
         var response = await Container.ApiClient.GetAsync(ApiRoutes.Download.GetDownloadTasks);
-        var result = await response.Deserialize<ResultDTO<List<ServerDownloadProgressDTO>>>();
+        var result = await response.Deserialize<List<ServerDownloadProgressDTO>>();
 
         // Assert
         response.IsSuccessStatusCode.ShouldBeTrue();

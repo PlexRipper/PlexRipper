@@ -2,8 +2,5 @@
 
 public class PlexMovieService : PlexMediaService, IPlexMovieService
 {
-    public PlexMovieService(
-        IMediator mediator,
-        IPlexAuthenticationService plexAuthenticationService,
-        IPlexApiService plexServiceApi) : base(mediator, plexAuthenticationService, plexServiceApi) { }
+    public PlexMovieService(IMediator mediator, IPlexApiService plexServiceApi) : base(mediator, plexServiceApi) { }
 }

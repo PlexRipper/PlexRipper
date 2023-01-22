@@ -37,7 +37,7 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
 
         SetDownloadStatus(downloadTaskDb);
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Ok();
     }
 }

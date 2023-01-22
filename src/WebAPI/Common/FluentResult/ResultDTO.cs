@@ -11,17 +11,46 @@ public class ResultDTO
     public bool IsSuccess { get; set; }
 
     [JsonProperty("reasons", Required = Required.Always)]
-    public IList<IReason> Reasons { get; set; } = new List<IReason>();
+    public List<ReasonDTO> Reasons { get; set; } = new();
 
     [JsonProperty("errors", Required = Required.Always)]
-    public IList<IError> Errors { get; set; } = new List<IError>();
+    public List<ErrorDTO> Errors { get; set; } = new();
 
     [JsonProperty("successes", Required = Required.Always)]
-    public IList<ISuccess> Successes { get; set; } = new List<ISuccess>();
+    public List<SuccessDTO> Successes { get; set; } = new();
 }
 
 public class ResultDTO<T> : ResultDTO
 {
     [JsonProperty("value", Required = Required.Always)]
     public T Value { get; set; }
+}
+
+public class ReasonDTO : IReason
+{
+    [JsonProperty("message", Required = Required.Always)]
+    public string Message { get; set; }
+
+    [JsonProperty("metadata", Required = Required.Always)]
+    public Dictionary<string, object> Metadata { get; set; }
+}
+
+public class ErrorDTO
+{
+    public List<ErrorDTO> Reasons { get; set; }
+
+    [JsonProperty("message", Required = Required.Always)]
+    public string Message { get; set; }
+
+    [JsonProperty("metadata", Required = Required.Always)]
+    public Dictionary<string, object> Metadata { get; set; }
+}
+
+public class SuccessDTO : ISuccess
+{
+    [JsonProperty("message", Required = Required.Always)]
+    public string Message { get; set; }
+
+    [JsonProperty("metadata", Required = Required.Always)]
+    public Dictionary<string, object> Metadata { get; set; }
 }

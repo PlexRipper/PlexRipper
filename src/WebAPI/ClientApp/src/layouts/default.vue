@@ -6,6 +6,7 @@
 		<template v-else>
 			<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
 			<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert" />
+			<CheckServerConnectionsProgress />
 			<!--	Use for setup-layout	-->
 			<template v-if="isSetupPage">
 				<vue-scroll>
@@ -38,9 +39,10 @@ import IAlert from '@interfaces/IAlert';
 import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
 import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
 import globalService from '~/service/globalService';
+import CheckServerConnectionsProgress from '@components/Progress/CheckServerConnectionsProgress.vue';
 
 @Component<Default>({
-	components: { NotificationsDrawer, PageLoadOverlay },
+	components: { InspectServerProgress: CheckServerConnectionsProgress, NotificationsDrawer, PageLoadOverlay },
 	loading: false,
 })
 export default class Default extends Vue {

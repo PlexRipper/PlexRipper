@@ -5,20 +5,14 @@ using PlexRipper.Settings.Modules;
 
 namespace Settings.UnitTests.Modules;
 
-public class DisplaySettingsModule_SetFromJson_UnitTests
+public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplaySettingsModule>
 {
-    public DisplaySettingsModule_SetFromJson_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DisplaySettingsModule_SetFromJson_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public void ShouldSetPropertiesFromJson_WhenValidJsonSettingsAreGiven()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DisplaySettingsModule>();
-
         var settingsModel = new SettingsModel
         {
             DisplaySettings = new DisplaySettings
@@ -43,9 +37,6 @@ public class DisplaySettingsModule_SetFromJson_UnitTests
     public void ShouldSetPropertiesFromJson_WhenInvalidJsonSettingsAreGiven()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DisplaySettingsModule>();
-
         var settingsModel = new SettingsModel
         {
             DisplaySettings = FakeData.GetDisplaySettings(config => { config.Seed = 234; }).Generate(),

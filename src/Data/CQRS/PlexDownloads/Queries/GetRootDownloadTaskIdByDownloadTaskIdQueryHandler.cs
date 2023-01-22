@@ -25,7 +25,7 @@ public class GetRootDownloadTaskIdByDownloadTaskIdQueryHandler : BaseHandler,
             await DownloadTasksQueryable
                 .Where(x => x.Id == request.Id)
                 .Select(x => x.RootDownloadTaskId)
-                .SingleOrDefaultAsync() ?? request.Id;
+                .SingleOrDefaultAsync(cancellationToken);
 
         return rootId > 0 ? Result.Ok(rootId) : Result.Fail($"Could not find DownloadTask with id {request.Id}");
     }

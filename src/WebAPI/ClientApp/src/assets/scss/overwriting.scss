@@ -155,6 +155,23 @@ v-expansion-panels
 }
 
 /*
+v-list
+ */
+.v-list {
+  &.theme--dark {
+    @extend .no-background;
+  }
+
+  &.theme--light {
+    @extend .no-background;
+  }
+
+  .v-list-item .v-list-item__title, .v-list-item .v-list-item__subtitle {
+    line-height: 2.0;
+  }
+}
+
+/*
 v-btn
 */
 
@@ -213,3 +230,5 @@ Transparent Background
     @extend .no-background;
   }
 }
+
+

@@ -1,55 +1,61 @@
-﻿using Bogus;
+using Bogus;
+using PlexRipper.Application;
 
 namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
 {
-    private static readonly Random _random = new();
-
-    public static Faker<PlexServer> GetPlexServer([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<PlexServer> GetPlexServer(int seed = 0)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
-
-        var uri = config.MockServer?.ServerUri ?? new Uri("https://test-server.com");
-
+        // Note: Ensure all faker values are a lambda f => x,
+        // otherwise Entity Framework will see differently generated values as the same object and mess up any database testing
         return new Faker<PlexServer>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed)
             .RuleFor(p => p.Id, _ => 0)
             .RuleFor(x => x.Name, f => f.Company.CompanyName())
-            .RuleFor(x => x.Address, uri.Host)
-            .RuleFor(x => x.Scheme, uri.Scheme)
-            .RuleFor(x => x.Port, uri.Port)
-            .RuleFor(x => x.Host, uri.Host)
-            .RuleFor(x => x.CreatedAt, f => f.Date.Past(10, DateTime.Now))
-            .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
-            .RuleFor(x => x.Version, _ => "1.24.3.5033-757abe6b4")
-            .RuleFor(x => x.LocalAddresses, f => f.Internet.Ip())
-            .RuleFor(x => x.MachineIdentifier, _ => Guid.NewGuid().ToString())
+            .RuleFor(x => x.Product, _ => "Plex Media Server")
+            .RuleFor(x => x.ProductVersion, f => f.System.Semver())
+            .RuleFor(x => x.Platform, _ => "Linux")
+            .RuleFor(x => x.PlatformVersion, f => f.System.Semver())
+            .RuleFor(x => x.Device, f => f.Company.CompanyName())
+            .RuleFor(x => x.MachineIdentifier, f => f.Random.Guid().ToString())
+            .RuleFor(x => x.CreatedAt, f => f.Date.Past(10, DateTime.UtcNow))
+            .RuleFor(x => x.LastSeenAt, f => f.Date.Recent(30))
+            .RuleFor(x => x.Provides, f => f.Company.CompanyName())
             .RuleFor(x => x.OwnerId, f => f.Random.Int(1000, 100000))
-            .RuleFor(x => x.ServerFixApplyDNSFix, f => f.Random.Bool())
-            .RuleFor(x => x.PlexAccountServers, _ => new List<PlexAccountServer>())
+            .RuleFor(x => x.PlexServerOwnerUsername, f => f.Name.LastName())
+            .RuleFor(x => x.PublicAddress, f => f.Internet.Ip())
+
+            // Server flags
+            .RuleFor(x => x.Owned, f => f.Random.Bool())
+            .RuleFor(x => x.Home, f => f.Random.Bool())
+            .RuleFor(x => x.Synced, f => f.Random.Bool())
+            .RuleFor(x => x.Relay, f => f.Random.Bool())
+            .RuleFor(x => x.Presence, f => f.Random.Bool())
+            .RuleFor(x => x.HttpsRequired, f => f.Random.Bool())
+            .RuleFor(x => x.PublicAddressMatches, f => f.Random.Bool())
+            .RuleFor(x => x.DnsRebindingProtection, f => f.Random.Bool())
+            .RuleFor(x => x.NatLoopbackSupported, f => f.Random.Bool())
+            .RuleFor(x => x.PreferredConnectionId, _ => 0)
+            .RuleFor(x => x.PlexServerConnections, f => GetPlexServerConnections(seed).Generate(f.Random.Int(1, 4)))
+            .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>())
             .RuleFor(x => x.ServerStatus, _ => new List<PlexServerStatus>())
-            .RuleFor(x => x.AccessToken, _ => "DO NOT USE")
-            .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>());
+            .RuleFor(x => x.ServerFixApplyDNSFix, _ => false)
+            .RuleFor(x => x.PlexAccountServers, _ => new List<PlexAccountServer>());
     }
 
-    public static Faker<PlexLibrary> GetPlexLibrary([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<PlexLibrary> GetPlexLibrary(int seed = 0, PlexMediaType libraryType = PlexMediaType.None)
     {
-        var config = UnitTestDataConfig.FromOptions(options, new UnitTestDataConfig
-        {
-            LibraryType = PlexMediaType.Movie,
-        });
-
         return new Faker<PlexLibrary>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed)
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.Key, f => f.Random.Int(1, 10000).ToString())
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
-            .RuleFor(x => x.Type, _ => config.LibraryType)
+            .RuleFor(x => x.Type, f => libraryType == PlexMediaType.None ? f.PlexRipper().LibraryType : libraryType)
             .RuleFor(x => x.PlexServerId, f => f.Random.Int(1, 10000))
-            .RuleFor(x => x.PlexServer, _ => new PlexServer())
+            .RuleFor(x => x.PlexServer, _ => null)
             .RuleFor(x => x.CreatedAt, f => f.Date.Past(4))
             .RuleFor(x => x.UpdatedAt, f => f.Date.Recent())
             .RuleFor(x => x.ScannedAt, f => f.Date.Recent())
@@ -58,22 +64,20 @@ public static partial class FakeData
             .RuleFor(x => x.LibraryLocationId, f => f.Random.Int(1, 10000))
             .RuleFor(x => x.LibraryLocationPath, f => f.System.DirectoryPath())
             .RuleFor(x => x.MetaData, _ => new PlexLibraryMetaData())
-            .RuleFor(x => x.DefaultDestination, _ => new FolderPath())
+            .RuleFor(x => x.DefaultDestination, _ => null)
             .RuleFor(x => x.DefaultDestinationId, f => f.Random.Int(1, 5))
             .RuleFor(x => x.Movies, _ => new List<PlexMovie>())
             .RuleFor(x => x.TvShows, _ => new List<PlexTvShow>())
-            .RuleFor(x => x.PlexAccountLibraries, _ => new List<PlexAccountLibrary>())
-            .RuleFor(x => x.DownloadTasks, _ => new List<DownloadTask>());
+            .RuleFor(x => x.PlexAccountLibraries, _ => null)
+            .RuleFor(x => x.DownloadTasks, _ => null);
     }
 
-    public static Faker<FolderPath> GetFolderPaths([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<FolderPath> GetFolderPaths(int seed = 0)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
-
         var ids = 0;
         return new Faker<FolderPath>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed)
             .RuleFor(x => x.Id, _ => ids++)
             .RuleFor(x => x.DisplayName, f => f.Random.Word())
             .RuleFor(x => x.FolderType, f => f.Random.Enum<FolderType>())
@@ -82,19 +86,56 @@ public static partial class FakeData
             .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>());
     }
 
-    private static int GetUniqueId(List<int> alreadyGenerated, [CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<PlexServerConnection> GetPlexServerConnections(int seed = 0)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        return new Faker<PlexServerConnection>()
+            .StrictMode(true)
+            .UseSeed(seed)
+            .RuleFor(x => x.Id, _ => 0)
+            .RuleFor(x => x.Protocol, f => f.Internet.Protocol())
+            .RuleFor(x => x.Address, f => f.Internet.Ip())
+            .RuleFor(x => x.Port, f => f.Internet.Port())
+            .RuleFor(x => x.Local, _ => false)
+            .RuleFor(x => x.Relay, _ => false)
+            .RuleFor(x => x.IPv4, _ => true)
+            .RuleFor(x => x.IPv6, _ => false)
+            .RuleFor(x => x.PortFix, _ => false)
+            .RuleFor(x => x.PlexServerStatus, _ => new List<PlexServerStatus>())
+            .RuleFor(x => x.PlexServer, _ => null)
+            .RuleFor(x => x.PlexServerId, _ => 0);
+    }
 
-        var rnd = new Random(config.Seed);
-        while (true)
-        {
-            var value = rnd.Next(1, 10000000);
-            if (!alreadyGenerated.Contains(value))
-            {
-                alreadyGenerated.Add(value);
-                return value;
-            }
-        }
+
+    public static List<PlexAccountServer> GetPlexAccountServer(
+        PlexAccount plexAccount,
+        List<PlexServer> plexServers,
+        int seed = 0)
+    {
+        var index = 0;
+        return new Faker<PlexAccountServer>()
+            .StrictMode(true)
+            .UseSeed(seed)
+            .RuleFor(x => x.PlexAccountId, _ => plexAccount.Id)
+            .RuleFor(x => x.PlexAccount, _ => null)
+            .RuleFor(x => x.PlexServerId, _ => plexServers[index++].Id)
+            .RuleFor(x => x.PlexServer, _ => null)
+            .RuleFor(x => x.AuthToken, f => f.Random.Uuid().ToString())
+            .RuleFor(x => x.AuthTokenCreationDate, _ => DateTime.UtcNow)
+            .Generate(plexServers.Count);
+    }
+
+    public static List<ServerAccessTokenDTO> GetServerAccessTokenDTO(
+        PlexAccount plexAccount,
+        List<PlexServer> plexServers,
+        int seed = 0)
+    {
+        var index = 0;
+        return new Faker<ServerAccessTokenDTO>()
+            .StrictMode(true)
+            .UseSeed(seed)
+            .RuleFor(x => x.PlexAccountId, _ => plexAccount.Id)
+            .RuleFor(x => x.MachineIdentifier, _ => plexServers[index++].MachineIdentifier)
+            .RuleFor(x => x.AccessToken, f => f.Random.Uuid().ToString())
+            .Generate(plexServers.Count);
     }
 }

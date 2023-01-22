@@ -49,7 +49,7 @@ public class PlexAccountDTO
     [JsonProperty("clientId", Required = Required.Always)]
     public string ClientId { get; set; }
 
-    [JsonProperty("clientId", Required = Required.Always)]
+    [JsonProperty("verificationCode", Required = Required.Always)]
     public string VerificationCode { get; set; }
 
     [JsonProperty("is2Fa", Required = Required.Always)]

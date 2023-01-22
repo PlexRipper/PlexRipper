@@ -45,3 +45,10 @@ export function inspectPlexServer(serverId: number): Observable<ResultDTO> {
 		apiName: syncPlexServer.name,
 	});
 }
+
+export function setPreferredPlexServerConnection(serverId: number, connectionId: number): Observable<ResultDTO> {
+	return PlexRipperAxios.put<void>({
+		url: `${PLEX_SERVER_RELATIVE_PATH}/${serverId}/preferred-connection/${connectionId}`,
+		apiName: setPreferredPlexServerConnection.name,
+	});
+}

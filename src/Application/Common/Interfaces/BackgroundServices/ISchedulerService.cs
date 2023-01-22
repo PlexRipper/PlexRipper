@@ -2,7 +2,5 @@
 
 public interface ISchedulerService : IBaseScheduler
 {
-    Task<Result> TriggerSyncPlexServersJob();
-
-    Task InspectPlexServersAsyncJob(int plexAccountId);
+    Task AwaitScheduler(CancellationToken cancellationToken = default);
 }

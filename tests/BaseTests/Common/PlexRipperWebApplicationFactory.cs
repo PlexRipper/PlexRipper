@@ -1,9 +1,12 @@
+using System.Collections.Specialized;
 using Autofac;
+using Autofac.Extras.Quartz;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.Config;
-using PlexRipper.DownloadManager;
+using PlexRipper.Data;
+using PlexRipper.Domain.Autofac;
 using PlexRipper.WebAPI.Common;
 
 namespace PlexRipper.BaseTests;
@@ -11,12 +14,14 @@ namespace PlexRipper.BaseTests;
 public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
 {
     private readonly string _memoryDbName;
+    private readonly MockPlexApi _mockPlexApi;
 
     private readonly UnitTestDataConfig _config;
 
-    public PlexRipperWebApplicationFactory(string memoryDbName, [CanBeNull] Action<UnitTestDataConfig> options = null)
+    public PlexRipperWebApplicationFactory(string memoryDbName, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
         _memoryDbName = memoryDbName;
+        _mockPlexApi = mockPlexApi;
         _config = UnitTestDataConfig.FromOptions(options);
     }
 
@@ -32,12 +37,16 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
             .ConfigureContainer<ContainerBuilder>(autoFacBuilder =>
             {
                 autoFacBuilder
+
+                    // Database context can be setup once and then retrieved by its DB name.
                     .Register((_, _) => MockDatabase.GetMemoryDbContext(_memoryDbName))
+                    .As<PlexRipperDbContext>()
                     .InstancePerDependency();
 
                 autoFacBuilder.RegisterModule<TestModule>();
 
                 SetMockedDependencies(autoFacBuilder);
+                RegisterBackgroundScheduler(autoFacBuilder);
 
                 //  SignalR requires the default ILogger
                 //  autoFacBuilder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
@@ -49,20 +58,60 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
         // Task.Run(() => host.StartAsync()).GetAwaiter().GetResult();
         // return host;
 
-        return base.CreateHost(builder);
+        try
+        {
+            return base.CreateHost(builder);
+        }
+        catch (Exception e)
+        {
+            Log.Fatal(e);
+            throw;
+        }
     }
 
     private void SetMockedDependencies(ContainerBuilder builder)
     {
         builder.RegisterType<MockSignalRService>().As<ISignalRService>();
 
+        if (_mockPlexApi is not null)
+        {
+            builder
+                .RegisterInstance(_mockPlexApi.CreateClient())
+                .As<System.Net.Http.HttpClient>()
+                .SingleInstance();
+        }
+
         if (_config.MockFileSystem is not null)
             builder.RegisterInstance(_config.MockFileSystem).As<IFileSystem>();
 
-        if (_config.MockDownloadSubscriptions is not null)
-            builder.RegisterInstance(_config.MockDownloadSubscriptions).As<IDownloadSubscriptions>();
-
         if (_config.MockConfigManager is not null)
             builder.RegisterInstance(_config.MockConfigManager).As<IConfigManager>();
+    }
+
+    private void RegisterBackgroundScheduler(ContainerBuilder builder)
+    {
+        var testQuartzProps = new NameValueCollection
+        {
+            { "quartz.scheduler.instanceName", "PlexRipper Scheduler" },
+            { "quartz.serializer.type", "json" },
+            { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
+            { "quartz.threadPool.threadCount", "10" },
+            { "quartz.jobStore.misfireThreshold", "60000" },
+        };
+
+        // Register Quartz dependencies
+        builder.RegisterModule(new QuartzAutofacFactoryModule
+        {
+            JobScopeConfigurator = (cb, tag) =>
+            {
+                // override dependency for job scope
+                cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
+                    .AsImplementedInterfaces()
+                    .InstancePerMatchingLifetimeScope(tag);
+            },
+
+            // During integration testing, we cannot use a real JobStore so we revert to default
+            ConfigurationProvider = _ => testQuartzProps,
+        });
     }
 }

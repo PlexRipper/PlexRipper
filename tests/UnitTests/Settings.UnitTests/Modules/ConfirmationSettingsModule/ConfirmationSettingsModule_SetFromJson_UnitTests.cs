@@ -5,20 +5,14 @@ using PlexRipper.Settings.Modules;
 
 namespace Settings.UnitTests.Modules;
 
-public class ConfirmationSettingsModule_SetFromJson_UnitTests
+public class ConfirmationSettingsModule_SetFromJson_UnitTests : BaseUnitTest<ConfirmationSettingsModule>
 {
-    public ConfirmationSettingsModule_SetFromJson_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public ConfirmationSettingsModule_SetFromJson_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public void ShouldSetPropertiesFromJson_WhenValidJsonSettingsAreGiven()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<ConfirmationSettingsModule>();
-
         var settingsModel = new SettingsModel
         {
             ConfirmationSettings = new ConfirmationSettings
@@ -47,9 +41,6 @@ public class ConfirmationSettingsModule_SetFromJson_UnitTests
     public void ShouldSetPropertiesFromJson_WhenInvalidJsonSettingsAreGiven()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<ConfirmationSettingsModule>();
-
         var settingsModel = new SettingsModel
         {
             ConfirmationSettings = new ConfirmationSettings

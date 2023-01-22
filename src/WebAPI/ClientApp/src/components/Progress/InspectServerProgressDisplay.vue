@@ -7,38 +7,12 @@
 		</td>
 		<!--	Status icon	-->
 		<td style="width: 10%">
-			<template v-if="progress">
-				<v-progress-circular v-if="!progress.completed" indeterminate color="red" />
-				<v-icon v-else-if="progress.connectionSuccessful">mdi-check</v-icon>
-				<v-icon v-else>mdi-close</v-icon>
-			</template>
-			<template v-else>
-				<v-progress-circular indeterminate color="red" />
-			</template>
+			<!--	Plex Connection Status Progress Icon -->
+			<boolean-progress :loading="!progress || !progress.completed" :success="progress.connectionSuccessful" />
 		</td>
 		<!--	Current Action	-->
 		<td style="width: 30%">
-			<template v-if="progress">
-				<template v-if="!progress.completed">
-					<span v-if="progress && progress.retryAttemptIndex > 0">
-						{{
-							$t('components.account-setup-progress.retry-connection', {
-								attemptIndex: progress.retryAttemptIndex,
-								attemptCount: progress.retryAttemptCount,
-							})
-						}}
-					</span>
-				</template>
-				<!--	Completed -->
-				<template v-else>
-					<span v-if="progress.connectionSuccessful">
-						{{ $t('components.account-setup-progress.server-connectable') }}
-					</span>
-					<span v-else>
-						{{ $t('components.account-setup-progress.server-un-connectable') }}
-					</span>
-				</template>
-			</template>
+			<ConnectionProgressText :progress="progress" />
 		</td>
 		<!--	Error message	-->
 		<td style="width: 30%">
@@ -55,9 +29,12 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
 import { SignalrService } from '@service';
-import { InspectServerProgress } from '@dto/mainApi';
+import { InspectServerProgressDTO } from '@dto/mainApi';
+import ConnectionProgressText from '@components/Progress/ConnectionProgressText.vue';
 
-@Component
+@Component({
+	components: { ConnectionProgressText },
+})
 export default class InspectServerProgressDisplay extends Vue {
 	@Prop({ required: true, type: Number })
 	readonly plexServerId!: number;
@@ -65,7 +42,7 @@ export default class InspectServerProgressDisplay extends Vue {
 	@Prop({ required: true, type: String })
 	readonly plexServerName!: string;
 
-	progress: InspectServerProgress | null = null;
+	progress: InspectServerProgressDTO | null = null;
 
 	mounted(): void {
 		useSubscription(

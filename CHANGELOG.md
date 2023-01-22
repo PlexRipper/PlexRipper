@@ -1,3 +1,20 @@
+## [0.10.0-RC1]
+
+WORK IN PROGRESS
+
+### Added
+
+
+### Changed
+ - Each PlexServer now has multiple connections available which can be chosen individually, this should solve any proxy and connection issues with servers.
+ - Each PlexServer can now have a preferred connection that can be set in the server settings 
+ - Changed the infrastructure for the download and fileMerge process to be hosted in the Quartz Background services
+ - Big re-organization of the PlexAccount setup process
+
+### Fixed
+ - Fixed the two-factor authentication not working due to the Plex error not being passed on from the http client
+ - Fixed the front-end page data not refreshing when deleting an PlexAccount
+
 ## [0.9.1]
 
 ### Added
@@ -13,7 +30,7 @@
 This has been a major refactoring with many unit and integration tests added to ensure stability.
 This means you will have to empty the config folder before installing to ensure proper workings.
 
-Note: This, by a long shot, doesn't encompases all the changes and fixes that have been made in this version due to the large scope of the changes.
+Note: This, by a long shot, doesn't encompasses all the changes and fixes that have been made in this version due to the large scope of the changes.
 
 ### Added
  - Per server configurable download speed limit (See server settings > Server Configuration)
@@ -27,11 +44,11 @@ Note: This, by a long shot, doesn't encompases all the changes and fixes that ha
  - Removed batch commands from the download page, these were not working and overcomplicated things too much.
  - Migrated project to .NET 6, which brings many performance improvements
  - Added a loading icon to the button when checking the server status in the server configuration
- - The server command "Re-sync Library media" now displayes a loading animation.
+ - The server command "Re-sync Library media" now displays a loading animation.
  - Replaced every button with a more performant and consistent button construction
  - Thumbnails displayed for movies and tvShows on the library pages in poster mode are now displayed from cache when navigating around PlexRipper. 
  - Rewrote the code for the entire download process to be more stable and allow for future features
- - Rewrote the user settings modules (PlexRipperConfig.json) which is now easy to extend and more resilliant.
+ - Rewrote the user settings modules (PlexRipperConfig.json) which is now easy to extend and more resilient.
  - Many performance improvements!
 
 ### Fixed

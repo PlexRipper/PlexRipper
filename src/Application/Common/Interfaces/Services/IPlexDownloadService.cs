@@ -12,7 +12,7 @@ public interface IPlexDownloadService
 
     Task<Result> RestartDownloadTask(int downloadTaskId);
 
-    Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders);
+    Task<Result> DownloadMedia(List<DownloadMediaDTO> downloadTaskOrders);
 
     Task<Result<bool>> DeleteDownloadTasksAsync(List<int> downloadTaskIds);
 

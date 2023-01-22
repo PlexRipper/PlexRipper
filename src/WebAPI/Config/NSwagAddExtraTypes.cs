@@ -1,7 +1,10 @@
 ﻿using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using PlexRipper.Application;
+using PlexRipper.Application.Enums;
 using PlexRipper.DownloadManager;
+using PlexRipper.WebAPI.Common;
+using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Config;
@@ -20,14 +23,19 @@ public class NSwagAddExtraTypes : IDocumentProcessor
     {
         List<Type> types = new()
         {
+            typeof(MessageTypes),
+            typeof(JobTypes),
+            typeof(JobStatus),
+            typeof(JobStatusUpdateDTO),
             typeof(DownloadTaskCreationProgress),
             typeof(LibraryProgress),
-            typeof(InspectServerProgress),
+            typeof(InspectServerProgressDTO),
             typeof(FileMergeProgress),
             typeof(NotificationDTO),
             typeof(SyncServerProgress),
             typeof(DownloadProgressDTO),
             typeof(ServerDownloadProgressDTO),
+            typeof(ServerConnectionCheckStatusProgressDTO),
         };
 
         foreach (var type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))

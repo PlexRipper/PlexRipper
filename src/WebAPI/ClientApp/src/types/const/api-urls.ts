@@ -9,6 +9,7 @@ export const BASE_API_URL = `${BASE_URL}/api`;
 // region Relative
 
 export const PLEX_SERVER_RELATIVE_PATH = '/PlexServer';
+export const PLEX_SERVER_CONNECTION_RELATIVE_PATH = '/PlexServerConnection';
 export const DOWNLOAD_RELATIVE_PATH = '/Download';
 export const FOLDER_PATH_RELATIVE_PATH = '/FolderPath';
 export const SETTINGS_RELATIVE_PATH = '/Settings';
@@ -22,6 +23,7 @@ export const PLEX_MEDIA_RELATIVE_PATH = '/PlexMedia';
 
 // region Absolute
 export const PLEX_SERVER_API_URL = `${BASE_API_URL}/${PLEX_SERVER_RELATIVE_PATH}`;
+export const PLEX_SERVER_CONNECTION_API_URL = `${BASE_API_URL}/${PLEX_SERVER_CONNECTION_RELATIVE_PATH}`;
 export const DOWNLOAD_API_URL = `${BASE_API_URL}/${DOWNLOAD_RELATIVE_PATH}`;
 export const FOLDER_PATH_API_URL = `${BASE_API_URL}/${FOLDER_PATH_RELATIVE_PATH}`;
 export const PLEX_LIBRARY_API_URL = `${BASE_API_URL}/${PLEX_LIBRARY_RELATIVE_PATH}`;

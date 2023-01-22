@@ -3,7 +3,7 @@ import { Context } from '@nuxt/types';
 import { ObservableStore } from '@codewithdan/observable-store';
 import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
 import { EMPTY, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import IAppConfig from '@class/IAppConfig';
@@ -59,6 +59,7 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		const x = this.getState()[propertyName.toString()];
 		if (!x) {
 			Log.error(`Failed to get IStoreProperty property name: ${propertyName}`, this.getState());
+			Log.error(`Are you sure "${propertyName}" belongs to the slice of service ${this.name}?`);
 			return;
 		}
 
@@ -104,8 +105,12 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		return this.getStateSliceProperty<T>(propertyName, true);
 	}
 
+	// TODO Figure out how to make conditional return type based on the types in IStoreState
 	protected getStateChanged<T>(propertyName: keyof IStoreState): Observable<T> {
-		return this.stateChanged.pipe(map((x) => x[propertyName] as unknown as T));
+		return this.stateChanged.pipe(
+			filter((x) => !!x),
+			map((x) => x[propertyName] as unknown as T),
+		);
 	}
 
 	// endregion

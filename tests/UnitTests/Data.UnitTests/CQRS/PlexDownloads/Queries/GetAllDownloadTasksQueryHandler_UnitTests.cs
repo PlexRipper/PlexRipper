@@ -3,12 +3,9 @@ using PlexRipper.Data;
 
 namespace Data.UnitTests;
 
-public class GetAllDownloadTasksQueryHandler_UnitTests
+public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
 {
-    public GetAllDownloadTasksQueryHandler_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public GetAllDownloadTasksQueryHandler_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldReturnNoDownloadTasks_WhenNoDownloadTasksAreInDb()
@@ -31,13 +28,16 @@ public class GetAllDownloadTasksQueryHandler_UnitTests
     public async Task ShouldReturnMovieDownloadTasks_WhenMovieDownloadTasksAreInDB()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext()
-            .Setup(config =>
-            {
-                config.Seed = 21467;
-                config.MovieDownloadTasksCount = 10;
-            });
-        var handle = new GetAllDownloadTasksQueryHandler(context);
+        Seed = 21467;
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 2;
+            config.MovieCount = 20;
+            config.MovieDownloadTasksCount = 10;
+        });
+
+        var handle = new GetAllDownloadTasksQueryHandler(GetDbContext());
         var request = new GetAllDownloadTasksQuery();
 
         // Act
@@ -60,16 +60,18 @@ public class GetAllDownloadTasksQueryHandler_UnitTests
     public async Task ShouldAllTvShowDownloadTasksWithAllIncludes_WhenTvShowDownloadTasksAreInDB()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext()
-            .Setup(config =>
-            {
-                config.Seed = 2767;
-                config.TvShowDownloadTasksCount = 5;
-                config.TvShowSeasonDownloadTasksCount = 5;
-                config.TvShowEpisodeDownloadTasksCount = 5;
-                config.LibraryType = PlexMediaType.TvShow;
-            });
-        var handle = new GetAllDownloadTasksQueryHandler(context);
+        Seed = 2767;
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 2;
+            config.TvShowCount = 20;
+            config.TvShowDownloadTasksCount = 5;
+            config.TvShowSeasonDownloadTasksCount = 5;
+            config.TvShowEpisodeDownloadTasksCount = 5;
+        });
+
+        var handle = new GetAllDownloadTasksQueryHandler(GetDbContext());
         var request = new GetAllDownloadTasksQuery();
 
         // Act

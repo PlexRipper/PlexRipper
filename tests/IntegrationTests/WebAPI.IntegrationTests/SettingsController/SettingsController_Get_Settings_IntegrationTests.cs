@@ -7,7 +7,6 @@ using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace WebAPI.IntegrationTests.SettingsController;
 
-[Collection("Sequential")]
 public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationTests
 {
     public SettingsController_Get_Settings_IntegrationTests(ITestOutputHelper output) : base(output) { }
@@ -20,7 +19,7 @@ public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationT
 
         // Act
         var response = await Container.ApiClient.GetAsync(ApiRoutes.Settings.GetSettings);
-        var result = await response.Deserialize<ResultDTO<SettingsModelDTO>>();
+        var result = await response.Deserialize<SettingsModelDTO>();
 
         // Assert
         response.IsSuccessStatusCode.ShouldBeTrue();

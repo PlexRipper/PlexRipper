@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using PlexRipper.Application;
+using PlexRipper.Application.BackgroundServices;
 using PlexRipper.DownloadManager;
 using PlexRipper.Settings.Models;
+using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
@@ -16,15 +18,15 @@ public class WebApiMappingProfile : Profile
     {
         // Result -> ResultDTO
         CreateMap<Result, ResultDTO>(MemberList.None);
-        CreateMap(typeof(Result<>), typeof(ResultDTO<>), MemberList.None);
-        CreateMap(typeof(Result<>), typeof(ResultDTO), MemberList.None);
+        CreateMap<ResultDTO, Result>(MemberList.None)
+            .ConvertUsing<ResultDTOToResult>();
 
-        // PlexServer -> PlexServerDTO
-        CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination)
-            .ForMember(dto => dto.Status, entity => entity.MapFrom(x => x.Status));
-
-        // PlexServerStatus -> PlexServerStatusDTO
-        CreateMap<PlexServerStatus, PlexServerStatusDTO>(MemberList.Destination);
+        // .ConvertUsing<ResultToResultDTO>();
+        CreateMap(typeof(Result<>), typeof(ResultDTO<>), MemberList.Destination).ReverseMap();
+        CreateMap(typeof(Result<>), typeof(ResultDTO), MemberList.Destination).ReverseMap();
+        CreateMap<IError, ErrorDTO>(MemberList.Destination).ReverseMap();
+        CreateMap<ISuccess, SuccessDTO>(MemberList.Destination).ReverseMap();
+        CreateMap<IReason, ReasonDTO>(MemberList.Destination).ReverseMap();
 
         // PlexLibrary -> PlexLibraryDTO
         CreateMap<PlexLibrary, PlexLibraryDTO>(MemberList.Destination)
@@ -43,16 +45,14 @@ public class WebApiMappingProfile : Profile
         // FileSystemModel -> FileSystemModelDTO
         CreateMap<FileSystemModel, FileSystemModelDTO>(MemberList.Destination).ReverseMap();
 
-        // Notification <-> NotificationUpdate
-        CreateMap<Notification, NotificationDTO>(MemberList.Destination)
-            .ReverseMap();
-
         PlexAccountMappings();
+        PlexServerMappings();
         DownloadTaskMappings();
         PlexMediaMappings();
         PlexMovieMappings();
         PlexTvShowMappings();
         SettingsMappings();
+        SignalRMappings();
     }
 
     private void PlexAccountMappings()
@@ -82,6 +82,21 @@ public class WebApiMappingProfile : Profile
                     };
                 });
             });
+    }
+
+    private void PlexServerMappings()
+    {
+        // PlexServer -> PlexServerDTO
+        CreateMap<PlexServer, PlexServerDTO>(MemberList.Destination);
+
+        // PlexServerConnection -> PlexServerConnectionDTO
+        CreateMap<PlexServerConnection, PlexServerConnectionDTO>(MemberList.Destination)
+            .ForMember(x => x.Progress, opt => opt.Ignore())
+            .ForMember(dto => dto.LatestConnectionStatus, entity => entity.MapFrom(x => x.PlexServerStatus.First()))
+            .ForMember(dto => dto.Url, entity => entity.MapFrom(x => x.Url));
+
+        // PlexServerStatus -> PlexServerStatusDTO
+        CreateMap<PlexServerStatus, PlexServerStatusDTO>(MemberList.Destination);
     }
 
     private void DownloadTaskMappings()
@@ -195,5 +210,22 @@ public class WebApiMappingProfile : Profile
         CreateMap<DownloadManagerSettings, IDownloadManagerSettings>().ReverseMap();
         CreateMap<LanguageSettings, ILanguageSettings>().ReverseMap();
         CreateMap<ServerSettings, IServerSettings>().ReverseMap();
+    }
+
+    private void SignalRMappings()
+    {
+        // InspectServerProgress -> InspectServerProgressDTO
+        CreateMap<InspectServerProgress, InspectServerProgressDTO>(MemberList.Destination);
+
+        // InspectServerProgress -> InspectServerProgressDTO
+        CreateMap<ServerConnectionCheckStatusProgress, ServerConnectionCheckStatusProgressDTO>(MemberList.Destination);
+
+        // Notification <-> NotificationUpdate
+        CreateMap<Notification, NotificationDTO>(MemberList.Destination)
+            .ReverseMap();
+
+        // JobStatusUpdate -> JobStatusUpdateDTO
+        CreateMap<JobStatusUpdate, JobStatusUpdateDTO>(MemberList.Destination)
+            .ForMember(dto => dto.JobType, entity => entity.MapFrom(x => Enum.Parse<JobTypes>(x.JobGroup)));
     }
 }

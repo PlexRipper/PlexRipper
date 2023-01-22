@@ -52,7 +52,7 @@ public static partial class PlexRipperDbContextExtensions
 
     public static IQueryable<PlexLibrary> IncludePlexServer(this IQueryable<PlexLibrary> plexLibrary)
     {
-        return plexLibrary.Include(x => x.PlexServer);
+        return plexLibrary.Include(x => x.PlexServer).ThenInclude(x => x.PlexServerConnections);
     }
 
     #endregion
@@ -66,7 +66,7 @@ public static partial class PlexRipperDbContextExtensions
 
     public static IQueryable<PlexMovie> IncludePlexServer(this IQueryable<PlexMovie> plexMovies)
     {
-        return plexMovies.Include(x => x.PlexServer);
+        return plexMovies.Include(x => x.PlexServer).ThenInclude(x => x.PlexServerConnections);
     }
 
     #endregion
@@ -95,7 +95,7 @@ public static partial class PlexRipperDbContextExtensions
 
     public static IQueryable<PlexTvShow> IncludePlexServer(this IQueryable<PlexTvShow> plexTvShows)
     {
-        return plexTvShows.Include(x => x.PlexServer);
+        return plexTvShows.Include(x => x.PlexServer).ThenInclude(x => x.PlexServerConnections);
     }
 
     public static IQueryable<PlexTvShow> IncludeSeasons(this IQueryable<PlexTvShow> plexTvShows)
@@ -119,7 +119,7 @@ public static partial class PlexRipperDbContextExtensions
 
     public static IQueryable<PlexTvShowSeason> IncludePlexServer(this IQueryable<PlexTvShowSeason> plexTvShowSeason)
     {
-        return plexTvShowSeason.Include(x => x.PlexServer);
+        return plexTvShowSeason.Include(x => x.PlexServer).ThenInclude(x => x.PlexServerConnections);
     }
 
     public static IQueryable<PlexTvShowSeason> IncludeEpisodes(this IQueryable<PlexTvShowSeason> plexTvShowSeason)
@@ -149,7 +149,7 @@ public static partial class PlexRipperDbContextExtensions
 
     public static IQueryable<PlexTvShowEpisode> IncludePlexServer(this IQueryable<PlexTvShowEpisode> plexTvShowEpisode)
     {
-        return plexTvShowEpisode.Include(x => x.PlexServer);
+        return plexTvShowEpisode.Include(x => x.PlexServer).ThenInclude(x => x.PlexServerConnections);
     }
 
     public static IQueryable<PlexTvShowEpisode> IncludeTvShow(this IQueryable<PlexTvShowEpisode> plexTvShowEpisodes)

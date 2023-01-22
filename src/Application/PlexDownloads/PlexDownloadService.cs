@@ -10,8 +10,6 @@ public class PlexDownloadService : IPlexDownloadService
 
     private readonly IMediator _mediator;
 
-    private readonly IDownloadQueue _downloadQueue;
-
     #endregion
 
     #region Constructors
@@ -20,17 +18,14 @@ public class PlexDownloadService : IPlexDownloadService
     /// Initializes a new instance of the <see cref="PlexDownloadService"/> class.
     /// </summary>
     /// <param name="mediator"></param>
-    /// <param name="downloadQueue"></param>
     /// <param name="downloadTaskFactory"></param>
     /// <param name="downloadCommands"></param>
     public PlexDownloadService(
         IMediator mediator,
-        IDownloadQueue downloadQueue,
         IDownloadTaskFactory downloadTaskFactory,
         IDownloadCommands downloadCommands)
     {
         _mediator = mediator;
-        _downloadQueue = downloadQueue;
         _downloadTaskFactory = downloadTaskFactory;
         _downloadCommands = downloadCommands;
     }
@@ -53,36 +48,38 @@ public class PlexDownloadService : IPlexDownloadService
 
     #region Commands
 
-    public async Task<Result> DownloadMediaAsync(List<DownloadMediaDTO> downloadTaskOrders)
+    public async Task<Result> DownloadMedia(List<DownloadMediaDTO> downloadTaskOrders)
     {
-        Log.Debug($"Attempting to add download task orders: {downloadTaskOrders}");
+        Log.Debug($"Attempting to add download task orders: ");
+        foreach (var downloadMediaDto in downloadTaskOrders)
+            Log.Debug($"{downloadMediaDto} ");
+
         var downloadTasks = await _downloadTaskFactory.GenerateAsync(downloadTaskOrders);
         if (downloadTasks.IsFailed)
             return downloadTasks.ToResult();
 
-        // Sent to download manager
-        return await _downloadQueue.AddToDownloadQueueAsync(downloadTasks.Value);
+        return await _downloadCommands.CreateDownloadTasks(downloadTasks.Value);
     }
 
     public async Task<Result<bool>> DeleteDownloadTasksAsync(List<int> downloadTaskIds)
     {
-        return await _downloadCommands.DeleteDownloadTaskClientsAsync(downloadTaskIds);
+        return await _downloadCommands.DeleteDownloadTaskClients(downloadTaskIds);
     }
 
     public Task<Result> RestartDownloadTask(int downloadTaskId)
     {
-        return _downloadCommands.RestartDownloadTasksAsync(downloadTaskId);
+        return _downloadCommands.RestartDownloadTask(downloadTaskId);
     }
 
     public async Task<Result> StopDownloadTask(int downloadTaskId)
     {
-        var result = await _downloadCommands.StopDownloadTasksAsync(downloadTaskId);
+        var result = await _downloadCommands.StopDownloadTasks(downloadTaskId);
         return result.IsSuccess ? Result.Ok() : result.ToResult();
     }
 
     public Task<Result> StartDownloadTask(int downloadTaskId)
     {
-        return _downloadCommands.ResumeDownloadTasksAsync(downloadTaskId);
+        return _downloadCommands.ResumeDownloadTask(downloadTaskId);
     }
 
     public Task<Result> PauseDownloadTask(int downloadTaskId)
@@ -92,7 +89,7 @@ public class PlexDownloadService : IPlexDownloadService
 
     public Task<Result> ClearCompleted(List<int> downloadTaskIds)
     {
-        return _downloadCommands.ClearCompletedAsync(downloadTaskIds);
+        return _downloadCommands.ClearCompleted(downloadTaskIds);
     }
 
     #endregion

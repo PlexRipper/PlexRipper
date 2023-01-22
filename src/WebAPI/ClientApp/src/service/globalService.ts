@@ -1,15 +1,15 @@
 import Log from 'consola';
 import { Context } from '@nuxt/types';
-import { Observable, forkJoin, of } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { ObservableStore } from '@codewithdan/observable-store';
 import DefaultState from '@const/default-state';
 import IAppConfig from '@class/IAppConfig';
 import IStoreState from '@interfaces/service/IStoreState';
 import * as Service from '@service';
+import { BaseService } from '@service';
 import { setConfigInAxios } from '~/plugins/axios';
 import { setLogConfig } from '~/plugins/setup';
-import { BaseService } from '@service';
 import { getBaseURL } from '@api-urls';
 
 export class GlobalService extends BaseService {
@@ -46,6 +46,8 @@ export class GlobalService extends BaseService {
 					Service.ProgressService.setup(nuxtContext),
 					Service.DownloadService.setup(nuxtContext),
 					Service.ServerService.setup(nuxtContext),
+					Service.ServerConnectionService.setup(nuxtContext),
+					Service.BackgroundJobsService.setup(nuxtContext),
 					Service.MediaService.setup(nuxtContext),
 					Service.SettingsService.setup(nuxtContext),
 					Service.NotificationService.setup(nuxtContext),
@@ -106,10 +108,6 @@ export class GlobalService extends BaseService {
 			map((value) => value?.pageReady ?? false),
 			filter((pageReady) => pageReady),
 		);
-	}
-
-	public translate(tag: string): string {
-		return this._nuxtContext.i18n.t(tag).toString();
 	}
 }
 

@@ -20,9 +20,10 @@ public class GetPlexServersByIdsQueryHandler : BaseHandler,
 
     public async Task<Result<List<PlexServer>>> Handle(GetPlexServersByIdsQuery request, CancellationToken cancellationToken)
     {
-        var query = PlexServerQueryable
-            .Include(x => x.ServerStatus)
-            .AsQueryable();
+        var query = PlexServerQueryable.AsQueryable();
+
+        if (request.IncludeConnections)
+            query = query.Include(x => x.PlexServerConnections);
 
         if (request.IncludeLibraries)
             query = query.Include(x => x.PlexLibraries);

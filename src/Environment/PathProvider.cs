@@ -33,6 +33,8 @@ public class PathProvider : IPathProvider
     public static string ConfigFileName => "PlexRipperSettings.json";
 
     public static string DatabaseName => "PlexRipperDB.db";
+    public static string DatabaseShmName => $"{DatabaseName}-shm";
+    public static string DatabaseWalName => $"{DatabaseName}-wal";
 
     #endregion
 
@@ -43,6 +45,10 @@ public class PathProvider : IPathProvider
     public static string DatabaseBackupDirectory => Path.Combine(ConfigDirectory, "Database BackUp");
 
     public static string DatabasePath => Path.Combine(ConfigDirectory, DatabaseName);
+
+    public static string Database_SHM_Path => Path.Combine(ConfigDirectory, DatabaseShmName);
+
+    public static string Database_WAL_Path => Path.Combine(ConfigDirectory, DatabaseWalName);
 
     public static string LogsDirectory => Path.Combine(RootDirectory, _configFolder, _logsFolder);
 
@@ -67,6 +73,8 @@ public class PathProvider : IPathProvider
         }
     }
 
+    public static string DatabaseConnectionString => $"Data Source={DatabasePath}";
+
     #region Interface Implementations
 
     string IPathProvider.RootDirectory => RootDirectory;
@@ -81,9 +89,20 @@ public class PathProvider : IPathProvider
 
     string IPathProvider.DatabasePath => DatabasePath;
 
+    string IPathProvider.Database_SHM_Path => Database_SHM_Path;
+
+    string IPathProvider.Database_WAL_Path => Database_WAL_Path;
+
     string IPathProvider.LogsDirectory => LogsDirectory;
 
     string IPathProvider.ConfigDirectory => ConfigDirectory;
+
+    public List<string> DatabaseFiles => new()
+    {
+        DatabasePath,
+        Database_SHM_Path,
+        Database_WAL_Path,
+    };
 
     #endregion
 

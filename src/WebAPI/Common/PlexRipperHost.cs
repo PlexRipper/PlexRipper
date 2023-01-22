@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Environment;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Data;
 using PlexRipper.WebAPI.Config;
 
 namespace PlexRipper.WebAPI.Common;
@@ -25,11 +26,23 @@ public static class PlexRipperHost
                 config.ClearProviders();
                 config.AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
             })
+            .ConfigureDatabase()
             .ConfigureContainer<ContainerBuilder>(containerBuilder =>
             {
                 Log.Debug("Setting up Autofac Containers");
                 ContainerConfig.ConfigureContainer(containerBuilder);
             })
             .UseServiceProviderFactory(new AutofacServiceProviderFactory());
+    }
+
+    public static IHostBuilder ConfigureDatabase(this IHostBuilder hostBuilder)
+    {
+        if (EnvironmentExtensions.IsIntegrationTestMode())
+            return hostBuilder;
+
+        var dbContext = new PlexRipperDbContext(new PathProvider());
+        dbContext.Setup();
+
+        return hostBuilder;
     }
 }

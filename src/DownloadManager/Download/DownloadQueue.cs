@@ -13,14 +13,11 @@ public class DownloadQueue : IDownloadQueue
     #region Fields
 
     private readonly IMediator _mediator;
-
-    private readonly IDownloadTaskValidator _downloadTaskValidator;
+    private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
 
     private readonly Subject<int> _serverCompletedDownloading = new();
-
-    private readonly Subject<DownloadTask> _startDownloadTask = new();
 
     private readonly CancellationToken _token = new();
 
@@ -30,10 +27,10 @@ public class DownloadQueue : IDownloadQueue
 
     #region Constructor
 
-    public DownloadQueue(IMediator mediator, IDownloadTaskValidator downloadTaskValidator)
+    public DownloadQueue(IMediator mediator, IDownloadTaskScheduler downloadTaskScheduler)
     {
         _mediator = mediator;
-        _downloadTaskValidator = downloadTaskValidator;
+        _downloadTaskScheduler = downloadTaskScheduler;
     }
 
     #endregion
@@ -47,8 +44,6 @@ public class DownloadQueue : IDownloadQueue
     /// </summary>
     public IObservable<int> ServerCompletedDownloading => _serverCompletedDownloading.AsObservable();
 
-    public IObservable<DownloadTask> StartDownloadTask => _startDownloadTask.AsObservable();
-
     #endregion
 
     #region Public Methods
@@ -57,27 +52,6 @@ public class DownloadQueue : IDownloadQueue
     {
         _copyTask = Task.Factory.StartNew(ExecuteDownloadQueueCheck, TaskCreationOptions.LongRunning);
         return _copyTask.IsFaulted ? Result.Fail("ExecuteFileTasks failed due to an error").LogError() : Result.Ok();
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result> AddToDownloadQueueAsync(List<DownloadTask> downloadTasks)
-    {
-        if (!downloadTasks.Any())
-            return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
-
-        var validateResult = _downloadTaskValidator.ValidateDownloadTasks(downloadTasks);
-        if (validateResult.IsFailed)
-            return validateResult.ToResult().LogDebug();
-
-        // Add to Database
-        var createResult = await _mediator.Send(new CreateDownloadTasksCommand(validateResult.Value));
-        if (createResult.IsFailed)
-            return createResult.ToResult().LogError();
-
-        Log.Debug($"Successfully added all {validateResult.Value.Count} DownloadTasks");
-        var uniquePlexServers = downloadTasks.Select(x => x.PlexServerId).Distinct().ToList();
-        await CheckDownloadQueue(uniquePlexServers);
-        return Result.Ok();
     }
 
     /// <summary>
@@ -90,12 +64,12 @@ public class DownloadQueue : IDownloadQueue
 
         Log.Information($"Adding {plexServerIds.Count} {nameof(PlexServer)}s to the DownloadQueue to check for the next download.");
         foreach (var plexServerId in plexServerIds)
-            await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId);
+            await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId, _token);
 
         return Result.Ok();
     }
 
-    public async Task<Result> CheckDownloadQueueServer(int plexServerId)
+    public async Task<Result<DownloadTask>> CheckDownloadQueueServer(int plexServerId)
     {
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
@@ -110,19 +84,21 @@ public class DownloadQueue : IDownloadQueue
 
         Log.Debug($"Checking {nameof(PlexServer)}: {plexServerName.Value} for the next download to start");
 
-        var nextDownloadTask = GetNextDownloadTask(downloadTasksResult.Value);
-        if (nextDownloadTask.IsFailed)
+        var nextDownloadTaskResult = GetNextDownloadTask(downloadTasksResult.Value);
+        if (nextDownloadTaskResult.IsFailed)
         {
             Log.Information($"There are no available downloadTasks remaining for PlexServer with Id: {plexServerName.Value}");
             _serverCompletedDownloading.OnNext(plexServerId);
             return Result.Ok();
         }
 
-        Log.Information($"Selected download task {nextDownloadTask.Value.FullTitle} to start as the next task");
+        var nextDownloadTask = nextDownloadTaskResult.Value;
 
-        _startDownloadTask.OnNext(nextDownloadTask.Value);
+        Log.Information($"Selected download task {nextDownloadTask.FullTitle} to start as the next task");
 
-        return Result.Ok();
+        await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.Id, nextDownloadTask.PlexServerId);
+
+        return Result.Ok(nextDownloadTask);
     }
 
     /// <summary>
@@ -169,7 +145,7 @@ public class DownloadQueue : IDownloadQueue
     {
         while (!_token.IsCancellationRequested)
         {
-            var item = await _plexServersToCheckChannel.Reader.ReadAsync();
+            var item = await _plexServersToCheckChannel.Reader.ReadAsync(_token);
             await CheckDownloadQueueServer(item);
         }
     }

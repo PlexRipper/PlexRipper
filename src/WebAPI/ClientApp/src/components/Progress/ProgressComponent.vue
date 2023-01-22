@@ -25,7 +25,7 @@
 				<!-- Progress text -->
 				<v-row v-if="text" justify="center" no-gutters>
 					<v-col cols="auto">
-						<h2>{{ text }}</h2>
+						<h3>{{ text }}</h3>
 					</v-col>
 				</v-row>
 			</template>
@@ -62,7 +62,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component<ProgressComponent>({})
 export default class ProgressComponent extends Vue {

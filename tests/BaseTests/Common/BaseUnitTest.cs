@@ -24,6 +24,7 @@ public class BaseUnitTest : IDisposable
     protected BaseUnitTest(ITestOutputHelper output)
     {
         Log.SetupTestLogging(output);
+        BogusExtensions.Setup();
     }
 
     #endregion

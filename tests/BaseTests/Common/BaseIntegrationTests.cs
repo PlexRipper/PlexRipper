@@ -24,6 +24,7 @@ public class BaseIntegrationTests : IAsyncLifetime
         Log.SetupTestLogging(output, logLevel);
         DatabaseName = MockDatabase.GetMemoryDatabaseName();
         Log.Information($"Initialized integration test with database name: {DatabaseName}");
+        BogusExtensions.Setup();
     }
 
     #endregion

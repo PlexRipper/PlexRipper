@@ -14,7 +14,7 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(seed)
             .RuleFor(x => x.Id, _ => 0)
-            .RuleFor(x => x.Key, f => f.Random.Int(1, 10000))
+            .RuleFor(x => x.Key, f => f.Random.Int(1, 1000000))
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.FullTitle, f => f.Company.CompanyName())
             .RuleFor(x => x.SortTitle, f => f.Company.CompanyName())
@@ -45,7 +45,7 @@ public static partial class FakeData
             });
     }
 
-    public static Faker<PlexMediaData> GetPlexMediaData(int seed = 0, Action<FakeDataConfig> options = null )
+    public static Faker<PlexMediaData> GetPlexMediaData(int seed = 0, Action<FakeDataConfig> options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
@@ -71,7 +71,7 @@ public static partial class FakeData
             .RuleFor(x => x.Parts, f => GetPlexMediaPart(seed, options).GenerateBetween(1, config.IncludeMultiPartMovies ? 2 : 1));
     }
 
-    public static Faker<PlexMediaDataPart> GetPlexMediaPart(int seed = 0, Action<FakeDataConfig> options = null )
+    public static Faker<PlexMediaDataPart> GetPlexMediaPart(int seed = 0, Action<FakeDataConfig> options = null)
     {
         return new Faker<PlexMediaDataPart>()
             .StrictMode(true)
@@ -92,7 +92,7 @@ public static partial class FakeData
 
     #region PlexMovies
 
-    public static Faker<PlexMovie> GetPlexMovies(int seed = 0, Action<FakeDataConfig> options = null )
+    public static Faker<PlexMovie> GetPlexMovies(int seed = 0, Action<FakeDataConfig> options = null)
     {
         var movieIds = new List<int>();
         var movieKeys = new List<int>();
@@ -116,7 +116,7 @@ public static partial class FakeData
 
     #region PlexTvShows
 
-    public static Faker<PlexTvShow> GetPlexTvShows(int seed = 0, Action<FakeDataConfig> options = null )
+    public static Faker<PlexTvShow> GetPlexTvShows(int seed = 0, Action<FakeDataConfig> options = null)
     {
         return new Faker<PlexTvShow>()
             .StrictMode(true)
@@ -147,7 +147,7 @@ public static partial class FakeData
             });
     }
 
-    public static Faker<PlexTvShowSeason> GetPlexTvShowSeason(int seed = 0, Action<FakeDataConfig> options = null )
+    public static Faker<PlexTvShowSeason> GetPlexTvShowSeason(int seed = 0, Action<FakeDataConfig> options = null)
     {
         var seasonKeys = new List<int>();
         return new Faker<PlexTvShowSeason>()
@@ -162,7 +162,7 @@ public static partial class FakeData
             .FinishWith((f, tvShowSeason) => { tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum(); });
     }
 
-    public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(int seed = 0, Action<FakeDataConfig> options = null )
+    public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(int seed = 0, Action<FakeDataConfig> options = null)
     {
         var episodeKeys = new List<int>();
         return new Faker<PlexTvShowEpisode>()

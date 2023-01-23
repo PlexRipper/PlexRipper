@@ -1,6 +1,5 @@
 using Application.Contracts;
 using PlexApi.Contracts;
-using PlexRipper.Application;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;

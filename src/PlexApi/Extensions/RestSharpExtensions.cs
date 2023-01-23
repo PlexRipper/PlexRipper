@@ -1,5 +1,4 @@
 using PlexApi.Contracts;
-using PlexRipper.Application;
 using Polly;
 using RestSharp;
 

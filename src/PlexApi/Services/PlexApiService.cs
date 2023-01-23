@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
+using Data.Contracts;
 using PlexRipper.Application;
-using PlexRipper.Application.PlexAccounts;
-using PlexRipper.Application.PlexAuthentication.Queries;
 
 namespace PlexRipper.PlexApi.Services;
 

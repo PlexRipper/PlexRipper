@@ -1,5 +1,5 @@
 using AutoMapper;
-using PlexRipper.Application.PlexAccounts;
+using Data.Contracts;
 
 namespace PlexRipper.Application;
 
@@ -45,7 +45,7 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
             .Select(async plexServerConnection => await CheckPlexServerConnectionStatusAsync(plexServerConnection));
 
         var tasksResult = await Task.WhenAll(connectionTasks);
-        var x = Result.Merge(tasksResult);
+        Result.Merge(tasksResult);
 
         if (tasksResult.Any(statusResult => statusResult.Value.IsSuccessful))
             return Result.Ok();

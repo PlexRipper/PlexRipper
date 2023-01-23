@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
+﻿using Data.Contracts;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.BaseTests.Asserts;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;

@@ -2,7 +2,6 @@ using System.Net;
 using System.Text.Json;
 using FluentResultExtensions;
 using PlexRipper.Application;
-using PlexRipper.PlexApi.Common;
 using PlexRipper.PlexApi.Converters;
 using PlexRipper.PlexApi.Extensions;
 using Polly;

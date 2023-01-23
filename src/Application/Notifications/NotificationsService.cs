@@ -1,4 +1,4 @@
-﻿using PlexRipper.Application.Notifications.Queries;
+﻿using Data.Contracts;
 
 namespace PlexRipper.Application.Notifications;
 
@@ -39,7 +39,7 @@ public class NotificationsService : INotificationsService
         return SendResult(result.ToResult());
     }
 
-    public async Task<Result> ClearAllNotifications()
+    public async Task<Result<int>> ClearAllNotifications()
     {
         return await _mediator.Send(new ClearAllNotificationsCommand());
     }

@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
+using Data.Contracts;
 using EFCore.BulkExtensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexTvShows;

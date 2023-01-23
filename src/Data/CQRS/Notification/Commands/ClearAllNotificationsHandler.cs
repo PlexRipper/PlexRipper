@@ -1,6 +1,6 @@
-﻿using EFCore.BulkExtensions;
+﻿using Data.Contracts;
 using FluentValidation;
-using PlexRipper.Application.Notifications;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -10,15 +10,14 @@ public class ClearAllNotificationsValidator : AbstractValidator<ClearAllNotifica
     public ClearAllNotificationsValidator() { }
 }
 
-public class ClearAllNotificationsHandler : BaseHandler, IRequestHandler<ClearAllNotificationsCommand, Result>
+public class ClearAllNotificationsHandler : BaseHandler, IRequestHandler<ClearAllNotificationsCommand, Result<int>>
 {
     public ClearAllNotificationsHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Result> Handle(ClearAllNotificationsCommand command, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(ClearAllNotificationsCommand command, CancellationToken cancellationToken)
     {
-        // Empty table
-        await _dbContext.TruncateAsync<Notification>();
-        await _dbContext.SaveChangesAsync();
-        return Result.Ok();
+        // Empty the table
+        var deletedNotificationsCount = await _dbContext.Notifications.ExecuteDeleteAsync(cancellationToken);
+        return Result.Ok(deletedNotificationsCount);
     }
 }

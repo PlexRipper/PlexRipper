@@ -1,3 +1,5 @@
+using Data.Contracts;
+
 namespace PlexRipper.Application.PlexAccounts;
 
 public class PlexAccountService : IPlexAccountService

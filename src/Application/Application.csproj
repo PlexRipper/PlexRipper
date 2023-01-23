@@ -16,6 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
         <ProjectReference Include="..\Domain\Domain.csproj" />
         <Compile Include="..\Domain\GlobalUsings.cs" />
     </ItemGroup>

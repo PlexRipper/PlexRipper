@@ -1,4 +1,4 @@
-using PlexRipper.Application.PlexAccounts;
+using Data.Contracts;
 
 namespace PlexRipper.Application;
 

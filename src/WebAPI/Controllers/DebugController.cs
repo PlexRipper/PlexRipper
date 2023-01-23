@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
-using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers;
 

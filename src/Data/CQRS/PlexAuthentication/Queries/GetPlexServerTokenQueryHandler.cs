@@ -1,6 +1,6 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexAuthentication.Queries;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexAuthentication;

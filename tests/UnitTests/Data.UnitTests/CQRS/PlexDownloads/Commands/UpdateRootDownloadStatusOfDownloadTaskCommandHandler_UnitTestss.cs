@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
+﻿using Data.Contracts;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data;
 using PlexRipper.Data.Common;
 

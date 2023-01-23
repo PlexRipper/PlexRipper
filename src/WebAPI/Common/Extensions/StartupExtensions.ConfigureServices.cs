@@ -7,7 +7,6 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application;
 using PlexRipper.WebAPI.Config;
-using Quartz;
 
 namespace PlexRipper.WebAPI.Common.Extensions;
 

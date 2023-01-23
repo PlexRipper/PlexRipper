@@ -1,6 +1,6 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Notifications.Queries;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.Queries;
@@ -13,7 +13,7 @@ public class GetNotificationsHandler : BaseHandler, IRequestHandler<GetNotificat
 
     public async Task<Result<List<Notification>>> Handle(GetNotificationsQuery request, CancellationToken cancellationToken)
     {
-        var list = await _dbContext.Notifications.ToListAsync();
+        var list = await _dbContext.Notifications.ToListAsync(cancellationToken: cancellationToken);
         return Result.Ok(list);
     }
 }

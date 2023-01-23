@@ -3,7 +3,6 @@ using PlexRipper.Domain.Config;
 using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace WebAPI.IntegrationTests.SettingsController;
 

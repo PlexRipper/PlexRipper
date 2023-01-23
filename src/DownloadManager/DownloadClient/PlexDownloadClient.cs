@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using Data.Contracts;
 using DownloadManager.Contracts;
 using PlexRipper.Application;
 using PlexRipper.Domain.RxNet;

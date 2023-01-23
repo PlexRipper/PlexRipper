@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using PlexRipper.PlexApi.Common;
+using PlexRipper.PlexApi;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;

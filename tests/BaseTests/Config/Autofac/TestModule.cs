@@ -3,7 +3,7 @@ using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.FileSystem.Common;
 
-namespace PlexRipper.BaseTests.Config;
+namespace PlexRipper.BaseTests;
 
 /// <summary>
 /// Add the default test mock modules here which can later be overridden

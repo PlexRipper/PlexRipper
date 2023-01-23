@@ -1,6 +1,6 @@
-﻿using EFCore.BulkExtensions;
+﻿using Data.Contracts;
+using EFCore.BulkExtensions;
 using FluentValidation;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;

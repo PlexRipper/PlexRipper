@@ -1,4 +1,4 @@
-using PlexRipper.Application;
+using Data.Contracts;
 using PlexRipper.Data.PlexLibraries;
 
 namespace Data.UnitTests.PlexLibraries;

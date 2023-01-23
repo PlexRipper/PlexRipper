@@ -21,13 +21,13 @@ public static partial class FakeData
         return new Faker<SettingsModel>()
             .StrictMode(true)
             .UseSeed(config.Seed)
-            .RuleFor(x => x.GeneralSettings, f => GetGeneralSettings(options).Generate())
-            .RuleFor(x => x.ConfirmationSettings, f => GetConfirmationSettings(options).Generate())
-            .RuleFor(x => x.DateTimeSettings, f => GetDateTimeSettings(options).Generate())
-            .RuleFor(x => x.DisplaySettings, f => GetDisplaySettings(options).Generate())
-            .RuleFor(x => x.DownloadManagerSettings, f => GetDownloadManagerSettings(options).Generate())
-            .RuleFor(x => x.LanguageSettings, f => GetLanguageSettings(options).Generate())
-            .RuleFor(x => x.ServerSettings, f => GetServerSettings(options).Generate());
+            .RuleFor(x => x.GeneralSettings, _ => GetGeneralSettings(options).Generate())
+            .RuleFor(x => x.ConfirmationSettings, _ => GetConfirmationSettings(options).Generate())
+            .RuleFor(x => x.DateTimeSettings, _ => GetDateTimeSettings(options).Generate())
+            .RuleFor(x => x.DisplaySettings, _ => GetDisplaySettings(options).Generate())
+            .RuleFor(x => x.DownloadManagerSettings, _ => GetDownloadManagerSettings(options).Generate())
+            .RuleFor(x => x.LanguageSettings, _ => GetLanguageSettings(options).Generate())
+            .RuleFor(x => x.ServerSettings, _ => GetServerSettings(options).Generate());
     }
 
     public static string GetSettingsModelJson(Action<UnitTestDataConfig> options = null)

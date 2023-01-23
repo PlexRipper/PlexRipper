@@ -1,5 +1,4 @@
-﻿using BackgroundServices.Listeners;
-using PlexRipper.Application;
+﻿using PlexRipper.Application;
 using Quartz;
 using Quartz.Impl.Matchers;
 

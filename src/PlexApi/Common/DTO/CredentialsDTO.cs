@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PlexRipper.PlexApi.Common.DTO;
+namespace PlexRipper.PlexApi;
 
 public class CredentialsDTO
 {

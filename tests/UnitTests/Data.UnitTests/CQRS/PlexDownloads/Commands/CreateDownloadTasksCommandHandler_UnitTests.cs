@@ -1,6 +1,6 @@
-﻿using EFCore.BulkExtensions;
+﻿using Data.Contracts;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Data.Common;
 

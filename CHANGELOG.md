@@ -3,7 +3,7 @@
 WORK IN PROGRESS
 
 ### Added
-
+ - Cypress Front-end testing
 
 ### Changed
  - Each PlexServer now has multiple connections available which can be chosen individually, this should solve any proxy and connection issues with servers.

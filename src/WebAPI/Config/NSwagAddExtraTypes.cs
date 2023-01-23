@@ -1,15 +1,13 @@
-﻿using Application.Contracts;
-using BackgroundServices.Contracts;
+﻿using BackgroundServices.Contracts;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
-using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
 using WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI.Config;
+namespace PlexRipper.WebAPI;
 
 /// <summary>
 /// Swagger/NSwag only picks up types that are directly used in API results.

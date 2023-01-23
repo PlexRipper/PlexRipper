@@ -4,7 +4,7 @@ using MediatR.Extensions.Autofac.DependencyInjection;
 using PlexRipper.Data;
 using PlexRipper.Domain.Behavior.Pipelines;
 
-namespace PlexRipper.WebAPI.Config;
+namespace PlexRipper.WebAPI;
 
 public class MediatrModule : Module
 {

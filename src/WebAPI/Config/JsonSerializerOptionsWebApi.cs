@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Domain.Config;
 
-namespace PlexRipper.WebAPI.Config;
+namespace PlexRipper.WebAPI;
 
 public static class JsonSerializerOptionsWebApi
 {

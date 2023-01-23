@@ -3,7 +3,6 @@ using Autofac.Extensions.DependencyInjection;
 using Environment;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data;
-using PlexRipper.WebAPI.Config;
 
 namespace PlexRipper.WebAPI.Common;
 

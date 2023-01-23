@@ -1,7 +1,7 @@
 using AutoMapper;
 using PlexRipper.WebAPI.Common.FluentResult;
 
-namespace PlexRipper.WebAPI.Config;
+namespace PlexRipper.WebAPI;
 
 public class ResultDTOToResult : ITypeConverter<ResultDTO, Result>
 {

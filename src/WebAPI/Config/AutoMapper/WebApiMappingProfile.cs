@@ -1,6 +1,5 @@
-﻿using AutoMapper;
+using AutoMapper;
 using BackgroundServices.Contracts;
-using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common;
@@ -12,7 +11,7 @@ using PlexRipper.WebAPI.SignalR.Common;
 using Settings.Contracts;
 using WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI.Config;
+namespace PlexRipper.WebAPI;
 
 public class WebApiMappingProfile : Profile
 {

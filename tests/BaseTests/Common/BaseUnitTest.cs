@@ -1,7 +1,7 @@
 using Autofac;
 using AutoMapper;
 using PlexRipper.Data;
-using PlexRipper.WebAPI.Config;
+using PlexRipper.WebAPI;
 
 namespace PlexRipper.BaseTests;
 

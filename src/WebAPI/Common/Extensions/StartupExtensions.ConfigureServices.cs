@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application;
-using PlexRipper.WebAPI.Config;
 
 namespace PlexRipper.WebAPI.Common.Extensions;
 

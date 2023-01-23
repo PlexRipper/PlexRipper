@@ -68,7 +68,7 @@ public static partial class FakeData
             .RuleFor(x => x.VideoResolution, f => f.PickRandom("sd", "720p", "1080p"))
             .RuleFor(x => x.Duration, f => f.Random.Long(50000, 55124400))
             .RuleFor(x => x.OptimizedForStreaming, f => f.Random.Bool())
-            .RuleFor(x => x.Parts, f => GetPlexMediaPart(seed, options).GenerateBetween(1, config.IncludeMultiPartMovies ? 2 : 1));
+            .RuleFor(x => x.Parts, _ => GetPlexMediaPart(seed, options).GenerateBetween(1, config.IncludeMultiPartMovies ? 2 : 1));
     }
 
     public static Faker<PlexMediaDataPart> GetPlexMediaPart(int seed = 0, Action<FakeDataConfig> options = null)
@@ -81,8 +81,8 @@ public static partial class FakeData
             .RuleFor(x => x.AudioProfile, _ => "dts")
             .RuleFor(x => x.HasThumbnail, f => f.Random.Int(0, 1).ToString())
             .RuleFor(x => x.HasChapterTextStream, f => f.Random.Bool())
-            .RuleFor(x => x.File, f => "/fake_download.mp4")
-            .RuleFor(x => x.Size, f => 50 * 1024)
+            .RuleFor(x => x.File, _ => "/fake_download.mp4")
+            .RuleFor(x => x.Size, _ => 50 * 1024)
             .RuleFor(x => x.Container, f => f.System.FileExt("video/mp4"))
             .RuleFor(x => x.VideoProfile, f => f.Random.Words(2))
             .RuleFor(x => x.Indexes, f => f.Random.Word());
@@ -124,7 +124,7 @@ public static partial class FakeData
             .ApplyBasePlexMedia(seed, options)
             .RuleFor(x => x.PlexTvShowGenres, _ => new List<PlexTvShowGenre>())
             .RuleFor(x => x.PlexTvShowRoles, _ => new List<PlexTvShowRole>())
-            .RuleFor(x => x.Seasons, f => GetPlexTvShowSeason(seed, options).GenerateBetween(1, 4))
+            .RuleFor(x => x.Seasons, _ => GetPlexTvShowSeason(seed, options).GenerateBetween(1, 4))
             .FinishWith((_, tvShow) =>
             {
                 for (var seasonIndex = 0; seasonIndex < tvShow.Seasons.Count; seasonIndex++)
@@ -158,8 +158,8 @@ public static partial class FakeData
             .RuleFor(x => x.ParentKey, _ => GetUniqueId(seasonKeys, seed))
             .RuleFor(x => x.TvShowId, _ => 0)
             .RuleFor(x => x.TvShow, _ => null)
-            .RuleFor(x => x.Episodes, f => GetPlexTvShowEpisode(seed, options).GenerateBetween(1, 10))
-            .FinishWith((f, tvShowSeason) => { tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum(); });
+            .RuleFor(x => x.Episodes, _ => GetPlexTvShowEpisode(seed, options).GenerateBetween(1, 10))
+            .FinishWith((_, tvShowSeason) => { tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum(); });
     }
 
     public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(int seed = 0, Action<FakeDataConfig> options = null)
@@ -176,7 +176,7 @@ public static partial class FakeData
             .RuleFor(x => x.TvShow, _ => null)
             .RuleFor(x => x.TvShowSeasonId, _ => 0)
             .RuleFor(x => x.TvShowSeason, _ => null)
-            .FinishWith((f, tvShowEpisode) =>
+            .FinishWith((_, tvShowEpisode) =>
             {
                 foreach (var mediaData in tvShowEpisode.EpisodeData)
                 foreach (var mediaDataPart in mediaData.Parts)

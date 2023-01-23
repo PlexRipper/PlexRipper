@@ -10,7 +10,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite" Version="0.4.0" />
-		<PackageReference Include="Autofac" Version="6.4.0" />
+		<PackageReference Include="Autofac" Version="6.5.0" />
 		<PackageReference Include="EFCore.BulkExtensions.SQLite" Version="7.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.2" />

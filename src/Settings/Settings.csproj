@@ -9,21 +9,21 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Autofac" Version="6.4.0"/>
-		<PackageReference Include="System.Text.Json" Version="7.0.1"/>
+		<PackageReference Include="Autofac" Version="6.5.0" />
+		<PackageReference Include="System.Text.Json" Version="7.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj"/>
-		<ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj"/>
+		<ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
+		<ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Common\Interfaces"/>
+		<Folder Include="Common\Interfaces" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="..\Domain\GlobalUsings.cs"/>
+		<Compile Include="..\Domain\GlobalUsings.cs" />
 	</ItemGroup>
 
 </Project>

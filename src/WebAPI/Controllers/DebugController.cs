@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using BackgroundServices.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
 

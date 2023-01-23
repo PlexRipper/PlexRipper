@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Application;
+﻿using FluentResults;
+
+namespace BackgroundServices.Contracts;
 
 public interface IDownloadTaskScheduler
 {

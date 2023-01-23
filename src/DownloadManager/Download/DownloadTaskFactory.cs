@@ -3,6 +3,7 @@ using AutoMapper;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using FileSystem.Contracts;
+using PlexApi.Contracts;
 using PlexRipper.Application;
 
 namespace PlexRipper.DownloadManager;

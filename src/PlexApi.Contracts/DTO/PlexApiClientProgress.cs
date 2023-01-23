@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Application;
+﻿namespace PlexApi.Contracts;
 
 public class PlexApiClientProgress
 {

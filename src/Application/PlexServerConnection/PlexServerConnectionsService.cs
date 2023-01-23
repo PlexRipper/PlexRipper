@@ -1,6 +1,7 @@
 using Application.Contracts;
 using AutoMapper;
 using Data.Contracts;
+using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
 

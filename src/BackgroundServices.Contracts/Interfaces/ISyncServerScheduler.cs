@@ -1,4 +1,7 @@
-namespace PlexRipper.Application;
+using FluentResults;
+using PlexRipper.Domain;
+
+namespace BackgroundServices.Contracts;
 
 public interface ISyncServerScheduler
 {

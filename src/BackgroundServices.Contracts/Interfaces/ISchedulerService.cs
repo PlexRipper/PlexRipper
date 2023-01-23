@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Application;
+﻿namespace BackgroundServices.Contracts;
 
 public interface ISchedulerService : IBaseScheduler
 {

@@ -17,7 +17,8 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
-        <Compile Include="..\Domain\GlobalUsings.cs" /> 
+        <Compile Include="..\Domain\GlobalUsings.cs" />
+        <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" /> 
     </ItemGroup>
 
     <ItemGroup>

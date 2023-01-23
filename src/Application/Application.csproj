@@ -17,11 +17,13 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
+        <ProjectReference Include="..\BackgroundServices.Contracts\BackgroundServices.Contracts.csproj" />
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
         <ProjectReference Include="..\Domain\Domain.csproj" />
         <Compile Include="..\Domain\GlobalUsings.cs" />
         <ProjectReference Include="..\DownloadManager.Contracts\DownloadManager.Contracts.csproj" />
         <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
+        <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

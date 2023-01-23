@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Application.Contracts;
 using Data.Contracts;
+using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
 

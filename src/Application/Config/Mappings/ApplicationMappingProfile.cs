@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
 

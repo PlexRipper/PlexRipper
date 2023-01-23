@@ -1,6 +1,8 @@
 ﻿using Application.Contracts;
+using FluentResults;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application;
+namespace PlexApi.Contracts;
 
 public interface IPlexApiService
 {

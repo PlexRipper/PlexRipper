@@ -2,6 +2,7 @@ using System.Collections.Specialized;
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
+using BackgroundServices.Contracts;
 using BackgroundServices.SyncServer;
 using Environment;
 using PlexRipper.Application;

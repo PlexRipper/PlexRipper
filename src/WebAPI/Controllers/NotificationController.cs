@@ -48,10 +48,10 @@ public class NotificationController : BaseController
 
     // POST api/<NotificationController>/clear
     [HttpPost("clear")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<int>))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> ClearAllNotifications()
     {
-        return ToActionResult(await _notificationsService.ClearAllNotifications());
+        return ToActionResult<int, int>(await _notificationsService.ClearAllNotifications());
     }
 }

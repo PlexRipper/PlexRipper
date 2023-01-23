@@ -11,5 +11,5 @@ public interface INotificationsService
     Task<Result> SendResult(Result result);
     Task<Result> SendResult<T>(Result<T> result);
 
-    Task<Result> ClearAllNotifications();
+    Task<Result<int>> ClearAllNotifications();
 }

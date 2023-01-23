@@ -1,6 +1,5 @@
 #region
 
-using EFCore.BulkExtensions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -83,7 +82,8 @@ public static class MockDatabase
             plexLibrariesToDb.AddRange(plexLibraries);
         }
 
-        await context.BulkInsertAsync(plexLibrariesToDb);
+        context.PlexLibraries.AddRange(plexLibrariesToDb);
+        await context.SaveChangesAsync();
         return context;
     }
 

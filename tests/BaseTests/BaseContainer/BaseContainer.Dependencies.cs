@@ -3,6 +3,7 @@
 using Application.Contracts;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
+using DownloadManager.Contracts;
 using Environment;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;

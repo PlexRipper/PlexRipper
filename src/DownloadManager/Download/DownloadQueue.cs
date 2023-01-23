@@ -2,6 +2,7 @@
 using System.Reactive.Subjects;
 using System.Threading.Channels;
 using Data.Contracts;
+using DownloadManager.Contracts;
 using PlexRipper.Application;
 
 namespace PlexRipper.DownloadManager;

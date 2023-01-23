@@ -1,4 +1,7 @@
-﻿namespace PlexRipper.Application;
+﻿using FluentResults;
+using PlexRipper.Domain;
+
+namespace DownloadManager.Contracts;
 
 public interface IDownloadCommands
 {

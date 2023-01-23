@@ -20,6 +20,7 @@
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
         <ProjectReference Include="..\Domain\Domain.csproj" />
         <Compile Include="..\Domain\GlobalUsings.cs" />
+        <ProjectReference Include="..\DownloadManager.Contracts\DownloadManager.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

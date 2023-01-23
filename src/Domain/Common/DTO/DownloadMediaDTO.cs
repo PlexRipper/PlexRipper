@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Domain;
 
-namespace Application.Contracts;
+namespace PlexRipper.Domain;
 
 public class DownloadMediaDTO
 {

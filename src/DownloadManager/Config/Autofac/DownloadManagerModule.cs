@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
+using DownloadManager.Contracts;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager.DownloadClient;

@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
+using DownloadManager.Contracts;
 
 namespace PlexRipper.Application;
 

@@ -1,6 +1,7 @@
-﻿using Application.Contracts;
+﻿using FluentResults;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application;
+namespace DownloadManager.Contracts;
 
 public interface IDownloadTaskFactory
 {

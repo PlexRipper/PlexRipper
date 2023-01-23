@@ -1,4 +1,5 @@
 using System.Net;
+using DownloadManager.Contracts;
 using Environment;
 using PlexRipper.Application;
 

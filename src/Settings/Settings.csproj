@@ -10,7 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="Autofac" Version="6.4.0" />
-        <PackageReference Include="System.Text.Json" Version="6.0.5" />
+        <PackageReference Include="System.Text.Json" Version="7.0.1" />
     </ItemGroup>
 
     <ItemGroup>

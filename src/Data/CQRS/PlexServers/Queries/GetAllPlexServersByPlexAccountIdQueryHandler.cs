@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Data.Contracts;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;

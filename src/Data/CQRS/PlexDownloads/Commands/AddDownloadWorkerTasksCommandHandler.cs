@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
 using PlexRipper.Application;
 using PlexRipper.Data.Common;
 

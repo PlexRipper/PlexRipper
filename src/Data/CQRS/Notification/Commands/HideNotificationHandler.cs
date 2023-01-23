@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Notifications;
 using PlexRipper.Data.Common;

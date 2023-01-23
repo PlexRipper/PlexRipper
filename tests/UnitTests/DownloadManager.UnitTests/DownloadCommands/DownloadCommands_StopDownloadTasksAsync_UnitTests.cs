@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Subjects;
+using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;

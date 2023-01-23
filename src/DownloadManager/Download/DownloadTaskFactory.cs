@@ -1,4 +1,5 @@
 using AutoMapper;
+using Data.Contracts;
 using PlexRipper.Application;
 
 namespace PlexRipper.DownloadManager;

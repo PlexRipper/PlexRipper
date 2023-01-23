@@ -1,3 +1,4 @@
+using Data.Contracts;
 using PlexRipper.Application;
 using PlexRipper.Data.PlexMovies.Commands;
 

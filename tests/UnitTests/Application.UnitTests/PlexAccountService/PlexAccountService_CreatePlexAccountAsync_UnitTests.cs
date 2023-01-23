@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application.PlexAccounts;
+﻿using Data.Contracts;
+using PlexRipper.Application.PlexAccounts;
 
 namespace PlexRipper.Application.UnitTests;
 

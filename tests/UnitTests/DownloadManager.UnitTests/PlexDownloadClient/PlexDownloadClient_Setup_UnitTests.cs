@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Data.Contracts;
 using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Moq.Language.Flow;

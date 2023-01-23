@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Data.Contracts;
 using EFCore.BulkExtensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;

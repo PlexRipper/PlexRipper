@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Application;
+﻿using Data.Contracts;
+
+namespace PlexRipper.Application;
 
 public class PlexMediaService : IPlexMediaService
 {

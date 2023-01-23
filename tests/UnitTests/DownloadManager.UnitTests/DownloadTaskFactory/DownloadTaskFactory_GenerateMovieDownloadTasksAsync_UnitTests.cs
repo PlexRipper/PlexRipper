@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application;
+﻿using Data.Contracts;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
 

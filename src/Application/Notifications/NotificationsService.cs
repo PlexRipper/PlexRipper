@@ -1,4 +1,4 @@
-﻿using PlexRipper.Application.Notifications.Queries;
+﻿using Data.Contracts;
 
 namespace PlexRipper.Application.Notifications;
 

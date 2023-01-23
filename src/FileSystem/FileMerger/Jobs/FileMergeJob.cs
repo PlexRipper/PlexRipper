@@ -5,7 +5,6 @@ using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Environment;
-using PlexRipper.Application;
 using PlexRipper.FileSystem.Common;
 using Quartz;
 

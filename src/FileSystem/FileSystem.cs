@@ -1,6 +1,5 @@
 ﻿using Environment;
 using FileSystem.Contracts;
-using PlexRipper.Application;
 
 namespace PlexRipper.FileSystem;
 

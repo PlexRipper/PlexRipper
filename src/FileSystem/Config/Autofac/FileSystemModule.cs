@@ -1,10 +1,9 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
 using Environment;
 using FileSystem.Contracts;
-using PlexRipper.Application;
 using PlexRipper.FileSystem.Common;
 using IFileSystem = FileSystem.Contracts.IFileSystem;
 using Module = Autofac.Module;

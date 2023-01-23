@@ -1,5 +1,4 @@
 ﻿using Data.Contracts;
-using PlexRipper.Application;
 using PlexRipper.BaseTests.Asserts;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;

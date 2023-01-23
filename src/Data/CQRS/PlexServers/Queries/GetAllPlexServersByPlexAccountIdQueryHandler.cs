@@ -3,7 +3,6 @@ using AutoMapper.QueryableExtensions;
 using Data.Contracts;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexServers;

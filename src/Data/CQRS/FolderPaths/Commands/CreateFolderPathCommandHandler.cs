@@ -1,6 +1,5 @@
 ﻿using Data.Contracts;
 using FluentValidation;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.FolderPaths;

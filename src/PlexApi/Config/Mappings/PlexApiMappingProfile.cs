@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using PlexRipper.Application;
 using PlexRipper.Domain.AutoMapper.ValueConverters;
 using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Api.Users.SignIn;

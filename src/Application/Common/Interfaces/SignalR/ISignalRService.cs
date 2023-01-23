@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application.BackgroundServices;
+﻿using Application.Contracts;
+using PlexRipper.Application.BackgroundServices;
 
 namespace PlexRipper.Application;
 

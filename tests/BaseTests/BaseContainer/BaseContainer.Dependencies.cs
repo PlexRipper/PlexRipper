@@ -1,5 +1,6 @@
 ﻿#region
 
+using Application.Contracts;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using Environment;

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Application.Contracts;
+using Newtonsoft.Json;
 
 namespace PlexRipper.Application;
 

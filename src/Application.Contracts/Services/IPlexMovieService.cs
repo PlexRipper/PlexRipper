@@ -1,3 +1,3 @@
-﻿namespace PlexRipper.Application;
+﻿namespace Application.Contracts;
 
 public interface IPlexMovieService : IPlexMediaService { }

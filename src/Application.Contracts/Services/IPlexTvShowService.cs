@@ -1,4 +1,7 @@
-﻿namespace PlexRipper.Application;
+﻿using FluentResults;
+using PlexRipper.Domain;
+
+namespace Application.Contracts;
 
 public interface IPlexTvShowService : IPlexMediaService
 {

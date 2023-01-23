@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Application;
+﻿using Application.Contracts;
+
+namespace PlexRipper.Application;
 
 public interface IDownloadTaskFactory
 {

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace PlexRipper.Application;
+namespace Application.Contracts;
 
 public class AuthPin
 {

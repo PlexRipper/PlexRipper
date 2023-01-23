@@ -1,3 +1,4 @@
+using Application.Contracts;
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application;

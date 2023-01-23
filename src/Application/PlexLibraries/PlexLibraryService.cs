@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Application.Contracts;
 using Data.Contracts;
 
 namespace PlexRipper.Application;

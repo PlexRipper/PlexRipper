@@ -1,6 +1,7 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Environment;

@@ -5,7 +5,7 @@ using Module = Autofac.Module;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// Used to register all dependancies in Autofac for the Application project.
+/// Used to register all dependencies in Autofac for the Application project.
 /// </summary>
 public class ApplicationModule : Module
 {

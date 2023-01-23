@@ -1,3 +1,4 @@
+using Application.Contracts;
 using AutoMapper;
 using Data.Contracts;
 using PlexRipper.Application;

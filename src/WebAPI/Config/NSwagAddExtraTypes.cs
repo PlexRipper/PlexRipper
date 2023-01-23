@@ -1,4 +1,5 @@
-﻿using NSwag.Generation.Processors;
+﻿using Application.Contracts;
+using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using PlexRipper.Application;
 using PlexRipper.Application.Enums;

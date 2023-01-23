@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using HttpClient.Contracts;
-using PlexRipper.PlexApi.Converters;
+using PlexApi.Contracts;
 using RestSharp;
 
 namespace PlexRipper.HttpClient;

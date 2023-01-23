@@ -9,7 +9,6 @@ public abstract class BaseScheduler
 
     protected abstract JobKey DefaultJobKey { get; }
 
-
     protected JobKey GetJobKey(int id)
     {
         return new JobKey($"{DefaultJobKey.Name}_{id}", DefaultJobKey.Group);
@@ -43,7 +42,6 @@ public abstract class BaseScheduler
     {
         return await _scheduler.Interrupt(key);
     }
-
 
     protected BaseScheduler(IScheduler scheduler)
     {

@@ -157,7 +157,6 @@ public class WebApiMappingProfile : Profile
             .ForMember(dto => dto.MediaData, entity => entity.MapFrom(x => x.EpisodeData));
     }
 
-
     private void SignalRMappings()
     {
         // InspectServerProgress -> InspectServerProgressDTO

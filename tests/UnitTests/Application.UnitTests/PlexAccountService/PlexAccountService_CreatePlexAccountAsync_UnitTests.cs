@@ -21,7 +21,8 @@ public class PlexAccountService_CreatePlexAccountAsync_UnitTests
     public PlexAccountService_CreatePlexAccountAsync_UnitTests(ITestOutputHelper output)
     {
         Log.SetupTestLogging(output);
-        _sut = new Mock<PlexAccountService>(MockBehavior.Strict, _iMediator.Object, _plexServerService.Object, _plexApiService.Object, _inspectServerScheduler.Object);
+        _sut = new Mock<PlexAccountService>(MockBehavior.Strict, _iMediator.Object, _plexServerService.Object, _plexApiService.Object,
+            _inspectServerScheduler.Object);
     }
 
     [Fact]

@@ -8,7 +8,6 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public int PlexAccountCount { get; set; } = 0;
 
-
     public int MovieCount { get; set; } = 0;
 
     public int TvShowCount { get; set; } = 0;

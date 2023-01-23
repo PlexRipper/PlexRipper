@@ -280,7 +280,6 @@ public class PlexLibraryService : IPlexLibraryService
         return tasksResult.Merge();
     }
 
-
     /// <inheritdoc/>
     public async Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId, Action<LibraryProgress> progressAction = null)
     {

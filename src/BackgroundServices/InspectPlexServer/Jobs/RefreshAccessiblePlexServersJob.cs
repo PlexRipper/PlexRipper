@@ -19,6 +19,7 @@ public class RefreshAccessiblePlexServersJob : IJob
         var dataMap = context.JobDetail.JobDataMap;
         var plexAccountId = dataMap.GetIntValue(PlexAccountIdParameter);
         Log.Debug($"Executing job: {nameof(RefreshAccessiblePlexServersJob)} for {nameof(plexAccountId)}: {plexAccountId}");
+
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try

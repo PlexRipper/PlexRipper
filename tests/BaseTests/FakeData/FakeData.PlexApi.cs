@@ -104,7 +104,6 @@ public static partial class FakeData
             .RuleFor(x => x.PlexServerId, _ => 0);
     }
 
-
     public static List<PlexAccountServer> GetPlexAccountServer(
         PlexAccount plexAccount,
         List<PlexServer> plexServers,

@@ -4,9 +4,7 @@ public class DownloadTaskCreationProgress
 {
     public decimal Percentage { get; set; }
 
-
     public int Current { get; set; }
-
 
     public int Total { get; set; }
 

@@ -6,7 +6,6 @@ public class PathSystem_SanitizeFileName_UnitTests : BaseUnitTest<PathSystem>
 {
     public PathSystem_SanitizeFileName_UnitTests(ITestOutputHelper output) : base(output) { }
 
-
     [Theory]
     [InlineData("Shaun het Schaap: De Film (2015)")]
     [InlineData("RANDOM MOVIE: # · GREAT")]

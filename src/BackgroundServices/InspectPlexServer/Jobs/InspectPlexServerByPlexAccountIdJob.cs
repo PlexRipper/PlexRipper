@@ -28,7 +28,6 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
         _syncServerScheduler = syncServerScheduler;
     }
 
-
     public async Task Execute(IJobExecutionContext context)
     {
         var dataMap = context.JobDetail.JobDataMap;

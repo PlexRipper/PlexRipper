@@ -45,7 +45,6 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
         return Result.Ok();
     }
 
-
     public async Task<Result> StopDownloadTaskJob(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
@@ -59,7 +58,6 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
 
         return Result.OkIf(await StopJob(jobKey), $"Failed to stop {nameof(DownloadTask)} with id {downloadTaskId}");
     }
-
 
     public async Task<bool> IsDownloading(int downloadTaskId)
     {

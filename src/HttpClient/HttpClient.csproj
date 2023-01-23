@@ -1,31 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <LangVersion>11</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <AssemblyName>PlexRipper.HttpClient</AssemblyName>
-        <RootNamespace>PlexRipper.HttpClient</RootNamespace>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>11</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyName>PlexRipper.HttpClient</AssemblyName>
+		<RootNamespace>PlexRipper.HttpClient</RootNamespace>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Autofac" Version="6.4.0" />
-        <PackageReference Include="Polly" Version="7.2.3" />
-        <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Autofac" Version="6.4.0"/>
+		<PackageReference Include="Polly" Version="7.2.3"/>
+		<PackageReference Include="Polly.Extensions.Http" Version="3.0.0"/>
+	</ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Domain\Domain.csproj" />
-        <ProjectReference Include="..\HttpClient.Contracts\HttpClient.Contracts.csproj" />
-        <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
-    </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Domain\Domain.csproj"/>
+		<ProjectReference Include="..\HttpClient.Contracts\HttpClient.Contracts.csproj"/>
+		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj"/>
+	</ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="..\Domain\GlobalUsings.cs" />
-    </ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\Domain\GlobalUsings.cs"/>
+	</ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Common" />
-    </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Common"/>
+	</ItemGroup>
 
 </Project>

@@ -8,11 +8,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Domain\Domain.csproj" />
+		<ProjectReference Include="..\Domain\Domain.csproj"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="RestSharp" Version="108.0.1" />
+		<PackageReference Include="RestSharp" Version="108.0.1"/>
 	</ItemGroup>
 
 </Project>

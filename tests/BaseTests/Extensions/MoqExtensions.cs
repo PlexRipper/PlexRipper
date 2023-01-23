@@ -23,7 +23,6 @@ public static class MoqExtensions
         return AutoMock.GetStrict(builder => builder.RegisterInstance(MapperSetup.CreateMapper()).As<IMapper>().SingleInstance());
     }
 
-
     public static IReturnsResult<T> ReturnOk<T>(this ISetup<T, Task<Result>> mock) where T : class
     {
         return mock.ReturnsAsync(Result.Ok());

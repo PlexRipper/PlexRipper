@@ -8,12 +8,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Domain\Domain.csproj" />
-	  <ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
+		<ProjectReference Include="..\Domain\Domain.csproj"/>
+		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="DTO\WebApi" />
+		<Folder Include="DTO\WebApi"/>
 	</ItemGroup>
 
 </Project>

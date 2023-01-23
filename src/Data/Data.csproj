@@ -1,42 +1,42 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <LangVersion>11</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>PlexRipper.Data</RootNamespace>
-        <AssemblyName>PlexRipper.Data</AssemblyName>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>11</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>PlexRipper.Data</RootNamespace>
+		<AssemblyName>PlexRipper.Data</AssemblyName>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite" Version="0.4.0" />
-        <PackageReference Include="Autofac" Version="6.4.0" />
-        <PackageReference Include="EFCore.BulkExtensions.SQLite" Version="7.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.2" />
-        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.2">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.1.6" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.3" />
-        <PackageReference Include="RestSharp" Version="108.0.1" />
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite" Version="0.4.0"/>
+		<PackageReference Include="Autofac" Version="6.4.0"/>
+		<PackageReference Include="EFCore.BulkExtensions.SQLite" Version="7.0.0"/>
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.2"/>
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.2"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.2"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.2">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.2"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.2"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.1.6"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.3"/>
+		<PackageReference Include="RestSharp" Version="108.0.1"/>
+	</ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
-    </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj"/>
+	</ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="CQRS\PlexAuthentication\Commands" />
-        <Folder Include="Migrations" />
-    </ItemGroup>
+	<ItemGroup>
+		<Folder Include="CQRS\PlexAuthentication\Commands"/>
+		<Folder Include="Migrations"/>
+	</ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="..\Domain\GlobalUsings.cs" />
-    </ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\Domain\GlobalUsings.cs"/>
+	</ItemGroup>
 
 </Project>

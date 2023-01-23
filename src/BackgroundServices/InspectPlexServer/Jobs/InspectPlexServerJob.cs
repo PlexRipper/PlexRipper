@@ -14,12 +14,12 @@ public class InspectPlexServerJob : IJob
         _plexServerService = plexServerService;
     }
 
-
     public async Task Execute(IJobExecutionContext context)
     {
         var dataMap = context.JobDetail.JobDataMap;
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
         Log.Debug($"Executing job: {nameof(InspectPlexServerJob)} for {nameof(plexServerId)}: {plexServerId}");
+
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try

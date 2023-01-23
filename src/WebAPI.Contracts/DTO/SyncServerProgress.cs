@@ -13,12 +13,9 @@ public class SyncServerProgress
         Percentage = DataFormat.GetPercentage(LibraryProgresses.Sum(x => x.Received), LibraryProgresses.Sum(x => x.Total));
     }
 
-
     public int Id { get; set; }
 
-
     public decimal Percentage { get; set; }
-
 
     public List<LibraryProgress> LibraryProgresses { get; set; }
 }

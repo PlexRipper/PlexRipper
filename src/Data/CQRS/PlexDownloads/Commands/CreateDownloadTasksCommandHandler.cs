@@ -76,7 +76,6 @@ public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<Cr
         return Result.Ok();
     }
 
-
     private void InsertDownloadTasks(List<DownloadTask> downloadTasks)
     {
         downloadTasks.ForEach(x =>

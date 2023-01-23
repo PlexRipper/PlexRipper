@@ -21,11 +21,11 @@ public class GetDownloadTaskByIdQueryHandler : BaseHandler, IRequestHandler<GetD
     {
         var query =
             DownloadTasksQueryable.AsTracking()
-            .Include(x => x.PlexServer)
-            .Include(x => x.PlexLibrary)
-            .Include(x => x.DestinationFolder)
-            .Include(x => x.DownloadFolder)
-            .Include(x => x.DownloadWorkerTasks);
+                .Include(x => x.PlexServer)
+                .Include(x => x.PlexLibrary)
+                .Include(x => x.DestinationFolder)
+                .Include(x => x.DownloadFolder)
+                .Include(x => x.DownloadWorkerTasks);
 
 // @formatter:off
         if (request.IncludeChildren)

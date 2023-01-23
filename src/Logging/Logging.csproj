@@ -1,22 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <LangVersion>11</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>11</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Serilog" Version="2.11.0"/>
-        <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1"/>
-        <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0"/>
-        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0"/>
-        <PackageReference Include="Serilog.Sinks.TestCorrelator" Version="3.2.0"/>
-        <PackageReference Include="Serilog.Sinks.XUnit" Version="3.0.3"/>
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Serilog" Version="2.11.0"/>
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1"/>
+		<PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0"/>
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0"/>
+		<PackageReference Include="Serilog.Sinks.TestCorrelator" Version="3.2.0"/>
+		<PackageReference Include="Serilog.Sinks.XUnit" Version="3.0.3"/>
+	</ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Environment\Environment.csproj"/>
-    </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Environment\Environment.csproj"/>
+	</ItemGroup>
 
 </Project>

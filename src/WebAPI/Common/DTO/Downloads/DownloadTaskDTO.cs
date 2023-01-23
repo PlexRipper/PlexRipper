@@ -16,7 +16,6 @@ public class DownloadTaskDTO
 
     public string FullTitle { get; set; }
 
-
     public DownloadStatus Status { get; set; }
 
     /// <summary>
@@ -24,7 +23,6 @@ public class DownloadTaskDTO
     /// </summary>
 
     public string FileLocationUrl { get; set; }
-
 
     public string FileName { get; set; }
 
@@ -34,7 +32,6 @@ public class DownloadTaskDTO
 
     public PlexMediaType MediaType { get; set; }
 
-
     public DownloadTaskType DownloadTaskType { get; set; }
 
     /// <summary>
@@ -43,21 +40,15 @@ public class DownloadTaskDTO
 
     public int Key { get; set; }
 
-
     public int DownloadSpeed { get; set; }
-
 
     public long DataReceived { get; set; }
 
-
     public long DataTotal { get; set; }
-
 
     public decimal Percentage { get; set; }
 
-
     public string DownloadDirectory { get; set; }
-
 
     public string DestinationDirectory { get; set; }
 
@@ -71,20 +62,15 @@ public class DownloadTaskDTO
 
     public int PlexServerId { get; set; }
 
-
     public int PlexLibraryId { get; set; }
-
 
     public int? ParentId { get; set; }
 
     #endregion
 
-
     public long TimeRemaining { get; set; }
 
-
     public string DownloadUrl { get; set; }
-
 
     public string Quality { get; set; }
 

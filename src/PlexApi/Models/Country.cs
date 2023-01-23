@@ -8,6 +8,5 @@ public class Country
     [JsonConverter(typeof(IntValueConverter))]
     public int Id { get; set; }
 
-
     public string Tag { get; set; }
 }

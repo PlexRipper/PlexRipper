@@ -55,7 +55,6 @@ public class PlexAccountService : IPlexAccountService
         return plexSignInResult;
     }
 
-
     /// <inheritdoc/>
     public async Task<Result> RefreshPlexAccount(int plexAccountId = 0)
     {
@@ -77,7 +76,6 @@ public class PlexAccountService : IPlexAccountService
 
         return Result.Ok();
     }
-
 
     /// <summary>
     /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
@@ -104,7 +102,6 @@ public class PlexAccountService : IPlexAccountService
         return Result.Ok(true);
     }
 
-
     #region Authentication
 
     private string GeneratePlexAccountClientId()
@@ -128,7 +125,6 @@ public class PlexAccountService : IPlexAccountService
     }
 
     #endregion
-
 
     #region CRUD
 

@@ -258,7 +258,6 @@ public class PlexApiService : IPlexApiService
 
     #endregion
 
-
     #region Authentication
 
     #region PlexSignIn
@@ -298,7 +297,6 @@ public class PlexApiService : IPlexApiService
     }
 
     #endregion
-
 
     private async Task<Result<string>> GetPlexApiTokenAsync(PlexAccount plexAccount)
     {

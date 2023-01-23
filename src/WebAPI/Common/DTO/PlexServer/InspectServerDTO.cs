@@ -6,7 +6,6 @@ public class InspectServerDTO
 {
     public int PlexAccountId { get; set; }
 
-
     public List<int> PlexServerIds { get; set; }
 }
 

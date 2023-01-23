@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <LangVersion>11</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <AssemblyName>Environment</AssemblyName>
-        <RootNamespace>Environment</RootNamespace>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>11</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyName>Environment</AssemblyName>
+		<RootNamespace>Environment</RootNamespace>
+	</PropertyGroup>
 
 </Project>

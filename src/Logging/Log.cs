@@ -4,6 +4,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using Xunit.Abstractions;
+
 // ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
 namespace Logging;

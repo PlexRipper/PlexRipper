@@ -8,8 +8,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\BackgroundServices.Contracts\BackgroundServices.Contracts.csproj" />
-	  <ProjectReference Include="..\Domain\Domain.csproj" />
+		<ProjectReference Include="..\BackgroundServices.Contracts\BackgroundServices.Contracts.csproj"/>
+		<ProjectReference Include="..\Domain\Domain.csproj"/>
 	</ItemGroup>
 
 </Project>

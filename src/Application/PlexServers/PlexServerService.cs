@@ -33,7 +33,6 @@ public class PlexServerService : IPlexServerService
         _plexLibraryService = plexLibraryService;
     }
 
-
     #region InspectPlexServers
 
     /// <summary>

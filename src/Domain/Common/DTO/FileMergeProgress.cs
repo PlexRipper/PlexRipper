@@ -14,12 +14,9 @@ public class FileMergeProgress
 
     public int DownloadTaskId { get; set; }
 
-
     public long DataTransferred { get; set; }
 
-
     public long DataTotal { get; set; }
-
 
     public decimal Percentage => DataFormat.GetPercentage(DataTransferred, DataTotal);
 
@@ -29,7 +26,6 @@ public class FileMergeProgress
 
     public int TransferSpeed { get; set; }
 
-
     public string TransferSpeedFormatted => DataFormat.FormatSpeedString(TransferSpeed);
 
     /// <summary>
@@ -38,12 +34,9 @@ public class FileMergeProgress
 
     public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, TransferSpeed);
 
-
     public long BytesRemaining => DataTotal - DataTransferred;
 
-
     public int PlexServerId { get; set; }
-
 
     public int PlexLibraryId { get; set; }
 }

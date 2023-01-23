@@ -78,7 +78,6 @@ public static class RestSharpExtensions
         return ToResponse<T>(policyResult);
     }
 
-
     private static RestResponse<T> ToResponse<T>(PolicyResult<RestResponse> response)
     {
         var isSuccessful = response.Outcome == OutcomeType.Successful;

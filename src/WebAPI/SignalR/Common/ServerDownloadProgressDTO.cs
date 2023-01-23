@@ -10,6 +10,5 @@ public class ServerDownloadProgressDTO
 
     public int Id { get; set; }
 
-
     public List<DownloadProgressDTO> Downloads { get; set; }
 }

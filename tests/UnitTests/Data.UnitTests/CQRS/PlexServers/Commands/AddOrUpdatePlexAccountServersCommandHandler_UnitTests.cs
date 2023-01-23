@@ -47,7 +47,6 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
                 .ShouldBeTrue();
     }
 
-
     [Fact]
     public async Task ShouldUpdateAndDeletePlexAccountServerAssociations_WhenTheyAreNotGiven()
     {

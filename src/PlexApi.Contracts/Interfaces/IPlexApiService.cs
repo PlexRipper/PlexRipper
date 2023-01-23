@@ -65,7 +65,6 @@ public interface IPlexApiService
 
     #endregion
 
-
     /// <summary>
     /// Fetches all the <see cref="PlexTvShowSeason">Plex TvShow Seasons</see> from the Plex api with the given <see cref="PlexLibrary"/>.
     /// </summary>
@@ -83,7 +82,6 @@ public interface IPlexApiService
     Task<Result<AuthPin>> Get2FAPin(string clientId);
 
     Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
-
 
     Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId = 0);
 }

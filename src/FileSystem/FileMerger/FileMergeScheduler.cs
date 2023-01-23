@@ -61,7 +61,6 @@ public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
         return Result.Ok();
     }
 
-
     public async Task<Result> StopFileMergeJob(int fileTaskId)
     {
         if (fileTaskId <= 0)

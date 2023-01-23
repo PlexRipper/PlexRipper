@@ -58,7 +58,6 @@ public partial class FakePlexApiData
             .FinishWith((_, connection) => { connection.Uri = new UriBuilder(connection.Protocol, connection.Address, connection.Port).ToString(); });
     }
 
-
     public static PlexErrorsResponseDTO GetFailedServerResourceResponse()
     {
         return new PlexErrorsResponseDTO()

@@ -6,7 +6,6 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
 {
     public DownloadQueue_GetNextDownloadTask_UnitTests(ITestOutputHelper output) : base(output) { }
 
-
     private List<DownloadTask> TestDownloadTasks(int count)
     {
         var downloadTasks = new List<DownloadTask>();

@@ -16,7 +16,10 @@ public class MockSignalRService : ISignalRService
 
     public void SendDownloadTaskUpdate(DownloadTask downloadTask) { }
 
-    public void SendFileMergeProgressUpdate(FileMergeProgress fileMergeProgress) { }
+    public Task SendFileMergeProgressUpdate(FileMergeProgress fileMergeProgress)
+    {
+        return Task.CompletedTask;
+    }
 
     public Task SendNotification(Notification notification)
     {

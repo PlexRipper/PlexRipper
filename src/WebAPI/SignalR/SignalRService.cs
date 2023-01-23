@@ -138,7 +138,7 @@ public class SignalRService : ISignalRService
     }
 
     /// <inheritdoc/>
-    public void SendFileMergeProgressUpdate(FileMergeProgress fileMergeProgress)
+    public async Task SendFileMergeProgressUpdate(FileMergeProgress fileMergeProgress)
     {
         if (_progressHub?.Clients?.All == null)
         {
@@ -146,7 +146,7 @@ public class SignalRService : ISignalRService
             return;
         }
 
-        Task.Run(() => _progressHub.Clients.All.SendAsync(MessageTypes.FileMergeProgress.ToString(), fileMergeProgress));
+        await _progressHub.Clients.All.SendAsync(MessageTypes.FileMergeProgress.ToString(), fileMergeProgress);
     }
 
     public void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress)

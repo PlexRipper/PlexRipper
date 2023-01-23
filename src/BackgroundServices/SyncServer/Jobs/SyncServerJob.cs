@@ -1,6 +1,5 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
-using PlexRipper.Application;
 using Quartz;
 using WebAPI.Contracts;
 

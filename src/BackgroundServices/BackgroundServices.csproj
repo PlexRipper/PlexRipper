@@ -7,8 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Application\Application.csproj" />
+        <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
         <ProjectReference Include="..\BackgroundServices.Contracts\BackgroundServices.Contracts.csproj" />
+        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,6 +19,11 @@
     <ItemGroup>
       <Folder Include="Common\DTO" />
       <Folder Include="Common\Enum" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Autofac" Version="6.4.0" />
+      <PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
     </ItemGroup>
 
 </Project>

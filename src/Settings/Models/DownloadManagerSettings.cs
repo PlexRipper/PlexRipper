@@ -1,5 +1,4 @@
-﻿using PlexRipper.Application;
-using Settings.Contracts;
+﻿using Settings.Contracts;
 
 namespace PlexRipper.Settings.Models;
 

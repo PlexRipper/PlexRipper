@@ -1,7 +1,6 @@
 ﻿using Application.Contracts;
 using BackgroundServices.Contracts;
 using Data.Contracts;
-using PlexRipper.Application;
 using Quartz;
 
 namespace BackgroundServices.InspectPlexServer;

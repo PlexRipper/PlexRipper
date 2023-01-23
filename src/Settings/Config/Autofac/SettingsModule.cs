@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Autofac;
-using PlexRipper.Application;
 using Settings.Contracts;
 using Module = Autofac.Module;
 

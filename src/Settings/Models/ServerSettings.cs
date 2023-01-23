@@ -1,5 +1,4 @@
-﻿using PlexRipper.Application;
-using PlexRipper.Domain.DownloadManager;
+﻿using PlexRipper.Domain.DownloadManager;
 using Settings.Contracts;
 
 namespace PlexRipper.Settings.Models;

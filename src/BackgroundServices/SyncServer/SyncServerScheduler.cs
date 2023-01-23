@@ -1,5 +1,4 @@
 using BackgroundServices.Contracts;
-using PlexRipper.Application;
 using Quartz;
 
 namespace BackgroundServices.SyncServer;

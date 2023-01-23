@@ -35,7 +35,7 @@ public class DownloadTask : BaseEntity
     public long DataReceived { get; set; }
 
     /// <summary>
-    /// The total size of the file in bytes
+    /// The total size of the file in bytes.
     /// </summary>
     [Column(Order = 6)]
     public long DataTotal { get; set; }

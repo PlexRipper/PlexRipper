@@ -166,7 +166,7 @@ public class PlexLibraryService : IPlexLibraryService
 
         var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
         if (createResult.IsFailed)
-            return createResult.ToResult();
+            return createResult;
 
         SendProgress(3, 3);
         return Result.Ok();

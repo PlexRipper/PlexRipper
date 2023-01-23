@@ -29,7 +29,7 @@ public class UpdateFolderPathCommandHandler : BaseHandler, IRequestHandler<Updat
             return ResultExtensions.EntityNotFound(nameof(FolderPath), command.FolderPath.Id);
 
         _dbContext.Entry(folderPath).CurrentValues.SetValues(command.FolderPath);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await SaveChangesAsync(cancellationToken);
 
         return Result.Ok(folderPath);
     }

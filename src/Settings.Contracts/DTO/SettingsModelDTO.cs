@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace PlexRipper.WebAPI.Common.DTO;
+namespace Settings.Contracts;
 
 public class SettingsModelDTO
 {

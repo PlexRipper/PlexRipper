@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Application;
-using Settings.Contracts;
 
-namespace PlexRipper.WebAPI.Common.DTO;
+namespace Settings.Contracts;
 
 public class DownloadManagerSettingsDTO : IDownloadManagerSettings
 {

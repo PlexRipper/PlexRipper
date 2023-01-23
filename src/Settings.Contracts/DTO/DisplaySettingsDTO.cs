@@ -1,8 +1,7 @@
 ﻿using Newtonsoft.Json;
-using PlexRipper.Application;
-using Settings.Contracts;
+using PlexRipper.Domain;
 
-namespace PlexRipper.WebAPI.Common.DTO;
+namespace Settings.Contracts;
 
 public class DisplaySettingsDTO : IDisplaySettings
 {

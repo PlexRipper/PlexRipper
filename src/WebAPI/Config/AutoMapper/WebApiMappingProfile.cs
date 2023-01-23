@@ -1,14 +1,12 @@
-using AutoMapper;
+﻿using AutoMapper;
 using BackgroundServices.Contracts;
 using PlexRipper.DownloadManager;
-using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
-using Settings.Contracts;
 using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI;
@@ -52,7 +50,6 @@ public class WebApiMappingProfile : Profile
         PlexMediaMappings();
         PlexMovieMappings();
         PlexTvShowMappings();
-        SettingsMappings();
         SignalRMappings();
     }
 
@@ -71,18 +68,9 @@ public class WebApiMappingProfile : Profile
         CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
             .ForMember(dto => dto.PlexServerAccess, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));
 
-        CreateMap<List<PlexServer>, List<PlexServerAccessDTO>>(MemberList.Destination)
-            .ConstructUsing((plexServers, context) =>
-            {
-                return plexServers.ConvertAll(x =>
-                {
-                    return new PlexServerAccessDTO
-                    {
-                        PlexServerId = x.Id,
-                        PlexLibraryIds = x.PlexLibraries.Select(y => y.Id).ToList(),
-                    };
-                });
-            });
+        CreateMap<PlexServer, PlexServerAccessDTO>(MemberList.Destination)
+            .ForMember(dto => dto.PlexServerId, opt => opt.MapFrom(x => x.Id))
+            .ForMember(dto => dto.PlexLibraryIds, opt => opt.MapFrom(x => x.PlexLibraries.Select(y => y.Id).ToList()));
     }
 
     private void PlexServerMappings()
@@ -110,23 +98,8 @@ public class WebApiMappingProfile : Profile
             .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
             .ForMember(dto => dto.Actions, opt => opt.MapFrom(entity => DownloadTaskActions.Convert(entity.DownloadStatus)));
 
-        CreateMap<List<DownloadTask>, List<ServerDownloadProgressDTO>>(MemberList.None)
-            .ConstructUsing((list, context) =>
-            {
-                var serverDownloads = new List<ServerDownloadProgressDTO>();
-                foreach (var serverId in list.Select(x => x.PlexServerId).Distinct())
-                {
-                    var downloadTasks = list.Where(x => x.PlexServerId == serverId).ToList();
-                    var downloadTaskDTO = context.Mapper.Map<List<DownloadProgressDTO>>(downloadTasks);
-                    serverDownloads.Add(new ServerDownloadProgressDTO
-                    {
-                        Id = serverId,
-                        Downloads = downloadTaskDTO,
-                    });
-                }
-
-                return serverDownloads;
-            });
+        CreateMap<List<DownloadTask>, List<ServerDownloadProgressDTO>>(MemberList.Destination)
+            .ConvertUsing<ListDownloadTaskToListServerDownloadProgressDTOConverter>();
     }
 
     private void PlexMediaMappings()
@@ -184,34 +157,6 @@ public class WebApiMappingProfile : Profile
             .ForMember(dto => dto.MediaData, entity => entity.MapFrom(x => x.EpisodeData));
     }
 
-    private void SettingsMappings()
-    {
-        CreateMap<SettingsModelDTO, SettingsModel>().ReverseMap();
-
-        CreateMap<GeneralSettingsDTO, GeneralSettings>().ReverseMap();
-        CreateMap<ConfirmationSettingsDTO, ConfirmationSettings>().ReverseMap();
-        CreateMap<DateTimeSettingsDTO, DateTimeSettings>().ReverseMap();
-        CreateMap<DisplaySettingsDTO, DisplaySettings>().ReverseMap();
-        CreateMap<DownloadManagerSettingsDTO, DownloadManagerSettings>().ReverseMap();
-        CreateMap<LanguageSettingsDTO, LanguageSettings>().ReverseMap();
-        CreateMap<ServerSettingsDTO, ServerSettings>().ReverseMap();
-
-        CreateMap<GeneralSettingsDTO, IGeneralSettings>().ReverseMap();
-        CreateMap<ConfirmationSettingsDTO, IConfirmationSettings>().ReverseMap();
-        CreateMap<DateTimeSettingsDTO, IDateTimeSettings>().ReverseMap();
-        CreateMap<DisplaySettingsDTO, IDisplaySettings>().ReverseMap();
-        CreateMap<DownloadManagerSettingsDTO, IDownloadManagerSettings>().ReverseMap();
-        CreateMap<LanguageSettingsDTO, ILanguageSettings>().ReverseMap();
-        CreateMap<ServerSettingsDTO, IServerSettings>().ReverseMap();
-
-        CreateMap<GeneralSettings, IGeneralSettings>().ReverseMap();
-        CreateMap<ConfirmationSettings, IConfirmationSettings>().ReverseMap();
-        CreateMap<DateTimeSettings, IDateTimeSettings>().ReverseMap();
-        CreateMap<DisplaySettings, IDisplaySettings>().ReverseMap();
-        CreateMap<DownloadManagerSettings, IDownloadManagerSettings>().ReverseMap();
-        CreateMap<LanguageSettings, ILanguageSettings>().ReverseMap();
-        CreateMap<ServerSettings, IServerSettings>().ReverseMap();
-    }
 
     private void SignalRMappings()
     {

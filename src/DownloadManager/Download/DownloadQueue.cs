@@ -1,8 +1,9 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Channels;
+using BackgroundServices.Contracts;
 using Data.Contracts;
-using PlexRipper.Application;
+using DownloadManager.Contracts;
 
 namespace PlexRipper.DownloadManager;
 

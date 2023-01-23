@@ -1,7 +1,6 @@
-using PlexRipper.Application;
-using PlexRipper.Application.BackgroundServices;
-using PlexRipper.Application.Enums;
+using BackgroundServices.Contracts;
 using Quartz;
+using WebAPI.Contracts;
 
 namespace BackgroundServices.Listeners;
 

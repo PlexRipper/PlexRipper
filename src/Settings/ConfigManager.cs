@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
 using Environment;
-using PlexRipper.Application;
+using FileSystem.Contracts;
 using PlexRipper.Domain.Config;
+using Settings.Contracts;
 
 namespace PlexRipper.Settings;
 

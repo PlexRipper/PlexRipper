@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using DownloadManager.Contracts;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using Quartz;

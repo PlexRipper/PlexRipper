@@ -1,6 +1,10 @@
+using Application.Contracts;
 using AutoMapper;
 using Data.Contracts;
-using PlexRipper.Application;
+using DownloadManager.Contracts;
+using FileSystem.Contracts;
+using PlexApi.Contracts;
+using Settings.Contracts;
 
 namespace PlexRipper.DownloadManager;
 

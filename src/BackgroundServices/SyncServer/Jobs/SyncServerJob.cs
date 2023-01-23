@@ -1,6 +1,7 @@
-﻿using Data.Contracts;
-using PlexRipper.Application;
+﻿using Application.Contracts;
+using Data.Contracts;
 using Quartz;
+using WebAPI.Contracts;
 
 namespace BackgroundServices.SyncServer;
 

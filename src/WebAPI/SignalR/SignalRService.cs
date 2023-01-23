@@ -1,11 +1,13 @@
+using Application.Contracts;
 using AutoMapper;
+using BackgroundServices.Contracts;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.Application;
-using PlexRipper.Application.BackgroundServices;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
 using PlexRipper.WebAPI.SignalR.Hubs;
+using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI.SignalR;
 

@@ -1,6 +1,8 @@
-﻿using Data.Contracts;
+﻿using Application.Contracts;
+using BackgroundServices.Contracts;
+using Data.Contracts;
 using DownloadManager.Contracts;
-using PlexRipper.Application;
+using FileSystem.Contracts;
 
 namespace PlexRipper.DownloadManager;
 

@@ -1,9 +1,11 @@
-﻿using AutoMapper;
+﻿using Application.Contracts;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
 using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
+using Settings.Contracts;
 
 namespace PlexRipper.WebAPI.Controllers;
 

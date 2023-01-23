@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using PlexApi.Contracts;
 using PlexRipper.PlexApi.Converters;
 using PlexRipper.PlexApi.Helpers;
 

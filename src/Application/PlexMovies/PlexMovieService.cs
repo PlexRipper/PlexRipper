@@ -1,4 +1,7 @@
-﻿namespace PlexRipper.Application;
+﻿using Application.Contracts;
+using PlexApi.Contracts;
+
+namespace PlexRipper.Application;
 
 public class PlexMovieService : PlexMediaService, IPlexMovieService
 {

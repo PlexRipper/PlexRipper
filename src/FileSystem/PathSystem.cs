@@ -1,5 +1,5 @@
 ﻿using System.IO.Abstractions;
-using PlexRipper.Application;
+using FileSystem.Contracts;
 
 namespace PlexRipper.FileSystem;
 

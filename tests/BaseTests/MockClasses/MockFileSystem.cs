@@ -1,4 +1,5 @@
-﻿using PlexRipper.Application;
+﻿using FileSystem.Contracts;
+using PlexRipper.Application;
 
 namespace PlexRipper.BaseTests;
 

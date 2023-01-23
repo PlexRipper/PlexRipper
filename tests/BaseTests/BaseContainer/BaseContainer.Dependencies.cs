@@ -1,15 +1,22 @@
 ﻿#region
 
+using Application.Contracts;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
+using BackgroundServices.Contracts;
+using DownloadManager.Contracts;
 using Environment;
+using FileSystem.Contracts;
+using HttpClient.Contracts;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using PlexApi.Contracts;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
 using PlexRipper.HttpClient;
 using PlexRipper.WebAPI;
+using Settings.Contracts;
 
 #endregion
 

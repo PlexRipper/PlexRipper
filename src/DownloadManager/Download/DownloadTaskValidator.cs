@@ -1,6 +1,6 @@
-﻿using Data.Contracts;
+﻿using Application.Contracts;
+using Data.Contracts;
 using FluentValidation;
-using PlexRipper.Application;
 
 namespace PlexRipper.DownloadManager;
 

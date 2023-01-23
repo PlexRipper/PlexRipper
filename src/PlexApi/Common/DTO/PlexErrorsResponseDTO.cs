@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using PlexRipper.Application;
+using Application.Contracts;
 
 namespace PlexRipper.PlexApi;
 

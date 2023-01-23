@@ -2,6 +2,7 @@
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.FileSystem.Common;
+using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
 

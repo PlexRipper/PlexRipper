@@ -1,12 +1,15 @@
 using System.Collections.Specialized;
 using Autofac;
 using Autofac.Extras.Quartz;
+using FileSystem.Contracts;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Domain.Autofac;
 using PlexRipper.WebAPI.Common;
+using Settings.Contracts;
+using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;
 

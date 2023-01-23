@@ -1,4 +1,5 @@
 ﻿using System.Net.Mime;
+using Application.Contracts;
 using AutoMapper;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;

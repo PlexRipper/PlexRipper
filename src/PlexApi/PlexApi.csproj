@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Autofac" Version="6.4.0" />
         <PackageReference Include="Polly" Version="7.2.3" />
         <PackageReference Include="RestSharp" Version="108.0.1" />
         <PackageReference Include="RestSharp.Serializers.SystemTextJson" Version="106.15.0" />
@@ -16,8 +17,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Application\Application.csproj" />
-        <Compile Include="..\Domain\GlobalUsings.cs" /> 
+        <Compile Include="..\Domain\GlobalUsings.cs" />
+        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
+        <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" /> 
     </ItemGroup>
 
     <ItemGroup>

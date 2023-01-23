@@ -1,4 +1,5 @@
 ﻿using PlexRipper.Application;
+using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
 

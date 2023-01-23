@@ -1,6 +1,5 @@
 using DownloadManager.Contracts;
 using FileSystem.Contracts;
-using PlexRipper.Application;
 
 namespace PlexRipper.DownloadManager;
 

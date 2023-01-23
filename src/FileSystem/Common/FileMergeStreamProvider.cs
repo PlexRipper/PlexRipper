@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Subjects;
-using PlexRipper.Application;
+using Application.Contracts;
+using FileSystem.Contracts;
 
 namespace PlexRipper.FileSystem.Common;
 

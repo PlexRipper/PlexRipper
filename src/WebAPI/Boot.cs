@@ -1,6 +1,9 @@
 using System.Net;
+using BackgroundServices.Contracts;
+using DownloadManager.Contracts;
 using Environment;
 using PlexRipper.Application;
+using Settings.Contracts;
 
 namespace PlexRipper.WebAPI;
 

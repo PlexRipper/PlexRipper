@@ -1,5 +1,5 @@
+using PlexRipper.PlexApi;
 using PlexRipper.PlexApi.Api;
-using PlexRipper.PlexApi.Common;
 
 namespace BaseTests.IntegrationTests.Setup;
 

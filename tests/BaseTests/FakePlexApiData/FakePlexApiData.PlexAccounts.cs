@@ -1,6 +1,6 @@
 ﻿using Bogus;
+using PlexRipper.PlexApi;
 using PlexRipper.PlexApi.Api.Users.SignIn;
-using PlexRipper.PlexApi.Common;
 
 namespace PlexRipper.BaseTests;
 

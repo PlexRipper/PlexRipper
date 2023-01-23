@@ -1,4 +1,4 @@
-namespace PlexRipper.PlexApi.Common;
+namespace PlexRipper.PlexApi;
 
 public static class PlexApiPaths
 {

@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
 using JustEat.HttpClientInterception;
-using PlexRipper.PlexApi.Common;
+using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;
 

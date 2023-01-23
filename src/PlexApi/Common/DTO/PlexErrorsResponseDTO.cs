@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using PlexRipper.Application;
 
-namespace PlexRipper.PlexApi.Common;
+namespace PlexRipper.PlexApi;
 
 public class PlexErrorsResponseDTO
 {

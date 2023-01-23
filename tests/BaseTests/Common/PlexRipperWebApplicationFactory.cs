@@ -4,7 +4,6 @@ using Autofac.Extras.Quartz;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
-using PlexRipper.BaseTests.Config;
 using PlexRipper.Data;
 using PlexRipper.Domain.Autofac;
 using PlexRipper.WebAPI.Common;

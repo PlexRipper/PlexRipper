@@ -3,7 +3,6 @@ using System.Reactive.Subjects;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
-using Moq.Language.Flow;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.DownloadManager.DownloadClient;
@@ -87,6 +86,7 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
         _sut.Start();
 
         await Task.Delay(1000);
+
         // Assert
         mock.Mock<IMediator>().Verify(x => x.Send(It.IsAny<UpdateDownloadTasksByIdCommand>(), It.IsAny<CancellationToken>()));
 

@@ -1,7 +1,5 @@
 using PlexRipper.Application;
 using PlexRipper.PlexApi.Api.Users.SignIn;
-using PlexRipper.PlexApi.Common;
-using PlexRipper.PlexApi.Common.DTO;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
 using RestSharp;

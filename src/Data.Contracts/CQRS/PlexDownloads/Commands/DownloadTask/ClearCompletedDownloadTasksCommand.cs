@@ -7,7 +7,7 @@ public class ClearCompletedDownloadTasksCommand : IRequest<Result>
 {
     public List<int> DownloadTaskIds { get; }
 
-    public ClearCompletedDownloadTasksCommand(List<int> downloadTaskIds = null)
+    public ClearCompletedDownloadTasksCommand(List<int> downloadTaskIds)
     {
         DownloadTaskIds = downloadTaskIds;
     }

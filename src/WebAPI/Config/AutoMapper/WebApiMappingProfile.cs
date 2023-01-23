@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using BackgroundServices.Contracts;
 using PlexRipper.Application;
-using PlexRipper.Application.BackgroundServices;
 using PlexRipper.DownloadManager;
 using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common;
@@ -10,6 +10,7 @@ using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
 using Settings.Contracts;
+using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI.Config;
 

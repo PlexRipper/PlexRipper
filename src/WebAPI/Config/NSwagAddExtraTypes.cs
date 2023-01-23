@@ -1,12 +1,13 @@
 ﻿using Application.Contracts;
+using BackgroundServices.Contracts;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using PlexRipper.Application;
-using PlexRipper.Application.Enums;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
+using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI.Config;
 

@@ -1,6 +1,4 @@
-using PlexRipper.Application.Enums;
-
-namespace PlexRipper.Application.BackgroundServices;
+namespace BackgroundServices.Contracts;
 
 public class JobStatusUpdate
 {

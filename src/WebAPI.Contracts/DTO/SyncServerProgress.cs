@@ -1,7 +1,7 @@
-﻿using Application.Contracts;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application;
+namespace WebAPI.Contracts;
 
 public class SyncServerProgress
 {

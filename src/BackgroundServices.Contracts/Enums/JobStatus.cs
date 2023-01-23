@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace PlexRipper.Application.Enums;
+namespace BackgroundServices.Contracts;
 
 public enum JobStatus
 {

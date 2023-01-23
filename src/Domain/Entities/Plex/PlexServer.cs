@@ -56,7 +56,6 @@ public class PlexServer : BaseEntity
     [Column(Order = 8)]
     public string ProductVersion { get; set; }
 
-
     /// <summary>
     /// Gets or sets the role this <see cref="PlexServer"/> provides, seems to be mostly "server".
     /// </summary>
@@ -112,7 +111,7 @@ public class PlexServer : BaseEntity
     public bool NatLoopbackSupported { get; set; }
 
     /// <summary>
-    /// Certain servers have protection or are misconfigured which is why we can apply certain fixes to facilitate server communication.
+    /// Gets or sets a value indicating whether certain servers have protection or are misconfigured which is why we can apply certain fixes to facilitate server communication.
     /// This will attempt to connect on port 80 of the server.
     /// </summary>
     [Column(Order = 24)]

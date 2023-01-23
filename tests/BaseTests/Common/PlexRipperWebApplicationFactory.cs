@@ -9,6 +9,7 @@ using PlexRipper.Data;
 using PlexRipper.Domain.Autofac;
 using PlexRipper.WebAPI.Common;
 using Settings.Contracts;
+using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;
 

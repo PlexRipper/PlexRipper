@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using PlexRipper.Domain;
+using WebAPI.Contracts;
 
 namespace Application.Contracts;
 

@@ -1,7 +1,7 @@
-﻿using Application.Contracts;
-using PlexRipper.Application.BackgroundServices;
+﻿using BackgroundServices.Contracts;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Application;
+namespace WebAPI.Contracts;
 
 public interface ISignalRService
 {

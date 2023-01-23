@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using PlexRipper.Application.Enums;
+﻿using BackgroundServices.Contracts;
+using Newtonsoft.Json;
 using PlexRipper.WebAPI.Common;
 
 namespace PlexRipper.WebAPI.SignalR.Common;

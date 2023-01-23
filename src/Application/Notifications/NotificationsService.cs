@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
+using WebAPI.Contracts;
 
 namespace PlexRipper.Application.Notifications;
 

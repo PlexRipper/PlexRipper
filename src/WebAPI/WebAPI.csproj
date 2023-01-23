@@ -43,6 +43,7 @@
         <ProjectReference Include="..\FileSystem\FileSystem.csproj" />
         <ProjectReference Include="..\PlexApi\PlexApi.csproj" />
         <ProjectReference Include="..\Settings\Settings.csproj" />
+        <ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
     </ItemGroup>
     <ItemGroup>
         <Content Remove="nswag.json" />

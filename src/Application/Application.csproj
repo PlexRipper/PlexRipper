@@ -21,6 +21,7 @@
         <ProjectReference Include="..\Domain\Domain.csproj" />
         <Compile Include="..\Domain\GlobalUsings.cs" />
         <ProjectReference Include="..\DownloadManager.Contracts\DownloadManager.Contracts.csproj" />
+        <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,7 @@
-﻿namespace PlexRipper.Application;
+﻿using FluentResults;
+using PlexRipper.Domain;
+
+namespace FileSystem.Contracts;
 
 public interface IFileSystem
 {

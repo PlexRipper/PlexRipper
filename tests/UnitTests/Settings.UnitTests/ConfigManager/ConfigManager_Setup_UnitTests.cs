@@ -1,6 +1,7 @@
 using System.Reactive.Subjects;
 using Autofac;
 using Environment;
+using FileSystem.Contracts;
 using PlexRipper.Application;
 using PlexRipper.Settings;
 

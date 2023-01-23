@@ -5,6 +5,7 @@ using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using DownloadManager.Contracts;
 using Environment;
+using FileSystem.Contracts;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using PlexRipper.Application;

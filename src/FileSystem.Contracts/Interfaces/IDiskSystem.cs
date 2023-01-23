@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Application;
+﻿using FluentResults;
+
+namespace FileSystem.Contracts;
 
 public interface IDiskSystem
 {

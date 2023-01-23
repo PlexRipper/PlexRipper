@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using FileSystem.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;

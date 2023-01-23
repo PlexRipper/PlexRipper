@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Autofac;
 using Environment;
+using FileSystem.Contracts;
 using PlexRipper.Application;
 using PlexRipper.Settings;
 

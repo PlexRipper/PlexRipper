@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Application;
+﻿namespace FileSystem.Contracts;
 
 public interface IMount
 {

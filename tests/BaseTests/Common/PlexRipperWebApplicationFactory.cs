@@ -1,6 +1,7 @@
 using System.Collections.Specialized;
 using Autofac;
 using Autofac.Extras.Quartz;
+using FileSystem.Contracts;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;

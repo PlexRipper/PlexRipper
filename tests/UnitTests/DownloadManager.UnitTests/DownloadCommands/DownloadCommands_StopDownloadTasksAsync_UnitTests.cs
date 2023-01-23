@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
+using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;

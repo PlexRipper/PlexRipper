@@ -6,7 +6,7 @@ using Environment;
 using FileSystem.Contracts;
 using PlexRipper.Application;
 using PlexRipper.FileSystem.Common;
-using IFileSystem = PlexRipper.Application.IFileSystem;
+using IFileSystem = FileSystem.Contracts.IFileSystem;
 using Module = Autofac.Module;
 
 namespace PlexRipper.FileSystem.Config;

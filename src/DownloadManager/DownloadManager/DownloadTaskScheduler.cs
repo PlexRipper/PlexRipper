@@ -1,5 +1,5 @@
+using BackgroundServices.Contracts;
 using PlexRipper.Application;
-using PlexRipper.Application.BackgroundServices;
 using PlexRipper.DownloadManager.Jobs;
 using Quartz;
 

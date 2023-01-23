@@ -1,19 +1,17 @@
 ﻿using Data.Contracts;
 using DownloadManager.Contracts;
 using PlexRipper.Application;
-using PlexRipper.Application.BackgroundServices;
 using PlexRipper.DownloadManager.DownloadClient;
 using Quartz;
 
 namespace PlexRipper.DownloadManager.Jobs;
 
-public class DownloadJob : IBaseJob, IDisposable
+public class DownloadJob : IJob, IDisposable
 {
     private readonly IMediator _mediator;
     private readonly IDownloadTaskFactory _downloadTaskFactory;
     private readonly INotificationsService _notificationsService;
     private readonly Func<PlexDownloadClient> _plexDownloadClientFactory;
-    private List<IDisposable> _disposables = new();
     private PlexDownloadClient _downloadClient;
 
     #region Fields
@@ -151,9 +149,6 @@ public class DownloadJob : IBaseJob, IDisposable
 
     public void Dispose()
     {
-        foreach (var disposable in _disposables)
-            disposable.Dispose();
-
         _downloadClient.Dispose();
     }
 }

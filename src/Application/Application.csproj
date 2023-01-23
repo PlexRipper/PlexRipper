@@ -21,8 +21,4 @@
         <Compile Include="..\Domain\GlobalUsings.cs" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="BackgroundServices" />
-    </ItemGroup>
-
 </Project>

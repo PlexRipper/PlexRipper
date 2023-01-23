@@ -20,6 +20,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
+        <ProjectReference Include="..\BackgroundServices.Contracts\BackgroundServices.Contracts.csproj" />
         <ProjectReference Include="..\DownloadManager.Contracts\DownloadManager.Contracts.csproj" />
         <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
         <ProjectReference Include="..\HttpClient\HttpClient.csproj" />

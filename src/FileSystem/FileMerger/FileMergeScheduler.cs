@@ -1,6 +1,6 @@
+using BackgroundServices.Contracts;
 using Data.Contracts;
 using FileSystem.Contracts;
-using PlexRipper.Application.BackgroundServices;
 using Quartz;
 
 namespace PlexRipper.FileSystem;

@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
+        <ProjectReference Include="..\BackgroundServices.Contracts\BackgroundServices.Contracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>

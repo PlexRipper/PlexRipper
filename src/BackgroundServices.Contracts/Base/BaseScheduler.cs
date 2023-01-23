@@ -1,6 +1,7 @@
+using FluentResults;
 using Quartz;
 
-namespace PlexRipper.Application.BackgroundServices;
+namespace BackgroundServices.Contracts;
 
 public abstract class BaseScheduler
 {

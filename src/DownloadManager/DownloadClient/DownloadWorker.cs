@@ -2,11 +2,11 @@ using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
-using PlexRipper.HttpClient;
+using HttpClient.Contracts;
 using RestSharp;
 using Timer = System.Timers.Timer;
 
-namespace PlexRipper.DownloadManager.DownloadClient;
+namespace PlexRipper.DownloadManager;
 
 /// <summary>
 /// The <see cref="DownloadWorker"/> is part of the multi-threaded <see cref="PlexDownloadClient"/>

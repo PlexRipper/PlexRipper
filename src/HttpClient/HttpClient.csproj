@@ -16,11 +16,16 @@
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
         <ProjectReference Include="..\Domain\Domain.csproj" />
+        <ProjectReference Include="..\HttpClient.Contracts\HttpClient.Contracts.csproj" />
         <ProjectReference Include="..\PlexApi\PlexApi.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <Compile Include="..\Domain\GlobalUsings.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Common" />
     </ItemGroup>
 
 </Project>

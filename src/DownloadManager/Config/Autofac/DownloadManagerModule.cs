@@ -4,8 +4,6 @@ using Autofac.Extras.Quartz;
 using BackgroundServices.Contracts;
 using DownloadManager.Contracts;
 using MediatR.Extensions.Autofac.DependencyInjection;
-using PlexRipper.Application;
-using PlexRipper.DownloadManager.DownloadClient;
 using Module = Autofac.Module;
 
 namespace PlexRipper.DownloadManager;

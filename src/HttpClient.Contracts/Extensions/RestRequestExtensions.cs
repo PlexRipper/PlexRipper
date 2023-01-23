@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using RestSharp;
 
-namespace PlexRipper.HttpClient;
+namespace HttpClient.Contracts;
 
 public static class RestRequestExtensions
 {

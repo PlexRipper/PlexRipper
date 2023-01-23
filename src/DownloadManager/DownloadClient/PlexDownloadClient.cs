@@ -2,11 +2,10 @@
 using System.Reactive.Linq;
 using Data.Contracts;
 using DownloadManager.Contracts;
-using PlexRipper.Application;
 using PlexRipper.Domain.RxNet;
 using Settings.Contracts;
 
-namespace PlexRipper.DownloadManager.DownloadClient;
+namespace PlexRipper.DownloadManager;
 
 /// <summary>
 /// The PlexDownloadClient handles a single <see cref="DownloadTask"/> at a time and

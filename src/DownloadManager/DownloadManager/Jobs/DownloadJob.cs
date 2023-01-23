@@ -1,8 +1,6 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
-using PlexRipper.Application;
-using PlexRipper.DownloadManager.DownloadClient;
 using Quartz;
 
 namespace PlexRipper.DownloadManager.Jobs;

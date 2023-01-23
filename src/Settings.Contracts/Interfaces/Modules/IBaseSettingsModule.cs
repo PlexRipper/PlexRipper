@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
+using FluentResults;
 
-namespace PlexRipper.Application;
+namespace Settings.Contracts;
 
 public interface IBaseSettingsModule<TModel> where TModel : class
 {

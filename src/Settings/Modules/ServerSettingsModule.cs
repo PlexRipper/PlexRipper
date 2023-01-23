@@ -3,6 +3,7 @@ using System.Reactive.Subjects;
 using PlexRipper.Application;
 using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
+using Settings.Contracts;
 
 namespace PlexRipper.Settings.Modules;
 

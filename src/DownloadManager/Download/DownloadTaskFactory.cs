@@ -5,6 +5,7 @@ using DownloadManager.Contracts;
 using FileSystem.Contracts;
 using PlexApi.Contracts;
 using PlexRipper.Application;
+using Settings.Contracts;
 
 namespace PlexRipper.DownloadManager;
 

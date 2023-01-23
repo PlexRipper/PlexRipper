@@ -1,3 +1,3 @@
-namespace PlexRipper.Application;
+namespace Settings.Contracts;
 
 public interface IGeneralSettingsModule : IBaseSettingsModule<IGeneralSettings>, IGeneralSettings { }

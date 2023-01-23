@@ -15,6 +15,7 @@ using PlexRipper.Data;
 using PlexRipper.DownloadManager;
 using PlexRipper.HttpClient;
 using PlexRipper.WebAPI;
+using Settings.Contracts;
 
 #endregion
 

@@ -4,6 +4,7 @@ using Data.Contracts;
 using DownloadManager.Contracts;
 using PlexRipper.Application;
 using PlexRipper.Domain.RxNet;
+using Settings.Contracts;
 
 namespace PlexRipper.DownloadManager.DownloadClient;
 

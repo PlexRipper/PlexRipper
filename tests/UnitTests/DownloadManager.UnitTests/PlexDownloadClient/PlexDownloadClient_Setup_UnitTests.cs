@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.DownloadManager.DownloadClient;
+using Settings.Contracts;
 
 namespace DownloadManager.UnitTests;
 

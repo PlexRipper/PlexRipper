@@ -1,5 +1,6 @@
 ﻿using FileSystem.Contracts;
 using PlexRipper.Application;
+using Settings.Contracts;
 
 // ReSharper disable RedundantDefaultMemberInitializer
 

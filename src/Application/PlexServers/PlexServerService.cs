@@ -2,6 +2,7 @@ using Application.Contracts;
 using BackgroundServices.Contracts;
 using Data.Contracts;
 using PlexApi.Contracts;
+using Settings.Contracts;
 
 namespace PlexRipper.Application;
 

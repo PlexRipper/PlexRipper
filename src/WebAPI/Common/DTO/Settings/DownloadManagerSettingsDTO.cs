@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using PlexRipper.Application;
+using Settings.Contracts;
 
 namespace PlexRipper.WebAPI.Common.DTO;
 

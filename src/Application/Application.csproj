@@ -24,6 +24,7 @@
         <ProjectReference Include="..\DownloadManager.Contracts\DownloadManager.Contracts.csproj" />
         <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
         <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
+        <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

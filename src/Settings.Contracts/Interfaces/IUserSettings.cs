@@ -1,6 +1,7 @@
 using System.Text.Json;
+using FluentResults;
 
-namespace PlexRipper.Application;
+namespace Settings.Contracts;
 
 /// <summary>
 /// Used to store and load settings from a json file.

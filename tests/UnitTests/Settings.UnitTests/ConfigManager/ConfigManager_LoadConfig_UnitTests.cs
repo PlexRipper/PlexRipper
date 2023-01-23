@@ -4,6 +4,7 @@ using Environment;
 using FileSystem.Contracts;
 using PlexRipper.Application;
 using PlexRipper.Settings;
+using Settings.Contracts;
 
 namespace Settings.UnitTests;
 

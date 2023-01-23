@@ -9,6 +9,7 @@ using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
+using Settings.Contracts;
 
 namespace PlexRipper.WebAPI.Config;
 

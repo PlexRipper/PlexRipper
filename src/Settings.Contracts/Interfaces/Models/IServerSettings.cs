@@ -1,6 +1,6 @@
 ﻿using PlexRipper.Domain.DownloadManager;
 
-namespace PlexRipper.Application;
+namespace Settings.Contracts;
 
 public interface IServerSettings
 {

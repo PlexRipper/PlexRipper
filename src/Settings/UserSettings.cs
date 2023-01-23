@@ -3,6 +3,7 @@ using System.Reactive.Subjects;
 using System.Text.Json;
 using PlexRipper.Application;
 using PlexRipper.Settings.Models;
+using Settings.Contracts;
 
 namespace PlexRipper.Settings;
 

@@ -1,4 +1,4 @@
-namespace PlexRipper.Application;
+namespace Settings.Contracts;
 
 public interface IGeneralSettings
 {

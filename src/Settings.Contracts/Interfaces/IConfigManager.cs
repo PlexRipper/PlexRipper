@@ -1,4 +1,7 @@
-﻿namespace PlexRipper.Application;
+﻿using FluentResults;
+using PlexRipper.Domain;
+
+namespace Settings.Contracts;
 
 public interface IConfigManager : ISetup
 {

@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Application;
+﻿using PlexRipper.Domain;
+
+namespace Settings.Contracts;
 
 public interface IDisplaySettings
 {

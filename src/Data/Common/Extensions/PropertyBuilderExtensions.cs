@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Newtonsoft.Json;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PlexRipper.Domain.Config;
 
 namespace PlexRipper.Data.Common;
 
@@ -15,11 +16,10 @@ public static class PropertyBuilderExtensions
         this PropertyBuilder<T> propertyBuilder)
         where T : class
     {
-// @formatter:off
+        // TODO Could add JsonSchema Source Generators here to speed things up
         propertyBuilder.HasConversion(
-            v => JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore }),
-            v => JsonConvert.DeserializeObject<T>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore }));
-// @formatter:on
+            v => JsonSerializer.Serialize(v, DefaultJsonSerializerOptions.ConfigBase),
+            v => JsonSerializer.Deserialize<T>(v, DefaultJsonSerializerOptions.ConfigBase));
         return propertyBuilder;
     }
 }

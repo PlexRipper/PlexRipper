@@ -1,14 +1,12 @@
 ﻿using FluentValidation;
-using Newtonsoft.Json;
 
 namespace PlexRipper.WebAPI.Common.DTO;
 
 public class InspectServerDTO
 {
-    [JsonProperty("plexAccountId", Required = Required.Always)]
     public int PlexAccountId { get; set; }
 
-    [JsonProperty("plexServerIds", Required = Required.Always)]
+
     public List<int> PlexServerIds { get; set; }
 }
 

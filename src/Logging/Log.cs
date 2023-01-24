@@ -48,14 +48,6 @@ public static class Log
 
     #region Setup
 
-    public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
-    {
-        Serilog.Log.Logger =
-            GetBaseConfiguration()
-                .MinimumLevel.Is(minimumLogLevel)
-                .CreateLogger();
-    }
-
     public static void SetupTestLogging(ITestOutputHelper output, LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
         Serilog.Log.Logger =

@@ -22,6 +22,7 @@ public static class ContainerConfig
     {
         // Application
         builder.RegisterModule<ApplicationModule>();
+        builder.RegisterModule<LogModule>();
 
         // Infrastructure
         builder.RegisterModule<DataModule>();

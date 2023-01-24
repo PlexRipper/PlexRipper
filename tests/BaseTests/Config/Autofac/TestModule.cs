@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.FileSystem.Common;
 using Settings.Contracts;
@@ -19,5 +18,7 @@ public class TestModule : Module
         builder.RegisterType<MockFileMergeStreamProvider>().As<IFileMergeStreamProvider>().SingleInstance();
         builder.RegisterType<MockFileMergeSystem>().As<IFileMergeSystem>().SingleInstance();
         builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
+
+        builder.RegisterType<TestLoggingClass>().SingleInstance();
     }
 }

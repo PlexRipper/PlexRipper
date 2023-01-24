@@ -11,10 +11,8 @@ using HttpClient.Contracts;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using PlexApi.Contracts;
-using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
-using PlexRipper.HttpClient;
 using PlexRipper.WebAPI;
 using Settings.Contracts;
 
@@ -108,6 +106,8 @@ public partial class BaseContainer : IDisposable
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 
     public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
+
+    public TestLoggingClass TestLoggingClass => Resolve<TestLoggingClass>();
 
     public IMapper Mapper => Resolve<IMapper>();
 

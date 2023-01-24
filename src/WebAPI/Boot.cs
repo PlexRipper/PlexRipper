@@ -1,8 +1,6 @@
 using System.Net;
 using BackgroundServices.Contracts;
 using DownloadManager.Contracts;
-using Environment;
-using PlexRipper.Application;
 using Settings.Contracts;
 
 namespace PlexRipper.WebAPI;
@@ -52,10 +50,6 @@ public class Boot : IBoot
     {
         Log.Information("Initiating boot process");
         ServicePointManager.DefaultConnectionLimit = 1000;
-
-        // First await the finishing off all these
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
-            Log.SetupLogging();
 
         _configManager.Setup();
         _downloadQueue.Setup();

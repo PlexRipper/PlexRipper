@@ -1,5 +1,4 @@
 using PlexRipper.WebAPI.Common;
-using Serilog.Events;
 
 namespace PlexRipper.WebAPI;
 
@@ -7,8 +6,6 @@ public class Program
 {
     public static void Main()
     {
-        Log.SetupLogging(LogEventLevel.Verbose);
-
         try
         {
             PlexRipperHost.Setup().Build().Run();

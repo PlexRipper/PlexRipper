@@ -1,8 +1,10 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Environment;
-using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data;
+using Serilog;
+using Serilog.Events;
+using Log = Logging.Log;
 
 namespace PlexRipper.WebAPI.Common;
 
@@ -10,20 +12,18 @@ public static class PlexRipperHost
 {
     public static IHostBuilder Setup()
     {
+        LogConfig.SetupLogging(LogEventLevel.Verbose);
+
         Log.Information("Starting up");
         Log.Information($"Currently running on {OsInfo.CurrentOS}");
 
         return Host.CreateDefaultBuilder()
+            .UseSerilog(LogConfig.GetLogger())
             .ConfigureWebHostDefaults(webHostBuilder =>
             {
                 webHostBuilder
                     .UseContentRoot(Directory.GetCurrentDirectory())
                     .UseStartup<Startup>();
-            })
-            .ConfigureLogging(config =>
-            {
-                config.ClearProviders();
-                config.AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
             })
             .ConfigureDatabase()
             .ConfigureContainer<ContainerBuilder>(containerBuilder =>

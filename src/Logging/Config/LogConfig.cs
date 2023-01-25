@@ -1,4 +1,5 @@
 using Environment;
+using Logging.Enricher;
 using Logging.Interface;
 using Serilog;
 using Serilog.Core;
@@ -71,6 +72,7 @@ public class LogConfig
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
             .MinimumLevel.Override("Quartz", LogEventLevel.Information)
             .Enrich.FromLogContext()
+            .Enrich.With<ExternalFrameworkEnricher>()
             .WriteTo.Debug(outputTemplate: Template)
             .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: Template);
     }

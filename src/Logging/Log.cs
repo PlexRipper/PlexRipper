@@ -26,40 +26,6 @@ public static class Log
         return $"[{fileName}.{memberName}] => {message}";
     }
 
-    private static string Template => "{NewLine}{Timestamp:HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}";
-
-    private static LoggerConfiguration GetBaseConfiguration()
-    {
-        return new LoggerConfiguration()
-            .MinimumLevel.Verbose()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-            .MinimumLevel.Override("Quartz", LogEventLevel.Information)
-            .WriteTo.Debug(outputTemplate: Template)
-            .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: Template)
-            .WriteTo.File(
-                Path.Combine(PathProvider.LogsDirectory, "log.txt"),
-                LogEventLevel.Debug,
-                Template,
-                rollingInterval: RollingInterval.Day,
-                rollOnFileSizeLimit: true,
-                retainedFileCountLimit: 7);
-    }
-
-    #region Setup
-
-    public static void SetupTestLogging(ITestOutputHelper output, LogEventLevel minimumLogLevel = LogEventLevel.Debug)
-    {
-        Serilog.Log.Logger =
-            GetBaseConfiguration()
-                .MinimumLevel.Is(minimumLogLevel)
-                .WriteTo.TestOutput(output, minimumLogLevel, Template)
-                .WriteTo.TestCorrelator(minimumLogLevel)
-                .CreateLogger();
-    }
-
-    #endregion
-
     public static void DbContextLogger(
         string message,
         [CallerMemberName] string memberName = "",

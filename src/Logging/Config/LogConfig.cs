@@ -25,20 +25,21 @@ public static class LogConfig
 
     public static Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
-        return GetBaseConfiguration()
-            .WriteTo.File(
-                Path.Combine(PathProvider.LogsDirectory, "log.txt"),
-                LogEventLevel.Debug,
-                Template,
-                rollingInterval: RollingInterval.Day,
-                rollOnFileSizeLimit: true,
-                retainedFileCountLimit: 7)
-            .MinimumLevel.Is(minimumLogLevel)
-            .CreateLogger();
-    }
+        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        {
+            return GetBaseConfiguration()
+                .WriteTo.File(
+                    Path.Combine(PathProvider.LogsDirectory, "log.txt"),
+                    LogEventLevel.Debug,
+                    Template,
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    retainedFileCountLimit: 7)
+                .MinimumLevel.Is(minimumLogLevel)
+                .CreateLogger();
+        }
 
-    public static Logger GetTestLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
-    {
+        // Test Logger
         return GetBaseConfiguration()
             .MinimumLevel.Is(minimumLogLevel)
             .WriteTo.TestOutput(_testOutput, minimumLogLevel, Template)

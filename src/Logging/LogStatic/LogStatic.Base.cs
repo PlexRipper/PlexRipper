@@ -1,21 +1,12 @@
 #nullable enable
-using Logging.Interface;
-using Serilog;
 using Serilog.Context;
 using Serilog.Events;
 
-namespace Logging.Log2;
+namespace Logging.LogStatic;
 
-public partial class Log : ILog
+public static partial class LogStatic
 {
-    private readonly ILogger _logger;
-
-    public Log(ILogger logger)
-    {
-        _logger = logger;
-    }
-
-    private void Write(
+    private static void Write(
         LogEventLevel logLevel,
         string messageTemplate,
         string memberName = "",
@@ -30,11 +21,11 @@ public partial class Log : ILog
         using (LogContext.PushProperty("LineNumber", sourceLineNumber))
         {
             // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-            _logger.Write(logLevel, messageTemplate, propertyValues);
+            Serilog.Log.Write(logLevel, messageTemplate, propertyValues);
         }
     }
 
-    private void Write(
+    private static void Write(
         LogEventLevel logLevel,
         string messageTemplate,
         Exception? exception = default,
@@ -50,7 +41,7 @@ public partial class Log : ILog
         using (LogContext.PushProperty("LineNumber", sourceLineNumber))
         {
             // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-            _logger.Write(logLevel, exception, messageTemplate, propertyValues);
+            Serilog.Log.Write(logLevel, exception, messageTemplate, propertyValues);
         }
     }
 }

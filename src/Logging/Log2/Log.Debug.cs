@@ -18,7 +18,7 @@ public partial class Log : ILog
         [CallerLineNumber] int sourceLineNumber = default!)
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-        Write(LogEventLevel.Debug, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+        Write(LogEventLevel.Debug, messageTemplate, memberName!, sourceFilePath!, sourceLineNumber);
     }
 
     /// <inheritdoc/>
@@ -31,7 +31,7 @@ public partial class Log : ILog
         [CallerLineNumber] int sourceLineNumber = default!)
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-        Write(LogEventLevel.Debug, messageTemplate, ex, memberName, sourceFilePath, sourceLineNumber);
+        Write(LogEventLevel.Debug, messageTemplate, ex, memberName!, sourceFilePath!, sourceLineNumber);
     }
 
     /// <inheritdoc/>
@@ -44,7 +44,7 @@ public partial class Log : ILog
         [CallerLineNumber] int sourceLineNumber = default!)
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-        Write(LogEventLevel.Debug, messageTemplate, memberName, sourceFilePath, sourceLineNumber, propertyValue);
+        Write(LogEventLevel.Debug, messageTemplate, memberName!, sourceFilePath!, sourceLineNumber, propertyValue);
     }
 
     /// <inheritdoc/>
@@ -58,7 +58,7 @@ public partial class Log : ILog
         [CallerLineNumber] int sourceLineNumber = default!)
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-        Write(LogEventLevel.Debug, messageTemplate, memberName, sourceFilePath, sourceLineNumber, propertyValue0, propertyValue1);
+        Write(LogEventLevel.Debug, messageTemplate, memberName!, sourceFilePath!, sourceLineNumber, propertyValue0, propertyValue1);
     }
 
     /// <inheritdoc/>
@@ -73,7 +73,58 @@ public partial class Log : ILog
         [CallerLineNumber] int sourceLineNumber = default!)
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-        Write(LogEventLevel.Debug, messageTemplate, memberName, sourceFilePath, sourceLineNumber, propertyValue0, propertyValue1, propertyValue2);
+        Write(LogEventLevel.Debug, messageTemplate, memberName!, sourceFilePath!, sourceLineNumber, propertyValue0, propertyValue1, propertyValue2);
+    }
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    public void Debug<T0, T1, T2, T3>(
+        string messageTemplate,
+        T0 propertyValue0,
+        T1 propertyValue1,
+        T2 propertyValue2,
+        T3 propertyValue3,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
+    {
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+        Write(LogEventLevel.Debug, messageTemplate, memberName!, sourceFilePath!, sourceLineNumber, propertyValue0, propertyValue1, propertyValue2,
+            propertyValue3);
+    }
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    public void Debug<T0, T1, T2, T3, T4>(
+        string messageTemplate,
+        T0 propertyValue0,
+        T1 propertyValue1,
+        T2 propertyValue2,
+        T3 propertyValue3,
+        T4 propertyValue4,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
+    {
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+        Write(LogEventLevel.Debug, messageTemplate, memberName!, sourceFilePath!, sourceLineNumber, propertyValue0, propertyValue1, propertyValue2,
+            propertyValue3, propertyValue4);
+    }
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    public void Debug<T0, T1, T2, T3, T4, T5>(
+        string messageTemplate,
+        T0 propertyValue0,
+        T1 propertyValue1,
+        T2 propertyValue2,
+        T3 propertyValue3,
+        T4 propertyValue4,
+        T5 propertyValue5,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
+    {
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+        Write(LogEventLevel.Debug, messageTemplate, memberName!, sourceFilePath!, sourceLineNumber, propertyValue0, propertyValue1, propertyValue2,
+            propertyValue3, propertyValue4, propertyValue5);
     }
 
     #endregion

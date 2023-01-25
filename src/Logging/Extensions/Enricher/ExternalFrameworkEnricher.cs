@@ -13,8 +13,10 @@ public class ExternalFrameworkEnricher : ILogEventEnricher
         if (logEvent.Properties.TryGetValue("SourceContext", out var value))
         {
             var nameSpace = value.ToString();
-
             var parts = nameSpace.Split('.').Select(x => x.Trim('\"')).ToList();
+            if (parts.Count < 3)
+                return;
+
             logEvent.AddPropertyIfAbsent(new LogEventProperty("FileName", new ScalarValue(parts[0])));
             logEvent.AddPropertyIfAbsent(new LogEventProperty("MemberName", new ScalarValue(parts.Last())));
             logEvent.AddPropertyIfAbsent(new LogEventProperty("LineNumber", new ScalarValue(0)));

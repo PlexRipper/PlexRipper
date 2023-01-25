@@ -19,7 +19,7 @@ public interface ILog
     /// Log.Debug("Starting up at {StartedAt}.", DateTime.Now);
     /// </code></example>
     [MessageTemplateFormatMethod("messageTemplate")]
-    void DebugLine(
+    LogEvent DebugLine(
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
@@ -37,7 +37,7 @@ public interface ILog
     /// Log.Debug(ex, "Processed {RecordCount} records in {TimeMS}.", records.Length, sw.ElapsedMilliseconds);
     /// </example>
     [MessageTemplateFormatMethod("messageTemplate")]
-    void Debug(
+    LogEvent Debug(
         Exception exception,
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
@@ -56,7 +56,7 @@ public interface ILog
     /// Log.Verbose("Staring into space, wondering if we're alone.");
     /// </example>
     [MessageTemplateFormatMethod("messageTemplate")]
-    void Debug<T>(
+    LogEvent Debug<T>(
         string messageTemplate,
         T propertyValue = default!,
         [CallerMemberName] string memberName = default!,
@@ -76,7 +76,7 @@ public interface ILog
     /// Log.Debug("Starting up at {StartedAt}.", DateTime.Now);
     /// </example>
     [MessageTemplateFormatMethod("messageTemplate")]
-    void Debug<T0, T1>(
+    LogEvent Debug<T0, T1>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -98,7 +98,7 @@ public interface ILog
     /// Log.Debug("Starting up at {StartedAt}.", DateTime.Now);
     /// </example>
     [MessageTemplateFormatMethod("messageTemplate")]
-    void Debug<T0, T1, T2>(
+    LogEvent Debug<T0, T1, T2>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -107,7 +107,8 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Debug<T0, T1, T2, T3>(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Debug<T0, T1, T2, T3>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -117,7 +118,8 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Debug<T0, T1, T2, T3, T4>(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Debug<T0, T1, T2, T3, T4>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -128,7 +130,8 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Debug<T0, T1, T2, T3, T4, T5>(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Debug<T0, T1, T2, T3, T4, T5>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -155,7 +158,7 @@ public interface ILog
     /// Log.Information("Starting up at {StartedAt}.", DateTime.Now);
     /// </code></example>
     [MessageTemplateFormatMethod("messageTemplate")]
-    void InformationLine(
+    LogEvent InformationLine(
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
@@ -173,7 +176,7 @@ public interface ILog
     /// Log.Verbose("Staring into space, wondering if we're alone.");
     /// </example>
     [MessageTemplateFormatMethod("messageTemplate")]
-    void Information<T>(
+    LogEvent Information<T>(
         string messageTemplate,
         T propertyValue = default!,
         [CallerMemberName] string memberName = default!,
@@ -193,7 +196,7 @@ public interface ILog
     /// Log.Information("Starting up at {StartedAt}.", DateTime.Now);
     /// </example>
     [MessageTemplateFormatMethod("messageTemplate")]
-    void Information<T0, T1>(
+    LogEvent Information<T0, T1>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -215,7 +218,7 @@ public interface ILog
     /// Log.Information("Starting up at {StartedAt}.", DateTime.Now);
     /// </example>
     [MessageTemplateFormatMethod("messageTemplate")]
-    void Information<T0, T1, T2>(
+    LogEvent Information<T0, T1, T2>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -236,14 +239,15 @@ public interface ILog
     /// Log.Information(ex, "Processed {RecordCount} records in {TimeMS}.", records.Length, sw.ElapsedMilliseconds);
     /// </example>
     [MessageTemplateFormatMethod("messageTemplate")]
-    void Information(
+    LogEvent Information(
         Exception exception,
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Information<T0, T1, T2, T3>(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Information<T0, T1, T2, T3>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -253,7 +257,8 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Information<T0, T1, T2, T3, T4>(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Information<T0, T1, T2, T3, T4>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -268,27 +273,43 @@ public interface ILog
 
     #region Error
 
-    void ErrorLine(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent ErrorLine(
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Error(
+    #region Exception
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Error(
+        Exception ex,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!);
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Error(
         Exception ex,
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Error<T>(
+    #endregion
+
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Error<T>(
         string messageTemplate,
-        T propertyValue = default!,
+        T propertyValue,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Error<T0, T1>(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Error<T0, T1>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -296,7 +317,8 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Error<T0, T1, T2>(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Error<T0, T1, T2>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -305,7 +327,8 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Error<T0, T1, T2, T3>(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Error<T0, T1, T2, T3>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -315,7 +338,8 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Error<T0, T1, T2, T3, T4>(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Error<T0, T1, T2, T3, T4>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
@@ -326,7 +350,8 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    void Error<T0, T1, T2, T3, T4, T5>(
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Error<T0, T1, T2, T3, T4, T5>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,

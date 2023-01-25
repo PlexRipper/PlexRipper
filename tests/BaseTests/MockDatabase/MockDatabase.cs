@@ -1,5 +1,6 @@
 #region
 
+using Logging.LogStatic;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -44,7 +45,8 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        Log.Debug($"Added {config.PlexServerCount} {nameof(PlexServer)}s to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
+        LogStatic.Debug("Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}", config.PlexServerCount,
+            nameof(PlexServer), nameof(PlexRipperDbContext), context.DatabaseName, 0);
         return context;
     }
 
@@ -96,7 +98,9 @@ public static class MockDatabase
 
         await context.PlexAccounts.AddAsync(plexAccount);
         await context.SaveChangesAsync();
-        Log.Debug($"Added 1 {nameof(PlexAccount)}: {plexAccount.Title} to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
+
+        LogStatic.Debug("Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to PlexRipperDbContext: {DatabaseName}", nameof(PlexAccount), plexAccount.Title,
+            context.DatabaseName, 0);
 
         var plexAccountServer = plexServers.Select(x => new PlexAccountServer
         {
@@ -200,7 +204,7 @@ public static class MockDatabase
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
-        optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Warning);
+        optionsBuilder.LogTo(text => LogStatic.DbContextLogger(text), LogLevel.Warning);
         return new PlexRipperDbContext(optionsBuilder.Options, dbName);
     }
 
@@ -228,7 +232,7 @@ public static class MockDatabase
         context.HasBeenSetup = true;
 
         // PlexServers and Libraries added
-        Log.Debug($"Setting up {nameof(PlexRipperDbContext)} for {context.DatabaseName}");
+        LogStatic.Debug("Setting up {NameOfPlexRipperDbContext} for {DatabaseName}", nameof(PlexRipperDbContext), context.DatabaseName, 0);
 
         if (config.PlexServerCount > 0)
             context = await context.AddPlexServers(options);
@@ -291,8 +295,8 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        Log.Debug(
-            $"Added {config.MovieDownloadTasksCount} Movie {nameof(DownloadTask)}s to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
+        LogStatic.Debug("Added {MovieDownloadTasksCount} Movie {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.MovieDownloadTasksCount,
+            nameof(DownloadTask), context.DatabaseName, 0);
 
         return context;
     }
@@ -325,8 +329,8 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        Log.Debug(
-            $"Added {config.TvShowDownloadTasksCount} TvShow {nameof(DownloadTask)}s to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
+        LogStatic.Debug("Added {TvShowDownloadTasksCount} TvShow {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.TvShowDownloadTasksCount,
+            nameof(DownloadTask), context.DatabaseName, 0);
 
         return context;
     }
@@ -357,7 +361,8 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        Log.Debug($"Added {config.MovieCount} {nameof(PlexMovie)}s to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
+        LogStatic.Debug("Added {MovieCount} {NameOfPlexMovie}s to PlexRipperDbContext: {DatabaseName}", config.MovieCount, nameof(PlexMovie),
+            context.DatabaseName, 0);
 
         return context;
     }
@@ -399,7 +404,8 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        Log.Debug($"Added {config.TvShowCount} {nameof(PlexTvShow)}s to {nameof(PlexRipperDbContext)}: {context.DatabaseName}");
+        LogStatic.Debug("Added {TvShowCount} {NameOfPlexTvShow}s to PlexRipperDbContext: {DatabaseName}", config.TvShowCount, nameof(PlexTvShow),
+            context.DatabaseName, 0);
 
         return context;
     }

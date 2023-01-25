@@ -6,12 +6,9 @@ using PlexRipper.Data.Common;
 
 namespace Data.UnitTests.Commands;
 
-public class CreateDownloadTasksCommandHandler_UnitTests
+public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest
 {
-    public CreateDownloadTasksCommandHandler_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public CreateDownloadTasksCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldCreateAllDownloadTasks_WhenAllAreNew()
@@ -20,7 +17,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests
         var downloadTasks = FakeData.GetTvShowDownloadTask().Generate(1);
         await using var context = MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true);
         var request = new CreateDownloadTasksCommand(downloadTasks);
-        var handler = new CreateDownloadTasksCommandHandler(context);
+        var handler = new CreateDownloadTasksCommandHandler(_log, context);
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);
@@ -41,7 +38,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests
         await context.BulkInsertAsync(new List<DownloadTask> { downloadTasks.First() });
         downloadTasks[0].Id = 1;
         var request = new CreateDownloadTasksCommand(downloadTasks);
-        var handler = new CreateDownloadTasksCommandHandler(context);
+        var handler = new CreateDownloadTasksCommandHandler(_log, context);
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);
@@ -59,7 +56,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests
         var downloadTasksTest = FakeData.GetTvShowDownloadTask().Generate(1);
         await using var context = MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true);
         var request = new CreateDownloadTasksCommand(downloadTasksTest);
-        var handler = new CreateDownloadTasksCommandHandler(context);
+        var handler = new CreateDownloadTasksCommandHandler(_log, context);
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);

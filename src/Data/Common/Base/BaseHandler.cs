@@ -1,10 +1,13 @@
 using EFCore.BulkExtensions;
+using Logging.Interface;
 
 namespace PlexRipper.Data.Common;
 
 public abstract class BaseHandler : IDisposable
 {
     #region Fields
+
+    protected readonly ILog _log;
 
     private protected readonly PlexRipperDbContext _dbContext;
 
@@ -18,8 +21,9 @@ public abstract class BaseHandler : IDisposable
 
     #region Constructors
 
-    protected BaseHandler(PlexRipperDbContext dbContext)
+    protected BaseHandler(ILog log, PlexRipperDbContext dbContext)
     {
+        _log = log;
         _dbContext = dbContext;
     }
 

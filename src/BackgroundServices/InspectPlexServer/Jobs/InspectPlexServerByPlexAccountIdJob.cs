@@ -1,6 +1,7 @@
 ﻿using Application.Contracts;
 using BackgroundServices.Contracts;
 using Data.Contracts;
+using Logging.Interface;
 using Quartz;
 
 namespace BackgroundServices.InspectPlexServer;
@@ -11,17 +12,20 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
 {
     public static string PlexAccountIdParameter => "plexAccountId";
 
+    private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexLibraryService _plexLibraryService;
     private readonly IPlexServerConnectionsService _plexServerConnectionsService;
     private readonly ISyncServerScheduler _syncServerScheduler;
 
     public InspectPlexServerByPlexAccountIdJob(
+        ILog log,
         IMediator mediator,
         IPlexLibraryService plexLibraryService,
         IPlexServerConnectionsService plexServerConnectionsService,
         ISyncServerScheduler syncServerScheduler)
     {
+        _log = log;
         _mediator = mediator;
         _plexLibraryService = plexLibraryService;
         _plexServerConnectionsService = plexServerConnectionsService;
@@ -32,7 +36,9 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
     {
         var dataMap = context.JobDetail.JobDataMap;
         var plexAccountId = dataMap.GetIntValue(PlexAccountIdParameter);
-        Log.Debug($"Executing job: {nameof(InspectPlexServerByPlexAccountIdJob)} for {nameof(plexAccountId)}: {plexAccountId}");
+        _log.Debug("Executing job: {InspectPlexServerByPlexAccountIdJob} for {PlexAccountIdName} with id: {PlexAccountId}",
+            nameof(InspectPlexServerByPlexAccountIdJob),
+            nameof(plexAccountId), plexAccountId);
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions

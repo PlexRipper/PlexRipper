@@ -6,7 +6,7 @@ using PlexRipper.Application.PlexAccounts;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class PlexAccountService_CreatePlexAccountAsync_UnitTests
+public class PlexAccountService_CreatePlexAccountAsync_UnitTests : BaseUnitTest
 {
     private readonly Mock<PlexAccountService> _sut;
 
@@ -18,9 +18,8 @@ public class PlexAccountService_CreatePlexAccountAsync_UnitTests
 
     private readonly Mock<IInspectServerScheduler> _inspectServerScheduler = new();
 
-    public PlexAccountService_CreatePlexAccountAsync_UnitTests(ITestOutputHelper output)
+    public PlexAccountService_CreatePlexAccountAsync_UnitTests(ITestOutputHelper output) : base(output)
     {
-        Log.SetupTestLogging(output);
         _sut = new Mock<PlexAccountService>(MockBehavior.Strict, _iMediator.Object, _plexServerService.Object, _plexApiService.Object,
             _inspectServerScheduler.Object);
     }

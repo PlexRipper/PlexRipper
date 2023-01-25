@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -16,7 +17,7 @@ public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryValidator : AbstractVal
 public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler : BaseHandler,
     IRequestHandler<GetMultiplePlexTvShowsByIdsWithEpisodesQuery, Result<List<PlexTvShow>>>
 {
-    public GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<List<PlexTvShow>>> Handle(GetMultiplePlexTvShowsByIdsWithEpisodesQuery request, CancellationToken cancellationToken)
     {

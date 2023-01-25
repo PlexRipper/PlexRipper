@@ -3,20 +3,17 @@ using Serilog.Sinks.TestCorrelator;
 
 namespace Logging.UnitTests;
 
-public class LoggingServiceIntegrationTests
+public class LoggingServiceIntegrationTests : BaseUnitTest
 {
-    public LoggingServiceIntegrationTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output, LogEventLevel.Verbose);
-    }
+    public LoggingServiceIntegrationTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose) { }
 
     [Fact]
     public void ShouldLogDebugToUnitTestConsole()
     {
         using (TestCorrelator.CreateContext())
         {
-            Log.Verbose("This is a verbose string");
-            Log.Debug("This is a debug string");
+            //_log.Verbose("This is a verbose string");
+            _log.Debug("This is a debug string", 0);
             Log.Warning("This is a warning string");
             Log.Information("This is an information string");
             Log.Error("This is an error string");

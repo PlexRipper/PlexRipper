@@ -1,7 +1,7 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -14,10 +14,10 @@ public class PlexServerConnectionController : BaseController
     private readonly IPlexServerConnectionsService _plexServerConnectionsService;
 
     public PlexServerConnectionController(
+        ILog log,
         IMapper mapper,
         IPlexServerConnectionsService plexServerConnectionsService,
-        INotificationsService notificationsService) : base(mapper,
-        notificationsService)
+        INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _plexServerConnectionsService = plexServerConnectionsService;
     }

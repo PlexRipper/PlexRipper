@@ -1,6 +1,8 @@
 using System.Net.Http.Json;
+using Logging.Interface;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config;
+using Serilog.Core;
 using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
@@ -14,6 +16,7 @@ public class BaseIntegrationTests : IAsyncLifetime
     private System.Net.Http.HttpClient _client;
     private MockPlexApi _mockPlexApi;
     protected BaseContainer Container;
+    protected ILog _log;
 
     #endregion
 
@@ -23,6 +26,7 @@ public class BaseIntegrationTests : IAsyncLifetime
     {
         // Log.SetupTestLogging(output, logLevel);
         LogConfig.SetTestOutputHelper(output);
+        _log = LogConfig.GetLog(logLevel);
         DatabaseName = MockDatabase.GetMemoryDatabaseName();
         Log.Information($"Initialized integration test with database name: {DatabaseName}");
         BogusExtensions.Setup();
@@ -73,7 +77,7 @@ public class BaseIntegrationTests : IAsyncLifetime
             throw new Exception(msg);
         }
 
-        _mockPlexApi = new MockPlexApi(options, GetPlexServerUris);
+        _mockPlexApi = new MockPlexApi(_log, options, GetPlexServerUris);
     }
 
     #endregion
@@ -92,7 +96,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected Uri SpinUpPlexServer(Action<PlexMockServerConfig> options = null)
     {
-        var mockServer = new PlexMockServer(options);
+        var mockServer = new PlexMockServer(_log, options);
         _plexMockServers.Add(mockServer);
         return mockServer.ServerUri;
     }

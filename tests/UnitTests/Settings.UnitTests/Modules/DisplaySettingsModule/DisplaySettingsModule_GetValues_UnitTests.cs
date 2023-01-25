@@ -2,12 +2,9 @@
 
 namespace Settings.UnitTests.Modules;
 
-public class DisplaySettingsModule_GetValues_UnitTests
+public class DisplaySettingsModule_GetValues_UnitTests : BaseUnitTest
 {
-    public DisplaySettingsModule_GetValues_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DisplaySettingsModule_GetValues_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public void ShouldReturnCurrentValues_WhenValidSettingsValuesAreSet()

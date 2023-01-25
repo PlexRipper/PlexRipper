@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Environment;
 using FileSystem.Contracts;
+using Logging.Interface;
 using PlexRipper.Domain.Config;
 using Settings.Contracts;
 
@@ -10,6 +11,7 @@ public class ConfigManager : IConfigManager
 {
     #region Fields
 
+    private readonly ILog _log;
     private readonly IFileSystem _fileSystem;
 
     private readonly IDirectorySystem _directorySystem;
@@ -22,8 +24,9 @@ public class ConfigManager : IConfigManager
 
     #region Constructor
 
-    public ConfigManager(IFileSystem fileSystem, IDirectorySystem directorySystem, IPathProvider pathProvider, IUserSettings userSettings)
+    public ConfigManager(ILog log, IFileSystem fileSystem, IDirectorySystem directorySystem, IPathProvider pathProvider, IUserSettings userSettings)
     {
+        _log = log;
         _fileSystem = fileSystem;
         _directorySystem = directorySystem;
         _pathProvider = pathProvider;
@@ -38,17 +41,17 @@ public class ConfigManager : IConfigManager
     {
         _userSettings.SettingsUpdated.Subscribe(_ => SaveConfig());
 
-        Log.Information($"Checking if \"{_pathProvider.ConfigFileName}\" exists at \"{_pathProvider.ConfigDirectory}\"");
+        _log.Information("Checking if \"{ConfigFileName}\" exists at \"{ConfigDirectory}\"", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory, 0);
 
         var configDirectoryExistsResult = _directorySystem.Exists(_pathProvider.ConfigDirectory);
         if (configDirectoryExistsResult.IsFailed)
             return configDirectoryExistsResult.LogFatal();
 
         if (configDirectoryExistsResult.Value)
-            Log.Information($"Config directory exists, will use \"{_pathProvider.ConfigDirectory}\"");
+            _log.Information("Config directory exists, will use \"{ConfigDirectory}\"", _pathProvider.ConfigDirectory);
         else
         {
-            Log.Information($"Config directory does not exist, will create now at \"{_pathProvider.ConfigDirectory}\".");
+            _log.Information("Config directory does not exist, will create now at \"{ConfigDirectory}\"", _pathProvider.ConfigDirectory);
             var createResult = _directorySystem.CreateDirectory(_pathProvider.ConfigDirectory);
             if (createResult.IsFailed)
             {
@@ -56,12 +59,13 @@ public class ConfigManager : IConfigManager
                 return createResult.LogFatal();
             }
 
-            Log.Debug($"Directory: \"{_pathProvider.ConfigDirectory}\" created!");
+            _log.Debug("Directory: \"{ConfigDirectory}\" created!", _pathProvider.ConfigDirectory);
         }
 
         if (!ConfigFileExists())
         {
-            Log.Information($"\"{_pathProvider.ConfigFileName}\" doesn't exist, will create new one now in \"{_pathProvider.ConfigDirectory}\"");
+            _log.Information("\"{ConfigFileName}\" doesn't exist, will create new one now in \"{ConfigDirectory}\"", _pathProvider.ConfigFileName,
+                _pathProvider.ConfigDirectory, 0);
             return SaveConfig();
         }
 
@@ -75,7 +79,7 @@ public class ConfigManager : IConfigManager
         var readResult = ReadFromConfigFile();
         if (readResult.IsFailed)
         {
-            Log.Information($"Resetting {_pathProvider.ConfigFileName} because it could not be loaded correctly");
+            _log.Information("Resetting {ConfigFileName} because it could not be loaded correctly", _pathProvider.ConfigFileName);
             return ResetConfig();
         }
 

@@ -4,12 +4,9 @@ using PlexRipper.Settings.Modules;
 
 namespace Settings.UnitTests;
 
-public class UserSettings_Reset_UnitTests
+public class UserSettings_Reset_UnitTests : BaseUnitTest
 {
-    public UserSettings_Reset_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public UserSettings_Reset_UnitTests(ITestOutputHelper output) : base(output) { }
 
     private UserSettings CreateUserSettings()
     {

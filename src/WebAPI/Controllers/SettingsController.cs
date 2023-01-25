@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.WebAPI.Common.FluentResult;
 using Settings.Contracts;
@@ -13,9 +14,10 @@ public class SettingsController : BaseController
     private readonly IUserSettings _userSettings;
 
     public SettingsController(
+        ILog log,
         IMapper mapper,
         IUserSettings userSettings,
-        INotificationsService notificationsService) : base(mapper, notificationsService)
+        INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _userSettings = userSettings;
     }

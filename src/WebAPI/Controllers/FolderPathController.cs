@@ -1,8 +1,8 @@
 ﻿using Application.Contracts;
 using AutoMapper;
 using FileSystem.Contracts;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -19,10 +19,11 @@ public class FolderPathController : BaseController
     private readonly IFileSystem _fileSystem;
 
     public FolderPathController(
+        ILog log,
         IFolderPathService folderPathService,
         IFileSystem fileSystem,
         IMapper mapper,
-        INotificationsService notificationsService) : base(mapper, notificationsService)
+        INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _folderPathService = folderPathService;
         _fileSystem = fileSystem;

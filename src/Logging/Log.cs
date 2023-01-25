@@ -1,9 +1,4 @@
 using System.Runtime.CompilerServices;
-using Environment;
-using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.SystemConsole.Themes;
-using Xunit.Abstractions;
 
 // ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
@@ -24,26 +19,6 @@ public static class Log
         var fileName = Path.GetFileNameWithoutExtension(sourceFilePath);
 
         return $"[{fileName}.{memberName}] => {message}";
-    }
-
-    public static void DbContextLogger(
-        string message,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
-    {
-        switch (message)
-        {
-            // ReSharper disable once StringLiteralTypo
-            case { } s when s.StartsWith("dbug:"):
-                Debug(message, memberName, sourceFilePath);
-                break;
-            case { } s when s.StartsWith("info:"):
-                Information(message, memberName, sourceFilePath);
-                break;
-            case { } s when s.StartsWith("fail:"):
-                Error(message, memberName, sourceFilePath);
-                break;
-        }
     }
 
     #region Verbose
@@ -74,42 +49,6 @@ public static class Log
         [CallerFilePath] string sourceFilePath = "")
     {
         Serilog.Log.Verbose(
-            (ex != null ? ex.ToString() : string.Empty)
-            .FormatForContext(memberName, sourceFilePath)
-        );
-    }
-
-    #endregion
-
-    #region Debug
-
-    public static void Debug(
-        string message,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
-    {
-        Serilog.Log.Debug(message.FormatForContext(memberName, sourceFilePath));
-    }
-
-    public static void Debug(
-        string message,
-        Exception ex,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
-    {
-        Serilog.Log.Debug(
-            message
-                .FormatForException(ex)
-                .FormatForContext(memberName, sourceFilePath)
-        );
-    }
-
-    public static void Debug(
-        Exception ex,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
-    {
-        Serilog.Log.Debug(
             (ex != null ? ex.ToString() : string.Empty)
             .FormatForContext(memberName, sourceFilePath)
         );

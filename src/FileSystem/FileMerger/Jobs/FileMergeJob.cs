@@ -5,6 +5,7 @@ using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Environment;
+using Logging.Interface;
 using PlexRipper.FileSystem.Common;
 using Quartz;
 
@@ -12,17 +13,20 @@ namespace PlexRipper.FileSystem;
 
 public class FileMergeJob : IJob
 {
+    private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IFileMergeSystem _fileMergeSystem;
     private readonly INotificationsService _notificationsService;
     private readonly IFileMergeStreamProvider _fileMergeStreamProvider;
 
     public FileMergeJob(
+        ILog log,
         IMediator mediator,
         IFileMergeSystem fileMergeSystem,
         INotificationsService notificationsService,
         IFileMergeStreamProvider fileMergeStreamProvider)
     {
+        _log = log;
         _mediator = mediator;
         _fileMergeSystem = fileMergeSystem;
         _notificationsService = notificationsService;
@@ -41,7 +45,10 @@ public class FileMergeJob : IJob
         var dataMap = context.JobDetail.JobDataMap;
         var fileTaskId = dataMap.GetIntValue(FileTaskId);
         var token = context.CancellationToken;
+        _log.Debug("Executing job: {NameOfFileMergeJob)} for {NameOfFileTaskId)} with id: {FileTaskId}", nameof(FileMergeJob), nameof(fileTaskId), fileTaskId);
 
+        // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
+        // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
             var fileTaskResult = await _mediator.Send(new GetFileTaskByIdQuery(fileTaskId), token);
@@ -54,7 +61,8 @@ public class FileMergeJob : IJob
             var fileTask = fileTaskResult.Value;
             var downloadTask = fileTask.DownloadTask;
 
-            Log.Information($"Executing {nameof(FileMergeJob)} with name {fileTask.FileName} and id {fileTaskId}");
+            _log.Information("Executing {NameOfFileMergeJob)} with name {FileTaskFileName} and id {FileTaskId}", nameof(FileMergeJob), fileTask.FileName,
+                fileTaskId);
 
             if (!fileTask.FilePaths.Any())
             {
@@ -118,7 +126,7 @@ public class FileMergeJob : IJob
                 if (EnvironmentExtensions.IsIntegrationTestMode())
                     outputStream = new ThrottledStream(streamResult.Value, 5000);
 
-                Log.Debug($"Combining {fileTask.FilePaths.Count} into a single file");
+                _log.Debug("Combining {FilePathsCount} into a single file", fileTask.FilePaths.Count);
 
                 // TODO Make merge able to be canceled with token
                 await _fileMergeStreamProvider.MergeFiles(fileTask.FilePaths, outputStream, _bytesReceivedProgress, token);
@@ -136,7 +144,7 @@ public class FileMergeJob : IJob
             _bytesReceivedProgress.Dispose();
             await _mediator.Send(new DeleteFileTaskByIdCommand(fileTask.Id), token);
             await _mediator.Publish(new DownloadStatusChanged(downloadTask.Id, downloadTask.RootDownloadTaskId, DownloadStatus.Completed), token);
-            Log.Information($"Finished combining {fileTask.FilePaths.Count} files into {fileTask.FileName}");
+            _log.Information("Finished combining {FilePathsCount} files into {FileTaskFileName}", fileTask.FilePaths.Count, fileTask.FileName, 0);
         }
         catch (Exception e)
         {

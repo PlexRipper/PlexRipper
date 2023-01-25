@@ -1,4 +1,5 @@
 using Environment;
+using Logging.Interface;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -7,9 +8,15 @@ using Xunit.Abstractions;
 
 namespace Logging;
 
-public static class LogConfig
+public class LogConfig
 {
     private static ITestOutputHelper _testOutput;
+    private static ILog _log;
+
+    protected LogConfig()
+    {
+        _log = new Log2.Log(GetLogger());
+    }
 
     private static string Template => "{NewLine}{Timestamp:HH:mm:ss} [{Level}] [{FileName}.{MemberName}:{LineNumber}] => {Message}{NewLine}{Exception}";
 
@@ -45,6 +52,15 @@ public static class LogConfig
             .WriteTo.TestOutput(_testOutput, minimumLogLevel, Template)
             .WriteTo.TestCorrelator(minimumLogLevel)
             .CreateLogger();
+    }
+
+    /// <summary>
+    /// Returns a reference to the singleton <see cref="ILog"/> object.
+    /// </summary>
+    /// <returns></returns>
+    public static ILog GetLog(LogEventLevel logLevel = LogEventLevel.Debug)
+    {
+        return _log ??= new Log2.Log(GetLogger(logLevel));
     }
 
     private static LoggerConfiguration GetBaseConfiguration()

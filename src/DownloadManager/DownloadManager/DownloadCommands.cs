@@ -3,6 +3,7 @@ using BackgroundServices.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using FileSystem.Contracts;
+using Logging.Interface;
 
 namespace PlexRipper.DownloadManager;
 
@@ -15,6 +16,7 @@ public class DownloadCommands : IDownloadCommands
     private readonly IDirectorySystem _directorySystem;
     private readonly IDownloadTaskValidator _downloadTaskValidator;
 
+    private readonly ILog _log;
     private readonly IMediator _mediator;
 
     private readonly INotificationsService _notificationsService;
@@ -27,6 +29,7 @@ public class DownloadCommands : IDownloadCommands
     #region Constructor
 
     public DownloadCommands(
+        ILog log,
         IMediator mediator,
         IDownloadQueue downloadQueue,
         IDirectorySystem directorySystem,
@@ -35,6 +38,7 @@ public class DownloadCommands : IDownloadCommands
         IDownloadTaskFactory downloadTaskFactory,
         IDownloadTaskScheduler downloadTaskScheduler)
     {
+        _log = log;
         _mediator = mediator;
         _downloadQueue = downloadQueue;
         _directorySystem = directorySystem;
@@ -63,7 +67,7 @@ public class DownloadCommands : IDownloadCommands
         if (createResult.IsFailed)
             return createResult.ToResult().LogError();
 
-        Log.Debug($"Successfully added all {validateResult.Value.Count} DownloadTasks");
+        _log.Debug("Successfully added all {ValidateCount} DownloadTasks", validateResult.Value.Count);
         var uniquePlexServers = downloadTasks.Select(x => x.PlexServerId).Distinct().ToList();
 
         await _mediator.Publish(new CheckDownloadQueue(uniquePlexServers));
@@ -103,8 +107,8 @@ public class DownloadCommands : IDownloadCommands
 
         if (await _downloadTaskScheduler.IsDownloading(downloadTaskId))
         {
-            Log.Information(
-                $"PlexServer {downloadTasksResult.Value.PlexServer.Name} already has a DownloadTask downloading so another one cannot be started");
+            _log.Information("PlexServer {PlexServerName} already has a DownloadTask downloading so another one cannot be started",
+                downloadTasksResult.Value.PlexServer.Name);
             return Result.Ok();
         }
 
@@ -147,7 +151,7 @@ public class DownloadCommands : IDownloadCommands
             return downloadTask.ToResult();
         }
 
-        Log.Information($"Stopping {downloadTask.Value.FullTitle} from downloading");
+        _log.Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.Value.FullTitle);
 
         // Check if currently downloading
         var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskId);

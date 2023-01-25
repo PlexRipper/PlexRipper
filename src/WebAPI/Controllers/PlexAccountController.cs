@@ -1,7 +1,7 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -11,7 +11,7 @@ public class PlexAccountController : BaseController
 {
     private readonly IPlexAccountService _plexAccountService;
 
-    public PlexAccountController(IPlexAccountService plexAccountService, IMapper mapper, INotificationsService notificationsService) : base(
+    public PlexAccountController(ILog log, IPlexAccountService plexAccountService, IMapper mapper, INotificationsService notificationsService) : base(log,
         mapper, notificationsService)
     {
         _plexAccountService = plexAccountService;
@@ -36,9 +36,8 @@ public class PlexAccountController : BaseController
             return NotFound(Result.Fail(msg));
         }
 
-        var msg2 = $"Returned {mapResult.Count} accounts";
-        Log.Debug(msg2);
-        return Ok(Result.Ok(mapResult).WithSuccess(msg2));
+        _log.Debug("Returned {PlexAccountCount} accounts", mapResult.Count);
+        return Ok(Result.Ok(mapResult).WithSuccess($"Returned {mapResult.Count} accounts"));
     }
 
     // GET api/<PlexAccountController>/5
@@ -129,9 +128,8 @@ public class PlexAccountController : BaseController
 
             if (result.Value)
             {
-                var msg = $"Username: {username} is available";
-                Log.Debug(msg);
-                return Ok(Result.Ok(true).WithSuccess(msg));
+                _log.Debug("Username: {UserName} is available", username);
+                return Ok(Result.Ok(true).WithSuccess($"Username: {username} is available"));
             }
             else
             {

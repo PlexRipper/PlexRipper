@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -15,7 +16,7 @@ public class DeleteMediaFromPlexLibraryCommandValidator : AbstractValidator<Dele
 
 public class DeleteMediaFromPlexLibraryCommandHandler : BaseHandler, IRequestHandler<DeleteMediaFromPlexLibraryCommand, Result<bool>>
 {
-    public DeleteMediaFromPlexLibraryCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public DeleteMediaFromPlexLibraryCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<bool>> Handle(DeleteMediaFromPlexLibraryCommand command, CancellationToken cancellationToken)
     {

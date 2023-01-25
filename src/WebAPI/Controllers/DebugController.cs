@@ -1,8 +1,8 @@
 ﻿using Application.Contracts;
 using AutoMapper;
 using BackgroundServices.Contracts;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -14,10 +14,11 @@ public class DebugController : BaseController
     private readonly IInspectServerScheduler _inspectServerScheduler;
 
     public DebugController(
+        ILog log,
         IDownloadTaskScheduler downloadTaskScheduler,
         IMapper mapper,
         INotificationsService notificationsService,
-        IInspectServerScheduler inspectServerScheduler) : base(mapper,
+        IInspectServerScheduler inspectServerScheduler) : base(log, mapper,
         notificationsService)
     {
         _downloadTaskScheduler = downloadTaskScheduler;

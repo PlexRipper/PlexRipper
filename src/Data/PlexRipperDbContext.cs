@@ -3,6 +3,7 @@ using System.Reflection;
 using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using Environment;
+using Logging.LogStatic;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -119,7 +120,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
         if (!optionsBuilder.IsConfigured)
         {
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            optionsBuilder.LogTo(text => Log.DbContextLogger(text), LogLevel.Error);
+            optionsBuilder.LogTo(text => LogStatic.DbContextLogger(text), LogLevel.Error);
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder
                 .UseSqlite(PathProvider.DatabaseConnectionString,
@@ -158,13 +159,13 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
     {
         try
         {
-            Log.Information("Setting up the PlexRipper database");
+            LogStatic.InformationLine("Setting up the PlexRipper database");
 
             // Don't migrate when running in memory, this causes error:
             // "Relational-specific methods can only be used when the context is using a relational database provider."
             if (!Database.IsInMemory() && !EnvironmentExtensions.IsIntegrationTestMode())
             {
-                Log.Information("Attempting to migrate database");
+                LogStatic.Information("Attempting to migrate database", 0);
                 Database.Migrate();
             }
         }
@@ -180,8 +181,8 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
         {
             if (!EnvironmentExtensions.IsIntegrationTestMode())
             {
-                Log.Information("Database was successfully connected!");
-                Log.Information($"Database connected at: {DatabasePath}");
+                LogStatic.InformationLine("Database was successfully connected!");
+                LogStatic.Information("Database connected at: {DatabasePath}", DatabasePath);
             }
 
             return Result.Ok();
@@ -195,7 +196,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
     {
         try
         {
-            Log.Information("Resetting PlexRipper database now");
+            LogStatic.InformationLine("Resetting PlexRipper database now");
             Database.CloseConnection();
             BackUpDatabase();
             Database.EnsureDeleted();
@@ -213,7 +214,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
 
     private Result BackUpDatabase()
     {
-        Log.Information("Attempting to back-up the PlexRipper database");
+        LogStatic.InformationLine("Attempting to back-up the PlexRipper database");
         if (!File.Exists(_pathProvider.DatabasePath))
             return Result.Fail($"Could not find Database at path: {_pathProvider.DatabasePath}").LogError();
 
@@ -235,7 +236,8 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
                     try
                     {
                         File.Copy(databaseFilePath, destinationPath);
-                        Log.Information($"Successfully copied \"{databaseFilePath}\" to back-up location\"{destinationPath}\"");
+                        LogStatic.Information("Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"", databaseFilePath,
+                            destinationPath, 0);
                     }
                     catch (Exception e)
                     {

@@ -1,10 +1,10 @@
 ﻿using System.Net.Mime;
 using Application.Contracts;
 using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers;
@@ -15,12 +15,15 @@ namespace PlexRipper.WebAPI.Controllers;
 [EnableCors("CORS_Configuration")]
 public abstract class BaseController : ControllerBase
 {
+    protected readonly ILog _log;
+
     protected readonly IMapper _mapper;
 
     protected readonly INotificationsService _notificationsService;
 
-    protected BaseController(IMapper mapper, INotificationsService notificationsService)
+    protected BaseController(ILog log, IMapper mapper, INotificationsService notificationsService)
     {
+        _log = log;
         _mapper = mapper;
         _notificationsService = notificationsService;
     }

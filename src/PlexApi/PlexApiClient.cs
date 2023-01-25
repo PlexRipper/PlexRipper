@@ -1,8 +1,8 @@
 using System.Net;
 using System.Text.Json;
 using FluentResultExtensions;
+using Logging.Interface;
 using PlexApi.Contracts;
-using PlexRipper.PlexApi.Converters;
 using PlexRipper.PlexApi.Extensions;
 using Polly;
 using RestSharp;
@@ -13,6 +13,7 @@ namespace PlexRipper.PlexApi;
 
 public class PlexApiClient
 {
+    private readonly ILog _log;
     private readonly RestClient _client;
 
     public static JsonSerializerOptions SerializerOptions => new()
@@ -23,8 +24,9 @@ public class PlexApiClient
         Converters = { new LongToDateTime() },
     };
 
-    public PlexApiClient(HttpClient httpClient)
+    public PlexApiClient(ILog log, HttpClient httpClient)
     {
+        _log = log;
         var options = new RestClientOptions()
         {
             MaxTimeout = 10000,
@@ -37,7 +39,7 @@ public class PlexApiClient
 
     public async Task<Result<T>> SendRequestAsync<T>(RestRequest request, int retryCount = 2, Action<PlexApiClientProgress> action = null) where T : class
     {
-        Log.Debug($"Sending request to: {_client.BuildUri(request)}");
+        _log.Debug("Sending request to: {Request}", _client.BuildUri(request));
 
         var response = await _client.SendRequestWithPolly<T>(request, retryCount, action);
         return GenerateResponseResult(response);

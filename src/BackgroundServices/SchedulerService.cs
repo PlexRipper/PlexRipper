@@ -1,4 +1,5 @@
 ﻿using BackgroundServices.Contracts;
+using Logging.Interface;
 using Quartz;
 using Quartz.Impl.Matchers;
 
@@ -8,6 +9,7 @@ public class SchedulerService : ISchedulerService
 {
     #region Fields
 
+    private readonly ILog _log;
     private readonly IScheduler _scheduler;
     private readonly IAllJobListener _allJobListener;
 
@@ -15,8 +17,9 @@ public class SchedulerService : ISchedulerService
 
     #region Constructors
 
-    public SchedulerService(IScheduler scheduler, IAllJobListener allJobListener)
+    public SchedulerService(ILog log, IScheduler scheduler, IAllJobListener allJobListener)
     {
+        _log = log;
         _scheduler = scheduler;
         _allJobListener = allJobListener;
     }
@@ -55,7 +58,7 @@ public class SchedulerService : ISchedulerService
 
     private Result SetupListeners()
     {
-        Log.Debug("Setting up Quartz listeners");
+        _log.Debug("Setting up Quartz listeners", 0);
         _scheduler.ListenerManager.AddJobListener(_allJobListener, GroupMatcher<JobKey>.AnyGroup());
         return Result.Ok();
     }

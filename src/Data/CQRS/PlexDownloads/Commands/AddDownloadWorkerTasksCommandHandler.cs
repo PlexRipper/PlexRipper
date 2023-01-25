@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -22,7 +23,7 @@ public class AddDownloadWorkerTasksCommandValidator : AbstractValidator<AddDownl
 
 public class AddDownloadWorkerTasksCommandHandler : BaseHandler, IRequestHandler<AddDownloadWorkerTasksCommand, Result<bool>>
 {
-    public AddDownloadWorkerTasksCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public AddDownloadWorkerTasksCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<bool>> Handle(AddDownloadWorkerTasksCommand command, CancellationToken cancellationToken)
     {

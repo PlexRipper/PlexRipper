@@ -2,6 +2,7 @@
 using Data.Contracts;
 using EFCore.BulkExtensions;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -33,13 +34,15 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
         PreserveInsertOrder = true,
     };
 
-    public CreateUpdateOrDeletePlexTvShowsCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public CreateUpdateOrDeletePlexTvShowsCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<bool>> Handle(CreateUpdateOrDeletePlexTvShowsCommand command, CancellationToken cancellationToken)
     {
         var plexLibrary = command.PlexLibrary;
 
-        Log.Debug($"Starting adding, updating or deleting of tv shows in library: {plexLibrary.Title} - {plexLibrary.Id}");
+        _log.Debug("Starting adding, updating or deleting of tv shows in library: {PlexLibraryTitle} with id:  {PlexLibraryId}", plexLibrary.Title,
+            plexLibrary.Id);
+
         var stopWatch = new Stopwatch();
         stopWatch.Start();
 
@@ -183,8 +186,9 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
         await _dbContext.BulkDeleteAsync(deleteEpisodeDict.Select(x => x.Value).ToList(), _config, cancellationToken: cancellationToken);
 
         stopWatch.Stop();
-        Log.Information(
-            $"Finished updating plexLibrary: {plexLibrary.Title} with id: {plexLibrary.Id} in {stopWatch.Elapsed.TotalSeconds} seconds.");
+        _log.Information(
+            "Finished updating plexLibrary: {PlexLibraryTitle} with id: {PlexLibraryId} in {TotalSeconds} seconds", plexLibrary.Title, plexLibrary.Id,
+            stopWatch.Elapsed.TotalSeconds);
         return Result.Ok(true);
     }
 

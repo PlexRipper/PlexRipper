@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -9,7 +10,7 @@ public class GetAllFolderPathsQueryValidator : AbstractValidator<GetAllFolderPat
 
 public class GetAllFolderPathsQueryHandler : BaseHandler, IRequestHandler<GetAllFolderPathsQuery, Result<List<FolderPath>>>
 {
-    public GetAllFolderPathsQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetAllFolderPathsQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<List<FolderPath>>> Handle(GetAllFolderPathsQuery request, CancellationToken cancellationToken)
     {

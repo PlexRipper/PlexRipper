@@ -1,11 +1,8 @@
 ﻿namespace Domain.UnitTests.Converters;
 
-public class DownloadTaskActions_Aggregate_UnitTests
+public class DownloadTaskActions_Aggregate_UnitTests : BaseUnitTest
 {
-    public DownloadTaskActions_Aggregate_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DownloadTaskActions_Aggregate_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public void ShouldBeStatusDownloading_WhenSomeAreDownloadFinished()

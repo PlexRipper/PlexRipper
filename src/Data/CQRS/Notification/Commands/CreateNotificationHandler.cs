@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -17,7 +18,7 @@ public class CreateNotificationValidator : AbstractValidator<CreateNotificationC
 
 public class CreateNotificationHandler : BaseHandler, IRequestHandler<CreateNotificationCommand, Result<int>>
 {
-    public CreateNotificationHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public CreateNotificationHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<int>> Handle(CreateNotificationCommand command, CancellationToken cancellationToken)
     {

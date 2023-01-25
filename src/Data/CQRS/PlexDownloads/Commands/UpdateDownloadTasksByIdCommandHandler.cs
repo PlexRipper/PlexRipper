@@ -1,6 +1,7 @@
 ﻿using Data.Contracts;
 using EFCore.BulkExtensions;
 using FluentValidation;
+using Logging.Interface;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -37,7 +38,7 @@ public class UpdateDownloadTasksByIdCommandValidator : AbstractValidator<UpdateD
 
 public class UpdateDownloadTasksByIdCommandHandler : BaseHandler, IRequestHandler<UpdateDownloadTasksByIdCommand, Result>
 {
-    public UpdateDownloadTasksByIdCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public UpdateDownloadTasksByIdCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(UpdateDownloadTasksByIdCommand command, CancellationToken cancellationToken)
     {

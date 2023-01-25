@@ -3,6 +3,7 @@ using AutoMapper;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using FileSystem.Contracts;
+using Logging.Interface;
 using PlexApi.Contracts;
 using Settings.Contracts;
 
@@ -21,6 +22,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
     private readonly IMapper _mapper;
 
+    private readonly ILog _log;
     private readonly IMediator _mediator;
 
     private readonly INotificationsService _notificationsService;
@@ -30,6 +32,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     #region Constructor
 
     public DownloadTaskFactory(
+        ILog log,
         IMediator mediator,
         IMapper mapper,
         INotificationsService notificationsService,
@@ -38,6 +41,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         IPlexApiService plexApiService,
         IDownloadManagerSettingsModule downloadManagerSettings)
     {
+        _log = log;
         _mediator = mediator;
         _mapper = mapper;
         _notificationsService = notificationsService;
@@ -338,7 +342,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         if (!plexMovieIds.Any())
             return ResultExtensions.IsEmpty(nameof(plexMovieIds)).LogWarning();
 
-        Log.Debug($"Creating {plexMovieIds.Count} movie download tasks.");
+        _log.Debug("Creating {PlexMovieIdsCount} movie download tasks", plexMovieIds.Count);
         var plexMoviesResult = await _mediator.Send(new GetMultiplePlexMoviesByIdsQuery(plexMovieIds, true, true));
 
         if (plexMoviesResult.IsFailed)
@@ -397,7 +401,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         if (!downloadTaskIds.Any())
             return ResultExtensions.IsEmpty(nameof(downloadTaskIds)).LogWarning();
 
-        Log.Debug($"Regenerating {downloadTaskIds.Count} download tasks.");
+        _log.Debug("Regenerating {DownloadTaskIdsCount} download tasks", downloadTaskIds.Count);
 
         var freshDownloadTasks = new List<DownloadTask>();
 
@@ -443,7 +447,9 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             freshDownloadTasks.AddRange(downloadTasksResult.Value);
         }
 
-        Log.Debug($"Successfully regenerated {freshDownloadTasks.Count} out of {downloadTaskIds.Count} download tasks.");
+        _log.Debug("Successfully regenerated {FreshDownloadTasksCount} out of {DownloadTaskIdsCount} download tasks", freshDownloadTasks.Count,
+            downloadTaskIds.Count);
+
         if (downloadTaskIds.Count - freshDownloadTasks.Count > 0)
             Log.Error("Failed to generate");
 

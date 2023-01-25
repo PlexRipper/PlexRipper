@@ -1,4 +1,5 @@
 ﻿using Data.Contracts;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -7,7 +8,7 @@ namespace PlexRipper.Data.PlexTvShows;
 public class GetPlexTvShowsByPlexLibraryIdQueryHandler : BaseHandler,
     IRequestHandler<GetPlexTvShowsByPlexLibraryIdQuery, Result<List<PlexTvShow>>>
 {
-    public GetPlexTvShowsByPlexLibraryIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetPlexTvShowsByPlexLibraryIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<List<PlexTvShow>>> Handle(GetPlexTvShowsByPlexLibraryIdQuery request, CancellationToken cancellationToken)
     {

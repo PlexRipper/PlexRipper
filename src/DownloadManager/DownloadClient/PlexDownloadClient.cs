@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using Data.Contracts;
 using DownloadManager.Contracts;
+using Logging.Interface;
 using PlexRipper.Domain.RxNet;
 using Settings.Contracts;
 
@@ -15,6 +16,7 @@ public class PlexDownloadClient : IDisposable
 {
     #region Fields
 
+    private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
 
@@ -33,14 +35,17 @@ public class PlexDownloadClient : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="PlexDownloadClient"/> class.
     /// </summary>
+    /// <param name="log"></param>
     /// <param name="mediator"></param>
     /// <param name="downloadWorkerFactory"></param>
     /// <param name="serverSettings"></param>
     public PlexDownloadClient(
+        ILog log,
         IMediator mediator,
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
         IServerSettingsModule serverSettings)
     {
+        _log = log;
         _mediator = mediator;
         _downloadWorkerFactory = downloadWorkerFactory;
         _serverSettings = serverSettings;
@@ -123,7 +128,7 @@ public class PlexDownloadClient : IDisposable
         if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
             return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
 
-        Log.Debug($"Start downloading {DownloadTask.FileName}");
+        _log.Debug("Start downloading {FileName}", DownloadTask.FileName);
         try
         {
             var results = new List<Result>();
@@ -146,7 +151,7 @@ public class PlexDownloadClient : IDisposable
 
     public async Task<Result<DownloadTask>> StopAsync()
     {
-        Log.Information($"Stop downloading {DownloadTask.FileName} from {DownloadTask.DownloadUrl}");
+        _log.Information("Stop downloading {DownloadTaskFileName} from {DownloadTaskDownloadUrl}", DownloadTask.FileName, DownloadTask.DownloadUrl, 0);
 
         await Task.WhenAll(_downloadWorkers.Select(x => x.StopAsync()));
 
@@ -182,7 +187,7 @@ public class PlexDownloadClient : IDisposable
         }
 
         if (DownloadTask is not null)
-            Log.Debug($"DownloadWorkers have been disposed for {DownloadTask.FullTitle}");
+            _log.Debug("DownloadWorkers have been disposed for {DownloadTaskFullTitle}", DownloadTask.FullTitle);
     }
 
     private Result<List<DownloadWorkerTask>> CreateDownloadWorkers(DownloadTask downloadTask)

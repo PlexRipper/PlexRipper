@@ -1,6 +1,7 @@
 using Application.Contracts;
 using BackgroundServices.Contracts;
 using Data.Contracts;
+using Logging.Interface;
 using PlexApi.Contracts;
 using Settings.Contracts;
 
@@ -8,6 +9,7 @@ namespace PlexRipper.Application;
 
 public class PlexServerService : IPlexServerService
 {
+    private readonly ILog _log;
     private readonly IMediator _mediator;
 
     private readonly IServerSettingsModule _serverSettingsModule;
@@ -18,6 +20,7 @@ public class PlexServerService : IPlexServerService
     private readonly IPlexLibraryService _plexLibraryService;
 
     public PlexServerService(
+        ILog log,
         IMediator mediator,
         IPlexApiService plexServiceApi,
         IPlexLibraryService plexLibraryService,
@@ -25,6 +28,7 @@ public class PlexServerService : IPlexServerService
         ISyncServerScheduler syncServerScheduler,
         IPlexServerConnectionsService plexServerConnectionsService)
     {
+        _log = log;
         _mediator = mediator;
         _serverSettingsModule = serverSettingsModule;
         _syncServerScheduler = syncServerScheduler;
@@ -141,7 +145,7 @@ public class PlexServerService : IPlexServerService
         if (plexAccountId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexAccountId)).LogWarning();
 
-        Log.Debug($"Refreshing Plex servers for PlexAccount: {plexAccountId}");
+        _log.Debug("Refreshing Plex servers for PlexAccount: {PlexAccountId}", plexAccountId);
         var tupleResult = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccountId);
         var serversResult = tupleResult.servers;
         var tokensResult = tupleResult.tokens;

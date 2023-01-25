@@ -1,11 +1,8 @@
 ﻿namespace Domain.UnitTests.Converters;
 
-public class HashGenerator_Generate_UnitTests
+public class HashGenerator_Generate_UnitTests : BaseUnitTest
 {
-    public HashGenerator_Generate_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public HashGenerator_Generate_UnitTests(ITestOutputHelper output): base(output) { }
 
     [Fact]
     public void ShouldGenerateAValidMD5Hash_WhenGivenAValidDownloadTask()

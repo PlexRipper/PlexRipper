@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Serilog.Core;
 using Serilog.Events;
 
 namespace Logging.Interface;
@@ -6,8 +7,6 @@ namespace Logging.Interface;
 public interface ILog
 {
     #region Debug
-
-
 
     /// <summary>
     /// Write a log event with the <see cref="LogEventLevel.Debug"/> level.
@@ -19,6 +18,7 @@ public interface ILog
     /// <example><code>
     /// Log.Debug("Starting up at {StartedAt}.", DateTime.Now);
     /// </code></example>
+    [MessageTemplateFormatMethod("messageTemplate")]
     void DebugLine(
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
@@ -36,6 +36,7 @@ public interface ILog
     /// <example>
     /// Log.Verbose("Staring into space, wondering if we're alone.");
     /// </example>
+    [MessageTemplateFormatMethod("messageTemplate")]
     void Debug<T>(
         string messageTemplate,
         T propertyValue = default!,
@@ -55,6 +56,7 @@ public interface ILog
     /// <example>
     /// Log.Debug("Starting up at {StartedAt}.", DateTime.Now);
     /// </example>
+    [MessageTemplateFormatMethod("messageTemplate")]
     void Debug<T0, T1>(
         string messageTemplate,
         T0 propertyValue0,
@@ -75,6 +77,7 @@ public interface ILog
     /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>    /// <example>
     /// Log.Debug("Starting up at {StartedAt}.", DateTime.Now);
     /// </example>
+    [MessageTemplateFormatMethod("messageTemplate")]
     void Debug<T0, T1, T2>(
         string messageTemplate,
         T0 propertyValue0,
@@ -95,6 +98,7 @@ public interface ILog
     /// <example>
     /// Log.Debug(ex, "Processed {RecordCount} records in {TimeMS}.", records.Length, sw.ElapsedMilliseconds);
     /// </example>
+    [MessageTemplateFormatMethod("messageTemplate")]
     void Debug(
         Exception exception,
         string messageTemplate,
@@ -102,12 +106,9 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-
     #endregion
 
     #region Information
-
-
 
     /// <summary>
     /// Write a log event with the <see cref="LogEventLevel.Information"/> level.
@@ -119,6 +120,7 @@ public interface ILog
     /// <example><code>
     /// Log.Information("Starting up at {StartedAt}.", DateTime.Now);
     /// </code></example>
+    [MessageTemplateFormatMethod("messageTemplate")]
     void InformationLine(
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
@@ -136,6 +138,7 @@ public interface ILog
     /// <example>
     /// Log.Verbose("Staring into space, wondering if we're alone.");
     /// </example>
+    [MessageTemplateFormatMethod("messageTemplate")]
     void Information<T>(
         string messageTemplate,
         T propertyValue = default!,
@@ -155,6 +158,7 @@ public interface ILog
     /// <example>
     /// Log.Information("Starting up at {StartedAt}.", DateTime.Now);
     /// </example>
+    [MessageTemplateFormatMethod("messageTemplate")]
     void Information<T0, T1>(
         string messageTemplate,
         T0 propertyValue0,
@@ -176,6 +180,7 @@ public interface ILog
     /// <example>
     /// Log.Information("Starting up at {StartedAt}.", DateTime.Now);
     /// </example>
+    [MessageTemplateFormatMethod("messageTemplate")]
     void Information<T0, T1, T2>(
         string messageTemplate,
         T0 propertyValue0,
@@ -196,13 +201,13 @@ public interface ILog
     /// <example>
     /// Log.Information(ex, "Processed {RecordCount} records in {TimeMS}.", records.Length, sw.ElapsedMilliseconds);
     /// </example>
+    [MessageTemplateFormatMethod("messageTemplate")]
     void Information(
         Exception exception,
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
-
 
     #endregion
 }

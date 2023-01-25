@@ -1,7 +1,10 @@
 using Autofac;
 using AutoMapper;
+using Logging.Interface;
 using PlexRipper.Data;
 using PlexRipper.WebAPI;
+using Serilog.Events;
+using Log = Logging.Log2.Log;
 
 namespace PlexRipper.BaseTests;
 
@@ -12,6 +15,7 @@ public class BaseUnitTest : IDisposable
     private string _databaseName;
     protected PlexRipperDbContext DbContext;
     private bool isDatabaseSetup = false;
+    protected ILog _log;
 
     #endregion
 
@@ -21,10 +25,13 @@ public class BaseUnitTest : IDisposable
     /// This constructor is run before every test
     /// </summary>
     /// <param name="output">Sets up the logging system for logging during testing.</param>
-    protected BaseUnitTest(ITestOutputHelper output)
+    /// <param name="logEventLevel"></param>
+    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug)
     {
-        Log.SetupTestLogging(output);
+        LogConfig.SetTestOutputHelper(output);
+        LogConfig.SetupLogging(logEventLevel);
         BogusExtensions.Setup();
+        _log = new Log(LogConfig.GetLogger());
     }
 
     #endregion
@@ -62,7 +69,7 @@ public class BaseUnitTest : IDisposable
         if (!isDatabaseSetup)
         {
             var msg = $"The test database has not been setup yet, run \"{nameof(SetupDatabase)}()\" in the test first!";
-            Log.Error(msg);
+            Logging.Log.Error(msg);
             throw new Exception(msg);
         }
 

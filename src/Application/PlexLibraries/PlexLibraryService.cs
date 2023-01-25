@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Application.Contracts;
 using Data.Contracts;
+using Logging.Interface;
 using PlexApi.Contracts;
 using WebAPI.Contracts;
 
@@ -10,6 +11,7 @@ public class PlexLibraryService : IPlexLibraryService
 {
     #region Fields
 
+    private readonly ILog _log;
     private readonly IMediator _mediator;
 
     private readonly IPlexApiService _plexServiceApi;
@@ -21,10 +23,12 @@ public class PlexLibraryService : IPlexLibraryService
     #region Constructors
 
     public PlexLibraryService(
+        ILog log,
         IMediator mediator,
         IPlexApiService plexServiceApi,
         ISignalRService signalRService)
     {
+        _log = log;
         _mediator = mediator;
         _plexServiceApi = plexServiceApi;
         _signalRService = signalRService;
@@ -111,7 +115,7 @@ public class PlexLibraryService : IPlexLibraryService
 
         // Phase 3 of 4: PlexLibrary media data was parsed successfully.
         SendProgress(3, 4);
-        Log.Debug($"Finished retrieving all media for library {plexLibrary.Title} in {timer.Elapsed.TotalSeconds}");
+        _log.Debug("Finished retrieving all media for library {Title} in {TotalSeconds} seconds.", plexLibrary.Title, timer.Elapsed.TotalSeconds);
         timer.Restart();
 
         // Update the MetaData of this library
@@ -127,7 +131,8 @@ public class PlexLibraryService : IPlexLibraryService
         if (createResult.IsFailed)
             return createResult.ToResult();
 
-        Log.Debug($"Finished updating all media in the database for library {plexLibrary.Title} in {timer.Elapsed.TotalSeconds}");
+        _log.Debug("Finished updating all media in the database for library {Title} in {TotalSeconds} seconds.", plexLibrary.Title,
+            timer.Elapsed.TotalSeconds);
 
         // Phase 4 of 4: Database has been successfully updated with new library data.
         SendProgress(4, 4);
@@ -248,7 +253,8 @@ public class PlexLibraryService : IPlexLibraryService
         if (plexAccountId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexAccountId), plexAccountId).LogWarning();
 
-        Log.Debug($"Retrieving accessible PlexLibraries for plexServer with id: {plexServerId} by using Plex account with id {plexAccountId}");
+        _log.Debug("Retrieving accessible PlexLibraries for plexServer with id: {PlexServerId} by using Plex account with id {PlexAccountId}", plexServerId,
+            plexAccountId);
 
         var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServerId, plexAccountId);
         if (libraries.IsFailed)

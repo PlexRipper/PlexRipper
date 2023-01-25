@@ -24,7 +24,7 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler_UnitTests : Ba
 
         var downloadTasks = await DbContext.DownloadTasks.IncludeDownloadTasks().IncludeByRoot().ToListAsync();
         var request = new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTasks.First().Id);
-        var handler = new UpdateRootDownloadStatusOfDownloadTaskCommandHandler(GetDbContext());
+        var handler = new UpdateRootDownloadStatusOfDownloadTaskCommandHandler(_log, GetDbContext());
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);
@@ -61,7 +61,7 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler_UnitTests : Ba
         SaveChanges();
 
         var request = new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTasks.First().Id);
-        var handler = new UpdateRootDownloadStatusOfDownloadTaskCommandHandler(GetDbContext());
+        var handler = new UpdateRootDownloadStatusOfDownloadTaskCommandHandler(_log, GetDbContext());
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);
@@ -91,7 +91,7 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler_UnitTests : Ba
         downloadTasks[0].Children[0].Children[0].Children[0].DownloadStatus = DownloadStatus.Error;
         SaveChanges();
         var request = new UpdateRootDownloadStatusOfDownloadTaskCommand(downloadTasks.First().Id);
-        var handler = new UpdateRootDownloadStatusOfDownloadTaskCommandHandler(GetDbContext());
+        var handler = new UpdateRootDownloadStatusOfDownloadTaskCommandHandler(_log, GetDbContext());
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);

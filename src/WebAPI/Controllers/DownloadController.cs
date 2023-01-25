@@ -1,7 +1,7 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
@@ -14,7 +14,8 @@ public class DownloadController : BaseController
 {
     private readonly IPlexDownloadService _plexDownloadService;
 
-    public DownloadController(IPlexDownloadService plexDownloadService, IMapper mapper, INotificationsService notificationsService) : base(mapper,
+    public DownloadController(ILog log, IPlexDownloadService plexDownloadService, IMapper mapper, INotificationsService notificationsService) : base(log,
+        mapper,
         notificationsService)
     {
         _plexDownloadService = plexDownloadService;

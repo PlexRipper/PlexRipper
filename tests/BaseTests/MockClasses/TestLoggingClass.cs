@@ -25,7 +25,13 @@ public class TestLoggingClass
         var position = new { Latitude = 25, Longitude = 134 };
         var elapsedMs = 34;
 
+        var string1 = "asfasf";
+        var string2 = "asfasf";
+
         _log.Debug("[DEBUG] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs);
+
+        //_log.Debug(string.Format("[DEBUG LOL] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs), 0);
+        // _log.Debug("[DEBUG] - Processed {String1} in {String2} ms.", string1, string2);
         _log.DebugLine("[DEBUG LINE] - LogDebug message");
         _log.Information("[INFORMATION] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs);
         _log.InformationLine("[INFORMATION LINE] - LogDebug message");

@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -19,7 +20,7 @@ public class GetAllPlexServersByPlexAccountIdQueryHandler : BaseHandler, IReques
 {
     private readonly IMapper _mapper;
 
-    public GetAllPlexServersByPlexAccountIdQueryHandler(PlexRipperDbContext dbContext, IMapper mapper) : base(dbContext)
+    public GetAllPlexServersByPlexAccountIdQueryHandler(ILog log, PlexRipperDbContext dbContext, IMapper mapper) : base(log, dbContext)
     {
         _mapper = mapper;
     }

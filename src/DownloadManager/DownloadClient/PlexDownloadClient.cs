@@ -111,7 +111,7 @@ public class PlexDownloadClient : IDisposable
         if (DownloadStatus != DownloadStatus.Downloading)
             Log.Warning($"DownloadClient with {DownloadTask.FileName} is currently not downloading and cannot be paused.");
 
-        Log.Information($"Pause downloading of {DownloadTask.FileName}");
+        _log.Information("Pause downloading of {DownloadTaskFileName}", DownloadTask.FileName);
 
         await Task.WhenAll(_downloadWorkers.Select(x => x.PauseAsync()));
 

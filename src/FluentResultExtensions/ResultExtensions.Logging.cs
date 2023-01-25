@@ -14,7 +14,13 @@ public static partial class ResultExtensions
 {
     #region Implementations
 
-    private static void LogByType(LogEventLevel logLevel, string message, Exception e = null, string memberName = default!, string sourceFilePath = default!, int sourceLineNumber = default!)
+    private static void LogByType(
+        LogEventLevel logLevel,
+        string message,
+        Exception e = null,
+        string memberName = default!,
+        string sourceFilePath = default!,
+        int sourceLineNumber = default!)
     {
         switch (logLevel)
         {
@@ -25,7 +31,7 @@ public static partial class ResultExtensions
                 LogStatic.Debug(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Information:
-                Log.Information(message, e, memberName, sourceFilePath);
+                LogStatic.Information(e, message, memberName, sourceFilePath);
                 break;
             case LogEventLevel.Warning:
                 Log.Warning(message, e, memberName, sourceFilePath);

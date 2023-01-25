@@ -75,7 +75,7 @@ public class ConfigManager : IConfigManager
 
     public virtual Result LoadConfig()
     {
-        Log.Information("Loading user config settings now.");
+        _log.Information("Loading user config settings now", 0);
         var readResult = ReadFromConfigFile();
         if (readResult.IsFailed)
         {
@@ -118,7 +118,7 @@ public class ConfigManager : IConfigManager
 
     public virtual Result SaveConfig()
     {
-        Log.Information("Saving user config settings now.");
+        _log.Information("Saving user config settings now", 0);
 
         var jsonSettings = GetJsonSettingsObject();
         if (jsonSettings.IsFailed)

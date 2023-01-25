@@ -26,7 +26,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler : BaseHandler, IRequest
         var serverAccessTokens = command.ServerAccessTokens;
 
         // Add or update the PlexAccount and PlexServer relationships
-        Log.Information("Adding or updating the PlexAccount association with PlexServers now.");
+        _log.Information("Adding or updating the PlexAccount association with PlexServers now", 0);
         var accessiblePlexServers = new List<int>();
         foreach (var serverAccessToken in serverAccessTokens)
         {

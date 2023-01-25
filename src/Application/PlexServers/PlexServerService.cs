@@ -55,7 +55,8 @@ public class PlexServerService : IPlexServerService
         var plexAccount = plexAccountResult.Value;
         var plexServers = plexAccountResult.Value.PlexServers;
 
-        Log.Information($"Inspecting {plexServers.Count} PlexServers for PlexAccount: {plexAccountResult.Value.DisplayName}");
+        _log.Information("Inspecting {PlexServersCount} PlexServers for PlexAccount: {PlexAccountDisplayName}", plexServers.Count,
+            plexAccountResult.Value.DisplayName, 0);
         if (!skipRefreshAccessibleServers)
         {
             var refreshResult = await RefreshAccessiblePlexServersAsync(plexAccount.Id);
@@ -73,7 +74,8 @@ public class PlexServerService : IPlexServerService
         if (checkResult.IsFailed)
             return checkResult;
 
-        Log.Information($"Successfully finished the inspection of all plexServers related to {nameof(PlexAccount)} {plexAccountId}");
+        _log.Information("Successfully finished the inspection of all plexServers related to {NameOfPlexAccount} {PlexAccountId}", nameof(PlexAccount),
+            plexAccountId);
         return Result.Ok();
     }
 
@@ -91,7 +93,7 @@ public class PlexServerService : IPlexServerService
 
         await _syncServerScheduler.QueueSyncPlexServerJob(plexServerId, true);
 
-        Log.Information($"Successfully finished the inspection of {nameof(PlexServer)} with id {plexServerId}");
+        _log.Information("Successfully finished the inspection of {NameOfPlexServer} with id {PlexServerId}", nameof(PlexServer), plexServerId);
         return await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
     }
 
@@ -175,7 +177,7 @@ public class PlexServerService : IPlexServerService
         if (plexAccountTokensResult.IsFailed)
             return plexAccountTokensResult;
 
-        Log.Information($"Successfully refreshed accessible Plex servers for account {plexAccountResult.Value.DisplayName}");
+        _log.Information("Successfully refreshed accessible Plex servers for account {DisplayName}", plexAccountResult.Value.DisplayName);
         return await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccountId));
     }
 

@@ -115,7 +115,7 @@ public class PlexLibraryService : IPlexLibraryService
 
         // Phase 3 of 4: PlexLibrary media data was parsed successfully.
         SendProgress(3, 4);
-        _log.Debug("Finished retrieving all media for library {Title} in {TotalSeconds} seconds.", plexLibrary.Title, timer.Elapsed.TotalSeconds);
+        _log.Debug("Finished retrieving all media for library {Title} in {Elapsed:000} seconds", plexLibrary.Title, timer.Elapsed.TotalSeconds, 0);
         timer.Restart();
 
         // Update the MetaData of this library
@@ -131,8 +131,8 @@ public class PlexLibraryService : IPlexLibraryService
         if (createResult.IsFailed)
             return createResult.ToResult();
 
-        _log.Debug("Finished updating all media in the database for library {Title} in {TotalSeconds} seconds.", plexLibrary.Title,
-            timer.Elapsed.TotalSeconds);
+        _log.Debug("Finished updating all media in the database for library {Title} in {Elapsed:000} seconds", plexLibrary.Title,
+            timer.Elapsed.TotalSeconds, 0);
 
         // Phase 4 of 4: Database has been successfully updated with new library data.
         SendProgress(4, 4);
@@ -194,7 +194,7 @@ public class PlexLibraryService : IPlexLibraryService
 
         if (!libraryDB.Value.HasMedia)
         {
-            Log.Information($"PlexLibrary with id {libraryId} has no media, forcing refresh from the PlexApi");
+            _log.Information("PlexLibrary with id {LibraryId} has no media, forcing refresh from the PlexApi", libraryId);
 
             var refreshResult = await RefreshLibraryMediaAsync(libraryId);
             if (refreshResult.IsFailed)
@@ -271,7 +271,7 @@ public class PlexLibraryService : IPlexLibraryService
 
     public async Task<Result> RetrieveAllAccessibleLibrariesAsync(int plexAccountId)
     {
-        Log.Information($"Retrieving accessible Plex libraries for Plex account with id {plexAccountId}");
+        _log.Information("Retrieving accessible Plex libraries for Plex account with id {PlexAccountId}", plexAccountId);
         var plexServersResult = await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccountId));
         if (plexServersResult.IsFailed)
             return plexServersResult.ToResult().LogError();
@@ -319,7 +319,7 @@ public class PlexLibraryService : IPlexLibraryService
                 return await RefreshPlexTvShowLibrary(newPlexLibrary, progressAction);
         }
 
-        Log.Information($"Successfully refreshed library {newPlexLibrary.Title} with id: {newPlexLibrary.Id}");
+        _log.Information("Successfully refreshed library {PlexLibraryTitle} with id: {PlexLibraryId}", newPlexLibrary.Title, newPlexLibrary.Id);
         return Result.Ok(newPlexLibrary);
     }
 

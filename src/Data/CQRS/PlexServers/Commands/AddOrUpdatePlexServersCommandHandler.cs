@@ -35,7 +35,7 @@ public class AddOrUpdatePlexServersCommandHandler : BaseHandler, IRequestHandler
         var plexServers = command.PlexServers;
 
         // Add or update the PlexServers in the database
-        Log.Information($"Adding or updating {plexServers.Count} PlexServers now.");
+        _log.Information("Adding or updating {PlexServersCount} PlexServers now", plexServers.Count);
         foreach (var plexServer in plexServers)
         {
             var plexServerDB =

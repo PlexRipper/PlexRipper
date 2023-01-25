@@ -39,7 +39,7 @@ public class SchedulerService : ISchedulerService
         SetupListeners();
         if (!_scheduler.IsStarted)
         {
-            Log.Information("Starting Quartz Scheduler");
+            _log.Information("Starting Quartz Scheduler", 0);
             await _scheduler.Start();
         }
 

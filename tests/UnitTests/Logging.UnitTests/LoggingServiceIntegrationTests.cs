@@ -15,7 +15,7 @@ public class LoggingServiceIntegrationTests : BaseUnitTest
             //_log.Verbose("This is a verbose string");
             _log.Debug("This is a debug string", 0);
             Log.Warning("This is a warning string");
-            Log.Information("This is an information string");
+            _log.Information("This is an information string", 0);
             Log.Error("This is an error string");
             Log.Fatal("This is a fatal string");
 

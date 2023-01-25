@@ -1,5 +1,6 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Logging.LogStatic;
 using PlexRipper.Domain.DownloadManager;
 using PlexRipper.Settings.Models;
 using Settings.Contracts;
@@ -32,7 +33,7 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
         var settings = GetPlexServerSettings(plexServerSettings.MachineIdentifier);
         if (settings is not null)
         {
-            Log.Information($"A Server setting with {plexServerSettings.MachineIdentifier} already exists, will update now.");
+            LogStatic.Information("A Server setting with {MachineIdentifier} already exists, will update now", plexServerSettings.MachineIdentifier);
             SetServerSettings(plexServerSettings);
         }
         else

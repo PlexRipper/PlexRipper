@@ -56,45 +56,6 @@ public static class Log
 
     #endregion
 
-    #region Information
-
-    public static void Information(
-        string message,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
-    {
-        Serilog.Log.Information(
-            message
-                .FormatForContext(memberName, sourceFilePath)
-        );
-    }
-
-    public static void Information(
-        string message,
-        Exception ex,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
-    {
-        Serilog.Log.Information(
-            message
-                .FormatForException(ex)
-                .FormatForContext(memberName, sourceFilePath)
-        );
-    }
-
-    public static void Information(
-        Exception ex,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
-    {
-        Serilog.Log.Information(
-            (ex != null ? ex.ToString() : string.Empty)
-            .FormatForContext(memberName, sourceFilePath)
-        );
-    }
-
-    #endregion
-
     #region Warning
 
     public static void Warning(

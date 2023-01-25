@@ -2,7 +2,6 @@ using System.Net.Http.Json;
 using Logging.Interface;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config;
-using Serilog.Core;
 using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
@@ -28,7 +27,7 @@ public class BaseIntegrationTests : IAsyncLifetime
         LogConfig.SetTestOutputHelper(output);
         _log = LogConfig.GetLog(logLevel);
         DatabaseName = MockDatabase.GetMemoryDatabaseName();
-        Log.Information($"Initialized integration test with database name: {DatabaseName}");
+        _log.Information("Initialized integration test with database name: {DatabaseName}", DatabaseName);
         BogusExtensions.Setup();
     }
 
@@ -61,7 +60,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected async Task CreateContainer(Action<UnitTestDataConfig> options = null)
     {
-        Container = await BaseContainer.Create(DatabaseName, Seed, options, _mockPlexApi);
+        Container = await BaseContainer.Create(_log, DatabaseName, Seed, options, _mockPlexApi);
     }
 
     #endregion
@@ -156,7 +155,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     public Task InitializeAsync()
     {
-        Log.Information("Initialize Integration Test");
+        _log.Information("Initialize Integration Test", 0);
         return Task.CompletedTask;
     }
 

@@ -67,7 +67,8 @@ public class DownloadQueue : IDownloadQueue
         if (!plexServerIds.Any())
             return ResultExtensions.IsEmpty(nameof(plexServerIds)).LogWarning();
 
-        Log.Information($"Adding {plexServerIds.Count} {nameof(PlexServer)}s to the DownloadQueue to check for the next download.");
+        _log.Information("Adding {PlexServerIdsCount} {NameOfPlexServer}s to the DownloadQueue to check for the next download", plexServerIds.Count,
+            nameof(PlexServer), 0);
         foreach (var plexServerId in plexServerIds)
             await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId, _token);
 

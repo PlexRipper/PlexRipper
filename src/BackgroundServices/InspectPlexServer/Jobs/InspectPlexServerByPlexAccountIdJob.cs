@@ -51,9 +51,11 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
                 return;
             }
 
-            var plexServers = plexAccountResult.Value.PlexServers;
+            var plexAccount = plexAccountResult.Value;
+            var plexServers = plexAccount.PlexServers;
 
-            Log.Information($"Inspecting {plexServers.Count} PlexServers for PlexAccount: {plexAccountResult.Value.DisplayName}");
+            _log.Information("Inspecting {PlexServersCount} PlexServers for PlexAccount: {PlexAccountDisplayName}", plexServers.Count, plexAccount.DisplayName,
+                0);
 
             // Check all connections of all Plex servers that this account has access to
             var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServersByAccountIdAsync(plexAccountId);
@@ -72,7 +74,9 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
             foreach (var plexServer in plexServers)
                 await _syncServerScheduler.QueueSyncPlexServerJob(plexServer.Id, true);
 
-            Log.Information($"Successfully finished the inspection of all plexServers related to {nameof(PlexAccount)} {plexAccountId}");
+            _log.Information(
+                "Successfully finished the inspection of all plexServers related to {NameOfPlexAccount}: {PlexAccountDisplayName} with id: {PlexAccountId}",
+                nameof(PlexAccount), plexAccount.DisplayName, plexAccountId);
         }
         catch (Exception e)
         {

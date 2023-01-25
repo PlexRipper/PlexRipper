@@ -1,6 +1,7 @@
 using System.Net;
 using BackgroundServices.Contracts;
 using DownloadManager.Contracts;
+using Logging.Interface;
 using Settings.Contracts;
 
 namespace PlexRipper.WebAPI;
@@ -12,6 +13,7 @@ public class Boot : IBoot
 {
     #region Fields
 
+    private readonly ILog _log;
     private readonly IHostApplicationLifetime _appLifetime;
 
     private readonly IConfigManager _configManager;
@@ -25,11 +27,13 @@ public class Boot : IBoot
     #region Constructor
 
     public Boot(
+        ILog log,
         IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
         ISchedulerService schedulerService,
         IDownloadQueue downloadQueue)
     {
+        _log = log;
         _appLifetime = appLifetime;
         _configManager = configManager;
         _schedulerService = schedulerService;
@@ -42,13 +46,13 @@ public class Boot : IBoot
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        Log.Information("Shutting down the container");
+        _log.Information("Shutting down the container", 0);
         await _schedulerService.StopAsync();
     }
 
     public async Task WaitForStartAsync(CancellationToken cancellationToken)
     {
-        Log.Information("Initiating boot process");
+        _log.Information("Initiating boot process", 0);
         ServicePointManager.DefaultConnectionLimit = 1000;
 
         _configManager.Setup();
@@ -59,7 +63,7 @@ public class Boot : IBoot
         _appLifetime.ApplicationStopping.Register(OnStopping);
         _appLifetime.ApplicationStopped.Register(OnStopped);
 
-        Log.Information("Finished Initiating boot process");
+        _log.Information("Finished Initiating boot process", 0);
     }
 
     #endregion
@@ -68,21 +72,21 @@ public class Boot : IBoot
 
     private void OnStarted()
     {
-        Log.Information("Boot.OnStarted has been called.");
+        _log.Information("Boot.OnStarted has been called", 0);
 
         // Perform post-startup activities here
     }
 
     private void OnStopped()
     {
-        Log.Information("Boot.OnStopped has been called.");
+        _log.Information("Boot.OnStopped has been called", 0);
 
         // Perform post-stopped activities here
     }
 
     private void OnStopping()
     {
-        Log.Information("Boot.OnStopping has been called.");
+        _log.Information("Boot.OnStopping has been called", 0);
 
         // Perform on-stopping activities here
     }

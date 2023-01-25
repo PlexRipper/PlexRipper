@@ -11,6 +11,7 @@ public class UserSettings_Reset_UnitTests : BaseUnitTest
     private UserSettings CreateUserSettings()
     {
         return new UserSettings(
+            _log,
             new ConfirmationSettingsModule(),
             new DateTimeSettingsModule(),
             new DisplaySettingsModule(),

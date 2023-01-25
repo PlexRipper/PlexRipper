@@ -1,4 +1,5 @@
 using Environment;
+using Logging.LogStatic;
 using PlexRipper.WebAPI.Common.Extensions;
 
 namespace PlexRipper.WebAPI;
@@ -15,7 +16,7 @@ public sealed class Startup
     public Startup(IWebHostEnvironment env)
     {
         CurrentEnvironment = env;
-        Log.Information($"PlexRipper running in {CurrentEnvironment.EnvironmentName ?? "Unknown"} mode.");
+        LogStatic.Information("PlexRipper running in {Environment} mode", CurrentEnvironment.EnvironmentName);
     }
 
     private IWebHostEnvironment CurrentEnvironment { get; }

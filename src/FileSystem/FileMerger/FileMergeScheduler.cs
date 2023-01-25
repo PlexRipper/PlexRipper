@@ -11,7 +11,7 @@ public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
-    public FileMergeScheduler(ILog log, IScheduler scheduler, IMediator mediator) : base(scheduler)
+    public FileMergeScheduler(ILog log, IScheduler scheduler, IMediator mediator) : base(log, scheduler)
     {
         _log = log;
         _mediator = mediator;

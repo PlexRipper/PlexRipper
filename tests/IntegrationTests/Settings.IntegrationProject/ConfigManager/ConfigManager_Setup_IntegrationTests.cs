@@ -11,6 +11,7 @@ public class ConfigManager_Setup_IntegrationTests : BaseIntegrationTests
     private UserSettings CreateUserSettings()
     {
         return new UserSettings(
+            _log,
             new ConfirmationSettingsModule(),
             new DateTimeSettingsModule(),
             new DisplaySettingsModule(),

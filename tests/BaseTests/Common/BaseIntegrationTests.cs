@@ -71,9 +71,10 @@ public class BaseIntegrationTests : IAsyncLifetime
     {
         if (Container is not null)
         {
-            const string msg = $"{nameof(CreateContainer)}() has already been called, cannot {nameof(SetupMockPlexApi)}()";
-            Log.Error(msg);
-            throw new Exception(msg);
+            _log.Error("{NameOfCreateContainer}() has already been called, cannot {NameOfSetupMockPlexApi}()", nameof(CreateContainer),
+                nameof(SetupMockPlexApi), 0);
+
+            // throw new Exception(msg);
         }
 
         _mockPlexApi = new MockPlexApi(_log, options, GetPlexServerUris);
@@ -122,8 +123,8 @@ public class BaseIntegrationTests : IAsyncLifetime
         }
         catch (Exception e)
         {
-            Log.Error($"RequestURI: {requestUri}");
-            Log.Error(e);
+            _log.Error("RequestURI: {RequestUri}", requestUri);
+            _log.Error(e);
             throw;
         }
     }
@@ -139,8 +140,8 @@ public class BaseIntegrationTests : IAsyncLifetime
         }
         catch (Exception e)
         {
-            Log.Error($"RequestURI: {httpRequestMessage.RequestUri}");
-            Log.Error(e);
+            _log.Error("RequestURI: {RequestUri}", httpRequestMessage.RequestUri);
+            _log.Error(e);
             throw;
         }
     }

@@ -171,7 +171,8 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
         }
         catch (SqliteException e)
         {
-            Log.Error("Failed to migrate the database or the database is corrupted.", e);
+            LogStatic.ErrorLine("Failed to migrate the database or the database is corrupted");
+            LogStatic.Error(e);
             ResetDatabase();
         }
 
@@ -188,7 +189,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
             return Result.Ok();
         }
 
-        Log.Error("Database could not be created and or migrated.");
+        LogStatic.ErrorLine("Database could not be created and or migrated");
         return Result.Fail($"Could not create database {DatabaseName} in {ConfigDirectory}").LogError();
     }
 
@@ -241,8 +242,8 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
                     }
                     catch (Exception e)
                     {
-                        Log.Error($"Failed to copy {databaseFilePath} to back-up location\"{destinationPath}\"");
-                        Log.Error(e);
+                        LogStatic.Error("Failed to copy {DatabaseFilePath} to back-up location {DestinationPath}", databaseFilePath, destinationPath, 0);
+                        LogStatic.Error(e);
                     }
 
                     continue;

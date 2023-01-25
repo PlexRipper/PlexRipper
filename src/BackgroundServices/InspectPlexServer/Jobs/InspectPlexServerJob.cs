@@ -33,7 +33,7 @@ public class InspectPlexServerJob : IJob
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
         }
     }
 

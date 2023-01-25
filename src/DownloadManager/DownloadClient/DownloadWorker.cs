@@ -237,7 +237,7 @@ public class DownloadWorker
         if (errorResult.Errors.Any() && !errorResult.Errors[0].Metadata.ContainsKey(nameof(DownloadWorker) + "Id"))
             errorResult.Errors[0].Metadata.Add(nameof(DownloadWorker) + "Id", Id);
 
-        Log.Error($"Download worker {Id} with {FileName} had an error!");
+        _log.Error("Download worker {Id} with {FileName} had an error!", Id, FileName, 0);
         DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
 
         SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());

@@ -33,7 +33,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler : BaseHandler, IRequest
             var plexServer = _dbContext.PlexServers.FirstOrDefault(x => x.MachineIdentifier == serverAccessToken.MachineIdentifier);
             if (plexServer is null)
             {
-                Log.Error("Server Access Token was given for a machine identifier that has no PlexServer in the database.");
+                _log.ErrorLine("Server Access Token was given for a machine identifier that has no PlexServer in the database");
                 continue;
             }
 

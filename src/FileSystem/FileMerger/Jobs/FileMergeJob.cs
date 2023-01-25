@@ -66,7 +66,7 @@ public class FileMergeJob : IJob
 
             if (!fileTask.FilePaths.Any())
             {
-                Log.Error($"File task: {fileTask.FileName} with id {fileTask.Id} did not have any file paths to merge");
+                _log.Error("File task: {FileName} with id {FileTaskId} did not have any file paths to merge", fileTask.FileName, fileTask.Id);
                 return;
             }
 
@@ -148,7 +148,7 @@ public class FileMergeJob : IJob
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
         }
     }
 }

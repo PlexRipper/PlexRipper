@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Logging.LogStatic;
 
 namespace PlexRipper.Domain;
 
@@ -75,7 +76,7 @@ public static class DataFormat
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            LogStatic.Error(e);
             throw;
         }
     }
@@ -91,7 +92,7 @@ public static class DataFormat
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            LogStatic.Error(e);
             throw;
         }
     }

@@ -109,7 +109,7 @@ public class SyncServerJob : IJob
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
         }
     }
 }

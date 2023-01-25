@@ -50,7 +50,7 @@ public class DeleteMediaFromPlexLibraryCommandHandler : BaseHandler, IRequestHan
         }
         catch (Exception e)
         {
-            Log.Error(e.Message);
+            _log.Error(e);
             return Result.Fail(new ExceptionalError(e));
         }
     }

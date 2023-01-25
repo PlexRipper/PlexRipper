@@ -68,9 +68,8 @@ public class BaseUnitTest : IDisposable
     {
         if (!isDatabaseSetup)
         {
-            var msg = $"The test database has not been setup yet, run \"{nameof(SetupDatabase)}()\" in the test first!";
-            Logging.Log.Error(msg);
-            throw new Exception(msg);
+            var logEvent = _log.ErrorLine("The test database has not been setup yet, run SetupDatabase() in the test first!");
+            throw new Exception(logEvent.ToString());
         }
 
         return MockDatabase.GetMemoryDbContext(_databaseName);

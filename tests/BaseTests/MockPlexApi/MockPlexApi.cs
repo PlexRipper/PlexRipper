@@ -56,7 +56,7 @@ public class MockPlexApi
                     });
                 }
 
-                Log.Error($"OnMissingRegistration was triggered on uri: {message.RequestUri} and not handled");
+                _log.Error("OnMissingRegistration was triggered on uri: {RequestUri} and not handled", message.RequestUri);
                 return null;
             },
         };

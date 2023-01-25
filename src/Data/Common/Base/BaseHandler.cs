@@ -89,7 +89,7 @@ public abstract class BaseHandler : IDisposable
                 case PlexMediaType.TvShow:
                     return plexLibraryQuery.IncludeTvShows(topLevelMediaOnly);
                 default:
-                    Log.Error($"PlexLibrary with MediaType {type} is currently not supported");
+                    _log.Error("PlexLibrary with MediaType {Type} is currently not supported", type);
                     return plexLibraryQuery;
             }
         }

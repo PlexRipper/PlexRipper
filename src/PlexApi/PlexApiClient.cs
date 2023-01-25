@@ -66,7 +66,7 @@ public class PlexApiClient
                     }
                     catch (Exception e)
                     {
-                        Log.Error(e.Message);
+                        _log.Error(e);
 
                         // Needs to throw to catch and retry again
                         throw;

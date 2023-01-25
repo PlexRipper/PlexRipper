@@ -31,13 +31,13 @@ public static partial class ResultExtensions
                 LogStatic.Debug(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Information:
-                LogStatic.Information(e, message, memberName, sourceFilePath);
+                LogStatic.Information(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Warning:
                 Log.Warning(message, e, memberName, sourceFilePath);
                 break;
             case LogEventLevel.Error:
-                Log.Error(message, e, memberName, sourceFilePath);
+                LogStatic.Error(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Fatal:
                 Log.Fatal(message, e, memberName, sourceFilePath);

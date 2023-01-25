@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Domain;
+using Logging.LogStatic;
+
+namespace PlexRipper.Domain;
 
 public static class EnumExtensions
 {
@@ -27,7 +29,7 @@ public static class EnumExtensions
 
         NotificationLevel DefaultException()
         {
-            Log.Error($"Failed to convert string \"{value}\" to type {nameof(NotificationLevel)}");
+            LogStatic.Error("Failed to convert string {Value} to type {NameOfNotificationLevel}", value, nameof(NotificationLevel), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -55,7 +57,7 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            Log.Error($"Failed to convert \"{value}\" to string of type {nameof(NotificationLevel)}");
+            LogStatic.Error("Failed to convert {Value} to string of type {NameOfNotificationLevel}", value, nameof(NotificationLevel), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -83,7 +85,7 @@ public static class EnumExtensions
 
         ViewMode DefaultException()
         {
-            Log.Error($"Failed to convert string \"{value}\" to type {nameof(ViewMode)}");
+            LogStatic.Error("Failed to convert string {Value} to type {NameOfNotificationLevel}", value, nameof(ViewMode), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -107,7 +109,7 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            Log.Error($"Failed to convert \"{value}\" to string of type {nameof(ViewMode)}");
+            LogStatic.Error("Failed to convert string {Value} to type {NameOfViewMode)}", value, nameof(ViewMode), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -143,7 +145,7 @@ public static class EnumExtensions
 
         PlexMediaType DefaultException()
         {
-            Log.Error($"Failed to convert string \"{value}\" to type {nameof(PlexMediaType)}");
+            LogStatic.Error("Failed to convert string {Value} to type {NameOfPlexMediaType}", value, nameof(PlexMediaType), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -175,7 +177,7 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            Log.Error($"Failed to convert \"{value}\" to string of type {nameof(PlexMediaType)}");
+            LogStatic.Error("Failed to convert {Value} to string of type {NameOfPlexMediaType}", value, nameof(PlexMediaType), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -208,7 +210,7 @@ public static class EnumExtensions
 
         FolderType DefaultException()
         {
-            Log.Error($"Failed to convert string \"{value}\" to type {nameof(FolderType)}");
+            LogStatic.Error("Failed to convert string {Value} to type {NameOfFolderType}", value, nameof(FolderType), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -237,7 +239,7 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            Log.Error($"Failed to convert \"{value}\" to string of type {nameof(FolderType)}");
+            LogStatic.Error("Failed to convert {Value} to string of type {NameOfFolderType}", value, nameof(FolderType), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -272,7 +274,7 @@ public static class EnumExtensions
 
         DownloadStatus DefaultException()
         {
-            Log.Error($"Failed to convert string \"{value}\" to type {nameof(DownloadStatus)}");
+            LogStatic.Error("Failed to convert string {Value} to type {NameOfDownloadStatus}", value, nameof(DownloadStatus), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -303,7 +305,7 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            Log.Error($"Failed to convert \"{value}\" to string of type {nameof(DownloadStatus)}");
+            LogStatic.Error("Failed to convert {Value} to string of type {NameOfDownloadStatus}", value, nameof(DownloadStatus), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -331,7 +333,7 @@ public static class EnumExtensions
 
         FileSystemEntityType DefaultException()
         {
-            Log.Error($"Failed to convert string \"{value}\" to type {nameof(FileSystemEntityType)}");
+            LogStatic.Error("Failed to convert string {Value} to type {NameOfFileSystemEntityType}", value, nameof(FileSystemEntityType), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -355,7 +357,7 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            Log.Error($"Failed to convert \"{value}\" to string of type {nameof(FileSystemEntityType)}");
+            LogStatic.Error("Failed to convert {Value} to string of type {NameOfFileSystemEntityType}", value, nameof(FileSystemEntityType), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -388,7 +390,7 @@ public static class EnumExtensions
 
         DownloadTaskType DefaultException()
         {
-            Log.Error($"Failed to convert string \"{value}\" to type {nameof(DownloadTaskType)}");
+            LogStatic.Error("Failed to convert string {Value} to type {NameOfDownloadTaskType}", value, nameof(DownloadTaskType), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -417,7 +419,7 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            Log.Error($"Failed to convert \"{value}\" to string of type {nameof(DownloadTaskType)}");
+            LogStatic.Error("Failed to convert {Value} to string of type {NameOfDownloadTaskType}", value, nameof(DownloadTaskType), 0);
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }

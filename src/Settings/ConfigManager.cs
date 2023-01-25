@@ -100,8 +100,8 @@ public class ConfigManager : IConfigManager
         catch (Exception e)
         {
             Result.Fail(new ExceptionalError(e)).LogError();
-            Log.Error($"Failed to JSON parse the contents from {_pathProvider.ConfigFileName}");
-            Log.Error($"Contents: {readResult.Value}");
+            _log.Error("Failed to JSON parse the contents from {ConfigFileName}", _pathProvider.ConfigFileName);
+            _log.Error("Contents: {Contents}", readResult.Value);
             return ResetConfig();
         }
     }
@@ -151,7 +151,7 @@ public class ConfigManager : IConfigManager
         var readResult = _fileSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
         if (readResult.IsFailed)
         {
-            Log.Error($"Failed to read {_pathProvider.ConfigFileName} from {_pathProvider.ConfigDirectory}");
+            _log.Error("Failed to read {ConfigFileName} from {ConfigDirectory}", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory, 0);
             readResult.LogError();
         }
 

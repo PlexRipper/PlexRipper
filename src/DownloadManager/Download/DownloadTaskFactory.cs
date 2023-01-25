@@ -451,7 +451,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             downloadTaskIds.Count);
 
         if (downloadTaskIds.Count - freshDownloadTasks.Count > 0)
-            Log.Error("Failed to generate");
+            _log.ErrorLine("Failed to generate");
 
         return Result.Ok(freshDownloadTasks);
     }
@@ -547,7 +547,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 var serverTokenWithUrl = await _plexApiService.GetPlexServerTokenWithUrl(downloadTask.PlexServerId, downloadUrl);
                 if (serverTokenWithUrl.IsFailed)
                 {
-                    Log.Error($"Failed to retrieve server token to create DownloadUrl for PlexServer {downloadTask.PlexServer.Name}");
+                    _log.Error("Failed to retrieve server token to create DownloadUrl for PlexServer {PlexServerName}", downloadTask.PlexServer.Name);
                     return serverTokenWithUrl.ToResult();
                 }
 

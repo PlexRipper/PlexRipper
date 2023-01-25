@@ -162,7 +162,7 @@ public class PlexApiService : IPlexApiService
 
         if (result.Value?.MediaContainer?.Directory is null)
         {
-            Log.Error($"Plex server: {plexServerResult.Value.Name} returned an empty response when libraries were requested.");
+            _log.Error("Plex server: {PlexServerResultName} returned an empty response when libraries were requested", plexServerResult.Value.Name);
             return result.ToResult();
         }
 

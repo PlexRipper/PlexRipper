@@ -62,7 +62,7 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Exception during downloading of ", ex);
+                    _log.Error(ex);
                     throw;
                 }
             }

@@ -34,7 +34,7 @@ public class UpdatePlexLibraryByIdCommandHandler : BaseHandler, IRequestHandler<
         }
         catch (Exception e)
         {
-            Log.Error(e.Message);
+            _log.Error(e);
             return Result.Fail(new ExceptionalError(e));
         }
     }

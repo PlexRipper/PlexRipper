@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Logging.LogStatic;
 using PlexRipper.PlexApi.Models;
 
 namespace PlexRipper.PlexApi.Mappings;
@@ -41,7 +42,7 @@ public class PlexMediaMetaDataDTOPlexMediaMetaData : ITypeConverter<PlexMediaCon
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            LogStatic.Error(e);
             throw;
         }
     }

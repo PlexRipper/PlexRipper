@@ -80,7 +80,7 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
         }
     }
 

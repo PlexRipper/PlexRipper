@@ -1,3 +1,4 @@
+using Logging.LogStatic;
 using PlexApi.Contracts;
 using Polly;
 using RestSharp;
@@ -33,10 +34,7 @@ public static class RestSharpExtensions
                 Log.Warning(msg);
 
                 if (response != null && response.ErrorMessage != string.Empty)
-                {
-                    Log.Error(response.ErrorException);
-                    Log.Error(response.ErrorMessage);
-                }
+                    LogStatic.Error(response.ErrorException, response.ErrorMessage);
 
                 retryIndex = retryAttempt;
                 if (action is not null)

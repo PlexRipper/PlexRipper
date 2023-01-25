@@ -31,16 +31,15 @@ public abstract class BaseController : ControllerBase
     [NonAction]
     protected IActionResult InternalServerError(Exception e)
     {
-        var msg = $"Internal server error: {e.Message}";
-        Log.Error(e);
-        var resultDTO = _mapper.Map<ResultDTO>(Result.Fail(msg));
+        _log.Error(e);
+        var resultDTO = _mapper.Map<ResultDTO>(Result.Fail($"Internal server error: {e.Message}"));
         return StatusCode(StatusCodes.Status500InternalServerError, resultDTO);
     }
 
     [NonAction]
     protected IActionResult InternalServerError(Result result)
     {
-        Log.Error("Internal server error:");
+        _log.ErrorLine("Internal server error:");
         result.LogError();
         _notificationsService.SendResult(result);
         var resultDTO = _mapper.Map<ResultDTO>(result);

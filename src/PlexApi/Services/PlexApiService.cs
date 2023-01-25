@@ -156,7 +156,7 @@ public class PlexApiService : IPlexApiService
         var result = await _plexApi.GetLibrarySectionsAsync(tokenResult.Value, plexServerResult.Value.GetServerUrl());
         if (result.IsFailed)
         {
-            Log.Warning($"Plex server: {plexServerResult.Value.Name} returned no libraries");
+            _log.Warning("Plex server with name: {PlexServerName} returned no libraries", plexServerResult.Value.Name);
             return result.ToResult();
         }
 
@@ -229,7 +229,7 @@ public class PlexApiService : IPlexApiService
         var result = await _plexApi.GetServerAsync(plexAccountToken.Value);
         if (result.IsFailed)
         {
-            Log.Warning("Failed to retrieve PlexServers");
+            _log.Warning("Failed to retrieve PlexServers for PlexAccount: {PlexAccountName}", plexAccountResult.Value.DisplayName);
             return (result.ToResult(), result.ToResult());
         }
 

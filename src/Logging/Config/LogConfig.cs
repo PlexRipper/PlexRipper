@@ -4,6 +4,7 @@ using Logging.Interface;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Formatting.Display;
 using Serilog.Sinks.SystemConsole.Themes;
 using Xunit.Abstractions;
 
@@ -20,6 +21,8 @@ public class LogConfig
     }
 
     private static string Template => "{NewLine}{Timestamp:HH:mm:ss} [{Level}] [{FileName}.{MemberName}:{LineNumber}] => {Message}{NewLine}{Exception}";
+
+    public static MessageTemplateTextFormatter TemplateTextFormatter => new(Template);
 
     public static void SetTestOutputHelper(ITestOutputHelper output)
     {
@@ -75,5 +78,31 @@ public class LogConfig
             .Enrich.With<ExternalFrameworkEnricher>()
             .WriteTo.Debug(outputTemplate: Template)
             .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: Template);
+    }
+
+    public static LogEvent ToLogEvent(
+        LogEventLevel logLevel,
+        string messageTemplate,
+        Exception? exception = default,
+        string memberName = default!,
+        string sourceFilePath = default!,
+        int sourceLineNumber = default!,
+        params object?[]? propertyValues)
+    {
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+        Serilog.Log.Logger.BindMessageTemplate(messageTemplate, propertyValues, out var parsedTemplate, out var boundProperties);
+
+        var dateTimeOffset = DateTimeOffset.Now;
+        var fileName = Path.GetFileNameWithoutExtension(sourceFilePath);
+
+        var properties = boundProperties.ToList();
+        properties.AddRange(new List<LogEventProperty>()
+        {
+            new("FileName", new ScalarValue(fileName)),
+            new("MemberName", new ScalarValue(memberName)),
+            new("LineNumber", new ScalarValue(sourceLineNumber)),
+        });
+
+        return new LogEvent(dateTimeOffset, logLevel, null, parsedTemplate, properties);
     }
 }

@@ -162,7 +162,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        Log.Warning("Integration Test has ended, Disposing!");
+        _log.WarningLine("Integration Test has ended, Disposing!");
 
         // Dispose HttpClient
         _client?.Dispose();

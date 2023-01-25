@@ -34,7 +34,7 @@ public static partial class ResultExtensions
                 LogStatic.Information(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Warning:
-                Log.Warning(message, e, memberName, sourceFilePath);
+                LogStatic.Warning(message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Error:
                 LogStatic.Error(e, message, memberName, sourceFilePath, sourceLineNumber);

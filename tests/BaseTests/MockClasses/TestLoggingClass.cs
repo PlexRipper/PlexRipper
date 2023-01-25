@@ -28,12 +28,14 @@ public class TestLoggingClass
         var string1 = "asfasf";
         var string2 = "asfasf";
 
-        _log.Debug("[DEBUG] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs);
+        //_log.Debug("[DEBUG] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs);
 
         //_log.Debug(string.Format("[DEBUG LOL] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs), 0);
         // _log.Debug("[DEBUG] - Processed {String1} in {String2} ms.", string1, string2);
-        _log.DebugLine("[DEBUG LINE] - LogDebug message");
-        _log.Information("[INFORMATION] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs);
-        _log.InformationLine("[INFORMATION LINE] - LogDebug message");
+        _log.Debug("[DEBUG LINE] - LogDebug message: {Position}", position);
+        _logger.Debug("[LOGGER DEBUG LINE] - LogDebug message: {Position}", position);
+
+        //_log.Information("[INFORMATION] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs);
+        // _log.InformationLine("[INFORMATION LINE] - LogDebug message");
     }
 }

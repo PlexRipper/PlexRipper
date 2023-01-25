@@ -145,7 +145,7 @@ public partial class BaseContainer : IDisposable
 
     public void Dispose()
     {
-        Log.Warning("Disposing Container");
+        _log.WarningLine("Disposing Container");
         PlexRipperDbContext.Database.EnsureDeleted();
         _services.GetAutofacRoot().Dispose();
         _factory?.Dispose();

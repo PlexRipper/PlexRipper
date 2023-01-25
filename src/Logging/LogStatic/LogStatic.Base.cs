@@ -1,12 +1,11 @@
 #nullable enable
-using Serilog.Context;
 using Serilog.Events;
 
 namespace Logging.LogStatic;
 
 public static partial class LogStatic
 {
-    private static void Write(
+    private static LogEvent Write(
         LogEventLevel logLevel,
         string messageTemplate,
         string memberName = "",
@@ -14,18 +13,14 @@ public static partial class LogStatic
         int sourceLineNumber = 0,
         params object?[]? propertyValues)
     {
-        var fileName = Path.GetFileNameWithoutExtension(sourceFilePath);
+        var logEvent = LogConfig.ToLogEvent(logLevel, messageTemplate, null, memberName, sourceFilePath, sourceLineNumber, propertyValues);
 
-        using (LogContext.PushProperty("FileName", fileName))
-        using (LogContext.PushProperty("MemberName", memberName))
-        using (LogContext.PushProperty("LineNumber", sourceLineNumber))
-        {
-            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-            Serilog.Log.Write(logLevel, messageTemplate, propertyValues);
-        }
+        Serilog.Log.Write(logEvent);
+
+        return logEvent;
     }
 
-    private static void Write(
+    private static LogEvent Write(
         LogEventLevel logLevel,
         string messageTemplate,
         Exception? exception = default,
@@ -34,14 +29,10 @@ public static partial class LogStatic
         int sourceLineNumber = 0,
         params object?[]? propertyValues)
     {
-        var fileName = Path.GetFileNameWithoutExtension(sourceFilePath);
+        var logEvent = LogConfig.ToLogEvent(logLevel, messageTemplate, exception, memberName, sourceFilePath, sourceLineNumber, propertyValues);
 
-        using (LogContext.PushProperty("FileName", fileName))
-        using (LogContext.PushProperty("MemberName", memberName))
-        using (LogContext.PushProperty("LineNumber", sourceLineNumber))
-        {
-            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-            Serilog.Log.Write(logLevel, exception, messageTemplate, propertyValues);
-        }
+        Serilog.Log.Write(logEvent);
+
+        return logEvent;
     }
 }

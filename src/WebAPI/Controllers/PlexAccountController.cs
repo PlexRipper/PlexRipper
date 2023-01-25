@@ -31,9 +31,8 @@ public class PlexAccountController : BaseController
         var mapResult = _mapper.Map<List<PlexAccountDTO>>(result.Value);
         if (!mapResult.Any() && enabledOnly)
         {
-            var msg = "Could not find any enabled accounts";
-            Log.Warning(msg);
-            return NotFound(Result.Fail(msg));
+            var logEvent = _log.WarningLine("Could not find any enabled accounts");
+            return NotFound(Result.Fail(logEvent.ToLogString()));
         }
 
         _log.Debug("Returned {PlexAccountCount} accounts", mapResult.Count);
@@ -128,14 +127,13 @@ public class PlexAccountController : BaseController
 
             if (result.Value)
             {
-                _log.Debug("Username: {UserName} is available", username);
-                return Ok(Result.Ok(true).WithSuccess($"Username: {username} is available"));
+                var logEvent = _log.Debug("Username: {UserName} is available", username);
+                return Ok(Result.Ok(true).WithSuccess(logEvent.ToLogString()));
             }
             else
             {
-                var msg = $"Account with username: \"{username}\" already exists!";
-                Log.Warning(msg);
-                return Ok(Result.Ok(false).WithError(msg));
+                var logEvent = _log.Warning("Account with username: {Username} already exists!", username);
+                return Ok(Result.Ok(false).WithError(logEvent.ToLogString()));
             }
         }
         catch (Exception e)

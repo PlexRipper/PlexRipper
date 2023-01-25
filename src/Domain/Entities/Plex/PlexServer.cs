@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using Logging.LogStatic;
 
 namespace PlexRipper.Domain;
 
@@ -210,7 +211,8 @@ public class PlexServer : BaseEntity
             if (connection is not null)
                 return connection.Url;
 
-            Log.Warning($"Could not find parameter {nameof(plexServerConnectionId)} with id {plexServerConnectionId} for server {Name}");
+            LogStatic.Warning("Could not find parameter {nameof(plexServerConnectionId)} with id {PlexServerConnectionId} for server {Name}",
+                nameof(plexServerConnectionId), plexServerConnectionId, Name, 0);
         }
 
         if (PreferredConnectionId > 0)
@@ -219,7 +221,7 @@ public class PlexServer : BaseEntity
             if (connection is not null)
                 return connection.Url;
 
-            Log.Warning($"Could not find preferred connection with id {PreferredConnectionId} for server {Name}");
+            LogStatic.Warning("Could not find preferred connection with id {PreferredConnectionId} for server {Name}", PreferredConnectionId, Name, 0);
         }
         else
         {
@@ -228,8 +230,8 @@ public class PlexServer : BaseEntity
                 return connection.Url;
         }
 
-        Log.Warning($"Could not find connection based on public address: {PublicAddress} for server {Name}");
-        Log.Warning($"Trying the first connection: {PlexServerConnections.First().Url}");
+        LogStatic.Warning("Could not find connection based on public address: {PublicAddress} for server {Name}", PublicAddress, Name, 0);
+        LogStatic.Warning("Trying the first connection: {PUrl}", PlexServerConnections.First().Url);
         return PlexServerConnections.First().Url;
     }
 

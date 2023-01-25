@@ -42,7 +42,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -53,7 +53,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -64,7 +64,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -84,7 +84,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -98,7 +98,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -118,7 +118,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -131,7 +131,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -147,7 +147,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -158,7 +158,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -173,7 +173,7 @@ public class SignalRService : ISignalRService
     {
         if (_notificationHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to NotificationHub");
+            _log.WarningLine("No Clients connected to NotificationHub");
             return;
         }
 
@@ -190,7 +190,7 @@ public class SignalRService : ISignalRService
     {
         if (_notificationHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to NotificationHub");
+            _log.WarningLine("No Clients connected to NotificationHub");
             return;
         }
 

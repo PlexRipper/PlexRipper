@@ -67,7 +67,8 @@ public class PlexServerService : IPlexServerService
             // await _plexLibraryService.RetrieveAccessibleLibrariesAsync(plexAccountId,)
         }
         else
-            Log.Warning($"Skipping {nameof(RefreshAccessiblePlexServersAsync)} in {nameof(InspectAllPlexServersByAccountId)}");
+            _log.Warning("Skipping {NameOfRefreshAccessiblePlexServersAsync} in {NameOfInspectAllPlexServersByAccountId}",
+                nameof(RefreshAccessiblePlexServersAsync), nameof(InspectAllPlexServersByAccountId), 0);
 
         // Create connection check tasks for all connections
         var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServersByAccountIdAsync(plexAccount.Id);

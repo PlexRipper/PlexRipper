@@ -94,7 +94,7 @@ public abstract class BaseController : ControllerBase
             return new OkObjectResult(resultDTO);
 
         // No Status Code found
-        Log.Warning($"Invalid ResultDTO had no status code assigned, defaulting to 500 error: {resultDTO}");
+        _log.Warning("Invalid ResultDTO had no status code assigned, defaulting to 500 error: {@ResultDto}", resultDTO);
         return new ObjectResult(resultDTO)
         {
             StatusCode = StatusCodes.Status500InternalServerError,

@@ -29,9 +29,9 @@ public static class RestSharpExtensions
             .WaitAndRetryAsync(retryCount, retryAttempt =>
             {
                 var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                var msg =
-                    $"Request: {request.Resource} failed, waiting {timeToWait.TotalSeconds} seconds before retrying again ({retryAttempt} of {retryCount}).";
-                Log.Warning(msg);
+                var msg = LogStatic.Warning(
+                    "Request: {RequestResource} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})",
+                    request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
 
                 if (response != null && response.ErrorMessage != string.Empty)
                     LogStatic.Error(response.ErrorException, response.ErrorMessage);
@@ -42,7 +42,7 @@ public static class RestSharpExtensions
                     action(new PlexApiClientProgress
                     {
                         StatusCode = (int)response.StatusCode,
-                        Message = msg,
+                        Message = msg.ToLogString(),
                         RetryAttemptIndex = retryAttempt,
                         RetryAttemptCount = retryCount,
                         TimeToNextRetry = (int)timeToWait.TotalSeconds,

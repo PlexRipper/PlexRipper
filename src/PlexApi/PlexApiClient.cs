@@ -54,7 +54,7 @@ public class PlexApiClient
                 .WaitAndRetryAsync(1, retryAttempt =>
                     {
                         var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                        Log.Warning($"Waiting {timeToWait.TotalSeconds} seconds before retrying again.");
+                        _log.Warning("Waiting {TotalSeconds} seconds before retrying again", timeToWait.TotalSeconds);
                         return timeToWait;
                     }
                 )

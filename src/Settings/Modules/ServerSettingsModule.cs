@@ -119,7 +119,7 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
     {
         if (sourceSettings?.Data is null)
         {
-            Log.Warning($"Can not update settings module {Name} with source settings null");
+            LogStatic.Warning("Can not update settings module {Name} with source settings null", Name);
             return GetValues();
         }
 

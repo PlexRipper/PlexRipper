@@ -90,7 +90,7 @@ public class ConfigManager : IConfigManager
             var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
             if (setFromJsonResult.IsFailed)
             {
-                Log.Warning("Certain properties were missing or had missing or invalid values. Will correct those and re-save now!");
+                _log.WarningLine("Certain properties were missing or had missing or invalid values. Will correct those and re-save now!");
                 setFromJsonResult.LogWarning();
                 return ResetConfig();
             }

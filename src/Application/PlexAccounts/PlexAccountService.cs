@@ -95,7 +95,7 @@ public class PlexAccountService : IPlexAccountService
 
         if (result.Value != null)
         {
-            Log.Warning($"An Account with the username: {username} already exists.");
+            _log.Warning("An Account with the username: {Username} already exists", username);
             return Result.Ok(false);
         }
 
@@ -147,7 +147,7 @@ public class PlexAccountService : IPlexAccountService
             return result;
         }
 
-        Log.Warning($"Could not find an Account with id: {accountId}");
+        _log.Warning("Could not find an Account with id: {AccountId}", accountId);
         return result;
     }
 

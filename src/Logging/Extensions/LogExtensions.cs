@@ -1,13 +1,13 @@
+using Serilog.Events;
+
 namespace Logging;
 
 public static class LogExtensions
 {
-    #region Base
-
-    private static string FormatForException(this string message, Exception ex)
+    public static string ToLogString(this LogEvent logEvent)
     {
-        return $"{message}: {ex?.ToString() ?? string.Empty}";
+        using var writer = new StringWriter();
+        LogConfig.TemplateTextFormatter.Format(logEvent, writer);
+        return writer.ToString();
     }
-
-    #endregion
 }

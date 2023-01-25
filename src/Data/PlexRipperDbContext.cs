@@ -249,7 +249,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
                     continue;
                 }
 
-                Log.Warning($"Could not find: \"{databaseFilePath}\" to backup");
+                LogStatic.Warning("Could not find: {DatabaseFilePath} to backup", databaseFilePath);
             }
 
             return Result.Ok();

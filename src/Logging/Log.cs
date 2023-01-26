@@ -57,46 +57,6 @@ public static class Log
     #endregion
 
 
-    #region Fatal
-
-    public static void Fatal(
-        string message,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
-    {
-        FatalAction();
-
-        Serilog.Log.Fatal(message.FormatForContext(memberName, sourceFilePath));
-    }
-
-    public static void Fatal(
-        string message,
-        Exception ex,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
-    {
-        FatalAction();
-
-        Serilog.Log.Fatal(message.FormatForException(ex).FormatForContext(memberName, sourceFilePath));
-    }
-
-    public static void Fatal(
-        Exception ex,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
-    {
-        FatalAction();
-
-        Serilog.Log.Fatal((ex?.ToString() ?? string.Empty).FormatForContext(memberName, sourceFilePath));
-    }
-
-    private static void FatalAction()
-    {
-        System.Environment.ExitCode = -1;
-    }
-
-    #endregion
-
     public static void CloseAndFlush()
     {
         Serilog.Log.CloseAndFlush();

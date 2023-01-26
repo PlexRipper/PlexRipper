@@ -2,6 +2,7 @@ using System.Collections.Specialized;
 using Autofac;
 using Autofac.Extras.Quartz;
 using FileSystem.Contracts;
+using Logging.LogStatic;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Application;
@@ -66,7 +67,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
         }
         catch (Exception e)
         {
-            Log.Fatal(e);
+            LogStatic.Fatal(e);
             throw;
         }
     }

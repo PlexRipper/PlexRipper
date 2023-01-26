@@ -12,17 +12,34 @@ namespace Logging;
 
 public class LogConfig
 {
-    private static ITestOutputHelper _testOutput;
-    private static ILog _log;
-
-    protected LogConfig()
-    {
-        _log = new Log2.Log(GetLogger());
-    }
+    #region Properties
 
     private static string Template => "{NewLine}{Timestamp:HH:mm:ss} [{Level}] [{FileName}.{MemberName}:{LineNumber}] => {Message}{NewLine}{Exception}";
 
     public static MessageTemplateTextFormatter TemplateTextFormatter => new(Template);
+
+    #endregion
+
+    #region Methods
+
+    #region Private
+
+    private static LoggerConfiguration GetBaseConfiguration()
+    {
+        return new LoggerConfiguration()
+            .MinimumLevel.Verbose()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+            .MinimumLevel.Override("Quartz", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .Enrich.With<ExternalFrameworkEnricher>()
+            .WriteTo.Debug(outputTemplate: Template)
+            .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: Template);
+    }
+
+    #endregion
+
+    #region Public
 
     public static void SetTestOutputHelper(ITestOutputHelper output)
     {
@@ -67,23 +84,10 @@ public class LogConfig
         return _log ??= new Log2.Log(GetLogger(logLevel));
     }
 
-    private static LoggerConfiguration GetBaseConfiguration()
-    {
-        return new LoggerConfiguration()
-            .MinimumLevel.Verbose()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-            .MinimumLevel.Override("Quartz", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .Enrich.With<ExternalFrameworkEnricher>()
-            .WriteTo.Debug(outputTemplate: Template)
-            .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: Template);
-    }
-
     public static LogEvent ToLogEvent(
         LogEventLevel logLevel,
         string messageTemplate,
-        Exception? exception = default,
+        Exception exception = default,
         string memberName = default!,
         string sourceFilePath = default!,
         int sourceLineNumber = default!,
@@ -103,6 +107,14 @@ public class LogConfig
             new("LineNumber", new ScalarValue(sourceLineNumber)),
         });
 
-        return new LogEvent(dateTimeOffset, logLevel, null, parsedTemplate, properties);
+        return new LogEvent(dateTimeOffset, logLevel, exception, parsedTemplate, properties);
     }
+
+    #endregion
+
+    #endregion
+
+    private static ITestOutputHelper _testOutput;
+
+    private static ILog _log;
 }

@@ -35,4 +35,9 @@ public static partial class LogStatic
 
         return logEvent;
     }
+
+    private static void FatalAction()
+    {
+        System.Environment.ExitCode = -1;
+    }
 }

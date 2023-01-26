@@ -177,7 +177,7 @@ public class BaseIntegrationTests : IAsyncLifetime
             Container.Dispose();
         }
 
-        Log.Fatal("Container disposed");
+        _log.FatalLine("Container disposed");
     }
 
     #endregion

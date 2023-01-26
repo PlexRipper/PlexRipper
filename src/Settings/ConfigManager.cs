@@ -41,30 +41,30 @@ public class ConfigManager : IConfigManager
     {
         _userSettings.SettingsUpdated.Subscribe(_ => SaveConfig());
 
-        _log.Information("Checking if \"{ConfigFileName}\" exists at \"{ConfigDirectory}\"", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory, 0);
+        _log.Information("Checking if {ConfigFileName} exists at {ConfigDirectory}", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory, 0);
 
         var configDirectoryExistsResult = _directorySystem.Exists(_pathProvider.ConfigDirectory);
         if (configDirectoryExistsResult.IsFailed)
             return configDirectoryExistsResult.LogFatal();
 
         if (configDirectoryExistsResult.Value)
-            _log.Information("Config directory exists, will use \"{ConfigDirectory}\"", _pathProvider.ConfigDirectory);
+            _log.Information("Config directory exists, will use {ConfigDirectory}", _pathProvider.ConfigDirectory);
         else
         {
-            _log.Information("Config directory does not exist, will create now at \"{ConfigDirectory}\"", _pathProvider.ConfigDirectory);
+            _log.Information("Config directory does not exist, will create now at {ConfigDirectory}", _pathProvider.ConfigDirectory);
             var createResult = _directorySystem.CreateDirectory(_pathProvider.ConfigDirectory);
             if (createResult.IsFailed)
             {
-                Log.Fatal($"Failed to create config directory at \"{_pathProvider.ConfigDirectory}\"");
+                _log.Fatal("Failed to create config directory at {ConfigDirectory}", _pathProvider.ConfigDirectory);
                 return createResult.LogFatal();
             }
 
-            _log.Debug("Directory: \"{ConfigDirectory}\" created!", _pathProvider.ConfigDirectory);
+            _log.Debug("Directory: {ConfigDirectory} created!", _pathProvider.ConfigDirectory);
         }
 
         if (!ConfigFileExists())
         {
-            _log.Information("\"{ConfigFileName}\" doesn't exist, will create new one now in \"{ConfigDirectory}\"", _pathProvider.ConfigFileName,
+            _log.Information("{ConfigFileName} doesn't exist, will create new one now in {ConfigDirectory}", _pathProvider.ConfigFileName,
                 _pathProvider.ConfigDirectory, 0);
             return SaveConfig();
         }

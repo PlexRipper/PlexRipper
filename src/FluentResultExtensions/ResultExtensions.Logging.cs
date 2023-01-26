@@ -40,7 +40,7 @@ public static partial class ResultExtensions
                 LogStatic.Error(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Fatal:
-                Log.Fatal(message, e, memberName, sourceFilePath);
+                LogStatic.Fatal(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
         }
     }

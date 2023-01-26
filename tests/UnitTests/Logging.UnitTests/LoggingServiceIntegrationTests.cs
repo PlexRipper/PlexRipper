@@ -17,7 +17,7 @@ public class LoggingServiceIntegrationTests : BaseUnitTest
             _log.Warning("This is a warning string", 0);
             _log.Information("This is an information string", 0);
             _log.Error("This is an error string", 0);
-            Log.Fatal("This is a fatal string");
+            _log.Fatal("This is a fatal string", 0);
 
             var logContext = TestCorrelator.GetLogEventsFromCurrentContext().ToList();
             logContext[0].Level.ShouldBe(LogEventLevel.Verbose);

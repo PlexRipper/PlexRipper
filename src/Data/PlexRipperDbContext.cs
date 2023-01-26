@@ -206,8 +206,8 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
         }
         catch (Exception e)
         {
-            Log.Fatal("Failed to reset database!");
-            Log.Fatal("TO FIX THIS: DELETE DATABASE MANUALLY FROM THE CONFIG DIRECTORY");
+            LogStatic.FatalLine("Failed to reset database!");
+            LogStatic.FatalLine("TO FIX THIS: DELETE DATABASE MANUALLY FROM THE CONFIG DIRECTORY");
             Result.Fail(new ExceptionalError(e)).LogFatal();
             throw;
         }

@@ -98,6 +98,11 @@ public static class LogConfig
         return new LogGeneric<T>(GetLogger(logLevel));
     }
 
+    public static ILog GetLog(Type classType, LogEventLevel logLevel = LogEventLevel.Debug)
+    {
+        return new LogGeneric<Type>(GetLogger(logLevel), classType);
+    }
+
     #endregion
 
     #endregion

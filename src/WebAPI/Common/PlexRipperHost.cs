@@ -1,7 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Environment;
-using Logging.LogStatic;
+using Logging.Interface;
 using PlexRipper.Data;
 using Serilog;
 using Serilog.Events;
@@ -10,10 +10,12 @@ namespace PlexRipper.WebAPI.Common;
 
 public static class PlexRipperHost
 {
+    private static readonly ILog _log = LogConfig.GetLog(typeof(PlexRipperHost));
+
     public static IHostBuilder Setup()
     {
         LogConfig.SetupLogging(LogEventLevel.Verbose);
-        LogStatic.Information("Currently running on {CurrentOS}", OsInfo.CurrentOS);
+        _log.Information("Currently running on {CurrentOS}", OsInfo.CurrentOS);
 
         return Host.CreateDefaultBuilder()
             .UseSerilog(LogConfig.GetLogger())
@@ -26,7 +28,7 @@ public static class PlexRipperHost
             .ConfigureDatabase()
             .ConfigureContainer<ContainerBuilder>(containerBuilder =>
             {
-                LogStatic.DebugLine("Setting up Autofac Containers");
+                _log.DebugLine("Setting up Autofac Containers");
                 ContainerConfig.ConfigureContainer(containerBuilder);
             })
             .UseServiceProviderFactory(new AutofacServiceProviderFactory());

@@ -6,8 +6,8 @@ namespace Logging.LogGeneric;
 
 public class LogGeneric<T> : Log, ILog<T> where T : class
 {
-    public LogGeneric(ILogger logger) : base(logger)
+    public LogGeneric(ILogger logger, Type classType = default) : base(logger)
     {
-        ClassType = typeof(T);
+        ClassType = classType ?? typeof(T);
     }
 }

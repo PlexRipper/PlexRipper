@@ -1,5 +1,5 @@
 using Environment;
-using Logging.LogStatic;
+using Logging.Interface;
 using PlexRipper.WebAPI.Common.Extensions;
 
 namespace PlexRipper.WebAPI;
@@ -9,6 +9,8 @@ namespace PlexRipper.WebAPI;
 /// </summary>
 public sealed class Startup
 {
+    private static readonly ILog _log = LogConfig.GetLog(typeof(Startup));
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Startup"/> class.
     /// </summary>
@@ -16,7 +18,7 @@ public sealed class Startup
     public Startup(IWebHostEnvironment env)
     {
         CurrentEnvironment = env;
-        LogStatic.Information("PlexRipper running in {Environment} mode", CurrentEnvironment.EnvironmentName);
+        _log.Information("PlexRipper running in {Environment} mode", CurrentEnvironment.EnvironmentName);
     }
 
     private IWebHostEnvironment CurrentEnvironment { get; }

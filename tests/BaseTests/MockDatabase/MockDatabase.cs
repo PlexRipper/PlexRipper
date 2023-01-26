@@ -1,6 +1,6 @@
 #region
 
-using Logging.LogStatic;
+using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,6 +15,7 @@ public static class MockDatabase
 {
     private static readonly Random Rnd = new();
     private static int _seed;
+    private static readonly ILog _log = LogConfig.GetLog(typeof(MockDatabase));
 
     #region Methods
 
@@ -45,7 +46,7 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        LogStatic.Debug("Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}", config.PlexServerCount,
+        _log.Debug("Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}", config.PlexServerCount,
             nameof(PlexServer), nameof(PlexRipperDbContext), context.DatabaseName, 0);
         return context;
     }
@@ -99,7 +100,7 @@ public static class MockDatabase
         await context.PlexAccounts.AddAsync(plexAccount);
         await context.SaveChangesAsync();
 
-        LogStatic.Debug("Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to PlexRipperDbContext: {DatabaseName}", nameof(PlexAccount), plexAccount.Title,
+        _log.Debug("Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to PlexRipperDbContext: {DatabaseName}", nameof(PlexAccount), plexAccount.Title,
             context.DatabaseName, 0);
 
         var plexAccountServer = plexServers.Select(x => new PlexAccountServer
@@ -204,7 +205,7 @@ public static class MockDatabase
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
-        optionsBuilder.LogTo(text => LogStatic.DbContextLogger(text), LogLevel.Warning);
+        optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Warning);
         return new PlexRipperDbContext(optionsBuilder.Options, dbName);
     }
 
@@ -232,7 +233,7 @@ public static class MockDatabase
         context.HasBeenSetup = true;
 
         // PlexServers and Libraries added
-        LogStatic.Debug("Setting up {NameOfPlexRipperDbContext} for {DatabaseName}", nameof(PlexRipperDbContext), context.DatabaseName, 0);
+        _log.Debug("Setting up {NameOfPlexRipperDbContext} for {DatabaseName}", nameof(PlexRipperDbContext), context.DatabaseName, 0);
 
         if (config.PlexServerCount > 0)
             context = await context.AddPlexServers(options);
@@ -295,7 +296,7 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        LogStatic.Debug("Added {MovieDownloadTasksCount} Movie {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.MovieDownloadTasksCount,
+        _log.Debug("Added {MovieDownloadTasksCount} Movie {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.MovieDownloadTasksCount,
             nameof(DownloadTask), context.DatabaseName, 0);
 
         return context;
@@ -329,7 +330,7 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        LogStatic.Debug("Added {TvShowDownloadTasksCount} TvShow {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.TvShowDownloadTasksCount,
+        _log.Debug("Added {TvShowDownloadTasksCount} TvShow {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.TvShowDownloadTasksCount,
             nameof(DownloadTask), context.DatabaseName, 0);
 
         return context;
@@ -361,7 +362,7 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        LogStatic.Debug("Added {MovieCount} {NameOfPlexMovie}s to PlexRipperDbContext: {DatabaseName}", config.MovieCount, nameof(PlexMovie),
+        _log.Debug("Added {MovieCount} {NameOfPlexMovie}s to PlexRipperDbContext: {DatabaseName}", config.MovieCount, nameof(PlexMovie),
             context.DatabaseName, 0);
 
         return context;
@@ -404,7 +405,7 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        LogStatic.Debug("Added {TvShowCount} {NameOfPlexTvShow}s to PlexRipperDbContext: {DatabaseName}", config.TvShowCount, nameof(PlexTvShow),
+        _log.Debug("Added {TvShowCount} {NameOfPlexTvShow}s to PlexRipperDbContext: {DatabaseName}", config.TvShowCount, nameof(PlexTvShow),
             context.DatabaseName, 0);
 
         return context;

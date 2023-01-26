@@ -13,12 +13,10 @@ public class LogUnitTests : BaseUnitTest
 
         // Act
         var logLevelSet = _log.IsLogLevelEnabled(LogEventLevel.Verbose);
-        var logStaticLevelSet = LogStatic.LogStatic.IsLogLevelEnabled(LogEventLevel.Verbose);
 
         // Assert
 
         logLevelSet.ShouldBeTrue();
-        logStaticLevelSet.ShouldBeTrue();
     }
 
     [Fact]

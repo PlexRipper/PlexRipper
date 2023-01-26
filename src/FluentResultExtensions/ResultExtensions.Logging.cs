@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using Logging.LogStatic;
 using Serilog.Events;
 
 // ReSharper disable once CheckNamespace
@@ -24,22 +23,22 @@ public static partial class ResultExtensions
         switch (logLevel)
         {
             case LogEventLevel.Verbose:
-                LogStatic.Verbose(e, message, memberName, sourceFilePath, sourceLineNumber);
+                _log.Verbose(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Debug:
-                LogStatic.Debug(e, message, memberName, sourceFilePath, sourceLineNumber);
+                _log.Debug(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Information:
-                LogStatic.Information(e, message, memberName, sourceFilePath, sourceLineNumber);
+                _log.Information(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Warning:
-                LogStatic.Warning(message, memberName, sourceFilePath, sourceLineNumber);
+                _log.Warning(message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Error:
-                LogStatic.Error(e, message, memberName, sourceFilePath, sourceLineNumber);
+                _log.Error(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Fatal:
-                LogStatic.Fatal(e, message, memberName, sourceFilePath, sourceLineNumber);
+                _log.Fatal(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
         }
     }

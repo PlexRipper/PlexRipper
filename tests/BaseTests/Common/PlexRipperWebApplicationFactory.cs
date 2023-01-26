@@ -2,10 +2,9 @@ using System.Collections.Specialized;
 using Autofac;
 using Autofac.Extras.Quartz;
 using FileSystem.Contracts;
-using Logging.LogStatic;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
-using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Domain.Autofac;
 using PlexRipper.WebAPI.Common;
@@ -18,6 +17,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 {
     private readonly string _memoryDbName;
     private readonly MockPlexApi _mockPlexApi;
+    private static readonly ILog _log = LogConfig.GetLog(typeof(PlexRipperWebApplicationFactory<>));
 
     private readonly UnitTestDataConfig _config;
 
@@ -67,7 +67,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
         }
         catch (Exception e)
         {
-            LogStatic.Fatal(e);
+            _log.Fatal(e);
             throw;
         }
     }

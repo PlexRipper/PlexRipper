@@ -1,4 +1,4 @@
-using Logging.LogStatic;
+using Logging.Interface;
 using PlexApi.Contracts;
 using Polly;
 using RestSharp;
@@ -7,6 +7,8 @@ namespace PlexRipper.PlexApi.Extensions;
 
 public static class RestSharpExtensions
 {
+    private static readonly ILog _log = LogConfig.GetLog(typeof(RestSharpExtensions));
+
     /// <summary>
     /// Sends a <see cref="RestRequest"/> with a <see cref="Policy"/>
     /// </summary>
@@ -29,12 +31,15 @@ public static class RestSharpExtensions
             .WaitAndRetryAsync(retryCount, retryAttempt =>
             {
                 var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                var msg = LogStatic.Warning(
+                var msg = _log.Warning(
                     "Request: {RequestResource} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})",
                     request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
 
                 if (response != null && response.ErrorMessage != string.Empty)
-                    LogStatic.Error(response.ErrorException, response.ErrorMessage);
+                {
+                    _log.ErrorLine(response.ErrorMessage);
+                    _log.Error(response.ErrorException);
+                }
 
                 retryIndex = retryAttempt;
                 if (action is not null)
@@ -82,9 +87,9 @@ public static class RestSharpExtensions
         if (isSuccessful)
         {
             if (response.Result.Content != string.Empty)
-                LogStatic.Verbose("Response Content: {Content}", response.Result.Content);
+                _log.Verbose("Response Content: {Content}", response.Result.Content);
             else
-                LogStatic.VerboseLine("Response was empty");
+                _log.VerboseLine("Response was empty");
 
             return response.Result as RestResponse<T>;
         }

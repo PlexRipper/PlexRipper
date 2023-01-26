@@ -4,7 +4,6 @@ using Logging.Interface;
 using PlexRipper.Data;
 using PlexRipper.WebAPI;
 using Serilog.Events;
-using Log = Logging.Log2.Log;
 
 namespace PlexRipper.BaseTests;
 
@@ -31,7 +30,7 @@ public class BaseUnitTest : IDisposable
         LogConfig.SetTestOutputHelper(output);
         LogConfig.SetupLogging(logEventLevel);
         BogusExtensions.Setup();
-        _log = new Log(LogConfig.GetLogger());
+        _log = LogConfig.GetLog(logEventLevel);
     }
 
     #endregion

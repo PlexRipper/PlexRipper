@@ -5,6 +5,11 @@ namespace Logging.LogStatic;
 
 public static partial class LogStatic
 {
+    public static bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug)
+    {
+        return Serilog.Log.IsEnabled(logLevel);
+    }
+
     private static LogEvent Write(
         LogEventLevel logLevel,
         string messageTemplate,

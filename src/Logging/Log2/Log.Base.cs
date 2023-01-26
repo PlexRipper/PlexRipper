@@ -14,6 +14,11 @@ public partial class Log : ILog
         _logger = logger;
     }
 
+    public bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug)
+    {
+        return _logger.IsEnabled(logLevel);
+    }
+
     private LogEvent Write(
         LogEventLevel logLevel,
         string messageTemplate,

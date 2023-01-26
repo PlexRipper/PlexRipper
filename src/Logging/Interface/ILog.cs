@@ -613,4 +613,6 @@ public interface ILog
         [CallerLineNumber] int sourceLineNumber = default!);
 
     #endregion
+
+    bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug);
 }

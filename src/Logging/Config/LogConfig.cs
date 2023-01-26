@@ -5,18 +5,22 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;
-using Serilog.Sinks.SystemConsole.Themes;
 using Xunit.Abstractions;
 
 namespace Logging;
 
-public class LogConfig
+public static class LogConfig
 {
     #region Properties
 
-    private static string Template => "{NewLine}{Timestamp:HH:mm:ss} [{Level}] [{FileName}.{MemberName}:{LineNumber}] => {Message}{NewLine}{Exception}";
+    private static readonly string _template =
+        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{ClassNamePropertyName}}}.{{{MemberNamePropertyName}}}:{{{LineNumberPropertyName}}}] => {{Message}}{{NewLine}}{{Exception}}";
 
-    public static MessageTemplateTextFormatter TemplateTextFormatter => new(Template);
+    public static MessageTemplateTextFormatter TemplateTextFormatter => new(_template);
+
+    public static string ClassNamePropertyName => "ClassName";
+    public static string MemberNamePropertyName => "MemberName";
+    public static string LineNumberPropertyName => "LineNumber";
 
     #endregion
 
@@ -33,8 +37,8 @@ public class LogConfig
             .MinimumLevel.Override("Quartz", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .Enrich.With<ExternalFrameworkEnricher>()
-            .WriteTo.Debug(outputTemplate: Template)
-            .WriteTo.Console(theme: SystemConsoleTheme.Colored, outputTemplate: Template);
+            .WriteTo.Debug(outputTemplate: _template)
+            .WriteTo.Console(theme: LogTheme.ColoredDark, outputTemplate: _template);
     }
 
     #endregion
@@ -59,7 +63,7 @@ public class LogConfig
                 .WriteTo.File(
                     Path.Combine(PathProvider.LogsDirectory, "log.txt"),
                     LogEventLevel.Debug,
-                    Template,
+                    _template,
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
                     retainedFileCountLimit: 7)
@@ -70,7 +74,7 @@ public class LogConfig
         // Test Logger
         return GetBaseConfiguration()
             .MinimumLevel.Is(minimumLogLevel)
-            .WriteTo.TestOutput(_testOutput, minimumLogLevel, Template)
+            .WriteTo.TestOutput(_testOutput, minimumLogLevel, _template)
             .WriteTo.TestCorrelator(minimumLogLevel)
             .CreateLogger();
     }
@@ -102,9 +106,10 @@ public class LogConfig
         var properties = boundProperties.ToList();
         properties.AddRange(new List<LogEventProperty>()
         {
-            new("FileName", new ScalarValue(fileName)),
-            new("MemberName", new ScalarValue(memberName)),
-            new("LineNumber", new ScalarValue(sourceLineNumber)),
+            // This works when each file only has 1 class and is named the same
+            new(ClassNamePropertyName, new ScalarValue(fileName)),
+            new(MemberNamePropertyName, new ScalarValue(memberName)),
+            new(LineNumberPropertyName, new ScalarValue(sourceLineNumber)),
         });
 
         return new LogEvent(dateTimeOffset, logLevel, exception, parsedTemplate, properties);

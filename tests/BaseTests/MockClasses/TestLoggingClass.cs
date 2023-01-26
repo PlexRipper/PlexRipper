@@ -6,9 +6,9 @@ namespace PlexRipper.BaseTests;
 public class TestLoggingClass
 {
     private readonly ILogger _logger;
-    private readonly ILog _log;
+    private readonly ILog<TestLoggingClass> _log;
 
-    public TestLoggingClass(ILogger logger, ILog log)
+    public TestLoggingClass(ILogger logger, ILog<TestLoggingClass> log)
     {
         _logger = logger;
         _log = log;
@@ -33,6 +33,7 @@ public class TestLoggingClass
         //_log.Debug(string.Format("[DEBUG LOL] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs), 0);
         // _log.Debug("[DEBUG] - Processed {String1} in {String2} ms.", string1, string2);
         _log.Debug("[DEBUG LINE] - LogDebug message: {Position}", position);
+
         _logger.Debug("[LOGGER DEBUG LINE] - LogDebug message: {Position}", position);
 
         //_log.Information("[INFORMATION] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs);

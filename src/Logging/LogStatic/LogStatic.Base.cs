@@ -1,4 +1,5 @@
 #nullable enable
+using Serilog;
 using Serilog.Events;
 
 namespace Logging.LogStatic;
@@ -7,7 +8,7 @@ public static partial class LogStatic
 {
     public static bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug)
     {
-        return Serilog.Log.IsEnabled(logLevel);
+        return Log.IsEnabled(logLevel);
     }
 
     private static LogEvent Write(
@@ -18,9 +19,9 @@ public static partial class LogStatic
         int sourceLineNumber = 0,
         params object?[]? propertyValues)
     {
-        var logEvent = LogConfig.ToLogEvent(logLevel, messageTemplate, null, memberName, sourceFilePath, sourceLineNumber, propertyValues);
+        var logEvent = Log.Logger.ToLogEvent(logLevel, messageTemplate, null, sourceFilePath, memberName, sourceLineNumber, propertyValues);
 
-        Serilog.Log.Write(logEvent);
+        Log.Write(logEvent);
 
         return logEvent;
     }
@@ -34,9 +35,9 @@ public static partial class LogStatic
         int sourceLineNumber = 0,
         params object?[]? propertyValues)
     {
-        var logEvent = LogConfig.ToLogEvent(logLevel, messageTemplate, exception, memberName, sourceFilePath, sourceLineNumber, propertyValues);
+        var logEvent = Log.Logger.ToLogEvent(logLevel, messageTemplate, exception, sourceFilePath, memberName, sourceLineNumber, propertyValues);
 
-        Serilog.Log.Write(logEvent);
+        Log.Write(logEvent);
 
         return logEvent;
     }

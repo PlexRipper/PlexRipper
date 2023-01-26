@@ -17,9 +17,9 @@ public class ExternalFrameworkEnricher : ILogEventEnricher
             if (parts.Count < 3)
                 return;
 
-            logEvent.AddPropertyIfAbsent(new LogEventProperty("FileName", new ScalarValue(parts[0])));
-            logEvent.AddPropertyIfAbsent(new LogEventProperty("MemberName", new ScalarValue(parts.Last())));
-            logEvent.AddPropertyIfAbsent(new LogEventProperty("LineNumber", new ScalarValue(0)));
+            logEvent.AddPropertyIfAbsent(new LogEventProperty(LogConfig.ClassNamePropertyName, new ScalarValue(parts[0])));
+            logEvent.AddPropertyIfAbsent(new LogEventProperty(LogConfig.MemberNamePropertyName, new ScalarValue(parts.Last())));
+            logEvent.AddPropertyIfAbsent(new LogEventProperty(LogConfig.LineNumberPropertyName, new ScalarValue(0)));
         }
     }
 }

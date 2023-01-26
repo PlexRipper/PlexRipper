@@ -616,3 +616,5 @@ public interface ILog
 
     bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug);
 }
+
+public interface ILog<T> : ILog where T : class { }

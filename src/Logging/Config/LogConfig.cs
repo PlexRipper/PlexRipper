@@ -1,6 +1,7 @@
 using Environment;
 using Logging.Enricher;
 using Logging.Interface;
+using Logging.LogGeneric;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -52,7 +53,7 @@ public static class LogConfig
 
     public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
-        Serilog.Log.Logger = GetLogger(minimumLogLevel);
+        Log.Logger = GetLogger(minimumLogLevel);
     }
 
     public static Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
@@ -88,31 +89,13 @@ public static class LogConfig
         return _log ??= new Log2.Log(GetLogger(logLevel));
     }
 
-    public static LogEvent ToLogEvent(
-        LogEventLevel logLevel,
-        string messageTemplate,
-        Exception exception = default,
-        string memberName = default!,
-        string sourceFilePath = default!,
-        int sourceLineNumber = default!,
-        params object?[]? propertyValues)
+    /// <summary>
+    /// Returns a reference to the singleton <see cref="ILog"/> object.
+    /// </summary>
+    /// <returns></returns>
+    public static ILog<T> GetLog<T>(LogEventLevel logLevel = LogEventLevel.Debug) where T : class
     {
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-        Serilog.Log.Logger.BindMessageTemplate(messageTemplate, propertyValues, out var parsedTemplate, out var boundProperties);
-
-        var dateTimeOffset = DateTimeOffset.Now;
-        var fileName = Path.GetFileNameWithoutExtension(sourceFilePath);
-
-        var properties = boundProperties.ToList();
-        properties.AddRange(new List<LogEventProperty>()
-        {
-            // This works when each file only has 1 class and is named the same
-            new(ClassNamePropertyName, new ScalarValue(fileName)),
-            new(MemberNamePropertyName, new ScalarValue(memberName)),
-            new(LineNumberPropertyName, new ScalarValue(sourceLineNumber)),
-        });
-
-        return new LogEvent(dateTimeOffset, logLevel, exception, parsedTemplate, properties);
+        return new LogGeneric<T>(GetLogger(logLevel));
     }
 
     #endregion
@@ -125,6 +108,6 @@ public static class LogConfig
 
     public static void CloseAndFlush()
     {
-        Serilog.Log.CloseAndFlush();
+        Log.CloseAndFlush();
     }
 }

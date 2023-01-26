@@ -38,7 +38,7 @@ public static class LogManager
 
     public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
-        Log.Logger = LogConfig.GetLogger(minimumLogLevel);
+        Serilog.Log.Logger = LogConfig.GetLogger(minimumLogLevel);
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ public static class LogManager
     /// <returns></returns>
     public static ILog<T> CreateLogInstance<T>(LogEventLevel logLevel = LogEventLevel.Debug) where T : class
     {
-        return new LogGeneric<T>(LogConfig.GetLogger(logLevel));
+        return new Log<T>(LogConfig.GetLogger(logLevel));
     }
 
     /// <summary>
@@ -56,11 +56,11 @@ public static class LogManager
     /// <returns></returns>
     public static ILog CreateLogInstance(Type classType, LogEventLevel logLevel = LogEventLevel.Debug)
     {
-        return new LogGeneric<Type>(LogConfig.GetLogger(logLevel), classType);
+        return new Log<Type>(LogConfig.GetLogger(logLevel), classType);
     }
 
     public static void CloseAndFlush()
     {
-        Log.CloseAndFlush();
+        Serilog.Log.CloseAndFlush();
     }
 }

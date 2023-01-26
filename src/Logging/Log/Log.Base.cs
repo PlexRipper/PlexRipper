@@ -3,7 +3,7 @@ using Logging.Interface;
 using Serilog;
 using Serilog.Events;
 
-namespace Logging.Log2;
+namespace Logging;
 
 public partial class Log : ILog
 {

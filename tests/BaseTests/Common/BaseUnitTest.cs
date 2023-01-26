@@ -13,7 +13,7 @@ public class BaseUnitTest : IDisposable
 
     private string _databaseName;
     protected PlexRipperDbContext DbContext;
-    private bool isDatabaseSetup = false;
+    private bool isDatabaseSetup;
     protected ILog _log;
 
     #endregion

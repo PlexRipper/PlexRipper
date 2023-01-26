@@ -81,7 +81,11 @@ public static class RestSharpExtensions
         var isSuccessful = response.Outcome == OutcomeType.Successful;
         if (isSuccessful)
         {
-            Log.Verbose("Response Content: " + response.Result.Content != string.Empty ? response.Result.Content : "Response was empty.");
+            if (response.Result.Content != string.Empty)
+                LogStatic.Verbose("Response Content: {Content}", response.Result.Content);
+            else
+                LogStatic.VerboseLine("Response was empty");
+
             return response.Result as RestResponse<T>;
         }
 

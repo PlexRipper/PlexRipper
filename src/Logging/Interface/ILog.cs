@@ -6,6 +6,88 @@ namespace Logging.Interface;
 
 public interface ILog
 {
+    #region Verbose
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent VerboseLine(
+        string messageTemplate,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!);
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Verbose(
+        Exception ex,
+        string messageTemplate,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!);
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Verbose<T>(
+        string messageTemplate,
+        T propertyValue = default!,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!);
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Verbose<T0, T1>(
+        string messageTemplate,
+        T0 propertyValue0,
+        T1 propertyValue1,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!);
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Verbose<T0, T1, T2>(
+        string messageTemplate,
+        T0 propertyValue0,
+        T1 propertyValue1,
+        T2 propertyValue2,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!);
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Verbose<T0, T1, T2, T3>(
+        string messageTemplate,
+        T0 propertyValue0,
+        T1 propertyValue1,
+        T2 propertyValue2,
+        T3 propertyValue3,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!);
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Verbose<T0, T1, T2, T3, T4>(
+        string messageTemplate,
+        T0 propertyValue0,
+        T1 propertyValue1,
+        T2 propertyValue2,
+        T3 propertyValue3,
+        T4 propertyValue4,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!);
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogEvent Verbose<T0, T1, T2, T3, T4, T5>(
+        string messageTemplate,
+        T0 propertyValue0,
+        T1 propertyValue1,
+        T2 propertyValue2,
+        T3 propertyValue3,
+        T4 propertyValue4,
+        T5 propertyValue5,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!);
+
+    #endregion
+
     #region Debug
 
     /// <summary>
@@ -440,14 +522,14 @@ public interface ILog
 
     #region Fatal
 
-    /// <inheritdoc/>
+    [MessageTemplateFormatMethod("messageTemplate")]
     LogEvent FatalLine(
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    /// <inheritdoc/>
+    [MessageTemplateFormatMethod("messageTemplate")]
     LogEvent Fatal(
         Exception ex,
         string messageTemplate,
@@ -455,7 +537,7 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    /// <inheritdoc/>
+    [MessageTemplateFormatMethod("messageTemplate")]
     LogEvent Fatal<T>(
         Exception ex,
         string messageTemplate,
@@ -464,10 +546,10 @@ public interface ILog
         string sourceFilePath = default,
         int sourceLineNumber = default);
 
-    /// <inheritdoc/>
+    [MessageTemplateFormatMethod("messageTemplate")]
     LogEvent Fatal(Exception ex, string memberName = default, string sourceFilePath = default, int sourceLineNumber = default);
 
-    /// <inheritdoc/>
+    [MessageTemplateFormatMethod("messageTemplate")]
     LogEvent Fatal<T>(
         string messageTemplate,
         T propertyValue = default!,
@@ -475,7 +557,7 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    /// <inheritdoc/>
+    [MessageTemplateFormatMethod("messageTemplate")]
     LogEvent Fatal<T0, T1>(
         string messageTemplate,
         T0 propertyValue0,
@@ -484,7 +566,7 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
-    /// <inheritdoc/>
+    [MessageTemplateFormatMethod("messageTemplate")]
     LogEvent Fatal<T0, T1, T2>(
         string messageTemplate,
         T0 propertyValue0,
@@ -494,6 +576,7 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
+    [MessageTemplateFormatMethod("messageTemplate")]
     LogEvent Fatal<T0, T1, T2, T3>(
         string messageTemplate,
         T0 propertyValue0,
@@ -504,6 +587,7 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
+    [MessageTemplateFormatMethod("messageTemplate")]
     LogEvent Fatal<T0, T1, T2, T3, T4>(
         string messageTemplate,
         T0 propertyValue0,
@@ -515,6 +599,7 @@ public interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
+    [MessageTemplateFormatMethod("messageTemplate")]
     LogEvent Fatal<T0, T1, T2, T3, T4, T5>(
         string messageTemplate,
         T0 propertyValue0,

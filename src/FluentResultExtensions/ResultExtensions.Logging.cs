@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using Logging;
 using Logging.LogStatic;
 using Serilog.Events;
 
@@ -25,7 +24,7 @@ public static partial class ResultExtensions
         switch (logLevel)
         {
             case LogEventLevel.Verbose:
-                Log.Verbose(message, e, memberName, sourceFilePath);
+                LogStatic.Verbose(e, message, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Debug:
                 LogStatic.Debug(e, message, memberName, sourceFilePath, sourceLineNumber);

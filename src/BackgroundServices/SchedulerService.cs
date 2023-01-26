@@ -72,7 +72,7 @@ public class SchedulerService : ISchedulerService
             await Task.Delay(1000, cancellationToken);
             var executingJobs = await _scheduler.GetCurrentlyExecutingJobs(cancellationToken);
             isExecutingJobs = executingJobs.Count > 0;
-            Log.Verbose($"Currently number of executing jobs: {executingJobs.Count}");
+            _log.Verbose("Currently number of executing jobs: {ExecutingJobsCount}", executingJobs.Count);
         }
 
         await Task.Delay(1000, cancellationToken);

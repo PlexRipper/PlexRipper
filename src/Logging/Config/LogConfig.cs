@@ -117,4 +117,9 @@ public class LogConfig
     private static ITestOutputHelper _testOutput;
 
     private static ILog _log;
+
+    public static void CloseAndFlush()
+    {
+        Serilog.Log.CloseAndFlush();
+    }
 }

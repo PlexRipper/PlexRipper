@@ -13,10 +13,10 @@ public static class LogConfig
 {
     #region Properties
 
-    private static readonly string _template =
+    public static readonly string Template =
         $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{ClassNamePropertyName}}}.{{{MemberNamePropertyName}}}:{{{LineNumberPropertyName}}}] => {{Message}}{{NewLine}}{{Exception}}";
 
-    public static MessageTemplateTextFormatter TemplateTextFormatter => new(_template);
+    public static MessageTemplateTextFormatter TemplateTextFormatter => new(Template);
 
     public static string ClassNamePropertyName => "ClassName";
     public static string MemberNamePropertyName => "MemberName";
@@ -37,8 +37,8 @@ public static class LogConfig
             .MinimumLevel.Override("Quartz", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .Enrich.With<ExternalFrameworkEnricher>()
-            .WriteTo.Debug(outputTemplate: _template)
-            .WriteTo.Console(theme: CustomLogThemes.ColoredDarkAnsi, outputTemplate: _template);
+            .WriteTo.Debug(outputTemplate: Template)
+            .WriteTo.Console(theme: CustomLogThemes.ColoredDarkAnsi, outputTemplate: Template);
     }
 
     #endregion
@@ -62,9 +62,9 @@ public static class LogConfig
         {
             return GetBaseConfiguration()
                 .WriteTo.File(
+                    TemplateTextFormatter,
                     Path.Combine(PathProvider.LogsDirectory, "log.txt"),
                     LogEventLevel.Debug,
-                    _template,
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
                     retainedFileCountLimit: 7)
@@ -75,7 +75,7 @@ public static class LogConfig
         // Test Logger
         return GetBaseConfiguration()
             .MinimumLevel.Is(minimumLogLevel)
-            .WriteTo.TestOutput(_testOutput, minimumLogLevel, _template)
+            .WriteTo.TestOutput(_testOutput, TemplateTextFormatter, minimumLogLevel)
             .WriteTo.TestCorrelator(minimumLogLevel)
             .CreateLogger();
     }

@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using Logging.Interface;
-using Logging.LogGeneric;
 using Serilog;
 
 namespace Logging;

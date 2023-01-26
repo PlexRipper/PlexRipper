@@ -1,7 +1,5 @@
 using System.Runtime.CompilerServices;
 using Logging.Interface;
-using Logging.LogGeneric;
-using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 

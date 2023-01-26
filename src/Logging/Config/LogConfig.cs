@@ -1,5 +1,6 @@
 using Environment;
 using Logging.Enricher;
+using Logging.Theme;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -37,7 +38,7 @@ public static class LogConfig
             .Enrich.FromLogContext()
             .Enrich.With<ExternalFrameworkEnricher>()
             .WriteTo.Debug(outputTemplate: _template)
-            .WriteTo.Console(theme: LogTheme.ColoredDark, outputTemplate: _template);
+            .WriteTo.Console(theme: CustomLogThemes.ColoredDarkAnsi, outputTemplate: _template);
     }
 
     #endregion

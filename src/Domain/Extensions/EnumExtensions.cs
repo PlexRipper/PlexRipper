@@ -4,7 +4,7 @@ namespace PlexRipper.Domain;
 
 public static class EnumExtensions
 {
-    private static readonly ILog _log = LogConfig.GetLog(typeof(EnumExtensions));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(EnumExtensions));
 
     #region NotificationLevel
 

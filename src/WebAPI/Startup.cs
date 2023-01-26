@@ -9,7 +9,7 @@ namespace PlexRipper.WebAPI;
 /// </summary>
 public sealed class Startup
 {
-    private static readonly ILog _log = LogConfig.GetLog(typeof(Startup));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(Startup));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Startup"/> class.

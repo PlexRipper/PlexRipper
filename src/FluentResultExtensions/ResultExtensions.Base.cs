@@ -8,5 +8,5 @@ namespace FluentResults;
 
 public static partial class ResultExtensions
 {
-    private static readonly ILog _log = LogConfig.GetLog(typeof(ResultExtensions));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(ResultExtensions));
 }

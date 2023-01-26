@@ -28,9 +28,9 @@ public class BaseUnitTest : IDisposable
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug)
     {
         LogConfig.SetTestOutputHelper(output);
-        LogConfig.SetupLogging(logEventLevel);
+        LogManager.SetupLogging(logEventLevel);
         BogusExtensions.Setup();
-        _log = LogConfig.GetLog(logEventLevel);
+        _log = LogManager.CreateLogInstance(typeof(BaseUnitTest), logEventLevel);
     }
 
     #endregion

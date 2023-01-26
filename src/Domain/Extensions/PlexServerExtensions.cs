@@ -4,7 +4,7 @@ namespace PlexRipper.Domain;
 
 public static class PlexServerExtensions
 {
-    private static readonly ILog _log = LogConfig.GetLog(typeof(PlexServerExtensions));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexServerExtensions));
 
     /// <summary>
     /// Gets the server url based on the available connections, e.g: http://112.202.10.213:32400.

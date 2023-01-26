@@ -1,7 +1,5 @@
 using Environment;
 using Logging.Enricher;
-using Logging.Interface;
-using Logging.LogGeneric;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -29,7 +27,7 @@ public static class LogConfig
 
     #region Private
 
-    private static LoggerConfiguration GetBaseConfiguration()
+    public static LoggerConfiguration GetBaseConfiguration()
     {
         return new LoggerConfiguration()
             .MinimumLevel.Verbose()
@@ -51,10 +49,11 @@ public static class LogConfig
         _testOutput = output;
     }
 
-    public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
-    {
-        Log.Logger = GetLogger(minimumLogLevel);
-    }
+    #endregion
+
+    #endregion
+
+    private static ITestOutputHelper _testOutput;
 
     public static Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
@@ -78,41 +77,5 @@ public static class LogConfig
             .WriteTo.TestOutput(_testOutput, minimumLogLevel, _template)
             .WriteTo.TestCorrelator(minimumLogLevel)
             .CreateLogger();
-    }
-
-    /// <summary>
-    /// Returns a reference to the singleton <see cref="ILog"/> object.
-    /// </summary>
-    /// <returns></returns>
-    public static ILog GetLog(LogEventLevel logLevel = LogEventLevel.Debug)
-    {
-        return _log ??= new Log2.Log(GetLogger(logLevel));
-    }
-
-    /// <summary>
-    /// Returns a reference to the singleton <see cref="ILog"/> object.
-    /// </summary>
-    /// <returns></returns>
-    public static ILog<T> GetLog<T>(LogEventLevel logLevel = LogEventLevel.Debug) where T : class
-    {
-        return new LogGeneric<T>(GetLogger(logLevel));
-    }
-
-    public static ILog GetLog(Type classType, LogEventLevel logLevel = LogEventLevel.Debug)
-    {
-        return new LogGeneric<Type>(GetLogger(logLevel), classType);
-    }
-
-    #endregion
-
-    #endregion
-
-    private static ITestOutputHelper _testOutput;
-
-    private static ILog _log;
-
-    public static void CloseAndFlush()
-    {
-        Log.CloseAndFlush();
     }
 }

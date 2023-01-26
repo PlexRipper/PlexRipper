@@ -15,7 +15,7 @@ public static class MockDatabase
 {
     private static readonly Random Rnd = new();
     private static int _seed;
-    private static readonly ILog _log = LogConfig.GetLog(typeof(MockDatabase));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(MockDatabase));
 
     #region Methods
 

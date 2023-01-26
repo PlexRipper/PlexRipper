@@ -4,7 +4,6 @@ using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using Environment;
 using Logging.Interface;
-using Logging.LogStatic;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,7 +15,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
 {
     private readonly IPathProvider _pathProvider;
 
-    private readonly ILog<PlexRipperDbContext> _log = LogConfig.GetLog<PlexRipperDbContext>();
+    private readonly ILog<PlexRipperDbContext> _log = LogManager.CreateLogInstance<PlexRipperDbContext>();
 
     #region Properties
 

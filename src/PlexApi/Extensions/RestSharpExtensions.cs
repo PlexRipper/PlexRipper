@@ -7,7 +7,7 @@ namespace PlexRipper.PlexApi.Extensions;
 
 public static class RestSharpExtensions
 {
-    private static readonly ILog _log = LogConfig.GetLog(typeof(RestSharpExtensions));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(RestSharpExtensions));
 
     /// <summary>
     /// Sends a <see cref="RestRequest"/> with a <see cref="Policy"/>

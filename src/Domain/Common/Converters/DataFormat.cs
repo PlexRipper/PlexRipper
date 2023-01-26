@@ -6,7 +6,7 @@ namespace PlexRipper.Domain;
 public static class DataFormat
 {
     private static readonly NumberFormatInfo NumberFormat = NumberFormatInfo.InvariantInfo;
-    private static readonly ILog _log = LogConfig.GetLog(typeof(DataFormat));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DataFormat));
 
     /// <summary>
     /// Format file size or downloaded size string.

@@ -17,7 +17,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 {
     private readonly string _memoryDbName;
     private readonly MockPlexApi _mockPlexApi;
-    private static readonly ILog _log = LogConfig.GetLog(typeof(PlexRipperWebApplicationFactory<>));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexRipperWebApplicationFactory<>));
 
     private readonly UnitTestDataConfig _config;
 

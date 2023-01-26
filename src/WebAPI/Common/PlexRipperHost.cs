@@ -10,11 +10,11 @@ namespace PlexRipper.WebAPI.Common;
 
 public static class PlexRipperHost
 {
-    private static readonly ILog _log = LogConfig.GetLog(typeof(PlexRipperHost));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexRipperHost));
 
     public static IHostBuilder Setup()
     {
-        LogConfig.SetupLogging(LogEventLevel.Verbose);
+        LogManager.SetupLogging(LogEventLevel.Verbose);
         _log.Information("Currently running on {CurrentOS}", OsInfo.CurrentOS);
 
         return Host.CreateDefaultBuilder()

@@ -46,13 +46,14 @@ public class PathSystem : IPathSystem
     /// <summary>
     /// Replaces invalid characters from a file or folder name
     /// Source: https://stackoverflow.com/a/13617375/8205497
+    /// With additional removal of backslash characters
     /// </summary>
     /// <param name="name"></param>
     /// <returns></returns>
     public string SanitizePath(string name)
     {
         var invalids = Path.GetInvalidFileNameChars();
-        name = name.Replace(@"·", "-").Replace(": ", " ");
+        name = name.Replace(@"·", "-").Replace("\\", " ").Replace(": ", " ");
         return string.Join(" ", name.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
     }
 }
